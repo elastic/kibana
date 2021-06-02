@@ -26,7 +26,7 @@ export default function (providerContext: FtrProviderContext) {
     });
     setupFleetAndAgents(providerContext);
     after(async () => {
-      await esArchiver.load('fleet/empty_fleet_server');
+      await esArchiver.unload('fleet/empty_fleet_server');
     });
 
     describe('list api tests', async () => {

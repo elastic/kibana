@@ -11,7 +11,7 @@ import { first, last } from 'lodash';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { IIndexPattern } from 'src/plugins/data/public';
-import { InfraSource } from '../../../../common/http_api/source_api';
+import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import { Color } from '../../../../common/color_palette';
 import { MetricsExplorerRow, MetricsExplorerAggregation } from '../../../../common/http_api';
 import { MetricExplorerSeriesChart } from '../../../pages/metrics/metrics_explorer/components/series_chart';
@@ -35,7 +35,7 @@ import { ThresholdAnnotations } from '../../common/criterion_preview_chart/thres
 interface Props {
   expression: MetricExpression;
   derivedIndexPattern: IIndexPattern;
-  source: InfraSource | null;
+  source: MetricsSourceConfiguration | null;
   filterQuery?: string;
   groupBy?: string | string[];
 }

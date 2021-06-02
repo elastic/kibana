@@ -15,6 +15,7 @@ import {
   UpdateDataFrameAnalyticsConfig,
 } from '../../data_frame_analytics/common';
 import { DeepPartial } from '../../../../common/types/common';
+import { NewJobCapsResponse } from '../../../../common/types/fields';
 import {
   DeleteDataFrameAnalyticsWithIndexStatus,
   AnalyticsMapReturnType,
@@ -173,6 +174,14 @@ export const dataFrameAnalytics = {
       path: `${basePath()}/data_frame/analytics/validate`,
       method: 'POST',
       body,
+    });
+  },
+  newJobCapsAnalytics(indexPatternTitle: string, isRollup: boolean = false) {
+    const query = isRollup === true ? { rollup: true } : {};
+    return http<NewJobCapsResponse>({
+      path: `${basePath()}/data_frame/analytics/new_job_caps/${indexPatternTitle}`,
+      method: 'GET',
+      query,
     });
   },
 };

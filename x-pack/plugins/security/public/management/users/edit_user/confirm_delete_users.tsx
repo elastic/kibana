@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiText } from '@elastic/eui';
+import { EuiConfirmModal, EuiText } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
@@ -13,9 +13,8 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { UserAPIClient } from '..';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { ConfirmModal } from '../../../components/confirm_modal';
-import { UserAPIClient } from '../user_api_client';
 
 export interface ConfirmDeleteUsersProps {
   usernames: string[];
@@ -54,13 +53,20 @@ export const ConfirmDeleteUsers: FunctionComponent<ConfirmDeleteUsersProps> = ({
   }, [services.http]);
 
   return (
-    <ConfirmModal
+    <EuiConfirmModal
+      role="dialog"
       title={i18n.translate('xpack.security.management.users.confirmDeleteUsers.title', {
         defaultMessage: "Delete {count, plural, one{user '{username}'} other{{count} users}}?",
         values: { count: usernames.length, username: usernames[0] },
       })}
       onCancel={onCancel}
       onConfirm={deleteUsers}
+      cancelButtonText={i18n.translate(
+        'xpack.security.management.users.confirmDeleteUsers.cancelButton',
+        {
+          defaultMessage: 'Cancel',
+        }
+      )}
       confirmButtonText={i18n.translate(
         'xpack.security.management.users.confirmDeleteUsers.confirmButton',
         {
@@ -69,7 +75,7 @@ export const ConfirmDeleteUsers: FunctionComponent<ConfirmDeleteUsersProps> = ({
           values: { count: usernames.length, isLoading: state.loading },
         }
       )}
-      confirmButtonColor="danger"
+      buttonColor="danger"
       isLoading={state.loading}
     >
       <EuiText>
@@ -94,6 +100,6 @@ export const ConfirmDeleteUsers: FunctionComponent<ConfirmDeleteUsersProps> = ({
           />
         </p>
       </EuiText>
-    </ConfirmModal>
+    </EuiConfirmModal>
   );
 };

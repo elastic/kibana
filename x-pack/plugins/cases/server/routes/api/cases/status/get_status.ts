@@ -8,8 +8,8 @@
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
 
-import { CasesStatusResponseRt, caseStatuses } from '../../../../../common/api';
-import { CASE_STATUS_URL } from '../../../../../common/constants';
+import { CasesStatusResponseRt, caseStatuses } from '../../../../../common';
+import { CASE_STATUS_URL } from '../../../../../common';
 import { constructQueryOptions } from '../helpers';
 
 export function initGetCasesStatusApi({ caseService, router, logger }: RouteDeps) {

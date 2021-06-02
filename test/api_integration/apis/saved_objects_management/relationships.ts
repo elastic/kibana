@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   const relationSchema = schema.object({
     id: schema.string(),
@@ -27,6 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
         uiCapabilitiesPath: schema.string(),
       }),
       namespaceType: schema.string(),
+      hiddenType: schema.boolean(),
     }),
   });
   const invalidRelationSchema = schema.object({
@@ -42,12 +43,8 @@ export default function ({ getService }: FtrProviderContext) {
   });
 
   describe('relationships', () => {
-    before(async () => {
-      await esArchiver.load('management/saved_objects/relationships');
-    });
-    after(async () => {
-      await esArchiver.unload('management/saved_objects/relationships');
-    });
+    before(() => kibanaServer.importExport.load('management/saved_objects/relationships'));
+    after(() => kibanaServer.importExport.unload('management/saved_objects/relationships'));
 
     const baseApiUrl = `/api/kibana/management/saved_objects/relationships`;
     const defaultTypes = ['visualization', 'index-pattern', 'search', 'dashboard'];
@@ -89,6 +86,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uiCapabilitiesPath: 'management.kibana.indexPatterns',
               },
               namespaceType: 'single',
+              hiddenType: false,
             },
           },
           {
@@ -105,6 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uiCapabilitiesPath: 'visualize.show',
               },
               namespaceType: 'single',
+              hiddenType: false,
             },
           },
         ]);
@@ -132,6 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uiCapabilitiesPath: 'management.kibana.indexPatterns',
               },
               namespaceType: 'single',
+              hiddenType: false,
             },
             relationship: 'child',
           },
@@ -148,6 +148,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uiCapabilitiesPath: 'visualize.show',
               },
               namespaceType: 'single',
+              hiddenType: false,
             },
             relationship: 'parent',
           },
@@ -192,6 +193,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uiCapabilitiesPath: 'visualize.show',
               },
               namespaceType: 'single',
+              hiddenType: false,
             },
           },
           {
@@ -208,6 +210,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uiCapabilitiesPath: 'visualize.show',
               },
               namespaceType: 'single',
+              hiddenType: false,
             },
           },
         ]);
@@ -232,6 +235,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uiCapabilitiesPath: 'visualize.show',
               },
               namespaceType: 'single',
+              hiddenType: false,
             },
             relationship: 'child',
           },
@@ -248,6 +252,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uiCapabilitiesPath: 'visualize.show',
               },
               namespaceType: 'single',
+              hiddenType: false,
             },
             relationship: 'child',
           },
@@ -292,6 +297,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uiCapabilitiesPath: 'discover.show',
               },
               namespaceType: 'single',
+              hiddenType: false,
             },
           },
           {
@@ -308,6 +314,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uiCapabilitiesPath: 'dashboard.show',
               },
               namespaceType: 'single',
+              hiddenType: false,
             },
           },
         ]);
@@ -334,6 +341,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uiCapabilitiesPath: 'discover.show',
               },
               namespaceType: 'single',
+              hiddenType: false,
             },
             relationship: 'child',
           },
@@ -378,6 +386,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uiCapabilitiesPath: 'discover.show',
               },
               namespaceType: 'single',
+              hiddenType: false,
             },
           },
           {
@@ -394,6 +403,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uiCapabilitiesPath: 'visualize.show',
               },
               namespaceType: 'single',
+              hiddenType: false,
             },
           },
         ]);
@@ -420,6 +430,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uiCapabilitiesPath: 'discover.show',
               },
               namespaceType: 'single',
+              hiddenType: false,
             },
             relationship: 'parent',
           },
@@ -466,6 +477,7 @@ export default function ({ getService }: FtrProviderContext) {
                   uiCapabilitiesPath: 'visualize.show',
                 },
                 namespaceType: 'single',
+                hiddenType: false,
                 title: 'Visualization',
               },
               relationship: 'child',

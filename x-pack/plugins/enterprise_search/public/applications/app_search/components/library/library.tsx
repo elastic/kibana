@@ -10,17 +10,17 @@ import React, { useState } from 'react';
 import {
   EuiSpacer,
   EuiPageHeader,
-  EuiPageHeaderSection,
   EuiTitle,
   EuiPageContentBody,
   EuiPageContent,
   EuiDragDropContext,
   EuiDroppable,
   EuiDraggable,
+  EuiButtonIconColor,
 } from '@elastic/eui';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { Schema } from '../../../shared/types';
+import { Schema, SchemaType } from '../../../shared/schema/types';
 import { Result } from '../result';
 
 export const Library: React.FC = () => {
@@ -63,14 +63,14 @@ export const Library: React.FC = () => {
   };
 
   const schema: Schema = {
-    title: 'text',
-    description: 'text',
-    date_established: 'date',
-    location: 'geolocation',
-    states: 'text',
-    visitors: 'number',
-    size: 'number',
-    length: 'number',
+    title: SchemaType.Text,
+    description: SchemaType.Text,
+    date_established: SchemaType.Date,
+    location: SchemaType.Geolocation,
+    states: SchemaType.Text,
+    visitors: SchemaType.Number,
+    size: SchemaType.Number,
+    length: SchemaType.Number,
   };
 
   const [isActionButtonFilled, setIsActionButtonFilled] = useState(false);
@@ -79,21 +79,15 @@ export const Library: React.FC = () => {
       title: 'Fill this action button',
       onClick: () => setIsActionButtonFilled(!isActionButtonFilled),
       iconType: isActionButtonFilled ? 'starFilled' : 'starEmpty',
-      iconColor: 'primary',
+      iconColor: 'primary' as EuiButtonIconColor,
     },
   ];
 
   return (
     <>
       <SetPageChrome trail={['Library']} />
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>Library</h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
-      <EuiPageContent>
+      <EuiPageHeader pageTitle="Library" />
+      <EuiPageContent hasBorder>
         <EuiPageContentBody>
           <EuiTitle size="m">
             <h2>Result</h2>
@@ -228,7 +222,7 @@ export const Library: React.FC = () => {
             <h3>With custom actions and a link</h3>
           </EuiTitle>
           <EuiSpacer />
-          <Result {...props} actions={actions} shouldLinkToDetailPage />
+          <Result {...props} actions={actions} shouldLinkToDetailPage showScore isMetaEngine />
           <EuiSpacer />
 
           <EuiSpacer />

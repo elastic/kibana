@@ -21,71 +21,44 @@ import {
   getDuplicates,
   getTupleDuplicateErrorsAndUniqueRules,
 } from './utils';
-import { getResult } from '../__mocks__/request_responses';
+import { getAlertMock } from '../__mocks__/request_responses';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
-import { PartialFilter, RuleTypeParams } from '../../types';
+import { PartialFilter } from '../../types';
 import { BulkError, ImportSuccessError } from '../utils';
 import { getOutputRuleAlertForRest } from '../__mocks__/utils';
 import { PartialAlert } from '../../../../../../alerting/server';
-import { SanitizedAlert } from '../../../../../../alerting/server/types';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { RuleAlertType } from '../../rules/types';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
-import { ThreatMapping } from '../../../../../common/detection_engine/schemas/types/threat_mapping';
+import { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request';
+import {
+  getMlRuleParams,
+  getQueryRuleParams,
+  getThreatRuleParams,
+} from '../../schemas/rule_schemas.mock';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
 describe('utils', () => {
   describe('transformAlertToRule', () => {
     test('should work with a full data set', () => {
-      const fullRule = getResult();
+      const fullRule = getAlertMock(getQueryRuleParams());
       const rule = transformAlertToRule(fullRule);
       expect(rule).toEqual(getOutputRuleAlertForRest());
     });
 
-    test('should work with a partial data set missing data', () => {
-      const fullRule = getResult();
-      const { from, language, ...omitParams } = fullRule.params;
-      fullRule.params = omitParams as RuleTypeParams;
+    test('should omit note if note is undefined', () => {
+      const fullRule = getAlertMock(getQueryRuleParams());
+      fullRule.params.note = undefined;
       const rule = transformAlertToRule(fullRule);
-      const {
-        from: from2,
-        language: language2,
-        ...expectedWithoutFromWithoutLanguage
-      } = getOutputRuleAlertForRest();
-      expect(rule).toEqual(expectedWithoutFromWithoutLanguage);
-    });
-
-    test('should omit query if query is undefined', () => {
-      const fullRule = getResult();
-      fullRule.params.query = undefined;
-      const rule = transformAlertToRule(fullRule);
-      const { query, ...expectedWithoutQuery } = getOutputRuleAlertForRest();
-      expect(rule).toEqual(expectedWithoutQuery);
-    });
-
-    test('should omit a mix of undefined, null, and missing fields', () => {
-      const fullRule = getResult();
-      fullRule.params.query = undefined;
-      fullRule.params.language = undefined;
-      const { from, ...omitParams } = fullRule.params;
-      fullRule.params = omitParams as RuleTypeParams;
-      const { enabled, ...omitEnabled } = fullRule;
-      const rule = transformAlertToRule(omitEnabled as RuleAlertType);
-      const {
-        from: from2,
-        enabled: enabled2,
-        language,
-        query,
-        ...expectedWithoutFromEnabledLanguageQuery
-      } = getOutputRuleAlertForRest();
-      expect(rule).toEqual(expectedWithoutFromEnabledLanguageQuery);
+      const { note, ...expectedWithoutNote } = getOutputRuleAlertForRest();
+      expect(rule).toEqual(expectedWithoutNote);
     });
 
     test('should return enabled is equal to false', () => {
-      const fullRule = getResult();
+      const fullRule = getAlertMock(getQueryRuleParams());
       fullRule.enabled = false;
       const ruleWithEnabledFalse = transformAlertToRule(fullRule);
       const expected = getOutputRuleAlertForRest();
@@ -94,7 +67,7 @@ describe('utils', () => {
     });
 
     test('should return immutable is equal to false', () => {
-      const fullRule = getResult();
+      const fullRule = getAlertMock(getQueryRuleParams());
       fullRule.params.immutable = false;
       const ruleWithEnabledFalse = transformAlertToRule(fullRule);
       const expected = getOutputRuleAlertForRest();
@@ -102,7 +75,7 @@ describe('utils', () => {
     });
 
     test('should work with tags but filter out any internal tags', () => {
-      const fullRule = getResult();
+      const fullRule = getAlertMock(getQueryRuleParams());
       fullRule.tags = ['tag 1', 'tag 2', `${INTERNAL_IDENTIFIER}_some_other_value`];
       const rule = transformAlertToRule(fullRule);
       const expected = getOutputRuleAlertForRest();
@@ -111,23 +84,23 @@ describe('utils', () => {
     });
 
     test('transforms ML Rule fields', () => {
-      const mlRule = getResult();
+      const mlRule = getAlertMock(getMlRuleParams());
       mlRule.params.anomalyThreshold = 55;
-      mlRule.params.machineLearningJobId = 'some_job_id';
+      mlRule.params.machineLearningJobId = ['some_job_id'];
       mlRule.params.type = 'machine_learning';
 
       const rule = transformAlertToRule(mlRule);
       expect(rule).toEqual(
         expect.objectContaining({
           anomaly_threshold: 55,
-          machine_learning_job_id: 'some_job_id',
+          machine_learning_job_id: ['some_job_id'],
           type: 'machine_learning',
         })
       );
     });
 
     test('transforms threat_matching fields', () => {
-      const threatRule = getResult();
+      const threatRule = getAlertMock(getThreatRuleParams());
       const threatFilters: PartialFilter[] = [
         {
           query: {
@@ -178,7 +151,10 @@ describe('utils', () => {
     // This has to stay here until we do data migration of saved objects and lists is removed from:
     // signal_params_schema.ts
     test('does not leak a lists structure in the transform which would cause validation issues', () => {
-      const result: RuleAlertType & { lists: [] } = { lists: [], ...getResult() };
+      const result: RuleAlertType & { lists: [] } = {
+        lists: [],
+        ...getAlertMock(getQueryRuleParams()),
+      };
       const rule = transformAlertToRule(result);
       expect(rule).toEqual(
         expect.not.objectContaining({
@@ -192,7 +168,7 @@ describe('utils', () => {
     test('does not leak an exceptions_list structure in the transform which would cause validation issues', () => {
       const result: RuleAlertType & { exceptions_list: [] } = {
         exceptions_list: [],
-        ...getResult(),
+        ...getAlertMock(getQueryRuleParams()),
       };
       const rule = transformAlertToRule(result);
       expect(rule).toEqual(
@@ -279,7 +255,7 @@ describe('utils', () => {
 
   describe('transformFindAlerts', () => {
     test('outputs empty data set when data set is empty correct', () => {
-      const output = transformFindAlerts({ data: [], page: 1, perPage: 0, total: 0 }, []);
+      const output = transformFindAlerts({ data: [], page: 1, perPage: 0, total: 0 }, {}, {});
       expect(output).toEqual({ data: [], page: 1, perPage: 0, total: 0 });
     });
 
@@ -289,9 +265,10 @@ describe('utils', () => {
           page: 1,
           perPage: 0,
           total: 0,
-          data: [getResult()],
+          data: [getAlertMock(getQueryRuleParams())],
         },
-        []
+        {},
+        {}
       );
       const expected = getOutputRuleAlertForRest();
       expect(output).toEqual({
@@ -301,25 +278,11 @@ describe('utils', () => {
         data: [expected],
       });
     });
-
-    test('returns 500 if the data is not of type siem alert', () => {
-      const unsafeCast = ([{ name: 'something else' }] as unknown) as SanitizedAlert[];
-      const output = transformFindAlerts(
-        {
-          data: unsafeCast,
-          page: 1,
-          perPage: 1,
-          total: 1,
-        },
-        []
-      );
-      expect(output).toBeNull();
-    });
   });
 
   describe('transform', () => {
     test('outputs 200 if the data is of type siem alert', () => {
-      const output = transform(getResult());
+      const output = transform(getAlertMock(getQueryRuleParams()));
       const expected = getOutputRuleAlertForRest();
       expect(output).toEqual(expected);
     });
@@ -434,7 +397,7 @@ describe('utils', () => {
 
   describe('transformOrBulkError', () => {
     test('outputs 200 if the data is of type siem alert', () => {
-      const output = transformOrBulkError('rule-1', getResult(), {
+      const output = transformOrBulkError('rule-1', getAlertMock(getQueryRuleParams()), {
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         actions: [],
         ruleThrottle: 'no_actions',
@@ -466,15 +429,15 @@ describe('utils', () => {
     });
 
     test('given single alert will return the alert transformed', () => {
-      const result1 = getResult();
+      const result1 = getAlertMock(getQueryRuleParams());
       const transformed = transformAlertsToRules([result1]);
       const expected = getOutputRuleAlertForRest();
       expect(transformed).toEqual([expected]);
     });
 
     test('given two alerts will return the two alerts transformed', () => {
-      const result1 = getResult();
-      const result2 = getResult();
+      const result1 = getAlertMock(getQueryRuleParams());
+      const result2 = getAlertMock(getQueryRuleParams());
       result2.id = 'some other id';
       result2.params.ruleId = 'some other id';
 
@@ -489,7 +452,7 @@ describe('utils', () => {
 
   describe('transformOrImportError', () => {
     test('returns 1 given success if the alert is an alert type and the existing success count is 0', () => {
-      const output = transformOrImportError('rule-1', getResult(), {
+      const output = transformOrImportError('rule-1', getAlertMock(getQueryRuleParams()), {
         success: true,
         success_count: 0,
         errors: [],
@@ -503,7 +466,7 @@ describe('utils', () => {
     });
 
     test('returns 2 given successes if the alert is an alert type and the existing success count is 1', () => {
-      const output = transformOrImportError('rule-1', getResult(), {
+      const output = transformOrImportError('rule-1', getAlertMock(getQueryRuleParams()), {
         success: true,
         success_count: 1,
         errors: [],

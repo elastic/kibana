@@ -24,7 +24,7 @@ import {
   registerAccountSourceDisplaySettingsConfig,
   registerAccountSourceSchemasRoute,
   registerAccountSourceReindexJobRoute,
-  registerAccountSourceReindexJobStatusRoute,
+  registerAccountSourceDownloadDiagnosticsRoute,
   registerOrgSourcesRoute,
   registerOrgSourcesStatusRoute,
   registerOrgSourceRoute,
@@ -39,7 +39,7 @@ import {
   registerOrgSourceDisplaySettingsConfig,
   registerOrgSourceSchemasRoute,
   registerOrgSourceReindexJobRoute,
-  registerOrgSourceReindexJobStatusRoute,
+  registerOrgSourceDownloadDiagnosticsRoute,
   registerOrgSourceOauthConfigurationsRoute,
   registerOrgSourceOauthConfigurationRoute,
   registerOauthConnectorParamsRoute,
@@ -540,17 +540,17 @@ describe('sources routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/account/sources/{sourceId}/reindex_job/{jobId}/status', () => {
+  describe('GET /api/workplace_search/account/sources/{sourceId}/download_diagnostics', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/account/sources/{sourceId}/reindex_job/{jobId}/status',
+        path: '/api/workplace_search/account/sources/{sourceId}/download_diagnostics',
       });
 
-      registerAccountSourceReindexJobStatusRoute({
+      registerAccountSourceDownloadDiagnosticsRoute({
         ...mockDependencies,
         router: mockRouter.router,
       });
@@ -558,7 +558,7 @@ describe('sources routes', () => {
 
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/ws/sources/:sourceId/reindex_job/:jobId/status',
+        path: '/ws/sources/:sourceId/download_diagnostics',
       });
     });
   });
@@ -1038,17 +1038,17 @@ describe('sources routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/org/sources/{sourceId}/reindex_job/{jobId}/status', () => {
+  describe('GET /api/workplace_search/org/sources/{sourceId}/download_diagnostics', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/org/sources/{sourceId}/reindex_job/{jobId}/status',
+        path: '/api/workplace_search/org/sources/{sourceId}/download_diagnostics',
       });
 
-      registerOrgSourceReindexJobStatusRoute({
+      registerOrgSourceDownloadDiagnosticsRoute({
         ...mockDependencies,
         router: mockRouter.router,
       });
@@ -1056,7 +1056,7 @@ describe('sources routes', () => {
 
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/ws/org/sources/:sourceId/reindex_job/:jobId/status',
+        path: '/ws/org/sources/:sourceId/download_diagnostics',
       });
     });
   });

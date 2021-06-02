@@ -20,7 +20,7 @@ import { InfraSource } from '../../../lib/sources';
 export const isIPv4 = (subject: string) => /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(subject);
 
 type RowWithMetadata = MetricsAPIRow & {
-  [META_KEY]: object[];
+  [META_KEY]: Array<Record<string, string | number | string[]>>;
 };
 
 export const applyMetadataToLastPath = (
@@ -47,7 +47,7 @@ export const applyMetadataToLastPath = (
         source.configuration.fields
       );
       // Set the label as the name and fallback to the id OR path.value
-      lastPath.label = get(firstMetaDoc, inventoryFields.name, lastPath.value);
+      lastPath.label = (firstMetaDoc[inventoryFields.name] ?? lastPath.value) as string;
       // If the inventory fields contain an ip address, we need to try and set that
       // on the path object. IP addersses are typically stored as multiple fields. We will
       // use the first IPV4 address we find.

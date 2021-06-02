@@ -6,28 +6,29 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientContract, IUiSettingsClient } from 'src/core/server';
+import type supertest from 'supertest';
+import type { SavedObjectsClientContract, IUiSettingsClient } from 'src/core/server';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 
 import {
   createTestServers,
   TestElasticsearchUtils,
   TestKibanaUtils,
   TestUtils,
+  HttpMethod,
+  getSupertest,
 } from '../../../../test_helpers/kbn_server';
-import { LegacyAPICaller } from '../../../elasticsearch/';
 import { httpServerMock } from '../../../http/http_server.mocks';
 
 let servers: TestUtils;
 let esServer: TestElasticsearchUtils;
 let kbn: TestKibanaUtils;
 
-let kbnServer: TestKibanaUtils['kbnServer'];
-
 interface AllServices {
-  kbnServer: TestKibanaUtils['kbnServer'];
   savedObjectsClient: SavedObjectsClientContract;
-  callCluster: LegacyAPICaller;
+  esClient: KibanaClient;
   uiSettings: IUiSettingsClient;
+  supertest: (method: HttpMethod, path: string) => supertest.Test;
 }
 
 let services: AllServices;
@@ -47,7 +48,6 @@ export async function startServers() {
   });
   esServer = await servers.startES();
   kbn = await servers.startKibana();
-  kbnServer = kbn.kbnServer;
 }
 
 export function getServices() {
@@ -55,19 +55,17 @@ export function getServices() {
     return services;
   }
 
-  const callCluster = esServer.es.getCallCluster();
+  const esClient = esServer.es.getClient();
 
   const savedObjectsClient = kbn.coreStart.savedObjects.getScopedClient(
     httpServerMock.createKibanaRequest()
   );
 
-  const uiSettings = kbnServer.newPlatform.start.core.uiSettings.asScopedToClient(
-    savedObjectsClient
-  );
+  const uiSettings = kbn.coreStart.uiSettings.asScopedToClient(savedObjectsClient);
 
   services = {
-    kbnServer,
-    callCluster,
+    supertest: (method: HttpMethod, path: string) => getSupertest(kbn.root, method, path),
+    esClient,
     savedObjectsClient,
     uiSettings,
   };
@@ -77,7 +75,6 @@ export function getServices() {
 
 export async function stopServers() {
   services = null!;
-  kbnServer = null!;
   if (servers) {
     await esServer.stop();
     await kbn.stop();

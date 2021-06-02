@@ -13,6 +13,11 @@ import { RENDER_AS, SCALING_TYPES } from '../constants';
 import { MapExtent, MapQuery } from './map_descriptor';
 import { Filter, TimeRange } from '../../../../../src/plugins/data/common';
 
+export type Timeslice = {
+  from: number;
+  to: number;
+};
+
 // Global map state passed to every layer.
 export type MapFilters = {
   buffer?: MapExtent; // extent with additional buffer
@@ -22,10 +27,12 @@ export type MapFilters = {
   refreshTimerLastTriggeredAt?: string;
   searchSessionId?: string;
   timeFilters: TimeRange;
+  timeslice?: Timeslice;
   zoom: number;
 };
 
 type ESSearchSourceSyncMeta = {
+  filterByMapBounds: boolean;
   sortField: string;
   sortOrder: SortDirection;
   scalingType: SCALING_TYPES;

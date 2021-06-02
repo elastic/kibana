@@ -32,7 +32,7 @@ export const migrations = {
     ...doc,
     ...(doc.attributes && {
       attributes: Object.keys(doc.attributes).reduce((acc, key) => {
-        if (key === 'timepicker:quickRanges' && doc.attributes[key].indexOf('section') > -1) {
+        if (key === 'timepicker:quickRanges' && doc.attributes[key]?.indexOf('section') > -1) {
           const ranges = JSON.parse(doc.attributes[key]).map(
             ({ from, to, display }: { from: string; to: string; display: string }) => {
               return {

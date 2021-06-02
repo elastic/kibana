@@ -14,7 +14,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Azure Active Directory PowerShell Sign-in",
-  "note": "The Azure Fleet Integration or Filebeat module must be enabled to use this rule.",
+  "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "query": "event.dataset:azure.signinlogs and azure.signinlogs.properties.app_display_name:\"Azure Active Directory PowerShell\" and azure.signinlogs.properties.token_issuer_type:AzureAD and event.outcome:(success or Success)",
   "references": [
     "https://msrc-blog.microsoft.com/2020/12/13/customer-guidance-on-recent-nation-state-cyber-attacks/",
@@ -57,5 +57,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 3
+  "version": 4
 }

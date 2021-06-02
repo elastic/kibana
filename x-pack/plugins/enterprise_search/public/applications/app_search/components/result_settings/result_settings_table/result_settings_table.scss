@@ -1,0 +1,30 @@
+.resultSettingsTable {
+  table-layout: auto;
+
+  &__columnLabels {
+    .euiTableHeaderCell {
+      border-bottom: none;
+      padding-bottom: $euiSizeM;
+    }
+  }
+
+  .euiTableRow:last-of-type {
+    .euiTableRowCell, .euiTableRowCellCheckbox {
+      // Because we are using the large border-top as a way of spacing, and table borders
+      // are collapsed, these tables do not have a bottom border. The exception to that is
+      // if the tbody is the last tbody of the table. To make it consistent, we explicitly
+      // disable all bottom borders here
+      border-bottom: none;
+    }
+  }
+
+  tbody + &__subHeader {
+    // Since this table has multiple sets of thead + tbody's, this is our way of keeping
+    // vertical space between the two
+    border-top: solid $euiSizeL * 2 transparent;
+  }
+
+  .euiTableRowCellCheckbox .euiTableCellContent {
+    justify-content: center;
+  }
+}

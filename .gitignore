@@ -60,6 +60,7 @@ npm-debug.log*
 .ci/runbld
 .ci/bash_standard_lib.sh
 .gradle
+.vagrant
 
 ## @cypress/snapshot from apm plugin
 snapshots.js
@@ -75,5 +76,6 @@ report.asciidoc
 .yarn-local-mirror
 
 # Bazel
-/bazel
-/.bazelrc.user
+bazel
+bazel-*
+.bazelrc.user

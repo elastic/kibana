@@ -2,6 +2,8 @@ include::introduction.asciidoc[]
 
 include::whats-new.asciidoc[]
 
+include::{kib-repo-dir}/concepts/index.asciidoc[]
+
 include::{kib-repo-dir}/getting-started/quick-start-guide.asciidoc[]
 
 include::setup.asciidoc[]
@@ -29,6 +31,8 @@ include::ml/index.asciidoc[]
 
 include::graph/index.asciidoc[]
 
+include::alerting/index.asciidoc[]
+
 include::{kib-repo-dir}/observability/index.asciidoc[]
 
 include::{kib-repo-dir}/apm/index.asciidoc[]
@@ -43,7 +47,11 @@ include::management.asciidoc[]
 
 include::{kib-repo-dir}/fleet/fleet.asciidoc[]
 
+<<<<<<< HEAD
 include::alerting/index.asciidoc[]
+=======
+include::reporting/index.asciidoc[]
+>>>>>>> master
 
 include::api.asciidoc[]
 

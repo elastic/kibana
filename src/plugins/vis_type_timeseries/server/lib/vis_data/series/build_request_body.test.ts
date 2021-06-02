@@ -72,20 +72,20 @@ describe('buildRequestBody(req)', () => {
     const series = panel.series[0];
     const getValidTimeInterval = jest.fn(() => '10s');
     const capabilities = {
-      searchTimezone: 'UTC',
+      timezone: 'UTC',
       getValidTimeInterval,
     };
     const config = {
       allowLeadingWildcards: true,
       queryStringOptions: {},
     };
-    const indexPatternObject = {};
+    const indexPattern = {};
     const doc = await buildRequestBody(
       { body },
       panel,
       series,
       config,
-      indexPatternObject,
+      indexPattern,
       capabilities,
       {
         get: async () => 50,
@@ -157,6 +157,7 @@ describe('buildRequestBody(req)', () => {
             intervalString: '10s',
             seriesId: 'c9b5f9c0-e403-11e6-be91-6f7688e9fac7',
             timeField: '@timestamp',
+            panelId: 'c9b5d2b0-e403-11e6-be91-6f7688e9fac7',
           },
         },
       },

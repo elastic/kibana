@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AggregationContainer } from '@elastic/elasticsearch/api/types';
 import {
   KibanaRequest,
   Logger,
@@ -17,9 +18,11 @@ import {
   SavedObjectsBulkResponse,
   SavedObjectsFindResult,
 } from 'kibana/server';
+import { nodeBuilder } from '../../../../../src/plugins/data/common';
 
 import { AuthenticatedUser, SecurityPluginSetup } from '../../../security/server';
 import {
+  ENABLE_CASE_CONNECTOR,
   ESCaseAttributes,
   CommentAttributes,
   SavedObjectFindOptions,
@@ -33,7 +36,8 @@ import {
   CaseResponse,
   caseTypeField,
   CasesFindRequest,
-} from '../../common/api';
+  GetCaseIdsByAlertIdAggs,
+} from '../../common';
 import { combineFilters, defaultSortField, groupTotalAlertsByID } from '../common';
 import { defaultPage, defaultPerPage } from '../routes/api';
 import {
@@ -112,6 +116,10 @@ interface GetCommentArgs extends ClientArgs {
   commentId: string;
 }
 
+interface GetCaseIdsByAlertIdArgs extends ClientArgs {
+  alertId: string;
+}
+
 interface PostCaseArgs extends ClientArgs {
   attributes: ESCaseAttributes;
 }
@@ -170,6 +178,7 @@ interface SubCasesMapWithPageInfo {
   subCasesMap: Map<string, SubCaseResponse[]>;
   page: number;
   perPage: number;
+  total: number;
 }
 
 interface CaseCommentStats {
@@ -193,6 +202,7 @@ interface CasesMapWithPageInfo {
   casesMap: Map<string, CaseResponse>;
   page: number;
   perPage: number;
+  total: number;
 }
 
 type FindCaseOptions = CasesFindRequest & SavedObjectFindOptions;
@@ -217,6 +227,7 @@ export interface CaseServiceSetup {
   getSubCases(args: GetSubCasesArgs): Promise<SavedObjectsBulkResponse<SubCaseAttributes>>;
   getCases(args: GetCasesArgs): Promise<SavedObjectsBulkResponse<ESCaseAttributes>>;
   getComment(args: GetCommentArgs): Promise<SavedObject<CommentAttributes>>;
+  getCaseIdsByAlertId(args: GetCaseIdsByAlertIdArgs): Promise<string[]>;
   getTags(args: ClientArgs): Promise<string[]>;
   getReporters(args: ClientArgs): Promise<User[]>;
   getUser(args: GetUserArgs): Promise<AuthenticatedUser | User>;
@@ -282,13 +293,15 @@ export class CaseService implements CaseServiceSetup {
       options: caseOptions,
     });
 
-    const subCasesResp = await this.findSubCasesGroupByCase({
-      client,
-      options: subCaseOptions,
-      ids: cases.saved_objects
-        .filter((caseInfo) => caseInfo.attributes.type === CaseType.collection)
-        .map((caseInfo) => caseInfo.id),
-    });
+    const subCasesResp = ENABLE_CASE_CONNECTOR
+      ? await this.findSubCasesGroupByCase({
+          client,
+          options: subCaseOptions,
+          ids: cases.saved_objects
+            .filter((caseInfo) => caseInfo.attributes.type === CaseType.collection)
+            .map((caseInfo) => caseInfo.id),
+        })
+      : { subCasesMap: new Map<string, SubCaseResponse[]>(), page: 0, perPage: 0 };
 
     const casesMap = cases.saved_objects.reduce((accMap, caseInfo) => {
       const subCasesForCase = subCasesResp.subCasesMap.get(caseInfo.id);
@@ -345,6 +358,7 @@ export class CaseService implements CaseServiceSetup {
       casesMap: casesWithComments,
       page: cases.page,
       perPage: cases.per_page,
+      total: cases.total,
     };
   }
 
@@ -407,7 +421,7 @@ export class CaseService implements CaseServiceSetup {
 
     let subCasesTotal = 0;
 
-    if (subCaseOptions) {
+    if (ENABLE_CASE_CONNECTOR && subCaseOptions) {
       subCasesTotal = await this.findSubCaseStatusStats({
         client,
         options: subCaseOptions,
@@ -526,6 +540,7 @@ export class CaseService implements CaseServiceSetup {
       subCasesMap: new Map<string, SubCaseResponse[]>(),
       page: 0,
       perPage: 0,
+      total: 0,
     };
 
     if (!options) {
@@ -582,7 +597,7 @@ export class CaseService implements CaseServiceSetup {
       return accMap;
     }, new Map<string, SubCaseResponse[]>());
 
-    return { subCasesMap, page: subCases.page, perPage: subCases.per_page };
+    return { subCasesMap, page: subCases.page, perPage: subCases.per_page, total: subCases.total };
   }
 
   /**
@@ -888,6 +903,56 @@ export class CaseService implements CaseServiceSetup {
       });
     } catch (error) {
       this.log.error(`Error on GET all comments for ${JSON.stringify(id)}: ${error}`);
+      throw error;
+    }
+  }
+
+  private buildCaseIdsAggs = (size: number = 100): Record<string, AggregationContainer> => ({
+    references: {
+      nested: {
+        path: `${CASE_COMMENT_SAVED_OBJECT}.references`,
+      },
+      aggregations: {
+        caseIds: {
+          terms: {
+            field: `${CASE_COMMENT_SAVED_OBJECT}.references.id`,
+            size,
+          },
+        },
+      },
+    },
+  });
+
+  public async getCaseIdsByAlertId({
+    client,
+    alertId,
+  }: GetCaseIdsByAlertIdArgs): Promise<string[]> {
+    try {
+      this.log.debug(`Attempting to GET all cases for alert id ${alertId}`);
+
+      let response = await client.find<CommentAttributes, GetCaseIdsByAlertIdAggs>({
+        type: CASE_COMMENT_SAVED_OBJECT,
+        fields: [],
+        page: 1,
+        perPage: 1,
+        sortField: defaultSortField,
+        aggs: this.buildCaseIdsAggs(),
+        filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`, alertId),
+      });
+      if (response.total > 100) {
+        response = await client.find<CommentAttributes, GetCaseIdsByAlertIdAggs>({
+          type: CASE_COMMENT_SAVED_OBJECT,
+          fields: [],
+          page: 1,
+          perPage: 1,
+          sortField: defaultSortField,
+          aggs: this.buildCaseIdsAggs(response.total),
+          filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`, alertId),
+        });
+      }
+      return response.aggregations?.references.caseIds.buckets.map((b) => b.key) ?? [];
+    } catch (error) {
+      this.log.error(`Error on GET all cases for alert id ${alertId}: ${error}`);
       throw error;
     }
   }

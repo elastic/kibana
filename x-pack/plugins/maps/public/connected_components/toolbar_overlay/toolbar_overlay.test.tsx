@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { Filter } from 'src/plugins/data/public';
 
 jest.mock('../../kibana_services', () => {
   return {
@@ -16,15 +17,27 @@ jest.mock('../../kibana_services', () => {
   };
 });
 
-// @ts-ignore
 import { ToolbarOverlay } from './toolbar_overlay';
 
-test('Must render zoom tools', async () => {
-  const component = shallow(<ToolbarOverlay />);
+test('Should only show set view control', async () => {
+  const component = shallow(
+    <ToolbarOverlay
+      showToolsControl={false}
+      showFitToBoundsButton={false}
+      showTimesliderButton={false}
+    />
+  );
   expect(component).toMatchSnapshot();
 });
 
-test('Must zoom tools and draw filter tools', async () => {
-  const component = shallow(<ToolbarOverlay addFilters={() => {}} geoFields={['coordinates']} />);
+test('Should show all controls', async () => {
+  const component = shallow(
+    <ToolbarOverlay
+      addFilters={async (filters: Filter[], actionId: string) => {}}
+      showToolsControl={true}
+      showFitToBoundsButton={true}
+      showTimesliderButton={true}
+    />
+  );
   expect(component).toMatchSnapshot();
 });

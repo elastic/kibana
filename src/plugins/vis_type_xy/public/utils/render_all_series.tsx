@@ -21,6 +21,7 @@ import {
 } from '@elastic/charts';
 
 import { DatatableRow } from '../../../expressions/public';
+import { METRIC_TYPES } from '../../../data/public';
 
 import { ChartType } from '../../common';
 import { SeriesParam, VisConfig } from '../types';
@@ -50,7 +51,15 @@ const getCurveType = (type?: 'linear' | 'cardinal' | 'step-after'): CurveType =>
  * @param getSeriesColor
  */
 export const renderAllSeries = (
-  { aspects, yAxes, xAxis, showValueLabel, enableHistogramMode, fittingFunction }: VisConfig,
+  {
+    aspects,
+    yAxes,
+    xAxis,
+    showValueLabel,
+    enableHistogramMode,
+    fittingFunction,
+    fillOpacity,
+  }: VisConfig,
   seriesParams: SeriesParam[],
   data: DatatableRow[],
   getSeriesName: (series: XYChartSeriesIdentifier) => SeriesName,
@@ -66,14 +75,23 @@ export const renderAllSeries = (
       data: { id: paramId },
       lineWidth: strokeWidth,
       showCircles,
+      circlesRadius,
       drawLinesBetweenPoints,
       mode,
       interpolate,
       type,
     }) => {
-      const yAspects = aspects.y.filter(
-        ({ aggId, accessor }) => aggId?.includes(paramId) && accessor !== null
-      );
+      const yAspects = aspects.y.filter(({ aggId, aggType, accessor }) => {
+        if (
+          aggType === METRIC_TYPES.PERCENTILES ||
+          aggType === METRIC_TYPES.PERCENTILE_RANKS ||
+          aggType === METRIC_TYPES.STD_DEV
+        ) {
+          return aggId?.includes(paramId) && accessor !== null;
+        } else {
+          return aggId === paramId && accessor !== null;
+        }
+      });
       if (!show || !yAspects.length) {
         return null;
       }
@@ -149,7 +167,7 @@ export const renderAllSeries = (
               stackMode={stackMode}
               areaSeriesStyle={{
                 area: {
-                  ...(type === ChartType.Line && { opacity: 0 }),
+                  ...(type === ChartType.Line ? { opacity: 0 } : { opacity: fillOpacity }),
                 },
                 line: {
                   strokeWidth,
@@ -158,6 +176,7 @@ export const renderAllSeries = (
                 point: {
                   visible: showCircles,
                   fill: markSizeAccessor ? ColorVariant.Series : undefined,
+                  radius: circlesRadius,
                 },
               }}
             />

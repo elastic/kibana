@@ -35,18 +35,18 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
       describe(scenario.id, () => {
         it('should handle mute alert instance request appropriately', async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'MY action',
-              actionTypeId: 'test.noop',
+              connector_type_id: 'test.noop',
               config: {},
               secrets: {},
             })
             .expect(200);
 
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
@@ -61,7 +61,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getMuteInstanceRequest(createdAlert.id, '1');
 
@@ -73,7 +73,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message: getConsumerUnauthorizedErrorMessage(
-                  'muteInstance',
+                  'muteAlert',
                   'test.noop',
                   'alertsFixture'
                 ),
@@ -94,11 +94,11 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               const { body: updatedAlert } = await supertestWithoutAuth
-                .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+                .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
-              expect(updatedAlert.mutedInstanceIds).to.eql(['1']);
+              expect(updatedAlert.muted_alert_ids).to.eql(['1']);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
@@ -114,17 +114,17 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
 
         it('should handle mute alert instance request appropriately when consumer is the same as producer', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
                 enabled: false,
-                alertTypeId: 'test.restricted-noop',
+                rule_type_id: 'test.restricted-noop',
                 consumer: 'alertsRestrictedFixture',
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getMuteInstanceRequest(createdAlert.id, '1');
 
@@ -138,7 +138,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message: getConsumerUnauthorizedErrorMessage(
-                  'muteInstance',
+                  'muteAlert',
                   'test.restricted-noop',
                   'alertsRestrictedFixture'
                 ),
@@ -150,11 +150,11 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               const { body: updatedAlert } = await supertestWithoutAuth
-                .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+                .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
-              expect(updatedAlert.mutedInstanceIds).to.eql(['1']);
+              expect(updatedAlert.muted_alert_ids).to.eql(['1']);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
@@ -170,17 +170,17 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
 
         it('should handle mute alert instance request appropriately when consumer is not the producer', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
                 enabled: false,
-                alertTypeId: 'test.unrestricted-noop',
+                rule_type_id: 'test.unrestricted-noop',
                 consumer: 'alertsFixture',
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getMuteInstanceRequest(createdAlert.id, '1');
 
@@ -192,7 +192,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message: getConsumerUnauthorizedErrorMessage(
-                  'muteInstance',
+                  'muteAlert',
                   'test.unrestricted-noop',
                   'alertsFixture'
                 ),
@@ -205,7 +205,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message: getProducerUnauthorizedErrorMessage(
-                  'muteInstance',
+                  'muteAlert',
                   'test.unrestricted-noop',
                   'alertsRestrictedFixture'
                 ),
@@ -217,11 +217,11 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               const { body: updatedAlert } = await supertestWithoutAuth
-                .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+                .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
-              expect(updatedAlert.mutedInstanceIds).to.eql(['1']);
+              expect(updatedAlert.muted_alert_ids).to.eql(['1']);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
@@ -237,17 +237,17 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
 
         it('should handle mute alert instance request appropriately when consumer is "alerts"', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
                 enabled: false,
-                alertTypeId: 'test.restricted-noop',
+                rule_type_id: 'test.restricted-noop',
                 consumer: 'alerts',
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getMuteInstanceRequest(createdAlert.id, '1');
 
@@ -258,7 +258,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message: getConsumerUnauthorizedErrorMessage(
-                  'muteInstance',
+                  'muteAlert',
                   'test.restricted-noop',
                   'alerts'
                 ),
@@ -272,7 +272,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message: getProducerUnauthorizedErrorMessage(
-                  'muteInstance',
+                  'muteAlert',
                   'test.restricted-noop',
                   'alertsRestrictedFixture'
                 ),
@@ -284,11 +284,11 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               const { body: updatedAlert } = await supertestWithoutAuth
-                .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+                .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
-              expect(updatedAlert.mutedInstanceIds).to.eql(['1']);
+              expect(updatedAlert.muted_alert_ids).to.eql(['1']);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
@@ -304,16 +304,14 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
 
         it('should handle mute alert instance request appropriately and not duplicate mutedInstanceIds when muting an instance already muted', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData({ enabled: false }))
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           await supertest
-            .post(
-              `${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}/alert_instance/1/_mute`
-            )
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}/alert/1/_mute`)
             .set('kbn-xsrf', 'foo')
             .expect(204, '');
 
@@ -327,7 +325,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message: getConsumerUnauthorizedErrorMessage(
-                  'muteInstance',
+                  'muteAlert',
                   'test.noop',
                   'alertsFixture'
                 ),
@@ -341,11 +339,11 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               const { body: updatedAlert } = await supertestWithoutAuth
-                .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+                .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
-              expect(updatedAlert.mutedInstanceIds).to.eql(['1']);
+              expect(updatedAlert.muted_alert_ids).to.eql(['1']);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

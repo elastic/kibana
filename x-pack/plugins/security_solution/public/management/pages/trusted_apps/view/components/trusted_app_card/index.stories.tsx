@@ -50,19 +50,37 @@ storiesOf('TrustedApps/TrustedAppCard', module)
     trustedApp.created_at = '2020-09-17T14:52:33.899Z';
     trustedApp.entries = [PATH_CONDITION];
 
-    return <TrustedAppCard trustedApp={trustedApp} onDelete={action('onClick')} />;
+    return (
+      <TrustedAppCard
+        trustedApp={trustedApp}
+        onDelete={action('onClick')}
+        onEdit={action('onClick')}
+      />
+    );
   })
   .add('multiple entries', () => {
     const trustedApp: TrustedApp = createSampleTrustedApp(5);
     trustedApp.created_at = '2020-09-17T14:52:33.899Z';
     trustedApp.entries = [PATH_CONDITION, SIGNER_CONDITION];
 
-    return <TrustedAppCard trustedApp={trustedApp} onDelete={action('onClick')} />;
+    return (
+      <TrustedAppCard
+        trustedApp={trustedApp}
+        onDelete={action('onClick')}
+        onEdit={action('onClick')}
+      />
+    );
   })
   .add('longs texts', () => {
     const trustedApp: TrustedApp = createSampleTrustedApp(5, true);
     trustedApp.created_at = '2020-09-17T14:52:33.899Z';
     trustedApp.entries = [PATH_CONDITION, SIGNER_CONDITION];
 
-    return <TrustedAppCard trustedApp={trustedApp} onDelete={action('onClick')} />;
+    return (
+      <TrustedAppCard
+        trustedApp={trustedApp}
+        onDelete={action('onClick')}
+        onEdit={action('onClick')}
+      />
+    );
   });

@@ -8,13 +8,11 @@
 import { shallow } from 'enzyme';
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import '../../../common/mock/match_media';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import {
-  apolloClientObservable,
   mockGlobalState,
   mockIndexPattern,
   TestProviders,
@@ -35,22 +33,10 @@ describe('NetworkTopCountries Table Component', () => {
   const mount = useMountAppended();
 
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    kibanaObservable,
-    storage
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   beforeEach(() => {
-    store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
-      kibanaObservable,
-      storage
-    );
+    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
   describe('rendering', () => {
@@ -109,27 +95,25 @@ describe('NetworkTopCountries Table Component', () => {
   describe('Sorting on Table', () => {
     test('when you click on the column header, you should show the sorting icon', () => {
       const wrapper = mount(
-        <MockedProvider>
-          <TestProviders store={store}>
-            <NetworkTopCountriesTable
-              data={mockData.NetworkTopCountries.edges}
-              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopCountries.pageInfo)}
-              flowTargeted={FlowTargetSourceDest.source}
-              id="topCountriesSource"
-              isInspect={false}
-              indexPattern={mockIndexPattern}
-              loading={false}
-              loadPage={loadPage}
-              showMorePagesIndicator={getOr(
-                false,
-                'showMorePagesIndicator',
-                mockData.NetworkTopCountries.pageInfo
-              )}
-              totalCount={mockData.NetworkTopCountries.totalCount}
-              type={networkModel.NetworkType.page}
-            />
-          </TestProviders>
-        </MockedProvider>
+        <TestProviders store={store}>
+          <NetworkTopCountriesTable
+            data={mockData.NetworkTopCountries.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopCountries.pageInfo)}
+            flowTargeted={FlowTargetSourceDest.source}
+            id="topCountriesSource"
+            isInspect={false}
+            indexPattern={mockIndexPattern}
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(
+              false,
+              'showMorePagesIndicator',
+              mockData.NetworkTopCountries.pageInfo
+            )}
+            totalCount={mockData.NetworkTopCountries.totalCount}
+            type={networkModel.NetworkType.page}
+          />
+        </TestProviders>
       );
       expect(store.getState().network.page.queries.topCountriesSource.sort).toEqual({
         direction: 'desc',
@@ -144,12 +128,8 @@ describe('NetworkTopCountries Table Component', () => {
         direction: 'asc',
         field: 'bytes_out',
       });
-      expect(wrapper.find('.euiTable thead tr th button').first().text()).toEqual(
-        'Bytes inClick to sort in ascending order'
-      );
-      expect(wrapper.find('.euiTable thead tr th button').at(1).text()).toEqual(
-        'Bytes outClick to sort in descending order'
-      );
+      expect(wrapper.find('.euiTable thead tr th button').first().text()).toEqual('Bytes in');
+      expect(wrapper.find('.euiTable thead tr th button').at(1).text()).toEqual('Bytes out');
       expect(wrapper.find('.euiTable thead tr th button').at(1).find('svg')).toBeTruthy();
     });
   });

@@ -17,7 +17,7 @@ export const createLastSuccessfulStepRoute: UMRestApiRouteFactory = (libs: UMSer
       monitorId: schema.string(),
       stepIndex: schema.number(),
       timestamp: schema.string(),
-      _debug: schema.maybe(schema.boolean()),
+      _inspect: schema.maybe(schema.boolean()),
     }),
   },
   handler: async ({ uptimeEsClient, request, response }) => {

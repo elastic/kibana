@@ -8,7 +8,7 @@
 import { EuiTitle } from '@elastic/eui';
 import React, { ComponentType } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { HttpSetup } from '../../../../../../../src/core/public';
+import { CoreStart } from '../../../../../../../src/core/public';
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
@@ -20,7 +20,7 @@ export default {
   component: ApmHeader,
   decorators: [
     (Story: ComponentType) => {
-      createCallApmApi(({} as unknown) as HttpSetup);
+      createCallApmApi(({} as unknown) as CoreStart);
 
       return (
         <EuiThemeProvider>

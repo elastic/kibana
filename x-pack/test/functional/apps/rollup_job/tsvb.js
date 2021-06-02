@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import mockRolledUpData from './hybrid_index_helper';
 
 export default function ({ getService, getPageObjects }) {
-  const es = getService('legacyEs');
+  const es = getService('es');
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
@@ -49,9 +49,8 @@ export default function ({ getService, getPageObjects }) {
 
       await retry.try(async () => {
         //Create a rollup for kibana to recognize
-        await es.transport.request({
-          path: `/_rollup/job/${rollupJobName}`,
-          method: 'PUT',
+        await es.rollup.putJob({
+          id: rollupJobName,
           body: {
             index_pattern: rollupSourceIndexName,
             rollup_index: rollupTargetIndexName,
@@ -83,7 +82,9 @@ export default function ({ getService, getPageObjects }) {
         'Oct 15, 2019 @ 19:31:44.000'
       );
       await PageObjects.visualBuilder.clickPanelOptions('metric');
-      await PageObjects.visualBuilder.setIndexPatternValue(rollupTargetIndexName);
+      await PageObjects.visualBuilder.setIndexPatternValue(rollupTargetIndexName, false);
+      await PageObjects.visualBuilder.selectIndexPatternTimeField('@timestamp');
+      await PageObjects.visualBuilder.setMetricsDataTimerangeMode('Last value');
       await PageObjects.visualBuilder.setIntervalValue('1d');
       await PageObjects.visualBuilder.setDropLastBucket(false);
       await PageObjects.common.sleep(3000);

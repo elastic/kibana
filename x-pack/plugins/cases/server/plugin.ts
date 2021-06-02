@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import { IContextProvider, KibanaRequest, Logger, PluginInitializerContext } from 'kibana/server';
+import {
+  IContextProvider,
+  KibanaRequest,
+  Logger,
+  PluginInitializerContext,
+  RequestHandlerContext,
+} from 'kibana/server';
 import { CoreSetup, CoreStart } from 'src/core/server';
 
 import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as ActionsPluginSetup } from '../../actions/server';
-import { APP_ID } from '../common/constants';
+import { APP_ID, ENABLE_CASE_CONNECTOR } from '../common';
 
 import { ConfigType } from './config';
 import { initCaseApi } from './routes/api';
@@ -70,7 +76,6 @@ export class CasePlugin {
     core.savedObjects.registerType(caseConfigureSavedObjectType);
     core.savedObjects.registerType(caseConnectorMappingsSavedObjectType);
     core.savedObjects.registerType(caseSavedObjectType);
-    core.savedObjects.registerType(subCaseSavedObjectType);
     core.savedObjects.registerType(caseUserActionSavedObjectType);
 
     this.log.debug(
@@ -111,22 +116,25 @@ export class CasePlugin {
       router,
     });
 
-    registerConnectors({
-      actionsRegisterType: plugins.actions.registerType,
-      logger: this.log,
-      caseService: this.caseService,
-      caseConfigureService: this.caseConfigureService,
-      connectorMappingsService: this.connectorMappingsService,
-      userActionService: this.userActionService,
-      alertsService: this.alertsService,
-    });
+    if (ENABLE_CASE_CONNECTOR) {
+      core.savedObjects.registerType(subCaseSavedObjectType);
+      registerConnectors({
+        actionsRegisterType: plugins.actions.registerType,
+        logger: this.log,
+        caseService: this.caseService,
+        caseConfigureService: this.caseConfigureService,
+        connectorMappingsService: this.connectorMappingsService,
+        userActionService: this.userActionService,
+        alertsService: this.alertsService,
+      });
+    }
   }
 
   public start(core: CoreStart) {
     this.log.debug(`Starting Case Workflow`);
 
     const getCasesClientWithRequestAndContext = async (
-      context: CasesRequestHandlerContext,
+      context: RequestHandlerContext,
       request: KibanaRequest
     ) => {
       const user = await this.caseService!.getUser({ request });

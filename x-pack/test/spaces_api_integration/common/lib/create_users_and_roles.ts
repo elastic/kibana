@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
 import { SuperTest } from 'supertest';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { AUTHENTICATION } from './authentication';
 
-export const createUsersAndRoles = async (es: Client, supertest: SuperTest<any>) => {
+export const createUsersAndRoles = async (es: KibanaClient, supertest: SuperTest<any>) => {
   await supertest
     .put('/api/security/role/kibana_legacy_user')
     .send({

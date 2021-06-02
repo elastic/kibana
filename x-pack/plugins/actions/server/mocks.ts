@@ -40,10 +40,11 @@ const createStartMock = () => {
 // this is a default renderer that escapes nothing
 export function renderActionParameterTemplatesDefault<RecordType>(
   actionTypeId: string,
+  actionId: string,
   params: Record<string, unknown>,
   variables: Record<string, unknown>
 ) {
-  return renderActionParameterTemplates(undefined, actionTypeId, params, variables);
+  return renderActionParameterTemplates(undefined, actionTypeId, actionId, params, variables);
 }
 
 const createServicesMock = () => {

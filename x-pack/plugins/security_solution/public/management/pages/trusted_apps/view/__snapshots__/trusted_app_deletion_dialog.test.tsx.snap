@@ -23,12 +23,13 @@ exports[`TrustedAppDeletionDialog renders correctly when deletion failed 1`] = `
       >
         <button
           aria-label="Closes this modal window"
-          class="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+          class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
           type="button"
         >
           <span
             aria-hidden="true"
             class="euiButtonIcon__icon"
+            color="inherit"
             data-euiicon-type="cross"
           />
         </button>
@@ -124,12 +125,13 @@ exports[`TrustedAppDeletionDialog renders correctly when deletion is in progress
       >
         <button
           aria-label="Closes this modal window"
-          class="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+          class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
           type="button"
         >
           <span
             aria-hidden="true"
             class="euiButtonIcon__icon"
+            color="inherit"
             data-euiicon-type="cross"
           />
         </button>
@@ -230,12 +232,13 @@ exports[`TrustedAppDeletionDialog renders correctly when dialog started 1`] = `
       >
         <button
           aria-label="Closes this modal window"
-          class="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+          class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
           type="button"
         >
           <span
             aria-hidden="true"
             class="euiButtonIcon__icon"
+            color="inherit"
             data-euiicon-type="cross"
           />
         </button>

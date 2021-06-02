@@ -83,3 +83,6 @@ export { licenseService } from './license';
 
 // Artifacts services
 export * from './artifacts';
+
+// Policy preconfiguration functions
+export { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';

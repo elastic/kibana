@@ -48,7 +48,7 @@ const jobDetails: JobDetails = {
   },
   [ANALYSIS_CONFIG_TYPE.CLASSIFICATION]: {
     helpText: i18n.translate('xpack.ml.dataframe.analytics.create.classificationHelpText', {
-      defaultMessage: 'Classification predicts labels of data points in the data set.',
+      defaultMessage: 'Classification predicts classes of data points in the data set.',
     }),
     icon: 'classificationJob',
     title: i18n.translate('xpack.ml.dataframe.analytics.create.classificationTitle', {

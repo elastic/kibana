@@ -6,7 +6,10 @@
  */
 
 import sinon from 'sinon';
-import { savedObjectsRepositoryMock } from '../../../../../src/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  savedObjectsRepositoryMock,
+} from '../../../../../src/core/server/mocks';
 import { SavedObjectsErrorHelpers, Logger } from '../../../../../src/core/server';
 import { ADJUST_THROUGHPUT_INTERVAL } from '../lib/create_managed_configuration';
 import { TaskManagerPlugin, TaskManagerStartContract } from '../plugin';
@@ -19,6 +22,7 @@ describe('managed configuration', () => {
 
   let clock: sinon.SinonFakeTimers;
   const savedObjectsClient = savedObjectsRepositoryMock.create();
+  const esStart = elasticsearchServiceMock.createStart();
 
   beforeEach(async () => {
     jest.resetAllMocks();
@@ -55,6 +59,7 @@ describe('managed configuration', () => {
     });
 
     const coreStart = coreMock.createStart();
+    coreStart.elasticsearch = esStart;
     coreStart.savedObjects.createInternalRepository.mockReturnValue(savedObjectsClient);
     taskManagerStart = await taskManager.start(coreStart);
 
@@ -81,10 +86,10 @@ describe('managed configuration', () => {
     clock.tick(ADJUST_THROUGHPUT_INTERVAL);
 
     expect(logger.warn).toHaveBeenCalledWith(
-      'Max workers configuration is temporarily reduced after Elasticsearch returned 1 "too many request" error(s).'
+      'Max workers configuration is temporarily reduced after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" error(s).'
     );
     expect(logger.debug).toHaveBeenCalledWith(
-      'Max workers configuration changing from 10 to 8 after seeing 1 error(s)'
+      'Max workers configuration changing from 10 to 8 after seeing 1 "too many request" and/or "execute [inline] script" error(s)'
     );
     expect(logger.debug).toHaveBeenCalledWith('Task pool now using 10 as the max worker value');
   });
@@ -105,10 +110,57 @@ describe('managed configuration', () => {
     clock.tick(ADJUST_THROUGHPUT_INTERVAL);
 
     expect(logger.warn).toHaveBeenCalledWith(
-      'Poll interval configuration is temporarily increased after Elasticsearch returned 1 "too many request" error(s).'
+      'Poll interval configuration is temporarily increased after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" error(s).'
     );
     expect(logger.debug).toHaveBeenCalledWith(
-      'Poll interval configuration changing from 3000 to 3600 after seeing 1 error(s)'
+      'Poll interval configuration changing from 3000 to 3600 after seeing 1 "too many request" and/or "execute [inline] script" error(s)'
+    );
+    expect(logger.debug).toHaveBeenCalledWith('Task poller now using interval of 3600ms');
+  });
+
+  test('should lower max workers when Elasticsearch returns "cannot execute [inline] scripts" error', async () => {
+    esStart
+      .createClient('taskManager')
+      .asInternalUser.search.mockRejectedValueOnce(
+        elasticsearchServiceMock.createErrorTransportRequestPromise(
+          new Error('cannot execute [inline] scripts" error')
+        )
+      );
+
+    await expect(taskManagerStart.fetch({})).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"cannot execute [inline] scripts" error"`
+    );
+    clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Max workers configuration is temporarily reduced after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" error(s).'
+    );
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Max workers configuration changing from 10 to 8 after seeing 1 "too many request" and/or "execute [inline] script" error(s)'
+    );
+    expect(logger.debug).toHaveBeenCalledWith('Task pool now using 10 as the max worker value');
+  });
+
+  test('should increase poll interval when Elasticsearch returns "cannot execute [inline] scripts" error', async () => {
+    esStart
+      .createClient('taskManager')
+      .asInternalUser.search.mockRejectedValueOnce(
+        elasticsearchServiceMock.createErrorTransportRequestPromise(
+          new Error('cannot execute [inline] scripts" error')
+        )
+      );
+
+    await expect(taskManagerStart.fetch({})).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"cannot execute [inline] scripts" error"`
+    );
+
+    clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Poll interval configuration is temporarily increased after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" error(s).'
+    );
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Poll interval configuration changing from 3000 to 3600 after seeing 1 "too many request" and/or "execute [inline] script" error(s)'
     );
     expect(logger.debug).toHaveBeenCalledWith('Task poller now using interval of 3600ms');
   });

@@ -8,7 +8,7 @@
 import { encode } from 'rison-node';
 import uuid from 'uuid';
 import { set } from '@elastic/safer-lodash-set';
-import { InfraSourceConfiguration } from '../../../../../../common/http_api/source_api';
+import { MetricsSourceConfigurationProperties } from '../../../../../../common/metrics_sources';
 import { colorTransformer, Color } from '../../../../../../common/color_palette';
 import { MetricsExplorerSeries } from '../../../../../../common/http_api/metrics_explorer';
 import {
@@ -143,7 +143,7 @@ const createTSVBIndexPattern = (alias: string) => {
 };
 
 export const createTSVBLink = (
-  source: InfraSourceConfiguration | undefined,
+  source: MetricsSourceConfigurationProperties | undefined,
   options: MetricsExplorerOptions,
   series: MetricsExplorerSeries,
   timeRange: MetricsExplorerTimeOptions,

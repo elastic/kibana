@@ -143,7 +143,8 @@ function getProps({
   rolesAPIClient.getRole.mockResolvedValue(role);
 
   const indexPatterns = dataPluginMock.createStartContract().indexPatterns;
-  indexPatterns.getTitles = jest.fn().mockResolvedValue(['foo*', 'bar*']);
+  // `undefined` titles can technically happen via import/export or other manual manipulation
+  indexPatterns.getTitles = jest.fn().mockResolvedValue(['foo*', 'bar*', undefined]);
 
   const indicesAPIClient = indicesAPIClientMock.create();
 
@@ -480,23 +481,25 @@ describe('<EditRolePage />', () => {
     });
   });
 
-  it('can render if features are not available', async () => {
-    const { http } = coreMock.createStart();
-    http.get.mockImplementation(async (path: any) => {
-      if (path === '/api/features') {
-        const error = { response: { status: 404 } };
-        throw error;
-      }
-
-      if (path === '/api/spaces/space') {
-        return buildSpaces();
-      }
-    });
-
-    const wrapper = mountWithIntl(<EditRolePage {...{ ...getProps({ action: 'edit' }), http }} />);
+  it('registers fatal error if features endpoint fails unexpectedly', async () => {
+    const error = { response: { status: 500 } };
+    const getFeatures = jest.fn().mockRejectedValue(error);
+    const props = getProps({ action: 'edit' });
+    const wrapper = mountWithIntl(<EditRolePage {...props} getFeatures={getFeatures} />);
 
     await waitForRender(wrapper);
+    expect(props.fatalErrors.add).toHaveBeenLastCalledWith(error);
+    expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(0);
+  });
 
+  it('can render if features call is not allowed', async () => {
+    const error = { response: { status: 403 } };
+    const getFeatures = jest.fn().mockRejectedValue(error);
+    const props = getProps({ action: 'edit' });
+    const wrapper = mountWithIntl(<EditRolePage {...props} getFeatures={getFeatures} />);
+
+    await waitForRender(wrapper);
+    expect(props.fatalErrors.add).not.toHaveBeenCalled();
     expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
     expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
     expectSaveFormButtons(wrapper);

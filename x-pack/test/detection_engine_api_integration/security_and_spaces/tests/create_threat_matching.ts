@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
+import { get, isEqual } from 'lodash';
 import expect from '@kbn/expect';
 
 import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
@@ -150,6 +150,97 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 10, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         expect(signalsOpen.hits.hits.length).equal(10);
+        const fullSource = signalsOpen.hits.hits.find(
+          (signal) => signal._source.signal.parents[0].id === 'UBXOBmkBR346wHgnLP8T'
+        );
+        const fullSignal = fullSource!._source; // If this doesn't exist the test is going to fail anyway so using a bang operator here to get rid of ts error
+        expect(fullSignal).eql({
+          '@timestamp': fullSignal['@timestamp'],
+          agent: {
+            ephemeral_id: '1b4978a0-48be-49b1-ac96-323425b389ab',
+            hostname: 'zeek-sensor-amsterdam',
+            id: 'e52588e6-7aa3-4c89-a2c4-d6bc5c286db1',
+            type: 'auditbeat',
+            version: '8.0.0',
+          },
+          cloud: {
+            instance: {
+              id: '133551048',
+            },
+            provider: 'digitalocean',
+            region: 'ams3',
+          },
+          ecs: {
+            version: '1.0.0-beta2',
+          },
+          event: {
+            action: 'boot',
+            dataset: 'login',
+            kind: 'signal',
+            module: 'system',
+            origin: '/var/log/wtmp',
+          },
+          host: {
+            architecture: 'x86_64',
+            containerized: false,
+            hostname: 'zeek-sensor-amsterdam',
+            id: '2ce8b1e7d69e4a1d9c6bcddc473da9d9',
+            name: 'zeek-sensor-amsterdam',
+            os: {
+              codename: 'bionic',
+              family: 'debian',
+              kernel: '4.15.0-45-generic',
+              name: 'Ubuntu',
+              platform: 'ubuntu',
+              version: '18.04.2 LTS (Bionic Beaver)',
+            },
+          },
+          message: 'System boot',
+          service: {
+            type: 'system',
+          },
+          signal: {
+            _meta: {
+              version: 35,
+            },
+            ancestors: [
+              {
+                depth: 0,
+                id: 'UBXOBmkBR346wHgnLP8T',
+                index: 'auditbeat-8.0.0-2019.02.19-000001',
+                type: 'event',
+              },
+            ],
+            depth: 1,
+            original_event: {
+              action: 'boot',
+              dataset: 'login',
+              kind: 'event',
+              module: 'system',
+              origin: '/var/log/wtmp',
+            },
+            original_time: fullSignal.signal.original_time,
+            parent: {
+              depth: 0,
+              id: 'UBXOBmkBR346wHgnLP8T',
+              index: 'auditbeat-8.0.0-2019.02.19-000001',
+              type: 'event',
+            },
+            parents: [
+              {
+                depth: 0,
+                id: 'UBXOBmkBR346wHgnLP8T',
+                index: 'auditbeat-8.0.0-2019.02.19-000001',
+                type: 'event',
+              },
+            ],
+            rule: fullSignal.signal.rule,
+            status: 'open',
+          },
+          threat: {
+            indicator: get(fullSignal, 'threat.indicator'),
+          },
+        });
       });
 
       it('should return 0 matches if the mapping does not match against anything in the mapping', async () => {
@@ -317,6 +408,16 @@ export default ({ getService }: FtrProviderContext) => {
                 {
                   description: "domain should match the auditbeat hosts' data's source.ip",
                   domain: '159.89.119.67',
+                  event: {
+                    category: 'threat',
+                    created: '2021-01-26T11:09:05.529Z',
+                    dataset: 'threatintel.abuseurl',
+                    ingested: '2021-01-26T11:09:06.595350Z',
+                    kind: 'enrichment',
+                    module: 'threatintel',
+                    reference: 'https://urlhaus.abuse.ch/url/978783/',
+                    type: 'indicator',
+                  },
                   first_seen: '2021-01-26T11:09:04.000Z',
                   matched: {
                     atomic: '159.89.119.67',
@@ -339,6 +440,16 @@ export default ({ getService }: FtrProviderContext) => {
                 {
                   description: "domain should match the auditbeat hosts' data's source.ip",
                   domain: '159.89.119.67',
+                  event: {
+                    category: 'threat',
+                    created: '2021-01-26T11:09:05.529Z',
+                    dataset: 'threatintel.abuseurl',
+                    ingested: '2021-01-26T11:09:06.595350Z',
+                    kind: 'enrichment',
+                    module: 'threatintel',
+                    reference: 'https://urlhaus.abuse.ch/url/978783/',
+                    type: 'indicator',
+                  },
                   first_seen: '2021-01-26T11:09:04.000Z',
                   matched: {
                     atomic: '159.89.119.67',
@@ -412,6 +523,16 @@ export default ({ getService }: FtrProviderContext) => {
               port: 57324,
               provider: 'geenensp',
               type: 'url',
+              event: {
+                category: 'threat',
+                created: '2021-01-26T11:09:05.529Z',
+                dataset: 'threatintel.abuseurl',
+                ingested: '2021-01-26T11:09:06.616763Z',
+                kind: 'enrichment',
+                module: 'threatintel',
+                reference: 'https://urlhaus.abuse.ch/url/978782/',
+                type: 'indicator',
+              },
             },
             {
               description: 'this should match auditbeat/hosts on ip',
@@ -426,6 +547,16 @@ export default ({ getService }: FtrProviderContext) => {
               },
               provider: 'other_provider',
               type: 'ip',
+              event: {
+                category: 'threat',
+                created: '2021-01-26T11:09:05.529Z',
+                dataset: 'threatintel.abuseurl',
+                ingested: '2021-01-26T11:09:06.616763Z',
+                kind: 'enrichment',
+                module: 'threatintel',
+                reference: 'https://urlhaus.abuse.ch/url/978782/',
+                type: 'indicator',
+              },
             },
           ]);
         });
@@ -492,6 +623,16 @@ export default ({ getService }: FtrProviderContext) => {
               port: 57324,
               provider: 'geenensp',
               type: 'url',
+              event: {
+                category: 'threat',
+                created: '2021-01-26T11:09:05.529Z',
+                dataset: 'threatintel.abuseurl',
+                ingested: '2021-01-26T11:09:06.616763Z',
+                kind: 'enrichment',
+                module: 'threatintel',
+                reference: 'https://urlhaus.abuse.ch/url/978782/',
+                type: 'indicator',
+              },
             },
             // We do not merge matched indicators during enrichment, so in
             // certain circumstances a given indicator document could appear
@@ -512,6 +653,16 @@ export default ({ getService }: FtrProviderContext) => {
               port: 57324,
               provider: 'geenensp',
               type: 'url',
+              event: {
+                category: 'threat',
+                created: '2021-01-26T11:09:05.529Z',
+                dataset: 'threatintel.abuseurl',
+                ingested: '2021-01-26T11:09:06.616763Z',
+                kind: 'enrichment',
+                module: 'threatintel',
+                reference: 'https://urlhaus.abuse.ch/url/978782/',
+                type: 'indicator',
+              },
             },
             {
               description: 'this should match auditbeat/hosts on ip',
@@ -526,6 +677,16 @@ export default ({ getService }: FtrProviderContext) => {
               },
               provider: 'other_provider',
               type: 'ip',
+              event: {
+                category: 'threat',
+                created: '2021-01-26T11:09:05.529Z',
+                dataset: 'threatintel.abuseurl',
+                ingested: '2021-01-26T11:09:06.616763Z',
+                kind: 'enrichment',
+                module: 'threatintel',
+                reference: 'https://urlhaus.abuse.ch/url/978782/',
+                type: 'indicator',
+              },
             },
           ]);
         });
@@ -600,6 +761,16 @@ export default ({ getService }: FtrProviderContext) => {
                 full: 'http://159.89.119.67:59600/bin.sh',
                 scheme: 'http',
               },
+              event: {
+                category: 'threat',
+                created: '2021-01-26T11:09:05.529Z',
+                dataset: 'threatintel.abuseurl',
+                ingested: '2021-01-26T11:09:06.595350Z',
+                kind: 'enrichment',
+                module: 'threatintel',
+                reference: 'https://urlhaus.abuse.ch/url/978783/',
+                type: 'indicator',
+              },
             },
           ]);
 
@@ -621,6 +792,16 @@ export default ({ getService }: FtrProviderContext) => {
                 full: 'http://159.89.119.67:59600/bin.sh',
                 scheme: 'http',
               },
+              event: {
+                category: 'threat',
+                created: '2021-01-26T11:09:05.529Z',
+                dataset: 'threatintel.abuseurl',
+                ingested: '2021-01-26T11:09:06.595350Z',
+                kind: 'enrichment',
+                module: 'threatintel',
+                reference: 'https://urlhaus.abuse.ch/url/978783/',
+                type: 'indicator',
+              },
             },
             {
               description: 'this should match auditbeat/hosts on both port and ip',
@@ -636,6 +817,16 @@ export default ({ getService }: FtrProviderContext) => {
               port: 57324,
               provider: 'geenensp',
               type: 'url',
+              event: {
+                category: 'threat',
+                created: '2021-01-26T11:09:05.529Z',
+                dataset: 'threatintel.abuseurl',
+                ingested: '2021-01-26T11:09:06.616763Z',
+                kind: 'enrichment',
+                module: 'threatintel',
+                reference: 'https://urlhaus.abuse.ch/url/978782/',
+                type: 'indicator',
+              },
             },
             {
               description: 'this should match auditbeat/hosts on both port and ip',
@@ -651,6 +842,16 @@ export default ({ getService }: FtrProviderContext) => {
               port: 57324,
               provider: 'geenensp',
               type: 'url',
+              event: {
+                category: 'threat',
+                created: '2021-01-26T11:09:05.529Z',
+                dataset: 'threatintel.abuseurl',
+                ingested: '2021-01-26T11:09:06.616763Z',
+                kind: 'enrichment',
+                module: 'threatintel',
+                reference: 'https://urlhaus.abuse.ch/url/978782/',
+                type: 'indicator',
+              },
             },
           ]);
         });

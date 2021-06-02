@@ -165,6 +165,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       register: deps.uiSettings.register,
     },
     getStartServices: () => plugin.startDependencies,
+    deprecations: deps.deprecations.getRegistry(plugin.name),
   };
 }
 

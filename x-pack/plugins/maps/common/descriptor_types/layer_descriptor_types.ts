@@ -16,6 +16,11 @@ import {
 import { DataRequestDescriptor } from './data_request_descriptor_types';
 import { AbstractSourceDescriptor, TermJoinSourceDescriptor } from './source_descriptor_types';
 
+export type Attribution = {
+  label: string;
+  url: string;
+};
+
 export type JoinDescriptor = {
   leftField?: string;
   right: TermJoinSourceDescriptor;
@@ -29,6 +34,7 @@ export type LayerDescriptor = {
   __trackedLayerDescriptor?: LayerDescriptor;
   __areTilesLoaded?: boolean;
   alpha?: number;
+  attribution?: Attribution;
   id: string;
   joins?: JoinDescriptor[];
   label?: string | null;
@@ -40,6 +46,7 @@ export type LayerDescriptor = {
   visible?: boolean;
   style?: StyleDescriptor | null;
   query?: Query;
+  includeInFitToBounds?: boolean;
 };
 
 export type VectorLayerDescriptor = LayerDescriptor & {

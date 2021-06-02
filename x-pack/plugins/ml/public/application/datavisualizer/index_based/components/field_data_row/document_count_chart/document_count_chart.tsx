@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -29,6 +29,7 @@ interface Props {
   chartPoints: DocumentCountChartPoint[];
   timeRangeEarliest: number;
   timeRangeLatest: number;
+  interval?: number;
 }
 
 const SPEC_ID = 'document_count';
@@ -38,6 +39,7 @@ export const DocumentCountChart: FC<Props> = ({
   chartPoints,
   timeRangeEarliest,
   timeRangeLatest,
+  interval,
 }) => {
   const seriesName = i18n.translate('xpack.ml.fieldDataCard.documentCountChart.seriesLabel', {
     defaultMessage: 'document count',
@@ -49,6 +51,21 @@ export const DocumentCountChart: FC<Props> = ({
   };
 
   const dateFormatter = niceTimeFormatter([timeRangeEarliest, timeRangeLatest]);
+
+  const adjustedChartPoints = useMemo(() => {
+    // Display empty chart when no data in range
+    if (chartPoints.length < 1) return [{ time: timeRangeEarliest, value: 0 }];
+
+    // If chart has only one bucket
+    // it won't show up correctly unless we add an extra data point
+    if (chartPoints.length === 1) {
+      return [
+        ...chartPoints,
+        { time: interval ? Number(chartPoints[0].time) + interval : timeRangeEarliest, value: 0 },
+      ];
+    }
+    return chartPoints;
+  }, [chartPoints, timeRangeEarliest, timeRangeLatest, interval]);
 
   return (
     <div style={{ width: width ?? '100%' }} data-test-subj="mlFieldDataDocumentCountChart">
@@ -73,8 +90,7 @@ export const DocumentCountChart: FC<Props> = ({
           yScaleType={ScaleType.Linear}
           xAccessor="time"
           yAccessors={['value']}
-          // Display empty chart when no data in range
-          data={chartPoints.length > 0 ? chartPoints : [{ time: timeRangeEarliest, value: 0 }]}
+          data={adjustedChartPoints}
         />
       </Chart>
     </div>

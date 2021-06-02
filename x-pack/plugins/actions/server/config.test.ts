@@ -5,9 +5,17 @@
  * 2.0.
  */
 
-import { configSchema } from './config';
+import { configSchema, ActionsConfig, getValidatedConfig } from './config';
+import { Logger } from '../../../..//src/core/server';
+import { loggingSystemMock } from '../../../..//src/core/server/mocks';
+
+const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 describe('config validation', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
   test('action defaults', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
@@ -15,13 +23,24 @@ describe('config validation', () => {
         "allowedHosts": Array [
           "*",
         ],
+        "cleanupFailedExecutionsTask": Object {
+          "cleanupInterval": "PT5M",
+          "enabled": true,
+          "idleInterval": "PT1H",
+          "pageSize": 100,
+        },
         "enabled": true,
         "enabledActionTypes": Array [
           "*",
         ],
+        "maxResponseContentLength": ByteSizeValue {
+          "valueInBytes": 1048576,
+        },
         "preconfigured": Object {},
+        "preconfiguredAlertHistoryEsIndex": false,
         "proxyRejectUnauthorizedCertificates": true,
         "rejectUnauthorized": true,
+        "responseTimeout": "PT1M",
       }
     `);
   });
@@ -45,10 +64,19 @@ describe('config validation', () => {
         "allowedHosts": Array [
           "*",
         ],
+        "cleanupFailedExecutionsTask": Object {
+          "cleanupInterval": "PT5M",
+          "enabled": true,
+          "idleInterval": "PT1H",
+          "pageSize": 100,
+        },
         "enabled": true,
         "enabledActionTypes": Array [
           "*",
         ],
+        "maxResponseContentLength": ByteSizeValue {
+          "valueInBytes": 1048576,
+        },
         "preconfigured": Object {
           "mySlack1": Object {
             "actionTypeId": ".slack",
@@ -59,8 +87,10 @@ describe('config validation', () => {
             "secrets": Object {},
           },
         },
+        "preconfiguredAlertHistoryEsIndex": false,
         "proxyRejectUnauthorizedCertificates": false,
         "rejectUnauthorized": false,
+        "responseTimeout": "PT1M",
       }
     `);
   });
@@ -83,6 +113,107 @@ describe('config validation', () => {
     ).toThrowErrorMatchingInlineSnapshot(
       `"[preconfigured]: invalid preconfigured action id \\"__proto__\\""`
     );
+  });
+
+  test('validates proxyBypassHosts and proxyOnlyHosts', () => {
+    const bypassHosts = ['bypass.elastic.co'];
+    const onlyHosts = ['only.elastic.co'];
+    let validated: ActionsConfig;
+
+    validated = configSchema.validate({});
+    expect(validated.proxyBypassHosts).toEqual(undefined);
+    expect(validated.proxyOnlyHosts).toEqual(undefined);
+
+    validated = configSchema.validate({
+      proxyBypassHosts: bypassHosts,
+    });
+    expect(validated.proxyBypassHosts).toEqual(bypassHosts);
+    expect(validated.proxyOnlyHosts).toEqual(undefined);
+
+    validated = configSchema.validate({
+      proxyOnlyHosts: onlyHosts,
+    });
+    expect(validated.proxyBypassHosts).toEqual(undefined);
+    expect(validated.proxyOnlyHosts).toEqual(onlyHosts);
+  });
+
+  test('validates proxyBypassHosts and proxyOnlyHosts used at the same time', () => {
+    const bypassHosts = ['bypass.elastic.co'];
+    const onlyHosts = ['only.elastic.co'];
+    const config: Record<string, unknown> = {
+      proxyBypassHosts: bypassHosts,
+      proxyOnlyHosts: onlyHosts,
+    };
+
+    let validated: ActionsConfig;
+
+    // the config schema validation validates with both set
+    validated = configSchema.validate(config);
+    expect(validated.proxyBypassHosts).toEqual(bypassHosts);
+    expect(validated.proxyOnlyHosts).toEqual(onlyHosts);
+
+    // getValidatedConfig will warn and set onlyHosts to undefined with both set
+    validated = getValidatedConfig(mockLogger, validated);
+    expect(validated.proxyBypassHosts).toEqual(bypassHosts);
+    expect(validated.proxyOnlyHosts).toEqual(undefined);
+    expect(mockLogger.warn.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "The confgurations xpack.actions.proxyBypassHosts and xpack.actions.proxyOnlyHosts can not be used at the same time. The configuration xpack.actions.proxyOnlyHosts will be ignored.",
+        ],
+      ]
+    `);
+  });
+
+  // Most of the customHostSettings tests are in ./lib/custom_host_settings.test.ts
+  // but this one seemed more relevant for this test suite, since url is the one
+  // required property.
+  test('validates customHostSettings contains a URL', () => {
+    const config: Record<string, unknown> = {
+      customHostSettings: [{}],
+    };
+
+    expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+      `"[customHostSettings.0.url]: expected value of type [string] but got [undefined]"`
+    );
+  });
+
+  test('action with tls configuration', () => {
+    const config: Record<string, unknown> = {
+      tls: {
+        verificationMode: 'none',
+        proxyVerificationMode: 'none',
+      },
+    };
+    expect(configSchema.validate(config)).toMatchInlineSnapshot(`
+      Object {
+        "allowedHosts": Array [
+          "*",
+        ],
+        "cleanupFailedExecutionsTask": Object {
+          "cleanupInterval": "PT5M",
+          "enabled": true,
+          "idleInterval": "PT1H",
+          "pageSize": 100,
+        },
+        "enabled": true,
+        "enabledActionTypes": Array [
+          "*",
+        ],
+        "maxResponseContentLength": ByteSizeValue {
+          "valueInBytes": 1048576,
+        },
+        "preconfigured": Object {},
+        "preconfiguredAlertHistoryEsIndex": false,
+        "proxyRejectUnauthorizedCertificates": true,
+        "rejectUnauthorized": true,
+        "responseTimeout": "PT1M",
+        "tls": Object {
+          "proxyVerificationMode": "none",
+          "verificationMode": "none",
+        },
+      }
+    `);
   });
 });
 

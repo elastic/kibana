@@ -167,42 +167,45 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         }),
         actions: [
           {
-            render: (packagePolicy: InMemoryPackagePolicy) => (
-              <ContextMenuActions
-                items={[
-                  // FIXME: implement View package policy action
-                  // <EuiContextMenuItem
-                  //   disabled
-                  //   icon="inspect"
-                  //   onClick={() => {}}
-                  //   key="packagePolicyView"
-                  // >
-                  //   <FormattedMessage
-                  //     id="xpack.fleet.policyDetails.packagePoliciesTable.viewActionTitle"
-                  //     defaultMessage="View integration"
-                  //   />
-                  // </EuiContextMenuItem>,
-                  <EuiContextMenuItem
-                    disabled={!hasWriteCapabilities}
-                    icon="pencil"
-                    href={getHref('edit_integration', {
-                      policyId: agentPolicy.id,
-                      packagePolicyId: packagePolicy.id,
-                    })}
-                    key="packagePolicyEdit"
-                  >
-                    <FormattedMessage
-                      id="xpack.fleet.policyDetails.packagePoliciesTable.editActionTitle"
-                      defaultMessage="Edit integration"
-                    />
-                  </EuiContextMenuItem>,
-                  // FIXME: implement Copy package policy action
-                  // <EuiContextMenuItem disabled icon="copy" onClick={() => {}} key="packagePolicyCopy">
-                  //   <FormattedMessage
-                  //     id="xpack.fleet.policyDetails.packagePoliciesTable.copyActionTitle"
-                  //     defaultMessage="Copy integration"
-                  //   />
-                  // </EuiContextMenuItem>,
+            render: (packagePolicy: InMemoryPackagePolicy) => {
+              const menuItems = [
+                // FIXME: implement View package policy action
+                // <EuiContextMenuItem
+                //   disabled
+                //   icon="inspect"
+                //   onClick={() => {}}
+                //   key="packagePolicyView"
+                // >
+                //   <FormattedMessage
+                //     id="xpack.fleet.policyDetails.packagePoliciesTable.viewActionTitle"
+                //     defaultMessage="View integration"
+                //   />
+                // </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  disabled={!hasWriteCapabilities}
+                  icon="pencil"
+                  href={getHref('edit_integration', {
+                    policyId: agentPolicy.id,
+                    packagePolicyId: packagePolicy.id,
+                  })}
+                  key="packagePolicyEdit"
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.policyDetails.packagePoliciesTable.editActionTitle"
+                    defaultMessage="Edit integration"
+                  />
+                </EuiContextMenuItem>,
+                // FIXME: implement Copy package policy action
+                // <EuiContextMenuItem disabled icon="copy" onClick={() => {}} key="packagePolicyCopy">
+                //   <FormattedMessage
+                //     id="xpack.fleet.policyDetails.packagePoliciesTable.copyActionTitle"
+                //     defaultMessage="Copy integration"
+                //   />
+                // </EuiContextMenuItem>,
+              ];
+
+              if (!agentPolicy.is_managed) {
+                menuItems.push(
                   <PackagePolicyDeleteProvider agentPolicy={agentPolicy} key="packagePolicyDelete">
                     {(deletePackagePoliciesPrompt) => {
                       return (
@@ -220,10 +223,11 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                         </DangerEuiContextMenuItem>
                       );
                     }}
-                  </PackagePolicyDeleteProvider>,
-                ]}
-              />
-            ),
+                  </PackagePolicyDeleteProvider>
+                );
+              }
+              return <ContextMenuActions items={menuItems} />;
+            },
           },
         ],
       },
@@ -244,19 +248,21 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
       }}
       {...rest}
       search={{
-        toolsRight: [
-          <EuiButton
-            key="addPackagePolicyButton"
-            isDisabled={!hasWriteCapabilities}
-            iconType="plusInCircle"
-            href={getHref('add_integration_from_policy', { policyId: agentPolicy.id })}
-          >
-            <FormattedMessage
-              id="xpack.fleet.policyDetails.addPackagePolicyButtonText"
-              defaultMessage="Add integration"
-            />
-          </EuiButton>,
-        ],
+        toolsRight: agentPolicy.is_managed
+          ? []
+          : [
+              <EuiButton
+                key="addPackagePolicyButton"
+                isDisabled={!hasWriteCapabilities}
+                iconType="plusInCircle"
+                href={getHref('add_integration_from_policy', { policyId: agentPolicy.id })}
+              >
+                <FormattedMessage
+                  id="xpack.fleet.policyDetails.addPackagePolicyButtonText"
+                  defaultMessage="Add integration"
+                />
+              </EuiButton>,
+            ],
         box: {
           incremental: true,
           schema: true,

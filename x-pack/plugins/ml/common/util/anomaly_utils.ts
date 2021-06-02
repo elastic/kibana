@@ -27,10 +27,18 @@ export enum ENTITY_FIELD_TYPE {
   PARTITON = 'partition',
 }
 
+export const ENTITY_FIELD_OPERATIONS = {
+  ADD: '+',
+  REMOVE: '-',
+} as const;
+
+export type EntityFieldOperation = typeof ENTITY_FIELD_OPERATIONS[keyof typeof ENTITY_FIELD_OPERATIONS];
+
 export interface EntityField {
   fieldName: string;
   fieldValue: string | number | undefined;
   fieldType?: ENTITY_FIELD_TYPE;
+  operation?: EntityFieldOperation;
 }
 
 // List of function descriptions for which actual values from record level results should be displayed.

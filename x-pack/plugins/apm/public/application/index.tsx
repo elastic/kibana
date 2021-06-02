@@ -13,6 +13,7 @@ import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
 import 'react-vis/dist/style.css';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
+import type { ObservabilityRuleTypeRegistry } from '../../../observability/public';
 import { euiStyled } from '../../../../../src/plugins/kibana_react/common';
 import { ConfigSchema } from '../';
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
@@ -102,25 +103,34 @@ export function ApmAppRoot({
  * This module is rendered asynchronously in the Kibana platform.
  */
 
-export const renderApp = (
-  core: CoreStart,
-  setupDeps: ApmPluginSetupDeps,
-  appMountParameters: AppMountParameters,
-  config: ConfigSchema,
-  startDeps: ApmPluginStartDeps
-) => {
+export const renderApp = ({
+  coreStart,
+  pluginsSetup,
+  appMountParameters,
+  config,
+  pluginsStart,
+  observabilityRuleTypeRegistry,
+}: {
+  coreStart: CoreStart;
+  pluginsSetup: ApmPluginSetupDeps;
+  appMountParameters: AppMountParameters;
+  config: ConfigSchema;
+  pluginsStart: ApmPluginStartDeps;
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
+}) => {
   const { element } = appMountParameters;
   const apmPluginContextValue = {
     appMountParameters,
     config,
-    core,
-    plugins: setupDeps,
+    core: coreStart,
+    plugins: pluginsSetup,
+    observabilityRuleTypeRegistry,
   };
 
   // render APM feedback link in global help menu
-  setHelpExtension(core);
-  setReadonlyBadge(core);
-  createCallApmApi(core.http);
+  setHelpExtension(coreStart);
+  setReadonlyBadge(coreStart);
+  createCallApmApi(coreStart);
 
   // Automatically creates static index pattern and stores as saved object
   createStaticIndexPattern().catch((e) => {
@@ -131,7 +141,7 @@ export const renderApp = (
   ReactDOM.render(
     <ApmAppRoot
       apmPluginContextValue={apmPluginContextValue}
-      startDeps={startDeps}
+      startDeps={pluginsStart}
     />,
     element
   );

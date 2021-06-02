@@ -79,6 +79,12 @@ export function registerAnomalyDetectionAlertType({
           }),
         },
         {
+          name: 'message',
+          description: i18n.translate('xpack.ml.alertContext.messageDescription', {
+            defaultMessage: 'Alert info message',
+          }),
+        },
+        {
           name: 'isInterim',
           description: i18n.translate('xpack.ml.alertContext.isInterimDescription', {
             defaultMessage: 'Indicate if top hits contain interim results',

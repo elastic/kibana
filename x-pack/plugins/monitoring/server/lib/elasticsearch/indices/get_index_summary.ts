@@ -18,7 +18,9 @@ import { LegacyRequest } from '../../../types';
 
 export function handleResponse(shardStats: any, indexUuid: string) {
   return (response: ElasticsearchResponse) => {
-    const indexStats = response.hits?.hits[0]?._source.index_stats;
+    const indexStats =
+      response.hits?.hits[0]?._source.index_stats ??
+      response.hits?.hits[0]?._source.elasticsearch?.index;
     const primaries = indexStats?.primaries;
     const total = indexStats?.total;
 
@@ -74,14 +76,30 @@ export function getIndexSummary(
   checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getIndexSummary');
 
   const metric = ElasticsearchMetric.getMetricFields();
-  const filters = [{ term: { 'index_stats.index': indexUuid } }];
+  const filters = [
+    {
+      bool: {
+        should: [
+          { term: { 'index_stats.index': indexUuid } },
+          { term: { 'elasticsearch.index.name': indexUuid } },
+        ],
+      },
+    },
+  ];
   const params = {
     index: esIndexPattern,
     size: 1,
     ignoreUnavailable: true,
     body: {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query: createQuery({ type: 'index_stats', start, end, clusterUuid, metric, filters }),
+      query: createQuery({
+        types: ['index', 'index_stats'],
+        start,
+        end,
+        clusterUuid,
+        metric,
+        filters,
+      }),
     },
   };
 

@@ -15,8 +15,15 @@ import {
   FIELDS_BROWSER_HOST_GEO_CONTINENT_NAME_CHECKBOX,
   FIELDS_BROWSER_MESSAGE_CHECKBOX,
   FIELDS_BROWSER_RESET_FIELDS,
+  FIELDS_BROWSER_CHECKBOX,
+  CLOSE_BTN,
 } from '../screens/fields_browser';
-import { KQL_SEARCH_BAR } from '../screens/hosts/main';
+
+export const addsFields = (fields: string[]) => {
+  fields.forEach((field) => {
+    cy.get(FIELDS_BROWSER_CHECKBOX(field)).click();
+  });
+};
 
 export const addsHostGeoCityNameToTimeline = () => {
   cy.get(FIELDS_BROWSER_HOST_GEO_CITY_NAME_CHECKBOX).check({
@@ -44,7 +51,7 @@ export const clearFieldsBrowser = () => {
 };
 
 export const closeFieldsBrowser = () => {
-  cy.get(KQL_SEARCH_BAR).click({ force: true });
+  cy.get(CLOSE_BTN).click({ force: true });
 };
 
 export const filterFieldsBrowser = (fieldName: string) => {

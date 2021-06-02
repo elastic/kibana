@@ -26,9 +26,6 @@ export const AdvancedPivotEditorSwitch: FC<StepDefineFormHook> = ({
       isAdvancedPivotEditorApplyButtonEnabled,
     },
   },
-  pivotConfig: {
-    actions: { setAggList, setGroupByList },
-  },
 }) => {
   return (
     <EuiFormRow>

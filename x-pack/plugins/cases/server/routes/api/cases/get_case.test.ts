@@ -8,7 +8,7 @@
 import { kibanaResponseFactory, RequestHandler, SavedObject } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
-import { ConnectorTypes, ESCaseAttributes } from '../../../../common/api';
+import { ConnectorTypes, ESCaseAttributes } from '../../../../common';
 import {
   createMockSavedObjectsRepository,
   createRoute,
@@ -21,7 +21,7 @@ import {
 } from '../__fixtures__';
 import { flattenCaseSavedObject } from '../utils';
 import { initGetCaseApi } from './get_case';
-import { CASE_DETAILS_URL } from '../../../../common/constants';
+import { CASE_DETAILS_URL } from '../../../../common';
 
 describe('GET case', () => {
   let routeHandler: RequestHandler<any, any, any>;

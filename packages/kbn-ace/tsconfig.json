@@ -1,15 +1,14 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "incremental": true,
     "outDir": "./target",
     "declaration": true,
+    "declarationMap": true,
     "sourceMap": true,
-    "types": [
-      "jest",
-      "node"
-    ]
+    "sourceRoot": "../../../../packages/kbn-ace/src",
+    "stripInternal": true,
+    "types": ["node"]
   },
-  "include": [
-    "src/**/*"
-  ]
+  "include": ["src/**/*"]
 }

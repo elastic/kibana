@@ -16,6 +16,7 @@ const byTypeSchema: MakeSchemaFrom<AlertsUsage>['count_by_type'] = {
   // Known alerts (searching the use of the alerts API `registerType`:
   // Built-in
   '__index-threshold': { type: 'long' },
+  '__es-query': { type: 'long' },
   // APM
   apm__error_rate: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
   apm__transaction_error_rate: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
@@ -41,6 +42,10 @@ const byTypeSchema: MakeSchemaFrom<AlertsUsage>['count_by_type'] = {
   xpack__uptime__alerts__monitorStatus: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
   xpack__uptime__alerts__tls: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
   xpack__uptime__alerts__durationAnomaly: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+  // Maps
+  '__geo-containment': { type: 'long' },
+  // ML
+  xpack_ml_anomaly_detection_alert: { type: 'long' },
 };
 
 export function createAlertsUsageCollector(

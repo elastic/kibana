@@ -8,10 +8,9 @@
 import { set } from '@elastic/safer-lodash-set';
 
 import {
-  Threshold,
+  ThresholdNormalized,
   TimestampOverrideOrUndefined,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -29,7 +28,7 @@ interface FindThresholdSignalsParams {
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   filter: unknown;
-  threshold: Threshold;
+  threshold: ThresholdNormalized;
   buildRuleMessage: BuildRuleMessage;
   timestampOverride: TimestampOverrideOrUndefined;
 }
@@ -88,7 +87,7 @@ export const findThresholdSignals = async ({
       : {}),
   };
 
-  const thresholdFields = normalizeThresholdField(threshold.field);
+  const thresholdFields = threshold.field;
 
   // Generate a nested terms aggregation for each threshold grouping field provided, appending leaf
   // aggregations to 1) filter out buckets that don't meet the cardinality threshold, if provided, and
@@ -139,9 +138,8 @@ export const findThresholdSignals = async ({
     logger,
     // @ts-expect-error refactor to pass type explicitly instead of unknown
     filter,
-    pageSize: 1,
+    pageSize: 0,
     sortOrder: 'desc',
     buildRuleMessage,
-    excludeDocsWithTimestampOverride: false,
   });
 };

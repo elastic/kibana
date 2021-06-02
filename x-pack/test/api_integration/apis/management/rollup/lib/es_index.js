@@ -13,7 +13,7 @@ import { getRandomString } from './random';
  * @param {ElasticsearchClient} es The Elasticsearch client instance
  */
 export const initElasticsearchIndicesHelpers = (getService) => {
-  const es = getService('legacyEs');
+  const es = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   let indicesCreated = [];

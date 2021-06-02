@@ -4,50 +4,201 @@
     "classes": [],
     "functions": [
       {
-        "id": "def-public.DashboardPicker",
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.AddFromLibraryButton",
         "type": "Function",
-        "label": "DashboardPicker",
-        "signature": [
-          "(props: ",
-          "DashboardPickerProps",
-          ") => JSX.Element"
-        ],
+        "tags": [],
+        "label": "AddFromLibraryButton",
         "description": [],
+        "signature": [
+          "({ onClick, ...rest }: Pick<",
+          "Props",
+          ", \"onClick\" | \"className\" | \"primary\" | \"iconSide\" | \"isDarkModeEnabled\">) => JSX.Element"
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/add_from_library.tsx",
+          "lineNumber": 17
+        },
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.AddFromLibraryButton.$1",
             "type": "Object",
-            "label": "props",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "presentationUtil",
-                "scope": "public",
-                "docId": "kibPresentationUtilPluginApi",
-                "section": "def-public.DashboardPickerProps",
-                "text": "DashboardPickerProps"
-              }
-            ],
+            "tags": [],
+            "label": "{ onClick, ...rest }",
             "description": [],
+            "signature": [
+              "Pick<",
+              "Props",
+              ", \"onClick\" | \"className\" | \"primary\" | \"iconSide\" | \"isDarkModeEnabled\">"
+            ],
             "source": {
-              "path": "src/plugins/presentation_util/public/components/dashboard_picker.tsx",
-              "lineNumber": 27
-            }
+              "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/add_from_library.tsx",
+              "lineNumber": 17
+            },
+            "deprecated": false,
+            "isRequired": true
           }
         ],
-        "tags": [],
         "returnComment": [],
-        "source": {
-          "path": "src/plugins/presentation_util/public/components/dashboard_picker.tsx",
-          "lineNumber": 27
-        },
         "initialIsOpen": false
       },
       {
-        "id": "def-public.SavedObjectSaveModalDashboard",
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.getStubPluginServices",
         "type": "Function",
-        "label": "SavedObjectSaveModalDashboard",
+        "tags": [],
+        "label": "getStubPluginServices",
+        "description": [],
         "signature": [
-          "(props: ",
+          "() => ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.PresentationUtilPluginStart",
+            "text": "PresentationUtilPluginStart"
+          }
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/public/services/index.ts",
+          "lineNumber": 27
+        },
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.LazyDashboardPicker",
+        "type": "Function",
+        "tags": [],
+        "label": "LazyDashboardPicker",
+        "description": [],
+        "signature": [
+          "React.ExoticComponent<",
+          "DashboardPickerProps",
+          "> & { readonly _result: (props: ",
+          "DashboardPickerProps",
+          ") => JSX.Element; }"
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/index.tsx",
+          "lineNumber": 32
+        },
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.props",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "source": {
+              "path": "node_modules/@types/react/index.d.ts",
+              "lineNumber": 359
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.LazyLabsBeakerButton",
+        "type": "Function",
+        "tags": [],
+        "label": "LazyLabsBeakerButton",
+        "description": [],
+        "signature": [
+          "React.ExoticComponent<",
+          "Props",
+          "> & { readonly _result: ({ solutions, ...props }: ",
+          "Props",
+          ") => JSX.Element; }"
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/index.tsx",
+          "lineNumber": 28
+        },
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.props",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "source": {
+              "path": "node_modules/@types/react/index.d.ts",
+              "lineNumber": 359
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.LazyLabsFlyout",
+        "type": "Function",
+        "tags": [],
+        "label": "LazyLabsFlyout",
+        "description": [],
+        "signature": [
+          "React.ExoticComponent<",
+          "Props",
+          "> & { readonly _result: (props: ",
+          "Props",
+          ") => JSX.Element; }"
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/index.tsx",
+          "lineNumber": 30
+        },
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.props",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "source": {
+              "path": "node_modules/@types/react/index.d.ts",
+              "lineNumber": 359
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.LazySavedObjectSaveModalDashboard",
+        "type": "Function",
+        "tags": [],
+        "label": "LazySavedObjectSaveModalDashboard",
+        "description": [],
+        "signature": [
+          "React.ExoticComponent<",
           {
             "pluginId": "presentationUtil",
             "scope": "public",
@@ -55,96 +206,961 @@
             "section": "def-public.SaveModalDashboardProps",
             "text": "SaveModalDashboardProps"
           },
-          ") => JSX.Element"
+          "> & { readonly _result: (props: ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.SaveModalDashboardProps",
+            "text": "SaveModalDashboardProps"
+          },
+          ") => JSX.Element; }"
         ],
-        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/index.tsx",
+          "lineNumber": 34
+        },
+        "deprecated": false,
+        "returnComment": [],
         "children": [
           {
-            "type": "Object",
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.props",
+            "type": "Uncategorized",
+            "tags": [],
             "label": "props",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "presentationUtil",
-                "scope": "public",
-                "docId": "kibPresentationUtilPluginApi",
-                "section": "def-public.SaveModalDashboardProps",
-                "text": "SaveModalDashboardProps"
-              }
-            ],
             "description": [],
+            "signature": [
+              "P"
+            ],
             "source": {
-              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 37
-            }
+              "path": "node_modules/@types/react/index.d.ts",
+              "lineNumber": 359
+            },
+            "deprecated": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.PrimaryActionButton",
+        "type": "Function",
         "tags": [],
-        "returnComment": [],
+        "label": "PrimaryActionButton",
+        "description": [],
+        "signature": [
+          "({ isDarkModeEnabled, ...props }: ",
+          "Props",
+          ") => JSX.Element"
+        ],
         "source": {
-          "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-          "lineNumber": 37
+          "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/primary_button.tsx",
+          "lineNumber": 19
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PrimaryActionButton.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ isDarkModeEnabled, ...props }",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/primary_button.tsx",
+              "lineNumber": 19
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.PrimaryActionPopover",
+        "type": "Function",
+        "tags": [],
+        "label": "PrimaryActionPopover",
+        "description": [],
+        "signature": [
+          "(props: Pick<",
+          "Props",
+          ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"label\" | \"onKeyDown\" | \"title\" | \"id\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"iconType\" | \"data-test-subj\" | \"panelRef\" | \"display\" | \"offset\" | \"iconSide\" | \"buttonRef\" | \"hasArrow\" | \"isDarkModeEnabled\" | \"anchorClassName\" | \"attachToAnchor\" | \"container\" | \"focusTrapProps\" | \"initialFocus\" | \"insert\" | \"ownFocus\" | \"panelClassName\" | \"panelPaddingSize\" | \"panelStyle\" | \"panelProps\" | \"popoverRef\" | \"repositionOnScroll\" | \"zIndex\" | \"onTrapDeactivation\" | \"buffer\" | \"arrowChildren\">) => JSX.Element"
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/primary_popover.tsx",
+          "lineNumber": 15
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PrimaryActionPopover.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Pick<",
+              "Props",
+              ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"label\" | \"onKeyDown\" | \"title\" | \"id\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"iconType\" | \"data-test-subj\" | \"panelRef\" | \"display\" | \"offset\" | \"iconSide\" | \"buttonRef\" | \"hasArrow\" | \"isDarkModeEnabled\" | \"anchorClassName\" | \"attachToAnchor\" | \"container\" | \"focusTrapProps\" | \"initialFocus\" | \"insert\" | \"ownFocus\" | \"panelClassName\" | \"panelPaddingSize\" | \"panelStyle\" | \"panelProps\" | \"popoverRef\" | \"repositionOnScroll\" | \"zIndex\" | \"onTrapDeactivation\" | \"buffer\" | \"arrowChildren\">"
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/primary_popover.tsx",
+              "lineNumber": 15
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.QuickButtonGroup",
+        "type": "Function",
+        "tags": [],
+        "label": "QuickButtonGroup",
+        "description": [],
+        "signature": [
+          "({ buttons }: ",
+          "Props",
+          ") => JSX.Element"
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/quick_group.tsx",
+          "lineNumber": 30
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.QuickButtonGroup.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ buttons }",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/quick_group.tsx",
+              "lineNumber": 30
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.SolutionToolbar",
+        "type": "Function",
+        "tags": [],
+        "label": "SolutionToolbar",
+        "description": [],
+        "signature": [
+          "({ isDarkModeEnabled, children }: ",
+          "Props",
+          ") => JSX.Element"
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/solution_toolbar/solution_toolbar.tsx",
+          "lineNumber": 35
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.SolutionToolbar.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ isDarkModeEnabled, children }",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/solution_toolbar/solution_toolbar.tsx",
+              "lineNumber": 35
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.SolutionToolbarButton",
+        "type": "Function",
+        "tags": [],
+        "label": "SolutionToolbarButton",
+        "description": [],
+        "signature": [
+          "({ label, primary, className, ...rest }: ",
+          "Props",
+          ") => JSX.Element"
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/button.tsx",
+          "lineNumber": 22
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.SolutionToolbarButton.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ label, primary, className, ...rest }",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/button.tsx",
+              "lineNumber": 22
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.SolutionToolbarPopover",
+        "type": "Function",
+        "tags": [],
+        "label": "SolutionToolbarPopover",
+        "description": [],
+        "signature": [
+          "({ label, iconType, primary, iconSide, ...popover }: ",
+          "Props",
+          ") => JSX.Element"
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/popover.tsx",
+          "lineNumber": 23
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.SolutionToolbarPopover.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  label,\n  iconType,\n  primary,\n  iconSide,\n  ...popover\n}",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/popover.tsx",
+              "lineNumber": 23
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.useLabs",
+        "type": "Function",
+        "tags": [],
+        "label": "useLabs",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.PresentationLabsService",
+            "text": "PresentationLabsService"
+          }
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/public/index.ts",
+          "lineNumber": 47
+        },
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.withSuspense",
+        "type": "Function",
+        "tags": [],
+        "label": "withSuspense",
+        "description": [
+          "\nA HOC which supplies React.Suspense with a fallback component, and a `EuiErrorBoundary` to contain errors."
+        ],
+        "signature": [
+          "<P extends {}>(Component: React.ComponentType<P>, fallback?: React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | null) => (props: P) => JSX.Element"
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/index.tsx",
+          "lineNumber": 17
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.withSuspense.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "Component",
+            "description": [
+              "A component deferred by `React.lazy`"
+            ],
+            "signature": [
+              "React.ComponentType<P>"
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/index.tsx",
+              "lineNumber": 18
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.withSuspense.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fallback",
+            "description": [
+              "A fallback component to render while things load; default is `EuiLoadingSpinner`"
+            ],
+            "signature": [
+              "React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | null"
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/index.tsx",
+              "lineNumber": 19
+            },
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       }
     ],
     "interfaces": [
       {
-        "id": "def-public.SaveModalDashboardProps",
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.PresentationCapabilitiesService",
         "type": "Interface",
-        "label": "SaveModalDashboardProps",
-        "description": [],
         "tags": [],
+        "label": "PresentationCapabilitiesService",
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/public/services/capabilities.ts",
+          "lineNumber": 9
+        },
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PresentationCapabilitiesService.canAccessDashboards",
+            "type": "Function",
             "tags": [],
-            "id": "def-public.SaveModalDashboardProps.documentInfo",
-            "type": "Object",
-            "label": "documentInfo",
+            "label": "canAccessDashboards",
             "description": [],
-            "source": {
-              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 30
-            },
             "signature": [
-              "SaveModalDocumentInfo"
+              "() => boolean"
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/public/services/capabilities.ts",
+              "lineNumber": 10
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PresentationCapabilitiesService.canCreateNewDashboards",
+            "type": "Function",
+            "tags": [],
+            "label": "canCreateNewDashboards",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/public/services/capabilities.ts",
+              "lineNumber": 11
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PresentationCapabilitiesService.canSaveVisualizations",
+            "type": "Function",
+            "tags": [],
+            "label": "canSaveVisualizations",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/public/services/capabilities.ts",
+              "lineNumber": 12
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PresentationCapabilitiesService.canSetAdvancedSettings",
+            "type": "Function",
+            "tags": [],
+            "label": "canSetAdvancedSettings",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/public/services/capabilities.ts",
+              "lineNumber": 13
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.PresentationDashboardsService",
+        "type": "Interface",
+        "tags": [],
+        "label": "PresentationDashboardsService",
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/public/services/dashboards.ts",
+          "lineNumber": 12
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PresentationDashboardsService.findDashboards",
+            "type": "Function",
+            "tags": [],
+            "label": "findDashboards",
+            "description": [],
+            "signature": [
+              "(query: string, fields: string[]) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-public.SimpleSavedObject",
+                "text": "SimpleSavedObject"
+              },
+              "<",
+              "PartialDashboardAttributes",
+              ">[]>"
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/public/services/dashboards.ts",
+              "lineNumber": 13
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.query",
+                "type": "string",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/public/services/dashboards.ts",
+                  "lineNumber": 14
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.fields",
+                "type": "Array",
+                "tags": [],
+                "label": "fields",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/public/services/dashboards.ts",
+                  "lineNumber": 15
+                },
+                "deprecated": false
+              }
             ]
           },
           {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PresentationDashboardsService.findDashboardsByTitle",
+            "type": "Function",
             "tags": [],
+            "label": "findDashboardsByTitle",
+            "description": [],
+            "signature": [
+              "(title: string) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-public.SimpleSavedObject",
+                "text": "SimpleSavedObject"
+              },
+              "<",
+              "PartialDashboardAttributes",
+              ">[]>"
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/public/services/dashboards.ts",
+              "lineNumber": 17
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/public/services/dashboards.ts",
+                  "lineNumber": 18
+                },
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.PresentationLabsService",
+        "type": "Interface",
+        "tags": [],
+        "label": "PresentationLabsService",
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/public/services/labs.ts",
+          "lineNumber": 22
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PresentationLabsService.isProjectEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isProjectEnabled",
+            "description": [],
+            "signature": [
+              "(id: \"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\" | \"labs:dashboard:deferBelowFold\") => boolean"
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/public/services/labs.ts",
+              "lineNumber": 23
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.id",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "\"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\" | \"labs:dashboard:deferBelowFold\""
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/public/services/labs.ts",
+                  "lineNumber": 23
+                },
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PresentationLabsService.getProjectIDs",
+            "type": "Function",
+            "tags": [],
+            "label": "getProjectIDs",
+            "description": [],
+            "signature": [
+              "() => readonly [\"labs:presentation:timeToPresent\", \"labs:canvas:useDataService\", \"labs:dashboard:deferBelowFold\"]"
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/public/services/labs.ts",
+              "lineNumber": 24
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PresentationLabsService.getProject",
+            "type": "Function",
+            "tags": [],
+            "label": "getProject",
+            "description": [],
+            "signature": [
+              "(id: \"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\" | \"labs:dashboard:deferBelowFold\") => ",
+              {
+                "pluginId": "presentationUtil",
+                "scope": "common",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-common.Project",
+                "text": "Project"
+              }
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/public/services/labs.ts",
+              "lineNumber": 25
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.id",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "\"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\" | \"labs:dashboard:deferBelowFold\""
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/public/services/labs.ts",
+                  "lineNumber": 25
+                },
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PresentationLabsService.getProjects",
+            "type": "Function",
+            "tags": [],
+            "label": "getProjects",
+            "description": [],
+            "signature": [
+              "(solutions?: (\"dashboard\" | \"canvas\" | \"presentation\")[] | undefined) => Record<\"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\" | \"labs:dashboard:deferBelowFold\", ",
+              {
+                "pluginId": "presentationUtil",
+                "scope": "common",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-common.Project",
+                "text": "Project"
+              },
+              ">"
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/public/services/labs.ts",
+              "lineNumber": 26
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.solutions",
+                "type": "Array",
+                "tags": [],
+                "label": "solutions",
+                "description": [],
+                "signature": [
+                  "(\"dashboard\" | \"canvas\" | \"presentation\")[] | undefined"
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/public/services/labs.ts",
+                  "lineNumber": 26
+                },
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PresentationLabsService.setProjectStatus",
+            "type": "Function",
+            "tags": [],
+            "label": "setProjectStatus",
+            "description": [],
+            "signature": [
+              "(id: \"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\" | \"labs:dashboard:deferBelowFold\", env: \"kibana\" | \"browser\" | \"session\", status: boolean) => void"
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/public/services/labs.ts",
+              "lineNumber": 27
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.id",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "\"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\" | \"labs:dashboard:deferBelowFold\""
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/public/services/labs.ts",
+                  "lineNumber": 27
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.env",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "env",
+                "description": [],
+                "signature": [
+                  "\"kibana\" | \"browser\" | \"session\""
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/public/services/labs.ts",
+                  "lineNumber": 27
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.status",
+                "type": "boolean",
+                "tags": [],
+                "label": "status",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/public/services/labs.ts",
+                  "lineNumber": 27
+                },
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PresentationLabsService.reset",
+            "type": "Function",
+            "tags": [],
+            "label": "reset",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/public/services/labs.ts",
+              "lineNumber": 28
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.QuickButtonProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "QuickButtonProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.QuickButtonProps",
+            "text": "QuickButtonProps"
+          },
+          " extends Pick<",
+          "EuiButtonGroupOptionProps",
+          ", \"iconType\">"
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/quick_group.tsx",
+          "lineNumber": 17
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.QuickButtonProps.createType",
+            "type": "string",
+            "tags": [],
+            "label": "createType",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/quick_group.tsx",
+              "lineNumber": 18
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.QuickButtonProps.onClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onClick",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/quick_group.tsx",
+              "lineNumber": 19
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.QuickButtonProps.isDarkModeEnabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDarkModeEnabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/quick_group.tsx",
+              "lineNumber": 20
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.SaveModalDashboardProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "SaveModalDashboardProps",
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/types.ts",
+          "lineNumber": 17
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.SaveModalDashboardProps.documentInfo",
+            "type": "Object",
+            "tags": [],
+            "label": "documentInfo",
+            "description": [],
+            "signature": [
+              "SaveModalDocumentInfo"
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/types.ts",
+              "lineNumber": 18
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.SaveModalDashboardProps.canSaveByReference",
+            "type": "boolean",
+            "tags": [],
+            "label": "canSaveByReference",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/types.ts",
+              "lineNumber": 19
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
             "id": "def-public.SaveModalDashboardProps.objectType",
             "type": "string",
+            "tags": [],
             "label": "objectType",
             "description": [],
             "source": {
-              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 31
-            }
+              "path": "src/plugins/presentation_util/public/components/types.ts",
+              "lineNumber": 20
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "presentationUtil",
             "id": "def-public.SaveModalDashboardProps.onClose",
             "type": "Function",
+            "tags": [],
             "label": "onClose",
             "description": [],
-            "source": {
-              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 32
-            },
             "signature": [
               "() => void"
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/types.ts",
+              "lineNumber": 21
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
-            "tags": [],
+            "parentPluginId": "presentationUtil",
             "id": "def-public.SaveModalDashboardProps.onSave",
             "type": "Function",
+            "tags": [],
             "label": "onSave",
             "description": [],
-            "source": {
-              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 33
-            },
             "signature": [
               "(props: ",
               {
@@ -155,18 +1171,46 @@
                 "text": "OnSaveProps"
               },
               " & { dashboardId: string | null; addToLibrary: boolean; }) => void"
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/types.ts",
+              "lineNumber": 22
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.props",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "savedObjects",
+                    "scope": "public",
+                    "docId": "kibSavedObjectsPluginApi",
+                    "section": "def-public.OnSaveProps",
+                    "text": "OnSaveProps"
+                  },
+                  " & { dashboardId: string | null; addToLibrary: boolean; }"
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/public/components/types.ts",
+                  "lineNumber": 22
+                },
+                "deprecated": false
+              }
             ]
           },
           {
-            "tags": [],
+            "parentPluginId": "presentationUtil",
             "id": "def-public.SaveModalDashboardProps.tagOptions",
             "type": "CompoundType",
+            "tags": [],
             "label": "tagOptions",
             "description": [],
-            "source": {
-              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 34
-            },
             "signature": [
               "string | number | boolean | {} | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactNodeArray | React.ReactPortal | ((state: ",
               {
@@ -177,59 +1221,191 @@
                 "text": "SaveModalState"
               },
               ") => React.ReactNode) | null | undefined"
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/types.ts",
+              "lineNumber": 23
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-          "lineNumber": 29
-        },
         "initialIsOpen": false
       }
     ],
     "enums": [],
-    "misc": [],
-    "objects": [],
+    "misc": [
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.Project",
+        "type": "Type",
+        "tags": [],
+        "label": "Project",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "presentationUtil",
+            "scope": "common",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-common.ProjectConfig",
+            "text": "ProjectConfig"
+          },
+          " & { status: ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "common",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-common.ProjectStatus",
+            "text": "ProjectStatus"
+          },
+          "; }"
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 94
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.ProjectID",
+        "type": "Type",
+        "tags": [],
+        "label": "ProjectID",
+        "description": [],
+        "signature": [
+          "\"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\" | \"labs:dashboard:deferBelowFold\""
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 70
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.projectIDs",
+        "type": "Object",
+        "tags": [],
+        "label": "projectIDs",
+        "description": [],
+        "signature": [
+          "readonly [\"labs:presentation:timeToPresent\", \"labs:canvas:useDataService\", \"labs:dashboard:deferBelowFold\"]"
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 16
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
     "setup": {
+      "parentPluginId": "presentationUtil",
       "id": "def-public.PresentationUtilPluginSetup",
       "type": "Interface",
+      "tags": [],
       "label": "PresentationUtilPluginSetup",
       "description": [],
-      "tags": [],
-      "children": [],
-      "source": {
-        "path": "src/plugins/presentation_util/public/types.ts",
-        "lineNumber": 10
-      },
-      "lifecycle": "setup",
-      "initialIsOpen": true
-    },
-    "start": {
-      "id": "def-public.PresentationUtilPluginStart",
-      "type": "Interface",
-      "label": "PresentationUtilPluginStart",
-      "description": [],
-      "tags": [],
-      "children": [
-        {
-          "tags": [],
-          "id": "def-public.PresentationUtilPluginStart.ContextProvider",
-          "type": "Function",
-          "label": "ContextProvider",
-          "description": [],
-          "source": {
-            "path": "src/plugins/presentation_util/public/types.ts",
-            "lineNumber": 13
-          },
-          "signature": [
-            "React.FC<{}>"
-          ]
-        }
-      ],
       "source": {
         "path": "src/plugins/presentation_util/public/types.ts",
         "lineNumber": 12
       },
+      "deprecated": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "presentationUtil",
+      "id": "def-public.PresentationUtilPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "PresentationUtilPluginStart",
+      "description": [],
+      "source": {
+        "path": "src/plugins/presentation_util/public/types.ts",
+        "lineNumber": 14
+      },
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "presentationUtil",
+          "id": "def-public.PresentationUtilPluginStart.ContextProvider",
+          "type": "Function",
+          "tags": [],
+          "label": "ContextProvider",
+          "description": [],
+          "signature": [
+            "React.FunctionComponent<{}>"
+          ],
+          "source": {
+            "path": "src/plugins/presentation_util/public/types.ts",
+            "lineNumber": 15
+          },
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "presentationUtil",
+              "id": "def-public.props",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "P & { children?: React.ReactNode; }"
+              ],
+              "source": {
+                "path": "node_modules/@types/react/index.d.ts",
+                "lineNumber": 554
+              },
+              "deprecated": false
+            },
+            {
+              "parentPluginId": "presentationUtil",
+              "id": "def-public.context",
+              "type": "Any",
+              "tags": [],
+              "label": "context",
+              "description": [],
+              "signature": [
+                "any"
+              ],
+              "source": {
+                "path": "node_modules/@types/react/index.d.ts",
+                "lineNumber": 554
+              },
+              "deprecated": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "presentationUtil",
+          "id": "def-public.PresentationUtilPluginStart.labsService",
+          "type": "Object",
+          "tags": [],
+          "label": "labsService",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "presentationUtil",
+              "scope": "public",
+              "docId": "kibPresentationUtilPluginApi",
+              "section": "def-public.PresentationLabsService",
+              "text": "PresentationLabsService"
+            }
+          ],
+          "source": {
+            "path": "src/plugins/presentation_util/public/types.ts",
+            "lineNumber": 16
+          },
+          "deprecated": false
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -239,15 +1415,898 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-server.SETTING_CATEGORY",
+        "type": "string",
+        "tags": [],
+        "label": "SETTING_CATEGORY",
+        "description": [],
+        "signature": [
+          "\"Presentation Labs\""
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/server/ui_settings.ts",
+          "lineNumber": 13
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "common": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
+    "functions": [
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.getProjectIDs",
+        "type": "Function",
+        "tags": [],
+        "label": "getProjectIDs",
+        "description": [],
+        "signature": [
+          "() => readonly [\"labs:presentation:timeToPresent\", \"labs:canvas:useDataService\", \"labs:dashboard:deferBelowFold\"]"
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 96
+        },
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.isProjectEnabledByStatus",
+        "type": "Function",
+        "tags": [],
+        "label": "isProjectEnabledByStatus",
+        "description": [],
+        "signature": [
+          "(active: boolean, status: ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "common",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-common.EnvironmentStatus",
+            "text": "EnvironmentStatus"
+          },
+          ") => boolean"
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 98
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.isProjectEnabledByStatus.$1",
+            "type": "boolean",
+            "tags": [],
+            "label": "active",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 98
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.isProjectEnabledByStatus.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "presentationUtil",
+                "scope": "common",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-common.EnvironmentStatus",
+                "text": "EnvironmentStatus"
+              }
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 98
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.ProjectConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProjectConfig",
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 84
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.ProjectConfig.id",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\" | \"labs:dashboard:deferBelowFold\""
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 85
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.ProjectConfig.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 86
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.ProjectConfig.isActive",
+            "type": "boolean",
+            "tags": [],
+            "label": "isActive",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 87
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.ProjectConfig.isDisplayed",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDisplayed",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 88
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.ProjectConfig.environments",
+            "type": "Array",
+            "tags": [],
+            "label": "environments",
+            "description": [],
+            "signature": [
+              "(\"kibana\" | \"browser\" | \"session\")[]"
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 89
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.ProjectConfig.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 90
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.ProjectConfig.solutions",
+            "type": "Array",
+            "tags": [],
+            "label": "solutions",
+            "description": [],
+            "signature": [
+              "(\"dashboard\" | \"canvas\" | \"presentation\")[]"
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 91
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
-    "misc": [],
-    "objects": []
+    "misc": [
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.DEFER_BELOW_FOLD",
+        "type": "string",
+        "tags": [],
+        "label": "DEFER_BELOW_FOLD",
+        "description": [],
+        "signature": [
+          "\"labs:dashboard:deferBelowFold\""
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 14
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.EnvironmentName",
+        "type": "Type",
+        "tags": [],
+        "label": "EnvironmentName",
+        "description": [],
+        "signature": [
+          "\"kibana\" | \"browser\" | \"session\""
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 71
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.EnvironmentStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "EnvironmentStatus",
+        "description": [],
+        "signature": [
+          "{ kibana?: boolean | undefined; browser?: boolean | undefined; session?: boolean | undefined; }"
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 74
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.LABS_PROJECT_PREFIX",
+        "type": "string",
+        "tags": [],
+        "label": "LABS_PROJECT_PREFIX",
+        "description": [],
+        "signature": [
+          "\"labs:\""
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 11
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"presentationUtil\""
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/common/index.ts",
+          "lineNumber": 9
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"presentationUtil\""
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/common/index.ts",
+          "lineNumber": 10
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.Project",
+        "type": "Type",
+        "tags": [],
+        "label": "Project",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "presentationUtil",
+            "scope": "common",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-common.ProjectConfig",
+            "text": "ProjectConfig"
+          },
+          " & { status: ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "common",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-common.ProjectStatus",
+            "text": "ProjectStatus"
+          },
+          "; }"
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 94
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.ProjectID",
+        "type": "Type",
+        "tags": [],
+        "label": "ProjectID",
+        "description": [],
+        "signature": [
+          "\"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\" | \"labs:dashboard:deferBelowFold\""
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 70
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.ProjectStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "ProjectStatus",
+        "description": [],
+        "signature": [
+          "{ defaultValue: boolean; isEnabled: boolean; isOverride: boolean; } & ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "common",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-common.EnvironmentStatus",
+            "text": "EnvironmentStatus"
+          }
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 78
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.SolutionName",
+        "type": "Type",
+        "tags": [],
+        "label": "SolutionName",
+        "description": [],
+        "signature": [
+          "\"dashboard\" | \"canvas\" | \"presentation\""
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 72
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.TIME_TO_PRESENT",
+        "type": "string",
+        "tags": [],
+        "label": "TIME_TO_PRESENT",
+        "description": [],
+        "signature": [
+          "\"labs:presentation:timeToPresent\""
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 13
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.USE_DATA_SERVICE",
+        "type": "string",
+        "tags": [],
+        "label": "USE_DATA_SERVICE",
+        "description": [],
+        "signature": [
+          "\"labs:canvas:useDataService\""
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 12
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.environmentNames",
+        "type": "Object",
+        "tags": [],
+        "label": "environmentNames",
+        "description": [],
+        "signature": [
+          "readonly [\"kibana\", \"browser\", \"session\"]"
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 17
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.projectIDs",
+        "type": "Object",
+        "tags": [],
+        "label": "projectIDs",
+        "description": [],
+        "signature": [
+          "readonly [\"labs:presentation:timeToPresent\", \"labs:canvas:useDataService\", \"labs:dashboard:deferBelowFold\"]"
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 16
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.projects",
+        "type": "Object",
+        "tags": [],
+        "label": "projects",
+        "description": [
+          "\nThis is a list of active Labs Projects for the Presentation Team.  It is the \"source of truth\" for all projects\nprovided to users of our solutions in Kibana."
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 24
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.projects.TIME_TO_PRESENT",
+            "type": "Object",
+            "tags": [],
+            "label": "[TIME_TO_PRESENT]",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 25
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.TIME_TO_PRESENT.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "\"labs:presentation:timeToPresent\""
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 26
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.TIME_TO_PRESENT.isActive",
+                "type": "boolean",
+                "tags": [],
+                "label": "isActive",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 27
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.TIME_TO_PRESENT.isDisplayed",
+                "type": "boolean",
+                "tags": [],
+                "label": "isDisplayed",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 28
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.TIME_TO_PRESENT.environments",
+                "type": "Array",
+                "tags": [],
+                "label": "environments",
+                "description": [],
+                "signature": [
+                  "(\"kibana\" | \"browser\" | \"session\")[]"
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 29
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.TIME_TO_PRESENT.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 30
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.TIME_TO_PRESENT.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 33
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.TIME_TO_PRESENT.solutions",
+                "type": "Array",
+                "tags": [],
+                "label": "solutions",
+                "description": [],
+                "signature": [
+                  "\"canvas\"[]"
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 36
+                },
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.projects.USE_DATA_SERVICE",
+            "type": "Object",
+            "tags": [],
+            "label": "[USE_DATA_SERVICE]",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 38
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.USE_DATA_SERVICE.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "\"labs:canvas:useDataService\""
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 39
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.USE_DATA_SERVICE.isActive",
+                "type": "boolean",
+                "tags": [],
+                "label": "isActive",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 40
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.USE_DATA_SERVICE.isDisplayed",
+                "type": "boolean",
+                "tags": [],
+                "label": "isDisplayed",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 41
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.USE_DATA_SERVICE.environments",
+                "type": "Array",
+                "tags": [],
+                "label": "environments",
+                "description": [],
+                "signature": [
+                  "(\"kibana\" | \"browser\" | \"session\")[]"
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 42
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.USE_DATA_SERVICE.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 43
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.USE_DATA_SERVICE.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 46
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.USE_DATA_SERVICE.solutions",
+                "type": "Array",
+                "tags": [],
+                "label": "solutions",
+                "description": [],
+                "signature": [
+                  "\"canvas\"[]"
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 52
+                },
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.projects.DEFER_BELOW_FOLD",
+            "type": "Object",
+            "tags": [],
+            "label": "[DEFER_BELOW_FOLD]",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 54
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DEFER_BELOW_FOLD.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "\"labs:dashboard:deferBelowFold\""
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 55
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DEFER_BELOW_FOLD.isActive",
+                "type": "boolean",
+                "tags": [],
+                "label": "isActive",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 56
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DEFER_BELOW_FOLD.isDisplayed",
+                "type": "boolean",
+                "tags": [],
+                "label": "isDisplayed",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 57
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DEFER_BELOW_FOLD.environments",
+                "type": "Array",
+                "tags": [],
+                "label": "environments",
+                "description": [],
+                "signature": [
+                  "(\"kibana\" | \"browser\" | \"session\")[]"
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 58
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DEFER_BELOW_FOLD.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 59
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DEFER_BELOW_FOLD.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 62
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DEFER_BELOW_FOLD.solutions",
+                "type": "Array",
+                "tags": [],
+                "label": "solutions",
+                "description": [],
+                "signature": [
+                  "\"dashboard\"[]"
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 66
+                },
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.solutionNames",
+        "type": "Object",
+        "tags": [],
+        "label": "solutionNames",
+        "description": [],
+        "signature": [
+          "readonly [\"canvas\", \"dashboard\", \"presentation\"]"
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 18
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

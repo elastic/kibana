@@ -49,10 +49,36 @@ export function registerFleetUsageCollector(
     schema: {
       agents_enabled: { type: 'boolean' },
       agents: {
-        total: { type: 'long' },
-        online: { type: 'long' },
-        error: { type: 'long' },
-        offline: { type: 'long' },
+        total_enrolled: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of enrolled agents, in any state',
+          },
+        },
+        healthy: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of enrolled agents in a healthy state',
+          },
+        },
+        unhealthy: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of enrolled agents in an unhealthy state',
+          },
+        },
+        offline: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of enrolled agents currently offline',
+          },
+        },
+        total_all_statuses: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of agents in any state, both enrolled and inactive',
+          },
+        },
       },
       packages: {
         type: 'array',

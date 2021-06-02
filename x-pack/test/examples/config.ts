@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { resolve } from 'path';
 import fs from 'fs';
+// @ts-expect-error https://github.com/elastic/kibana/issues/95679
 import { KIBANA_ROOT } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {

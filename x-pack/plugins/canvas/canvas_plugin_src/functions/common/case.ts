@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { Observable } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
-  when: () => any;
-  if: boolean;
-  then: () => any;
+  when?(): Observable<any>;
+  if?: boolean;
+  then?(): Observable<any>;
 }
 
 interface Case {
@@ -31,16 +33,16 @@ export function caseFn(): ExpressionFunctionDefinition<'case', any, Arguments, P
       when: {
         aliases: ['_'],
         resolve: false,
-        help: argHelp.when,
+        help: argHelp.when!,
       },
       if: {
         types: ['boolean'],
-        help: argHelp.if,
+        help: argHelp.if!,
       },
       then: {
         resolve: false,
         required: true,
-        help: argHelp.then,
+        help: argHelp.then!,
       },
     },
     fn: async (input, args) => {
@@ -56,14 +58,11 @@ async function doesMatch(context: any, args: Arguments) {
     return args.if;
   }
   if (typeof args.when !== 'undefined') {
-    return (await args.when()) === context;
+    return (await args.when().pipe(take(1)).toPromise()) === context;
   }
   return true;
 }
 
 async function getResult(context: any, args: Arguments) {
-  if (typeof args.then !== 'undefined') {
-    return await args.then();
-  }
-  return context;
+  return args.then?.().pipe(take(1)).toPromise() ?? context;
 }

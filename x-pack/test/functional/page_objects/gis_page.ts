@@ -21,10 +21,12 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
   const comboBox = getService('comboBox');
   const renderable = getService('renderable');
   const browser = getService('browser');
-  const MenuToggle = getService('MenuToggle');
+  const menuToggle = getService('menuToggle');
   const listingTable = getService('listingTable');
+  const monacoEditor = getService('monacoEditor');
+  const dashboardPanelActions = getService('dashboardPanelActions');
 
-  const setViewPopoverToggle = new MenuToggle({
+  const setViewPopoverToggle = menuToggle.create({
     name: 'SetView Popover',
     menuTestSubject: 'mapSetViewForm',
     toggleButtonTestSubject: 'toggleSetViewVisibilityButton',
@@ -612,6 +614,32 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
         throw new Error(`Unable to parse mapbox style, error: ${err.message}`);
       }
       return mapboxStyle;
+    }
+
+    async getResponse(requestName: string) {
+      await inspector.open();
+      const response = await this._getResponse(requestName);
+      await inspector.close();
+      return response;
+    }
+
+    async _getResponse(requestName: string) {
+      if (requestName) {
+        await testSubjects.click('inspectorRequestChooser');
+        await testSubjects.click(`inspectorRequestChooser${requestName}`);
+      }
+      await inspector.openInspectorRequestsView();
+      await testSubjects.click('inspectorRequestDetailResponse');
+      await find.byCssSelector('.react-monaco-editor-container');
+      const responseBody = await monacoEditor.getCodeEditorValue();
+      return JSON.parse(responseBody);
+    }
+
+    async getResponseFromDashboardPanel(panelTitle: string, requestName: string) {
+      await dashboardPanelActions.openInspectorByTitle(panelTitle);
+      const response = await this._getResponse(requestName);
+      await inspector.close();
+      return response;
     }
 
     getInspectorStatRowHit(stats: string[][], rowName: string) {

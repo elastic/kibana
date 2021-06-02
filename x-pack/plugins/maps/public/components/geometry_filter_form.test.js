@@ -16,76 +16,14 @@ const defaultProps = {
   onSubmit: () => {},
 };
 
-test('should not render relation select when geo field is geo_point', async () => {
-  const component = shallow(
-    <GeometryFilterForm
-      {...defaultProps}
-      geoFields={[
-        {
-          geoFieldName: 'my geo field',
-          geoFieldType: 'geo_point',
-          indexPatternTitle: 'My index',
-          indexPatternId: 1,
-        },
-      ]}
-    />
-  );
-
-  expect(component).toMatchSnapshot();
-});
-
-test('should render relation select when geo field is geo_shape', async () => {
-  const component = shallow(
-    <GeometryFilterForm
-      {...defaultProps}
-      geoFields={[
-        {
-          geoFieldName: 'my geo field',
-          geoFieldType: 'geo_shape',
-          indexPatternTitle: 'My index',
-          indexPatternId: 1,
-        },
-      ]}
-    />
-  );
-
-  expect(component).toMatchSnapshot();
-});
-
-test('should not show "within" relation when filter geometry is not closed', async () => {
-  const component = shallow(
-    <GeometryFilterForm
-      {...defaultProps}
-      geoFields={[
-        {
-          geoFieldName: 'my geo field',
-          geoFieldType: 'geo_shape',
-          indexPatternTitle: 'My index',
-          indexPatternId: 1,
-        },
-      ]}
-      isFilterGeometryClosed={false}
-    />
-  );
+test('render', async () => {
+  const component = shallow(<GeometryFilterForm {...defaultProps} />);
 
   expect(component).toMatchSnapshot();
 });
 
 test('should render error message', async () => {
-  const component = shallow(
-    <GeometryFilterForm
-      {...defaultProps}
-      geoFields={[
-        {
-          geoFieldName: 'my geo field',
-          geoFieldType: 'geo_point',
-          indexPatternTitle: 'My index',
-          indexPatternId: 1,
-        },
-      ]}
-      errorMsg="Simulated error"
-    />
-  );
+  const component = shallow(<GeometryFilterForm {...defaultProps} errorMsg="Simulated error" />);
 
   expect(component).toMatchSnapshot();
 });

@@ -7,7 +7,7 @@
 
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
 
-const timefilterMock = dataPluginMock.createStartContract().query.timefilter.timefilter;
+export const timefilterMock = dataPluginMock.createStartContract().query.timefilter.timefilter;
 
 export const useTimefilter = jest.fn(() => {
   return timefilterMock;

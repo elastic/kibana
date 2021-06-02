@@ -9,7 +9,6 @@ import { Action } from 'redux';
 import { Observable } from 'rxjs';
 
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
-import { AppApolloClient } from '../../../common/lib/lib';
 import { inputsModel } from '../../../common/store/inputs';
 import { NotesById } from '../../../common/store/app/model';
 
@@ -56,7 +55,6 @@ export interface TimelineEpicDependencies<State> {
   timelineTimeRangeSelector: (state: State) => inputsModel.TimeRange;
   selectAllTimelineQuery: () => (state: State, id: string) => inputsModel.GlobalQuery;
   selectNotesByIdSelector: (state: State) => NotesById;
-  apolloClient$: Observable<AppApolloClient>;
   kibana$: Observable<CoreStart>;
   storage: Storage;
 }

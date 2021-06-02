@@ -5,20 +5,50 @@
  * 2.0.
  */
 
-export { aggregateAlertRoute } from './aggregate';
-export { createAlertRoute } from './create';
-export { deleteAlertRoute } from './delete';
-export { findAlertRoute } from './find';
-export { getAlertRoute } from './get';
-export { getAlertStateRoute } from './get_alert_state';
-export { getAlertInstanceSummaryRoute } from './get_alert_instance_summary';
-export { listAlertTypesRoute } from './list_alert_types';
-export { updateAlertRoute } from './update';
-export { enableAlertRoute } from './enable';
-export { disableAlertRoute } from './disable';
-export { updateApiKeyRoute } from './update_api_key';
-export { muteAlertInstanceRoute } from './mute_instance';
-export { unmuteAlertInstanceRoute } from './unmute_instance';
-export { muteAllAlertRoute } from './mute_all';
-export { unmuteAllAlertRoute } from './unmute_all';
-export { healthRoute } from './health';
+import { IRouter } from 'kibana/server';
+import { ILicenseState } from '../lib';
+import { defineLegacyRoutes } from './legacy';
+import { AlertingRequestHandlerContext } from '../types';
+import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
+import { createRuleRoute } from './create_rule';
+import { getRuleRoute } from './get_rule';
+import { updateRuleRoute } from './update_rule';
+import { deleteRuleRoute } from './delete_rule';
+import { aggregateRulesRoute } from './aggregate_rules';
+import { disableRuleRoute } from './disable_rule';
+import { enableRuleRoute } from './enable_rule';
+import { findRulesRoute } from './find_rules';
+import { getRuleAlertSummaryRoute } from './get_rule_alert_summary';
+import { getRuleStateRoute } from './get_rule_state';
+import { healthRoute } from './health';
+import { ruleTypesRoute } from './rule_types';
+import { muteAllRuleRoute } from './mute_all_rule';
+import { muteAlertRoute } from './mute_alert';
+import { unmuteAllRuleRoute } from './unmute_all_rule';
+import { unmuteAlertRoute } from './unmute_alert';
+import { updateRuleApiKeyRoute } from './update_rule_api_key';
+
+export function defineRoutes(
+  router: IRouter<AlertingRequestHandlerContext>,
+  licenseState: ILicenseState,
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
+) {
+  defineLegacyRoutes(router, licenseState, encryptedSavedObjects);
+  createRuleRoute(router, licenseState);
+  getRuleRoute(router, licenseState);
+  updateRuleRoute(router, licenseState);
+  deleteRuleRoute(router, licenseState);
+  aggregateRulesRoute(router, licenseState);
+  disableRuleRoute(router, licenseState);
+  enableRuleRoute(router, licenseState);
+  findRulesRoute(router, licenseState);
+  getRuleAlertSummaryRoute(router, licenseState);
+  getRuleStateRoute(router, licenseState);
+  healthRoute(router, licenseState, encryptedSavedObjects);
+  ruleTypesRoute(router, licenseState);
+  muteAllRuleRoute(router, licenseState);
+  muteAlertRoute(router, licenseState);
+  unmuteAllRuleRoute(router, licenseState);
+  unmuteAlertRoute(router, licenseState);
+  updateRuleApiKeyRoute(router, licenseState);
+}

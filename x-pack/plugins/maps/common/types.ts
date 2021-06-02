@@ -6,6 +6,7 @@
  */
 
 export interface CreateDocSourceResp {
+  indexPatternId?: string;
   success: boolean;
   error?: Error;
 }
@@ -20,5 +21,11 @@ export interface IndexSourceMappings {
 }
 
 export interface BodySettings {
+  [key: string]: any;
+}
+
+export interface WriteSettings {
+  index: string;
+  body: object;
   [key: string]: any;
 }

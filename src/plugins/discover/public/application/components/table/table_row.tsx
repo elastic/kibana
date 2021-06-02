@@ -65,7 +65,11 @@ export function DocViewTableRow({
             onClick={() => onFilter(fieldMapping, valueRaw, '-')}
           />
           {typeof onToggleColumn === 'function' && (
-            <DocViewTableRowBtnToggleColumn active={isColumnActive} onClick={onToggleColumn} />
+            <DocViewTableRowBtnToggleColumn
+              active={isColumnActive}
+              onClick={onToggleColumn}
+              fieldname={String(key)}
+            />
           )}
           <DocViewTableRowBtnFilterExists
             disabled={!fieldMapping || !fieldMapping.filterable}

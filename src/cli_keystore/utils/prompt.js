@@ -75,6 +75,7 @@ export function question(question, options = {}) {
     });
 
     rl.question(questionPrompt, (value) => {
+      rl.close();
       resolve(value);
     });
   });

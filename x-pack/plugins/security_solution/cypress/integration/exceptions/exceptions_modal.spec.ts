@@ -133,7 +133,7 @@ describe('Exceptions modal', () => {
     closeExceptionBuilderModal();
   });
 
-  it.skip('Does not overwrite values of nested entry items', () => {
+  it('Does not overwrite values of nested entry items', () => {
     openExceptionModalFromRuleSettings();
     cy.get(LOADING_SPINNER).should('not.exist');
 
@@ -144,13 +144,14 @@ describe('Exceptions modal', () => {
 
     // exception item 2 with nested field
     cy.get(ADD_OR_BTN).click();
-    addExceptionEntryFieldValueOfItemX('c', 1, 0);
+    addExceptionEntryFieldValueOfItemX('agent.name', 1, 0);
     cy.get(ADD_NESTED_BTN).click();
     addExceptionEntryFieldValueOfItemX('user.id{downarrow}{enter}', 1, 1);
     cy.get(ADD_AND_BTN).click();
     addExceptionEntryFieldValueOfItemX('last{downarrow}{enter}', 1, 3);
     // This button will now read `Add non-nested button`
-    cy.get(ADD_NESTED_BTN).click();
+    cy.get(ADD_NESTED_BTN).scrollIntoView();
+    cy.get(ADD_NESTED_BTN).focus().click();
     addExceptionEntryFieldValueOfItemX('@timestamp', 1, 4);
 
     // should have only deleted `user.id`
@@ -161,7 +162,11 @@ describe('Exceptions modal', () => {
       .eq(0)
       .should('have.text', 'agent.name');
     cy.get(EXCEPTION_ITEM_CONTAINER).eq(0).find(FIELD_INPUT).eq(1).should('have.text', 'b');
-    cy.get(EXCEPTION_ITEM_CONTAINER).eq(1).find(FIELD_INPUT).eq(0).should('have.text', 'c');
+    cy.get(EXCEPTION_ITEM_CONTAINER)
+      .eq(1)
+      .find(FIELD_INPUT)
+      .eq(0)
+      .should('have.text', 'agent.name');
     cy.get(EXCEPTION_ITEM_CONTAINER).eq(1).find(FIELD_INPUT).eq(1).should('have.text', 'user');
     cy.get(EXCEPTION_ITEM_CONTAINER).eq(1).find(FIELD_INPUT).eq(2).should('have.text', 'last');
     cy.get(EXCEPTION_ITEM_CONTAINER)
@@ -178,7 +183,11 @@ describe('Exceptions modal', () => {
       .eq(0)
       .should('have.text', 'agent.name');
     cy.get(EXCEPTION_ITEM_CONTAINER).eq(0).find(FIELD_INPUT).eq(1).should('have.text', 'b');
-    cy.get(EXCEPTION_ITEM_CONTAINER).eq(1).find(FIELD_INPUT).eq(0).should('have.text', 'c');
+    cy.get(EXCEPTION_ITEM_CONTAINER)
+      .eq(1)
+      .find(FIELD_INPUT)
+      .eq(0)
+      .should('have.text', 'agent.name');
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(1)
       .find(FIELD_INPUT)

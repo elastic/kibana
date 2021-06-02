@@ -9,6 +9,7 @@ import React, { ChangeEvent, ReactElement } from 'react';
 import { createMockedDragDropContext } from './mocks';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { InnerIndexPatternDataPanel, IndexPatternDataPanel, MemoizedDataPanel } from './datapanel';
+import { FieldList } from './field_list';
 import { FieldItem } from './field_item';
 import { NoFieldsCallout } from './no_fields_callout';
 import { act } from 'react-dom/test-utils';
@@ -21,6 +22,7 @@ import { documentField } from './document_field';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { indexPatternFieldEditorPluginMock } from '../../../../../src/plugins/index_pattern_field_editor/public/mocks';
 import { getFieldByNameFactory } from './pure_helpers';
+import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
 
 const fieldsOne = [
   {
@@ -173,7 +175,7 @@ const initialState: IndexPatternPrivateState = {
           label: 'My Op',
           dataType: 'number',
           isBucketed: false,
-          operationType: 'avg',
+          operationType: 'average',
           sourceField: 'memory',
         },
       },
@@ -200,7 +202,7 @@ const initialState: IndexPatternPrivateState = {
           label: 'My Op',
           dataType: 'number',
           isBucketed: false,
-          operationType: 'avg',
+          operationType: 'average',
           sourceField: 'bytes',
         },
       },
@@ -235,7 +237,7 @@ const initialState: IndexPatternPrivateState = {
   isFirstExistenceFetch: false,
 };
 
-const dslQuery = { bool: { must: [{ match_all: {} }], filter: [], should: [], must_not: [] } };
+const dslQuery = { bool: { must: [], filter: [], should: [], must_not: [] } };
 
 describe('IndexPattern Data Panel', () => {
   let defaultProps: Parameters<typeof InnerIndexPatternDataPanel>[0] & {
@@ -266,6 +268,7 @@ describe('IndexPattern Data Panel', () => {
       showNoDataPopover: jest.fn(),
       dropOntoWorkspace: jest.fn(),
       hasSuggestionForField: jest.fn(() => false),
+      uiActions: uiActionsPluginMock.createStartContract(),
     };
   });
 
@@ -713,6 +716,30 @@ describe('IndexPattern Data Panel', () => {
       expect(wrapper.find(NoFieldsCallout).length).toEqual(2);
     });
 
+    it('should not allow field details when error', () => {
+      const wrapper = mountWithIntl(
+        <InnerIndexPatternDataPanel {...props} existenceFetchFailed={true} />
+      );
+
+      expect(wrapper.find(FieldList).prop('fieldGroups')).toEqual(
+        expect.objectContaining({
+          AvailableFields: expect.objectContaining({ hideDetails: true }),
+        })
+      );
+    });
+
+    it('should allow field details when timeout', () => {
+      const wrapper = mountWithIntl(
+        <InnerIndexPatternDataPanel {...props} existenceFetchTimeout={true} />
+      );
+
+      expect(wrapper.find(FieldList).prop('fieldGroups')).toEqual(
+        expect.objectContaining({
+          AvailableFields: expect.objectContaining({ hideDetails: false }),
+        })
+      );
+    });
+
     it('should filter down by name', () => {
       const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...props} />);
       act(() => {
@@ -827,7 +854,7 @@ describe('IndexPattern Data Panel', () => {
         });
 
         // wait for indx pattern to be loaded
-        await new Promise((r) => setTimeout(r, 0));
+        await act(async () => await new Promise((r) => setTimeout(r, 0)));
 
         expect(props.indexPatternFieldEditor.openEditor).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -860,10 +887,11 @@ describe('IndexPattern Data Panel', () => {
             .prop('children') as ReactElement).props.items[0].props.onClick();
         });
         // wait for indx pattern to be loaded
-        await new Promise((r) => setTimeout(r, 0));
+        await act(async () => await new Promise((r) => setTimeout(r, 0)));
+
         await (props.indexPatternFieldEditor.openEditor as jest.Mock).mock.calls[0][0].onSave();
         // wait for indx pattern to be loaded
-        await new Promise((r) => setTimeout(r, 0));
+        await act(async () => await new Promise((r) => setTimeout(r, 0)));
         expect(props.onUpdateIndexPattern).toHaveBeenCalledWith(
           expect.objectContaining({
             fields: [

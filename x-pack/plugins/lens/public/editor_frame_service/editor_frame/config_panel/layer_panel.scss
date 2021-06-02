@@ -36,6 +36,7 @@
 
 .lnsLayerPanel__group {
   padding: $euiSizeS 0;
+  margin-bottom: $euiSizeS;
 }
 
 .lnsLayerPanel__group:empty {
@@ -66,8 +67,6 @@
 }
 
 .lnsLayerPanel__dimension--empty {
-  margin-top: $euiSizeS;
-
   &:focus,
   &:focus-within {
     @include euiFocusRing;

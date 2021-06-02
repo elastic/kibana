@@ -37,79 +37,87 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe('get_sub_case', () => {
-    let actionID: string;
-    before(async () => {
-      actionID = await createCaseAction(supertest);
-    });
-    after(async () => {
-      await deleteCaseAction(supertest, actionID);
-    });
-    afterEach(async () => {
-      await deleteAllCaseItems(es);
+  // ENABLE_CASE_CONNECTOR: remove the outer describe once the case connector feature is completed
+  describe('get_sub_case disabled route', () => {
+    it('should return a 404 when attempting to access the route and the case connector feature is disabled', async () => {
+      await supertest.get(getSubCaseDetailsUrl('case-id', 'sub-case-id')).expect(404);
     });
 
-    it('should return a case', async () => {
-      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
+    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
+    describe.skip('get_sub_case', () => {
+      let actionID: string;
+      before(async () => {
+        actionID = await createCaseAction(supertest);
+      });
+      after(async () => {
+        await deleteCaseAction(supertest, actionID);
+      });
+      afterEach(async () => {
+        await deleteAllCaseItems(es);
+      });
 
-      const { body }: { body: SubCaseResponse } = await supertest
-        .get(getSubCaseDetailsUrl(caseInfo.id, caseInfo.subCases![0].id))
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
+      it('should return a case', async () => {
+        const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
 
-      expect(removeServerGeneratedPropertiesFromComments(body.comments)).to.eql(
-        commentsResp({
-          comments: [{ comment: defaultCreateSubComment, id: caseInfo.comments![0].id }],
-          associationType: AssociationType.subCase,
-        })
-      );
+        const { body }: { body: SubCaseResponse } = await supertest
+          .get(getSubCaseDetailsUrl(caseInfo.id, caseInfo.subCases![0].id))
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
 
-      expect(removeServerGeneratedPropertiesFromSubCase(body)).to.eql(
-        subCaseResp({ id: body.id, totalComment: 1, totalAlerts: 2 })
-      );
-    });
+        expect(removeServerGeneratedPropertiesFromComments(body.comments)).to.eql(
+          commentsResp({
+            comments: [{ comment: defaultCreateSubComment, id: caseInfo.comments![0].id }],
+            associationType: AssociationType.subCase,
+          })
+        );
 
-    it('should return the correct number of alerts with multiple types of alerts', async () => {
-      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
+        expect(removeServerGeneratedPropertiesFromSubCase(body)).to.eql(
+          subCaseResp({ id: body.id, totalComment: 1, totalAlerts: 2 })
+        );
+      });
 
-      const { body: singleAlert }: { body: CaseResponse } = await supertest
-        .post(getCaseCommentsUrl(caseInfo.id))
-        .query({ subCaseId: caseInfo.subCases![0].id })
-        .set('kbn-xsrf', 'true')
-        .send(postCommentAlertReq)
-        .expect(200);
+      it('should return the correct number of alerts with multiple types of alerts', async () => {
+        const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
 
-      const { body }: { body: SubCaseResponse } = await supertest
-        .get(getSubCaseDetailsUrl(caseInfo.id, caseInfo.subCases![0].id))
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
+        const { body: singleAlert }: { body: CaseResponse } = await supertest
+          .post(getCaseCommentsUrl(caseInfo.id))
+          .query({ subCaseId: caseInfo.subCases![0].id })
+          .set('kbn-xsrf', 'true')
+          .send(postCommentAlertReq)
+          .expect(200);
 
-      expect(removeServerGeneratedPropertiesFromComments(body.comments)).to.eql(
-        commentsResp({
-          comments: [
-            { comment: defaultCreateSubComment, id: caseInfo.comments![0].id },
-            {
-              comment: postCommentAlertReq,
-              id: singleAlert.comments![1].id,
-            },
-          ],
-          associationType: AssociationType.subCase,
-        })
-      );
+        const { body }: { body: SubCaseResponse } = await supertest
+          .get(getSubCaseDetailsUrl(caseInfo.id, caseInfo.subCases![0].id))
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
 
-      expect(removeServerGeneratedPropertiesFromSubCase(body)).to.eql(
-        subCaseResp({ id: body.id, totalComment: 2, totalAlerts: 3 })
-      );
-    });
+        expect(removeServerGeneratedPropertiesFromComments(body.comments)).to.eql(
+          commentsResp({
+            comments: [
+              { comment: defaultCreateSubComment, id: caseInfo.comments![0].id },
+              {
+                comment: postCommentAlertReq,
+                id: singleAlert.comments![1].id,
+              },
+            ],
+            associationType: AssociationType.subCase,
+          })
+        );
 
-    it('unhappy path - 404s when case is not there', async () => {
-      await supertest
-        .get(getSubCaseDetailsUrl('fake-case-id', 'fake-sub-case-id'))
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(404);
+        expect(removeServerGeneratedPropertiesFromSubCase(body)).to.eql(
+          subCaseResp({ id: body.id, totalComment: 2, totalAlerts: 3 })
+        );
+      });
+
+      it('unhappy path - 404s when case is not there', async () => {
+        await supertest
+          .get(getSubCaseDetailsUrl('fake-case-id', 'fake-sub-case-id'))
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(404);
+      });
     });
   });
 };

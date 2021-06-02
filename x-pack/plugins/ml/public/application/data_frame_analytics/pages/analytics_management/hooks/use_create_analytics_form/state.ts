@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { RuntimeMappings } from '../../../../../../../common/types/fields';
 import { DeepPartial, DeepReadonly } from '../../../../../../../common/types/common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
+import { isRuntimeMappings } from '../../../../../../../common/util/runtime_field_utils';
 
 import { defaultSearchQuery, getAnalysisType } from '../../../../common/analytics';
 import { CloneDataFrameAnalyticsConfig } from '../../components/action_clone';
@@ -94,6 +96,9 @@ export interface State {
     requiredFieldsError: string | undefined;
     randomizeSeed: undefined | number;
     resultsField: undefined | string;
+    runtimeMappings: undefined | RuntimeMappings;
+    runtimeMappingsUpdated: boolean;
+    previousRuntimeMapping: undefined | RuntimeMappings;
     softTreeDepthLimit: undefined | number;
     softTreeDepthTolerance: undefined | number;
     sourceIndex: EsIndexName;
@@ -171,6 +176,9 @@ export const getInitialState = (): State => ({
     requiredFieldsError: undefined,
     randomizeSeed: undefined,
     resultsField: undefined,
+    runtimeMappings: undefined,
+    runtimeMappingsUpdated: false,
+    previousRuntimeMapping: undefined,
     softTreeDepthLimit: undefined,
     softTreeDepthTolerance: undefined,
     sourceIndex: '',
@@ -212,6 +220,9 @@ export const getJobConfigFromFormState = (
         ? formState.sourceIndex.split(',').map((d) => d.trim())
         : formState.sourceIndex,
       query: formState.jobConfigQuery,
+      ...(isRuntimeMappings(formState.runtimeMappings)
+        ? { runtime_mappings: formState.runtimeMappings }
+        : {}),
     },
     dest: {
       index: formState.destinationIndex,
@@ -340,6 +351,7 @@ export function getFormStateFromJobConfig(
     sourceIndex: Array.isArray(analyticsJobConfig.source.index)
       ? analyticsJobConfig.source.index.join(',')
       : analyticsJobConfig.source.index,
+    runtimeMappings: analyticsJobConfig.source.runtime_mappings,
     modelMemoryLimit: analyticsJobConfig.model_memory_limit,
     maxNumThreads: analyticsJobConfig.max_num_threads,
     includes: analyticsJobConfig.analyzed_fields?.includes ?? [],

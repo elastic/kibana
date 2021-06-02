@@ -14,6 +14,8 @@ import { OverviewPage } from '../pages/overview';
 import { jsonRt } from './json_rt';
 import { AlertsPage } from '../pages/alerts';
 import { CasesPage } from '../pages/cases';
+import { ExploratoryViewPage } from '../components/shared/exploratory_view';
+import { alertStatusRt } from '../../common/typings';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
@@ -103,6 +105,8 @@ export const routes = {
       query: t.partial({
         rangeFrom: t.string,
         rangeTo: t.string,
+        kuery: t.string,
+        status: alertStatusRt,
         refreshPaused: jsonRt.pipe(t.boolean),
         refreshInterval: jsonRt.pipe(t.number),
       }),
@@ -111,6 +115,26 @@ export const routes = {
       {
         text: i18n.translate('xpack.observability.alerts.breadcrumb', {
           defaultMessage: 'Alerts',
+        }),
+      },
+    ],
+  },
+  '/exploratory-view': {
+    handler: () => {
+      return <ExploratoryViewPage />;
+    },
+    params: {
+      query: t.partial({
+        rangeFrom: t.string,
+        rangeTo: t.string,
+        refreshPaused: jsonRt.pipe(t.boolean),
+        refreshInterval: jsonRt.pipe(t.number),
+      }),
+    },
+    breadcrumb: [
+      {
+        text: i18n.translate('xpack.observability.overview.exploratoryView', {
+          defaultMessage: 'Analyze data',
         }),
       },
     ],

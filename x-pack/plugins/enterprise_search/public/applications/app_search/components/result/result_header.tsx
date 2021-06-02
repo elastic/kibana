@@ -7,8 +7,11 @@
 
 import React from 'react';
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
+import { ResultActions } from './result_actions';
 import { ResultHeaderItem } from './result_header_item';
-import { ResultMeta } from './types';
+import { ResultMeta, ResultAction } from './types';
 
 import './result_header.scss';
 
@@ -16,33 +19,61 @@ interface Props {
   showScore: boolean;
   isMetaEngine: boolean;
   resultMeta: ResultMeta;
+  actions: ResultAction[];
+  documentLink?: string;
 }
 
-export const ResultHeader: React.FC<Props> = ({ showScore, resultMeta, isMetaEngine }) => {
+export const ResultHeader: React.FC<Props> = ({
+  showScore,
+  resultMeta,
+  isMetaEngine,
+  actions,
+  documentLink,
+}) => {
   return (
     <header className="appSearchResultHeader">
-      {showScore && (
-        <div className="appSearchResultHeader__column">
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        justifyContent="spaceBetween"
+        responsive={false}
+        wrap
+      >
+        <EuiFlexItem grow>
           <ResultHeaderItem
-            data-test-subj="ResultScore"
-            field="score"
-            value={resultMeta.score}
-            type="score"
+            href={documentLink}
+            data-test-subj="ResultId"
+            field="ID"
+            value={resultMeta.id}
+            type="id"
           />
-        </div>
-      )}
-
-      <div className="appSearchResultHeader__column">
-        {isMetaEngine && (
-          <ResultHeaderItem
-            data-test-subj="ResultEngine"
-            field="engine"
-            value={resultMeta.engine}
-            type="string"
-          />
+        </EuiFlexItem>
+        {showScore && (
+          <EuiFlexItem grow={false}>
+            <ResultHeaderItem
+              data-test-subj="ResultScore"
+              field="Score"
+              value={resultMeta.score}
+              type="score"
+            />
+          </EuiFlexItem>
         )}
-        <ResultHeaderItem data-test-subj="ResultId" field="id" value={resultMeta.id} type="id" />
-      </div>
+        {isMetaEngine && (
+          <EuiFlexItem grow={false}>
+            <ResultHeaderItem
+              data-test-subj="ResultEngine"
+              field="Engine"
+              value={resultMeta.engine}
+              type="string"
+            />
+          </EuiFlexItem>
+        )}
+        {actions.length > 0 && (
+          <EuiFlexItem grow={false}>
+            <ResultActions actions={actions} />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
     </header>
   );
 };

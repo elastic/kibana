@@ -99,9 +99,15 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
       version,
       force,
     };
-    await AgentService.sendUpgradeAgentsActions(soClient, esClient, upgradeOptions);
+    const results = await AgentService.sendUpgradeAgentsActions(soClient, esClient, upgradeOptions);
+    const body = results.items.reduce<PostBulkAgentUpgradeResponse>((acc, so) => {
+      acc[so.id] = {
+        success: !so.error,
+        error: so.error?.message,
+      };
+      return acc;
+    }, {});
 
-    const body: PostBulkAgentUpgradeResponse = {};
     return response.ok({ body });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });

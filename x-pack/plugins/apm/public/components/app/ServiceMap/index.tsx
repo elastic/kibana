@@ -19,7 +19,7 @@ import { useLicenseContext } from '../../../context/license/use_license_context'
 import { useTheme } from '../../../hooks/use_theme';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { DatePicker } from '../../shared/DatePicker';
-import { LicensePrompt } from '../../shared/LicensePrompt';
+import { LicensePrompt } from '../../shared/license_prompt';
 import { Controls } from './Controls';
 import { Cytoscape } from './Cytoscape';
 import { getCytoscapeDivStyle } from './cytoscape_options';

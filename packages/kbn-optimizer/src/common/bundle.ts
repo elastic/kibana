@@ -11,6 +11,7 @@ import Fs from 'fs';
 
 import { BundleCache } from './bundle_cache';
 import { UnknownVals } from './ts_helpers';
+import { omit } from './obj_helpers';
 import { includes, ascending, entriesToObject } from './array_helpers';
 
 const VALID_BUNDLE_TYPES = ['plugin' as const, 'entry' as const];
@@ -90,7 +91,7 @@ export class Bundle {
    */
   createCacheKey(files: string[], mtimes: Map<string, number | undefined>): unknown {
     return {
-      spec: this.toSpec(),
+      spec: omit(this.toSpec(), ['pageLoadAssetSizeLimit']),
       mtimes: entriesToObject(
         files.map((p) => [p, mtimes.get(p)] as const).sort(ascending((e) => e[0]))
       ),

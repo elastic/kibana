@@ -32,6 +32,13 @@ export interface SearchSessionSavedObjectAttributes {
    */
   expires: string;
   /**
+   * Time of transition into completed state,
+   *
+   * Can be "null" in case already completed session
+   * transitioned into in-progress session
+   */
+  completed?: string | null;
+  /**
    * status
    */
   status: SearchSessionStatus;

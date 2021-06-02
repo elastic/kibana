@@ -1,31 +1,31 @@
-[[actions-and-connectors-api-list]]
+[[list-connector-types-api]]
 === List connector types API
 ++++
-<titleabbrev>List all connector types API</titleabbrev>
+<titleabbrev>List all connector types</titleabbrev>
 ++++
 
 Retrieves a list of all connector types.
 
-[[actions-and-connectors-api-list-request]]
+[[list-connector-types-api-request]]
 ==== Request
 
 `GET <kibana host>:<port>/api/actions/connector_types`
 
 `GET <kibana host>:<port>/s/<space_id>/api/actions/connector_types`
 
-[[actions-and-connectors-api-list-path-params]]
+[[list-connector-types-api-path-params]]
 ==== Path parameters
 
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[actions-and-connectors-api-list-codes]]
+[[list-connector-types-api-codes]]
 ==== Response code
 
 `200`::
     Indicates a successful call.
 
-[[actions-and-connectors-api-list-example]]
+[[list-connector-types-api-example]]
 ==== Example
 
 [source,sh]

@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'avg',
+        operation: 'average',
         field: 'bytes',
       });
 
@@ -67,6 +67,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('lens datatable', async () => {
       await PageObjects.lens.switchToVisualization('lnsDatatable');
       await a11y.testAppSnapshot();
+    });
+
+    it('lens datatable with dynamic cell colouring', async () => {
+      await PageObjects.lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger');
+      await PageObjects.lens.setTableDynamicColoring('cell');
+      await a11y.testAppSnapshot();
+    });
+
+    it('lens datatable with dynamic text colouring', async () => {
+      await PageObjects.lens.setTableDynamicColoring('text');
+      await a11y.testAppSnapshot();
+    });
+
+    it('lens datatable with palette panel open', async () => {
+      await PageObjects.lens.openTablePalettePanel();
+      await a11y.testAppSnapshot();
+    });
+
+    it('lens datatable with custom palette stops', async () => {
+      await PageObjects.lens.changePaletteTo('custom');
+      await a11y.testAppSnapshot();
+      await PageObjects.lens.closePaletteEditor();
+      await PageObjects.lens.closeDimensionEditor();
     });
 
     it('lens metric chart', async () => {
@@ -104,7 +127,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'avg',
+        operation: 'average',
         field: 'bytes',
       });
 
@@ -112,8 +135,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    // Skip until https://github.com/elastic/kibana/issues/88661 gets closed
-    it.skip('lens XY chart with multiple layers', async () => {
+    it('lens XY chart with multiple layers', async () => {
       await PageObjects.lens.createLayer();
 
       await PageObjects.lens.switchToVisualization('area');

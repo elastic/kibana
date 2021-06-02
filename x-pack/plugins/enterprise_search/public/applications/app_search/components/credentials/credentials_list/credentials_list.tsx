@@ -12,6 +12,7 @@ import { useActions, useValues } from 'kea';
 import { EuiBasicTable, EuiBasicTableColumn, EuiCopy, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { EDIT_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../shared/constants';
 import { HiddenText } from '../../../../shared/hidden_text';
 import { convertMetaToPagination, handlePageChange } from '../../../../shared/table_pagination';
 import { TOKEN_TYPE_DISPLAY_NAMES } from '../constants';
@@ -82,9 +83,7 @@ export const CredentialsList: React.FC = () => {
     {
       actions: [
         {
-          name: i18n.translate('xpack.enterpriseSearch.actions.edit', {
-            defaultMessage: 'Edit',
-          }),
+          name: EDIT_BUTTON_LABEL,
           description: i18n.translate('xpack.enterpriseSearch.appSearch.credentials.editKey', {
             defaultMessage: 'Edit API Key',
           }),
@@ -94,9 +93,7 @@ export const CredentialsList: React.FC = () => {
           onClick: (token: ApiToken) => showCredentialsForm(token),
         },
         {
-          name: i18n.translate('xpack.enterpriseSearch.actions.delete', {
-            defaultMessage: 'Delete',
-          }),
+          name: DELETE_BUTTON_LABEL,
           description: i18n.translate('xpack.enterpriseSearch.appSearch.credentials.deleteKey', {
             defaultMessage: 'Delete API Key',
           }),
@@ -119,7 +116,7 @@ export const CredentialsList: React.FC = () => {
           title={
             <h2>
               {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.empty.title', {
-                defaultMessage: 'No API Keys have been created yet.',
+                defaultMessage: 'Create your first API key',
               })}
             </h2>
           }

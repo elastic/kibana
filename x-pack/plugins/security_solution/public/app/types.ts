@@ -17,14 +17,13 @@ import {
   CombinedState,
 } from 'redux';
 
-import { AppMountParameters, AppSearchDeepLink } from '../../../../../src/core/public';
+import { AppMountParameters, AppDeepLink } from '../../../../../src/core/public';
 import { StartServices } from '../types';
-import { AppFrontendLibs } from '../common/lib/lib';
 
 /**
  * The React properties used to render `SecurityApp` as well as the `element` to render it into.
  */
-export interface RenderAppProps extends AppFrontendLibs, AppMountParameters {
+export interface RenderAppProps extends AppMountParameters {
   services: StartServices;
   store: Store<State, Action>;
   SubPluginRoutes: React.FC;
@@ -59,8 +58,8 @@ export type SecuritySubPluginKeyStore =
 export type SecuritySubPluginNames = keyof typeof SecurityPageName;
 
 interface SecurityDeepLink {
-  base: AppSearchDeepLink[];
-  premium?: AppSearchDeepLink[];
+  base: AppDeepLink[];
+  premium?: AppDeepLink[];
 }
 
 export type SecurityDeepLinks = { [key in SecuritySubPluginNames]: SecurityDeepLink };

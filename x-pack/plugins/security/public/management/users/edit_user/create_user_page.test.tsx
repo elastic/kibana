@@ -20,6 +20,8 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
 }));
 
 describe('CreateUserPage', () => {
+  jest.setTimeout(15_000);
+
   it('creates user when submitting form and redirects back', async () => {
     const coreStart = coreMock.createStart();
     const history = createMemoryHistory({ initialEntries: ['/create'] });

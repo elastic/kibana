@@ -67,10 +67,9 @@ export const postEnrollmentApiKeyHandler: RequestHandler<
 export const deleteEnrollmentApiKeyHandler: RequestHandler<
   TypeOf<typeof DeleteEnrollmentAPIKeyRequestSchema.params>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
   try {
-    await APIKeyService.deleteEnrollmentApiKey(soClient, esClient, request.params.keyId);
+    await APIKeyService.deleteEnrollmentApiKey(esClient, request.params.keyId);
 
     const body: DeleteEnrollmentAPIKeyResponse = { action: 'deleted' };
 

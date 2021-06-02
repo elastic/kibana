@@ -15,6 +15,7 @@ import {
   IndexPriorityField,
   ReplicasField,
   FreezeField,
+  ReadonlyField,
 } from '../shared_fields';
 
 import { Phase } from '../phase';
@@ -37,6 +38,9 @@ export const ColdPhase: FunctionComponent = () => {
 
       {/* Freeze section */}
       {!isUsingSearchableSnapshotInHotPhase && <FreezeField phase="cold" />}
+
+      {/* Readonly section */}
+      {!isUsingSearchableSnapshotInHotPhase && <ReadonlyField phase="cold" />}
 
       {/* Data tier allocation section */}
       <DataTierAllocationField

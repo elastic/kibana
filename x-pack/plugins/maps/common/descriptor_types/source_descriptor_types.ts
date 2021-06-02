@@ -19,11 +19,6 @@ import {
   SOURCE_TYPES,
 } from '../constants';
 
-export type AttributionDescriptor = {
-  attributionText?: string;
-  attributionUrl?: string;
-};
-
 export type AbstractSourceDescriptor = {
   id?: string;
   type: string;
@@ -95,8 +90,8 @@ export type ESGeoLineSourceDescriptor = AbstractESAggSourceDescriptor & {
 
 export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
   geoField: string;
-  filterByMapBounds?: boolean;
-  tooltipProperties?: string[];
+  filterByMapBounds: boolean;
+  tooltipProperties: string[];
   sortField: string;
   sortOrder: SortDirection;
   scalingType: SCALING_TYPES;
@@ -129,14 +124,11 @@ export type WMSSourceDescriptor = AbstractSourceDescriptor & {
   serviceUrl: string;
   layers: string;
   styles: string;
-  attributionText: string;
-  attributionUrl: string;
 };
 
-export type XYZTMSSourceDescriptor = AbstractSourceDescriptor &
-  AttributionDescriptor & {
-    urlTemplate: string;
-  };
+export type XYZTMSSourceDescriptor = AbstractSourceDescriptor & {
+  urlTemplate: string;
+};
 
 export type MVTFieldDescriptor = {
   name: string;

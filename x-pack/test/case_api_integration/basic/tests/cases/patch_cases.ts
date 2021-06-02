@@ -134,7 +134,8 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(404);
     });
 
-    it('should 400 and not allow converting a collection back to an individual case', async () => {
+    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
+    it.skip('should 400 and not allow converting a collection back to an individual case', async () => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
@@ -156,7 +157,8 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(400);
     });
 
-    it('should allow converting an individual case to a collection when it does not have alerts', async () => {
+    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
+    it.skip('should allow converting an individual case to a collection when it does not have alerts', async () => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
@@ -212,7 +214,30 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(400);
     });
 
-    it("should 400 when attempting to update a collection case's status", async () => {
+    it('should 400 when attempting to update the case type when the case connector feature is disabled', async () => {
+      const { body: postedCase } = await supertest
+        .post(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send(postCaseReq)
+        .expect(200);
+
+      await supertest
+        .patch(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send({
+          cases: [
+            {
+              id: postedCase.id,
+              version: postedCase.version,
+              type: CaseType.collection,
+            },
+          ],
+        })
+        .expect(400);
+    });
+
+    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
+    it.skip("should 400 when attempting to update a collection case's status", async () => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')

@@ -67,8 +67,9 @@ and lighter shades will symbolize countries with less traffic.
 
 . In **Layer style**, set:
 
-** **Fill color** to the grey color ramp
+** **Fill color: As number** to the grey color ramp
 ** **Border color** to white
+** **Label** to symbol label
 
 . Click **Save & close**.
 +
@@ -102,7 +103,7 @@ The layer is only visible when users zoom in.
 
 . In **Layer settings**, set:
 ** **Name** to `Actual Requests`
-** **Visibilty** to the range [9, 24]
+** **Visibility** to the range [9, 24]
 ** **Opacity** to 100%
 
 . Add a tooltip field and select **agent**, **bytes**, **clientip**, **host**,
@@ -134,9 +135,9 @@ grids with less bytes transferred.
 ** **Name** to `Total Requests and Bytes`
 ** **Visibility** to the range [0, 9]
 ** **Opacity** to 100%
-. Add a metric with:
-** **Aggregation** set to **Sum**
-** **Field** set to **bytes**
+. In **Metrics**, use:
+** **Agregation** set to **Count**, and
+** **Aggregation** set to **Sum** with **Field** set to **bytes**
 . In **Layer style**, change **Symbol size**:
 ** Set the field select to *sum bytes*.
 ** Set the min size to 7 and the max size to 25 px.

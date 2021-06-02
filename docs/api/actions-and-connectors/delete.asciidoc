@@ -1,21 +1,21 @@
-[[actions-and-connectors-api-delete]]
+[[delete-connector-api]]
 === Delete connector API
 ++++
-<titleabbrev>Delete connector API</titleabbrev>
+<titleabbrev>Delete connector</titleabbrev>
 ++++
 
 Deletes an connector by ID.
 
 WARNING: When you delete a connector, _it cannot be recovered_.
 
-[[actions-and-connectors-api-delete-request]]
+[[delete-connector-api-request]]
 ==== Request
 
 `DELETE <kibana host>:<port>/api/actions/connector/<id>`
 
 `DELETE <kibana host>:<port>/s/<space_id>/api/actions/connector/<id>`
 
-[[actions-and-connectors-api-delete-path-params]]
+[[delete-connector-api-path-params]]
 ==== Path parameters
 
 `id`::
@@ -24,7 +24,7 @@ WARNING: When you delete a connector, _it cannot be recovered_.
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[actions-and-connectors-api-delete-response-codes]]
+[[delete-connector-api-response-codes]]
 ==== Response code
 
 `200`::

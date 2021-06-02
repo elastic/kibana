@@ -29,6 +29,7 @@ interface Props {
   iconType?: string;
   action?: React.ReactNode;
   filled?: boolean;
+  hasBorder?: boolean;
   isLoading?: boolean;
   className?: string;
 }
@@ -39,6 +40,7 @@ export const DataPanel: React.FC<Props> = ({
   iconType,
   action,
   filled,
+  hasBorder,
   isLoading,
   className,
   children,
@@ -52,6 +54,7 @@ export const DataPanel: React.FC<Props> = ({
     <EuiPanel
       {...props}
       color={filled ? 'subdued' : 'plain'}
+      hasBorder={hasBorder}
       className={classes}
       hasShadow={false}
       aria-busy={isLoading}

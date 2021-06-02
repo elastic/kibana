@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { UiPlugins } from '../../plugins';
+import { InternalPluginInfo, UiPlugins } from '../../plugins';
 import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
 
 const createUiPlugins = (pluginDeps: Record<string, string[]>) => {
@@ -16,12 +16,13 @@ const createUiPlugins = (pluginDeps: Record<string, string[]>) => {
     browserConfigs: new Map(),
   };
 
-  Object.entries(pluginDeps).forEach(([pluginId, deps]) => {
+  const addPlugin = (pluginId: string, deps: string[]) => {
     uiPlugins.internal.set(pluginId, {
       requiredBundles: deps,
+      version: '8.0.0',
       publicTargetDir: '',
       publicAssetsDir: '',
-    } as any);
+    } as InternalPluginInfo);
     uiPlugins.public.set(pluginId, {
       id: pluginId,
       configPath: 'config-path',
@@ -29,6 +30,12 @@ const createUiPlugins = (pluginDeps: Record<string, string[]>) => {
       requiredPlugins: [],
       requiredBundles: deps,
     });
+
+    deps.forEach((dep) => addPlugin(dep, []));
+  };
+
+  Object.entries(pluginDeps).forEach(([pluginId, deps]) => {
+    addPlugin(pluginId, deps);
   });
 
   return uiPlugins;
@@ -56,13 +63,13 @@ describe('getPluginsBundlePaths', () => {
     });
 
     expect(pluginBundlePaths.get('a')).toEqual({
-      bundlePath: '/regular-bundle-path/plugin/a/a.plugin.js',
-      publicPath: '/regular-bundle-path/plugin/a/',
+      bundlePath: '/regular-bundle-path/plugin/a/8.0.0/a.plugin.js',
+      publicPath: '/regular-bundle-path/plugin/a/8.0.0/',
     });
 
     expect(pluginBundlePaths.get('b')).toEqual({
-      bundlePath: '/regular-bundle-path/plugin/b/b.plugin.js',
-      publicPath: '/regular-bundle-path/plugin/b/',
+      bundlePath: '/regular-bundle-path/plugin/b/8.0.0/b.plugin.js',
+      publicPath: '/regular-bundle-path/plugin/b/8.0.0/',
     });
   });
 });

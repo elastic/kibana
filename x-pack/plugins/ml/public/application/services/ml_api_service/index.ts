@@ -25,7 +25,6 @@ import {
 import { MlCapabilitiesResponse } from '../../../../common/types/capabilities';
 import { Calendar, CalendarId, UpdateCalendar } from '../../../../common/types/calendars';
 import { BucketSpanEstimatorData } from '../../../../common/types/job_service';
-import { RuntimeMappings } from '../../../../common/types/fields';
 import {
   Job,
   JobStats,
@@ -42,6 +41,7 @@ import {
 } from '../../datavisualizer/index_based/common';
 import { DataRecognizerConfigResponse, Module } from '../../../../common/types/modules';
 import { getHttp } from '../../util/dependency_cache';
+import type { RuntimeMappings } from '../../../../common/types/fields';
 
 export interface MlInfoResponse {
   defaults: MlServerDefaults;
@@ -323,14 +323,22 @@ export function mlApiServicesProvider(httpService: HttpService) {
       bucketSpan,
       start,
       end,
+      overallScore,
     }: {
       jobId: string;
       topN: string;
       bucketSpan: string;
       start: number;
       end: number;
+      overallScore?: number;
     }) {
-      const body = JSON.stringify({ topN, bucketSpan, start, end });
+      const body = JSON.stringify({
+        topN,
+        bucketSpan,
+        start,
+        end,
+        ...(overallScore ? { overall_score: overallScore } : {}),
+      });
       return httpService.http<any>({
         path: `${basePath()}/anomaly_detectors/${jobId}/results/overall_buckets`,
         method: 'POST',
@@ -357,13 +365,6 @@ export function mlApiServicesProvider(httpService: HttpService) {
     checkManageMLCapabilities() {
       return httpService.http<MlCapabilitiesResponse>({
         path: `${basePath()}/ml_capabilities`,
-        method: 'GET',
-      });
-    },
-
-    getNotificationSettings() {
-      return httpService.http<any>({
-        path: `${basePath()}/notification_settings`,
         method: 'GET',
       });
     },
@@ -474,6 +475,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
       interval,
       fields,
       maxExamples,
+      runtimeMappings,
     }: {
       indexPatternTitle: string;
       query: any;
@@ -484,6 +486,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
       interval?: number;
       fields?: FieldRequestConfig[];
       maxExamples?: number;
+      runtimeMappings?: RuntimeMappings;
     }) {
       const body = JSON.stringify({
         query,
@@ -494,6 +497,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
         interval,
         fields,
         maxExamples,
+        runtimeMappings,
       });
 
       return httpService.http<any>({
@@ -508,16 +512,19 @@ export function mlApiServicesProvider(httpService: HttpService) {
       query,
       fields,
       samplerShardSize,
+      runtimeMappings,
     }: {
       indexPatternTitle: string;
       query: any;
       fields: FieldHistogramRequestConfig[];
       samplerShardSize?: number;
+      runtimeMappings?: RuntimeMappings;
     }) {
       const body = JSON.stringify({
         query,
         fields,
         samplerShardSize,
+        runtimeMappings,
       });
 
       return httpService.http<any>({
@@ -536,6 +543,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
       samplerShardSize,
       aggregatableFields,
       nonAggregatableFields,
+      runtimeMappings,
     }: {
       indexPatternTitle: string;
       query: any;
@@ -545,6 +553,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
       samplerShardSize?: number;
       aggregatableFields: string[];
       nonAggregatableFields: string[];
+      runtimeMappings?: RuntimeMappings;
     }) {
       const body = JSON.stringify({
         query,
@@ -554,6 +563,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
         samplerShardSize,
         aggregatableFields,
         nonAggregatableFields,
+        runtimeMappings,
       });
 
       return httpService.http<any>({

@@ -9,7 +9,7 @@ Increments all the specified counter fields (by one by default). Creates the doc
 <b>Signature:</b>
 
 ```typescript
-incrementCounter<T = unknown>(type: string, id: string, counterFields: Array<string | SavedObjectsIncrementCounterField>, options?: SavedObjectsIncrementCounterOptions): Promise<SavedObject<T>>;
+incrementCounter<T = unknown>(type: string, id: string, counterFields: Array<string | SavedObjectsIncrementCounterField>, options?: SavedObjectsIncrementCounterOptions<T>): Promise<SavedObject<T>>;
 ```
 
 ## Parameters
@@ -19,7 +19,7 @@ incrementCounter<T = unknown>(type: string, id: string, counterFields: Array<str
 |  type | <code>string</code> | The type of saved object whose fields should be incremented |
 |  id | <code>string</code> | The id of the document whose fields should be incremented |
 |  counterFields | <code>Array&lt;string &#124; SavedObjectsIncrementCounterField&gt;</code> | An array of field names to increment or an array of [SavedObjectsIncrementCounterField](./kibana-plugin-core-server.savedobjectsincrementcounterfield.md) |
-|  options | <code>SavedObjectsIncrementCounterOptions</code> | [SavedObjectsIncrementCounterOptions](./kibana-plugin-core-server.savedobjectsincrementcounteroptions.md) |
+|  options | <code>SavedObjectsIncrementCounterOptions&lt;T&gt;</code> | [SavedObjectsIncrementCounterOptions](./kibana-plugin-core-server.savedobjectsincrementcounteroptions.md) |
 
 <b>Returns:</b>
 
@@ -51,6 +51,20 @@ repository
   .incrementCounter('dashboard_counter_type', 'counter_id', [
     'stats.apiCalls',
   ])
+
+// Increment the apiCalls field counter by 4
+repository
+  .incrementCounter('dashboard_counter_type', 'counter_id', [
+    { fieldName: 'stats.apiCalls' incrementBy: 4 },
+  ])
+
+// Initialize the document with arbitrary fields if not present
+repository.incrementCounter<{ appId: string }>(
+  'dashboard_counter_type',
+  'counter_id',
+  [ 'stats.apiCalls'],
+  { upsertAttributes: { appId: 'myId' } }
+)
 
 ```
 

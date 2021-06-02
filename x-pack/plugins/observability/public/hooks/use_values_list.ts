@@ -5,32 +5,105 @@
  * 2.0.
  */
 
-import { IIndexPattern } from '../../../../../src/plugins/data/common';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { useFetcher } from './use_fetcher';
+import { capitalize, union } from 'lodash';
+import { useEffect, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
+import { IndexPattern } from '../../../../../src/plugins/data/common';
 import { ESFilter } from '../../../../../typings/elasticsearch';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import { createEsParams, useEsSearch } from './use_es_search';
 
-interface Props {
+export interface Props {
   sourceField: string;
   query?: string;
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
   filters?: ESFilter[];
+  time?: { from: string; to: string };
+  keepHistory?: boolean;
 }
 
-export const useValuesList = ({ sourceField, indexPattern, query, filters }: Props) => {
-  const {
-    services: { data },
-  } = useKibana<{ data: DataPublicPluginStart }>();
+export const useValuesList = ({
+  sourceField,
+  indexPattern,
+  query = '',
+  filters,
+  time,
+  keepHistory,
+}: Props): { values: string[]; loading?: boolean } => {
+  const [debouncedQuery, setDebounceQuery] = useState<string>(query);
+  const [values, setValues] = useState<string[]>([]);
 
-  const { data: values, status } = useFetcher(() => {
-    return data.autocomplete.getValueSuggestions({
-      indexPattern,
-      query: query || '',
-      field: indexPattern.fields.find(({ name }) => name === sourceField)!,
-      boolFilter: filters ?? [],
-    });
-  }, [sourceField, query, data.autocomplete, indexPattern, filters]);
+  const { from, to } = time ?? {};
 
-  return { values, loading: status === 'loading' || status === 'pending' };
+  let includeClause = '';
+
+  if (query) {
+    if (query[0].toLowerCase() === query[0]) {
+      // if first letter is lowercase we also add the capitalize option
+      includeClause = `(${query}|${capitalize(query)}).*`;
+    } else {
+      // otherwise we add lowercase option prefix
+      includeClause = `(${query}|${query.toLowerCase()}).*`;
+    }
+  }
+
+  useDebounce(
+    () => {
+      setDebounceQuery(query);
+    },
+    350,
+    [query]
+  );
+
+  const { data, loading } = useEsSearch(
+    createEsParams({
+      index: indexPattern.title,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              ...(filters ?? []),
+              ...(from && to
+                ? [
+                    {
+                      range: {
+                        '@timestamp': {
+                          gte: from,
+                          lte: to,
+                        },
+                      },
+                    },
+                  ]
+                : []),
+            ],
+          },
+        },
+        size: 0,
+        aggs: {
+          values: {
+            terms: {
+              field: sourceField,
+              size: 100,
+              ...(query ? { include: includeClause } : {}),
+            },
+          },
+        },
+      },
+    }),
+    [debouncedQuery, from, to, JSON.stringify(filters)]
+  );
+
+  useEffect(() => {
+    const newValues =
+      data?.aggregations?.values.buckets.map(({ key: value }) => value as string) ?? [];
+
+    if (keepHistory && query) {
+      setValues((prevState) => {
+        return union(newValues, prevState);
+      });
+    } else {
+      setValues(newValues);
+    }
+  }, [data, keepHistory, loading, query]);
+
+  return { values, loading };
 };

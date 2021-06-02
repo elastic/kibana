@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { delay } from 'bluebird';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { logWrapper } from './log_wrapper';
 
@@ -17,6 +18,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const find = getService('find');
   const comboBox = getService('comboBox');
   const browser = getService('browser');
+  const dashboardAddPanel = getService('dashboardAddPanel');
 
   const PageObjects = getPageObjects([
     'common',
@@ -124,8 +126,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
 
       if (opts.palette) {
-        await testSubjects.click('lns-palettePicker');
-        await find.clickByCssSelector(`#${opts.palette}`);
+        await this.setPalette(opts.palette);
       }
 
       if (!opts.keepOpen) {
@@ -173,6 +174,19 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
+     * Drags field to geo field workspace
+     *
+     * @param field  - the desired geo_point or geo_shape field
+     * */
+    async dragFieldToGeoFieldWorkspace(field: string) {
+      await browser.html5DragAndDrop(
+        testSubjects.getCssSelector(`lnsFieldListPanelField-${field}`),
+        testSubjects.getCssSelector('lnsGeoFieldWorkspace')
+      );
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    /**
      * Drags field to workspace
      *
      * @param field  - the desired field for the dimension
@@ -192,13 +206,14 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await retry.try(async () => {
         await testSubjects.click('lnsFieldListPanelRemove');
         await testSubjects.missingOrFail('lnsFieldListPanelRemove');
-        await testSubjects.click('confirmModalConfirmButton');
-        await testSubjects.missingOrFail('confirmModalConfirmButton');
       });
     },
 
     async searchField(name: string) {
-      await testSubjects.setValue('lnsIndexPatternFieldSearch', name);
+      await testSubjects.setValue('lnsIndexPatternFieldSearch', name, {
+        clearWithKeyboard: true,
+        typeCharByChar: true,
+      });
     },
 
     async waitForField(field: string) {
@@ -347,6 +362,25 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
+    async enableTimeShift() {
+      await testSubjects.click('indexPattern-advanced-popover');
+      await retry.try(async () => {
+        await testSubjects.click('indexPattern-time-shift-enable');
+      });
+    },
+
+    async setTimeShift(shift: string) {
+      await comboBox.setCustom('indexPattern-dimension-time-shift', shift);
+    },
+
+    async hasFixAction() {
+      return await testSubjects.exists('errorFixAction');
+    },
+
+    async useFixAction() {
+      await testSubjects.click('errorFixAction');
+    },
+
     // closes the dimension editor flyout
     async closeDimensionEditor() {
       await retry.try(async () => {
@@ -432,11 +466,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await colorPickerInput.type(color);
       await PageObjects.common.sleep(1000); // give time for debounced components to rerender
     },
-    async editMissingValues(option: string) {
+    async openVisualOptions() {
       await retry.try(async () => {
-        await testSubjects.click('lnsValuesButton');
-        await testSubjects.exists('lnsValuesButton');
+        await testSubjects.click('lnsVisualOptionsButton');
+        await testSubjects.exists('lnsVisualOptionsButton');
       });
+    },
+    async useCurvedLines() {
+      await testSubjects.click('lnsCurveStyleToggle');
+    },
+    async editMissingValues(option: string) {
       await testSubjects.click('lnsMissingValuesSelect');
       const optionSelector = await find.byCssSelector(`#${option}`);
       await optionSelector.click();
@@ -650,6 +689,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return el.getVisibleText();
     },
 
+    async getDatatableCellStyle(rowIndex = 0, colIndex = 0) {
+      const el = await this.getDatatableCell(rowIndex, colIndex);
+      const styleString = await el.getAttribute('style');
+      return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
+        const [prop, value] = cssLine.split(':');
+        if (prop && value) {
+          memo[prop.trim()] = value.trim();
+        }
+        return memo;
+      }, {});
+    },
+
     async getDatatableHeader(index = 0) {
       return find.byCssSelector(
         `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridHeader"] [role=columnheader]:nth-child(${
@@ -691,6 +742,46 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         );
       }
       return buttonEl.click();
+    },
+
+    async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text') {
+      await testSubjects.click('lnsDatatable_dynamicColoring_groups_' + coloringType);
+    },
+
+    async openTablePalettePanel() {
+      await testSubjects.click('lnsDatatable_dynamicColoring_trigger');
+    },
+
+    // different picker from the next one
+    async changePaletteTo(paletteName: string) {
+      await testSubjects.click('lnsDatatable_dynamicColoring_palette_picker');
+      await testSubjects.click(`${paletteName}-palette`);
+    },
+
+    async setPalette(paletteName: string) {
+      await testSubjects.click('lns-palettePicker');
+      await find.clickByCssSelector(`#${paletteName}`);
+    },
+
+    async closePaletteEditor() {
+      await retry.try(async () => {
+        await testSubjects.click('lns-indexPattern-PalettePanelContainerBack');
+        await testSubjects.missingOrFail('lns-indexPattern-PalettePanelContainerBack');
+      });
+    },
+
+    async openColorStopPopup(index = 0) {
+      const stopEls = await testSubjects.findAll('euiColorStopThumb');
+      if (stopEls[index]) {
+        await stopEls[index].click();
+      }
+    },
+
+    async setColorStopValue(value: number | string) {
+      await testSubjects.setValue(
+        'lnsDatatable_dynamicColoring_progression_custom_stops_value',
+        String(value)
+      );
     },
 
     async toggleColumnVisibility(dimension: string) {
@@ -746,7 +837,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       if (inViewMode) {
         await PageObjects.dashboard.switchToEditMode();
       }
-      await PageObjects.visualize.clickLensWidget();
+      await dashboardAddPanel.clickCreateNewLink();
       await this.goToTimeRange();
       await this.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -756,7 +847,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
       await this.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'avg',
+        operation: 'average',
         field: 'bytes',
       });
 
@@ -820,6 +911,84 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('lnsIndexPatternActions');
       await testSubjects.existOrFail('indexPattern-add-field');
       await testSubjects.click('indexPattern-add-field');
+    },
+
+    /** resets visualization/layer or removes a layer */
+    async removeLayer() {
+      await testSubjects.click('lnsLayerRemove');
+    },
+
+    /**
+     * Starts dragging @param dragging, drags over @param draggedOver and drops it into @dropTarget
+     */
+    async dragEnterDrop(dragging: string, draggedOver: string, dropTarget: string) {
+      await browser.execute(
+        `
+          function createEvent(typeOfEvent) {
+            const event = document.createEvent("CustomEvent");
+            event.initCustomEvent(typeOfEvent, true, true, null);
+            event.dataTransfer = {
+                data: {},
+                setData: function(key, value) {
+                    this.data[key] = value;
+                },
+                getData: function(key) {
+                    return this.data[key];
+                }
+            };
+            return event;
+          }
+          function dispatchEvent(element, event, transferData) {
+            if (transferData !== undefined) {
+                event.dataTransfer = transferData;
+            }
+            if (element.dispatchEvent) {
+                element.dispatchEvent(event);
+            } else if (element.fireEvent) {
+                element.fireEvent("on" + event.type, event);
+            }
+          }
+
+          const origin = document.querySelector(arguments[0]);
+          const dragStartEvent = createEvent('dragstart');
+          dispatchEvent(origin, dragStartEvent);
+
+          setTimeout(() => {
+            const target = document.querySelector(arguments[1]);
+            const dragenter = createEvent('dragenter');
+            const dragover = createEvent('dragover');
+            dispatchEvent(target, dragenter, dragStartEvent.dataTransfer);
+            dispatchEvent(target, dragover, dragStartEvent.dataTransfer);
+            setTimeout(() => {
+              const target = document.querySelector(arguments[2]);
+              const dropEvent = createEvent('drop');
+              dispatchEvent(target, dropEvent, dragStartEvent.dataTransfer);
+              const dragEndEvent = createEvent('dragend');
+              dispatchEvent(origin, dragEndEvent, dropEvent.dataTransfer);
+            }, 100)
+          }, 100);
+      `,
+        dragging,
+        draggedOver,
+        dropTarget
+      );
+      await delay(150);
+    },
+
+    /**
+     * Drags field to dimension trigger to extra drop type
+     *
+     * @param from - the selector of the dimension being moved
+     * @param to - the selector of the main drop type of dimension being dropped to
+     * @param type - extra drop type
+     * */
+    async dragDimensionToExtraDropType(from: string, to: string, type: 'duplicate' | 'swap') {
+      await this.dragEnterDrop(
+        testSubjects.getCssSelector(from),
+        testSubjects.getCssSelector(`${to} > lnsDragDrop`),
+        testSubjects.getCssSelector(`${to} > lnsDragDrop-${type}`)
+      );
+      await PageObjects.header.waitUntilLoadingHasFinished();
     },
   });
 }

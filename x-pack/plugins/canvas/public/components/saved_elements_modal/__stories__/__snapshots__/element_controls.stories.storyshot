@@ -22,7 +22,7 @@ exports[`Storyshots components/SavedElementsModal/ElementControls has two button
       >
         <button
           aria-label="Edit element"
-          className="euiButtonIcon euiButtonIcon--primary"
+          className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
           data-test-subj="canvasElementCard__editButton"
           disabled={false}
           onBlur={[Function]}
@@ -33,6 +33,7 @@ exports[`Storyshots components/SavedElementsModal/ElementControls has two button
           <span
             aria-hidden="true"
             className="euiButtonIcon__icon"
+            color="inherit"
             data-euiicon-type="pencil"
             size="m"
           />
@@ -50,7 +51,7 @@ exports[`Storyshots components/SavedElementsModal/ElementControls has two button
       >
         <button
           aria-label="Delete element"
-          className="euiButtonIcon euiButtonIcon--danger"
+          className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
           data-test-subj="canvasElementCard__deleteButton"
           disabled={false}
           onBlur={[Function]}
@@ -61,6 +62,7 @@ exports[`Storyshots components/SavedElementsModal/ElementControls has two button
           <span
             aria-hidden="true"
             className="euiButtonIcon__icon"
+            color="inherit"
             data-euiicon-type="trash"
             size="m"
           />

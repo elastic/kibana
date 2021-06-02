@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { AbstractVectorSource, GeoJsonWithMeta } from '../vector_source';
-import { getKibanaRegionList } from '../../../meta';
+import { fetchGeoJson, getKibanaRegionList } from '../../../util';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { FIELD_ORIGIN, FORMAT_TYPE, SOURCE_TYPES } from '../../../../common/constants';
 import { KibanaRegionField } from '../../fields/kibana_region_field';
@@ -79,11 +79,12 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
 
   async getGeoJsonWithMeta(): Promise<GeoJsonWithMeta> {
     const vectorFileMeta = await this.getVectorFileMeta();
-    const featureCollection = await AbstractVectorSource.getGeoJson({
-      format: vectorFileMeta.format.type as FORMAT_TYPE,
-      featureCollectionPath: vectorFileMeta.meta.feature_collection_path,
-      fetchUrl: vectorFileMeta.url,
-    });
+    const featureCollection = await fetchGeoJson(
+      vectorFileMeta.url,
+      vectorFileMeta.format.type as FORMAT_TYPE,
+      vectorFileMeta.meta.feature_collection_path
+    );
+
     return {
       data: featureCollection,
       meta: {},
@@ -103,7 +104,7 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
     return this._descriptor.name;
   }
 
-  canFormatFeatureProperties() {
+  hasTooltipProperties() {
     return true;
   }
 }

@@ -81,7 +81,7 @@ export const PrivateSources: React.FC = () => {
   );
 
   const privateSourcesEmptyState = (
-    <EuiPanel>
+    <EuiPanel hasShadow={false} color="subdued">
       <EuiSpacer size="xxl" />
       <EuiEmptyPrompt iconType="lock" title={<h2>{PRIVATE_EMPTY_TITLE}</h2>} />
       <EuiSpacer size="xxl" />
@@ -107,7 +107,7 @@ export const PrivateSources: React.FC = () => {
   );
 
   const sharedSourcesEmptyState = (
-    <EuiPanel>
+    <EuiPanel hasShadow={false} color="subdued">
       <EuiSpacer size="xxl" />
       <EuiEmptyPrompt
         iconType={noSharedSourcesIcon}

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
+import type {
   Plugin,
   CoreStart,
   CoreSetup,
@@ -15,10 +15,12 @@ import {
   SavedObjectsClientContract,
   SavedObjectsBatchResponse,
   ApplicationStart,
-} from '../../../core/public';
+} from 'src/core/public';
+
+import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
 
 import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
-import {
+import type {
   TelemetrySavedObjectAttributes,
   TelemetrySavedObject,
 } from '../common/telemetry_config/types';
@@ -30,27 +32,79 @@ import {
 import { getNotifyUserAboutOptInDefault } from '../common/telemetry_config/get_telemetry_notify_user_about_optin_default';
 import { PRIVACY_STATEMENT_URL } from '../common/constants';
 
-export interface TelemetryPluginSetup {
-  telemetryService: TelemetryService;
+/**
+ * Publicly exposed APIs from the Telemetry Service
+ */
+export interface TelemetryServicePublicApis {
+  /** Is the cluster opted-in to telemetry? **/
+  getIsOptedIn: () => boolean | null;
+  /** Is the user allowed to change the opt-in/out status? **/
+  userCanChangeSettings: boolean;
+  /** Can phone-home telemetry calls be made? This depends on whether we have opted-in or if we are rendering a report */
+  canSendTelemetry: () => boolean;
+  /** Is the cluster allowed to change the opt-in/out status? **/
+  getCanChangeOptInStatus: () => boolean;
+  /** Fetches an unencrypted telemetry payload so we can show it to the user **/
+  fetchExample: () => Promise<unknown[]>;
+  /**
+   * Overwrite the opt-in status.
+   * It will send a final request to the remote telemetry cluster to report about the opt-in/out change.
+   * @param optedIn Whether the user is opting-in (`true`) or out (`false`).
+   */
+  setOptIn: (optedIn: boolean) => Promise<boolean>;
 }
 
+/**
+ * Public's setup exposed APIs by the telemetry plugin
+ */
+export interface TelemetryPluginSetup {
+  /** {@link TelemetryService} **/
+  telemetryService: TelemetryServicePublicApis;
+}
+
+/**
+ * Public's start exposed APIs by the telemetry plugin
+ */
 export interface TelemetryPluginStart {
-  telemetryService: TelemetryService;
-  telemetryNotifications: TelemetryNotifications;
+  /** {@link TelemetryServicePublicApis} **/
+  telemetryService: TelemetryServicePublicApis;
+  /** Notification helpers **/
+  telemetryNotifications: {
+    /** Notify that the user has been presented with the opt-in/out notice. */
+    setOptedInNoticeSeen: () => Promise<void>;
+  };
+  /** Set of publicly exposed telemetry constants **/
   telemetryConstants: {
+    /** Elastic's privacy statement url **/
     getPrivacyStatementUrl: () => string;
   };
 }
 
+interface TelemetryPluginSetupDependencies {
+  screenshotMode: ScreenshotModePluginSetup;
+}
+
+/**
+ * Public-exposed configuration
+ */
 export interface TelemetryPluginConfig {
+  /** Is the plugin enabled? **/
   enabled: boolean;
+  /** Remote telemetry service's URL **/
   url: string;
+  /** The banner is expected to be shown when needed **/
   banner: boolean;
+  /** Does the cluster allow changing the opt-in/out status via the UI? **/
   allowChangingOptInStatus: boolean;
+  /** Is the cluster opted-in? **/
   optIn: boolean | null;
+  /** Opt-in/out notification URL **/
   optInStatusUrl: string;
+  /** Should the telemetry payloads be sent from the server or the browser? **/
   sendUsageFrom: 'browser' | 'server';
+  /** Should notify the user about the opt-in status? **/
   telemetryNotifyUserAboutOptInDefault?: boolean;
+  /** Does the user have enough privileges to change the settings? **/
   userCanChangeSettings?: boolean;
 }
 
@@ -67,11 +121,15 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     this.config = initializerContext.config.get();
   }
 
-  public setup({ http, notifications }: CoreSetup): TelemetryPluginSetup {
+  public setup(
+    { http, notifications }: CoreSetup,
+    { screenshotMode }: TelemetryPluginSetupDependencies
+  ): TelemetryPluginSetup {
     const config = this.config;
     const currentKibanaVersion = this.currentKibanaVersion;
     this.telemetryService = new TelemetryService({
       config,
+      isScreenshotMode: screenshotMode.isScreenshotMode(),
       http,
       notifications,
       currentKibanaVersion,
@@ -80,7 +138,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     this.telemetrySender = new TelemetrySender(this.telemetryService);
 
     return {
-      telemetryService: this.telemetryService,
+      telemetryService: this.getTelemetryServicePublicApis(),
     };
   }
 
@@ -92,11 +150,12 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     this.canUserChangeSettings = this.getCanUserChangeSettings(application);
     this.telemetryService.userCanChangeSettings = this.canUserChangeSettings;
 
-    this.telemetryNotifications = new TelemetryNotifications({
+    const telemetryNotifications = new TelemetryNotifications({
       http,
       overlays,
       telemetryService: this.telemetryService,
     });
+    this.telemetryNotifications = telemetryNotifications;
 
     application.currentAppId$.subscribe(async () => {
       const isUnauthenticated = this.getIsUnauthenticated(http);
@@ -119,11 +178,25 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     });
 
     return {
-      telemetryService: this.telemetryService,
-      telemetryNotifications: this.telemetryNotifications,
+      telemetryService: this.getTelemetryServicePublicApis(),
+      telemetryNotifications: {
+        setOptedInNoticeSeen: () => telemetryNotifications.setOptedInNoticeSeen(),
+      },
       telemetryConstants: {
         getPrivacyStatementUrl: () => PRIVACY_STATEMENT_URL,
       },
+    };
+  }
+
+  private getTelemetryServicePublicApis(): TelemetryServicePublicApis {
+    const telemetryService = this.telemetryService!;
+    return {
+      getIsOptedIn: () => telemetryService.getIsOptedIn(),
+      setOptIn: (optedIn) => telemetryService.setOptIn(optedIn),
+      canSendTelemetry: () => telemetryService.canSendTelemetry(),
+      userCanChangeSettings: telemetryService.userCanChangeSettings,
+      getCanChangeOptInStatus: () => telemetryService.getCanChangeOptInStatus(),
+      fetchExample: () => telemetryService.fetchExample(),
     };
   }
 

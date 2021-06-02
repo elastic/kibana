@@ -22,6 +22,22 @@ import { generateId } from '../../../id_generator';
 
 jest.mock('../../../id_generator');
 
+let container: HTMLDivElement | undefined;
+
+beforeEach(() => {
+  container = document.createElement('div');
+  container.id = 'lensContainer';
+  document.body.appendChild(container);
+});
+
+afterEach(() => {
+  if (container && container.parentNode) {
+    container.parentNode.removeChild(container);
+  }
+
+  container = undefined;
+});
+
 describe('ConfigPanel', () => {
   let mockVisualization: jest.Mocked<Visualization>;
   let mockVisualization2: jest.Mocked<Visualization>;
@@ -103,9 +119,30 @@ describe('ConfigPanel', () => {
     expect(component.find(LayerPanel).exists()).toBe(false);
   });
 
+  it('allow datasources and visualizations to use setters', () => {
+    const props = getDefaultProps();
+    const component = mountWithIntl(<LayerPanels {...props} />);
+    const { updateDatasource, updateAll } = component.find(LayerPanel).props();
+
+    const updater = () => 'updated';
+    updateDatasource('ds1', updater);
+    expect(props.dispatch).toHaveBeenCalledTimes(1);
+    expect(props.dispatch.mock.calls[0][0].updater(props.datasourceStates.ds1.state)).toEqual(
+      'updated'
+    );
+
+    updateAll('ds1', updater, props.visualizationState);
+    expect(props.dispatch).toHaveBeenCalledTimes(2);
+    expect(props.dispatch.mock.calls[0][0].updater(props.datasourceStates.ds1.state)).toEqual(
+      'updated'
+    );
+  });
+
   describe('focus behavior when adding or removing layers', () => {
     it('should focus the only layer when resetting the layer', () => {
-      const component = mountWithIntl(<LayerPanels {...getDefaultProps()} />);
+      const component = mountWithIntl(<LayerPanels {...getDefaultProps()} />, {
+        attachTo: container,
+      });
       const firstLayerFocusable = component
         .find(LayerPanel)
         .first()
@@ -126,7 +163,7 @@ describe('ConfigPanel', () => {
         first: mockDatasource.publicAPIMock,
         second: mockDatasource.publicAPIMock,
       };
-      const component = mountWithIntl(<LayerPanels {...defaultProps} />);
+      const component = mountWithIntl(<LayerPanels {...defaultProps} />, { attachTo: container });
       const secondLayerFocusable = component
         .find(LayerPanel)
         .at(1)
@@ -147,7 +184,7 @@ describe('ConfigPanel', () => {
         first: mockDatasource.publicAPIMock,
         second: mockDatasource.publicAPIMock,
       };
-      const component = mountWithIntl(<LayerPanels {...defaultProps} />);
+      const component = mountWithIntl(<LayerPanels {...defaultProps} />, { attachTo: container });
       const firstLayerFocusable = component
         .find(LayerPanel)
         .first()
@@ -169,7 +206,9 @@ describe('ConfigPanel', () => {
         }
       });
 
-      const component = mountWithIntl(<LayerPanels {...getDefaultProps()} dispatch={dispatch} />);
+      const component = mountWithIntl(<LayerPanels {...getDefaultProps()} dispatch={dispatch} />, {
+        attachTo: container,
+      });
       act(() => {
         component.find('[data-test-subj="lnsLayerAddButton"]').first().simulate('click');
       });

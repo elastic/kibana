@@ -42,6 +42,7 @@ export const RelevanceTuningForm: React.FC = () => {
   return (
     <section className="relevanceTuningForm">
       <form>
+        <EuiSpacer size="s" />
         <EuiTitle size="m">
           <h2>
             {i18n.translate(
@@ -73,7 +74,7 @@ export const RelevanceTuningForm: React.FC = () => {
           </>
         )}
         {filteredSchemaFields.map((fieldName) => (
-          <EuiPanel key={fieldName} className="relevanceTuningForm__panel">
+          <EuiPanel key={fieldName} hasBorder className="relevanceTuningForm__panel">
             <EuiAccordion
               key={fieldName}
               id={fieldName}
@@ -112,7 +113,7 @@ export const RelevanceTuningForm: React.FC = () => {
             </EuiTitle>
             <EuiSpacer size="s" />
             {filteredSchemaFieldsWithConflicts.map((fieldName) => (
-              <EuiPanel key={fieldName} className="relevanceTuningForm__panel">
+              <EuiPanel key={fieldName} hasBorder className="relevanceTuningForm__panel">
                 <EuiTitle size="xs">
                   <h4 data-test-subj="DisabledField">{fieldName}</h4>
                 </EuiTitle>

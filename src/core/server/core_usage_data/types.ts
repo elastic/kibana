@@ -123,6 +123,18 @@ export interface CoreUsageData extends CoreUsageStats {
 }
 
 /**
+ * Type describing Core's usage data payload
+ * @internal
+ */
+export type ConfigUsageData = Record<string, any | any[]>;
+
+/**
+ * Type describing Core's usage data payload
+ * @internal
+ */
+export type ExposedConfigsToUsage = Map<string, Record<string, boolean>>;
+
+/**
  * Usage data from Core services
  * @internal
  */
@@ -212,6 +224,13 @@ export interface CoreConfigUsageData {
       supportedProtocols: string[];
       clientAuthentication: 'none' | 'optional' | 'required';
     };
+    securityResponseHeaders: {
+      strictTransportSecurity: string;
+      xContentTypeOptions: string;
+      referrerPolicy: string;
+      permissionsPolicyConfigured: boolean;
+      disableEmbedding: boolean;
+    };
   };
 
   logging: {
@@ -235,6 +254,11 @@ export interface CoreConfigUsageData {
   // uiSettings: {
   //   overridesCount: number;
   // };
+
+  deprecatedKeys: {
+    set: string[];
+    unset: string[];
+  };
 }
 
 /** @internal */
@@ -263,4 +287,5 @@ export interface CoreUsageDataStart {
    * @internal
    * */
   getCoreUsageData(): Promise<CoreUsageData>;
+  getConfigsUsageData(): Promise<ConfigUsageData>;
 }

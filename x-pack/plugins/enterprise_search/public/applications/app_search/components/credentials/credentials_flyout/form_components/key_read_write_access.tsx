@@ -22,7 +22,7 @@ export const FormKeyReadWriteAccess: React.FC = () => {
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiPanel>
+      <EuiPanel hasBorder>
         <EuiTitle size="xs">
           <h3>
             {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.formReadWrite.label', {

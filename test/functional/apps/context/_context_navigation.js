@@ -19,15 +19,21 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const docTable = getService('docTable');
   const PageObjects = getPageObjects(['common', 'context', 'discover', 'timePicker']);
+  const kibanaServer = getService('kibanaServer');
 
   describe('discover - context - back navigation', function contextSize() {
     before(async function () {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
       await PageObjects.common.navigateToApp('discover');
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
         await PageObjects.discover.clickFieldListItem(columnName);
         await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
       }
+    });
+
+    after(async function () {
+      await kibanaServer.uiSettings.replace({});
     });
 
     it('should go back after loading', async function () {

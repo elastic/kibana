@@ -5,12 +5,7 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
-import { ListClient } from '../../../../../../lists/server';
-import {
-  Type,
-  LanguageOrUndefined,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
-import {
+import type {
   ThreatQuery,
   ThreatMapping,
   ThreatMappingEntries,
@@ -19,19 +14,26 @@ import {
   ConcurrentSearches,
   ItemsPerSearch,
   ThreatIndicatorPathOrUndefined,
-} from '../../../../../common/detection_engine/schemas/types/threat_mapping';
-import { PartialFilter, RuleTypeParams } from '../../types';
+  LanguageOrUndefined,
+  Type,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { ListClient } from '../../../../../../lists/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
 } from '../../../../../../alerting/server';
-import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas';
-import { ElasticsearchClient, Logger } from '../../../../../../../../src/core/server';
-import { RuleAlertAction } from '../../../../../common/detection_engine/types';
+import { ElasticsearchClient, Logger, SavedObject } from '../../../../../../../../src/core/server';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
-import { RuleRangeTuple, SearchAfterAndBulkCreateReturnType, SignalsEnrichment } from '../types';
+import {
+  AlertAttributes,
+  RuleRangeTuple,
+  SearchAfterAndBulkCreateReturnType,
+  SignalsEnrichment,
+} from '../types';
+import { ThreatRuleParams } from '../../schemas/rule_schemas';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 
@@ -41,7 +43,7 @@ export interface CreateThreatSignalsOptions {
   query: string;
   inputIndex: string[];
   type: Type;
-  filters: PartialFilter[];
+  filters: unknown[];
   language: LanguageOrUndefined;
   savedId: string | undefined;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
@@ -51,25 +53,15 @@ export interface CreateThreatSignalsOptions {
   eventsTelemetry: TelemetryEventsSender | undefined;
   alertId: string;
   outputIndex: string;
-  params: RuleTypeParams;
+  ruleSO: SavedObject<AlertAttributes<ThreatRuleParams>>;
   searchAfterSize: number;
-  actions: RuleAlertAction[];
-  createdBy: string;
-  createdAt: string;
-  updatedBy: string;
-  updatedAt: string;
-  interval: string;
-  enabled: boolean;
-  tags: string[];
   refresh: false | 'wait_for';
-  throttle: string;
-  threatFilters: PartialFilter[];
+  threatFilters: unknown[];
   threatQuery: ThreatQuery;
   buildRuleMessage: BuildRuleMessage;
   threatIndex: ThreatIndex;
   threatIndicatorPath: ThreatIndicatorPathOrUndefined;
   threatLanguage: ThreatLanguageOrUndefined;
-  name: string;
   concurrentSearches: ConcurrentSearches;
   itemsPerSearch: ItemsPerSearch;
 }
@@ -81,7 +73,7 @@ export interface CreateThreatSignalOptions {
   query: string;
   inputIndex: string[];
   type: Type;
-  filters: PartialFilter[];
+  filters: unknown[];
   language: LanguageOrUndefined;
   savedId: string | undefined;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
@@ -91,20 +83,10 @@ export interface CreateThreatSignalOptions {
   eventsTelemetry: TelemetryEventsSender | undefined;
   alertId: string;
   outputIndex: string;
-  params: RuleTypeParams;
+  ruleSO: SavedObject<AlertAttributes<ThreatRuleParams>>;
   searchAfterSize: number;
-  actions: RuleAlertAction[];
-  createdBy: string;
-  createdAt: string;
-  updatedBy: string;
-  updatedAt: string;
-  interval: string;
-  enabled: boolean;
-  tags: string[];
   refresh: false | 'wait_for';
-  throttle: string;
   buildRuleMessage: BuildRuleMessage;
-  name: string;
   currentThreatList: ThreatListItem[];
   currentResult: SearchAfterAndBulkCreateReturnType;
 }
@@ -154,7 +136,7 @@ export interface GetThreatListOptions {
   searchAfter: string[] | undefined;
   sortField: string | undefined;
   sortOrder: SortOrderOrUndefined;
-  threatFilters: PartialFilter[];
+  threatFilters: unknown[];
   exceptionItems: ExceptionListItemSchema[];
   listClient: ListClient;
   buildRuleMessage: BuildRuleMessage;
@@ -165,7 +147,7 @@ export interface ThreatListCountOptions {
   esClient: ElasticsearchClient;
   query: string;
   language: ThreatLanguageOrUndefined;
-  threatFilters: PartialFilter[];
+  threatFilters: unknown[];
   index: string[];
   exceptionItems: ExceptionListItemSchema[];
 }
@@ -210,7 +192,7 @@ export interface BuildThreatEnrichmentOptions {
   listClient: ListClient;
   logger: Logger;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  threatFilters: PartialFilter[];
+  threatFilters: unknown[];
   threatIndex: ThreatIndex;
   threatIndicatorPath: ThreatIndicatorPathOrUndefined;
   threatLanguage: ThreatLanguageOrUndefined;

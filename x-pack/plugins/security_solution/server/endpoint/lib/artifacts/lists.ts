@@ -7,26 +7,35 @@
 
 import { createHash } from 'crypto';
 import { deflate } from 'zlib';
-import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
-import { validate } from '../../../../common/validate';
+import type {
+  Entry,
+  EntryNested,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 
-import { Entry, EntryNested } from '../../../../../lists/common/schemas/types';
-import { ExceptionListClient } from '../../../../../lists/server';
-import { ENDPOINT_LIST_ID, ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../common/shared_imports';
 import {
-  InternalArtifactSchema,
-  TranslatedEntry,
-  WrappedTranslatedExceptionList,
-  wrappedTranslatedExceptionList,
-  TranslatedEntryNestedEntry,
-  translatedEntryNestedEntry,
-  translatedEntry as translatedEntryType,
-  TranslatedEntryMatcher,
-  translatedEntryMatchMatcher,
-  translatedEntryMatchAnyMatcher,
-  TranslatedExceptionListItem,
+  ENDPOINT_EVENT_FILTERS_LIST_ID,
+  ENDPOINT_LIST_ID,
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
+} from '@kbn/securitysolution-list-constants';
+import { ExceptionListClient } from '../../../../../lists/server';
+import {
   internalArtifactCompleteSchema,
   InternalArtifactCompleteSchema,
+  InternalArtifactSchema,
+  TranslatedEntry,
+  translatedEntry as translatedEntryType,
+  translatedEntryMatchAnyMatcher,
+  TranslatedEntryMatcher,
+  translatedEntryMatchMatcher,
+  TranslatedEntryMatchWildcardMatcher,
+  translatedEntryMatchWildcardMatcher,
+  TranslatedEntryNestedEntry,
+  translatedEntryNestedEntry,
+  TranslatedExceptionListItem,
+  WrappedTranslatedExceptionList,
+  wrappedTranslatedExceptionList,
 } from '../../schemas';
 
 export async function buildArtifact(
@@ -77,7 +86,10 @@ export async function getFilteredEndpointExceptionList(
   eClient: ExceptionListClient,
   schemaVersion: string,
   filter: string,
-  listId: typeof ENDPOINT_LIST_ID | typeof ENDPOINT_TRUSTED_APPS_LIST_ID
+  listId:
+    | typeof ENDPOINT_LIST_ID
+    | typeof ENDPOINT_TRUSTED_APPS_LIST_ID
+    | typeof ENDPOINT_EVENT_FILTERS_LIST_ID
 ): Promise<WrappedTranslatedExceptionList> {
   const exceptions: WrappedTranslatedExceptionList = { entries: [] };
   let page = 1;
@@ -142,6 +154,27 @@ export async function getEndpointTrustedAppsList(
   );
 }
 
+export async function getEndpointEventFiltersList(
+  eClient: ExceptionListClient,
+  schemaVersion: string,
+  os: string,
+  policyId?: string
+): Promise<WrappedTranslatedExceptionList> {
+  const osFilter = `exception-list-agnostic.attributes.os_types:\"${os}\"`;
+  const policyFilter = `(exception-list-agnostic.attributes.tags:\"policy:all\"${
+    policyId ? ` or exception-list-agnostic.attributes.tags:\"policy:${policyId}\"` : ''
+  })`;
+
+  await eClient.createEndpointEventFiltersList();
+
+  return getFilteredEndpointExceptionList(
+    eClient,
+    schemaVersion,
+    `${osFilter} and ${policyFilter}`,
+    ENDPOINT_EVENT_FILTERS_LIST_ID
+  );
+}
+
 /**
  * Translates Exception list items to Exceptions the endpoint can understand
  * @param exceptions
@@ -176,6 +209,10 @@ function getMatcherFunction(field: string, matchAny?: boolean): TranslatedEntryM
     : field.endsWith('.caseless')
     ? 'exact_caseless'
     : 'exact_cased';
+}
+
+function getMatcherWildcardFunction(field: string): TranslatedEntryMatchWildcardMatcher {
+  return field.endsWith('.caseless') ? 'wildcard_caseless' : 'wildcard_cased';
 }
 
 function normalizeFieldName(field: string): string {
@@ -239,6 +276,17 @@ function translateEntry(
     case 'match_any': {
       const matcher = getMatcherFunction(entry.field, true);
       return translatedEntryMatchAnyMatcher.is(matcher)
+        ? {
+            field: normalizeFieldName(entry.field),
+            operator: entry.operator,
+            type: matcher,
+            value: entry.value,
+          }
+        : undefined;
+    }
+    case 'wildcard': {
+      const matcher = getMatcherWildcardFunction(entry.field);
+      return translatedEntryMatchWildcardMatcher.is(matcher)
         ? {
             field: normalizeFieldName(entry.field),
             operator: entry.operator,

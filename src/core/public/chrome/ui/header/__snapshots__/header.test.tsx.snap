@@ -4050,54 +4050,105 @@ exports[`Header renders 1`] = `
                       hasArrow={true}
                       id="headerHelpMenu"
                       isOpen={false}
-                      ownFocus={false}
+                      ownFocus={true}
                       panelPaddingSize="m"
                       repositionOnScroll={true}
                     >
-                      <EuiOutsideClickDetector
-                        onOutsideClick={[Function]}
+                      <div
+                        className="euiPopover euiPopover--anchorDownRight"
+                        data-test-subj="helpMenuButton"
+                        id="headerHelpMenu"
                       >
                         <div
-                          className="euiPopover euiPopover--anchorDownRight"
-                          data-test-subj="helpMenuButton"
-                          id="headerHelpMenu"
-                          onKeyDown={[Function]}
-                          onMouseDown={[Function]}
-                          onMouseUp={[Function]}
-                          onTouchEnd={[Function]}
-                          onTouchStart={[Function]}
+                          className="euiPopover__anchor"
                         >
-                          <div
-                            className="euiPopover__anchor"
+                          <EuiHeaderSectionItemButton
+                            aria-expanded={false}
+                            aria-haspopup="true"
+                            aria-label="Help menu"
+                            onClick={[Function]}
                           >
-                            <EuiHeaderSectionItemButton
+                            <EuiButtonEmpty
                               aria-expanded={false}
                               aria-haspopup="true"
                               aria-label="Help menu"
+                              buttonRef={
+                                Object {
+                                  "current": <button
+                                    aria-expanded="false"
+                                    aria-haspopup="true"
+                                    aria-label="Help menu"
+                                    class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
+                                    type="button"
+                                  >
+                                    <span
+                                      class="euiButtonContent euiButtonEmpty__content"
+                                    >
+                                      <span
+                                        class="euiButtonEmpty__text"
+                                      >
+                                        <span
+                                          class="euiHeaderSectionItemButton__content"
+                                        >
+                                          <span
+                                            data-euiicon-type="help"
+                                          />
+                                        </span>
+                                      </span>
+                                    </span>
+                                  </button>,
+                                }
+                              }
+                              className="euiHeaderSectionItemButton"
+                              color="text"
                               onClick={[Function]}
                             >
                               <button
                                 aria-expanded={false}
                                 aria-haspopup="true"
                                 aria-label="Help menu"
-                                className="euiHeaderSectionItem__button"
+                                className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
+                                disabled={false}
                                 onClick={[Function]}
                                 type="button"
                               >
-                                <EuiIcon
-                                  size="m"
-                                  type="help"
+                                <EuiButtonContent
+                                  className="euiButtonEmpty__content"
+                                  iconSide="left"
+                                  iconSize="m"
+                                  textProps={
+                                    Object {
+                                      "className": "euiButtonEmpty__text",
+                                    }
+                                  }
                                 >
                                   <span
-                                    data-euiicon-type="help"
-                                    size="m"
-                                  />
-                                </EuiIcon>
+                                    className="euiButtonContent euiButtonEmpty__content"
+                                  >
+                                    <span
+                                      className="euiButtonEmpty__text"
+                                    >
+                                      <span
+                                        className="euiHeaderSectionItemButton__content"
+                                      >
+                                        <EuiIcon
+                                          size="m"
+                                          type="help"
+                                        >
+                                          <span
+                                            data-euiicon-type="help"
+                                            size="m"
+                                          />
+                                        </EuiIcon>
+                                      </span>
+                                    </span>
+                                  </span>
+                                </EuiButtonContent>
                               </button>
-                            </EuiHeaderSectionItemButton>
-                          </div>
+                            </EuiButtonEmpty>
+                          </EuiHeaderSectionItemButton>
                         </div>
-                      </EuiOutsideClickDetector>
+                      </div>
                     </EuiPopover>
                   </HeaderHelpMenu>
                 </div>
@@ -4194,26 +4245,90 @@ exports[`Header renders 1`] = `
                     data-test-subj="toggleNavButton"
                     onClick={[Function]}
                   >
-                    <button
+                    <EuiButtonEmpty
                       aria-controls="mockId"
                       aria-expanded={false}
                       aria-label="Toggle primary navigation"
                       aria-pressed={false}
-                      className="euiHeaderSectionItem__button"
+                      buttonRef={
+                        Object {
+                          "current": <button
+                            aria-controls="mockId"
+                            aria-expanded="false"
+                            aria-label="Toggle primary navigation"
+                            aria-pressed="false"
+                            class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
+                            data-test-subj="toggleNavButton"
+                            type="button"
+                          >
+                            <span
+                              class="euiButtonContent euiButtonEmpty__content"
+                            >
+                              <span
+                                class="euiButtonEmpty__text"
+                              >
+                                <span
+                                  class="euiHeaderSectionItemButton__content"
+                                >
+                                  <span
+                                    data-euiicon-type="menu"
+                                  />
+                                </span>
+                              </span>
+                            </span>
+                          </button>,
+                        }
+                      }
+                      className="euiHeaderSectionItemButton"
+                      color="text"
                       data-test-subj="toggleNavButton"
                       onClick={[Function]}
-                      type="button"
                     >
-                      <EuiIcon
-                        size="m"
-                        type="menu"
+                      <button
+                        aria-controls="mockId"
+                        aria-expanded={false}
+                        aria-label="Toggle primary navigation"
+                        aria-pressed={false}
+                        className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
+                        data-test-subj="toggleNavButton"
+                        disabled={false}
+                        onClick={[Function]}
+                        type="button"
                       >
-                        <span
-                          data-euiicon-type="menu"
-                          size="m"
-                        />
-                      </EuiIcon>
-                    </button>
+                        <EuiButtonContent
+                          className="euiButtonEmpty__content"
+                          iconSide="left"
+                          iconSize="m"
+                          textProps={
+                            Object {
+                              "className": "euiButtonEmpty__text",
+                            }
+                          }
+                        >
+                          <span
+                            className="euiButtonContent euiButtonEmpty__content"
+                          >
+                            <span
+                              className="euiButtonEmpty__text"
+                            >
+                              <span
+                                className="euiHeaderSectionItemButton__content"
+                              >
+                                <EuiIcon
+                                  size="m"
+                                  type="menu"
+                                >
+                                  <span
+                                    data-euiicon-type="menu"
+                                    size="m"
+                                  />
+                                </EuiIcon>
+                              </span>
+                            </span>
+                          </span>
+                        </EuiButtonContent>
+                      </button>
+                    </EuiButtonEmpty>
                   </EuiHeaderSectionItemButton>
                 </div>
               </EuiHeaderSectionItem>
@@ -5041,10 +5156,12 @@ exports[`Header renders 1`] = `
                                 >
                                   <EuiIcon
                                     className="euiListGroupItem__icon"
+                                    color="inherit"
                                     type="home"
                                   >
                                     <span
                                       className="euiListGroupItem__icon"
+                                      color="inherit"
                                       data-euiicon-type="home"
                                     />
                                   </EuiIcon>
@@ -5356,6 +5473,7 @@ exports[`Header renders 1`] = `
                                     >
                                       <span
                                         class="euiListGroupItem__icon"
+                                        color="inherit"
                                         data-euiicon-type="lock"
                                       />
                                       <span
@@ -5387,10 +5505,12 @@ exports[`Header renders 1`] = `
                                   >
                                     <EuiIcon
                                       className="euiListGroupItem__icon"
+                                      color="inherit"
                                       type="lock"
                                     >
                                       <span
                                         className="euiListGroupItem__icon"
+                                        color="inherit"
                                         data-euiicon-type="lock"
                                       />
                                     </EuiIcon>
@@ -5434,6 +5554,7 @@ exports[`Header renders 1`] = `
                     <EuiButtonContent
                       className="euiButtonEmpty__content"
                       iconSide="left"
+                      iconSize="s"
                       iconType="cross"
                       textProps={
                         Object {
@@ -5446,13 +5567,15 @@ exports[`Header renders 1`] = `
                       >
                         <EuiIcon
                           className="euiButtonContent__icon"
-                          size="m"
+                          color="inherit"
+                          size="s"
                           type="cross"
                         >
                           <span
                             className="euiButtonContent__icon"
+                            color="inherit"
                             data-euiicon-type="cross"
-                            size="m"
+                            size="s"
                           />
                         </EuiIcon>
                         <span

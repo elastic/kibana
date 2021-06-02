@@ -20,6 +20,7 @@ import { ConfigSchema } from '../../../config';
 import {
   createSessionStateContainer,
   SearchSessionState,
+  SessionMeta,
   SessionStateContainer,
 } from './search_session_state';
 import { ISessionsClient } from './sessions_client';
@@ -72,13 +73,13 @@ export interface SearchSessionIndicatorUiConfig {
 }
 
 /**
- * Responsible for tracking a current search session. Supports only a single session at a time.
+ * Responsible for tracking a current search session. Supports a single session at a time.
  */
 export class SessionService {
   public readonly state$: Observable<SearchSessionState>;
   private readonly state: SessionStateContainer<TrackSearchDescriptor>;
 
-  public readonly searchSessionName$: Observable<string | undefined>;
+  public readonly sessionMeta$: Observable<SessionMeta>;
   private searchSessionInfoProvider?: SearchSessionInfoProvider;
   private searchSessionIndicatorUiConfig?: Partial<SearchSessionIndicatorUiConfig>;
   private subscription = new Subscription();
@@ -97,20 +98,24 @@ export class SessionService {
     const {
       stateContainer,
       sessionState$,
-      sessionStartTime$,
-      searchSessionName$,
+      sessionMeta$,
     } = createSessionStateContainer<TrackSearchDescriptor>({
       freeze: freezeState,
     });
     this.state$ = sessionState$;
     this.state = stateContainer;
-    this.searchSessionName$ = searchSessionName$;
+    this.sessionMeta$ = sessionMeta$;
 
     this.subscription.add(
-      sessionStartTime$.subscribe((startTime) => {
-        if (startTime) this.nowProvider.set(startTime);
-        else this.nowProvider.reset();
-      })
+      sessionMeta$
+        .pipe(
+          map((meta) => meta.startTime),
+          distinctUntilChanged()
+        )
+        .subscribe((startTime) => {
+          if (startTime) this.nowProvider.set(startTime);
+          else this.nowProvider.reset();
+        })
     );
 
     getStartServices().then(([coreStart]) => {
@@ -123,21 +128,6 @@ export class SessionService {
       this.subscription.add(
         coreStart.application.currentAppId$.subscribe((newAppName) => {
           this.currentApp = newAppName;
-          if (!this.getSessionId()) return;
-
-          // Apps required to clean up their sessions before unmounting
-          // Make sure that apps don't leave sessions open by throwing an error in DEV mode
-          const message = `Application '${
-            this.state.get().appName
-          }' had an open session while navigating`;
-          if (initializerContext.env.mode.dev) {
-            coreStart.fatalErrors.add(message);
-          } else {
-            // this should never happen in prod because should be caught in dev mode
-            // in case this happen we don't want to throw fatal error, as most likely possible bugs are not that critical
-            // eslint-disable-next-line no-console
-            console.warn(message);
-          }
         })
       );
     });
@@ -225,18 +215,6 @@ export class SessionService {
    * Cleans up current state
    */
   public clear() {
-    // make sure apps can't clear other apps' sessions
-    const currentSessionApp = this.state.get().appName;
-    if (currentSessionApp && currentSessionApp !== this.currentApp) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        `Skip clearing session "${this.getSessionId()}" because it belongs to a different app. current: "${
-          this.currentApp
-        }", owner: "${currentSessionApp}"`
-      );
-      return;
-    }
-
     this.state.transitions.clear();
     this.searchSessionInfoProvider = undefined;
     this.searchSessionIndicatorUiConfig = undefined;

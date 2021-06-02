@@ -63,6 +63,7 @@ export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig
   id: string;
   actionTypeId: string;
   name: string;
+  isMissingSecrets?: boolean;
   config?: Config;
   isPreconfigured: boolean;
 }
@@ -107,13 +108,18 @@ export interface ActionType<
     config?: ValidatorType<Config>;
     secrets?: ValidatorType<Secrets>;
   };
-  renderParameterTemplates?(params: Params, variables: Record<string, unknown>): Params;
+  renderParameterTemplates?(
+    params: Params,
+    variables: Record<string, unknown>,
+    actionId?: string
+  ): Params;
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
 }
 
 export interface RawAction extends SavedObjectAttributes {
   actionTypeId: string;
   name: string;
+  isMissingSecrets: boolean;
   config: SavedObjectAttributes;
   secrets: SavedObjectAttributes;
 }
@@ -133,6 +139,17 @@ export interface ActionTaskExecutorParams {
 
 export interface ProxySettings {
   proxyUrl: string;
+  proxyBypassHosts: Set<string> | undefined;
+  proxyOnlyHosts: Set<string> | undefined;
   proxyHeaders?: Record<string, string>;
-  proxyRejectUnauthorizedCertificates: boolean;
+  proxyTLSSettings: TLSSettings;
+}
+
+export interface ResponseSettings {
+  maxContentLength: number;
+  timeout: number;
+}
+
+export interface TLSSettings {
+  verificationMode?: 'none' | 'certificate' | 'full';
 }

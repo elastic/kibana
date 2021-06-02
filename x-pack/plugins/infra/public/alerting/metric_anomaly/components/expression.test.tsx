@@ -12,7 +12,7 @@ import React from 'react';
 import { Expression, AlertContextMeta } from './expression';
 import { act } from 'react-dom/test-utils';
 
-jest.mock('../../../containers/source/use_source_via_http', () => ({
+jest.mock('../../../containers/metrics_source/use_source_via_http', () => ({
   useSourceViaHttp: () => ({
     source: { id: 'default' },
     createDerivedIndexPattern: () => ({ fields: [], title: 'metricbeat-*' }),

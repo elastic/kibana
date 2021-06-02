@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BASE_PATH, pagePathGetters } from '../constants';
+import { BASE_PATH, pagePathGetters, PLUGIN_ID } from '../constants';
 import type { StaticPage, DynamicPage, DynamicPagePathValues } from '../constants';
 
 import { useStartServices } from './';
@@ -18,6 +18,8 @@ export const useLink = () => {
   const core = useStartServices();
   return {
     getPath,
+    getAssetsPath: (path: string) =>
+      core.http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/${path}`),
     getHref: (page: StaticPage | DynamicPage, values?: DynamicPagePathValues) => {
       const path = getPath(page, values);
       return core.http.basePath.prepend(`${BASE_PATH}#${path}`);

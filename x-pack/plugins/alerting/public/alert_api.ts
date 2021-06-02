@@ -6,12 +6,11 @@
  */
 
 import { HttpSetup } from 'kibana/public';
-import { i18n } from '@kbn/i18n';
-import { BASE_ALERT_API_PATH } from '../common';
+import { LEGACY_BASE_ALERT_API_PATH } from '../common';
 import type { Alert, AlertType } from '../common';
 
 export async function loadAlertTypes({ http }: { http: HttpSetup }): Promise<AlertType[]> {
-  return await http.get(`${BASE_ALERT_API_PATH}/list_alert_types`);
+  return await http.get(`${LEGACY_BASE_ALERT_API_PATH}/list_alert_types`);
 }
 
 export async function loadAlertType({
@@ -20,21 +19,11 @@ export async function loadAlertType({
 }: {
   http: HttpSetup;
   id: AlertType['id'];
-}): Promise<AlertType> {
-  const maybeAlertType = ((await http.get(
-    `${BASE_ALERT_API_PATH}/list_alert_types`
-  )) as AlertType[]).find((type) => type.id === id);
-  if (!maybeAlertType) {
-    throw new Error(
-      i18n.translate('xpack.alerting.loadAlertType.missingAlertTypeError', {
-        defaultMessage: 'Alert type "{id}" is not registered.',
-        values: {
-          id,
-        },
-      })
-    );
-  }
-  return maybeAlertType;
+}): Promise<AlertType | undefined> {
+  const alertTypes = (await http.get(
+    `${LEGACY_BASE_ALERT_API_PATH}/list_alert_types`
+  )) as AlertType[];
+  return alertTypes.find((type) => type.id === id);
 }
 
 export async function loadAlert({
@@ -44,5 +33,5 @@ export async function loadAlert({
   http: HttpSetup;
   alertId: string;
 }): Promise<Alert> {
-  return await http.get(`${BASE_ALERT_API_PATH}/alert/${alertId}`);
+  return await http.get(`${LEGACY_BASE_ALERT_API_PATH}/alert/${alertId}`);
 }

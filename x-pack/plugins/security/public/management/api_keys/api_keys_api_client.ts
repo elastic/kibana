@@ -7,21 +7,35 @@
 
 import type { HttpStart } from 'src/core/public';
 
-import type { ApiKey, ApiKeyToInvalidate } from '../../../common/model';
+import type { ApiKey, ApiKeyRoleDescriptors, ApiKeyToInvalidate } from '../../../common/model';
 
-interface CheckPrivilegesResponse {
+export interface CheckPrivilegesResponse {
   areApiKeysEnabled: boolean;
   isAdmin: boolean;
   canManage: boolean;
 }
 
-interface InvalidateApiKeysResponse {
+export interface InvalidateApiKeysResponse {
   itemsInvalidated: ApiKeyToInvalidate[];
   errors: any[];
 }
 
-interface GetApiKeysResponse {
+export interface GetApiKeysResponse {
   apiKeys: ApiKey[];
+}
+
+export interface CreateApiKeyRequest {
+  name: string;
+  expiration?: string;
+  role_descriptors?: ApiKeyRoleDescriptors;
+  metadata?: Record<string, any>;
+}
+
+export interface CreateApiKeyResponse {
+  id: string;
+  name: string;
+  expiration: number;
+  api_key: string;
 }
 
 const apiKeysUrl = '/internal/security/api_key';
@@ -40,6 +54,12 @@ export class APIKeysAPIClient {
   public async invalidateApiKeys(apiKeys: ApiKeyToInvalidate[], isAdmin = false) {
     return await this.http.post<InvalidateApiKeysResponse>(`${apiKeysUrl}/invalidate`, {
       body: JSON.stringify({ apiKeys, isAdmin }),
+    });
+  }
+
+  public async createApiKey(apiKey: CreateApiKeyRequest) {
+    return await this.http.post<CreateApiKeyResponse>(apiKeysUrl, {
+      body: JSON.stringify(apiKey),
     });
   }
 }

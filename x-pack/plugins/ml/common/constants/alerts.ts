@@ -47,3 +47,5 @@ export const ML_ALERT_TYPES_CONFIG: Record<
 };
 
 export const ALERT_PREVIEW_SAMPLE_SIZE = 5;
+
+export const TOP_N_BUCKETS_COUNT = 1;

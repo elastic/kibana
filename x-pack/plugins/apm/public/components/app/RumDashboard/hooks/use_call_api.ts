@@ -11,9 +11,9 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { FetchOptions } from '../../../../../common/fetch_options';
 
 export function useCallApi() {
-  const { http } = useApmPluginContext().core;
+  const { core } = useApmPluginContext();
 
   return useMemo(() => {
-    return <T = void>(options: FetchOptions) => callApi<T>(http, options);
-  }, [http]);
+    return <T = void>(options: FetchOptions) => callApi<T>(core, options);
+  }, [core]);
 }

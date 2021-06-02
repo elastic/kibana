@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorTypes } from '../../../common/api';
+import { ConnectorTypes } from '../../../common';
 
 import { createMockSavedObjectsRepository, mockCaseMappings } from '../../routes/api/__fixtures__';
 import { createCasesClientWithMockSavedObjectsClient } from '../mocks';

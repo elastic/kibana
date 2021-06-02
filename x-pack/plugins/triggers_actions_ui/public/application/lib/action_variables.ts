@@ -26,6 +26,7 @@ export enum AlertProvidedActionVariables {
   ruleName = 'rule.name',
   ruleSpaceId = 'rule.spaceId',
   ruleTags = 'rule.tags',
+  ruleType = 'rule.type',
   date = 'date',
   alertId = 'alert.id',
   alertActionGroup = 'alert.actionGroup',
@@ -80,6 +81,13 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
     name: AlertProvidedActionVariables.ruleTags,
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.ruleTagsLabel', {
       defaultMessage: 'The tags of the rule.',
+    }),
+  });
+
+  result.push({
+    name: AlertProvidedActionVariables.ruleType,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.ruleTypeLabel', {
+      defaultMessage: 'The type of rule.',
     }),
   });
 

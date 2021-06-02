@@ -9,6 +9,9 @@
 const Path = require('path');
 
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
+
 const CompressionPlugin = require('compression-webpack-plugin');
 const { REPO_ROOT } = require('@kbn/utils');
 const webpack = require('webpack');
@@ -105,6 +108,28 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
   },
 
   optimization: {
+    minimizer: [
+      new CssMinimizerPlugin({
+        minimizerOptions: {
+          preset: [
+            'default',
+            {
+              discardComments: false,
+            },
+          ],
+        },
+      }),
+      new TerserPlugin({
+        cache: false,
+        sourceMap: false,
+        extractComments: false,
+        parallel: false,
+        terserOptions: {
+          compress: true,
+          mangle: true,
+        },
+      }),
+    ],
     noEmitOnErrors: true,
     splitChunks: {
       cacheGroups: {
@@ -152,21 +177,21 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
               compiler.hooks.emit.tap('MetricsPlugin', (compilation) => {
                 const metrics = [
                   {
-                    group: '@kbn/ui-shared-deps asset size',
-                    id: 'kbn-ui-shared-deps.js',
+                    group: 'page load bundle size',
+                    id: 'kbnUiSharedDeps-js',
                     value: compilation.assets['kbn-ui-shared-deps.js'].size(),
                   },
                   {
-                    group: '@kbn/ui-shared-deps asset size',
-                    id: 'kbn-ui-shared-deps.@elastic.js',
-                    value: compilation.assets['kbn-ui-shared-deps.@elastic.js'].size(),
-                  },
-                  {
-                    group: '@kbn/ui-shared-deps asset size',
-                    id: 'css',
+                    group: 'page load bundle size',
+                    id: 'kbnUiSharedDeps-css',
                     value:
                       compilation.assets['kbn-ui-shared-deps.css'].size() +
                       compilation.assets['kbn-ui-shared-deps.v7.light.css'].size(),
+                  },
+                  {
+                    group: 'page load bundle size',
+                    id: 'kbnUiSharedDeps-elastic',
+                    value: compilation.assets['kbn-ui-shared-deps.@elastic.js'].size(),
                   },
                 ];
 

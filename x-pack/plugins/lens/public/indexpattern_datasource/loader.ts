@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import _ from 'lodash';
+import { uniq, mapValues } from 'lodash';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { HttpSetup, SavedObjectReference } from 'kibana/public';
 import { InitializationOptions, StateSetter } from '../types';
@@ -17,7 +17,7 @@ import {
   IndexPatternField,
   IndexPatternLayer,
 } from './types';
-import { updateLayerIndexPattern } from './operations';
+import { updateLayerIndexPattern, translateToOperationName } from './operations';
 import { DateRange, ExistingFields } from '../../common/types';
 import { BASE_API_URL } from '../../common';
 import {
@@ -109,7 +109,7 @@ export async function loadIndexPatterns({
             const restriction =
               typeMeta.aggs && typeMeta.aggs[agg] && typeMeta.aggs[agg][field.name];
             if (restriction) {
-              restrictionsObj[agg] = restriction;
+              restrictionsObj[translateToOperationName(agg)] = restriction;
             }
           });
           if (Object.keys(restrictionsObj).length) {
@@ -227,7 +227,7 @@ export async function loadInitialState({
   const state =
     persistedState && references ? injectReferences(persistedState, references) : undefined;
 
-  const requiredPatterns: string[] = _.uniq(
+  const requiredPatterns: string[] = uniq(
     state
       ? Object.values(state.layers)
           .map((l) => l.indexPatternId)
@@ -312,7 +312,7 @@ export async function changeIndexPattern({
     setState((s) => ({
       ...s,
       layers: isSingleEmptyLayer(state.layers)
-        ? _.mapValues(state.layers, (layer) => updateLayerIndexPattern(layer, indexPatterns[id]))
+        ? mapValues(state.layers, (layer) => updateLayerIndexPattern(layer, indexPatterns[id]))
         : state.layers,
       indexPatterns: {
         ...s.indexPatterns,
@@ -445,16 +445,18 @@ export async function syncExistingFields({
       ...state,
       isFirstExistenceFetch: false,
       existenceFetchFailed: false,
+      existenceFetchTimeout: false,
       existingFields: emptinessInfo.reduce((acc, info) => {
         acc[info.indexPatternTitle] = booleanMap(info.existingFieldNames);
         return acc;
       }, state.existingFields),
     }));
   } catch (e) {
-    // show all fields as available if fetch failed
+    // show all fields as available if fetch failed or timed out
     setState((state) => ({
       ...state,
-      existenceFetchFailed: true,
+      existenceFetchFailed: e.res?.status !== 408,
+      existenceFetchTimeout: e.res?.status === 408,
       existingFields: indexPatterns.reduce((acc, pattern) => {
         acc[pattern.title] = booleanMap(pattern.fields.map((field) => field.name));
         return acc;

@@ -49,7 +49,7 @@ type ValueTypeOfField<T> = T extends Record<string, string | number>
 
 type MaybeArray<T> = T | T[];
 
-type Fields = MaybeArray<string | estypes.DateField>;
+type Fields = Exclude<Required<estypes.SearchRequest>['body']['fields'], undefined>;
 type DocValueFields = MaybeArray<string | estypes.DocValueField>;
 
 export type SearchHit<
@@ -58,7 +58,7 @@ export type SearchHit<
   TDocValueFields extends DocValueFields | undefined = undefined
 > = Omit<estypes.Hit, '_source' | 'fields'> &
   (TSource extends false ? {} : { _source: TSource }) &
-  (TFields extends estypes.Fields
+  (TFields extends Fields
     ? {
         fields: Partial<Record<ValueTypeOfField<TFields>, unknown[]>>;
       }
@@ -77,7 +77,7 @@ type HitsOf<
 > = Array<
   SearchHit<
     TOptions extends { _source: false } ? undefined : TDocument,
-    TOptions extends { fields: estypes.Fields } ? TOptions['fields'] : undefined,
+    TOptions extends { fields: Fields } ? TOptions['fields'] : undefined,
     TOptions extends { docvalue_fields: DocValueFields } ? TOptions['docvalue_fields'] : undefined
   >
 >;
@@ -370,6 +370,16 @@ export type AggregateOf<
   missing: {
     doc_count: number;
   } & SubAggregateOf<TAggregationContainer, TDocument>;
+  multi_terms: {
+    doc_count_error_upper_bound: number;
+    sum_other_doc_count: number;
+    buckets: Array<
+      {
+        doc_count: number;
+        key: string[];
+      } & SubAggregateOf<TAggregationContainer, TDocument>
+    >;
+  };
   nested: {
     doc_count: number;
   } & SubAggregateOf<TAggregationContainer, TDocument>;

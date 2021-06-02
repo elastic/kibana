@@ -27,9 +27,12 @@ function main() {
   const ecsMappings = readEcsJSONFile(ecsDir, ECS_MAPPINGS_FILE);
 
   // add our custom fields
-  ecsMappings.mappings.properties.kibana = mappings.EcsKibanaExtensionsMappings;
+  ecsMappings.mappings.properties = {
+    ...ecsMappings.mappings.properties,
+    ...mappings.EcsCustomPropertyMappings,
+  };
 
-  const exportedProperties = mappings.EcsEventLogProperties;
+  const exportedProperties = mappings.EcsPropertiesToGenerate;
   const multiValuedProperties = new Set(mappings.EcsEventLogMultiValuedProperties);
 
   augmentMappings(ecsMappings.mappings, multiValuedProperties);

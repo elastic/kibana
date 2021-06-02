@@ -8,6 +8,7 @@
 export {
   calculateRelativeFromAbsoluteMilliseconds,
   formDataToAbsoluteTimings,
+  getPhaseMinAgeInMilliseconds,
   AbsoluteTimings,
   PhaseAgeInMilliseconds,
   RelativePhaseTimingInMs,

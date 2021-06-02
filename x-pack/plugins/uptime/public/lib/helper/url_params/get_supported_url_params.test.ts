@@ -63,6 +63,7 @@ describe('getSupportedUrlParams', () => {
       pagination: undefined,
       search: SEARCH,
       statusFilter: STATUS_FILTER,
+      query: '',
     });
   });
 

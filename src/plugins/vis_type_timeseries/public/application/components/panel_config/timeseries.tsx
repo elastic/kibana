@@ -5,6 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import React, { Component } from 'react';
 import {
@@ -22,23 +24,21 @@ import {
   EuiTitle,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 
 // @ts-expect-error not typed yet
 import { SeriesEditor } from '../series_editor';
-// @ts-ignore should be typed after https://github.com/elastic/kibana/pull/92812 to reduce conflicts
+// @ts-expect-error not typed yet
 import { AnnotationsEditor } from '../annotations_editor';
-// @ts-ignore should be typed after https://github.com/elastic/kibana/pull/92812 to reduce conflicts
+// @ts-expect-error not typed yet
 import { IndexPattern } from '../index_pattern';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { ColorPicker } from '../color_picker';
 import { YesNo } from '../yes_no';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
-// @ts-ignore this is typed in https://github.com/elastic/kibana/pull/92812, remove ignore after merging
 import { QueryBarWrapper } from '../query_bar_wrapper';
 import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
 import { TimeseriesVisParams } from '../../../types';
+import { TOOLTIP_MODES } from '../../../../common/enums';
 
 const positionOptions = [
   {
@@ -127,7 +127,8 @@ export class TimeseriesPanelConfig extends Component<
       axis_min: '',
       legend_position: 'right',
       show_grid: 1,
-      tooltip_mode: 'show_all',
+      tooltip_mode: TOOLTIP_MODES.SHOW_ALL,
+      ignore_daylight_time: false,
     };
     const model = { ...defaults, ...this.props.model };
     const { selectedTab } = this.state;
@@ -183,9 +184,9 @@ export class TimeseriesPanelConfig extends Component<
               fields={this.props.fields}
               model={this.props.model}
               onChange={this.props.onChange}
-              allowLevelofDetail={true}
+              allowLevelOfDetail={true}
+              allowIndexSwitchingMode={true}
             />
-
             <EuiHorizontalRule />
 
             <EuiFlexGroup responsive={false} wrap={true}>
@@ -202,29 +203,47 @@ export class TimeseriesPanelConfig extends Component<
                 >
                   <QueryBarWrapper
                     query={{
-                      language: model.filter.language || getDefaultQueryLanguage(),
-                      query: model.filter.query || '',
+                      language: model.filter?.language || getDefaultQueryLanguage(),
+                      query: model.filter?.query || '',
                     }}
-                    onChange={(filter: PanelConfigProps['model']['filter']) =>
-                      this.props.onChange({ filter })
-                    }
-                    indexPatterns={[model.index_pattern || model.default_index_pattern]}
+                    onChange={(filter) => {
+                      this.props.onChange({ filter });
+                    }}
+                    indexPatterns={[model.index_pattern]}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel>
-                  <FormattedMessage
-                    id="visTypeTimeseries.timeseries.optionsTab.ignoreGlobalFilterLabel"
-                    defaultMessage="Ignore global filter?"
+                <EuiFormRow
+                  label={i18n.translate(
+                    'visTypeTimeseries.timeseries.optionsTab.ignoreGlobalFilterLabel',
+                    {
+                      defaultMessage: 'Ignore global filter?',
+                    }
+                  )}
+                >
+                  <YesNo
+                    value={model.ignore_global_filter}
+                    name="ignore_global_filter"
+                    onChange={this.props.onChange}
                   />
-                </EuiFormLabel>
-                <EuiSpacer size="m" />
-                <YesNo
-                  value={model.ignore_global_filter}
-                  name="ignore_global_filter"
-                  onChange={this.props.onChange}
-                />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormRow
+                  label={i18n.translate(
+                    'visTypeTimeseries.timeseries.optionsTab.ignoreDaylightTimeLabel',
+                    {
+                      defaultMessage: 'Ignore daylight time?',
+                    }
+                  )}
+                >
+                  <YesNo
+                    value={model.ignore_daylight_time}
+                    name="ignore_daylight_time"
+                    onChange={this.props.onChange}
+                  />
+                </EuiFormRow>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
@@ -334,19 +353,17 @@ export class TimeseriesPanelConfig extends Component<
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel>
-                  <FormattedMessage
-                    id="visTypeTimeseries.timeseries.optionsTab.showLegendLabel"
-                    defaultMessage="Show legend?"
+                <EuiFormRow
+                  label={i18n.translate('visTypeTimeseries.timeseries.optionsTab.showLegendLabel', {
+                    defaultMessage: 'Show legend?',
+                  })}
+                >
+                  <YesNo
+                    value={model.show_legend}
+                    name="show_legend"
+                    onChange={this.props.onChange}
                   />
-                </EuiFormLabel>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <YesNo
-                  value={model.show_legend}
-                  name="show_legend"
-                  onChange={this.props.onChange}
-                />
+                </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFormLabel htmlFor={htmlId('legendPos')}>
@@ -367,15 +384,16 @@ export class TimeseriesPanelConfig extends Component<
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel>
-                  <FormattedMessage
-                    id="visTypeTimeseries.timeseries.optionsTab.displayGridLabel"
-                    defaultMessage="Display grid"
-                  />
-                </EuiFormLabel>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <YesNo value={model.show_grid} name="show_grid" onChange={this.props.onChange} />
+                <EuiFormRow
+                  label={i18n.translate(
+                    'visTypeTimeseries.timeseries.optionsTab.displayGridLabel',
+                    {
+                      defaultMessage: 'Display grid',
+                    }
+                  )}
+                >
+                  <YesNo value={model.show_grid} name="show_grid" onChange={this.props.onChange} />
+                </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFormLabel>
@@ -406,6 +424,7 @@ export class TimeseriesPanelConfig extends Component<
           <EuiTab
             isSelected={selectedTab === PANEL_CONFIG_TABS.DATA}
             onClick={() => this.switchTab(PANEL_CONFIG_TABS.DATA)}
+            data-test-subj="timeSeriesEditorDataBtn"
           >
             <FormattedMessage
               id="visTypeTimeseries.timeseries.dataTab.dataButtonLabel"

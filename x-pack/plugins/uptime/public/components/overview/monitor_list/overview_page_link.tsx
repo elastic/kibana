@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { useUrlParams } from '../../../hooks';
 
 const OverviewPageLinkButtonIcon = styled(EuiButtonIcon)`
-  padding-top: 12px;
+  margin-top: 12px;
 `;
 
 interface OverviewPageLinkProps {
@@ -52,7 +52,7 @@ export const OverviewPageLink: FunctionComponent<OverviewPageLinkProps> = ({
       data-test-subj={dataTestSubj}
       iconType={icon}
       aria-label={!pagination ? disableLinkLabel : ariaLabel}
-      disabled={!pagination}
+      isDisabled={!pagination}
     />
   );
 };

@@ -15,8 +15,8 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "AWS S3 Bucket Configuration Deletion",
-  "note": "The AWS Filebeat module must be enabled to use this rule.",
-  "query": "event.action:(DeleteBucketPolicy or DeleteBucketReplication or DeleteBucketCors or DeleteBucketEncryption or DeleteBucketLifecycle) and event.dataset:aws.cloudtrail and event.provider:s3.amazonaws.com and event.outcome:success",
+  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:aws.cloudtrail and event.provider:s3.amazonaws.com and event.action:(DeleteBucketPolicy or DeleteBucketReplication or DeleteBucketCors or DeleteBucketEncryption or DeleteBucketLifecycle) and event.outcome:success",
   "references": [
     "https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteBucketPolicy.html",
     "https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteBucketReplication.html",
@@ -54,5 +54,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 4
+  "version": 5
 }

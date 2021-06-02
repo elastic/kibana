@@ -7,7 +7,7 @@
 
 import './layer_panel.scss';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   EuiPanel,
   EuiSpacer,
@@ -25,9 +25,9 @@ import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { LayerPanelProps, ActiveDimensionState } from './types';
 import { DimensionContainer } from './dimension_container';
 import { RemoveLayerButton } from './remove_layer_button';
-import { EmptyDimensionButton } from './empty_dimension_button';
-import { DimensionButton } from './dimension_button';
-import { DraggableDimensionButton } from './draggable_dimension_button';
+import { EmptyDimensionButton } from './buttons/empty_dimension_button';
+import { DimensionButton } from './buttons/dimension_button';
+import { DraggableDimensionButton } from './buttons/draggable_dimension_button';
 import { useFocusUpdate } from './use_focus_update';
 
 const initialActiveDimensionState = {
@@ -72,6 +72,7 @@ export function LayerPanel(
     setActiveDimension(initialActiveDimensionState);
   }, [activeVisualization.id]);
 
+  const panelRef = useRef<HTMLDivElement | null>(null);
   const registerLayerRef = useCallback((el) => registerNewLayerRef(layerId, el), [
     layerId,
     registerNewLayerRef,
@@ -405,6 +406,7 @@ export function LayerPanel(
       </section>
 
       <DimensionContainer
+        panelRef={(el) => (panelRef.current = el)}
         isOpen={!!activeId}
         groupLabel={activeGroup?.groupLabel || ''}
         handleClose={() => {
@@ -484,6 +486,7 @@ export function LayerPanel(
                       groupId: activeGroup.groupId,
                       accessor: activeId,
                       setState: props.updateVisualization,
+                      panelRef,
                     }}
                   />
                 </div>

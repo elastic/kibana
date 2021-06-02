@@ -86,9 +86,9 @@ export class UiActionsEnhancedExamplesPlugin
         const { core: coreStart, plugins: pluginsStart, self } = start();
         const handle = coreStart.overlays.openFlyout(
           toMountPoint(
-            h(pluginsStart.uiActionsEnhanced.FlyoutManageDrilldowns, {
+            h(pluginsStart.uiActionsEnhanced.DrilldownManager, {
               onClose: () => handle.close(),
-              viewMode: 'create',
+              initialRoute: '/create',
               dynamicActionManager: self.managerWithoutEmbeddableSingleButton,
               triggers: [SAMPLE_APP2_CLICK_TRIGGER],
               placeContext: {},
@@ -111,9 +111,9 @@ export class UiActionsEnhancedExamplesPlugin
         const { core: coreStart, plugins: pluginsStart, self } = start();
         const handle = coreStart.overlays.openFlyout(
           toMountPoint(
-            h(pluginsStart.uiActionsEnhanced.FlyoutManageDrilldowns, {
+            h(pluginsStart.uiActionsEnhanced.DrilldownManager, {
               onClose: () => handle.close(),
-              viewMode: 'manage',
+              initialRoute: '/manage',
               dynamicActionManager: self.managerWithoutEmbeddableSingleButton,
               triggers: [SAMPLE_APP2_CLICK_TRIGGER],
               placeContext: { sampleApp2ClickContext },

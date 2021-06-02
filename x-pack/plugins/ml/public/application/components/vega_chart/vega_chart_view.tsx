@@ -9,12 +9,13 @@ import React, { useMemo, useEffect, FC } from 'react';
 
 // There is still an issue with Vega Lite's typings with the strict mode Kibana is using.
 // @ts-ignore
-import type { TopLevelSpec } from 'vega-lite/build-es5/vega-lite';
+import type { TopLevelSpec } from 'vega-lite/build/vega-lite';
 
 // There is still an issue with Vega Lite's typings with the strict mode Kibana is using.
 // @ts-ignore
-import { compile } from 'vega-lite/build-es5/vega-lite';
+import { compile } from 'vega-lite/build/vega-lite';
 import { parse, View, Warn } from 'vega';
+import { expressionInterpreter } from 'vega-interpreter';
 import { Handler } from 'vega-tooltip';
 
 import { htmlIdGenerator } from '@elastic/eui';
@@ -29,7 +30,7 @@ export const VegaChartView: FC<VegaChartViewProps> = ({ vegaSpec }) => {
   useEffect(() => {
     const vgSpec = compile(vegaSpec).spec;
 
-    const view = new View(parse(vgSpec))
+    const view = new View(parse(vgSpec, undefined, { ast: true }), { expr: expressionInterpreter })
       .logLevel(Warn)
       .renderer('canvas')
       .tooltip(new Handler().call)

@@ -50,7 +50,7 @@ describe('metricBuckets(req, panel, series)', () => {
       },
       {},
       {},
-      undefined,
+      { maxBucketsLimit: 2000, getValidTimeInterval: jest.fn(() => '1d') },
       {
         get: async () => 50,
       }

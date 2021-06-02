@@ -66,6 +66,7 @@ export const combineResults = (
   newResult: SearchAfterAndBulkCreateReturnType
 ): SearchAfterAndBulkCreateReturnType => ({
   success: currentResult.success === false ? false : newResult.success,
+  warning: currentResult.warning || newResult.warning,
   bulkCreateTimes: calculateAdditiveMax(currentResult.bulkCreateTimes, newResult.bulkCreateTimes),
   searchAfterTimes: calculateAdditiveMax(
     currentResult.searchAfterTimes,
@@ -93,6 +94,7 @@ export const combineConcurrentResults = (
       const lastLookBackDate = calculateMaxLookBack(accum.lastLookBackDate, item.lastLookBackDate);
       return {
         success: accum.success && item.success,
+        warning: accum.warning || item.warning,
         searchAfterTimes: [maxSearchAfterTime],
         bulkCreateTimes: [maxBulkCreateTimes],
         lastLookBackDate,
@@ -103,6 +105,7 @@ export const combineConcurrentResults = (
     },
     {
       success: true,
+      warning: false,
       searchAfterTimes: [],
       bulkCreateTimes: [],
       lastLookBackDate: undefined,

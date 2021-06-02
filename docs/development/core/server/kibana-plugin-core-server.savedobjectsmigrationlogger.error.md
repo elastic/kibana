@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-error: (msg: string, meta: LogMeta) => void;
+error: <Meta extends LogMeta = LogMeta>(msg: string, meta: Meta) => void;
 ```

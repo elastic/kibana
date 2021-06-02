@@ -66,7 +66,7 @@ export function getNumberSettings(item: FieldVisConfig, defaultIndexPattern: IIn
         defaultMessage: 'Average of {fieldName}',
         values: { fieldName: item.fieldName },
       }),
-      operationType: 'avg',
+      operationType: 'average',
       sourceField: item.fieldName!,
     },
     col1: {

@@ -12,9 +12,9 @@ import {
   EuiFormRow,
   EuiSwitch,
   EuiFieldText,
-  EuiComboBox,
   EuiText,
   EuiCodeEditor,
+  EuiTextArea,
   EuiFieldPassword,
 } from '@elastic/eui';
 
@@ -22,6 +22,7 @@ import type { RegistryVarsEntry } from '../../../../types';
 
 import 'brace/mode/yaml';
 import 'brace/theme/textmate';
+import { MultiTextInput } from './multi_text_input';
 
 export const PackagePolicyInputVarField: React.FunctionComponent<{
   varDef: RegistryVarsEntry;
@@ -29,7 +30,8 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
   onChange: (newValue: any) => void;
   errors?: string[] | null;
   forceShowErrors?: boolean;
-}> = memo(({ varDef, value, onChange, errors: varErrors, forceShowErrors }) => {
+  frozen?: boolean;
+}> = memo(({ varDef, value, onChange, errors: varErrors, forceShowErrors, frozen }) => {
   const [isDirty, setIsDirty] = useState<boolean>(false);
   const { multi, required, type, title, name, description } = varDef;
   const isInvalid = (isDirty || forceShowErrors) && !!varErrors;
@@ -39,23 +41,24 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
   const field = useMemo(() => {
     if (multi) {
       return (
-        <EuiComboBox
-          noSuggestions
-          isInvalid={isInvalid}
-          selectedOptions={value.map((val: string) => ({ label: val }))}
-          onCreateOption={(newVal: any) => {
-            onChange([...value, newVal]);
-          }}
-          onChange={(newVals: any[]) => {
-            onChange(newVals.map((val) => val.label));
-          }}
+        <MultiTextInput
+          value={value}
+          onChange={onChange}
           onBlur={() => setIsDirty(true)}
+          isDisabled={frozen}
         />
       );
     }
     switch (type) {
       case 'yaml':
-        return (
+        return frozen ? (
+          <EuiTextArea
+            className="ace_editor"
+            disabled
+            value={value}
+            style={{ height: '175px', padding: '4px', whiteSpace: 'pre', resize: 'none' }}
+          />
+        ) : (
           <EuiCodeEditor
             width="100%"
             mode="yaml"
@@ -79,6 +82,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
             showLabel={false}
             onChange={(e) => onChange(e.target.checked)}
             onBlur={() => setIsDirty(true)}
+            disabled={frozen}
           />
         );
       case 'password':
@@ -89,6 +93,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
             value={value === undefined ? '' : value}
             onChange={(e) => onChange(e.target.value)}
             onBlur={() => setIsDirty(true)}
+            disabled={frozen}
           />
         );
       default:
@@ -98,10 +103,11 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
             value={value === undefined ? '' : value}
             onChange={(e) => onChange(e.target.value)}
             onBlur={() => setIsDirty(true)}
+            disabled={frozen}
           />
         );
     }
-  }, [isInvalid, multi, onChange, type, value, fieldLabel]);
+  }, [isInvalid, multi, onChange, type, value, fieldLabel, frozen]);
 
   // Boolean cannot be optional by default set to false
   const isOptional = useMemo(() => type !== 'bool' && !required, [required, type]);

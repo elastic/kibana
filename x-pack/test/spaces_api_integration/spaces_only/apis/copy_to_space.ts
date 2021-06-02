@@ -12,7 +12,7 @@ import { copyToSpaceTestSuiteFactory } from '../../common/suites/copy_to_space';
 export default function copyToSpacesOnlySuite({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   const {
     copyToSpaceTest,

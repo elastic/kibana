@@ -7,7 +7,6 @@
 
 import { History } from 'history';
 import React, { memo, FC } from 'react';
-import { ApolloProvider } from 'react-apollo';
 import { Store, Action } from 'redux';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
@@ -19,30 +18,23 @@ import { DEFAULT_DARK_MODE, APP_NAME } from '../../common/constants';
 import { ErrorToastDispatcher } from '../common/components/error_toast_dispatcher';
 import { MlCapabilitiesProvider } from '../common/components/ml/permissions/ml_capabilities_provider';
 import { GlobalToaster, ManageGlobalToaster } from '../common/components/toasters';
-import { AppFrontendLibs } from '../common/lib/lib';
 import { KibanaContextProvider, useKibana, useUiSetting$ } from '../common/lib/kibana';
 import { State } from '../common/store';
 
-import { ApolloClientContext } from '../common/utils/apollo_context';
 import { ManageGlobalTimeline } from '../timelines/components/manage_timeline';
 import { StartServices } from '../types';
 import { PageRouter } from './routes';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
+import { UserPrivilegesProvider } from '../detections/components/user_privileges';
 
-interface StartAppComponent extends AppFrontendLibs {
+interface StartAppComponent {
   children: React.ReactNode;
   history: History;
   onAppLeave: (handler: AppLeaveHandler) => void;
   store: Store<State, Action>;
 }
 
-const StartAppComponent: FC<StartAppComponent> = ({
-  children,
-  apolloClient,
-  history,
-  onAppLeave,
-  store,
-}) => {
+const StartAppComponent: FC<StartAppComponent> = ({ children, history, onAppLeave, store }) => {
   const { i18n } = useKibana().services;
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
 
@@ -52,21 +44,19 @@ const StartAppComponent: FC<StartAppComponent> = ({
         <ManageGlobalToaster>
           <ManageGlobalTimeline>
             <ReduxStoreProvider store={store}>
-              <ApolloProvider client={apolloClient}>
-                <ApolloClientContext.Provider value={apolloClient}>
-                  <EuiThemeProvider darkMode={darkMode}>
-                    <MlCapabilitiesProvider>
-                      <ManageUserInfo>
-                        <PageRouter history={history} onAppLeave={onAppLeave}>
-                          {children}
-                        </PageRouter>
-                      </ManageUserInfo>
-                    </MlCapabilitiesProvider>
-                  </EuiThemeProvider>
-                  <ErrorToastDispatcher />
-                  <GlobalToaster />
-                </ApolloClientContext.Provider>
-              </ApolloProvider>
+              <EuiThemeProvider darkMode={darkMode}>
+                <MlCapabilitiesProvider>
+                  <UserPrivilegesProvider>
+                    <ManageUserInfo>
+                      <PageRouter history={history} onAppLeave={onAppLeave}>
+                        {children}
+                      </PageRouter>
+                    </ManageUserInfo>
+                  </UserPrivilegesProvider>
+                </MlCapabilitiesProvider>
+              </EuiThemeProvider>
+              <ErrorToastDispatcher />
+              <GlobalToaster />
             </ReduxStoreProvider>
           </ManageGlobalTimeline>
         </ManageGlobalToaster>
@@ -77,7 +67,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
 
 const StartApp = memo(StartAppComponent);
 
-interface SecurityAppComponentProps extends AppFrontendLibs {
+interface SecurityAppComponentProps {
   children: React.ReactNode;
   history: History;
   onAppLeave: (handler: AppLeaveHandler) => void;
@@ -87,7 +77,6 @@ interface SecurityAppComponentProps extends AppFrontendLibs {
 
 const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
   children,
-  apolloClient,
   history,
   onAppLeave,
   services,
@@ -99,7 +88,7 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
       ...services,
     }}
   >
-    <StartApp apolloClient={apolloClient} history={history} onAppLeave={onAppLeave} store={store}>
+    <StartApp history={history} onAppLeave={onAppLeave} store={store}>
       {children}
     </StartApp>
   </KibanaContextProvider>

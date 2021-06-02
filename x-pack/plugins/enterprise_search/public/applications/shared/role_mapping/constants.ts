@@ -101,18 +101,21 @@ export const FILTER_ROLE_MAPPINGS_PLACEHOLDER = i18n.translate(
   }
 );
 
-export const MANAGE_ROLE_MAPPING_BUTTON = i18n.translate(
-  'xpack.enterpriseSearch.roleMapping.manageRoleMappingButtonLabel',
-  {
-    defaultMessage: 'Manage',
-  }
-);
-
 export const ROLE_MAPPINGS_TITLE = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.roleMappingsTitle',
   {
     defaultMessage: 'Users & roles',
   }
+);
+
+export const ADD_ROLE_MAPPING_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.newRoleMappingTitle',
+  { defaultMessage: 'Add role mapping' }
+);
+
+export const MANAGE_ROLE_MAPPING_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.manageRoleMappingTitle',
+  { defaultMessage: 'Manage role mapping' }
 );
 
 export const EMPTY_ROLE_MAPPINGS_TITLE = i18n.translate(

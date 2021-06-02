@@ -1,12 +1,10 @@
 [[actions-and-connectors-legacy-api-update]]
 ==== Legacy Update connector API
 ++++
-<titleabbrev>Legacy Update connector API</titleabbrev>
+<titleabbrev>Legacy Update connector</titleabbrev>
 ++++
 
-deprecated::[7.13.0]
-
-Please use the <<actions-and-connectors-api-update>> instead.
+deprecated::[7.13.0,Use <<update-connector-api>> instead.]
 
 Updates the attributes for an existing connector.
 
@@ -72,6 +70,7 @@ The API returns the following:
     "refresh": false,
     "executionTimeField": null
   },
-  "isPreconfigured": false
+  "isPreconfigured": false,
+  "isMissingSecrets": false
 }
 --------------------------------------------------

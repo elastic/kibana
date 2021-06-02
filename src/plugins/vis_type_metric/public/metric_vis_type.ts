@@ -64,6 +64,7 @@ export const createMetricVisTypeDefinition = (): VisTypeDefinition<VisParams> =>
           '!cumulative_sum',
           '!geo_bounds',
           '!filtered_metric',
+          '!single_percentile',
         ],
         aggSettings: {
           top_hits: {

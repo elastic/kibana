@@ -7,6 +7,7 @@
  */
 import { Discover } from './discover';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createDiscoverDirective(reactDirective: any) {
   return reactDirective(Discover, [
     ['fetch', { watchDepth: 'reference' }],
@@ -19,6 +20,7 @@ export function createDiscoverDirective(reactDirective: any) {
     ['opts', { watchDepth: 'reference' }],
     ['resetQuery', { watchDepth: 'reference' }],
     ['resultState', { watchDepth: 'reference' }],
+    ['fetchStatus', { watchDepth: 'reference' }],
     ['rows', { watchDepth: 'reference' }],
     ['savedSearch', { watchDepth: 'reference' }],
     ['searchSource', { watchDepth: 'reference' }],
@@ -28,5 +30,6 @@ export function createDiscoverDirective(reactDirective: any) {
     ['updateQuery', { watchDepth: 'reference' }],
     ['updateSavedQueryId', { watchDepth: 'reference' }],
     ['unmappedFieldsConfig', { watchDepth: 'value' }],
+    ['refreshAppState', { watchDepth: 'reference' }],
   ]);
 }

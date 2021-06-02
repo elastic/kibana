@@ -7,7 +7,7 @@
 
 import { CustomRule, ThreatIndicatorRule } from '../../objects/rule';
 
-export const createCustomRule = (rule: CustomRule, ruleId = 'rule_testing') =>
+export const createCustomRule = (rule: CustomRule, ruleId = 'rule_testing', interval = '100m') =>
   cy.request({
     method: 'POST',
     url: 'api/detection_engine/rules',
@@ -15,7 +15,7 @@ export const createCustomRule = (rule: CustomRule, ruleId = 'rule_testing') =>
       rule_id: ruleId,
       risk_score: parseInt(rule.riskScore, 10),
       description: rule.description,
-      interval: '10s',
+      interval,
       name: rule.name,
       severity: rule.severity.toLocaleLowerCase(),
       type: 'query',
@@ -41,13 +41,15 @@ export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'r
       name: rule.name,
       severity: rule.severity.toLocaleLowerCase(),
       type: 'threat_match',
+      timeline_id: rule.timeline.templateTimelineId,
+      timeline_title: rule.timeline.title,
       threat_mapping: [
         {
           entries: [
             {
-              field: rule.indicatorMapping,
+              field: rule.indicatorMappingField,
               type: 'mapping',
-              value: rule.indicatorMapping,
+              value: rule.indicatorIndexField,
             },
           ],
         },
@@ -55,19 +57,24 @@ export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'r
       threat_query: '*:*',
       threat_language: 'kuery',
       threat_filters: [],
-      threat_index: ['mock*'],
+      threat_index: rule.indicatorIndexPattern,
       threat_indicator_path: '',
       from: 'now-17520h',
-      index: ['exceptions-*'],
+      index: rule.index,
       query: rule.customQuery || '*:*',
       language: 'kuery',
-      enabled: false,
+      enabled: true,
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
     failOnStatusCode: false,
   });
 
-export const createCustomRuleActivated = (rule: CustomRule, ruleId = '1') =>
+export const createCustomRuleActivated = (
+  rule: CustomRule,
+  ruleId = '1',
+  interval = '100m',
+  maxSignals = 500
+) =>
   cy.request({
     method: 'POST',
     url: 'api/detection_engine/rules',
@@ -75,17 +82,17 @@ export const createCustomRuleActivated = (rule: CustomRule, ruleId = '1') =>
       rule_id: ruleId,
       risk_score: parseInt(rule.riskScore, 10),
       description: rule.description,
-      interval: '10s',
+      interval,
       name: rule.name,
       severity: rule.severity.toLocaleLowerCase(),
       type: 'query',
       from: 'now-17520h',
-      index: ['auditbeat-*'],
+      index: rule.index,
       query: rule.customQuery,
       language: 'kuery',
       enabled: true,
       tags: ['rule1'],
-      max_signals: 500,
+      max_signals: maxSignals,
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
     failOnStatusCode: false,

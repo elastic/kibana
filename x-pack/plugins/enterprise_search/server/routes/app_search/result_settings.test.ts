@@ -71,20 +71,32 @@ describe('result settings routes', () => {
         path: '/as/engines/:engineName/result_settings',
       });
     });
+  });
 
-    describe('validates', () => {
-      it('correctly', () => {
-        const request = {
-          body: {
-            result_fields: resultFields,
-          },
-        };
-        mockRouter.shouldValidate(request);
+  describe('POST /api/app_search/engines/{name}/sample_response_search', () => {
+    const mockRouter = new MockRouter({
+      method: 'post',
+      path: '/api/app_search/engines/{engineName}/sample_response_search',
+    });
+
+    beforeEach(() => {
+      registerResultSettingsRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request to enterprise search', () => {
+      mockRouter.callRoute({
+        params: { engineName: 'some-engine' },
+        body: {
+          query: 'test',
+          result_fields: resultFields,
+        },
       });
 
-      it('missing required fields', () => {
-        const request = { body: {} };
-        mockRouter.shouldThrow(request);
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/as/engines/:engineName/sample_response_search',
       });
     });
   });

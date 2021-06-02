@@ -27,7 +27,9 @@ describe('KibanaTelemetryAdapter', () => {
       },
     };
     getSavedObjectsClient = () => {
-      return {};
+      return {
+        get: () => {},
+      };
     };
     collectorFetchContext = createCollectorFetchContextMock();
   });

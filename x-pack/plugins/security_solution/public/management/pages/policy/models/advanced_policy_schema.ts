@@ -596,6 +596,28 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'linux.advanced.diagnostic.enabled',
+    first_supported_version: '7.12',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.diagnostic.enabled',
+      {
+        defaultMessage:
+          "A value of 'false' disables running diagnostic features on Endpoint. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.diagnostic.enabled',
+    first_supported_version: '7.12',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.diagnostic.enabled',
+      {
+        defaultMessage:
+          "A value of 'false' disables running diagnostic features on Endpoint. Default: true.",
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.alerts.cloud_lookup',
     first_supported_version: '7.12',
     documentation: i18n.translate(
@@ -623,6 +645,16 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.ransomware.mbr',
       {
         defaultMessage: "A value of 'false' disables Ransomware MBR protection. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.ransomware.canary',
+    first_supported_version: '7.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.ransomware.canary',
+      {
+        defaultMessage: "A value of 'false' disables Ransomware canary protection. Default: true.",
       }
     ),
   },

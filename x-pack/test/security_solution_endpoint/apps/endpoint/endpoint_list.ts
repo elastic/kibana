@@ -32,41 +32,40 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     ],
     [
       'rezzani-7.example.com',
-      'Error',
+      'Unhealthy',
       'Default',
       'Failure',
       'windows 10.0',
       '10.101.149.26, 2606:a000:ffc0:39:11ef:37b9:3371:578c',
       '6.8.0',
-      'Jan 24, 2020 @ 16:06:09.541',
+      'Apr 19, 2021 @ 14:10:05.309',
       '',
     ],
     [
       'cadmann-4.example.com',
-      'Error',
+      'Unhealthy',
       'Default',
       'Failure',
       'windows 10.0',
       '10.192.213.130, 10.70.28.129',
       '6.6.1',
-      'Jan 24, 2020 @ 16:06:09.541',
+      'Apr 19, 2021 @ 14:10:05.309',
       '',
     ],
     [
       'thurlow-9.example.com',
-      'Error',
+      'Unhealthy',
       'Default',
       'Success',
       'windows 10.0',
       '10.46.229.234',
       '6.0.0',
-      'Jan 24, 2020 @ 16:06:09.541',
+      'Apr 19, 2021 @ 14:10:05.309',
       '',
     ],
   ];
 
   describe('endpoint list', function () {
-    this.tags('ciGroup7');
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
 
     describe('when initially navigating to page', () => {
@@ -268,24 +267,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           ],
           [
             'cadmann-4.example.com',
-            'Error',
+            'Unhealthy',
             'Default',
             'Failure',
             'windows 10.0',
             '10.192.213.130, 10.70.28.129',
             '6.6.1',
-            'Jan 24, 2020 @ 16:06:09.541',
+            'Apr 19, 2021 @ 14:10:05.309',
             '',
           ],
           [
             'thurlow-9.example.com',
-            'Error',
+            'Unhealthy',
             'Default',
             'Success',
             'windows 10.0',
             '10.46.229.234',
             '6.0.0',
-            'Jan 24, 2020 @ 16:06:09.541',
+            'Apr 19, 2021 @ 14:10:05.309',
             '',
           ],
         ];

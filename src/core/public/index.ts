@@ -41,7 +41,6 @@ import {
   ChromeNavControls,
   ChromeNavLink,
   ChromeNavLinks,
-  ChromeNavLinkUpdateableFields,
   ChromeDocTitle,
   ChromeStart,
   ChromeRecentlyAccessed,
@@ -65,20 +64,17 @@ import { UiSettingsState, IUiSettingsClient } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
+import { DeprecationsServiceStart } from './deprecations';
 
-export type { PackageInfo, EnvironmentMode, IExternalUrlPolicy } from '../server/types';
-export type { CoreContext, CoreSystem } from './core_system';
-export { DEFAULT_APP_CATEGORIES } from '../utils';
 export type {
-  AppCategory,
-  UiSettingsParams,
-  UserProvidedValues,
-  UiSettingsType,
-  ImageValidation,
-  StringValidation,
-  StringValidationRegex,
-  StringValidationRegexString,
-} from '../types';
+  PackageInfo,
+  EnvironmentMode,
+  IExternalUrlPolicy,
+  DomainDeprecationDetails,
+} from '../server/types';
+export type { CoreContext, CoreSystem } from './core_system';
+export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
+export type { AppCategory, UiSettingsParams, UserProvidedValues, UiSettingsType } from '../types';
 
 export { AppNavLinkStatus, AppStatus, ScopedHistory } from './application';
 export type {
@@ -93,13 +89,11 @@ export type {
   AppLeaveAction,
   AppLeaveDefaultAction,
   AppLeaveConfirmAction,
-  AppMeta,
   AppUpdatableFields,
   AppUpdater,
-  AppSearchDeepLink,
+  AppDeepLink,
   PublicAppInfo,
-  PublicAppMetaInfo,
-  PublicAppSearchDeepLinkInfo,
+  PublicAppDeepLinkInfo,
   NavigateToAppOptions,
 } from './application';
 
@@ -138,6 +132,8 @@ export type {
   SavedObjectsImportSimpleWarning,
   SavedObjectsImportActionRequiredWarning,
   SavedObjectsImportWarning,
+  SavedObjectReferenceWithContext,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
 } from './saved_objects';
 
 export { HttpFetchError } from './http';
@@ -183,6 +179,8 @@ export type {
   ToastOptions,
   ErrorToastOptions,
 } from './notifications';
+
+export type { DeprecationsServiceStart, ResolveDeprecationResponse } from './deprecations';
 
 export type { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
 
@@ -268,6 +266,8 @@ export interface CoreStart {
   uiSettings: IUiSettingsClient;
   /** {@link FatalErrorsStart} */
   fatalErrors: FatalErrorsStart;
+  /** {@link DeprecationsServiceStart} */
+  deprecations: DeprecationsServiceStart;
   /**
    * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
    * use *only* to retrieve config values. There is no way to set injected values
@@ -295,7 +295,6 @@ export type {
   ChromeNavControls,
   ChromeNavLink,
   ChromeNavLinks,
-  ChromeNavLinkUpdateableFields,
   ChromeDocTitle,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,

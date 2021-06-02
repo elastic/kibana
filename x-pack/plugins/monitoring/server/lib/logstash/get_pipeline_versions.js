@@ -28,7 +28,7 @@ function fetchPipelineVersions(...args) {
     },
   ];
   const query = createQuery({
-    type: 'logstash_stats',
+    types: ['stats', 'logstash_stats'],
     metric: LogstashMetric.getMetricFields(),
     clusterUuid,
     filters,

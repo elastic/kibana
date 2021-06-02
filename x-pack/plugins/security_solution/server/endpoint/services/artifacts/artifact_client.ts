@@ -5,64 +5,23 @@
  * 2.0.
  */
 
-/* eslint-disable max-classes-per-file */
-
 import { inflate as _inflate } from 'zlib';
 import { promisify } from 'util';
-import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
-import { ArtifactConstants, getArtifactId } from '../../lib/artifacts';
-import {
-  InternalArtifactCompleteSchema,
-  InternalArtifactCreateSchema,
-} from '../../schemas/artifacts';
+import { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
 import { Artifact, ArtifactsClientInterface } from '../../../../../fleet/server';
 
 const inflateAsync = promisify(_inflate);
 
 export interface EndpointArtifactClientInterface {
-  getArtifact(id: string): Promise<SavedObject<InternalArtifactCompleteSchema> | undefined>;
+  getArtifact(id: string): Promise<InternalArtifactCompleteSchema | undefined>;
 
-  createArtifact(
-    artifact: InternalArtifactCompleteSchema
-  ): Promise<SavedObject<InternalArtifactCompleteSchema>>;
+  createArtifact(artifact: InternalArtifactCompleteSchema): Promise<InternalArtifactCompleteSchema>;
 
   deleteArtifact(id: string): Promise<void>;
 }
 
-export class ArtifactClient implements EndpointArtifactClientInterface {
-  private savedObjectsClient: SavedObjectsClientContract;
-
-  constructor(savedObjectsClient: SavedObjectsClientContract) {
-    this.savedObjectsClient = savedObjectsClient;
-  }
-
-  public async getArtifact(id: string): Promise<SavedObject<InternalArtifactCompleteSchema>> {
-    return this.savedObjectsClient.get<InternalArtifactCompleteSchema>(
-      ArtifactConstants.SAVED_OBJECT_TYPE,
-      id
-    );
-  }
-
-  public async createArtifact(
-    artifact: InternalArtifactCompleteSchema
-  ): Promise<SavedObject<InternalArtifactCompleteSchema>> {
-    return this.savedObjectsClient.create<InternalArtifactCreateSchema>(
-      ArtifactConstants.SAVED_OBJECT_TYPE,
-      {
-        ...artifact,
-        created: Date.now(),
-      },
-      { id: getArtifactId(artifact) }
-    );
-  }
-
-  public async deleteArtifact(id: string) {
-    await this.savedObjectsClient.delete(ArtifactConstants.SAVED_OBJECT_TYPE, id);
-  }
-}
-
 /**
- * Endpoint specific artifact managment client which uses FleetArtifactsClient to persist artifacts
+ * Endpoint specific artifact management client which uses FleetArtifactsClient to persist artifacts
  * to the Fleet artifacts index (then used by Fleet Server)
  */
 export class EndpointArtifactClient implements EndpointArtifactClientInterface {
@@ -91,15 +50,12 @@ export class EndpointArtifactClient implements EndpointArtifactClientInterface {
       return;
     }
 
-    // FIXME:PT change method signature so that it returns back only the `InternalArtifactCompleteSchema`
-    return ({
-      attributes: artifacts.items[0],
-    } as unknown) as SavedObject<InternalArtifactCompleteSchema>;
+    return artifacts.items[0];
   }
 
   async createArtifact(
     artifact: InternalArtifactCompleteSchema
-  ): Promise<SavedObject<InternalArtifactCompleteSchema>> {
+  ): Promise<InternalArtifactCompleteSchema> {
     // FIXME:PT refactor to make this more efficient by passing through the uncompressed artifact content
     // Artifact `.body` is compressed/encoded. We need it decoded and as a string
     const artifactContent = await inflateAsync(Buffer.from(artifact.body, 'base64'));
@@ -110,15 +66,13 @@ export class EndpointArtifactClient implements EndpointArtifactClientInterface {
       type: this.parseArtifactId(artifact.identifier).type,
     });
 
-    return ({
-      attributes: createdArtifact,
-    } as unknown) as SavedObject<InternalArtifactCompleteSchema>;
+    return createdArtifact;
   }
 
   async deleteArtifact(id: string) {
     // Ignoring the `id` not being in the type until we can refactor the types in endpoint.
     // @ts-ignore
-    const artifactId = (await this.getArtifact(id)).attributes?.id;
+    const artifactId = (await this.getArtifact(id))?.id!;
     return this.fleetArtifacts.deleteArtifact(artifactId);
   }
 }

@@ -34,15 +34,20 @@ import { esFilters, IndexPatternField, search } from '../../../../data/public';
 import { DiscoverSidebarResponsive } from './sidebar';
 import { DiscoverProps } from './types';
 import { SortPairArr } from '../angular/doc_table/lib/get_sort';
-import { SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
+import {
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  DOC_TABLE_LEGACY,
+  SEARCH_FIELDS_FROM_SOURCE,
+} from '../../../common';
 import { popularizeField } from '../helpers/popularize_field';
-import { getStateColumnActions } from '../angular/doc_table/actions/columns';
 import { DocViewFilterFn } from '../doc_views/doc_views_types';
 import { DiscoverGrid } from './discover_grid/discover_grid';
 import { DiscoverTopNav } from './discover_topnav';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
 import { setBreadcrumbsTitle } from '../helpers/breadcrumbs';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
+import { InspectorSession } from '../../../../inspector/public';
+import { useDataGridColumns } from '../helpers/use_data_grid_columns';
 
 const DocTableLegacyMemoized = React.memo(DocTableLegacy);
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -68,8 +73,10 @@ export function Discover({
   searchSource,
   state,
   unmappedFieldsConfig,
+  refreshAppState,
 }: DiscoverProps) {
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
+  const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const collapseIcon = useRef<HTMLButtonElement>(null);
   const isMobile = () => {
@@ -93,7 +100,7 @@ export function Discover({
   }, [opts.chartAggConfigs]);
 
   const contentCentered = resultState === 'uninitialized';
-  const isLegacy = services.uiSettings.get('doc_table:legacy');
+  const isLegacy = services.uiSettings.get(DOC_TABLE_LEGACY);
   const useNewFieldsApi = !services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
   const updateQuery = useCallback(
     (_payload, isUpdate?: boolean) => {
@@ -105,6 +112,16 @@ export function Discover({
     [opts]
   );
 
+  const { columns, onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useDataGridColumns({
+    capabilities,
+    config,
+    indexPattern,
+    indexPatterns,
+    setAppState,
+    state,
+    useNewFieldsApi,
+  });
+
   useEffect(() => {
     const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
     chrome.docTitle.change(`Discover${pageTitleSuffix}`);
@@ -113,24 +130,23 @@ export function Discover({
     addHelpMenuToAppChrome(chrome, docLinks);
   }, [savedSearch, chrome, docLinks]);
 
-  const { onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useMemo(
-    () =>
-      getStateColumnActions({
-        capabilities,
-        config,
-        indexPattern,
-        indexPatterns,
-        setAppState,
-        state,
-        useNewFieldsApi,
-      }),
-    [capabilities, config, indexPattern, indexPatterns, setAppState, state, useNewFieldsApi]
-  );
-
   const onOpenInspector = useCallback(() => {
     // prevent overlapping
     setExpandedDoc(undefined);
-  }, [setExpandedDoc]);
+    const session = services.inspector.open(opts.inspectorAdapters, {
+      title: savedSearch.title,
+    });
+    setInspectorSession(session);
+  }, [setExpandedDoc, opts.inspectorAdapters, savedSearch, services.inspector]);
+
+  useEffect(() => {
+    return () => {
+      if (inspectorSession) {
+        // Close the inspector if this scope is destroyed (e.g. because the user navigates away).
+        inspectorSession.close();
+      }
+    };
+  }, [inspectorSession]);
 
   const onSort = useCallback(
     (sort: string[][]) => {
@@ -203,12 +219,12 @@ export function Discover({
     [opts, state]
   );
 
-  const columns = useMemo(() => {
-    if (!state.columns) {
-      return [];
+  const onEditRuntimeField = () => {
+    if (refreshAppState) {
+      refreshAppState();
     }
-    return useNewFieldsApi ? state.columns.filter((col) => col !== '_source') : state.columns;
-  }, [state, useNewFieldsApi]);
+  };
+
   return (
     <I18nProvider>
       <EuiPage className="dscPage" data-fetch-counter={fetchCounter}>
@@ -245,23 +261,27 @@ export function Discover({
                 trackUiMetric={trackUiMetric}
                 unmappedFieldsConfig={unmappedFieldsConfig}
                 useNewFieldsApi={useNewFieldsApi}
+                onEditRuntimeField={onEditRuntimeField}
               />
             </EuiFlexItem>
             <EuiHideFor sizes={['xs', 's']}>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
-                  iconSize="m"
-                  size="s"
-                  onClick={() => setIsSidebarClosed(!isSidebarClosed)}
-                  data-test-subj="collapseSideBarButton"
-                  aria-controls="discover-sidebar"
-                  aria-expanded={isSidebarClosed ? 'false' : 'true'}
-                  aria-label={i18n.translate('discover.toggleSidebarAriaLabel', {
-                    defaultMessage: 'Toggle sidebar',
-                  })}
-                  buttonRef={collapseIcon}
-                />
+                <div>
+                  <EuiSpacer size="s" />
+                  <EuiButtonIcon
+                    iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
+                    iconSize="m"
+                    size="xs"
+                    onClick={() => setIsSidebarClosed(!isSidebarClosed)}
+                    data-test-subj="collapseSideBarButton"
+                    aria-controls="discover-sidebar"
+                    aria-expanded={isSidebarClosed ? 'false' : 'true'}
+                    aria-label={i18n.translate('discover.toggleSidebarAriaLabel', {
+                      defaultMessage: 'Toggle sidebar',
+                    })}
+                    buttonRef={collapseIcon}
+                  />
+                </div>
               </EuiFlexItem>
             </EuiHideFor>
             <EuiFlexItem className="dscPageContent__wrapper">
@@ -368,7 +388,7 @@ export function Discover({
 
                     <EuiFlexItem className="eui-yScroll">
                       <section
-                        className="dscTable eui-yScroll"
+                        className="dscTable eui-yScroll eui-xScroll"
                         aria-labelledby="documentsAriaLabel"
                         ref={scrollableDesktop}
                         tabIndex={-1}
@@ -413,13 +433,13 @@ export function Discover({
                               searchTitle={opts.savedSearch.lastSavedTitle}
                               setExpandedDoc={setExpandedDoc}
                               showTimeCol={
-                                !config.get('doc_table:hideTimeColumn', false) &&
+                                !config.get(DOC_HIDE_TIME_COLUMN_SETTING, false) &&
                                 !!indexPattern.timeFieldName
                               }
                               services={services}
                               settings={state.grid}
-                              onAddColumn={onAddColumn}
                               onFilter={onAddFilter as DocViewFilterFn}
+                              onAddColumn={onAddColumn}
                               onRemoveColumn={onRemoveColumn}
                               onSetColumns={onSetColumns}
                               onSort={onSort}

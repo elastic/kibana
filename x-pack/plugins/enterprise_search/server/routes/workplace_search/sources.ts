@@ -22,9 +22,9 @@ const schemaValuesSchema = schema.recordOf(
 );
 
 const pageSchema = schema.object({
-  current: schema.number(),
-  size: schema.number(),
-  total_pages: schema.number(),
+  current: schema.nullable(schema.number()),
+  size: schema.nullable(schema.number()),
+  total_pages: schema.nullable(schema.number()),
   total_results: schema.number(),
 });
 
@@ -193,6 +193,9 @@ export function registerAccountSourceReauthPrepareRoute({
       validate: {
         params: schema.object({
           id: schema.string(),
+        }),
+        query: schema.object({
+          kibana_host: schema.string(),
         }),
       },
     },
@@ -378,22 +381,21 @@ export function registerAccountSourceReindexJobRoute({
   );
 }
 
-export function registerAccountSourceReindexJobStatusRoute({
+export function registerAccountSourceDownloadDiagnosticsRoute({
   router,
   enterpriseSearchRequestHandler,
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/account/sources/{sourceId}/reindex_job/{jobId}/status',
+      path: '/api/workplace_search/account/sources/{sourceId}/download_diagnostics',
       validate: {
         params: schema.object({
           sourceId: schema.string(),
-          jobId: schema.string(),
         }),
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/ws/sources/:sourceId/reindex_job/:jobId/status',
+      path: '/ws/sources/:sourceId/download_diagnostics',
     })
   );
 }
@@ -538,6 +540,9 @@ export function registerOrgSourceReauthPrepareRoute({
       validate: {
         params: schema.object({
           id: schema.string(),
+        }),
+        query: schema.object({
+          kibana_host: schema.string(),
         }),
       },
     },
@@ -724,22 +729,21 @@ export function registerOrgSourceReindexJobRoute({
   );
 }
 
-export function registerOrgSourceReindexJobStatusRoute({
+export function registerOrgSourceDownloadDiagnosticsRoute({
   router,
   enterpriseSearchRequestHandler,
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/org/sources/{sourceId}/reindex_job/{jobId}/status',
+      path: '/api/workplace_search/org/sources/{sourceId}/download_diagnostics',
       validate: {
         params: schema.object({
           sourceId: schema.string(),
-          jobId: schema.string(),
         }),
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/ws/org/sources/:sourceId/reindex_job/:jobId/status',
+      path: '/ws/org/sources/:sourceId/download_diagnostics',
     })
   );
 }
@@ -893,7 +897,7 @@ export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
   registerAccountSourceDisplaySettingsConfig(dependencies);
   registerAccountSourceSchemasRoute(dependencies);
   registerAccountSourceReindexJobRoute(dependencies);
-  registerAccountSourceReindexJobStatusRoute(dependencies);
+  registerAccountSourceDownloadDiagnosticsRoute(dependencies);
   registerOrgSourcesRoute(dependencies);
   registerOrgSourcesStatusRoute(dependencies);
   registerOrgSourceRoute(dependencies);
@@ -908,7 +912,7 @@ export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
   registerOrgSourceDisplaySettingsConfig(dependencies);
   registerOrgSourceSchemasRoute(dependencies);
   registerOrgSourceReindexJobRoute(dependencies);
-  registerOrgSourceReindexJobStatusRoute(dependencies);
+  registerOrgSourceDownloadDiagnosticsRoute(dependencies);
   registerOrgSourceOauthConfigurationsRoute(dependencies);
   registerOrgSourceOauthConfigurationRoute(dependencies);
   registerOauthConnectorParamsRoute(dependencies);

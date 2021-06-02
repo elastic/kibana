@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { parseExperimentalConfigValue } from '../../..//common/experimental_features';
 import { createInitialState } from './reducer';
 
 jest.mock('../lib/kibana', () => ({
@@ -22,6 +23,7 @@ describe('createInitialState', () => {
           kibanaIndexPatterns: [{ id: '1234567890987654321', title: 'mock-kibana' }],
           configIndexPatterns: ['auditbeat-*', 'filebeat'],
           signalIndexName: 'siem-signals-default',
+          enableExperimental: parseExperimentalConfigValue([]),
         }
       );
 
@@ -35,6 +37,7 @@ describe('createInitialState', () => {
           kibanaIndexPatterns: [{ id: '1234567890987654321', title: 'mock-kibana' }],
           configIndexPatterns: [],
           signalIndexName: 'siem-signals-default',
+          enableExperimental: parseExperimentalConfigValue([]),
         }
       );
 

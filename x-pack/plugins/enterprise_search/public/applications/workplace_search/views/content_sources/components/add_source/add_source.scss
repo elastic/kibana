@@ -43,16 +43,6 @@
     }
   }
 
-  &__outer-box {
-    border: 1px solid #DBE2EB;
-    padding-right: 16px;
-    border-radius: 6px;
-    overflow: hidden;
-    background-color: #FFFFFF;
-    box-shadow: 0 2px 2px -1px rgba(152, 162, 179, .3),
-      0 1px 5px -2px rgba(152, 162, 179, .3);
-  }
-
   &__intro-image {
     background-color: #22272E;
     display: flex;

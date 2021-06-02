@@ -170,6 +170,12 @@ export function getState({
     appStateFromUrl.query = migrateLegacyQuery(appStateFromUrl.query);
   }
 
+  if (appStateFromUrl?.sort && !appStateFromUrl.sort.length) {
+    // If there's an empty array given in the URL, the sort prop should be removed
+    // This allows the sort prop to be overwritten with the default sorting
+    delete appStateFromUrl.sort;
+  }
+
   let initialAppState = handleSourceColumnState(
     {
       ...defaultAppState,
@@ -177,7 +183,8 @@ export function getState({
     },
     uiSettings
   );
-  // todo filter source depending on fields fetchinbg flag (if no columns remain and source fetching is enabled, use default columns)
+
+  // todo filter source depending on fields fetching flag (if no columns remain and source fetching is enabled, use default columns)
   let previousAppState: AppState;
   const appStateContainer = createStateContainer<AppState>(initialAppState);
 

@@ -4,13 +4,101 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
 <ScriptingWarningCallOut
   isVisible={true}
 >
+  <EuiText
+    size="s"
+  >
+    <div
+      className="euiText euiText--small"
+    >
+      <p>
+        <FormattedMessage
+          defaultMessage="Familiarize yourself with {scripFields} and {scriptsInAggregation} before using this feature. Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow and, if done incorrectly, can cause Kibana to become unusable."
+          id="indexPatternManagement.warningCallOutLabel.callOutDetail"
+          values={
+            Object {
+              "scripFields": <EuiLink
+                target="_blank"
+              >
+                <FormattedMessage
+                  defaultMessage="scripted fields"
+                  id="indexPatternManagement.warningCallOutLabel.scripFieldsLink"
+                  values={Object {}}
+                />
+              </EuiLink>,
+              "scriptsInAggregation": <EuiLink
+                target="_blank"
+              >
+                <FormattedMessage
+                  defaultMessage="scripts in aggregations"
+                  id="indexPatternManagement.warningCallOutLabel.scriptsInAggregationLink"
+                  values={Object {}}
+                />
+              </EuiLink>,
+            }
+          }
+        >
+          <span>
+            Familiarize yourself with 
+            <EuiLink
+              target="_blank"
+            >
+              <button
+                className="euiLink euiLink--primary"
+                disabled={false}
+                type="button"
+              >
+                <FormattedMessage
+                  defaultMessage="scripted fields"
+                  id="indexPatternManagement.warningCallOutLabel.scripFieldsLink"
+                  values={Object {}}
+                >
+                  <span>
+                    scripted fields
+                  </span>
+                </FormattedMessage>
+              </button>
+            </EuiLink>
+             and 
+            <EuiLink
+              target="_blank"
+            >
+              <button
+                className="euiLink euiLink--primary"
+                disabled={false}
+                type="button"
+              >
+                <FormattedMessage
+                  defaultMessage="scripts in aggregations"
+                  id="indexPatternManagement.warningCallOutLabel.scriptsInAggregationLink"
+                  values={Object {}}
+                >
+                  <span>
+                    scripts in aggregations
+                  </span>
+                </FormattedMessage>
+              </button>
+            </EuiLink>
+             before using this feature. Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow and, if done incorrectly, can cause Kibana to become unusable.
+          </span>
+        </FormattedMessage>
+      </p>
+    </div>
+  </EuiText>
+  <EuiSpacer
+    size="m"
+  >
+    <div
+      className="euiSpacer euiSpacer--m"
+    />
+  </EuiSpacer>
   <EuiCallOut
     color="warning"
     iconType="alert"
     title={
       <FormattedMessage
-        defaultMessage="Proceed with caution"
-        id="indexPatternManagement.warningCallOutHeader"
+        defaultMessage="Scripted fields are deprecated"
+        description="Deprecation warning title within scripted field editor"
+        id="indexPatternManagement.scriptedFieldsDeprecatedTitle"
         values={Object {}}
       />
     }
@@ -24,12 +112,14 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
         <EuiIcon
           aria-hidden="true"
           className="euiCallOutHeader__icon"
+          color="inherit"
           size="m"
           type="alert"
         >
           <span
             aria-hidden="true"
             className="euiCallOutHeader__icon"
+            color="inherit"
             data-euiicon-type="alert"
             size="m"
           />
@@ -38,12 +128,13 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
           className="euiCallOutHeader__title"
         >
           <FormattedMessage
-            defaultMessage="Proceed with caution"
-            id="indexPatternManagement.warningCallOutHeader"
+            defaultMessage="Scripted fields are deprecated"
+            description="Deprecation warning title within scripted field editor"
+            id="indexPatternManagement.scriptedFieldsDeprecatedTitle"
             values={Object {}}
           >
             <span>
-              Proceed with caution
+              Scripted fields are deprecated
             </span>
           </FormattedMessage>
         </span>
@@ -54,113 +145,57 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
         <div
           className="euiText euiText--small"
         >
-          <p>
-            <FormattedMessage
-              defaultMessage="Please familiarize yourself with {scripFields} and with {scriptsInAggregation} before using scripted fields."
-              id="indexPatternManagement.warningCallOutLabel.callOutDetail"
-              values={
-                Object {
-                  "scripFields": <EuiLink
-                    target="_blank"
-                  >
-                    <FormattedMessage
-                      defaultMessage="script fields"
-                      id="indexPatternManagement.warningCallOutLabel.scripFieldsLink"
-                      values={Object {}}
-                    />
-                     
-                    <EuiIcon
-                      type="link"
-                    />
-                  </EuiLink>,
-                  "scriptsInAggregation": <EuiLink
-                    target="_blank"
-                  >
-                    <FormattedMessage
-                      defaultMessage="scripts in aggregations"
-                      id="indexPatternManagement.warningCallOutLabel.scriptsInAggregationLink"
-                      values={Object {}}
-                    />
-                     
-                    <EuiIcon
-                      type="link"
-                    />
-                  </EuiLink>,
-                }
-              }
+          <EuiText
+            size="s"
+          >
+            <div
+              className="euiText euiText--small"
             >
-              <span>
-                Please familiarize yourself with 
-                <EuiLink
-                  target="_blank"
+              <p>
+                <FormattedMessage
+                  defaultMessage="For greater flexibility and Painless script support, use {runtimeDocs}."
+                  id="indexPatternManagement.scriptedFieldsDeprecatedBody"
+                  values={
+                    Object {
+                      "runtimeDocs": <EuiLink
+                        target="_blank"
+                      >
+                        <FormattedMessage
+                          defaultMessage="runtime fields"
+                          id="indexPatternManagement.warningCallOutLabel.runtimeLink"
+                          values={Object {}}
+                        />
+                      </EuiLink>,
+                    }
+                  }
                 >
-                  <button
-                    className="euiLink euiLink--primary"
-                    disabled={false}
-                    type="button"
-                  >
-                    <FormattedMessage
-                      defaultMessage="script fields"
-                      id="indexPatternManagement.warningCallOutLabel.scripFieldsLink"
-                      values={Object {}}
+                  <span>
+                    For greater flexibility and Painless script support, use 
+                    <EuiLink
+                      target="_blank"
                     >
-                      <span>
-                        script fields
-                      </span>
-                    </FormattedMessage>
-                     
-                    <EuiIcon
-                      type="link"
-                    >
-                      <span
-                        data-euiicon-type="link"
-                      />
-                    </EuiIcon>
-                  </button>
-                </EuiLink>
-                 and with 
-                <EuiLink
-                  target="_blank"
-                >
-                  <button
-                    className="euiLink euiLink--primary"
-                    disabled={false}
-                    type="button"
-                  >
-                    <FormattedMessage
-                      defaultMessage="scripts in aggregations"
-                      id="indexPatternManagement.warningCallOutLabel.scriptsInAggregationLink"
-                      values={Object {}}
-                    >
-                      <span>
-                        scripts in aggregations
-                      </span>
-                    </FormattedMessage>
-                     
-                    <EuiIcon
-                      type="link"
-                    >
-                      <span
-                        data-euiicon-type="link"
-                      />
-                    </EuiIcon>
-                  </button>
-                </EuiLink>
-                 before using scripted fields.
-              </span>
-            </FormattedMessage>
-          </p>
-          <p>
-            <FormattedMessage
-              defaultMessage="Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow, and if done incorrectly, can cause Kibana to be unusable. There's no safety net here. If you make a typo, unexpected exceptions will be thrown all over the place!"
-              id="indexPatternManagement.warningCallOut.descriptionLabel"
-              values={Object {}}
-            >
-              <span>
-                Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow, and if done incorrectly, can cause Kibana to be unusable. There's no safety net here. If you make a typo, unexpected exceptions will be thrown all over the place!
-              </span>
-            </FormattedMessage>
-          </p>
+                      <button
+                        className="euiLink euiLink--primary"
+                        disabled={false}
+                        type="button"
+                      >
+                        <FormattedMessage
+                          defaultMessage="runtime fields"
+                          id="indexPatternManagement.warningCallOutLabel.runtimeLink"
+                          values={Object {}}
+                        >
+                          <span>
+                            runtime fields
+                          </span>
+                        </FormattedMessage>
+                      </button>
+                    </EuiLink>
+                    .
+                  </span>
+                </FormattedMessage>
+              </p>
+            </div>
+          </EuiText>
         </div>
       </EuiText>
     </div>

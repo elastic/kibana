@@ -82,10 +82,11 @@ describe('task', () => {
       const mockContext = createMockEndpointAppContext();
       const mockTaskManager = taskManagerMock.createSetup();
 
-      new ManifestTask({
+      const manifestTaskInstance = new ManifestTask({
         endpointAppContext: mockContext,
         taskManager: mockTaskManager,
       });
+      manifestTaskInstance.start({ taskManager: taskManagerMock.createStart() });
 
       mockContext.service.getManifestManager = jest.fn().mockReturnValue(manifestManager);
 

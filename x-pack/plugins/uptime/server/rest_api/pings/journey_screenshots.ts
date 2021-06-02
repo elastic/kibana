@@ -16,10 +16,10 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
     params: schema.object({
       checkGroup: schema.string(),
       stepIndex: schema.number(),
-      _debug: schema.maybe(schema.boolean()),
+      _inspect: schema.maybe(schema.boolean()),
     }),
     query: schema.object({
-      _debug: schema.maybe(schema.boolean()),
+      _inspect: schema.maybe(schema.boolean()),
     }),
   },
   handler: async ({ uptimeEsClient, request, response }) => {
@@ -37,7 +37,7 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
     return response.ok({
       body: Buffer.from(result.blob, 'base64'),
       headers: {
-        'content-type': 'image/png',
+        'content-type': result.mimeType || 'image/png', // falls back to 'image/png' for earlier versions of synthetics
         'cache-control': 'max-age=600',
         'caption-name': result.stepName,
         'max-steps': result.totalSteps,

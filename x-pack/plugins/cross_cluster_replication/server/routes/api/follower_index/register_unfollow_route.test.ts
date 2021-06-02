@@ -8,10 +8,8 @@
 import { httpServiceMock, httpServerMock } from 'src/core/server/mocks';
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 
-import { isEsError } from '../../../shared_imports';
-import { formatEsError } from '../../../lib/format_es_error';
-import { License } from '../../../services';
-import { mockRouteContext } from '../test_lib';
+import { handleEsError } from '../../../shared_imports';
+import { mockRouteContext, mockLicense, mockError } from '../test_lib';
 import { registerUnfollowRoute } from './register_unfollow_route';
 
 const httpService = httpServiceMock.createSetupContract();
@@ -24,12 +22,9 @@ describe('[CCR API] Unfollow follower index/indices', () => {
 
     registerUnfollowRoute({
       router,
-      license: {
-        guardApiRoute: (route: any) => route,
-      } as License,
+      license: mockLicense,
       lib: {
-        isEsError,
-        formatEsError,
+        handleEsError,
       },
     });
 
@@ -38,12 +33,14 @@ describe('[CCR API] Unfollow follower index/indices', () => {
 
   it('unfollows a single item', async () => {
     const routeContextMock = mockRouteContext({
-      callAsCurrentUser: jest
-        .fn()
-        .mockResolvedValueOnce({ acknowledge: true })
-        .mockResolvedValueOnce({ acknowledge: true })
-        .mockResolvedValueOnce({ acknowledge: true })
-        .mockResolvedValueOnce({ acknowledge: true }),
+      ccr: {
+        pauseFollow: jest.fn().mockResolvedValueOnce({ acknowledge: true }),
+        unfollow: jest.fn().mockResolvedValueOnce({ acknowledge: true }),
+      },
+      indices: {
+        close: jest.fn().mockResolvedValueOnce({ acknowledge: true }),
+        open: jest.fn().mockResolvedValueOnce({ acknowledge: true }),
+      },
     });
 
     const request = httpServerMock.createKibanaRequest({
@@ -57,23 +54,30 @@ describe('[CCR API] Unfollow follower index/indices', () => {
 
   it('unfollows multiple items', async () => {
     const routeContextMock = mockRouteContext({
-      callAsCurrentUser: jest
-        .fn()
-        // a
-        .mockResolvedValueOnce({ acknowledge: true })
-        .mockResolvedValueOnce({ acknowledge: true })
-        .mockResolvedValueOnce({ acknowledge: true })
-        .mockResolvedValueOnce({ acknowledge: true })
-        // b
-        .mockResolvedValueOnce({ acknowledge: true })
-        .mockResolvedValueOnce({ acknowledge: true })
-        .mockResolvedValueOnce({ acknowledge: true })
-        .mockResolvedValueOnce({ acknowledge: true })
-        // c
-        .mockResolvedValueOnce({ acknowledge: true })
-        .mockResolvedValueOnce({ acknowledge: true })
-        .mockResolvedValueOnce({ acknowledge: true })
-        .mockResolvedValueOnce({ acknowledge: true }),
+      ccr: {
+        pauseFollow: jest
+          .fn()
+          .mockResolvedValueOnce({ acknowledge: true }) // a
+          .mockResolvedValueOnce({ acknowledge: true }) // b
+          .mockResolvedValueOnce({ acknowledge: true }), // c
+        unfollow: jest
+          .fn()
+          .mockResolvedValueOnce({ acknowledge: true }) // a
+          .mockResolvedValueOnce({ acknowledge: true }) // b
+          .mockResolvedValueOnce({ acknowledge: true }), // c
+      },
+      indices: {
+        close: jest
+          .fn()
+          .mockResolvedValueOnce({ acknowledge: true }) // a
+          .mockResolvedValueOnce({ acknowledge: true }) // b
+          .mockResolvedValueOnce({ acknowledge: true }), // c
+        open: jest
+          .fn()
+          .mockResolvedValueOnce({ acknowledge: true }) // a
+          .mockResolvedValueOnce({ acknowledge: true }) // b
+          .mockResolvedValueOnce({ acknowledge: true }), // c
+      },
     });
 
     const request = httpServerMock.createKibanaRequest({
@@ -87,16 +91,20 @@ describe('[CCR API] Unfollow follower index/indices', () => {
 
   it('returns partial errors', async () => {
     const routeContextMock = mockRouteContext({
-      callAsCurrentUser: jest
-        .fn()
-        // a
-        .mockResolvedValueOnce({ acknowledge: true })
-        .mockResolvedValueOnce({ acknowledge: true })
-        .mockResolvedValueOnce({ acknowledge: true })
-        .mockResolvedValueOnce({ acknowledge: true })
-        // b
-        .mockResolvedValueOnce({ acknowledge: true })
-        .mockRejectedValueOnce({ response: { error: {} } }),
+      ccr: {
+        pauseFollow: jest
+          .fn()
+          .mockResolvedValueOnce({ acknowledge: true }) // a
+          .mockResolvedValueOnce({ acknowledge: true }), // B
+        unfollow: jest.fn().mockResolvedValueOnce({ acknowledge: true }), // a
+      },
+      indices: {
+        close: jest
+          .fn()
+          .mockResolvedValueOnce({ acknowledge: true }) // a
+          .mockRejectedValueOnce(mockError), // b
+        open: jest.fn().mockResolvedValueOnce({ acknowledge: true }), // a
+      },
     });
 
     const request = httpServerMock.createKibanaRequest({

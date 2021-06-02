@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 import { escapeHatch, wrapError } from '../../utils';
 import { RouteDeps } from '../../types';
-import { CASE_COMMENTS_URL } from '../../../../../common/constants';
-import { CommentRequest } from '../../../../../common/api';
+import { CASE_COMMENTS_URL, ENABLE_CASE_CONNECTOR, CommentRequest } from '../../../../../common';
 
 export function initPostCommentApi({ router, logger }: RouteDeps) {
   router.post(
@@ -28,15 +28,21 @@ export function initPostCommentApi({ router, logger }: RouteDeps) {
       },
     },
     async (context, request, response) => {
-      if (!context.cases) {
-        return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
-      }
-
-      const casesClient = context.cases.getCasesClient();
-      const caseId = request.query?.subCaseId ?? request.params.case_id;
-      const comment = request.body as CommentRequest;
-
       try {
+        if (!ENABLE_CASE_CONNECTOR && request.query?.subCaseId !== undefined) {
+          throw Boom.badRequest(
+            'The `subCaseId` is not supported when the case connector feature is disabled'
+          );
+        }
+
+        if (!context.cases) {
+          return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
+        }
+
+        const casesClient = context.cases.getCasesClient();
+        const caseId = request.query?.subCaseId ?? request.params.case_id;
+        const comment = request.body as CommentRequest;
+
         return response.ok({
           body: await casesClient.addComment({ caseId, comment }),
         });

@@ -166,23 +166,6 @@ export interface InfraFieldDef {
   [type: string]: InfraFieldDetails;
 }
 
-export interface InfraTSVBResponse {
-  [key: string]: InfraTSVBPanel;
-}
-
-export interface InfraTSVBPanel {
-  id: string;
-  series: InfraTSVBSeries[];
-}
-
-export interface InfraTSVBSeries {
-  id: string;
-  label: string;
-  data: InfraTSVBDataPoint[];
-}
-
-export type InfraTSVBDataPoint = [number, number];
-
 export type InfraRouteConfig<Params, Query, Body, Method extends RouteMethod> = {
   method: RouteMethod;
 } & RouteConfig<Params, Query, Body, Method>;

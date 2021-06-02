@@ -100,6 +100,17 @@ describe('EnterpriseSearchRequestHandler', () => {
         });
       });
 
+      it('passes a body if that body is a string buffer', async () => {
+        const requestHandler = enterpriseSearchRequestHandler.createRequest({
+          path: '/api/example',
+        });
+        await makeAPICall(requestHandler, { body: Buffer.from('{"bodacious":true}') });
+
+        EnterpriseSearchAPI.shouldHaveBeenCalledWith('http://localhost:3002/api/example', {
+          body: '{"bodacious":true}',
+        });
+      });
+
       it('passes request params', async () => {
         const requestHandler = enterpriseSearchRequestHandler.createRequest({
           path: '/api/example',
@@ -196,6 +207,18 @@ describe('EnterpriseSearchRequestHandler', () => {
           },
           headers: mockExpectedResponseHeaders,
         });
+      });
+    });
+
+    it('works if response contains no json data', async () => {
+      EnterpriseSearchAPI.mockReturn();
+
+      const requestHandler = enterpriseSearchRequestHandler.createRequest({ path: '/api/prep' });
+      await makeAPICall(requestHandler);
+
+      expect(responseMock.custom).toHaveBeenCalledWith({
+        statusCode: 200,
+        headers: mockExpectedResponseHeaders,
       });
     });
   });
@@ -456,10 +479,12 @@ const EnterpriseSearchAPI = {
       ...expectedParams,
     });
   },
-  mockReturn(response: object, options?: any) {
+  mockReturn(response?: object, options?: any) {
     fetchMock.mockImplementation(() => {
       const headers = Object.assign({}, mockExpectedResponseHeaders, options?.headers);
-      return Promise.resolve(new Response(JSON.stringify(response), { ...options, headers }));
+      return Promise.resolve(
+        new Response(response ? JSON.stringify(response) : undefined, { ...options, headers })
+      );
     });
   },
   mockReturnError() {

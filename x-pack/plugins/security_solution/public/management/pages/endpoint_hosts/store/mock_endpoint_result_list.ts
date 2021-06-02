@@ -54,7 +54,7 @@ export const mockEndpointResultList: (options?: {
   for (let index = 0; index < actualCountToReturn; index++) {
     hosts.push({
       metadata: generator.generateHostMetadata(),
-      host_status: HostStatus.ERROR,
+      host_status: HostStatus.UNHEALTHY,
       query_strategy_version: queryStrategyVersion,
     });
   }
@@ -74,7 +74,7 @@ export const mockEndpointResultList: (options?: {
 export const mockEndpointDetailsApiResult = (): HostInfo => {
   return {
     metadata: generator.generateHostMetadata(),
-    host_status: HostStatus.ERROR,
+    host_status: HostStatus.UNHEALTHY,
     query_strategy_version: MetadataQueryStrategyVersions.VERSION_2,
   };
 };
