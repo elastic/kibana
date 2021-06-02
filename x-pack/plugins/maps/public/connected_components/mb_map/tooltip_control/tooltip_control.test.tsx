@@ -77,7 +77,7 @@ const defaultProps = {
   layerList: [mockLayer],
   isDrawingFilter: false,
   addFilters: async () => {},
-  geoFields: [],
+  geoFieldNames: [],
   openTooltips: [],
   hasLockedTooltips: false,
 };
