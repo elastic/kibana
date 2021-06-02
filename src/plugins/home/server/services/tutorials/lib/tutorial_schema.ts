@@ -102,7 +102,7 @@ const instructionsSchema = schema.object({
   instructionSets: schema.arrayOf(instructionSetSchema),
   params: schema.maybe(schema.arrayOf(paramSchema)),
 });
-export type InstructionsSchema = TypeOf<typeof instructionSchema>;
+export type InstructionsSchema = TypeOf<typeof instructionsSchema>;
 
 const tutorialIdRegExp = /^[a-zA-Z0-9-]+$/;
 export const tutorialSchema = schema.object({

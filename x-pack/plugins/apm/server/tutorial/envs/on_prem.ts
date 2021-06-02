@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import {
   INSTRUCTION_VARIANT,
-  TutorialSchema,
+  InstructionsSchema,
 } from '../../../../../../src/plugins/home/server';
 import {
   createDjangoAgentInstructions,
@@ -44,7 +44,7 @@ export function onPremInstructions({
   metricsIndices: string;
   sourcemapIndices: string;
   onboardingIndices: string;
-}): TutorialSchema['onPrem'] {
+}): InstructionsSchema {
   const EDIT_CONFIG = createEditConfig();
   const START_SERVER_UNIX = createStartServerUnix();
   const START_SERVER_UNIX_SYSV = createStartServerUnixSysv();
