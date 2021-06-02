@@ -22,7 +22,7 @@ const createConflictError = (
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const kibanaServer = getService('kibanaServer');
+  const esArchiver = getService('esArchiver');
 
   describe('import', () => {
     // mock success results including metadata
@@ -42,197 +42,199 @@ export default function ({ getService }: FtrProviderContext) {
       meta: { title: 'Requests', icon: 'dashboardApp' },
     };
 
-    describe('with basic data existing', () => {
-      before(() => kibanaServer.importExport.load('saved_objects/basic'));
-      after(() => kibanaServer.importExport.unload('saved_objects/basic'));
+    describe('with kibana index', () => {
+      describe('with basic data existing', () => {
+        before(() => esArchiver.load('saved_objects/basic'));
+        after(() => esArchiver.unload('saved_objects/basic'));
 
-      it('should return 415 when no file passed in', async () => {
-        await supertest
-          .post('/api/saved_objects/_import')
-          .expect(415)
-          .then((resp) => {
-            expect(resp.body).to.eql({
-              statusCode: 415,
-              error: 'Unsupported Media Type',
-              message: 'Unsupported Media Type',
+        it('should return 415 when no file passed in', async () => {
+          await supertest
+            .post('/api/saved_objects/_import')
+            .expect(415)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                statusCode: 415,
+                error: 'Unsupported Media Type',
+                message: 'Unsupported Media Type',
+              });
             });
-          });
-      });
-
-      it('should return errors when conflicts exist', async () => {
-        await supertest
-          .post('/api/saved_objects/_import')
-          .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
-          .expect(200)
-          .then((resp) => {
-            expect(resp.body).to.eql({
-              success: false,
-              successCount: 0,
-              errors: [
-                createConflictError(indexPattern),
-                createConflictError(visualization),
-                createConflictError(dashboard),
-              ],
-              warnings: [],
-            });
-          });
-      });
-
-      it('should return 200 when conflicts exist but overwrite is passed in', async () => {
-        await supertest
-          .post('/api/saved_objects/_import')
-          .query({ overwrite: true })
-          .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
-          .expect(200)
-          .then((resp) => {
-            expect(resp.body).to.eql({
-              success: true,
-              successCount: 3,
-              successResults: [
-                { ...indexPattern, overwrite: true },
-                { ...visualization, overwrite: true },
-                { ...dashboard, overwrite: true },
-              ],
-              warnings: [],
-            });
-          });
-      });
-
-      it('should return 200 when trying to import unsupported types', async () => {
-        const fileBuffer = Buffer.from(
-          '{"id":"1","type":"wigwags","attributes":{"title":"my title"},"references":[]}',
-          'utf8'
-        );
-        await supertest
-          .post('/api/saved_objects/_import')
-          .attach('file', fileBuffer, 'export.ndjson')
-          .expect(200)
-          .then((resp) => {
-            expect(resp.body).to.eql({
-              success: false,
-              successCount: 0,
-              errors: [
-                {
-                  id: '1',
-                  type: 'wigwags',
-                  title: 'my title',
-                  meta: { title: 'my title' },
-                  error: { type: 'unsupported_type' },
-                },
-              ],
-              warnings: [],
-            });
-          });
-      });
-
-      it('should return 200 when importing SO with circular refs', async () => {
-        const fileBuffer = Buffer.from(
-          dedent`
-            {"attributes":{"title":"dashboard-b"},"id":"dashboard-b","references":[{"id":"dashboard-a","name":"circular-dashboard-ref","type":"dashboard"}],"type":"dashboard"}
-            {"attributes":{"title":"dashboard-a"},"id":"dashboard-a","references":[{"id":"dashboard-b","name":"circular-dashboard-ref","type":"dashboard"}],"type":"dashboard"}
-          `,
-          'utf8'
-        );
-        const resp = await supertest
-          .post('/api/saved_objects/_import')
-          .attach('file', fileBuffer, 'export.ndjson')
-          .expect(200);
-
-        expect(resp.body).to.eql({
-          success: true,
-          successCount: 2,
-          successResults: [
-            {
-              id: 'dashboard-b',
-              meta: {
-                icon: 'dashboardApp',
-                title: 'dashboard-b',
-              },
-              type: 'dashboard',
-            },
-            {
-              id: 'dashboard-a',
-              meta: {
-                icon: 'dashboardApp',
-                title: 'dashboard-a',
-              },
-              type: 'dashboard',
-            },
-          ],
-          warnings: [],
         });
-      });
 
-      it('should return 400 when trying to import more than 10,000 objects', async () => {
-        const fileChunks = [];
-        for (let i = 0; i <= 10001; i++) {
-          fileChunks.push(`{"type":"visualization","id":"${i}","attributes":{},"references":[]}`);
-        }
-        await supertest
-          .post('/api/saved_objects/_import')
-          .attach('file', Buffer.from(fileChunks.join('\n'), 'utf8'), 'export.ndjson')
-          .expect(400)
-          .then((resp) => {
-            expect(resp.body).to.eql({
-              statusCode: 400,
-              error: 'Bad Request',
-              message: "Can't import more than 10001 objects",
+        it('should return errors when conflicts exist', async () => {
+          await supertest
+            .post('/api/saved_objects/_import')
+            .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
+            .expect(200)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                success: false,
+                successCount: 0,
+                errors: [
+                  createConflictError(indexPattern),
+                  createConflictError(visualization),
+                  createConflictError(dashboard),
+                ],
+                warnings: [],
+              });
             });
-          });
-      });
+        });
 
-      it('should return errors when index patterns or search are missing', async () => {
-        const objectsToImport = [
-          JSON.stringify({
-            type: 'visualization',
-            id: '1',
-            attributes: { title: 'My visualization' },
-            references: [
+        it('should return 200 when conflicts exist but overwrite is passed in', async () => {
+          await supertest
+            .post('/api/saved_objects/_import')
+            .query({ overwrite: true })
+            .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
+            .expect(200)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                success: true,
+                successCount: 3,
+                successResults: [
+                  { ...indexPattern, overwrite: true },
+                  { ...visualization, overwrite: true },
+                  { ...dashboard, overwrite: true },
+                ],
+                warnings: [],
+              });
+            });
+        });
+
+        it('should return 200 when trying to import unsupported types', async () => {
+          const fileBuffer = Buffer.from(
+            '{"id":"1","type":"wigwags","attributes":{"title":"my title"},"references":[]}',
+            'utf8'
+          );
+          await supertest
+            .post('/api/saved_objects/_import')
+            .attach('file', fileBuffer, 'export.ndjson')
+            .expect(200)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                success: false,
+                successCount: 0,
+                errors: [
+                  {
+                    id: '1',
+                    type: 'wigwags',
+                    title: 'my title',
+                    meta: { title: 'my title' },
+                    error: { type: 'unsupported_type' },
+                  },
+                ],
+                warnings: [],
+              });
+            });
+        });
+
+        it('should return 200 when importing SO with circular refs', async () => {
+          const fileBuffer = Buffer.from(
+            dedent`
+              {"attributes":{"title":"dashboard-b"},"id":"dashboard-b","references":[{"id":"dashboard-a","name":"circular-dashboard-ref","type":"dashboard"}],"type":"dashboard"}
+              {"attributes":{"title":"dashboard-a"},"id":"dashboard-a","references":[{"id":"dashboard-b","name":"circular-dashboard-ref","type":"dashboard"}],"type":"dashboard"}
+            `,
+            'utf8'
+          );
+          const resp = await supertest
+            .post('/api/saved_objects/_import')
+            .attach('file', fileBuffer, 'export.ndjson')
+            .expect(200);
+
+          expect(resp.body).to.eql({
+            success: true,
+            successCount: 2,
+            successResults: [
               {
-                name: 'ref_0',
-                type: 'index-pattern',
-                id: 'non-existing',
+                id: 'dashboard-b',
+                meta: {
+                  icon: 'dashboardApp',
+                  title: 'dashboard-b',
+                },
+                type: 'dashboard',
               },
               {
-                name: 'ref_1',
-                type: 'search',
-                id: 'non-existing-search',
+                id: 'dashboard-a',
+                meta: {
+                  icon: 'dashboardApp',
+                  title: 'dashboard-a',
+                },
+                type: 'dashboard',
               },
             ],
-          }),
-        ];
-        await supertest
-          .post('/api/saved_objects/_import')
-          .attach('file', Buffer.from(objectsToImport.join('\n'), 'utf8'), 'export.ndjson')
-          .expect(200)
-          .then((resp) => {
-            expect(resp.body).to.eql({
-              success: false,
-              successCount: 0,
-              errors: [
+            warnings: [],
+          });
+        });
+
+        it('should return 400 when trying to import more than 10,000 objects', async () => {
+          const fileChunks = [];
+          for (let i = 0; i <= 10001; i++) {
+            fileChunks.push(`{"type":"visualization","id":"${i}","attributes":{},"references":[]}`);
+          }
+          await supertest
+            .post('/api/saved_objects/_import')
+            .attach('file', Buffer.from(fileChunks.join('\n'), 'utf8'), 'export.ndjson')
+            .expect(400)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message: "Can't import more than 10001 objects",
+              });
+            });
+        });
+
+        it('should return errors when index patterns or search are missing', async () => {
+          const objectsToImport = [
+            JSON.stringify({
+              type: 'visualization',
+              id: '1',
+              attributes: { title: 'My visualization' },
+              references: [
                 {
-                  type: 'visualization',
-                  id: '1',
-                  title: 'My visualization',
-                  meta: { title: 'My visualization', icon: 'visualizeApp' },
-                  error: {
-                    type: 'missing_references',
-                    references: [
-                      {
-                        type: 'index-pattern',
-                        id: 'non-existing',
-                      },
-                      {
-                        type: 'search',
-                        id: 'non-existing-search',
-                      },
-                    ],
-                  },
+                  name: 'ref_0',
+                  type: 'index-pattern',
+                  id: 'non-existing',
+                },
+                {
+                  name: 'ref_1',
+                  type: 'search',
+                  id: 'non-existing-search',
                 },
               ],
-              warnings: [],
+            }),
+          ];
+          await supertest
+            .post('/api/saved_objects/_import')
+            .attach('file', Buffer.from(objectsToImport.join('\n'), 'utf8'), 'export.ndjson')
+            .expect(200)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                success: false,
+                successCount: 0,
+                errors: [
+                  {
+                    type: 'visualization',
+                    id: '1',
+                    title: 'My visualization',
+                    meta: { title: 'My visualization', icon: 'visualizeApp' },
+                    error: {
+                      type: 'missing_references',
+                      references: [
+                        {
+                          type: 'index-pattern',
+                          id: 'non-existing',
+                        },
+                        {
+                          type: 'search',
+                          id: 'non-existing-search',
+                        },
+                      ],
+                    },
+                  },
+                ],
+                warnings: [],
+              });
             });
-          });
+        });
       });
     });
   });
