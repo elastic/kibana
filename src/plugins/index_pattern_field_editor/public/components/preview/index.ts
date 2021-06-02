@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export const pluginName = 'index_pattern_field_editor';
+export { useFieldPreviewContext, FieldPreviewProvider } from './field_preview_context';
 
-export const euiFlyoutClassname = 'indexPatternFieldEditorFlyout';
+export { FieldPreview } from './field_preview';

@@ -22,7 +22,7 @@ import { coreMock } from 'src/core/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
 import { usageCollectionPluginMock } from '../../usage_collection/public/mocks';
 
-import { FieldEditorFlyoutContentContainer } from './components/field_editor_flyout_content_container';
+import { FieldEditorLoader } from './components/field_editor_loader';
 import { IndexPatternFieldEditorPlugin } from './plugin';
 import { DeleteFieldModal } from './components/delete_field_modal';
 import { IndexPattern } from './shared_imports';
@@ -65,7 +65,7 @@ describe('IndexPatternFieldEditorPlugin', () => {
     expect(openFlyout).toHaveBeenCalled();
 
     const [[arg]] = openFlyout.mock.calls;
-    expect(arg.props.children.type).toBe(FieldEditorFlyoutContentContainer);
+    expect(arg.props.children.type).toBe(FieldEditorLoader);
 
     // We force call the "onSave" prop from the <RuntimeFieldEditorFlyoutContent /> component
     // and make sure that the the spy is being called.

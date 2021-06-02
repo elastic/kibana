@@ -9,6 +9,7 @@
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { get } from 'lodash';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,7 +30,7 @@ import {
 } from '../../shared_imports';
 import { Field } from '../../types';
 import { useFieldEditorContext } from '../field_editor_context';
-import { useFieldPreviewContext } from '../field_preview_context';
+import { useFieldPreviewContext } from '../preview';
 
 import { RUNTIME_FIELD_OPTIONS } from './constants';
 import { schema } from './form_schema';
@@ -153,7 +154,12 @@ const FieldEditorComponent = ({ field, onChange, syntaxError }: Props) => {
     existingConcreteFields,
     fieldTypeToProcess,
   } = useFieldEditorContext();
-  const { fields, error, updateParams: updatePreviewParams } = useFieldPreviewContext();
+  const {
+    fields,
+    error,
+    updateParams: updatePreviewParams,
+    setIsPanelVisible,
+  } = useFieldPreviewContext();
   const { form } = useForm<Field, FieldFormInternal>({
     defaultValue: field,
     schema,
@@ -168,10 +174,13 @@ const FieldEditorComponent = ({ field, onChange, syntaxError }: Props) => {
   const nameFieldConfig = getNameFieldConfig(namesNotAllowed, field);
   const i18nTexts = geti18nTexts();
 
-  const [{ name: updatedName, type: updatedType, script: updatedScript }] = useFormData({ form });
+  const [formData] = useFormData({ form });
+  const { name: updatedName, type: updatedType, script: updatedScript } = formData;
   const nameHasChanged = Boolean(field?.name) && field?.name !== updatedName;
   const typeHasChanged =
     Boolean(field?.type) && field?.type !== (updatedType && updatedType[0].value);
+  const isValueVisible = get(formData, '__meta__.isValueVisible');
+  const isFormatVisible = get(formData, '__meta__.isFormatVisible');
 
   useEffect(() => {
     if (onChange) {
@@ -201,6 +210,14 @@ const FieldEditorComponent = ({ field, onChange, syntaxError }: Props) => {
       script: Boolean(updatedScript?.source.trim()) ? updatedScript : null,
     });
   }, [updatedName, updatedType, updatedScript, updatePreviewParams]);
+
+  useEffect(() => {
+    if (isValueVisible || isFormatVisible) {
+      setIsPanelVisible(true);
+    } else {
+      setIsPanelVisible(false);
+    }
+  }, [isValueVisible, isFormatVisible, setIsPanelVisible]);
 
   return (
     <Form form={form} className="indexPatternFieldEditor__form">
