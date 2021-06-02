@@ -42,6 +42,7 @@ import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../t
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 import { CasesNavigation } from '../links';
 import { OwnerProvider } from '../owner_context';
+import { DoesNotExist } from './does_not_exist';
 
 const gutterTimeline = '70px'; // seems to be a timeline reference from the original file
 export interface CaseViewComponentProps {
@@ -499,7 +500,7 @@ export const CaseView = React.memo(
   }: CaseViewProps) => {
     const { data, isLoading, isError, fetchCase, updateCase } = useGetCase(caseId, subCaseId);
     if (isError) {
-      return null;
+      return <DoesNotExist allCasesNavigation={allCasesNavigation} caseId={caseId} />;
     }
     if (isLoading) {
       return (
