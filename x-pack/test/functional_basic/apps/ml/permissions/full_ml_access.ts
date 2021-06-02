@@ -25,7 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe(`(${testUser.user})`, function () {
         const ecIndexPattern = 'ft_module_sample_ecommerce';
         const ecExpectedTotalCount = '287';
-        const ecExpectedModuleId = 'sample_data_ecommerce';
+        // const ecExpectedModuleId = 'sample_data_ecommerce';
 
         const uploadFilePath = path.join(
           __dirname,
@@ -135,7 +135,9 @@ export default function ({ getService }: FtrProviderContext) {
               testUser.discoverAvailable ? 'with' : 'without'
             } Discover card`
           );
-          await ml.dataVisualizerIndexBased.assertActionsPanelExists();
+          if (testUser.discoverAvailable) {
+            await ml.dataVisualizerIndexBased.assertActionsPanelExists();
+          }
           await ml.dataVisualizerIndexBased.assertViewInDiscoverCard(testUser.discoverAvailable);
 
           // @TODO: Re-enable in follow up

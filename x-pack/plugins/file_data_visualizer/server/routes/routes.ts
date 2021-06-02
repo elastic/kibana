@@ -113,9 +113,6 @@ export function dataVisualizerRoutes(coreSetup: CoreSetup<StartDeps, unknown>, l
         params: indexPatternTitleSchema,
         body: dataVisualizerFieldHistogramsSchema,
       },
-      options: {
-        tags: ['access:ml:canAccessML', 'access:dataVisualizer:view'],
-      },
     },
     async (context, request, response) => {
       try {
@@ -161,9 +158,6 @@ export function dataVisualizerRoutes(coreSetup: CoreSetup<StartDeps, unknown>, l
       validate: {
         params: indexPatternTitleSchema,
         body: dataVisualizerFieldStatsSchema,
-      },
-      options: {
-        tags: ['access:ml:canAccessML', 'access:dataVisualizer:view'],
       },
     },
     async (context, request, response) => {
@@ -228,9 +222,6 @@ export function dataVisualizerRoutes(coreSetup: CoreSetup<StartDeps, unknown>, l
       validate: {
         params: indexPatternTitleSchema,
         body: dataVisualizerOverallStatsSchema,
-      },
-      options: {
-        tags: ['access:ml:canAccessML', 'access:dataVisualizer:view'],
       },
     },
     async (context, request, response) => {

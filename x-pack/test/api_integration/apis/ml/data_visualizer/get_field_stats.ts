@@ -177,7 +177,7 @@ export default ({ getService }: FtrProviderContext) => {
   }
 
   // Move these tests to file_data_visualizer plugin
-  describe.skip('get_field_stats', function () {
+  describe('get_field_stats', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
