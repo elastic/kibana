@@ -59,7 +59,7 @@ export const callEnterpriseSearchConfigAPI = async ({
     const options = {
       headers: { Authorization: request.headers.authorization as string },
       signal: controller.signal,
-      agent: entSearchHttpAgent(config),
+      agent: entSearchHttpAgent.getHttpAgent(),
     };
 
     const response = await fetch(enterpriseSearchUrl, options);

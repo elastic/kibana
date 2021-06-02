@@ -5,18 +5,13 @@
  * 2.0.
  */
 
-import { mockConfig, mockLogger } from '../__mocks__';
+import { mockConfig, mockLogger, mockHttpAgent } from '../__mocks__';
 
 import {
   ENTERPRISE_SEARCH_KIBANA_COOKIE,
   JSON_HEADER,
   READ_ONLY_MODE_HEADER,
 } from '../../common/constants';
-
-const mockHttpAgent = jest.fn();
-jest.mock('./enterprise_search_http_agent', () => ({
-  entSearchHttpAgent: () => mockHttpAgent,
-}));
 
 import { EnterpriseSearchRequestHandler } from './enterprise_search_request_handler';
 

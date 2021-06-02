@@ -6,6 +6,7 @@
  */
 
 import { DEFAULT_INITIAL_APP_DATA } from '../../common/__mocks__';
+import '../__mocks__/http_agent.mock.ts';
 
 jest.mock('node-fetch');
 import fetch from 'node-fetch';

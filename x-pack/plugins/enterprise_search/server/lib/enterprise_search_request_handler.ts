@@ -24,7 +24,7 @@ import {
   READ_ONLY_MODE_HEADER,
 } from '../../common/constants';
 
-import { entSearchHttpAgent, HttpAgent } from './enterprise_search_http_agent';
+import { entSearchHttpAgent } from './enterprise_search_http_agent';
 
 interface ConstructorDependencies {
   config: ConfigType;
@@ -55,14 +55,12 @@ export interface IEnterpriseSearchRequestHandler {
  */
 export class EnterpriseSearchRequestHandler {
   private enterpriseSearchUrl: string;
-  private httpAgent: HttpAgent;
   private log: Logger;
   private headers: Record<string, string> = {};
 
   constructor({ config, log }: ConstructorDependencies) {
     this.log = log;
     this.enterpriseSearchUrl = config.host as string;
-    this.httpAgent = entSearchHttpAgent(config);
   }
 
   createRequest({ path, params = {}, hasValidData = () => true }: RequestParams) {
@@ -85,7 +83,7 @@ export class EnterpriseSearchRequestHandler {
           method: request.route.method as string,
           headers: { Authorization: request.headers.authorization as string, ...JSON_HEADER },
           body: this.getBodyAsString(request.body as object | Buffer),
-          agent: this.httpAgent,
+          agent: entSearchHttpAgent.getHttpAgent(),
         };
 
         // Call the Enterprise Search API

@@ -13,63 +13,73 @@ import { PeerCertificate } from 'tls';
 import { ConfigType } from '../';
 
 export type HttpAgent = http.Agent | https.Agent;
-
-// Returns an HTTP agent to be used for requests to Enterprise Search APIs
-export const entSearchHttpAgent = (config: ConfigType): HttpAgent => {
-  const defaultAgent = new http.Agent();
-
-  if (!config.host) return defaultAgent;
-
-  try {
-    const parsedHost = new URL(config.host);
-    if (parsedHost.protocol === 'https:') {
-      return new https.Agent({
-        ca: loadCertificateAuthorities(config.ssl.certificateAuthorities),
-        ...getAgentOptions(config.ssl.verificationMode),
-      });
-    }
-  } catch {
-    // Ignore URL parsing errors and fall back to the HTTP agent
-  }
-
-  return defaultAgent;
-};
-
-// Loads custom CA certificate files and returns all certificates as an array
-export const loadCertificateAuthorities = (ca: string | string[] | undefined): string[] => {
-  const parsedCerts: string[] = [];
-  if (ca) {
-    const paths = Array.isArray(ca) ? ca : [ca];
-    paths.forEach((path) => {
-      const parsedCert = readFileSync(path, 'utf8');
-      parsedCerts.push(parsedCert);
-    });
-  }
-  return parsedCerts;
-};
-
 interface AgentOptions {
   rejectUnauthorized?: boolean;
   checkServerIdentity?: ((host: string, cert: PeerCertificate) => Error | undefined) | undefined;
 }
 
-export const getAgentOptions = (
-  verificationMode: 'full' | 'certificate' | 'none'
-): AgentOptions => {
-  const agentOptions: AgentOptions = {};
+/*
+ * Returns an HTTP agent to be used for requests to Enterprise Search APIs
+ */
+class EnterpriseSearchHttpAgent {
+  public httpAgent: HttpAgent = new http.Agent();
 
-  switch (verificationMode) {
-    case 'none':
-      agentOptions.rejectUnauthorized = false;
-      break;
-    case 'certificate':
-      agentOptions.rejectUnauthorized = true;
-      agentOptions.checkServerIdentity = () => undefined;
-      break;
-    case 'full':
-    default:
-      agentOptions.rejectUnauthorized = true;
-      break;
+  getHttpAgent() {
+    return this.httpAgent;
   }
-  return agentOptions;
-};
+
+  initializeHttpAgent(config: ConfigType) {
+    if (!config.host) return;
+
+    try {
+      const parsedHost = new URL(config.host);
+      if (parsedHost.protocol === 'https:') {
+        this.httpAgent = new https.Agent({
+          ca: this.loadCertificateAuthorities(config.ssl.certificateAuthorities),
+          ...this.getAgentOptions(config.ssl.verificationMode),
+        });
+      }
+    } catch {
+      // Ignore URL parsing errors and fall back to the HTTP agent
+    }
+  }
+
+  /*
+   * Loads custom CA certificate files and returns all certificates as an array
+   * This is a potentially expensive operation & why this helper is a class
+   * initialized once on plugin init
+   */
+  loadCertificateAuthorities(certificates: string | string[] | undefined): string[] {
+    if (!certificates) return [];
+
+    const paths = Array.isArray(certificates) ? certificates : [certificates];
+    return paths.map((path) => readFileSync(path, 'utf8'));
+  }
+
+  /*
+   * Convert verificationMode to rejectUnauthorized for more consistent config settings
+   * with the rest of Kibana
+   * @see https://github.com/elastic/kibana/blob/master/x-pack/plugins/actions/server/builtin_action_types/lib/get_node_tls_options.ts
+   */
+  getAgentOptions(verificationMode: 'full' | 'certificate' | 'none') {
+    const agentOptions: AgentOptions = {};
+
+    switch (verificationMode) {
+      case 'none':
+        agentOptions.rejectUnauthorized = false;
+        break;
+      case 'certificate':
+        agentOptions.rejectUnauthorized = true;
+        agentOptions.checkServerIdentity = () => undefined;
+        break;
+      case 'full':
+      default:
+        agentOptions.rejectUnauthorized = true;
+        break;
+    }
+
+    return agentOptions;
+  }
+}
+
+export const entSearchHttpAgent = new EnterpriseSearchHttpAgent();
