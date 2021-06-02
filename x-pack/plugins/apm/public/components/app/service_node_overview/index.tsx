@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiPanel, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiPanel, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
@@ -22,7 +22,6 @@ import { useFetcher } from '../../../hooks/use_fetcher';
 import { px, truncate, unit } from '../../../style/variables';
 import { ServiceNodeMetricOverviewLink } from '../../shared/Links/apm/ServiceNodeMetricOverviewLink';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
-import { SearchBar } from '../../shared/search_bar';
 
 const INITIAL_PAGE_SIZE = 25;
 const INITIAL_SORT_FIELD = 'cpu';

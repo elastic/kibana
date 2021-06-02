@@ -6,7 +6,6 @@
  */
 
 import { shallow } from 'enzyme';
-import { Location } from 'history';
 import React from 'react';
 import { mockMoment } from '../../../../utils/testHelpers';
 import { DetailView } from './index';
@@ -19,11 +18,7 @@ describe('DetailView', () => {
 
   it('should render empty state', () => {
     const wrapper = shallow(
-      <DetailView
-        errorGroup={{} as any}
-        urlParams={{}}
-        location={{} as Location}
-      />
+      <DetailView errorGroup={{} as any} urlParams={{}} />
     );
     expect(wrapper.isEmptyRender()).toBe(true);
   });
@@ -46,11 +41,7 @@ describe('DetailView', () => {
     };
 
     const wrapper = shallow(
-      <DetailView
-        errorGroup={errorGroup}
-        urlParams={{}}
-        location={{} as Location}
-      />
+      <DetailView errorGroup={errorGroup} urlParams={{}} />
     ).find('DiscoverErrorLink');
 
     expect(wrapper.exists()).toBe(true);
@@ -69,11 +60,7 @@ describe('DetailView', () => {
       transaction: undefined,
     };
     const wrapper = shallow(
-      <DetailView
-        errorGroup={errorGroup}
-        urlParams={{}}
-        location={{} as Location}
-      />
+      <DetailView errorGroup={errorGroup} urlParams={{}} />
     ).find('Summary');
 
     expect(wrapper.exists()).toBe(true);
@@ -93,11 +80,7 @@ describe('DetailView', () => {
       } as any,
     };
     const wrapper = shallow(
-      <DetailView
-        errorGroup={errorGroup}
-        urlParams={{}}
-        location={{} as Location}
-      />
+      <DetailView errorGroup={errorGroup} urlParams={{}} />
     ).find('EuiTabs');
 
     expect(wrapper.exists()).toBe(true);
@@ -117,11 +100,7 @@ describe('DetailView', () => {
       } as any,
     };
     const wrapper = shallow(
-      <DetailView
-        errorGroup={errorGroup}
-        urlParams={{}}
-        location={{} as Location}
-      />
+      <DetailView errorGroup={errorGroup} urlParams={{}} />
     ).find('TabContent');
 
     expect(wrapper.exists()).toBe(true);
@@ -145,13 +124,7 @@ describe('DetailView', () => {
       } as any,
     };
     expect(() =>
-      shallow(
-        <DetailView
-          errorGroup={errorGroup}
-          urlParams={{}}
-          location={{} as Location}
-        />
-      )
+      shallow(<DetailView errorGroup={errorGroup} urlParams={{}} />)
     ).not.toThrowError();
   });
 });

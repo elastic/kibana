@@ -17,7 +17,6 @@ import { useTransactionDistributionFetcher } from '../../../hooks/use_transactio
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { HeightRetainer } from '../../shared/HeightRetainer';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
-import { SearchBar } from '../../shared/search_bar';
 import { TransactionDistribution } from './Distribution';
 import { useWaterfallFetcher } from './use_waterfall_fetcher';
 import { WaterfallWithSummmary } from './WaterfallWithSummmary';

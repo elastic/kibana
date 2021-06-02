@@ -8,7 +8,6 @@
 import {
   EuiCallOut,
   EuiCode,
-  EuiFlexGroup,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -25,7 +24,6 @@ import { useUrlParams } from '../../../context/url_params_context/use_url_params
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
-import { SearchBar } from '../../shared/search_bar';
 import { TransactionList } from './TransactionList';
 import { useRedirect } from './useRedirect';
 import { useTransactionListFetcher } from './use_transaction_list';

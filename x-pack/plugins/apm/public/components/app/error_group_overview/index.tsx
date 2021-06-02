@@ -18,7 +18,6 @@ import { useTrackPageview } from '../../../../../observability/public';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import { SearchBar } from '../../shared/search_bar';
 import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
 import { ErrorGroupList } from './List';
 

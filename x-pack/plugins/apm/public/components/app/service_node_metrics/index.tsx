@@ -28,7 +28,6 @@ import { useApmServiceContext } from '../../../context/apm_service/use_apm_servi
 import { px, truncate, unit } from '../../../style/variables';
 import { MetricsChart } from '../../shared/charts/metrics_chart';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
-import { SearchBar } from '../../shared/search_bar';
 
 const INITIAL_DATA = {
   host: '',
