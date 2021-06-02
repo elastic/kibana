@@ -136,7 +136,7 @@ yarn prettier  "./x-pack/plugins/apm/**/*.{tsx,ts,js}" --write
 ### ESLint
 
 ```
-yarn eslint ./x-pack/plugins/apm --fix
+node scripts/eslint.js x-pack/legacy/plugins/apm
 ```
 
 ## Setup default APM users
