@@ -149,7 +149,9 @@ export { formulaOperation } from './formula/formula';
 export interface ParamEditorProps<C> {
   currentColumn: C;
   layer: IndexPatternLayer;
-  updateLayer: (newLayer: IndexPatternLayer) => void;
+  updateLayer: (
+    setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
+  ) => void;
   columnId: string;
   indexPattern: IndexPattern;
   uiSettings: IUiSettingsClient;
@@ -355,7 +357,8 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
     columnId: string,
     indexPattern: IndexPattern,
     layer: IndexPatternLayer,
-    uiSettings: IUiSettingsClient
+    uiSettings: IUiSettingsClient,
+    orderedColumnIds: string[]
   ) => ExpressionAstFunction;
   /**
    * Validate that the operation has the right preconditions in the state. For example:

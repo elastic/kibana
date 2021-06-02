@@ -105,10 +105,9 @@ export type FrameMock = jest.Mocked<FramePublicAPI>;
 
 export function createMockPaletteDefinition(): jest.Mocked<PaletteDefinition> {
   return {
-    getColors: jest.fn((_) => ['#ff0000', '#00ff00']),
+    getCategoricalColors: jest.fn((_) => ['#ff0000', '#00ff00']),
     title: 'Mock Palette',
     id: 'default',
-    renderEditor: jest.fn(),
     toExpression: jest.fn(() => ({
       type: 'expression',
       chain: [
@@ -119,7 +118,7 @@ export function createMockPaletteDefinition(): jest.Mocked<PaletteDefinition> {
         },
       ],
     })),
-    getColor: jest.fn().mockReturnValue('#ff0000'),
+    getCategoricalColor: jest.fn().mockReturnValue('#ff0000'),
   };
 }
 
