@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { MetricsUIAggregation } from '../../../types';
+import { noop } from '../../../shared/lib/transformers/noop';
+import { MetricsUISnapshotMetric } from '../../../types';
 
-export const sqsOldestMessage: MetricsUIAggregation = {
-  sqsOldestMessage: {
-    max: {
-      field: 'aws.sqs.oldest_message_age.sec',
+export const sqsOldestMessage: MetricsUISnapshotMetric = {
+  aggs: {
+    sqsOldestMessage: {
+      max: {
+        field: 'aws.sqs.oldest_message_age.sec',
+      },
     },
   },
+  transformer: noop,
 };

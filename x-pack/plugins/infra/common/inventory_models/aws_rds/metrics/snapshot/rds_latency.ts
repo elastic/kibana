@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { MetricsUIAggregation } from '../../../types';
+import { noop } from '../../../shared/lib/transformers/noop';
+import { MetricsUISnapshotMetric } from '../../../types';
 
-export const rdsLatency: MetricsUIAggregation = {
-  rdsLatency: {
-    avg: {
-      field: 'aws.rds.latency.dml',
+export const rdsLatency: MetricsUISnapshotMetric = {
+  aggs: {
+    rdsLatency: {
+      avg: {
+        field: 'aws.rds.latency.dml',
+      },
     },
   },
+  transformer: noop,
 };

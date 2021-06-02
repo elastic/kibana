@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { MetricsUIAggregation } from '../../../types';
+import { noop } from '../../../shared/lib/transformers/noop';
+import { MetricsUISnapshotMetric } from '../../../types';
 
-export const cpu: MetricsUIAggregation = {
-  cpu: {
-    avg: {
-      field: 'docker.cpu.total.pct',
+export const cpu: MetricsUISnapshotMetric = {
+  aggs: {
+    cpu: {
+      avg: {
+        field: 'docker.cpu.total.pct',
+      },
     },
   },
+  transformer: noop,
 };

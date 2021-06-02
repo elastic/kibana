@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-import { noop } from '../../../shared/lib/transformers/noop';
-import { MetricsUISnapshotMetric } from '../../../types';
+import { MetricsAPISeries } from '../../../../http_api';
 
-export const load: MetricsUISnapshotMetric = {
-  aggs: {
-    load: { avg: { field: 'system.load.5' } },
-  },
-  transformer: noop,
-};
+export const noop = (series: MetricsAPISeries[]) => series;

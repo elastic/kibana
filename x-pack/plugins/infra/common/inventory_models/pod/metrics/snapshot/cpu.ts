@@ -5,30 +5,34 @@
  * 2.0.
  */
 
-import { MetricsUIAggregation } from '../../../types';
+import { noop } from '../../../shared/lib/transformers/noop';
+import { MetricsUISnapshotMetric } from '../../../types';
 
-export const cpu: MetricsUIAggregation = {
-  cpu_with_limit: {
-    avg: {
-      field: 'kubernetes.pod.cpu.usage.limit.pct',
-    },
-  },
-  cpu_without_limit: {
-    avg: {
-      field: 'kubernetes.pod.cpu.usage.node.pct',
-    },
-  },
-  cpu: {
-    bucket_script: {
-      buckets_path: {
-        with_limit: 'cpu_with_limit',
-        without_limit: 'cpu_without_limit',
+export const cpu: MetricsUISnapshotMetric = {
+  aggs: {
+    cpu_with_limit: {
+      avg: {
+        field: 'kubernetes.pod.cpu.usage.limit.pct',
       },
-      script: {
-        source: 'params.with_limit > 0.0 ? params.with_limit : params.without_limit',
-        lang: 'painless',
+    },
+    cpu_without_limit: {
+      avg: {
+        field: 'kubernetes.pod.cpu.usage.node.pct',
       },
-      gap_policy: 'skip',
+    },
+    cpu: {
+      bucket_script: {
+        buckets_path: {
+          with_limit: 'cpu_with_limit',
+          without_limit: 'cpu_without_limit',
+        },
+        script: {
+          source: 'params.with_limit > 0.0 ? params.with_limit : params.without_limit',
+          lang: 'painless',
+        },
+        gap_policy: 'skip',
+      },
     },
   },
+  transformer: noop,
 };

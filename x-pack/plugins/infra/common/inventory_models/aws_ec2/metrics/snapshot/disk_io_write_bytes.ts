@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { MetricsUIAggregation } from '../../../types';
+import { noop } from '../../../shared/lib/transformers/noop';
+import { MetricsUISnapshotMetric } from '../../../types';
 
-export const diskIOWriteBytes: MetricsUIAggregation = {
-  diskIOWriteBytes: {
-    avg: {
-      field: 'aws.ec2.diskio.write.bytes_per_sec',
+export const diskIOWriteBytes: MetricsUISnapshotMetric = {
+  aggs: {
+    diskIOWriteBytes: {
+      avg: {
+        field: 'aws.ec2.diskio.write.bytes_per_sec',
+      },
     },
   },
+  transformer: noop,
 };

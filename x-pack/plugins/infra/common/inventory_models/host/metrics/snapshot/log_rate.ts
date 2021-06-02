@@ -5,29 +5,21 @@
  * 2.0.
  */
 
-import { MetricsUIAggregation } from '../../../types';
+import { noop } from '../../../shared/lib/transformers/noop';
+import { MetricsUISnapshotMetric } from '../../../types';
 
-export const logRate: MetricsUIAggregation = {
-  count: {
-    bucket_script: {
-      buckets_path: { count: '_count' },
-      script: {
-        source: 'count * 1',
-        lang: 'expression',
+export const logRate: MetricsUISnapshotMetric = {
+  aggs: {
+    logRate: {
+      bucket_script: {
+        buckets_path: { count: '_count' },
+        script: {
+          source: 'count * 1',
+          lang: 'expression',
+        },
+        gap_policy: 'skip',
       },
-      gap_policy: 'skip',
     },
   },
-  cumsum: {
-    cumulative_sum: {
-      buckets_path: 'count',
-    },
-  },
-  logRate: {
-    derivative: {
-      buckets_path: 'cumsum',
-      gap_policy: 'skip',
-      unit: '1s',
-    },
-  },
+  transformer: noop,
 };

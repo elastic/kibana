@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { MetricsUIAggregation } from '../../../types';
+import { noop } from '../../../shared/lib/transformers/noop';
+import { MetricsUISnapshotMetric } from '../../../types';
 
-export const s3BucketSize: MetricsUIAggregation = {
-  s3BucketSize: {
-    max: {
-      field: 'aws.s3_daily_storage.bucket.size.bytes',
+export const s3BucketSize: MetricsUISnapshotMetric = {
+  aggs: {
+    s3BucketSize: {
+      max: {
+        field: 'aws.s3_daily_storage.bucket.size.bytes',
+      },
     },
   },
+  transformer: noop,
 };

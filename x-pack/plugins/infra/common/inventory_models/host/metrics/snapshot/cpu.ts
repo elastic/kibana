@@ -5,36 +5,40 @@
  * 2.0.
  */
 
-import { MetricsUIAggregation } from '../../../types';
+import { noop } from '../../../shared/lib/transformers/noop';
+import { MetricsUISnapshotMetric } from '../../../types';
 
-export const cpu: MetricsUIAggregation = {
-  cpu_user: {
-    avg: {
-      field: 'system.cpu.user.pct',
-    },
-  },
-  cpu_system: {
-    avg: {
-      field: 'system.cpu.system.pct',
-    },
-  },
-  cpu_cores: {
-    max: {
-      field: 'system.cpu.cores',
-    },
-  },
-  cpu: {
-    bucket_script: {
-      buckets_path: {
-        user: 'cpu_user',
-        system: 'cpu_system',
-        cores: 'cpu_cores',
+export const cpu: MetricsUISnapshotMetric = {
+  aggs: {
+    cpu_user: {
+      avg: {
+        field: 'system.cpu.user.pct',
       },
-      script: {
-        source: '(params.user + params.system) / params.cores',
-        lang: 'painless',
+    },
+    cpu_system: {
+      avg: {
+        field: 'system.cpu.system.pct',
       },
-      gap_policy: 'skip',
+    },
+    cpu_cores: {
+      max: {
+        field: 'system.cpu.cores',
+      },
+    },
+    cpu: {
+      bucket_script: {
+        buckets_path: {
+          user: 'cpu_user',
+          system: 'cpu_system',
+          cores: 'cpu_cores',
+        },
+        script: {
+          source: '(params.user + params.system) / params.cores',
+          lang: 'painless',
+        },
+        gap_policy: 'skip',
+      },
     },
   },
+  transformer: noop,
 };

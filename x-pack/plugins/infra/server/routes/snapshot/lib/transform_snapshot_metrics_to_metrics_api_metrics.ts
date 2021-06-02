@@ -37,6 +37,6 @@ export const transformSnapshotMetricsToMetricsAPIMetrics = (
         },
       };
     }
-    return { id: metric.type, aggregations: inventoryModel.metrics.snapshot?.[metric.type] };
+    return { id: metric.type, aggregations: inventoryModel.metrics.snapshot?.[metric.type].aggs };
   });
 };

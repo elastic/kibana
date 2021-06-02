@@ -5,30 +5,34 @@
  * 2.0.
  */
 
-import { MetricsUIAggregation } from '../../../types';
+import { noop } from '../../../shared/lib/transformers/noop';
+import { MetricsUISnapshotMetric } from '../../../types';
 
-export const memory: MetricsUIAggregation = {
-  memory_with_limit: {
-    avg: {
-      field: 'kubernetes.pod.memory.usage.limit.pct',
-    },
-  },
-  memory_without_limit: {
-    avg: {
-      field: 'kubernetes.pod.memory.usage.node.pct',
-    },
-  },
-  memory: {
-    bucket_script: {
-      buckets_path: {
-        with_limit: 'memory_with_limit',
-        without_limit: 'memory_without_limit',
+export const memory: MetricsUISnapshotMetric = {
+  aggs: {
+    memory_with_limit: {
+      avg: {
+        field: 'kubernetes.pod.memory.usage.limit.pct',
       },
-      script: {
-        source: 'params.with_limit > 0.0 ? params.with_limit : params.without_limit',
-        lang: 'painless',
+    },
+    memory_without_limit: {
+      avg: {
+        field: 'kubernetes.pod.memory.usage.node.pct',
       },
-      gap_policy: 'skip',
+    },
+    memory: {
+      bucket_script: {
+        buckets_path: {
+          with_limit: 'memory_with_limit',
+          without_limit: 'memory_without_limit',
+        },
+        script: {
+          source: 'params.with_limit > 0.0 ? params.with_limit : params.without_limit',
+          lang: 'painless',
+        },
+        gap_policy: 'skip',
+      },
     },
   },
+  transformer: noop,
 };

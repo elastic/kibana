@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { MetricsUIAggregation } from '../../../types';
+import { noop } from '../../../shared/lib/transformers/noop';
+import { MetricsUISnapshotMetric } from '../../../types';
 
-export const tx: MetricsUIAggregation = {
-  tx: {
-    avg: {
-      field: 'aws.ec2.network.in.bytes_per_sec',
+export const tx: MetricsUISnapshotMetric = {
+  aggs: {
+    tx: {
+      avg: {
+        field: 'aws.ec2.network.in.bytes_per_sec',
+      },
     },
   },
+  transformer: noop,
 };

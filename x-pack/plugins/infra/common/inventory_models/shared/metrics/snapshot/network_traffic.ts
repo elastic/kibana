@@ -9,23 +9,6 @@ import { MetricsUIAggregation } from '../../../types';
 
 export const networkTraffic = (id: string, field: string): MetricsUIAggregation => {
   return {
-    [`${id}_max`]: { max: { field } },
-    [`${id}_deriv`]: {
-      derivative: {
-        buckets_path: `${id}_max`,
-        gap_policy: 'skip',
-        unit: '1s',
-      },
-    },
-    [id]: {
-      bucket_script: {
-        buckets_path: { value: `${id}_deriv[normalized_value]` },
-        script: {
-          source: 'params.value > 0.0 ? params.value : 0.0',
-          lang: 'painless',
-        },
-        gap_policy: 'skip',
-      },
-    },
+    [id]: { max: { field } },
   };
 };

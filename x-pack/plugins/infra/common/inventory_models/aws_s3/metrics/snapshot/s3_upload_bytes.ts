@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { MetricsUIAggregation } from '../../../types';
+import { noop } from '../../../shared/lib/transformers/noop';
+import { MetricsUISnapshotMetric } from '../../../types';
 
-export const s3UploadBytes: MetricsUIAggregation = {
-  s3UploadBytes: {
-    max: {
-      field: 'aws.s3_request.uploaded.bytes',
+export const s3UploadBytes: MetricsUISnapshotMetric = {
+  aggs: {
+    s3UploadBytes: {
+      max: {
+        field: 'aws.s3_request.uploaded.bytes',
+      },
     },
   },
+  transformer: noop,
 };

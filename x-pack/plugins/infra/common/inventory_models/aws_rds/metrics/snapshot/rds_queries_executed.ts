@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { MetricsUIAggregation } from '../../../types';
+import { noop } from '../../../shared/lib/transformers/noop';
+import { MetricsUISnapshotMetric } from '../../../types';
 
-export const rdsQueriesExecuted: MetricsUIAggregation = {
-  rdsQueriesExecuted: {
-    avg: {
-      field: 'aws.rds.queries',
+export const rdsQueriesExecuted: MetricsUISnapshotMetric = {
+  aggs: {
+    rdsQueriesExecuted: {
+      avg: {
+        field: 'aws.rds.queries',
+      },
     },
   },
+  transformer: noop,
 };

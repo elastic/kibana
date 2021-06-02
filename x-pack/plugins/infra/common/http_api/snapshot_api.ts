@@ -110,6 +110,7 @@ export const SnapshotRequestRT = rt.intersection([
     filterQuery: rt.union([rt.string, rt.null]),
     includeTimeseries: rt.boolean,
     overrideCompositeSize: rt.number,
+    combinedComposite: rt.boolean,
   }),
 ]);
 

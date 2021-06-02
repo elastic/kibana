@@ -45,7 +45,7 @@ export const metricToAggregation = (
       },
     };
   }
-  return inventoryModel.metrics.snapshot?.[metric.type];
+  return inventoryModel.metrics.snapshot?.[metric.type].aggs;
 };
 
 export const getMetricsAggregations = (

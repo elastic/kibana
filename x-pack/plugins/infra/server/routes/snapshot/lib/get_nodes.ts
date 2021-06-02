@@ -9,10 +9,12 @@ import { SnapshotRequest } from '../../../../common/http_api';
 import { ESSearchClient } from '../../../lib/metrics/types';
 import { InfraSource } from '../../../lib/sources';
 import { transformRequestToMetricsAPIRequest } from './transform_request_to_metrics_api_request';
-import { queryAllData } from './query_all_data';
+import { queryAllData, queryAllSnapshotData } from './query_all_data';
 import { transformMetricsApiResponseToSnapshotResponse } from './trasform_metrics_ui_response';
 import { copyMissingMetrics } from './copy_missing_metrics';
 import { LogQueryFields } from '../../../services/log_queries/get_log_query_fields';
+import { transformSnapshotRequestToESQuery } from './transform_snapshot_request_to_es_query';
+import { convertSnapshotBucketsToSnapshotResponse } from './convert_snapshot_buckets_to_snapshot_response';
 
 export interface SourceOverrides {
   indexPattern: string;
@@ -32,21 +34,61 @@ const transformAndQueryData = async ({
   compositeSize: number;
   sourceOverrides?: SourceOverrides;
 }) => {
-  const metricsApiRequest = await transformRequestToMetricsAPIRequest({
-    client,
-    source,
-    snapshotRequest,
-    compositeSize,
-    sourceOverrides,
-  });
-  const metricsApiResponse = await queryAllData(client, metricsApiRequest);
-  const snapshotResponse = transformMetricsApiResponseToSnapshotResponse(
-    metricsApiRequest,
-    snapshotRequest,
-    source,
-    metricsApiResponse
-  );
-  return copyMissingMetrics(snapshotResponse);
+  if (snapshotRequest.combinedComposite) {
+    // console.log('---- Composite with Terms & Date Histogram ----');
+    // console.time('total');
+    // console.time('transformSnapshotRequestToESQuery');
+    const esQuery = await transformSnapshotRequestToESQuery({
+      client,
+      source,
+      snapshotRequest,
+      compositeSize,
+      sourceOverrides,
+    });
+    // console.timeEnd('transformSnapshotRequestToESQuery');
+    // console.time('queryAllSnapshotData');
+    const snapshotBuckets = await queryAllSnapshotData(client, esQuery);
+    // console.timeEnd('queryAllSnapshotData');
+    // console.time('convertSnapshotBucketsToSnapshotResponse');
+    const combinedSnapshotResponse = convertSnapshotBucketsToSnapshotResponse(
+      snapshotRequest,
+      snapshotBuckets,
+      source
+    );
+    // console.timeEnd('convertSnapshotBucketsToSnapshotResponse');
+    // console.log(JSON.stringify(combinedSnapshotResponse, null, 2));
+    // console.timeEnd('total');
+    console.log('Combined Composite Snapshot', combinedSnapshotResponse.nodes.length);
+    return combinedSnapshotResponse;
+  } else {
+    // console.log('---- Composite with only Terms ----');
+
+    // console.time('total');
+    // console.time('transformRequestToMetricsAPIRequest');
+    const metricsApiRequest = await transformRequestToMetricsAPIRequest({
+      client,
+      source,
+      snapshotRequest,
+      compositeSize,
+      sourceOverrides,
+    });
+    // console.timeEnd('transformRequestToMetricsAPIRequest');
+    // console.time('queryAllData');
+    const metricsApiResponse = await queryAllData(client, metricsApiRequest);
+    // console.timeEnd('queryAllData');
+    const snapshotResponse = transformMetricsApiResponseToSnapshotResponse(
+      metricsApiRequest,
+      snapshotRequest,
+      source,
+      metricsApiResponse
+    );
+    // console.time('copyMissingMetrics');
+    const results = copyMissingMetrics(snapshotResponse);
+    // console.timeEnd('copyMissingMetrics');
+    // console.timeEnd('total');
+    console.log('Legacy Snapshot', results.nodes.length);
+    return results;
+  }
 };
 
 export const getNodes = async (

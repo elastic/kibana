@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { MetricsUIAggregation } from '../../../types';
+import { noop } from '../../../shared/lib/transformers/noop';
+import { MetricsUISnapshotMetric } from '../../../types';
 
-export const sqsMessagesSent: MetricsUIAggregation = {
-  sqsMessagesSent: {
-    max: {
-      field: 'aws.sqs.messages.sent',
+export const sqsMessagesSent: MetricsUISnapshotMetric = {
+  aggs: {
+    sqsMessagesSent: {
+      max: {
+        field: 'aws.sqs.messages.sent',
+      },
     },
   },
+  transformer: noop,
 };

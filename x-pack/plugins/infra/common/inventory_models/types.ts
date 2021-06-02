@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import { MetricsAPISeries } from '../http_api';
 
 export const ItemTypeRT = rt.keyof({
   host: null,
@@ -347,9 +348,14 @@ export const SnapshotMetricTypeRT = rt.keyof(SnapshotMetricTypeKeys);
 
 export type SnapshotMetricType = rt.TypeOf<typeof SnapshotMetricTypeRT>;
 
+export interface MetricsUISnapshotMetric {
+  aggs: MetricsUIAggregation;
+  transformer: (timeSeries: MetricsAPISeries[]) => MetricsAPISeries[];
+}
+
 export interface InventoryMetrics {
   tsvb: { [name: string]: TSVBMetricModelCreator };
-  snapshot: { [name: string]: MetricsUIAggregation };
+  snapshot: { [name: string]: MetricsUISnapshotMetric };
   defaultSnapshot: SnapshotMetricType;
   /** This is used by the inventory view to calculate the appropriate amount of time for the metrics detail page. Some metris like awsS3 require multiple days where others like host only need an hour.*/
   defaultTimeRangeInSeconds: number;

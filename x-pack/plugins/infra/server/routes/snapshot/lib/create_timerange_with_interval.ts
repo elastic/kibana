@@ -55,7 +55,8 @@ export const createTimeRangeWithInterval = async (
     };
   }
   const calculatedInterval = await createInterval(client, options);
-  const lookbackSize = Math.max(timerange.lookbackSize || 5, 5);
+  // const lookbackSize = Math.max(timerange.lookbackSize || 5, 5);
+  const lookbackSize = timerange.lookbackSize;
   return {
     interval: `${calculatedInterval}s`,
     from: timerange.to - calculatedInterval * lookbackSize * 1000, // We need at least 5 buckets worth of data

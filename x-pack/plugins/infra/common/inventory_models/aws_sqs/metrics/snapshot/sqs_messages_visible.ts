@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { MetricsUIAggregation } from '../../../types';
+import { noop } from '../../../shared/lib/transformers/noop';
+import { MetricsUISnapshotMetric } from '../../../types';
 
-export const sqsMessagesVisible: MetricsUIAggregation = {
-  sqsMessagesVisible: {
-    avg: {
-      field: 'aws.sqs.messages.visible',
+export const sqsMessagesVisible: MetricsUISnapshotMetric = {
+  aggs: {
+    sqsMessagesVisible: {
+      avg: {
+        field: 'aws.sqs.messages.visible',
+      },
     },
   },
+  transformer: noop,
 };

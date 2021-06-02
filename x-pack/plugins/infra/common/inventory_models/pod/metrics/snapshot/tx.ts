@@ -5,5 +5,10 @@
  * 2.0.
  */
 
+import { noop } from '../../../shared/lib/transformers/noop';
+import { MetricsUISnapshotMetric } from '../../../types';
 import { networkTraffic } from '../../../shared/metrics/snapshot/network_traffic';
-export const tx = networkTraffic('tx', 'kubernetes.pod.network.tx.bytes');
+export const tx: MetricsUISnapshotMetric = {
+  aggs: networkTraffic('tx', 'kubernetes.pod.network.tx.bytes'),
+  transformer: noop,
+};

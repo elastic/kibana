@@ -5,24 +5,28 @@
  * 2.0.
  */
 
-import { MetricsUIAggregation } from '../../../types';
+import { noop } from '../../../shared/lib/transformers/noop';
+import { MetricsUISnapshotMetric } from '../../../types';
 
-export const cpu: MetricsUIAggregation = {
-  cpu_avg: {
-    avg: {
-      field: 'aws.rds.cpu.total.pct',
+export const cpu: MetricsUISnapshotMetric = {
+  aggs: {
+    cpu_avg: {
+      avg: {
+        field: 'aws.rds.cpu.total.pct',
+      },
+    },
+    cpu: {
+      bucket_script: {
+        buckets_path: {
+          cpu: 'cpu_avg',
+        },
+        script: {
+          source: 'params.cpu / 100',
+          lang: 'painless',
+        },
+        gap_policy: 'skip',
+      },
     },
   },
-  cpu: {
-    bucket_script: {
-      buckets_path: {
-        cpu: 'cpu_avg',
-      },
-      script: {
-        source: 'params.cpu / 100',
-        lang: 'painless',
-      },
-      gap_policy: 'skip',
-    },
-  },
+  transformer: noop,
 };

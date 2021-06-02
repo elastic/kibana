@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { noop } from '../../../shared/lib/transformers/noop';
+import { MetricsUISnapshotMetric } from '../../../types';
 import { networkTrafficWithInterfaces } from '../../../shared/metrics/snapshot/network_traffic_with_interfaces';
-export const tx = networkTrafficWithInterfaces(
-  'tx',
-  'system.network.out.bytes',
-  'system.network.name'
-);
+export const tx: MetricsUISnapshotMetric = {
+  aggs: networkTrafficWithInterfaces('tx', 'system.network.out.bytes', 'system.network.name'),
+  transformer: noop,
+};

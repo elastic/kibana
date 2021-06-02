@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { MetricsUIAggregation } from '../../../types';
+import { noop } from '../../../shared/lib/transformers/noop';
+import { MetricsUISnapshotMetric } from '../../../types';
 
-export const memory: MetricsUIAggregation = {
-  memory: { avg: { field: 'system.memory.actual.used.pct' } },
+export const memory: MetricsUISnapshotMetric = {
+  aggs: {
+    memory: { avg: { field: 'system.memory.actual.used.pct' } },
+  },
+  transformer: noop,
 };
