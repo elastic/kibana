@@ -40,35 +40,47 @@ export class AttachmentService {
   constructor(private readonly log: Logger) {}
 
   public async get({
-    soClient,
+    unsecuredSavedObjectsClient,
     attachmentId,
   }: GetAttachmentArgs): Promise<SavedObject<AttachmentAttributes>> {
     try {
       this.log.debug(`Attempting to GET attachment ${attachmentId}`);
-      return await soClient.get<AttachmentAttributes>(CASE_COMMENT_SAVED_OBJECT, attachmentId);
+      return await unsecuredSavedObjectsClient.get<AttachmentAttributes>(
+        CASE_COMMENT_SAVED_OBJECT,
+        attachmentId
+      );
     } catch (error) {
       this.log.error(`Error on GET attachment ${attachmentId}: ${error}`);
       throw error;
     }
   }
 
-  public async delete({ soClient, attachmentId }: GetAttachmentArgs) {
+  public async delete({ unsecuredSavedObjectsClient, attachmentId }: GetAttachmentArgs) {
     try {
       this.log.debug(`Attempting to GET attachment ${attachmentId}`);
-      return await soClient.delete(CASE_COMMENT_SAVED_OBJECT, attachmentId);
+      return await unsecuredSavedObjectsClient.delete(CASE_COMMENT_SAVED_OBJECT, attachmentId);
     } catch (error) {
       this.log.error(`Error on GET attachment ${attachmentId}: ${error}`);
       throw error;
     }
   }
 
-  public async create({ soClient, attributes, references, id }: CreateAttachmentArgs) {
+  public async create({
+    unsecuredSavedObjectsClient,
+    attributes,
+    references,
+    id,
+  }: CreateAttachmentArgs) {
     try {
       this.log.debug(`Attempting to POST a new comment`);
-      return await soClient.create<AttachmentAttributes>(CASE_COMMENT_SAVED_OBJECT, attributes, {
-        references,
-        id,
-      });
+      return await unsecuredSavedObjectsClient.create<AttachmentAttributes>(
+        CASE_COMMENT_SAVED_OBJECT,
+        attributes,
+        {
+          references,
+          id,
+        }
+      );
     } catch (error) {
       this.log.error(`Error on POST a new comment: ${error}`);
       throw error;
@@ -76,14 +88,14 @@ export class AttachmentService {
   }
 
   public async update({
-    soClient,
+    unsecuredSavedObjectsClient,
     attachmentId,
     updatedAttributes,
     version,
   }: UpdateAttachmentArgs) {
     try {
       this.log.debug(`Attempting to UPDATE comment ${attachmentId}`);
-      return await soClient.update<AttachmentAttributes>(
+      return await unsecuredSavedObjectsClient.update<AttachmentAttributes>(
         CASE_COMMENT_SAVED_OBJECT,
         attachmentId,
         updatedAttributes,
@@ -95,12 +107,12 @@ export class AttachmentService {
     }
   }
 
-  public async bulkUpdate({ soClient, comments }: BulkUpdateAttachmentArgs) {
+  public async bulkUpdate({ unsecuredSavedObjectsClient, comments }: BulkUpdateAttachmentArgs) {
     try {
       this.log.debug(
         `Attempting to UPDATE comments ${comments.map((c) => c.attachmentId).join(', ')}`
       );
-      return await soClient.bulkUpdate<AttachmentAttributes>(
+      return await unsecuredSavedObjectsClient.bulkUpdate<AttachmentAttributes>(
         comments.map((c) => ({
           type: CASE_COMMENT_SAVED_OBJECT,
           id: c.attachmentId,

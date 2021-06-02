@@ -13,7 +13,7 @@ import { ESCasesConfigureAttributes } from '../../../common/api';
 import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../common/constants';
 
 interface ClientArgs {
-  soClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
 }
 
 interface GetCaseConfigureArgs extends ClientArgs {
@@ -36,20 +36,20 @@ interface PatchCaseConfigureArgs extends ClientArgs {
 export class CaseConfigureService {
   constructor(private readonly log: Logger) {}
 
-  public async delete({ soClient, configurationId }: GetCaseConfigureArgs) {
+  public async delete({ unsecuredSavedObjectsClient, configurationId }: GetCaseConfigureArgs) {
     try {
       this.log.debug(`Attempting to DELETE case configure ${configurationId}`);
-      return await soClient.delete(CASE_CONFIGURE_SAVED_OBJECT, configurationId);
+      return await unsecuredSavedObjectsClient.delete(CASE_CONFIGURE_SAVED_OBJECT, configurationId);
     } catch (error) {
       this.log.debug(`Error on DELETE case configure ${configurationId}: ${error}`);
       throw error;
     }
   }
 
-  public async get({ soClient, configurationId }: GetCaseConfigureArgs) {
+  public async get({ unsecuredSavedObjectsClient, configurationId }: GetCaseConfigureArgs) {
     try {
       this.log.debug(`Attempting to GET case configuration ${configurationId}`);
-      return await soClient.get<ESCasesConfigureAttributes>(
+      return await unsecuredSavedObjectsClient.get<ESCasesConfigureAttributes>(
         CASE_CONFIGURE_SAVED_OBJECT,
         configurationId
       );
@@ -59,10 +59,10 @@ export class CaseConfigureService {
     }
   }
 
-  public async find({ soClient, options }: FindCaseConfigureArgs) {
+  public async find({ unsecuredSavedObjectsClient, options }: FindCaseConfigureArgs) {
     try {
       this.log.debug(`Attempting to find all case configuration`);
-      return await soClient.find<ESCasesConfigureAttributes>({
+      return await unsecuredSavedObjectsClient.find<ESCasesConfigureAttributes>({
         ...cloneDeep(options),
         // Get the latest configuration
         sortField: 'created_at',
@@ -75,10 +75,10 @@ export class CaseConfigureService {
     }
   }
 
-  public async post({ soClient, attributes, id }: PostCaseConfigureArgs) {
+  public async post({ unsecuredSavedObjectsClient, attributes, id }: PostCaseConfigureArgs) {
     try {
       this.log.debug(`Attempting to POST a new case configuration`);
-      return await soClient.create<ESCasesConfigureAttributes>(
+      return await unsecuredSavedObjectsClient.create<ESCasesConfigureAttributes>(
         CASE_CONFIGURE_SAVED_OBJECT,
         {
           ...attributes,
@@ -91,10 +91,14 @@ export class CaseConfigureService {
     }
   }
 
-  public async patch({ soClient, configurationId, updatedAttributes }: PatchCaseConfigureArgs) {
+  public async patch({
+    unsecuredSavedObjectsClient,
+    configurationId,
+    updatedAttributes,
+  }: PatchCaseConfigureArgs) {
     try {
       this.log.debug(`Attempting to UPDATE case configuration ${configurationId}`);
-      return await soClient.update<ESCasesConfigureAttributes>(
+      return await unsecuredSavedObjectsClient.update<ESCasesConfigureAttributes>(
         CASE_CONFIGURE_SAVED_OBJECT,
         configurationId,
         {

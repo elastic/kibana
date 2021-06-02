@@ -34,7 +34,7 @@ export const get = async (
     checkEnabledCaseConnectorOrThrow(subCaseId);
 
     const userActions = await userActionService.getAll({
-      soClient: unsecuredSavedObjectsClient,
+      unsecuredSavedObjectsClient,
       caseId,
       subCaseId,
     });

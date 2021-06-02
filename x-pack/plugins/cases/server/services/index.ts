@@ -15,5 +15,5 @@ export { AlertService, AlertServiceContract } from './alerts';
 export { AttachmentService } from './attachments';
 
 export interface ClientArgs {
-  soClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
 }

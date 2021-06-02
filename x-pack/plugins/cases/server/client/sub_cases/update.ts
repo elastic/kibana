@@ -115,19 +115,19 @@ function getParentIDs({
 
 async function getParentCases({
   caseService,
-  soClient,
+  unsecuredSavedObjectsClient,
   subCaseIDs,
   subCasesMap,
 }: {
   caseService: CasesService;
-  soClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
   subCaseIDs: string[];
   subCasesMap: Map<string, SavedObject<SubCaseAttributes>>;
 }): Promise<Map<string, SavedObject<ESCaseAttributes>>> {
   const parentIDInfo = getParentIDs({ subCaseIDs, subCasesMap });
 
   const parentCases = await caseService.getCases({
-    soClient,
+    unsecuredSavedObjectsClient,
     caseIds: parentIDInfo.ids,
   });
 
@@ -182,15 +182,15 @@ function getID(comment: SavedObject<CommentAttributes>): string | undefined {
 async function getAlertComments({
   subCasesToSync,
   caseService,
-  soClient,
+  unsecuredSavedObjectsClient,
 }: {
   subCasesToSync: SubCasePatchRequest[];
   caseService: CasesService;
-  soClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
 }): Promise<SavedObjectsFindResponse<CommentAttributes>> {
   const ids = subCasesToSync.map((subCase) => subCase.id);
   return caseService.getAllSubCaseComments({
-    soClient,
+    unsecuredSavedObjectsClient,
     id: ids,
     options: {
       filter: nodeBuilder.or([
@@ -206,13 +206,13 @@ async function getAlertComments({
  */
 async function updateAlerts({
   caseService,
-  soClient,
+  unsecuredSavedObjectsClient,
   casesClientInternal,
   logger,
   subCasesToSync,
 }: {
   caseService: CasesService;
-  soClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
   casesClientInternal: CasesClientInternal;
   logger: Logger;
   subCasesToSync: SubCasePatchRequest[];
@@ -223,7 +223,11 @@ async function updateAlerts({
       return acc;
     }, new Map<string, SubCasePatchRequest>());
     // get all the alerts for all sub cases that need to be synced
-    const totalAlerts = await getAlertComments({ caseService, soClient, subCasesToSync });
+    const totalAlerts = await getAlertComments({
+      caseService,
+      unsecuredSavedObjectsClient,
+      subCasesToSync,
+    });
     // create a map of the status (open, closed, etc) to alert info that needs to be updated
     const alertsToUpdate = totalAlerts.saved_objects.reduce(
       (acc: UpdateAlertRequest[], alertComment) => {
@@ -274,7 +278,7 @@ export async function update({
     const { unsecuredSavedObjectsClient, user, caseService, userActionService } = clientArgs;
 
     const bulkSubCases = await caseService.getSubCases({
-      soClient: unsecuredSavedObjectsClient,
+      unsecuredSavedObjectsClient,
       ids: query.subCases.map((q) => q.id),
     });
 
@@ -292,7 +296,7 @@ export async function update({
     }
 
     const subIDToParentCase = await getParentCases({
-      soClient: unsecuredSavedObjectsClient,
+      unsecuredSavedObjectsClient,
       caseService,
       subCaseIDs: nonEmptySubCaseRequests.map((subCase) => subCase.id),
       subCasesMap,
@@ -300,7 +304,7 @@ export async function update({
 
     const updatedAt = new Date().toISOString();
     const updatedCases = await caseService.patchSubCases({
-      soClient: unsecuredSavedObjectsClient,
+      unsecuredSavedObjectsClient,
       subCases: nonEmptySubCaseRequests.map((thisCase) => {
         const { id: subCaseId, version, ...updateSubCaseAttributes } = thisCase;
         let closedInfo: { closed_at: string | null; closed_by: User | null } = {
@@ -352,7 +356,7 @@ export async function update({
 
     await updateAlerts({
       caseService,
-      soClient: unsecuredSavedObjectsClient,
+      unsecuredSavedObjectsClient,
       casesClientInternal,
       subCasesToSync: subCasesToSyncAlertsFor,
       logger: clientArgs.logger,
@@ -380,7 +384,7 @@ export async function update({
     );
 
     await userActionService.bulkCreate({
-      soClient: unsecuredSavedObjectsClient,
+      unsecuredSavedObjectsClient,
       actions: buildSubCaseUserActions({
         originalSubCases: bulkSubCases.saved_objects,
         updatedSubCases: updatedCases.saved_objects,

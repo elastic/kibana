@@ -149,7 +149,7 @@ async function get(
   casesClientInternal: CasesClientInternal
 ): Promise<CasesConfigurationsResponse> {
   const {
-    unsecuredSavedObjectsClient: soClient,
+    unsecuredSavedObjectsClient,
     caseConfigureService,
     logger,
     authorization,
@@ -179,7 +179,7 @@ async function get(
 
     let error: string | null = null;
     const myCaseConfigure = await caseConfigureService.find({
-      soClient,
+      unsecuredSavedObjectsClient,
       options: { filter },
     });
 
@@ -264,7 +264,7 @@ async function update(
   const {
     caseConfigureService,
     logger,
-    unsecuredSavedObjectsClient: soClient,
+    unsecuredSavedObjectsClient,
     user,
     authorization,
     auditLogger,
@@ -291,7 +291,7 @@ async function update(
     );
 
     const configuration = await caseConfigureService.get({
-      soClient,
+      unsecuredSavedObjectsClient,
       configurationId,
     });
 
@@ -345,7 +345,7 @@ async function update(
     }
 
     const patch = await caseConfigureService.patch({
-      soClient,
+      unsecuredSavedObjectsClient,
       configurationId: configuration.id,
       updatedAttributes: {
         ...queryWithoutVersionAndConnector,
@@ -381,7 +381,7 @@ async function create(
   casesClientInternal: CasesClientInternal
 ): Promise<CasesConfigureResponse> {
   const {
-    unsecuredSavedObjectsClient: soClient,
+    unsecuredSavedObjectsClient,
     caseConfigureService,
     logger,
     user,
@@ -413,7 +413,7 @@ async function create(
     );
 
     const myCaseConfigure = await caseConfigureService.find({
-      soClient,
+      unsecuredSavedObjectsClient,
       options: { filter },
     });
 
@@ -429,7 +429,7 @@ async function create(
     if (myCaseConfigure.saved_objects.length > 0) {
       await Promise.all(
         myCaseConfigure.saved_objects.map((cc) =>
-          caseConfigureService.delete({ soClient, configurationId: cc.id })
+          caseConfigureService.delete({ unsecuredSavedObjectsClient, configurationId: cc.id })
         )
       );
     }
@@ -460,7 +460,7 @@ async function create(
     }
 
     const post = await caseConfigureService.post({
-      soClient,
+      unsecuredSavedObjectsClient,
       attributes: {
         ...configuration,
         connector: transformCaseConnectorToEsConnector(configuration.connector),

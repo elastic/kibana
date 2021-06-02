@@ -52,7 +52,7 @@ interface NewCommentResp {
 interface CommentableCaseParams {
   collection: SavedObject<ESCaseAttributes>;
   subCase?: SavedObject<SubCaseAttributes>;
-  soClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
   caseService: CasesService;
   attachmentService: AttachmentService;
   logger: Logger;
@@ -65,7 +65,7 @@ interface CommentableCaseParams {
 export class CommentableCase {
   private readonly collection: SavedObject<ESCaseAttributes>;
   private readonly subCase?: SavedObject<SubCaseAttributes>;
-  private readonly soClient: SavedObjectsClientContract;
+  private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly caseService: CasesService;
   private readonly attachmentService: AttachmentService;
   private readonly logger: Logger;
@@ -73,14 +73,14 @@ export class CommentableCase {
   constructor({
     collection,
     subCase,
-    soClient,
+    unsecuredSavedObjectsClient,
     caseService,
     attachmentService,
     logger,
   }: CommentableCaseParams) {
     this.collection = collection;
     this.subCase = subCase;
-    this.soClient = soClient;
+    this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.caseService = caseService;
     this.attachmentService = attachmentService;
     this.logger = logger;
@@ -144,7 +144,7 @@ export class CommentableCase {
 
       if (this.subCase) {
         const updatedSubCase = await this.caseService.patchSubCase({
-          soClient: this.soClient,
+          unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
           subCaseId: this.subCase.id,
           updatedAttributes: {
             updated_at: date,
@@ -166,7 +166,7 @@ export class CommentableCase {
       }
 
       const updatedCase = await this.caseService.patchCase({
-        soClient: this.soClient,
+        unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
         caseId: this.collection.id,
         updatedAttributes: {
           updated_at: date,
@@ -186,7 +186,7 @@ export class CommentableCase {
           version: updatedCase.version ?? this.collection.version,
         },
         subCase: updatedSubCaseAttributes,
-        soClient: this.soClient,
+        unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
         caseService: this.caseService,
         attachmentService: this.attachmentService,
         logger: this.logger,
@@ -217,7 +217,7 @@ export class CommentableCase {
 
       const [comment, commentableCase] = await Promise.all([
         this.attachmentService.update({
-          soClient: this.soClient,
+          unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
           attachmentId: id,
           updatedAttributes: {
             ...queryRestAttributes,
@@ -272,7 +272,7 @@ export class CommentableCase {
 
       const [comment, commentableCase] = await Promise.all([
         this.attachmentService.create({
-          soClient: this.soClient,
+          unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
           attributes: transformNewComment({
             associationType: this.subCase ? AssociationType.subCase : AssociationType.case,
             createdDate,
@@ -310,7 +310,7 @@ export class CommentableCase {
   public async encode(): Promise<CaseResponse> {
     try {
       const collectionCommentStats = await this.caseService.getAllCaseComments({
-        soClient: this.soClient,
+        unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
         id: this.collection.id,
         options: {
           fields: [],
@@ -320,7 +320,7 @@ export class CommentableCase {
       });
 
       const collectionComments = await this.caseService.getAllCaseComments({
-        soClient: this.soClient,
+        unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
         id: this.collection.id,
         options: {
           fields: [],
@@ -340,7 +340,7 @@ export class CommentableCase {
 
       if (this.subCase) {
         const subCaseComments = await this.caseService.getAllSubCaseComments({
-          soClient: this.soClient,
+          unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
           id: this.subCase.id,
         });
         const totalAlerts =
