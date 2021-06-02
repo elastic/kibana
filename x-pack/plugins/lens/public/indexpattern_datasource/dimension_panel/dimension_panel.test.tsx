@@ -33,6 +33,9 @@ import { OperationMetadata } from '../../types';
 import { DateHistogramIndexPatternColumn } from '../operations/definitions/date_histogram';
 import { getFieldByNameFactory } from '../pure_helpers';
 import { Filtering } from './filtering';
+import { TimeShift } from './time_shift';
+import { DimensionEditor } from './dimension_editor';
+import { AdvancedOptions } from './advanced_options';
 
 jest.mock('../loader');
 jest.mock('../query_input', () => ({
@@ -1311,6 +1314,196 @@ describe('IndexPatternDimensionEditorPanel', () => {
               col2: expect.objectContaining({
                 timeScale: undefined,
                 label: 'Count of records',
+              }),
+            },
+          },
+        },
+      });
+    });
+  });
+
+  describe('time shift', () => {
+    function getProps(colOverrides: Partial<IndexPatternColumn>) {
+      return {
+        ...defaultProps,
+        state: getStateWithColumns({
+          datecolumn: {
+            dataType: 'date',
+            isBucketed: true,
+            label: '',
+            customLabel: true,
+            operationType: 'date_histogram',
+            sourceField: 'ts',
+            params: {
+              interval: '1d',
+            },
+          },
+          col2: {
+            dataType: 'number',
+            isBucketed: false,
+            label: 'Count of records',
+            operationType: 'count',
+            sourceField: 'Records',
+            ...colOverrides,
+          } as IndexPatternColumn,
+        }),
+        columnId: 'col2',
+      };
+    }
+
+    it('should not show custom options if time shift is not available', () => {
+      const props = {
+        ...defaultProps,
+        state: getStateWithColumns({
+          col2: {
+            dataType: 'number',
+            isBucketed: false,
+            label: 'Count of records',
+            operationType: 'count',
+            sourceField: 'Records',
+          } as IndexPatternColumn,
+        }),
+        columnId: 'col2',
+      };
+      wrapper = shallow(
+        <IndexPatternDimensionEditorComponent
+          {...props}
+          state={{
+            ...props.state,
+            indexPatterns: {
+              '1': {
+                ...props.state.indexPatterns['1'],
+                timeFieldName: undefined,
+              },
+            },
+          }}
+        />
+      );
+      expect(
+        wrapper
+          .find(DimensionEditor)
+          .dive()
+          .find(AdvancedOptions)
+          .dive()
+          .find('[data-test-subj="indexPattern-time-shift-enable"]')
+      ).toHaveLength(0);
+    });
+
+    it('should show custom options if time shift is available', () => {
+      wrapper = shallow(<IndexPatternDimensionEditorComponent {...getProps({})} />);
+      expect(
+        wrapper
+          .find(DimensionEditor)
+          .dive()
+          .find(AdvancedOptions)
+          .dive()
+          .find('[data-test-subj="indexPattern-time-shift-enable"]')
+      ).toHaveLength(1);
+    });
+
+    it('should show current time shift if set', () => {
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...getProps({ timeShift: '1d' })} />);
+      expect(wrapper.find(TimeShift).find(EuiComboBox).prop('selectedOptions')[0].value).toEqual(
+        '1d'
+      );
+    });
+
+    it('should allow to set time shift initially', () => {
+      const props = getProps({});
+      wrapper = shallow(<IndexPatternDimensionEditorComponent {...props} />);
+      wrapper
+        .find(DimensionEditor)
+        .dive()
+        .find(AdvancedOptions)
+        .dive()
+        .find('[data-test-subj="indexPattern-time-shift-enable"]')
+        .prop('onClick')!({} as MouseEvent);
+      expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                timeShift: '',
+              }),
+            },
+          },
+        },
+      });
+    });
+
+    it('should carry over time shift to other operation if possible', () => {
+      const props = getProps({
+        timeShift: '1d',
+        sourceField: 'bytes',
+        operationType: 'sum',
+        label: 'Sum of bytes per hour',
+      });
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+      wrapper
+        .find('button[data-test-subj="lns-indexPatternDimension-count incompatible"]')
+        .simulate('click');
+      expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                timeShift: '1d',
+              }),
+            },
+          },
+        },
+      });
+    });
+
+    it('should allow to change time shift', () => {
+      const props = getProps({
+        timeShift: '1d',
+      });
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+      wrapper.find(TimeShift).find(EuiComboBox).prop('onCreateOption')!('1h', []);
+      expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                timeShift: '1h',
+              }),
+            },
+          },
+        },
+      });
+    });
+
+    it('should allow to time shift', () => {
+      const props = getProps({
+        timeShift: '1h',
+      });
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+      wrapper
+        .find('[data-test-subj="indexPattern-time-shift-remove"]')
+        .find(EuiButtonIcon)
+        .prop('onClick')!(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        {} as any
+      );
+      expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                timeShift: undefined,
               }),
             },
           },
