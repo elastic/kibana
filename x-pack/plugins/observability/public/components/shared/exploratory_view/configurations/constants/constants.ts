@@ -81,7 +81,6 @@ export const FieldLabels: Record<string, string> = {
   'performance.metric': METRIC_LABEL,
   'Business.KPI': KPI_LABEL,
 
-
   'labels.net_connection_carrier_name': 'Carrier Name',
   'http.request.method': 'Request Method',
   'labels.net_connection_type': 'Connection Type',
@@ -119,6 +118,7 @@ export const ReportToDataTypeMap: Record<ReportViewTypeId, AppDataType> = {
   logs: 'infra_logs',
   cpu: 'infra_metrics',
   cwv: 'ux',
+  mrp: 'ux',
 };
 
 export const USE_BREAK_DOWN_COLUMN = 'USE_BREAK_DOWN_COLUMN';
