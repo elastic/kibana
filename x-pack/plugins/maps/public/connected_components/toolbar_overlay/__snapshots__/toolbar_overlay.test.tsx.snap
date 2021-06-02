@@ -29,18 +29,7 @@ exports[`Should show all controls 1`] = `
     <Connect(FitToData) />
   </EuiFlexItem>
   <EuiFlexItem>
-    <Connect(ToolsControl)
-      geoFields={
-        Array [
-          Object {
-            "geoFieldName": "myGeoFieldName",
-            "geoFieldType": "geo_point",
-            "indexPatternId": "1",
-            "indexPatternTitle": "myIndex",
-          },
-        ]
-      }
-    />
+    <Connect(ToolsControl) />
   </EuiFlexItem>
   <EuiFlexItem>
     <Connect(TimesliderToggleButton) />
