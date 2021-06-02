@@ -29,7 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const security = getService('security');
   const find = getService('find');
 
-  describe('dashboard time to visualize security', () => {
+  describe.only('dashboard time to visualize security', () => {
     before(async () => {
       await esArchiver.load('dashboard/feature_controls/security');
       await esArchiver.loadIfNeeded('logstash_functional');

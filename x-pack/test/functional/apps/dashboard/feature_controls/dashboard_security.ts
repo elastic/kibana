@@ -31,7 +31,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
 
-  describe('dashboard feature controls security', () => {
+  describe.only('dashboard feature controls security', () => {
     before(async () => {
       await esArchiver.load('dashboard/feature_controls/security');
       await esArchiver.loadIfNeeded('logstash_functional');
