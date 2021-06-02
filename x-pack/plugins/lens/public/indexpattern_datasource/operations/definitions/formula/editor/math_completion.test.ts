@@ -12,7 +12,7 @@ import type { IndexPatternField } from '../../../../types';
 import type { OperationMetadata } from '../../../../../types';
 import { dataPluginMock } from '../../../../../../../../../src/plugins/data/public/mocks';
 import { tinymathFunctions } from '../util';
-import { getSignatureHelp, getHover, suggest } from './math_completion';
+import { getSignatureHelp, getHover, suggest, monacoPositionToOffset } from './math_completion';
 
 const buildGenericColumn = (type: string) => {
   return ({ field }: { field?: IndexPatternField }) => {
@@ -364,6 +364,16 @@ describe('math completion', () => {
         data: dataPluginMock.createStartContract(),
       });
       expect(results.list).toEqual(['bytes', 'memory']);
+    });
+  });
+
+  describe('monacoPositionToOffset', () => {
+    it('should work with multi-line strings accounting for newline characters', () => {
+      const input = `012
+456
+89')`;
+      expect(input[monacoPositionToOffset(input, new monaco.Position(1, 1))]).toEqual('0');
+      expect(input[monacoPositionToOffset(input, new monaco.Position(3, 2))]).toEqual('9');
     });
   });
 });

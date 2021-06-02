@@ -405,31 +405,25 @@ export function FormulaEditor({
       if (e.isFlush || e.isRedoing || e.isUndoing) {
         return;
       }
-      if (e.changes.length === 1 && (e.changes[0].text === '=' || e.changes[0].text === "'")) {
+      if (e.changes.length === 1) {
+        const char = e.changes[0].text;
+        if (char !== '=' && char !== "'") {
+          return;
+        }
         const currentPosition = e.changes[0].range;
         if (currentPosition) {
-          let tokenInfo = getTokenInfo(
-            editor.getValue(),
-            monacoPositionToOffset(
-              editor.getValue(),
-              new monaco.Position(currentPosition.startLineNumber, currentPosition.startColumn)
-            )
+          const currentText = editor.getValue();
+          const offset = monacoPositionToOffset(
+            currentText,
+            new monaco.Position(currentPosition.startLineNumber, currentPosition.startColumn)
           );
+          let tokenInfo = getTokenInfo(currentText, offset + 1);
 
-          if (!tokenInfo && e.changes[0].text === "'") {
+          if (!tokenInfo && char === "'") {
             // try again this time replacing the current quote with an escaped quote
-            const line = editor.getValue();
-            const lineEscaped =
-              line.substring(0, currentPosition.startColumn - 1) +
-              "\\'" +
-              line.substring(currentPosition.endColumn);
-            tokenInfo = getTokenInfo(
-              lineEscaped,
-              monacoPositionToOffset(
-                line,
-                new monaco.Position(currentPosition.startLineNumber, currentPosition.startColumn)
-              ) + 1
-            );
+            const line = currentText;
+            const lineEscaped = line.substring(0, offset) + "\\'" + line.substring(offset + 1);
+            tokenInfo = getTokenInfo(lineEscaped, offset + 2);
           }
 
           const isSingleQuoteCase = /'LENS_MATH_MARKER/;
@@ -447,7 +441,8 @@ export function FormulaEditor({
           }
 
           let editOperation: monaco.editor.IIdentifiedSingleEditOperation | null = null;
-          if (e.changes[0].text === '=') {
+          let cursorOffset = 2;
+          if (char === '=') {
             editOperation = {
               range: {
                 ...currentPosition,
@@ -458,7 +453,7 @@ export function FormulaEditor({
               text: `''`,
             };
           }
-          if (e.changes[0].text === "'") {
+          if (char === "'") {
             editOperation = {
               range: {
                 ...currentPosition,
@@ -468,6 +463,7 @@ export function FormulaEditor({
               },
               text: `\\'`,
             };
+            cursorOffset = 3;
           }
 
           if (editOperation) {
@@ -479,9 +475,9 @@ export function FormulaEditor({
                   // After inserting, move the cursor in between the single quotes or after the escaped quote
                   new monaco.Selection(
                     currentPosition.startLineNumber,
-                    currentPosition.startColumn + 2,
+                    currentPosition.startColumn + cursorOffset,
                     currentPosition.startLineNumber,
-                    currentPosition.startColumn + 2
+                    currentPosition.startColumn + cursorOffset
                   ),
                 ]
               );
@@ -490,7 +486,7 @@ export function FormulaEditor({
               // after an = char
               // Timeout is required because otherwise the cursor position is not updated.
               editor.setPosition({
-                column: currentPosition.startColumn + 2,
+                column: currentPosition.startColumn + cursorOffset,
                 lineNumber: currentPosition.startLineNumber,
               });
               editor.trigger('lens', 'editor.action.triggerSuggest', {});

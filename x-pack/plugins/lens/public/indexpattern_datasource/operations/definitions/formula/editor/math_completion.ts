@@ -96,7 +96,7 @@ export function monacoPositionToOffset(expression: string, position: monaco.Posi
     .slice(0, position.lineNumber)
     .reduce(
       (prev, current, index) =>
-        prev + index === position.lineNumber - 1 ? position.column : current.length,
+        prev + (index === position.lineNumber - 1 ? position.column - 1 : current.length + 1),
       0
     );
 }

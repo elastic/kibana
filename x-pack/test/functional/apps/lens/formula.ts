@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('14,005');
     });
 
-    it('should insert single quotes when needed to create valid KQL', async () => {
+    it('should insert single quotes and escape when needed to create valid KQL', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
@@ -69,15 +69,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         keepOpen: true,
       });
 
-      const input = await find.activeElement();
+      let input = await find.activeElement();
       await input.type(' ');
       await input.pressKeys(browser.keys.ARROW_LEFT);
       await input.type(`Men's`);
 
       await PageObjects.common.sleep(100);
 
-      const element = await find.byCssSelector('.monaco-editor');
-      expect(await element.getVisibleText()).to.equal(`count(kql=\'Men\\'s \')`);
+      let element = await find.byCssSelector('.monaco-editor');
+      expect(await element.getVisibleText()).to.equal(`count(kql='Men\\'s ')`);
+
+      await PageObjects.lens.typeFormula('count(kql=');
+      input = await find.activeElement();
+      await input.type(`Men\'s `);
+
+      element = await find.byCssSelector('.monaco-editor');
+      expect(await element.getVisibleText()).to.equal(`count(kql='Men\\'s ')`);
     });
 
     it('should persist a broken formula on close', async () => {
