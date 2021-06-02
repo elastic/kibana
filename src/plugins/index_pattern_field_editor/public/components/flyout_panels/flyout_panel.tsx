@@ -99,7 +99,7 @@ export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
   }
 
   return (
-    <EuiFlexItem style={styles}>
+    <EuiFlexItem className="fieldEditor__flyoutPanels__column" style={styles}>
       <flyoutPanelContext.Provider value={{ registerContent, registerFooter }}>
         <div className={classes} {...rest}>
           {children}

@@ -1,5 +1,9 @@
 .fieldEditor__flyoutPanels {
   height: 100%;
+
+  &__column {
+    height: 100%;
+  }
 }
 
 .fieldEditor__flyoutPanel {

@@ -1,0 +1,14 @@
+.indexPatternFieldEditor__previewFieldList {
+  &__item {
+    border-bottom: $euiBorderThin;
+    padding-top: $euiSize;
+
+    &__key {
+      overflow-wrap: anywhere;
+    }
+
+    &__value {
+      overflow-wrap: anywhere;
+    }
+  }
+}
