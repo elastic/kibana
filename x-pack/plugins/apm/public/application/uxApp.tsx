@@ -12,6 +12,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router } from 'react-router-dom';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
+import { i18n } from '@kbn/i18n';
 import type { ObservabilityRuleTypeRegistry } from '../../../observability/public';
 import { euiStyled } from '../../../../../src/plugins/kibana_react/common';
 import {
@@ -25,13 +26,14 @@ import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPat
 import { RumHome, UX_LABEL } from '../components/app/RumDashboard/RumHome';
 import { ApmPluginContext } from '../context/apm_plugin/apm_plugin_context';
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
-import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { ConfigSchema } from '../index';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { px, units } from '../style/variables';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
 import { UXActionMenu } from '../components/app/RumDashboard/ActionMenu';
+import { useBreadcrumbs } from '../../../observability/public';
+import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 
 const CsmMainContainer = euiStyled.div`
   padding: ${px(units.plus)};
@@ -50,7 +52,17 @@ export const uxRoutes: APMRouteDefinition[] = [
 function UxApp() {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
-  useBreadcrumbs(uxRoutes);
+  const { core } = useApmPluginContext();
+  const basePath = core.http.basePath.get();
+
+  useBreadcrumbs([
+    { text: UX_LABEL, href: basePath + '/app/ux' },
+    {
+      text: i18n.translate('xpack.apm.ux.overview', {
+        defaultMessage: 'Overview',
+      }),
+    },
+  ]);
 
   return (
     <ThemeProvider
