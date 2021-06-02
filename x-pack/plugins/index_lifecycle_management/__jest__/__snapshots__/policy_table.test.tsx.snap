@@ -98,6 +98,7 @@ exports[`policy table should show empty state when there are not any policies 1`
         >
           <span
             class="euiButtonContent__icon"
+            color="inherit"
             data-euiicon-type="plusInCircle"
           />
           <span
