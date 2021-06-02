@@ -13,20 +13,23 @@ import React, {
   useCallback,
   createContext,
   useContext,
+  useMemo,
 } from 'react';
 import classnames from 'classnames';
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem, EuiResizeObserver } from '@elastic/eui';
 
 import { useFlyoutPanelsContext } from './flyout_panels';
 
 interface Context {
   registerFooter: () => void;
   registerContent: () => void;
+  height: number;
 }
 
 const flyoutPanelContext = createContext<Context>({
   registerFooter: () => {},
   registerContent: () => {},
+  height: -1,
 });
 
 export interface Props {
@@ -50,6 +53,8 @@ export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
     hasContent: false,
     hasFooter: false,
   });
+
+  const [panelHeight, setPanelHeight] = useState(-1);
 
   /* eslint-disable @typescript-eslint/naming-convention */
   const classes = classnames('fieldEditor__flyoutPanel', className, {
@@ -86,6 +91,16 @@ export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
     });
   }, []);
 
+  const onResize = useCallback(({ height }: { height: number }) => {
+    setPanelHeight(height);
+  }, []);
+
+  const ctx = useMemo(() => ({ registerContent, registerFooter, height: panelHeight }), [
+    registerFooter,
+    registerContent,
+    panelHeight,
+  ]);
+
   useLayoutEffect(() => {
     const removePanel = addPanel({ width });
 
@@ -99,13 +114,19 @@ export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
   }
 
   return (
-    <EuiFlexItem className="fieldEditor__flyoutPanels__column" style={styles}>
-      <flyoutPanelContext.Provider value={{ registerContent, registerFooter }}>
-        <div className={classes} {...rest}>
-          {children}
-        </div>
-      </flyoutPanelContext.Provider>
-    </EuiFlexItem>
+    <EuiResizeObserver onResize={onResize}>
+      {(resizeRef) => (
+        <EuiFlexItem className="fieldEditor__flyoutPanels__column" style={styles}>
+          <div ref={resizeRef} style={{ height: '100%' }}>
+            <flyoutPanelContext.Provider value={ctx}>
+              <div className={classes} {...rest}>
+                {children}
+              </div>
+            </flyoutPanelContext.Provider>
+          </div>
+        </EuiFlexItem>
+      )}
+    </EuiResizeObserver>
   );
 };
 
