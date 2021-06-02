@@ -18,7 +18,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { RouteComponentProps } from 'react-router-dom';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
@@ -48,16 +47,18 @@ const MetadataFlexGroup = euiStyled(EuiFlexGroup)`
     `${theme.eui.paddingSizes.m} 0 0 ${theme.eui.paddingSizes.m}`};
 `;
 
-type ServiceNodeMetricsProps = RouteComponentProps<{
+interface ServiceNodeMetricsProps {
   serviceName: string;
   serviceNodeName: string;
-}>;
+}
 
-export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
+export function ServiceNodeMetrics({
+  serviceName,
+  serviceNodeName,
+}: ServiceNodeMetricsProps) {
   const {
     urlParams: { kuery, start, end },
   } = useUrlParams();
-  const { serviceName, serviceNodeName } = match.params;
   const { agentName } = useApmServiceContext();
   const { data } = useServiceMetricChartsFetcher({ serviceNodeName });
 
@@ -167,7 +168,6 @@ export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
           </EuiFlexItem>
         </MetadataFlexGroup>
       )}
-      <SearchBar />
 
       {agentName && (
         <ChartPointerEventContextProvider>

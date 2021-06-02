@@ -14,12 +14,12 @@ import {
   RULE_ID,
   RULE_NAME,
 } from '@kbn/rule-data-utils/target/technical_field_names';
-import { parseTechnicalFields } from '../../../../../../rule_registry/common';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { asPercent, asDuration } from '../../../../../common/utils/formatters';
-import { TimestampTooltip } from '../../../shared/TimestampTooltip';
+import { parseTechnicalFields } from '../../../../../rule_registry/common';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { asPercent, asDuration } from '../../../../common/utils/formatters';
+import { TimestampTooltip } from '../TimestampTooltip';
 
 interface AlertDetailProps {
   alerts: APIReturnType<'GET /api/apm/services/{serviceName}/alerts'>['alerts'];

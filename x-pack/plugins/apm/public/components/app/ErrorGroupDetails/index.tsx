@@ -16,7 +16,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { useTrackPageview } from '../../../../../observability/public';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
@@ -65,43 +64,42 @@ function ErrorGroupHeader({
   isUnhandled?: boolean;
 }) {
   return (
-    <>
-      <SearchBar />
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <h2>
-              {i18n.translate('xpack.apm.errorGroupDetails.errorGroupTitle', {
-                defaultMessage: 'Error group {errorGroupId}',
-                values: {
-                  errorGroupId: getShortGroupId(groupId),
-                },
-              })}
-            </h2>
-          </EuiTitle>
-        </EuiFlexItem>
+    <EuiFlexGroup alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiTitle>
+          <h2>
+            {i18n.translate('xpack.apm.errorGroupDetails.errorGroupTitle', {
+              defaultMessage: 'Error group {errorGroupId}',
+              values: {
+                errorGroupId: getShortGroupId(groupId),
+              },
+            })}
+          </h2>
+        </EuiTitle>
+      </EuiFlexItem>
 
-        {isUnhandled && (
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="warning">
-              {i18n.translate('xpack.apm.errorGroupDetails.unhandledLabel', {
-                defaultMessage: 'Unhandled',
-              })}
-            </EuiBadge>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </>
+      {isUnhandled && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="warning">
+            {i18n.translate('xpack.apm.errorGroupDetails.unhandledLabel', {
+              defaultMessage: 'Unhandled',
+            })}
+          </EuiBadge>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 }
 
-type ErrorGroupDetailsProps = RouteComponentProps<{
+interface ErrorGroupDetailsProps {
   groupId: string;
   serviceName: string;
-}>;
+}
 
-export function ErrorGroupDetails({ location, match }: ErrorGroupDetailsProps) {
-  const { serviceName, groupId } = match.params;
+export function ErrorGroupDetails({
+  serviceName,
+  groupId,
+}: ErrorGroupDetailsProps) {
   const { urlParams } = useUrlParams();
   const { environment, kuery, start, end } = urlParams;
   const { data: errorGroupData } = useFetcher(
@@ -198,11 +196,7 @@ export function ErrorGroupDetails({ location, match }: ErrorGroupDetailsProps) {
       </EuiPanel>
       <EuiSpacer size="s" />
       {showDetails && (
-        <DetailView
-          errorGroup={errorGroupData}
-          urlParams={urlParams}
-          location={location}
-        />
+        <DetailView errorGroup={errorGroupData} urlParams={urlParams} />
       )}
     </>
   );

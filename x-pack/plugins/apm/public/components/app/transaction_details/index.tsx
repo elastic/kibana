@@ -8,7 +8,7 @@
 import { EuiHorizontalRule, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { flatten, isEmpty } from 'lodash';
 import React from 'react';
-import { RouteComponentProps, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { useTrackPageview } from '../../../../../observability/public';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -27,12 +27,7 @@ interface Sample {
   transactionId: string;
 }
 
-type TransactionDetailsProps = RouteComponentProps<{ serviceName: string }>;
-
-export function TransactionDetails({
-  location,
-  match,
-}: TransactionDetailsProps) {
+export function TransactionDetails() {
   const { urlParams } = useUrlParams();
   const history = useHistory();
   const {
@@ -82,10 +77,6 @@ export function TransactionDetails({
 
   return (
     <>
-      <SearchBar />
-
-      <EuiSpacer size="s" />
-
       <EuiTitle>
         <h2>{transactionName}</h2>
       </EuiTitle>
@@ -116,7 +107,6 @@ export function TransactionDetails({
 
       <HeightRetainer>
         <WaterfallWithSummmary
-          location={location}
           urlParams={urlParams}
           waterfall={waterfall}
           isLoading={waterfallStatus === FETCH_STATUS.LOADING}

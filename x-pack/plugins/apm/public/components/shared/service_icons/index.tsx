@@ -8,12 +8,12 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactChild, useState } from 'react';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useTheme } from '../../../../hooks/use_theme';
-import { ContainerType } from '../../../../../common/service_metadata';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { getAgentIcon } from '../../../shared/AgentIcon/get_agent_icon';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { useTheme } from '../../../hooks/use_theme';
+import { ContainerType } from '../../../../common/service_metadata';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { getAgentIcon } from '../AgentIcon/get_agent_icon';
 import { CloudDetails } from './cloud_details';
 import { ContainerDetails } from './container_details';
 import { IconPopover } from './icon_popover';

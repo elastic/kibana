@@ -15,7 +15,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 import { enableInspectEsQueries } from '../../../../observability/public';
 import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
 import { useKibanaUrl } from '../../hooks/useKibanaUrl';
@@ -27,6 +26,8 @@ import { TimeComparison } from './time_comparison';
 import { TransactionTypeSelect } from './transaction_type_select';
 
 interface Props {
+  hidden?: boolean;
+  showKueryBar?: boolean;
   showTimeComparison?: boolean;
   showTransactionTypeSelector?: boolean;
 }
@@ -78,10 +79,17 @@ function DebugQueryCallout() {
 }
 
 export function SearchBar({
+  hidden = false,
+  showKueryBar = true,
   showTimeComparison = false,
   showTransactionTypeSelector = false,
 }: Props) {
   const { isSmall, isMedium, isLarge, isXl, isXXL } = useBreakPoints();
+
+  if (hidden) {
+    return null;
+  }
+
   return (
     <>
       <DebugQueryCallout />
@@ -101,9 +109,12 @@ export function SearchBar({
                 <TransactionTypeSelect />
               </EuiFlexItem>
             )}
-            <EuiFlexItem>
-              <KueryBar />
-            </EuiFlexItem>
+
+            {showKueryBar && (
+              <EuiFlexItem>
+                <KueryBar />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={showTimeComparison && !isXXL}>

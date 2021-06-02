@@ -68,42 +68,38 @@ export function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
   useTrackPageview({ app: 'apm', path: 'error_group_overview', delay: 15000 });
 
   if (!errorDistributionData || !errorGroupListData) {
-    return <SearchBar />;
+    return null;
   }
 
   return (
-    <>
-      <SearchBar />
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem>
+        <EuiPanel>
+          <ErrorDistribution
+            distribution={errorDistributionData}
+            title={i18n.translate(
+              'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
+              {
+                defaultMessage: 'Error occurrences',
+              }
+            )}
+          />
+        </EuiPanel>
+      </EuiFlexItem>
 
-      <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiFlexItem>
-          <EuiPanel>
-            <ErrorDistribution
-              distribution={errorDistributionData}
-              title={i18n.translate(
-                'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
-                {
-                  defaultMessage: 'Error occurrences',
-                }
-              )}
-            />
-          </EuiPanel>
-        </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiPanel>
+          <EuiTitle size="xs">
+            <h3>Errors</h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
 
-        <EuiFlexItem>
-          <EuiPanel>
-            <EuiTitle size="xs">
-              <h3>Errors</h3>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-
-            <ErrorGroupList
-              items={errorGroupListData.errorGroups}
-              serviceName={serviceName}
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+          <ErrorGroupList
+            items={errorGroupListData.errorGroups}
+            serviceName={serviceName}
+          />
+        </EuiPanel>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

@@ -10,6 +10,7 @@ import React from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
 import { isRumAgentName } from '../../../../common/agent_name';
 import { AnnotationsContextProvider } from '../../../context/annotations/annotations_context';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useBreakPoints } from '../../../hooks/use_break_points';
 import { LatencyChart } from '../../shared/charts/latency_chart';
@@ -29,14 +30,12 @@ import { ServiceOverviewTransactionsTable } from './service_overview_transaction
 export const chartHeight = 288;
 
 interface ServiceOverviewProps {
-  agentName?: string;
   serviceName: string;
 }
 
-export function ServiceOverview({
-  agentName,
-  serviceName,
-}: ServiceOverviewProps) {
+export function ServiceOverview({ serviceName }: ServiceOverviewProps) {
+  const { agentName } = useApmServiceContext();
+
   useTrackPageview({ app: 'apm', path: 'service_overview' });
   useTrackPageview({ app: 'apm', path: 'service_overview', delay: 15000 });
 
@@ -49,8 +48,6 @@ export function ServiceOverview({
   return (
     <AnnotationsContextProvider>
       <ChartPointerEventContextProvider>
-        <SearchBar showTransactionTypeSelector showTimeComparison />
-
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
             <EuiPanel>

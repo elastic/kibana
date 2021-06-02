@@ -9,8 +9,8 @@ import { EuiDescriptionList } from '@elastic/eui';
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { asInteger } from '../../../../../common/utils/formatters';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { asInteger } from '../../../../common/utils/formatters';
+import { APIReturnType } from '../../../services/rest/createCallApmApi';
 
 type ServiceDetailsReturnType = APIReturnType<'GET /api/apm/services/{serviceName}/metadata/details'>;
 

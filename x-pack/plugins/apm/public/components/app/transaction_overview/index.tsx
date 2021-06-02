@@ -79,8 +79,6 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
 
   return (
     <>
-      <SearchBar showTransactionTypeSelector />
-
       <TransactionCharts />
       <EuiSpacer size="s" />
       <EuiPanel>

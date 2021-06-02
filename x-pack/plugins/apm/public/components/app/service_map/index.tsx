@@ -7,7 +7,6 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React, { PropsWithChildren, ReactNode } from 'react';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { useTrackPageview } from '../../../../../observability/public';
 import {
@@ -18,7 +17,6 @@ import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { useTheme } from '../../../hooks/use_theme';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { DatePicker } from '../../shared/DatePicker';
 import { LicensePrompt } from '../../shared/license_prompt';
 import { Controls } from './Controls';
 import { Cytoscape } from './Cytoscape';
@@ -28,31 +26,16 @@ import { EmptyPrompt } from './empty_prompt';
 import { Popover } from './Popover';
 import { TimeoutPrompt } from './timeout_prompt';
 import { useRefDimensions } from './useRefDimensions';
+import { SearchBar } from '../../shared/search_bar';
 
 interface ServiceMapProps {
   serviceName?: string;
 }
 
-const ServiceMapDatePickerFlexGroup = euiStyled(EuiFlexGroup)`
-  padding: ${({ theme }) => theme.eui.euiSizeM};
-  border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
-  margin: 0;
-`;
-
-function DatePickerSection() {
-  return (
-    <ServiceMapDatePickerFlexGroup justifyContent="flexEnd" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <DatePicker />
-      </EuiFlexItem>
-    </ServiceMapDatePickerFlexGroup>
-  );
-}
-
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
     <>
-      <DatePickerSection />
+      <SearchBar showKueryBar={false} />
       <EuiFlexGroup
         alignItems="center"
         justifyContent="spaceAround"
@@ -153,7 +136,8 @@ export function ServiceMap({
 
   return (
     <>
-      <DatePickerSection />
+      <SearchBar showKueryBar={false} />
+
       <div data-test-subj="ServiceMap" style={{ height }} ref={ref}>
         <Cytoscape
           elements={data.elements}

@@ -11,14 +11,14 @@ import { merge } from 'lodash';
 // import { renderWithTheme } from '../../../../utils/testHelpers';
 import React, { ReactNode } from 'react';
 import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
-import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
-import { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
+import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
+import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
-} from '../../../../context/apm_plugin/mock_apm_plugin_context';
-import * as fetcherHook from '../../../../hooks/use_fetcher';
-import { ServiceIcons } from './';
+} from '../../../context/apm_plugin/mock_apm_plugin_context';
+import * as fetcherHook from '../../../hooks/use_fetcher';
+import { ServiceIcons } from '.';
 import { EuiThemeProvider } from 'src/plugins/kibana_react/common';
 
 const KibanaReactContext = createKibanaReactContext({

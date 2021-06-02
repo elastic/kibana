@@ -143,22 +143,18 @@ function ServiceNodeOverview({ serviceName }: ServiceNodeOverviewProps) {
   ];
 
   return (
-    <>
-      <SearchBar />
-
-      <EuiPanel hasShadow={false}>
-        <ManagedTable
-          noItemsMessage={i18n.translate('xpack.apm.jvmsTable.noJvmsLabel', {
-            defaultMessage: 'No JVMs were found',
-          })}
-          items={items}
-          columns={columns}
-          initialPageSize={INITIAL_PAGE_SIZE}
-          initialSortField={INITIAL_SORT_FIELD}
-          initialSortDirection={INITIAL_SORT_DIRECTION}
-        />
-      </EuiPanel>
-    </>
+    <EuiPanel hasShadow={false}>
+      <ManagedTable
+        noItemsMessage={i18n.translate('xpack.apm.jvmsTable.noJvmsLabel', {
+          defaultMessage: 'No JVMs were found',
+        })}
+        items={items}
+        columns={columns}
+        initialPageSize={INITIAL_PAGE_SIZE}
+        initialSortField={INITIAL_SORT_FIELD}
+        initialSortDirection={INITIAL_SORT_DIRECTION}
+      />
+    </EuiPanel>
   );
 }
 

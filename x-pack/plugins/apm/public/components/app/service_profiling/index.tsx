@@ -83,8 +83,6 @@ export function ServiceProfiling({
 
   return (
     <>
-      <SearchBar />
-
       <EuiPanel>
         <EuiFlexGroup direction="column">
           <EuiFlexItem>

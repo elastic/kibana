@@ -36,7 +36,54 @@ const MainContainer = euiStyled.div`
   height: 100%;
 `;
 
+export function ApmAppRoot({
+  apmPluginContextValue,
+  pluginsStart,
+}: {
+  apmPluginContextValue: ApmPluginContextValue;
+  pluginsStart: ApmPluginStartDeps;
+}) {
+  const { appMountParameters, core } = apmPluginContextValue;
+  const { history } = appMountParameters;
+  const i18nCore = core.i18n;
+
+  return (
+    <RedirectAppLinks application={core.application}>
+      <ApmPluginContext.Provider value={apmPluginContextValue}>
+        <KibanaContextProvider services={{ ...core, ...pluginsStart }}>
+          <i18nCore.Context>
+            <Router history={history}>
+              <UrlParamsProvider>
+                <LicenseProvider>
+                  <AnomalyDetectionJobsContextProvider>
+                    <ApmThemeProvider>
+                      <MainContainer
+                        data-test-subj="apmMainContainer"
+                        role="main"
+                      >
+                        <MountApmHeaderActionMenu />
+
+                        <Route component={ScrollToTopOnPathChange} />
+                        <Switch>
+                          {routes.map((route, i) => (
+                            <ApmRoute key={i} {...route} />
+                          ))}
+                        </Switch>
+                      </MainContainer>
+                    </ApmThemeProvider>
+                  </AnomalyDetectionJobsContextProvider>
+                </LicenseProvider>
+              </UrlParamsProvider>
+            </Router>
+          </i18nCore.Context>
+        </KibanaContextProvider>
+      </ApmPluginContext.Provider>
+    </RedirectAppLinks>
+  );
+}
+
 function MountApmHeaderActionMenu() {
+  useBreadcrumbs(routes);
   const { setHeaderActionMenu } = useApmPluginContext().appMountParameters;
 
   return (
@@ -59,56 +106,5 @@ function ApmThemeProvider({ children }: { children: React.ReactNode }) {
     >
       {children}
     </ThemeProvider>
-  );
-}
-
-function App() {
-  useBreadcrumbs(routes);
-
-  return (
-    <MainContainer data-test-subj="apmMainContainer" role="main">
-      <MountApmHeaderActionMenu />
-
-      <Route component={ScrollToTopOnPathChange} />
-      <Switch>
-        {routes.map((route, i) => (
-          <ApmRoute key={i} {...route} />
-        ))}
-      </Switch>
-    </MainContainer>
-  );
-}
-
-export function ApmAppRoot({
-  apmPluginContextValue,
-  pluginsStart,
-}: {
-  apmPluginContextValue: ApmPluginContextValue;
-  pluginsStart: ApmPluginStartDeps;
-}) {
-  const { appMountParameters, core } = apmPluginContextValue;
-  const { history } = appMountParameters;
-  const i18nCore = core.i18n;
-
-  return (
-    <RedirectAppLinks application={core.application}>
-      <ApmPluginContext.Provider value={apmPluginContextValue}>
-        <KibanaContextProvider services={{ ...core, ...pluginsStart }}>
-          <i18nCore.Context>
-            <Router history={history}>
-              <UrlParamsProvider>
-                <LicenseProvider>
-                  <AnomalyDetectionJobsContextProvider>
-                    <ApmThemeProvider>
-                      <App />
-                    </ApmThemeProvider>
-                  </AnomalyDetectionJobsContextProvider>
-                </LicenseProvider>
-              </UrlParamsProvider>
-            </Router>
-          </i18nCore.Context>
-        </KibanaContextProvider>
-      </ApmPluginContext.Provider>
-    </RedirectAppLinks>
   );
 }

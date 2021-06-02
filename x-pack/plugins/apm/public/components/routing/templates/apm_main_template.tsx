@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-
 import { ApmPluginStartDeps } from '../../../plugin';
 import { EnvironmentFilter } from '../../shared/EnvironmentFilter';
 
@@ -25,7 +24,7 @@ export function ApmMainTemplate({
   environmentSelector = true,
   children,
 }: {
-  pageTitle: string;
+  pageTitle: React.ReactNode;
   environmentSelector?: boolean;
   children: React.ReactNode;
 }) {

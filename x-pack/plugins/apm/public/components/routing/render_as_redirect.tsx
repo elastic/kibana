@@ -12,7 +12,7 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
  * Given a path, redirect to that location, preserving the search and maintaining
  * backward-compatibilty with legacy (pre-7.9) hash-based URLs.
  */
-export function renderAsRedirectTo(to: string) {
+export function redirectTo(to: string) {
   return ({ location }: RouteComponentProps<{}>) => {
     let resolvedUrl: URL | undefined;
 

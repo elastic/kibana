@@ -13,8 +13,8 @@ import {
   EuiPopoverTitle,
 } from '@elastic/eui';
 import React from 'react';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { px } from '../../../../style/variables';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { px } from '../../../style/variables';
 
 interface IconPopoverProps {
   title: string;
