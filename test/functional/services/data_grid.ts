@@ -10,7 +10,7 @@ import { chunk } from 'lodash';
 import { FtrService } from '../ftr_provider_context';
 import { WebElementWrapper } from './lib/web_element_wrapper';
 
-interface TabbedGridData {
+export interface TabbedGridData {
   columns: string[];
   rows: string[][];
 }

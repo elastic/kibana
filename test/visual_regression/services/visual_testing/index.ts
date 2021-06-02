@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { VisualTestingProvider } from './visual_testing';
+export * from './visual_testing';
