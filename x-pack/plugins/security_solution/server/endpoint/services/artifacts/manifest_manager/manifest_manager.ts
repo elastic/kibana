@@ -94,6 +94,9 @@ const getArtifactIds = (manifest: ManifestSchema) =>
 const manifestsEqual = (manifest1: ManifestSchema, manifest2: ManifestSchema) =>
   isEqual(new Set(getArtifactIds(manifest1)), new Set(getArtifactIds(manifest2)));
 
+/**
+ * Manages the manifest of artifacts that will be sent to the Elastic Endpoint. Examples of artifacts include exception lists and policies.
+ */
 export class ManifestManager {
   protected artifactClient: EndpointArtifactClientInterface;
   protected exceptionListClient: ExceptionListClient;
