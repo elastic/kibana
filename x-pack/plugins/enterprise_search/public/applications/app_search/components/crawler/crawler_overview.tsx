@@ -5,14 +5,31 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
-import { EuiPageHeader } from '@elastic/eui';
+import { useActions, useValues } from 'kea';
 
-import { CRAWLER_TITLE } from '.';
+import { EuiCode, EuiPageHeader } from '@elastic/eui';
 
-export const CrawlerOverview: React.FC = () => (
-  <div data-test-subj="CrawlerOverview">
-    <EuiPageHeader pageTitle={CRAWLER_TITLE} />
-  </div>
-);
+import { FlashMessages } from '../../../shared/flash_messages';
+
+import { CRAWLER_TITLE } from './constants';
+import { CrawlerOverviewLogic } from './crawler_overview_logic';
+
+export const CrawlerOverview: React.FC = () => {
+  const { domains } = useValues(CrawlerOverviewLogic);
+
+  const { fetchCrawlerData } = useActions(CrawlerOverviewLogic);
+
+  useEffect(() => {
+    fetchCrawlerData();
+  }, []);
+
+  return (
+    <div data-test-subj="CrawlerOverview">
+      <EuiPageHeader pageTitle={CRAWLER_TITLE} />
+      <FlashMessages />
+      <EuiCode language="json">{JSON.stringify(domains, null, 2)}</EuiCode>
+    </div>
+  );
+};

@@ -5,16 +5,31 @@
  * 2.0.
  */
 
+import { setMockActions, setMockValues } from '../../../__mocks__';
+import '../../../__mocks__/shallow_useeffect.mock';
+
 import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
+import { EuiCode } from '@elastic/eui';
+
 import { CrawlerOverview } from './crawler_overview';
+
+const actions = {
+  fetchCrawlerData: jest.fn(),
+};
+
+const values = {
+  domains: [],
+};
 
 describe('CrawlerOverview', () => {
   let wrapper: ShallowWrapper;
 
   beforeEach(() => {
+    setMockValues(values);
+    setMockActions(actions);
     wrapper = shallow(<CrawlerOverview />);
   });
 
@@ -23,7 +38,11 @@ describe('CrawlerOverview', () => {
   });
 
   it('renders', () => {
-    expect(wrapper.find('[data-test-subj="CrawlerOverview"]')).toHaveLength(1);
+    expect(wrapper.find(EuiCode)).toHaveLength(1);
+  });
+
+  it('calls fetchCrawlerData on page load', () => {
+    expect(actions.fetchCrawlerData).toHaveBeenCalledTimes(1);
   });
 
   // it('contains a DomainsTable', () => {})
