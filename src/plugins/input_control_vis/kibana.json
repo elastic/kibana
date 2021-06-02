@@ -2,7 +2,7 @@
   "id": "inputControlVis",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
-  "server": true,
+  "server": false,
   "ui": true,
   "requiredPlugins": [
     "data",
