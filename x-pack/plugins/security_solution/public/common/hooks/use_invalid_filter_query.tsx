@@ -37,3 +37,9 @@ export const useInvalidFilterQuery = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterQuery, addError, query, startDate, endDate]);
 };
+
+/**
+ * TODO:
+ * fix timeline rerender
+ * fix overview rerender
+ */

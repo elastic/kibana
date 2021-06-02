@@ -69,16 +69,8 @@ const EventCountsComponent: React.FC<Props> = ({
   );
 
   useInvalidFilterQuery({
-    filterQuery: hostFilterQuery,
+    filterQuery: hostFilterQuery || networkFilterQuery,
     kqlError: hostKqlError,
-    query,
-    startDate: from,
-    endDate: to,
-  });
-
-  useInvalidFilterQuery({
-    filterQuery: networkFilterQuery,
-    kqlError: networkKqlError,
     query,
     startDate: from,
     endDate: to,

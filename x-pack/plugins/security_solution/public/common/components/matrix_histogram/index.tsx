@@ -216,6 +216,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
             titleSize={titleSize}
             subtitle={subtitleWithCounts}
             inspectMultiple
+            isInspectDisabled={filterQuery === undefined}
           >
             <EuiFlexGroup alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>
