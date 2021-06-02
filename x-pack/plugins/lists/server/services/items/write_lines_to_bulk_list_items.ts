@@ -8,17 +8,17 @@
 import { Readable } from 'stream';
 
 import { ElasticsearchClient } from 'kibana/server';
-
-import { createListIfItDoesNotExist } from '../lists/create_list_if_it_does_not_exist';
-import {
+import type {
   DeserializerOrUndefined,
   ListIdOrUndefined,
   ListSchema,
   MetaOrUndefined,
   SerializerOrUndefined,
   Type,
-  Version,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { Version } from '@kbn/securitysolution-io-ts-types';
+
+import { createListIfItDoesNotExist } from '../lists/create_list_if_it_does_not_exist';
 import { ConfigType } from '../../config';
 
 import { BufferLines } from './buffer_lines';

@@ -9,8 +9,9 @@ import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Observable } from 'rxjs';
 import { AppMountParameters, CoreStart } from 'src/core/public';
+import { KibanaPageTemplate } from '../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../plugin';
-import { createObservabilityRuleRegistryMock } from '../rules/observability_rule_registry_mock';
+import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 import { renderApp } from './';
 
 describe('renderApp', () => {
@@ -45,7 +46,7 @@ describe('renderApp', () => {
       uiSettings: { get: () => false },
       http: { basePath: { prepend: (path: string) => path } },
     } as unknown) as CoreStart;
-    const config = { unsafe: { alertingExperience: { enabled: true } } };
+    const config = { unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } } };
     const params = ({
       element: window.document.createElement('div'),
       history: createMemoryHistory(),
@@ -58,7 +59,8 @@ describe('renderApp', () => {
         core,
         plugins,
         appMountParameters: params,
-        observabilityRuleRegistry: createObservabilityRuleRegistryMock(),
+        observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
+        ObservabilityPageTemplate: KibanaPageTemplate,
       });
       unmount();
     }).not.toThrowError();

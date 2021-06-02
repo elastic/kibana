@@ -12,6 +12,7 @@ import {
   BROWSER_FAMILY_LABEL,
   BROWSER_VERSION_LABEL,
   CLS_LABEL,
+  CORE_WEB_VITALS_LABEL,
   CPU_USAGE_LABEL,
   DEVICE_LABEL,
   ENVIRONMENT_LABEL,
@@ -102,6 +103,7 @@ export const DataViewLabels: Record<ReportViewTypeId, string> = {
   logs: LOGS_FREQUENCY_LABEL,
   mem: MEMORY_USAGE_LABEL,
   nwk: NETWORK_ACTIVITY_LABEL,
+  cwv: CORE_WEB_VITALS_LABEL,
   mrp: 'Mobile response duration',
 };
 
@@ -116,4 +118,9 @@ export const ReportToDataTypeMap: Record<ReportViewTypeId, AppDataType> = {
   mem: 'infra_metrics',
   logs: 'infra_logs',
   cpu: 'infra_metrics',
+  cwv: 'ux',
 };
+
+export const USE_BREAK_DOWN_COLUMN = 'USE_BREAK_DOWN_COLUMN';
+export const FILTER_RECORDS = 'FILTER_RECORDS';
+export const OPERATION_COLUMN = 'operation';

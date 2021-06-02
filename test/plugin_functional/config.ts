@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import path from 'path';
 import fs from 'fs';
 
@@ -22,6 +22,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     testFiles: [
       require.resolve('./test_suites/usage_collection'),
+      require.resolve('./test_suites/telemetry'),
       require.resolve('./test_suites/core'),
       require.resolve('./test_suites/custom_visualizations'),
       require.resolve('./test_suites/panel_actions'),

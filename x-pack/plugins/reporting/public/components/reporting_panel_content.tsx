@@ -19,6 +19,11 @@ export interface Props {
   apiClient: ReportingAPIClient;
   toasts: ToastsSetup;
   reportType: string;
+
+  /**
+   * Whether the report to be generated requires saved state that is not captured in the URL submitted to the report generator.
+   */
+  requiresSavedState: boolean;
   layoutId: string | undefined;
   objectId?: string;
   getJobParams: () => BaseParams;
@@ -85,7 +90,10 @@ class ReportingPanelContentUi extends Component<Props, State> {
   }
 
   public render() {
-    if (this.isNotSaved() || this.props.isDirty || this.state.isStale) {
+    if (
+      this.props.requiresSavedState &&
+      (this.isNotSaved() || this.props.isDirty || this.state.isStale)
+    ) {
       return (
         <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
           <EuiFormRow

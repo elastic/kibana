@@ -170,7 +170,7 @@ import {
   dateHistogramInterval,
   InvalidEsCalendarIntervalError,
   InvalidEsIntervalFormatError,
-  Ipv4Address,
+  IpAddress,
   isValidEsInterval,
   isValidInterval,
   parseEsInterval,
@@ -181,6 +181,7 @@ import {
   tabifyGetColumns,
   calcAutoIntervalLessThan,
 } from '../common';
+import { autocompleteConfigDeprecationProvider } from './config_deprecations';
 
 export {
   // aggs
@@ -247,7 +248,7 @@ export const search = {
     intervalOptions,
     InvalidEsCalendarIntervalError,
     InvalidEsIntervalFormatError,
-    Ipv4Address,
+    IpAddress,
     isNumberType,
     isStringType,
     isType,
@@ -301,6 +302,7 @@ export {
 };
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
+  deprecations: autocompleteConfigDeprecationProvider,
   exposeToBrowser: {
     autocomplete: true,
     search: true,

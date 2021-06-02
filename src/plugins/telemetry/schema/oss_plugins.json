@@ -6950,6 +6950,28 @@
                   }
                 }
               }
+            },
+            "deprecatedKeys": {
+              "properties": {
+                "set": {
+                  "type": "array",
+                  "items": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "Config path added during config deprecation."
+                    }
+                  }
+                },
+                "unset": {
+                  "type": "array",
+                  "items": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "Config path removed during config deprecation."
+                    }
+                  }
+                }
+              }
             }
           }
         },
@@ -8195,6 +8217,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "bfetch:disableCompression": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "visualization:visualize:legacyChartsLibrary": {
           "type": "boolean",
           "_meta": {
@@ -8274,6 +8302,18 @@
           }
         },
         "labs:canvas:useDataService": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "labs:dashboard:enable_ui": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "labs:dashboard:deferBelowFold": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."

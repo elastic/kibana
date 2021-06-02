@@ -1397,6 +1397,7 @@ export const sampleAreaVis = {
             drawLinesBetweenPoints: true,
             lineWidth: 2,
             showCircles: true,
+            circlesRadius: 3,
             interpolate: 'linear',
             valueAxis: 'ValueAxis-1',
           },
@@ -1414,6 +1415,10 @@ export const sampleAreaVis = {
           color: '#E7664C',
         },
         labels: {},
+        palette: {
+          name: 'default',
+        },
+        fillOpacity: 0.5,
       },
     },
     editorConfig: {
@@ -1559,6 +1564,7 @@ export const sampleAreaVis = {
         },
         drawLinesBetweenPoints: true,
         showCircles: true,
+        circlesRadius: 5,
         interpolate: 'linear',
         valueAxis: 'ValueAxis-1',
       },
@@ -1574,6 +1580,9 @@ export const sampleAreaVis = {
       width: 1,
       style: 'full',
       color: '#E7664C',
+    },
+    palette: {
+      name: 'default',
     },
     labels: {},
     dimensions: {

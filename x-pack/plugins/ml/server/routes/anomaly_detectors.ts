@@ -20,7 +20,8 @@ import {
   forecastAnomalyDetector,
   getBucketParamsSchema,
   getModelSnapshotsSchema,
-  updateModelSnapshotSchema,
+  updateModelSnapshotsSchema,
+  updateModelSnapshotBodySchema,
 } from './schemas/anomaly_detectors_schema';
 
 /**
@@ -179,6 +180,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
         const { jobId } = request.params;
         const { body } = await mlClient.putJob({
           job_id: jobId,
+          // @ts-expect-error job type custom_rules is incorrect
           body: request.body,
         });
 
@@ -274,6 +276,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       path: '/api/ml/anomaly_detectors/{jobId}/_close',
       validate: {
         params: jobIdSchema,
+        query: schema.object({ force: schema.maybe(schema.boolean()) }),
       },
       options: {
         tags: ['access:ml:canCloseJob'],
@@ -312,6 +315,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       path: '/api/ml/anomaly_detectors/{jobId}',
       validate: {
         params: jobIdSchema,
+        query: schema.object({ force: schema.maybe(schema.boolean()) }),
       },
       options: {
         tags: ['access:ml:canDeleteJob'],
@@ -518,6 +522,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
             bucket_span: request.body.bucketSpan,
             start: request.body.start !== undefined ? String(request.body.start) : undefined,
             end: request.body.end !== undefined ? String(request.body.end) : undefined,
+            overall_score: request.body.overall_score ?? 0,
           },
         });
         return response.ok({
@@ -637,15 +642,15 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
    * @apiName UpdateModelSnapshotsById
    * @apiDescription Updates the model snapshot for the specified snapshot ID
    *
-   * @apiSchema (params) getModelSnapshotsSchema
-   * @apiSchema (body) updateModelSnapshotSchema
+   * @apiSchema (params) updateModelSnapshotsSchema
+   * @apiSchema (body) updateModelSnapshotBodySchema
    */
   router.post(
     {
       path: '/api/ml/anomaly_detectors/{jobId}/model_snapshots/{snapshotId}/_update',
       validate: {
-        params: getModelSnapshotsSchema,
-        body: updateModelSnapshotSchema,
+        params: updateModelSnapshotsSchema,
+        body: updateModelSnapshotBodySchema,
       },
       options: {
         tags: ['access:ml:canCreateJob'],
@@ -674,13 +679,13 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
    * @apiName GetModelSnapshotsById
    * @apiDescription Deletes the model snapshot for the specified snapshot ID
    *
-   * @apiSchema (params) getModelSnapshotsSchema
+   * @apiSchema (params) updateModelSnapshotsSchema
    */
   router.delete(
     {
       path: '/api/ml/anomaly_detectors/{jobId}/model_snapshots/{snapshotId}',
       validate: {
-        params: getModelSnapshotsSchema,
+        params: updateModelSnapshotsSchema,
       },
       options: {
         tags: ['access:ml:canCreateJob'],

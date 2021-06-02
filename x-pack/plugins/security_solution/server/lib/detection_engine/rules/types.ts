@@ -14,55 +14,70 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsClientContract,
 } from 'kibana/server';
+import type {
+  MachineLearningJobIdOrUndefined,
+  From,
+  FromOrUndefined,
+  RiskScore,
+  RiskScoreMapping,
+  RiskScoreMappingOrUndefined,
+  RiskScoreOrUndefined,
+  ThreatIndexOrUndefined,
+  ThreatQueryOrUndefined,
+  ThreatMappingOrUndefined,
+  ThreatFiltersOrUndefined,
+  ThreatLanguageOrUndefined,
+  ConcurrentSearchesOrUndefined,
+  ItemsPerSearchOrUndefined,
+  ThreatIndicatorPathOrUndefined,
+  Threats,
+  ThreatsOrUndefined,
+  TypeOrUndefined,
+  Type,
+  LanguageOrUndefined,
+  SeverityMapping,
+  SeverityMappingOrUndefined,
+  SeverityOrUndefined,
+  Severity,
+  MaxSignalsOrUndefined,
+  MaxSignals,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import type { VersionOrUndefined, Version } from '@kbn/securitysolution-io-ts-types';
+
+import type { ListArrayOrUndefined, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import {
   FalsePositives,
-  From,
   RuleId,
   Immutable,
   DescriptionOrUndefined,
   Interval,
-  MaxSignals,
-  RiskScore,
   OutputIndex,
   Name,
-  Severity,
   Tags,
-  Threats,
   To,
-  Type,
   References,
-  Version,
   AnomalyThresholdOrUndefined,
   QueryOrUndefined,
-  LanguageOrUndefined,
   SavedIdOrUndefined,
   TimelineIdOrUndefined,
   TimelineTitleOrUndefined,
-  MachineLearningJobIdOrUndefined,
   IndexOrUndefined,
   NoteOrUndefined,
   MetaOrUndefined,
   Description,
   Enabled,
-  VersionOrUndefined,
   IdOrUndefined,
   RuleIdOrUndefined,
   EnabledOrUndefined,
   FalsePositivesOrUndefined,
-  FromOrUndefined,
   OutputIndexOrUndefined,
   IntervalOrUndefined,
-  MaxSignalsOrUndefined,
-  RiskScoreOrUndefined,
   NameOrUndefined,
-  SeverityOrUndefined,
   TagsOrUndefined,
   ToOrUndefined,
-  ThreatsOrUndefined,
   ThresholdOrUndefined,
-  TypeOrUndefined,
   ReferencesOrUndefined,
   PerPageOrUndefined,
   PageOrUndefined,
@@ -79,31 +94,16 @@ import {
   Author,
   AuthorOrUndefined,
   LicenseOrUndefined,
-  RiskScoreMapping,
-  RiskScoreMappingOrUndefined,
-  SeverityMapping,
-  SeverityMappingOrUndefined,
   TimestampOverrideOrUndefined,
   BuildingBlockTypeOrUndefined,
   RuleNameOverrideOrUndefined,
   EventCategoryOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
-import {
-  ThreatIndexOrUndefined,
-  ThreatQueryOrUndefined,
-  ThreatMappingOrUndefined,
-  ThreatFiltersOrUndefined,
-  ThreatLanguageOrUndefined,
-  ConcurrentSearchesOrUndefined,
-  ItemsPerSearchOrUndefined,
-  ThreatIndicatorPathOrUndefined,
-} from '../../../../common/detection_engine/schemas/types/threat_mapping';
 
 import { AlertsClient, PartialAlert } from '../../../../../alerting/server';
 import { Alert, SanitizedAlert } from '../../../../../alerting/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { PartialFilter } from '../types';
-import { ListArrayOrUndefined, ListArray } from '../../../../common/detection_engine/schemas/types';
 import { RuleParams } from '../schemas/rule_schemas';
 
 export type RuleAlertType = Alert<RuleParams>;
@@ -131,7 +131,7 @@ export interface IRuleStatusResponseAttributes {
   last_success_at: LastSuccessAt | null | undefined;
   last_success_message: LastSuccessMessage | null | undefined;
   status: JobStatus | null | undefined;
-  last_look_back_date: string | null | undefined;
+  last_look_back_date: string | null | undefined; // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
   gap: string | null | undefined;
   bulk_create_time_durations: string[] | null | undefined;
   search_after_time_durations: string[] | null | undefined;
@@ -209,12 +209,6 @@ export const isRuleStatusFindType = (
   obj: unknown
 ): obj is SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => {
   return get('saved_objects', obj) != null;
-};
-
-export const isRuleStatusFindTypes = (
-  obj: unknown[] | undefined
-): obj is Array<SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes>> => {
-  return obj ? obj.every((ruleStatus) => isRuleStatusFindType(ruleStatus)) : false;
 };
 
 export interface CreateRulesOptions {
