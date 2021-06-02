@@ -42,10 +42,10 @@ const alert: Alert = {
   'event.kind': ['state'],
   'rule.category': ['Latency threshold'],
 };
-const getFormatter = () => () =>
-  (({
-    reason: 'a good reason',
-  } as unknown) as ObservabilityRuleTypeRegistry['getFormatter']);
+const getFormatter: ObservabilityRuleTypeRegistry['getFormatter'] = () => () => ({
+  link: '/',
+  reason: 'a good reason',
+});
 
 describe('getAlertAnnotations', () => {
   describe('with no alerts', () => {
@@ -76,6 +76,21 @@ describe('getAlertAnnotations', () => {
         getAlertAnnotations({ alerts: [alert], getFormatter, theme })![0].props
           .dataValues[0].details
       ).toEqual('a good reason');
+    });
+
+    describe('with no formatter', () => {
+      it('uses the rule type', () => {
+        const getNoFormatter: ObservabilityRuleTypeRegistry['getFormatter'] = () =>
+          undefined;
+
+        expect(
+          getAlertAnnotations({
+            alerts: [alert],
+            getFormatter: getNoFormatter,
+            theme,
+          })![0].props.dataValues[0].details
+        ).toEqual(alert['rule.name']![0]);
+      });
     });
   });
 
