@@ -23,7 +23,7 @@ import {
   ENGINE_DOCUMENTS_PATH,
   ENGINE_DOCUMENT_DETAIL_PATH,
   ENGINE_SCHEMA_PATH,
-  // ENGINE_CRAWLER_PATH,
+  ENGINE_CRAWLER_PATH,
   META_ENGINE_SOURCE_ENGINES_PATH,
   ENGINE_RELEVANCE_TUNING_PATH,
   ENGINE_SYNONYMS_PATH,
@@ -34,6 +34,7 @@ import {
 } from '../../routes';
 import { AnalyticsRouter } from '../analytics';
 import { ApiLogs } from '../api_logs';
+import { CrawlerRouter } from '../crawler';
 import { CurationsRouter } from '../curations';
 import { DocumentDetail, Documents } from '../documents';
 import { EngineOverview } from '../engine_overview';
@@ -52,7 +53,7 @@ export const EngineRouter: React.FC = () => {
       canViewEngineAnalytics,
       canViewEngineDocuments,
       canViewEngineSchema,
-      // canViewEngineCrawler,
+      canViewEngineCrawler,
       canViewMetaEngineSourceEngines,
       canManageEngineRelevanceTuning,
       canManageEngineSynonyms,
@@ -141,6 +142,11 @@ export const EngineRouter: React.FC = () => {
       {canViewMetaEngineSourceEngines && (
         <Route path={META_ENGINE_SOURCE_ENGINES_PATH}>
           <SourceEngines />
+        </Route>
+      )}
+      {canViewEngineCrawler && (
+        <Route path={ENGINE_CRAWLER_PATH}>
+          <CrawlerRouter />
         </Route>
       )}
       <Route>
