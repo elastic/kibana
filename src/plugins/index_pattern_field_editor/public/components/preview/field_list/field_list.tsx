@@ -17,7 +17,11 @@ import './field_list.scss';
 
 const ITEM_HEIGHT = 64;
 
-export const PreviewFieldList = () => {
+interface Props {
+  height: number;
+}
+
+export const PreviewFieldList: React.FC<Props> = ({ height }) => {
   const { indexPattern } = useFieldEditorContext();
   const {
     currentDocument: { value: currentDocument },
@@ -42,11 +46,11 @@ export const PreviewFieldList = () => {
     [fields, currentDocument?._source]
   );
 
-  if (currentDocument === undefined) {
+  if (currentDocument === undefined || height === -1) {
     return null;
   }
 
-  const listHeight = Math.min(fieldsValues.length * ITEM_HEIGHT, 600);
+  const listHeight = Math.min(fieldsValues.length * ITEM_HEIGHT, height);
 
   return (
     <VirtualList
@@ -57,11 +61,11 @@ export const PreviewFieldList = () => {
       itemSize={ITEM_HEIGHT}
       overscanCount={4}
       renderItem={({ index, style }) => {
-        const item = fieldsValues[index];
+        const field = fieldsValues[index];
 
         return (
-          <div key={item.key} style={style}>
-            <PreviewListItem key={item.key} field={item} />
+          <div key={field.key} style={style}>
+            <PreviewListItem key={field.key} field={field} />
           </div>
         );
       }}

@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import React, { useState, useCallback } from 'react';
+import { EuiSpacer, EuiResizeObserver } from '@elastic/eui';
 
 import { useFieldPreviewContext } from './field_preview_context';
 import { FieldPreviewHeader } from './field_preview_header';
@@ -16,6 +16,8 @@ import { FieldPreviewError } from './field_preview_error';
 import { PreviewFieldList } from './field_list/field_list';
 
 export const FieldPreview = () => {
+  const [fieldListHeight, setFieldListHeight] = useState(-1);
+
   const {
     params: {
       value: { name, script, format },
@@ -25,6 +27,10 @@ export const FieldPreview = () => {
 
   // To show the preview we at least need a name to be defined and the script or the format
   const isEmptyPromptVisible = name === null || (script !== null && format !== null);
+
+  const onFieldListResize = useCallback(({ height }: { height: number }) => {
+    setFieldListHeight(height);
+  }, []);
 
   return (
     <>
@@ -38,7 +44,17 @@ export const FieldPreview = () => {
           <PreviewDocumentsNav />
           <EuiSpacer />
 
-          {error === null ? <PreviewFieldList /> : <FieldPreviewError />}
+          {error === null ? (
+            <EuiResizeObserver onResize={onFieldListResize}>
+              {(resizeRef) => (
+                <div ref={resizeRef} style={{ flex: 1 }}>
+                  <PreviewFieldList height={fieldListHeight} />
+                </div>
+              )}
+            </EuiResizeObserver>
+          ) : (
+            <FieldPreviewError />
+          )}
         </>
       )}
     </>

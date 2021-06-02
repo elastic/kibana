@@ -19,6 +19,8 @@ import {
 
 import { useFieldPreviewContext } from './field_preview_context';
 
+import './preview_documents_nav.scss';
+
 export const PreviewDocumentsNav = () => {
   const {
     currentDocument: { value: currentDocument, loadSingle, loadFromCluster, isLoading },
@@ -82,7 +84,7 @@ export const PreviewDocumentsNav = () => {
   );
 
   return (
-    <EuiFlexGroup gutterSize="s">
+    <EuiFlexGroup className="indexPatternFieldEditor__documentsNav" gutterSize="s">
       <EuiFlexItem>
         <EuiFormRow
           label={i18n.translate('indexPatternFieldEditor.fieldPreview.documentIdField.label', {
