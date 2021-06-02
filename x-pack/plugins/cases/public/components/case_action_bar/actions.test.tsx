@@ -49,7 +49,14 @@ describe('CaseView actions', () => {
   it('clicking trash toggles modal', () => {
     const wrapper = mount(
       <TestProviders>
-        <Actions caseData={basicCase} currentExternalIncident={null} />
+        <Actions
+          allCasesNavigation={{
+            href: 'all-cases-href',
+            onClick: jest.fn(),
+          }}
+          caseData={basicCase}
+          currentExternalIncident={null}
+        />
       </TestProviders>
     );
 
@@ -67,7 +74,14 @@ describe('CaseView actions', () => {
     }));
     const wrapper = mount(
       <TestProviders>
-        <Actions caseData={basicCase} currentExternalIncident={null} />
+        <Actions
+          allCasesNavigation={{
+            href: 'all-cases-href',
+            onClick: jest.fn(),
+          }}
+          caseData={basicCase}
+          currentExternalIncident={null}
+        />
       </TestProviders>
     );
 
@@ -82,6 +96,10 @@ describe('CaseView actions', () => {
     const wrapper = mount(
       <TestProviders>
         <Actions
+          allCasesNavigation={{
+            href: 'all-cases-href',
+            onClick: jest.fn(),
+          }}
           caseData={basicCase}
           currentExternalIncident={{
             ...basicPush,
