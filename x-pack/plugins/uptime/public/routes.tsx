@@ -8,6 +8,7 @@
 import React, { FC, useEffect } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import {
   CERTIFICATES_ROUTE,
   MONITOR_ROUTE,
@@ -39,6 +40,10 @@ interface RouteProps {
 }
 
 const baseTitle = 'Uptime - Kibana';
+
+export const MONITORING_OVERVIEW_LABEL = i18n.translate('xpack.uptime.overview.heading', {
+  defaultMessage: 'Monitoring overview',
+});
 
 const Routes: RouteProps[] = [
   {
@@ -96,9 +101,7 @@ const Routes: RouteProps[] = [
     dataTestSubj: 'uptimeOverviewPage',
     telemetryId: UptimePage.Overview,
     pageHeader: {
-      pageTitle: (
-        <FormattedMessage id="xpack.uptime.overview.heading" defaultMessage="Monitoring overview" />
-      ),
+      pageTitle: MONITORING_OVERVIEW_LABEL,
       rightSideItems: [<UptimeDatePicker />],
     },
   },
