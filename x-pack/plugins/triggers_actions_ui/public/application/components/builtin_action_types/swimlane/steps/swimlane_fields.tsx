@@ -146,7 +146,6 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
           options={connectorTypeButtons}
           idSelected={connectorType}
           onChange={(type) => editActionConfig('connectorType', type)}
-          isFullWidth
         />
       </EuiFormRow>
       {isValidFieldForConnector(
