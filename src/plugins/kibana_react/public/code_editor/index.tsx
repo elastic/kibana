@@ -48,7 +48,7 @@ export const CodeEditor: React.FunctionComponent<Props> = (props) => {
  * Renders a Monaco code editor in the same style as other EUI form fields.
  */
 export const CodeEditorField: React.FunctionComponent<Props> = (props) => {
-  const { width, height, options } = props;
+  const { width, height, options, fullWidth } = props;
   const darkMode = useUiSetting<boolean>('theme:darkMode');
   const theme = darkMode ? darkTheme : lightTheme;
   const style = {
@@ -72,7 +72,12 @@ export const CodeEditorField: React.FunctionComponent<Props> = (props) => {
           </EuiFormControlLayout>
         }
       >
-        <EuiFormControlLayout append={<div hidden />} style={style} readOnly={options?.readOnly}>
+        <EuiFormControlLayout
+          append={<div hidden />}
+          style={style}
+          readOnly={options?.readOnly}
+          fullWidth={fullWidth}
+        >
           <LazyBaseEditor {...props} useDarkTheme={darkMode} transparentBackground />
         </EuiFormControlLayout>
       </React.Suspense>

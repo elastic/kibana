@@ -24,7 +24,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import type { monaco } from '@kbn/monaco';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { CodeEditor } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { CodeEditorField } from '../../../../../../../../../src/plugins/kibana_react/public';
 import type { RoleIndexPrivilege } from '../../../../../../common/model';
 import type { IndicesAPIClient } from '../../../indices_api_client';
 import type { RoleValidator } from '../../validate_role';
@@ -331,9 +331,10 @@ export class IndexPrivilegeForm extends Component<Props, State> {
               fullWidth={true}
               data-test-subj={`queryInput${this.props.formIndex}`}
             >
-              <CodeEditor
+              <CodeEditorField
                 languageId="xjson"
                 width="100%"
+                fullWidth={true}
                 height={this.state.documentQueryEditorHeight}
                 aria-label={i18n.translate(
                   'xpack.security.management.editRole.indexPrivilegeForm.grantedDocumentsQueryEditorAriaLabel',

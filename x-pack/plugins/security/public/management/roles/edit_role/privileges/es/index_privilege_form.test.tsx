@@ -12,7 +12,7 @@ import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/
 import { coreMock } from 'src/core/public/mocks';
 
 import {
-  CodeEditor,
+  CodeEditorField,
   KibanaContextProvider,
 } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { indicesAPIClientMock } from '../../../index.mock';
@@ -191,7 +191,7 @@ describe(`document level security`, () => {
       </KibanaContextProvider>
     );
     expect(wrapper.find('EuiSwitch[data-test-subj="restrictDocumentsQuery0"]')).toHaveLength(1);
-    expect(wrapper.find(CodeEditor)).toHaveLength(1);
+    expect(wrapper.find(CodeEditorField)).toHaveLength(1);
   });
 });
 
