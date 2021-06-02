@@ -1,0 +1,62 @@
+[docker@kfdcel01 setup-kibana]$ ls -lrt
+total 392
+-rw-rw-r-- 1 docker docker    234 Mar 17 12:09 README.md
+-rw-rw-r-- 1 docker docker    444 Mar 17 12:09 Dockerfile
+-rwxrwxr-x 1 docker docker   1471 Mar 17 12:09 build-and-run.sh
+-rw-rw-r-- 1 docker docker  12888 Mar 17 12:09 chrome.pug
+-rw-rw-r-- 1 docker docker 356345 Mar 17 12:09 eui_theme_light.css
+-rw-rw-r-- 1 docker docker    318 Mar 17 12:09 req.conf
+-rw-rw-r-- 1 docker docker   1850 Mar 17 12:09 kibana.crt
+-rw-rw-r-- 1 docker docker    444 Mar 17 12:09 kibana.yml
+[docker@kfdcel01 setup-kibana]$ cat Dockerfile
+FROM kibana:7.11.1
+
+# RUN sed -i 's/title Kibana/title PROD/g' /usr/share/kibana/src/legacy/ui/ui_render/views/chrome.pug
+COPY --chown=kibana:root eui_theme_light.css /usr/share/kibana/node_modules/@elastic/eui/dist/eui_theme_light.css
+COPY --chown=kibana:kibana kibana.yml /usr/share/kibana/config/kibana.yml
+COPY --chown=kibana:kibana kibana.key /usr/share/kibana/kibana.key
+COPY --chown=kibana:kibana kibana.crt /usr/share/kibana/kibana.crt
+[docker@kfdcel01 setup-kibana]$ cat build-and-run.sh
+#!/usr/bin/env bash
+set -v
+
+# vars
+NAME='hlog-kibana'
+PORT='30001:5601'
+HOST=$(hostname | cut -d. -f1)
+NETWORK='elastic'
+LOCAL_DB='elasticsearch.hosts: "http://esdb:9200"'
+PROD_DB='elasticsearch.hosts: ["http://kfdcel02.hlcl.com:9200", "http://kfdcel03.hlcl.com:9200", "http://kfdcel04.hlcl.com:9200", "http://kfdcel05.hlcl.com:9200", "http://kfdcel06.hlcl.com:9200", "http://kfdcel07.hlcl.com:9200"]'
+CERT_CONF="req.conf"
+
+# building and running kibana
+function setupKibana() {
+
+  # generate fresh https certificates
+  sed -i "s/ENVHOST/${HOST}/g" "${CERT_CONF}"
+  rm -f "${PWD}"/kibana.crt "${PWD}"/kibana.key > /dev/null 2>&1 || true
+  openssl genrsa 4096 > "${PWD}"/kibana.key
+  openssl req -new -x509 -nodes -sha256 -days 3650 -key "${PWD}"/kibana.key -out "${PWD}"/kibana.crt -config "${CERT_CONF}"
+  chmod 400 "${PWD}"/kibana.key
+
+  # add database depending on environment
+  echo "${db}" >> kibana.yml
+
+  # build Docker image
+  docker build -t ${NAME} .
+  docker rm -f ${NAME} > /dev/null 2>&1 || true
+  docker network create ${NETWORK} > /dev/null 2>&1 || true
+  docker run -d --name=${NAME} --network ${NETWORK} -p ${PORT} ${NAME}
+
+  # remove artifacts
+  rm -f "${PWD}"/kibana.key "${PWD}"/kibana.key
+
+}
+
+# update kibana.yml depending on env (DEVE|TEST|PROD)
+[[ ${HOST} == 'kfdct069' ]] && db="${LOCAL_DB}"
+[[ ${HOST} == 'kfdct070' ]] && db="${LOCAL_DB}"
+[[ ${HOST} == 'kfdct080' ]] && db="${LOCAL_DB}"
+[[ ${HOST} == 'kfdcel01' ]] && db="${PROD_DB}"
+setupKibana
+[docker@kfdcel01 setup-kibana]$
