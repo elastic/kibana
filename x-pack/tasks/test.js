@@ -4,11 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import runSequence from 'run-sequence';
 import pluginHelpers from '@kbn/plugin-helpers';
+import gulp from 'gulp';
+import mocha from 'gulp-mocha';
+
+import { createAutoJUnitReporter } from '../../src/dev';
+
 import { getEnabledPlugins } from './helpers/get_plugins';
 import { forPluginServerTests } from './helpers/globs';
-import { createAutoJUnitReporter } from '../../src/dev';
+import { cleanTest } from './clean';
 
 const MOCHA_OPTIONS = {
   ui: 'bdd',
@@ -17,38 +21,32 @@ const MOCHA_OPTIONS = {
   }),
 };
 
-export default (gulp, { mocha }) => {
-  gulp.task('test', (cb) => {
-    const preTasks = ['clean-test'];
-    runSequence(preTasks, 'testserver', 'testbrowser', cb);
+export function testserver() {
+  const globs = [
+    'common/**/__tests__/**/*.js',
+    'server/**/__tests__/**/*.js',
+  ].concat(forPluginServerTests());
+
+  return gulp.src(globs, { read: false })
+    .pipe(mocha(MOCHA_OPTIONS));
+}
+
+export async function testbrowser() {
+  const plugins = await getEnabledPlugins();
+
+  await pluginHelpers.run('testBrowser', {
+    plugins: plugins.join(','),
   });
+}
 
-  gulp.task('testonly', ['testserver', 'testbrowser']);
+export async function testbrowserDev() {
+  const plugins = await getEnabledPlugins();
 
-  gulp.task('testserver', () => {
-    const globs = [
-      'common/**/__tests__/**/*.js',
-      'server/**/__tests__/**/*.js',
-    ].concat(forPluginServerTests());
-
-    return gulp.src(globs, { read: false })
-      .pipe(mocha(MOCHA_OPTIONS));
+  await pluginHelpers.run('testBrowser', {
+    dev: true,
+    plugins: plugins.join(','),
   });
+}
 
-  gulp.task('testbrowser', () => {
-    return getEnabledPlugins().then(plugins => {
-      return pluginHelpers.run('testBrowser', {
-        plugins: plugins.join(','),
-      });
-    });
-  });
-
-  gulp.task('testbrowser-dev', () => {
-    return getEnabledPlugins().then(plugins => {
-      return pluginHelpers.run('testBrowser', {
-        dev: true,
-        plugins: plugins.join(','),
-      });
-    });
-  });
-};
+export const testonly = gulp.series(testserver, testbrowser);
+export const test = gulp.series(cleanTest, testserver, testbrowser);

@@ -6,30 +6,39 @@
 
 import { resolve } from 'path';
 import { writeFileSync } from 'fs';
+import gulp from 'gulp';
 import pluginHelpers from '@kbn/plugin-helpers';
 import { ToolingLog } from '@kbn/dev-utils';
+
 import { generateNoticeFromSource } from '../../src/dev';
 
-export default (gulp, { buildTarget }) => {
-  gulp.task('build', ['clean', 'report', 'prepare:build'], async () => {
-    await pluginHelpers.run('build', {
-      skipArchive: true,
-      buildDestination: buildTarget,
-    });
+import { buildTarget } from './helpers/paths';
+import { clean } from './clean';
+import { report } from './report';
+import { prepare } from './prepare';
 
-    const buildRoot = resolve(buildTarget, 'kibana/x-pack');
-    const log = new ToolingLog({
-      level: 'info',
-      writeTo: process.stdout
-    });
-
-    writeFileSync(
-      resolve(buildRoot, 'NOTICE.txt'),
-      await generateNoticeFromSource({
-        productName: 'Kibana X-Pack',
-        log,
-        directory: buildRoot
-      })
-    );
+async function pluginHelpersBuild() {
+  await pluginHelpers.run('build', {
+    skipArchive: true,
+    buildDestination: buildTarget,
   });
-};
+}
+
+async function generateNotice() {
+  const buildRoot = resolve(buildTarget, 'kibana/x-pack');
+  const log = new ToolingLog({
+    level: 'info',
+    writeTo: process.stdout
+  });
+
+  writeFileSync(
+    resolve(buildRoot, 'NOTICE.txt'),
+    await generateNoticeFromSource({
+      productName: 'Kibana X-Pack',
+      log,
+      directory: buildRoot
+    })
+  );
+}
+
+export const build = gulp.series(gulp.parallel(clean, report, prepare), pluginHelpersBuild, generateNotice);
