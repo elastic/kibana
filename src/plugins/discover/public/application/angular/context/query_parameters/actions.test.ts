@@ -10,6 +10,7 @@ import { getQueryParameterActions } from './actions';
 import { FilterManager, SortDirection } from '../../../../../../data/public';
 import { coreMock } from '../../../../../../../core/public/mocks';
 import { ContextAppState, LoadingStatus, QueryParameters } from '../../context_app_state';
+import { EsHitRecord } from '../api/context';
 const setupMock = coreMock.createSetup();
 
 let state: ContextAppState;
@@ -29,7 +30,7 @@ beforeEach(() => {
       anchorId: '',
       columns: [],
       filters: [],
-      sort: ['field', SortDirection.asc],
+      sort: [['field', SortDirection.asc]],
       tieBreakerField: '',
     },
     loadingStatus: {
@@ -39,8 +40,7 @@ beforeEach(() => {
     },
     rows: {
       all: [],
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      anchor: { $$_isAnchor: true, fields: [], sort: [], _source: [], _id: '' },
+      anchor: ({ isAnchor: true, fields: [], sort: [], _id: '' } as unknown) as EsHitRecord,
       predecessors: [],
       successors: [],
     },
@@ -129,7 +129,7 @@ describe('context query_parameter actions', function () {
         indexPatternId: 'INDEX_PATTERN',
         predecessorCount: 100,
         successorCount: 100,
-        sort: ['field', SortDirection.asc],
+        sort: [['field', SortDirection.asc]],
         tieBreakerField: '',
       });
 
@@ -142,7 +142,7 @@ describe('context query_parameter actions', function () {
         indexPatternId: 'INDEX_PATTERN',
         predecessorCount: 100,
         successorCount: 100,
-        sort: ['field', SortDirection.asc],
+        sort: [['field', SortDirection.asc]],
         tieBreakerField: '',
       });
     });
