@@ -3,6 +3,7 @@
     "console": "src/plugins/console",
     "core": "src/core",
     "discover": "src/plugins/discover",
+    "bfetch": "src/plugins/bfetch",
     "dashboard": "src/plugins/dashboard",
     "data": "src/plugins/data",
     "embeddableApi": "src/plugins/embeddable",
