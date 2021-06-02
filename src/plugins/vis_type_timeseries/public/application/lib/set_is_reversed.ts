@@ -9,12 +9,12 @@
 import color from 'color';
 import { getUISettings } from '../../services';
 
-const isDarkTheme = () => getUISettings().get('theme:darkMode');
+const isDarkTheme = () => getUISettings().get<boolean>('theme:darkMode');
 
 /**
  * Returns true if the color that is passed has low luminosity
  */
-const isColorDark = (c) => {
+const isColorDark = (c: string) => {
   return color(c).luminosity() < 0.45;
 };
 
@@ -22,7 +22,7 @@ const isColorDark = (c) => {
  * Checks to see if the `currentTheme` is dark in luminosity.
  * Defaults to checking `theme:darkMode`.
  */
-export const isThemeDark = (currentTheme) => {
+export const isThemeDark = (currentTheme?: string) => {
   let themeIsDark = currentTheme || isDarkTheme();
 
   // If passing a string, check the luminosity
@@ -37,7 +37,7 @@ export const isThemeDark = (currentTheme) => {
  * Checks to find if the ultimate `backgroundColor` is dark.
  * Defaults to returning if the `currentTheme` is dark.
  */
-export const isBackgroundDark = (backgroundColor, currentTheme) => {
+export const isBackgroundDark = (backgroundColor: string, currentTheme: string) => {
   const themeIsDark = isThemeDark(currentTheme);
 
   // If a background color doesn't exist or it inherits, pass back if it's a darktheme
@@ -52,8 +52,9 @@ export const isBackgroundDark = (backgroundColor, currentTheme) => {
 /**
  * Checks to see if `backgroundColor` is the the same lightness spectrum as `currentTheme`.
  */
-export const isBackgroundInverted = (backgroundColor, currentTheme) => {
+export const isBackgroundInverted = (backgroundColor: string, currentTheme: string) => {
   const backgroundIsDark = isBackgroundDark(backgroundColor, currentTheme);
   const themeIsDark = isThemeDark(currentTheme);
+
   return backgroundIsDark !== themeIsDark;
 };

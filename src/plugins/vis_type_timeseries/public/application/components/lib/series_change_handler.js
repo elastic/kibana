@@ -10,7 +10,14 @@ import { newMetricAggFn } from './new_metric_agg_fn';
 import { isBasicAgg } from '../../../../common/agg_lookup';
 import { handleAdd, handleChange } from './collection_actions';
 
-export const seriesChangeHandler = (props, items) => (doc) => {
+export const seriesChangeHandler = (props, items) => (doc, part) => {
+  // For Sibling Pipeline / Special aggregations, the field is used as a reference to the target aggregation.
+  // In these cases, an error occurs when switching to standard aggregation type.
+  // We should set an empty value for the "field" when switching the agg type
+  if (part.type && doc.field) {
+    doc.field = null;
+  }
+
   // If we only have one sibling and the user changes to a pipeline
   // agg we are going to add the pipeline instead of changing the
   // current item.

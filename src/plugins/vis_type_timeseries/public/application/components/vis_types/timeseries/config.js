@@ -29,7 +29,6 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { SeriesConfigQueryBarWithIgnoreGlobalFilter } from '../../series_config_query_bar_with_ignore_global_filter';
 import { PalettePicker } from '../../palette_picker';
 import { getChartsSetup } from '../../../../services';
-import { isPercentDisabled } from '../../lib/stacked';
 import { STACKED_OPTIONS } from '../../../visualizations/constants/chart';
 
 export const TimeseriesConfig = injectI18n(function (props) {
@@ -74,7 +73,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
         defaultMessage: 'Percent',
       }),
       value: STACKED_OPTIONS.PERCENT,
-      disabled: isPercentDisabled(props.seriesQuantity[model.id]),
+      disabled: props.seriesQuantity[model.id] < 2,
     },
   ];
   const selectedStackedOption = stackedOptions.find((option) => {

@@ -5,5 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-export const isPercentDisabled = (seriesQuantity) => seriesQuantity < 2;
+export const createChangeHandler = (
+  handleChange: Function,
+  baseObject: Record<string, any> = {}
+) => (part: Record<string, any> = {}) =>
+  handleChange(
+    {
+      ...baseObject,
+      ...part,
+    },
+    part
+  );

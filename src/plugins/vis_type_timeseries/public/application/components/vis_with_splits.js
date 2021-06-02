@@ -7,11 +7,14 @@
  */
 
 import React, { useCallback } from 'react';
-import { getDisplayName } from './lib/get_display_name';
 import { labelDateFormatter } from './lib/label_date_formatter';
 import { findIndex, first } from 'lodash';
 import { emptyLabel } from '../../../common/empty_label';
 import { getSplitByTermsColor } from '../lib/get_split_by_terms_color';
+
+function getDisplayName(Component) {
+  return Component.displayName || Component.name || 'Component';
+}
 
 export function visWithSplits(WrappedComponent) {
   function SplitVisComponent(props) {

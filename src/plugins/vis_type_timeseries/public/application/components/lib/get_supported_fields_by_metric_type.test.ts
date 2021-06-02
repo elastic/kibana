@@ -10,16 +10,18 @@ import { getSupportedFieldsByMetricType } from './get_supported_fields_by_metric
 import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
 
 describe('getSupportedFieldsByMetricType', () => {
-  const shouldHaveHistogramAndNumbers = (type) =>
-    it(`should return numbers and histogram for ${type}`, () => {
+  const shouldHaveHistogramAndNumbers = (type: string) =>
+    test(`should return numbers and histogram for ${type}`, () => {
       expect(getSupportedFieldsByMetricType(type)).toEqual(['number', 'histogram']);
     });
-  const shouldSupportAllFieldTypes = (type) =>
-    it(`should return all field types for ${type}`, () => {
+
+  const shouldSupportAllFieldTypes = (type: string) =>
+    test(`should return all field types for ${type}`, () => {
       expect(getSupportedFieldsByMetricType(type)).toEqual(Object.values(KBN_FIELD_TYPES));
     });
-  const shouldHaveOnlyNumbers = (type) =>
-    it(`should return only numbers for ${type}`, () => {
+
+  const shouldHaveOnlyNumbers = (type: string) =>
+    test(`should return only numbers for ${type}`, () => {
       expect(getSupportedFieldsByMetricType(type)).toEqual(['number']);
     });
 
@@ -32,7 +34,7 @@ describe('getSupportedFieldsByMetricType', () => {
   shouldHaveOnlyNumbers('positive_rate');
   shouldHaveOnlyNumbers('std_deviation');
 
-  it(`should return everything but histogram for cardinality`, () => {
+  test(`should return everything but histogram for cardinality`, () => {
     expect(getSupportedFieldsByMetricType('cardinality')).not.toContain('histogram');
   });
 });

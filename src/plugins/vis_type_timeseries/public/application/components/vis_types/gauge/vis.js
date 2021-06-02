@@ -11,6 +11,7 @@ import React from 'react';
 import { visWithSplits } from '../../vis_with_splits';
 import { createTickFormatter } from '../../lib/tick_formatter';
 import { get, isUndefined, assign, includes } from 'lodash';
+
 import { Gauge } from '../../../visualizations/views/gauge';
 import { getLastValue } from '../../../../../common/last_value_utils';
 import { getOperator, shouldOperate } from '../../../../../common/operators_utils';
@@ -71,7 +72,12 @@ function GaugeVisualization(props) {
   if (model.gauge_width) params.gaugeLine = model.gauge_width;
   if (model.gauge_inner_color) params.innerColor = model.gauge_inner_color;
   if (model.gauge_inner_width) params.innerLine = model.gauge_inner_width;
-  if (model.gauge_max != null) params.max = model.gauge_max;
+
+  if (model.gauge_max != null) {
+    params.max = Number(model.gauge_max);
+  } else {
+    params.max = Math.max(...(series[0].data || []).map(([, v]) => v));
+  }
 
   return (
     <div className="tvbVis" style={style}>

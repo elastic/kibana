@@ -12,7 +12,6 @@ import { get, find } from 'lodash';
 import { GroupBySelect } from './group_by_select';
 import { createTextHandler } from '../lib/create_text_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
-import { isPercentDisabled } from '../lib/stacked';
 import { FieldSelect } from '../aggs/field_select';
 import { MetricSelect } from '../aggs/metric_select';
 import {
@@ -81,11 +80,7 @@ export const SplitByTermsUI = ({
   const selectedField = find(fields[indexPattern], ({ name }) => name === model.terms_field);
   const selectedFieldType = get(selectedField, 'type');
 
-  if (
-    seriesQuantity &&
-    model.stacked === STACKED_OPTIONS.PERCENT &&
-    isPercentDisabled(seriesQuantity[model.id])
-  ) {
+  if (seriesQuantity && model.stacked === STACKED_OPTIONS.PERCENT && seriesQuantity[model.id] < 2) {
     onChange({ ['stacked']: STACKED_OPTIONS.NONE });
   }
 

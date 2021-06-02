@@ -12,7 +12,6 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import { isBackgroundInverted, isBackgroundDark } from '../../lib/set_is_reversed';
 import { getLastValue } from '../../../../common/last_value_utils';
-import { getValueBy } from '../lib/get_value_by';
 import { GaugeVis } from './gauge_vis';
 import reactcss from 'reactcss';
 import { calculateCoordinates } from '../lib/calculate_coordinates';
@@ -62,7 +61,7 @@ export class Gauge extends Component {
     const { metric, type } = this.props;
     const { scale, translateX, translateY } = this.state;
     const value = getLastValue(metric?.data);
-    const max = (metric && getValueBy('max', metric.data)) || 1;
+
     const formatter =
       (metric && (metric.tickFormatter || metric.formatter)) ||
       this.props.tickFormatter ||
@@ -89,7 +88,7 @@ export class Gauge extends Component {
       gaugeLine: this.props.gaugeLine,
       innerLine: this.props.innerLine,
       innerColor: this.props.innerColor,
-      max: this.props.max || max,
+      max: this.props.max,
       color: (metric && metric.color) || '#8ac336',
       type,
     };
@@ -166,7 +165,7 @@ Gauge.propTypes = {
   gaugeLine: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   innerColor: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   innerLine: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  max: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  max: PropTypes.number,
   metric: PropTypes.object,
   backgroundColor: PropTypes.string,
   type: PropTypes.oneOf(['half', 'circle']),

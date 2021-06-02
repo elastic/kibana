@@ -9,7 +9,7 @@
 import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
 import { METRIC_TYPES } from '../../../../common/enums';
 
-export function getSupportedFieldsByMetricType(type) {
+export function getSupportedFieldsByMetricType(type: METRIC_TYPES | string) {
   switch (type) {
     case METRIC_TYPES.CARDINALITY:
       return Object.values(KBN_FIELD_TYPES).filter((t) => t !== KBN_FIELD_TYPES.HISTOGRAM);
