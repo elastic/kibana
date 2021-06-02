@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render } from '../../../../../lib/helper/rtl_helpers';
 import { WaterfallTooltipContent } from './waterfall_tooltip_content';
 
 jest.mock('../context/waterfall_chart', () => ({
@@ -61,7 +61,7 @@ jest.mock('../context/waterfall_chart', () => ({
   }),
 }));
 
-describe('SidebarTooltip', () => {
+describe('WaterfallTooltipContent', () => {
   it('renders tooltip', () => {
     const { getByText, queryByText } = render(
       <WaterfallTooltipContent text="1. https://www.elastic.co" url="https://www.elastic.co" />

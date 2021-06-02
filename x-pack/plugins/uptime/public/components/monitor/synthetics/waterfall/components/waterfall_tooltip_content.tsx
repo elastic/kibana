@@ -20,7 +20,7 @@ const StyledText = euiStyled(EuiText)`
 `;
 
 const StyledHorizontalRule = euiStyled(EuiHorizontalRule)`
-  background-color: ${(props) => props?.theme?.eui?.euiColorDarkShade};
+  background-color: ${(props) => props.theme.eui.euiColorDarkShade};
 `;
 
 export const WaterfallTooltipContent: React.FC<Props> = ({ text, url }) => {
