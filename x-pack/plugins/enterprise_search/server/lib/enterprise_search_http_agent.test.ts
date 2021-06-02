@@ -13,7 +13,11 @@ import https from 'https';
 
 import { ConfigType } from '../';
 
-import { entSearchHttpAgent, loadCertificateAuthorities } from './enterprise_search_http_agent';
+import {
+  entSearchHttpAgent,
+  loadCertificateAuthorities,
+  getAgentOptions,
+} from './enterprise_search_http_agent';
 
 describe('entSearchHttpAgent', () => {
   it('should be an https.Agent when host URL is using HTTPS', () => {
@@ -73,6 +77,27 @@ describe('loadCertificateAuthorities', () => {
       expect(() => loadCertificateAuthorities('/invalid/ca')).toThrow(
         "ENOENT: no such file or directory, open '/invalid/ca'"
       );
+    });
+  });
+});
+
+describe('getAgentOptions', () => {
+  it('verificationMode: none', () => {
+    expect(getAgentOptions('none')).toEqual({
+      rejectUnauthorized: false,
+    });
+  });
+
+  it('verificationMode: certificate', () => {
+    expect(getAgentOptions('certificate')).toEqual({
+      rejectUnauthorized: true,
+      checkServerIdentity: expect.any(Function),
+    });
+  });
+
+  it('verificationMode: full', () => {
+    expect(getAgentOptions('full')).toEqual({
+      rejectUnauthorized: true,
     });
   });
 });

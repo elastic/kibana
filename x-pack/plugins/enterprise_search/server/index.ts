@@ -23,7 +23,10 @@ export const configSchema = schema.object({
     certificateAuthorities: schema.maybe(
       schema.oneOf([schema.arrayOf(schema.string(), { minSize: 1 }), schema.string()])
     ),
-    rejectUnauthorized: schema.boolean({ defaultValue: true }),
+    verificationMode: schema.oneOf(
+      [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+      { defaultValue: 'full' }
+    ),
   }),
 });
 

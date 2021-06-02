@@ -8,6 +8,7 @@
 import { readFileSync } from 'fs';
 import http from 'http';
 import https from 'https';
+import { PeerCertificate } from 'tls';
 
 import { ConfigType } from '../';
 
@@ -24,7 +25,7 @@ export const entSearchHttpAgent = (config: ConfigType): HttpAgent => {
     if (parsedHost.protocol === 'https:') {
       return new https.Agent({
         ca: loadCertificateAuthorities(config.ssl.certificateAuthorities),
-        rejectUnauthorized: !!config.ssl.rejectUnauthorized,
+        ...getAgentOptions(config.ssl.verificationMode),
       });
     }
   } catch {
@@ -45,4 +46,30 @@ export const loadCertificateAuthorities = (ca: string | string[] | undefined): s
     });
   }
   return parsedCerts;
+};
+
+interface AgentOptions {
+  rejectUnauthorized?: boolean;
+  checkServerIdentity?: ((host: string, cert: PeerCertificate) => Error | undefined) | undefined;
+}
+
+export const getAgentOptions = (
+  verificationMode: 'full' | 'certificate' | 'none'
+): AgentOptions => {
+  const agentOptions: AgentOptions = {};
+
+  switch (verificationMode) {
+    case 'none':
+      agentOptions.rejectUnauthorized = false;
+      break;
+    case 'certificate':
+      agentOptions.rejectUnauthorized = true;
+      agentOptions.checkServerIdentity = () => undefined;
+      break;
+    case 'full':
+    default:
+      agentOptions.rejectUnauthorized = true;
+      break;
+  }
+  return agentOptions;
 };
