@@ -284,7 +284,8 @@ export default ({ getService }: FtrProviderContext) => {
     },
   ];
 
-  describe('Categorization example endpoint - ', function () {
+  // skipping categorization tests, see https://github.com/elastic/kibana/issues/101056
+  describe.skip('Categorization example endpoint - ', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/categorization');
       await ml.testResources.setKibanaTimeZoneToUTC();
