@@ -21,7 +21,6 @@ import themeDark from '@elastic/eui/dist/eui_theme_dark.json';
 import themeLight from '@elastic/eui/dist/eui_theme_light.json';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { DiscoverGridContext } from './discover_grid_context';
-import { EsHitRecord } from '../../angular/context/api/context';
 
 /**
  * Returning a generated id of a given ES document, since `_id` can be the same
@@ -40,11 +39,7 @@ export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
   const checked = useMemo(() => selectedDocs.includes(id), [selectedDocs, id]);
 
   useEffect(() => {
-    if ((doc as EsHitRecord).isAnchor) {
-      setCellProps({
-        className: 'dscDiscoverGrid__cell--highlight',
-      });
-    } else if (expanded && doc && expanded._id === doc._id) {
+    if (expanded && doc && expanded._id === doc._id) {
       setCellProps({
         style: {
           backgroundColor: isDarkMode ? themeDark.euiColorHighlight : themeLight.euiColorHighlight,
@@ -118,19 +113,6 @@ export function DiscoverGridDocumentToolbarBtn({
           />
         </EuiContextMenuItem>
       ),
-
-      <EuiContextMenuItem
-        data-test-subj="dscGridClearSelectedDocuments"
-        key="clearSelection"
-        icon="cross"
-        onClick={() => {
-          setIsSelectionPopoverOpen(false);
-          setSelectedDocs([]);
-          setIsFilterActive(false);
-        }}
-      >
-        <FormattedMessage id="discover.clearSelection" defaultMessage="Clear selection" />
-      </EuiContextMenuItem>,
       <EuiCopy
         key="copyJsonWrapper"
         data-test-subj="dscGridCopySelectedDocumentsJSON"
@@ -147,6 +129,18 @@ export function DiscoverGridDocumentToolbarBtn({
           </EuiContextMenuItem>
         )}
       </EuiCopy>,
+      <EuiContextMenuItem
+        data-test-subj="dscGridClearSelectedDocuments"
+        key="clearSelection"
+        icon="cross"
+        onClick={() => {
+          setIsSelectionPopoverOpen(false);
+          setSelectedDocs([]);
+          setIsFilterActive(false);
+        }}
+      >
+        <FormattedMessage id="discover.clearSelection" defaultMessage="Clear selection" />
+      </EuiContextMenuItem>,
     ];
   }, [
     isFilterActive,

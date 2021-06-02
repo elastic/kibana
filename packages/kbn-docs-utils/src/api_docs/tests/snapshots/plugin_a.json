@@ -165,7 +165,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "a",
-                "description": [],
+                "description": [
+                  "im a string"
+                ],
                 "signature": [
                   {
                     "pluginId": "pluginA",
@@ -292,7 +294,9 @@
             "type": "string",
             "tags": [],
             "label": "a",
-            "description": [],
+            "description": [
+              "The letter A"
+            ],
             "signature": [
               "string"
             ],
@@ -309,7 +313,9 @@
             "type": "number",
             "tags": [],
             "label": "b",
-            "description": [],
+            "description": [
+              "Feed me to the function"
+            ],
             "signature": [
               "number | undefined"
             ],
@@ -326,7 +332,9 @@
             "type": "Array",
             "tags": [],
             "label": "c",
-            "description": [],
+            "description": [
+              "So many params"
+            ],
             "signature": [
               {
                 "pluginId": "pluginA",
@@ -350,7 +358,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "d",
-            "description": [],
+            "description": [
+              "a great param"
+            ],
             "signature": [
               {
                 "pluginId": "pluginA",
@@ -373,7 +383,9 @@
             "type": "string",
             "tags": [],
             "label": "e",
-            "description": [],
+            "description": [
+              "Another comment"
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -586,7 +598,7 @@
             "section": "def-public.ImAType",
             "text": "ImAType"
           },
-          ", e: string | undefined) => ",
+          ", e?: string | undefined) => ",
           {
             "pluginId": "pluginA",
             "scope": "public",

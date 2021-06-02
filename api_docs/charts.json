@@ -179,7 +179,9 @@
             "type": "Array",
             "tags": [],
             "label": "xValues",
-            "description": [],
+            "description": [
+              "sorted and unquie x values"
+            ],
             "signature": [
               "number[]"
             ],
@@ -417,7 +419,9 @@
             "type": "Object",
             "tags": [],
             "label": "splitSeriesAccessorFnMap",
-            "description": [],
+            "description": [
+              "needed when using `splitSeriesAccessors` as `AccessorFn`"
+            ],
             "signature": [
               "Map<React.ReactText, ",
               "AccessorFn",

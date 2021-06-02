@@ -11,19 +11,12 @@ import { getAngularModule, getServices } from '../../kibana_services';
 import contextAppRouteTemplate from './context.html';
 import { getRootBreadcrumbs } from '../helpers/breadcrumbs';
 
-const k7Breadcrumbs = ($route) => {
-  const { indexPattern } = $route.current.locals;
-  const { id } = $route.current.params;
-
+const k7Breadcrumbs = () => {
   return [
     ...getRootBreadcrumbs(),
     {
       text: i18n.translate('discover.context.breadcrumb', {
-        defaultMessage: 'Context of {indexPatternTitle}#{docId}',
-        values: {
-          indexPatternTitle: indexPattern.title,
-          docId: id,
-        },
+        defaultMessage: 'Surrounding documents',
       }),
     },
   ];
