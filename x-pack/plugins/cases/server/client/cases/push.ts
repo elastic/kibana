@@ -77,6 +77,7 @@ export const push = async (
     user,
     logger,
     authorization,
+    casesConnectors,
   } = clientArgs;
 
   try {
@@ -110,8 +111,7 @@ export const push = async (
     });
 
     const connectorMappings = await casesClientInternal.configuration.getMappings({
-      connectorId: connector.id,
-      connectorType: connector.actionTypeId,
+      connector: theCase.connector,
     });
 
     if (connectorMappings.length === 0) {
@@ -125,6 +125,7 @@ export const push = async (
       connector: connector as ActionConnector,
       mappings: connectorMappings[0].attributes.mappings,
       alerts,
+      casesConnectors,
     });
 
     const pushRes = await actionsClient.execute({

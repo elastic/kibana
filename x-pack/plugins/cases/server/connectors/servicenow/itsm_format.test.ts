@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CaseResponse } from '../../../common';
-import { serviceNowITSMExternalServiceFormatter } from './itsm_formatter';
+import { CaseResponse } from '../../../common/api';
+import { format } from './itsm_format';
 
 describe('ITSM formatter', () => {
   const theCase = {
@@ -16,13 +16,13 @@ describe('ITSM formatter', () => {
   } as CaseResponse;
 
   it('it formats correctly', async () => {
-    const res = await serviceNowITSMExternalServiceFormatter.format(theCase, []);
+    const res = await format(theCase, []);
     expect(res).toEqual(theCase.connector.fields);
   });
 
   it('it formats correctly when fields do not exist ', async () => {
     const invalidFields = { connector: { fields: null } } as CaseResponse;
-    const res = await serviceNowITSMExternalServiceFormatter.format(invalidFields, []);
+    const res = await format(invalidFields, []);
     expect(res).toEqual({
       severity: null,
       urgency: null,

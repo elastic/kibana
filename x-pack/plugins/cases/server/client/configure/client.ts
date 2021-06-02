@@ -20,7 +20,6 @@ import {
   excess,
   GetConfigureFindRequest,
   GetConfigureFindRequestRt,
-  GetFieldsResponse,
   throwErrors,
   CasesConfigurationsResponse,
   CaseConfigurationsResponseRt,
@@ -34,7 +33,6 @@ import {
 } from '../../common';
 import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '../types';
-import { getFields } from './get_fields';
 import { getMappings } from './get_mappings';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -42,12 +40,7 @@ import { FindActionResult } from '../../../../actions/server/types';
 import { ActionType } from '../../../../actions/common';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
-import {
-  ConfigurationGetFields,
-  MappingsArgs,
-  CreateMappingsArgs,
-  UpdateMappingsArgs,
-} from './types';
+import { MappingsArgs, CreateMappingsArgs, UpdateMappingsArgs } from './types';
 import { createMappings } from './create_mappings';
 import { updateMappings } from './update_mappings';
 import {
@@ -62,7 +55,6 @@ import {
  * @ignore
  */
 export interface InternalConfigureSubClient {
-  getFields(params: ConfigurationGetFields): Promise<GetFieldsResponse>;
   getMappings(
     params: MappingsArgs
   ): Promise<SavedObjectsFindResponse<ConnectorMappings>['saved_objects']>;
@@ -109,12 +101,9 @@ export const createInternalConfigurationSubClient = (
   casesClientInternal: CasesClientInternal
 ): InternalConfigureSubClient => {
   const configureSubClient: InternalConfigureSubClient = {
-    getFields: (params: ConfigurationGetFields) => getFields(params, clientArgs),
     getMappings: (params: MappingsArgs) => getMappings(params, clientArgs),
-    createMappings: (params: CreateMappingsArgs) =>
-      createMappings(params, clientArgs, casesClientInternal),
-    updateMappings: (params: UpdateMappingsArgs) =>
-      updateMappings(params, clientArgs, casesClientInternal),
+    createMappings: (params: CreateMappingsArgs) => createMappings(params, clientArgs),
+    updateMappings: (params: UpdateMappingsArgs) => updateMappings(params, clientArgs),
   };
 
   return Object.freeze(configureSubClient);
@@ -186,8 +175,7 @@ async function get(
         if (connector != null) {
           try {
             mappings = await casesClientInternal.configuration.getMappings({
-              connectorId: connector.id,
-              connectorType: connector.type,
+              connector: transformESConnectorToCaseConnector(connector),
             });
           } catch (e) {
             error = e.isBoom
@@ -295,22 +283,22 @@ async function update(
 
     try {
       const resMappings = await casesClientInternal.configuration.getMappings({
-        connectorId: connector != null ? connector.id : configuration.attributes.connector.id,
-        connectorType: connector != null ? connector.type : configuration.attributes.connector.type,
+        connector:
+          connector != null
+            ? connector
+            : transformESConnectorToCaseConnector(configuration.attributes.connector),
       });
       mappings = resMappings.length > 0 ? resMappings[0].attributes.mappings : [];
 
       if (connector != null) {
         if (resMappings.length !== 0) {
           mappings = await casesClientInternal.configuration.updateMappings({
-            connectorId: connector.id,
-            connectorType: connector.type,
+            connector,
             mappingId: resMappings[0].id,
           });
         } else {
           mappings = await casesClientInternal.configuration.createMappings({
-            connectorId: connector.id,
-            connectorType: connector.type,
+            connector,
             owner: configuration.attributes.owner,
           });
         }
@@ -419,8 +407,7 @@ async function create(
 
     try {
       mappings = await casesClientInternal.configuration.createMappings({
-        connectorId: configuration.connector.id,
-        connectorType: configuration.connector.type,
+        connector: configuration.connector,
         owner: configuration.owner,
       });
     } catch (e) {

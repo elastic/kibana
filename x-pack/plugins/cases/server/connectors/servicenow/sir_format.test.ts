@@ -6,7 +6,7 @@
  */
 
 import { CaseResponse } from '../../../common';
-import { serviceNowSIRExternalServiceFormatter } from './sir_formatter';
+import { format } from './sir_format';
 
 describe('ITSM formatter', () => {
   const theCase = {
@@ -24,7 +24,7 @@ describe('ITSM formatter', () => {
   } as CaseResponse;
 
   it('it formats correctly without alerts', async () => {
-    const res = await serviceNowSIRExternalServiceFormatter.format(theCase, []);
+    const res = await format(theCase, []);
     expect(res).toEqual({
       dest_ip: null,
       source_ip: null,
@@ -38,7 +38,7 @@ describe('ITSM formatter', () => {
 
   it('it formats correctly when fields do not exist ', async () => {
     const invalidFields = { connector: { fields: null } } as CaseResponse;
-    const res = await serviceNowSIRExternalServiceFormatter.format(invalidFields, []);
+    const res = await format(invalidFields, []);
     expect(res).toEqual({
       dest_ip: null,
       source_ip: null,
@@ -73,7 +73,7 @@ describe('ITSM formatter', () => {
         url: { full: 'https://attack.com/api' },
       },
     ];
-    const res = await serviceNowSIRExternalServiceFormatter.format(theCase, alerts);
+    const res = await format(theCase, alerts);
     expect(res).toEqual({
       dest_ip: '192.168.1.1,192.168.1.4',
       source_ip: '192.168.1.2,192.168.1.3',
@@ -109,7 +109,7 @@ describe('ITSM formatter', () => {
         url: { full: 'https://attack.com/api' },
       },
     ];
-    const res = await serviceNowSIRExternalServiceFormatter.format(theCase, alerts);
+    const res = await format(theCase, alerts);
     expect(res).toEqual({
       dest_ip: '192.168.1.1',
       source_ip: '192.168.1.2,192.168.1.3',
@@ -150,7 +150,7 @@ describe('ITSM formatter', () => {
       connector: { fields: { ...theCase.connector.fields, destIp: false, malwareHash: false } },
     } as CaseResponse;
 
-    const res = await serviceNowSIRExternalServiceFormatter.format(newCase, alerts);
+    const res = await format(newCase, alerts);
     expect(res).toEqual({
       dest_ip: null,
       source_ip: '192.168.1.2,192.168.1.3',

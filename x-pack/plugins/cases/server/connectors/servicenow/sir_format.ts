@@ -5,23 +5,10 @@
  * 2.0.
  */
 import { get } from 'lodash/fp';
-import { ConnectorServiceNowSIRTypeFields } from '../../../common';
-import { ExternalServiceFormatter } from '../types';
-interface ExternalServiceParams {
-  dest_ip: string | null;
-  source_ip: string | null;
-  category: string | null;
-  subcategory: string | null;
-  malware_hash: string | null;
-  malware_url: string | null;
-  priority: string | null;
-}
-type SirFieldKey = 'dest_ip' | 'source_ip' | 'malware_hash' | 'malware_url';
-type AlertFieldMappingAndValues = Record<
-  string,
-  { alertPath: string; sirFieldKey: SirFieldKey; add: boolean }
->;
-const format: ExternalServiceFormatter<ExternalServiceParams>['format'] = (theCase, alerts) => {
+import { ConnectorServiceNowSIRTypeFields } from '../../../common/api';
+import { ServiceNowSIRFormat, SirFieldKey, AlertFieldMappingAndValues } from './types';
+
+export const format: ServiceNowSIRFormat = (theCase, alerts) => {
   const {
     destIp = null,
     sourceIp = null,
@@ -82,7 +69,4 @@ const format: ExternalServiceFormatter<ExternalServiceParams>['format'] = (theCa
     subcategory,
     priority,
   };
-};
-export const serviceNowSIRExternalServiceFormatter: ExternalServiceFormatter<ExternalServiceParams> = {
-  format,
 };
