@@ -28,30 +28,8 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response2.status).to.be(400);
       expect(response2.body.statusCode).to.be(400);
       expect(response2.body.message).to.be(
-        '[request body.field.name]: expected value of type [string] but got [undefined]'
+        '[request body.name]: expected value of type [string] but got [undefined]'
       );
-    });
-
-    it('returns an error when creating a non-runtime field', async () => {
-      const title = `foo-${Date.now()}-${Math.random()}*`;
-      const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
-        index_pattern: {
-          title,
-        },
-      });
-      const id = response1.body.index_pattern.id;
-      const response2 = await supertest
-        .post(`/api/index_patterns/index_pattern/${id}/runtime_field`)
-        .send({
-          field: {
-            name: 'bar',
-            type: 'number',
-          },
-        });
-
-      expect(response2.status).to.be(400);
-      expect(response2.body.statusCode).to.be(400);
-      expect(response2.body.message).to.be('Only runtime fields can be created');
     });
   });
 }
