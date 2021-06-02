@@ -39,10 +39,11 @@ export interface Props {
 interface State {
   isPopoverOpen: boolean;
   isLayerEditable: boolean;
+  editModeEnabled: boolean;
 }
 
 export class TOCEntryActionsPopover extends Component<Props, State> {
-  state: State = { isPopoverOpen: false, isLayerEditable: false };
+  state: State = { isPopoverOpen: false, isLayerEditable: false, editModeEnabled: false };
   private _isMounted = false;
 
   componentDidMount() {
@@ -59,10 +60,15 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
 
   async _checkLayerEditable() {
     const isLayerEditable = await this.props.layer.isEditable();
-    if (!this._isMounted || isLayerEditable === this.state.isLayerEditable) {
+    const editModeEnabled = await this.props.layer.getEditModeEnabled();
+    if (
+      !this._isMounted ||
+      (isLayerEditable === this.state.isLayerEditable &&
+        editModeEnabled === this.state.editModeEnabled)
+    ) {
       return;
     }
-    this.setState({ isLayerEditable });
+    this.setState({ isLayerEditable, editModeEnabled });
   }
 
   _togglePopover = () => {
@@ -128,7 +134,13 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
           name: EDIT_FEATURES_LABEL,
           icon: <EuiIcon type="pencil" size="m" />,
           'data-test-subj': 'editLayerButton',
-          toolTipContent: null,
+          toolTipContent: this.state.editModeEnabled
+            ? null
+            : i18n.translate('xpack.maps.layerTocActions.editLayerTooltip', {
+                defaultMessage:
+                  'Only fully added document layers without clustering, joins or time filtering enabled can be modified',
+              }),
+          disabled: !this.state.editModeEnabled,
           onClick: async () => {
             this._closePopover();
             const supportedShapeTypes = await (this.props.layer.getSource() as ESSearchSource).getSupportedShapeTypes();

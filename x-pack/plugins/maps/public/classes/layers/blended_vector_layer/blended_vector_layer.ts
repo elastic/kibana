@@ -259,10 +259,6 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     return false;
   }
 
-  async isEditable(): Promise<boolean> {
-    return false;
-  }
-
   async cloneDescriptor(): Promise<LayerDescriptor> {
     const clonedDescriptor = await super.cloneDescriptor();
 
@@ -293,6 +289,10 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
 
   getStyleForEditing(): IVectorStyle {
     return this._documentStyle;
+  }
+
+  async getEditModeEnabled(): Promise<boolean> {
+    return false;
   }
 
   async syncData(syncContext: DataRequestContext) {

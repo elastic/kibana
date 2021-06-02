@@ -74,6 +74,7 @@ export interface ILayer {
   isLoadingBounds(): boolean;
   isFilteredByGlobalTime(): Promise<boolean>;
   isEditable(): Promise<boolean>;
+  getEditModeEnabled(): Promise<boolean>;
   hasErrors(): boolean;
   getErrors(): string;
   getMbLayerIds(): string[];
@@ -243,6 +244,10 @@ export class AbstractLayer implements ILayer {
   }
 
   async isEditable(): Promise<boolean> {
+    return false;
+  }
+
+  async getEditModeEnabled(): Promise<boolean> {
     return false;
   }
 
