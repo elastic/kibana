@@ -20,9 +20,7 @@ export function AdvancedOptions(props: {
 }) {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const popoverOptions = props.options.filter((option) => option.showInPopover);
-  const inlineOptions = props.options
-    .filter((option) => option.inlineElement)
-    .map((option) => React.cloneElement(option.inlineElement!, { key: option.dataTestSubj }));
+  const inlineOptions = props.options.filter((option) => option.inlineElement);
 
   return (
     <>
@@ -74,7 +72,12 @@ export function AdvancedOptions(props: {
       {inlineOptions.length > 0 && (
         <>
           <EuiSpacer size="s" />
-          {inlineOptions}
+          {inlineOptions.map((option, index) => (
+            <>
+              {React.cloneElement(option.inlineElement!, { key: option.dataTestSubj })}
+              {index !== inlineOptions.length - 1 && <EuiSpacer size="s" />}
+            </>
+          ))}
         </>
       )}
     </>
