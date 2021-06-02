@@ -62,14 +62,22 @@ The 7.13.1 release includes the following bug fixes.
 [float]
 [[fixes-v7.13.1]]
 === Bug Fixes
+Alerting::
+* Adds ignore_above to alerts params mappings to handle immense params {kibana-pull}100726[#100726]
+Dashboard::
+* Moves the by value migrations for 7.13 {kibana-pull}100622[#100622]
+* Fixes JSON editor height in Inspector on Safari {kibana-pull}99032[#99032]
 Fleet::
 * Adds missing install button for integrations that aren't installed yet {kibana-pull}100370[#100370]
 Lens & Visualizations::
 * Fixes an issue where upgrading from 7.12.1 to 7.13.0 breaks *TSVB* vizualizations with no timefield defined {kibana-pull}100864[#100864]
+* Fixes the Math aggregation for the Table visualization in *TSVB* {kibana-pull}100765[#100765]
 Machine Learning::
 * Fixes field used in remote desktop protocol (RDP) anomaly detection job to event.type {kibana-pull}100000[#100000]
+Management::
+* Fixes large integer formatting with decimal part using numeral-js {kibana-pull}99609[#99609]
 Querying & Filtering::
-* Fixes bug with scripted number range filters {kibana-pull}99554[#99554]
+* Using a range query in KQL against a scripted number field now works properly {kibana-pull}99554[#99554]
 Sharing::
 * Adds appropriate table caption for table listing generated reports {kibana-pull}100118[#100118]
 Security::
