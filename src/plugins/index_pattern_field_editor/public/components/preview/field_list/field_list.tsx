@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
+import VirtualList from 'react-tiny-virtual-list';
 import { get } from 'lodash';
 
 import { useFieldEditorContext } from '../../field_editor_context';
@@ -14,29 +15,56 @@ import { PreviewListItem } from './field_list_item';
 
 import './field_list.scss';
 
+const ITEM_HEIGHT = 64;
+
 export const PreviewFieldList = () => {
   const { indexPattern } = useFieldEditorContext();
   const {
     currentDocument: { value: currentDocument },
   } = useFieldPreviewContext();
 
-  const fields = indexPattern.fields.getAll();
-  const fieldsValues = fields
-    .map((field) => ({
-      key: field.displayName,
-      value: JSON.stringify(get(currentDocument?._source, field.name)),
-    }))
-    .filter(({ value }) => value !== undefined);
+  const {
+    fields: { getAll: getAllFields },
+  } = indexPattern;
+
+  const fields = useMemo(() => {
+    return getAllFields();
+  }, [getAllFields]);
+
+  const fieldsValues = useMemo(
+    () =>
+      fields
+        .map((field) => ({
+          key: field.displayName,
+          value: JSON.stringify(get(currentDocument?._source, field.name)),
+        }))
+        .filter(({ value }) => value !== undefined),
+    [fields, currentDocument?._source]
+  );
 
   if (currentDocument === undefined) {
     return null;
   }
 
+  const listHeight = Math.min(fieldsValues.length * ITEM_HEIGHT, 600);
+
   return (
-    <>
-      {fieldsValues.map((field) => (
-        <PreviewListItem key={field.key} field={field} />
-      ))}
-    </>
+    <VirtualList
+      style={{ overflowX: 'hidden' }}
+      width="100%"
+      height={listHeight}
+      itemCount={fieldsValues.length}
+      itemSize={ITEM_HEIGHT}
+      overscanCount={4}
+      renderItem={({ index, style }) => {
+        const item = fieldsValues[index];
+
+        return (
+          <div key={item.key} style={style}>
+            <PreviewListItem key={item.key} field={item} />
+          </div>
+        );
+      }}
+    />
   );
 };

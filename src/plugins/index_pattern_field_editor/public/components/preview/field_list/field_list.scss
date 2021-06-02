@@ -1,14 +1,22 @@
 .indexPatternFieldEditor__previewFieldList {
   &__item {
     border-bottom: $euiBorderThin;
-    padding-top: $euiSize;
+    height: 64px;
+    align-items: center;
+    width: 100%;
 
-    &__key {
-      overflow-wrap: anywhere;
+    &__key, &__value {
+      flex-basis: calc(50% - 16px);
+      display: flex;
+      flex-shrink: 0;
+      flex-grow: 0;
+      overflow: hidden;
     }
 
-    &__value {
-      overflow-wrap: anywhere;
+    &__key__wrapper, &__value__wrapper {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 }

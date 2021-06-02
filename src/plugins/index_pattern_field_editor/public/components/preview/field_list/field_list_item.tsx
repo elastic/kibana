@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 
 interface Props {
   field: {
@@ -20,11 +20,17 @@ export const PreviewListItem: React.FC<Props> = ({ field: { key, value } }) => {
   return (
     <EuiFlexGroup className="indexPatternFieldEditor__previewFieldList__item">
       <EuiFlexItem className="indexPatternFieldEditor__previewFieldList__item__key">
-        {key}
+        <div className="indexPatternFieldEditor__previewFieldList__item__key__wrapper">{key}</div>
       </EuiFlexItem>
-      <EuiFlexItem className="indexPatternFieldEditor__previewFieldList__item__value">
-        {value}
-      </EuiFlexItem>
+      <EuiToolTip
+        anchorClassName="indexPatternFieldEditor__previewFieldList__item__value"
+        position="top"
+        content={value}
+      >
+        <div className="indexPatternFieldEditor__previewFieldList__item__value__wrapper">
+          {value}
+        </div>
+      </EuiToolTip>
     </EuiFlexGroup>
   );
 };
