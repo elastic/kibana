@@ -115,8 +115,6 @@ describe('createPluginInitializerContext', () => {
       expect(configObject).toStrictEqual({
         kibana: {
           index: '.kibana',
-          autocompleteTerminateAfter: duration(100000),
-          autocompleteTimeout: duration(1000),
         },
         elasticsearch: {
           shardTimeout: duration(30, 's'),

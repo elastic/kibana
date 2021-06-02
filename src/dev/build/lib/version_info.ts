@@ -28,7 +28,10 @@ export async function getVersionInfo({ isRelease, versionQualifier, pkg }: Optio
   );
 
   return {
-    buildSha: (await execa('git', ['rev-parse', 'HEAD'])).stdout,
+    buildSha:
+      process.env.GIT_COMMIT ||
+      process.env.BUILDKITE_COMMIT ||
+      (await execa('git', ['rev-parse', 'HEAD'])).stdout,
     buildVersion,
     buildNumber: await getBuildNumber(),
   };
