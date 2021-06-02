@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiProgress, EuiPageHeader, EuiPageHeaderSection, EuiTitle } from '@elastic/eui';
+import { EuiBadge, EuiProgress, EuiPageHeader, EuiPageHeaderSection } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled, { css } from 'styled-components';
