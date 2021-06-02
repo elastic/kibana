@@ -101,15 +101,26 @@ export function DimensionEditor(props: DimensionEditorProps) {
   };
   const { fieldByOperation, operationWithoutField } = operationSupportMatrix;
 
-  const setStateWrapper = (layer: IndexPatternLayer) => {
-    const hasIncompleteColumns = Boolean(layer.incompleteColumns?.[columnId]);
+  const setStateWrapper = (
+    setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
+  ) => {
+    const hypotheticalLayer = typeof setter === 'function' ? setter(state.layers[layerId]) : setter;
+    const hasIncompleteColumns = Boolean(hypotheticalLayer.incompleteColumns?.[columnId]);
     const prevOperationType =
-      operationDefinitionMap[state.layers[layerId].columns[columnId]?.operationType]?.input;
-    setState(mergeLayer({ state, layerId, newLayer: layer }), {
-      shouldReplaceDimension: Boolean(layer.columns[columnId]),
-      // clear the dimension if there's an incomplete column pending && previous operation was a fullReference operation
-      shouldRemoveDimension: Boolean(hasIncompleteColumns && prevOperationType === 'fullReference'),
-    });
+      operationDefinitionMap[hypotheticalLayer.columns[columnId]?.operationType]?.input;
+    setState(
+      (prevState) => {
+        const layer = typeof setter === 'function' ? setter(prevState.layers[layerId]) : setter;
+        return mergeLayer({ state: prevState, layerId, newLayer: layer });
+      },
+      {
+        shouldReplaceDimension: Boolean(hypotheticalLayer.columns[columnId]),
+        // clear the dimension if there's an incomplete column pending && previous operation was a fullReference operation
+        shouldRemoveDimension: Boolean(
+          hasIncompleteColumns && prevOperationType === 'fullReference'
+        ),
+      }
+    );
   };
 
   const selectedOperationDefinition =
@@ -338,8 +349,19 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   key={index}
                   layer={state.layers[layerId]}
                   columnId={referenceId}
-                  updateLayer={(newLayer: IndexPatternLayer) => {
-                    setState(mergeLayer({ state, layerId, newLayer }));
+                  updateLayer={(
+                    setter:
+                      | IndexPatternLayer
+                      | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
+                  ) => {
+                    setState(
+                      mergeLayer({
+                        state,
+                        layerId,
+                        newLayer:
+                          typeof setter === 'function' ? setter(state.layers[layerId]) : setter,
+                      })
+                    );
                   }}
                   validation={validation}
                   currentIndexPattern={currentIndexPattern}
