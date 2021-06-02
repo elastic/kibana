@@ -51,8 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
     query: { bool: { must: [{ match_all: {} }] } },
   };
 
-  // skipping categorization tests, see https://github.com/elastic/kibana/issues/101056
-  describe.skip('get categorizer_stats', function () {
+  describe('get categorizer_stats', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/module_sample_logs');
       await ml.testResources.setKibanaTimeZoneToUTC();

@@ -31,6 +31,7 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
             fromDate: schema.string(),
             toDate: schema.string(),
             fieldName: schema.string(),
+            size: schema.maybe(schema.number()),
           },
           { unknowns: 'allow' }
         ),
@@ -38,7 +39,7 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
     },
     async (context, req, res) => {
       const requestClient = context.core.elasticsearch.client.asCurrentUser;
-      const { fromDate, toDate, fieldName, dslQuery } = req.body;
+      const { fromDate, toDate, fieldName, dslQuery, size } = req.body;
 
       const [{ savedObjects, elasticsearch }, { data }] = await setup.getStartServices();
       const savedObjectsClient = savedObjects.getScopedClient(req);
@@ -112,7 +113,7 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
         }
 
         return res.ok({
-          body: await getStringSamples(search, field),
+          body: await getStringSamples(search, field, size),
         });
       } catch (e) {
         if (e instanceof SavedObjectNotFound) {
@@ -245,7 +246,8 @@ export async function getNumberHistogram(
 
 export async function getStringSamples(
   aggSearchWithBody: (aggs: Record<string, estypes.AggregationContainer>) => unknown,
-  field: IFieldType
+  field: IFieldType,
+  size = 10
 ): Promise<FieldStatsResponse> {
   const fieldRef = getFieldRef(field);
 
@@ -257,7 +259,7 @@ export async function getStringSamples(
         top_values: {
           terms: {
             ...fieldRef,
-            size: 10,
+            size,
           },
         },
       },
