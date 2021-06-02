@@ -122,7 +122,7 @@ export class HeadlessChromiumDriver {
        * should be considered fully opaque to us.
        */
       await this.page.evaluateOnNewDocument(
-        (storeName: string, value?: object) => {
+        (storeName: string, value: object) => {
           Object.defineProperty(window, storeName, {
             enumerable: true,
             writable: false,

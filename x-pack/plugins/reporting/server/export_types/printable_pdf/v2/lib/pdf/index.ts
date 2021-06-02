@@ -17,7 +17,7 @@ import { getDocOptions, REPORTING_TABLE_LAYOUT } from './get_doc_options';
 import { getFont } from './get_font';
 import { getTemplate } from './get_template';
 
-const assetPath = path.resolve(__dirname, '..', '..', '..', 'common', 'assets');
+const assetPath = path.resolve(__dirname, '..', '..', '..', '..', 'common', 'assets');
 const tableBorderWidth = 1;
 
 export class PdfMaker {

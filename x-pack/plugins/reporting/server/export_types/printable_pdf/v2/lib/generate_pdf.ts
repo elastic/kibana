@@ -17,7 +17,7 @@ import { ConditionalHeaders } from '../../../common';
 import { PdfMaker } from './pdf';
 import { getTracker } from './tracker';
 
-const REDIRECT_APP_URL = 'temp';
+// const REDIRECT_APP_URL = 'temp';
 
 const getTimeRange = (urlScreenshots: ScreenshotResults[]) => {
   const grouped = groupBy(urlScreenshots.map((u) => u.timeRange));
@@ -53,7 +53,9 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
     tracker.startScreenshots();
     const screenshots$ = getScreenshots({
       logger,
-      urls: locators.map<[url: string, locator: Locator]>((locator) => [REDIRECT_APP_URL, locator]),
+      // urls: locators.map<[url: string, locator: Locator]>((locator) => [REDIRECT_APP_URL, locator]),
+      // TODO: Use the above line once we have a redirect app and URL service to work with locators
+      urls: locators.map<[url: string, locator: Locator]>((locator) => [locator.id, locator]),
       conditionalHeaders,
       layout,
       browserTimezone,

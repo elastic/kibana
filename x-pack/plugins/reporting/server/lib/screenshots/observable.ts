@@ -72,7 +72,7 @@ export function screenshotsObservableFactory(
                 } else {
                   url = urlOrTuple;
                 }
-                // const locator = locators && locators[index];
+
                 // If we're moving to another page in the app, we'll want to wait for the app to tell us
                 // it's loaded the next page.
                 const p = index + 1;
@@ -150,7 +150,7 @@ export function screenshotsObservableFactory(
               )
             );
           }),
-          take(urls.length),
+          take(urlsOrTuples.length),
           toArray()
         );
       }),

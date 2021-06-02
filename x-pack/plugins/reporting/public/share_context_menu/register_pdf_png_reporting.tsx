@@ -58,6 +58,8 @@ const getPdfV1JobParams = (opts: JobParamsProviderOptions) => (): JobParamsPDF =
 
 const getPdfV2JobParams = (opts: JobParamsProviderOptions) => (): JobParamsPDFV2 => {
   const locator = opts.sharingData.locator as Locator;
+  // TODO: Remove this once we have URL service locators since we are not going to treat locator.id as the store for the url
+  locator.id = locator.id.replace(window.location.origin + opts.apiClient.getServerBasePath(), '');
   return {
     ...jobParamsProvider(opts),
     locators: [locator], // multi URL for PDF
