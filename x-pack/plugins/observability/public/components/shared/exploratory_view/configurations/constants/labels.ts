@@ -200,6 +200,14 @@ export const NETWORK_ACTIVITY_LABEL = i18n.translate(
     defaultMessage: 'Network activity',
   }
 );
+
+export const CORE_WEB_VITALS_LABEL = i18n.translate(
+  'xpack.observability.expView.fieldLabels.coreWebVitals',
+  {
+    defaultMessage: 'Core web vitals',
+  }
+);
+
 export const MEMORY_USAGE_LABEL = i18n.translate(
   'xpack.observability.expView.fieldLabels.memoryUsage',
   {
