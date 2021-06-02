@@ -16,7 +16,7 @@ import { RouteDependencies } from '../../../types';
 export const registerGetRoute = ({
   router,
   license,
-  lib: { isEsError, formatEsError },
+  lib: { handleEsError },
 }: RouteDependencies) => {
   const paramsSchema = schema.object({
     id: schema.string(),
@@ -30,12 +30,13 @@ export const registerGetRoute = ({
       },
     },
     license.guardApiRoute(async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
       const { id } = request.params;
 
       try {
         const {
-          follower_indices: followerIndices,
-        } = await context.crossClusterReplication!.client.callAsCurrentUser('ccr.info', { id });
+          body: { follower_indices: followerIndices },
+        } = await client.asCurrentUser.ccr.followInfo({ index: id });
 
         const followerIndexInfo = followerIndices && followerIndices[0];
 
@@ -48,31 +49,26 @@ export const registerGetRoute = ({
         // If this follower is paused, skip call to ES stats api since it will return 404
         if (followerIndexInfo.status === 'paused') {
           return response.ok({
+            // @ts-expect-error Once #98266 is merged, test this again.
             body: deserializeFollowerIndex({
               ...followerIndexInfo,
             }),
           });
         } else {
           const {
-            indices: followerIndicesStats,
-          } = await context.crossClusterReplication!.client.callAsCurrentUser(
-            'ccr.followerIndexStats',
-            { id }
-          );
+            body: { indices: followerIndicesStats },
+          } = await client.asCurrentUser.ccr.followStats({ index: id });
 
           return response.ok({
+            // @ts-expect-error Once #98266 is merged, test this again.
             body: deserializeFollowerIndex({
               ...followerIndexInfo,
               ...(followerIndicesStats ? followerIndicesStats[0] : {}),
             }),
           });
         }
-      } catch (err) {
-        if (isEsError(err)) {
-          return response.customError(formatEsError(err));
-        }
-        // Case: default
-        throw err;
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     })
   );
