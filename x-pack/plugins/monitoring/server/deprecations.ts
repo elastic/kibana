@@ -54,6 +54,11 @@ export const deprecations = ({
       if (emailNotificationsEnabled && !updatedKey && !legacyKey) {
         addDeprecation({
           message: `Config key [${fromPath}.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}] will be required for email notifications to work in 8.0."`,
+          correctiveActions: {
+            manualSteps: [
+              `Add [${fromPath}.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}] to your kibana configs."`,
+            ],
+          },
         });
       }
       return config;
@@ -64,10 +69,16 @@ export const deprecations = ({
         if (es.username === 'elastic') {
           addDeprecation({
             message: `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana_system" user instead.`,
+            correctiveActions: {
+              manualSteps: [`Replace [${fromPath}.username] from "elastic" to "kibana_system".`],
+            },
           });
         } else if (es.username === 'kibana') {
           addDeprecation({
             message: `Setting [${fromPath}.username] to "kibana" is deprecated. You should use the "kibana_system" user instead.`,
+            correctiveActions: {
+              manualSteps: [`Replace [${fromPath}.username] from "kibana" to "kibana_system".`],
+            },
           });
         }
       }
@@ -79,10 +90,20 @@ export const deprecations = ({
         if (ssl.key !== undefined && ssl.certificate === undefined) {
           addDeprecation({
             message: `Setting [${fromPath}.key] without [${fromPath}.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`,
+            correctiveActions: {
+              manualSteps: [
+                `Set [${fromPath}.ssl.certificate] in your kibana configs to enable TLS client authentication to Elasticsearch.`,
+              ],
+            },
           });
         } else if (ssl.certificate !== undefined && ssl.key === undefined) {
           addDeprecation({
             message: `Setting [${fromPath}.certificate] without [${fromPath}.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`,
+            correctiveActions: {
+              manualSteps: [
+                `Set [${fromPath}.ssl.key] in your kibana configs to enable TLS client authentication to Elasticsearch.`,
+              ],
+            },
           });
         }
       }
