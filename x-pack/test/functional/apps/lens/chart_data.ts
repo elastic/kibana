@@ -93,12 +93,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // assert axes
       expect(debugState.axes!.x[0].labels).to.eql([
-        'Other',
-        '169.228.188.120',
-        '226.82.228.233',
-        '78.83.247.30',
-        '93.28.27.24',
         '97.220.3.248',
+        '169.228.188.120',
+        '78.83.247.30',
+        '226.82.228.233',
+        '93.28.27.24',
+        'Other',
       ]);
       expect(debugState.axes!.y[0].labels).to.eql(['']);
 
