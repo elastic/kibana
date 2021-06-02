@@ -148,7 +148,7 @@ export const RoleMapping: React.FC = () => {
                 handleEngineSelectionChange(options.map(({ value }) => value as string));
               }}
               fullWidth
-              isDisabled={accessAllEngines} // TODO Ability.canHaveScopedEngines(roleType)
+              isDisabled={accessAllEngines || !roleHasScopedEngines(roleType)}
             />
           </EuiFormRow>
         </>
