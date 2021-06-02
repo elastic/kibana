@@ -234,6 +234,7 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
           <span
             aria-hidden="true"
             className="euiButtonIcon__icon"
+            color="inherit"
             data-euiicon-type="plusInCircle"
             size="m"
           />
@@ -248,6 +249,7 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
           <span
             aria-hidden="true"
             className="euiButtonIcon__icon"
+            color="inherit"
             data-euiicon-type="minusInCircle"
             size="m"
           />
@@ -521,6 +523,7 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
         <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
+          color="inherit"
           data-euiicon-type="plusInCircle"
           size="m"
         />
@@ -535,6 +538,7 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
         <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
+          color="inherit"
           data-euiicon-type="minusInCircle"
           size="m"
         />
@@ -781,6 +785,7 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
         <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
+          color="inherit"
           data-euiicon-type="plusInCircle"
           size="m"
         />
@@ -795,6 +800,7 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
         <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
+          color="inherit"
           data-euiicon-type="minusInCircle"
           size="m"
         />
@@ -963,6 +969,7 @@ exports[`Storyshots components/Color/ColorPicker three colors 1`] = `
         <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
+          color="inherit"
           data-euiicon-type="plusInCircle"
           size="m"
         />
@@ -977,6 +984,7 @@ exports[`Storyshots components/Color/ColorPicker three colors 1`] = `
         <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
+          color="inherit"
           data-euiicon-type="minusInCircle"
           size="m"
         />
