@@ -16,7 +16,7 @@ import { createKbnUrlStateStorage, defer } from '../../../../kibana_utils/public
 import { createBrowserHistory } from 'history';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
-import { DashboardCapabilities } from '../types';
+import { DashboardAppCapabilities } from '../types';
 import { EmbeddableFactory } from '../../../../embeddable/public';
 import { HelloWorldEmbeddable } from '../../../../embeddable/public/tests/fixtures';
 import { DashboardContainer } from '../embeddable';
@@ -43,7 +43,7 @@ const createDashboardState = () =>
     toasts: coreMock.createStart().notifications.toasts,
   });
 
-const defaultCapabilities: DashboardCapabilities = {
+const defaultCapabilities: DashboardAppCapabilities = {
   show: false,
   createNew: false,
   saveQuery: false,

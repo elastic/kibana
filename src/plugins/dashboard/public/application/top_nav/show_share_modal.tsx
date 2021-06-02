@@ -16,7 +16,7 @@ import { SharePluginStart } from '../../services/share';
 import { dashboardUrlParams } from '../dashboard_router';
 import { DashboardStateManager } from '../dashboard_state_manager';
 import { shareModalStrings } from '../../dashboard_strings';
-import { DashboardCapabilities } from '../types';
+import { DashboardAppCapabilities } from '../types';
 
 const showFilterBarId = 'showFilterBar';
 
@@ -24,14 +24,14 @@ interface ShowShareModalProps {
   share: SharePluginStart;
   anchorElement: HTMLElement;
   savedDashboard: DashboardSavedObject;
-  dashboardCapabilities: DashboardCapabilities;
+  dashboardCapabilities: DashboardAppCapabilities;
   dashboardStateManager: DashboardStateManager;
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
   if (!anonymousUserCapabilities.dashboard) return false;
 
-  const dashboard = (anonymousUserCapabilities.dashboard as unknown) as DashboardCapabilities;
+  const dashboard = (anonymousUserCapabilities.dashboard as unknown) as DashboardAppCapabilities;
 
   return !!dashboard.show;
 };
