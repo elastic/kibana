@@ -27,7 +27,7 @@ export const configSchema = schema.object({
           schema.literal('data_frozen'),
         ]),
         {
-          defaultValue: ['data_hot', 'data_warm'],
+          defaultValue: ['data_hot', 'data_warm', 'data_content', 'data_cold'],
         }
       ),
       terminateAfter: schema.duration({ defaultValue: 100000 }),
