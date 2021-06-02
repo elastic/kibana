@@ -16,6 +16,10 @@ describe('CaseActionBar', () => {
   const onRefresh = jest.fn();
   const onUpdateField = jest.fn();
   const defaultProps = {
+    allCasesNavigation: {
+      href: 'all-cases-href',
+      onClick: jest.fn(),
+    },
     caseData: basicCase,
     isAlerting: true,
     isLoading: false,
