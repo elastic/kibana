@@ -697,12 +697,14 @@ exports[`Discover IndexPattern Management renders correctly 1`] = `
             <EuiIcon
               aria-hidden="true"
               className="euiButtonIcon__icon"
+              color="inherit"
               size="m"
               type="boxesHorizontal"
             >
               <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="boxesHorizontal"
                 size="m"
               />

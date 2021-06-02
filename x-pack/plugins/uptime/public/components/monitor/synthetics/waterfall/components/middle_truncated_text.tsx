@@ -16,6 +16,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { WaterfallTooltipResponsiveMaxWidth } from './styles';
 import { FIXED_AXIS_HEIGHT } from './constants';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 
@@ -113,7 +114,13 @@ export const MiddleTruncatedText = ({
       <EuiScreenReaderOnly>
         <span data-test-subj="middleTruncatedTextSROnly">{fullText}</span>
       </EuiScreenReaderOnly>
-      <EuiToolTip content={fullText} position="top" data-test-subj="middleTruncatedTextToolTip">
+      <WaterfallTooltipResponsiveMaxWidth
+        as={EuiToolTip}
+        content={`${index}. ${fullText}`}
+        data-test-subj="middleTruncatedTextToolTip"
+        delay="long"
+        position="top"
+      >
         <>
           {onClick ? (
             <StyledButton
@@ -153,7 +160,7 @@ export const MiddleTruncatedText = ({
             </InnerContainer>
           )}
         </>
-      </EuiToolTip>
+      </WaterfallTooltipResponsiveMaxWidth>
       <span>
         <EuiLink href={url} external target="_blank">
           <EuiScreenReaderOnly>
