@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, Type } from '@kbn/config-schema';
+import { RUNTIME_FIELD_TYPES, RuntimeType } from '../../../../common';
 
 export const serializedFieldFormatSchema = schema.object({
   id: schema.maybe(schema.string()),
@@ -53,3 +54,18 @@ export const fieldSpecSchemaFields = {
 };
 
 export const fieldSpecSchema = schema.object(fieldSpecSchemaFields);
+
+export const runtimeFieldSpecTypeSchema = schema.oneOf(
+  RUNTIME_FIELD_TYPES.map((runtimeFieldType) => schema.literal(runtimeFieldType)) as [
+    Type<RuntimeType>
+  ]
+);
+export const runtimeFieldSpec = {
+  type: runtimeFieldSpecTypeSchema,
+  script: schema.maybe(
+    schema.object({
+      source: schema.string(),
+    })
+  ),
+};
+export const runtimeFieldSpecSchema = schema.object(runtimeFieldSpec);

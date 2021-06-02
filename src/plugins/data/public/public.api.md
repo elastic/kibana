@@ -1368,6 +1368,7 @@ export class IndexPattern implements IIndexPattern {
         typeMeta?: string | undefined;
         type?: string | undefined;
     };
+    getRuntimeField(name: string): RuntimeField | null;
     // @deprecated (undocumented)
     getScriptedFields(): IndexPatternField[];
     getSourceFiltering(): {
@@ -1375,6 +1376,7 @@ export class IndexPattern implements IIndexPattern {
     };
     // (undocumented)
     getTimeField(): IndexPatternField | undefined;
+    hasRuntimeField(name: string): boolean;
     // (undocumented)
     id?: string;
     // @deprecated (undocumented)
@@ -1385,9 +1387,13 @@ export class IndexPattern implements IIndexPattern {
     isTimeNanosBased(): boolean;
     // (undocumented)
     metaFields: string[];
-    removeRuntimeField(name: string): void;
+    removeRuntimeField(name: string, opts?: {
+        removeFieldFormat: boolean;
+        removeCustomLabel: boolean;
+    }): void;
     // @deprecated
     removeScriptedField(fieldName: string): void;
+    replaceAllRuntimeFields(newFields: Record<string, RuntimeField>): void;
     resetOriginalSavedObjectBody: () => void;
     // (undocumented)
     protected setFieldAttrs<K extends keyof FieldAttrSet>(fieldName: string, attrName: K, value: FieldAttrSet[K]): void;

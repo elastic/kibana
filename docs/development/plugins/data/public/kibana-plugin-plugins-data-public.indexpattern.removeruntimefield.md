@@ -9,7 +9,10 @@ Remove a runtime field - removed from mapped field or removed unmapped field as 
 <b>Signature:</b>
 
 ```typescript
-removeRuntimeField(name: string): void;
+removeRuntimeField(name: string, opts?: {
+        removeFieldFormat: boolean;
+        removeCustomLabel: boolean;
+    }): void;
 ```
 
 ## Parameters
@@ -17,6 +20,7 @@ removeRuntimeField(name: string): void;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  name | <code>string</code> |  |
+|  opts | <code>{</code><br/><code>        removeFieldFormat: boolean;</code><br/><code>        removeCustomLabel: boolean;</code><br/><code>    }</code> |  |
 
 <b>Returns:</b>
 

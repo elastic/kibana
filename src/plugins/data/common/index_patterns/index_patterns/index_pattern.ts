@@ -364,7 +364,6 @@ export class IndexPattern implements IIndexPattern {
    * @param name Field name
    * @param runtimeField Runtime field definition
    */
-
   addRuntimeField(name: string, runtimeField: RuntimeField) {
     const existingField = this.getFieldByName(name);
     if (existingField) {
@@ -384,12 +383,49 @@ export class IndexPattern implements IIndexPattern {
   }
 
   /**
+   * Checks if runtime field exists
+   * @param name
+   */
+  hasRuntimeField(name: string): boolean {
+    return !!this.runtimeFieldMap[name];
+  }
+
+  /**
+   * Returns runtime field if exists
+   * @param name
+   */
+  getRuntimeField(name: string): RuntimeField | null {
+    return this.runtimeFieldMap[name] ?? null;
+  }
+
+  /**
+   * Replaces all existing runtime fields with new fields
+   * @param newFields
+   */
+  replaceAllRuntimeFields(newFields: Record<string, RuntimeField>) {
+    const oldRuntimeFieldNames = Object.keys(this.runtimeFieldMap);
+    oldRuntimeFieldNames.forEach((name) => {
+      this.removeRuntimeField(name, { removeCustomLabel: false, removeFieldFormat: false });
+    });
+
+    Object.entries(newFields).forEach(([name, field]) => {
+      this.addRuntimeField(name, field);
+    });
+  }
+
+  /**
    * Remove a runtime field - removed from mapped field or removed unmapped
    * field as appropriate
    * @param name Field name
+   * @param opts specify additional removal options
    */
-
-  removeRuntimeField(name: string) {
+  removeRuntimeField(
+    name: string,
+    opts: { removeFieldFormat: boolean; removeCustomLabel: boolean } = {
+      removeCustomLabel: true,
+      removeFieldFormat: true,
+    }
+  ) {
     const existingField = this.getFieldByName(name);
     if (existingField) {
       if (existingField.isMapped) {
@@ -397,8 +433,14 @@ export class IndexPattern implements IIndexPattern {
         existingField.runtimeField = undefined;
       } else {
         // runtimeField only
-        this.setFieldCustomLabel(name, null);
-        this.deleteFieldFormat(name);
+        if (opts.removeCustomLabel) {
+          this.setFieldCustomLabel(name, null);
+        }
+
+        if (opts.removeFieldFormat) {
+          this.deleteFieldFormat(name);
+        }
+
         this.fields.remove(existingField);
       }
     }
