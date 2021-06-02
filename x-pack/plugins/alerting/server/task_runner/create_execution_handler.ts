@@ -177,19 +177,19 @@ export function createExecutionHandler<
         event: { action: EVENT_LOG_ACTIONS.executeAction },
         kibana: {
           alerting: {
+            instance_id: alertInstanceId,
             action_group_id: actionGroup,
             action_subgroup: actionSubgroup,
-            instance_id: alertInstanceId,
-            primary_saved_object: {
-              id: alertId,
-              type: 'alert',
-              ...namespace,
-            },
-            rule_type_id: alertType.id,
           },
           saved_objects: [
-            { rel: SAVED_OBJECT_REL_PRIMARY, type: 'alert', id: alertId, ...namespace },
-            { type: 'action', id: action.id, ...namespace },
+            {
+              rel: SAVED_OBJECT_REL_PRIMARY,
+              type: 'alert',
+              id: alertId,
+              type_id: alertType.id,
+              ...namespace,
+            },
+            { type: 'action', id: action.id, type_id: action.actionTypeId, ...namespace },
           ],
         },
       };

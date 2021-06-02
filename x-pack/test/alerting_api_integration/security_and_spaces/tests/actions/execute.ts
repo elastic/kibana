@@ -546,18 +546,12 @@ export default function ({ getService }: FtrProviderContext) {
 
     expect(event?.event?.outcome).to.equal(outcome);
 
-    expect(event?.kibana?.alerting?.action_type_id).to.equal(actionTypeId);
-    expect(event?.kibana?.alerting?.primary_saved_object).to.eql({
-      type: 'action',
-      id: connectorId,
-      namespace: spaceId,
-    });
-
     expect(event?.kibana?.saved_objects).to.eql([
       {
         rel: 'primary',
         type: 'action',
         id: connectorId,
+        type_id: actionTypeId,
         namespace: spaceId,
       },
     ]);

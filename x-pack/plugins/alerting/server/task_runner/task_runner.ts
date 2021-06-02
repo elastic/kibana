@@ -489,19 +489,12 @@ export class TaskRunner<
       '@timestamp': runDate,
       event: { action: EVENT_LOG_ACTIONS.execute },
       kibana: {
-        alerting: {
-          primary_saved_object: {
-            id: alertId,
-            type: 'alert',
-            namespace,
-          },
-          rule_type_id: this.alertType.id,
-        },
         saved_objects: [
           {
             rel: SAVED_OBJECT_REL_PRIMARY,
             type: 'alert',
             id: alertId,
+            type_id: this.alertType.id,
             namespace,
           },
         ],
@@ -691,18 +684,13 @@ function generateNewAndRecoveredInstanceEvents<
           instance_id: instanceId,
           ...(group ? { action_group_id: group } : {}),
           ...(subgroup ? { action_subgroup: subgroup } : {}),
-          primary_saved_object: {
-            id: alertId,
-            type: 'alert',
-            namespace,
-          },
-          rule_type_id: ruleId,
         },
         saved_objects: [
           {
             rel: SAVED_OBJECT_REL_PRIMARY,
             type: 'alert',
             id: alertId,
+            type_id: ruleId,
             namespace,
           },
         ],

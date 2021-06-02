@@ -160,21 +160,18 @@ test('enqueues execution per selected action', async () => {
               "action_group_id": "default",
               "action_subgroup": undefined,
               "instance_id": "2",
-              "primary_saved_object": Object {
-                "id": "1",
-                "type": "alert",
-              },
-              "rule_type_id": "test",
             },
             "saved_objects": Array [
               Object {
                 "id": "1",
                 "rel": "primary",
                 "type": "alert",
+                "type_id": "test",
               },
               Object {
                 "id": "1",
                 "type": "action",
+                "type_id": "test",
               },
             ],
           },
