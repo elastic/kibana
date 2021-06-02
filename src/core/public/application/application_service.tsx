@@ -64,6 +64,10 @@ const getAppUrl = (mounters: Map<string, Mounter>, appId: string, path: string =
   return appendAppPath(appBasePath, path);
 };
 
+const getAppDeepLinkPath = (mounters: Map<string, Mounter>, appId: string, deepLinkId: string) => {
+  return mounters.get(appId)?.deepLinkPaths[deepLinkId];
+};
+
 const allApplicationsFilter = '__ALL__';
 
 interface AppUpdaterWrapper {
@@ -175,6 +179,7 @@ export class ApplicationService {
         this.mounters.set(app.id, {
           appRoute: app.appRoute!,
           appBasePath: basePath.prepend(app.appRoute!),
+          deepLinkPaths: toDeepLinkPaths(app.deepLinks),
           exactRoute: app.exactRoute ?? false,
           mount: wrapMount(plugin, app),
           unmountBeforeMounting: false,
@@ -226,7 +231,7 @@ export class ApplicationService {
 
     const navigateToApp: InternalApplicationStart['navigateToApp'] = async (
       appId,
-      { path, state, replace = false, openInNewTab = false }: NavigateToAppOptions = {}
+      { deepLinkId, path, state, replace = false, openInNewTab = false }: NavigateToAppOptions = {}
     ) => {
       const currentAppId = this.currentAppId$.value;
       const navigatingToSameApp = currentAppId === appId;
@@ -235,6 +240,10 @@ export class ApplicationService {
         : await this.shouldNavigate(overlays, appId);
 
       if (shouldNavigate) {
+        if (deepLinkId) {
+          const deepLinkPath = getAppDeepLinkPath(availableMounters, appId, deepLinkId);
+          if (deepLinkPath) path = appendAppPath(deepLinkPath, path);
+        }
         if (path === undefined) {
           path = applications$.value.get(appId)?.defaultPath;
         }
@@ -414,4 +423,12 @@ const populateDeepLinkDefaults = (deepLinks?: AppDeepLink[]): AppDeepLink[] => {
       : AppNavLinkStatus.hidden,
     deepLinks: populateDeepLinkDefaults(deepLink.deepLinks),
   }));
+};
+
+const toDeepLinkPaths = (deepLinks?: AppDeepLink[]): Mounter['deepLinkPaths'] => {
+  if (!deepLinks) return {};
+  return deepLinks.reduce((deepLinkPaths: Mounter['deepLinkPaths'], deepLink) => {
+    if (deepLink.path) deepLinkPaths[deepLink.id] = deepLink.path;
+    return { ...deepLinkPaths, ...toDeepLinkPaths(deepLink.deepLinks) };
+  }, {});
 };

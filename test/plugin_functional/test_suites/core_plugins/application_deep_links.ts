@@ -77,6 +77,20 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       await testSubjects.existOrFail('dlAppHome');
     });
 
+    it('should navigate to nested page B using navigateToApp path', async () => {
+      await testSubjects.click('dlNavDeepPageB');
+      await waitForUrlToBe('/app/dl/page-b');
+      await loadingScreenNotShown();
+      await testSubjects.existOrFail('dlAppPageB');
+    });
+
+    it('should navigate to nested page A using navigateToApp deepLinkId', async () => {
+      await testSubjects.click('dlNavDeepPageAById');
+      await waitForUrlToBe('/app/dl/page-a');
+      await loadingScreenNotShown();
+      await testSubjects.existOrFail('dlAppPageA');
+    });
+
     it('should not display hidden deep links', async () => {
       expect(await appsMenu.linkExists('DL Section One')).to.be(false);
       expect(await appsMenu.linkExists('DL Page C')).to.be(false);

@@ -22,13 +22,13 @@ const availableApps = new Map([
       euiIconType: 'canvasApp',
       deepLinks: [
         {
-          id: 'app2:deepApp1',
+          id: 'deepApp1',
           order: 50,
           title: 'Deep App 1',
           path: '/deepapp1',
           deepLinks: [
             {
-              id: 'app2:deepApp2',
+              id: 'deepApp2',
               order: 40,
               title: 'Deep App 2',
               path: '/deepapp2',

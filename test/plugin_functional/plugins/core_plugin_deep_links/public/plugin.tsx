@@ -21,23 +21,23 @@ export class CorePluginDeepLinksPlugin
       navLinkStatus: AppNavLinkStatus.hidden,
       deepLinks: [
         {
-          id: 'deepLinks:home',
+          id: 'home',
           title: 'DL Home',
           path: '/home',
           navLinkStatus: AppNavLinkStatus.visible,
         },
         {
-          id: 'deepLinks:page-a',
+          id: 'pageA',
           title: 'DL Page A',
           path: '/page-a',
           navLinkStatus: AppNavLinkStatus.visible,
         },
         {
-          id: 'deepLinks:section-one',
+          id: 'sectionOne',
           title: 'DL Section One',
           deepLinks: [
             {
-              id: 'deepLinks:page-b',
+              id: 'pageB',
               title: 'DL Page B',
               path: '/page-b',
               navLinkStatus: AppNavLinkStatus.visible,
@@ -45,7 +45,7 @@ export class CorePluginDeepLinksPlugin
           ],
         },
         {
-          id: 'deepLinks:page-c',
+          id: 'pageC',
           title: 'DL Page C',
           path: '/page-c',
           // navLinkStatus hidden by default

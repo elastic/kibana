@@ -177,8 +177,9 @@ function toNavDeepLinks(
 ): Array<[string, NavLinkWrapper]> {
   if (!deepLinks) return [];
   return deepLinks.reduce((navDeepLinks: Array<[string, NavLinkWrapper]>, deepLink) => {
+    const id = `${app.id}:${deepLink.id}`;
     if (deepLink.path) {
-      navDeepLinks.push([deepLink.id, toNavLink(app, http.basePath, deepLink)]);
+      navDeepLinks.push([id, toNavLink(app, http.basePath, { ...deepLink, id })]);
     }
     navDeepLinks.push(...toNavDeepLinks(app, deepLink.deepLinks, http));
     return navDeepLinks;

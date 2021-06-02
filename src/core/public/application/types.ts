@@ -599,6 +599,7 @@ export interface AppLeaveActionFactory {
 export interface Mounter {
   appRoute: string;
   appBasePath: string;
+  deepLinkPaths: Record<string, string>;
   mount: AppMount;
   exactRoute: boolean;
   unmountBeforeMounting?: boolean;
@@ -664,11 +665,17 @@ export interface InternalApplicationSetup extends Pick<ApplicationSetup, 'regist
 
 /**
  * Options for the {@link ApplicationStart.navigateToApp | navigateToApp API}
+ * @public
  */
 export interface NavigateToAppOptions {
   /**
+   * optional {@link App.deepLinks | deep link} id inside the application to navigate to.
+   * If an additional {@link NavigateToAppOptions.path | path} is defined it will be appended to the deep link path.
+   */
+  deepLinkId?: string;
+  /**
    * optional path inside application to deep link to.
-   * If undefined, will use {@link App.defaultPath | the app's default path}` as default.
+   * If undefined, will use {@link App.defaultPath | the app's default path} as default.
    */
   path?: string;
   /**

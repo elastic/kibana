@@ -100,7 +100,7 @@ const Nav = withRouter(({ history, navigateToApp }: NavProps) => (
   <EuiSideNav
     items={[
       {
-        name: 'DL!',
+        name: 'DeepLinks!',
         id: 'deeplinks',
         items: [
           {
@@ -116,12 +116,20 @@ const Nav = withRouter(({ history, navigateToApp }: NavProps) => (
             'data-test-subj': 'dlNavPageA',
           },
           {
-            id: 'navigateDeep',
+            id: 'navigateDeepByPath',
             name: 'DL section 1 page B',
             onClick: () => {
-              navigateToApp('deeplinks', { path: 'page-b?query=here', state: 'foo!!' });
+              navigateToApp('deeplinks', { path: '/page-b' });
             },
-            'data-test-subj': 'dlNavDeepPage',
+            'data-test-subj': 'dlNavDeepPageB',
+          },
+          {
+            id: 'navigateDeepById',
+            name: 'DL page A deep link',
+            onClick: () => {
+              navigateToApp('deeplinks', { deepLinkId: 'pageA' });
+            },
+            'data-test-subj': 'dlNavDeepPageAById',
           },
         ],
       },
