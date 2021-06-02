@@ -108,7 +108,7 @@ export function getPackagePolicyWithAgentConfigurations(
   agentConfigurations: AgentConfiguration[]
 ) {
   const [firstInput, ...restInputs] = packagePolicy.inputs;
-  const apmServer = firstInput?.config?.[APM_SERVER];
+  const apmServerValue = firstInput?.config?.[APM_SERVER].value;
   return {
     ...packagePolicy,
     inputs: [
@@ -116,9 +116,9 @@ export function getPackagePolicyWithAgentConfigurations(
         ...firstInput,
         config: {
           [APM_SERVER]: {
-            ...apmServer,
-            agent_config: {
-              value: agentConfigurations.map((configuration) => ({
+            value: {
+              ...apmServerValue,
+              agent_config: agentConfigurations.map((configuration) => ({
                 service: configuration.service,
                 config: configuration.settings,
                 etag: configuration.etag,
