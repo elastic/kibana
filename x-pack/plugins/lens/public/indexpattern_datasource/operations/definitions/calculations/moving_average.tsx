@@ -78,7 +78,7 @@ export const movingAverageOperation: OperationDefinition<
     }
   },
   getDefaultLabel: (column, indexPattern, columns) => {
-    return ofName(columns[column.references[0]]?.label, column.timeScale);
+    return ofName(columns[column.references[0]]?.label, column.timeScale, column.timeShift);
   },
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'moving_average', {
@@ -92,7 +92,7 @@ export const movingAverageOperation: OperationDefinition<
     const metric = layer.columns[referenceIds[0]];
     const { window = WINDOW_DEFAULT_VALUE } = columnParams;
     return {
-      label: ofName(metric?.label, previousColumn?.timeScale),
+      label: ofName(metric?.label, previousColumn?.timeScale, previousColumn?.timeShift),
       dataType: 'number',
       operationType: 'moving_average',
       isBucketed: false,
@@ -100,6 +100,7 @@ export const movingAverageOperation: OperationDefinition<
       references: referenceIds,
       timeScale: previousColumn?.timeScale,
       filter: getFilter(previousColumn, columnParams),
+      timeShift: previousColumn?.timeShift,
       params: {
         window,
         ...getFormatFromPreviousColumn(previousColumn),
@@ -153,6 +154,7 @@ Example: Smooth a line of measurements:
       },
     }),
   },
+  shiftable: true,
 };
 
 function MovingAverageParamEditor({

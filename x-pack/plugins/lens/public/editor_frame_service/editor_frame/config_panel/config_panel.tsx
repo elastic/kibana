@@ -81,10 +81,6 @@ export function LayerPanels(
             typeof newDatasourceState === 'function'
               ? newDatasourceState(prevState.datasourceStates[datasourceId].state)
               : newDatasourceState;
-          const updatedVisualizationState =
-            typeof newVisualizationState === 'function'
-              ? newVisualizationState(prevState.visualization.state)
-              : newVisualizationState;
           return {
             ...prevState,
             datasourceStates: {
@@ -96,7 +92,7 @@ export function LayerPanels(
             },
             visualization: {
               ...prevState.visualization,
-              state: updatedVisualizationState,
+              state: newVisualizationState,
             },
             stagedPreview: undefined,
           };
