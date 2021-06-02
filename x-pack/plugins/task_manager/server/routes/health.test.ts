@@ -355,6 +355,7 @@ function mockHealthStats(overrides = {}) {
           load: [0, 100, 75],
           execution: {
             duration: {},
+            duration_by_persistence: {},
             persistence: [],
             result_frequency_percent_as_number: {},
           },

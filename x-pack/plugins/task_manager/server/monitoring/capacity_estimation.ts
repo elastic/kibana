@@ -10,7 +10,7 @@ import stats from 'stats-lite';
 import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { RawMonitoringStats, RawMonitoredStat, HealthStatus } from './monitoring_stats_stream';
 import { AveragedStat } from './task_run_calcultors';
-import { TaskPersistence, TaskPersistenceTypes } from './task_run_statistics';
+import { TaskPersistenceTypes } from './task_run_statistics';
 
 export interface CapacityEstimationStat extends JsonObject {
   observed: {
