@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import _ from 'lodash';
+import { mapValues } from 'lodash';
 import { EditorFrameState } from '../state_management';
 import { Datasource, Visualization } from '../../../types';
 
@@ -35,7 +35,7 @@ export function removeLayer(opts: RemoveLayerOptions): EditorFrameState {
 
   return {
     ...state,
-    datasourceStates: _.mapValues(state.datasourceStates, (datasourceState, datasourceId) => {
+    datasourceStates: mapValues(state.datasourceStates, (datasourceState, datasourceId) => {
       const datasource = datasourceMap[datasourceId!];
       return {
         ...datasourceState,

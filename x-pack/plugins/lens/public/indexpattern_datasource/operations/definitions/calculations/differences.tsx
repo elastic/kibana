@@ -66,7 +66,7 @@ export const derivativeOperation: OperationDefinition<
     }
   },
   getDefaultLabel: (column, indexPattern, columns) => {
-    return ofName(columns[column.references[0]]?.label, column.timeScale);
+    return ofName(columns[column.references[0]]?.label, column.timeScale, column.timeShift);
   },
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'derivative');
@@ -74,7 +74,7 @@ export const derivativeOperation: OperationDefinition<
   buildColumn: ({ referenceIds, previousColumn, layer }, columnParams) => {
     const ref = layer.columns[referenceIds[0]];
     return {
-      label: ofName(ref?.label, previousColumn?.timeScale),
+      label: ofName(ref?.label, previousColumn?.timeScale, previousColumn?.timeShift),
       dataType: 'number',
       operationType: OPERATION_NAME,
       isBucketed: false,
@@ -82,6 +82,7 @@ export const derivativeOperation: OperationDefinition<
       references: referenceIds,
       timeScale: previousColumn?.timeScale,
       filter: getFilter(previousColumn, columnParams),
+      timeShift: previousColumn?.timeShift,
       params: getFormatFromPreviousColumn(previousColumn),
     };
   },
@@ -108,4 +109,5 @@ export const derivativeOperation: OperationDefinition<
   },
   timeScalingMode: 'optional',
   filterable: true,
+  shiftable: true,
 };

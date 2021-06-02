@@ -38,7 +38,7 @@ export const EmptyStateComponent = ({
   const noIndicesMessage = (
     <FormattedMessage
       id="xpack.uptime.emptyState.noIndexTitle"
-      defaultMessage="No indices found matching pattern {indexName}"
+      defaultMessage="No indices found for the pattern {indexName}"
       values={{ indexName: <em>{settings?.heartbeatIndices}</em> }}
     />
   );
