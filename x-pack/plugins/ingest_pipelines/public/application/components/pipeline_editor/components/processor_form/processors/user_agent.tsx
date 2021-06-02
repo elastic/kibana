@@ -19,7 +19,7 @@ import { FieldNameField } from './common_fields/field_name_field';
 import { TargetField } from './common_fields/target_field';
 import { PropertiesField } from './common_fields/properties_field';
 
-const propertyOptions: EuiComboBoxOptionOption[] = [
+const propertyOptions: Array<EuiComboBoxOptionOption<string>> = [
   { label: 'name' },
   { label: 'os' },
   { label: 'device' },
@@ -96,8 +96,8 @@ export const UserAgent: FunctionComponent = () => {
           { defaultMessage: 'Properties added to the target field.' }
         )}
         euiFieldProps={{
-          options: propertyOptions as [],
-          noSuggestions: !propertyOptions,
+          options: propertyOptions,
+          noSuggestions: false,
           'data-test-subj': 'propertiesValueField',
         }}
       />
@@ -113,7 +113,7 @@ export const UserAgent: FunctionComponent = () => {
               <EuiFlexItem grow={false}>
                 <FormattedMessage
                   id="xpack.ingestPipelines.pipelineEditor.userAgentForm.extractDeviceNameFieldText"
-                  defaultMessage="Extract Device Type"
+                  defaultMessage="Extract device type"
                 />
               </EuiFlexItem>
               <EuiFlexItem style={{ marginBottom: -4 }}>
