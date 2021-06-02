@@ -48,7 +48,7 @@ webpack(
   name = "target_web",
   data = DEPS + [
     ":src",
-    ":webpack.config.js",
+    "webpack.config.js",
   ],
   output_dir = True,
   args = [
