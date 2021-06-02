@@ -12,7 +12,7 @@ import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 import { componentTemplateSchema } from './schema_validation';
 
-export const registerCreateRoute = ({ router, lib: { isEsError } }: RouteDependencies): void => {
+export const registerCreateRoute = ({ router, lib: { handleEsError } }: RouteDependencies): void => {
   router.post(
     {
       path: addBasePath('/component_templates'),
@@ -20,24 +20,21 @@ export const registerCreateRoute = ({ router, lib: { isEsError } }: RouteDepende
         body: componentTemplateSchema,
       },
     },
-    async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.dataManagement!.client;
+    async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
 
-      const serializedComponentTemplate = serializeComponentTemplate(req.body);
+      const serializedComponentTemplate = serializeComponentTemplate(request.body);
 
-      const { name } = req.body;
+      const { name } = request.body;
 
       try {
         // Check that a component template with the same name doesn't already exist
-        const componentTemplateResponse = await callAsCurrentUser(
-          'dataManagement.getComponentTemplate',
-          { name }
-        );
-
-        const { component_templates: componentTemplates } = componentTemplateResponse;
+        const { body : { component_templates: componentTemplates } } = await client.asCurrentUser.cluster.getComponentTemplate({
+          name,
+        });
 
         if (componentTemplates.length) {
-          return res.conflict({
+          return response.conflict({
             body: new Error(
               i18n.translate('xpack.idxMgmt.componentTemplates.createRoute.duplicateErrorMessage', {
                 defaultMessage: "There is already a component template with name '{name}'.",
@@ -53,21 +50,14 @@ export const registerCreateRoute = ({ router, lib: { isEsError } }: RouteDepende
       }
 
       try {
-        const response = await callAsCurrentUser('dataManagement.saveComponentTemplate', {
+        const { body: responseBody } = await client.asCurrentUser.cluster.putComponentTemplate({
           name,
           body: serializedComponentTemplate,
         });
 
-        return res.ok({ body: response });
+        return response.ok({ body: responseBody });
       } catch (error) {
-        if (isEsError(error)) {
-          return res.customError({
-            statusCode: error.statusCode,
-            body: error,
-          });
-        }
-
-        throw error;
+        return handleEsError({ error, response });;
       }
     }
   );

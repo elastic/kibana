@@ -28,10 +28,13 @@ export function registerDeleteRoute({ router }: RouteDependencies) {
       path: addBasePath('/delete_index_templates'),
       validate: { body: bodySchema },
     },
-    async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.dataManagement!.client;
-      const { templates } = req.body as TypeOf<typeof bodySchema>;
-      const response: { templatesDeleted: Array<TemplateDeserialized['name']>; errors: any[] } = {
+    async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
+      const { templates } = request.body as TypeOf<typeof bodySchema>;
+      const responseBody: {
+        templatesDeleted: Array<TemplateDeserialized['name']>;
+        errors: any[];
+      } = {
         templatesDeleted: [],
         errors: [],
       };
@@ -40,18 +43,18 @@ export function registerDeleteRoute({ router }: RouteDependencies) {
         templates.map(async ({ name, isLegacy }) => {
           try {
             if (isLegacy) {
-              await callAsCurrentUser('indices.deleteTemplate', {
+              await client.asCurrentUser.indices.deleteTemplate({
                 name,
               });
             } else {
-              await callAsCurrentUser('dataManagement.deleteComposableIndexTemplate', {
+              await client.asCurrentUser.indices.deleteIndexTemplate({
                 name,
               });
             }
 
-            return response.templatesDeleted.push(name);
+            return responseBody.templatesDeleted.push(name);
           } catch (e) {
-            return response.errors.push({
+            return responseBody.errors.push({
               name,
               error: wrapEsError(e),
             });
@@ -59,7 +62,7 @@ export function registerDeleteRoute({ router }: RouteDependencies) {
         })
       );
 
-      return res.ok({ body: response });
+      return response.ok({ body: responseBody });
     }
   );
 }

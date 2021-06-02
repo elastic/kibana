@@ -10,22 +10,23 @@ import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 
 export function registerListRoute({ router, indexDataEnricher, lib }: RouteDependencies) {
-  router.get({ path: addBasePath('/indices'), validate: false }, async (ctx, req, res) => {
-    try {
-      const indices = await fetchIndices(
-        ctx.core.elasticsearch.legacy.client.callAsCurrentUser,
-        indexDataEnricher
-      );
-      return res.ok({ body: indices });
-    } catch (e) {
-      if (lib.isEsError(e)) {
-        return res.customError({
-          statusCode: e.statusCode,
-          body: e,
-        });
+  router.get(
+    { path: addBasePath('/indices'), validate: false },
+    async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
+      try {
+        const indices = await fetchIndices(client, indexDataEnricher);
+        return response.ok({ body: indices });
+      } catch (e) {
+        if (lib.isEsError(e)) {
+          return response.customError({
+            statusCode: e.statusCode,
+            body: e,
+          });
+        }
+        // Case: default
+        throw e;
       }
-      // Case: default
-      throw e;
     }
-  });
+  );
 }

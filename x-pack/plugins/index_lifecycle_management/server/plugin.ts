@@ -6,14 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  CoreSetup,
-  Plugin,
-  Logger,
-  PluginInitializerContext,
-  LegacyAPICaller,
-} from 'src/core/server';
-import { handleEsError } from './shared_imports';
+import { CoreSetup, Plugin, Logger, PluginInitializerContext } from 'src/core/server';
+import { IScopedClusterClient } from 'kibana/server';
 
 import { Index as IndexWithoutIlm } from '../../index_management/common/types';
 import { PLUGIN } from '../common/constants';
@@ -22,24 +16,21 @@ import { Dependencies } from './types';
 import { registerApiRoutes } from './routes';
 import { License } from './services';
 import { IndexLifecycleManagementConfig } from './config';
+import { handleEsError } from './shared_imports';
 
 const indexLifecycleDataEnricher = async (
   indicesList: IndexWithoutIlm[],
-  // TODO replace deprecated ES client after Index Management is updated
-  callAsCurrentUser: LegacyAPICaller
+  client: IScopedClusterClient
 ): Promise<Index[]> => {
   if (!indicesList || !indicesList.length) {
     return [];
   }
 
-  const params = {
-    path: '/*/_ilm/explain',
-    method: 'GET',
-  };
-
-  const { indices: ilmIndicesData } = await callAsCurrentUser<{
-    indices: { [indexName: string]: IndexLifecyclePolicy };
-  }>('transport.request', params);
+  const {
+    body: { indices: ilmIndicesData },
+  } = await client.asCurrentUser.ilm.explainLifecycle({
+    index: '*',
+  });
 
   return indicesList.map((index: IndexWithoutIlm) => {
     return {

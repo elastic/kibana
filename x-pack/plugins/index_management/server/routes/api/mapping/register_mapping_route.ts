@@ -24,23 +24,21 @@ function formatHit(hit: { [key: string]: { mappings: any } }, indexName: string)
 export function registerMappingRoute({ router, lib }: RouteDependencies) {
   router.get(
     { path: addBasePath('/mapping/{indexName}'), validate: { params: paramsSchema } },
-    async (ctx, req, res) => {
-      const { indexName } = req.params as typeof paramsSchema.type;
+    async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
+      const { indexName } = request.params as typeof paramsSchema.type;
       const params = {
         expand_wildcards: 'none',
         index: indexName,
       };
 
       try {
-        const hit = await ctx.core.elasticsearch.legacy.client.callAsCurrentUser(
-          'indices.getMapping',
-          params
-        );
-        const response = formatHit(hit, indexName);
-        return res.ok({ body: response });
+        const { body: hit } = await client.asCurrentUser.indices.getMapping(params);
+        const responseBody = formatHit(hit, indexName);
+        return response.ok({ body: responseBody });
       } catch (e) {
         if (lib.isEsError(e)) {
-          return res.customError({
+          return response.customError({
             statusCode: e.statusCode,
             body: e,
           });

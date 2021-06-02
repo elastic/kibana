@@ -18,17 +18,15 @@ const httpService = httpServiceMock.createSetupContract();
 
 const mockedIndexDataEnricher = new IndexDataEnricher();
 
-const mockRouteContext = ({
-  callAsCurrentUser,
-}: {
-  callAsCurrentUser: any;
-}): RequestHandlerContext => {
+const mockRouteContext = ({ hasPrivileges }: { hasPrivileges: unknown }): RequestHandlerContext => {
   const routeContextMock = ({
     core: {
       elasticsearch: {
-        legacy: {
-          client: {
-            callAsCurrentUser,
+        client: {
+          asCurrentUser: {
+            security: {
+              hasPrivileges,
+            },
           },
         },
       },
@@ -62,15 +60,17 @@ describe('GET privileges', () => {
 
   it('should return the correct response when a user has privileges', async () => {
     const privilegesResponseMock = {
-      username: 'elastic',
-      has_all_requested: true,
-      cluster: { manage_index_templates: true },
-      index: {},
-      application: {},
+      body: {
+        username: 'elastic',
+        has_all_requested: true,
+        cluster: { manage_index_templates: true },
+        index: {},
+        application: {},
+      },
     };
 
     const routeContextMock = mockRouteContext({
-      callAsCurrentUser: jest.fn().mockResolvedValueOnce(privilegesResponseMock),
+      hasPrivileges: jest.fn().mockResolvedValueOnce(privilegesResponseMock),
     });
 
     const request = httpServerMock.createKibanaRequest();
@@ -86,15 +86,17 @@ describe('GET privileges', () => {
 
   it('should return the correct response when a user does not have privileges', async () => {
     const privilegesResponseMock = {
-      username: 'elastic',
-      has_all_requested: false,
-      cluster: { manage_index_templates: false },
-      index: {},
-      application: {},
+      body: {
+        username: 'elastic',
+        has_all_requested: false,
+        cluster: { manage_index_templates: false },
+        index: {},
+        application: {},
+      },
     };
 
     const routeContextMock = mockRouteContext({
-      callAsCurrentUser: jest.fn().mockResolvedValueOnce(privilegesResponseMock),
+      hasPrivileges: jest.fn().mockResolvedValueOnce(privilegesResponseMock),
     });
 
     const request = httpServerMock.createKibanaRequest();
@@ -130,7 +132,7 @@ describe('GET privileges', () => {
 
     it('should return the default privileges response', async () => {
       const routeContextMock = mockRouteContext({
-        callAsCurrentUser: jest.fn(),
+        hasPrivileges: jest.fn(),
       });
 
       const request = httpServerMock.createKibanaRequest();

@@ -6,8 +6,8 @@
  */
 
 import { CatIndicesParams } from 'elasticsearch';
+import { IScopedClusterClient } from 'kibana/server';
 import { IndexDataEnricher } from '../services';
-import { CallAsCurrentUser } from '../types';
 import { Index } from '../index';
 
 interface Hit {
@@ -35,45 +35,49 @@ interface IndexInfo {
 }
 
 interface GetIndicesResponse {
-  [indexName: string]: IndexInfo;
+  body: {
+    [indexName: string]: IndexInfo;
+  };
 }
 
 async function fetchIndicesCall(
-  callAsCurrentUser: CallAsCurrentUser,
+  client: IScopedClusterClient,
   indexNames?: string[]
 ): Promise<Index[]> {
   const indexNamesString = indexNames && indexNames.length ? indexNames.join(',') : '*';
 
   // This call retrieves alias and settings (incl. hidden status) information about indices
-  const indices: GetIndicesResponse = await callAsCurrentUser('transport.request', {
-    method: 'GET',
-    // transport.request doesn't do any URI encoding, unlike other JS client APIs. This enables
-    // working with Logstash indices with names like %{[@metadata][beat]}-%{[@metadata][version]}.
-    path: `/${encodeURIComponent(indexNamesString)}`,
-    query: {
-      expand_wildcards: 'hidden,all',
-    },
+  // const indices: GetIndicesResponse = await callAsCurrentUser('transport.request', {
+  //   method: 'GET',
+  //   // transport.request doesn't do any URI encoding, unlike other JS client APIs. This enables
+  //   // working with Logstash indices with names like %{[@metadata][beat]}-%{[@metadata][version]}.
+  //   path: `/${encodeURIComponent(indexNamesString)}`,
+  //   query: {
+  //     expand_wildcards: 'hidden,all',
+  //   },
+  // });
+
+  const { body: indices }: GetIndicesResponse = await client.asCurrentUser.indices.get({
+    index: encodeURIComponent(indexNamesString),
+    expand_wildcards: 'hidden,all',
   });
 
   if (!Object.keys(indices).length) {
     return [];
   }
 
-  const catQuery: Pick<CatIndicesParams, 'format' | 'h'> & {
-    expand_wildcards: string;
-    index?: string;
-  } = {
+  // This call retrieves health and other high-level information about indices.
+  // const catHits: Hit[] = await callAsCurrentUser('transport.request', {
+  //   method: 'GET',
+  //   path: '/_cat/indices',
+  //   query: catQuery,
+  // });
+
+  const { body: catHits }: Hit[] = await client.asCurrentUser.cat.indices({
     format: 'json',
     h: 'health,status,index,uuid,pri,rep,docs.count,sth,store.size',
     expand_wildcards: 'hidden,all',
     index: indexNamesString,
-  };
-
-  // This call retrieves health and other high-level information about indices.
-  const catHits: Hit[] = await callAsCurrentUser('transport.request', {
-    method: 'GET',
-    path: '/_cat/indices',
-    query: catQuery,
   });
 
   // System indices may show up in _cat APIs, as these APIs are primarily used for troubleshooting
@@ -106,10 +110,10 @@ async function fetchIndicesCall(
 }
 
 export const fetchIndices = async (
-  callAsCurrentUser: CallAsCurrentUser,
+  client: IScopedClusterClient,
   indexDataEnricher: IndexDataEnricher,
   indexNames?: string[]
 ) => {
-  const indices = await fetchIndicesCall(callAsCurrentUser, indexNames);
-  return await indexDataEnricher.enrichIndices(indices, callAsCurrentUser);
+  const indices = await fetchIndicesCall(client, indexNames);
+  return await indexDataEnricher.enrichIndices(indices, client);
 };

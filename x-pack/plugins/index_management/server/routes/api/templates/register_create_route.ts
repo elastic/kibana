@@ -18,22 +18,22 @@ const bodySchema = templateSchema;
 export function registerCreateRoute({ router, lib }: RouteDependencies) {
   router.post(
     { path: addBasePath('/index_templates'), validate: { body: bodySchema } },
-    async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.dataManagement!.client;
-      const template = req.body as TemplateDeserialized;
+    async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
+      const template = request.body as TemplateDeserialized;
       const {
         _kbnMeta: { isLegacy },
       } = template;
 
       // Check that template with the same name doesn't already exist
-      const templateExists = await doesTemplateExist({
+      const { body: templateExists } = await doesTemplateExist({
         name: template.name,
-        callAsCurrentUser,
+        client,
         isLegacy,
       });
 
       if (templateExists) {
-        return res.conflict({
+        return response.conflict({
           body: new Error(
             i18n.translate('xpack.idxMgmt.createRoute.duplicateTemplateIdErrorMessage', {
               defaultMessage: "There is already a template with name '{name}'.",
@@ -47,13 +47,13 @@ export function registerCreateRoute({ router, lib }: RouteDependencies) {
 
       try {
         // Otherwise create new index template
-        const response = await saveTemplate({ template, callAsCurrentUser, isLegacy });
+        const { body: responseBody } = await saveTemplate({ template, client, isLegacy });
 
-        return res.ok({ body: response });
+        return response.ok({ body: responseBody });
       } catch (e) {
         if (lib.isEsError(e)) {
           const error = lib.parseEsError(e.response);
-          return res.customError({
+          return response.customError({
             statusCode: e.statusCode,
             body: {
               message: error.message,

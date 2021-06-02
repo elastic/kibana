@@ -10,7 +10,7 @@ import { PluginInitializerContext } from 'src/core/server';
 import { IndexMgmtServerPlugin } from './plugin';
 import { configSchema } from './config';
 
-export const plugin = (ctx: PluginInitializerContext) => new IndexMgmtServerPlugin(ctx);
+export const plugin = (context: PluginInitializerContext) => new IndexMgmtServerPlugin(context);
 
 export const config = {
   schema: configSchema,

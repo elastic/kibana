@@ -17,24 +17,18 @@ const bodySchema = schema.object({
 export function registerFreezeRoute({ router, lib }: RouteDependencies) {
   router.post(
     { path: addBasePath('/indices/freeze'), validate: { body: bodySchema } },
-    async (ctx, req, res) => {
-      const body = req.body as typeof bodySchema.type;
-      const { indices = [] } = body;
-
-      const params = {
-        path: `/${encodeURIComponent(indices.join(','))}/_freeze`,
-        method: 'POST',
-      };
+    async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
+      const { indices = [] } = request.body as typeof bodySchema.type;
 
       try {
-        await await ctx.core.elasticsearch.legacy.client.callAsCurrentUser(
-          'transport.request',
-          params
-        );
-        return res.ok();
+        await client.asCurrentUser.indices.freeze({
+          index: encodeURIComponent(indices.join(',')),
+        });
+        return response.ok();
       } catch (e) {
         if (lib.isEsError(e)) {
-          return res.customError({
+          return response.customError({
             statusCode: e.statusCode,
             body: e,
           });

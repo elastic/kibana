@@ -5,16 +5,20 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from 'kibana/server';
+
 // Cloud has its own system for managing templates and we want to make
 // this clear in the UI when a template is used in a Cloud deployment.
 export const getCloudManagedTemplatePrefix = async (
-  callAsCurrentUser: any
+  client: ElasticsearchClient
 ): Promise<string | undefined> => {
   try {
-    const { persistent, transient, defaults } = await callAsCurrentUser('cluster.getSettings', {
-      filterPath: '*.*managed_index_templates',
-      flatSettings: true,
-      includeDefaults: true,
+    const {
+      body: { persistent, transient, defaults },
+    } = await client.asCurrentUser.cluster.getSettings({
+      filter_path: '*.*managed_index_templates',
+      flat_settings: true,
+      include_defaults: true,
     });
 
     const { 'cluster.metadata.managed_index_templates': managedTemplatesPrefix = undefined } = {

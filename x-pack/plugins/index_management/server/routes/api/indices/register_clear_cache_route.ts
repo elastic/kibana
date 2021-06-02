@@ -17,22 +17,22 @@ const bodySchema = schema.object({
 export function registerClearCacheRoute({ router, lib }: RouteDependencies) {
   router.post(
     { path: addBasePath('/indices/clear_cache'), validate: { body: bodySchema } },
-    async (ctx, req, res) => {
-      const payload = req.body as typeof bodySchema.type;
-      const { indices = [] } = payload;
+    async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
+      const { indices = [] } = request.body as typeof bodySchema.type;
 
       const params = {
-        expandWildcards: 'none',
+        expand_wildcards: 'none',
         format: 'json',
         index: indices,
       };
 
       try {
-        await ctx.core.elasticsearch.legacy.client.callAsCurrentUser('indices.clearCache', params);
-        return res.ok();
+        await client.asCurrentUser.indices.clearCache(params);
+        return response.ok();
       } catch (e) {
         if (lib.isEsError(e)) {
-          return res.customError({
+          return response.customError({
             statusCode: e.statusCode,
             body: e,
           });

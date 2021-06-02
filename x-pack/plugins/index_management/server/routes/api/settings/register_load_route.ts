@@ -24,25 +24,23 @@ function formatHit(hit: { [key: string]: {} }) {
 export function registerLoadRoute({ router, lib }: RouteDependencies) {
   router.get(
     { path: addBasePath('/settings/{indexName}'), validate: { params: paramsSchema } },
-    async (ctx, req, res) => {
-      const { indexName } = req.params as typeof paramsSchema.type;
+    async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
+      const { indexName } = request.params as typeof paramsSchema.type;
       const params = {
-        expandWildcards: 'none',
-        flatSettings: false,
+        expand_wildcards: 'none',
+        flat_settings: false,
         local: false,
-        includeDefaults: true,
+        include_defaults: true,
         index: indexName,
       };
 
       try {
-        const hit = await ctx.core.elasticsearch.legacy.client.callAsCurrentUser(
-          'indices.getSettings',
-          params
-        );
-        return res.ok({ body: formatHit(hit) });
+        const { body: hit } = await client.asCurrentUser.indices.getSettings(params);
+        return response.ok({ body: formatHit(hit) });
       } catch (e) {
         if (lib.isEsError(e)) {
-          return res.customError({
+          return response.customError({
             statusCode: e.statusCode,
             body: e,
           });

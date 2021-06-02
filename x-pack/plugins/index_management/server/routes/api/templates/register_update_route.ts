@@ -24,30 +24,30 @@ export function registerUpdateRoute({ router, lib }: RouteDependencies) {
       path: addBasePath('/index_templates/{name}'),
       validate: { body: bodySchema, params: paramsSchema },
     },
-    async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.dataManagement!.client;
-      const { name } = req.params as typeof paramsSchema.type;
-      const template = req.body as TemplateDeserialized;
+    async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
+      const { name } = request.params as typeof paramsSchema.type;
+      const template = request.body as TemplateDeserialized;
       const {
         _kbnMeta: { isLegacy },
       } = template;
 
       // Verify the template exists (ES will throw 404 if not)
-      const doesExist = await doesTemplateExist({ name, callAsCurrentUser, isLegacy });
+      const { body: templateExists } = await doesTemplateExist({ name, client, isLegacy });
 
-      if (!doesExist) {
-        return res.notFound();
+      if (!templateExists) {
+        return response.notFound();
       }
 
       try {
         // Next, update index template
-        const response = await saveTemplate({ template, callAsCurrentUser, isLegacy });
+        const { body: responseBody } = await saveTemplate({ template, client, isLegacy });
 
-        return res.ok({ body: response });
+        return response.ok({ body: responseBody });
       } catch (e) {
         if (lib.isEsError(e)) {
           const error = lib.parseEsError(e.response);
-          return res.customError({
+          return response.customError({
             statusCode: e.statusCode,
             body: {
               message: error.message,

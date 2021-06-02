@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { IndicesStatsResponse } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
@@ -14,7 +15,7 @@ const paramsSchema = schema.object({
   indexName: schema.string(),
 });
 
-function formatHit(hit: { _shards: any; indices: { [key: string]: any } }, indexName: string) {
+function formatHit(hit: IndicesStatsResponse, indexName: string) {
   const { _shards, indices } = hit;
   const stats = indices[indexName];
   return {
@@ -26,22 +27,20 @@ function formatHit(hit: { _shards: any; indices: { [key: string]: any } }, index
 export function registerStatsRoute({ router, lib }: RouteDependencies) {
   router.get(
     { path: addBasePath('/stats/{indexName}'), validate: { params: paramsSchema } },
-    async (ctx, req, res) => {
-      const { indexName } = req.params as typeof paramsSchema.type;
+    async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
+      const { indexName } = request.params as typeof paramsSchema.type;
       const params = {
         expand_wildcards: 'none',
         index: indexName,
       };
 
       try {
-        const hit = await ctx.core.elasticsearch.legacy.client.callAsCurrentUser(
-          'indices.stats',
-          params
-        );
-        return res.ok({ body: formatHit(hit, indexName) });
+        const { body: hit } = await client.asCurrentUser.indices.stats(params);
+        return response.ok({ body: formatHit(hit, indexName) });
       } catch (e) {
         if (lib.isEsError(e)) {
-          return res.customError({
+          return response.customError({
             statusCode: e.statusCode,
             body: e,
           });

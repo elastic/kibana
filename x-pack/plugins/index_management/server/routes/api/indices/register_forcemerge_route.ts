@@ -23,10 +23,11 @@ export function registerForcemergeRoute({ router, lib }: RouteDependencies) {
         body: bodySchema,
       },
     },
-    async (ctx, req, res) => {
-      const { maxNumSegments, indices = [] } = req.body as typeof bodySchema.type;
+    async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
+      const { maxNumSegments, indices = [] } = request.body as typeof bodySchema.type;
       const params = {
-        expandWildcards: 'none',
+        expand_wildcards: 'none',
         index: indices,
       };
 
@@ -35,11 +36,11 @@ export function registerForcemergeRoute({ router, lib }: RouteDependencies) {
       }
 
       try {
-        await ctx.core.elasticsearch.legacy.client.callAsCurrentUser('indices.forcemerge', params);
-        return res.ok();
+        await client.asCurrentUser.indices.forcemerge(params);
+        return response.ok();
       } catch (e) {
         if (lib.isEsError(e)) {
-          return res.customError({
+          return response.customError({
             statusCode: e.statusCode,
             body: e,
           });

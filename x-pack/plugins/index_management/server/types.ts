@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import type {
-  LegacyScopedClusterClient,
-  ILegacyScopedClusterClient,
-  IRouter,
-  RequestHandlerContext,
-} from 'src/core/server';
+import { IRouter } from 'src/core/server';
+
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { SecurityPluginSetup } from '../../security/server';
@@ -24,7 +20,7 @@ export interface Dependencies {
 }
 
 export interface RouteDependencies {
-  router: IndexManagementRouter;
+  router: IRouter;
   config: {
     isSecurityEnabled: () => boolean;
   };
@@ -35,28 +31,3 @@ export interface RouteDependencies {
     handleEsError: typeof handleEsError;
   };
 }
-
-export type CallAsCurrentUser = LegacyScopedClusterClient['callAsCurrentUser'];
-
-export interface DataManagementContext {
-  client: ILegacyScopedClusterClient;
-}
-
-/**
- * @internal
- */
-export interface IndexManagementApiRequestHandlerContext {
-  client: ILegacyScopedClusterClient;
-}
-
-/**
- * @internal
- */
-export interface IndexManagementRequestHandlerContext extends RequestHandlerContext {
-  dataManagement: IndexManagementApiRequestHandlerContext;
-}
-
-/**
- * @internal
- */
-export type IndexManagementRouter = IRouter<IndexManagementRequestHandlerContext>;

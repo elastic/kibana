@@ -14,7 +14,7 @@ const paramsSchema = schema.object({
   names: schema.string(),
 });
 
-export const registerDeleteRoute = ({ router }: RouteDependencies): void => {
+export const registerDeleteRoute = ({ router, lib: { handleEsError } }: RouteDependencies): void => {
   router.delete(
     {
       path: addBasePath('/component_templates/{names}'),
@@ -22,32 +22,32 @@ export const registerDeleteRoute = ({ router }: RouteDependencies): void => {
         params: paramsSchema,
       },
     },
-    async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.dataManagement!.client;
-      const { names } = req.params;
+    async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
+      const { names } = request.params;
       const componentNames = names.split(',');
 
-      const response: { itemsDeleted: string[]; errors: any[] } = {
+      const responseBody: { itemsDeleted: string[]; errors: any[] } = {
         itemsDeleted: [],
         errors: [],
       };
 
       await Promise.all(
         componentNames.map((componentName) => {
-          return callAsCurrentUser('dataManagement.deleteComponentTemplate', {
+          return client.asCurrentUser.cluster.deleteComponentTemplate({
             name: componentName,
           })
-            .then(() => response.itemsDeleted.push(componentName))
-            .catch((e) =>
-              response.errors.push({
+            .then(() => responseBody.itemsDeleted.push(componentName))
+            .catch((error) =>
+            responseBody.errors.push({
                 name: componentName,
-                error: e,
+                error: handleEsError({ error, response }),
               })
             );
         })
       );
 
-      return res.ok({ body: response });
+      return response.ok({ body: responseBody });
     }
   );
 };

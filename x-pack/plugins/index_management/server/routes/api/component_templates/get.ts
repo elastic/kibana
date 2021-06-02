@@ -19,25 +19,24 @@ const paramsSchema = schema.object({
   name: schema.string(),
 });
 
-export function registerGetAllRoute({ router, lib: { isEsError } }: RouteDependencies) {
+export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   // Get all component templates
   router.get(
     { path: addBasePath('/component_templates'), validate: false },
-    async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.dataManagement!.client;
+    async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
 
       try {
         const {
-          component_templates: componentTemplates,
-        }: { component_templates: ComponentTemplateFromEs[] } = await callAsCurrentUser(
-          'dataManagement.getComponentTemplates'
-        );
+          body: {
+            component_templates: componentTemplates,
+          },
+        } = await client.asCurrentUser.cluster.getComponentTemplate();
 
-        const { index_templates: indexTemplates } = await callAsCurrentUser(
-          'dataManagement.getComposableIndexTemplates'
-        );
 
-        const body = componentTemplates.map((componentTemplate) => {
+        const { body: { index_templates: indexTemplates } } = await client.asCurrentUser.indices.getIndexTemplate();
+
+        const body = componentTemplates.map((componentTemplate: ComponentTemplateFromEs) => {
           const deserializedComponentTemplateListItem = deserializeComponentTemplateList(
             componentTemplate,
             indexTemplates
@@ -45,16 +44,9 @@ export function registerGetAllRoute({ router, lib: { isEsError } }: RouteDepende
           return deserializedComponentTemplateListItem;
         });
 
-        return res.ok({ body });
+        return response.ok({ body });
       } catch (error) {
-        if (isEsError(error)) {
-          return res.customError({
-            statusCode: error.statusCode,
-            body: error,
-          });
-        }
-
-        throw error;
+        return handleEsError({ error, response });;
       }
     }
   );
@@ -67,34 +59,22 @@ export function registerGetAllRoute({ router, lib: { isEsError } }: RouteDepende
         params: paramsSchema,
       },
     },
-    async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.dataManagement!.client;
-      const { name } = req.params;
+    async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
+      const { name } = request.params;
 
       try {
-        const { component_templates: componentTemplates } = await callAsCurrentUser(
-          'dataManagement.getComponentTemplates',
-          {
-            name,
-          }
-        );
+        const { body: { component_templates: componentTemplates } } = await client.asCurrentUser.cluster.getComponentTemplate({
+          name,
+        });
 
-        const { index_templates: indexTemplates } = await callAsCurrentUser(
-          'dataManagement.getComposableIndexTemplates'
-        );
+        const { body: { index_templates: indexTemplates } } = await client.asCurrentUser.indices.getIndexTemplate();
 
-        return res.ok({
+        return response.ok({
           body: deserializeComponentTemplate(componentTemplates[0], indexTemplates),
         });
       } catch (error) {
-        if (isEsError(error)) {
-          return res.customError({
-            statusCode: error.statusCode,
-            body: error,
-          });
-        }
-
-        throw error;
+        return handleEsError({ error, response });;
       }
     }
   );

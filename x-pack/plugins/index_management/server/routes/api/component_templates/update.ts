@@ -15,7 +15,7 @@ const paramsSchema = schema.object({
   name: schema.string(),
 });
 
-export const registerUpdateRoute = ({ router, lib: { isEsError } }: RouteDependencies): void => {
+export const registerUpdateRoute = ({ router, lib: { handleEsError } }: RouteDependencies): void => {
   router.put(
     {
       path: addBasePath('/component_templates/{name}'),
@@ -24,16 +24,16 @@ export const registerUpdateRoute = ({ router, lib: { isEsError } }: RouteDepende
         params: paramsSchema,
       },
     },
-    async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.dataManagement!.client;
-      const { name } = req.params;
-      const { template, version, _meta } = req.body;
+    async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
+      const { name } = request.params;
+      const { template, version, _meta } = request.body;
 
       try {
         // Verify component exists; ES will throw 404 if not
-        await callAsCurrentUser('dataManagement.getComponentTemplate', { name });
+        await client.asCurrentUser.cluster.getComponentTemplate({ name });
 
-        const response = await callAsCurrentUser('dataManagement.saveComponentTemplate', {
+        const { body: responseBody } = await client.asCurrentUser.cluster.putComponentTemplate({
           name,
           body: {
             template,
@@ -42,16 +42,9 @@ export const registerUpdateRoute = ({ router, lib: { isEsError } }: RouteDepende
           },
         });
 
-        return res.ok({ body: response });
+        return response.ok({ body: responseBody });
       } catch (error) {
-        if (isEsError(error)) {
-          return res.customError({
-            statusCode: error.statusCode,
-            body: error,
-          });
-        }
-
-        throw error;
+        return handleEsError({ error, response });
       }
     }
   );

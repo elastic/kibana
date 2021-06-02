@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { CallAsCurrentUser } from '../types';
+import type { ElasticsearchClient } from 'kibana/server';
 import { Index } from '../index';
 
-export type Enricher = (indices: Index[], callAsCurrentUser: CallAsCurrentUser) => Promise<Index[]>;
+export type Enricher = (indices: Index[], client: ElasticsearchClient) => Promise<Index[]>;
 
 export class IndexDataEnricher {
   private readonly _enrichers: Enricher[] = [];
@@ -19,14 +19,14 @@ export class IndexDataEnricher {
 
   public enrichIndices = async (
     indices: Index[],
-    callAsCurrentUser: CallAsCurrentUser
+    client: ElasticsearchClient
   ): Promise<Index[]> => {
     let enrichedIndices = indices;
 
     for (let i = 0; i < this.enrichers.length; i++) {
       const dataEnricher = this.enrichers[i];
       try {
-        const dataEnricherResponse = await dataEnricher(enrichedIndices, callAsCurrentUser);
+        const dataEnricherResponse = await dataEnricher(enrichedIndices, client);
         enrichedIndices = dataEnricherResponse;
       } catch (e) {
         // silently swallow enricher response errors

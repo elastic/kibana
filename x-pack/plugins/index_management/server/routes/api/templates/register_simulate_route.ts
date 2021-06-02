@@ -18,20 +18,20 @@ export function registerSimulateRoute({ router, lib }: RouteDependencies) {
       path: addBasePath('/index_templates/simulate'),
       validate: { body: bodySchema },
     },
-    async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.dataManagement!.client;
-      const template = req.body as TypeOf<typeof bodySchema>;
+    async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
+      const template = request.body as TypeOf<typeof bodySchema>;
 
       try {
-        const templatePreview = await callAsCurrentUser('dataManagement.simulateTemplate', {
+        const { body: templatePreview } = await client.asCurrentUser.indices.simulateIndexTemplate({
           body: template,
         });
 
-        return res.ok({ body: templatePreview });
+        return response.ok({ body: templatePreview });
       } catch (e) {
         if (lib.isEsError(e)) {
           const error = lib.parseEsError(e.response);
-          return res.customError({
+          return response.customError({
             statusCode: e.statusCode,
             body: {
               message: error.message,
