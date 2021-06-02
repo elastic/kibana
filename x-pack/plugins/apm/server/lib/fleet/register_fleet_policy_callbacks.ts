@@ -100,25 +100,31 @@ function registerAgentConfigExternalCallback({
   fleetPluginStart.registerExternalCallback(callbackName, callbackFn);
 }
 
+const APM_SERVER = 'apm-server';
+
 // Immutable function applies the given package policy with a set of agent configurations
 export function getPackagePolicyWithAgentConfigurations(
   packagePolicy: PackagePolicy,
   agentConfigurations: AgentConfiguration[]
 ) {
   const [firstInput, ...restInputs] = packagePolicy.inputs;
+  const apmServer = firstInput?.config?.[APM_SERVER];
   return {
     ...packagePolicy,
     inputs: [
       {
         ...firstInput,
         config: {
-          agent_config: {
-            value: agentConfigurations.map((configuration) => ({
-              service: configuration.service,
-              config: configuration.settings,
-              etag: configuration.etag,
-              [AGENT_NAME]: configuration.agent_name,
-            })),
+          [APM_SERVER]: {
+            ...apmServer,
+            agent_config: {
+              value: agentConfigurations.map((configuration) => ({
+                service: configuration.service,
+                config: configuration.settings,
+                etag: configuration.etag,
+                [AGENT_NAME]: configuration.agent_name,
+              })),
+            },
           },
         },
       },
