@@ -9,7 +9,7 @@ import d3 from 'd3';
 import { useCallback } from 'react';
 import { DraggableId, FluidDragActions, Position, SensorAPI } from 'react-beautiful-dnd';
 
-import { IS_DRAGGING_CLASS_NAME } from '../components/drag_and_drop/helpers';
+import { IS_DRAGGING_CLASS_NAME } from '../components/drag_and_drop/drag_classnames';
 import { HIGHLIGHTED_DROP_TARGET_CLASS_NAME } from '../../timelines/components/timeline/data_providers/empty';
 import { EMPTY_PROVIDERS_GROUP_CLASS_NAME } from '../../timelines/components/timeline/data_providers/providers';
 

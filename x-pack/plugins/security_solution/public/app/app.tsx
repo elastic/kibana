@@ -26,6 +26,7 @@ import { StartServices } from '../types';
 import { PageRouter } from './routes';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 import { UserPrivilegesProvider } from '../detections/components/user_privileges';
+import { AppMountProvider } from './app_mount_context';
 
 interface StartAppComponent {
   children: React.ReactNode;
@@ -44,6 +45,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
 }) => {
   const { i18n } = useKibana().services;
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
+  const appMountParams = { onAppLeave, setHeaderActionMenu };
 
   return (
     <EuiErrorBoundary>
@@ -55,13 +57,9 @@ const StartAppComponent: FC<StartAppComponent> = ({
                 <MlCapabilitiesProvider>
                   <UserPrivilegesProvider>
                     <ManageUserInfo>
-                      <PageRouter
-                        history={history}
-                        onAppLeave={onAppLeave}
-                        setHeaderActionMenu={setHeaderActionMenu}
-                      >
-                        {children}
-                      </PageRouter>
+                      <AppMountProvider appMountParams={appMountParams}>
+                        <PageRouter history={history}>{children}</PageRouter>
+                      </AppMountProvider>
                     </ManageUserInfo>
                   </UserPrivilegesProvider>
                 </MlCapabilitiesProvider>

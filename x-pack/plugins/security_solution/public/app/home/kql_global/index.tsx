@@ -18,10 +18,9 @@ const Wrapper = styled.header<{ $isFixed: boolean }>`
     ${
       $isFixed
         ? `
-          left: 240px;
           position: fixed;
           right: 0;
-          width: calc(100% - 240px);
+          width: 100%;
         `
         : ''
     }
