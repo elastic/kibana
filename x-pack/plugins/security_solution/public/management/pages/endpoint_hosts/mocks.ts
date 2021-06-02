@@ -96,9 +96,15 @@ export const fleetApisHttpMock = httpHandlerMockFactory<FleetApisHttpMockInterfa
     method: 'get',
     handler: () => {
       const generator = new EndpointDocGenerator('seed');
+      const endpointMetadata = generator.generateHostMetadata();
+      const agentPolicy = generator.generateAgentPolicy();
+
+      // Make sure that the Agent policy returned from the API has the Integration Policy ID
+      // that the endpoint metadata is using.
+      (agentPolicy.package_policies as string[]).push(endpointMetadata.Endpoint.policy.applied.id);
 
       return {
-        items: [generator.generateAgentPolicy()],
+        items: [agentPolicy],
         perPage: 10,
         total: 1,
         page: 1,

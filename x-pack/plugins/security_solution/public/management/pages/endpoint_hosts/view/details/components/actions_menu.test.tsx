@@ -20,21 +20,31 @@ jest.mock('../../../../../../common/lib/kibana');
 
 describe('When using the Endpoint Details Actions Menu', () => {
   let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
+  let coreStart: AppContextTestRender['coreStart'];
   let waitForAction: AppContextTestRender['middlewareSpy']['waitForAction'];
-  let history: AppContextTestRender['history'];
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let httpMocks: ReturnType<typeof endpointPageHttpMock>;
+
+  const setEndpointMetadataResponse = (isolation: boolean = false) => {
+    const endpointHost = httpMocks.responseProvider.metadataDetails();
+    // Safe to mutate this mocked data
+    // @ts-ignore
+    endpointHost.metadata.Endpoint.state.isolation = isolation;
+    httpMocks.responseProvider.metadataDetails.mockReturnValue(endpointHost);
+  };
 
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
 
     (useKibana as jest.Mock).mockReturnValue({ services: mockedContext.startServices });
-    ({ history } = mockedContext);
+    coreStart = mockedContext.coreStart;
     waitForAction = mockedContext.middlewareSpy.waitForAction;
     httpMocks = endpointPageHttpMock(mockedContext.coreStart.http);
 
     act(() => {
-      history.push('/endpoints?selected_endpoint=5fe11314-678c-413e-87a2-b4a3461878ee');
+      mockedContext.history.push(
+        '/endpoints?selected_endpoint=5fe11314-678c-413e-87a2-b4a3461878ee'
+      );
     });
 
     render = async () => {
@@ -53,32 +63,51 @@ describe('When using the Endpoint Details Actions Menu', () => {
   });
 
   describe('and endpoint host is NOT isolated', () => {
-    beforeEach(() => {
-      const endpointHost = httpMocks.responseProvider.metadataDetails();
-      // Safe to mutate this mocked data
-      // @ts-ignore
-      endpointHost.metadata.Endpoint.state.isolation = false;
-      httpMocks.responseProvider.metadataDetails.mockReturnValue(endpointHost);
-    });
+    beforeEach(() => setEndpointMetadataResponse());
 
     it.each([
-      ['isolateLink', 'Isolate host'],
-      ['hostLink', 'View host details'],
-      ['agentPolicyLink', 'View agent policy'],
-      ['agentDetailsLink', 'View agent details'],
-    ])('should display %s actions', async (dataTestSubj) => {
+      ['Isolate host', 'isolateLink'],
+      ['View host details', 'hostLink'],
+      ['View agent policy', 'agentPolicyLink'],
+      ['View agent details', 'agentDetailsLink'],
+    ])('should display %s action', async (_, dataTestSubj) => {
       await render();
       expect(renderResult.getByTestId(dataTestSubj)).not.toBeNull();
     });
 
-    it('should navigate via router', () => {
-      //
-    });
+    it.each([
+      ['Isolate host', 'isolateLink'],
+      ['View host details', 'hostLink'],
+      ['View agent policy', 'agentPolicyLink'],
+      ['View agent details', 'agentDetailsLink'],
+    ])(
+      'should navigate via kibana `navigateToApp()` when %s is clicked',
+      async (_, dataTestSubj) => {
+        await render();
+        act(() => {
+          fireEvent.click(renderResult.getByTestId(dataTestSubj));
+        });
+
+        expect(coreStart.application.navigateToApp).toHaveBeenCalled();
+      }
+    );
   });
 
   describe('and endpoint host is isolated', () => {
-    it.todo('should display Unisolate action');
+    beforeEach(() => setEndpointMetadataResponse(true));
 
-    it.todo('should navigate via router when unisolate is clicked');
+    it('should display Unisolate action', async () => {
+      await render();
+      expect(renderResult.getByTestId('unIsolateLink')).not.toBeNull();
+    });
+
+    it('should navigate via router when unisolate is clicked', async () => {
+      await render();
+      act(() => {
+        fireEvent.click(renderResult.getByTestId('unIsolateLink'));
+      });
+
+      expect(coreStart.application.navigateToApp).toHaveBeenCalled();
+    });
   });
 });
