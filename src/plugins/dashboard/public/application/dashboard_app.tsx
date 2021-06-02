@@ -35,7 +35,6 @@ export function DashboardApp({
   history,
 }: DashboardAppProps) {
   const {
-    data,
     core,
     chrome,
     embeddable,
@@ -61,13 +60,6 @@ export function DashboardApp({
     kbnUrlStateStorage,
     isEmbeddedExternally: Boolean(embedSettings),
   });
-
-  // Clear search session when leaving dashboard route
-  useEffect(() => {
-    return () => {
-      data.search.session.clear();
-    };
-  }, [data.search.session]);
 
   // Build app leave handler whenever hasUnsavedChanges changes
   useEffect(() => {

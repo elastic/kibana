@@ -79,14 +79,21 @@ export const buildDashboardContainer = async ({
     throw new EmbeddableFactoryNotFoundError('dashboard app requires dashboard embeddable factory');
   }
 
+  /**
+   * Use an existing session instead of starting a new one if there is a session already, and dashboard is being created with an incoming
+   * embeddable.
+   */
+  const existingSession = session.getSessionId();
+  const searchSessionId = searchSessionIdFromURL ?? (existingSession && incomingEmbeddable ? existingSession : session.start());
+
   // Build the initial input for the dashboard container based on the dashboard state.
   const initialInput = stateToDashboardContainerInput({
-    searchSessionId: searchSessionIdFromURL ?? session.start(),
     isEmbeddedExternally: Boolean(isEmbeddedExternally),
     dashboardState: initialDashboardState,
     dashboardCapabilities,
     incomingEmbeddable,
     query: data.query,
+    searchSessionId,
     savedDashboard,
   });
 
