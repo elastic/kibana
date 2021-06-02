@@ -37,7 +37,7 @@ kibanaPipeline(timeoutMinutes: 210) {
                   tasks([
                     kibanaPipeline.functionalTestProcess('oss-baseline', './test/scripts/jenkins_baseline.sh'),
                     kibanaPipeline.functionalTestProcess('xpack-baseline', './test/scripts/jenkins_xpack_baseline.sh'),
-                    kibanaPipeline.scriptTask('Check Public API Docs', 'test/scripts/checks/plugin_public_api_docs.sh'),
+                    kibanaPipeline.scriptTask('Check Public API Docs', 'test/scripts/checks/baseline_plugin_public_api_docs.sh'),
                   ])
                 }
               }

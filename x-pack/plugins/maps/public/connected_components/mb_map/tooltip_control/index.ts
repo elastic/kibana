@@ -20,6 +20,7 @@ import {
   getLayerList,
   getOpenTooltips,
   getHasLockedTooltips,
+  getGeoFieldNames,
   isDrawingFilter,
 } from '../../../selectors/map_selectors';
 import { MapStoreState } from '../../../reducers/store';
@@ -30,6 +31,7 @@ function mapStateToProps(state: MapStoreState) {
     hasLockedTooltips: getHasLockedTooltips(state),
     isDrawingFilter: isDrawingFilter(state),
     openTooltips: getOpenTooltips(state),
+    geoFieldNames: getGeoFieldNames(state),
   };
 }
 

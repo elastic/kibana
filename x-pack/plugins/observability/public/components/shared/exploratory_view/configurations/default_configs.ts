@@ -17,6 +17,7 @@ import { getMemoryUsageLensConfig } from './metrics/memory_usage_config';
 import { getNetworkActivityLensConfig } from './metrics/network_activity_config';
 import { getLogsFrequencyLensConfig } from './logs/logs_frequency_config';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
+import { getCoreWebVitalsConfig } from './rum/core_web_vitals_config';
 
 interface Props {
   reportType: keyof typeof ReportViewTypes;
@@ -30,6 +31,8 @@ export const getDefaultConfigs = ({ reportType, seriesId, indexPattern }: Props)
       return getPerformanceDistLensConfig({ seriesId, indexPattern });
     case 'kpi-trends':
       return getKPITrendsLensConfig({ seriesId, indexPattern });
+    case 'core-web-vitals':
+      return getCoreWebVitalsConfig({ seriesId, indexPattern });
     case 'uptime-duration':
       return getMonitorDurationConfig({ seriesId, indexPattern });
     case 'uptime-pings':
