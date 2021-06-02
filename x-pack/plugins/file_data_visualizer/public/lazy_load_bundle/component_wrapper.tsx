@@ -7,7 +7,9 @@
 
 import React, { FC } from 'react';
 
-const FileDataVisualizerComponent = React.lazy(() => import('../application/file_datavisualizer'));
+const FileDataVisualizerComponent = React.lazy(
+  () => import('../application/file_data_visualizer/file_data_visualizer')
+);
 
 export const FileDataVisualizerWrapper: FC = () => {
   return (
