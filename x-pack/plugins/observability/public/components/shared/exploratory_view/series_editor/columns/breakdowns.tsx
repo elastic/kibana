@@ -8,11 +8,9 @@
 import React from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FieldLabels } from '../../configurations/constants';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { USE_BREAK_DOWN_COLUMN } from '../../configurations/constants';
 import { DataSeries } from '../../types';
-import { useSeriesStorage } from '../../hooks/use_series_storage';
 
 interface Props {
   seriesId: string;
