@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { I18nStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
@@ -16,19 +16,25 @@ import { getServices } from '../../../kibana_services';
 import './open_options_popover.scss';
 import { DOC_TABLE_LEGACY } from '../../../../common';
 
-let isOpen = false;
-
 interface OptionsPopoverProps {
   onClose: () => void;
   anchorElement: HTMLElement;
 }
 
-export function OptionsPopover(props: OptionsPopoverProps) {
+export function OptionsPopover({ onClose, anchorElement }: OptionsPopoverProps) {
   const {
     core: { uiSettings },
     addBasePath,
   } = getServices();
   const isLegacy = uiSettings.get(DOC_TABLE_LEGACY);
+  const renderCount = useRef(0);
+  useEffect(() => {
+    renderCount.current++;
+    if (renderCount.current === 2) {
+      // Close the popover when the triggering link is clicked a second time
+      onClose();
+    }
+  }, [onClose]);
 
   const mode = isLegacy
     ? i18n.translate('discover.openOptionsPopover.legacyTableText', {
@@ -39,7 +45,7 @@ export function OptionsPopover(props: OptionsPopoverProps) {
       });
 
   return (
-    <EuiWrappingPopover ownFocus button={props.anchorElement} closePopover={props.onClose} isOpen>
+    <EuiWrappingPopover ownFocus button={anchorElement} closePopover={onClose} isOpen={true}>
       <div className="dscOptionsPopover">
         <EuiText color="subdued" size="s">
           <p>
@@ -82,6 +88,18 @@ export function OptionsPopover(props: OptionsPopoverProps) {
   );
 }
 
+export function getContainer() {
+  const id = 'dscOptionsPopoverContainer';
+  const container = document.getElementById(id);
+  if (container) {
+    return container;
+  }
+  const newContainer = document.createElement('div');
+  newContainer.id = 'dscOptionsPopoverContainer';
+  document.body.appendChild(newContainer);
+  return newContainer;
+}
+
 export function openOptionsPopover({
   I18nContext,
   anchorElement,
@@ -89,19 +107,12 @@ export function openOptionsPopover({
   I18nContext: I18nStart['Context'];
   anchorElement: HTMLElement;
 }) {
-  if (isOpen) {
-    return;
-  }
+  const container = getContainer();
 
-  isOpen = true;
-  const container = document.createElement('div');
   const onClose = () => {
     ReactDOM.unmountComponentAtNode(container);
     document.body.removeChild(container);
-    isOpen = false;
   };
-
-  document.body.appendChild(container);
 
   const element = (
     <I18nContext>
