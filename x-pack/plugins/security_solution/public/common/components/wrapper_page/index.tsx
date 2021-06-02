@@ -25,12 +25,13 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { TimelineId } from '../../../../common/types/timeline';
 import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
-import { APP_ID, APP_NAME, DETECTIONS_SUB_PLUGIN_ID } from '../../../../common/constants';
+import { APP_ID, DETECTIONS_SUB_PLUGIN_ID } from '../../../../common/constants';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { navTabs } from '../../../app/home/home_navigations';
+import { useAppMountContext } from '../../../app/app_mount_context';
 
 const translatedNavTitle = i18n.translate('xpack.securitySolution.navigation.mainLabel', {
-  defaultMessage: APP_NAME,
+  defaultMessage: 'Security',
 });
 
 const ChildrenWrapper = styled(EuiPanel)<{
@@ -83,6 +84,7 @@ export const WrapperPage: React.FC<WrapperPageProps & CommonProps> = React.memo(
 
     const { application, overlays } = useKibana().services;
     const subPluginId = useRef<string>('');
+    const { onAppLeave } = useAppMountContext();
     const { ref, height = 0 } = useThrottledResizeObserver(300);
     const banners$ = overlays.banners.get$();
     const [headerFixed, setHeaderFixed] = useState<boolean>(true);
@@ -153,8 +155,7 @@ export const WrapperPage: React.FC<WrapperPageProps & CommonProps> = React.memo(
           shouldShowTimelineBottomBar && (
             <>
               <AutoSaveWarningMsg />
-              {/* TODO: Pass onAppLeave from context */}
-              <Flyout timelineId={TimelineId.active} onAppLeave={() => {}} />
+              <Flyout timelineId={TimelineId.active} onAppLeave={onAppLeave} />
             </>
           )
         }
@@ -180,6 +181,7 @@ export const WrapperPage: React.FC<WrapperPageProps & CommonProps> = React.memo(
           $withTimeline={!noTimeline}
           className="securityPageWrapper"
           data-test-subj="pageContainer"
+          {...otherProps}
         >
           {children}
           <AppGlobalStyle />

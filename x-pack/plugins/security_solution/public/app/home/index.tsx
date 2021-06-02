@@ -17,20 +17,15 @@ import { useKibana } from '../../common/lib/kibana';
 import { DETECTIONS_SUB_PLUGIN_ID } from '../../../common/constants';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useUpgradeEndpointPackage } from '../../common/hooks/endpoint/upgrade';
-import { AppLeaveHandler, AppMountParameters } from '../../../../../../src/core/public';
 import { HeaderGlobal } from './header_global';
+import { useAppMountContext } from '../app_mount_context';
 interface HomePageProps {
   children: React.ReactNode;
-  onAppLeave: (handler: AppLeaveHandler) => void;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
-const HomePageComponent: React.FC<HomePageProps> = ({
-  children,
-  onAppLeave,
-  setHeaderActionMenu,
-}) => {
+const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   const { application } = useKibana().services;
+  const { setHeaderActionMenu } = useAppMountContext();
   const subPluginId = useRef<string>('');
 
   application.currentAppId$.subscribe((appId) => {
