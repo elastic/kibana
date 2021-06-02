@@ -13,11 +13,10 @@ import { SetViewControl } from './set_view_control';
 import { ToolsControl } from './tools_control';
 import { FitToData } from './fit_to_data';
 import { TimesliderToggleButton } from './timeslider_toggle_button';
-import { GeoFieldWithIndex } from '../../components/geo_field_with_index';
 
 export interface Props {
   addFilters?: ((filters: Filter[], actionId: string) => Promise<void>) | null;
-  geoFields: GeoFieldWithIndex[];
+  showToolsControl: boolean;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
   showFitToBoundsButton: boolean;
@@ -26,10 +25,9 @@ export interface Props {
 
 export function ToolbarOverlay(props: Props) {
   const toolsButton =
-    props.addFilters && props.geoFields.length ? (
+    props.addFilters && props.showToolsControl ? (
       <EuiFlexItem>
         <ToolsControl
-          geoFields={props.geoFields}
           getFilterActions={props.getFilterActions}
           getActionContext={props.getActionContext}
         />
