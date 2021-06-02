@@ -14765,8 +14765,6 @@
     "xpack.ml.fieldTypeIcon.numberTypeAriaLabel": "数字タイプ",
     "xpack.ml.fieldTypeIcon.textTypeAriaLabel": "テキストタイプ",
     "xpack.ml.fieldTypeIcon.unknownTypeAriaLabel": "不明なタイプ",
-    "xpack.ml.fileDataVisualizerDescription": "CSV、NDJSON、またはログファイルをインポートします。",
-    "xpack.ml.fileDataVisualizerTitle": "ファイルをアップロード",
     "xpack.ml.formatters.metricChangeDescription.actualSameAsTypicalDescription": "実際値が通常値と同じ",
     "xpack.ml.formatters.metricChangeDescription.moreThan100xHigherDescription": "100x よりも高い",
     "xpack.ml.formatters.metricChangeDescription.moreThan100xLowerDescription": "100x よりも低い",
