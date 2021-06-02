@@ -63,6 +63,7 @@ import { SearchEmbeddableFactory } from './application/embeddable';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { replaceUrlHashQuery } from '../../kibana_utils/public/';
 import { IndexPatternFieldEditorStart } from '../../../plugins/index_pattern_field_editor/public';
+import { SourceViewer } from './application/components/source_viewer/source_viewer';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -178,7 +179,6 @@ export class DiscoverPlugin
         })
       );
     }
-
     this.docViewsRegistry = new DocViewsRegistry();
     setDocViewsRegistry(this.docViewsRegistry);
     this.docViewsRegistry.addDocView({
@@ -273,6 +273,27 @@ export class DiscoverPlugin
 
         // make sure the index pattern list is up to date
         await dataStart.indexPatterns.clearCache();
+        const useNewFieldsApi = !core.uiSettings.get('discover:searchFieldsFromSource');
+        if (useNewFieldsApi) {
+          this.docViewsRegistry!.addDocView({
+            title: i18n.translate('discover.docViews.source.sourceTitle', {
+              defaultMessage: '_source',
+            }),
+            order: 30,
+            component: ({ hit, indexPattern }) => (
+              <SourceViewer
+                docProps={{
+                  index: hit._index,
+                  id: hit._id,
+                  indexPatternId: indexPattern?.id || '',
+                  indexPatternService: dataStart.indexPatterns,
+                }}
+                hasLineNumbers
+              />
+            ),
+          });
+        }
+
         const { renderApp } = await import('./application/application');
         params.element.classList.add('dscAppWrapper');
         const unmount = await renderApp(innerAngularName, params.element);
