@@ -75,7 +75,13 @@ import { estypes } from '@elastic/elasticsearch';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
 import { IIndexPattern, IndexPattern, IndexPatternField } from '../../index_patterns';
-import { AggConfigs, ES_SEARCH_STRATEGY, ISearchGeneric, ISearchOptions } from '../..';
+import {
+  AggConfigs,
+  ES_SEARCH_STRATEGY,
+  IEsSearchResponse,
+  ISearchGeneric,
+  ISearchOptions,
+} from '../..';
 import type {
   ISearchSource,
   SearchFieldValue,
@@ -414,6 +420,15 @@ export class SearchSource {
     }
   }
 
+  private postFlightTransform(response: IEsSearchResponse<any>) {
+    const aggs = this.getField('aggs');
+    if (aggs instanceof AggConfigs) {
+      return aggs.postFlightTransform(response);
+    } else {
+      return response;
+    }
+  }
+
   private async fetchOthers(response: estypes.SearchResponse<any>, options: ISearchOptions) {
     const aggs = this.getField('aggs');
     if (aggs instanceof AggConfigs) {
@@ -451,24 +466,26 @@ export class SearchSource {
           if (isErrorResponse(response)) {
             obs.error(response);
           } else if (isPartialResponse(response)) {
-            obs.next(response);
+            obs.next(this.postFlightTransform(response));
           } else {
             if (!this.hasPostFlightRequests()) {
-              obs.next(response);
+              obs.next(this.postFlightTransform(response));
               obs.complete();
             } else {
               // Treat the complete response as partial, then run the postFlightRequests.
               obs.next({
-                ...response,
+                ...this.postFlightTransform(response),
                 isPartial: true,
                 isRunning: true,
               });
               const sub = from(this.fetchOthers(response.rawResponse, options)).subscribe({
                 next: (responseWithOther) => {
-                  obs.next({
-                    ...response,
-                    rawResponse: responseWithOther,
-                  });
+                  obs.next(
+                    this.postFlightTransform({
+                      ...response,
+                      rawResponse: responseWithOther!,
+                    })
+                  );
                 },
                 error: (e) => {
                   obs.error(e);

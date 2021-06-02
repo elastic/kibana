@@ -48,7 +48,8 @@ const setup = () => {
   };
 };
 
-describe('createStreamingBatchedFunction()', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/101126
+describe.skip('createStreamingBatchedFunction()', () => {
   test('returns a function', () => {
     const { fetchStreaming } = setup();
     const fn = createStreamingBatchedFunction({

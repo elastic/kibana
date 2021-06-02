@@ -4,6 +4,10 @@
 
 ## IndexPattern.addScriptedField() method
 
+> Warning: This API is now obsolete.
+> 
+> 
+
 Add scripted field to field list
 
 <b>Signature:</b>

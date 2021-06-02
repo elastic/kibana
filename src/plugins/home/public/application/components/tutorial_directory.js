@@ -42,6 +42,8 @@ class TutorialDirectoryUi extends React.Component {
   constructor(props) {
     super(props);
 
+    const extraTabs = getServices().addDataService.getAddDataTabs();
+
     this.tabs = [
       {
         id: ALL_TAB_ID,
@@ -77,7 +79,13 @@ class TutorialDirectoryUi extends React.Component {
           id: 'home.tutorial.tabs.sampleDataTitle',
           defaultMessage: 'Sample data',
         }),
+        content: <SampleDataSetCards addBasePath={this.props.addBasePath} />,
       },
+      ...extraTabs.map(({ id, name, component: Component }) => ({
+        id,
+        name,
+        content: <Component />,
+      })),
     ];
 
     let openTab = ALL_TAB_ID;
@@ -190,8 +198,9 @@ class TutorialDirectoryUi extends React.Component {
   };
 
   renderTabContent = () => {
-    if (this.state.selectedTabId === SAMPLE_DATA_TAB_ID) {
-      return <SampleDataSetCards addBasePath={this.props.addBasePath} />;
+    const tab = this.tabs.find(({ id }) => id === this.state.selectedTabId);
+    if (tab?.content) {
+      return tab.content;
     }
 
     return (

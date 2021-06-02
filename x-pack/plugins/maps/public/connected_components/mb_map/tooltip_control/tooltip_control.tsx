@@ -20,7 +20,6 @@ import { Geometry } from 'geojson';
 import { Filter } from 'src/plugins/data/public';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import {
-  ES_GEO_FIELD_TYPE,
   FEATURE_ID_PROPERTY_NAME,
   GEO_JSON_TYPE,
   LON_INDEX,
@@ -37,7 +36,6 @@ import { FeatureGeometryFilterForm } from './features_tooltip';
 import { EXCLUDE_TOO_MANY_FEATURES_BOX } from '../../../classes/util/mb_filter_expressions';
 import { ILayer } from '../../../classes/layers/layer';
 import { IVectorLayer } from '../../../classes/layers/vector_layer';
-import { GeoFieldWithIndex } from '../../../components/geo_field_with_index';
 import { RenderToolTipContent } from '../../../classes/tooltips/tooltip_property';
 
 function justifyAnchorLocation(
@@ -70,7 +68,7 @@ export interface Props {
   closeOnHoverTooltip: () => void;
   getActionContext?: () => ActionExecutionContext;
   getFilterActions?: () => Promise<Action[]>;
-  geoFields: GeoFieldWithIndex[];
+  geoFieldNames: string[];
   hasLockedTooltips: boolean;
   isDrawingFilter: boolean;
   layerList: ILayer[];
@@ -163,8 +161,10 @@ export class TooltipControl extends Component<Props, {}> {
     const actions = [];
 
     const geometry = this._getFeatureGeometry({ layerId, featureId });
-    const geoFieldsForFeature = this._filterGeoFieldsByFeatureGeometry(geometry);
-    if (geometry && geoFieldsForFeature.length && this.props.addFilters) {
+    const isPolygon =
+      geometry &&
+      (geometry.type === GEO_JSON_TYPE.POLYGON || geometry.type === GEO_JSON_TYPE.MULTI_POLYGON);
+    if (isPolygon && this.props.geoFieldNames.length && this.props.addFilters) {
       actions.push({
         label: i18n.translate('xpack.maps.tooltip.action.filterByGeometryLabel', {
           defaultMessage: 'Filter by geometry',
@@ -175,8 +175,8 @@ export class TooltipControl extends Component<Props, {}> {
             onClose={() => {
               this.props.closeOnClickTooltip(tooltipId);
             }}
-            geometry={geometry}
-            geoFields={geoFieldsForFeature}
+            geometry={geometry!}
+            geoFieldNames={this.props.geoFieldNames}
             addFilters={this.props.addFilters}
             getFilterActions={this.props.getFilterActions}
             getActionContext={this.props.getActionContext}
@@ -189,29 +189,6 @@ export class TooltipControl extends Component<Props, {}> {
     }
 
     return actions;
-  }
-
-  _filterGeoFieldsByFeatureGeometry(geometry: Geometry | null) {
-    if (!geometry) {
-      return [];
-    }
-
-    // line geometry can only create filters for geo_shape fields.
-    if (
-      geometry.type === GEO_JSON_TYPE.LINE_STRING ||
-      geometry.type === GEO_JSON_TYPE.MULTI_LINE_STRING
-    ) {
-      return this.props.geoFields.filter(({ geoFieldType }) => {
-        return geoFieldType === ES_GEO_FIELD_TYPE.GEO_SHAPE;
-      });
-    }
-
-    // TODO support geo distance filters for points
-    if (geometry.type === GEO_JSON_TYPE.POINT || geometry.type === GEO_JSON_TYPE.MULTI_POINT) {
-      return [];
-    }
-
-    return this.props.geoFields;
   }
 
   _getTooltipFeatures(
