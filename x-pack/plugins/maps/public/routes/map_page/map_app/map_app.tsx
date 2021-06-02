@@ -7,7 +7,8 @@
 
 import React from 'react';
 import _ from 'lodash';
-import { finalize, switchMap, tap } from 'rxjs/operators';
+import { from } from 'rxjs';
+import { debounceTime, finalize, first, skipUntil, switchMap, tap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { AppLeaveAction, AppMountParameters } from 'kibana/public';
 import { Adapters } from 'src/plugins/embeddable/public';
@@ -38,7 +39,6 @@ import {
   SavedQuery,
   QueryStateChange,
   QueryState,
-  waitUntilNextSessionCompletes$,
 } from '../../../../../../../src/plugins/data/public';
 import { MapContainer } from '../../../connected_components/map_container';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
@@ -55,6 +55,7 @@ import {
   unsavedChangesTitle,
   unsavedChangesWarning,
 } from '../saved_map';
+import { getLayerList } from '../../../selectors/map_selectors';
 
 interface MapRefreshConfig {
   isPaused: boolean;
@@ -122,14 +123,39 @@ export class MapApp extends React.Component<Props, State> {
   componentDidMount() {
     this._isMounted = true;
 
+    const reduxState$ = from(this.props.savedMap.getStore());
     this._autoRefreshSubscription = getTimeFilter()
       .getAutoRefreshFetch$()
       .pipe(
         tap(() => {
-          this.props.setQuery({ searchSessionId: getSearchService().session.start() });
+          this.props.setQuery({ forceRefresh: true });
         }),
         switchMap((done) =>
-          waitUntilNextSessionCompletes$(getSearchService().session).pipe(finalize(done))
+          reduxState$
+            .pipe(
+              debounceTime(300),
+              // using switchMap since switchMap will discard promise from previous state iterations in progress
+              switchMap(async (state) => {
+                console.log('state', state);
+                const promises = getLayerList(state).map(async (layer) => {
+                  return {
+                    isFilteredByGlobalTime: await layer.isFilteredByGlobalTime(),
+                    layer,
+                  };
+                });
+                const layersWithMeta = await Promise.all(promises);
+                return layersWithMeta;
+              }),
+              first((layersWithMeta) => {
+                console.log('layersWithMeta', layersWithMeta);
+                const areTimeLayersStillLoading = layersWithMeta
+                  .filter(({ isFilteredByGlobalTime }) => isFilteredByGlobalTime)
+                  .some(({ layer }) => layer.isLayerLoading());
+                console.log('areTimeLayersStillLoading', areTimeLayersStillLoading);
+                return !areTimeLayersStillLoading;
+              })
+            )
+            .pipe(finalize(done))
         )
       )
       .subscribe();
