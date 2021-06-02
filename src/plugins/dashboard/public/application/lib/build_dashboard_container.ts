@@ -84,7 +84,9 @@ export const buildDashboardContainer = async ({
    * embeddable.
    */
   const existingSession = session.getSessionId();
-  const searchSessionId = searchSessionIdFromURL ?? (existingSession && incomingEmbeddable ? existingSession : session.start());
+  const searchSessionId =
+    searchSessionIdFromURL ??
+    (existingSession && incomingEmbeddable ? existingSession : session.start());
 
   // Build the initial input for the dashboard container based on the dashboard state.
   const initialInput = stateToDashboardContainerInput({
