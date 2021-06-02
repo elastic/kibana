@@ -16,10 +16,11 @@ import { operationDefinitionMap } from '..';
 
 export const buildLabelFunction = (ofName: (name?: string) => string) => (
   name?: string,
-  timeScale?: TimeScaleUnit
+  timeScale?: TimeScaleUnit,
+  timeShift?: string
 ) => {
   const rawLabel = ofName(name);
-  return adjustTimeScaleLabelSuffix(rawLabel, undefined, timeScale);
+  return adjustTimeScaleLabelSuffix(rawLabel, undefined, timeScale, undefined, timeShift);
 };
 
 /**

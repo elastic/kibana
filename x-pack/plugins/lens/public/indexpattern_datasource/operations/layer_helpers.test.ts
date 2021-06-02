@@ -2589,7 +2589,10 @@ describe('state_helpers', () => {
             col1: { operationType: 'average' },
           },
         },
-        indexPattern
+        indexPattern,
+        {},
+        '1',
+        {}
       );
       expect(mock).toHaveBeenCalled();
       expect(errors).toHaveLength(1);
@@ -2608,7 +2611,10 @@ describe('state_helpers', () => {
               { operationType: 'testReference', references: [] },
           },
         },
-        indexPattern
+        indexPattern,
+        {},
+        '1',
+        {}
       );
       expect(mock).toHaveBeenCalled();
       expect(errors).toHaveLength(1);
@@ -2637,7 +2643,10 @@ describe('state_helpers', () => {
             col1: { operationType: 'testIncompleteReference' },
           },
         },
-        indexPattern
+        indexPattern,
+        {},
+        '1',
+        {}
       );
       expect(savedRef).toHaveBeenCalled();
       expect(incompleteRef).not.toHaveBeenCalled();
@@ -2659,7 +2668,10 @@ describe('state_helpers', () => {
               { operationType: 'testReference', references: [] },
           },
         },
-        indexPattern
+        indexPattern,
+        {},
+        '1',
+        {}
       );
       expect(mock).toHaveBeenCalledWith(
         {
