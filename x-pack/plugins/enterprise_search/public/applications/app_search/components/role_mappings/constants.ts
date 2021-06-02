@@ -117,38 +117,46 @@ export const ADMIN_ROLE_TYPE_DESCRIPTION = i18n.translate(
   }
 );
 
-export const FULL_ENGINE_ACCESS_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.fullEngineAccessTitle',
-  {
-    defaultMessage: 'Full engine access',
-  }
-);
-
-export const FULL_ENGINE_ACCESS_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.fullEngineAccessDescription',
-  {
-    defaultMessage: 'Access to all current and future engines.',
-  }
-);
-
-export const LIMITED_ENGINE_ACCESS_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.limitedEngineAccessTitle',
-  {
-    defaultMessage: 'Limited engine access',
-  }
-);
-
-export const LIMITED_ENGINE_ACCESS_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.limitedEngineAccessDescription',
-  {
-    defaultMessage: 'Limit user access to specific engines:',
-  }
-);
-
 export const ENGINE_REQUIRED_ERROR = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engineRequiredError',
   {
     defaultMessage: 'At least one assigned engine is required.',
+  }
+);
+
+export const ALL_ENGINES_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.allEnginesLabel',
+  {
+    defaultMessage: 'Assign to all engines',
+  }
+);
+
+export const ALL_ENGINES_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.allEnginesDescription',
+  {
+    defaultMessage:
+      'Assigning to all engines includes all current and future engines as created and administered at a later date.',
+  }
+);
+
+export const SPECIFIC_ENGINES_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.specificEnginesLabel',
+  {
+    defaultMessage: 'Assign to specific engines',
+  }
+);
+
+export const SPECIFIC_ENGINES_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.specificEnginesDescription',
+  {
+    defaultMessage: 'Assign to a select set of engines statically.',
+  }
+);
+
+export const ENGINE_ASSIGNMENT_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engineAssignmentLabel',
+  {
+    defaultMessage: 'Engine assignment',
   }
 );
 

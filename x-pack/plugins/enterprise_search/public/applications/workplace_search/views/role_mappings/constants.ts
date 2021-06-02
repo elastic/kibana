@@ -66,13 +66,6 @@ export const GROUP_ASSIGNMENT_INVALID_ERROR = i18n.translate(
   }
 );
 
-export const GROUP_ASSIGNMENT_ALL_GROUPS_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.roleMapping.groupAssignmentAllGroupsLabel',
-  {
-    defaultMessage: 'Include in all groups, including future groups',
-  }
-);
-
 export const EMPTY_ROLE_MAPPINGS_BODY = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.roleMapping.emptyRoleMappingsBody',
   {
@@ -85,5 +78,34 @@ export const ROLE_MAPPINGS_TABLE_HEADER = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.roleMapping.roleMappingsTableHeader',
   {
     defaultMessage: 'Group Access',
+  }
+);
+
+export const ALL_GROUPS_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.roleMapping.allGroupsLabel',
+  {
+    defaultMessage: 'Assign to all groups',
+  }
+);
+
+export const ALL_GROUPS_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.roleMapping.allGroupsDescription',
+  {
+    defaultMessage:
+      'Assigning to all groups includes all current and future groups as created and administered at a later date.',
+  }
+);
+
+export const SPECIFIC_GROUPS_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.roleMapping.specificGroupsLabel',
+  {
+    defaultMessage: 'Assign to specific groups',
+  }
+);
+
+export const SPECIFIC_GROUPS_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.roleMapping.specificGroupsDescription',
+  {
+    defaultMessage: 'Assign to a select set of groups statically.',
   }
 );

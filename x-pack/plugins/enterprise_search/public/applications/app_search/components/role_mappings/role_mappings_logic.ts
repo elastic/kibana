@@ -7,6 +7,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { EuiComboBoxOptionOption } from '@elastic/eui';
+
 import {
   clearFlashMessages,
   flashAPIErrors,
@@ -48,7 +50,7 @@ const getFirstAttributeValue = (roleMapping: ASRoleMapping) =>
   Object.entries(roleMapping.rules)[0][1] as AttributeName;
 
 interface RoleMappingsActions {
-  handleAccessAllEnginesChange(): void;
+  handleAccessAllEnginesChange(selected: boolean): { selected: boolean };
   handleAuthProviderChange(value: string[]): { value: string[] };
   handleAttributeSelectorChange(
     value: AttributeName,
@@ -56,13 +58,7 @@ interface RoleMappingsActions {
   ): { value: AttributeName; firstElasticsearchRole: string };
   handleAttributeValueChange(value: string): { value: string };
   handleDeleteMapping(roleId: string): { roleId: string };
-  handleEngineSelectionChange(
-    engineName: string,
-    selected: boolean
-  ): {
-    engineName: string;
-    selected: boolean;
-  };
+  handleEngineSelectionChange(engineNames: string[]): { engineNames: string[] };
   handleRoleChange(roleType: RoleTypes): { roleType: RoleTypes };
   handleSaveMapping(): void;
   initializeRoleMapping(roleId?: string): { roleId?: string };
@@ -91,6 +87,7 @@ interface RoleMappingsValues {
   selectedAuthProviders: string[];
   selectedEngines: Set<string>;
   roleMappingFlyoutOpen: boolean;
+  selectedOptions: EuiComboBoxOptionOption[];
 }
 
 export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappingsActions>>({
@@ -100,16 +97,13 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     setRoleMappingData: (data: RoleMappingServerDetails) => data,
     handleAuthProviderChange: (value: string) => ({ value }),
     handleRoleChange: (roleType: RoleTypes) => ({ roleType }),
-    handleEngineSelectionChange: (engineName: string, selected: boolean) => ({
-      engineName,
-      selected,
-    }),
+    handleEngineSelectionChange: (engineNames: string[]) => ({ engineNames }),
     handleAttributeSelectorChange: (value: string, firstElasticsearchRole: string) => ({
       value,
       firstElasticsearchRole,
     }),
     handleAttributeValueChange: (value: string) => ({ value }),
-    handleAccessAllEnginesChange: true,
+    handleAccessAllEnginesChange: (selected: boolean) => ({ selected }),
     resetState: true,
     initializeRoleMappings: true,
     initializeRoleMapping: (roleId) => ({ roleId }),
@@ -190,7 +184,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         setRoleMappingData: (_, { roleMapping }) =>
           roleMapping ? roleMapping.accessAllEngines : true,
         handleRoleChange: (_, { roleType }) => !roleHasScopedEngines(roleType),
-        handleAccessAllEnginesChange: (accessAllEngines) => !accessAllEngines,
+        handleAccessAllEnginesChange: (_, { selected }) => selected,
       },
     ],
     attributeValue: [
@@ -221,13 +215,9 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         setRoleMappingData: (_, { roleMapping }) =>
           roleMapping ? new Set(roleMapping.engines.map((engine) => engine.name)) : new Set(),
         handleAccessAllEnginesChange: () => new Set(),
-        handleEngineSelectionChange: (engines, { engineName, selected }) => {
-          const newSelectedEngineNames = new Set(engines as Set<string>);
-          if (selected) {
-            newSelectedEngineNames.add(engineName);
-          } else {
-            newSelectedEngineNames.delete(engineName);
-          }
+        handleEngineSelectionChange: (_, { engineNames }) => {
+          const newSelectedEngineNames = new Set() as Set<string>;
+          engineNames.forEach((engineName) => newSelectedEngineNames.add(engineName));
 
           return newSelectedEngineNames;
         },
@@ -267,6 +257,17 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       },
     ],
   },
+  selectors: ({ selectors }) => ({
+    selectedOptions: [
+      () => [selectors.selectedEngines, selectors.availableEngines],
+      (selectedEngines, availableEngines) => {
+        const selectedNames = Array.from(selectedEngines.values());
+        return availableEngines
+          .filter(({ name }: { name: string }) => selectedNames.includes(name))
+          .map(({ name }: { name: string }) => ({ label: name, value: name }));
+      },
+    ],
+  }),
   listeners: ({ actions, values }) => ({
     initializeRoleMappings: async () => {
       const { http } = HttpLogic.values;
