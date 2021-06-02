@@ -6,7 +6,7 @@
  */
 import type { ReactEventHandler } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Redirect, Route, Switch, useLocation, useParams } from 'react-router-dom';
+import { Redirect, Route, Switch, useLocation, useParams, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   EuiBetaBadge,
@@ -29,11 +29,21 @@ import {
   useSetPackageInstallStatus,
   useUIExtension,
   useBreadcrumbs,
+  useStartServices,
 } from '../../../../hooks';
-import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
+import {
+  PLUGIN_ID,
+  INTEGRATIONS_PLUGIN_ID,
+  INTEGRATIONS_ROUTING_PATHS,
+  pagePathGetters,
+} from '../../../../constants';
 import { useCapabilities, useGetPackageInfoByKey, useLink } from '../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../services';
-import type { DetailViewPanelName, PackageInfo } from '../../../../types';
+import type {
+  CreatePackagePolicyRouteState,
+  DetailViewPanelName,
+  PackageInfo,
+} from '../../../../types';
 import { InstallStatus } from '../../../../types';
 import { Error, Loading } from '../../../../components';
 import type { WithHeaderLayoutProps } from '../../../../layouts';
@@ -70,11 +80,13 @@ function Breadcrumbs({ packageTitle }: { packageTitle: string }) {
 
 export function Detail() {
   const { pkgkey, panel } = useParams<DetailParams>();
-  const { getHref } = useLink();
+  const { getHref, getPath } = useLink();
   const hasWriteCapabilites = useCapabilities().write;
-  const { search } = useLocation();
+  const history = useHistory();
+  const { pathname, search, hash } = useLocation();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
+  const services = useStartServices();
 
   // Package info state
   const [packageInfo, setPackageInfo] = useState<PackageInfo | null>(null);
@@ -192,43 +204,39 @@ export function Detail() {
     (ev) => {
       ev.preventDefault();
 
-      // TODO: Figure out an approach for this redirect/state logic in the new
-      // separate integrations UI context
-
       // The object below, given to `createHref` is explicitly accessing keys of `location` in order
       // to ensure that dependencies to this `useCallback` is set correctly (because `location` is mutable)
-      // const currentPath = history.createHref({
-      //   pathname,
-      //   search,
-      //   hash,
-      // });
-      // const redirectToPath: CreatePackagePolicyRouteState['onSaveNavigateTo'] &
-      //   CreatePackagePolicyRouteState['onCancelNavigateTo'] = [
-      //   INTEGRATIONS_PLUGIN_ID,
-      //   {
-      //     path: currentPath,
-      //   },
-      // ];
+      const currentPath = history.createHref({
+        pathname,
+        search,
+        hash,
+      });
+      const redirectToPath: CreatePackagePolicyRouteState['onSaveNavigateTo'] &
+        CreatePackagePolicyRouteState['onCancelNavigateTo'] = [
+        INTEGRATIONS_PLUGIN_ID,
+        {
+          path: currentPath,
+        },
+      ];
+      const redirectBackRouteState: CreatePackagePolicyRouteState = {
+        onSaveNavigateTo: redirectToPath,
+        onCancelNavigateTo: redirectToPath,
+        onCancelUrl: currentPath,
+      };
 
-      // const redirectBackRouteState: CreatePackagePolicyRouteState = {
-      //   onSaveNavigateTo: redirectToPath,
-      //   onCancelNavigateTo: redirectToPath,
-      //   onCancelUrl: currentPath,
-      // };
-      // history.push({
-      //   pathname: getPath('add_integration_to_policy', {
-      //     pkgkey,
-      //     ...(integration ? { integration } : {}),
-      //   }),
-      //   state: redirectBackRouteState,
-      // });
-
-      window.location.href = getHref('add_integration_to_policy', {
+      const path = pagePathGetters.add_integration_to_policy({
         pkgkey,
         ...(integration ? { integration } : {}),
+      })[1];
+
+      services.application.navigateToApp(PLUGIN_ID, {
+        // Necessary because of Fleet's HashRouter. Can be changed when
+        // https://github.com/elastic/kibana/issues/96134 is resolved
+        path: `#${path}`,
+        state: redirectBackRouteState,
       });
     },
-    [getHref, pkgkey, integration]
+    [history, hash, pathname, search, pkgkey, integration, services.application]
   );
 
   const headerRightContent = useMemo(
