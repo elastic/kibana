@@ -31,7 +31,7 @@ export const config: PluginConfigDescriptor = {
     epm: true,
     agents: true,
   },
-  deprecations: ({ renameFromRoot, unused, rename }) => [
+  deprecations: ({ renameFromRoot, unused }) => [
     renameFromRoot('xpack.ingestManager', 'xpack.fleet'),
     renameFromRoot('xpack.fleet.fleet', 'xpack.fleet.agents'),
     unused('agents.kibana'),
