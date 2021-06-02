@@ -11,7 +11,7 @@ import {
   EuiFormRow,
   EuiComboBox,
   EuiComboBoxOptionOption,
-  EuiRadioGroup,
+  EuiButtonGroup,
 } from '@elastic/eui';
 import * as i18n from '../translations';
 import {
@@ -42,7 +42,7 @@ interface Props {
   errors: IErrorObject;
 }
 
-const radios = [
+const connectorTypeButtons = [
   { id: 'all', label: 'All' },
   { id: 'alerts', label: 'Alerts' },
   { id: 'cases', label: 'Cases' },
@@ -140,11 +140,13 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
   return (
     <>
       <EuiFormRow id="connectorType" fullWidth label={i18n.SW_CONNECTOR_TYPE_LABEL}>
-        <EuiRadioGroup
-          options={radios}
+        <EuiButtonGroup
+          name="connectorType"
+          legend={i18n.SW_CONNECTOR_TYPE_LABEL}
+          options={connectorTypeButtons}
           idSelected={connectorType}
           onChange={(type) => editActionConfig('connectorType', type)}
-          name="connectorType"
+          isFullWidth
         />
       </EuiFormRow>
       {isValidFieldForConnector(
