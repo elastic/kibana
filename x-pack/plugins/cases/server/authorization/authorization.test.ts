@@ -423,7 +423,7 @@ describe('authorization', () => {
       });
     });
 
-    it('throws and logs an error when there are no registered owners from plugins and security is disabled', async () => {
+    it('throws and logs an error when there are no registered owners from plugins and security is enabled', async () => {
       expect.assertions(2);
 
       featuresStart.getKibanaFeatures.mockReturnValue([]);

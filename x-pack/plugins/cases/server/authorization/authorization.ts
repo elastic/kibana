@@ -109,16 +109,16 @@ export class Authorization {
     };
 
     try {
-      await this.ensureAuthorizedHelper(
+      await this._ensureAuthorized(
         entities.map((entity) => entity.owner),
         operation
       );
-
-      logSavedObjects();
     } catch (error) {
       logSavedObjects(error);
       throw error;
     }
+
+    logSavedObjects();
   }
 
   /**
@@ -126,14 +126,14 @@ export class Authorization {
    */
   public async getAuthorizationFilter(operation: OperationDetails): Promise<AuthFilterHelpers> {
     try {
-      return await this.getFindAuthorizationFilterHelper(operation);
+      return await this._getAuthorizationFilter(operation);
     } catch (error) {
       this.auditLogger.log({ error, operation });
       throw error;
     }
   }
 
-  private async ensureAuthorizedHelper(owners: string[], operation: OperationDetails) {
+  private async _ensureAuthorized(owners: string[], operation: OperationDetails) {
     const { securityAuth } = this;
     const areAllOwnersAvailable = owners.every((owner) => this.featureCaseOwners.has(owner));
 
@@ -168,9 +168,7 @@ export class Authorization {
     // else security is disabled so let the operation proceed
   }
 
-  private async getFindAuthorizationFilterHelper(
-    operation: OperationDetails
-  ): Promise<AuthFilterHelpers> {
+  private async _getAuthorizationFilter(operation: OperationDetails): Promise<AuthFilterHelpers> {
     const { securityAuth } = this;
     if (securityAuth && this.shouldCheckAuthorization()) {
       const { authorizedOwners } = await this.getAuthorizedOwners([operation]);

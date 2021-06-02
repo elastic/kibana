@@ -91,7 +91,7 @@ Object {
     "message": "an error",
   },
   "event": Object {
-    "action": "comment_create",
+    "action": "case_comment_create",
     "category": Array [
       "database",
     ],
@@ -117,7 +117,7 @@ Object {
     "message": "an error",
   },
   "event": Object {
-    "action": "comment_create",
+    "action": "case_comment_create",
     "category": Array [
       "database",
     ],
@@ -133,7 +133,7 @@ Object {
 exports[`audit_logger log function event structure creates the correct audit event for operation: "createComment" without an error but with an entity 1`] = `
 Object {
   "event": Object {
-    "action": "comment_create",
+    "action": "case_comment_create",
     "category": Array [
       "database",
     ],
@@ -155,7 +155,7 @@ Object {
 exports[`audit_logger log function event structure creates the correct audit event for operation: "createComment" without an error or entity 1`] = `
 Object {
   "event": Object {
-    "action": "comment_create",
+    "action": "case_comment_create",
     "category": Array [
       "database",
     ],
@@ -175,7 +175,7 @@ Object {
     "message": "an error",
   },
   "event": Object {
-    "action": "configuration_create",
+    "action": "case_configuration_create",
     "category": Array [
       "database",
     ],
@@ -201,7 +201,7 @@ Object {
     "message": "an error",
   },
   "event": Object {
-    "action": "configuration_create",
+    "action": "case_configuration_create",
     "category": Array [
       "database",
     ],
@@ -217,7 +217,7 @@ Object {
 exports[`audit_logger log function event structure creates the correct audit event for operation: "createConfiguration" without an error but with an entity 1`] = `
 Object {
   "event": Object {
-    "action": "configuration_create",
+    "action": "case_configuration_create",
     "category": Array [
       "database",
     ],
@@ -239,7 +239,7 @@ Object {
 exports[`audit_logger log function event structure creates the correct audit event for operation: "createConfiguration" without an error or entity 1`] = `
 Object {
   "event": Object {
-    "action": "configuration_create",
+    "action": "case_configuration_create",
     "category": Array [
       "database",
     ],
@@ -259,7 +259,7 @@ Object {
     "message": "an error",
   },
   "event": Object {
-    "action": "comment_delete_all",
+    "action": "case_comment_delete_all",
     "category": Array [
       "database",
     ],
@@ -285,7 +285,7 @@ Object {
     "message": "an error",
   },
   "event": Object {
-    "action": "comment_delete_all",
+    "action": "case_comment_delete_all",
     "category": Array [
       "database",
     ],
@@ -301,7 +301,7 @@ Object {
 exports[`audit_logger log function event structure creates the correct audit event for operation: "deleteAllComments" without an error but with an entity 1`] = `
 Object {
   "event": Object {
-    "action": "comment_delete_all",
+    "action": "case_comment_delete_all",
     "category": Array [
       "database",
     ],
@@ -323,7 +323,7 @@ Object {
 exports[`audit_logger log function event structure creates the correct audit event for operation: "deleteAllComments" without an error or entity 1`] = `
 Object {
   "event": Object {
-    "action": "comment_delete_all",
+    "action": "case_comment_delete_all",
     "category": Array [
       "database",
     ],
@@ -427,7 +427,7 @@ Object {
     "message": "an error",
   },
   "event": Object {
-    "action": "comment_delete",
+    "action": "case_comment_delete",
     "category": Array [
       "database",
     ],
@@ -453,7 +453,7 @@ Object {
     "message": "an error",
   },
   "event": Object {
-    "action": "comment_delete",
+    "action": "case_comment_delete",
     "category": Array [
       "database",
     ],
@@ -469,7 +469,7 @@ Object {
 exports[`audit_logger log function event structure creates the correct audit event for operation: "deleteComment" without an error but with an entity 1`] = `
 Object {
   "event": Object {
-    "action": "comment_delete",
+    "action": "case_comment_delete",
     "category": Array [
       "database",
     ],
@@ -491,7 +491,7 @@ Object {
 exports[`audit_logger log function event structure creates the correct audit event for operation: "deleteComment" without an error or entity 1`] = `
 Object {
   "event": Object {
-    "action": "comment_delete",
+    "action": "case_comment_delete",
     "category": Array [
       "database",
     ],
@@ -595,7 +595,7 @@ Object {
     "message": "an error",
   },
   "event": Object {
-    "action": "comment_find",
+    "action": "case_comment_find",
     "category": Array [
       "database",
     ],
@@ -621,7 +621,7 @@ Object {
     "message": "an error",
   },
   "event": Object {
-    "action": "comment_find",
+    "action": "case_comment_find",
     "category": Array [
       "database",
     ],
@@ -637,7 +637,7 @@ Object {
 exports[`audit_logger log function event structure creates the correct audit event for operation: "findComments" without an error but with an entity 1`] = `
 Object {
   "event": Object {
-    "action": "comment_find",
+    "action": "case_comment_find",
     "category": Array [
       "database",
     ],
@@ -659,7 +659,7 @@ Object {
 exports[`audit_logger log function event structure creates the correct audit event for operation: "findComments" without an error or entity 1`] = `
 Object {
   "event": Object {
-    "action": "comment_find",
+    "action": "case_comment_find",
     "category": Array [
       "database",
     ],
@@ -679,7 +679,7 @@ Object {
     "message": "an error",
   },
   "event": Object {
-    "action": "configuration_find",
+    "action": "case_configuration_find",
     "category": Array [
       "database",
     ],
@@ -705,7 +705,7 @@ Object {
     "message": "an error",
   },
   "event": Object {
-    "action": "configuration_find",
+    "action": "case_configuration_find",
     "category": Array [
       "database",
     ],
@@ -721,7 +721,7 @@ Object {
 exports[`audit_logger log function event structure creates the correct audit event for operation: "findConfigurations" without an error but with an entity 1`] = `
 Object {
   "event": Object {
-    "action": "configuration_find",
+    "action": "case_configuration_find",
     "category": Array [
       "database",
     ],
@@ -743,7 +743,7 @@ Object {
 exports[`audit_logger log function event structure creates the correct audit event for operation: "findConfigurations" without an error or entity 1`] = `
 Object {
   "event": Object {
-    "action": "configuration_find",
+    "action": "case_configuration_find",
     "category": Array [
       "database",
     ],
@@ -763,7 +763,7 @@ Object {
     "message": "an error",
   },
   "event": Object {
-    "action": "comment_get_all",
+    "action": "case_comment_get_all",
     "category": Array [
       "database",
     ],
@@ -789,7 +789,7 @@ Object {
     "message": "an error",
   },
   "event": Object {
-    "action": "comment_get_all",
+    "action": "case_comment_get_all",
     "category": Array [
       "database",
     ],
@@ -805,7 +805,7 @@ Object {
 exports[`audit_logger log function event structure creates the correct audit event for operation: "getAllComments" without an error but with an entity 1`] = `
 Object {
   "event": Object {
-    "action": "comment_get_all",
+    "action": "case_comment_get_all",
     "category": Array [
       "database",
     ],
@@ -827,7 +827,7 @@ Object {
 exports[`audit_logger log function event structure creates the correct audit event for operation: "getAllComments" without an error or entity 1`] = `
 Object {
   "event": Object {
-    "action": "comment_get_all",
+    "action": "case_comment_get_all",
     "category": Array [
       "database",
     ],
@@ -1099,7 +1099,7 @@ Object {
     "message": "an error",
   },
   "event": Object {
-    "action": "comment_get",
+    "action": "case_comment_get",
     "category": Array [
       "database",
     ],
@@ -1125,7 +1125,7 @@ Object {
     "message": "an error",
   },
   "event": Object {
-    "action": "comment_get",
+    "action": "case_comment_get",
     "category": Array [
       "database",
     ],
@@ -1141,7 +1141,7 @@ Object {
 exports[`audit_logger log function event structure creates the correct audit event for operation: "getComment" without an error but with an entity 1`] = `
 Object {
   "event": Object {
-    "action": "comment_get",
+    "action": "case_comment_get",
     "category": Array [
       "database",
     ],
@@ -1163,7 +1163,7 @@ Object {
 exports[`audit_logger log function event structure creates the correct audit event for operation: "getComment" without an error or entity 1`] = `
 Object {
   "event": Object {
-    "action": "comment_get",
+    "action": "case_comment_get",
     "category": Array [
       "database",
     ],
@@ -1351,7 +1351,7 @@ Object {
     "message": "an error",
   },
   "event": Object {
-    "action": "user_actions_get",
+    "action": "case_user_actions_get",
     "category": Array [
       "database",
     ],
@@ -1377,7 +1377,7 @@ Object {
     "message": "an error",
   },
   "event": Object {
-    "action": "user_actions_get",
+    "action": "case_user_actions_get",
     "category": Array [
       "database",
     ],
@@ -1393,7 +1393,7 @@ Object {
 exports[`audit_logger log function event structure creates the correct audit event for operation: "getUserActions" without an error but with an entity 1`] = `
 Object {
   "event": Object {
-    "action": "user_actions_get",
+    "action": "case_user_actions_get",
     "category": Array [
       "database",
     ],
@@ -1415,7 +1415,7 @@ Object {
 exports[`audit_logger log function event structure creates the correct audit event for operation: "getUserActions" without an error or entity 1`] = `
 Object {
   "event": Object {
-    "action": "user_actions_get",
+    "action": "case_user_actions_get",
     "category": Array [
       "database",
     ],
@@ -1603,7 +1603,7 @@ Object {
     "message": "an error",
   },
   "event": Object {
-    "action": "comment_update",
+    "action": "case_comment_update",
     "category": Array [
       "database",
     ],
@@ -1629,7 +1629,7 @@ Object {
     "message": "an error",
   },
   "event": Object {
-    "action": "comment_update",
+    "action": "case_comment_update",
     "category": Array [
       "database",
     ],
@@ -1645,7 +1645,7 @@ Object {
 exports[`audit_logger log function event structure creates the correct audit event for operation: "updateComment" without an error but with an entity 1`] = `
 Object {
   "event": Object {
-    "action": "comment_update",
+    "action": "case_comment_update",
     "category": Array [
       "database",
     ],
@@ -1667,7 +1667,7 @@ Object {
 exports[`audit_logger log function event structure creates the correct audit event for operation: "updateComment" without an error or entity 1`] = `
 Object {
   "event": Object {
-    "action": "comment_update",
+    "action": "case_comment_update",
     "category": Array [
       "database",
     ],
@@ -1687,7 +1687,7 @@ Object {
     "message": "an error",
   },
   "event": Object {
-    "action": "configuration_update",
+    "action": "case_configuration_update",
     "category": Array [
       "database",
     ],
@@ -1713,7 +1713,7 @@ Object {
     "message": "an error",
   },
   "event": Object {
-    "action": "configuration_update",
+    "action": "case_configuration_update",
     "category": Array [
       "database",
     ],
@@ -1729,7 +1729,7 @@ Object {
 exports[`audit_logger log function event structure creates the correct audit event for operation: "updateConfiguration" without an error but with an entity 1`] = `
 Object {
   "event": Object {
-    "action": "configuration_update",
+    "action": "case_configuration_update",
     "category": Array [
       "database",
     ],
@@ -1751,7 +1751,7 @@ Object {
 exports[`audit_logger log function event structure creates the correct audit event for operation: "updateConfiguration" without an error or entity 1`] = `
 Object {
   "event": Object {
-    "action": "configuration_update",
+    "action": "case_configuration_update",
     "category": Array [
       "database",
     ],

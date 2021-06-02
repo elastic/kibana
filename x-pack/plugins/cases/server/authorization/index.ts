@@ -123,7 +123,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [WriteOperations.CreateConfiguration]: {
     ecsType: EVENT_TYPES.creation,
     name: WriteOperations.CreateConfiguration,
-    action: 'configuration_create',
+    action: 'case_configuration_create',
     verbs: createVerbs,
     docType: 'case configuration',
     savedObjectType: CASE_CONFIGURE_SAVED_OBJECT,
@@ -131,7 +131,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [WriteOperations.UpdateConfiguration]: {
     ecsType: EVENT_TYPES.change,
     name: WriteOperations.UpdateConfiguration,
-    action: 'configuration_update',
+    action: 'case_configuration_update',
     verbs: updateVerbs,
     docType: 'case configuration',
     savedObjectType: CASE_CONFIGURE_SAVED_OBJECT,
@@ -139,7 +139,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [ReadOperations.FindConfigurations]: {
     ecsType: EVENT_TYPES.access,
     name: ReadOperations.FindConfigurations,
-    action: 'configuration_find',
+    action: 'case_configuration_find',
     verbs: accessVerbs,
     docType: 'case configurations',
     savedObjectType: CASE_CONFIGURE_SAVED_OBJECT,
@@ -188,7 +188,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [WriteOperations.CreateComment]: {
     ecsType: EVENT_TYPES.creation,
     name: WriteOperations.CreateComment,
-    action: 'comment_create',
+    action: 'case_comment_create',
     verbs: createVerbs,
     docType: 'comments',
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
@@ -196,7 +196,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [WriteOperations.DeleteAllComments]: {
     ecsType: EVENT_TYPES.deletion,
     name: DELETE_COMMENT_OPERATION,
-    action: 'comment_delete_all',
+    action: 'case_comment_delete_all',
     verbs: deleteVerbs,
     docType: 'comments',
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
@@ -204,7 +204,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [WriteOperations.DeleteComment]: {
     ecsType: EVENT_TYPES.deletion,
     name: DELETE_COMMENT_OPERATION,
-    action: 'comment_delete',
+    action: 'case_comment_delete',
     verbs: deleteVerbs,
     docType: 'comments',
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
@@ -212,7 +212,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [WriteOperations.UpdateComment]: {
     ecsType: EVENT_TYPES.change,
     name: WriteOperations.UpdateComment,
-    action: 'comment_update',
+    action: 'case_comment_update',
     verbs: updateVerbs,
     docType: 'comments',
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
@@ -220,7 +220,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [ReadOperations.GetComment]: {
     ecsType: EVENT_TYPES.access,
     name: ACCESS_COMMENT_OPERATION,
-    action: 'comment_get',
+    action: 'case_comment_get',
     verbs: accessVerbs,
     docType: 'comments',
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
@@ -228,7 +228,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [ReadOperations.GetAllComments]: {
     ecsType: EVENT_TYPES.access,
     name: ACCESS_COMMENT_OPERATION,
-    action: 'comment_get_all',
+    action: 'case_comment_get_all',
     verbs: accessVerbs,
     docType: 'comments',
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
@@ -236,7 +236,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [ReadOperations.FindComments]: {
     ecsType: EVENT_TYPES.access,
     name: ACCESS_COMMENT_OPERATION,
-    action: 'comment_find',
+    action: 'case_comment_find',
     verbs: accessVerbs,
     docType: 'comments',
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
@@ -254,7 +254,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [ReadOperations.GetUserActions]: {
     ecsType: EVENT_TYPES.access,
     name: ReadOperations.GetUserActions,
-    action: 'user_actions_get',
+    action: 'case_user_actions_get',
     verbs: accessVerbs,
     docType: 'user actions',
     savedObjectType: CASE_USER_ACTION_SAVED_OBJECT,

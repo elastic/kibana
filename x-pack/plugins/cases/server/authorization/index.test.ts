@@ -13,7 +13,7 @@ describe('index tests', () => {
     expect(isWriteOperation(Operations.createCase)).toBeTruthy();
   });
 
-  it('should identify a read operation', () => {
+  it('should return false when the operation is not a write operation', () => {
     expect(isWriteOperation(Operations.getCase)).toBeFalsy();
   });
 
