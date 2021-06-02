@@ -11658,7 +11658,9 @@
             "type": "Object",
             "tags": [],
             "label": "indexPatterns",
-            "description": [],
+            "description": [
+              "The index patterns contract of the data plugin"
+            ],
             "signature": [
               "Pick<",
               {

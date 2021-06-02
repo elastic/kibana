@@ -1909,8 +1909,6 @@
     "expressions.functions.fontHelpText": "创建字体样式。",
     "expressions.functions.mapColumn.args.copyMetaFromHelpText": "如果设置，指定列 ID 的元对象将复制到指定目标列。如果列不存在，复制将无提示失败。",
     "expressions.functions.mapColumn.args.expressionHelpText": "在每行上执行的表达式，为其提供了单行 {DATATABLE} 上下文，其将返回单元格值。",
-    "expressions.functions.mapColumn.args.idHelpText": "结果列的可选 ID。如果为 `null`，名称/列参数将用作 ID。",
-    "expressions.functions.mapColumn.args.nameHelpText": "结果列的名称。",
     "expressions.functions.mapColumnHelpText": "添加计算为其他列的结果的列。只有提供参数时，才会执行更改。另请参见 {alterColumnFn} 和 {staticColumnFn}。",
     "expressions.functions.math.args.expressionHelpText": "已计算的 {TINYMATH} 表达式。请参阅 {TINYMATH_URL}。",
     "expressions.functions.math.args.onErrorHelpText": "如果 {TINYMATH} 评估失败或返回 NaN，返回值将由 onError 指定。为 `'throw'` 时，其将引发异常，从而终止表达式执行 (默认) 。",
