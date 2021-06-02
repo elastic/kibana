@@ -596,6 +596,10 @@ inactive socket. *Default: `"120000"`*
  | Paths to a PEM-encoded X.509 server certificate and its corresponding private key. These
 are used by {kib} to establish trust when receiving inbound SSL/TLS connections from users.
 
+|[[server-uuid]] `server.uuid:`
+ | The unique identifier for this {kib} instance.
+
+
 |===
 
 [NOTE]
