@@ -16,10 +16,11 @@ import {
   getInvalidFieldMessage,
   getSafeName,
   isValidNumber,
-  useDebounceWithOptions,
   getFilter,
 } from './helpers';
 import { FieldBasedIndexPatternColumn } from './column_types';
+import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
+import { useDebounceWithOptions } from '../../../shared_components';
 
 export interface PercentileIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'percentile';
@@ -34,12 +35,18 @@ export interface PercentileIndexPatternColumn extends FieldBasedIndexPatternColu
   };
 }
 
-function ofName(name: string, percentile: number) {
-  return i18n.translate('xpack.lens.indexPattern.percentileOf', {
-    defaultMessage:
-      '{percentile, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} percentile of {name}',
-    values: { name, percentile },
-  });
+function ofName(name: string, percentile: number, timeShift: string | undefined) {
+  return adjustTimeScaleLabelSuffix(
+    i18n.translate('xpack.lens.indexPattern.percentileOf', {
+      defaultMessage:
+        '{percentile, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} percentile of {name}',
+      values: { name, percentile },
+    }),
+    undefined,
+    undefined,
+    undefined,
+    timeShift
+  );
 }
 
 const DEFAULT_PERCENTILE_VALUE = 95;
@@ -54,6 +61,7 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
   input: 'field',
   operationParams: [{ name: 'percentile', type: 'number', required: false }],
   filterable: true,
+  shiftable: true,
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
     if (supportedFieldTypes.includes(fieldType) && aggregatable && !aggregationRestrictions) {
       return {
@@ -74,7 +82,11 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
     );
   },
   getDefaultLabel: (column, indexPattern, columns) =>
-    ofName(getSafeName(column.sourceField, indexPattern), column.params.percentile),
+    ofName(
+      getSafeName(column.sourceField, indexPattern),
+      column.params.percentile,
+      column.timeShift
+    ),
   buildColumn: ({ field, previousColumn, indexPattern }, columnParams) => {
     const existingPercentileParam =
       previousColumn?.operationType === 'percentile' &&
@@ -84,13 +96,18 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
     const newPercentileParam =
       columnParams?.percentile ?? (existingPercentileParam || DEFAULT_PERCENTILE_VALUE);
     return {
-      label: ofName(getSafeName(field.name, indexPattern), newPercentileParam),
+      label: ofName(
+        getSafeName(field.name, indexPattern),
+        newPercentileParam,
+        previousColumn?.timeShift
+      ),
       dataType: 'number',
       operationType: 'percentile',
       sourceField: field.name,
       isBucketed: false,
       scale: 'ratio',
       filter: getFilter(previousColumn, columnParams),
+      timeShift: previousColumn?.timeShift,
       params: {
         percentile: newPercentileParam,
         ...getFormatFromPreviousColumn(previousColumn),
@@ -100,7 +117,7 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: ofName(field.displayName, oldColumn.params.percentile),
+      label: ofName(field.displayName, oldColumn.params.percentile, oldColumn.timeShift),
       sourceField: field.name,
     };
   },
@@ -113,6 +130,8 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
         schema: 'metric',
         field: column.sourceField,
         percentile: column.params.percentile,
+        // time shift is added to wrapping aggFilteredMetric if filter is set
+        timeShift: column.filter ? undefined : column.timeShift,
       }
     ).toAst();
   },
@@ -146,7 +165,8 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
                 : ofName(
                     indexPattern.getFieldByName(currentColumn.sourceField)?.displayName ||
                       currentColumn.sourceField,
-                    inputValueAsNumber
+                    inputValueAsNumber,
+                    currentColumn.timeShift
                   ),
               params: {
                 ...currentColumn.params,

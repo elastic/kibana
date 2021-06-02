@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
+import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup, CoreStart } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { termsOperation, TermsIndexPatternColumn } from './terms';
 import { filtersOperation, FiltersIndexPatternColumn } from './filters';
@@ -42,13 +42,14 @@ import {
   FormulaIndexPatternColumn,
 } from './formula';
 import { lastValueOperation, LastValueIndexPatternColumn } from './last_value';
-import { OperationMetadata } from '../../../types';
+import { FramePublicAPI, OperationMetadata } from '../../../types';
 import type { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from './column_types';
 import { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../types';
 import { DateRange } from '../../../../common';
 import { ExpressionAstFunction } from '../../../../../../../src/plugins/expressions/public';
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { RangeIndexPatternColumn, rangeOperation } from './ranges';
+import { IndexPatternDimensionEditorProps } from '../../dimension_panel';
 
 /**
  * A union type of all available column types. If a column is of an unknown type somewhere
@@ -149,7 +150,9 @@ export { formulaOperation } from './formula/formula';
 export interface ParamEditorProps<C> {
   currentColumn: C;
   layer: IndexPatternLayer;
-  updateLayer: (newLayer: IndexPatternLayer) => void;
+  updateLayer: (
+    setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
+  ) => void;
   columnId: string;
   indexPattern: IndexPattern;
   uiSettings: IUiSettingsClient;
@@ -158,6 +161,7 @@ export interface ParamEditorProps<C> {
   http: HttpSetup;
   dateRange: DateRange;
   data: DataPublicPluginStart;
+  activeData?: IndexPatternDimensionEditorProps['activeData'];
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
 }
 
@@ -238,7 +242,22 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
     columnId: string,
     indexPattern: IndexPattern,
     operationDefinitionMap?: Record<string, GenericOperationDefinition>
-  ) => string[] | undefined;
+  ) =>
+    | Array<
+        | string
+        | {
+            message: string;
+            fixAction?: {
+              label: string;
+              newState: (
+                core: CoreStart,
+                frame: FramePublicAPI,
+                layerId: string
+              ) => Promise<IndexPatternLayer>;
+            };
+          }
+      >
+    | undefined;
 
   /*
    * Flag whether this operation can be scaled by time unit if a date histogram is available.
@@ -253,6 +272,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * autocomplete.
    */
   filterable?: boolean;
+  shiftable?: boolean;
 
   getHelpMessage?: (props: HelpProps<C>) => React.ReactNode;
   /*
@@ -355,7 +375,8 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
     columnId: string,
     indexPattern: IndexPattern,
     layer: IndexPatternLayer,
-    uiSettings: IUiSettingsClient
+    uiSettings: IUiSettingsClient,
+    orderedColumnIds: string[]
   ) => ExpressionAstFunction;
   /**
    * Validate that the operation has the right preconditions in the state. For example:
@@ -363,12 +384,27 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
    * - Requires a date histogram operation somewhere before it in order
    * - Missing references
    */
-  getErrorMessage: (
+  getErrorMessage?: (
     layer: IndexPatternLayer,
     columnId: string,
     indexPattern: IndexPattern,
     operationDefinitionMap?: Record<string, GenericOperationDefinition>
-  ) => string[] | undefined;
+  ) =>
+    | Array<
+        | string
+        | {
+            message: string;
+            fixAction?: {
+              label: string;
+              newState: (
+                core: CoreStart,
+                frame: FramePublicAPI,
+                layerId: string
+              ) => Promise<IndexPatternLayer>;
+            };
+          }
+      >
+    | undefined;
 }
 
 export interface RequiredReference {

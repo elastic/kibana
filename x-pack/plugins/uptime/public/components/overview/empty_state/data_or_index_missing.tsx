@@ -43,14 +43,14 @@ export const DataOrIndexMissing = ({ headingMessage, settings }: DataMissingProp
                 <p>
                   <FormattedMessage
                     id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
-                    defaultMessage="If you have not setup heartbeat yet, you can setup heartbeat to start monitoring your services."
+                    defaultMessage="Set up Heartbeat to start monitoring your services."
                   />
                 </p>
                 <p>
                   <FormattedMessage
                     id="xpack.uptime.emptyState.configureHeartbeatIndexSettings"
-                    defaultMessage="If you have setup heartbeat and confirmed data is being sent to Elasticsearch,
-                    update your index pattern settings and insure they are aligned with your Heartbeat config."
+                    defaultMessage="If Heartbeat is already set up, confirm it's sending data to Elasticsearch,
+                    then update the index pattern settings to match the Heartbeat config."
                   />
                 </p>
               </>

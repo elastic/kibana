@@ -58,8 +58,6 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
   const globalConfig: SharedGlobalConfig = {
     kibana: {
       index: '.kibana-tests',
-      autocompleteTerminateAfter: duration(100000),
-      autocompleteTimeout: duration(1000),
     },
     elasticsearch: {
       shardTimeout: duration('30s'),
