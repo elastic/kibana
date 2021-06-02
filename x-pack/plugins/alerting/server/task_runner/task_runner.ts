@@ -684,40 +684,69 @@ function generateNewAndRecoveredInstanceEvents<
     console.log(`recovered instance: ${JSON.stringify(recoveredAlertInstances[id])}`);
     const { group: actionGroup, subgroup: actionSubgroup } =
       recoveredAlertInstances[id].getLastScheduledActions() ?? {};
+    const state = recoveredAlertInstances[id].getState();
     const message = `${params.alertLabel} instance '${id}' has recovered`;
-    logInstanceEvent(id, EVENT_LOG_ACTIONS.recoveredInstance, message, actionGroup, actionSubgroup);
+    logInstanceEvent(
+      id,
+      EVENT_LOG_ACTIONS.recoveredInstance,
+      message,
+      state,
+      actionGroup,
+      actionSubgroup
+    );
   }
 
   for (const id of newIds) {
     console.log(`new instance: ${JSON.stringify(currentAlertInstances[id])}`);
     const { actionGroup, subgroup: actionSubgroup } =
       currentAlertInstances[id].getScheduledActionOptions() ?? {};
+    const state = currentAlertInstances[id].getState();
     const message = `${params.alertLabel} created new instance: '${id}'`;
-    logInstanceEvent(id, EVENT_LOG_ACTIONS.newInstance, message, actionGroup, actionSubgroup);
+    logInstanceEvent(
+      id,
+      EVENT_LOG_ACTIONS.newInstance,
+      message,
+      state,
+      actionGroup,
+      actionSubgroup
+    );
   }
 
   for (const id of currentAlertInstanceIds) {
     console.log(`active instance: ${JSON.stringify(currentAlertInstances[id])}`);
     const { actionGroup, subgroup: actionSubgroup } =
       currentAlertInstances[id].getScheduledActionOptions() ?? {};
+    const state = currentAlertInstances[id].getState();
     const message = `${params.alertLabel} active instance: '${id}' in ${
       actionSubgroup
         ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
         : `actionGroup: '${actionGroup}'`
     }`;
-    logInstanceEvent(id, EVENT_LOG_ACTIONS.activeInstance, message, actionGroup, actionSubgroup);
+    logInstanceEvent(
+      id,
+      EVENT_LOG_ACTIONS.activeInstance,
+      message,
+      state,
+      actionGroup,
+      actionSubgroup
+    );
   }
 
   function logInstanceEvent(
     instanceId: string,
     action: string,
     message: string,
+    state: InstanceState,
     group?: string,
     subgroup?: string
   ) {
     const event: IEvent = {
       event: {
         action,
+        ...(state?.start ? { start: state.start as string } : {}),
+        ...(state?.end ? { end: state.end as string } : {}),
+        ...(state?.duration ? { duration: state.duration as number } : {}),
+        ...(state?.uuid ? { id: state.uuid as string } : {}),
       },
       kibana: {
         alerting: {
