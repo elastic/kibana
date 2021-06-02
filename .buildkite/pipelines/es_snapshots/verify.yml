@@ -1,0 +1,66 @@
+env:
+  IGNORE_SHIP_CI_STATS_ERROR: 'true'
+steps:
+  - command: .buildkite/scripts/lifecycle/pre_build.sh
+    label: Pre-Build
+  - wait
+  - command: .buildkite/scripts/steps/build_kibana.sh
+    label: Build Kibana Distribution and Plugins
+    agents:
+      queue: c2-8
+    key: build
+    if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+
+  - command: .buildkite/scripts/steps/functional/xpack-cigroup.sh
+    label: 'Default CI Group'
+    parallelism: 13
+    agents:
+      queue: ci-group-6
+    artifact_paths: target/junit/**/*.xml
+    depends_on: build
+
+  - command: CI_GROUP=Docker .buildkite/scripts/steps/functional/xpack-cigroup.sh
+    label: 'Docker CI Group'
+    agents:
+      queue: ci-group-6
+    artifact_paths: target/junit/**/*.xml
+    depends_on: build
+
+  - command: .buildkite/scripts/steps/functional/oss-cigroup.sh
+    label: 'OSS CI Group'
+    parallelism: 12
+    agents:
+      queue: ci-group-4d
+    artifact_paths: target/junit/**/*.xml
+    depends_on: build
+
+  - command: .buildkite/scripts/steps/test/jest_integration.sh
+    label: 'Jest Integration Tests'
+    agents:
+      queue: jest
+    artifact_paths: target/junit/**/*.xml
+
+  - command: .buildkite/scripts/steps/test/api_integration.sh
+    label: 'API Integration Tests'
+    agents:
+      queue: jest
+    artifact_paths: target/junit/**/*.xml
+
+  - wait
+
+  - trigger: 'kibana-elasticsearch-snapshot-promote'
+    async: true
+    build:
+      env:
+        ES_SNAPSHOT_MANIFEST: '$ES_SNAPSHOT_MANIFEST'
+      branch: '$BUILDKITE_BRANCH'
+
+  - wait: ~
+    continue_on_failure: true
+  - plugins:
+      - junit-annotate#v1.9.0:
+          artifacts: target/junit/**/*.xml
+  - wait: ~
+    continue_on_failure: true
+  - command: .buildkite/scripts/lifecycle/post_build.sh
+    label: Post-Build
