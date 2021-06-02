@@ -88,6 +88,7 @@ export const TopMetricsAggForm: PivotAggsConfigTopMetrics['AggFormComponent'] = 
                 }
               >
                 <EuiButtonGroup
+                  type="single"
                   legend={i18n.translate(
                     'xpack.transform.agg.popoverForm.sortDirectionTopMetricsLabel',
                     {
@@ -95,12 +96,11 @@ export const TopMetricsAggForm: PivotAggsConfigTopMetrics['AggFormComponent'] = 
                     }
                   )}
                   options={sortDirectionOptions}
-                  idSelected={aggConfig.sortDirection}
+                  idSelected={aggConfig.sortDirection ?? ''}
                   onChange={(id: string) =>
                     onChange({ ...aggConfig, sortDirection: id as SortDirection })
                   }
                   color="text"
-                  type="single"
                 />
               </EuiFormRow>
 
@@ -119,6 +119,7 @@ export const TopMetricsAggForm: PivotAggsConfigTopMetrics['AggFormComponent'] = 
                 }
               >
                 <EuiButtonGroup
+                  type="single"
                   legend={i18n.translate(
                     'xpack.transform.agg.popoverForm.sortModeTopMetricsLabel',
                     {
@@ -126,12 +127,11 @@ export const TopMetricsAggForm: PivotAggsConfigTopMetrics['AggFormComponent'] = 
                     }
                   )}
                   options={sortModeOptions}
-                  idSelected={aggConfig.sortMode}
+                  idSelected={aggConfig.sortMode ?? ''}
                   onChange={(id: string) => {
                     onChange({ ...aggConfig, sortMode: id as SortMode });
                   }}
                   color="text"
-                  type="single"
                 />
               </EuiFormRow>
 
