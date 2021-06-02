@@ -37,19 +37,4 @@ export const registerFeature = (home: HomePublicPluginSetup) => {
     solutionId: 'kibana',
     order: 500,
   });
-
-  home.featureCatalogue.register({
-    id: `${PLUGIN_ID}_file_data_visualizer`,
-    title: i18n.translate('xpack.ml.fileDataVisualizerTitle', {
-      defaultMessage: 'Upload a file',
-    }),
-    description: i18n.translate('xpack.ml.fileDataVisualizerDescription', {
-      defaultMessage: 'Import your own CSV, NDJSON, or log file.',
-    }),
-    icon: 'document',
-    path: '/app/ml/filedatavisualizer',
-    showOnHomePage: true,
-    category: FeatureCatalogueCategory.DATA,
-    order: 520,
-  });
 };

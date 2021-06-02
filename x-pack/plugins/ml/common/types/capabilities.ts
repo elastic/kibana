@@ -105,11 +105,7 @@ export function getPluginPrivileges() {
   return {
     admin: {
       ...privilege,
-      api: [
-        'fileUpload:import',
-        'fileUpload:analyzeFile',
-        ...allMlCapabilitiesKeys.map((k) => `ml:${k}`),
-      ],
+      api: allMlCapabilitiesKeys.map((k) => `ml:${k}`),
       catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
       ui: allMlCapabilitiesKeys,
       savedObject: {
@@ -127,7 +123,7 @@ export function getPluginPrivileges() {
     },
     user: {
       ...privilege,
-      api: ['fileUpload:analyzeFile', ...userMlCapabilitiesKeys.map((k) => `ml:${k}`)],
+      api: userMlCapabilitiesKeys.map((k) => `ml:${k}`),
       catalogue: [PLUGIN_ID],
       management: { insightsAndAlerting: [] },
       ui: userMlCapabilitiesKeys,
