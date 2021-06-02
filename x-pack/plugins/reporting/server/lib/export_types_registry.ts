@@ -10,7 +10,10 @@ import { getExportType as getTypeCsvDeprecated } from '../export_types/csv';
 import { getExportType as getTypeCsvFromSavedObject } from '../export_types/csv_searchsource_immediate';
 import { getExportType as getTypeCsv } from '../export_types/csv_searchsource';
 import { getExportType as getTypePng } from '../export_types/png';
-import { getExportType as getTypePrintablePdf } from '../export_types/printable_pdf';
+import {
+  getExportType as getTypePrintablePdf,
+  getExportTypeV2 as getTypePrintablePdfV2,
+} from '../export_types/printable_pdf';
 import { CreateJobFn, ExportTypeDefinition } from '../types';
 
 type GetCallbackFn = (item: ExportTypeDefinition) => boolean;
@@ -89,6 +92,7 @@ export function getExportTypesRegistry(): ExportTypesRegistry {
     getTypeCsvFromSavedObject,
     getTypePng,
     getTypePrintablePdf,
+    getTypePrintablePdfV2,
   ];
   getTypeFns.forEach((getType) => {
     registry.register(getType());
