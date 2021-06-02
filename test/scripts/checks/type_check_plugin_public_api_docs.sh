@@ -12,3 +12,6 @@ checks-reporter-with-killswitch "Build TS Refs" \
 
 checks-reporter-with-killswitch "Check Types" \
   node scripts/type_check
+
+echo " -- building api docs"
+node scripts/build_api_docs
