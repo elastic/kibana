@@ -149,73 +149,72 @@ export default function ({ getService }: FtrProviderContext) {
         },
       },
     },
-    // skipping categorization tests, see https://github.com/elastic/kibana/issues/101056
-    // {
-    //   suiteTitle: 'with categorization detector and default datafeed settings',
-    //   jobSource: 'ft_ecommerce',
-    //   jobId: `ec_advanced_2_${Date.now()}`,
-    //   get jobIdClone(): string {
-    //     return `${this.jobId}_clone`;
-    //   },
-    //   jobDescription:
-    //     'Create advanced job from ft_ecommerce dataset with a categorization detector and default datafeed settings',
-    //   jobGroups: ['automated', 'ecommerce', 'advanced'],
-    //   get jobGroupsClone(): string[] {
-    //     return [...this.jobGroups, 'clone'];
-    //   },
-    //   pickFieldsConfig: {
-    //     categorizationField: 'products.product_name',
-    //     detectors: [
-    //       {
-    //         identifier: 'count by mlcategory',
-    //         function: 'count',
-    //         byField: 'mlcategory',
-    //       } as Detector,
-    //     ],
-    //     influencers: ['mlcategory'],
-    //     bucketSpan: '4h',
-    //     memoryLimit: '100mb',
-    //   } as PickFieldsConfig,
-    //   datafeedConfig: {} as DatafeedConfig,
-    //   expected: {
-    //     wizard: {
-    //       timeField: 'order_date',
-    //     },
-    //     row: {
-    //       recordCount: '4,675',
-    //       memoryStatus: 'ok',
-    //       jobState: 'closed',
-    //       datafeedState: 'stopped',
-    //       latestTimestamp: '2019-07-12 23:45:36',
-    //     },
-    //     counts: {
-    //       processed_record_count: '4,675',
-    //       processed_field_count: '4,675',
-    //       input_bytes: '354.2 KB',
-    //       input_field_count: '4,675',
-    //       invalid_date_count: '0',
-    //       missing_field_count: '0',
-    //       out_of_order_timestamp_count: '0',
-    //       empty_bucket_count: '0',
-    //       sparse_bucket_count: '0',
-    //       bucket_count: '185',
-    //       earliest_record_timestamp: '2019-06-12 00:04:19',
-    //       latest_record_timestamp: '2019-07-12 23:45:36',
-    //       input_record_count: '4,675',
-    //       latest_bucket_timestamp: '2019-07-12 20:00:00',
-    //     },
-    //     modelSizeStats: {
-    //       result_type: 'model_size_stats',
-    //       model_bytes_exceeded: '0.0 B',
-    //       // not checking total_by_field_count as the number of categories might change
-    //       total_over_field_count: '0',
-    //       total_partition_field_count: '2',
-    //       bucket_allocation_failures_count: '0',
-    //       memory_status: 'ok',
-    //       timestamp: '2019-07-12 16:00:00',
-    //     },
-    //   },
-    // },
+    {
+      suiteTitle: 'with categorization detector and default datafeed settings',
+      jobSource: 'ft_ecommerce',
+      jobId: `ec_advanced_2_${Date.now()}`,
+      get jobIdClone(): string {
+        return `${this.jobId}_clone`;
+      },
+      jobDescription:
+        'Create advanced job from ft_ecommerce dataset with a categorization detector and default datafeed settings',
+      jobGroups: ['automated', 'ecommerce', 'advanced'],
+      get jobGroupsClone(): string[] {
+        return [...this.jobGroups, 'clone'];
+      },
+      pickFieldsConfig: {
+        categorizationField: 'products.product_name',
+        detectors: [
+          {
+            identifier: 'count by mlcategory',
+            function: 'count',
+            byField: 'mlcategory',
+          } as Detector,
+        ],
+        influencers: ['mlcategory'],
+        bucketSpan: '4h',
+        memoryLimit: '100mb',
+      } as PickFieldsConfig,
+      datafeedConfig: {} as DatafeedConfig,
+      expected: {
+        wizard: {
+          timeField: 'order_date',
+        },
+        row: {
+          recordCount: '4,675',
+          memoryStatus: 'ok',
+          jobState: 'closed',
+          datafeedState: 'stopped',
+          latestTimestamp: '2019-07-12 23:45:36',
+        },
+        counts: {
+          processed_record_count: '4,675',
+          processed_field_count: '4,675',
+          input_bytes: '354.2 KB',
+          input_field_count: '4,675',
+          invalid_date_count: '0',
+          missing_field_count: '0',
+          out_of_order_timestamp_count: '0',
+          empty_bucket_count: '0',
+          sparse_bucket_count: '0',
+          bucket_count: '185',
+          earliest_record_timestamp: '2019-06-12 00:04:19',
+          latest_record_timestamp: '2019-07-12 23:45:36',
+          input_record_count: '4,675',
+          latest_bucket_timestamp: '2019-07-12 20:00:00',
+        },
+        modelSizeStats: {
+          result_type: 'model_size_stats',
+          model_bytes_exceeded: '0.0 B',
+          // not checking total_by_field_count as the number of categories might change
+          total_over_field_count: '0',
+          total_partition_field_count: '2',
+          bucket_allocation_failures_count: '0',
+          memory_status: 'ok',
+          timestamp: '2019-07-12 16:00:00',
+        },
+      },
+    },
   ];
 
   const calendarId = `wizard-test-calendar_${Date.now()}`;
