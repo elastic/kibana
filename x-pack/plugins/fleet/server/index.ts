@@ -31,7 +31,7 @@ export const config: PluginConfigDescriptor = {
     epm: true,
     agents: true,
   },
-  deprecations: ({ renameFromRoot, unused }) => [
+  deprecations: ({ renameFromRoot, unused, rename }) => [
     renameFromRoot('xpack.ingestManager', 'xpack.fleet'),
     renameFromRoot('xpack.fleet.fleet', 'xpack.fleet.agents'),
     unused('agents.kibana'),
@@ -41,6 +41,18 @@ export const config: PluginConfigDescriptor = {
     unused('agents.pollingRequestTimeout'),
     unused('agents.tlsCheckDisabled'),
     unused('agents.fleetServerEnabled'),
+    (fullConfig, fromPath, addDeprecation) => {
+      const oldValue = fullConfig?.xpack?.fleet?.agents?.elasticsearch?.host;
+      if (oldValue) {
+        delete fullConfig.xpack.fleet.agents.elasticsearch.host;
+        fullConfig.xpack.fleet.agents.elasticsearch.hosts = [oldValue];
+        addDeprecation({
+          message: `Config key [xpack.fleet.agents.elasticsearch.host] is deprecated and replaced by [xpack.fleet.agents.elasticsearch.hosts]`,
+        });
+      }
+
+      return fullConfig;
+    },
   ],
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
@@ -49,7 +61,7 @@ export const config: PluginConfigDescriptor = {
     agents: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       elasticsearch: schema.object({
-        host: schema.maybe(schema.string()),
+        hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }))),
         ca_sha256: schema.maybe(schema.string()),
       }),
       fleet_server: schema.maybe(
