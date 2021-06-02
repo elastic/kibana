@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC } from 'react';
+
+const FileDataVisualizerComponent = React.lazy(() => import('../application/file_datavisualizer'));
 
 export const FileDataVisualizerWrapper: FC = () => {
-  const [FileDataVisualizerComponent, setFileDataVisualizerComponent] = useState<FC<{}> | null>(
-    null
+  return (
+    <React.Suspense fallback={<div />}>
+      <FileDataVisualizerComponent />
+    </React.Suspense>
   );
-
-  useEffect(() => {
-    if (FileDataVisualizerComponent === null) {
-      import('../application/file_datavisualizer').then(({ FileDataVisualizer }) => {
-        setFileDataVisualizerComponent(FileDataVisualizer);
-      });
-    }
-  }, [FileDataVisualizerComponent]);
-
-  return <>{FileDataVisualizerComponent}</>;
 };

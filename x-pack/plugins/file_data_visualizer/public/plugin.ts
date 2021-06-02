@@ -21,7 +21,7 @@ import { getMaxBytesFormatted } from './application/util/get_max_bytes';
 import { registerHomeAddData } from './register_home';
 
 export interface FileDataVisualizerSetupDependencies {
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
 }
 export interface FileDataVisualizerStartDependencies {
   data: DataPublicPluginStart;
@@ -44,7 +44,9 @@ export class FileDataVisualizerPlugin
       FileDataVisualizerStartDependencies
     > {
   public setup(core: CoreSetup, plugins: FileDataVisualizerSetupDependencies) {
-    registerHomeAddData(plugins.home);
+    if (plugins.home) {
+      registerHomeAddData(plugins.home);
+    }
   }
 
   public start(core: CoreStart, plugins: FileDataVisualizerStartDependencies) {

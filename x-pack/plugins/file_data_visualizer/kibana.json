@@ -10,12 +10,12 @@
     "embeddable",
     "share",
     "discover",
-    "fileUpload",
-    "home"
+    "fileUpload"
   ],
   "optionalPlugins": [
     "security",
-    "maps"
+    "maps",
+    "home"
   ],
   "requiredBundles": [
     "kibanaReact",

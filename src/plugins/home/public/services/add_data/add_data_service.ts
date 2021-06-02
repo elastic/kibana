@@ -16,9 +16,7 @@ export interface AddDataTab {
 }
 
 export class AddDataService {
-  private addDataTabs: {
-    [key: string]: AddDataTab;
-  } = {};
+  private addDataTabs: Record<string, AddDataTab> = {};
 
   public setup() {
     return {
