@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import uuid from 'uuid';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Dictionary, pickBy, mapValues, without, cloneDeep } from 'lodash';
 import type { Request } from '@hapi/hapi';
@@ -324,9 +325,9 @@ export class TaskRunner<
     });
 
     trackAlertDurations({
-      originalAlertInstances,
-      currentAlertInstances: instancesWithScheduledActions,
-      recoveredAlertInstances,
+      originalAlerts: originalAlertInstances,
+      currentAlerts: instancesWithScheduledActions,
+      recoveredAlerts: recoveredAlertInstances,
     });
 
     generateNewAndRecoveredInstanceEvents({
@@ -396,15 +397,6 @@ export class TaskRunner<
       this.logger.debug(`no scheduling of actions for alert ${alertLabel}: alert is muted.`);
     }
 
-    console.log(
-      `executeAlertInstances ${JSON.stringify({
-        alertTypeState: updatedAlertTypeState || undefined,
-        alertInstances: mapValues<
-          Record<string, AlertInstance<InstanceState, InstanceContext>>,
-          RawAlertInstance
-        >(instancesWithScheduledActions, (alertInstance) => alertInstance.toRaw()),
-      })}`
-    );
     return {
       alertTypeState: updatedAlertTypeState || undefined,
       alertInstances: mapValues<
@@ -606,9 +598,9 @@ interface TrackAlertDurationsParams<
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext
 > {
-  originalAlertInstances: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
-  currentAlertInstances: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
-  recoveredAlertInstances: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
+  originalAlerts: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
+  currentAlerts: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
+  recoveredAlerts: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
 }
 
 function trackAlertDurations<
@@ -616,16 +608,45 @@ function trackAlertDurations<
   InstanceContext extends AlertInstanceContext
 >(params: TrackAlertDurationsParams<InstanceState, InstanceContext>) {
   const currentTime = new Date().toISOString();
-  const { currentAlertInstances, originalAlertInstances, recoveredAlertInstances } = params;
-  const originalAlertInstanceIds = Object.keys(originalAlertInstances);
-  const currentAlertInstanceIds = Object.keys(currentAlertInstances);
-  const recoveredAlertInstanceIds = Object.keys(recoveredAlertInstances);
-  const newIds = without(currentAlertInstanceIds, ...originalAlertInstanceIds);
+  const { currentAlerts, originalAlerts, recoveredAlerts } = params;
+  const originalAlertIds = Object.keys(originalAlerts);
+  const currentAlertIds = Object.keys(currentAlerts);
+  const recoveredAlertIds = Object.keys(recoveredAlerts);
+  const newAlertIds = without(currentAlertIds, ...originalAlertIds);
 
   // Inject start time into instance state of new instances
-  for (const id of newIds) {
-    const state = currentAlertInstances[id].getState();
-    currentAlertInstances[id].replaceState({ ...state, start: currentTime });
+  for (const id of newAlertIds) {
+    const state = currentAlerts[id].getState();
+    currentAlerts[id].replaceState({ ...state, start: currentTime, uuid: uuid.v4() });
+  }
+
+  // Calculate duration to date for active instances
+  for (const id of currentAlertIds) {
+    const state = originalAlertIds.includes(id)
+      ? originalAlerts[id].getState()
+      : currentAlerts[id].getState();
+    const duration = state.start
+      ? new Date(currentTime).valueOf() - new Date(state.start as string).valueOf()
+      : undefined;
+    currentAlerts[id].replaceState({
+      ...state,
+      ...(state.start ? { start: state.start } : {}),
+      ...(state.uuid ? { uuid: state.uuid } : {}),
+      ...(duration !== undefined ? { duration } : {}),
+    });
+  }
+
+  // Inject end time into instance state of recovered instances
+  for (const id of recoveredAlertIds) {
+    const state = recoveredAlerts[id].getState();
+    const duration = state.start
+      ? new Date(currentTime).valueOf() - new Date(state.start as string).valueOf()
+      : undefined;
+    recoveredAlerts[id].replaceState({
+      ...state,
+      end: currentTime,
+      ...(duration ? { duration } : {}),
+    });
   }
 }
 
@@ -660,6 +681,7 @@ function generateNewAndRecoveredInstanceEvents<
   const newIds = without(currentAlertInstanceIds, ...originalAlertInstanceIds);
 
   for (const id of recoveredAlertInstanceIds) {
+    console.log(`recovered instance: ${JSON.stringify(recoveredAlertInstances[id])}`);
     const { group: actionGroup, subgroup: actionSubgroup } =
       recoveredAlertInstances[id].getLastScheduledActions() ?? {};
     const message = `${params.alertLabel} instance '${id}' has recovered`;
@@ -675,6 +697,7 @@ function generateNewAndRecoveredInstanceEvents<
   }
 
   for (const id of currentAlertInstanceIds) {
+    console.log(`active instance: ${JSON.stringify(currentAlertInstances[id])}`);
     const { actionGroup, subgroup: actionSubgroup } =
       currentAlertInstances[id].getScheduledActionOptions() ?? {};
     const message = `${params.alertLabel} active instance: '${id}' in ${
