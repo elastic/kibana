@@ -1418,23 +1418,20 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .dive()
         .find('[data-test-subj="indexPattern-time-shift-enable"]')
         .prop('onClick')!({} as MouseEvent);
-      expect(props.setState).toHaveBeenCalledWith(
-        {
-          ...props.state,
-          layers: {
-            first: {
-              ...props.state.layers.first,
-              columns: {
-                ...props.state.layers.first.columns,
-                col2: expect.objectContaining({
-                  timeShift: '',
-                }),
-              },
+      expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                timeShift: '',
+              }),
             },
           },
         },
-        { shouldRemoveDimension: false, shouldReplaceDimension: true }
-      );
+      });
     });
 
     it('should carry over time shift to other operation if possible', () => {
@@ -1448,23 +1445,20 @@ describe('IndexPatternDimensionEditorPanel', () => {
       wrapper
         .find('button[data-test-subj="lns-indexPatternDimension-count incompatible"]')
         .simulate('click');
-      expect(props.setState).toHaveBeenCalledWith(
-        {
-          ...props.state,
-          layers: {
-            first: {
-              ...props.state.layers.first,
-              columns: {
-                ...props.state.layers.first.columns,
-                col2: expect.objectContaining({
-                  timeShift: '1d',
-                }),
-              },
+      expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                timeShift: '1d',
+              }),
             },
           },
         },
-        { shouldRemoveDimension: false, shouldReplaceDimension: true }
-      );
+      });
     });
 
     it('should allow to change time shift', () => {
@@ -1473,23 +1467,20 @@ describe('IndexPatternDimensionEditorPanel', () => {
       });
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
       wrapper.find(TimeShift).find(EuiComboBox).prop('onCreateOption')!('1h', []);
-      expect(props.setState).toHaveBeenCalledWith(
-        {
-          ...props.state,
-          layers: {
-            first: {
-              ...props.state.layers.first,
-              columns: {
-                ...props.state.layers.first.columns,
-                col2: expect.objectContaining({
-                  timeShift: '1h',
-                }),
-              },
+      expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                timeShift: '1h',
+              }),
             },
           },
         },
-        { shouldRemoveDimension: false, shouldReplaceDimension: true }
-      );
+      });
     });
 
     it('should allow to time shift', () => {
@@ -1504,23 +1495,20 @@ describe('IndexPatternDimensionEditorPanel', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         {} as any
       );
-      expect(props.setState).toHaveBeenCalledWith(
-        {
-          ...props.state,
-          layers: {
-            first: {
-              ...props.state.layers.first,
-              columns: {
-                ...props.state.layers.first.columns,
-                col2: expect.objectContaining({
-                  timeShift: undefined,
-                }),
-              },
+      expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                timeShift: undefined,
+              }),
             },
           },
         },
-        { shouldRemoveDimension: false, shouldReplaceDimension: true }
-      );
+      });
     });
   });
 
