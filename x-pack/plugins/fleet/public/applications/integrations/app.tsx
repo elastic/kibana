@@ -64,7 +64,6 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
 
   useEffect(() => {
     (async () => {
-      setIsPermissionsLoading(false);
       setPermissionsError(undefined);
       setIsInitialized(false);
       setInitializationError(null);
