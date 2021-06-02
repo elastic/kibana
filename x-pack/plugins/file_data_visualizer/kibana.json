@@ -15,6 +15,7 @@
   "optionalPlugins": [
     "security",
     "maps",
+    "home",
     "lens"
   ],
   "requiredBundles": [
