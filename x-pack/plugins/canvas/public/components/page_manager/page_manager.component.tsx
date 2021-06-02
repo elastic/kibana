@@ -11,9 +11,9 @@ import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elasti
 import { DragDropContext, Droppable, Draggable, DragDropContextProps } from 'react-beautiful-dnd';
 // @ts-expect-error untyped dependency
 import Style from 'style-it';
-
 import { ConfirmModal } from '../confirm_modal';
-import { Link } from '../link';
+import { RoutingLink } from '../routing';
+import { WorkpadRoutingContext } from '../../routes/workpad';
 import { PagePreview } from '../page_preview';
 
 import { ComponentStrings } from '../../../i18n';
@@ -131,13 +131,9 @@ export class PageManager extends Component<Props, State> {
   resetRemove = () => this._isMounted && this.setState({ removeId: null });
 
   doRemove = () => {
-    const { onPreviousPage, onRemovePage, selectedPage } = this.props;
+    const { onRemovePage } = this.props;
     const { removeId } = this.state;
     this.resetRemove();
-
-    if (removeId === selectedPage) {
-      onPreviousPage();
-    }
 
     if (removeId !== null) {
       onRemovePage(removeId);
@@ -156,7 +152,7 @@ export class PageManager extends Component<Props, State> {
   };
 
   renderPage = (page: CanvasPage, i: number) => {
-    const { isWriteable, selectedPage, workpadId, workpadCSS } = this.props;
+    const { isWriteable, selectedPage, workpadCSS } = this.props;
     const pageNumber = i + 1;
 
     return (
@@ -183,18 +179,18 @@ export class PageManager extends Component<Props, State> {
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <Link
-                  name="loadWorkpad"
-                  params={{ id: workpadId, page: pageNumber }}
-                  aria-label={strings.getPageNumberAriaLabel(pageNumber)}
-                >
-                  {Style.it(
-                    workpadCSS,
-                    <div>
-                      <PagePreview height={100} page={page} onRemove={this.onConfirmRemove} />
-                    </div>
+                <WorkpadRoutingContext.Consumer>
+                  {({ getUrl }) => (
+                    <RoutingLink to={getUrl(pageNumber)}>
+                      {Style.it(
+                        workpadCSS,
+                        <div>
+                          <PagePreview height={100} page={page} onRemove={this.onConfirmRemove} />
+                        </div>
+                      )}
+                    </RoutingLink>
                   )}
-                </Link>
+                </WorkpadRoutingContext.Consumer>
               </EuiFlexItem>
             </EuiFlexGroup>
           </div>
