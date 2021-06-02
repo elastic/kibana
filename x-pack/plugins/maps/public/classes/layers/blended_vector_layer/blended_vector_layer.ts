@@ -292,7 +292,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
   }
 
   async getEditModeEnabled(): Promise<boolean> {
-    return false;
+    return this._isClustered ? false : super.getEditModeEnabled();
   }
 
   async syncData(syncContext: DataRequestContext) {
