@@ -30,7 +30,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
           `Use extended "object" format instead.`,
         correctiveActions: {
           manualSteps: [
-            `Use an object format for "xpack.security.authc.providers" in your kibana configs.`,
+            `Use the extended object format for "xpack.security.authc.providers" in your Kibana configuration.`,
           ],
         },
       });
@@ -54,7 +54,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
           'Enabling both `basic` and `token` authentication providers in `xpack.security.authc.providers` is deprecated. Login page will only use `token` provider.',
         correctiveActions: {
           manualSteps: [
-            'Remove one of the authentication providers `basic` or `token` in "xpack.security.authc.providers".',
+            'Remove either the `basic` or `token` auth provider in "xpack.security.authc.providers" from your Kibana configuration.',
           ],
         },
       });
@@ -71,7 +71,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
           '`xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize` is deprecated and is no longer used',
         correctiveActions: {
           manualSteps: [
-            `Remove "xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize" from your kibana configs.`,
+            `Remove "xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize" from your Kibana configuration.`,
           ],
         },
       });
@@ -85,7 +85,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
           'To turn off security features, disable them in Elasticsearch instead.',
         correctiveActions: {
           manualSteps: [
-            `Remove "xpack.security.enabled" from your kibana configs.`,
+            `Remove "xpack.security.enabled" from your Kibana configuration.`,
             `To turn off security features, disable them in Elasticsearch instead.`,
           ],
         },

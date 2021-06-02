@@ -46,7 +46,7 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
           correctiveActions: {
             manualSteps: [
               `Set 'xpack.reporting.roles.enabled' to 'false' in your kibana configs.`,
-              `Frant reporting privileges to users using Kibana application privileges` +
+              `Grant reporting privileges to users using Kibana application privileges` +
                 `under **Management > Security > Roles**.`,
             ],
           },

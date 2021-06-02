@@ -29,7 +29,7 @@ const disabledDeprecation: ConfigDeprecation = (config, fromPath, addDeprecation
     addDeprecation({
       message: `Disabling the Spaces plugin (xpack.spaces.enabled) will not be supported in the next major version (8.0)`,
       correctiveActions: {
-        manualSteps: [`Remove "xpack.spaces.enabled: false" from your kibana configs`],
+        manualSteps: [`Remove "xpack.spaces.enabled: false" from your Kibana configuration`],
       },
     });
   }
