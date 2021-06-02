@@ -69,7 +69,7 @@ babel(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = [":target"] + DEPS,
+  deps = DEPS + [":target"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )

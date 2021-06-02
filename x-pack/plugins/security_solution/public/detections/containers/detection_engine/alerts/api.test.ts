@@ -22,13 +22,15 @@ import {
   createSignalIndex,
   createHostIsolation,
 } from './api';
+import { coreMock } from '../../../../../../../../src/core/public/mocks';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
 jest.mock('../../../../common/lib/kibana');
 
-const fetchMock = jest.fn();
-mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock } });
+const coreStartMock = coreMock.createStart({ basePath: '/mock' });
+mockKibanaServices.mockReturnValue(coreStartMock);
+const fetchMock = coreStartMock.http.fetch;
 
 describe('Detections Alerts API', () => {
   describe('fetchQueryAlerts', () => {
@@ -167,9 +169,11 @@ describe('Detections Alerts API', () => {
   });
 
   describe('createHostIsolation', () => {
+    const postMock = coreStartMock.http.post;
+
     beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue(mockHostIsolation);
+      postMock.mockClear();
+      postMock.mockResolvedValue(mockHostIsolation);
     });
 
     test('check parameter url', async () => {
@@ -178,8 +182,7 @@ describe('Detections Alerts API', () => {
         comment: 'commento',
         caseIds: ['88c04a90-b19c-11eb-b838-bf3c7840b969'],
       });
-      expect(fetchMock).toHaveBeenCalledWith('/api/endpoint/isolate', {
-        method: 'POST',
+      expect(postMock).toHaveBeenCalledWith('/api/endpoint/isolate', {
         body:
           '{"agent_ids":["fd8a122b-4c54-4c05-b295-e5f8381fc59d"],"comment":"commento","case_ids":["88c04a90-b19c-11eb-b838-bf3c7840b969"]}',
       });

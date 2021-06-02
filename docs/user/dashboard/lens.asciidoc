@@ -4,8 +4,19 @@
 To create visualizations with *Lens*, you drag and drop data fields onto the visualization builder, 
 then *Lens* uses heuristics to apply each field. 
 
-[role="screenshot"]
-image:dashboard/images/lens.png[Lens]
+++++
+<script type="text/javascript" async 
+src="https://play.vidyard.com/embed/v4.js"></script>
+<img
+style="width: 100%; margin: auto; display: block;"
+class="vidyard-player-embed"
+src="https://play.vidyard.com/G6RNjq6U9odYRCYUxY2vfq.jpg"
+data-uuid="G6RNjq6U9odYRCYUxY2vfq"
+data-v="4"
+data-type="inline"
+/>
+</br>
+++++
 
 [float]
 [[lens-required-choices]]
@@ -13,11 +24,9 @@ image:dashboard/images/lens.png[Lens]
 
 Open *Lens*, then explore the fields in your data. The list of fields are determined by the index pattern and time filter.
 
-. On the dashboard, click *Create panel*.
+. On the dashboard, click *Create visualization*.
 
-. On the *New visualization* window, click *Lens*.
-
-. <<set-time-filter,Set the time filter>>. 
+. In *Lens*, <<set-time-filter,set the time filter>>. 
 
 . To view the fields in the a different index pattern, click the index pattern, then select a different index pattern from the dropdown.
 
@@ -56,11 +65,11 @@ TIP: *Other* can equal more than 100% by a small amount.
 
 [float]
 [[create-the-visualization-panel]]
-==== Create the visualization panel
+==== Create visualizations
 
-Drag and drop the fields on to the visualization builder, then 
+Drag and drop the fields on to the visualization builder, then customize the visualization.
 
-. Drag and drop the fields to the visualization builder.
+. Drag and drop the fields on to the visualization builder.
 
 . To change the visualization type, use the following options:
 
@@ -102,7 +111,7 @@ For more information about adding fields to index patterns and Painless scriptin
 
 [float]
 [[drag-and-drop-keyboard-navigation]]
-===== Create visualization panels with keyboard navigation
+===== Create visualizations with keyboard navigation
 
 *Lens* has a fully accessible, continuously improved drag and drop system, which allows you to use a keyboard instead of a mouse.
 
@@ -181,6 +190,8 @@ A subset of *Lens* visualizations support value labels.
 [role="screenshot"]
 image::images/lens_value_labels_xychart_toggle.png[Lens Bar chart value labels menu]
 
+NOTE: In bar charts, you are unable to move the label positions.
+
 * *Pie*, *Donut*, and *Treemap*
 +
 [role="screenshot"]
@@ -234,6 +245,9 @@ refer to <<explore-fields-in-your-data,Explore the fields in your data>>.
 
 Sorting dimensions in visualizations is unsupported in *Lens*.
 
+You can sort the dimensions for a single column in data tables: click the column header, then select the sorting criteria you want to use.
+If you use the dimension as `Columns`, then all the columns that belong to the same dimension are sorted in the table.
+
 [float]
 [[is-it-possible-to-use-saved-serches-in-lens]]
 ===== How do I visualize saved searches?
@@ -245,3 +259,47 @@ Visualizing saved searches in unsupported in *Lens*.
 ===== How do I change the number of suggestions?
 
 Configuring the *Suggestions* that *Lens* automatically populates is unsupported.
+
+[float]
+[[is-it-possible-to-use-different-indexpatterns-in-lens]]
+===== Can I visualize multiple index patterns in a single visualization?
+
+You can create *Bar*, *Line* and *Area* charts from multiple index patterns.
+
+Each *Layer* in a visualization is associated with an index pattern and mutiple *Layers* can be combined together within the same visualization. Each *Layer* also has a chart switcher button in order to select the best type of visualization for the specific dataset.
+You can also change the index pattern for a single *Layer*.
+
+[float]
+[[why-my-field-x-is-missing-from-the-fields-list]]
+===== Why is my field X missing from the fields list?
+
+*Lens* does not support the visualization of full-text fields, therefore it is not showing them in the data summary.
+
+[float]
+[[how-to-handle-gaps-in-time-series-visualizations]]
+===== How do I handle gaps in time series visualizations?
+
+*Lens* provides a set of features to handle missing values for *Area* and *Line* charts, which is useful for sparse data in time series data.
+
+To select a different way to represent missing values, open the *Visual options* menu, then select how to handle missing values. The default is to hide the missing values.
++
+[role="screenshot"]
+image::images/lens_missing_values_strategy.png[Lens Missing values strategies menu]
+
+[float]
+[[is-it-possible-to-change-the-scale-of-Y-axis]]
+===== Is it possible to statically define the scale of the y-axis in a visualization?
+
+The ability to start the y-axis from another value than 0, or use a logarithmic scale, is unsupported in *Lens*.
+
+[float]
+[[is-it-possible-to-have-pagination-for-datatable]]
+===== Is it possible to have pagination in a data table?
+
+Pagination in a data table is unsupported in *Lens*. However, the <<types-of-visualizations,aggregation-based data table>> supports pagination.
+
+[float]
+[[is-it-possible-to-have-more-than-one-Y-axis-scale]]
+===== Is it possible to have more than one y-axis scale in visualizations?
+
+*Lens* lets you pick, for each Y dimension, up to two distinct axis: *left* and *right*. Each axis can have a different scale.

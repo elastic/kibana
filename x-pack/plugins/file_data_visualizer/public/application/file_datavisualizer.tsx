@@ -28,3 +28,7 @@ export const FileDataVisualizer: FC = () => {
     </KibanaContextProvider>
   );
 };
+
+// exporting as default so it can be used with React.lazy
+// eslint-disable-next-line import/no-default-export
+export default FileDataVisualizer;
