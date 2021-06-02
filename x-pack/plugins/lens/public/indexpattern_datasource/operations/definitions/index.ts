@@ -150,7 +150,9 @@ export { formulaOperation } from './formula/formula';
 export interface ParamEditorProps<C> {
   currentColumn: C;
   layer: IndexPatternLayer;
-  updateLayer: (newLayer: IndexPatternLayer) => void;
+  updateLayer: (
+    setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
+  ) => void;
   columnId: string;
   indexPattern: IndexPattern;
   uiSettings: IUiSettingsClient;
