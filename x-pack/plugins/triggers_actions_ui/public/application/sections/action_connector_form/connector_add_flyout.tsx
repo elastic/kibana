@@ -40,6 +40,7 @@ import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 import { createConnectorReducer, InitialConnector, ConnectorReducer } from './connector_reducer';
 import { getConnectorWithInvalidatedFields } from '../../lib/value_validators';
+import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 
 const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
   onClose,
@@ -49,7 +50,7 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
   consumer,
   actionTypeRegistry,
 }) => {
-  let hasErrors = false;
+  const [hasErrors, setHasErrors] = useState<boolean>(true);
   let actionTypeModel: ActionTypeModel | undefined;
 
   const {
@@ -87,11 +88,19 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
       Record<string, unknown>
     >,
   });
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     (async () => {
       if (actionTypeModel) {
+        setIsLoading(true);
         const res = await getConnectorErrors(connector, actionTypeModel);
+        setHasErrors(
+          !!Object.keys(res.connectorErrors).find(
+            (errorKey) => (res.connectorErrors as IErrorObject)[errorKey].length >= 1
+          )
+        );
+        setIsLoading(false);
         setErrors({ ...res });
       }
     })();
@@ -137,10 +146,6 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
     );
   } else {
     actionTypeModel = actionTypeRegistry.get(actionType.id);
-
-    hasErrors = !!Object.keys(errors.connectorErrors).find(
-      (errorKey) => (errors.connectorErrors as IErrorObject)[errorKey].length >= 1
-    );
 
     currentForm = (
       <ActionConnectorForm
@@ -297,7 +302,17 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
           )
         }
       >
-        {currentForm}
+        <>
+          {currentForm}
+          {isLoading ? (
+            <>
+              <EuiSpacer size="m" />
+              <CenterJustifiedSpinner size="l" />{' '}
+            </>
+          ) : (
+            <></>
+          )}
+        </>
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>

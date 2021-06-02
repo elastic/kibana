@@ -20,6 +20,7 @@ import {
   EuiPortal,
   EuiCallOut,
   EuiSpacer,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -54,6 +55,7 @@ export const AlertEdit = ({
   );
   const [isConfirmAlertCloseModalOpen, setIsConfirmAlertCloseModalOpen] = useState<boolean>(false);
   const [alertActionsErrors, setAlertActionsErrors] = useState<IErrorObject[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const {
     http,
@@ -67,8 +69,10 @@ export const AlertEdit = ({
 
   useEffect(() => {
     (async () => {
+      setIsLoading(true);
       const res = await getAlertActionErrors(alert as Alert, actionTypeRegistry);
       setAlertActionsErrors([...res]);
+      setIsLoading(false);
     })();
   }, [alert, actionTypeRegistry]);
 
@@ -87,7 +91,11 @@ export const AlertEdit = ({
 
   async function onSaveAlert(): Promise<Alert | undefined> {
     try {
-      if (isValidAlert(alert, alertErrors, alertActionsErrors) && !hasActionsWithBrokenConnector) {
+      if (
+        !isLoading &&
+        isValidAlert(alert, alertErrors, alertActionsErrors) &&
+        !hasActionsWithBrokenConnector
+      ) {
         const newAlert = await updateAlert({ http, alert, id: alert.id });
         toasts.addSuccess(
           i18n.translate('xpack.triggersActionsUI.sections.alertEdit.saveSuccessNotificationText', {
@@ -184,6 +192,14 @@ export const AlertEdit = ({
                     )}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
+                {isLoading ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiSpacer size="s" />
+                    <EuiLoadingSpinner size="l" />
+                  </EuiFlexItem>
+                ) : (
+                  <></>
+                )}
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     fill

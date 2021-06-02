@@ -19,6 +19,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiFlexGroup,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionConnectorForm, getConnectorErrors } from './action_connector_form';
@@ -35,6 +36,7 @@ import {
 } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
 import { getConnectorWithInvalidatedFields } from '../../lib/value_validators';
+import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type ConnectorAddModalProps = {
@@ -57,7 +59,7 @@ const ConnectorAddModal = ({
     notifications: { toasts },
     application: { capabilities },
   } = useKibana().services;
-  let hasErrors = false;
+  const [hasErrors, setHasErrors] = useState<boolean>(true);
   const initialConnector: InitialConnector<
     Record<string, unknown>,
     Record<string, unknown>
@@ -70,6 +72,7 @@ const ConnectorAddModal = ({
     [actionType.id]
   );
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const canSave = hasSaveActionsCapability(capabilities);
 
   const reducer: ConnectorReducer<
@@ -98,7 +101,14 @@ const ConnectorAddModal = ({
 
   useEffect(() => {
     (async () => {
+      setIsLoading(true);
       const res = await getConnectorErrors(connector, actionTypeModel);
+      setHasErrors(
+        !!Object.keys(res.connectorErrors).find(
+          (errorKey) => (res.connectorErrors as IErrorObject)[errorKey].length >= 1
+        )
+      );
+      setIsLoading(false);
       setErrors({ ...res });
     })();
   }, [connector, actionTypeModel]);
@@ -118,10 +128,6 @@ const ConnectorAddModal = ({
     setServerError(undefined);
     onClose();
   }, [initialConnector, onClose]);
-
-  hasErrors = !!Object.keys(errors.connectorErrors).find(
-    (errorKey) => (errors.connectorErrors as IErrorObject)[errorKey].length >= 1
-  );
 
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await createActionConnector({ http, connector })
@@ -174,15 +180,25 @@ const ConnectorAddModal = ({
       </EuiModalHeader>
 
       <EuiModalBody>
-        <ActionConnectorForm
-          connector={connector}
-          actionTypeName={actionType.name}
-          dispatch={dispatch}
-          serverError={serverError}
-          errors={errors.connectorErrors}
-          actionTypeRegistry={actionTypeRegistry}
-          consumer={consumer}
-        />
+        <>
+          <ActionConnectorForm
+            connector={connector}
+            actionTypeName={actionType.name}
+            dispatch={dispatch}
+            serverError={serverError}
+            errors={errors.connectorErrors}
+            actionTypeRegistry={actionTypeRegistry}
+            consumer={consumer}
+          />
+          {isLoading ? (
+            <>
+              <EuiSpacer size="m" />
+              <CenterJustifiedSpinner size="l" />{' '}
+            </>
+          ) : (
+            <></>
+          )}
+        </>
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty onClick={closeModal}>

@@ -7,7 +7,14 @@
 
 import React, { useReducer, useMemo, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiFlyoutHeader,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiPortal,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import {
@@ -30,6 +37,7 @@ import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
 import { hasAlertChanged, haveAlertParamsChanged } from './has_alert_changed';
 import { getAlertWithInvalidatedFields } from '../../lib/value_validators';
+import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 
 const AlertAdd = ({
   consumer,
@@ -104,10 +112,13 @@ const AlertAdd = ({
   }, [alert.params, initialAlertParams, setInitialAlertParams]);
 
   const [alertActionsErrors, setAlertActionsErrors] = useState<IErrorObject[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     (async () => {
+      setIsLoading(true);
       const res = await getAlertActionErrors(alert as Alert, actionTypeRegistry);
+      setIsLoading(false);
       setAlertActionsErrors([...res]);
     })();
   }, [alert, actionTypeRegistry]);
@@ -204,9 +215,10 @@ const AlertAdd = ({
             </EuiFlyoutBody>
             <AlertAddFooter
               isSaving={isSaving}
+              isFormLoading={isLoading}
               onSave={async () => {
                 setIsSaving(true);
-                if (!isValidAlert(alert, alertErrors, alertActionsErrors)) {
+                if (isLoading || !isValidAlert(alert, alertErrors, alertActionsErrors)) {
                   setAlert(
                     getAlertWithInvalidatedFields(
                       alert as Alert,
