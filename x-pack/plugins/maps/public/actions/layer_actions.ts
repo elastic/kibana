@@ -38,7 +38,6 @@ import {
   UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE,
   UPDATE_SOURCE_PROP,
-  CLEAR_DRAWING_DATA,
 } from './map_action_constants';
 import { clearDataRequests, syncDataForLayerId, updateStyleMeta } from './data_request_actions';
 import { cleanTooltipStateForLayer } from './tooltip_actions';
@@ -55,11 +54,6 @@ import { IVectorStyle } from '../classes/styles/vector/vector_style';
 import { notifyLicensedFeatureUsage } from '../licensed_features';
 import { IESAggField } from '../classes/fields/agg';
 import { IField } from '../classes/fields/field';
-// @ts-ignore
-import {
-  createNewIndexAndPattern,
-  addFeatureToIndex,
-} from '../classes/layers/new_vector_layer_wizard/utils/indexing_service';
 
 export function trackCurrentLayerState(layerId: string) {
   return {
@@ -584,11 +578,5 @@ export function setAreTilesLoaded(layerId: string, areTilesLoaded: boolean) {
     id: layerId,
     propName: '__areTilesLoaded',
     newValue: areTilesLoaded,
-  };
-}
-
-export function clearDrawingData() {
-  return {
-    type: CLEAR_DRAWING_DATA,
   };
 }

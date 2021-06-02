@@ -20,14 +20,22 @@ import { DrawState } from '../../../../../common/descriptor_types';
 
 const geoJSONReader = new jsts.io.GeoJSONReader();
 
-export interface Props {
+export interface ReduxStateProps {
+  drawType?: DRAW_TYPE;
+  drawState?: DrawState;
+  drawMode: DRAW_MODE;
+}
+
+export interface ReduxDispatchProps {
   addNewFeatureToIndex: (geometry: Geometry | Position[]) => void;
   disableDrawState: () => void;
-  drawType: DRAW_TYPE;
-  drawState: DrawState;
-  drawMode: DRAW_MODE;
+}
+
+export interface OwnProps {
   mbMap: MbMap;
 }
+
+type Props = ReduxStateProps & ReduxDispatchProps & OwnProps;
 
 export class DrawFeatureControl extends Component<Props, {}> {
   _onDraw = (mbDrawControl: MapboxDraw) => async (e: { features: Feature[] }) => {

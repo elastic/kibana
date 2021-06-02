@@ -8,21 +8,26 @@
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import { FeatureDrawControl } from './feature_draw_control';
+import {
+  FeatureEditTools,
+  ReduxDispatchProps,
+  ReduxStateProps,
+  OwnProps,
+} from './feature_edit_tools';
 import { setDrawMode, setShapeToDraw } from '../../../../actions';
 import { MapStoreState } from '../../../../reducers/store';
 import { DRAW_MODE, DRAW_TYPE } from '../../../../../common';
-import { getDrawMode } from '../../../../selectors/ui_selectors';
 import { getShapeToDraw } from '../../../../selectors/map_selectors';
 
-function mapStateToProps(state: MapStoreState) {
+function mapStateToProps(state: MapStoreState): ReduxStateProps {
   return {
-    filterModeActive: getDrawMode(state) === DRAW_MODE.DRAW_FILTERS,
     drawType: getShapeToDraw(state),
   };
 }
 
-function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
+function mapDispatchToProps(
+  dispatch: ThunkDispatch<MapStoreState, void, AnyAction>
+): ReduxDispatchProps {
   return {
     setDrawShape: (shapeToDraw: DRAW_TYPE) => {
       dispatch(setShapeToDraw(shapeToDraw));
@@ -33,8 +38,13 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
   };
 }
 
-const connectedFeatureEditControl = connect(
+const connectedFeatureEditControl = connect<
+  ReduxStateProps,
+  ReduxDispatchProps,
+  OwnProps,
+  MapStoreState
+>(
   mapStateToProps,
   mapDispatchToProps
-)(FeatureDrawControl);
-export { connectedFeatureEditControl as FeatureDrawControl };
+)(FeatureEditTools);
+export { connectedFeatureEditControl as FeatureEditTools };

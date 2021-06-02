@@ -62,6 +62,7 @@ const defaultProps = {
   isEditButtonDisabled: false,
   hideTOCDetails: () => {},
   showTOCDetails: () => {},
+  layerIsInEditMode: false,
 };
 
 describe('TOCEntry', () => {

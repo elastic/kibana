@@ -21,7 +21,14 @@ import { ToolbarOverlay } from './toolbar_overlay';
 
 test('Should only show set view control', async () => {
   const component = shallow(
-    <ToolbarOverlay geoFields={[]} showFitToBoundsButton={false} showTimesliderButton={false} />
+    <ToolbarOverlay
+      geoFields={[]}
+      showFitToBoundsButton={false}
+      showTimesliderButton={false}
+      showEditButton={false}
+      shapeDrawModeActive={false}
+      pointDrawModeActive={false}
+    />
   );
   expect(component).toMatchSnapshot();
 });
@@ -39,6 +46,9 @@ test('Should show all controls', async () => {
       geoFields={[geoFieldWithIndex]}
       showFitToBoundsButton={true}
       showTimesliderButton={true}
+      showEditButton={false}
+      shapeDrawModeActive={false}
+      pointDrawModeActive={false}
     />
   );
   expect(component).toMatchSnapshot();

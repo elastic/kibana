@@ -46,6 +46,9 @@ const defaultProps = {
   removeLayer: () => {},
   toggleVisible: () => {},
   supportsFitToBounds: true,
+  enableShapeEditing: () => {},
+  enablePointEditing: () => {},
+  layerSettings: () => {},
 };
 
 describe('TOCEntryActionsPopover', () => {

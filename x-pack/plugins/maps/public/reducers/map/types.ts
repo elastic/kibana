@@ -7,7 +7,6 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { Feature } from 'geojson';
 import {
   DrawState,
   EditState,
@@ -41,7 +40,6 @@ export type MapContext = {
   refreshTimerLastTriggeredAt?: string;
   drawState?: DrawState;
   editState?: EditState;
-  featuresToIndexQueue: Feature[];
   searchSessionId?: string;
   searchSessionMapBuffer?: MapExtent;
 };

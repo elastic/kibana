@@ -14,6 +14,7 @@ export interface CreateDocSourceResp {
 export interface MatchingIndexesResp {
   matchingIndexes?: string[];
   success: boolean;
+  error?: Error;
 }
 
 export interface IndexSourceMappings {

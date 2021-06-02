@@ -9,13 +9,18 @@ import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { Geometry, Position } from 'geojson';
-import { DrawFeatureControl } from './draw_feature_control';
+import {
+  DrawFeatureControl,
+  ReduxDispatchProps,
+  ReduxStateProps,
+  OwnProps,
+} from './draw_feature_control';
 import { addNewFeatureToIndex, setShapeToDraw } from '../../../../actions';
 import { MapStoreState } from '../../../../reducers/store';
 import { getDrawState, getShapeToDraw } from '../../../../selectors/map_selectors';
 import { getDrawMode } from '../../../../selectors/ui_selectors';
 
-function mapStateToProps(state: MapStoreState) {
+function mapStateToProps(state: MapStoreState): ReduxStateProps {
   return {
     drawType: getShapeToDraw(state),
     drawState: getDrawState(state),
@@ -23,9 +28,11 @@ function mapStateToProps(state: MapStoreState) {
   };
 }
 
-function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
+function mapDispatchToProps(
+  dispatch: ThunkDispatch<MapStoreState, void, AnyAction>
+): ReduxDispatchProps {
   return {
-    addNewFeatureToIndex(geometry: Geometry | Position[], path: string) {
+    addNewFeatureToIndex(geometry: Geometry | Position[]) {
       dispatch(addNewFeatureToIndex(geometry));
     },
     disableDrawState() {
@@ -34,5 +41,8 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
   };
 }
 
-const connected = connect(mapStateToProps, mapDispatchToProps)(DrawFeatureControl);
+const connected = connect<ReduxStateProps, ReduxDispatchProps, OwnProps, MapStoreState>(
+  mapStateToProps,
+  mapDispatchToProps
+)(DrawFeatureControl);
 export { connected as DrawFeatureControl };

@@ -41,7 +41,7 @@ export interface Props {
   }) => void;
   isFilterGeometryClosed?: boolean;
   errorMsg?: string;
-  className: string;
+  className?: string;
   isLoading?: boolean;
 }
 

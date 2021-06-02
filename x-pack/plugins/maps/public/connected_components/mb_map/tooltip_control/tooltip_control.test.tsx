@@ -80,6 +80,7 @@ const defaultProps = {
   geoFields: [],
   openTooltips: [],
   hasLockedTooltips: false,
+  filterModeActive: false,
 };
 
 const hoverTooltipState = {

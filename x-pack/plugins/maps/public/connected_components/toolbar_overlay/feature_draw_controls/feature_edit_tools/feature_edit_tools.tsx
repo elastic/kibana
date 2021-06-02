@@ -12,14 +12,22 @@ import { DRAW_TYPE } from '../../../../../common/constants';
 // @ts-expect-error
 import { GeometryFilterForm } from '../../../../components/draw_forms/geometry_filter_form/geometry_filter_form';
 
-export interface Props {
-  drawType: string;
+export interface ReduxStateProps {
+  drawType?: string;
+}
+
+export interface ReduxDispatchProps {
   setDrawShape: (shapeToDraw: DRAW_TYPE) => void;
-  pointsOnly?: boolean;
   cancelEditing: () => void;
 }
 
-export function FeatureDrawControl(props: Props) {
+export interface OwnProps {
+  pointsOnly?: boolean;
+}
+
+type Props = ReduxStateProps & ReduxDispatchProps & OwnProps;
+
+export function FeatureEditTools(props: Props) {
   const drawLineSelected = props.drawType === DRAW_TYPE.LINE;
   const drawPolygonSelected = props.drawType === DRAW_TYPE.POLYGON;
   const drawCircleSelected = props.drawType === DRAW_TYPE.DISTANCE;

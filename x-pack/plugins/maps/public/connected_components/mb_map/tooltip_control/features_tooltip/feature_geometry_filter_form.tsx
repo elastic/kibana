@@ -80,15 +80,14 @@ export class FeatureGeometryFilterForm extends Component<Props, State> {
     geoFieldName,
     relation,
   }: {
-    geometryLabel: string;
-    indexPatternId: string;
-    geoFieldName: string;
-    relation: ES_SPATIAL_RELATIONS;
+    geometryLabel?: string;
+    indexPatternId?: string;
+    geoFieldName?: string;
+    relation?: ES_SPATIAL_RELATIONS;
   }) => {
     this.setState({ errorMsg: undefined });
     const preIndexedShape = await this._loadPreIndexedShape();
-    if (!this._isMounted) {
-      // do not create filter if component is unmounted
+    if (!this._isMounted || !(geometryLabel && indexPatternId && geoFieldName && relation)) {
       return;
     }
 
