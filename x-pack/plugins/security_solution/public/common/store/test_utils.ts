@@ -89,7 +89,9 @@ export const createSpyMiddleware = <
       type ResolvedAction = A extends { type: typeof actionType } ? A : never;
 
       // Error is defined here so that we get a better stack trace that points to the test from where it was used
-      const err = new Error(`action '${actionType}' was not dispatched within the allocated time`);
+      const err = new Error(
+        `Timeout! Action '${actionType}' was not dispatched within the allocated time`
+      );
 
       return new Promise<ResolvedAction>((resolve, reject) => {
         const watch: ActionWatcher = (action) => {

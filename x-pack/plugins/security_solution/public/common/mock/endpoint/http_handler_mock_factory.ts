@@ -159,6 +159,11 @@ export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}
       }
     };
 
+    // For debugging purposes.
+    // It will provide a stack trace leading back to the location in the test file
+    // where the `core.http` mocks were applied from.
+    const testContextStackTrace = new Error().stack;
+
     const responseProvider: MockedApi<R>['responseProvider'] = mocks.reduce(
       (providers, routeMock) => {
         // FIXME: find a way to remove the ignore below. May need to limit the calling signature of `RouteMock['handler']`
@@ -211,6 +216,9 @@ export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}
         }
 
         const err = new ApiRouteNotMocked(`API [${method.toUpperCase()} ${path}] is not MOCKED!`);
+        // Append additional stack calling data from when this API mock was applied
+        err.stack += `\n${testContextStackTrace}`;
+
         // eslint-disable-next-line no-console
         console.error(err);
         throw err;
