@@ -4,19 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import del from 'del';
+import gulp from 'gulp';
+import log from 'fancy-log';
 
-export default (gulp, { coverageDir, buildDir, packageDir, log }) => {
-  gulp.task('clean-test', () => {
-    log('Deleting', coverageDir);
-    return del([coverageDir]);
-  });
+import { coverageDir, buildDir, packageDir } from './helpers/paths';
 
-  gulp.task('clean', ['clean-test'], () => {
-    const toDelete = [
-      buildDir,
-      packageDir,
-    ];
-    log('Deleting', toDelete.join(', '));
-    return del(toDelete);
-  });
-};
+export async function cleanTest() {
+  log('Deleting', coverageDir);
+  await del([coverageDir]);
+}
+
+async function cleanDist() {
+  const toDelete = [
+    buildDir,
+    packageDir,
+  ];
+
+  log('Deleting', toDelete.join(', '));
+  await del(toDelete);
+}
+
+export const clean = gulp.series(cleanTest, cleanDist);
