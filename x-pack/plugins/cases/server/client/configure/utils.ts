@@ -90,7 +90,7 @@ export const formatFields = (theData: unknown, theType: string): ConnectorField[
   }
 };
 
-const getPreferredFields = (theType: string, swimlaneMappings?: SwimlaneMappings) => {
+const getPreferredFields = (theType: string) => {
   let title: string = '';
   let description: string = '';
   let comments: string = '';

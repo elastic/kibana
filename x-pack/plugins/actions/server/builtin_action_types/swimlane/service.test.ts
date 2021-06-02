@@ -42,7 +42,6 @@ describe('Swimlane Service', () => {
   const headers = {
     'Content-Type': 'application/json',
     'Private-Token': 'token',
-    'kbn-xsrf': 'true',
   };
 
   const incident = {
@@ -144,12 +143,15 @@ describe('Swimlane Service', () => {
   });
 
   describe('createRecord', () => {
+    const data = {
+      id: '123',
+      name: 'title',
+      createdDate: '2021-06-01T17:29:51.092Z',
+    };
+
     test('it creates a record correctly', async () => {
       requestMock.mockImplementation(() => ({
-        data: {
-          id: '123',
-          name: 'title',
-        },
+        data,
       }));
 
       const res = await service.createRecord({
@@ -159,16 +161,14 @@ describe('Swimlane Service', () => {
       expect(res).toEqual({
         id: '123',
         title: 'title',
+        pushedDate: '2021-06-01T17:29:51.092Z',
         url: `${config.apiUrl.slice(0, -1)}/record/${config.appId}/123`,
       });
     });
 
     test('it should call request with correct arguments', async () => {
       requestMock.mockImplementation(() => ({
-        data: {
-          id: '123',
-          name: 'title',
-        },
+        data,
       }));
 
       await service.createRecord({

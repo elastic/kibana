@@ -17,7 +17,7 @@ simulator usage
 
 This may get out of date, consult the code for exact urls and inputs.  Each
 simulator's last path segment should be the name of the service (eg, slack,
-pagerduty, swimlane, etc).
+pagerduty, etc).
 
 ```console
 $ export SLACK_URL=http://elastic:changeme@localhost:5620/api/_actions-FTS-external-service-simulators/slack
