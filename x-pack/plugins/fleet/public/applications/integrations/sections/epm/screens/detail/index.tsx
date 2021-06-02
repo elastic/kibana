@@ -6,7 +6,7 @@
  */
 import type { ReactEventHandler } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Redirect, Route, Switch, useHistory, useLocation, useParams } from 'react-router-dom';
+import { Redirect, Route, Switch, useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   EuiBetaBadge,
@@ -33,11 +33,7 @@ import {
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import { useCapabilities, useGetPackageInfoByKey, useLink } from '../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../services';
-import type {
-  CreatePackagePolicyRouteState,
-  DetailViewPanelName,
-  PackageInfo,
-} from '../../../../types';
+import type { DetailViewPanelName, PackageInfo } from '../../../../types';
 import { InstallStatus } from '../../../../types';
 import { Error, Loading } from '../../../../components';
 import type { WithHeaderLayoutProps } from '../../../../layouts';
@@ -76,8 +72,7 @@ export function Detail() {
   const { pkgkey, panel } = useParams<DetailParams>();
   const { getHref } = useLink();
   const hasWriteCapabilites = useCapabilities().write;
-  const history = useHistory();
-  const { pathname, search, hash } = useLocation();
+  const { search } = useLocation();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
 
