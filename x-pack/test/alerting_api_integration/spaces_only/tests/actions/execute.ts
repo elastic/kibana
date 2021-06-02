@@ -97,6 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
       await validateEventLog({
         spaceId: Spaces.space1.id,
         actionId: createdAction.id,
+        actionTypeId: 'test.index-record',
         outcome: 'success',
         message: `action executed: test.index-record:${createdAction.id}: My action`,
       });
@@ -138,6 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
       await validateEventLog({
         spaceId: Spaces.space1.id,
         actionId: createdAction.id,
+        actionTypeId: 'test.failing',
         outcome: 'failure',
         message: `action execution failure: test.failing:${createdAction.id}: failing action`,
         errorMessage: `an error occurred while running the action executor: expected failure for .kibana-alerting-test-data actions-failure-1:space1`,
@@ -330,13 +332,14 @@ export default function ({ getService }: FtrProviderContext) {
   interface ValidateEventLogParams {
     spaceId: string;
     actionId: string;
+    actionTypeId: string;
     outcome: string;
     message: string;
     errorMessage?: string;
   }
 
   async function validateEventLog(params: ValidateEventLogParams): Promise<void> {
-    const { spaceId, actionId, outcome, message, errorMessage } = params;
+    const { spaceId, actionId, actionTypeId, outcome, message, errorMessage } = params;
 
     const events: IValidatedEvent[] = await retry.try(async () => {
       return await getEventLog({
@@ -370,6 +373,13 @@ export default function ({ getService }: FtrProviderContext) {
     expect(eventEnd <= dateNow).to.equal(true);
 
     expect(event?.event?.outcome).to.equal(outcome);
+
+    expect(event?.kibana?.alerting?.action_type_id).to.equal(actionTypeId);
+    expect(event?.kibana?.alerting?.primary_saved_object).to.eql({
+      type: 'action',
+      id: actionId,
+      namespace: 'space1',
+    });
 
     expect(event?.kibana?.saved_objects).to.eql([
       {

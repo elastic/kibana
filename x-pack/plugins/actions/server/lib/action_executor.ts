@@ -125,6 +125,7 @@ export class ActionExecutor {
       event: { action: EVENT_LOG_ACTIONS.execute },
       kibana: {
         alerting: {
+          action_type_id: actionTypeId,
           primary_saved_object: {
             id: actionId,
             type: 'action',

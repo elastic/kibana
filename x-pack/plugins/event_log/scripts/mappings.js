@@ -28,6 +28,10 @@ exports.EcsCustomPropertyMappings = {
             type: 'keyword',
             ignore_above: 1024,
           },
+          action_type_id: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
           instance_id: {
             type: 'keyword',
             ignore_above: 1024,
