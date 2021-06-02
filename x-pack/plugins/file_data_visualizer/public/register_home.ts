@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-// import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
+import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { FileDataVisualizerWrapper } from './lazy_load_bundle/component_wrapper';
 
 const PLUGIN_ID = 'fileDataViz';
@@ -32,7 +32,7 @@ export function registerHomeAddData(home: HomePublicPluginSetup) {
     icon: 'document',
     path: '/app/home#/tutorial_directory',
     showOnHomePage: true,
-    category: 'data',
+    category: FeatureCatalogueCategory.DATA,
     order: 520,
   });
 }

@@ -20,7 +20,8 @@
   "requiredBundles": [
     "kibanaReact",
     "maps",
-    "esUiShared"
+    "esUiShared",
+    "home"
   ],
   "extraPublicDirs": [
     "common"
