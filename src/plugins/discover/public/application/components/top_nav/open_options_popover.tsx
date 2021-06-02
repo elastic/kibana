@@ -95,7 +95,7 @@ export function getContainer() {
     return container;
   }
   const newContainer = document.createElement('div');
-  newContainer.id = 'dscOptionsPopoverContainer';
+  newContainer.id = id;
   document.body.appendChild(newContainer);
   return newContainer;
 }
