@@ -149,7 +149,7 @@ export const TopMetricsAggForm: PivotAggsConfigTopMetrics['AggFormComponent'] = 
                       text: v,
                       name: v,
                     }))}
-                    value={aggConfig.sortField}
+                    value={aggConfig.numericType}
                     onChange={(e) => {
                       onChange({
                         ...aggConfig,

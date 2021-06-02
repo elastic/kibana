@@ -36,7 +36,13 @@ export function getTopMetricsAggConfig(
         return null;
       }
 
-      const { sortField, sortDirection, sortMode, numericType } = this.aggConfig;
+      const {
+        sortField,
+        sortDirection,
+        sortMode,
+        numericType,
+        ...unsupportedConfig
+      } = this.aggConfig;
 
       let sort = null;
 
@@ -49,6 +55,7 @@ export function getTopMetricsAggConfig(
               order: sortDirection,
               ...(sortMode ? { mode: sortMode } : {}),
               ...(numericType ? { numeric_type: numericType } : {}),
+              ...(unsupportedConfig ?? {}),
             },
           };
         } else {
@@ -77,20 +84,24 @@ export function getTopMetricsAggConfig(
       let sortDirection = null;
       let sortMode = null;
       let numericType = null;
+      let unsupportedConfig = null;
 
       if (isValidSortDirection(sortDefinition)) {
         sortDirection = sortDefinition;
       }
 
       if (typeof sortDefinition === 'object') {
-        if (isValidSortDirection(sortDefinition.order)) {
-          sortDirection = sortDefinition.order;
+        const { order, mode, numeric_type: numType, ...rest } = sortDefinition;
+        unsupportedConfig = rest;
+
+        if (isValidSortDirection(order)) {
+          sortDirection = order;
         }
-        if (isValidSortMode(sortDefinition.mode)) {
-          sortMode = sortDefinition.mode;
+        if (isValidSortMode(mode)) {
+          sortMode = mode;
         }
-        if (isValidSortNumericType(sortDefinition.numeric_type)) {
-          numericType = sortDefinition.numeric_type;
+        if (isValidSortNumericType(numType)) {
+          numericType = numType;
         }
       }
 
@@ -99,6 +110,7 @@ export function getTopMetricsAggConfig(
         sortDirection,
         ...(sortMode ? { sortMode } : {}),
         ...(numericType ? { numericType } : {}),
+        ...(unsupportedConfig ?? {}),
       };
     },
     isValid() {
