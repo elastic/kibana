@@ -45,7 +45,6 @@ import type {
   FleetServerPolicy,
   Installation,
   Output,
-  FullAgentPolicyOutputPermissions,
 } from '../../common';
 import { AgentPolicyNameExistsError, HostedAgentPolicyRestrictionRelatedError } from '../errors';
 import {
