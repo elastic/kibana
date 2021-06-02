@@ -124,7 +124,7 @@ _Note: Run the following commands from `kibana/`._
 ### Typescript
 
 ```
-yarn tsc --noEmit --emitDeclarationOnly false --project x-pack/plugins/apm/tsconfig.json --skipLibCheck
+node scripts/type_check.js --project x-pack/plugins/apm/tsconfig.json
 ```
 
 ### Prettier
