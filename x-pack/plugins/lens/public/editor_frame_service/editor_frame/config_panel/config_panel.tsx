@@ -61,43 +61,51 @@ export function LayerPanels(
   );
   const updateDatasource = useMemo(
     () => (datasourceId: string, newState: unknown) => {
-      dispatch({
-        type: 'UPDATE_DATASOURCE_STATE',
-        updater: (prevState: unknown) =>
-          typeof newState === 'function' ? newState(prevState) : newState,
-        datasourceId,
-        clearStagedPreview: false,
-      });
+      // React will synchronously update if this is triggered from a third party component,
+      // which we don't want. The timeout lets user interaction have priority, then React updates.
+      setTimeout(() => {
+        dispatch({
+          type: 'UPDATE_DATASOURCE_STATE',
+          updater: (prevState: unknown) =>
+            typeof newState === 'function' ? newState(prevState) : newState,
+          datasourceId,
+          clearStagedPreview: false,
+        });
+      }, 0);
     },
     [dispatch]
   );
   const updateAll = useMemo(
     () => (datasourceId: string, newDatasourceState: unknown, newVisualizationState: unknown) => {
-      dispatch({
-        type: 'UPDATE_STATE',
-        subType: 'UPDATE_ALL_STATES',
-        updater: (prevState) => {
-          const updatedDatasourceState =
-            typeof newDatasourceState === 'function'
-              ? newDatasourceState(prevState.datasourceStates[datasourceId].state)
-              : newDatasourceState;
-          return {
-            ...prevState,
-            datasourceStates: {
-              ...prevState.datasourceStates,
-              [datasourceId]: {
-                state: updatedDatasourceState,
-                isLoading: false,
+      // React will synchronously update if this is triggered from a third party component,
+      // which we don't want. The timeout lets user interaction have priority, then React updates.
+      setTimeout(() => {
+        dispatch({
+          type: 'UPDATE_STATE',
+          subType: 'UPDATE_ALL_STATES',
+          updater: (prevState) => {
+            const updatedDatasourceState =
+              typeof newDatasourceState === 'function'
+                ? newDatasourceState(prevState.datasourceStates[datasourceId].state)
+                : newDatasourceState;
+            return {
+              ...prevState,
+              datasourceStates: {
+                ...prevState.datasourceStates,
+                [datasourceId]: {
+                  state: updatedDatasourceState,
+                  isLoading: false,
+                },
               },
-            },
-            visualization: {
-              ...prevState.visualization,
-              state: newVisualizationState,
-            },
-            stagedPreview: undefined,
-          };
-        },
-      });
+              visualization: {
+                ...prevState.visualization,
+                state: newVisualizationState,
+              },
+              stagedPreview: undefined,
+            };
+          },
+        });
+      }, 0);
     },
     [dispatch]
   );
