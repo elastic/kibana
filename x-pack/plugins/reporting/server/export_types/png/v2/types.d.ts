@@ -9,7 +9,7 @@ import { Locator } from '../../../../common/types';
 import { LayoutParams } from '../../../lib/layouts';
 import { BaseParams, BasePayload } from '../../../types';
 
-interface BaseParamsPDFV2<P extends object = object> {
+interface BaseParamsPNGV2<P extends object = object> {
   layout: LayoutParams;
   forceNow?: string;
   /**
@@ -17,11 +17,11 @@ interface BaseParamsPDFV2<P extends object = object> {
    * report to be created. This value is typically used by the plugin client to re-create
    * the same visual state as when the report was requested as well as navigate to the correct page.
    */
-  locators: Array<Locator<P>>;
+  locator: Locator<P>;
 }
 
-// Job params: structure of incoming user request data, after being parsed from RISON
-export type JobParamsPDFV2 = BaseParamsPDFV2 & BaseParams;
+// Job params: structure of incoming user request data
+export type JobParamsPNGV2 = BaseParamsPNGV2 & BaseParams;
 
 // Job payload: structure of stored job data provided by create_job
-export type TaskPayloadPDFV2 = BaseParamsPDFV2 & BasePayload;
+export type TaskPayloadPNGV2 = BaseParamsPNGV2 & BasePayload;

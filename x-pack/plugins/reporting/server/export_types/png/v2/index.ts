@@ -11,19 +11,17 @@ import {
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_STANDARD,
   LICENSE_TYPE_TRIAL,
-  PNG_JOB_TYPE as jobType,
-} from '../../../common/constants';
-import { CreateJobFn, ExportTypeDefinition, RunTaskFn } from '../../types';
+  PNG_JOB_TYPE_V2 as jobType,
+} from '../../../../common/constants';
+import { CreateJobFn, ExportTypeDefinition, RunTaskFn } from '../../../types';
 import { createJobFnFactory } from './create_job';
 import { runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';
-import { JobParamsPNG, TaskPayloadPNG } from './types';
-
-export { getExportType as getExportTypeV2 } from './v2';
+import { JobParamsPNGV2, TaskPayloadPNGV2 } from './types';
 
 export const getExportType = (): ExportTypeDefinition<
-  CreateJobFn<JobParamsPNG>,
-  RunTaskFn<TaskPayloadPNG>
+  CreateJobFn<JobParamsPNGV2>,
+  RunTaskFn<TaskPayloadPNGV2>
 > => ({
   ...metadata,
   jobType,

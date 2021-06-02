@@ -190,6 +190,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
       case 'csv_searchsource':
         return CSV_REPORT_TYPE;
       case 'png':
+      case 'pngV2':
         return PNG_REPORT_TYPE;
       default:
         return this.props.reportType;

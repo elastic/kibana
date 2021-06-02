@@ -14,6 +14,8 @@ interface BaseParamsPNG {
   relativeUrl: string;
 }
 
+export { JobParamsPNGV2, TaskPayloadPNGV2 } from './v2/types';
+
 // Job params: structure of incoming user request data
 export type JobParamsPNG = BaseParamsPNG & BaseParams;
 

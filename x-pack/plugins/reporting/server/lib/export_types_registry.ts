@@ -9,7 +9,7 @@ import { isString } from 'lodash';
 import { getExportType as getTypeCsvDeprecated } from '../export_types/csv';
 import { getExportType as getTypeCsvFromSavedObject } from '../export_types/csv_searchsource_immediate';
 import { getExportType as getTypeCsv } from '../export_types/csv_searchsource';
-import { getExportType as getTypePng } from '../export_types/png';
+import { getExportType as getTypePng, getExportTypeV2 as getTypePngV2 } from '../export_types/png';
 import {
   getExportType as getTypePrintablePdf,
   getExportTypeV2 as getTypePrintablePdfV2,
@@ -91,6 +91,7 @@ export function getExportTypesRegistry(): ExportTypesRegistry {
     getTypeCsvDeprecated,
     getTypeCsvFromSavedObject,
     getTypePng,
+    getTypePngV2,
     getTypePrintablePdf,
     getTypePrintablePdfV2,
   ];

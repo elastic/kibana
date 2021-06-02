@@ -15,7 +15,7 @@ import type { ShareContext } from '../../../../../src/plugins/share/public';
 import type { LicensingPluginSetup } from '../../../licensing/public';
 import type { LayoutParams, Locator } from '../../common/types';
 import { isJobV2Params } from '../../common/job_utils';
-import type { JobParamsPNG } from '../../server/export_types/png/types';
+import type { JobParamsPNG, JobParamsPNGV2 } from '../../server/export_types/png/types';
 import type { JobParamsPDF, JobParamsPDFV2 } from '../../server/export_types/printable_pdf/types';
 import { ScreenCapturePanelContent } from '../components/screen_capture_panel_content_lazy';
 import { checkLicense } from '../lib/license_check';
@@ -69,7 +69,7 @@ const getPdfV2JobParams = (opts: JobParamsProviderOptions) => (): JobParamsPDFV2
 const getPdfJobParams = (opts: JobParamsProviderOptions) =>
   isJobV2Params(opts) ? getPdfV2JobParams(opts) : getPdfV1JobParams(opts);
 
-const getPngJobParams = (opts: JobParamsProviderOptions) => (): JobParamsPNG => {
+const getPngJobParamsV1 = (opts: JobParamsProviderOptions) => (): JobParamsPNG => {
   // Replace hashes with original RISON values.
   const relativeUrl = opts.shareableUrl.replace(
     window.location.origin + opts.apiClient.getServerBasePath(),
@@ -81,6 +81,20 @@ const getPngJobParams = (opts: JobParamsProviderOptions) => (): JobParamsPNG => 
     relativeUrl, // single URL for PNG
   };
 };
+
+const getPngJobParamsV2 = (opts: JobParamsProviderOptions) => (): JobParamsPNGV2 => {
+  const locator = opts.sharingData.locator as Locator;
+  // TODO: Remove this once we have URL service locators since we are not going to treat locator.id as the store for the url
+  locator.id = locator.id.replace(window.location.origin + opts.apiClient.getServerBasePath(), '');
+
+  return {
+    ...jobParamsProvider(opts),
+    locator, // single locator for PNG
+  };
+};
+
+const getPngJobParams = (opts: JobParamsProviderOptions) =>
+  isJobV2Params(opts) ? getPngJobParamsV2(opts) : getPngJobParamsV1(opts);
 
 export const reportingScreenshotShareProvider = ({
   apiClient,
@@ -187,7 +201,7 @@ export const reportingScreenshotShareProvider = ({
           <ScreenCapturePanelContent
             apiClient={apiClient}
             toasts={toasts}
-            reportType="png"
+            reportType={isJobV2Params(jobProviderOptions) ? 'pngV2' : 'png'}
             objectId={objectId}
             getJobParams={getPngJobParams(jobProviderOptions)}
             isDirty={isDirty}
