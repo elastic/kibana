@@ -122,7 +122,6 @@ export const buildEventsSearchQuery = ({
           field: '*',
           include_unmapped: true,
         },
-        ...docFields,
       ],
       ...(aggregations ? { aggregations } : {}),
       sort: [
