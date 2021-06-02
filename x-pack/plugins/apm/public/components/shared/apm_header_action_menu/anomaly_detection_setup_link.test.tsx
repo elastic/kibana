@@ -8,8 +8,8 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { MissingJobsAlert } from './anomaly_detection_setup_link';
-import * as hooks from '../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
-import { FETCH_STATUS } from '../../hooks/use_fetcher';
+import * as hooks from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 
 async function renderTooltipAnchor({
   jobs,

@@ -27,7 +27,7 @@ import { UrlParamsProvider } from '../../context/url_params_context/url_params_c
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { ApmPluginStartDeps } from '../../plugin';
 import { HeaderMenuPortal } from '../../../../observability/public';
-import { ApmHeaderActionMenu } from '../../application/action_menu';
+import { ApmHeaderActionMenu } from '../shared/apm_header_action_menu';
 import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
 import { AnomalyDetectionJobsContextProvider } from '../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import { apmRouteConfig } from './apm_route_config';
