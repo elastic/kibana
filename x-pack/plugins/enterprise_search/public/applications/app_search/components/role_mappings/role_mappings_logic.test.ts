@@ -43,6 +43,7 @@ describe('RoleMappingsLogic', () => {
     selectedEngines: new Set(),
     accessAllEngines: true,
     selectedAuthProviders: [ANY_AUTH_PROVIDER],
+    selectedOptions: [],
   };
 
   const mappingsServerProps = { multipleAuthProvidersConfig: true, roleMappings: [asRoleMapping] };
@@ -92,6 +93,10 @@ describe('RoleMappingsLogic', () => {
           attributeValue: 'superuser',
           elasticsearchRoles: mappingServerProps.elasticsearchRoles,
           selectedEngines: new Set(engines.map((e) => e.name)),
+          selectedOptions: [
+            { label: engines[0].name, value: engines[0].name },
+            { label: engines[1].name, value: engines[1].name },
+          ],
         });
       });
 
@@ -139,21 +144,21 @@ describe('RoleMappingsLogic', () => {
       });
 
       it('handles adding an engine to selected engines', () => {
-        RoleMappingsLogic.actions.handleEngineSelectionChange(otherEngine.name, true);
+        RoleMappingsLogic.actions.handleEngineSelectionChange([engine.name, otherEngine.name]);
 
         expect(RoleMappingsLogic.values.selectedEngines).toEqual(
           new Set([engine.name, otherEngine.name])
         );
       });
       it('handles removing an engine from selected engines', () => {
-        RoleMappingsLogic.actions.handleEngineSelectionChange(otherEngine.name, false);
+        RoleMappingsLogic.actions.handleEngineSelectionChange([engine.name]);
 
         expect(RoleMappingsLogic.values.selectedEngines).toEqual(new Set([engine.name]));
       });
     });
 
     it('handleAccessAllEnginesChange', () => {
-      RoleMappingsLogic.actions.handleAccessAllEnginesChange();
+      RoleMappingsLogic.actions.handleAccessAllEnginesChange(false);
 
       expect(RoleMappingsLogic.values).toEqual({
         ...DEFAULT_VALUES,

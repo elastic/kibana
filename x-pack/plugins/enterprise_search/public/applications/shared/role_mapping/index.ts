@@ -7,5 +7,6 @@
 
 export { AttributeSelector } from './attribute_selector';
 export { RoleMappingsTable } from './role_mappings_table';
+export { RoleOptionLabel } from './role_option_label';
 export { RoleSelector } from './role_selector';
 export { RoleMappingFlyout } from './role_mapping_flyout';

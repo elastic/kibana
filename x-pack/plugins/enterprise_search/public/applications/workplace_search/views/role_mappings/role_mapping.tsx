@@ -9,26 +9,15 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import {
-  EuiCheckbox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiHorizontalRule, EuiRadioGroup, EuiSpacer } from '@elastic/eui';
 
-import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { AttributeSelector, RoleSelector, RoleMappingFlyout } from '../../../shared/role_mapping';
 import {
-  SAVE_ROLE_MAPPING,
-  UPDATE_ROLE_MAPPING,
-  ROLE_LABEL,
-  ROLE_MAPPINGS_TITLE,
-  ADD_ROLE_MAPPING_TITLE,
-  MANAGE_ROLE_MAPPING_TITLE,
-} from '../../../shared/role_mapping/constants';
+  AttributeSelector,
+  RoleSelector,
+  RoleOptionLabel,
+  RoleMappingFlyout,
+} from '../../../shared/role_mapping';
+
 import { Role } from '../../types';
 
 import {
@@ -59,6 +48,19 @@ const roleOptions = [
   },
 ] as RoleType[];
 
+const groupOptions = [
+  {
+    id: 'all',
+    label: <RoleOptionLabel label={ALL_GROUPS_LABEL} description={ALL_GROUPS_DESCRIPTION} />,
+  },
+  {
+    id: 'specific',
+    label: (
+      <RoleOptionLabel label={SPECIFIC_GROUPS_LABEL} description={SPECIFIC_GROUPS_DESCRIPTION} />
+    ),
+  },
+];
+
 export const RoleMapping: React.FC = () => {
   const {
     handleSaveMapping,
@@ -83,6 +85,7 @@ export const RoleMapping: React.FC = () => {
     availableAuthProviders,
     multipleAuthProvidersConfig,
     selectedAuthProviders,
+    selectedOptions,
     roleMapping,
   } = useValues(RoleMappingsLogic);
 
@@ -110,39 +113,35 @@ export const RoleMapping: React.FC = () => {
         multipleAuthProvidersConfig={multipleAuthProvidersConfig}
         handleAuthProviderChange={handleAuthProviderChange}
       />
+      <EuiSpacer size="m" />
       <RoleSelector
         roleOptions={roleOptions}
         roleType={roleType}
         onChange={handleRoleChange}
         label="Role"
       />
+      <EuiHorizontalRule />
+      <EuiFormRow>
+        <EuiRadioGroup
+          options={groupOptions}
+          idSelected={includeInAllGroups ? 'all' : 'specific'}
+          onChange={(id) => handleAllGroupsSelectionChange(id === 'all')}
+          legend={{
+            children: <span>Group assignment</span>,
+          }}
+        />
+      </EuiFormRow>
       <EuiFormRow isInvalid={!hasGroupAssignment} error={[GROUP_ASSIGNMENT_INVALID_ERROR]}>
-        <>
-          {availableGroups.map(({ id, name }) => (
-            <EuiCheckbox
-              key={id}
-              name={name}
-              id={id}
-              checked={selectedGroups.has(id)}
-              onChange={(e) => {
-                handleGroupSelectionChange(id, e.target.checked);
-              }}
-              label={name}
-              disabled={includeInAllGroups}
-            />
-          ))}
-          <EuiSpacer />
-          <EuiCheckbox
-            key="allGroups"
-            name="allGroups"
-            id="allGroups"
-            checked={includeInAllGroups}
-            onChange={(e) => {
-              handleAllGroupsSelectionChange(e.target.checked);
-            }}
-            label={GROUP_ASSIGNMENT_ALL_GROUPS_LABEL}
-          />
-        </>
+        <EuiComboBox
+          data-test-subj="groupsSelect"
+          selectedOptions={selectedOptions}
+          options={availableGroups.map(({ name, id }) => ({ label: name, value: id }))}
+          onChange={(options) => {
+            handleGroupSelectionChange(options.map(({ value }) => value as string));
+          }}
+          fullWidth
+          isDisabled={includeInAllGroups}
+        />
       </EuiFormRow>
     </RoleMappingFlyout>
   );

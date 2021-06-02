@@ -10,19 +10,13 @@ import { setMockActions, setMockValues } from '../../../__mocks__';
 
 import React from 'react';
 
+import { waitFor } from '@testing-library/dom';
 import { shallow } from 'enzyme';
 
-import { EuiCheckbox } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiRadioGroup } from '@elastic/eui';
 
 import { AttributeSelector, RoleSelector } from '../../../shared/role_mapping';
 import { wsRoleMapping } from '../../../shared/role_mapping/__mocks__/roles';
-import {
-  SAVE_ROLE_MAPPING,
-  UPDATE_ROLE_MAPPING,
-  ADD_ROLE_MAPPING_TITLE,
-  MANAGE_ROLE_MAPPING_TITLE,
-} from '../../../shared/role_mapping/constants';
-import { ViewContentHeader } from '../../components/shared/view_content_header';
 
 import { RoleMapping } from './role_mapping';
 
@@ -89,23 +83,30 @@ describe('RoleMapping', () => {
     expect(wrapper.find(RoleSelector)).toHaveLength(1);
   });
 
-  it('handles group checkbox click', () => {
+  it('sets initial selected state when includeInAllGroups is true', () => {
+    setMockValues({ ...mockValues, includeInAllGroups: true });
     const wrapper = shallow(<RoleMapping />);
-    wrapper
-      .find(EuiCheckbox)
-      .first()
-      .simulate('change', { target: { checked: true } });
 
-    expect(handleGroupSelectionChange).toHaveBeenCalledWith(groups[0].id, true);
+    expect(wrapper.find(EuiRadioGroup).prop('idSelected')).toBe('all');
   });
 
-  it('handles all groups checkbox click', () => {
+  it('handles all/specific groups radio change', () => {
     const wrapper = shallow(<RoleMapping />);
-    wrapper
-      .find(EuiCheckbox)
-      .last()
-      .simulate('change', { target: { checked: true } });
+    const radio = wrapper.find(EuiRadioGroup);
+    radio.simulate('change', { target: { checked: false } });
 
-    expect(handleAllGroupsSelectionChange).toHaveBeenCalledWith(true);
+    expect(handleAllGroupsSelectionChange).toHaveBeenCalledWith(false);
+  });
+
+  it('handles group checkbox click', async () => {
+    const wrapper = shallow(<RoleMapping />);
+    await waitFor(() =>
+      ((wrapper.find(EuiComboBox).props() as unknown) as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }).onChange([{ label: groups[0].name, value: groups[0].name }])
+    );
+    wrapper.update();
+
+    expect(handleGroupSelectionChange).toHaveBeenCalledWith([groups[0].name]);
   });
 });

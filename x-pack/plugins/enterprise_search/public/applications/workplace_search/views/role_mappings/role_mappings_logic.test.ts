@@ -37,6 +37,7 @@ describe('RoleMappingsLogic', () => {
     selectedGroups: new Set(),
     includeInAllGroups: false,
     selectedAuthProviders: [ANY_AUTH_PROVIDER],
+    selectedOptions: [],
   };
   const roleGroup = {
     id: '123',
@@ -92,6 +93,7 @@ describe('RoleMappingsLogic', () => {
         expect(RoleMappingsLogic.values.selectedGroups).toEqual(
           new Set([wsRoleMapping.groups[0].id])
         );
+        expect(RoleMappingsLogic.values.selectedOptions).toEqual([]);
       });
 
       it('sets default group with new role mapping', () => {
@@ -121,10 +123,13 @@ describe('RoleMappingsLogic', () => {
         },
       });
 
-      RoleMappingsLogic.actions.handleGroupSelectionChange(otherGroup.id, true);
+      RoleMappingsLogic.actions.handleGroupSelectionChange([group.id, otherGroup.id]);
       expect(RoleMappingsLogic.values.selectedGroups).toEqual(new Set([group.id, otherGroup.id]));
+      expect(RoleMappingsLogic.values.selectedOptions).toEqual([
+        { label: roleGroup.name, value: roleGroup.id },
+      ]);
 
-      RoleMappingsLogic.actions.handleGroupSelectionChange(otherGroup.id, false);
+      RoleMappingsLogic.actions.handleGroupSelectionChange([group.id]);
       expect(RoleMappingsLogic.values.selectedGroups).toEqual(new Set([group.id]));
     });
 

@@ -9,14 +9,18 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiCheckbox, EuiFormRow, EuiRadio, EuiTitle } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiHorizontalRule, EuiRadioGroup, EuiSpacer } from '@elastic/eui';
 
-import { AttributeSelector, RoleSelector, RoleMappingFlyout } from '../../../shared/role_mapping';
+import {
+  AttributeSelector,
+  RoleSelector,
+  RoleOptionLabel,
+  RoleMappingFlyout,
+} from '../../../shared/role_mapping';
 import { AppLogic } from '../../app_logic';
 import { AdvanceRoleType } from '../../types';
 
 import { roleHasScopedEngines } from '../../utils/role/has_scoped_engines';
-import { Engine } from '../engine/types';
 
 import {
   ADVANCED_ROLE_TYPES,
@@ -58,6 +62,7 @@ export const RoleMapping: React.FC = () => {
     roleType,
     selectedEngines,
     selectedAuthProviders,
+    selectedOptions,
   } = useValues(RoleMappingsLogic);
 
   const isNew = !roleMapping;
@@ -76,18 +81,21 @@ export const RoleMapping: React.FC = () => {
     ? [...standardRoleOptions, ...advancedRoleOptions]
     : standardRoleOptions;
 
-  const engineSelector = (engine: Engine) => (
-    <EuiCheckbox
-      key={engine.name}
-      name={engine.name}
-      id={`engine_option_${engine.name}`}
-      checked={selectedEngines.has(engine.name)}
-      onChange={(e) => {
-        handleEngineSelectionChange(engine.name, e.target.checked);
-      }}
-      label={engine.name}
-    />
-  );
+  const engineOptions = [
+    {
+      id: 'all',
+      label: <RoleOptionLabel label={ALL_ENGINES_LABEL} description={ALL_ENGINES_DESCRIPTION} />,
+    },
+    {
+      id: 'specific',
+      label: (
+        <RoleOptionLabel
+          label={SPECIFIC_ENGINES_LABEL}
+          description={SPECIFIC_ENGINES_DESCRIPTION}
+        />
+      ),
+    },
+  ];
 
   return (
     <RoleMappingFlyout
@@ -109,6 +117,7 @@ export const RoleMapping: React.FC = () => {
         handleAuthProviderChange={handleAuthProviderChange}
         multipleAuthProvidersConfig={multipleAuthProvidersConfig}
       />
+      <EuiSpacer size="m" />
       <RoleSelector
         roleType={roleType}
         roleOptions={roleOptions}
@@ -118,44 +127,29 @@ export const RoleMapping: React.FC = () => {
 
       {hasAdvancedRoles && (
         <>
+          <EuiHorizontalRule />
           <EuiFormRow>
-            <EuiRadio
-              id="accessAllEngines"
+            <EuiRadioGroup
+              options={engineOptions}
               disabled={!roleHasScopedEngines(roleType)}
-              checked={accessAllEngines}
-              onChange={handleAccessAllEnginesChange}
-              label={
-                <>
-                  <EuiTitle size="xs">
-                    <h4>{FULL_ENGINE_ACCESS_TITLE}</h4>
-                  </EuiTitle>
-                  <p>{FULL_ENGINE_ACCESS_DESCRIPTION}</p>
-                </>
-              }
+              idSelected={accessAllEngines ? 'all' : 'specific'}
+              onChange={(id) => handleAccessAllEnginesChange(id === 'all')}
+              legend={{
+                children: <span>{ENGINE_ASSIGNMENT_LABEL}</span>,
+              }}
             />
           </EuiFormRow>
           <EuiFormRow isInvalid={!hasEngineAssignment} error={[ENGINE_REQUIRED_ERROR]}>
-            <>
-              <EuiRadio
-                id="selectEngines"
-                disabled={!roleHasScopedEngines(roleType)}
-                checked={!accessAllEngines}
-                onChange={handleAccessAllEnginesChange}
-                label={
-                  <>
-                    <EuiTitle size="xs">
-                      <h4>{LIMITED_ENGINE_ACCESS_TITLE}</h4>
-                    </EuiTitle>
-                    <p>{LIMITED_ENGINE_ACCESS_DESCRIPTION}</p>
-                  </>
-                }
-              />
-              {!accessAllEngines && (
-                <div className="engines-list">
-                  {availableEngines.map((engine) => engineSelector(engine))}
-                </div>
-              )}
-            </>
+            <EuiComboBox
+              data-test-subj="enginesSelect"
+              selectedOptions={selectedOptions}
+              options={availableEngines.map(({ name }) => ({ label: name, value: name }))}
+              onChange={(options) => {
+                handleEngineSelectionChange(options.map(({ value }) => value as string));
+              }}
+              fullWidth
+              isDisabled={accessAllEngines} // TODO Ability.canHaveScopedEngines(roleType)
+            />
           </EuiFormRow>
         </>
       )}

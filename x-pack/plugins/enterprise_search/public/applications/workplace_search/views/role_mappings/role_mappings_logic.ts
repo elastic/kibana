@@ -7,6 +7,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { EuiComboBoxOptionOption } from '@elastic/eui';
+
 import {
   clearFlashMessages,
   flashAPIErrors,
@@ -54,10 +56,7 @@ interface RoleMappingsActions {
   ): { value: AttributeName; firstElasticsearchRole: string };
   handleAttributeValueChange(value: string): { value: string };
   handleDeleteMapping(roleId: string): { roleId: string };
-  handleGroupSelectionChange(
-    groupId: string,
-    selected: boolean
-  ): { groupId: string; selected: boolean };
+  handleGroupSelectionChange(groupIds: string[]): { groupIds: string[] };
   handleRoleChange(roleType: Role): { roleType: Role };
   handleSaveMapping(): void;
   initializeRoleMapping(roleId?: string): { roleId?: string };
@@ -85,6 +84,7 @@ interface RoleMappingsValues {
   selectedAuthProviders: string[];
   selectedGroups: Set<string>;
   roleMappingFlyoutOpen: boolean;
+  selectedOptions: EuiComboBoxOptionOption[];
 }
 
 export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappingsActions>>({
@@ -94,7 +94,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     setRoleMappingData: (data: RoleMappingServerDetails) => data,
     handleAuthProviderChange: (value: string[]) => ({ value }),
     handleRoleChange: (roleType: Role) => ({ roleType }),
-    handleGroupSelectionChange: (groupId: string, selected: boolean) => ({ groupId, selected }),
+    handleGroupSelectionChange: (groupIds: string[]) => ({ groupIds }),
     handleAttributeSelectorChange: (value: string, firstElasticsearchRole: string) => ({
       value,
       firstElasticsearchRole,
@@ -207,13 +207,10 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
                   .filter((group) => group.name === DEFAULT_GROUP_NAME)
                   .map((group) => group.id)
               ),
-        handleGroupSelectionChange: (groups, { groupId, selected }) => {
-          const newSelectedGroupNames = new Set(groups as Set<string>);
-          if (selected) {
-            newSelectedGroupNames.add(groupId);
-          } else {
-            newSelectedGroupNames.delete(groupId);
-          }
+        handleGroupSelectionChange: (_, { groupIds }) => {
+          const newSelectedGroupNames = new Set() as Set<string>;
+          groupIds.forEach((groupId) => newSelectedGroupNames.add(groupId));
+
           return newSelectedGroupNames;
         },
       },
@@ -251,6 +248,17 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       },
     ],
   },
+  selectors: ({ selectors }) => ({
+    selectedOptions: [
+      () => [selectors.selectedGroups, selectors.availableGroups],
+      (selectedGroups, availableGroups) => {
+        const selectedIds = Array.from(selectedGroups.values());
+        return availableGroups
+          .filter(({ id }: { id: string }) => selectedIds.includes(id))
+          .map(({ id, name }: { id: string; name: string }) => ({ label: name, value: id }));
+      },
+    ],
+  }),
   listeners: ({ actions, values }) => ({
     initializeRoleMappings: async () => {
       const { http } = HttpLogic.values;
