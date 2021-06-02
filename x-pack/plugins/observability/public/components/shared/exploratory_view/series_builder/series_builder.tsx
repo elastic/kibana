@@ -27,6 +27,7 @@ export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; labe
   ux: [
     { id: 'pld', label: 'Performance distribution' },
     { id: 'kpi', label: 'KPI over time' },
+    { id: 'cwv', label: 'Core Web Vitals' },
   ],
   apm: [
     { id: 'svl', label: 'Latency' },

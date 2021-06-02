@@ -161,7 +161,9 @@
                 "type": "Array",
                 "tags": [],
                 "label": "objects",
-                "description": [],
+                "description": [
+                  "- [{ type, id, attributes, references, migrationVersion }]"
+                ],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -451,7 +453,9 @@
                 "type": "Array",
                 "tags": [],
                 "label": "objects",
-                "description": [],
+                "description": [
+                  "- an array ids, or an array of objects containing id and optionally type"
+                ],
                 "signature": [
                   "{ id: string; type: string; }[]"
                 ],
@@ -9362,7 +9366,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "namespace",
-                "description": [],
+                "description": [
+                  "The namespace ID, which must be either a non-empty string or `undefined`."
+                ],
                 "signature": [
                   "string | undefined"
                 ],
@@ -9400,7 +9406,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "namespace",
-                "description": [],
+                "description": [
+                  "The namespace string, which must be non-empty."
+                ],
                 "signature": [
                   "string"
                 ],
@@ -14499,15 +14507,15 @@
               {
                 "plugin": "lens",
                 "link": {
-                  "path": "x-pack/plugins/lens/server/migrations.ts",
-                  "lineNumber": 245
+                  "path": "x-pack/plugins/lens/server/migrations/saved_object_migrations.ts",
+                  "lineNumber": 167
                 }
               },
               {
                 "plugin": "lens",
                 "link": {
-                  "path": "x-pack/plugins/lens/server/migrations.ts",
-                  "lineNumber": 312
+                  "path": "x-pack/plugins/lens/server/migrations/saved_object_migrations.ts",
+                  "lineNumber": 234
                 }
               }
             ],

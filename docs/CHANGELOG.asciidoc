@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 7.x releases.
 
+* <<release-notes-7.13.1>>
 * <<release-notes-7.13.0>>
 * <<release-notes-7.12.1>>
 * <<release-notes-7.12.0>>
@@ -52,6 +53,27 @@ Review important information about the {kib} 7.x releases.
 * <<release-notes-7.0.0-alpha1>>
 
 --
+
+[[release-notes-7.13.1]]
+== {kib} 7.13.1
+
+The 7.13.1 release includes the following bug fixes.
+
+[float]
+[[fixes-v7.13.1]]
+=== Bug Fixes
+Fleet::
+* Adds missing install button for integrations that aren't installed yet {kibana-pull}100370[#100370]
+Lens & Visualizations::
+* Fixes an issue where upgrading from 7.12.1 to 7.13.0 breaks *TSVB* vizualizations with no timefield defined {kibana-pull}100864[#100864]
+Machine Learning::
+* Fixes field used in remote desktop protocol (RDP) anomaly detection job to event.type {kibana-pull}100000[#100000]
+Querying & Filtering::
+* Fixes bug with scripted number range filters {kibana-pull}99554[#99554]
+Sharing::
+* Adds appropriate table caption for table listing generated reports {kibana-pull}100118[#100118]
+Security::
+* Gracefully handle malformed index patterns on role management pages {kibana-pull}99918[#99918]
 
 [[release-notes-7.13.0]]
 == {kib} 7.13.0

@@ -6,16 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { isArray, last } from 'lodash';
+import { PluginFunctionalProviderContext } from '../../services';
 
-export const DEFAULT_VALUE = '-';
-
-const extractValue = (data) => (data && data[1]) ?? null;
-
-export const getLastValue = (data) => {
-  if (!isArray(data)) {
-    return data ?? DEFAULT_VALUE;
-  }
-
-  return extractValue(last(data)) ?? DEFAULT_VALUE;
-};
+export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
+  describe('telemetry', function () {
+    loadTestFile(require.resolve('./telemetry'));
+  });
+}

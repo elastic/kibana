@@ -2350,7 +2350,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/server/plugin.tsx",
-          "lineNumber": 31
+          "lineNumber": 34
         },
         "deprecated": false,
         "children": [
@@ -2366,7 +2366,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/server/plugin.tsx",
-              "lineNumber": 35
+              "lineNumber": 38
             },
             "deprecated": false,
             "children": [
@@ -2389,7 +2389,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/lens/server/plugin.tsx",
-                  "lineNumber": 35
+                  "lineNumber": 38
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2433,7 +2433,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/server/plugin.tsx",
-              "lineNumber": 39
+              "lineNumber": 42
             },
             "deprecated": false,
             "children": [
@@ -2464,7 +2464,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/lens/server/plugin.tsx",
-                  "lineNumber": 39
+                  "lineNumber": 42
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2487,7 +2487,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/lens/server/plugin.tsx",
-                  "lineNumber": 39
+                  "lineNumber": 42
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2523,7 +2523,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/server/plugin.tsx",
-              "lineNumber": 59
+              "lineNumber": 63
             },
             "deprecated": false,
             "children": [
@@ -2545,7 +2545,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/lens/server/plugin.tsx",
-                  "lineNumber": 59
+                  "lineNumber": 63
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2568,7 +2568,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/lens/server/plugin.tsx",
-                  "lineNumber": 59
+                  "lineNumber": 63
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2588,7 +2588,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/server/plugin.tsx",
-              "lineNumber": 66
+              "lineNumber": 70
             },
             "deprecated": false,
             "children": [],
@@ -2609,7 +2609,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/server/plugin.tsx",
-          "lineNumber": 21
+          "lineNumber": 23
         },
         "deprecated": false,
         "children": [
@@ -2632,7 +2632,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/server/plugin.tsx",
-              "lineNumber": 22
+              "lineNumber": 24
             },
             "deprecated": false
           },
@@ -2655,7 +2655,29 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/server/plugin.tsx",
-              "lineNumber": 23
+              "lineNumber": 25
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-server.PluginSetupContract.embeddable",
+            "type": "Object",
+            "tags": [],
+            "label": "embeddable",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "embeddable",
+                "scope": "server",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-server.EmbeddableSetup",
+                "text": "EmbeddableSetup"
+              }
+            ],
+            "source": {
+              "path": "x-pack/plugins/lens/server/plugin.tsx",
+              "lineNumber": 26
             },
             "deprecated": false
           }
@@ -2671,7 +2693,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/server/plugin.tsx",
-          "lineNumber": 26
+          "lineNumber": 29
         },
         "deprecated": false,
         "children": [
@@ -2694,7 +2716,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/server/plugin.tsx",
-              "lineNumber": 27
+              "lineNumber": 30
             },
             "deprecated": false
           },
@@ -2716,7 +2738,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/server/plugin.tsx",
-              "lineNumber": 28
+              "lineNumber": 31
             },
             "deprecated": false
           }

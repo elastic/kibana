@@ -25,6 +25,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
       <span
         aria-hidden="true"
         className="euiButtonIcon__icon"
+        color="inherit"
         data-euiicon-type="cross"
         size="m"
       />
@@ -333,6 +334,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
       <span
         aria-hidden="true"
         className="euiButtonIcon__icon"
+        color="inherit"
         data-euiicon-type="cross"
         size="m"
       />
@@ -638,6 +640,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
       <span
         aria-hidden="true"
         className="euiButtonIcon__icon"
+        color="inherit"
         data-euiicon-type="cross"
         size="m"
       />
@@ -938,6 +941,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
       <span
         aria-hidden="true"
         className="euiButtonIcon__icon"
+        color="inherit"
         data-euiicon-type="cross"
         size="m"
       />
