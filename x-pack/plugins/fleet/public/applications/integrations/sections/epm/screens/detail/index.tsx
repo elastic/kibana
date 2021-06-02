@@ -80,7 +80,7 @@ function Breadcrumbs({ packageTitle }: { packageTitle: string }) {
 
 export function Detail() {
   const { pkgkey, panel } = useParams<DetailParams>();
-  const { getHref, getPath } = useLink();
+  const { getHref } = useLink();
   const hasWriteCapabilites = useCapabilities().write;
   const history = useHistory();
   const { pathname, search, hash } = useLocation();
