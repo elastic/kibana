@@ -52,9 +52,8 @@ export async function storedPackagePoliciesToAgentPermissions(
         pkgVersion: packagePolicy.package.version,
       });
 
-      // FIXME is this true?
-      if (!pkg.data_streams) {
-        return [packagePolicy.name, DEFAULT_PERMISSIONS];
+      if (!pkg.data_streams || pkg.data_streams.length === 0) {
+        return [packagePolicy.name, undefined];
       }
 
       let dataStreamsForPermissions: DataStreamMeta[];
