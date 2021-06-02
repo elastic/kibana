@@ -18,6 +18,15 @@ const alertsFields = [
   ...alertsRequiredFields,
 ];
 
+const translationMapping: Record<string, string> = {
+  caseNameConfig: i18n.SW_REQUIRED_CASE_NAME,
+  descriptionConfig: i18n.SW_REQUIRED_DESCRIPTION,
+  commentsConfig: i18n.SW_REQUIRED_COMMENTS,
+  alertNameConfig: i18n.SW_REQUIRED_ALERT_NAME,
+  alertSourceConfig: i18n.SW_REQUIRED_ALERT_SOURCE,
+  severityConfig: i18n.SW_REQUIRED_SEVERITY,
+};
+
 export const isValidFieldForConnector = (
   connector: SwimlaneConnectorType,
   field: string
@@ -43,7 +52,7 @@ export const validateMappingForConnector = (
           : casesRequiredFields.includes(key);
 
       if (isFieldRequired && mapping != null && mapping[key] == null) {
-        errors = { ...errors, [key]: i18n.SW_FIELD_MAPPING_IS_REQUIRED };
+        errors = { ...errors, [key]: translationMapping[key] };
       }
     }
 

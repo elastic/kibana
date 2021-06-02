@@ -215,3 +215,38 @@ export const EMPTY_MAPPING_WARNING_DESC = i18n.translate(
     defaultMessage: `The mapping of the connector is empty. Create a connector of type Alerts before pushing to a case.`,
   }
 );
+
+export const SW_REQUIRED_ALERT_SOURCE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredAlertSource',
+  {
+    defaultMessage: 'Alert Source is required.',
+  }
+);
+
+export const SW_REQUIRED_SEVERITY = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredSeverity',
+  {
+    defaultMessage: 'Severity is required.',
+  }
+);
+
+export const SW_REQUIRED_CASE_NAME = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredCaseName',
+  {
+    defaultMessage: 'Case Name is required.',
+  }
+);
+
+export const SW_REQUIRED_COMMENTS = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredComments',
+  {
+    defaultMessage: 'Comments are required.',
+  }
+);
+
+export const SW_REQUIRED_DESCRIPTION = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredDescription',
+  {
+    defaultMessage: 'Description is required.',
+  }
+);
