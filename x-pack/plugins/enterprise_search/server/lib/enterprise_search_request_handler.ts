@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import http from 'http';
-import https from 'https';
-
 import fetch, { Response } from 'node-fetch';
 import querystring from 'querystring';
 
@@ -27,7 +24,7 @@ import {
   READ_ONLY_MODE_HEADER,
 } from '../../common/constants';
 
-import { entSearchHttpAgent } from './enterprise_search_http_agent';
+import { entSearchHttpAgent, HttpAgent } from './enterprise_search_http_agent';
 
 interface ConstructorDependencies {
   config: ConfigType;
@@ -58,7 +55,7 @@ export interface IEnterpriseSearchRequestHandler {
  */
 export class EnterpriseSearchRequestHandler {
   private enterpriseSearchUrl: string;
-  private httpAgent: http.Agent | https.Agent;
+  private httpAgent: HttpAgent;
   private log: Logger;
   private headers: Record<string, string> = {};
 
