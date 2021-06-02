@@ -42,12 +42,12 @@ export function AgentConfigurations() {
 
   return (
     <>
-      <EuiTitle size="l">
-        <h1>
+      <EuiTitle>
+        <h2>
           {i18n.translate('xpack.apm.agentConfig.titleText', {
             defaultMessage: 'Agent central configuration',
           })}
-        </h1>
+        </h2>
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiText color="subdued">

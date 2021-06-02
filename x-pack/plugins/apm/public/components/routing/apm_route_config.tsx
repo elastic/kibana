@@ -8,36 +8,36 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { getServiceNodeName } from '../../../../../common/service_nodes';
-import { APMRouteDefinition } from '../../../../application/routes';
-import { toQuery } from '../../../shared/Links/url_helpers';
-import { ErrorGroupDetails } from '../../ErrorGroupDetails';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { ServiceNodeMetrics } from '../../service_node_metrics';
-import { Settings } from '../../Settings';
-import { AgentConfigurations } from '../../Settings/AgentConfigurations';
-import { AnomalyDetection } from '../../Settings/anomaly_detection';
-import { ApmIndices } from '../../Settings/ApmIndices';
-import { CustomizeUI } from '../../Settings/CustomizeUI';
-import { TraceLink } from '../../TraceLink';
-import { TransactionDetails } from '../../transaction_details';
+import { getServiceNodeName } from '../../../common/service_nodes';
+import { APMRouteDefinition } from '../../application/routes';
+import { toQuery } from '../shared/Links/url_helpers';
+import { ErrorGroupDetails } from '../app/ErrorGroupDetails';
+import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
+import { ServiceNodeMetrics } from '../app/service_node_metrics';
+import { Settings } from '../app/Settings';
+import { AgentConfigurations } from '../app/Settings/AgentConfigurations';
+import { AnomalyDetection } from '../app/Settings/anomaly_detection';
+import { ApmIndices } from '../app/Settings/ApmIndices';
+import { CustomizeUI } from '../app/Settings/CustomizeUI';
+import { TraceLink } from '../app/TraceLink';
+import { TransactionDetails } from '../app/transaction_details';
 import {
   CreateAgentConfigurationRouteHandler,
   EditAgentConfigurationRouteHandler,
 } from './route_handlers/agent_configuration';
-import { enableServiceOverview } from '../../../../../common/ui_settings_keys';
-import { redirectTo } from '../../../routing/render_as_redirect';
-import { ApmMainTemplate } from '../../../routing/templates/apm_main_template';
-import { ApmServiceTemplate } from '../../../routing/templates/apm_service_template';
-import { ServiceProfiling } from '../../service_profiling';
-import { ErrorGroupOverview } from '../../error_group_overview';
-import { ServiceMap } from '../../service_map';
-import { ServiceNodeOverview } from '../../service_node_overview';
-import { ServiceMetrics } from '../../service_metrics';
-import { ServiceOverview } from '../../service_overview';
-import { TransactionOverview } from '../../transaction_overview';
-import { ServiceInventory } from '../../service_inventory';
-import { TraceOverview } from '../../trace_overview';
+import { enableServiceOverview } from '../../../common/ui_settings_keys';
+import { redirectTo } from './render_as_redirect';
+import { ApmMainTemplate } from './templates/apm_main_template';
+import { ApmServiceTemplate } from './templates/apm_service_template';
+import { ServiceProfiling } from '../app/service_profiling';
+import { ErrorGroupOverview } from '../app/error_group_overview';
+import { ServiceMap } from '../app/service_map';
+import { ServiceNodeOverview } from '../app/service_node_overview';
+import { ServiceMetrics } from '../app/service_metrics';
+import { ServiceOverview } from '../app/service_overview';
+import { TransactionOverview } from '../app/transaction_overview';
+import { ServiceInventory } from '../app/service_inventory';
+import { TraceOverview } from '../app/trace_overview';
 
 // These component function definitions are used below with the `component`
 // property of the route definitions.
@@ -278,7 +278,7 @@ const EditAgentConfigurationTitle = i18n.translate(
 );
 const SettingsCustomizeUITitle = i18n.translate(
   'xpack.apm.views.settings.customizeUI.title',
-  { defaultMessage: 'Customize UI' }
+  { defaultMessage: 'Customize app' }
 );
 const SettingsAnomalyDetectionTitle = i18n.translate(
   'xpack.apm.views.settings.anomalyDetection.title',
@@ -292,7 +292,7 @@ const SettingsTitle = i18n.translate('xpack.apm.views.listSettings.title', {
  * The array of route definitions to be used when the application
  * creates the routes.
  */
-export const routes: APMRouteDefinition[] = [
+export const apmRouteConfig: APMRouteDefinition[] = [
   /*
    * Home routes
    */

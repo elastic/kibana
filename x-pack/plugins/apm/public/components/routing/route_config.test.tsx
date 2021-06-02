@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { routes } from './';
+import { apmRouteConfig } from './apm_route_config';
 
 describe('routes', () => {
   describe('/', () => {
-    const route = routes.find((r) => r.path === '/');
+    const route = apmRouteConfig.find((r) => r.path === '/');
 
     describe('with no hash path', () => {
       it('redirects to /services', () => {

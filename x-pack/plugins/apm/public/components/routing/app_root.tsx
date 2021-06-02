@@ -17,7 +17,6 @@ import {
   RedirectAppLinks,
   useUiSetting$,
 } from '../../../../../../src/plugins/kibana_react/public';
-import { routes } from '../../components/app/Main/route_config';
 import { ScrollToTopOnPathChange } from '../../components/app/Main/ScrollToTopOnPathChange';
 import {
   ApmPluginContext,
@@ -31,6 +30,7 @@ import { HeaderMenuPortal } from '../../../../observability/public';
 import { ApmHeaderActionMenu } from '../../application/action_menu';
 import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
 import { AnomalyDetectionJobsContextProvider } from '../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
+import { apmRouteConfig } from './apm_route_config';
 
 const MainContainer = euiStyled.div`
   height: 100%;
@@ -65,7 +65,7 @@ export function ApmAppRoot({
 
                         <Route component={ScrollToTopOnPathChange} />
                         <Switch>
-                          {routes.map((route, i) => (
+                          {apmRouteConfig.map((route, i) => (
                             <ApmRoute key={i} {...route} />
                           ))}
                         </Switch>
@@ -83,7 +83,7 @@ export function ApmAppRoot({
 }
 
 function MountApmHeaderActionMenu() {
-  useBreadcrumbs(routes);
+  useBreadcrumbs(apmRouteConfig);
   const { setHeaderActionMenu } = useApmPluginContext().appMountParameters;
 
   return (

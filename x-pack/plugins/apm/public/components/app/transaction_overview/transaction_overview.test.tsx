@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fireEvent, getByText, queryByLabelText } from '@testing-library/react';
+import { queryByLabelText } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { CoreStart } from 'kibana/public';
 import React from 'react';
@@ -106,46 +106,6 @@ describe('TransactionOverview', () => {
   });
 
   const FILTER_BY_TYPE_LABEL = 'Transaction type';
-
-  describe('when transactionType is selected and multiple transaction types are given', () => {
-    it('renders a radio group with transaction types', () => {
-      const { container } = setup({
-        serviceTransactionTypes: ['firstType', 'secondType'],
-        urlParams: {
-          transactionType: 'secondType',
-        },
-      });
-
-      expect(getByText(container, 'firstType')).toBeInTheDocument();
-      expect(getByText(container, 'secondType')).toBeInTheDocument();
-
-      expect(getByText(container, 'firstType')).not.toBeNull();
-    });
-
-    it('should update the URL when a transaction type is selected', () => {
-      const { container } = setup({
-        serviceTransactionTypes: ['firstType', 'secondType'],
-        urlParams: {
-          transactionType: 'secondType',
-        },
-      });
-
-      expect(history.location.search).toEqual(
-        '?transactionType=secondType&rangeFrom=now-15m&rangeTo=now'
-      );
-      expect(getByText(container, 'firstType')).toBeInTheDocument();
-      expect(getByText(container, 'secondType')).toBeInTheDocument();
-
-      fireEvent.change(getByText(container, 'firstType').parentElement!, {
-        target: { value: 'firstType' },
-      });
-
-      expect(history.push).toHaveBeenCalled();
-      expect(history.location.search).toEqual(
-        '?transactionType=firstType&rangeFrom=now-15m&rangeTo=now'
-      );
-    });
-  });
 
   describe('when a transaction type is selected, and there are no other transaction types', () => {
     it('does not render a radio group with transaction types', () => {

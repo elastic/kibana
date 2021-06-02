@@ -176,12 +176,12 @@ export function ApmIndices() {
 
   return (
     <>
-      <EuiTitle size="l">
-        <h1>
+      <EuiTitle>
+        <h2>
           {i18n.translate('xpack.apm.settings.apmIndices.title', {
             defaultMessage: 'Indices',
           })}
-        </h1>
+        </h2>
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiText color="subdued">

@@ -5,20 +5,12 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiPage,
-  EuiPageBody,
-  EuiPageSideBar,
-  EuiSideNav,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageSideBar, EuiSideNav } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { getAPMHref } from '../../shared/Links/apm/APMLink';
-import { HomeLink } from '../../shared/Links/apm/HomeLink';
 
 export function Settings({ children }: { children: ReactNode }) {
   const { core } = useApmPluginContext();
@@ -41,19 +33,6 @@ export function Settings({ children }: { children: ReactNode }) {
     <>
       <EuiPage>
         <EuiPageSideBar>
-          <HomeLink>
-            <EuiButtonEmpty
-              flush="left"
-              size="s"
-              color="primary"
-              iconType="arrowLeft"
-            >
-              {i18n.translate('xpack.apm.settings.returnLinkLabel', {
-                defaultMessage: 'Return to inventory',
-              })}
-            </EuiButtonEmpty>
-            <EuiSpacer size="s" />
-          </HomeLink>
           <EuiSideNav
             toggleOpenOnMobile={() => toggleOpenOnMobile()}
             isOpenOnMobile={isSideNavOpenOnMobile}
