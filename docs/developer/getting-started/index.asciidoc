@@ -92,6 +92,10 @@ may need to run:
 yarn kbn clean
 ----
 
+NOTE: Running this command is only necessary in rare circumstance where you need to recover
+a consistent state when problems arise. If you need to run this command often, complete
+this form to provide feedback: https://ela.st/yarn-kbn-clean
+
 If you have failures during `yarn kbn bootstrap` you may have some
 corrupted packages in your yarn cache which you can clean with:
 
