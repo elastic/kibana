@@ -8,14 +8,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
-import {
-  EuiButtonEmpty,
-  EuiPageBody,
-  EuiPageHeader,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { DomainDeprecationDetails } from 'kibana/public';
@@ -71,7 +64,14 @@ export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponent
   >(undefined);
   const [isResolvingDeprecation, setIsResolvingDeprecation] = useState(false);
 
-  const { deprecations, breadcrumbs, docLinks, api, notifications } = useAppContext();
+  const {
+    deprecations,
+    breadcrumbs,
+    docLinks,
+    api,
+    notifications,
+    managementPageLayout: ManagementPageLayout,
+  } = useAppContext();
 
   const getAllDeprecations = useCallback(async () => {
     setIsLoading(true);
@@ -135,49 +135,32 @@ export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponent
     getAllDeprecations();
   }, [deprecations, getAllDeprecations]);
 
-  const getPageContent = () => {
-    if (kibanaDeprecations && kibanaDeprecations.length === 0) {
-      return (
+  if (kibanaDeprecations && kibanaDeprecations.length === 0) {
+    return (
+      <ManagementPageLayout template="centeredContent">
         <NoDeprecationsPrompt
           deprecationType={i18nTexts.deprecationLabel}
           navigateToOverviewPage={() => history.push('/overview')}
         />
-      );
-    }
-
-    let content: React.ReactNode;
-
-    if (isLoading) {
-      content = <SectionLoading>{i18nTexts.isLoading}</SectionLoading>;
-    } else if (kibanaDeprecations?.length) {
-      content = (
-        <KibanaDeprecationList
-          deprecations={kibanaDeprecations}
-          showStepsModal={toggleStepsModal}
-          showResolveModal={toggleResolveModal}
-          reloadDeprecations={getAllDeprecations}
-          isLoading={isLoading}
-        />
-      );
-    } else if (error) {
-      content = <KibanaDeprecationErrors errorType="requestError" />;
-    }
-
-    return (
-      <div data-test-subj="kibanaDeprecationsContent">
-        <EuiSpacer />
-        {content}
-      </div>
+      </ManagementPageLayout>
     );
-  };
+  }
 
-  return (
-    <EuiPageBody>
-      <EuiPageContent>
-        <EuiPageHeader
-          pageTitle={i18nTexts.pageTitle}
-          description={i18nTexts.pageDescription}
-          rightSideItems={[
+  let content: React.ReactNode;
+
+  if (isLoading) {
+    content = (
+      <ManagementPageLayout template="centeredContent">
+        <SectionLoading>{i18nTexts.isLoading}</SectionLoading>
+      </ManagementPageLayout>
+    );
+  } else if (kibanaDeprecations?.length) {
+    content = (
+      <ManagementPageLayout
+        pageHeader={{
+          pageTitle: i18nTexts.pageTitle,
+          description: i18nTexts.pageDescription,
+          rightSideItems: [
             <EuiButtonEmpty
               href={docLinks.links.upgradeAssistant}
               target="_blank"
@@ -186,26 +169,38 @@ export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponent
             >
               {i18nTexts.docLinkText}
             </EuiButtonEmpty>,
-          ]}
+          ],
+        }}
+      >
+        <KibanaDeprecationList
+          deprecations={kibanaDeprecations}
+          showStepsModal={toggleStepsModal}
+          showResolveModal={toggleResolveModal}
+          reloadDeprecations={getAllDeprecations}
+          isLoading={isLoading}
         />
 
-        <EuiPageContentBody>
-          {getPageContent()}
+        {stepsModalContent && (
+          <StepsModal closeModal={() => toggleStepsModal()} modalContent={stepsModalContent} />
+        )}
 
-          {stepsModalContent && (
-            <StepsModal closeModal={() => toggleStepsModal()} modalContent={stepsModalContent} />
-          )}
+        {resolveModalContent && (
+          <ResolveDeprecationModal
+            closeModal={() => toggleResolveModal()}
+            resolveDeprecation={resolveDeprecation}
+            isResolvingDeprecation={isResolvingDeprecation}
+            deprecation={resolveModalContent}
+          />
+        )}
+      </ManagementPageLayout>
+    );
+  } else if (error) {
+    content = (
+      <ManagementPageLayout template="centeredContent">
+        <KibanaDeprecationErrors errorType="requestError" />
+      </ManagementPageLayout>
+    );
+  }
 
-          {resolveModalContent && (
-            <ResolveDeprecationModal
-              closeModal={() => toggleResolveModal()}
-              resolveDeprecation={resolveDeprecation}
-              isResolvingDeprecation={isResolvingDeprecation}
-              deprecation={resolveModalContent}
-            />
-          )}
-        </EuiPageContentBody>
-      </EuiPageContent>
-    </EuiPageBody>
-  );
+  return <div data-test-subj="kibanaDeprecationsContent">{content}</div>;
 });

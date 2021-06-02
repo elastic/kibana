@@ -11,12 +11,9 @@ import { withRouter, RouteComponentProps } from 'react-router-dom';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiPageBody,
-  EuiPageHeader,
   EuiTabbedContent,
   EuiTabbedContentTab,
-  EuiPageContent,
-  EuiPageContentBody,
+  EuiSpacer,
   EuiToolTip,
   EuiNotificationBadge,
 } from '@elastic/eui';
@@ -76,7 +73,13 @@ export const EsDeprecationsContent = withRouter(
   }: RouteComponentProps<MatchParams>) => {
     const [telemetryState, setTelemetryState] = useState<TelemetryState>(TelemetryState.Complete);
 
-    const { api, breadcrumbs, getUrlForApp, docLinks } = useAppContext();
+    const {
+      api,
+      breadcrumbs,
+      getUrlForApp,
+      docLinks,
+      managementPageLayout: ManagementPageLayout,
+    } = useAppContext();
 
     const { data: checkupData, isLoading, error, resendRequest } = api.useLoadUpgradeStatus();
 
@@ -162,51 +165,51 @@ export const EsDeprecationsContent = withRouter(
     }, [api, tabName, isLoading]);
 
     return (
-      <EuiPageBody>
-        <EuiPageContent>
-          <EuiPageHeader
-            pageTitle={i18nTexts.pageTitle}
-            description={i18nTexts.pageDescription}
-            rightSideItems={[
-              <EuiButtonEmpty
-                href={docLinks.links.upgradeAssistant}
-                target="_blank"
-                iconType="help"
-                data-test-subj="documentationLink"
-              >
-                {i18nTexts.docLinkText}
-              </EuiButtonEmpty>,
-            ]}
-          >
-            <EuiToolTip position="bottom" content={i18nTexts.backupDataButton.tooltipText}>
-              <EuiButton
-                fill
-                href={getUrlForApp('management', {
-                  path: 'data/snapshot_restore',
-                })}
-                iconType="popout"
-                iconSide="right"
-                target="_blank"
-              >
-                {i18nTexts.backupDataButton.label}
-              </EuiButton>
-            </EuiToolTip>
-          </EuiPageHeader>
+      <ManagementPageLayout
+        pageHeader={{
+          pageTitle: i18nTexts.pageTitle,
+          description: i18nTexts.pageDescription,
+          rightSideItems: [
+            <EuiButtonEmpty
+              href={docLinks.links.upgradeAssistant}
+              target="_blank"
+              iconType="help"
+              data-test-subj="documentationLink"
+            >
+              {i18nTexts.docLinkText}
+            </EuiButtonEmpty>,
+          ],
+        }}
+      >
+        <>
+          <EuiToolTip position="top" content={i18nTexts.backupDataButton.tooltipText}>
+            <EuiButton
+              fill
+              href={getUrlForApp('management', {
+                path: 'data/snapshot_restore',
+              })}
+              iconType="popout"
+              iconSide="right"
+              target="_blank"
+            >
+              {i18nTexts.backupDataButton.label}
+            </EuiButton>
+          </EuiToolTip>
 
-          <EuiPageContentBody>
-            <EuiTabbedContent
-              data-test-subj={
-                telemetryState === TelemetryState.Running
-                  ? 'upgradeAssistantTelemetryRunning'
-                  : undefined
-              }
-              tabs={tabs}
-              onTabClick={onTabClick}
-              selectedTab={tabs.find((tab) => tab.id === tabName)}
-            />
-          </EuiPageContentBody>
-        </EuiPageContent>
-      </EuiPageBody>
+          <EuiSpacer size="m" />
+
+          <EuiTabbedContent
+            data-test-subj={
+              telemetryState === TelemetryState.Running
+                ? 'upgradeAssistantTelemetryRunning'
+                : undefined
+            }
+            tabs={tabs}
+            onTabClick={onTabClick}
+            selectedTab={tabs.find((tab) => tab.id === tabName)}
+          />
+        </>
+      </ManagementPageLayout>
     );
   }
 );

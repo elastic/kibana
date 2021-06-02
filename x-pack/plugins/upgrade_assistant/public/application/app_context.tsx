@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React, { createContext, useContext } from 'react';
 
 import {
   CoreStart,
@@ -12,7 +13,7 @@ import {
   HttpSetup,
   NotificationsStart,
 } from 'src/core/public';
-import React, { createContext, useContext } from 'react';
+import { ManagementAppMountParams } from '../../../../../src/plugins/management/public';
 import { ApiService } from './lib/api';
 import { BreadcrumbService } from './lib/breadcrumbs';
 
@@ -33,6 +34,7 @@ export interface ContextValue {
   breadcrumbs: BreadcrumbService;
   getUrlForApp: CoreStart['application']['getUrlForApp'];
   deprecations: DeprecationsServiceStart;
+  managementPageLayout: ManagementAppMountParams['managementPageLayout'];
 }
 
 export const AppContext = createContext<ContextValue>({} as any);

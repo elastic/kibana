@@ -23,7 +23,7 @@ export async function mountManagementSection(
     { i18n, docLinks, notifications, application, deprecations },
   ] = await coreSetup.getStartServices();
 
-  const { element, history, setBreadcrumbs } = params;
+  const { element, history, setBreadcrumbs, managementPageLayout } = params;
   const { http } = coreSetup;
 
   apiService.setup(http);
@@ -43,5 +43,6 @@ export async function mountManagementSection(
     breadcrumbs: breadcrumbService,
     getUrlForApp: application.getUrlForApp,
     deprecations,
+    managementPageLayout,
   });
 }

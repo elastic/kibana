@@ -6,17 +6,21 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiPageContent, EuiLink } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useAppContext } from '../app_context';
 
 export const ComingSoonPrompt: React.FunctionComponent = () => {
-  const { kibanaVersionInfo, docLinks } = useAppContext();
+  const {
+    kibanaVersionInfo,
+    docLinks,
+    managementPageLayout: ManagementPageLayout,
+  } = useAppContext();
   const { nextMajor, currentMajor } = kibanaVersionInfo;
   const { ELASTIC_WEBSITE_URL } = docLinks;
 
   return (
-    <EuiPageContent>
+    <ManagementPageLayout template="centeredContent">
       <EuiEmptyPrompt
         iconType="wrench"
         data-test-subj="comingSoonPrompt"
@@ -60,6 +64,6 @@ export const ComingSoonPrompt: React.FunctionComponent = () => {
           </>
         }
       />
-    </EuiPageContent>
+    </ManagementPageLayout>
   );
 };

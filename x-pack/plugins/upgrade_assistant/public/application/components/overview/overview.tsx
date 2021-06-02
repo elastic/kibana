@@ -8,11 +8,7 @@
 import React, { FunctionComponent, useEffect } from 'react';
 
 import {
-  EuiPageContent,
-  EuiPageContentBody,
   EuiText,
-  EuiPageHeader,
-  EuiPageBody,
   EuiButtonEmpty,
   EuiFlexItem,
   EuiFlexGroup,
@@ -73,7 +69,13 @@ interface Props {
 }
 
 export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
-  const { kibanaVersionInfo, breadcrumbs, docLinks, api } = useAppContext();
+  const {
+    kibanaVersionInfo,
+    breadcrumbs,
+    docLinks,
+    api,
+    managementPageLayout: ManagementPageLayout,
+  } = useAppContext();
   const { nextMajor } = kibanaVersionInfo;
 
   useEffect(() => {
@@ -91,72 +93,68 @@ export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
   }, [breadcrumbs]);
 
   return (
-    <EuiPageBody>
-      <EuiPageContent data-test-subj="overviewPageContent">
-        <EuiPageHeader
-          pageTitle={i18nTexts.pageTitle}
-          rightSideItems={[
-            <EuiButtonEmpty
-              href={docLinks.links.upgradeAssistant}
-              target="_blank"
-              iconType="help"
-              data-test-subj="documentationLink"
-            >
-              {i18nTexts.docLink}
-            </EuiButtonEmpty>,
-          ]}
-        />
+    <ManagementPageLayout
+      pageHeader={{
+        pageTitle: i18nTexts.pageTitle,
+        rightSideItems: [
+          <EuiButtonEmpty
+            href={docLinks.links.upgradeAssistant}
+            target="_blank"
+            iconType="help"
+            data-test-subj="documentationLink"
+          >
+            {i18nTexts.docLink}
+          </EuiButtonEmpty>,
+        ],
+      }}
+    >
+      <>
+        <EuiText data-test-subj="overviewDetail" grow={false}>
+          <p>{i18nTexts.pageDescription}</p>
+        </EuiText>
 
-        <EuiPageContentBody>
-          <>
-            <EuiText data-test-subj="overviewDetail" grow={false}>
-              <p>{i18nTexts.pageDescription}</p>
+        <EuiSpacer />
+
+        {/* Remove this in last minor of the current major (e.g., 7.15) */}
+        <LatestMinorBanner />
+
+        <EuiSpacer size="xl" />
+
+        {/* Deprecation stats */}
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <ESDeprecationStats history={history} />
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <KibanaDeprecationStats history={history} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer />
+
+        {/* Deprecation logging */}
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiTitle size="s">
+              <h2>{i18nTexts.deprecationLoggingTitle}</h2>
+            </EuiTitle>
+
+            <EuiText>
+              <p>
+                {i18nTexts.getDeprecationLoggingDescription(
+                  `${nextMajor}.x`,
+                  docLinks.links.elasticsearch.deprecationLogging
+                )}
+              </p>
             </EuiText>
 
-            <EuiSpacer />
+            <EuiSpacer size="m" />
 
-            {/* Remove this in last minor of the current major (e.g., 7.15) */}
-            <LatestMinorBanner />
-
-            <EuiSpacer size="xl" />
-
-            {/* Deprecation stats */}
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <ESDeprecationStats history={history} />
-              </EuiFlexItem>
-
-              <EuiFlexItem>
-                <KibanaDeprecationStats history={history} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-
-            <EuiSpacer />
-
-            {/* Deprecation logging */}
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiTitle size="s">
-                  <h2>{i18nTexts.deprecationLoggingTitle}</h2>
-                </EuiTitle>
-
-                <EuiText>
-                  <p>
-                    {i18nTexts.getDeprecationLoggingDescription(
-                      `${nextMajor}.x`,
-                      docLinks.links.elasticsearch.deprecationLogging
-                    )}
-                  </p>
-                </EuiText>
-
-                <EuiSpacer size="m" />
-
-                <DeprecationLoggingToggle />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        </EuiPageContentBody>
-      </EuiPageContent>
-    </EuiPageBody>
+            <DeprecationLoggingToggle />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
+    </ManagementPageLayout>
   );
 };
