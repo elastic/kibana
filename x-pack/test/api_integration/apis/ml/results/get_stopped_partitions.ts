@@ -85,7 +85,8 @@ export default ({ getService }: FtrProviderContext) => {
 
   const testJobIds = testSetUps.map((t) => t.jobId);
 
-  describe('get stopped_partitions', function () {
+  // skipping categorization tests, see https://github.com/elastic/kibana/issues/101056
+  describe.skip('get stopped_partitions', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/module_sample_logs');
       await ml.testResources.setKibanaTimeZoneToUTC();
