@@ -49,5 +49,11 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     describe('', function () {
       loadTestFile(require.resolve('./exception_operators_data_types/index'));
     });
+
+    // That split here enable us on using a different ciGroup to run the tests
+    // listed on ./keyword_family/index
+    describe('', function () {
+      loadTestFile(require.resolve('./keyword_family/index'));
+    });
   });
 };
