@@ -21,7 +21,13 @@ describe('Breakdowns', function () {
   });
 
   it('should render properly', async function () {
-    render(<Breakdowns seriesId={'series-id'} breakdowns={dataViewSeries.breakdowns} />);
+    render(
+      <Breakdowns
+        seriesId={'series-id'}
+        breakdowns={dataViewSeries.breakdowns}
+        reportViewConfig={dataViewSeries}
+      />
+    );
 
     screen.getAllByText('Browser family');
   });
@@ -30,7 +36,11 @@ describe('Breakdowns', function () {
     const initSeries = { breakdown: USER_AGENT_OS };
 
     const { setSeries } = render(
-      <Breakdowns seriesId={'series-id'} breakdowns={dataViewSeries.breakdowns} />,
+      <Breakdowns
+        seriesId={'series-id'}
+        breakdowns={dataViewSeries.breakdowns}
+        reportViewConfig={dataViewSeries}
+      />,
       { initSeries }
     );
 

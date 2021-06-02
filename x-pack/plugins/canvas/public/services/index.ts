@@ -16,6 +16,7 @@ import { expressionsServiceFactory } from './expressions';
 import { searchServiceFactory } from './search';
 import { labsServiceFactory } from './labs';
 import { reportingServiceFactory } from './reporting';
+import { workpadServiceFactory } from './workpad';
 
 export { NotifyService } from './notify';
 export { SearchService } from './search';
@@ -85,6 +86,7 @@ export const services = {
   search: new CanvasServiceProvider(searchServiceFactory),
   reporting: new CanvasServiceProvider(reportingServiceFactory),
   labs: new CanvasServiceProvider(labsServiceFactory),
+  workpad: new CanvasServiceProvider(workpadServiceFactory),
 };
 
 export type CanvasServiceProviders = typeof services;
@@ -98,6 +100,7 @@ export interface CanvasServices {
   search: ServiceFromProvider<typeof services.search>;
   reporting: ServiceFromProvider<typeof services.reporting>;
   labs: ServiceFromProvider<typeof services.labs>;
+  workpad: ServiceFromProvider<typeof services.workpad>;
 }
 
 export const startServices = async (

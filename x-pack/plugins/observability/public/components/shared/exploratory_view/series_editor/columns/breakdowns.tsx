@@ -10,13 +10,17 @@ import { EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldLabels } from '../../configurations/constants';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
+import { USE_BREAK_DOWN_COLUMN } from '../../configurations/constants';
+import { DataSeries } from '../../types';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
 
 interface Props {
   seriesId: string;
   breakdowns: string[];
+  reportViewConfig: DataSeries;
 }
 
-export function Breakdowns({ seriesId, breakdowns = [] }: Props) {
+export function Breakdowns({ reportViewConfig, seriesId, breakdowns = [] }: Props) {
   const { setSeries, getSeries } = useSeriesStorage();
 
   const series = getSeries(seriesId);
@@ -38,13 +42,21 @@ export function Breakdowns({ seriesId, breakdowns = [] }: Props) {
     }
   };
 
-  const items = breakdowns.map((breakdown) => ({ id: breakdown, label: FieldLabels[breakdown] }));
-  items.push({
-    id: NO_BREAKDOWN,
-    label: i18n.translate('xpack.observability.exp.breakDownFilter.noBreakdown', {
-      defaultMessage: 'No breakdown',
-    }),
-  });
+  const hasUseBreakdownColumn = reportViewConfig.xAxisColumn.sourceField === USE_BREAK_DOWN_COLUMN;
+
+  const items = breakdowns.map((breakdown) => ({
+    id: breakdown,
+    label: reportViewConfig.labels[breakdown],
+  }));
+
+  if (!hasUseBreakdownColumn) {
+    items.push({
+      id: NO_BREAKDOWN,
+      label: i18n.translate('xpack.observability.exp.breakDownFilter.noBreakdown', {
+        defaultMessage: 'No breakdown',
+      }),
+    });
+  }
 
   const options = items.map(({ id, label }) => ({
     inputDisplay: id === NO_BREAKDOWN ? label : <strong>{label}</strong>,
@@ -52,13 +64,16 @@ export function Breakdowns({ seriesId, breakdowns = [] }: Props) {
     dropdownDisplay: label,
   }));
 
+  const valueOfSelected =
+    selectedBreakdown || (hasUseBreakdownColumn ? options[0].value : NO_BREAKDOWN);
+
   return (
     <div style={{ width: 200 }}>
       <EuiSuperSelect
         fullWidth
         compressed
         options={options}
-        valueOfSelected={selectedBreakdown ?? NO_BREAKDOWN}
+        valueOfSelected={valueOfSelected}
         onChange={(value) => onOptionChange(value)}
         data-test-subj={'seriesBreakdown'}
       />
