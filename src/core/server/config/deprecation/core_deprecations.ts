@@ -152,6 +152,11 @@ const serverHostZeroDeprecation: ConfigDeprecation = (settings, fromPath, addDep
       message:
         'Support for setting server.host to "0" in kibana.yml is deprecated and will be removed in Kibana version 8.0.0. ' +
         'Instead use "0.0.0.0" to bind to all interfaces.',
+      correctiveActions: {
+        manualSteps: [
+          `Replace "server.host: 0" to "server.host: 0.0.0.0" in your kibana configurations.`,
+        ],
+      },
     });
   }
   return settings;
