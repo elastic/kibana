@@ -164,8 +164,8 @@ export const EndpointList = () => {
   const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackagePolicyRouteState>(
     'fleet',
     {
-      path: `#/integrations${
-        endpointPackageVersion ? `/endpoint-${endpointPackageVersion}/add-integration` : ''
+      path: `#/policies/add-integration${
+        endpointPackageVersion ? `/endpoint-${endpointPackageVersion}` : ''
       }`,
       state: {
         onCancelNavigateTo: [
@@ -433,6 +433,14 @@ export const EndpointList = () => {
                 selected_endpoint: item.metadata.agent.id,
               });
 
+              const policyDetailsPath = pagePathGetters.policy_details({
+                policyId: agentPolicies[item.metadata.Endpoint.policy.applied.id],
+              })[1];
+
+              const agentDetailsPath = pagePathGetters.fleet_agent_details({
+                agentId: item.metadata.elastic.agent.id,
+              })[1];
+
               return (
                 <TableRowActions
                   items={[
@@ -474,15 +482,9 @@ export const EndpointList = () => {
                       'data-test-subj': 'agentPolicyLink',
                       navigateAppId: 'fleet',
                       navigateOptions: {
-                        path: `#${pagePathGetters.policy_details({
-                          policyId: agentPolicies[item.metadata.Endpoint.policy.applied.id],
-                        })}`,
+                        path: `#${policyDetailsPath}`,
                       },
-                      href: `${services?.application?.getUrlForApp(
-                        'fleet'
-                      )}#${pagePathGetters.policy_details({
-                        policyId: agentPolicies[item.metadata.Endpoint.policy.applied.id],
-                      })}`,
+                      href: `${services?.application?.getUrlForApp('fleet')}#${policyDetailsPath}`,
                       disabled:
                         agentPolicies[item.metadata.Endpoint.policy.applied.id] === undefined,
                       children: (
@@ -498,15 +500,9 @@ export const EndpointList = () => {
                       'data-test-subj': 'agentDetailsLink',
                       navigateAppId: 'fleet',
                       navigateOptions: {
-                        path: `#${pagePathGetters.fleet_agent_details({
-                          agentId: item.metadata.elastic.agent.id,
-                        })}`,
+                        path: `#${agentDetailsPath}`,
                       },
-                      href: `${services?.application?.getUrlForApp(
-                        'fleet'
-                      )}#${pagePathGetters.fleet_agent_details({
-                        agentId: item.metadata.elastic.agent.id,
-                      })}`,
+                      href: `${services?.application?.getUrlForApp('fleet')}#${agentDetailsPath}`,
                       children: (
                         <FormattedMessage
                           id="xpack.securitySolution.endpoint.list.actions.agentDetails"
