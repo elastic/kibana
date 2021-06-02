@@ -24,6 +24,7 @@ import {
   ADMIN_ROLE_TYPE_DESCRIPTION,
   USER_ROLE_TYPE_DESCRIPTION,
   GROUP_ASSIGNMENT_INVALID_ERROR,
+  GROUP_ASSIGNMENT_LABEL,
   ALL_GROUPS_LABEL,
   ALL_GROUPS_DESCRIPTION,
   SPECIFIC_GROUPS_LABEL,
@@ -127,7 +128,7 @@ export const RoleMapping: React.FC = () => {
           idSelected={includeInAllGroups ? 'all' : 'specific'}
           onChange={(id) => handleAllGroupsSelectionChange(id === 'all')}
           legend={{
-            children: <span>Group assignment</span>,
+            children: <span>{GROUP_ASSIGNMENT_LABEL}</span>,
           }}
         />
       </EuiFormRow>

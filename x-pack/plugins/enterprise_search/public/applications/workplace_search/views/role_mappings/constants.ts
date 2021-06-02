@@ -66,6 +66,13 @@ export const GROUP_ASSIGNMENT_INVALID_ERROR = i18n.translate(
   }
 );
 
+export const GROUP_ASSIGNMENT_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.roleMapping.groupAssignmentLabel',
+  {
+    defaultMessage: 'Group assignment',
+  }
+);
+
 export const EMPTY_ROLE_MAPPINGS_BODY = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.roleMapping.emptyRoleMappingsBody',
   {
