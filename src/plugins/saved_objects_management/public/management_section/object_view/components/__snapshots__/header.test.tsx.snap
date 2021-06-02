@@ -95,11 +95,13 @@ exports[`Intro component renders correctly 1`] = `
                           >
                             <EuiIcon
                               className="euiButtonContent__icon"
+                              color="inherit"
                               size="m"
                               type="eye"
                             >
                               <span
                                 className="euiButtonContent__icon"
+                                color="inherit"
                                 data-euiicon-type="eye"
                                 size="m"
                               />
@@ -178,11 +180,13 @@ exports[`Intro component renders correctly 1`] = `
                           >
                             <EuiIcon
                               className="euiButtonContent__icon"
+                              color="inherit"
                               size="m"
                               type="trash"
                             >
                               <span
                                 className="euiButtonContent__icon"
+                                color="inherit"
                                 data-euiicon-type="trash"
                                 size="m"
                               />
