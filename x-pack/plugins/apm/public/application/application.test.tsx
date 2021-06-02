@@ -47,8 +47,6 @@ describe('renderApp', () => {
       observabilityRuleTypeRegistry,
     } = mockApmPluginContextValue;
 
-    const registerSectionsSpy = jest.fn();
-
     const plugins = {
       licensing: { license$: new Observable() },
       triggersActionsUi: { actionTypeRegistry: {}, alertTypeRegistry: {} },
@@ -73,7 +71,7 @@ describe('renderApp', () => {
     const pluginsStart = ({
       observability: {
         navigation: {
-          registerSections: () => registerSectionsSpy,
+          registerSections: () => jest.fn(),
           PageTemplate: ({ children }: { children: React.ReactNode }) => (
             <div>hello worlds {children}</div>
           ),

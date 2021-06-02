@@ -47,7 +47,6 @@ function DebugQueryCallout() {
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-        yolo
         <EuiCallOut
           title={i18n.translate(
             'xpack.apm.searchBar.inspectEsQueriesEnabled.callout.title',

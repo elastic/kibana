@@ -26,7 +26,7 @@ import {
   EditAgentConfigurationRouteHandler,
 } from './route_handlers/agent_configuration';
 import { enableServiceOverview } from '../../../common/ui_settings_keys';
-import { redirectTo } from './render_as_redirect';
+import { redirectTo } from './redirect_to';
 import { ApmMainTemplate } from './templates/apm_main_template';
 import { ApmServiceTemplate } from './templates/apm_service_template';
 import { ServiceProfiling } from '../app/service_profiling';

@@ -31,7 +31,7 @@ import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { px, units } from '../style/variables';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
 import { UXActionMenu } from '../components/app/RumDashboard/ActionMenu';
-import { redirectTo } from '../components/routing/render_as_redirect';
+import { redirectTo } from '../components/routing/redirect_to';
 
 const CsmMainContainer = euiStyled.div`
   padding: ${px(units.plus)};

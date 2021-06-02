@@ -153,7 +153,7 @@ export function ErrorGroupDetails({
           <Titles>
             <EuiText>
               {logMessage && (
-                <Fragment>
+                <>
                   <Label>
                     {i18n.translate(
                       'xpack.apm.errorGroupDetails.logMessageLabel',
@@ -163,7 +163,7 @@ export function ErrorGroupDetails({
                     )}
                   </Label>
                   <Message>{logMessage}</Message>
-                </Fragment>
+                </>
               )}
               <Label>
                 {i18n.translate(

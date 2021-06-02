@@ -121,11 +121,11 @@ export function ServiceInventory() {
     <>
       <SearchBar />
       <EuiFlexGroup direction="column" gutterSize="s">
-        {displayMlCallout ? (
+        {displayMlCallout && (
           <EuiFlexItem>
             <MLCallout onDismiss={() => setUserHasDismissedCallout(true)} />
           </EuiFlexItem>
-        ) : null}
+        )}
         <EuiFlexItem>
           <EuiPanel hasShadow={false}>
             <ServiceList

@@ -77,10 +77,8 @@ export function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
           <ErrorDistribution
             distribution={errorDistributionData}
             title={i18n.translate(
-              'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
-              {
-                defaultMessage: 'Error occurrences',
-              }
+              'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.title',
+              { defaultMessage: 'Error occurrences' }
             )}
           />
         </EuiPanel>
@@ -89,7 +87,12 @@ export function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
       <EuiFlexItem>
         <EuiPanel>
           <EuiTitle size="xs">
-            <h3>Errors</h3>
+            <h3>
+              {i18n.translate(
+                'xpack.apm.serviceDetails.metrics.errorsList.title',
+                { defaultMessage: 'Errors' }
+              )}
+            </h3>
           </EuiTitle>
           <EuiSpacer size="s" />
 
