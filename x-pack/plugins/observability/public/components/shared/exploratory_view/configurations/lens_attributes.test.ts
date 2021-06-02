@@ -342,7 +342,7 @@ describe('Lens Attribute', () => {
               orderBy: { columnId: 'y-axis-column', type: 'column' },
               orderDirection: 'desc',
               otherBucket: true,
-              size: 3,
+              size: 10,
             },
             scale: 'ordinal',
             sourceField: 'user_agent.name',
