@@ -255,8 +255,8 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
           </EuiFormRow>
         ) : (
           <EuiFormRow
-            label={i18n.translate('xpack.transform.agg.popoverForm.fieldsLabel', {
-              defaultMessage: 'Fields',
+            label={i18n.translate('xpack.transform.agg.popoverForm.fieldLabel', {
+              defaultMessage: 'Field',
             })}
           >
             <EuiSelect
