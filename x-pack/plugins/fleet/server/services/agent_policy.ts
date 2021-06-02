@@ -750,23 +750,14 @@ class AgentPolicyService {
           }),
     };
 
-    const hasTightPermissions = appContextService.getConfig()?.agents.agentPolicyTightPermissions;
-    let permissions: FullAgentPolicyOutputPermissions;
+    const permissions = (await storedPackagePoliciesToAgentPermissions(
+      soClient,
+      agentPolicy.package_policies
+    )) || { _fallback: DEFAULT_PERMISSIONS };
 
-    if (hasTightPermissions) {
-      permissions = (await storedPackagePoliciesToAgentPermissions(
-        soClient,
-        agentPolicy.package_policies
-      )) || { _fallback: DEFAULT_PERMISSIONS };
-
-      permissions._elastic_agent_checks = {
-        cluster: DEFAULT_PERMISSIONS.cluster,
-      };
-    } else {
-      permissions = {
-        _fallback: DEFAULT_PERMISSIONS,
-      };
-    }
+    permissions._elastic_agent_checks = {
+      cluster: DEFAULT_PERMISSIONS.cluster,
+    };
 
     // Only add permissions if output.type is "elasticsearch"
     fullAgentPolicy.output_permissions = Object.keys(fullAgentPolicy.outputs).reduce<

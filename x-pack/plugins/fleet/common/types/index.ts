@@ -22,7 +22,6 @@ export interface FleetConfigType {
     fleet_server?: {
       hosts?: string[];
     };
-    agentPolicyTightPermissions: boolean;
   };
   agentPolicies?: PreconfiguredAgentPolicy[];
   packages?: PreconfiguredPackage[];
