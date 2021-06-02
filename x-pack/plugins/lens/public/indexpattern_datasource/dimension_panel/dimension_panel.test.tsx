@@ -169,7 +169,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     setState = jest.fn().mockImplementation((newState) => {
       if (wrapper instanceof ReactWrapper) {
-        wrapper.setProps({ state: newState });
+        wrapper.setProps({
+          state: typeof newState === 'function' ? newState(wrapper.prop('state')) : newState,
+        });
       }
     });
 
@@ -495,26 +497,27 @@ describe('IndexPatternDimensionEditorPanel', () => {
       comboBox.prop('onChange')!([option]);
     });
 
-    expect(setState).toHaveBeenCalledWith(
-      {
-        ...initialState,
-        layers: {
-          first: {
-            ...state.layers.first,
-            columns: {
-              ...state.layers.first.columns,
-              col1: expect.objectContaining({
-                operationType: 'max',
-                sourceField: 'memory',
-                params: { format: { id: 'bytes' } },
-                // Other parts of this don't matter for this test
-              }),
-            },
+    expect(setState.mock.calls[0]).toEqual([
+      expect.any(Function),
+      { shouldRemoveDimension: false, shouldReplaceDimension: true },
+    ]);
+    expect(setState.mock.calls[0][0](defaultProps.state)).toEqual({
+      ...initialState,
+      layers: {
+        first: {
+          ...state.layers.first,
+          columns: {
+            ...state.layers.first.columns,
+            col1: expect.objectContaining({
+              operationType: 'max',
+              sourceField: 'memory',
+              params: { format: { id: 'bytes' } },
+              // Other parts of this don't matter for this test
+            }),
           },
         },
       },
-      { shouldRemoveDimension: false, shouldReplaceDimension: true }
-    );
+    });
   });
 
   it('should switch operations when selecting a field that requires another operation', () => {
@@ -529,25 +532,26 @@ describe('IndexPatternDimensionEditorPanel', () => {
       comboBox.prop('onChange')!([option]);
     });
 
-    expect(setState).toHaveBeenCalledWith(
-      {
-        ...state,
-        layers: {
-          first: {
-            ...state.layers.first,
-            columns: {
-              ...state.layers.first.columns,
-              col1: expect.objectContaining({
-                operationType: 'terms',
-                sourceField: 'source',
-                // Other parts of this don't matter for this test
-              }),
-            },
+    expect(setState.mock.calls[0]).toEqual([
+      expect.any(Function),
+      { shouldRemoveDimension: false, shouldReplaceDimension: true },
+    ]);
+    expect(setState.mock.calls[0][0](defaultProps.state)).toEqual({
+      ...state,
+      layers: {
+        first: {
+          ...state.layers.first,
+          columns: {
+            ...state.layers.first.columns,
+            col1: expect.objectContaining({
+              operationType: 'terms',
+              sourceField: 'source',
+              // Other parts of this don't matter for this test
+            }),
           },
         },
       },
-      { shouldRemoveDimension: false, shouldReplaceDimension: true }
-    );
+    });
   });
 
   it('should keep the field when switching to another operation compatible for this field', () => {
@@ -562,26 +566,27 @@ describe('IndexPatternDimensionEditorPanel', () => {
       wrapper.find('button[data-test-subj="lns-indexPatternDimension-min"]').simulate('click');
     });
 
-    expect(setState).toHaveBeenCalledWith(
-      {
-        ...state,
-        layers: {
-          first: {
-            ...state.layers.first,
-            columns: {
-              ...state.layers.first.columns,
-              col1: expect.objectContaining({
-                operationType: 'min',
-                sourceField: 'bytes',
-                params: { format: { id: 'bytes' } },
-                // Other parts of this don't matter for this test
-              }),
-            },
+    expect(setState.mock.calls[0]).toEqual([
+      expect.any(Function),
+      { shouldRemoveDimension: false, shouldReplaceDimension: true },
+    ]);
+    expect(setState.mock.calls[0][0](state)).toEqual({
+      ...state,
+      layers: {
+        first: {
+          ...state.layers.first,
+          columns: {
+            ...state.layers.first.columns,
+            col1: expect.objectContaining({
+              operationType: 'min',
+              sourceField: 'bytes',
+              params: { format: { id: 'bytes' } },
+              // Other parts of this don't matter for this test
+            }),
           },
         },
       },
-      { shouldRemoveDimension: false, shouldReplaceDimension: true }
-    );
+    });
   });
 
   it('should not set the state if selecting the currently active operation', () => {
@@ -635,23 +640,24 @@ describe('IndexPatternDimensionEditorPanel', () => {
       wrapper.find('button[data-test-subj="lns-indexPatternDimension-min"]').simulate('click');
     });
 
-    expect(setState).toHaveBeenCalledWith(
-      {
-        ...state,
-        layers: {
-          first: {
-            ...state.layers.first,
-            columns: {
-              ...state.layers.first.columns,
-              col1: expect.objectContaining({
-                label: 'Minimum of bytes',
-              }),
-            },
+    expect(setState.mock.calls[0]).toEqual([
+      expect.any(Function),
+      { shouldRemoveDimension: false, shouldReplaceDimension: true },
+    ]);
+    expect(setState.mock.calls[0][0](state)).toEqual({
+      ...state,
+      layers: {
+        first: {
+          ...state.layers.first,
+          columns: {
+            ...state.layers.first.columns,
+            col1: expect.objectContaining({
+              label: 'Minimum of bytes',
+            }),
           },
         },
       },
-      { shouldRemoveDimension: false, shouldReplaceDimension: true }
-    );
+    });
   });
 
   it('should keep the label on operation change if it is custom', () => {
@@ -672,24 +678,25 @@ describe('IndexPatternDimensionEditorPanel', () => {
       wrapper.find('button[data-test-subj="lns-indexPatternDimension-min"]').simulate('click');
     });
 
-    expect(setState).toHaveBeenCalledWith(
-      {
-        ...state,
-        layers: {
-          first: {
-            ...state.layers.first,
-            columns: {
-              ...state.layers.first.columns,
-              col1: expect.objectContaining({
-                label: 'Custom label',
-                customLabel: true,
-              }),
-            },
+    expect(setState.mock.calls[0]).toEqual([
+      expect.any(Function),
+      { shouldRemoveDimension: false, shouldReplaceDimension: true },
+    ]);
+    expect(setState.mock.calls[0][0](state)).toEqual({
+      ...state,
+      layers: {
+        first: {
+          ...state.layers.first,
+          columns: {
+            ...state.layers.first.columns,
+            col1: expect.objectContaining({
+              label: 'Custom label',
+              customLabel: true,
+            }),
           },
         },
       },
-      { shouldRemoveDimension: false, shouldReplaceDimension: true }
-    );
+    });
   });
 
   it('should remove customLabel flag if label is set to default', () => {
@@ -740,23 +747,24 @@ describe('IndexPatternDimensionEditorPanel', () => {
           .simulate('click');
       });
 
-      expect(setState).toHaveBeenCalledWith(
-        {
-          ...state,
-          layers: {
-            first: {
-              ...state.layers.first,
-              columns: {
-                ...state.layers.first.columns,
-              },
-              incompleteColumns: {
-                col1: { operationType: 'terms' },
-              },
+      expect(setState.mock.calls[0]).toEqual([
+        expect.any(Function),
+        { shouldRemoveDimension: false, shouldReplaceDimension: true },
+      ]);
+      expect(setState.mock.calls[0][0](state)).toEqual({
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+            },
+            incompleteColumns: {
+              col1: { operationType: 'terms' },
             },
           },
         },
-        { shouldRemoveDimension: false, shouldReplaceDimension: true }
-      );
+      });
     });
 
     it('should show error message in invalid state', () => {
@@ -865,20 +873,22 @@ describe('IndexPatternDimensionEditorPanel', () => {
       wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} columnId={'col2'} />);
 
       wrapper.find('button[data-test-subj="lns-indexPatternDimension-average"]').simulate('click');
-      expect(setState).toHaveBeenCalledWith(
-        {
-          ...state,
-          layers: {
-            first: {
-              ...state.layers.first,
-              incompleteColumns: {
-                col2: { operationType: 'average' },
-              },
+
+      expect(setState.mock.calls[0]).toEqual([
+        expect.any(Function),
+        { shouldRemoveDimension: false, shouldReplaceDimension: false },
+      ]);
+      expect(setState.mock.calls[0][0](state)).toEqual({
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            incompleteColumns: {
+              col2: { operationType: 'average' },
             },
           },
         },
-        { shouldRemoveDimension: false, shouldReplaceDimension: false }
-      );
+      });
 
       const comboBox = wrapper
         .find(EuiComboBox)
@@ -890,26 +900,23 @@ describe('IndexPatternDimensionEditorPanel', () => {
         comboBox.prop('onChange')!([options![1].options![2]]);
       });
 
-      expect(setState).toHaveBeenLastCalledWith(
-        {
-          ...state,
-          layers: {
-            first: {
-              ...state.layers.first,
-              columns: {
-                ...state.layers.first.columns,
-                col2: expect.objectContaining({
-                  sourceField: 'source',
-                  operationType: 'terms',
-                  // Other parts of this don't matter for this test
-                }),
-              },
-              columnOrder: ['col2', 'col1'],
+      expect(setState.mock.calls[1][0](state)).toEqual({
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col2: expect.objectContaining({
+                sourceField: 'source',
+                operationType: 'terms',
+                // Other parts of this don't matter for this test
+              }),
             },
+            columnOrder: ['col2', 'col1'],
           },
         },
-        { shouldRemoveDimension: false, shouldReplaceDimension: true }
-      );
+      });
     });
 
     it('should clean up when transitioning from incomplete reference-based operations to field operation', () => {
@@ -936,20 +943,21 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .simulate('click');
 
       // Now check that the dimension gets cleaned up on state update
-      expect(setState).toHaveBeenCalledWith(
-        {
-          ...state,
-          layers: {
-            first: {
-              ...state.layers.first,
-              incompleteColumns: {
-                col2: { operationType: 'average' },
-              },
+      expect(setState.mock.calls[0]).toEqual([
+        expect.any(Function),
+        { shouldRemoveDimension: false, shouldReplaceDimension: false },
+      ]);
+      expect(setState.mock.calls[0][0](state)).toEqual({
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            incompleteColumns: {
+              col2: { operationType: 'average' },
             },
           },
         },
-        { shouldRemoveDimension: true, shouldReplaceDimension: false }
-      );
+      });
     });
 
     it('should select the Records field when count is selected', () => {
@@ -973,7 +981,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .find('button[data-test-subj="lns-indexPatternDimension-count incompatible"]')
         .simulate('click');
 
-      const newColumnState = setState.mock.calls[0][0].layers.first.columns.col2;
+      const newColumnState = setState.mock.calls[0][0](state).layers.first.columns.col2;
       expect(newColumnState.operationType).toEqual('count');
       expect(newColumnState.sourceField).toEqual('Records');
     });
@@ -1030,24 +1038,26 @@ describe('IndexPatternDimensionEditorPanel', () => {
         comboBox.prop('onChange')!([option]);
       });
 
-      expect(setState).toHaveBeenLastCalledWith(
-        {
-          ...state,
-          layers: {
-            first: {
-              ...state.layers.first,
-              columns: {
-                ...state.layers.first.columns,
-                col1: expect.objectContaining({
-                  sourceField: 'source',
-                  operationType: 'terms',
-                }),
-              },
+      expect(setState.mock.calls.length).toEqual(2);
+      expect(setState.mock.calls[1]).toEqual([
+        expect.any(Function),
+        { shouldRemoveDimension: false, shouldReplaceDimension: true },
+      ]);
+      expect(setState.mock.calls[1][0](state)).toEqual({
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col1: expect.objectContaining({
+                sourceField: 'source',
+                operationType: 'terms',
+              }),
             },
           },
         },
-        { shouldRemoveDimension: false, shouldReplaceDimension: true }
-      );
+      });
     });
   });
 
@@ -1130,24 +1140,25 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .find('[data-test-subj="indexPattern-time-scaling-enable"]')
         .hostNodes()
         .simulate('click');
-      expect(props.setState).toHaveBeenCalledWith(
-        {
-          ...props.state,
-          layers: {
-            first: {
-              ...props.state.layers.first,
-              columns: {
-                ...props.state.layers.first.columns,
-                col2: expect.objectContaining({
-                  timeScale: 's',
-                  label: 'Count of records per second',
-                }),
-              },
+      expect(setState.mock.calls[0]).toEqual([
+        expect.any(Function),
+        { shouldRemoveDimension: false, shouldReplaceDimension: true },
+      ]);
+      expect(setState.mock.calls[0][0](props.state)).toEqual({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                timeScale: 's',
+                label: 'Count of records per second',
+              }),
             },
           },
         },
-        { shouldRemoveDimension: false, shouldReplaceDimension: true }
-      );
+      });
     });
 
     it('should carry over time scaling to other operation if possible', () => {
@@ -1161,24 +1172,25 @@ describe('IndexPatternDimensionEditorPanel', () => {
       wrapper
         .find('button[data-test-subj="lns-indexPatternDimension-count incompatible"]')
         .simulate('click');
-      expect(props.setState).toHaveBeenCalledWith(
-        {
-          ...props.state,
-          layers: {
-            first: {
-              ...props.state.layers.first,
-              columns: {
-                ...props.state.layers.first.columns,
-                col2: expect.objectContaining({
-                  timeScale: 'h',
-                  label: 'Count of records per hour',
-                }),
-              },
+      expect(setState.mock.calls[0]).toEqual([
+        expect.any(Function),
+        { shouldRemoveDimension: false, shouldReplaceDimension: true },
+      ]);
+      expect(setState.mock.calls[0][0](props.state)).toEqual({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                timeScale: 'h',
+                label: 'Count of records per hour',
+              }),
             },
           },
         },
-        { shouldRemoveDimension: false, shouldReplaceDimension: true }
-      );
+      });
     });
 
     it('should not carry over time scaling if the other operation does not support it', () => {
@@ -1190,24 +1202,25 @@ describe('IndexPatternDimensionEditorPanel', () => {
       });
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
       wrapper.find('button[data-test-subj="lns-indexPatternDimension-average"]').simulate('click');
-      expect(props.setState).toHaveBeenCalledWith(
-        {
-          ...props.state,
-          layers: {
-            first: {
-              ...props.state.layers.first,
-              columns: {
-                ...props.state.layers.first.columns,
-                col2: expect.objectContaining({
-                  timeScale: undefined,
-                  label: 'Average of bytes',
-                }),
-              },
+      expect(setState.mock.calls[0]).toEqual([
+        expect.any(Function),
+        { shouldRemoveDimension: false, shouldReplaceDimension: true },
+      ]);
+      expect(setState.mock.calls[0][0](props.state)).toEqual({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                timeScale: undefined,
+                label: 'Average of bytes',
+              }),
             },
           },
         },
-        { shouldRemoveDimension: false, shouldReplaceDimension: true }
-      );
+      });
     });
 
     it('should allow to change time scaling', () => {
@@ -1223,24 +1236,25 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .prop('onChange')!(({
         target: { value: 'h' },
       } as unknown) as ChangeEvent<HTMLSelectElement>);
-      expect(props.setState).toHaveBeenCalledWith(
-        {
-          ...props.state,
-          layers: {
-            first: {
-              ...props.state.layers.first,
-              columns: {
-                ...props.state.layers.first.columns,
-                col2: expect.objectContaining({
-                  timeScale: 'h',
-                  label: 'Count of records per hour',
-                }),
-              },
+      expect(setState.mock.calls[0]).toEqual([
+        expect.any(Function),
+        { shouldRemoveDimension: false, shouldReplaceDimension: true },
+      ]);
+      expect(setState.mock.calls[0][0](props.state)).toEqual({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                timeScale: 'h',
+                label: 'Count of records per hour',
+              }),
             },
           },
         },
-        { shouldRemoveDimension: false, shouldReplaceDimension: true }
-      );
+      });
     });
 
     it('should not adjust label if it is custom', () => {
@@ -1252,24 +1266,25 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .prop('onChange')!(({
         target: { value: 'h' },
       } as unknown) as ChangeEvent<HTMLSelectElement>);
-      expect(props.setState).toHaveBeenCalledWith(
-        {
-          ...props.state,
-          layers: {
-            first: {
-              ...props.state.layers.first,
-              columns: {
-                ...props.state.layers.first.columns,
-                col2: expect.objectContaining({
-                  timeScale: 'h',
-                  label: 'My label',
-                }),
-              },
+      expect(setState.mock.calls[0]).toEqual([
+        expect.any(Function),
+        { shouldRemoveDimension: false, shouldReplaceDimension: true },
+      ]);
+      expect(setState.mock.calls[0][0](props.state)).toEqual({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                timeScale: 'h',
+                label: 'My label',
+              }),
             },
           },
         },
-        { shouldRemoveDimension: false, shouldReplaceDimension: true }
-      );
+      });
     });
 
     it('should allow to remove time scaling', () => {
@@ -1282,24 +1297,25 @@ describe('IndexPatternDimensionEditorPanel', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         {} as any
       );
-      expect(props.setState).toHaveBeenCalledWith(
-        {
-          ...props.state,
-          layers: {
-            first: {
-              ...props.state.layers.first,
-              columns: {
-                ...props.state.layers.first.columns,
-                col2: expect.objectContaining({
-                  timeScale: undefined,
-                  label: 'Count of records',
-                }),
-              },
+      expect(setState.mock.calls[0]).toEqual([
+        expect.any(Function),
+        { shouldRemoveDimension: false, shouldReplaceDimension: true },
+      ]);
+      expect(setState.mock.calls[0][0](props.state)).toEqual({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                timeScale: undefined,
+                label: 'Count of records',
+              }),
             },
           },
         },
-        { shouldRemoveDimension: false, shouldReplaceDimension: true }
-      );
+      });
     });
   });
 
@@ -1384,26 +1400,27 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .find('[data-test-subj="indexPattern-filter-by-enable"]')
         .hostNodes()
         .simulate('click');
-      expect(props.setState).toHaveBeenCalledWith(
-        {
-          ...props.state,
-          layers: {
-            first: {
-              ...props.state.layers.first,
-              columns: {
-                ...props.state.layers.first.columns,
-                col2: expect.objectContaining({
-                  filter: {
-                    language: 'kuery',
-                    query: '',
-                  },
-                }),
-              },
+      expect(setState.mock.calls[0]).toEqual([
+        expect.any(Function),
+        { shouldRemoveDimension: false, shouldReplaceDimension: true },
+      ]);
+      expect(setState.mock.calls[0][0](props.state)).toEqual({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                filter: {
+                  language: 'kuery',
+                  query: '',
+                },
+              }),
             },
           },
         },
-        { shouldRemoveDimension: false, shouldReplaceDimension: true }
-      );
+      });
     });
 
     it('should carry over filter to other operation if possible', () => {
@@ -1417,23 +1434,24 @@ describe('IndexPatternDimensionEditorPanel', () => {
       wrapper
         .find('button[data-test-subj="lns-indexPatternDimension-count incompatible"]')
         .simulate('click');
-      expect(props.setState).toHaveBeenCalledWith(
-        {
-          ...props.state,
-          layers: {
-            first: {
-              ...props.state.layers.first,
-              columns: {
-                ...props.state.layers.first.columns,
-                col2: expect.objectContaining({
-                  filter: { language: 'kuery', query: 'a: b' },
-                }),
-              },
+      expect(setState.mock.calls[0]).toEqual([
+        expect.any(Function),
+        { shouldRemoveDimension: false, shouldReplaceDimension: true },
+      ]);
+      expect(setState.mock.calls[0][0](props.state)).toEqual({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                filter: { language: 'kuery', query: 'a: b' },
+              }),
             },
           },
         },
-        { shouldRemoveDimension: false, shouldReplaceDimension: true }
-      );
+      });
     });
 
     it('should allow to change filter', () => {
@@ -1445,23 +1463,24 @@ describe('IndexPatternDimensionEditorPanel', () => {
         language: 'kuery',
         query: 'c: d',
       });
-      expect(props.setState).toHaveBeenCalledWith(
-        {
-          ...props.state,
-          layers: {
-            first: {
-              ...props.state.layers.first,
-              columns: {
-                ...props.state.layers.first.columns,
-                col2: expect.objectContaining({
-                  filter: { language: 'kuery', query: 'c: d' },
-                }),
-              },
+      expect(setState.mock.calls[0]).toEqual([
+        expect.any(Function),
+        { shouldRemoveDimension: false, shouldReplaceDimension: true },
+      ]);
+      expect(setState.mock.calls[0][0](props.state)).toEqual({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                filter: { language: 'kuery', query: 'c: d' },
+              }),
             },
           },
         },
-        { shouldRemoveDimension: false, shouldReplaceDimension: true }
-      );
+      });
     });
 
     it('should allow to remove filter', () => {
@@ -1476,23 +1495,24 @@ describe('IndexPatternDimensionEditorPanel', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         {} as any
       );
-      expect(props.setState).toHaveBeenCalledWith(
-        {
-          ...props.state,
-          layers: {
-            first: {
-              ...props.state.layers.first,
-              columns: {
-                ...props.state.layers.first.columns,
-                col2: expect.objectContaining({
-                  filter: undefined,
-                }),
-              },
+      expect(setState.mock.calls[0]).toEqual([
+        expect.any(Function),
+        { shouldRemoveDimension: false, shouldReplaceDimension: true },
+      ]);
+      expect(setState.mock.calls[0][0](props.state)).toEqual({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                filter: undefined,
+              }),
             },
           },
         },
-        { shouldRemoveDimension: false, shouldReplaceDimension: true }
-      );
+      });
     });
   });
 
@@ -1530,22 +1550,23 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     wrapper.find('button[data-test-subj="lns-indexPatternDimension-average"]').simulate('click');
 
-    expect(setState).toHaveBeenCalledWith(
-      {
-        ...state,
-        layers: {
-          first: {
-            ...state.layers.first,
-            incompleteColumns: {
-              col2: {
-                operationType: 'average',
-              },
+    expect(setState.mock.calls[0]).toEqual([
+      expect.any(Function),
+      { shouldRemoveDimension: false, shouldReplaceDimension: false },
+    ]);
+    expect(setState.mock.calls[0][0](defaultProps.state)).toEqual({
+      ...state,
+      layers: {
+        first: {
+          ...state.layers.first,
+          incompleteColumns: {
+            col2: {
+              operationType: 'average',
             },
           },
         },
       },
-      { shouldRemoveDimension: false, shouldReplaceDimension: false }
-    );
+    });
 
     const comboBox = wrapper
       .find(EuiComboBox)
@@ -1556,26 +1577,23 @@ describe('IndexPatternDimensionEditorPanel', () => {
       comboBox.prop('onChange')!([options![1].options![0]]);
     });
 
-    expect(setState).toHaveBeenCalledWith(
-      {
-        ...state,
-        layers: {
-          first: {
-            ...state.layers.first,
-            columnOrder: ['col1', 'col2'],
-            columns: {
-              ...state.layers.first.columns,
-              col2: expect.objectContaining({
-                operationType: 'average',
-                sourceField: 'bytes',
-              }),
-            },
-            incompleteColumns: {},
+    expect(setState.mock.calls[1][0](defaultProps.state)).toEqual({
+      ...state,
+      layers: {
+        first: {
+          ...state.layers.first,
+          columnOrder: ['col1', 'col2'],
+          columns: {
+            ...state.layers.first.columns,
+            col2: expect.objectContaining({
+              operationType: 'average',
+              sourceField: 'bytes',
+            }),
           },
+          incompleteColumns: {},
         },
       },
-      { shouldRemoveDimension: false, shouldReplaceDimension: true }
-    );
+    });
   });
 
   it('should select operation directly if only one field is possible', () => {
@@ -1599,26 +1617,27 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     wrapper.find('button[data-test-subj="lns-indexPatternDimension-average"]').simulate('click');
 
-    expect(setState).toHaveBeenCalledWith(
-      {
-        ...initialState,
-        layers: {
-          first: {
-            ...initialState.layers.first,
-            columns: {
-              ...initialState.layers.first.columns,
-              col2: expect.objectContaining({
-                sourceField: 'bytes',
-                operationType: 'average',
-                // Other parts of this don't matter for this test
-              }),
-            },
-            columnOrder: ['col1', 'col2'],
+    expect(setState.mock.calls[0]).toEqual([
+      expect.any(Function),
+      { shouldRemoveDimension: false, shouldReplaceDimension: true },
+    ]);
+    expect(setState.mock.calls[0][0](initialState)).toEqual({
+      ...initialState,
+      layers: {
+        first: {
+          ...initialState.layers.first,
+          columns: {
+            ...initialState.layers.first.columns,
+            col2: expect.objectContaining({
+              sourceField: 'bytes',
+              operationType: 'average',
+              // Other parts of this don't matter for this test
+            }),
           },
+          columnOrder: ['col1', 'col2'],
         },
       },
-      { shouldRemoveDimension: false, shouldReplaceDimension: true }
-    );
+    });
   });
 
   it('should select operation directly if only document is possible', () => {
@@ -1626,25 +1645,26 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     wrapper.find('button[data-test-subj="lns-indexPatternDimension-count"]').simulate('click');
 
-    expect(setState).toHaveBeenCalledWith(
-      {
-        ...state,
-        layers: {
-          first: {
-            ...state.layers.first,
-            columns: {
-              ...state.layers.first.columns,
-              col2: expect.objectContaining({
-                operationType: 'count',
-                // Other parts of this don't matter for this test
-              }),
-            },
-            columnOrder: ['col1', 'col2'],
+    expect(setState.mock.calls[0]).toEqual([
+      expect.any(Function),
+      { shouldRemoveDimension: false, shouldReplaceDimension: true },
+    ]);
+    expect(setState.mock.calls[0][0](state)).toEqual({
+      ...state,
+      layers: {
+        first: {
+          ...state.layers.first,
+          columns: {
+            ...state.layers.first.columns,
+            col2: expect.objectContaining({
+              operationType: 'count',
+              // Other parts of this don't matter for this test
+            }),
           },
+          columnOrder: ['col1', 'col2'],
         },
       },
-      { shouldRemoveDimension: false, shouldReplaceDimension: true }
-    );
+    });
   });
 
   it('should indicate compatible fields when selecting the operation first', () => {
@@ -1762,26 +1782,27 @@ describe('IndexPatternDimensionEditorPanel', () => {
       comboBox.prop('onChange')!([option]);
     });
 
-    expect(setState).toHaveBeenCalledWith(
-      {
-        ...state,
-        layers: {
-          first: {
-            ...state.layers.first,
-            columns: {
-              ...state.layers.first.columns,
-              col2: expect.objectContaining({
-                operationType: 'range',
-                sourceField: 'bytes',
-                // Other parts of this don't matter for this test
-              }),
-            },
-            columnOrder: ['col1', 'col2'],
+    expect(setState.mock.calls[0]).toEqual([
+      expect.any(Function),
+      { shouldRemoveDimension: false, shouldReplaceDimension: true },
+    ]);
+    expect(setState.mock.calls[0][0](defaultProps.state)).toEqual({
+      ...state,
+      layers: {
+        first: {
+          ...state.layers.first,
+          columns: {
+            ...state.layers.first.columns,
+            col2: expect.objectContaining({
+              operationType: 'range',
+              sourceField: 'bytes',
+              // Other parts of this don't matter for this test
+            }),
           },
+          columnOrder: ['col1', 'col2'],
         },
       },
-      { shouldRemoveDimension: false, shouldReplaceDimension: true }
-    );
+    });
   });
 
   it('should use helper function when changing the function', () => {
