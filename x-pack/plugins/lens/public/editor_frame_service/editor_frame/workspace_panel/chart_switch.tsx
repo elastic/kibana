@@ -16,7 +16,7 @@ import {
   EuiSelectable,
   EuiIconTip,
   EuiSelectableOption,
-  EuiBetaBadge,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -287,6 +287,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
                 .map(
                   (v): SelectableEntry => ({
                     'aria-label': v.fullLabel || v.label,
+                    className: 'lnsChartSwitch__option',
                     isGroupLabel: false,
                     key: `${v.visualizationId}:${v.id}`,
                     value: `${v.visualizationId}:${v.id}`,
@@ -296,26 +297,15 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
                       <EuiIcon className="lnsChartSwitch__chartIcon" type={v.icon || 'empty'} />
                     ),
                     append: (
-                      <EuiFlexGroup gutterSize="xs">
+                      <EuiFlexGroup gutterSize="xs" responsive={false}>
                         {v.showBetaBadge ? (
                           <EuiFlexItem grow={false}>
-                            <EuiBetaBadge
-                              label={
-                                <FormattedMessage
-                                  id="xpack.lens.chartSwitch.betaLabel"
-                                  defaultMessage="Beta"
-                                />
-                              }
-                              title={i18n.translate('xpack.lens.chartSwitch.betaLabel', {
-                                defaultMessage: 'Beta',
-                              })}
-                              tooltipContent={
-                                <FormattedMessage
-                                  id="xpack.lens.chartSwitch.betaTooltipContent"
-                                  defaultMessage="This chart type is not GA."
-                                />
-                              }
-                            />
+                            <EuiBadge color="hollow">
+                              <FormattedMessage
+                                id="xpack.lens.chartSwitch.betaLabel"
+                                defaultMessage="Beta"
+                              />
+                            </EuiBadge>
                           </EuiFlexItem>
                         ) : null}
                         {v.selection.dataLoss !== 'nothing' ? (
