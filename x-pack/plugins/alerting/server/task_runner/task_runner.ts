@@ -323,6 +323,12 @@ export class TaskRunner<
       alertLabel,
     });
 
+    trackAlertDurations({
+      originalAlertInstances,
+      currentAlertInstances: instancesWithScheduledActions,
+      recoveredAlertInstances,
+    });
+
     generateNewAndRecoveredInstanceEvents({
       eventLogger,
       originalAlertInstances,
@@ -390,6 +396,15 @@ export class TaskRunner<
       this.logger.debug(`no scheduling of actions for alert ${alertLabel}: alert is muted.`);
     }
 
+    console.log(
+      `executeAlertInstances ${JSON.stringify({
+        alertTypeState: updatedAlertTypeState || undefined,
+        alertInstances: mapValues<
+          Record<string, AlertInstance<InstanceState, InstanceContext>>,
+          RawAlertInstance
+        >(instancesWithScheduledActions, (alertInstance) => alertInstance.toRaw()),
+      })}`
+    );
     return {
       alertTypeState: updatedAlertTypeState || undefined,
       alertInstances: mapValues<
@@ -587,6 +602,33 @@ export class TaskRunner<
   }
 }
 
+interface TrackAlertDurationsParams<
+  InstanceState extends AlertInstanceState,
+  InstanceContext extends AlertInstanceContext
+> {
+  originalAlertInstances: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
+  currentAlertInstances: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
+  recoveredAlertInstances: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
+}
+
+function trackAlertDurations<
+  InstanceState extends AlertInstanceState,
+  InstanceContext extends AlertInstanceContext
+>(params: TrackAlertDurationsParams<InstanceState, InstanceContext>) {
+  const currentTime = new Date().toISOString();
+  const { currentAlertInstances, originalAlertInstances, recoveredAlertInstances } = params;
+  const originalAlertInstanceIds = Object.keys(originalAlertInstances);
+  const currentAlertInstanceIds = Object.keys(currentAlertInstances);
+  const recoveredAlertInstanceIds = Object.keys(recoveredAlertInstances);
+  const newIds = without(currentAlertInstanceIds, ...originalAlertInstanceIds);
+
+  // Inject start time into instance state of new instances
+  for (const id of newIds) {
+    const state = currentAlertInstances[id].getState();
+    currentAlertInstances[id].replaceState({ ...state, start: currentTime });
+  }
+}
+
 interface GenerateNewAndRecoveredInstanceEventsParams<
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext
@@ -625,6 +667,7 @@ function generateNewAndRecoveredInstanceEvents<
   }
 
   for (const id of newIds) {
+    console.log(`new instance: ${JSON.stringify(currentAlertInstances[id])}`);
     const { actionGroup, subgroup: actionSubgroup } =
       currentAlertInstances[id].getScheduledActionOptions() ?? {};
     const message = `${params.alertLabel} created new instance: '${id}'`;
