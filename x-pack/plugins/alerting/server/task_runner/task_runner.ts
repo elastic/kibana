@@ -51,6 +51,7 @@ import {
 } from '../../common';
 import { NormalizedAlertType } from '../alert_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
+import { getDocsForRuleTypeByProducer } from '../lib/get_docs_for_rule_type_by_producer';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
@@ -303,6 +304,8 @@ export class TaskRunner<
     event.message = `alert executed: ${alertLabel}`;
     event.event = event.event || {};
     event.event.outcome = 'success';
+    event.rule = { ...event.rule, name: alert.name, author: [alert.updatedBy ?? ''], version: alert.version};
+
 
     // Cleanup alert instances that are no longer scheduling actions to avoid over populating the alertInstances object
     const instancesWithScheduledActions = pickBy(
@@ -486,7 +489,7 @@ export class TaskRunner<
       // explicitly set execute timestamp so it will be before other events
       // generated here (new-instance, schedule-action, etc)
       '@timestamp': runDate,
-      event: { action: EVENT_LOG_ACTIONS.execute },
+      event: { action: EVENT_LOG_ACTIONS.execute, kind: 'alert', category: [this.alertType.producer] },
       kibana: {
         saved_objects: [
           {
@@ -497,6 +500,15 @@ export class TaskRunner<
           },
         ],
       },
+      rule: {
+        id: alertId,
+        license: this.alertType.minimumLicenseRequired,
+        category: this.alertType.producer,
+        ruleset: this.alertType.producer,
+        uuid: spaceId,
+        reference: getDocsForRuleTypeByProducer(this.alertType.id, this.alertType.producer),
+        namespace,
+      }
     };
     eventLogger.startTiming(event);
 

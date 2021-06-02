@@ -389,7 +389,7 @@ export class AlertsClient {
         savedObject: { type: 'alert', id },
       })
     );
-    return this.getAlertFromRaw<Params>(result.id, result.attributes, result.references);
+    return this.getAlertFromRaw<Params>(result.id, result.attributes, result.references, result.version);
   }
 
   public async getAlertState({ id }: { id: string }): Promise<AlertTaskState | void> {
@@ -1437,18 +1437,20 @@ export class AlertsClient {
   private getAlertFromRaw<Params extends AlertTypeParams>(
     id: string,
     rawAlert: RawAlert,
-    references: SavedObjectReference[] | undefined
+    references: SavedObjectReference[] | undefined,
+    version?: string
   ): Alert {
     // In order to support the partial update API of Saved Objects we have to support
     // partial updates of an Alert, but when we receive an actual RawAlert, it is safe
     // to cast the result to an Alert
-    return this.getPartialAlertFromRaw<Params>(id, rawAlert, references) as Alert;
+    return this.getPartialAlertFromRaw<Params>(id, rawAlert, references, version) as Alert;
   }
 
   private getPartialAlertFromRaw<Params extends AlertTypeParams>(
     id: string,
     { createdAt, updatedAt, meta, notifyWhen, scheduledTaskId, ...rawAlert }: Partial<RawAlert>,
-    references: SavedObjectReference[] | undefined
+    references: SavedObjectReference[] | undefined,
+    version?: string
   ): PartialAlert<Params> {
     // Not the prettiest code here, but if we want to use most of the
     // alert fields from the rawAlert using `...rawAlert` kind of access, we
@@ -1467,6 +1469,7 @@ export class AlertsClient {
       // we currently only support the Interval Schedule type
       // Once we support additional types, this type signature will likely change
       schedule: rawAlert.schedule as IntervalSchedule,
+      version,
       actions: rawAlert.actions
         ? this.injectReferencesIntoActions(id, rawAlert.actions, references || [])
         : [],

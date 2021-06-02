@@ -91,6 +91,7 @@ export const EventSchema = schema.maybe(
         ruleset: ecsString(),
         uuid: ecsString(),
         version: ecsString(),
+        namespace: ecsString(),
       })
     ),
     user: schema.maybe(
