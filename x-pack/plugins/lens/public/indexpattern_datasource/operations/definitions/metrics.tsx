@@ -54,10 +54,13 @@ function buildMetricOperation<T extends MetricColumn<string>>({
 }) {
   const labelLookup = (name: string, column?: BaseIndexPatternColumn) => {
     const label = ofName(name);
-    if (!optionalTimeScaling) {
-      return label;
-    }
-    return adjustTimeScaleLabelSuffix(label, undefined, column?.timeScale);
+    return adjustTimeScaleLabelSuffix(
+      label,
+      undefined,
+      optionalTimeScaling ? column?.timeScale : undefined,
+      undefined,
+      column?.timeShift
+    );
   };
 
   return {
@@ -104,6 +107,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         scale: 'ratio',
         timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
         filter: getFilter(previousColumn, columnParams),
+        timeShift: previousColumn?.timeShift,
         params: getFormatFromPreviousColumn(previousColumn),
       } as T;
     },
@@ -120,11 +124,14 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         enabled: true,
         schema: 'metric',
         field: column.sourceField,
+        // time shift is added to wrapping aggFilteredMetric if filter is set
+        timeShift: column.filter ? undefined : column.timeShift,
       }).toAst();
     },
     getErrorMessage: (layer, columnId, indexPattern) =>
       getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
     filterable: true,
+    shiftable: true,
   } as OperationDefinition<T, 'field'>;
 }
 

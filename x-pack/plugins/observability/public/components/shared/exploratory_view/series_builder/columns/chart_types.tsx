@@ -20,9 +20,11 @@ const CHART_TYPE_LABEL = i18n.translate('xpack.observability.expView.chartTypes.
 
 export function SeriesChartTypesSelect({
   seriesId,
+  seriesTypes,
   defaultChartType,
 }: {
   seriesId: string;
+  seriesTypes?: SeriesType[];
   defaultChartType: SeriesType;
 }) {
   const { series, setSeries, allSeries } = useUrlStorage(seriesId);
@@ -42,8 +44,18 @@ export function SeriesChartTypesSelect({
       onChange={onChange}
       value={seriesType}
       excludeChartTypes={['bar_percentage_stacked']}
+      includeChartTypes={
+        seriesTypes || [
+          'bar',
+          'bar_horizontal',
+          'line',
+          'area',
+          'bar_stacked',
+          'area_stacked',
+          'bar_horizontal_percentage_stacked',
+        ]
+      }
       label={CHART_TYPE_LABEL}
-      includeChartTypes={['bar', 'bar_horizontal', 'line', 'area', 'bar_stacked', 'area_stacked']}
     />
   );
 }
