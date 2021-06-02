@@ -15,9 +15,8 @@ import type { DataPluginStart, DataPluginStartDependencies } from '../../plugin'
 
 const indexPatternSpecSchema = schema.object({
   title: schema.string(),
-
-  id: schema.maybe(schema.string()),
   version: schema.maybe(schema.string()),
+  id: schema.maybe(schema.string()),
   type: schema.maybe(schema.string()),
   timeFieldName: schema.maybe(schema.string()),
   sourceFilters: schema.maybe(
