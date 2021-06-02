@@ -3,13 +3,12 @@ pageLoadAssetSize:
   alerting: 106936
   apm: 64385
   apmOss: 18996
-  beatsManagement: 188135
-  bfetch: 41874
+  bfetch: 51874
   canvas: 1066647
   charts: 195358
   cloud: 21076
   console: 46091
-  core: 414000
+  core: 432925
   crossClusterReplication: 65408
   dashboard: 374194
   dashboardEnhanced: 65646
@@ -77,7 +76,7 @@ pageLoadAssetSize:
   tileMap: 65337
   timelion: 29920
   transform: 41007
-  triggersActionsUi: 186732
+  triggersActionsUi: 100000
   uiActions: 97717
   uiActionsEnhanced: 313011
   upgradeAssistant: 81241

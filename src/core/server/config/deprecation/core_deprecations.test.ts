@@ -24,7 +24,7 @@ describe('core deprecations', () => {
       const { messages } = applyCoreDeprecations();
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "Environment variable CONFIG_PATH is deprecated. It has been replaced with KBN_PATH_CONF pointing to a config folder",
+          "Environment variable \\"CONFIG_PATH\\" is deprecated. It has been replaced with \\"KBN_PATH_CONF\\" pointing to a config folder",
         ]
       `);
     });
@@ -405,7 +405,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.events.log\\" has been deprecated and will be removed in 8.0. Moving forward, log levels can be customized on a per-logger basis using the new logging configuration. ",
+          "\\"logging.events.log\\" has been deprecated and will be removed in 8.0. Moving forward, log levels can be customized on a per-logger basis using the new logging configuration.",
         ]
       `);
     });
@@ -418,7 +418,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.events.error\\" has been deprecated and will be removed in 8.0. Moving forward, you can use \\"logging.root.level: error\\" in your logging configuration. ",
+          "\\"logging.events.error\\" has been deprecated and will be removed in 8.0. Moving forward, you can use \\"logging.root.level: error\\" in your logging configuration.",
         ]
       `);
     });

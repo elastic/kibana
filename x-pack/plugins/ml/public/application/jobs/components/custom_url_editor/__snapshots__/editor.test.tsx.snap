@@ -18,6 +18,7 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
   />
   <EuiForm
     className="ml-edit-url-form"
+    data-test-subj="mlJobCustomUrlForm"
   >
     <EuiFormRow
       className="url-label"
@@ -63,6 +64,7 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
     >
       <EuiRadioGroup
         className="url-link-to-radio"
+        data-test-subj="mlJobCustomUrlLinkToTypeInput"
         idSelected="KIBANA_DASHBOARD"
         onChange={[Function]}
         options={
@@ -100,6 +102,7 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
     >
       <EuiSelect
         compressed={true}
+        data-test-subj="mlJobCustomUrlDashboardNameInput"
         onChange={[Function]}
         options={
           Array [
@@ -134,6 +137,7 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
       <EuiComboBox
         async={false}
         compressed={false}
+        data-test-subj="mlJobCustomUrlQueryEntitiesInput"
         fullWidth={false}
         isClearable={true}
         onChange={[Function]}
@@ -175,6 +179,7 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
         >
           <EuiSelect
             compressed={true}
+            data-test-subj="mlJobCustomUrlTimeRangeInput"
             onChange={[Function]}
             options={
               Array [
@@ -215,6 +220,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
   />
   <EuiForm
     className="ml-edit-url-form"
+    data-test-subj="mlJobCustomUrlForm"
   >
     <EuiFormRow
       className="url-label"
@@ -260,6 +266,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
     >
       <EuiRadioGroup
         className="url-link-to-radio"
+        data-test-subj="mlJobCustomUrlLinkToTypeInput"
         idSelected="KIBANA_DISCOVER"
         onChange={[Function]}
         options={
@@ -297,6 +304,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
     >
       <EuiSelect
         compressed={true}
+        data-test-subj="mlJobCustomUrlDiscoverIndexPatternInput"
         onChange={[Function]}
         options={
           Array [
@@ -331,6 +339,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
       <EuiComboBox
         async={false}
         compressed={false}
+        data-test-subj="mlJobCustomUrlQueryEntitiesInput"
         fullWidth={false}
         isClearable={true}
         onChange={[Function]}
@@ -378,6 +387,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
         >
           <EuiSelect
             compressed={true}
+            data-test-subj="mlJobCustomUrlTimeRangeInput"
             onChange={[Function]}
             options={
               Array [
@@ -420,6 +430,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
         >
           <EuiFieldText
             compressed={true}
+            data-test-subj="mlJobCustomUrlTimeRangeIntervalInput"
             isInvalid={true}
             onChange={[Function]}
             value=""
@@ -449,6 +460,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
   />
   <EuiForm
     className="ml-edit-url-form"
+    data-test-subj="mlJobCustomUrlForm"
   >
     <EuiFormRow
       className="url-label"
@@ -494,6 +506,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
     >
       <EuiRadioGroup
         className="url-link-to-radio"
+        data-test-subj="mlJobCustomUrlLinkToTypeInput"
         idSelected="KIBANA_DISCOVER"
         onChange={[Function]}
         options={
@@ -531,6 +544,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
     >
       <EuiSelect
         compressed={true}
+        data-test-subj="mlJobCustomUrlDiscoverIndexPatternInput"
         onChange={[Function]}
         options={
           Array [
@@ -565,6 +579,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
       <EuiComboBox
         async={false}
         compressed={false}
+        data-test-subj="mlJobCustomUrlQueryEntitiesInput"
         fullWidth={false}
         isClearable={true}
         onChange={[Function]}
@@ -612,6 +627,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
         >
           <EuiSelect
             compressed={true}
+            data-test-subj="mlJobCustomUrlTimeRangeInput"
             onChange={[Function]}
             options={
               Array [
@@ -650,6 +666,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
         >
           <EuiFieldText
             compressed={true}
+            data-test-subj="mlJobCustomUrlTimeRangeIntervalInput"
             isInvalid={false}
             onChange={[Function]}
             value="1h"
@@ -679,6 +696,7 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
   />
   <EuiForm
     className="ml-edit-url-form"
+    data-test-subj="mlJobCustomUrlForm"
   >
     <EuiFormRow
       className="url-label"
@@ -728,6 +746,7 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
     >
       <EuiRadioGroup
         className="url-link-to-radio"
+        data-test-subj="mlJobCustomUrlLinkToTypeInput"
         idSelected="KIBANA_DASHBOARD"
         onChange={[Function]}
         options={
@@ -765,6 +784,7 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
     >
       <EuiSelect
         compressed={true}
+        data-test-subj="mlJobCustomUrlDashboardNameInput"
         onChange={[Function]}
         options={
           Array [
@@ -799,6 +819,7 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
       <EuiComboBox
         async={false}
         compressed={false}
+        data-test-subj="mlJobCustomUrlQueryEntitiesInput"
         fullWidth={false}
         isClearable={true}
         onChange={[Function]}
@@ -840,6 +861,7 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
         >
           <EuiSelect
             compressed={true}
+            data-test-subj="mlJobCustomUrlTimeRangeInput"
             onChange={[Function]}
             options={
               Array [
@@ -880,6 +902,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
   />
   <EuiForm
     className="ml-edit-url-form"
+    data-test-subj="mlJobCustomUrlForm"
   >
     <EuiFormRow
       className="url-label"
@@ -929,6 +952,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
     >
       <EuiRadioGroup
         className="url-link-to-radio"
+        data-test-subj="mlJobCustomUrlLinkToTypeInput"
         idSelected="OTHER"
         onChange={[Function]}
         options={
@@ -966,6 +990,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
     >
       <EuiTextArea
         compressed={true}
+        data-test-subj="mlJobCustomUrlOtherTypeUrlInput"
         fullWidth={true}
         onChange={[Function]}
         rows={2}
@@ -994,6 +1019,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
   />
   <EuiForm
     className="ml-edit-url-form"
+    data-test-subj="mlJobCustomUrlForm"
   >
     <EuiFormRow
       className="url-label"
@@ -1039,6 +1065,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
     >
       <EuiRadioGroup
         className="url-link-to-radio"
+        data-test-subj="mlJobCustomUrlLinkToTypeInput"
         idSelected="OTHER"
         onChange={[Function]}
         options={
@@ -1076,6 +1103,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
     >
       <EuiTextArea
         compressed={true}
+        data-test-subj="mlJobCustomUrlOtherTypeUrlInput"
         fullWidth={true}
         onChange={[Function]}
         rows={2}

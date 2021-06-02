@@ -23,7 +23,7 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { updateColumnParam } from '../layer_helpers';
-import { OperationDefinition } from './index';
+import { OperationDefinition, ParamEditorProps } from './index';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import {
   AggFunctionsMapping,
@@ -35,6 +35,7 @@ import {
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { getInvalidFieldMessage, getSafeName } from './helpers';
 import { HelpPopover, HelpPopoverButton } from '../../help_popover';
+import { IndexPatternLayer } from '../../types';
 
 const { isValidInterval } = search.aggs;
 const autoInterval = 'auto';
@@ -46,6 +47,28 @@ export interface DateHistogramIndexPatternColumn extends FieldBasedIndexPatternC
     interval: string;
     timeZone?: string;
   };
+}
+
+function getMultipleDateHistogramsErrorMessage(layer: IndexPatternLayer, columnId: string) {
+  const usesTimeShift = Object.values(layer.columns).some(
+    (col) => col.timeShift && col.timeShift !== ''
+  );
+  if (!usesTimeShift) {
+    return undefined;
+  }
+  const dateHistograms = layer.columnOrder.filter(
+    (colId) => layer.columns[colId].operationType === 'date_histogram'
+  );
+  if (dateHistograms.length < 2) {
+    return undefined;
+  }
+  return i18n.translate('xpack.lens.indexPattern.multipleDateHistogramsError', {
+    defaultMessage:
+      '"{dimensionLabel}" is not the only date histogram. When using time shifts, make sure to only use one date histogram.',
+    values: {
+      dimensionLabel: layer.columns[columnId].label,
+    },
+  });
 }
 
 export const dateHistogramOperation: OperationDefinition<
@@ -60,7 +83,13 @@ export const dateHistogramOperation: OperationDefinition<
   priority: 5, // Highest priority level used
   operationParams: [{ name: 'interval', type: 'string', required: false }],
   getErrorMessage: (layer, columnId, indexPattern) =>
-    getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+    [
+      ...(getInvalidFieldMessage(
+        layer.columns[columnId] as FieldBasedIndexPatternColumn,
+        indexPattern
+      ) || []),
+      getMultipleDateHistogramsErrorMessage(layer, columnId) || '',
+    ].filter(Boolean),
   getHelpMessage: (props) => <AutoDateHistogramPopover {...props} />,
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
@@ -150,7 +179,15 @@ export const dateHistogramOperation: OperationDefinition<
       extended_bounds: JSON.stringify({}),
     }).toAst();
   },
-  paramEditor: ({ layer, columnId, currentColumn, updateLayer, dateRange, data, indexPattern }) => {
+  paramEditor: function ParamEditor({
+    layer,
+    columnId,
+    currentColumn,
+    updateLayer,
+    dateRange,
+    data,
+    indexPattern,
+  }: ParamEditorProps<DateHistogramIndexPatternColumn>) {
     const field = currentColumn && indexPattern.getFieldByName(currentColumn.sourceField);
     const intervalIsRestricted =
       field!.aggregationRestrictions && field!.aggregationRestrictions.date_histogram;
@@ -225,10 +262,11 @@ export const dateHistogramOperation: OperationDefinition<
                       disabled={calendarOnlyIntervals.has(interval.unit)}
                       isInvalid={!isValid}
                       onChange={(e) => {
-                        setInterval({
+                        const newInterval = {
                           ...interval,
                           value: e.target.value,
-                        });
+                        };
+                        setInterval(newInterval);
                       }}
                     />
                   </EuiFlexItem>
@@ -238,10 +276,11 @@ export const dateHistogramOperation: OperationDefinition<
                       data-test-subj="lensDateHistogramUnit"
                       value={interval.unit}
                       onChange={(e) => {
-                        setInterval({
+                        const newInterval = {
                           ...interval,
                           unit: e.target.value,
-                        });
+                        };
+                        setInterval(newInterval);
                       }}
                       isInvalid={!isValid}
                       options={[
