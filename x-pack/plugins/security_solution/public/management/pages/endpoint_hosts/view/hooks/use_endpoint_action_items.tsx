@@ -72,7 +72,7 @@ export const useEndpointActionItems = (
               children: (
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.actions.unIsolateHost"
-                  defaultMessage="Unisolate Host"
+                  defaultMessage="Unisolate host"
                 />
               ),
             }
@@ -88,7 +88,7 @@ export const useEndpointActionItems = (
               children: (
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.actions.isolateHost"
-                  defaultMessage="Isolate Host"
+                  defaultMessage="Isolate host"
                 />
               ),
             },
@@ -102,7 +102,7 @@ export const useEndpointActionItems = (
           children: (
             <FormattedMessage
               id="xpack.securitySolution.endpoint.actions.hostDetails"
-              defaultMessage="View Host Details"
+              defaultMessage="View host details"
             />
           ),
         },
@@ -123,7 +123,7 @@ export const useEndpointActionItems = (
           children: (
             <FormattedMessage
               id="xpack.securitySolution.endpoint.actions.agentPolicy"
-              defaultMessage="View Agent Policy"
+              defaultMessage="View agent policy"
             />
           ),
         },
@@ -143,7 +143,7 @@ export const useEndpointActionItems = (
           children: (
             <FormattedMessage
               id="xpack.securitySolution.endpoint.actions.agentDetails"
-              defaultMessage="View Agent Details"
+              defaultMessage="View agent details"
             />
           ),
         },

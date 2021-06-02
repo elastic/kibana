@@ -99,8 +99,10 @@ export const fleetApisHttpMock = httpHandlerMockFactory<FleetApisHttpMockInterfa
       const endpointMetadata = generator.generateHostMetadata();
       const agentPolicy = generator.generateAgentPolicy();
 
-      // Make sure that the Agent policy returned from the API has the Integration Policy ID
-      // that the endpoint metadata is using.
+      // Make sure that the Agent policy returned from the API has the Integration Policy ID that
+      // the endpoint metadata is using. This is needed especially when testing the Endpoint Details
+      // flyout where certain actions might be disabled if we know the endpoint integration policy no
+      // longer exists.
       (agentPolicy.package_policies as string[]).push(endpointMetadata.Endpoint.policy.applied.id);
 
       return {

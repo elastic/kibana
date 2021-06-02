@@ -110,7 +110,10 @@ export const createSpyMiddleware = <
         const timeout = setTimeout(() => {
           watchers.delete(watch);
           reject(err);
+          // TODO: is there a way we can grab the current timeout value from jest?
+          // For now, this is using the default value - 500.
         }, 4500);
+
         watchers.add(watch);
       });
     },

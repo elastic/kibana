@@ -522,7 +522,7 @@ describe('when on the endpoint list page', () => {
       const {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         host_status,
-        metadata: { agent, ...details },
+        metadata: { agent, Endpoint, ...details },
         // eslint-disable-next-line @typescript-eslint/naming-convention
         query_strategy_version,
       } = mockEndpointDetailsApiResult();
@@ -531,6 +531,13 @@ describe('when on the endpoint list page', () => {
         host_status,
         metadata: {
           ...details,
+          Endpoint: {
+            ...Endpoint,
+            state: {
+              ...Endpoint.state,
+              isolation: false,
+            },
+          },
           agent: {
             ...agent,
             id: '1',
@@ -747,7 +754,7 @@ describe('when on the endpoint list page', () => {
       const renderResult = await renderAndWaitForData();
 
       act(() => {
-        fireEvent.click(renderResult.getByTestId('hostIsolationTakeActionButton'));
+        fireEvent.click(renderResult.getByTestId('endpointDetailsActionsButton'));
       });
 
       const changeUrlAction = middlewareSpy.waitForAction('userChangedUrl');
@@ -756,7 +763,7 @@ describe('when on the endpoint list page', () => {
         fireEvent.click(
           reactTestingLibrary
             .within(renderResult.baseElement as HTMLElement)
-            .getByTestId('hostIsolationIsolateAction')
+            .getByTestId('isolateLink')
         );
       });
 
