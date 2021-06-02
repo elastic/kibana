@@ -186,7 +186,7 @@ Platform::
 Security::
 * Deprecates the `xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize` setting for SAML authentication {kibana-pull}68117[#68117]
 Visualizations::
-* In 7.0 and later, *Timelion* app is deprecated. In 8.0 and later, *Timelion* app is removed from {kib} {kibana-pull}74660[#74660]
+* In 7.0 and later, *Timelion* app is deprecated. In 7.16 and later, *Timelion* app is removed from {kib} {kibana-pull}74660[#74660]
 +
 To prepare for the removal of *Timelion* app, you must migrate *Timelion* app worksheets to a dashboard.
 +
