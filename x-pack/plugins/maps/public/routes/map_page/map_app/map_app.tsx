@@ -8,7 +8,7 @@
 import React from 'react';
 import _ from 'lodash';
 import { from } from 'rxjs';
-import { debounceTime, finalize, first, skipUntil, switchMap, tap } from 'rxjs/operators';
+import { debounceTime, finalize, first, switchMap, tap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { AppLeaveAction, AppMountParameters } from 'kibana/public';
 import { Adapters } from 'src/plugins/embeddable/public';
@@ -18,7 +18,6 @@ import {
   getCoreChrome,
   getMapsCapabilities,
   getNavigation,
-  getSearchService,
   getTimeFilter,
   getToasts,
 } from '../../../kibana_services';
@@ -123,6 +122,7 @@ export class MapApp extends React.Component<Props, State> {
   componentDidMount() {
     this._isMounted = true;
 
+    // @ts-expect-error
     const reduxState$ = from(this.props.savedMap.getStore());
     this._autoRefreshSubscription = getTimeFilter()
       .getAutoRefreshFetch$()
@@ -136,7 +136,6 @@ export class MapApp extends React.Component<Props, State> {
               debounceTime(300),
               // using switchMap since switchMap will discard promise from previous state iterations in progress
               switchMap(async (state) => {
-                console.log('state', state);
                 const promises = getLayerList(state).map(async (layer) => {
                   return {
                     isFilteredByGlobalTime: await layer.isFilteredByGlobalTime(),
@@ -147,11 +146,9 @@ export class MapApp extends React.Component<Props, State> {
                 return layersWithMeta;
               }),
               first((layersWithMeta) => {
-                console.log('layersWithMeta', layersWithMeta);
                 const areTimeLayersStillLoading = layersWithMeta
                   .filter(({ isFilteredByGlobalTime }) => isFilteredByGlobalTime)
                   .some(({ layer }) => layer.isLayerLoading());
-                console.log('areTimeLayersStillLoading', areTimeLayersStillLoading);
                 return !areTimeLayersStillLoading;
               })
             )
