@@ -33,6 +33,7 @@ export function initPlugin(router: IRouter, path: string) {
       return jsonResponse(res, 200, {
         id: 'wowzeronza',
         name: 'ET-69',
+        createdDate: '2021-06-01T17:29:51.092Z',
       });
     }
   );
@@ -55,6 +56,7 @@ export function initPlugin(router: IRouter, path: string) {
       return jsonResponse(res, 200, {
         id: 'wowzeronza',
         name: 'ET-69',
+        modifiedDate: '2021-06-01T17:29:51.092Z',
       });
     }
   );

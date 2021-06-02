@@ -32,7 +32,7 @@ const createErrorMessage = (errorResponse: ResponseError | null | undefined): st
   }
 
   const { ErrorCode, Argument } = errorResponse;
-  return `${Argument} (${ErrorCode})`;
+  return Argument != null && ErrorCode != null ? `${Argument} (${ErrorCode})` : '';
 };
 
 export const createExternalService = (

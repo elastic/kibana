@@ -21,6 +21,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
     config: {
       apiUrl: 'http://swimlane.mynonexistent.co',
       appId: '123456asdf',
+      connectorType: 'all',
       mappings: {
         alertSourceConfig: {
           id: 'adnjls',
@@ -64,6 +65,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
       apiToken: 'swimlane-api-key',
     },
   };
+
   describe('swimlane', () => {
     let swimlaneSimulatorURL: string = '<could not determine kibana url>';
 

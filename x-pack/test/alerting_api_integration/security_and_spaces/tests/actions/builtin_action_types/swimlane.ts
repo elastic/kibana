@@ -28,6 +28,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
     config: {
       apiUrl: 'http://swimlane.mynonexistent.com',
       appId: '123456asdf',
+      connectorType: 'all',
       mappings: {
         alertSourceConfig: {
           id: 'adnjls',
@@ -63,6 +64,12 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
           id: 'a6fdf',
           name: 'Comments',
           key: 'comments',
+          fieldType: 'notes',
+        },
+        descriptionConfig: {
+          id: 'a6fdf',
+          name: 'Description',
+          key: 'description',
           fieldType: 'text',
         },
       },
@@ -79,17 +86,19 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
           alertSource: 'Elastic',
           caseName: 'Case Name',
           caseId: 'es3456789',
-          comments: 'This is a comment',
+          description: 'This is a description',
           externalId: null,
         },
         comments: [
           {
             comment: 'first comment',
+            commentId: '123',
           },
         ],
       },
     },
   };
+
   describe('Swimlane', () => {
     let swimlaneSimulatorURL: string = '<could not determine kibana url>';
     // need to wait for kibanaServer to settle ...
@@ -322,17 +331,24 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [createRecord]\n- [1.subAction]: expected value to equal [pushToService]',
+                  'error validating action params: [subAction]: expected value to equal [pushToService]',
               });
             });
         });
 
+        /**
+         * All subActionParams are optional.
+         * If subActionParams is not provided all
+         * the subActionParams attributes will be set to null
+         * and the validation will succeed. For that reason,
+         * the subActionParams need to be set to null.
+         */
         it('should handle failing with a simulated success without subActionParams', async () => {
           await supertest
             .post(`/api/actions/connector/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
-              params: { subAction: 'pushToService' },
+              params: { subAction: 'pushToService', subActionParams: null },
             })
             .then((resp: any) => {
               expect(resp.body).to.eql({
@@ -340,33 +356,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [createRecord]\n- [1.subActionParams.incident.alertName]: expected value of type [string] but got [undefined]',
-              });
-            });
-        });
-
-        it('should handle failing with a simulated success without alertName', async () => {
-          await supertest
-            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              params: {
-                ...mockSwimlane.params,
-                subActionParams: {
-                  incident: {
-                    severity: 'very much so',
-                  },
-                  comments: [],
-                },
-              },
-            })
-            .then((resp: any) => {
-              expect(resp.body).to.eql({
-                connector_id: simulatedActionId,
-                status: 'error',
-                retry: false,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [createRecord]\n- [1.subActionParams.incident.alertName]: expected value of type [string] but got [undefined]',
+                  'error validating action params: [subActionParams]: expected a plain object value, but found [null] instead.',
               });
             });
         });
@@ -390,7 +380,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [createRecord]\n- [1.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.commentId]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]',
+                  'error validating action params: [subActionParams.incident.comments]: definition for this key is missing',
               });
             });
         });
@@ -414,11 +404,12 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [createRecord]\n- [1.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]',
+                  'error validating action params: [subActionParams.incident.comments]: definition for this key is missing',
               });
             });
         });
       });
+
       describe('Execution', () => {
         it('should handle creating an incident', async () => {
           const { body } = await supertest
@@ -442,10 +433,12 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
             data: {
               id: 'wowzeronza',
               title: 'ET-69',
+              pushedDate: '2021-06-01T17:29:51.092Z',
               url: `${swimlaneSimulatorURL}/record/123456asdf/wowzeronza`,
             },
           });
         });
+
         it('should handle updating an incident', async () => {
           const { body } = await supertest
             .post(`/api/actions/connector/${simulatedActionId}/_execute`)
@@ -471,6 +464,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
             data: {
               id: 'wowzeronza',
               title: 'ET-69',
+              pushedDate: '2021-06-01T17:29:51.092Z',
               url: `${swimlaneSimulatorURL}/record/123456asdf/wowzeronza`,
             },
           });
