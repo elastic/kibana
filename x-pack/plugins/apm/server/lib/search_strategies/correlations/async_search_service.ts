@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { descending, group, sum } from 'd3-array';
+import {
+  descending,
+  // group,
+  sum,
+} from 'd3-array';
 import { shuffle, uniqWith, isEqual } from 'lodash';
 
 import type { ElasticsearchClient } from 'src/core/server';
@@ -25,7 +29,7 @@ import { fetchTransactionDurationRanges } from './query_ranges';
 
 const PERCENTILES = 20;
 const CORRELATION_THRESHOLD = 0.03;
-const KS_TEST_THRESHOLD = 0.1;
+// const KS_TEST_THRESHOLD = 0.1;
 
 export const asyncSearchServiceProvider = (
   esClient: ElasticsearchClient,
