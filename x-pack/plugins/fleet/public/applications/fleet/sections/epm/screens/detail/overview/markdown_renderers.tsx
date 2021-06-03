@@ -60,8 +60,10 @@ export const markdownRenderers = {
     </EuiLink>
   ),
   code: ({ language, value }: { language: string; value: string }) => {
+    // Old packages are using `$json`, which is not valid any more with the move to prism.js
+    const parsedLang = language === '$json' ? 'json' : language;
     return (
-      <EuiCodeBlock language={language} isCopyable>
+      <EuiCodeBlock language={parsedLang} isCopyable>
         {value}
       </EuiCodeBlock>
     );
