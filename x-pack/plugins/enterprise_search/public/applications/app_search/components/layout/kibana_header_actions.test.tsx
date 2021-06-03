@@ -11,7 +11,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import { QueryTesterButton } from '../query_tester';
 
 import { KibanaHeaderActions } from './kibana_header_actions';
 
@@ -27,7 +27,7 @@ describe('KibanaHeaderActions', () => {
 
   it('renders', () => {
     const wrapper = shallow(<KibanaHeaderActions />);
-    expect(wrapper.find(EuiButtonEmpty).exists()).toBe(true);
+    expect(wrapper.find(QueryTesterButton).exists()).toBe(true);
   });
 
   it('does not render a "Query Tester" button if there is no engine available', () => {
@@ -35,6 +35,6 @@ describe('KibanaHeaderActions', () => {
       engineName: '',
     });
     const wrapper = shallow(<KibanaHeaderActions />);
-    expect(wrapper.find(EuiButtonEmpty).exists()).toBe(false);
+    expect(wrapper.find(QueryTesterButton).exists()).toBe(false);
   });
 });
