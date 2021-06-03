@@ -5180,6 +5180,110 @@
             }
           }
         },
+        "endpointMetrics": {
+          "properties": {
+            "endpoints_total": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of active endpoints"
+              }
+            },
+            "endpoints": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "id": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The Endpoint agent id"
+                    }
+                  },
+                  "version": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The Endpoint version running"
+                    }
+                  },
+                  "os_name": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The name of the operating system"
+                    }
+                  },
+                  "os_platform": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The operating system platform"
+                    }
+                  },
+                  "os_version": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The operating system version"
+                    }
+                  },
+                  "uptime_endpoint": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "How long the endpoint has been up"
+                    }
+                  },
+                  "uptime_system": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "How long the system has been up"
+                    }
+                  },
+                  "memory": {
+                    "properties": {
+                      "mean": {
+                        "type": "long",
+                        "_meta": {
+                          "description": "The memory used (mean)"
+                        }
+                      },
+                      "latest": {
+                        "type": "long",
+                        "_meta": {
+                          "description": "The memory used (latest"
+                        }
+                      }
+                    }
+                  },
+                  "cpu": {
+                    "properties": {
+                      "mean": {
+                        "type": "long",
+                        "_meta": {
+                          "description": "The CPU usage (mean)"
+                        }
+                      },
+                      "histogram": {
+                        "type": "array",
+                        "items": {
+                          "properties": {
+                            "window": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The CPU window"
+                              }
+                            },
+                            "value": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The CPU value"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "endpoints": {
           "properties": {
             "total_installed": {

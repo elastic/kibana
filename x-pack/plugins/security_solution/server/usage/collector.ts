@@ -9,12 +9,15 @@ import { CoreSetup, SavedObjectsClientContract } from '../../../../../src/core/s
 import { CollectorFetchContext } from '../../../../../src/plugins/usage_collection/server';
 import { CollectorDependencies } from './types';
 import { fetchDetectionsMetrics } from './detections';
-import { EndpointUsage, getEndpointTelemetryFromFleet } from './endpoints';
+import { fetchEndpointMetrics } from './endpoints';
+import { EndpointMetrics } from './endpoints/types';
+import { EndpointUsage, getEndpointTelemetryFromFleet } from './endpoints_legacy';
 
 export type RegisterCollector = (deps: CollectorDependencies) => void;
 export interface UsageData {
   endpoints: EndpointUsage | {};
   detectionMetrics: {};
+  endpointMetrics: EndpointMetrics | {};
 }
 
 export async function getInternalSavedObjectsClient(core: CoreSetup) {
@@ -397,6 +400,74 @@ export const registerCollector: RegisterCollector = ({
           },
         },
       },
+      endpointMetrics: {
+        endpoints_total: {
+          type: 'long',
+          _meta: { description: 'The number of active endpoints' },
+        },
+        endpoints: {
+          type: 'array',
+          items: {
+            id: {
+              type: 'keyword',
+              _meta: { description: 'The Endpoint agent id' },
+            },
+            version: {
+              type: 'keyword',
+              _meta: { description: 'The Endpoint version running' },
+            },
+            os_name: {
+              type: 'keyword',
+              _meta: { description: 'The name of the operating system' },
+            },
+            os_platform: {
+              type: 'keyword',
+              _meta: { description: 'The operating system platform' },
+            },
+            os_version: {
+              type: 'keyword',
+              _meta: { description: 'The operating system version' },
+            },
+            uptime_endpoint: {
+              type: 'long',
+              _meta: { description: 'How long the endpoint has been up' },
+            },
+            uptime_system: {
+              type: 'long',
+              _meta: { description: 'How long the system has been up' },
+            },
+            memory: {
+              mean: {
+                type: 'long',
+                _meta: { description: 'The memory used (mean)' },
+              },
+              latest: {
+                type: 'long',
+                _meta: { description: 'The memory used (latest' },
+              },
+            },
+            cpu: {
+              mean: {
+                type: 'long',
+                _meta: { description: 'The CPU usage (mean)' },
+              },
+              histogram: {
+                type: 'array',
+                items: {
+                  window: {
+                    type: 'long',
+                    _meta: { description: 'The CPU window' },
+                  },
+                  value: {
+                    type: 'long',
+                    _meta: { description: 'The CPU value' },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
       endpoints: {
         total_installed: {
           type: 'long',
@@ -452,13 +523,15 @@ export const registerCollector: RegisterCollector = ({
     fetch: async ({ esClient }: CollectorFetchContext): Promise<UsageData> => {
       const internalSavedObjectsClient = await getInternalSavedObjectsClient(core);
       const savedObjectsClient = (internalSavedObjectsClient as unknown) as SavedObjectsClientContract;
-      const [detectionMetrics, endpoints] = await Promise.allSettled([
+      const [detectionMetrics, endpointMetrics, endpoints] = await Promise.allSettled([
         fetchDetectionsMetrics(kibanaIndex, signalsIndex, esClient, ml, savedObjectsClient),
+        fetchEndpointMetrics(esClient),
         getEndpointTelemetryFromFleet(savedObjectsClient, endpointAppContext, esClient),
       ]);
 
       return {
         detectionMetrics: detectionMetrics.status === 'fulfilled' ? detectionMetrics.value : {},
+        endpointMetrics: endpointMetrics.status === 'fulfilled' ? endpointMetrics.value : {},
         endpoints: endpoints.status === 'fulfilled' ? endpoints.value : {},
       };
     },
