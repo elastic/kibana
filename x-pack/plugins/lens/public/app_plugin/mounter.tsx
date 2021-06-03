@@ -7,7 +7,7 @@
 
 import React, { FC, useCallback } from 'react';
 
-import { AppMountParameters, CoreSetup } from 'kibana/public';
+import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { History } from 'history';
@@ -47,34 +47,18 @@ import {
 import { getResolvedDateRange } from '../utils';
 import { getLastKnownDoc } from './save_modal_container';
 
-export async function mountApp(
-  core: CoreSetup<LensPluginStartDependencies, void>,
-  params: AppMountParameters,
-  mountProps: {
-    createEditorFrame: EditorFrameStart['createInstance'];
-    getByValueFeatureFlag: () => Promise<DashboardFeatureFlagConfig>;
-    attributeService: () => Promise<LensAttributeService>;
-    getPresentationUtilContext: () => Promise<FC>;
-  }
-) {
-  const {
-    createEditorFrame,
-    getByValueFeatureFlag,
-    attributeService,
-    getPresentationUtilContext,
-  } = mountProps;
-  const [coreStart, startDependencies] = await core.getStartServices();
+export const getLensServices = async (
+  coreStart: CoreStart,
+  startDependencies: LensPluginStartDependencies,
+  attributeService: () => Promise<LensAttributeService>
+): Promise<LensAppServices> => {
   const { data, navigation, embeddable, savedObjectsTagging } = startDependencies;
 
-  const instance = await createEditorFrame();
   const storage = new Storage(localStorage);
   const stateTransfer = embeddable?.getStateTransfer();
-  const historyLocationState = params.history.location.state as HistoryLocationState;
   const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState(APP_ID);
 
-  const dashboardFeatureFlag = await getByValueFeatureFlag();
-
-  const lensServices: LensAppServices = {
+  return {
     data,
     storage,
     navigation,
@@ -97,8 +81,29 @@ export async function mountApp(
     },
 
     // Temporarily required until the 'by value' paradigm is default.
-    dashboardFeatureFlag,
+    dashboardFeatureFlag: startDependencies.dashboard.dashboardFeatureFlagConfig,
   };
+};
+
+export async function mountApp(
+  core: CoreSetup<LensPluginStartDependencies, void>,
+  params: AppMountParameters,
+  mountProps: {
+    createEditorFrame: EditorFrameStart['createInstance'];
+    attributeService: () => Promise<LensAttributeService>;
+    getPresentationUtilContext: () => Promise<FC>;
+  }
+) {
+  const { createEditorFrame, attributeService, getPresentationUtilContext } = mountProps;
+  const [coreStart, startDependencies] = await core.getStartServices();
+  const instance = await createEditorFrame();
+  const historyLocationState = params.history.location.state as HistoryLocationState;
+
+  const lensServices = await getLensServices(coreStart, startDependencies, attributeService);
+
+  const { stateTransfer, data, storage, dashboardFeatureFlag } = lensServices;
+
+  const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState(APP_ID);
 
   addHelpMenuToAppChrome(coreStart.chrome, coreStart.docLinks);
   coreStart.chrome.docTitle.change(

@@ -8,11 +8,8 @@
   "requiredPlugins": [
     "lens",
     "data",
-    "dashboard",
-    "developerExamples",
-    "presentationUtil",
-    "savedObjectsTagging"
+    "developerExamples"
   ],
   "optionalPlugins": [],
-  "requiredBundles": ["kibanaReact"]
+  "requiredBundles": []
 }

@@ -8,11 +8,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBetaBadge, EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import {
-  LensSavedModalLazy,
-  TypedLensByValueInput,
-  LensEmbeddableInput,
-} from '../../../../../../lens/public';
+import { TypedLensByValueInput, LensEmbeddableInput } from '../../../../../../lens/public';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { DataViewLabels } from '../configurations/constants';
 import { useUrlStorage } from '../hooks/use_url_storage';
@@ -31,6 +27,8 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
   const { series } = useUrlStorage(seriesId);
 
   const [isSaveOpen, setIsSaveOpen] = useState(false);
+
+  const LensSaveModalComponent = lens.SaveModalComponent;
 
   return (
     <>
@@ -95,7 +93,7 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
       </EuiFlexGroup>
 
       {isSaveOpen && lensAttributes && (
-        <LensSavedModalLazy
+        <LensSaveModalComponent
           isVisible={isSaveOpen}
           initialInput={(lensAttributes as unknown) as LensEmbeddableInput}
           onClose={() => setIsSaveOpen(false)}

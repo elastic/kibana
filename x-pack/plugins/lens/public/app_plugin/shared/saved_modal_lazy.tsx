@@ -5,16 +5,46 @@
  * 2.0.
  */
 
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { CoreStart } from 'kibana/public';
 import type { SaveModalContainerProps } from '../save_modal_container';
+import type { LensAttributeService } from '../../lens_attribute_service';
+import type { LensPluginStartDependencies } from '../../plugin';
+import type { LensAppServices } from '../types';
+import { getLensServices } from '../mounter';
 const SaveModal = React.lazy(() => import('../save_modal_container'));
 
-export const LensSavedModalLazy = (props: SaveModalContainerProps) => {
+const LensSavedModalLazy = (props: SaveModalContainerProps) => {
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <SaveModal {...props} />
     </Suspense>
   );
 };
+
+export function getSaveModalComponent(
+  coreStart: CoreStart,
+  startDependencies: LensPluginStartDependencies,
+  attributeService: () => Promise<LensAttributeService>
+) {
+  return (props: SaveModalContainerProps) => {
+    const [lensServices, setLensServices] = useState<LensAppServices>();
+
+    useEffect(() => {
+      async function loadLensService() {
+        const lensServicesT = await getLensServices(coreStart, startDependencies, attributeService);
+
+        setLensServices(lensServicesT);
+      }
+      loadLensService();
+    }, []);
+
+    if (!lensServices) {
+      return <EuiLoadingSpinner />;
+    }
+
+    return <LensSavedModalLazy {...props} lensServices={lensServices} />;
+  };
+}

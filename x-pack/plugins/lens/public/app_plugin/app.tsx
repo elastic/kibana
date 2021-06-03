@@ -65,7 +65,6 @@ export function App({
     uiSettings,
     application,
     notifications,
-    attributeService,
     savedObjectsTagging,
     getOriginatingAppName,
 
@@ -266,7 +265,7 @@ export function App({
       {isSaveModalVisible && (
         <SaveModalContainer
           isVisible={isSaveModalVisible}
-          attributeService={attributeService}
+          lensServices={lensAppServices}
           originatingApp={
             appState.isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined
           }

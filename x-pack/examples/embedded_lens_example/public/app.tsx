@@ -24,7 +24,6 @@ import {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
   XYState,
-  LensSavedModalLazy,
   LensEmbeddableInput,
 } from '../../../plugins/lens/public';
 import { StartDependencies } from './plugin';
@@ -116,6 +115,7 @@ export const App = (props: {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const LensComponent = props.plugins.lens.EmbeddableComponent;
+  const LensSaveModalComponent = props.plugins.lens.SaveModalComponent;
 
   const [time, setTime] = useState({
     from: 'now-5d',
@@ -213,7 +213,7 @@ export const App = (props: {
                   }}
                 />
                 {isSaveModalVisible && (
-                  <LensSavedModalLazy
+                  <LensSaveModalComponent
                     initialInput={
                       (getLensAttributes(
                         props.defaultIndexPattern,

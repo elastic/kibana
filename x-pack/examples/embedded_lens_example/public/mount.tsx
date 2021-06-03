@@ -9,7 +9,6 @@ import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { CoreSetup, AppMountParameters } from 'kibana/public';
 import { StartDependencies } from './plugin';
-import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
 
 export const mount = (coreSetup: CoreSetup<StartDependencies>) => async ({
   element,
@@ -27,17 +26,9 @@ export const mount = (coreSetup: CoreSetup<StartDependencies>) => async ({
   const i18nCore = core.i18n;
 
   const reactElement = (
-    <KibanaContextProvider
-      services={{
-        ...core,
-        ...plugins,
-        savedObjectsClient: core.savedObjects.client,
-      }}
-    >
-      <i18nCore.Context>
-        <App {...deps} defaultIndexPattern={defaultIndexPattern} />
-      </i18nCore.Context>
-    </KibanaContextProvider>
+    <i18nCore.Context>
+      <App {...deps} defaultIndexPattern={defaultIndexPattern} />
+    </i18nCore.Context>
   );
   render(reactElement, element);
   return () => unmountComponentAtNode(element);

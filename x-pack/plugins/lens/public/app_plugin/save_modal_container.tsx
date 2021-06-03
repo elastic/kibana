@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { partition, uniq } from 'lodash';
 import { SaveModal } from './save_modal';
 import { LensAppProps, LensAppServices } from './types';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import type { SaveProps } from './app';
 import { Document, injectFilterReferences } from '../persistence';
 import { LensByReferenceInput, LensEmbeddableInput } from '../editor_frame_service/embeddable';
@@ -26,7 +25,6 @@ import { getAllIndexPatterns } from '../utils';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { checkForDuplicateTitle } from '../../../../../src/plugins/saved_objects/public';
 import { LensAppState } from '../state_management';
-import { LensPublicStart } from '../plugin';
 
 type ExtraProps = Pick<LensAppProps, 'initialInput'> &
   Partial<
@@ -42,9 +40,9 @@ export type SaveModalContainerProps = {
   onClose: () => void;
   onSave?: () => void;
   runSave?: (saveProps: SaveProps, options: { saveToLibrary: boolean }) => void;
-  attributeService?: LensAttributeService;
   isSaveable?: boolean;
   getAppNameFromId?: () => string | undefined;
+  lensServices: LensAppServices;
 } & ExtraProps;
 
 export function SaveModalContainer({
@@ -62,79 +60,40 @@ export function SaveModalContainer({
   getAppNameFromId = () => undefined,
   isSaveable = true,
   lastKnownDoc: initLastKnowDoc,
-  attributeService: initAttributeService,
+  lensServices,
 }: SaveModalContainerProps) {
   const [lastKnownDoc, setLastKnownDoc] = useState<Document | undefined>(initLastKnowDoc);
-  const [attributeService, setAttributeService] = useState(initAttributeService);
 
-  // Lens Public Start will be used when SaveModalContainer is used outside lens app to fetch
-  // Attribute service
-  const kServices = useKibana<LensAppServices & { lens: LensPublicStart }>().services;
   const {
+    presentationUtil,
+    attributeService,
     notifications,
-    application,
-    lens,
     data,
     chrome,
-    dashboard,
     savedObjectsTagging,
-    presentationUtil,
-    savedObjectsClient,
-  } = kServices;
-
-  if (!presentationUtil) {
-    throw Error('presentationUtil is required as plugin dependency to use LensSavedModalLazy');
-  }
-
-  if (!savedObjectsTagging) {
-    throw Error('savedObjectsTagging is required as plugin dependency to use LensSavedModalLazy');
-  }
-
-  if (!dashboard) {
-    throw Error('dashboard is required as plugin dependency to use LensSavedModalLazy');
-  }
-
-  if (!savedObjectsClient) {
-    throw Error(
-      'savedObjectsClient is required from kibana context services to use LensSavedModalLazy'
-    );
-  }
+    application,
+    dashboardFeatureFlag,
+  } = lensServices;
 
   const { ContextProvider: PresentationUtilContext } = presentationUtil;
 
   useEffect(() => {
     if (initialInput) {
       async function loadLastKnownDoc() {
-        let attributeServiceT: LensAttributeService;
-        if (!initAttributeService && lens?.attributeService) {
-          attributeServiceT = await lens.attributeService();
-          setAttributeService(attributeServiceT);
-
-          getLastKnownDoc({
-            data,
-            initialInput,
-            chrome,
-            notifications,
-            attributeService: attributeServiceT,
-          }).then((result) => {
-            if (result) setLastKnownDoc(result.doc);
-          });
-        } else {
-          getLastKnownDoc({
-            data,
-            initialInput,
-            chrome,
-            notifications,
-            attributeService: initAttributeService!,
-          }).then((result) => {
-            if (result) setLastKnownDoc(result.doc);
-          });
-        }
+        getLastKnownDoc({
+          data,
+          initialInput,
+          chrome,
+          notifications,
+          attributeService,
+        }).then((result) => {
+          if (result) setLastKnownDoc(result.doc);
+        });
       }
 
       loadLastKnownDoc();
     }
-  }, [chrome, data, lens, initialInput, notifications, initAttributeService]);
+  }, [chrome, data, initialInput, notifications, attributeService]);
 
   const tagsIds =
     persistedDoc && savedObjectsTagging
@@ -149,7 +108,7 @@ export function SaveModalContainer({
       if (attributeService) {
         runSaveLensVisualization(
           {
-            ...kServices,
+            ...lensServices,
             lastKnownDoc,
             setIsSaveModalVisible: () => {
               onClose();
@@ -180,7 +139,7 @@ export function SaveModalContainer({
         isVisible={isVisible}
         originatingApp={originatingApp}
         savingToLibraryPermitted={savingToLibraryPermitted}
-        allowByValueEmbeddables={dashboard.dashboardFeatureFlagConfig?.allowByValueEmbeddables}
+        allowByValueEmbeddables={dashboardFeatureFlag?.allowByValueEmbeddables}
         savedObjectsTagging={savedObjectsTagging}
         tagsIds={tagsIds}
         onSave={(saveProps, options) => {
