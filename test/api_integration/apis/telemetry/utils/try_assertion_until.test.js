@@ -23,9 +23,11 @@ describe(`tryAssertionUntil`, () => {
   });
 
   test('exhausts all attempts before failing when assertion fails', async () => {
+    let attemptNumber = 0;
     const subject = jest.fn().mockResolvedValue();
     const assertion = jest.fn().mockImplementation(() => {
-      throw new Error('assertion error');
+      attemptNumber++;
+      throw new Error(`assertion error: ${attemptNumber}`);
     });
     let error;
 
@@ -38,9 +40,9 @@ describe(`tryAssertionUntil`, () => {
     expect(error.message).toMatchInlineSnapshot(`
       "Assertion failed after 3 attempts:
       [
-        \\"assertion error\\",
-        \\"assertion error\\",
-        \\"assertion error\\"
+        \\"assertion error: 1\\",
+        \\"assertion error: 2\\",
+        \\"assertion error: 3\\"
       ]"
     `);
 
@@ -49,8 +51,10 @@ describe(`tryAssertionUntil`, () => {
   });
 
   test('exhausts all attempts before failing when subject fails', async () => {
+    let attemptNumber = 0;
     const subject = jest.fn().mockImplementation(() => {
-      throw new Error('subject error');
+      attemptNumber++;
+      throw new Error(`subject error: ${attemptNumber}`);
     });
     const assertion = jest.fn().mockResolvedValue();
     let error;
@@ -64,9 +68,9 @@ describe(`tryAssertionUntil`, () => {
     expect(error.message).toMatchInlineSnapshot(`
       "Assertion failed after 3 attempts:
       [
-        \\"subject error\\",
-        \\"subject error\\",
-        \\"subject error\\"
+        \\"subject error: 1\\",
+        \\"subject error: 2\\",
+        \\"subject error: 3\\"
       ]"
     `);
 
@@ -134,7 +138,7 @@ describe(`tryAssertionUntil`, () => {
       error = err;
     }
 
-    expect(error.message).toMatchInlineSnapshot(`"Exepcting to at least attempt subject 1 time."`);
+    expect(error.message).toMatchInlineSnapshot(`"Number of attempts must be at greater than 1."`);
     expect(subject).toBeCalledTimes(0);
     expect(assertion).toBeCalledTimes(0);
   });

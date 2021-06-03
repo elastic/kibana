@@ -21,7 +21,7 @@ export async function tryAssertionUntil<R>(
   waitTimeMs?: number
 ) {
   if (numAttempts < 1) {
-    throw Error(`Exepcting to at least attempt subject 1 time.`);
+    throw Error(`Number of attempts must be at greater than 1.`);
   }
 
   const attempts = Array.from({ length: numAttempts }, (_, i) => i + 1);
