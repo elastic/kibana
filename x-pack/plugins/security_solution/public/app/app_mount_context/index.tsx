@@ -10,6 +10,11 @@ import React, { createContext, useContext } from 'react';
 
 /* eslint-disable react/display-name */
 
+/**
+ * We use context to provide these values to prevent prop drilling as well
+ * as pass values such as onAppLeave to the SecurityPageWrapper which is
+ * nested within each subApp's Router
+ */
 interface AppMountContextType {
   onAppLeave: AppMountParameters['onAppLeave'];
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
