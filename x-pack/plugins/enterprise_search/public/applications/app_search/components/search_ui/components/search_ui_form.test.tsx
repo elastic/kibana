@@ -31,6 +31,7 @@ describe('SearchUIForm', () => {
     urlField: 'url',
     facetFields: ['category'],
     sortFields: ['size'],
+    dataLoading: false,
   };
   const actions = {
     onActiveFieldChange: jest.fn(),
@@ -222,5 +223,18 @@ describe('SearchUIForm', () => {
       expect(hiddenInput.prop('id')).toBe('searchKey');
       expect(hiddenInput.prop('value')).toBe('search-123abc');
     });
+  });
+
+  it('should disable everything while data is loading', () => {
+    setMockValues({
+      ...values,
+      dataLoading: true,
+    });
+    const wrapper = shallow(<SearchUIForm />);
+    expect(wrapper.find('[data-test-subj="selectTitle"]').prop('disabled')).toBe(true);
+    expect(wrapper.find('[data-test-subj="selectFilters"]').prop('isDisabled')).toBe(true);
+    expect(wrapper.find('[data-test-subj="selectSort"]').prop('isDisabled')).toBe(true);
+    expect(wrapper.find('[data-test-subj="selectUrl"]').prop('disabled')).toBe(true);
+    expect(wrapper.find('[data-test-subj="generateSearchUiPreview"]').prop('disabled')).toBe(true);
   });
 });
