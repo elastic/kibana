@@ -30,7 +30,7 @@ import {
   GetOneTrustedAppResponse,
 } from '../../../../../common/endpoint/types/trusted_apps';
 
-import { resolvePathVariables } from './utils';
+import { resolvePathVariables } from '../../../common/utils';
 import { sendGetEndpointSpecificPackagePolicies } from '../../policy/store/services/ingest';
 
 export interface TrustedAppsService {

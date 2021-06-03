@@ -49,15 +49,6 @@ export function DimensionContainer({
     return canClose;
   }, [handleClose]);
 
-  useEffect(() => {
-    if (isOpen) {
-      // without setTimeout here the flyout pushes content when animating
-      setTimeout(() => {
-        setFocusTrapIsEnabled(true);
-      }, 255);
-    }
-  }, [isOpen]);
-
   const closeOnEscape = useCallback(
     (event: KeyboardEvent) => {
       if (event.key === keys.ESCAPE) {
@@ -98,6 +89,13 @@ export function DimensionContainer({
             role="dialog"
             aria-labelledby="lnsDimensionContainerTitle"
             className="lnsDimensionContainer euiFlyout"
+            onAnimationEnd={() => {
+              if (isOpen) {
+                // EuiFocusTrap interferes with animating elements with absolute position:
+                // running this onAnimationEnd, otherwise the flyout pushes content when animating
+                setFocusTrapIsEnabled(true);
+              }
+            }}
           >
             <EuiFlyoutHeader hasBorder className="lnsDimensionContainer__header">
               <EuiFlexGroup

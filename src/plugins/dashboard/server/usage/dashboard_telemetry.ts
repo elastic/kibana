@@ -51,6 +51,9 @@ export interface DashboardCollectorData {
   visualizationByValue: {
     [key: string]: number;
   };
+  embeddable: {
+    [key: string]: number;
+  };
 }
 
 export const getEmptyTelemetryData = (): DashboardCollectorData => ({
@@ -58,6 +61,7 @@ export const getEmptyTelemetryData = (): DashboardCollectorData => ({
   panelsByValue: 0,
   lensByValue: {},
   visualizationByValue: {},
+  embeddable: {},
 });
 
 type DashboardCollectorFunction = (
@@ -138,6 +142,23 @@ export const collectForPanels: DashboardCollectorFunction = (panels, collectorDa
   collectByValueLensInfo(panels, collectorData);
 };
 
+export const collectEmbeddableData = (
+  panels: SavedDashboardPanel730ToLatest[],
+  collectorData: DashboardCollectorData,
+  embeddableService: EmbeddablePersistableStateService
+) => {
+  for (const panel of panels) {
+    collectorData.embeddable = embeddableService.telemetry(
+      {
+        ...panel.embeddableConfig,
+        id: panel.id || '',
+        type: panel.type,
+      },
+      collectorData.embeddable
+    );
+  }
+};
+
 export async function collectDashboardTelemetry(
   savedObjectClient: Pick<ISavedObjectsRepository, 'find'>,
   embeddableService: EmbeddablePersistableStateService
@@ -157,6 +178,7 @@ export async function collectDashboardTelemetry(
     ) as unknown) as SavedDashboardPanel730ToLatest[];
 
     collectForPanels(panels, collectorData);
+    collectEmbeddableData(panels, collectorData, embeddableService);
   }
 
   return collectorData;
