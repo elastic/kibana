@@ -362,6 +362,25 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
+    async enableTimeShift() {
+      await testSubjects.click('indexPattern-advanced-popover');
+      await retry.try(async () => {
+        await testSubjects.click('indexPattern-time-shift-enable');
+      });
+    },
+
+    async setTimeShift(shift: string) {
+      await comboBox.setCustom('indexPattern-dimension-time-shift', shift);
+    },
+
+    async hasFixAction() {
+      return await testSubjects.exists('errorFixAction');
+    },
+
+    async useFixAction() {
+      await testSubjects.click('errorFixAction');
+    },
+
     // closes the dimension editor flyout
     async closeDimensionEditor() {
       await retry.try(async () => {
