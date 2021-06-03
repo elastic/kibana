@@ -288,7 +288,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             const allPieSlicesColor = await pieChart.getAllPieSliceStyles('80,000');
             let whitePieSliceCounts = 0;
             allPieSlicesColor.forEach((style) => {
-              if (style.indexOf('rgb(255, 255, 255)') > 0) {
+              if (style.indexOf('rgb(255, 255, 255)') > -1) {
                 whitePieSliceCounts++;
               }
             });
@@ -306,12 +306,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('resets a pie slice color to the original when removed', async function () {
           const currentUrl = await getUrlFromShare();
-          const newUrl = currentUrl.replace(`vis:(colors:('80,000':%23FFFFFF))`, '');
+          const newUrl = isNewChartsLibraryEnabled
+            ? currentUrl.replace(`'80000':%23FFFFFF`, '')
+            : currentUrl.replace(`vis:(colors:('80,000':%23FFFFFF))`, '');
           await hardRefresh(newUrl);
           await PageObjects.header.waitUntilLoadingHasFinished();
 
           await retry.try(async () => {
-            const pieSliceStyle = await pieChart.getPieSliceStyle(`80,000`);
+            const pieSliceStyle = await pieChart.getPieSliceStyle('80,000');
+
             // After removing all overrides, pie slice style should match original.
             expect(pieSliceStyle).to.be(originalPieSliceStyle);
           });
