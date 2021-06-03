@@ -176,27 +176,27 @@ exports[`Inspector Data View component should render empty state 1`] = `
       <div
         className="euiEmptyPrompt"
       >
+        <EuiTitle
+          size="m"
+        >
+          <h2
+            className="euiTitle euiTitle--medium"
+          >
+            <FormattedMessage
+              defaultMessage="No data available"
+              id="data.inspector.table.noDataAvailableTitle"
+              values={Object {}}
+            >
+              No data available
+            </FormattedMessage>
+          </h2>
+        </EuiTitle>
         <EuiTextColor
           color="subdued"
         >
           <span
             className="euiTextColor euiTextColor--subdued"
           >
-            <EuiTitle
-              size="m"
-            >
-              <h2
-                className="euiTitle euiTitle--medium"
-              >
-                <FormattedMessage
-                  defaultMessage="No data available"
-                  id="data.inspector.table.noDataAvailableTitle"
-                  values={Object {}}
-                >
-                  No data available
-                </FormattedMessage>
-              </h2>
-            </EuiTitle>
             <EuiSpacer
               size="m"
             >

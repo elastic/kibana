@@ -28,7 +28,7 @@ exports[`Header should render a different name, prompt, and beta tag if provided
           label="Beta"
         >
           <span
-            className="euiBetaBadge"
+            className="euiBetaBadge euiBetaBadge--hollow"
             title="Beta"
           >
             Beta
