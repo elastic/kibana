@@ -114,10 +114,7 @@ export class ToolsControl extends Component<Props, State> {
     this._closePopover();
   };
 
-  _initiateDistanceDraw = (options: {
-    actionId: string;
-    filterLabel: string;
-  }) => {
+  _initiateDistanceDraw = (options: { actionId: string; filterLabel: string }) => {
     this.props.activateDrawFilterMode({
       drawType: DRAW_TYPE.DISTANCE,
       ...options,
