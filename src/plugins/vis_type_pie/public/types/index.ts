@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { VisTypeXyServerPlugin } from './plugin';
-
-export const plugin = () => new VisTypeXyServerPlugin();
+export * from './types';

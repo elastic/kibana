@@ -324,6 +324,14 @@ export class VisualizeEditorPageObject extends FtrService {
     await this.testSubjects.click('visualizeEditorAutoButton');
   }
 
+  public async togglePieLegend() {
+    await this.testSubjects.click('visTypePieAddLegendSwitch');
+  }
+
+  public async togglePieNestedLegend() {
+    await this.testSubjects.click('visTypePieNestedLegendSwitch');
+  }
+
   public async isApplyEnabled() {
     const applyButton = await this.testSubjects.find('visualizeEditorRenderButton');
     return await applyButton.isEnabled();
