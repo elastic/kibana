@@ -532,7 +532,6 @@
     "@types/geojson": "7946.0.7",
     "@types/getopts": "^2.0.1",
     "@types/getos": "^3.0.0",
-    "@types/git-url-parse": "^9.0.0",
     "@types/glob": "^7.1.2",
     "@types/gulp": "^4.0.6",
     "@types/gulp-zip": "^4.0.1",
