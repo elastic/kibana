@@ -47,7 +47,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   const chartTheme = chartsThemeService.useChartsTheme();
   const isDarkTheme = chartsThemeService.useDarkMode();
 
-  const table = Object.values(data.tables)[0];
+  const tableId = Object.keys(data.tables)[0];
+  const table = data.tables[tableId];
 
   let chartData = table.rows;
 
@@ -257,7 +258,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
         debugState={window._echDebugStateFlag ?? false}
       />
       <Heatmap
-        id={'heatmap'}
+        id={tableId}
         name={valueColumn.name}
         colorScale={ScaleType.Quantize}
         colors={colorPalette}
