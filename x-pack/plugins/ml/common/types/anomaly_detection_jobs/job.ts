@@ -10,23 +10,23 @@ import { estypes } from '@elastic/elasticsearch';
 export type JobId = string;
 export type BucketSpan = string;
 
-export type Job = estypes.Job;
+export type Job = estypes.MlJob;
 
-export type AnalysisConfig = estypes.AnalysisConfig;
+export type AnalysisConfig = estypes.MlAnalysisConfig;
 
-export type Detector = estypes.Detector;
+export type Detector = estypes.MlDetector;
 
-export type AnalysisLimits = estypes.AnalysisLimits;
+export type AnalysisLimits = estypes.MlAnalysisLimits;
 
-export type DataDescription = estypes.DataDescription;
+export type DataDescription = estypes.MlDataDescription;
 
-export type ModelPlotConfig = estypes.ModelPlotConfig;
+export type ModelPlotConfig = estypes.MlModelPlotConfig;
 
-export type CustomRule = estypes.DetectionRule;
+export type CustomRule = estypes.MlDetectionRule;
 
 export interface PerPartitionCategorization {
   enabled?: boolean;
   stop_on_warn?: boolean;
 }
 
-export type CustomSettings = estypes.CustomSettings;
+export type CustomSettings = estypes.XpackUsageCustomSettings;
