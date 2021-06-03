@@ -262,11 +262,11 @@ on the {kib} index at startup. {kib} users still need to authenticate with
  {es} {ref}/indices-create-index.html[index name limitations].
  *Default: `".kibana"`*
 
-| `kibana.autocompleteTimeout:` {ess-icon}
+| `data.autocomplete.valueSuggestions.timeout:` {ess-icon}
  | Time in milliseconds to wait for autocomplete suggestions from {es}.
 This value must be a whole number greater than zero. *Default: `"1000"`*
 
-| `kibana.autocompleteTerminateAfter:` {ess-icon}
+| `data.autocomplete.valueSuggestions.terminateAfter:` {ess-icon}
  | Maximum number of documents loaded by each shard to generate autocomplete
 suggestions. This value must be a whole number greater than zero.
 *Default: `"100000"`*
@@ -596,6 +596,10 @@ inactive socket. *Default: `"120000"`*
  | Paths to a PEM-encoded X.509 server certificate and its corresponding private key. These
 are used by {kib} to establish trust when receiving inbound SSL/TLS connections from users.
 
+|[[server-uuid]] `server.uuid:`
+ | The unique identifier for this {kib} instance.
+
+
 |===
 
 [NOTE]
@@ -722,6 +726,12 @@ out through *Advanced Settings*. *Default: `true`*
 | `vis_type_vega.enableExternalUrls:` {ess-icon}
  | Set this value to true to allow Vega to use any URL to access external data
 sources and images. When false, Vega can only get data from {es}. *Default: `false`*
+
+| `xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled`
+ | Enables the *Explore underlying data* option that allows you to open *Discover* from a dashboard panel and view the panel data. *Default: `false`*
+
+ | `xpack.discoverEnhanced.actions.exploreDataInChart.enabled`
+ | Enables you to view the underlying documents in a data series from a dashboard panel. *Default: `false`*
 
 | `xpack.license_management.enabled`
  | Set this value to false to

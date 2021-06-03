@@ -10,7 +10,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { AppDataType } from '../../types';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
-import { useUrlStorage } from '../../hooks/use_url_storage';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { ReportToDataTypeMap } from '../../configurations/constants';
 
 export const dataTypes: Array<{ id: AppDataType; label: string }> = [
@@ -22,8 +22,9 @@ export const dataTypes: Array<{ id: AppDataType; label: string }> = [
 ];
 
 export function DataTypesCol({ seriesId }: { seriesId: string }) {
-  const { series, setSeries, removeSeries } = useUrlStorage(seriesId);
+  const { getSeries, setSeries, removeSeries } = useSeriesStorage();
 
+  const series = getSeries(seriesId);
   const { loading } = useAppIndexPatternContext();
 
   const onDataTypeChange = (dataType?: AppDataType) => {

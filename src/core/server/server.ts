@@ -153,6 +153,7 @@ export class Server {
       http: httpSetup,
       metrics: metricsSetup,
       savedObjectsStartPromise: this.savedObjectsStartPromise,
+      changedDeprecatedConfigPath$: this.configService.getDeprecatedConfigPath$(),
     });
 
     const savedObjectsSetup = await this.savedObjects.setup({
@@ -192,8 +193,6 @@ export class Server {
 
     const deprecationsSetup = this.deprecations.setup({
       http: httpSetup,
-      elasticsearch: elasticsearchServiceSetup,
-      coreUsageData: coreUsageDataSetup,
     });
 
     const coreSetup: InternalCoreSetup = {
@@ -265,6 +264,7 @@ export class Server {
     await this.http.start();
 
     startTransaction?.end();
+
     return this.coreStart;
   }
 

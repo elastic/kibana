@@ -58,12 +58,13 @@ export interface App<HistoryLocationState = unknown> {
     capabilities?: Partial<Capabilities>;
     category?: AppCategory;
     chromeless?: boolean;
+    deepLinks?: AppDeepLink[];
     defaultPath?: string;
     euiIconType?: string;
     exactRoute?: boolean;
     icon?: string;
     id: string;
-    meta?: AppMeta;
+    keywords?: string[];
     mount: AppMount<HistoryLocationState>;
     navLinkStatus?: AppNavLinkStatus;
     order?: number;
@@ -84,6 +85,20 @@ export interface AppCategory {
     label: string;
     order?: number;
 }
+
+// @public
+export type AppDeepLink = {
+    id: string;
+    title: string;
+    keywords?: string[];
+    navLinkStatus?: AppNavLinkStatus;
+} & ({
+    path: string;
+    deepLinks?: AppDeepLink[];
+} | {
+    path?: string;
+    deepLinks: AppDeepLink[];
+});
 
 // @public
 export type AppLeaveAction = AppLeaveDefaultAction | AppLeaveConfirmAction;
@@ -143,12 +158,6 @@ export interface ApplicationStart {
 }
 
 // @public
-export interface AppMeta {
-    keywords?: string[];
-    searchDeepLinks?: AppSearchDeepLink[];
-}
-
-// @public
 export type AppMount<HistoryLocationState = unknown> = (params: AppMountParameters<HistoryLocationState>) => AppUnmount | Promise<AppUnmount>;
 
 // @public (undocumented)
@@ -171,20 +180,6 @@ export enum AppNavLinkStatus {
 }
 
 // @public
-export type AppSearchDeepLink = {
-    id: string;
-    title: string;
-} & ({
-    path: string;
-    searchDeepLinks?: AppSearchDeepLink[];
-    keywords?: string[];
-} | {
-    path?: string;
-    searchDeepLinks: AppSearchDeepLink[];
-    keywords?: string[];
-});
-
-// @public
 export enum AppStatus {
     accessible = 0,
     inaccessible = 1
@@ -194,7 +189,7 @@ export enum AppStatus {
 export type AppUnmount = () => void;
 
 // @public
-export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath' | 'meta'>;
+export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath' | 'deepLinks'>;
 
 // @public
 export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
@@ -332,14 +327,7 @@ export interface ChromeNavLinks {
     getNavLinks$(): Observable<Array<Readonly<ChromeNavLink>>>;
     has(id: string): boolean;
     showOnly(id: string): void;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "AppBase"
-    //
-    // @deprecated
-    update(id: string, values: ChromeNavLinkUpdateableFields): ChromeNavLink | undefined;
 }
-
-// @public (undocumented)
-export type ChromeNavLinkUpdateableFields = Partial<Pick<ChromeNavLink, 'disabled' | 'hidden' | 'url' | 'href'>>;
 
 // @public
 export interface ChromeRecentlyAccessed {
@@ -596,6 +584,7 @@ export interface DocLinksStart {
             readonly introduction: string;
             readonly fieldFormattersNumber: string;
             readonly fieldFormattersString: string;
+            readonly runtimeFields: string;
         };
         readonly addData: string;
         readonly kibana: string;
@@ -1078,23 +1067,19 @@ export interface PluginInitializerContext<ConfigSchema extends object = object> 
 export type PluginOpaqueId = symbol;
 
 // @public
-export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'meta'> & {
+export type PublicAppDeepLinkInfo = Omit<AppDeepLink, 'deepLinks' | 'keywords' | 'navLinkStatus'> & {
+    deepLinks: PublicAppDeepLinkInfo[];
+    keywords: string[];
+    navLinkStatus: AppNavLinkStatus;
+};
+
+// @public
+export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'keywords' | 'deepLinks'> & {
     status: AppStatus;
     navLinkStatus: AppNavLinkStatus;
     appRoute: string;
-    meta: PublicAppMetaInfo;
-};
-
-// @public
-export type PublicAppMetaInfo = Omit<AppMeta, 'keywords' | 'searchDeepLinks'> & {
     keywords: string[];
-    searchDeepLinks: PublicAppSearchDeepLinkInfo[];
-};
-
-// @public
-export type PublicAppSearchDeepLinkInfo = Omit<AppSearchDeepLink, 'searchDeepLinks' | 'keywords'> & {
-    searchDeepLinks: PublicAppSearchDeepLinkInfo[];
-    keywords: string[];
+    deepLinks: PublicAppDeepLinkInfo[];
 };
 
 // @public

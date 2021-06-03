@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
@@ -76,7 +76,11 @@ const WebhookActionConnectorFields: React.FunctionComponent<
       )
     );
   }
-  const hasHeaderErrors = headerErrors.keyHeader.length > 0 || headerErrors.valueHeader.length > 0;
+  const hasHeaderErrors: boolean =
+    (headerErrors.keyHeader !== undefined &&
+      headerErrors.valueHeader !== undefined &&
+      headerErrors.keyHeader.length > 0) ||
+    headerErrors.valueHeader.length > 0;
 
   function addHeader() {
     if (headers && !!Object.keys(headers).find((key) => key === httpHeaderKey)) {
@@ -110,7 +114,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<
   let headerControl;
   if (hasHeaders) {
     headerControl = (
-      <Fragment>
+      <>
         <EuiTitle size="xxs">
           <h5>
             <FormattedMessage
@@ -188,7 +192,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<
             </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </Fragment>
+      </>
     );
   }
 
@@ -219,8 +223,15 @@ const WebhookActionConnectorFields: React.FunctionComponent<
     );
   });
 
+  const isUrlInvalid: boolean =
+    errors.url !== undefined && errors.url.length > 0 && url !== undefined;
+  const isPasswordInvalid: boolean =
+    password !== undefined && errors.password !== undefined && errors.password.length > 0;
+  const isUserInvalid: boolean =
+    user !== undefined && errors.user !== undefined && errors.user.length > 0;
+
   return (
-    <Fragment>
+    <>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiFormRow
@@ -248,7 +259,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<
             id="url"
             fullWidth
             error={errors.url}
-            isInvalid={errors.url.length > 0 && url !== undefined}
+            isInvalid={isUrlInvalid}
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.urlTextFieldLabel',
               {
@@ -258,7 +269,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<
           >
             <EuiFieldText
               name="url"
-              isInvalid={errors.url.length > 0 && url !== undefined}
+              isInvalid={isUrlInvalid}
               fullWidth
               readOnly={readOnly}
               value={url || ''}
@@ -326,7 +337,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<
                 id="webhookUser"
                 fullWidth
                 error={errors.user}
-                isInvalid={errors.user.length > 0 && user !== undefined}
+                isInvalid={isUserInvalid}
                 label={i18n.translate(
                   'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.userTextFieldLabel',
                   {
@@ -336,7 +347,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<
               >
                 <EuiFieldText
                   fullWidth
-                  isInvalid={errors.user.length > 0 && user !== undefined}
+                  isInvalid={isUserInvalid}
                   name="user"
                   readOnly={readOnly}
                   value={user || ''}
@@ -357,7 +368,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<
                 id="webhookPassword"
                 fullWidth
                 error={errors.password}
-                isInvalid={errors.password.length > 0 && password !== undefined}
+                isInvalid={isPasswordInvalid}
                 label={i18n.translate(
                   'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.passwordTextFieldLabel',
                   {
@@ -369,7 +380,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<
                   fullWidth
                   name="password"
                   readOnly={readOnly}
-                  isInvalid={errors.password.length > 0 && password !== undefined}
+                  isInvalid={isPasswordInvalid}
                   value={password || ''}
                   data-test-subj="webhookPasswordInput"
                   onChange={(e) => {
@@ -421,7 +432,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<
         {hasHeaders && headerControl}
         <EuiSpacer size="m" />
       </div>
-    </Fragment>
+    </>
   );
 };
 

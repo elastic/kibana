@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../../../plugin';
 import { useFetcher } from '../../../../..';
-import { useUrlStorage } from '../../hooks/use_url_storage';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { SeriesType } from '../../../../../../../lens/public';
 
 const CHART_TYPE_LABEL = i18n.translate('xpack.observability.expView.chartTypes.label', {
@@ -20,12 +20,16 @@ const CHART_TYPE_LABEL = i18n.translate('xpack.observability.expView.chartTypes.
 
 export function SeriesChartTypesSelect({
   seriesId,
+  seriesTypes,
   defaultChartType,
 }: {
   seriesId: string;
+  seriesTypes?: SeriesType[];
   defaultChartType: SeriesType;
 }) {
-  const { series, setSeries, allSeries } = useUrlStorage(seriesId);
+  const { getSeries, setSeries, allSeries } = useSeriesStorage();
+
+  const series = getSeries(seriesId);
 
   const seriesType = series?.seriesType ?? defaultChartType;
 
@@ -42,8 +46,18 @@ export function SeriesChartTypesSelect({
       onChange={onChange}
       value={seriesType}
       excludeChartTypes={['bar_percentage_stacked']}
+      includeChartTypes={
+        seriesTypes || [
+          'bar',
+          'bar_horizontal',
+          'line',
+          'area',
+          'bar_stacked',
+          'area_stacked',
+          'bar_horizontal_percentage_stacked',
+        ]
+      }
       label={CHART_TYPE_LABEL}
-      includeChartTypes={['bar', 'bar_horizontal', 'line', 'area', 'bar_stacked', 'area_stacked']}
     />
   );
 }

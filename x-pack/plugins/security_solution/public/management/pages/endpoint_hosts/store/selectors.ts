@@ -26,6 +26,12 @@ import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
 } from '../../../common/constants';
 import { Query } from '../../../../../../../../src/plugins/data/common/query/types';
+import {
+  isFailedResourceState,
+  isLoadedResourceState,
+  isLoadingResourceState,
+} from '../../../state';
+import { ServerApiError } from '../../../../common/types';
 
 export const listData = (state: Immutable<EndpointState>) => state.hosts;
 
@@ -39,11 +45,16 @@ export const listLoading = (state: Immutable<EndpointState>): boolean => state.l
 
 export const listError = (state: Immutable<EndpointState>) => state.error;
 
-export const detailsData = (state: Immutable<EndpointState>) => state.details;
+export const detailsData = (state: Immutable<EndpointState>) =>
+  state.endpointDetails.hostDetails.details;
 
-export const detailsLoading = (state: Immutable<EndpointState>): boolean => state.detailsLoading;
+export const detailsLoading = (state: Immutable<EndpointState>): boolean =>
+  state.endpointDetails.hostDetails.detailsLoading;
 
-export const detailsError = (state: Immutable<EndpointState>) => state.detailsError;
+export const detailsError = (
+  state: Immutable<EndpointState>
+): EndpointState['endpointDetails']['hostDetails']['detailsError'] =>
+  state.endpointDetails.hostDetails.detailsError;
 
 export const policyItems = (state: Immutable<EndpointState>) => state.policyItems;
 
@@ -171,6 +182,7 @@ export const isOnEndpointPage = (state: Immutable<EndpointState>) => {
   );
 };
 
+/** Sanitized list of URL query params supported by the Details page */
 export const uiQueryParams: (
   state: Immutable<EndpointState>
 ) => Immutable<EndpointIndexUIQueryParams> = createSelector(
@@ -202,7 +214,12 @@ export const uiQueryParams: (
 
         if (value !== undefined) {
           if (key === 'show') {
-            if (value === 'policy_response' || value === 'details') {
+            if (
+              value === 'policy_response' ||
+              value === 'details' ||
+              value === 'activity_log' ||
+              value === 'isolate'
+            ) {
               data[key] = value;
             }
           } else {
@@ -227,12 +244,24 @@ export const hasSelectedEndpoint: (state: Immutable<EndpointState>) => boolean =
 );
 
 /** What policy details panel view to show */
-export const showView: (state: EndpointState) => 'policy_response' | 'details' = createSelector(
-  uiQueryParams,
-  (searchParams) => {
-    return searchParams.show === 'policy_response' ? 'policy_response' : 'details';
-  }
-);
+export const showView: (
+  state: EndpointState
+) => EndpointIndexUIQueryParams['show'] = createSelector(uiQueryParams, (searchParams) => {
+  return searchParams.show ?? 'details';
+});
+
+/**
+ * Returns the selected endpoint's elastic agent Id
+ * used for fetching endpoint actions log
+ */
+export const selectedAgent = (state: Immutable<EndpointState>): string => {
+  const hostList = state.hosts;
+  const { selected_endpoint: selectedEndpoint } = uiQueryParams(state);
+  return (
+    hostList.find((host) => host.metadata.agent.id === selectedEndpoint)?.metadata.elastic.agent
+      .id || ''
+  );
+};
 
 /**
  * Returns the Host Status which is connected the fleet agent
@@ -299,3 +328,53 @@ export const searchBarQuery: (state: Immutable<EndpointState>) => Query = create
     return decodedQuery;
   }
 );
+
+export const getCurrentIsolationRequestState = (
+  state: Immutable<EndpointState>
+): EndpointState['isolationRequestState'] => {
+  return state.isolationRequestState;
+};
+
+export const getIsIsolationRequestPending: (
+  state: Immutable<EndpointState>
+) => boolean = createSelector(getCurrentIsolationRequestState, (isolateHost) =>
+  isLoadingResourceState(isolateHost)
+);
+
+export const getWasIsolationRequestSuccessful: (
+  state: Immutable<EndpointState>
+) => boolean = createSelector(getCurrentIsolationRequestState, (isolateHost) =>
+  isLoadedResourceState(isolateHost)
+);
+
+export const getIsolationRequestError: (
+  state: Immutable<EndpointState>
+) => ServerApiError | undefined = createSelector(getCurrentIsolationRequestState, (isolateHost) => {
+  if (isFailedResourceState(isolateHost)) {
+    return isolateHost.error;
+  }
+});
+
+export const getActivityLogData = (
+  state: Immutable<EndpointState>
+): Immutable<EndpointState['endpointDetails']['activityLog']> => state.endpointDetails.activityLog;
+
+export const getActivityLogRequestLoading: (
+  state: Immutable<EndpointState>
+) => boolean = createSelector(getActivityLogData, (activityLog) =>
+  isLoadingResourceState(activityLog)
+);
+
+export const getActivityLogRequestLoaded: (
+  state: Immutable<EndpointState>
+) => boolean = createSelector(getActivityLogData, (activityLog) =>
+  isLoadedResourceState(activityLog)
+);
+
+export const getActivityLogError: (
+  state: Immutable<EndpointState>
+) => ServerApiError | undefined = createSelector(getActivityLogData, (activityLog) => {
+  if (isFailedResourceState(activityLog)) {
+    return activityLog.error;
+  }
+});

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
@@ -39,7 +39,7 @@ describe('alert_form', () => {
     validate: (): ValidationResult => {
       return { errors: {} };
     },
-    alertParamsExpression: () => <Fragment />,
+    alertParamsExpression: () => <></>,
     requiresAppContext: false,
   };
 
@@ -47,19 +47,19 @@ describe('alert_form', () => {
     id: 'my-action-type',
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
-      return {
+    validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
+      return Promise.resolve({
         config: {
           errors: {},
         },
         secrets: {
           errors: {},
         },
-      };
+      });
     },
-    validateParams: (): GenericValidationResult<unknown> => {
+    validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
-      return validationResult;
+      return Promise.resolve(validationResult);
     },
     actionConnectorFields: null,
   });
@@ -72,7 +72,7 @@ describe('alert_form', () => {
     validate: (): ValidationResult => {
       return { errors: {} };
     },
-    alertParamsExpression: () => <Fragment />,
+    alertParamsExpression: () => <></>,
     requiresAppContext: true,
   };
 
@@ -84,7 +84,7 @@ describe('alert_form', () => {
     validate: (): ValidationResult => {
       return { errors: {} };
     },
-    alertParamsExpression: () => <Fragment />,
+    alertParamsExpression: () => <></>,
     requiresAppContext: false,
   };
 
@@ -322,7 +322,7 @@ describe('alert_form', () => {
           validate: (): ValidationResult => {
             return { errors: {} };
           },
-          alertParamsExpression: () => <Fragment />,
+          alertParamsExpression: () => <></>,
           requiresAppContext: true,
         },
         {
@@ -333,7 +333,7 @@ describe('alert_form', () => {
           validate: (): ValidationResult => {
             return { errors: {} };
           },
-          alertParamsExpression: () => <Fragment />,
+          alertParamsExpression: () => <></>,
           requiresAppContext: false,
         },
       ]);

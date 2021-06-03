@@ -94,9 +94,6 @@
 /x-pack/plugins/apm/server/projections/rum_page_load_transactions.ts @elastic/uptime
 /x-pack/test/apm_api_integration/tests/csm/ @elastic/uptime
 
-# Beats
-/x-pack/plugins/beats_management/  @elastic/beats
-#CC# /x-pack/plugins/beats_management/ @elastic/beats
 
 # Presentation
 /src/plugins/dashboard/ @elastic/kibana-presentation
@@ -150,6 +147,7 @@
 #CC# /x-pack/plugins/file_upload @elastic/kibana-gis
 /src/plugins/tile_map/ @elastic/kibana-gis
 /src/plugins/region_map/ @elastic/kibana-gis
+/packages/kbn-mapbox-gl @elastic/kibana-gis
 
 # Operations
 /src/dev/ @elastic/kibana-operations
@@ -176,6 +174,7 @@
 /.bazelversion @elastic/kibana-operations
 /WORKSPACE.bazel @elastic/kibana-operations
 #CC# /packages/kbn-expect/ @elastic/kibana-operations
+/.buildkite/ @elastic/kibana-operations
 
 # Quality Assurance
 /src/dev/code_coverage @elastic/kibana-qa
@@ -341,7 +340,7 @@
 #CC# /x-pack/plugins/security_solution/ @elastic/security-solution
 
 # Security Solution sub teams
-/x-pack/plugins/case @elastic/security-threat-hunting
+/x-pack/plugins/cases @elastic/security-threat-hunting
 /x-pack/plugins/timelines @elastic/security-threat-hunting
 /x-pack/test/case_api_integration @elastic/security-threat-hunting
 /x-pack/plugins/lists @elastic/security-detections-response

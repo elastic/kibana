@@ -31,8 +31,8 @@ export const AccessDeniedPage = () => (
             <EuiTitle>
               <h1>
                 <FormattedMessage
-                  id="xpack.ml.management.jobsList.accessDeniedTitle"
-                  defaultMessage="Access denied"
+                  id="xpack.ml.management.jobsList.insufficientLicenseTitle"
+                  defaultMessage="Machine Learning"
                 />
               </h1>
             </EuiTitle>
@@ -42,7 +42,7 @@ export const AccessDeniedPage = () => (
           <EuiSpacer size="m" />
           <EuiCallOut
             title={i18n.translate('xpack.ml.management.jobsList.noPermissionToAccessLabel', {
-              defaultMessage: 'You need permission to access ML jobs',
+              defaultMessage: 'Access denied',
             })}
             color="danger"
             iconType="cross"
