@@ -21,6 +21,7 @@ import { shape } from './shape';
 import { string } from './string';
 import { style } from './style';
 import { AnyExpressionTypeDefinition } from '../types';
+import { uiSetting } from './ui_setting';
 
 export const typeSpecs: AnyExpressionTypeDefinition[] = [
   boolean,
@@ -37,6 +38,7 @@ export const typeSpecs: AnyExpressionTypeDefinition[] = [
   shape,
   string,
   style,
+  uiSetting,
 ];
 
 export * from './boolean';

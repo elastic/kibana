@@ -17,6 +17,7 @@ import { derivative } from './derivative';
 import { movingAverage } from './moving_average';
 import { mapColumn } from './map_column';
 import { math } from './math';
+import { uiSetting } from './ui_setting';
 
 export const functionSpecs: AnyExpressionFunctionDefinition[] = [
   clog,
@@ -29,6 +30,7 @@ export const functionSpecs: AnyExpressionFunctionDefinition[] = [
   movingAverage,
   mapColumn,
   math,
+  uiSetting,
 ];
 
 export * from './clog';

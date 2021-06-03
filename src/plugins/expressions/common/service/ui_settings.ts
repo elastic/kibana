@@ -6,5 +6,7 @@
  * Side Public License, v 1.
  */
 
-export * from './expressions_services';
-export * from './ui_settings';
+import type { IUiSettingsClient } from 'src/core/public';
+import { createGetterSetter } from '../../../kibana_utils/common';
+
+export const [getUiSettings, setUiSettings] = createGetterSetter<IUiSettingsClient>('UiSettings');
