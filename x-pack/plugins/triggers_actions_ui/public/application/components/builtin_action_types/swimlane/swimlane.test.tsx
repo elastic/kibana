@@ -66,7 +66,7 @@ describe('swimlane action params validation', () => {
   test('action params validation succeeds when action params is valid', () => {
     const actionParams = {
       subActionParams: {
-        alertName: 'Alert Name',
+        alertName: 'Rule Name',
       },
     };
 

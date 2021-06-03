@@ -20,8 +20,8 @@ export const applicationFields = [
   },
   {
     id: 'adnfls',
-    name: 'Alert Name',
-    key: 'alert-name',
+    name: 'Rule Name',
+    key: 'rule-name',
     fieldType: 'text',
   },
   {
@@ -53,7 +53,7 @@ export const applicationFields = [
 export const mappings = {
   alertSourceConfig: applicationFields[0],
   severityConfig: applicationFields[1],
-  alertNameConfig: applicationFields[2],
+  ruleNameConfig: applicationFields[2],
   caseIdConfig: applicationFields[3],
   caseNameConfig: applicationFields[4],
   commentsConfig: applicationFields[5],

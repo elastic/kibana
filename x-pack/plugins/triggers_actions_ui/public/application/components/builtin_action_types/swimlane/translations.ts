@@ -21,10 +21,10 @@ export const SW_ACTION_TYPE_TITLE = i18n.translate(
   }
 );
 
-export const SW_REQUIRED_ALERT_NAME = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredAlertName',
+export const SW_REQUIRED_RULE_NAME = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredRuleName',
   {
-    defaultMessage: 'Alert Name is required.',
+    defaultMessage: 'Rule Name is required.',
   }
 );
 
@@ -131,7 +131,7 @@ export const SW_MAPPING_DESCRIPTION_TEXT_FIELD_LABEL = i18n.translate(
 export const SW_ALERT_NAME_FIELD_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.alertNameFieldLabel',
   {
-    defaultMessage: 'Alert Name',
+    defaultMessage: 'Rule Name',
   }
 );
 

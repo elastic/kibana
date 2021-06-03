@@ -45,7 +45,7 @@ describe('Swimlane Service', () => {
   };
 
   const incident = {
-    alertName: 'Alert Name',
+    alertName: 'Rule Name',
     alertSource: 'Alert Source',
     caseId: 'Case Id',
     caseName: 'Case Name',
@@ -182,7 +182,7 @@ describe('Swimlane Service', () => {
         data: {
           applicationId: config.appId,
           values: {
-            [mappings.alertNameConfig.id]: 'Alert Name',
+            [mappings.ruleNameConfig.id]: 'Rule Name',
             [mappings.alertSourceConfig.id]: 'Alert Source',
             [mappings.caseNameConfig.id]: 'Case Name',
             [mappings.caseIdConfig.id]: 'Case Id',

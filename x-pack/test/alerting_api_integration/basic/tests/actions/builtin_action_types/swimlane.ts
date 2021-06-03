@@ -35,10 +35,10 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
           key: 'severity',
           fieldType: 'text',
         },
-        alertNameConfig: {
+        ruleNameConfig: {
           id: 'adnfls',
-          name: 'Alert Name',
-          key: 'alert-name',
+          name: 'Rule Name',
+          key: 'rule-name',
           fieldType: 'text',
         },
         caseIdConfig: {

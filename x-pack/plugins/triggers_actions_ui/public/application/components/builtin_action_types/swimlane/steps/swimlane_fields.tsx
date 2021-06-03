@@ -85,7 +85,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
     () => ({
       alertSourceConfig: createSelectedOption(mappings?.alertSourceConfig),
       severityConfig: createSelectedOption(mappings?.severityConfig),
-      alertNameConfig: createSelectedOption(mappings?.alertNameConfig),
+      ruleNameConfig: createSelectedOption(mappings?.ruleNameConfig),
       caseIdConfig: createSelectedOption(mappings?.caseIdConfig),
       caseNameConfig: createSelectedOption(mappings?.caseNameConfig),
       commentsConfig: createSelectedOption(mappings?.commentsConfig),
@@ -194,23 +194,23 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
           </EuiFormRow>
         </>
       )}
-      {isValidFieldForConnector(connectorType as SwimlaneConnectorType, 'alertNameConfig') && (
+      {isValidFieldForConnector(connectorType as SwimlaneConnectorType, 'ruleNameConfig') && (
         <>
           <EuiFormRow
-            id="alertNameConfig"
+            id="ruleNameConfig"
             fullWidth
             label={i18n.SW_ALERT_NAME_FIELD_LABEL}
-            error={mappingErrors?.alertNameConfig}
-            isInvalid={mappingErrors?.alertNameConfig != null}
+            error={mappingErrors?.ruleNameConfig}
+            isInvalid={mappingErrors?.ruleNameConfig != null}
           >
             <EuiComboBox
               fullWidth
-              selectedOptions={state.alertNameConfig}
+              selectedOptions={state.ruleNameConfig}
               options={textOptions}
               singleSelection={SINGLE_SELECTION}
               data-test-subj="swimlaneAlertNameInput"
-              onChange={(e) => editMappings('alertNameConfig', e)}
-              isInvalid={mappingErrors?.alertNameConfig != null}
+              onChange={(e) => editMappings('ruleNameConfig', e)}
+              isInvalid={mappingErrors?.ruleNameConfig != null}
             />
           </EuiFormRow>
         </>

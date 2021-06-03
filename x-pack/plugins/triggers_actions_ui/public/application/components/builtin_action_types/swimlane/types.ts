@@ -26,7 +26,7 @@ export interface SwimlaneMappingConfig {
   severityConfig: SwimlaneFieldMappingConfig;
   caseNameConfig: SwimlaneFieldMappingConfig;
   caseIdConfig: SwimlaneFieldMappingConfig;
-  alertNameConfig: SwimlaneFieldMappingConfig;
+  ruleNameConfig: SwimlaneFieldMappingConfig;
   commentsConfig: SwimlaneFieldMappingConfig;
   descriptionConfig: SwimlaneFieldMappingConfig;
   [key: string]: SwimlaneFieldMappingConfig;

@@ -39,13 +39,13 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
   } = ((actionConnector as unknown) as SwimlaneActionConnector).config;
   const { hasAlertName, hasAlertSource, hasComments, hasSeverity } = useMemo(
     () => ({
-      hasAlertName: mappings.alertNameConfig != null,
+      hasAlertName: mappings.ruleNameConfig != null,
       hasAlertSource: mappings.alertSourceConfig != null,
       hasComments: mappings.commentsConfig != null,
       hasSeverity: mappings.severityConfig != null,
     }),
     [
-      mappings.alertNameConfig,
+      mappings.ruleNameConfig,
       mappings.alertSourceConfig,
       mappings.commentsConfig,
       mappings.severityConfig,
