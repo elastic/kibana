@@ -8,8 +8,13 @@
 import { SwimlaneConnectorType, SwimlaneMappingConfig } from './types';
 import * as i18n from './translations';
 
-const casesRequiredFields = ['caseNameConfig', 'descriptionConfig', 'commentsConfig'];
-const casesFields = ['caseIdConfig', ...casesRequiredFields];
+const casesRequiredFields = [
+  'caseNameConfig',
+  'descriptionConfig',
+  'commentsConfig',
+  'caseIdConfig',
+];
+const casesFields = [...casesRequiredFields];
 const alertsRequiredFields = ['alertNameConfig'];
 const alertsFields = [
   'alertSourceConfig',
