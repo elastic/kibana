@@ -144,12 +144,7 @@ async function get(
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): Promise<CasesConfigurationsResponse> {
-  const {
-    unsecuredSavedObjectsClient,
-    caseConfigureService,
-    logger,
-    authorization,
-  } = clientArgs;
+  const { unsecuredSavedObjectsClient, caseConfigureService, logger, authorization } = clientArgs;
   try {
     const queryParams = pipe(
       excess(GetConfigureFindRequestRt).decode(params),
