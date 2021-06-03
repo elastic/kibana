@@ -468,9 +468,8 @@ export const getDatatableVisualization = ({
     return metricColumnsWithArrayValues.map((label) => (
       <FormattedMessage
         key={label}
-        id="xpack.lens.pie.arrayValues"
-        defaultMessage="{label} contains array values. Your visualization may not render as
-              expected."
+        id="xpack.lens.datatables.arrayValues"
+        defaultMessage="{label} contains array values. Summary rows will take into account each numeric value within the arrays."
         values={{
           label: <strong>{label}</strong>,
         }}
