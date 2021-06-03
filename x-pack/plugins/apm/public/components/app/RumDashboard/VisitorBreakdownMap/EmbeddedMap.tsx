@@ -83,10 +83,6 @@ export function EmbeddedMapComponent() {
     attributes: { title: '' },
     id: uuid.v4(),
     filters: mapFilters,
-    refreshConfig: {
-      value: 0,
-      pause: false,
-    },
     viewMode: ViewMode.VIEW,
     isLayerTOCOpen: false,
     query: {
