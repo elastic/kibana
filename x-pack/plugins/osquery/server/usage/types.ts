@@ -15,15 +15,37 @@ export type CollectorDependencies = {
   core: CoreSetup;
 } & Pick<SetupPlugins, 'usageCollection'>;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const usageSchema: MakeSchemaFrom<any> = {
-  query_metrics: {
-    live_query_usage: {
-      call_count: {
+  live_query_usage: {
+    // session is an awkward name for this
+    session: {
+      count: {
         type: 'long',
       },
-      error_count: {
+      errors: {
         type: 'long',
       },
+    },
+    cumulative: {
+      queries: {
+        type: 'long',
+      },
+    },
+  },
+  scheduled_queries: {
+    queryGroups: {
+      total: {
+        type: 'long',
+      },
+      empty: {
+        type: 'long',
+      },
+    },
+  },
+  agent_info: {
+    enrolled: {
+      type: 'long',
     },
   },
   beat_metrics: {
@@ -42,7 +64,7 @@ export const usageSchema: MakeSchemaFrom<any> = {
       },
       memory: {
         rss: {
-          // TODO?: add a dimension on these for agent instance
+          // ???: add a dimension on these for agent instance
           latest: {
             type: 'long',
           },

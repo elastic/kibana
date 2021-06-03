@@ -5,44 +5,56 @@
  * 2.0.
  */
 
+import { SavedObjectsClientContract } from 'kibana/server';
+import { usageMetricSavedObjectType } from '../../../common/types';
+
 export interface RouteUsageMetric {
-  call_count: number;
-  error_count: number;
+  queries: number;
+  errors: number;
 }
 
-// TODO: use ES for this recording
-class UsageRecorder {
-  private counts = new Map<string, number>();
-  public incrementCallCount(route: string, increment = 1) {
-    const count = this.counts.get(route) ?? 0;
-    this.counts.set(route, count + increment);
-  }
-  public getCallCount(route: string): number {
-    return this.counts.get(route) ?? 0;
-  }
+export type RouteString = 'live_query';
 
-  private errors = new Map<string, number>();
-  public incrementErrorCount(route: string, increment = 1) {
-    const count = this.errors.get(route) ?? 0;
-    this.errors.set(route, count + increment);
-  }
-  public getErrorCount(route: string): number {
-    return this.errors.get(route) ?? 0;
-  }
-
-  public getRouteMetric(route: string): RouteUsageMetric {
-    return {
-      call_count: this.getCallCount(route),
-      error_count: this.getErrorCount(route),
-    };
-  }
+export async function createMetricObjects(soClient: SavedObjectsClientContract) {
+  const res = await Promise.allSettled(
+    ['live_query'].map(async (route) => {
+      try {
+        await soClient.get(usageMetricSavedObjectType, route);
+      } catch (e) {
+        await soClient.create(
+          usageMetricSavedObjectType,
+          {
+            errors: 0,
+            count: 0,
+          },
+          {
+            id: route,
+          }
+        );
+      }
+    })
+  );
+  return !res.some((e) => e.status === 'rejected');
 }
 
-let usageRecorder: UsageRecorder;
+export async function getCount(soClient: SavedObjectsClientContract, route: RouteString) {
+  return await soClient.get(usageMetricSavedObjectType, route);
+}
 
-export const getUsageRecorder = (): UsageRecorder => {
-  if (usageRecorder == null) {
-    usageRecorder = new UsageRecorder();
-  }
-  return usageRecorder;
-};
+export async function incrementCount(
+  soClient: SavedObjectsClientContract,
+  route: RouteString,
+  key: 'errors' | 'count' = 'count',
+  increment = 1
+) {
+  const metric = await soClient.get<{ count: number; errors: number }>(
+    usageMetricSavedObjectType,
+    route
+  );
+  metric.attributes[key] += increment;
+  await soClient.update(usageMetricSavedObjectType, route, metric.attributes);
+}
+
+export async function getRouteMetric(soClient: SavedObjectsClientContract, route: RouteString) {
+  return (await getCount(soClient, route)).attributes;
+}

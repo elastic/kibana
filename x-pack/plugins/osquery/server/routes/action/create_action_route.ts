@@ -18,7 +18,7 @@ import {
   CreateActionRequestBodySchema,
 } from '../../../common/schemas/routes/action/create_action_request_body_schema';
 
-import { getUsageRecorder } from '../usage';
+import { incrementCount } from '../usage';
 
 export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
@@ -41,10 +41,9 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
         osqueryContext,
         agentSelection
       );
-      const usageRecorder = getUsageRecorder();
-      usageRecorder.incrementCallCount('live_query');
+      incrementCount(soClient, 'live_query');
       if (!selectedAgents.length) {
-        usageRecorder.incrementErrorCount('live_query');
+        incrementCount(soClient, 'live_query', 'errors');
         return response.badRequest({ body: new Error('No agents found for selection') });
       }
 
@@ -73,7 +72,7 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
           },
         });
       } catch (error) {
-        usageRecorder.incrementErrorCount('live_query');
+        incrementCount(soClient, 'live_query', 'errors');
         return response.customError({
           statusCode: 500,
           body: new Error(`Error occurred whlie processing ${error}`),

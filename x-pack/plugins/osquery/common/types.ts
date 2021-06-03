@@ -7,7 +7,8 @@
 
 export const savedQuerySavedObjectType = 'osquery-saved-query';
 export const packSavedObjectType = 'osquery-pack';
-export type SavedObjectType = 'osquery-saved-query' | 'osquery-pack';
+export const usageMetricSavedObjectType = 'osquery-usage-metric';
+export type SavedObjectType = 'osquery-saved-query' | 'osquery-pack' | 'osquery-usage-metric';
 
 /**
  * This makes any optional property the same as Required<T> would but also has the

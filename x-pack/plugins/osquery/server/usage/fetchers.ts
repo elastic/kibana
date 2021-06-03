@@ -10,8 +10,11 @@ import {
   TopHitsAggregate,
   ValueAggregate,
 } from '@elastic/elasticsearch/api/types';
-import { getUsageRecorder } from '../routes/usage';
-import { ElasticsearchClient } from '../../../../../src/core/server';
+import { PackagePolicyServiceInterface } from '../../../fleet/server';
+import { getRouteMetric } from '../routes/usage';
+import { ElasticsearchClient, SavedObjectsClientContract } from '../../../../../src/core/server';
+import { ListResult, PackagePolicy, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../fleet/common';
+import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import { METRICS_INDICES } from './constants';
 
 export interface MetricEntry {
@@ -25,17 +28,121 @@ export interface BeatMetricAggregation {
   cpuMs: MetricEntry;
 }
 
-// TODO: pipe this through ES
-export function getLiveQueryUsage() {
-  const usageRecorder = getUsageRecorder();
-  return usageRecorder.getRouteMetric('live_query');
+interface PolicyLevelUsage {
+  scheduled_queries?: {};
+  agent_info?: {};
+}
+
+export async function getPolicyLevelUsage(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
+  packagePolicyService?: PackagePolicyServiceInterface
+): Promise<PolicyLevelUsage> {
+  if (!packagePolicyService) {
+    return {};
+  }
+  const packagePolicies = await packagePolicyService.list(soClient, {
+    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
+    perPage: 10_000,
+  });
+
+  const result: PolicyLevelUsage = {
+    scheduled_queries: getScheduledQueryUsage(packagePolicies),
+    // TODO: figure out how to support dynamic keys in metrics
+    // packageVersions: getPackageVersions(packagePolicies),
+  };
+  const agentResponse = await esClient.search({
+    body: {
+      size: 0,
+      aggs: {
+        policied: {
+          filter: {
+            terms: {
+              policy_id: packagePolicies.items.map((p) => p.policy_id),
+            },
+          },
+        },
+      },
+    },
+    index: '.fleet-agents',
+  });
+  if (agentResponse.statusCode === 200) {
+    result.agent_info = {
+      enrolled: (agentResponse.body.aggregations?.policied as SingleBucketAggregate).doc_count,
+    };
+  }
+  return result;
+}
+
+export function getPackageVersions(packagePolicies: ListResult<PackagePolicy>) {
+  return packagePolicies.items.reduce((acc, item) => {
+    if (item.package) {
+      acc[item.package.version] = (acc[item.package.version] ?? 0) + 1;
+    }
+    return acc;
+  }, {} as { [version: string]: number });
+}
+
+interface ScheduledQueryUsageMetrics {
+  queryGroups: {
+    total: number;
+    empty: number;
+  };
+}
+
+export function getScheduledQueryUsage(packagePolicies: ListResult<PackagePolicy>) {
+  return packagePolicies.items.reduce(
+    (acc, item) => {
+      ++acc.queryGroups.total;
+      if (item.inputs.length === 0) {
+        ++acc.queryGroups.empty;
+      }
+      return acc;
+    },
+    {
+      queryGroups: {
+        total: 0,
+        empty: 0,
+      },
+    } as ScheduledQueryUsageMetrics
+  );
+}
+
+export async function getLiveQueryUsage(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient
+) {
+  const { body: metricResponse } = await esClient.search({
+    body: {
+      size: 0,
+      aggs: {
+        queries: {
+          filter: {
+            term: {
+              input_type: 'osquery',
+            },
+          },
+        },
+      },
+    },
+    index: '.fleet-actions',
+  });
+  const esQueries = (metricResponse.aggregations?.queries as SingleBucketAggregate).doc_count;
+  const result = {
+    session: await getRouteMetric(soClient, 'live_query'),
+    // getting error stats out of ES is difficult due to a lack of error info on .fleet-actions
+    // and a lack of indexable osquery specific info on .fleet-actions-results
+    cumulative: {
+      queries: esQueries,
+    },
+  };
+
+  return result;
 }
 
 export async function getBeatUsage(esClient: ElasticsearchClient) {
-  // is there a better way to get these aggregates?
-  // needs a time window limit to make sure the reports are fresh
-  // XXX: these aggregates conflate agents, they should be broken out by id
-  // XXX: currently cpu is recorded as a duration rather than a load %
+  // ???: currently cpu is recorded as a duration rather than a load %. this might make it difficult to reason about the metrics in parallel systems.
+  // ???: these metrics would be more actionable with some facets of them (e.g. platform, architecture, etc)
   const { body: metricResponse } = await esClient.search({
     body: {
       size: 0,
@@ -94,7 +201,6 @@ export async function getBeatUsage(esClient: ElasticsearchClient) {
     cpuMs: {},
   };
 
-  // XXX: discrimating the union types gets hairy when attempting to genericize, figure out a fix!
   if ('max_rss' in lastDayAggs) {
     result.rss.max = (lastDayAggs.max_rss as ValueAggregate).value;
   }
