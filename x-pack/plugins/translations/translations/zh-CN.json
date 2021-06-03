@@ -21832,7 +21832,6 @@
     "xpack.securitySolution.trustedapps.list.actions.delete": "移除",
     "xpack.securitySolution.trustedapps.list.actions.delete.description": "移除此条目",
     "xpack.securitySolution.trustedapps.list.addButton": "添加受信任的应用程序",
-    "xpack.securitySolution.trustedapps.list.backButton": "返回",
     "xpack.securitySolution.trustedapps.list.columns.actions": "操作",
     "xpack.securitySolution.trustedapps.list.pageTitle": "受信任的应用程序",
     "xpack.securitySolution.trustedapps.list.totalCount": "{totalItemCount, plural, other {# 个受信任的应用程序}}",
