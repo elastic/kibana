@@ -8,20 +8,21 @@
 import { ReactElement } from 'react';
 import { SensorAPI } from 'react-beautiful-dnd';
 import { Store } from 'redux';
-import {
+import type {
   LastUpdatedAtProps,
   LoadingPanelProps,
   UseDraggableKeyboardWrapper,
   UseDraggableKeyboardWrapperProps,
 } from './components';
-import { TGridIntegratedProps } from './components/t_grid/integrated';
-import { UseAddToTimelineProps, UseAddToTimeline } from './hooks/use_add_to_timeline';
-import { tGridActions } from './store/t_grid';
-import { tGridReducer } from './store/t_grid/reducer';
-import { TimelineState } from './store/t_grid/types';
+import type { TGridIntegratedProps } from './components/t_grid/integrated';
+import type { TGridStandaloneProps } from './components/t_grid/standalone';
+import type { UseAddToTimelineProps, UseAddToTimeline } from './hooks/use_add_to_timeline';
+
 export * from './store/t_grid';
-export interface TimelinesPluginSetup {
-  getTGrid: (props: TGridProps) => ReactElement<TGridProps>;
+export interface TimelinesUIStart {
+  getTGrid: <T extends TGridType = 'embedded'>(
+    props: GetTGridProps<T>
+  ) => ReactElement<GetTGridProps<T>>;
   getTGridReducer: () => any;
   getLoadingPanel: (props: LoadingPanelProps) => ReactElement<LoadingPanelProps>;
   getLastUpdated: (props: LastUpdatedAtProps) => ReactElement<LastUpdatedAtProps>;
@@ -32,11 +33,20 @@ export interface TimelinesPluginSetup {
   ) => UseDraggableKeyboardWrapper;
   setTGridEmbeddedStore: (store: Store) => void;
 }
-export interface ReduxDeps {
-  actions: typeof tGridActions;
-  reducer: typeof tGridReducer;
-  initialState: TimelineState;
+
+interface TGridStandaloneCompProps extends TGridStandaloneProps {
+  type: 'standalone';
 }
-export interface TGridProps extends TGridIntegratedProps {
-  type: 'standalone' | 'embedded';
+
+interface TGridIntegratedCompProps extends TGridIntegratedProps {
+  type: 'embedded';
 }
+
+export type TGridType = 'standalone' | 'embedded';
+export type GetTGridProps<T extends TGridType> = T extends 'standalone'
+  ? TGridStandaloneCompProps
+  : T extends 'embedded'
+  ? TGridIntegratedCompProps
+  : TGridIntegratedCompProps;
+
+export type TGridProps = TGridStandaloneCompProps | TGridIntegratedCompProps;

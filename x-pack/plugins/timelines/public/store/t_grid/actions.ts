@@ -12,10 +12,13 @@ import {
   ColumnHeaderOptions,
   SortColumnTimeline,
   TimelineExpandedDetailType,
+  TGridPersistInput,
   TimelineTabs,
 } from '../../../common/types/timeline';
 
 const actionCreator = actionCreatorFactory('x-pack/timelines/t-grid');
+
+export const createTGrid = actionCreator<TGridPersistInput>('CREATE_TIMELINE');
 
 export const upsertColumn = actionCreator<{
   column: ColumnHeaderOptions;

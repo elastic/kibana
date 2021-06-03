@@ -9,9 +9,32 @@ import { PluginInitializerContext } from '../../../../src/core/public';
 import './index.scss';
 import { TimelinesPlugin } from './plugin';
 
-export * from './types';
-export * as TGridActions from './store/t_grid/actions';
-export * from '../common/utils/accessibility';
+export { tGridActions, tGridSelectors, TGridModel, TimelinesUIStart } from './types';
+export {
+  ARIA_COLINDEX_ATTRIBUTE,
+  ARIA_ROWINDEX_ATTRIBUTE,
+  DATA_COLINDEX_ATTRIBUTE,
+  DATA_ROWINDEX_ATTRIBUTE,
+  FIRST_ARIA_INDEX,
+  OnColumnFocused,
+  arrayIndexToAriaIndex,
+  elementOrChildrenHasFocus,
+  isArrowDownOrArrowUp,
+  isArrowUp,
+  isEscape,
+  isTab,
+  focusColumn,
+  getFocusedAriaColindexCell,
+  getFocusedDataColindexCell,
+  getNotesContainerClassName,
+  getRowRendererClassName,
+  getTableSkipFocus,
+  handleSkipFocus,
+  onFocusReFocusDraggable,
+  onKeyDownFocusHandler,
+  skipFocusInContainerTo,
+  stopPropagationAndPreventDefault,
+} from '../common/utils/accessibility';
 export {
   addFieldToTimelineColumns,
   getTimelineIdFromColumnDroppableId,

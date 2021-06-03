@@ -9,7 +9,7 @@
 import { DataPluginSetup, DataPluginStart } from '../../../../src/plugins/data/server/plugin';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface TimelinesPluginSetup {}
+export interface TimelinesPluginUI {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface TimelinesPluginStart {}
 

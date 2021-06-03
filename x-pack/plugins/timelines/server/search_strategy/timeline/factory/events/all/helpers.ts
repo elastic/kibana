@@ -30,8 +30,11 @@ const getTimestamp = (hit: EventHit): string => {
   return '';
 };
 
-export const buildFieldsRequest = (fields: string[]) =>
-  uniq([...fields.filter((f) => !f.startsWith('_')), ...TIMELINE_EVENTS_FIELDS]).map((field) => ({
+export const buildFieldsRequest = (fields: string[], excludeEcsData?: boolean) =>
+  uniq([
+    ...fields.filter((f) => !f.startsWith('_')),
+    ...(excludeEcsData ? [] : TIMELINE_EVENTS_FIELDS),
+  ]).map((field) => ({
     field,
     include_unmapped: true,
   }));

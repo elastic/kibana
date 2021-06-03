@@ -7,22 +7,19 @@
 
 import React from 'react';
 
-import { TGridProps } from '../types';
-import { TGridIntegrated } from './t_grid/integrated';
+import type { TGridProps } from '../types';
+import { TGridIntegrated, TGridIntegratedProps } from './t_grid/integrated';
+import { TGridStandalone } from './t_grid/standalone';
 
 export const TGrid = (props: TGridProps) => {
   const { type, ...componentsProps } = props;
   console.log('TGridIntegrated ', type);
-  if (props.type === 'standalone') {
-    return (
-      <div data-test-subj="timeline-wrapper">
-        {/* <EuiButton onClick={testActionHandler}>{'whatever'}</EuiButton> */}
-        <h1>{'current time: '}</h1>
-      </div>
-    );
-  } else {
-    return <TGridIntegrated {...componentsProps} />;
+  if (type === 'standalone') {
+    return <TGridStandalone {...componentsProps} />;
+  } else if (type === 'embedded') {
+    return <TGridIntegrated {...((componentsProps as unknown) as TGridIntegratedProps)} />;
   }
+  return null;
 };
 
 // eslint-disable-next-line import/no-default-export

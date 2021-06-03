@@ -11,8 +11,15 @@ import { ToggleDetailPanel } from './actions';
 import { TimelineById, TimelineId } from './types';
 import { TGridModel } from './model';
 
-import { ColumnHeaderOptions } from '../../../common/types/timeline';
-import { getTGridManageDefaults } from './defaults';
+import {
+  ColumnHeaderOptions,
+  RowRendererId,
+  SerializedFilterQuery,
+  SortColumnTimeline,
+  TimelineExpandedDetail,
+} from '../../../common/types/timeline';
+import { getTGridManageDefaults, tGridDefaults } from './defaults';
+import { Filter } from '../../../../../../src/plugins/data/public';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 export type Maybe<T> = T | null;
@@ -23,17 +30,6 @@ enum TimelineTabs {
   notes = 'notes',
   pinned = 'pinned',
   eql = 'eql',
-}
-
-enum Direction {
-  asc = 'asc',
-  desc = 'desc',
-}
-
-interface SortColumnTimeline {
-  columnId: string;
-  columnType: string;
-  sortDirection: 'none' | Direction;
 }
 
 /** The default minimum width of a column (when a width for the column type is not specified) */
@@ -64,6 +60,67 @@ interface TimelineNonEcsData {
   field: string;
   value?: Maybe<string[]>;
 }
+
+interface CreateTGridParams {
+  columns: ColumnHeaderOptions[];
+  dateRange: {
+    start: string;
+    end: string;
+  };
+  excludedRowRendererIds?: RowRendererId[];
+  expandedDetail?: TimelineExpandedDetail;
+  filters?: Filter[];
+  id: string;
+  itemsPerPage?: number;
+  itemsPerPageOptions?: number[];
+  indexNames: string[];
+  kqlQuery?: {
+    filterQuery: SerializedFilterQuery | null;
+  };
+  sort?: SortColumnTimeline[];
+  showCheckboxes?: boolean;
+  timelineById: TimelineById;
+}
+
+/** Adds a new `Timeline` to the provided collection of `TimelineById` */
+export const createInitTGrid = ({
+  columns,
+  dateRange,
+  excludedRowRendererIds = tGridDefaults.excludedRowRendererIds,
+  expandedDetail = tGridDefaults.expandedDetail,
+  filters = tGridDefaults.filters,
+  id,
+  itemsPerPage = tGridDefaults.itemsPerPage,
+  itemsPerPageOptions = tGridDefaults.itemsPerPageOptions,
+  indexNames,
+  kqlQuery = { filterQuery: null },
+  sort = tGridDefaults.sort,
+  showCheckboxes = false,
+  timelineById,
+}: CreateTGridParams): TimelineById => {
+  return {
+    ...timelineById,
+    [id]: {
+      ...tGridDefaults,
+      ...getTGridManageDefaults(id),
+      columns,
+      dateRange,
+      expandedDetail,
+      excludedRowRendererIds,
+      filters,
+      itemsPerPage,
+      itemsPerPageOptions,
+      indexNames,
+      kqlQuery,
+      sort,
+      isLoading: false,
+      isTGridLoading: false,
+      savedObjectId: null,
+      showCheckboxes,
+      version: null,
+    },
+  };
+};
 
 /**
  * Adds or updates a column. When updating a column, it will be moved to the

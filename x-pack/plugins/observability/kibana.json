@@ -16,6 +16,7 @@
     "data",
     "alerting",
     "ruleRegistry",
+    "timelines",
     "triggersActionsUi"
   ],
   "ui": true,

@@ -16,4 +16,5 @@ export type CellValueElementProps = EuiDataGridCellValueElementProps & {
   header: ColumnHeaderOptions;
   linkValues: string[] | undefined;
   timelineId: string;
+  setFlyoutAlert?: (data: any) => void;
 };

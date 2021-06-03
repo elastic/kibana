@@ -21,10 +21,10 @@ import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import {
   Direction,
   DocValueFields,
-  FactoryQueryTypes,
+  TimelineFactoryQueryTypes,
   Inspect,
   PaginationInputPaginated,
-  StrategyResponseType,
+  TimelineStrategyResponseType,
   TimelineEdges,
   TimelineEventsAllRequestOptions,
   TimelineEventsAllStrategyResponse,
@@ -69,6 +69,7 @@ export interface UseTimelineEventsProps {
   filterQuery?: ESQuery | string;
   skip?: boolean;
   endDate: string;
+  excludeEcsData?: boolean;
   id: string;
   fields: string[];
   indexNames: string[];
@@ -85,8 +86,8 @@ const createFilter = (filterQuery: ESQuery | string | undefined) =>
 const getTimelineEvents = (timelineEdges: TimelineEdges[]): TimelineItem[] =>
   timelineEdges.map((e: TimelineEdges) => e.node);
 
-const getInspectResponse = <T extends FactoryQueryTypes>(
-  response: StrategyResponseType<T>,
+const getInspectResponse = <T extends TimelineFactoryQueryTypes>(
+  response: TimelineStrategyResponseType<T>,
   prevResponse: InspectResponse
 ): InspectResponse => ({
   dsl: response?.inspect?.dsl ?? prevResponse?.dsl ?? [],
@@ -106,6 +107,7 @@ export const initSortDefault = [
 export const useTimelineEvents = ({
   docValueFields,
   endDate,
+  excludeEcsData = false,
   id = ID,
   indexNames,
   fields,
@@ -258,6 +260,7 @@ export const useTimelineEvents = ({
       const currentRequest = {
         defaultIndex: indexNames,
         docValueFields: docValueFields ?? [],
+        excludeEcsData,
         factoryQueryType: TimelineEventsQueries.all,
         fieldRequested: fields,
         fields: [],
@@ -289,6 +292,7 @@ export const useTimelineEvents = ({
     activePage,
     docValueFields,
     endDate,
+    excludeEcsData,
     filterQuery,
     id,
     language,

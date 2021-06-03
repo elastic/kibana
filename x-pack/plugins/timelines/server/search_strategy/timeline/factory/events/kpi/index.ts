@@ -13,7 +13,7 @@ import {
   TimelineRequestBasicOptions,
   TimelineKpiStrategyResponse,
 } from '../../../../../../common/search_strategy/timeline';
-import { inspectStringifyObject } from '../../../../../../utils/build_query';
+import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { TimelineFactory } from '../../types';
 import { buildTimelineKpiQuery } from './query.kpi.dsl';
 

@@ -17,7 +17,7 @@ import type {
   SerializedFilterQuery,
 } from '../../../../common/types/timeline';
 import { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
-import { TGridModel } from '../../../../../timelines/public';
+import type { TGridModel } from '../../../../../timelines/public';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';
@@ -38,7 +38,6 @@ export type TimelineModel = TGridModel & {
   eventType?: TimelineEventsType;
   /** A map of events in this timeline to the chronologically ordered notes (in this timeline) associated with the event */
   eventIdToNoteIds: Record<string, string[]>;
-  filters?: Filter[];
   /** The chronological history of actions related to this timeline */
   historyIds: string[];
   /** The chronological history of actions related to this timeline */
@@ -49,10 +48,6 @@ export type TimelineModel = TGridModel & {
   isLive: boolean;
   /** determines the behavior of the KQL bar */
   kqlMode: KqlMode;
-  /** the KQL query in the KQL bar */
-  kqlQuery: {
-    filterQuery: SerializedFilterQuery | null;
-  };
   /** Title */
   title: string;
   /** timelineType: default | template */
@@ -66,11 +61,6 @@ export type TimelineModel = TGridModel & {
   /** Events pinned to this timeline */
   pinnedEventIds: Record<string, boolean>;
   pinnedEventsSaveObject: Record<string, PinnedEvent>;
-  /** Specifies the granularity of the date range (e.g. 1 Day / Week / Month) applicable to the mini-map */
-  dateRange: {
-    start: string;
-    end: string;
-  };
   showSaveModal?: boolean;
   savedQueryId?: string | null;
   /** When true, show the timeline flyover */

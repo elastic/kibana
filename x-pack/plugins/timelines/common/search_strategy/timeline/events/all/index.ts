@@ -38,4 +38,5 @@ export interface TimelineEventsAllRequestOptions extends TimelineRequestOptionsP
   fields: string[] | Array<{ field: string; include_unmapped: boolean }>;
   fieldRequested: string[];
   language: 'eql' | 'kuery' | 'lucene';
+  excludeEcsData?: boolean;
 }

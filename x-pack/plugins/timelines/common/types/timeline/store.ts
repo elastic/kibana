@@ -31,13 +31,32 @@ export interface SerializedFilterQuery {
   serializedQuery: string;
 }
 
-export type SortDirection = 'none' | Direction;
+export type SortDirection = 'none' | 'asc' | 'desc' | Direction;
 export interface SortColumnTimeline {
   columnId: string;
   columnType: string;
   sortDirection: SortDirection;
 }
 
+export interface TGridPersistInput {
+  id: string;
+  dateRange: {
+    start: string;
+    end: string;
+  };
+  excludedRowRendererIds?: RowRendererId[];
+  expandedDetail?: TimelineExpandedDetail;
+  filters?: Filter[];
+  columns: ColumnHeaderOptions[];
+  itemsPerPage?: number;
+  itemsPerPageOptions?: number[];
+  indexNames: string[];
+  kqlQuery?: {
+    filterQuery: SerializedFilterQuery | null;
+  };
+  sort?: SortColumnTimeline[];
+  showCheckboxes?: boolean;
+}
 export interface TimelinePersistInput {
   id: string;
   dataProviders?: DataProvider[];

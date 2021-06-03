@@ -6,10 +6,7 @@
  */
 
 import { Direction } from '../../../common/search_strategy';
-import {
-  ColumnHeaderOptions,
-  ColumnHeaderType,
-} from '../../../common/types/timeline';
+import { ColumnHeaderOptions, ColumnHeaderType } from '../../../common/types/timeline';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
@@ -65,12 +62,17 @@ export const defaultHeaders: ColumnHeaderOptions[] = [
 
 export const tGridDefaults: SubsetTGridModel = {
   columns: defaultHeaders,
+  dateRange: { start: '', end: '' },
   deletedEventIds: [],
   excludedRowRendererIds: [],
   expandedDetail: {},
+  filters: [],
+  kqlQuery: {
+    filterQuery: null,
+  },
   indexNames: [],
-  isSelectAllChecked: false,
   isLoading: false,
+  isSelectAllChecked: false,
   itemsPerPage: 25,
   itemsPerPageOptions: [10, 25, 50, 100],
   loadingEventIds: [],
@@ -79,19 +81,19 @@ export const tGridDefaults: SubsetTGridModel = {
   sort: [
     {
       columnId: '@timestamp',
-      columnType: 'number',
+      columnType: 'date',
       sortDirection: Direction.desc,
     },
   ],
-  // savedObjectId: null,
-  // version: null,
+  savedObjectId: null,
+  version: null,
 };
 
 export const getTGridManageDefaults = (id: string) => ({
   defaultColumns: defaultHeaders,
   loadingText: i18n.LOADING_EVENTS,
   footerText: i18n.TOTAL_COUNT_OF_EVENTS,
-  documentType: i18n.TOTAL_COUNT_OF_EVENTS,
+  documentType: '',
   selectAll: false,
   id,
   isLoading: false,

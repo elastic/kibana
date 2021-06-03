@@ -11,6 +11,7 @@ import {
   clearEventsDeleted,
   clearEventsLoading,
   clearSelected,
+  createTGrid,
   initializeTGrid,
   removeColumn,
   setEventsDeleted,
@@ -29,6 +30,7 @@ import {
 
 import {
   applyDeltaToTimelineColumnWidth,
+  createInitTGrid,
   getInitializeTgrid,
   removeTimelineColumn,
   setDeletedTimelineEvents,
@@ -54,6 +56,45 @@ export const tGridReducer = reducerWithInitialState(initialTGridState)
     ...state,
     timelineById: upsertTimelineColumn({ column, id, index, timelineById: state.timelineById }),
   }))
+  .case(
+    createTGrid,
+    (
+      state,
+      {
+        id,
+        dateRange,
+        excludedRowRendererIds,
+        expandedDetail = {},
+        columns,
+        itemsPerPage,
+        itemsPerPageOptions,
+        indexNames,
+        kqlQuery,
+        sort,
+        showCheckboxes,
+        filters,
+      }
+    ) => {
+      return {
+        ...state,
+        timelineById: createInitTGrid({
+          columns,
+          dateRange,
+          excludedRowRendererIds,
+          expandedDetail,
+          filters,
+          id,
+          itemsPerPage,
+          itemsPerPageOptions,
+          indexNames,
+          kqlQuery,
+          sort,
+          showCheckboxes,
+          timelineById: state.timelineById,
+        }),
+      };
+    }
+  )
   .case(toggleDetailPanel, (state, action) => ({
     ...state,
     timelineById: {

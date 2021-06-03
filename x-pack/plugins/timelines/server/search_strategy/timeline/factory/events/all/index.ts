@@ -27,21 +27,36 @@ export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
     const { fieldRequested, ...queryOptions } = cloneDeep(options);
-    queryOptions.fields = buildFieldsRequest(fieldRequested);
+    queryOptions.fields = buildFieldsRequest(fieldRequested, queryOptions.excludeEcsData);
     return buildTimelineEventsAllQuery(queryOptions);
   },
   parse: async (
     options: TimelineEventsAllRequestOptions,
     response: IEsSearchResponse<unknown>
   ): Promise<TimelineEventsAllStrategyResponse> => {
-    const { fieldRequested, ...queryOptions } = cloneDeep(options);
-    queryOptions.fields = buildFieldsRequest(fieldRequested);
+    // eslint-disable-next-line prefer-const
+    let { fieldRequested, ...queryOptions } = cloneDeep(options);
+    queryOptions.fields = buildFieldsRequest(fieldRequested, queryOptions.excludeEcsData);
     const { activePage, querySize } = options.pagination;
     const totalCount = response.rawResponse.hits.total || 0;
     const hits = response.rawResponse.hits.hits;
+
+    if (fieldRequested.includes('*') && hits.length > 0) {
+      fieldRequested = Object.keys(hits[0]?.fields ?? {}).reduce((acc, f) => {
+        if (!acc.includes(f)) {
+          return [...acc, f];
+        }
+        return acc;
+      }, fieldRequested);
+    }
+
     const edges: TimelineEdges[] = await Promise.all(
       hits.map((hit) =>
-        formatTimelineData(options.fieldRequested, TIMELINE_EVENTS_FIELDS, hit as EventHit)
+        formatTimelineData(
+          fieldRequested,
+          options.excludeEcsData ? [] : TIMELINE_EVENTS_FIELDS,
+          hit as EventHit
+        )
       )
     );
     const inspect = {

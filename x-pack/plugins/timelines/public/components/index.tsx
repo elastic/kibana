@@ -17,19 +17,30 @@ import { TGrid as TGridComponent } from './tgrid';
 import { TGridProps } from '../types';
 import { DragDropContextWrapper } from './drag_and_drop';
 import { initialTGridState } from '../store/t_grid/reducer';
+import { TGridIntegratedProps } from './t_grid/integrated';
 
-export const TGrid = (props: TGridProps & { store?: Store; storage: Storage }) => {
-  console.log('TGrid', props.type);
-  // eslint-disable-next-line prefer-const
+const EMPTY_BROWSER_FIELDS = {};
+
+type TGridComponent = TGridProps & {
+  store?: Store;
+  storage: Storage;
+};
+
+export const TGrid = (props: TGridComponent) => {
+  console.log('TGrid');
   const { store, storage, ...tGridProps } = props;
   let tGridStore = store;
   if (!tGridStore && props.type === 'standalone') {
     tGridStore = createStore(initialTGridState, storage);
   }
+  let browserFields = EMPTY_BROWSER_FIELDS;
+  if ((tGridProps as TGridIntegratedProps).browserFields != null) {
+    browserFields = (tGridProps as TGridIntegratedProps).browserFields;
+  }
   return (
     <Provider store={tGridStore!}>
       <I18nProvider>
-        <DragDropContextWrapper browserFields={props.browserFields} defaultsHeader={props.columns}>
+        <DragDropContextWrapper browserFields={browserFields} defaultsHeader={props.columns}>
           <TGridComponent {...tGridProps} />
         </DragDropContextWrapper>
       </I18nProvider>

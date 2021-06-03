@@ -14,7 +14,7 @@ import {
   TimelineEqlRequestOptions,
   TimelineEqlResponse,
 } from '../../../../common/search_strategy/timeline/events/eql';
-import { inspectStringifyObject } from '../../../server/utils/build_query';
+import { inspectStringifyObject } from '../../../utils/build_query';
 import { TIMELINE_EVENTS_FIELDS } from '../factory/events/all/constants';
 import { formatTimelineData } from '../factory/events/all/helpers';
 

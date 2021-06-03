@@ -32,9 +32,9 @@ export async function getTopAlerts({
         },
       },
       fields: ['*'],
-      collapse: {
-        field: ALERT_UUID,
-      },
+      // collapse: {
+      //   field: ALERT_UUID,
+      // },
       size,
       sort: {
         [TIMESTAMP]: 'desc',

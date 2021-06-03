@@ -31,6 +31,7 @@ import type { ObservabilityAPIReturnType } from '../../services/call_observabili
 import { getAbsoluteDateRange } from '../../utils/date';
 import { AlertsSearchBar } from './alerts_search_bar';
 import { AlertsTable } from './alerts_table';
+import { AlertsTableTGrid } from './alerts_table_t_grid';
 import { StatusFilter } from './status_filter';
 
 export type TopAlertResponse = ObservabilityAPIReturnType<'GET /api/observability/rules/alerts/top'>[number];
@@ -80,6 +81,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
           },
         },
       }).then((alerts) => {
+        console.log('obs alerts', alerts);
         return alerts.map((alert) => {
           const parsedFields = parseTechnicalFields(alert);
           const formatter = observabilityRuleTypeRegistry.getFormatter(parsedFields[RULE_ID]!);
@@ -90,7 +92,6 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
           };
 
           const parsedLink = formatted.link ? parse(formatted.link, true) : undefined;
-
           return {
             ...formatted,
             fields: parsedFields,
@@ -194,6 +195,14 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
           </EuiFlexItem>
           <EuiFlexItem>
             <AlertsTable items={topAlerts ?? []} />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <AlertsTableTGrid
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              kuery={kuery}
+              status={status}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexGroup>

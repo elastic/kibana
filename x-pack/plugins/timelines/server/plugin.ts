@@ -13,14 +13,14 @@ import {
   Logger,
 } from '../../../../src/core/server';
 
-import { SetupPlugins, StartPlugins, TimelinesPluginSetup, TimelinesPluginStart } from './types';
+import { SetupPlugins, StartPlugins, TimelinesPluginUI, TimelinesPluginStart } from './types';
 import { defineRoutes } from './routes';
 import { timelineSearchStrategyProvider } from './search_strategy/timeline';
 import { timelineEqlSearchStrategyProvider } from './search_strategy/timeline/eql';
 import { indexFieldsProvider } from './search_strategy/index_fields';
 
 export class TimelinesPlugin
-  implements Plugin<TimelinesPluginSetup, TimelinesPluginStart, SetupPlugins, StartPlugins> {
+  implements Plugin<TimelinesPluginUI, TimelinesPluginStart, SetupPlugins, StartPlugins> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

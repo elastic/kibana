@@ -6,13 +6,14 @@
  */
 
 import { EuiDataGridColumn } from '@elastic/eui';
-import { FilterManager } from '../../../../../../src/plugins/data/public';
+import { Filter, FilterManager } from '../../../../../../src/plugins/data/public';
 import { TimelineNonEcsData } from '../../../common/search_strategy';
 import {
   ColumnHeaderOptions,
   RowRendererId,
   TimelineExpandedDetail,
   SortColumnTimeline,
+  SerializedFilterQuery,
 } from '../../../common/types/timeline';
 
 export interface TGridModel {
@@ -21,14 +22,25 @@ export interface TGridModel {
     Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> &
       ColumnHeaderOptions
   >;
+  /** Specifies the granularity of the date range (e.g. 1 Day / Week / Month) applicable to the mini-map */
+  dateRange: {
+    start: string;
+    end: string;
+  };
   /** Events to not be rendered **/
   deletedEventIds: string[];
   /** A list of Ids of excluded Row Renderers */
   excludedRowRendererIds: RowRendererId[];
   /** This holds the view information for the flyout when viewing timeline in a consuming view (i.e. hosts page) or the side panel in the primary timeline view */
   expandedDetail: TimelineExpandedDetail;
+  filters?: Filter[];
   /** When non-empty, display a graph view for this event */
   graphEventId?: string;
+  /** the KQL query in the KQL bar */
+  kqlQuery: {
+    // TODO convert to nodebuilder
+    filterQuery: SerializedFilterQuery | null;
+  };
   /** Uniquely identifies the timeline */
   id: string;
   /** TO DO sourcerer @X define this */
@@ -71,17 +83,22 @@ export type SubsetTGridModel = Readonly<
   Pick<
     TGridModel,
     | 'columns'
+    | 'dateRange'
     | 'deletedEventIds'
     | 'excludedRowRendererIds'
     | 'expandedDetail'
-    | 'loadingEventIds'
+    | 'filters'
+    | 'kqlQuery'
     | 'indexNames'
+    | 'isLoading'
     | 'isSelectAllChecked'
     | 'itemsPerPage'
     | 'itemsPerPageOptions'
-    | 'selectedEventIds'
+    | 'loadingEventIds'
     | 'showCheckboxes'
     | 'sort'
-    | 'isLoading'
+    | 'selectedEventIds'
+    | 'savedObjectId'
+    | 'version'
   >
 >;
