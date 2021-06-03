@@ -51,7 +51,7 @@ const PolicyDetailsHeader = styled.div`
   padding: ${(props) => props.theme.eui.paddingSizes.xl} 0;
   background-color: #fafbfd;
   border-bottom: 1px solid #d3dae6;
-  .siemHeaderPage {
+  .securitySolutionHeaderPage {
     max-width: ${maxFormWidth};
     margin: 0 auto;
   }

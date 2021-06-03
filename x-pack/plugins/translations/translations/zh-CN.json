@@ -20986,8 +20986,6 @@
     "xpack.securitySolution.header.editableTitle.cancel": "取消",
     "xpack.securitySolution.header.editableTitle.editButtonAria": "通过单击，可以编辑 {title}",
     "xpack.securitySolution.header.editableTitle.save": "保存",
-    "xpack.securitySolution.headerGlobal.buttonAddData": "添加数据",
-    "xpack.securitySolution.headerGlobal.securitySolution": "安全解决方案",
     "xpack.securitySolution.headerPage.pageSubtitle": "上一事件：{beat}",
     "xpack.securitySolution.hooks.useAddToTimeline.addedFieldMessage": "已将 {fieldOrValue} 添加到时间线",
     "xpack.securitySolution.hooks.useAddToTimeline.template.addedFieldMessage": "已将 {fieldOrValue} 添加到时间线模板",
