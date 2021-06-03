@@ -43,6 +43,7 @@ import { ReferenceEditor } from './reference_editor';
 import { setTimeScaling, TimeScaling } from './time_scaling';
 import { defaultFilter, Filtering, setFilter } from './filtering';
 import { AdvancedOptions } from './advanced_options';
+import { setTimeShift, TimeShift } from './time_shift';
 import { useDebouncedValue } from '../../shared_components';
 
 const operationPanels = getOperationDisplay();
@@ -142,6 +143,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
   }, [fieldByOperation, operationWithoutField]);
 
   const [filterByOpenInitially, setFilterByOpenInitally] = useState(false);
+  const [timeShiftedFocused, setTimeShiftFocused] = useState(false);
 
   // Operations are compatible if they match inputs. They are always compatible in
   // the empty state. Field-based operations are not compatible with field-less operations.
@@ -503,6 +505,38 @@ export function DimensionEditor(props: DimensionEditorProps) {
                       layer={state.layers[layerId]}
                       updateLayer={setStateWrapper}
                       isInitiallyOpen={filterByOpenInitially}
+                    />
+                  ) : null,
+              },
+              {
+                title: i18n.translate('xpack.lens.indexPattern.timeShift.label', {
+                  defaultMessage: 'Time shift',
+                }),
+                dataTestSubj: 'indexPattern-time-shift-enable',
+                onClick: () => {
+                  setTimeShiftFocused(true);
+                  setStateWrapper(setTimeShift(columnId, state.layers[layerId], ''));
+                },
+                showInPopover: Boolean(
+                  operationDefinitionMap[selectedColumn.operationType].shiftable &&
+                    selectedColumn.timeShift === undefined &&
+                    (currentIndexPattern.timeFieldName ||
+                      Object.values(state.layers[layerId].columns).some(
+                        (col) => col.operationType === 'date_histogram'
+                      ))
+                ),
+                inlineElement:
+                  operationDefinitionMap[selectedColumn.operationType].shiftable &&
+                  selectedColumn.timeShift !== undefined ? (
+                    <TimeShift
+                      indexPattern={currentIndexPattern}
+                      selectedColumn={selectedColumn}
+                      columnId={columnId}
+                      layer={state.layers[layerId]}
+                      updateLayer={setStateWrapper}
+                      isFocused={timeShiftedFocused}
+                      activeData={props.activeData}
+                      layerId={layerId}
                     />
                   ) : null,
               },

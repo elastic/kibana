@@ -43,6 +43,8 @@ const DATASET_IS_PREFIX_TEMPLATE_PRIORITY = 150;
 const QUERY_DEFAULT_FIELD_TYPES = ['keyword', 'text'];
 const QUERY_DEFAULT_FIELD_LIMIT = 1024;
 
+const META_PROP_KEYS = ['metric_type', 'unit'];
+
 /**
  * getTemplate retrieves the default template but overwrites the index pattern with the given value.
  *
@@ -168,6 +170,22 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
         default:
           fieldProps.type = type;
       }
+
+      const fieldHasMetaProps = META_PROP_KEYS.some((key) => key in field);
+      if (fieldHasMetaProps) {
+        switch (type) {
+          case 'group':
+          case 'group-nested':
+            break;
+          default: {
+            const meta = {};
+            if ('metric_type' in field) Reflect.set(meta, 'metric_type', field.metric_type);
+            if ('unit' in field) Reflect.set(meta, 'unit', field.unit);
+            fieldProps.meta = meta;
+          }
+        }
+      }
+
       props[field.name] = fieldProps;
     });
   }
