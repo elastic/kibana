@@ -193,8 +193,6 @@ export class Server {
 
     const deprecationsSetup = this.deprecations.setup({
       http: httpSetup,
-      elasticsearch: elasticsearchServiceSetup,
-      coreUsageData: coreUsageDataSetup,
     });
 
     const coreSetup: InternalCoreSetup = {
