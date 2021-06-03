@@ -90,8 +90,8 @@ export class AccessibilityService extends FtrService {
       },
     };
 
-    await (this.Wd.driver.manage() as any).setTimeouts({
-      ...(await (this.Wd.driver.manage() as any).getTimeouts()),
+    await this.Wd.driver.manage().setTimeouts({
+      ...(await this.Wd.driver.manage().getTimeouts()),
       script: 600000,
     });
 
