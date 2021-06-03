@@ -13,7 +13,7 @@ import {
   createMockLevelLogger,
   createMockReportingCore,
 } from '../../test_helpers';
-import { Report } from './report';
+import { Report, ReportDocument } from './report';
 import { ReportingStore } from './store';
 
 describe('ReportingStore', () => {
@@ -174,11 +174,75 @@ describe('ReportingStore', () => {
     });
   });
 
+  it('findReport gets a report from ES and returns a Report object', async () => {
+    // setup
+    const mockReport: ReportDocument = {
+      _id: '1234-foo-78',
+      _index: '.reporting-test-17409',
+      _primary_term: 1234,
+      _seq_no: 5678,
+      _source: {
+        kibana_name: 'test',
+        kibana_id: 'test123',
+        migration_version: 'X.0.0',
+        created_at: 'some time',
+        created_by: 'some security person',
+        jobtype: 'csv',
+        status: 'pending',
+        meta: { testMeta: 'meta' } as any,
+        payload: { testPayload: 'payload' } as any,
+        browser_type: 'browser type string',
+        attempts: 0,
+        max_attempts: 1,
+        timeout: 30000,
+        output: null,
+      },
+    };
+    mockEsClient.get.mockResolvedValue({ body: mockReport } as any);
+    const store = new ReportingStore(mockCore, mockLogger);
+    const report = new Report({
+      ...mockReport,
+      ...mockReport._source,
+    });
+
+    expect(await store.findReportFromTask(report.toReportTaskJSON())).toMatchInlineSnapshot(`
+      Report {
+        "_id": "1234-foo-78",
+        "_index": ".reporting-test-17409",
+        "_primary_term": 1234,
+        "_seq_no": 5678,
+        "attempts": 0,
+        "browser_type": "browser type string",
+        "completed_at": undefined,
+        "created_at": "some time",
+        "created_by": "some security person",
+        "jobtype": "csv",
+        "kibana_id": undefined,
+        "kibana_name": undefined,
+        "max_attempts": 1,
+        "meta": Object {
+          "testMeta": "meta",
+        },
+        "migration_version": "7.14.0",
+        "output": null,
+        "payload": Object {
+          "testPayload": "payload",
+        },
+        "process_expiration": undefined,
+        "started_at": undefined,
+        "status": "pending",
+        "timeout": 30000,
+      }
+    `);
+  });
+
   it('setReportClaimed sets the status of a record to processing', async () => {
     const store = new ReportingStore(mockCore, mockLogger);
     const report = new Report({
       _id: 'id-of-processing',
       _index: '.reporting-test-index-12345',
+      _seq_no: 42,
+      _primary_term: 10002,
       jobtype: 'test-report',
       created_by: 'created_by_test_string',
       browser_type: 'browser_type_test_string',
@@ -200,14 +264,16 @@ describe('ReportingStore', () => {
         Object {
           "body": Object {
             "doc": Object {
+              "migration_version": "7.14.0",
               "status": "processing",
               "testDoc": "test",
             },
           },
           "id": "id-of-processing",
-          "if_primary_term": undefined,
-          "if_seq_no": undefined,
+          "if_primary_term": 10002,
+          "if_seq_no": 42,
           "index": ".reporting-test-index-12345",
+          "refresh": true,
         },
       ]
     `);
@@ -218,6 +284,8 @@ describe('ReportingStore', () => {
     const report = new Report({
       _id: 'id-of-failure',
       _index: '.reporting-test-index-12345',
+      _seq_no: 42,
+      _primary_term: 10002,
       jobtype: 'test-report',
       created_by: 'created_by_test_string',
       browser_type: 'browser_type_test_string',
@@ -240,13 +308,15 @@ describe('ReportingStore', () => {
           "body": Object {
             "doc": Object {
               "errors": "yes",
+              "migration_version": "7.14.0",
               "status": "failed",
             },
           },
           "id": "id-of-failure",
-          "if_primary_term": undefined,
-          "if_seq_no": undefined,
+          "if_primary_term": 10002,
+          "if_seq_no": 42,
           "index": ".reporting-test-index-12345",
+          "refresh": true,
         },
       ]
     `);
@@ -257,6 +327,8 @@ describe('ReportingStore', () => {
     const report = new Report({
       _id: 'vastly-great-report-id',
       _index: '.reporting-test-index-12345',
+      _seq_no: 42,
+      _primary_term: 10002,
       jobtype: 'test-report',
       created_by: 'created_by_test_string',
       browser_type: 'browser_type_test_string',
@@ -279,13 +351,15 @@ describe('ReportingStore', () => {
           "body": Object {
             "doc": Object {
               "certainly_completed": "yes",
+              "migration_version": "7.14.0",
               "status": "completed",
             },
           },
           "id": "vastly-great-report-id",
-          "if_primary_term": undefined,
-          "if_seq_no": undefined,
+          "if_primary_term": 10002,
+          "if_seq_no": 42,
           "index": ".reporting-test-index-12345",
+          "refresh": true,
         },
       ]
     `);
@@ -296,6 +370,8 @@ describe('ReportingStore', () => {
     const report = new Report({
       _id: 'vastly-great-report-id',
       _index: '.reporting-test-index-12345',
+      _seq_no: 42,
+      _primary_term: 10002,
       jobtype: 'test-report',
       created_by: 'created_by_test_string',
       browser_type: 'browser_type_test_string',
@@ -323,6 +399,7 @@ describe('ReportingStore', () => {
           "body": Object {
             "doc": Object {
               "certainly_completed": "pretty_much",
+              "migration_version": "7.14.0",
               "output": Object {
                 "warnings": Array [
                   "those pants don't go with that shirt",
@@ -332,9 +409,55 @@ describe('ReportingStore', () => {
             },
           },
           "id": "vastly-great-report-id",
-          "if_primary_term": undefined,
-          "if_seq_no": undefined,
+          "if_primary_term": 10002,
+          "if_seq_no": 42,
           "index": ".reporting-test-index-12345",
+          "refresh": true,
+        },
+      ]
+    `);
+  });
+
+  it('prepareReportForRetry resets the expiration and status on the report document', async () => {
+    const store = new ReportingStore(mockCore, mockLogger);
+    const report = new Report({
+      _id: 'pretty-good-report-id',
+      _index: '.reporting-test-index-94058763',
+      _seq_no: 42,
+      _primary_term: 10002,
+      jobtype: 'test-report-2',
+      created_by: 'created_by_test_string',
+      browser_type: 'browser_type_test_string',
+      status: 'processing',
+      process_expiration: '2002',
+      max_attempts: 3,
+      payload: {
+        title: 'test report',
+        headers: 'rp_test_headers',
+        objectType: 'testOt',
+        browserTimezone: 'utc',
+      },
+      timeout: 30000,
+    });
+
+    await store.prepareReportForRetry(report);
+
+    const [updateCall] = mockEsClient.update.mock.calls;
+    expect(updateCall).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "body": Object {
+            "doc": Object {
+              "migration_version": "7.14.0",
+              "process_expiration": null,
+              "status": "pending",
+            },
+          },
+          "id": "pretty-good-report-id",
+          "if_primary_term": 10002,
+          "if_seq_no": 42,
+          "index": ".reporting-test-index-94058763",
+          "refresh": true,
         },
       ]
     `);
