@@ -31,7 +31,7 @@ import {
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { isFailedResourceState, isLoadedResourceState } from '../state';
 import { forceHTMLElementOffsetWidth } from './components/effected_policy_select/test_utils';
-import { resolvePathVariables } from '../service/utils';
+import { resolvePathVariables } from '../../../common/utils';
 import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 

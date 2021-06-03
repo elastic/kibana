@@ -25,7 +25,7 @@ import {
   UpdateAlertStatusProps,
   CasesFromAlertsResponse,
 } from './types';
-import { resolvePathVariables } from '../../../../management/pages/trusted_apps/service/utils';
+import { resolvePathVariables } from '../../../../management/common/utils';
 import { isolateHost, unIsolateHost } from '../../../../common/lib/host_isolation';
 
 /**
