@@ -29,12 +29,19 @@ export const policyFactory = (): PolicyConfig => {
         mode: ProtectionModes.prevent,
         supported: true,
       },
+      memory: {
+        mode: ProtectionModes.prevent,
+      },
       popup: {
         malware: {
           message: '',
           enabled: true,
         },
         ransomware: {
+          message: '',
+          enabled: true,
+        },
+        memory: {
           message: '',
           enabled: true,
         },
