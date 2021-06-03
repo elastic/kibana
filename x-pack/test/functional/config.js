@@ -42,7 +42,6 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/maps'),
       resolve(__dirname, './apps/status_page'),
       resolve(__dirname, './apps/timelion'),
-      resolve(__dirname, './apps/upgrade_assistant'),
       resolve(__dirname, './apps/visualize'),
       resolve(__dirname, './apps/uptime'),
       resolve(__dirname, './apps/saved_objects_management'),
@@ -59,6 +58,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/transform'),
       resolve(__dirname, './apps/reporting_management'),
       resolve(__dirname, './apps/management'),
+      resolve(__dirname, './apps/upgrade_assistant'),
 
       // This license_management file must be last because it is destructive.
       resolve(__dirname, './apps/license_management'),
