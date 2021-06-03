@@ -22,11 +22,12 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { CANCEL_BUTTON_LABEL } from '../../shared/constants/actions';
+
 import {
   ROLE_MAPPING_FLYOUT_CREATE_TITLE,
   ROLE_MAPPING_FLYOUT_UPDATE_TITLE,
   ROLE_MAPPING_FLYOUT_DESCRIPTION,
-  ROLE_MAPPING_FLYOUT_CANCEL_BUTTON,
   ROLE_MAPPING_FLYOUT_CREATE_BUTTON,
   ROLE_MAPPING_FLYOUT_UPDATE_BUTTON,
 } from './constants';
@@ -70,9 +71,7 @@ export const RoleMappingFlyout: React.FC<Props> = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={closeRoleMappingFlyout}>
-              {ROLE_MAPPING_FLYOUT_CANCEL_BUTTON}
-            </EuiButtonEmpty>
+            <EuiButtonEmpty onClick={closeRoleMappingFlyout}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton

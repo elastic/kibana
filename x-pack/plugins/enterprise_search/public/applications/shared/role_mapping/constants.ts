@@ -161,13 +161,6 @@ export const ROLE_MAPPING_FLYOUT_DESCRIPTION = i18n.translate(
   }
 );
 
-export const ROLE_MAPPING_FLYOUT_CANCEL_BUTTON = i18n.translate(
-  'xpack.enterpriseSearch.roleMapping.roleMappingFlyoutCancelButton',
-  {
-    defaultMessage: 'Cancel',
-  }
-);
-
 export const ROLE_MAPPING_ADD_BUTTON = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.roleMappingAddButton',
   {
