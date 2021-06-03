@@ -45,6 +45,12 @@ export function getSaveModalComponent(
       return <EuiLoadingSpinner />;
     }
 
-    return <LensSavedModalLazy {...props} lensServices={lensServices} />;
+    const { ContextProvider: PresentationUtilContext } = lensServices.presentationUtil;
+
+    return (
+      <PresentationUtilContext>
+        <LensSavedModalLazy {...props} lensServices={lensServices} />
+      </PresentationUtilContext>
+    );
   };
 }

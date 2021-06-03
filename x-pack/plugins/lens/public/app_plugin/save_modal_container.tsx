@@ -65,7 +65,6 @@ export function SaveModalContainer({
   const [lastKnownDoc, setLastKnownDoc] = useState<Document | undefined>(initLastKnowDoc);
 
   const {
-    presentationUtil,
     attributeService,
     notifications,
     data,
@@ -74,8 +73,6 @@ export function SaveModalContainer({
     application,
     dashboardFeatureFlag,
   } = lensServices;
-
-  const { ContextProvider: PresentationUtilContext } = presentationUtil;
 
   useEffect(() => {
     if (initialInput) {
@@ -134,23 +131,21 @@ export function SaveModalContainer({
   const savingToLibraryPermitted = Boolean(isSaveable && application.capabilities.visualize.save);
 
   return (
-    <PresentationUtilContext>
-      <SaveModal
-        isVisible={isVisible}
-        originatingApp={originatingApp}
-        savingToLibraryPermitted={savingToLibraryPermitted}
-        allowByValueEmbeddables={dashboardFeatureFlag?.allowByValueEmbeddables}
-        savedObjectsTagging={savedObjectsTagging}
-        tagsIds={tagsIds}
-        onSave={(saveProps, options) => {
-          runLensSave(saveProps, options);
-        }}
-        onClose={onClose}
-        getAppNameFromId={getAppNameFromId}
-        lastKnownDoc={lastKnownDoc}
-        returnToOriginSwitchLabel={returnToOriginSwitchLabel}
-      />
-    </PresentationUtilContext>
+    <SaveModal
+      isVisible={isVisible}
+      originatingApp={originatingApp}
+      savingToLibraryPermitted={savingToLibraryPermitted}
+      allowByValueEmbeddables={dashboardFeatureFlag?.allowByValueEmbeddables}
+      savedObjectsTagging={savedObjectsTagging}
+      tagsIds={tagsIds}
+      onSave={(saveProps, options) => {
+        runLensSave(saveProps, options);
+      }}
+      onClose={onClose}
+      getAppNameFromId={getAppNameFromId}
+      lastKnownDoc={lastKnownDoc}
+      returnToOriginSwitchLabel={returnToOriginSwitchLabel}
+    />
   );
 }
 
