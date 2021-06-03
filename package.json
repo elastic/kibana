@@ -138,7 +138,7 @@
     "@kbn/legacy-logging": "link:bazel-bin/packages/kbn-legacy-logging",
     "@kbn/logging": "link:bazel-bin/packages/kbn-logging",
     "@kbn/monaco": "link:bazel-bin/packages/kbn-monaco",
-    "@kbn/rule-data-utils": "link:packages/kbn-rule-data-utils",
+    "@kbn/rule-data-utils": "link:bazel-bin/packages/kbn-rule-data-utils",
     "@kbn/securitysolution-list-constants": "link:bazel-bin/packages/kbn-securitysolution-list-constants",
     "@kbn/securitysolution-es-utils": "link:bazel-bin/packages/kbn-securitysolution-es-utils",
     "@kbn/securitysolution-io-ts-types": "link:bazel-bin/packages/kbn-securitysolution-io-ts-types",
