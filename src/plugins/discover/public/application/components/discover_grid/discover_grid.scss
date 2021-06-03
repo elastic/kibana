@@ -47,6 +47,8 @@
 
 // We only truncate if the cell is not a control column.
 .euiDataGridHeader {
+  display: flex; // fixing row header in firefox
+
   .euiDataGridHeaderCell__content {
     @include euiTextTruncate;
     overflow: hidden;
