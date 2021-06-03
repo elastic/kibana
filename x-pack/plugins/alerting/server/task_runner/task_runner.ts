@@ -644,8 +644,8 @@ function trackAlertDurations<
       : undefined;
     recoveredAlerts[id].replaceState({
       ...state,
-      end: currentTime,
       ...(duration ? { duration } : {}),
+      ...(state.start ? { end: currentTime } : {}),
     });
   }
 }
