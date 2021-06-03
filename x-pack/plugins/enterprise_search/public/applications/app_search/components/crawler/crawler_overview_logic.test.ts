@@ -14,16 +14,16 @@ jest.mock('../engine', () => ({
 }));
 
 import { CrawlerOverviewLogic } from './crawler_overview_logic';
-import { ECrawlerPolicies, ECrawlerRules, ICrawlRule } from './types';
+import { CrawlerPolicies, CrawlerRules, CrawlRule } from './types';
 
 const DEFAULT_VALUES = {
   domains: [],
 };
 
-const DEFAULT_CRAWL_RULE: ICrawlRule = {
+const DEFAULT_CRAWL_RULE: CrawlRule = {
   id: '-',
-  policy: ECrawlerPolicies.Allow,
-  rule: ECrawlerRules.regex,
+  policy: CrawlerPolicies.Allow,
+  rule: CrawlerRules.regex,
   pattern: '.*',
 };
 

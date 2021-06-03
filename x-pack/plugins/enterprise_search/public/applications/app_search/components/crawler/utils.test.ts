@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ECrawlerPolicies, ECrawlerRules, ICrawlRule, ICrawlerDomainFromServer } from './types';
+import { CrawlerPolicies, CrawlerRules, CrawlRule, CrawlerDomainFromServer } from './types';
 
 import { crawlerDomainServerToClient, crawlerDataServerToClient } from './utils';
 
-const DEFAULT_CRAWL_RULE: ICrawlRule = {
+const DEFAULT_CRAWL_RULE: CrawlRule = {
   id: '-',
-  policy: ECrawlerPolicies.Allow,
-  rule: ECrawlerRules.regex,
+  policy: CrawlerPolicies.Allow,
+  rule: CrawlerRules.regex,
   pattern: '.*',
 };
 
@@ -59,7 +59,7 @@ describe('crawlerDomainServerToClient', () => {
 
 describe('crawlerDataServerToClient', () => {
   test('return value', () => {
-    const domains: ICrawlerDomainFromServer[] = [
+    const domains: CrawlerDomainFromServer[] = [
       {
         id: 'x',
         name: 'moviedatabase.com',

@@ -12,16 +12,16 @@ import { flashAPIErrors } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { EngineLogic } from '../engine';
 
-import { ICrawlerData, ICrawlerDataFromServer, ICrawlerDomain } from './types';
+import { CrawlerData, CrawlerDataFromServer, CrawlerDomain } from './types';
 import { crawlerDataServerToClient } from './utils';
 
 interface CrawlerOverviewValues {
-  domains: ICrawlerDomain[];
+  domains: CrawlerDomain[];
 }
 
 interface CrawlerOverviewActions {
   fetchCrawlerData(): void;
-  setCrawlerData(data: ICrawlerData): { data: ICrawlerData };
+  setCrawlerData(data: CrawlerData): { data: CrawlerData };
 }
 
 export const CrawlerOverviewLogic = kea<
@@ -47,7 +47,7 @@ export const CrawlerOverviewLogic = kea<
 
       try {
         const response = await http.get(`/api/app_search/engines/${engineName}/crawler`);
-        const crawlerData = crawlerDataServerToClient(response as ICrawlerDataFromServer);
+        const crawlerData = crawlerDataServerToClient(response as CrawlerDataFromServer);
         actions.setCrawlerData(crawlerData);
       } catch (e) {
         flashAPIErrors(e);

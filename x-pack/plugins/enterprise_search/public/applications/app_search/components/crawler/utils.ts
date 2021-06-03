@@ -6,13 +6,13 @@
  */
 
 import {
-  ICrawlerDomain,
-  ICrawlerDomainFromServer,
-  ICrawlerData,
-  ICrawlerDataFromServer,
+  CrawlerDomain,
+  CrawlerDomainFromServer,
+  CrawlerData,
+  CrawlerDataFromServer,
 } from './types';
 
-export function crawlerDomainServerToClient(payload: ICrawlerDomainFromServer): ICrawlerDomain {
+export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): CrawlerDomain {
   const {
     id,
     name,
@@ -25,7 +25,7 @@ export function crawlerDomainServerToClient(payload: ICrawlerDomainFromServer): 
     entry_points: entryPoints,
   } = payload;
 
-  const clientPayload: ICrawlerDomain = {
+  const clientPayload: CrawlerDomain = {
     id,
     url: name,
     documentCount,
@@ -46,7 +46,7 @@ export function crawlerDomainServerToClient(payload: ICrawlerDomainFromServer): 
   return clientPayload;
 }
 
-export function crawlerDataServerToClient(payload: ICrawlerDataFromServer): ICrawlerData {
+export function crawlerDataServerToClient(payload: CrawlerDataFromServer): CrawlerData {
   const { domains } = payload;
 
   return {

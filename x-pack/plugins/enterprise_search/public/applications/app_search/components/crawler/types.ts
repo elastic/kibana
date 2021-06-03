@@ -5,63 +5,63 @@
  * 2.0.
  */
 
-export enum ECrawlerPolicies {
+export enum CrawlerPolicies {
   Allow = 'allow',
   Deny = 'deny',
 }
 
-export enum ECrawlerRules {
+export enum CrawlerRules {
   beginsWith = 'begins',
   endsWith = 'ends',
   contains = 'contains',
   regex = 'regex',
 }
 
-export interface ICrawlRule {
+export interface CrawlRule {
   id: string;
-  policy: ECrawlerPolicies;
-  rule: ECrawlerRules;
+  policy: CrawlerPolicies;
+  rule: CrawlerRules;
   pattern: string;
 }
 
-export interface IEntryPoint {
+export interface EntryPoint {
   id: string;
   value: string;
 }
 
-export interface ISitemap {
+export interface Sitemap {
   id: string;
   url: string;
 }
 
-export interface ICrawlerDomain {
+export interface CrawlerDomain {
   createdOn: string;
   documentCount: number;
   id: string;
   lastCrawl?: string;
   url: string;
-  crawlRules: ICrawlRule[];
-  defaultCrawlRule?: ICrawlRule;
-  entryPoints: IEntryPoint[];
-  sitemaps: ISitemap[];
+  crawlRules: CrawlRule[];
+  defaultCrawlRule?: CrawlRule;
+  entryPoints: EntryPoint[];
+  sitemaps: Sitemap[];
 }
 
-export interface ICrawlerDomainFromServer {
+export interface CrawlerDomainFromServer {
   id: string;
   name: string;
   created_on: string;
   last_visited_at?: string;
   document_count: number;
-  crawl_rules: ICrawlRule[];
-  default_crawl_rule?: ICrawlRule;
-  entry_points: IEntryPoint[];
-  sitemaps: ISitemap[];
+  crawl_rules: CrawlRule[];
+  default_crawl_rule?: CrawlRule;
+  entry_points: EntryPoint[];
+  sitemaps: Sitemap[];
 }
 
-export interface ICrawlerData {
-  domains: ICrawlerDomain[];
+export interface CrawlerData {
+  domains: CrawlerDomain[];
 }
 
-export interface ICrawlerDataFromServer {
-  domains: ICrawlerDomainFromServer[];
+export interface CrawlerDataFromServer {
+  domains: CrawlerDomainFromServer[];
 }
