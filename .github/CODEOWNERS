@@ -174,6 +174,7 @@
 /.bazelversion @elastic/kibana-operations
 /WORKSPACE.bazel @elastic/kibana-operations
 #CC# /packages/kbn-expect/ @elastic/kibana-operations
+/.buildkite/ @elastic/kibana-operations
 
 # Quality Assurance
 /src/dev/code_coverage @elastic/kibana-qa
@@ -339,7 +340,7 @@
 #CC# /x-pack/plugins/security_solution/ @elastic/security-solution
 
 # Security Solution sub teams
-/x-pack/plugins/case @elastic/security-threat-hunting
+/x-pack/plugins/cases @elastic/security-threat-hunting
 /x-pack/plugins/timelines @elastic/security-threat-hunting
 /x-pack/test/case_api_integration @elastic/security-threat-hunting
 /x-pack/plugins/lists @elastic/security-detections-response

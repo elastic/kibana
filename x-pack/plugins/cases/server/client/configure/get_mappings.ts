@@ -24,7 +24,7 @@ export const getMappings = async (
     }
 
     const myConnectorMappings = await connectorMappingsService.find({
-      soClient: unsecuredSavedObjectsClient,
+      unsecuredSavedObjectsClient,
       options: {
         hasReference: {
           type: ACTION_SAVED_OBJECT_TYPE,

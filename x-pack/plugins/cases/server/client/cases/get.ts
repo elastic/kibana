@@ -57,12 +57,7 @@ export const getCaseIDsByAlertID = async (
   { alertID, options }: CaseIDsByAlertIDParams,
   clientArgs: CasesClientArgs
 ): Promise<string[]> => {
-  const {
-    unsecuredSavedObjectsClient: savedObjectsClient,
-    caseService,
-    logger,
-    authorization,
-  } = clientArgs;
+  const { unsecuredSavedObjectsClient, caseService, logger, authorization } = clientArgs;
 
   try {
     const queryParams = pipe(
@@ -82,7 +77,7 @@ export const getCaseIDsByAlertID = async (
     );
 
     const commentsWithAlert = await caseService.getCaseIdsByAlertId({
-      soClient: savedObjectsClient,
+      unsecuredSavedObjectsClient,
       alertId: alertID,
       filter,
     });
@@ -148,17 +143,20 @@ export const get = async (
     if (ENABLE_CASE_CONNECTOR) {
       const [caseInfo, subCasesForCaseId] = await Promise.all([
         caseService.getCase({
-          soClient: unsecuredSavedObjectsClient,
+          unsecuredSavedObjectsClient,
           id,
         }),
-        caseService.findSubCasesByCaseId({ soClient: unsecuredSavedObjectsClient, ids: [id] }),
+        caseService.findSubCasesByCaseId({
+          unsecuredSavedObjectsClient,
+          ids: [id],
+        }),
       ]);
 
       theCase = caseInfo;
       subCaseIds = subCasesForCaseId.saved_objects.map((so) => so.id);
     } else {
       theCase = await caseService.getCase({
-        soClient: unsecuredSavedObjectsClient,
+        unsecuredSavedObjectsClient,
         id,
       });
     }
@@ -178,7 +176,7 @@ export const get = async (
     }
 
     const theComments = await caseService.getAllCaseComments({
-      soClient: unsecuredSavedObjectsClient,
+      unsecuredSavedObjectsClient,
       id,
       options: {
         sortField: 'created_at',
@@ -209,7 +207,7 @@ export async function getTags(
   params: AllTagsFindRequest,
   clientArgs: CasesClientArgs
 ): Promise<string[]> {
-  const { unsecuredSavedObjectsClient: soClient, caseService, logger, authorization } = clientArgs;
+  const { unsecuredSavedObjectsClient, caseService, logger, authorization } = clientArgs;
 
   try {
     const queryParams = pipe(
@@ -225,7 +223,7 @@ export async function getTags(
     const filter = combineAuthorizedAndOwnerFilter(queryParams.owner, authorizationFilter);
 
     const cases = await caseService.getTags({
-      soClient,
+      unsecuredSavedObjectsClient,
       filter,
     });
 
@@ -259,7 +257,7 @@ export async function getReporters(
   params: AllReportersFindRequest,
   clientArgs: CasesClientArgs
 ): Promise<User[]> {
-  const { unsecuredSavedObjectsClient: soClient, caseService, logger, authorization } = clientArgs;
+  const { unsecuredSavedObjectsClient, caseService, logger, authorization } = clientArgs;
 
   try {
     const queryParams = pipe(
@@ -275,7 +273,7 @@ export async function getReporters(
     const filter = combineAuthorizedAndOwnerFilter(queryParams.owner, authorizationFilter);
 
     const cases = await caseService.getReporters({
-      soClient,
+      unsecuredSavedObjectsClient,
       filter,
     });
 

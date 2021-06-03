@@ -12,7 +12,7 @@ import { CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '../../../common/constants'
 import { SavedObjectFindOptionsKueryNode } from '../../common';
 
 interface ClientArgs {
-  soClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
 }
 interface FindConnectorMappingsArgs extends ClientArgs {
   options?: SavedObjectFindOptionsKueryNode;
@@ -32,10 +32,10 @@ interface UpdateConnectorMappingsArgs extends ClientArgs {
 export class ConnectorMappingsService {
   constructor(private readonly log: Logger) {}
 
-  public async find({ soClient, options }: FindConnectorMappingsArgs) {
+  public async find({ unsecuredSavedObjectsClient, options }: FindConnectorMappingsArgs) {
     try {
       this.log.debug(`Attempting to find all connector mappings`);
-      return await soClient.find<ConnectorMappings>({
+      return await unsecuredSavedObjectsClient.find<ConnectorMappings>({
         ...options,
         type: CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
       });
@@ -45,10 +45,14 @@ export class ConnectorMappingsService {
     }
   }
 
-  public async post({ soClient, attributes, references }: PostConnectorMappingsArgs) {
+  public async post({
+    unsecuredSavedObjectsClient,
+    attributes,
+    references,
+  }: PostConnectorMappingsArgs) {
     try {
       this.log.debug(`Attempting to POST a new connector mappings`);
-      return await soClient.create<ConnectorMappings>(
+      return await unsecuredSavedObjectsClient.create<ConnectorMappings>(
         CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
         attributes,
         {
@@ -62,14 +66,14 @@ export class ConnectorMappingsService {
   }
 
   public async update({
-    soClient,
+    unsecuredSavedObjectsClient,
     mappingId,
     attributes,
     references,
   }: UpdateConnectorMappingsArgs) {
     try {
       this.log.debug(`Attempting to UPDATE connector mappings ${mappingId}`);
-      return await soClient.update<ConnectorMappings>(
+      return await unsecuredSavedObjectsClient.update<ConnectorMappings>(
         CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
         mappingId,
         attributes,

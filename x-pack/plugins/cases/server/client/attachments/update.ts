@@ -40,7 +40,7 @@ export interface UpdateArgs {
 interface CombinedCaseParams {
   attachmentService: AttachmentService;
   caseService: CasesService;
-  soClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
   caseID: string;
   logger: Logger;
   subCaseId?: string;
@@ -49,7 +49,7 @@ interface CombinedCaseParams {
 async function getCommentableCase({
   attachmentService,
   caseService,
-  soClient,
+  unsecuredSavedObjectsClient,
   caseID,
   subCaseId,
   logger,
@@ -57,11 +57,11 @@ async function getCommentableCase({
   if (subCaseId) {
     const [caseInfo, subCase] = await Promise.all([
       caseService.getCase({
-        soClient,
+        unsecuredSavedObjectsClient,
         id: caseID,
       }),
       caseService.getSubCase({
-        soClient,
+        unsecuredSavedObjectsClient,
         id: subCaseId,
       }),
     ]);
@@ -70,19 +70,19 @@ async function getCommentableCase({
       caseService,
       collection: caseInfo,
       subCase,
-      soClient,
+      unsecuredSavedObjectsClient,
       logger,
     });
   } else {
     const caseInfo = await caseService.getCase({
-      soClient,
+      unsecuredSavedObjectsClient,
       id: caseID,
     });
     return new CommentableCase({
       attachmentService,
       caseService,
       collection: caseInfo,
-      soClient,
+      unsecuredSavedObjectsClient,
       logger,
     });
   }
@@ -100,7 +100,7 @@ export async function update(
   const {
     attachmentService,
     caseService,
-    unsecuredSavedObjectsClient: soClient,
+    unsecuredSavedObjectsClient,
     logger,
     user,
     userActionService,
@@ -121,14 +121,14 @@ export async function update(
     const commentableCase = await getCommentableCase({
       attachmentService,
       caseService,
-      soClient,
+      unsecuredSavedObjectsClient,
       caseID,
       subCaseId: subCaseID,
       logger,
     });
 
     const myComment = await attachmentService.get({
-      soClient,
+      unsecuredSavedObjectsClient,
       attachmentId: queryCommentId,
     });
 
@@ -175,7 +175,7 @@ export async function update(
     });
 
     await userActionService.bulkCreate({
-      soClient,
+      unsecuredSavedObjectsClient,
       actions: [
         buildCommentUserActionItem({
           action: 'update',

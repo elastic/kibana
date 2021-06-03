@@ -67,7 +67,8 @@ export const useLensAttributes = ({
       seriesType,
       filters,
       operationType,
-      reportDefinitions
+      reportDefinitions,
+      breakdown
     );
 
     if (breakdown) {

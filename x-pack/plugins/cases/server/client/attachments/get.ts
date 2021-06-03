@@ -85,7 +85,7 @@ export async function find(
   { caseID, queryParams }: FindArgs,
   clientArgs: CasesClientArgs
 ): Promise<CommentsResponse> {
-  const { unsecuredSavedObjectsClient: soClient, caseService, logger, authorization } = clientArgs;
+  const { unsecuredSavedObjectsClient, caseService, logger, authorization } = clientArgs;
 
   try {
     checkEnabledCaseConnectorOrThrow(queryParams?.subCaseId);
@@ -108,7 +108,7 @@ export async function find(
     const args = queryParams
       ? {
           caseService,
-          soClient,
+          unsecuredSavedObjectsClient,
           id,
           options: {
             // We need this because the default behavior of getAllCaseComments is to return all the comments
@@ -125,7 +125,7 @@ export async function find(
         }
       : {
           caseService,
-          soClient,
+          unsecuredSavedObjectsClient,
           id,
           options: {
             page: defaultPage,
@@ -164,16 +164,11 @@ export async function get(
   { attachmentID, caseID }: GetArgs,
   clientArgs: CasesClientArgs
 ): Promise<CommentResponse> {
-  const {
-    attachmentService,
-    unsecuredSavedObjectsClient: soClient,
-    logger,
-    authorization,
-  } = clientArgs;
+  const { attachmentService, unsecuredSavedObjectsClient, logger, authorization } = clientArgs;
 
   try {
     const comment = await attachmentService.get({
-      soClient,
+      unsecuredSavedObjectsClient,
       attachmentId: attachmentID,
     });
 
@@ -202,7 +197,7 @@ export async function getAll(
   { caseID, includeSubCaseComments, subCaseID }: GetAllArgs,
   clientArgs: CasesClientArgs
 ): Promise<AllCommentsResponse> {
-  const { unsecuredSavedObjectsClient: soClient, caseService, logger, authorization } = clientArgs;
+  const { unsecuredSavedObjectsClient, caseService, logger, authorization } = clientArgs;
 
   try {
     let comments: SavedObjectsFindResponse<CommentAttributes>;
@@ -222,7 +217,7 @@ export async function getAll(
 
     if (subCaseID) {
       comments = await caseService.getAllSubCaseComments({
-        soClient,
+        unsecuredSavedObjectsClient,
         id: subCaseID,
         options: {
           filter,
@@ -231,7 +226,7 @@ export async function getAll(
       });
     } else {
       comments = await caseService.getAllCaseComments({
-        soClient,
+        unsecuredSavedObjectsClient,
         id: caseID,
         includeSubCaseComments,
         options: {

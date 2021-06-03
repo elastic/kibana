@@ -93,7 +93,7 @@ export function createSubCasesClient(
 async function deleteSubCase(ids: string[], clientArgs: CasesClientArgs): Promise<void> {
   try {
     const {
-      unsecuredSavedObjectsClient: soClient,
+      unsecuredSavedObjectsClient,
       user,
       userActionService,
       caseService,
@@ -101,8 +101,8 @@ async function deleteSubCase(ids: string[], clientArgs: CasesClientArgs): Promis
     } = clientArgs;
 
     const [comments, subCases] = await Promise.all([
-      caseService.getAllSubCaseComments({ soClient, id: ids }),
-      caseService.getSubCases({ soClient, ids }),
+      caseService.getAllSubCaseComments({ unsecuredSavedObjectsClient, id: ids }),
+      caseService.getSubCases({ unsecuredSavedObjectsClient, ids }),
     ]);
 
     const subCaseErrors = subCases.saved_objects.filter((subCase) => subCase.error !== undefined);
@@ -123,16 +123,16 @@ async function deleteSubCase(ids: string[], clientArgs: CasesClientArgs): Promis
 
     await Promise.all(
       comments.saved_objects.map((comment) =>
-        attachmentService.delete({ soClient, attachmentId: comment.id })
+        attachmentService.delete({ unsecuredSavedObjectsClient, attachmentId: comment.id })
       )
     );
 
-    await Promise.all(ids.map((id) => caseService.deleteSubCase(soClient, id)));
+    await Promise.all(ids.map((id) => caseService.deleteSubCase(unsecuredSavedObjectsClient, id)));
 
     const deleteDate = new Date().toISOString();
 
     await userActionService.bulkCreate({
-      soClient,
+      unsecuredSavedObjectsClient,
       actions: subCases.saved_objects.map((subCase) =>
         buildCaseUserActionItem({
           action: 'delete',
@@ -161,7 +161,7 @@ async function find(
   clientArgs: CasesClientArgs
 ): Promise<SubCasesFindResponse> {
   try {
-    const { unsecuredSavedObjectsClient: soClient, caseService } = clientArgs;
+    const { unsecuredSavedObjectsClient, caseService } = clientArgs;
 
     const ids = [caseID];
     const { subCase: subCaseQueryOptions } = constructQueryOptions({
@@ -170,7 +170,7 @@ async function find(
     });
 
     const subCases = await caseService.findSubCasesGroupByCase({
-      soClient,
+      unsecuredSavedObjectsClient,
       ids,
       options: {
         sortField: 'created_at',
@@ -188,7 +188,7 @@ async function find(
           sortByField: queryParams.sortField,
         });
         return caseService.findSubCaseStatusStats({
-          soClient,
+          unsecuredSavedObjectsClient,
           options: statusQueryOptions ?? {},
           ids,
         });
@@ -220,10 +220,10 @@ async function get(
   clientArgs: CasesClientArgs
 ): Promise<SubCaseResponse> {
   try {
-    const { unsecuredSavedObjectsClient: soClient, caseService } = clientArgs;
+    const { unsecuredSavedObjectsClient, caseService } = clientArgs;
 
     const subCase = await caseService.getSubCase({
-      soClient,
+      unsecuredSavedObjectsClient,
       id,
     });
 
@@ -236,7 +236,7 @@ async function get(
     }
 
     const theComments = await caseService.getAllSubCaseComments({
-      soClient,
+      unsecuredSavedObjectsClient,
       id,
       options: {
         sortField: 'created_at',

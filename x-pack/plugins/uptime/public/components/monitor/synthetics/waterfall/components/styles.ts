@@ -143,7 +143,12 @@ export const WaterfallChartLegendContainer = euiStyled.div`
   box-shadow: 0px -1px 4px 0px ${(props) => props.theme.eui.euiColorLightShade};
 `; // NOTE: EuiShadowColor is a little too dark to work with the background-color
 
-export const WaterfallChartTooltip = euiStyled.div`
+export const WaterfallTooltipResponsiveMaxWidth = euiStyled.div`
+  margin-top: 16px;
+  max-width: 90vw;
+`;
+
+export const WaterfallChartTooltip = euiStyled(WaterfallTooltipResponsiveMaxWidth)`
   background-color: ${(props) => props.theme.eui.euiColorDarkestShade};
   border-radius: ${(props) => props.theme.eui.euiBorderRadius};
   color: ${(props) => props.theme.eui.euiColorLightestShade};

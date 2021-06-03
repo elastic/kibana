@@ -50,7 +50,7 @@ async function getStatusTotalsByType(
   params: CasesStatusRequest,
   clientArgs: CasesClientArgs
 ): Promise<CasesStatusResponse> {
-  const { unsecuredSavedObjectsClient: soClient, caseService, logger, authorization } = clientArgs;
+  const { unsecuredSavedObjectsClient, caseService, logger, authorization } = clientArgs;
 
   try {
     const queryParams = pipe(
@@ -71,7 +71,7 @@ async function getStatusTotalsByType(
           authorizationFilter,
         });
         return caseService.findCaseStatusStats({
-          soClient,
+          unsecuredSavedObjectsClient,
           caseOptions: statusQuery.case,
           subCaseOptions: statusQuery.subCase,
           ensureSavedObjectsAreAuthorized,

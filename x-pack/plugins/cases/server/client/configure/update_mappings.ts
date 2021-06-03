@@ -29,7 +29,7 @@ export const updateMappings = async (
     });
 
     const theMapping = await connectorMappingsService.update({
-      soClient: unsecuredSavedObjectsClient,
+      unsecuredSavedObjectsClient,
       mappingId,
       attributes: {
         mappings: res.defaultMappings,
