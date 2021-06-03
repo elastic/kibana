@@ -30,11 +30,7 @@ import { createCaseError } from '../../common/error';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
-import {
-  combineAuthorizedAndOwnerFilter,
-  ensureAuthorized,
-  getAuthorizationFilter,
-} from '../utils';
+import { combineAuthorizedAndOwnerFilter } from '../utils';
 import { CasesService } from '../../services';
 
 /**
@@ -61,13 +57,7 @@ export const getCaseIDsByAlertID = async (
   { alertID, options }: CaseIDsByAlertIDParams,
   clientArgs: CasesClientArgs
 ): Promise<string[]> => {
-  const {
-    unsecuredSavedObjectsClient: savedObjectsClient,
-    caseService,
-    logger,
-    authorization,
-    auditLogger,
-  } = clientArgs;
+  const { unsecuredSavedObjectsClient, caseService, logger, authorization } = clientArgs;
 
   try {
     const queryParams = pipe(
@@ -78,12 +68,7 @@ export const getCaseIDsByAlertID = async (
     const {
       filter: authorizationFilter,
       ensureSavedObjectsAreAuthorized,
-      logSuccessfulAuthorization,
-    } = await getAuthorizationFilter({
-      authorization,
-      operation: Operations.getCaseIDsByAlertID,
-      auditLogger,
-    });
+    } = await authorization.getAuthorizationFilter(Operations.getCaseIDsByAlertID);
 
     const filter = combineAuthorizedAndOwnerFilter(
       queryParams.owner,
@@ -92,7 +77,7 @@ export const getCaseIDsByAlertID = async (
     );
 
     const commentsWithAlert = await caseService.getCaseIdsByAlertId({
-      soClient: savedObjectsClient,
+      unsecuredSavedObjectsClient,
       alertId: alertID,
       filter,
     });
@@ -103,8 +88,6 @@ export const getCaseIDsByAlertID = async (
         id: comment.id,
       }))
     );
-
-    logSuccessfulAuthorization();
 
     return CasesService.getCaseIDsFromAlertAggs(commentsWithAlert);
   } catch (error) {
@@ -145,13 +128,7 @@ export const get = async (
   { id, includeComments, includeSubCaseComments }: GetParams,
   clientArgs: CasesClientArgs
 ): Promise<CaseResponse> => {
-  const {
-    unsecuredSavedObjectsClient,
-    caseService,
-    logger,
-    authorization: auth,
-    auditLogger,
-  } = clientArgs;
+  const { unsecuredSavedObjectsClient, caseService, logger, authorization } = clientArgs;
 
   try {
     if (!ENABLE_CASE_CONNECTOR && includeSubCaseComments) {
@@ -166,27 +143,27 @@ export const get = async (
     if (ENABLE_CASE_CONNECTOR) {
       const [caseInfo, subCasesForCaseId] = await Promise.all([
         caseService.getCase({
-          soClient: unsecuredSavedObjectsClient,
+          unsecuredSavedObjectsClient,
           id,
         }),
-        caseService.findSubCasesByCaseId({ soClient: unsecuredSavedObjectsClient, ids: [id] }),
+        caseService.findSubCasesByCaseId({
+          unsecuredSavedObjectsClient,
+          ids: [id],
+        }),
       ]);
 
       theCase = caseInfo;
       subCaseIds = subCasesForCaseId.saved_objects.map((so) => so.id);
     } else {
       theCase = await caseService.getCase({
-        soClient: unsecuredSavedObjectsClient,
+        unsecuredSavedObjectsClient,
         id,
       });
     }
 
-    await ensureAuthorized({
+    await authorization.ensureAuthorized({
       operation: Operations.getCase,
-      owners: [theCase.attributes.owner],
-      authorization: auth,
-      auditLogger,
-      savedObjectIDs: [theCase.id],
+      entities: [{ owner: theCase.attributes.owner, id: theCase.id }],
     });
 
     if (!includeComments) {
@@ -199,7 +176,7 @@ export const get = async (
     }
 
     const theComments = await caseService.getAllCaseComments({
-      soClient: unsecuredSavedObjectsClient,
+      unsecuredSavedObjectsClient,
       id,
       options: {
         sortField: 'created_at',
@@ -230,13 +207,7 @@ export async function getTags(
   params: AllTagsFindRequest,
   clientArgs: CasesClientArgs
 ): Promise<string[]> {
-  const {
-    unsecuredSavedObjectsClient: soClient,
-    caseService,
-    logger,
-    authorization: auth,
-    auditLogger,
-  } = clientArgs;
+  const { unsecuredSavedObjectsClient, caseService, logger, authorization } = clientArgs;
 
   try {
     const queryParams = pipe(
@@ -247,17 +218,12 @@ export async function getTags(
     const {
       filter: authorizationFilter,
       ensureSavedObjectsAreAuthorized,
-      logSuccessfulAuthorization,
-    } = await getAuthorizationFilter({
-      authorization: auth,
-      operation: Operations.findCases,
-      auditLogger,
-    });
+    } = await authorization.getAuthorizationFilter(Operations.findCases);
 
     const filter = combineAuthorizedAndOwnerFilter(queryParams.owner, authorizationFilter);
 
     const cases = await caseService.getTags({
-      soClient,
+      unsecuredSavedObjectsClient,
       filter,
     });
 
@@ -277,7 +243,6 @@ export async function getTags(
     });
 
     ensureSavedObjectsAreAuthorized(mappedCases);
-    logSuccessfulAuthorization();
 
     return [...tags.values()];
   } catch (error) {
@@ -292,13 +257,7 @@ export async function getReporters(
   params: AllReportersFindRequest,
   clientArgs: CasesClientArgs
 ): Promise<User[]> {
-  const {
-    unsecuredSavedObjectsClient: soClient,
-    caseService,
-    logger,
-    authorization: auth,
-    auditLogger,
-  } = clientArgs;
+  const { unsecuredSavedObjectsClient, caseService, logger, authorization } = clientArgs;
 
   try {
     const queryParams = pipe(
@@ -309,17 +268,12 @@ export async function getReporters(
     const {
       filter: authorizationFilter,
       ensureSavedObjectsAreAuthorized,
-      logSuccessfulAuthorization,
-    } = await getAuthorizationFilter({
-      authorization: auth,
-      operation: Operations.getReporters,
-      auditLogger,
-    });
+    } = await authorization.getAuthorizationFilter(Operations.getReporters);
 
     const filter = combineAuthorizedAndOwnerFilter(queryParams.owner, authorizationFilter);
 
     const cases = await caseService.getReporters({
-      soClient,
+      unsecuredSavedObjectsClient,
       filter,
     });
 
@@ -343,7 +297,6 @@ export async function getReporters(
     });
 
     ensureSavedObjectsAreAuthorized(mappedCases);
-    logSuccessfulAuthorization();
 
     return UsersRt.encode([...reporters.values()]);
   } catch (error) {

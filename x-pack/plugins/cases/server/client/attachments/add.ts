@@ -49,28 +49,31 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
 } from '../../../common';
 
-import { decodeCommentRequest, ensureAuthorized } from '../utils';
+import { decodeCommentRequest } from '../utils';
 import { Operations } from '../../authorization';
 
 async function getSubCase({
   caseService,
-  savedObjectsClient,
+  unsecuredSavedObjectsClient,
   caseId,
   createdAt,
   userActionService,
   user,
 }: {
   caseService: CasesService;
-  savedObjectsClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
   caseId: string;
   createdAt: string;
   userActionService: CaseUserActionService;
   user: User;
 }): Promise<SavedObject<SubCaseAttributes>> {
-  const mostRecentSubCase = await caseService.getMostRecentSubCase(savedObjectsClient, caseId);
+  const mostRecentSubCase = await caseService.getMostRecentSubCase(
+    unsecuredSavedObjectsClient,
+    caseId
+  );
   if (mostRecentSubCase && mostRecentSubCase.attributes.status !== CaseStatuses.closed) {
     const subCaseAlertsAttachement = await caseService.getAllSubCaseComments({
-      soClient: savedObjectsClient,
+      unsecuredSavedObjectsClient,
       id: mostRecentSubCase.id,
       options: {
         fields: [],
@@ -89,13 +92,13 @@ async function getSubCase({
   }
 
   const newSubCase = await caseService.createSubCase({
-    soClient: savedObjectsClient,
+    unsecuredSavedObjectsClient,
     createdAt,
     caseId,
     createdBy: user,
   });
   await userActionService.bulkCreate({
-    soClient: savedObjectsClient,
+    unsecuredSavedObjectsClient,
     actions: [
       buildCaseUserActionItem({
         action: 'create',
@@ -123,7 +126,6 @@ const addGeneratedAlerts = async (
     caseService,
     userActionService,
     logger,
-    auditLogger,
     authorization,
   } = clientArgs;
 
@@ -143,16 +145,13 @@ const addGeneratedAlerts = async (
     const createdDate = new Date().toISOString();
     const savedObjectID = SavedObjectsUtils.generateId();
 
-    await ensureAuthorized({
-      authorization,
-      auditLogger,
-      owners: [comment.owner],
-      savedObjectIDs: [savedObjectID],
+    await authorization.ensureAuthorized({
+      entities: [{ owner: comment.owner, id: savedObjectID }],
       operation: Operations.createComment,
     });
 
     const caseInfo = await caseService.getCase({
-      soClient: unsecuredSavedObjectsClient,
+      unsecuredSavedObjectsClient,
       id: caseId,
     });
 
@@ -171,7 +170,7 @@ const addGeneratedAlerts = async (
 
     const subCase = await getSubCase({
       caseService,
-      savedObjectsClient: unsecuredSavedObjectsClient,
+      unsecuredSavedObjectsClient,
       caseId,
       createdAt: createdDate,
       userActionService,
@@ -182,7 +181,7 @@ const addGeneratedAlerts = async (
       logger,
       collection: caseInfo,
       subCase,
-      soClient: unsecuredSavedObjectsClient,
+      unsecuredSavedObjectsClient,
       caseService,
       attachmentService,
     });
@@ -212,7 +211,7 @@ const addGeneratedAlerts = async (
     }
 
     await userActionService.bulkCreate({
-      soClient: unsecuredSavedObjectsClient,
+      unsecuredSavedObjectsClient,
       actions: [
         buildCommentUserActionItem({
           action: 'create',
@@ -241,25 +240,25 @@ const addGeneratedAlerts = async (
 async function getCombinedCase({
   caseService,
   attachmentService,
-  soClient,
+  unsecuredSavedObjectsClient,
   id,
   logger,
 }: {
   caseService: CasesService;
   attachmentService: AttachmentService;
-  soClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
   id: string;
   logger: Logger;
 }): Promise<CommentableCase> {
   const [casePromise, subCasePromise] = await Promise.allSettled([
     caseService.getCase({
-      soClient,
+      unsecuredSavedObjectsClient,
       id,
     }),
     ...(ENABLE_CASE_CONNECTOR
       ? [
           caseService.getSubCase({
-            soClient,
+            unsecuredSavedObjectsClient,
             id,
           }),
         ]
@@ -269,7 +268,7 @@ async function getCombinedCase({
   if (subCasePromise.status === 'fulfilled') {
     if (subCasePromise.value.references.length > 0) {
       const caseValue = await caseService.getCase({
-        soClient,
+        unsecuredSavedObjectsClient,
         id: subCasePromise.value.references[0].id,
       });
       return new CommentableCase({
@@ -278,7 +277,7 @@ async function getCombinedCase({
         subCase: subCasePromise.value,
         caseService,
         attachmentService,
-        soClient,
+        unsecuredSavedObjectsClient,
       });
     } else {
       throw Boom.badRequest('Sub case found without reference to collection');
@@ -293,7 +292,7 @@ async function getCombinedCase({
       collection: casePromise.value,
       caseService,
       attachmentService,
-      soClient,
+      unsecuredSavedObjectsClient,
     });
   }
 }
@@ -336,7 +335,6 @@ export const addComment = async (
     user,
     logger,
     authorization,
-    auditLogger,
   } = clientArgs;
 
   if (isCommentRequestTypeGenAlert(comment)) {
@@ -353,12 +351,9 @@ export const addComment = async (
   try {
     const savedObjectID = SavedObjectsUtils.generateId();
 
-    await ensureAuthorized({
-      authorization,
-      auditLogger,
+    await authorization.ensureAuthorized({
       operation: Operations.createComment,
-      owners: [comment.owner],
-      savedObjectIDs: [savedObjectID],
+      entities: [{ owner: comment.owner, id: savedObjectID }],
     });
 
     const createdDate = new Date().toISOString();
@@ -366,7 +361,7 @@ export const addComment = async (
     const combinedCase = await getCombinedCase({
       caseService,
       attachmentService,
-      soClient: unsecuredSavedObjectsClient,
+      unsecuredSavedObjectsClient,
       id: caseId,
       logger,
     });
@@ -398,7 +393,7 @@ export const addComment = async (
     }
 
     await userActionService.bulkCreate({
-      soClient: unsecuredSavedObjectsClient,
+      unsecuredSavedObjectsClient,
       actions: [
         buildCommentUserActionItem({
           action: 'create',

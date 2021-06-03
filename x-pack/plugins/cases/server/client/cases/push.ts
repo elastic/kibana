@@ -24,7 +24,6 @@ import { createIncident, getCommentContextFromAttributes } from './utils';
 import { createCaseError, flattenCaseSavedObject, getAlertInfoFromComments } from '../../common';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { CasesClient, CasesClientArgs, CasesClientInternal } from '..';
-import { ensureAuthorized } from '../utils';
 import { Operations } from '../../authorization';
 
 /**
@@ -77,7 +76,6 @@ export const push = async (
     actionsClient,
     user,
     logger,
-    auditLogger,
     authorization,
   } = clientArgs;
 
@@ -93,12 +91,9 @@ export const push = async (
       casesClient.userActions.getAll({ caseId }),
     ]);
 
-    await ensureAuthorized({
-      authorization,
-      auditLogger,
+    await authorization.ensureAuthorized({
+      entities: [{ owner: theCase.owner, id: caseId }],
       operation: Operations.pushCase,
-      savedObjectIDs: [caseId],
-      owners: [theCase.owner],
     });
 
     // We need to change the logic when we support subcases
@@ -151,12 +146,12 @@ export const push = async (
     /* Start of update case with push information */
     const [myCase, myCaseConfigure, comments] = await Promise.all([
       caseService.getCase({
-        soClient: unsecuredSavedObjectsClient,
+        unsecuredSavedObjectsClient,
         id: caseId,
       }),
-      caseConfigureService.find({ soClient: unsecuredSavedObjectsClient }),
+      caseConfigureService.find({ unsecuredSavedObjectsClient }),
       caseService.getAllCaseComments({
-        soClient: unsecuredSavedObjectsClient,
+        unsecuredSavedObjectsClient,
         id: caseId,
         options: {
           fields: [],
@@ -186,7 +181,7 @@ export const push = async (
 
     const [updatedCase, updatedComments] = await Promise.all([
       caseService.patchCase({
-        soClient: unsecuredSavedObjectsClient,
+        unsecuredSavedObjectsClient,
         caseId,
         updatedAttributes: {
           ...(shouldMarkAsClosed
@@ -204,7 +199,7 @@ export const push = async (
       }),
 
       attachmentService.bulkUpdate({
-        soClient: unsecuredSavedObjectsClient,
+        unsecuredSavedObjectsClient,
         comments: comments.saved_objects
           .filter((comment) => comment.attributes.pushed_at == null)
           .map((comment) => ({
@@ -218,7 +213,7 @@ export const push = async (
       }),
 
       userActionService.bulkCreate({
-        soClient: unsecuredSavedObjectsClient,
+        unsecuredSavedObjectsClient,
         actions: [
           ...(shouldMarkAsClosed
             ? [

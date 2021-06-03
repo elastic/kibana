@@ -12,26 +12,28 @@ import { CasesClientArgs } from '..';
 import { createCaseError } from '../../common/error';
 import { AttachmentService, CasesService } from '../../services';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
-import { Operations } from '../../authorization';
-import { ensureAuthorized } from '../utils';
+import { Operations, OwnerEntity } from '../../authorization';
 import { OWNER_FIELD } from '../../../common/api';
 
 async function deleteSubCases({
   attachmentService,
   caseService,
-  soClient,
+  unsecuredSavedObjectsClient,
   caseIds,
 }: {
   attachmentService: AttachmentService;
   caseService: CasesService;
-  soClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
   caseIds: string[];
 }) {
-  const subCasesForCaseIds = await caseService.findSubCasesByCaseId({ soClient, ids: caseIds });
+  const subCasesForCaseIds = await caseService.findSubCasesByCaseId({
+    unsecuredSavedObjectsClient,
+    ids: caseIds,
+  });
 
   const subCaseIDs = subCasesForCaseIds.saved_objects.map((subCase) => subCase.id);
   const commentsForSubCases = await caseService.getAllSubCaseComments({
-    soClient,
+    unsecuredSavedObjectsClient,
     id: subCaseIDs,
   });
 
@@ -39,13 +41,13 @@ async function deleteSubCases({
   // per case ID
   await Promise.all(
     commentsForSubCases.saved_objects.map((commentSO) =>
-      attachmentService.delete({ soClient, attachmentId: commentSO.id })
+      attachmentService.delete({ unsecuredSavedObjectsClient, attachmentId: commentSO.id })
     )
   );
 
   await Promise.all(
     subCasesForCaseIds.saved_objects.map((subCaseSO) =>
-      caseService.deleteSubCase(soClient, subCaseSO.id)
+      caseService.deleteSubCase(unsecuredSavedObjectsClient, subCaseSO.id)
     )
   );
 }
@@ -57,19 +59,17 @@ async function deleteSubCases({
  */
 export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): Promise<void> {
   const {
-    unsecuredSavedObjectsClient: soClient,
+    unsecuredSavedObjectsClient,
     caseService,
     attachmentService,
     user,
     userActionService,
     logger,
-    authorization: auth,
-    auditLogger,
+    authorization,
   } = clientArgs;
   try {
-    const cases = await caseService.getCases({ soClient, caseIds: ids });
-    const soIds = new Set<string>();
-    const owners = new Set<string>();
+    const cases = await caseService.getCases({ unsecuredSavedObjectsClient, caseIds: ids });
+    const entities = new Map<string, OwnerEntity>();
 
     for (const theCase of cases.saved_objects) {
       // bulkGet can return an error.
@@ -80,23 +80,18 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
           logger,
         });
       }
-
-      soIds.add(theCase.id);
-      owners.add(theCase.attributes.owner);
+      entities.set(theCase.id, { id: theCase.id, owner: theCase.attributes.owner });
     }
 
-    await ensureAuthorized({
+    await authorization.ensureAuthorized({
       operation: Operations.deleteCase,
-      owners: [...owners.values()],
-      authorization: auth,
-      auditLogger,
-      savedObjectIDs: [...soIds.values()],
+      entities: Array.from(entities.values()),
     });
 
     await Promise.all(
       ids.map((id) =>
         caseService.deleteCase({
-          soClient,
+          unsecuredSavedObjectsClient,
           id,
         })
       )
@@ -105,7 +100,7 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
     const comments = await Promise.all(
       ids.map((id) =>
         caseService.getAllCaseComments({
-          soClient,
+          unsecuredSavedObjectsClient,
           id,
         })
       )
@@ -117,7 +112,7 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
           Promise.all(
             c.saved_objects.map(({ id }) =>
               attachmentService.delete({
-                soClient,
+                unsecuredSavedObjectsClient,
                 attachmentId: id,
               })
             )
@@ -130,7 +125,7 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
       await deleteSubCases({
         attachmentService,
         caseService,
-        soClient,
+        unsecuredSavedObjectsClient,
         caseIds: ids,
       });
     }
@@ -138,7 +133,7 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
     const deleteDate = new Date().toISOString();
 
     await userActionService.bulkCreate({
-      soClient,
+      unsecuredSavedObjectsClient,
       actions: cases.saved_objects.map((caseInfo) =>
         buildCaseUserActionItem({
           action: 'delete',

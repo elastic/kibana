@@ -13,7 +13,6 @@ import { CasesClientArgs } from '../types';
 import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
 import { createCaseError } from '../../common/error';
 import { checkEnabledCaseConnectorOrThrow } from '../../common';
-import { ensureAuthorized } from '../utils';
 import { Operations } from '../../authorization';
 
 /**
@@ -59,13 +58,12 @@ export async function deleteAll(
 ): Promise<void> {
   const {
     user,
-    unsecuredSavedObjectsClient: soClient,
+    unsecuredSavedObjectsClient,
     caseService,
     attachmentService,
     userActionService,
     logger,
     authorization,
-    auditLogger,
   } = clientArgs;
 
   try {
@@ -73,7 +71,7 @@ export async function deleteAll(
 
     const id = subCaseID ?? caseID;
     const comments = await caseService.getCommentsByAssociation({
-      soClient,
+      unsecuredSavedObjectsClient,
       id,
       associationType: subCaseID ? AssociationType.subCase : AssociationType.case,
     });
@@ -82,18 +80,18 @@ export async function deleteAll(
       throw Boom.notFound(`No comments found for ${id}.`);
     }
 
-    await ensureAuthorized({
-      authorization,
-      auditLogger,
+    await authorization.ensureAuthorized({
       operation: Operations.deleteAllComments,
-      savedObjectIDs: comments.saved_objects.map((comment) => comment.id),
-      owners: comments.saved_objects.map((comment) => comment.attributes.owner),
+      entities: comments.saved_objects.map((comment) => ({
+        owner: comment.attributes.owner,
+        id: comment.id,
+      })),
     });
 
     await Promise.all(
       comments.saved_objects.map((comment) =>
         attachmentService.delete({
-          soClient,
+          unsecuredSavedObjectsClient,
           attachmentId: comment.id,
         })
       )
@@ -102,7 +100,7 @@ export async function deleteAll(
     const deleteDate = new Date().toISOString();
 
     await userActionService.bulkCreate({
-      soClient,
+      unsecuredSavedObjectsClient,
       actions: comments.saved_objects.map((comment) =>
         buildCommentUserActionItem({
           action: 'delete',
@@ -136,12 +134,11 @@ export async function deleteComment(
 ) {
   const {
     user,
-    unsecuredSavedObjectsClient: soClient,
+    unsecuredSavedObjectsClient,
     attachmentService,
     userActionService,
     logger,
     authorization,
-    auditLogger,
   } = clientArgs;
 
   try {
@@ -150,7 +147,7 @@ export async function deleteComment(
     const deleteDate = new Date().toISOString();
 
     const myComment = await attachmentService.get({
-      soClient,
+      unsecuredSavedObjectsClient,
       attachmentId: attachmentID,
     });
 
@@ -158,11 +155,8 @@ export async function deleteComment(
       throw Boom.notFound(`This comment ${attachmentID} does not exist anymore.`);
     }
 
-    await ensureAuthorized({
-      authorization,
-      auditLogger,
-      owners: [myComment.attributes.owner],
-      savedObjectIDs: [myComment.id],
+    await authorization.ensureAuthorized({
+      entities: [{ owner: myComment.attributes.owner, id: myComment.id }],
       operation: Operations.deleteComment,
     });
 
@@ -175,12 +169,12 @@ export async function deleteComment(
     }
 
     await attachmentService.delete({
-      soClient,
+      unsecuredSavedObjectsClient,
       attachmentId: attachmentID,
     });
 
     await userActionService.bulkCreate({
-      soClient,
+      unsecuredSavedObjectsClient,
       actions: [
         buildCommentUserActionItem({
           action: 'delete',

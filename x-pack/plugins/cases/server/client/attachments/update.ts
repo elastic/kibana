@@ -15,7 +15,7 @@ import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../common/consta
 import { AttachmentService, CasesService } from '../../services';
 import { CaseResponse, CommentPatchRequest } from '../../../common/api';
 import { CasesClientArgs } from '..';
-import { decodeCommentRequest, ensureAuthorized } from '../utils';
+import { decodeCommentRequest } from '../utils';
 import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
 
@@ -40,7 +40,7 @@ export interface UpdateArgs {
 interface CombinedCaseParams {
   attachmentService: AttachmentService;
   caseService: CasesService;
-  soClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
   caseID: string;
   logger: Logger;
   subCaseId?: string;
@@ -49,7 +49,7 @@ interface CombinedCaseParams {
 async function getCommentableCase({
   attachmentService,
   caseService,
-  soClient,
+  unsecuredSavedObjectsClient,
   caseID,
   subCaseId,
   logger,
@@ -57,11 +57,11 @@ async function getCommentableCase({
   if (subCaseId) {
     const [caseInfo, subCase] = await Promise.all([
       caseService.getCase({
-        soClient,
+        unsecuredSavedObjectsClient,
         id: caseID,
       }),
       caseService.getSubCase({
-        soClient,
+        unsecuredSavedObjectsClient,
         id: subCaseId,
       }),
     ]);
@@ -70,19 +70,19 @@ async function getCommentableCase({
       caseService,
       collection: caseInfo,
       subCase,
-      soClient,
+      unsecuredSavedObjectsClient,
       logger,
     });
   } else {
     const caseInfo = await caseService.getCase({
-      soClient,
+      unsecuredSavedObjectsClient,
       id: caseID,
     });
     return new CommentableCase({
       attachmentService,
       caseService,
       collection: caseInfo,
-      soClient,
+      unsecuredSavedObjectsClient,
       logger,
     });
   }
@@ -100,12 +100,11 @@ export async function update(
   const {
     attachmentService,
     caseService,
-    unsecuredSavedObjectsClient: soClient,
+    unsecuredSavedObjectsClient,
     logger,
     user,
     userActionService,
     authorization,
-    auditLogger,
   } = clientArgs;
 
   try {
@@ -122,14 +121,14 @@ export async function update(
     const commentableCase = await getCommentableCase({
       attachmentService,
       caseService,
-      soClient,
+      unsecuredSavedObjectsClient,
       caseID,
       subCaseId: subCaseID,
       logger,
     });
 
     const myComment = await attachmentService.get({
-      soClient,
+      unsecuredSavedObjectsClient,
       attachmentId: queryCommentId,
     });
 
@@ -137,12 +136,9 @@ export async function update(
       throw Boom.notFound(`This comment ${queryCommentId} does not exist anymore.`);
     }
 
-    await ensureAuthorized({
-      authorization,
-      auditLogger,
+    await authorization.ensureAuthorized({
+      entities: [{ owner: myComment.attributes.owner, id: myComment.id }],
       operation: Operations.updateComment,
-      savedObjectIDs: [myComment.id],
-      owners: [myComment.attributes.owner],
     });
 
     if (myComment.attributes.type !== queryRestAttributes.type) {
@@ -179,7 +175,7 @@ export async function update(
     });
 
     await userActionService.bulkCreate({
-      soClient,
+      unsecuredSavedObjectsClient,
       actions: [
         buildCommentUserActionItem({
           action: 'update',

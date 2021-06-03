@@ -21,7 +21,7 @@ import {
 } from '../../../common/api';
 
 import { createCaseError } from '../../common/error';
-import { constructQueryOptions, getAuthorizationFilter } from '../utils';
+import { constructQueryOptions } from '../utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import { Operations } from '../../authorization';
 import { transformCases } from '../../common';
@@ -36,13 +36,7 @@ export const find = async (
   params: CasesFindRequest,
   clientArgs: CasesClientArgs
 ): Promise<CasesFindResponse> => {
-  const {
-    unsecuredSavedObjectsClient,
-    caseService,
-    authorization: auth,
-    auditLogger,
-    logger,
-  } = clientArgs;
+  const { unsecuredSavedObjectsClient, caseService, authorization, logger } = clientArgs;
 
   try {
     const queryParams = pipe(
@@ -53,12 +47,7 @@ export const find = async (
     const {
       filter: authorizationFilter,
       ensureSavedObjectsAreAuthorized,
-      logSuccessfulAuthorization,
-    } = await getAuthorizationFilter({
-      authorization: auth,
-      operation: Operations.findCases,
-      auditLogger,
-    });
+    } = await authorization.getAuthorizationFilter(Operations.findCases);
 
     const queryArgs = {
       tags: queryParams.tags,
@@ -71,7 +60,7 @@ export const find = async (
 
     const caseQueries = constructQueryOptions({ ...queryArgs, authorizationFilter });
     const cases = await caseService.findCasesGroupedByID({
-      soClient: unsecuredSavedObjectsClient,
+      unsecuredSavedObjectsClient,
       caseOptions: {
         ...queryParams,
         ...caseQueries.case,
@@ -92,15 +81,13 @@ export const find = async (
       ...caseStatuses.map((status) => {
         const statusQuery = constructQueryOptions({ ...queryArgs, status, authorizationFilter });
         return caseService.findCaseStatusStats({
-          soClient: unsecuredSavedObjectsClient,
+          unsecuredSavedObjectsClient,
           caseOptions: statusQuery.case,
           subCaseOptions: statusQuery.subCase,
           ensureSavedObjectsAreAuthorized,
         });
       }),
     ]);
-
-    logSuccessfulAuthorization();
 
     return CasesFindResponseRt.encode(
       transformCases({
