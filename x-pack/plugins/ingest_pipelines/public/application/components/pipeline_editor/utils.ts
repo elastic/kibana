@@ -104,7 +104,7 @@ export const checkIfSamePath = (pathA: ProcessorSelector, pathB: ProcessorSelect
 };
 
 /*
- * Given a string it checks if its contents are a valid mustache template snippet.
+ * Given a string it checks if it contains a valid mustache template snippet.
  *
  * Note: This allows strings with spaces such as: {{{hello world}}}. I figured we
  * should use .+ instead of \S (disallow all whitespaces) because the backend seems
@@ -112,10 +112,10 @@ export const checkIfSamePath = (pathA: ProcessorSelector, pathB: ProcessorSelect
  *
  * See: https://www.elastic.co/guide/en/elasticsearch/reference/master/ingest.html#template-snippets
  */
-export const isTemplateSnippet = (str: string = '') => {
+export const hasTemplateSnippet = (str: string = '') => {
   // Matches when:
-  //  * Starts with {{{
+  //  * contains a {{{
   //  * Followed by all strings of length >= 1
-  //  * And ends with }}}
-  return /^{{{.+}}}$/.test(str);
+  //  * And followed by }}}
+  return /{{{.+}}}/.test(str);
 };

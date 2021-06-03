@@ -18,7 +18,7 @@ import {
   UseField,
   Field,
 } from '../../../../../../shared_imports';
-import { isTemplateSnippet } from '../../../utils';
+import { hasTemplateSnippet } from '../../../utils';
 
 import { FieldsConfig, to, from } from './shared';
 
@@ -126,7 +126,7 @@ export const SetProcessor: FunctionComponent = () => {
         path="fields.value"
       />
 
-      {isTemplateSnippet(fields?.value) && (
+      {hasTemplateSnippet(fields?.value) && (
         <UseField
           componentProps={{
             euiFieldProps: {
