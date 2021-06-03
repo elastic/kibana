@@ -231,7 +231,7 @@ export class FleetPlugin
         privileges: {
           all: {
             api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`],
-            app: [PLUGIN_ID, 'kibana'],
+            app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, 'kibana'],
             catalogue: ['fleet'],
             savedObject: {
               all: allSavedObjectTypes,
@@ -241,7 +241,7 @@ export class FleetPlugin
           },
           read: {
             api: [`${PLUGIN_ID}-read`],
-            app: [PLUGIN_ID, 'kibana'],
+            app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, 'kibana'],
             catalogue: ['fleet'], // TODO: check if this is actually available to read user
             savedObject: {
               all: [],
