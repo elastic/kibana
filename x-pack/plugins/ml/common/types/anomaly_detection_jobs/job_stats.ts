@@ -7,22 +7,13 @@
 
 import { estypes } from '@elastic/elasticsearch';
 
-export type JobStats = estypes.MlJobStats & {
-  model_size_stats: ModelSizeStats;
-  timing_stats: TimingStats;
-};
+export type JobStats = estypes.MlJobStats;
 
 export type DataCounts = estypes.MlDataCounts;
 
-export type ModelSizeStats = estypes.MlModelSizeStats & {
-  model_bytes_exceeded: number;
-  model_bytes_memory_limit: number;
-  peak_model_bytes?: number;
-};
+export type ModelSizeStats = estypes.MlModelSizeStats;
 
-export type TimingStats = estypes.MlTimingStats & {
-  total_bucket_processing_time_ms: number;
-};
+export type TimingStats = estypes.MlTimingStats;
 
 export type ForecastsStats = estypes.MlJobForecastStatistics;
 

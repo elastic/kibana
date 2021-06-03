@@ -29,4 +29,4 @@ export interface PerPartitionCategorization {
   stop_on_warn?: boolean;
 }
 
-export type CustomSettings = estypes.XpackUsageCustomSettings;
+export type CustomSettings = estypes.MlCustomSettings;
