@@ -258,6 +258,7 @@ export const EndpointDetails = memo(
 
     return (
       <>
+        <EuiSpacer size="l" />
         <EuiDescriptionList
           type="column"
           listItems={detailsResultsUpper}

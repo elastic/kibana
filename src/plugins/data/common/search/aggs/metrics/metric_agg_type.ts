@@ -11,7 +11,8 @@ import { AggType, AggTypeConfig } from '../agg_type';
 import { AggParamType } from '../param_types/agg';
 import { AggConfig } from '../agg_config';
 import { METRIC_TYPES } from './metric_agg_types';
-import { FieldTypes } from '../param_types';
+import { BaseParamType, FieldTypes } from '../param_types';
+import { AggGroupNames } from '../agg_groups';
 
 export interface IMetricAggConfig extends AggConfig {
   type: InstanceType<typeof MetricAggType>;
@@ -47,6 +48,14 @@ export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig
   constructor(config: MetricAggTypeConfig<TMetricAggConfig>) {
     super(config);
 
+    this.params.push(
+      new BaseParamType({
+        name: 'timeShift',
+        type: 'string',
+        write: () => {},
+      }) as MetricAggParam<TMetricAggConfig>
+    );
+
     this.getValue =
       config.getValue ||
       ((agg, bucket) => {
@@ -69,6 +78,14 @@ export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig
       });
 
     this.isScalable = config.isScalable || (() => false);
+
+    // split at this point if there are time shifts and this is the first metric
+    this.splitForTimeShift = (agg, aggs) =>
+      aggs.hasTimeShifts() &&
+      aggs.byType(AggGroupNames.Metrics)[0] === agg &&
+      !aggs
+        .byType(AggGroupNames.Buckets)
+        .some((bucketAgg) => bucketAgg.type.splitForTimeShift(bucketAgg, aggs));
   }
 }
 
