@@ -38,7 +38,7 @@ function sortSeries(visData, model) {
 }
 
 function TopNVisualization(props) {
-  const { backgroundColor, model, visData, getCustomFieldFormatter } = props;
+  const { backgroundColor, model, visData, createCustomFieldFormatter } = props;
 
   const series = sortSeries(visData, model).map((item) => {
     const id = first(item.id.split(/:/));
@@ -46,7 +46,7 @@ function TopNVisualization(props) {
     if (seriesConfig) {
       const tickFormatter = seriesConfig.ignore_field_formatting
         ? createTickFormatter(seriesConfig.formatter, seriesConfig.value_template, props.getConfig)
-        : getCustomFieldFormatter(seriesConfig.metrics[0]?.field);
+        : createCustomFieldFormatter(seriesConfig.metrics[0]?.field);
       const value = getLastValue(item.data);
       let color = item.color || seriesConfig.color;
       if (model.bar_color_rules) {

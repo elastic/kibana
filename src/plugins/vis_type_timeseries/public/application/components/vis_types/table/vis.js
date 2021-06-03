@@ -48,7 +48,7 @@ class TableVis extends Component {
   }
 
   renderRow = (row) => {
-    const { model, getCustomFieldFormatter } = this.props;
+    const { model, createCustomFieldFormatter } = this.props;
     let rowDisplay = model.pivot_type === 'date' ? this.dateFormatter.convert(row.key) : row.key;
     if (model.drilldown_url) {
       const url = replaceVars(model.drilldown_url, {}, { key: row.key });
@@ -61,7 +61,7 @@ class TableVis extends Component {
         if (!column) return null;
         const formatter = column.ignore_field_formatting
           ? createTickFormatter(column.formatter, column.value_template, this.props.getConfig)
-          : getCustomFieldFormatter(column.metrics[0]?.field);
+          : createCustomFieldFormatter(column.metrics[0]?.field);
         const value = formatter(item.last);
         let trend;
         if (column.trend_arrows) {

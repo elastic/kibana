@@ -62,5 +62,5 @@ export interface TimeseriesVisProps {
   syncColors: boolean;
   palettesService: PaletteRegistry;
   fieldFormatMap: Record<string, unknown> | undefined;
-  getCustomFieldFormatter: (fieldName: string) => (value: number) => unknown;
+  createCustomFieldFormatter: (fieldName: string) => (value: number) => unknown;
 }

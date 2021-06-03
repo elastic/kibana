@@ -145,7 +145,7 @@ class TimeseriesVisualization extends Component {
       syncColors,
       palettesService,
       fieldFormatMap,
-      getCustomFieldFormatter,
+      createCustomFieldFormatter,
     } = this.props;
     const series = get(visData, `${model.id}.series`, []);
     const interval = getInterval(visData, model);
@@ -198,7 +198,7 @@ class TimeseriesVisualization extends Component {
 
       const seriesGroupTickFormatter = seriesGroup.ignore_field_formatting
         ? TimeseriesVisualization.getTickFormatter(seriesGroup, this.props.getConfig)
-        : getCustomFieldFormatter(fieldName);
+        : createCustomFieldFormatter(fieldName);
 
       const palette = {
         ...seriesGroup.palette,

@@ -36,7 +36,7 @@ function getColors(props) {
 }
 
 function MetricVisualization(props) {
-  const { backgroundColor, model, visData, getCustomFieldFormatter } = props;
+  const { backgroundColor, model, visData, createCustomFieldFormatter } = props;
   const colors = getColors(props);
   const series = get(visData, `${model.id}.series`, [])
     .filter((row) => row)
@@ -46,7 +46,7 @@ function MetricVisualization(props) {
       if (seriesDef) {
         newProps.formatter = seriesDef.ignore_field_formatting
           ? createTickFormatter(seriesDef.formatter, seriesDef.value_template, props.getConfig)
-          : getCustomFieldFormatter(seriesDef.metrics[0]?.field);
+          : createCustomFieldFormatter(seriesDef.metrics[0]?.field);
       }
       if (i === 0 && colors.color) newProps.color = colors.color;
       return assign({}, pick(row, ['label', 'data']), newProps);

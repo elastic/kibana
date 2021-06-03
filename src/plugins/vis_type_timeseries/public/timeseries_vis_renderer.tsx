@@ -73,7 +73,7 @@ export const getTimeseriesVisRenderer: (deps: {
             handlers={handlers}
             indexPattern={indexPattern}
             model={model}
-            visData={visData}
+            visData={visData as TimeseriesVisData}
             syncColors={syncColors}
             uiState={handlers.uiState! as PersistedState}
             palettesService={palettesService}
