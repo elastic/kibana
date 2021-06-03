@@ -640,10 +640,9 @@ describe('when on the endpoint list page', () => {
       jest.clearAllMocks();
     });
 
-    it('should show the flyout', async () => {
+    it('should show the flyout and footer', async () => {
       const renderResult = await renderAndWaitForData();
       await expect(renderResult.findByTestId('endpointDetailsFlyout')).not.toBeNull();
-      // Should also show the footer
       await expect(renderResult.queryByTestId('endpointDetailsFlyoutFooter')).not.toBeNull();
     });
 
