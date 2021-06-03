@@ -145,3 +145,6 @@ The following fields are defined in the technical field component template and s
 - `kibana.rac.alert.severity.value`: the severity of the alert, as a numerical value, which allows sorting.
 - `kibana.rac.alert.evaluation.value`: The measured (numerical value).
 - `kibana.rac.alert.threshold.value`: The threshold that was defined (or, in case of multiple thresholds, the one that was exceeded).
+- `kibana.rac.alert.ancestors`: the array of ancestors (if any) for the alert.
+- `kibana.rac.alert.depth`: the depth of the alert in the ancestral tree (default 0).
+- `kibana.rac.alert.building_block_type`: the building block type of the alert (default undefined).

@@ -113,7 +113,7 @@ export const Template = (args) => <LogStream {...args} />;
 
 The purpose of this component is to allow you, the developer, to have your very own Log Stream in your plugin.
 
-The component is exposed through `infra/public`. Since Kibana uses relative paths is up to you to find how to import it (sorry).
+The component is exposed through `infra/public`. Since Kibana uses relative paths, it is up to you to find how to import it (sorry).
 
 ```tsx
 import { LogStream } from '../../../../../../infra/public';
@@ -124,8 +124,9 @@ import { LogStream } from '../../../../../../infra/public';
 
 To use the component your plugin needs to follow certain criteria:
 
-- Ensure `"infra"` is specified as a `requiredPlugins` in your plugin's `kibana.json`.
-- Ensure the `<LogStream />` component is mounted inside the hiearchy of a [`kibana-react` provider](https://github.com/elastic/kibana/blob/b2d0aa7b7fae1c89c8f9e8854ae73e71be64e765/src/plugins/kibana_react/README.md#L45).
+- Ensure `"infra"` and `"data"` are specified as a `requiredPlugins` in your plugin's `kibana.json`.
+- Ensure the `<LogStream />` component is mounted inside the hierachy of a [`kibana-react` provider](https://github.com/elastic/kibana/blob/b2d0aa7b7fae1c89c8f9e8854ae73e71be64e765/src/plugins/kibana_react/README.md#L45). At a minimum, the kibana-react provider must pass `http` (from core start services) and `data` (from core plugin start dependencies).
+- Ensure the `<LogStream />` component is mounted inside the hierachy of a [`EuiThemeProvider`](https://github.com/elastic/kibana/blob/master/src/plugins/kibana_react/common/eui_styled_components.tsx).
 
 ## Usage
 
@@ -354,25 +355,30 @@ The infra plugin has the concept of a "source configuration", a collection of se
 The `<LogStream />` component will use the `"default"` source configuration. If you want to use your own configuration, you need to first create it when you initialize your plugin, and then specify it in the `<LogStream />` component with the `sourceId` prop.
 
 ```tsx
-//  Your `plugin/init.ts`
+//  Your `server/plugin.ts`
 class MyPlugin {
   // ...
   setup(core, plugins) {
     plugins.infra.defineInternalSourceConfiguration(
       'my_source',  // ID for your source configuration
       {
-        logAlias: 'some-index-*',  // Optional. what ES index to query.
+        name: 'some-name',
+        description: 'some description',
+        logIndices: { // Also accepts an `index_pattern` type with `indexPatternId`
+          type: 'index_name',
+          indexName: 'some-index',
+        },
         logColumns: [
-          { timestampColumn: { id: '...uuid4' },                   // The `@timestamp` column.
-          { fieldColumn: { id: '...uuid4', field: 'some_field' }}, // Any column(s) you want.
-          { messageColumn: { id: '...uuid' }}                      // The `message` column.
+          { timestampColumn: { id: '...uuid4' },                   // The `@timestamp` column. `id` is an arbitrary string identifier.
+          { fieldColumn: { id: '...uuid4', field: 'some_field' }}, // Any column(s) you want. `id` is an arbitrary string identifier.
+          { messageColumn: { id: '...uuid' }}                      // The `message` column. `id` is an arbitrary string identifier.
         ]
       }
     );
   }
 }
 
-// Somewhere else on your code
+// Somewhere else in your client-side code
 <LogStream
   sourceId="my_source"
   startTimestamp={...}

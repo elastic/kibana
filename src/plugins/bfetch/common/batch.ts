@@ -19,3 +19,8 @@ export interface BatchResponseItem<Result extends object, Error extends ErrorLik
   result?: Result;
   error?: Error;
 }
+
+export interface BatchItemWrapper {
+  compressed: boolean;
+  payload: string;
+}

@@ -1112,7 +1112,7 @@
         ],
         "source": {
           "path": "src/core/public/index.ts",
-          "lineNumber": 206
+          "lineNumber": 203
         },
         "deprecated": false,
         "children": [
@@ -1136,7 +1136,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 208
+              "lineNumber": 205
             },
             "deprecated": false
           },
@@ -1160,7 +1160,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 210
+              "lineNumber": 207
             },
             "deprecated": false
           },
@@ -1184,7 +1184,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 212
+              "lineNumber": 209
             },
             "deprecated": false
           },
@@ -1208,7 +1208,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 214
+              "lineNumber": 211
             },
             "deprecated": false
           },
@@ -1232,7 +1232,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 216
+              "lineNumber": 213
             },
             "deprecated": false
           },
@@ -1252,7 +1252,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 223
+              "lineNumber": 220
             },
             "deprecated": true,
             "references": []
@@ -1279,7 +1279,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 227
+              "lineNumber": 224
             },
             "deprecated": false,
             "returnComment": [],
@@ -1299,7 +1299,7 @@
         ],
         "source": {
           "path": "src/core/public/index.ts",
-          "lineNumber": 251
+          "lineNumber": 248
         },
         "deprecated": false,
         "children": [
@@ -1323,7 +1323,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 253
+              "lineNumber": 250
             },
             "deprecated": false
           },
@@ -1347,7 +1347,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 255
+              "lineNumber": 252
             },
             "deprecated": false
           },
@@ -1371,7 +1371,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 257
+              "lineNumber": 254
             },
             "deprecated": false
           },
@@ -1395,7 +1395,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 259
+              "lineNumber": 256
             },
             "deprecated": false
           },
@@ -1419,7 +1419,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 261
+              "lineNumber": 258
             },
             "deprecated": false
           },
@@ -1443,7 +1443,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 263
+              "lineNumber": 260
             },
             "deprecated": false
           },
@@ -1467,7 +1467,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 265
+              "lineNumber": 262
             },
             "deprecated": false
           },
@@ -1491,7 +1491,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 267
+              "lineNumber": 264
             },
             "deprecated": false
           },
@@ -1515,7 +1515,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 269
+              "lineNumber": 266
             },
             "deprecated": false
           },
@@ -1539,7 +1539,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 271
+              "lineNumber": 268
             },
             "deprecated": false
           },
@@ -1563,7 +1563,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 273
+              "lineNumber": 270
             },
             "deprecated": false
           },
@@ -1583,7 +1583,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 280
+              "lineNumber": 277
             },
             "deprecated": true,
             "references": [
@@ -1770,7 +1770,7 @@
         "description": [],
         "source": {
           "path": "src/core/public/doc_links/doc_links_service.ts",
-          "lineNumber": 408
+          "lineNumber": 409
         },
         "deprecated": false,
         "children": [
@@ -1783,7 +1783,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/doc_links/doc_links_service.ts",
-              "lineNumber": 409
+              "lineNumber": 410
             },
             "deprecated": false
           },
@@ -1796,7 +1796,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/doc_links/doc_links_service.ts",
-              "lineNumber": 410
+              "lineNumber": 411
             },
             "deprecated": false
           },
@@ -1808,11 +1808,11 @@
             "label": "links",
             "description": [],
             "signature": [
-              "{ readonly canvas: { readonly guide: string; }; readonly dashboard: { readonly guide: string; readonly drilldowns: string; readonly drilldownsTriggerPicker: string; readonly urlDrilldownTemplateSyntax: string; readonly urlDrilldownVariables: string; }; readonly discover: Record<string, string>; readonly filebeat: { readonly base: string; readonly installation: string; readonly configuration: string; readonly elasticsearchOutput: string; readonly elasticsearchModule: string; readonly startup: string; readonly exportedFields: string; }; readonly auditbeat: { readonly base: string; }; readonly metricbeat: { readonly base: string; readonly configure: string; readonly httpEndpoint: string; readonly install: string; readonly start: string; }; readonly enterpriseSearch: { readonly base: string; readonly appSearchBase: string; readonly workplaceSearchBase: string; }; readonly heartbeat: { readonly base: string; }; readonly logstash: { readonly base: string; }; readonly functionbeat: { readonly base: string; }; readonly winlogbeat: { readonly base: string; }; readonly aggs: { readonly composite: string; readonly composite_missing_bucket: string; readonly date_histogram: string; readonly date_range: string; readonly date_format_pattern: string; readonly filter: string; readonly filters: string; readonly geohash_grid: string; readonly histogram: string; readonly ip_range: string; readonly range: string; readonly significant_terms: string; readonly terms: string; readonly avg: string; readonly avg_bucket: string; readonly max_bucket: string; readonly min_bucket: string; readonly sum_bucket: string; readonly cardinality: string; readonly count: string; readonly cumulative_sum: string; readonly derivative: string; readonly geo_bounds: string; readonly geo_centroid: string; readonly max: string; readonly median: string; readonly min: string; readonly moving_avg: string; readonly percentile_ranks: string; readonly serial_diff: string; readonly std_dev: string; readonly sum: string; readonly top_hits: string; }; readonly runtimeFields: { readonly overview: string; readonly mapping: string; }; readonly scriptedFields: { readonly scriptFields: string; readonly scriptAggs: string; readonly painless: string; readonly painlessApi: string; readonly painlessLangSpec: string; readonly painlessSyntax: string; readonly painlessWalkthrough: string; readonly luceneExpressions: string; }; readonly search: { readonly sessions: string; }; readonly indexPatterns: { readonly introduction: string; readonly fieldFormattersNumber: string; readonly fieldFormattersString: string; }; readonly addData: string; readonly kibana: string; readonly upgradeAssistant: string; readonly elasticsearch: Record<string, string>; readonly siem: { readonly guide: string; readonly gettingStarted: string; }; readonly query: { readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; }; readonly date: { readonly dateMath: string; readonly dateMathIndexNames: string; }; readonly management: Record<string, string>; readonly ml: Record<string, string>; readonly transforms: Record<string, string>; readonly visualize: Record<string, string>; readonly apis: Readonly<{ bulkIndexAlias: string; byteSizeUnits: string; createAutoFollowPattern: string; createFollower: string; createIndex: string; createSnapshotLifecyclePolicy: string; createRoleMapping: string; createRoleMappingTemplates: string; createRollupJobsRequest: string; createApiKey: string; createPipeline: string; createTransformRequest: string; cronExpressions: string; executeWatchActionModes: string; indexExists: string; openIndex: string; putComponentTemplate: string; painlessExecute: string; painlessExecuteAPIContexts: string; putComponentTemplateMetadata: string; putSnapshotLifecyclePolicy: string; putIndexTemplateV1: string; putWatch: string; simulatePipeline: string; timeUnits: string; updateTransform: string; }>; readonly observability: Record<string, string>; readonly alerting: Record<string, string>; readonly maps: Record<string, string>; readonly monitoring: Record<string, string>; readonly security: Readonly<{ apiKeyServiceSettings: string; clusterPrivileges: string; elasticsearchSettings: string; elasticsearchEnableSecurity: string; indicesPrivileges: string; kibanaTLS: string; kibanaPrivileges: string; mappingRoles: string; mappingRolesFieldRules: string; runAsPrivilege: string; }>; readonly watcher: Record<string, string>; readonly ccs: Record<string, string>; readonly plugins: Record<string, string>; readonly snapshotRestore: Record<string, string>; readonly ingest: Record<string, string>; }"
+              "{ readonly canvas: { readonly guide: string; }; readonly dashboard: { readonly guide: string; readonly drilldowns: string; readonly drilldownsTriggerPicker: string; readonly urlDrilldownTemplateSyntax: string; readonly urlDrilldownVariables: string; }; readonly discover: Record<string, string>; readonly filebeat: { readonly base: string; readonly installation: string; readonly configuration: string; readonly elasticsearchOutput: string; readonly elasticsearchModule: string; readonly startup: string; readonly exportedFields: string; }; readonly auditbeat: { readonly base: string; }; readonly metricbeat: { readonly base: string; readonly configure: string; readonly httpEndpoint: string; readonly install: string; readonly start: string; }; readonly enterpriseSearch: { readonly base: string; readonly appSearchBase: string; readonly workplaceSearchBase: string; }; readonly heartbeat: { readonly base: string; }; readonly logstash: { readonly base: string; }; readonly functionbeat: { readonly base: string; }; readonly winlogbeat: { readonly base: string; }; readonly aggs: { readonly composite: string; readonly composite_missing_bucket: string; readonly date_histogram: string; readonly date_range: string; readonly date_format_pattern: string; readonly filter: string; readonly filters: string; readonly geohash_grid: string; readonly histogram: string; readonly ip_range: string; readonly range: string; readonly significant_terms: string; readonly terms: string; readonly avg: string; readonly avg_bucket: string; readonly max_bucket: string; readonly min_bucket: string; readonly sum_bucket: string; readonly cardinality: string; readonly count: string; readonly cumulative_sum: string; readonly derivative: string; readonly geo_bounds: string; readonly geo_centroid: string; readonly max: string; readonly median: string; readonly min: string; readonly moving_avg: string; readonly percentile_ranks: string; readonly serial_diff: string; readonly std_dev: string; readonly sum: string; readonly top_hits: string; }; readonly runtimeFields: { readonly overview: string; readonly mapping: string; }; readonly scriptedFields: { readonly scriptFields: string; readonly scriptAggs: string; readonly painless: string; readonly painlessApi: string; readonly painlessLangSpec: string; readonly painlessSyntax: string; readonly painlessWalkthrough: string; readonly luceneExpressions: string; }; readonly search: { readonly sessions: string; }; readonly indexPatterns: { readonly introduction: string; readonly fieldFormattersNumber: string; readonly fieldFormattersString: string; readonly runtimeFields: string; }; readonly addData: string; readonly kibana: string; readonly upgradeAssistant: string; readonly elasticsearch: Record<string, string>; readonly siem: { readonly guide: string; readonly gettingStarted: string; }; readonly query: { readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; }; readonly date: { readonly dateMath: string; readonly dateMathIndexNames: string; }; readonly management: Record<string, string>; readonly ml: Record<string, string>; readonly transforms: Record<string, string>; readonly visualize: Record<string, string>; readonly apis: Readonly<{ bulkIndexAlias: string; byteSizeUnits: string; createAutoFollowPattern: string; createFollower: string; createIndex: string; createSnapshotLifecyclePolicy: string; createRoleMapping: string; createRoleMappingTemplates: string; createRollupJobsRequest: string; createApiKey: string; createPipeline: string; createTransformRequest: string; cronExpressions: string; executeWatchActionModes: string; indexExists: string; openIndex: string; putComponentTemplate: string; painlessExecute: string; painlessExecuteAPIContexts: string; putComponentTemplateMetadata: string; putSnapshotLifecyclePolicy: string; putIndexTemplateV1: string; putWatch: string; simulatePipeline: string; timeUnits: string; updateTransform: string; }>; readonly observability: Record<string, string>; readonly alerting: Record<string, string>; readonly maps: Record<string, string>; readonly monitoring: Record<string, string>; readonly security: Readonly<{ apiKeyServiceSettings: string; clusterPrivileges: string; elasticsearchSettings: string; elasticsearchEnableSecurity: string; indicesPrivileges: string; kibanaTLS: string; kibanaPrivileges: string; mappingRoles: string; mappingRolesFieldRules: string; runAsPrivilege: string; }>; readonly watcher: Record<string, string>; readonly ccs: Record<string, string>; readonly plugins: Record<string, string>; readonly snapshotRestore: Record<string, string>; readonly ingest: Record<string, string>; }"
             ],
             "source": {
               "path": "src/core/public/doc_links/doc_links_service.ts",
-              "lineNumber": 411
+              "lineNumber": 412
             },
             "deprecated": false
           }
@@ -7427,7 +7427,7 @@
         ],
         "source": {
           "path": "src/core/public/index.ts",
-          "lineNumber": 237
+          "lineNumber": 234
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -8545,6 +8545,20 @@
                 }
               },
               {
+                "plugin": "monitoring",
+                "link": {
+                  "path": "x-pack/plugins/monitoring/server/kibana_monitoring/collectors/get_usage_collector.ts",
+                  "lineNumber": 107
+                }
+              },
+              {
+                "plugin": "monitoring",
+                "link": {
+                  "path": "x-pack/plugins/monitoring/server/telemetry_collection/register_monitoring_telemetry_collection.ts",
+                  "lineNumber": 148
+                }
+              },
+              {
                 "plugin": "securitySolution",
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
@@ -8563,27 +8577,6 @@
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
                   "lineNumber": 235
-                }
-              },
-              {
-                "plugin": "beatsManagement",
-                "link": {
-                  "path": "x-pack/plugins/beats_management/server/lib/adapters/database/kibana_database_adapter.ts",
-                  "lineNumber": 113
-                }
-              },
-              {
-                "plugin": "monitoring",
-                "link": {
-                  "path": "x-pack/plugins/monitoring/server/kibana_monitoring/collectors/get_usage_collector.ts",
-                  "lineNumber": 107
-                }
-              },
-              {
-                "plugin": "monitoring",
-                "link": {
-                  "path": "x-pack/plugins/monitoring/server/telemetry_collection/register_monitoring_telemetry_collection.ts",
-                  "lineNumber": 148
                 }
               },
               {
@@ -8755,7 +8748,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "endpoint",
-                "description": [],
+                "description": [
+                  "- String descriptor of the endpoint e.g. `cluster.getSettings` or `ping`."
+                ],
                 "signature": [
                   "string"
                 ],
@@ -8772,7 +8767,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "clientParams",
-                "description": [],
+                "description": [
+                  "- A dictionary of parameters that will be passed directly to the Elasticsearch JS client."
+                ],
                 "signature": [
                   "Record<string, any>"
                 ],
@@ -8789,7 +8786,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [],
+                "description": [
+                  "- Options that affect the way we call the API and process the result."
+                ],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -9388,55 +9387,6 @@
                 }
               },
               {
-                "plugin": "lists",
-                "link": {
-                  "path": "x-pack/plugins/lists/server/routes/read_privileges_route.ts",
-                  "lineNumber": 31
-                }
-              },
-              {
-                "plugin": "lists",
-                "link": {
-                  "path": "x-pack/plugins/lists/server/routes/read_privileges_route.ts",
-                  "lineNumber": 35
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/framework/kibana_framework_adapter.ts",
-                  "lineNumber": 34
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/query_signals_route.ts",
-                  "lineNumber": 52
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/open_close_signals_route.ts",
-                  "lineNumber": 60
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/privileges/read_privileges_route.ts",
-                  "lineNumber": 41
-                }
-              },
-              {
-                "plugin": "beatsManagement",
-                "link": {
-                  "path": "x-pack/plugins/beats_management/server/lib/adapters/database/kibana_database_adapter.ts",
-                  "lineNumber": 111
-                }
-              },
-              {
                 "plugin": "canvas",
                 "link": {
                   "path": "x-pack/plugins/canvas/server/routes/es_fields/es_fields.ts",
@@ -9822,6 +9772,20 @@
                 }
               },
               {
+                "plugin": "lists",
+                "link": {
+                  "path": "x-pack/plugins/lists/server/routes/read_privileges_route.ts",
+                  "lineNumber": 31
+                }
+              },
+              {
+                "plugin": "lists",
+                "link": {
+                  "path": "x-pack/plugins/lists/server/routes/read_privileges_route.ts",
+                  "lineNumber": 35
+                }
+              },
+              {
                 "plugin": "monitoring",
                 "link": {
                   "path": "x-pack/plugins/monitoring/server/kibana_monitoring/collectors/get_usage_collector.ts",
@@ -9840,6 +9804,34 @@
                 "link": {
                   "path": "x-pack/plugins/monitoring/server/plugin.ts",
                   "lineNumber": 356
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/lib/framework/kibana_framework_adapter.ts",
+                  "lineNumber": 34
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/query_signals_route.ts",
+                  "lineNumber": 52
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/open_close_signals_route.ts",
+                  "lineNumber": 60
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/privileges/read_privileges_route.ts",
+                  "lineNumber": 41
                 }
               },
               {
@@ -10817,7 +10809,7 @@
         ],
         "source": {
           "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-          "lineNumber": 87
+          "lineNumber": 96
         },
         "deprecated": false,
         "children": [
@@ -10838,7 +10830,7 @@
             ],
             "source": {
               "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-              "lineNumber": 100
+              "lineNumber": 109
             },
             "deprecated": false,
             "children": [
@@ -10854,7 +10846,7 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 100
+                  "lineNumber": 109
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10871,7 +10863,7 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 100
+                  "lineNumber": 109
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10890,7 +10882,7 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 100
+                  "lineNumber": 109
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -10915,7 +10907,7 @@
             ],
             "source": {
               "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-              "lineNumber": 116
+              "lineNumber": 125
             },
             "deprecated": false,
             "children": [
@@ -10931,7 +10923,7 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 116
+                  "lineNumber": 125
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10948,7 +10940,7 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 116
+                  "lineNumber": 125
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10967,7 +10959,7 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 116
+                  "lineNumber": 125
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -10992,7 +10984,7 @@
             ],
             "source": {
               "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-              "lineNumber": 129
+              "lineNumber": 138
             },
             "deprecated": false,
             "children": [
@@ -11008,7 +11000,7 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 129
+                  "lineNumber": 138
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -11027,7 +11019,7 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 129
+                  "lineNumber": 138
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -11052,7 +11044,7 @@
             ],
             "source": {
               "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-              "lineNumber": 145
+              "lineNumber": 154
             },
             "deprecated": false,
             "children": [
@@ -11068,7 +11060,7 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 145
+                  "lineNumber": 154
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -11087,7 +11079,7 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 145
+                  "lineNumber": 154
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -12713,34 +12705,6 @@
                 }
               },
               {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
-                  "lineNumber": 125
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
-                  "lineNumber": 218
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
-                  "lineNumber": 235
-                }
-              },
-              {
-                "plugin": "beatsManagement",
-                "link": {
-                  "path": "x-pack/plugins/beats_management/server/lib/adapters/database/kibana_database_adapter.ts",
-                  "lineNumber": 31
-                }
-              },
-              {
                 "plugin": "indexManagement",
                 "link": {
                   "path": "x-pack/plugins/index_management/server/plugin.ts",
@@ -12766,6 +12730,27 @@
                 "link": {
                   "path": "x-pack/plugins/licensing/server/plugin.test.ts",
                   "lineNumber": 41
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
+                  "lineNumber": 125
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
+                  "lineNumber": 218
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
+                  "lineNumber": 235
                 }
               },
               {
@@ -15941,48 +15926,6 @@
         "removeBy": "7.16",
         "references": [
           {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/server/schemas/common/get_call_cluster.mock.ts",
-              "lineNumber": 9
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/server/schemas/common/get_call_cluster.mock.ts",
-              "lineNumber": 27
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/server/schemas/common/get_call_cluster.mock.ts",
-              "lineNumber": 31
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
-              "lineNumber": 10
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
-              "lineNumber": 447
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
-              "lineNumber": 466
-            }
-          },
-          {
             "plugin": "canvas",
             "link": {
               "path": "x-pack/plugins/canvas/server/lib/query_es_sql.ts",
@@ -16270,6 +16213,48 @@
             }
           },
           {
+            "plugin": "securitySolution",
+            "link": {
+              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
+              "lineNumber": 10
+            }
+          },
+          {
+            "plugin": "securitySolution",
+            "link": {
+              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
+              "lineNumber": 447
+            }
+          },
+          {
+            "plugin": "securitySolution",
+            "link": {
+              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
+              "lineNumber": 466
+            }
+          },
+          {
+            "plugin": "lists",
+            "link": {
+              "path": "x-pack/plugins/lists/server/schemas/common/get_call_cluster.mock.ts",
+              "lineNumber": 9
+            }
+          },
+          {
+            "plugin": "lists",
+            "link": {
+              "path": "x-pack/plugins/lists/server/schemas/common/get_call_cluster.mock.ts",
+              "lineNumber": 27
+            }
+          },
+          {
+            "plugin": "lists",
+            "link": {
+              "path": "x-pack/plugins/lists/server/schemas/common/get_call_cluster.mock.ts",
+              "lineNumber": 31
+            }
+          },
+          {
             "plugin": "monitoring",
             "link": {
               "path": "x-pack/plugins/monitoring/server/lib/alerts/disable_watcher_cluster_alerts.ts",
@@ -16456,6 +16441,27 @@
             "link": {
               "path": "x-pack/plugins/monitoring/target/types/server/telemetry_collection/get_licenses.d.ts",
               "lineNumber": 20
+            }
+          },
+          {
+            "plugin": "lists",
+            "link": {
+              "path": "x-pack/plugins/lists/target/types/server/schemas/common/get_call_cluster.mock.d.ts",
+              "lineNumber": 2
+            }
+          },
+          {
+            "plugin": "lists",
+            "link": {
+              "path": "x-pack/plugins/lists/target/types/server/schemas/common/get_call_cluster.mock.d.ts",
+              "lineNumber": 4
+            }
+          },
+          {
+            "plugin": "lists",
+            "link": {
+              "path": "x-pack/plugins/lists/target/types/server/schemas/common/get_call_cluster.mock.d.ts",
+              "lineNumber": 5
             }
           },
           {
@@ -22315,7 +22321,7 @@
         ],
         "source": {
           "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-          "lineNumber": 70
+          "lineNumber": 79
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -23171,20 +23177,6 @@
             "link": {
               "path": "x-pack/plugins/licensing/server/plugin.ts",
               "lineNumber": 180
-            }
-          },
-          {
-            "plugin": "beatsManagement",
-            "link": {
-              "path": "x-pack/plugins/beats_management/server/lib/adapters/database/kibana_database_adapter.ts",
-              "lineNumber": 8
-            }
-          },
-          {
-            "plugin": "beatsManagement",
-            "link": {
-              "path": "x-pack/plugins/beats_management/server/lib/adapters/database/kibana_database_adapter.ts",
-              "lineNumber": 28
             }
           },
           {
