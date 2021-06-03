@@ -965,6 +965,41 @@ describe('state_helpers', () => {
         );
       });
 
+      it('should not carry over label when operation and field change at the same time', () => {
+        expect(
+          replaceColumn({
+            layer: {
+              indexPatternId: '1',
+              columnOrder: ['col1'],
+              columns: {
+                col1: {
+                  label: 'My custom label',
+                  customLabel: true,
+                  dataType: 'date',
+                  isBucketed: true,
+
+                  // Private
+                  operationType: 'date_histogram',
+                  sourceField: 'timestamp',
+                  params: {
+                    interval: 'h',
+                  },
+                },
+              },
+            },
+            indexPattern,
+            columnId: 'col1',
+            op: 'terms',
+            field: indexPattern.fields[4],
+            visualizationGroups: [],
+          }).columns.col1
+        ).toEqual(
+          expect.objectContaining({
+            label: 'Top values of source',
+          })
+        );
+      });
+
       it('should carry over label on operation switch when customLabel flag on previousColumn is set', () => {
         expect(
           replaceColumn({
