@@ -155,16 +155,18 @@ export function FormulaEditor({
       if (errors.length) {
         if (currentColumn.params.isFormulaBroken) {
           // If the formula is already broken, show the latest error message in the workspace
-          updateLayer(
-            regenerateLayerFromAst(
-              text || '',
-              layer,
-              columnId,
-              currentColumn,
-              indexPattern,
-              visibleOperationsMap
-            ).newLayer
-          );
+          if (currentColumn.params.formula !== text) {
+            updateLayer(
+              regenerateLayerFromAst(
+                text || '',
+                layer,
+                columnId,
+                currentColumn,
+                indexPattern,
+                visibleOperationsMap
+              ).newLayer
+            );
+          }
         }
 
         const markers = errors
@@ -259,7 +261,7 @@ export function FormulaEditor({
     },
     // Make it validate on flyout open in case of a broken formula left over
     // from a previous edit
-    { skipFirstRender: true },
+    { skipFirstRender: false },
     256,
     [text]
   );
