@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import { i18n } from '@kbn/i18n';
+import { EuiForm } from '@elastic/eui';
 import { HostMetadata } from '../../../../../../../common/endpoint/types';
 import { BackToEndpointDetailsFlyoutSubHeader } from './back_to_endpoint_details_flyout_subheader';
 import {
@@ -29,7 +30,6 @@ import {
   getIsEndpointHostIsolated,
 } from '../../../store/selectors';
 import { AppAction } from '../../../../../../common/store/actions';
-import { useToasts } from '../../../../../../common/lib/kibana';
 
 /**
  * Component handles both isolate and un-isolate for a given endpoint
@@ -39,7 +39,6 @@ export const EndpointIsolationFlyoutPanel = memo<{
 }>(({ hostMeta }) => {
   const history = useHistory();
   const dispatch = useDispatch<Dispatch<AppAction>>();
-  const toast = useToasts();
 
   const { show, ...queryParams } = useEndpointSelector(uiQueryParams);
   const isCurrentlyIsolated = useEndpointSelector(getIsEndpointHostIsolated);
@@ -85,12 +84,6 @@ export const EndpointIsolationFlyoutPanel = memo<{
     });
   }, []);
 
-  useEffect(() => {
-    if (isolateError) {
-      toast.addDanger(isolateError.message);
-    }
-  }, [isolateError, toast]);
-
   return (
     <>
       <BackToEndpointDetailsFlyoutSubHeader endpointId={hostMeta.agent.id} />
@@ -107,14 +100,20 @@ export const EndpointIsolationFlyoutPanel = memo<{
             onComplete={handleCancel}
           />
         ) : (
-          <IsolationForm
-            comment={formValues.comment}
-            isLoading={isPending}
-            hostName={hostMeta.host.name}
-            onCancel={handleCancel}
-            onConfirm={handleConfirm}
-            onChange={handleChange}
-          />
+          <EuiForm
+            isInvalid={!!isolateError}
+            error={isolateError?.message}
+            data-test-subj="endpointIsolationForm"
+          >
+            <IsolationForm
+              comment={formValues.comment}
+              isLoading={isPending}
+              hostName={hostMeta.host.name}
+              onCancel={handleCancel}
+              onConfirm={handleConfirm}
+              onChange={handleChange}
+            />
+          </EuiForm>
         )}
       </FlyoutBodyNoTopPadding>
     </>

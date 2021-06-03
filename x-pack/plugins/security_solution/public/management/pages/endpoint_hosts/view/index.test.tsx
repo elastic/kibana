@@ -1005,18 +1005,13 @@ describe('when on the endpoint list page', () => {
         });
       });
 
-      it('should show error toast if isolate fails', async () => {
+      it('should show error if isolate fails', async () => {
         isolateApiMock.responseProvider.isolateHost.mockImplementation(() => {
           throw new Error('oh oh. something went wrong');
         });
-
-        // coreStart.http.post.mockReset();
-        // coreStart.http.post.mockRejectedValue(new Error('oh oh. something went wrong'));
         await confirmIsolateAndWaitForApiResponse('failure');
 
-        expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
-          'oh oh. something went wrong'
-        );
+        expect(renderResult.getByText('oh oh. something went wrong')).not.toBeNull();
       });
 
       it('should reset isolation state and show form again', async () => {
