@@ -6,7 +6,7 @@
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
-import { PLUGIN_ID } from '../../../plugins/fleet/common';
+import { INTEGRATIONS_PLUGIN_ID } from '../../../plugins/fleet/common';
 
 // NOTE: import path below should be the deep path to the actual module - else we get CI errors
 import { pagePathGetters } from '../../../plugins/fleet/public/constants/page_paths';
@@ -17,7 +17,7 @@ export function FleetIntegrations({ getService, getPageObjects }: FtrProviderCon
 
   return {
     async navigateToIntegrationDetails(pkgkey: string) {
-      await pageObjects.common.navigateToApp(PLUGIN_ID, {
+      await pageObjects.common.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
         hash: pagePathGetters.integration_details_overview({ pkgkey })[1],
       });
     },

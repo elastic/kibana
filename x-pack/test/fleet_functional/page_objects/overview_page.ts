@@ -18,7 +18,7 @@ export function OverviewPage({ getService, getPageObjects }: FtrProviderContext)
   return {
     async navigateToOverview() {
       await pageObjects.common.navigateToApp(PLUGIN_ID, {
-        hash: pagePathGetters.overview(),
+        hash: pagePathGetters.overview()[1],
       });
     },
 
