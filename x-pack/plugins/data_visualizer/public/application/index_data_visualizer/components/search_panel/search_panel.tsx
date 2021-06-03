@@ -111,7 +111,7 @@ export const SearchPanel: FC<Props> = ({
               onChange={searchChangeHandler}
               onSubmit={searchHandler}
               placeholder={i18n.translate(
-                'xpack.fileDataVisualizer.searchPanel.queryBarPlaceholderText',
+                'xpack.dataVisualizer.searchPanel.queryBarPlaceholderText',
                 {
                   defaultMessage: 'Search… (e.g. status:200 AND extension:"PHP")',
                 }
@@ -125,7 +125,7 @@ export const SearchPanel: FC<Props> = ({
         >
           <EuiCode>
             {i18n.translate(
-              'xpack.fileDataVisualizer.searchPanel.invalidKuerySyntaxErrorMessageQueryBar',
+              'xpack.dataVisualizer.searchPanel.invalidKuerySyntaxErrorMessageQueryBar',
               {
                 defaultMessage: 'Invalid query',
               }

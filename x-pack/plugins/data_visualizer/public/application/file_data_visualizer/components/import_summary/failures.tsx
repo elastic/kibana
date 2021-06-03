@@ -51,7 +51,7 @@ export class Failures extends Component<Props, State> {
         id="failureList"
         buttonContent={
           <FormattedMessage
-            id="xpack.fileDataVisualizer.importSummary.failedDocumentsButtonLabel"
+            id="xpack.dataVisualizer.file.importSummary.failedDocumentsButtonLabel"
             defaultMessage="Failed documents"
           />
         }

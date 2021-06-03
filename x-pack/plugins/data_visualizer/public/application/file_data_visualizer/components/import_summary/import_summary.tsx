@@ -45,7 +45,7 @@ export const ImportSummary: FC<Props> = ({
       <EuiCallOut
         title={
           <FormattedMessage
-            id="xpack.fileDataVisualizer.importSummary.importCompleteTitle"
+            id="xpack.dataVisualizer.file.importSummary.importCompleteTitle"
             defaultMessage="Import complete"
           />
         }
@@ -62,7 +62,7 @@ export const ImportSummary: FC<Props> = ({
           <EuiCallOut
             title={
               <FormattedMessage
-                id="xpack.fileDataVisualizer.importSummary.documentsCouldNotBeImportedTitle"
+                id="xpack.dataVisualizer.file.importSummary.documentsCouldNotBeImportedTitle"
                 defaultMessage="Some documents could not be imported"
               />
             }
@@ -71,7 +71,7 @@ export const ImportSummary: FC<Props> = ({
           >
             <p>
               <FormattedMessage
-                id="xpack.fileDataVisualizer.importSummary.documentsCouldNotBeImportedDescription"
+                id="xpack.dataVisualizer.file.importSummary.documentsCouldNotBeImportedDescription"
                 defaultMessage="{importFailuresLength} out of {docCount} documents could not be imported.
                 This could be due to lines not matching the Grok pattern."
                 values={{
@@ -102,7 +102,7 @@ function createDisplayItems(
     {
       title: (
         <FormattedMessage
-          id="xpack.fileDataVisualizer.importSummary.indexTitle"
+          id="xpack.dataVisualizer.file.importSummary.indexTitle"
           defaultMessage="Index"
         />
       ),
@@ -111,7 +111,7 @@ function createDisplayItems(
     {
       title: (
         <FormattedMessage
-          id="xpack.fileDataVisualizer.importSummary.documentsIngestedTitle"
+          id="xpack.dataVisualizer.file.importSummary.documentsIngestedTitle"
           defaultMessage="Documents ingested"
         />
       ),
@@ -123,7 +123,7 @@ function createDisplayItems(
     items.splice(1, 0, {
       title: (
         <FormattedMessage
-          id="xpack.fileDataVisualizer.importSummary.ingestPipelineTitle"
+          id="xpack.dataVisualizer.file.importSummary.ingestPipelineTitle"
           defaultMessage="Ingest pipeline"
         />
       ),
@@ -135,7 +135,7 @@ function createDisplayItems(
     items.splice(1, 0, {
       title: (
         <FormattedMessage
-          id="xpack.fileDataVisualizer.importSummary.indexPatternTitle"
+          id="xpack.dataVisualizer.file.importSummary.indexPatternTitle"
           defaultMessage="Index pattern"
         />
       ),
@@ -147,7 +147,7 @@ function createDisplayItems(
     items.push({
       title: (
         <FormattedMessage
-          id="xpack.fileDataVisualizer.importSummary.failedDocumentsTitle"
+          id="xpack.dataVisualizer.file.importSummary.failedDocumentsTitle"
           defaultMessage="Failed documents"
         />
       ),

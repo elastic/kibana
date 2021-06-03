@@ -47,7 +47,7 @@ export const FullTimeRangeSelector: FC<Props> = ({
     } catch (e) {
       toasts.addDanger(
         i18n.translate(
-          'xpack.fileDataVisualizer.fullTimeRangeSelector.errorSettingTimeRangeNotification',
+          'xpack.dataVisualizer.index.fullTimeRangeSelector.errorSettingTimeRangeNotification',
           {
             defaultMessage: 'An error occurred setting the time range.',
           }
@@ -62,7 +62,7 @@ export const FullTimeRangeSelector: FC<Props> = ({
       data-test-subj="mlButtonUseFullData"
     >
       <FormattedMessage
-        id="xpack.fileDataVisualizer.fullTimeRangeSelector.useFullDataButtonLabel"
+        id="xpack.dataVisualizer.index.fullTimeRangeSelector.useFullDataButtonLabel"
         defaultMessage="Use full {indexPatternTitle} data"
         values={{
           indexPatternTitle: indexPattern.title,

@@ -38,7 +38,7 @@ export const FieldCountPanel: FC<Props> = ({
           data-test-subj="mlDataVisualizerShowEmptyFieldsSwitch"
           label={
             <FormattedMessage
-              id="xpack.fileDataVisualizer.searchPanel.showEmptyFields"
+              id="xpack.dataVisualizer.searchPanel.showEmptyFields"
               defaultMessage="Show empty fields"
             />
           }

@@ -20,10 +20,10 @@ interface ColumnsAndLayer {
   layer: XYLayerConfig;
 }
 
-const TOP_VALUES_LABEL = i18n.translate('xpack.fileDataVisualizer.lensChart.topValuesLabel', {
+const TOP_VALUES_LABEL = i18n.translate('xpack.dataVisualizer.index.lensChart.topValuesLabel', {
   defaultMessage: 'Top values',
 });
-const COUNT = i18n.translate('xpack.fileDataVisualizer.lensChart.countLabel', {
+const COUNT = i18n.translate('xpack.dataVisualizer.index.lensChart.countLabel', {
   defaultMessage: 'Count',
 });
 
@@ -65,7 +65,7 @@ export function getNumberSettings(item: FieldVisConfig, defaultIndexPattern: Ind
     col2: {
       dataType: 'number',
       isBucketed: false,
-      label: i18n.translate('xpack.fileDataVisualizer.lensChart.averageOfLabel', {
+      label: i18n.translate('xpack.dataVisualizer.index.lensChart.averageOfLabel', {
         defaultMessage: 'Average of {fieldName}',
         values: { fieldName: item.fieldName },
       }),
@@ -247,7 +247,7 @@ export function getLensAttributes(
 
   return {
     visualizationType: 'lnsXY',
-    title: i18n.translate('xpack.fileDataVisualizer.lensChart.chartTitle', {
+    title: i18n.translate('xpack.dataVisualizer.index.lensChart.chartTitle', {
       defaultMessage: 'Lens for {fieldName}',
       values: { fieldName: item.fieldName },
     }),

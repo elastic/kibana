@@ -80,31 +80,31 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
   }
 
   let processFileTitle = i18n.translate(
-    'xpack.fileDataVisualizer.importProgress.processFileTitle',
+    'xpack.dataVisualizer.file.importProgress.processFileTitle',
     {
       defaultMessage: 'Process file',
     }
   );
   let createIndexTitle = i18n.translate(
-    'xpack.fileDataVisualizer.importProgress.createIndexTitle',
+    'xpack.dataVisualizer.file.importProgress.createIndexTitle',
     {
       defaultMessage: 'Create index',
     }
   );
   let createIngestPipelineTitle = i18n.translate(
-    'xpack.fileDataVisualizer.importProgress.createIngestPipelineTitle',
+    'xpack.dataVisualizer.file.importProgress.createIngestPipelineTitle',
     {
       defaultMessage: 'Create ingest pipeline',
     }
   );
   let uploadingDataTitle = i18n.translate(
-    'xpack.fileDataVisualizer.importProgress.uploadDataTitle',
+    'xpack.dataVisualizer.file.importProgress.uploadDataTitle',
     {
       defaultMessage: 'Upload data',
     }
   );
   let createIndexPatternTitle = i18n.translate(
-    'xpack.fileDataVisualizer.importProgress.createIndexPatternTitle',
+    'xpack.dataVisualizer.file.importProgress.createIndexPatternTitle',
     {
       defaultMessage: 'Create index pattern',
     }
@@ -113,7 +113,7 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
   const creatingIndexStatus = (
     <p>
       <FormattedMessage
-        id="xpack.fileDataVisualizer.importProgress.stepTwoCreatingIndexDescription"
+        id="xpack.dataVisualizer.file.importProgress.stepTwoCreatingIndexDescription"
         defaultMessage="Creating index"
       />
     </p>
@@ -122,7 +122,7 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
   const creatingIndexAndIngestPipelineStatus = (
     <p>
       <FormattedMessage
-        id="xpack.fileDataVisualizer.importProgress.stepTwoCreatingIndexIngestPipelineDescription"
+        id="xpack.dataVisualizer.file.importProgress.stepTwoCreatingIndexIngestPipelineDescription"
         defaultMessage="Creating index and ingest pipeline"
       />
     </p>
@@ -130,7 +130,7 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
 
   if (completedStep >= 0) {
     processFileTitle = i18n.translate(
-      'xpack.fileDataVisualizer.importProgress.processingFileTitle',
+      'xpack.dataVisualizer.file.importProgress.processingFileTitle',
       {
         defaultMessage: 'Processing file',
       }
@@ -138,7 +138,7 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
     statusInfo = (
       <p>
         <FormattedMessage
-          id="xpack.fileDataVisualizer.importProgress.processingImportedFileDescription"
+          id="xpack.dataVisualizer.file.importProgress.processingImportedFileDescription"
           defaultMessage="Processing file for import"
         />
       </p>
@@ -146,13 +146,13 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
   }
   if (completedStep >= 1) {
     processFileTitle = i18n.translate(
-      'xpack.fileDataVisualizer.importProgress.fileProcessedTitle',
+      'xpack.dataVisualizer.file.importProgress.fileProcessedTitle',
       {
         defaultMessage: 'File processed',
       }
     );
     createIndexTitle = i18n.translate(
-      'xpack.fileDataVisualizer.importProgress.creatingIndexTitle',
+      'xpack.dataVisualizer.file.importProgress.creatingIndexTitle',
       {
         defaultMessage: 'Creating index',
       }
@@ -161,11 +161,14 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
       createPipeline === true ? creatingIndexAndIngestPipelineStatus : creatingIndexStatus;
   }
   if (completedStep >= 2) {
-    createIndexTitle = i18n.translate('xpack.fileDataVisualizer.importProgress.indexCreatedTitle', {
-      defaultMessage: 'Index created',
-    });
+    createIndexTitle = i18n.translate(
+      'xpack.dataVisualizer.file.importProgress.indexCreatedTitle',
+      {
+        defaultMessage: 'Index created',
+      }
+    );
     createIngestPipelineTitle = i18n.translate(
-      'xpack.fileDataVisualizer.importProgress.creatingIngestPipelineTitle',
+      'xpack.dataVisualizer.file.importProgress.creatingIngestPipelineTitle',
       {
         defaultMessage: 'Creating ingest pipeline',
       }
@@ -175,13 +178,13 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
   }
   if (completedStep >= 3) {
     createIngestPipelineTitle = i18n.translate(
-      'xpack.fileDataVisualizer.importProgress.ingestPipelineCreatedTitle',
+      'xpack.dataVisualizer.file.importProgress.ingestPipelineCreatedTitle',
       {
         defaultMessage: 'Ingest pipeline created',
       }
     );
     uploadingDataTitle = i18n.translate(
-      'xpack.fileDataVisualizer.importProgress.uploadingDataTitle',
+      'xpack.dataVisualizer.file.importProgress.uploadingDataTitle',
       {
         defaultMessage: 'Uploading data',
       }
@@ -190,14 +193,14 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
   }
   if (completedStep >= 4) {
     uploadingDataTitle = i18n.translate(
-      'xpack.fileDataVisualizer.importProgress.dataUploadedTitle',
+      'xpack.dataVisualizer.file.importProgress.dataUploadedTitle',
       {
         defaultMessage: 'Data uploaded',
       }
     );
     if (createIndexPattern === true) {
       createIndexPatternTitle = i18n.translate(
-        'xpack.fileDataVisualizer.importProgress.creatingIndexPatternTitle',
+        'xpack.dataVisualizer.file.importProgress.creatingIndexPatternTitle',
         {
           defaultMessage: 'Creating index pattern',
         }
@@ -205,7 +208,7 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
       statusInfo = (
         <p>
           <FormattedMessage
-            id="xpack.fileDataVisualizer.importProgress.creatingIndexPatternDescription"
+            id="xpack.dataVisualizer.file.importProgress.creatingIndexPatternDescription"
             defaultMessage="Creating index pattern"
           />
         </p>
@@ -216,7 +219,7 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
   }
   if (completedStep >= 5) {
     createIndexPatternTitle = i18n.translate(
-      'xpack.fileDataVisualizer.importProgress.indexPatternCreatedTitle',
+      'xpack.dataVisualizer.file.importProgress.indexPatternCreatedTitle',
       {
         defaultMessage: 'Index pattern created',
       }
@@ -290,7 +293,7 @@ const UploadFunctionProgress: FC<{ progress: number }> = ({ progress }) => {
     <React.Fragment>
       <p>
         <FormattedMessage
-          id="xpack.fileDataVisualizer.importProgress.uploadingDataDescription"
+          id="xpack.dataVisualizer.file.importProgress.uploadingDataDescription"
           defaultMessage="Uploading data"
         />
       </p>

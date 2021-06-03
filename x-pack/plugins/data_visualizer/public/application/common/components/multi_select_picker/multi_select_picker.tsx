@@ -32,7 +32,7 @@ const NoFilterItems = () => {
         <EuiSpacer size="xs" />
         <p>
           <FormattedMessage
-            id="xpack.fileDataVisualizer.multiSelectPicker.NoFiltersFoundMessage"
+            id="xpack.dataVisualizer.multiSelectPicker.NoFiltersFoundMessage"
             defaultMessage="No filters found"
           />
         </p>

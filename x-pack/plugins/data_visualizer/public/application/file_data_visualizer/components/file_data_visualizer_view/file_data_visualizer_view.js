@@ -12,7 +12,7 @@ import { EuiSpacer } from '@elastic/eui';
 
 import { isEqual } from 'lodash';
 
-import { AboutPanel, LoadingPanel } from '../../../common/components/about_panel';
+import { AboutPanel, LoadingPanel } from '../about_panel';
 import { BottomBar } from '../bottom_bar';
 import { ResultsView } from '../results_view';
 import { FileCouldNotBeRead, FileTooLarge } from './file_error_callouts';
@@ -142,7 +142,7 @@ export class FileDataVisualizerView extends Component {
         throw {
           message: (
             <FormattedMessage
-              id="xpack.fileDataVisualizer.fileDatavisualizerView.xmlNotCurrentlySupportedErrorMessage"
+              id="xpack.dataVisualizer.file.xmlNotCurrentlySupportedErrorMessage"
               defaultMessage="XML not currently supported"
             />
           ),

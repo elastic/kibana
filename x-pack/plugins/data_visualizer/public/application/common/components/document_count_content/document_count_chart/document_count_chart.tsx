@@ -42,7 +42,7 @@ export const DocumentCountChart: FC<Props> = ({
   interval,
 }) => {
   const seriesName = i18n.translate(
-    'xpack.fileDataVisualizer.fieldDataCard.documentCountChart.seriesLabel',
+    'xpack.dataVisualizer.dataGrid.field.documentCountChart.seriesLabel',
     {
       defaultMessage: 'document count',
     }

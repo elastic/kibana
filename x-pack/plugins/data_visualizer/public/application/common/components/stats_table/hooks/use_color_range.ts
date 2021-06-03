@@ -51,22 +51,19 @@ export enum COLOR_RANGE_SCALE {
 export const colorRangeScaleOptions = [
   {
     value: COLOR_RANGE_SCALE.LINEAR,
-    text: i18n.translate('xpack.fileDataVisualizer.components.colorRangeLegend.linearScaleLabel', {
+    text: i18n.translate('xpack.dataVisualizer.components.colorRangeLegend.linearScaleLabel', {
       defaultMessage: 'Linear',
     }),
   },
   {
     value: COLOR_RANGE_SCALE.INFLUENCER,
-    text: i18n.translate(
-      'xpack.fileDataVisualizer.components.colorRangeLegend.influencerScaleLabel',
-      {
-        defaultMessage: 'Influencer custom scale',
-      }
-    ),
+    text: i18n.translate('xpack.dataVisualizer.components.colorRangeLegend.influencerScaleLabel', {
+      defaultMessage: 'Influencer custom scale',
+    }),
   },
   {
     value: COLOR_RANGE_SCALE.SQRT,
-    text: i18n.translate('xpack.fileDataVisualizer.components.colorRangeLegend.sqrtScaleLabel', {
+    text: i18n.translate('xpack.dataVisualizer.components.colorRangeLegend.sqrtScaleLabel', {
       defaultMessage: 'Sqrt',
     }),
   },
@@ -86,26 +83,20 @@ export enum COLOR_RANGE {
 export const colorRangeOptions = [
   {
     value: COLOR_RANGE.BLUE,
-    text: i18n.translate(
-      'xpack.fileDataVisualizer.components.colorRangeLegend.blueColorRangeLabel',
-      {
-        defaultMessage: 'Blue',
-      }
-    ),
+    text: i18n.translate('xpack.dataVisualizer.components.colorRangeLegend.blueColorRangeLabel', {
+      defaultMessage: 'Blue',
+    }),
   },
   {
     value: COLOR_RANGE.RED,
-    text: i18n.translate(
-      'xpack.fileDataVisualizer.components.colorRangeLegend.redColorRangeLabel',
-      {
-        defaultMessage: 'Red',
-      }
-    ),
+    text: i18n.translate('xpack.dataVisualizer.components.colorRangeLegend.redColorRangeLabel', {
+      defaultMessage: 'Red',
+    }),
   },
   {
     value: COLOR_RANGE.RED_GREEN,
     text: i18n.translate(
-      'xpack.fileDataVisualizer.components.colorRangeLegend.redGreenColorRangeLabel',
+      'xpack.dataVisualizer.components.colorRangeLegend.redGreenColorRangeLabel',
       {
         defaultMessage: 'Red - Green',
       }
@@ -114,7 +105,7 @@ export const colorRangeOptions = [
   {
     value: COLOR_RANGE.GREEN_RED,
     text: i18n.translate(
-      'xpack.fileDataVisualizer.components.colorRangeLegend.greenRedColorRangeLabel',
+      'xpack.dataVisualizer.components.colorRangeLegend.greenRedColorRangeLabel',
       {
         defaultMessage: 'Green - Red',
       }
@@ -123,7 +114,7 @@ export const colorRangeOptions = [
   {
     value: COLOR_RANGE.YELLOW_GREEN_BLUE,
     text: i18n.translate(
-      'xpack.fileDataVisualizer.components.colorRangeLegend.yellowGreenBlueColorRangeLabel',
+      'xpack.dataVisualizer.components.colorRangeLegend.yellowGreenBlueColorRangeLabel',
       {
         defaultMessage: 'Yellow - Green - Blue',
       }

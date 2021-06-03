@@ -22,7 +22,7 @@ const searchSizeOptions = [1000, 5000, 10000, 100000, -1].map((v) => {
       v > 0 ? (
         <span data-test-subj={`mlDataVisualizerShardSizeOption ${v}`}>
           <FormattedMessage
-            id="xpack.fileDataVisualizer.searchPanel.sampleSizeOptionLabel"
+            id="xpack.dataVisualizer.searchPanel.sampleSizeOptionLabel"
             defaultMessage="Sample size (per shard): {wrappedValue}"
             values={{ wrappedValue: <b>{v}</b> }}
           />
@@ -30,7 +30,7 @@ const searchSizeOptions = [1000, 5000, 10000, 100000, -1].map((v) => {
       ) : (
         <span data-test-subj={`mlDataVisualizerShardSizeOption all`}>
           <FormattedMessage
-            id="xpack.fileDataVisualizer.searchPanel.allOptionLabel"
+            id="xpack.dataVisualizer.searchPanel.allOptionLabel"
             defaultMessage="Search all"
           />
         </span>
@@ -46,7 +46,7 @@ export const ShardSizeFilter: FC<Props> = ({ samplerShardSize, setSamplerShardSi
           options={searchSizeOptions}
           valueOfSelected={String(samplerShardSize)}
           onChange={(value) => setSamplerShardSize(+value)}
-          aria-label={i18n.translate('xpack.fileDataVisualizer.searchPanel.sampleSizeAriaLabel', {
+          aria-label={i18n.translate('xpack.dataVisualizer.searchPanel.sampleSizeAriaLabel', {
             defaultMessage: 'Select number of documents to sample',
           })}
           data-test-subj="mlDataVisualizerShardSizeSelect"
@@ -54,7 +54,7 @@ export const ShardSizeFilter: FC<Props> = ({ samplerShardSize, setSamplerShardSi
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiIconTip
-          content={i18n.translate('xpack.fileDataVisualizer.searchPanel.queryBarPlaceholder', {
+          content={i18n.translate('xpack.dataVisualizer.searchPanel.queryBarPlaceholder', {
             defaultMessage:
               'Selecting a smaller sample size will reduce query run times and the load on the cluster.',
           })}

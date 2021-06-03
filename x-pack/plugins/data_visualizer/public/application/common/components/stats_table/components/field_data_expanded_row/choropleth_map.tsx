@@ -27,7 +27,7 @@ export const getChoroplethTopValuesLayer = (
 ): VectorLayerDescriptor => {
   return {
     id: htmlIdGenerator()(),
-    label: i18n.translate('xpack.fileDataVisualizer.choroplethMap.topValuesCount', {
+    label: i18n.translate('xpack.dataVisualizer.choroplethMap.topValuesCount', {
       defaultMessage: 'Top values count for {fieldName}',
       values: { fieldName },
     }),
@@ -112,7 +112,7 @@ export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
           <EuiSpacer size="xs" />
           <EuiText size="xs" textAlign={'left'}>
             <FormattedMessage
-              id="xpack.fileDataVisualizer.fieldDataCardExpandedRow.choroplethMapTopValues.calculatedFromSampleDescription"
+              id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.choroplethMapTopValues.calculatedFromSampleDescription"
               defaultMessage="Calculated from sample of {topValuesSamplerShardSize} documents per shard"
               values={{
                 topValuesSamplerShardSize,

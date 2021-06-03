@@ -19,13 +19,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { ExperimentalBadge } from '../experimental_badge';
+import { ExperimentalBadge } from '../../../common/components/experimental_badge';
 
 import { useDataVisualizerKibana } from '../../../kibana_context';
 
 export const WelcomeContent: FC = () => {
   const toolTipContent = i18n.translate(
-    'xpack.fileDataVisualizer.welcomeContent.experimentalFeatureTooltip',
+    'xpack.dataVisualizer.file.welcomeContent.experimentalFeatureTooltip',
     {
       defaultMessage: "Experimental feature. We'd love to hear your feedback.",
     }
@@ -47,7 +47,7 @@ export const WelcomeContent: FC = () => {
         <EuiTitle size="m">
           <h1>
             <FormattedMessage
-              id="xpack.fileDataVisualizer.welcomeContent.visualizeDataFromLogFileTitle"
+              id="xpack.dataVisualizer.file.welcomeContent.visualizeDataFromLogFileTitle"
               defaultMessage="Visualize data from a log file&nbsp;{experimentalBadge}"
               values={{
                 experimentalBadge: <ExperimentalBadge tooltipContent={toolTipContent} />,
@@ -59,7 +59,7 @@ export const WelcomeContent: FC = () => {
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.fileDataVisualizer.welcomeContent.visualizeDataFromLogFileDescription"
+              id="xpack.dataVisualizer.file.welcomeContent.visualizeDataFromLogFileDescription"
               defaultMessage="The File Data Visualizer helps you understand the fields and metrics in a log file.
               Upload your file, analyze its data, and then choose whether to import the data into an Elasticsearch index."
             />
@@ -69,7 +69,7 @@ export const WelcomeContent: FC = () => {
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.fileDataVisualizer.welcomeContent.supportedFileFormatDescription"
+              id="xpack.dataVisualizer.file.welcomeContent.supportedFileFormatDescription"
               defaultMessage="The File Data Visualizer supports these file formats:"
             />
           </p>
@@ -83,7 +83,7 @@ export const WelcomeContent: FC = () => {
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="xpack.fileDataVisualizer.welcomeContent.delimitedTextFilesDescription"
+                  id="xpack.dataVisualizer.file.welcomeContent.delimitedTextFilesDescription"
                   defaultMessage="Delimited text files, such as CSV and TSV"
                 />
               </p>
@@ -99,7 +99,7 @@ export const WelcomeContent: FC = () => {
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="xpack.fileDataVisualizer.welcomeContent.newlineDelimitedJsonDescription"
+                  id="xpack.dataVisualizer.file.welcomeContent.newlineDelimitedJsonDescription"
                   defaultMessage="Newline-delimited JSON"
                 />
               </p>
@@ -115,7 +115,7 @@ export const WelcomeContent: FC = () => {
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="xpack.fileDataVisualizer.welcomeContent.logFilesWithCommonFormatDescription"
+                  id="xpack.dataVisualizer.file.welcomeContent.logFilesWithCommonFormatDescription"
                   defaultMessage="Log files with a common format for the timestamp"
                 />
               </p>
@@ -126,7 +126,7 @@ export const WelcomeContent: FC = () => {
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.fileDataVisualizer.welcomeContent.uploadedFilesAllowedSizeDescription"
+              id="xpack.dataVisualizer.file.welcomeContent.uploadedFilesAllowedSizeDescription"
               defaultMessage="You can upload files up to {maxFileSize}."
               values={{ maxFileSize }}
             />
@@ -136,7 +136,7 @@ export const WelcomeContent: FC = () => {
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.fileDataVisualizer.welcomeContent.experimentalFeatureDescription"
+              id="xpack.dataVisualizer.file.welcomeContent.experimentalFeatureDescription"
               defaultMessage="This feature is experimental. Got feedback? Please create an issue in&nbsp;{githubLink}."
               values={{
                 githubLink: (

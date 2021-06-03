@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
 import { CoreSetup } from 'src/core/public';
 
 import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
@@ -32,16 +30,14 @@ export class DataLoader {
   private _runtimeMappings: RuntimeMappings;
   private _indexPatternTitle: IndexPatternTitle = '';
   private _maxExamples: number = MAX_EXAMPLES_DEFAULT;
-  private _toastNotificationsService: ToastNotificationService;
 
   constructor(
     indexPattern: IndexPattern,
-    toastNotifications: CoreSetup['notifications']['toasts']
+    toastNotifications?: CoreSetup['notifications']['toasts']
   ) {
     this._indexPattern = indexPattern;
     this._runtimeMappings = this._indexPattern.getComputedFields().runtimeFields as RuntimeMappings;
     this._indexPatternTitle = indexPattern.title;
-    this._toastNotificationsService = toastNotificationServiceProvider(toastNotifications);
   }
 
   async loadFieldHistograms(
@@ -59,34 +55,6 @@ export class DataLoader {
     });
 
     return stats;
-  }
-
-  displayError(err: any) {
-    if (err.statusCode === 500) {
-      this._toastNotificationsService.displayErrorToast(
-        err,
-        i18n.translate('xpack.ml.datavisualizer.dataLoader.internalServerErrorMessage', {
-          defaultMessage:
-            'Error loading data in index {index}. {message}. ' +
-            'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
-          values: {
-            index: this._indexPattern.title,
-            message: err.message,
-          },
-        })
-      );
-    } else {
-      this._toastNotificationsService.displayErrorToast(
-        err,
-        i18n.translate('xpack.ml.datavisualizer.page.errorLoadingDataMessage', {
-          defaultMessage: 'Error loading data in index {index}. {message}',
-          values: {
-            index: this._indexPattern.title,
-            message: err.message,
-          },
-        })
-      );
-    }
   }
 
   public set maxExamples(max: number) {

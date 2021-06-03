@@ -39,7 +39,7 @@ export const BottomBar: FC<BottomBarProps> = ({ mode, onChangeMode, onCancel, di
               content={
                 disableImport ? (
                   <FormattedMessage
-                    id="xpack.fileDataVisualizer.bottomBar.missingImportPrivilegesMessage"
+                    id="xpack.dataVisualizer.file.bottomBar.missingImportPrivilegesMessage"
                     defaultMessage="You require the ingest_admin role to enable data importing"
                   />
                 ) : null
@@ -52,7 +52,7 @@ export const BottomBar: FC<BottomBarProps> = ({ mode, onChangeMode, onCancel, di
                 data-test-subj="mlFileDataVisOpenImportPageButton"
               >
                 <FormattedMessage
-                  id="xpack.fileDataVisualizer.bottomBar.readMode.importButtonLabel"
+                  id="xpack.dataVisualizer.file.bottomBar.readMode.importButtonLabel"
                   defaultMessage="Import"
                 />
               </EuiButton>
@@ -61,7 +61,7 @@ export const BottomBar: FC<BottomBarProps> = ({ mode, onChangeMode, onCancel, di
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty color="ghost" onClick={() => onCancel()}>
               <FormattedMessage
-                id="xpack.fileDataVisualizer.bottomBar.readMode.cancelButtonLabel"
+                id="xpack.dataVisualizer.file.bottomBar.readMode.cancelButtonLabel"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
@@ -76,7 +76,7 @@ export const BottomBar: FC<BottomBarProps> = ({ mode, onChangeMode, onCancel, di
           <EuiFlexItem grow={false}>
             <EuiButton color="ghost" onClick={() => onChangeMode(DATAVISUALIZER_MODE.READ)}>
               <FormattedMessage
-                id="xpack.fileDataVisualizer.bottomBar.backButtonLabel"
+                id="xpack.dataVisualizer.file.bottomBar.backButtonLabel"
                 defaultMessage="Back"
               />
             </EuiButton>
@@ -84,7 +84,7 @@ export const BottomBar: FC<BottomBarProps> = ({ mode, onChangeMode, onCancel, di
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty color="ghost" onClick={() => onCancel()}>
               <FormattedMessage
-                id="xpack.fileDataVisualizer.bottomBar.cancelButtonLabel"
+                id="xpack.dataVisualizer.file.bottomBar.cancelButtonLabel"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>

@@ -30,7 +30,7 @@ export const DateContent: FC<FieldDataRowProps> = ({ config }) => {
   const { earliest, latest } = stats;
 
   const summaryTableTitle = i18n.translate(
-    'xpack.fileDataVisualizer.fieldDataCard.cardDate.summaryTableTitle',
+    'xpack.dataVisualizer.dataGrid.field.cardDate.summaryTableTitle',
     {
       defaultMessage: 'Summary',
     }
@@ -40,7 +40,7 @@ export const DateContent: FC<FieldDataRowProps> = ({ config }) => {
       function: 'earliest',
       display: (
         <FormattedMessage
-          id="xpack.fileDataVisualizer.fieldDataCard.cardDate.earliestLabel"
+          id="xpack.dataVisualizer.dataGrid.field.cardDate.earliestLabel"
           defaultMessage="earliest"
         />
       ),
@@ -50,7 +50,7 @@ export const DateContent: FC<FieldDataRowProps> = ({ config }) => {
       function: 'latest',
       display: (
         <FormattedMessage
-          id="xpack.fileDataVisualizer.fieldDataCard.cardDate.latestLabel"
+          id="xpack.dataVisualizer.dataGrid.field.cardDate.latestLabel"
           defaultMessage="latest"
         />
       ),

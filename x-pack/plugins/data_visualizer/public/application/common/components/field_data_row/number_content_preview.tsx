@@ -24,26 +24,20 @@ export const FileBasedNumberContentPreview = ({ config }: { config: FileBasedFie
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem>
           <b>
-            <FormattedMessage
-              id="xpack.fileDataVisualizer.fieldStatsCard.minTitle"
-              defaultMessage="min"
-            />
+            <FormattedMessage id="xpack.dataVisualizer.fieldStats.minTitle" defaultMessage="min" />
           </b>
         </EuiFlexItem>
         <EuiFlexItem>
           <b>
             <FormattedMessage
-              id="xpack.fileDataVisualizer.fieldStatsCard.medianTitle"
+              id="xpack.dataVisualizer.fieldStats.medianTitle"
               defaultMessage="median"
             />
           </b>
         </EuiFlexItem>
         <EuiFlexItem>
           <b>
-            <FormattedMessage
-              id="xpack.fileDataVisualizer.fieldStatsCard.maxTitle"
-              defaultMessage="max"
-            />
+            <FormattedMessage id="xpack.dataVisualizer.fieldStats.maxTitle" defaultMessage="max" />
           </b>
         </EuiFlexItem>
       </EuiFlexGroup>

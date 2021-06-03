@@ -104,7 +104,7 @@ export class DataLoader {
   displayError(err: any) {
     if (err.statusCode === 500) {
       this._toastNotifications.addError(err, {
-        title: i18n.translate('xpack.fileDataVisualizer.dataLoader.internalServerErrorMessage', {
+        title: i18n.translate('xpack.dataVisualizer.index.dataLoader.internalServerErrorMessage', {
           defaultMessage:
             'Error loading data in index {index}. {message}. ' +
             'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
@@ -116,7 +116,7 @@ export class DataLoader {
       });
     } else {
       this._toastNotifications.addError(err, {
-        title: i18n.translate('xpack.fileDataVisualizer.page.errorLoadingDataMessage.', {
+        title: i18n.translate('xpack.dataVisualizer.index.errorLoadingDataMessage.', {
           defaultMessage: 'Error loading data in index {index}. {message}',
           values: {
             index: this._indexPattern.title,

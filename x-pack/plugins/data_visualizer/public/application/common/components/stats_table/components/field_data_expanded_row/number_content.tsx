@@ -52,7 +52,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
       function: 'min',
       display: (
         <FormattedMessage
-          id="xpack.fileDataVisualizer.fieldDataCardExpandedRow.numberContent.minLabel"
+          id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.numberContent.minLabel"
           defaultMessage="min"
         />
       ),
@@ -62,7 +62,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
       function: 'median',
       display: (
         <FormattedMessage
-          id="xpack.fileDataVisualizer.fieldDataCardExpandedRow.numberContent.medianLabel"
+          id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.numberContent.medianLabel"
           defaultMessage="median"
         />
       ),
@@ -72,7 +72,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
       function: 'max',
       display: (
         <FormattedMessage
-          id="xpack.fileDataVisualizer.fieldDataCardExpandedRow.numberContent.maxLabel"
+          id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.numberContent.maxLabel"
           defaultMessage="max"
         />
       ),
@@ -93,7 +93,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
   ];
 
   const summaryTableTitle = i18n.translate(
-    'xpack.fileDataVisualizer.fieldDataCardExpandedRow.numberContent.summaryTableTitle',
+    'xpack.dataVisualizer.dataGrid.fieldExpandedRow.numberContent.summaryTableTitle',
     {
       defaultMessage: 'Summary',
     }
@@ -121,7 +121,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
           <EuiFlexItem grow={false}>
             <ExpandedRowFieldHeader>
               <FormattedMessage
-                id="xpack.fileDataVisualizer.fieldDataCardExpandedRow.numberContent.distributionTitle"
+                id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.numberContent.distributionTitle"
                 defaultMessage="Distribution"
               />
             </ExpandedRowFieldHeader>
@@ -138,7 +138,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
           <EuiFlexItem grow={false}>
             <EuiText size="xs">
               <FormattedMessage
-                id="xpack.fileDataVisualizer.fieldDataCardExpandedRow.numberContent.displayingPercentilesLabel"
+                id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.numberContent.displayingPercentilesLabel"
                 defaultMessage="Displaying {minPercent} - {maxPercent} percentiles"
                 values={{
                   minPercent: numberAsOrdinal(distribution.minPercentile),

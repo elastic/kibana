@@ -20,15 +20,12 @@ export function getActions(
   const canUseLensEditor = lensPlugin.canUseEditor();
   return [
     {
-      name: i18n.translate('xpack.fileDataVisualizer.indexBasedDataGrid.exploreInLensTitle', {
+      name: i18n.translate('xpack.dataVisualizer.index.dataGrid.exploreInLensTitle', {
         defaultMessage: 'Explore in Lens',
       }),
-      description: i18n.translate(
-        'xpack.fileDataVisualizer.indexBasedDataGrid.exploreInLensDescription',
-        {
-          defaultMessage: 'Explore in Lens',
-        }
-      ),
+      description: i18n.translate('xpack.dataVisualizer.index.dataGrid.exploreInLensDescription', {
+        defaultMessage: 'Explore in Lens',
+      }),
       type: 'icon',
       icon: 'lensApp',
       available: (item: FieldVisConfig) =>

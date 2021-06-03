@@ -17,7 +17,7 @@ export const ExperimentalBadge: FC<{ tooltipContent: string }> = ({ tooltipConte
         className="experimental-badge"
         label={
           <FormattedMessage
-            id="xpack.fileDataVisualizer.experimentalBadge.experimentalLabel"
+            id="xpack.dataVisualizer.experimentalBadge.experimentalLabel"
             defaultMessage="Experimental"
           />
         }

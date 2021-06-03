@@ -37,7 +37,7 @@ export const TotalFieldsCount: FC<TotalFieldsCountProps> = ({ fieldsCountStats }
         <EuiText>
           <h5>
             <FormattedMessage
-              id="xpack.fileDataVisualizer.searchPanel.allFieldsLabel"
+              id="xpack.dataVisualizer.searchPanel.allFieldsLabel"
               defaultMessage="All fields"
             />
           </h5>
@@ -56,7 +56,7 @@ export const TotalFieldsCount: FC<TotalFieldsCountProps> = ({ fieldsCountStats }
       <EuiFlexItem grow={false}>
         <EuiText color="subdued" size="s" data-test-subj="mlDataVisualizerTotalFieldsCount">
           <FormattedMessage
-            id="xpack.fileDataVisualizer.searchPanel.ofFieldsTotal"
+            id="xpack.dataVisualizer.searchPanel.ofFieldsTotal"
             defaultMessage="of {totalCount} total"
             values={{ totalCount: fieldsCountStats.totalFieldsCount }}
           />

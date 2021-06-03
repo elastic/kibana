@@ -33,7 +33,7 @@ export const TextContent: FC<FieldDataRowProps> = ({ config }) => {
             <EuiSpacer size="xl" />
             <EuiCallOut
               title={i18n.translate(
-                'xpack.fileDataVisualizer.fieldDataCard.cardText.noExamplesForFieldsTitle',
+                'xpack.dataVisualizer.dataGrid.fieldText.noExamplesForFieldsTitle',
                 {
                   defaultMessage: 'No examples were obtained for this field',
                 }
@@ -41,7 +41,7 @@ export const TextContent: FC<FieldDataRowProps> = ({ config }) => {
               iconType="alert"
             >
               <FormattedMessage
-                id="xpack.fileDataVisualizer.fieldDataCard.cardText.fieldNotPresentDescription"
+                id="xpack.dataVisualizer.dataGrid.fieldText.fieldNotPresentDescription"
                 defaultMessage="This field was not present in the {sourceParam} field of documents queried."
                 values={{
                   sourceParam: <span className="fieldDataCard__codeContent">_source</span>,
@@ -51,7 +51,7 @@ export const TextContent: FC<FieldDataRowProps> = ({ config }) => {
               <EuiSpacer size="s" />
 
               <FormattedMessage
-                id="xpack.fileDataVisualizer.fieldDataCard.cardText.fieldMayBePopulatedDescription"
+                id="xpack.dataVisualizer.dataGrid.fieldText.fieldMayBePopulatedDescription"
                 defaultMessage="It may be populated, for example, using a {copyToParam} parameter in the document mapping, or be pruned from the {sourceParam} field after indexing through the use of {includesParam} and {excludesParam} parameters."
                 values={{
                   copyToParam: <span className="fieldDataCard__codeContent">copy_to</span>,

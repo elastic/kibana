@@ -182,14 +182,14 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     if (!currentIndexPattern.isTimeBased()) {
       toasts.addWarning({
         title: i18n.translate(
-          'xpack.fileDataVisualizer.indexPatternNotBasedOnTimeSeriesNotificationTitle',
+          'xpack.dataVisualizer.index.indexPatternNotBasedOnTimeSeriesNotificationTitle',
           {
             defaultMessage: 'The index pattern {indexPatternTitle} is not based on a time series',
             values: { indexPatternTitle: currentIndexPattern.title },
           }
         ),
         text: i18n.translate(
-          'xpack.fileDataVisualizer.indexPatternNotBasedOnTimeSeriesNotificationDescription',
+          'xpack.dataVisualizer.index.indexPatternNotBasedOnTimeSeriesNotificationDescription',
           {
             defaultMessage: 'Anomaly detection only runs over time-based indices',
           }
@@ -764,7 +764,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     const actionColumn: EuiTableActionsColumnType<FieldVisConfig> = {
       name: (
         <FormattedMessage
-          id="xpack.fileDataVisualizer.indexBasedDataGrid.actionsColumnLabel"
+          id="xpack.dataVisualizer.index.dataGrid.actionsColumnLabel"
           defaultMessage="Actions"
         />
       ),

@@ -58,7 +58,7 @@ export const MetricDistributionChart: FC<Props> = ({
   // Ideally we wouldn't show these values at all in the tooltip,
   // but this is not yet possible with Elastic charts.
   const seriesName = i18n.translate(
-    'xpack.fileDataVisualizer.fieldDataCard.metricDistributionChart.seriesName',
+    'xpack.dataVisualizer.dataGrid.field.metricDistributionChart.seriesName',
     {
       defaultMessage: 'distribution',
     }

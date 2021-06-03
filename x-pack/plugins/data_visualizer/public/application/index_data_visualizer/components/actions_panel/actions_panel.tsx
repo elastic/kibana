@@ -92,7 +92,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
           <EuiTitle size="s">
             <h2>
               <FormattedMessage
-                id="xpack.fileDataVisualizer.actionsPanel.exploreTitle"
+                id="xpack.dataVisualizer.index.actionsPanel.exploreTitle"
                 defaultMessage="Explore your data"
               />
             </h2>
@@ -102,14 +102,14 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
             href={discoverLink}
             icon="discoverApp"
             description={i18n.translate(
-              'xpack.fileDataVisualizer.actionsPanel.viewIndexInDiscoverDescription',
+              'xpack.dataVisualizer.index.actionsPanel.viewIndexInDiscoverDescription',
               {
                 defaultMessage: 'Explore the documents in your index.',
               }
             )}
             title={
               <FormattedMessage
-                id="xpack.fileDataVisualizer.actionsPanel.discoverAppTitle"
+                id="xpack.dataVisualizer.index.actionsPanel.discoverAppTitle"
                 defaultMessage="Discover"
               />
             }

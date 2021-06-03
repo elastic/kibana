@@ -72,7 +72,7 @@ export const ResultsView: FC<Props> = ({
               <EuiFlexItem grow={false}>
                 <EuiButton onClick={() => showEditFlyout()} disabled={disableButtons}>
                   <FormattedMessage
-                    id="xpack.fileDataVisualizer.resultsView.overrideSettingsButtonLabel"
+                    id="xpack.dataVisualizer.file.resultsView.overrideSettingsButtonLabel"
                     defaultMessage="Override settings"
                   />
                 </EuiButton>
@@ -80,7 +80,7 @@ export const ResultsView: FC<Props> = ({
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty onClick={() => showExplanationFlyout()} disabled={disableButtons}>
                   <FormattedMessage
-                    id="xpack.fileDataVisualizer.resultsView.analysisExplanationButtonLabel"
+                    id="xpack.dataVisualizer.file.resultsView.analysisExplanationButtonLabel"
                     defaultMessage="Analysis explanation"
                   />
                 </EuiButtonEmpty>
@@ -94,7 +94,7 @@ export const ResultsView: FC<Props> = ({
             <EuiTitle size="s">
               <h2 data-test-subj="mlFileDataVisStatsTitle">
                 <FormattedMessage
-                  id="xpack.fileDataVisualizer.resultsView.fileStatsName"
+                  id="xpack.dataVisualizer.file.resultsView.fileStatsName"
                   defaultMessage="File stats"
                 />
               </h2>

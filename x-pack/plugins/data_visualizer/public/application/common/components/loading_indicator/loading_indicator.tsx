@@ -22,7 +22,7 @@ export const LoadingIndicator: FC = () => (
       <EuiFlexItem grow={false}>
         <EuiText color="subdued">
           <FormattedMessage
-            id="xpack.fileDataVisualizer.fieldDataCard.loadingLabel"
+            id="xpack.dataVisualizer.dataGrid.field.loadingLabel"
             defaultMessage="Loading"
           />
         </EuiText>

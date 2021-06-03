@@ -11,31 +11,31 @@ import type { IndexPatternField } from '../../../../../../../src/plugins/data/co
 import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/common';
 
 export const jobTypeAriaLabels = {
-  BOOLEAN: i18n.translate('xpack.fileDataVisualizer.fieldTypeIcon.booleanTypeAriaLabel', {
+  BOOLEAN: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.booleanTypeAriaLabel', {
     defaultMessage: 'boolean type',
   }),
-  DATE: i18n.translate('xpack.fileDataVisualizer.fieldTypeIcon.dateTypeAriaLabel', {
+  DATE: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.dateTypeAriaLabel', {
     defaultMessage: 'date type',
   }),
-  GEO_POINT: i18n.translate('xpack.fileDataVisualizer.fieldTypeIcon.geoPointTypeAriaLabel', {
+  GEO_POINT: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.geoPointTypeAriaLabel', {
     defaultMessage: '{geoPointParam} type',
     values: {
       geoPointParam: 'geo point',
     },
   }),
-  IP: i18n.translate('xpack.fileDataVisualizer.fieldTypeIcon.ipTypeAriaLabel', {
+  IP: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.ipTypeAriaLabel', {
     defaultMessage: 'ip type',
   }),
-  KEYWORD: i18n.translate('xpack.fileDataVisualizer.fieldTypeIcon.keywordTypeAriaLabel', {
+  KEYWORD: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.keywordTypeAriaLabel', {
     defaultMessage: 'keyword type',
   }),
-  NUMBER: i18n.translate('xpack.fileDataVisualizer.fieldTypeIcon.numberTypeAriaLabel', {
+  NUMBER: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.numberTypeAriaLabel', {
     defaultMessage: 'number type',
   }),
-  TEXT: i18n.translate('xpack.fileDataVisualizer.fieldTypeIcon.textTypeAriaLabel', {
+  TEXT: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.textTypeAriaLabel', {
     defaultMessage: 'text type',
   }),
-  UNKNOWN: i18n.translate('xpack.fileDataVisualizer.fieldTypeIcon.unknownTypeAriaLabel', {
+  UNKNOWN: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.unknownTypeAriaLabel', {
     defaultMessage: 'unknown type',
   }),
 };

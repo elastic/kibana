@@ -20,7 +20,7 @@ export const NotInDocsContent: FC = () => (
     <EuiSpacer size="s" />
     <EuiText textAlign="center">
       <FormattedMessage
-        id="xpack.fileDataVisualizer.fieldDataCard.fieldNotInDocsLabel"
+        id="xpack.dataVisualizer.dataGrid.field.fieldNotInDocsLabel"
         defaultMessage="This field does not appear in any documents for the selected time range"
       />
     </EuiText>

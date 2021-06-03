@@ -12,7 +12,7 @@ import { FileDataVisualizerWrapper } from './lazy_load_bundle/component_wrapper'
 export function registerHomeAddData(home: HomePublicPluginSetup) {
   home.addData.registerAddDataTab({
     id: 'fileDataViz',
-    name: i18n.translate('xpack.fileDataVisualizer.embeddedTabTitle', {
+    name: i18n.translate('xpack.dataVisualizer.file.embeddedTabTitle', {
       defaultMessage: 'Upload file',
     }),
     component: FileDataVisualizerWrapper,

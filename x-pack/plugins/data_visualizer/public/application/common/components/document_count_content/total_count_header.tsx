@@ -14,13 +14,13 @@ export const TotalCountHeader = ({ totalCount }: { totalCount: number }) => {
     <EuiFlexItem>
       <EuiText size="s" data-test-subj="mlDataVisualizerTotalDocCountHeader">
         <FormattedMessage
-          id="xpack.fileDataVisualizer.searchPanel.totalDocCountLabel"
+          id="xpack.dataVisualizer.searchPanel.totalDocCountLabel"
           defaultMessage="Total documents: {strongTotalCount}"
           values={{
             strongTotalCount: (
               <strong data-test-subj="mlDataVisualizerTotalDocCount">
                 <FormattedMessage
-                  id="xpack.fileDataVisualizer.searchPanel.totalDocCountNumber"
+                  id="xpack.dataVisualizer.searchPanel.totalDocCountNumber"
                   defaultMessage="{totalCount, plural, one {#} other {#}}"
                   values={{ totalCount }}
                 />

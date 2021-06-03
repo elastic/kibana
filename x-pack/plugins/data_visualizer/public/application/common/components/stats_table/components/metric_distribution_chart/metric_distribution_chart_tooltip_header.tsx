@@ -31,7 +31,7 @@ export const MetricDistributionChartTooltipHeader: FC<Props> = ({
     <div style={{ maxWidth }}>
       {chartPoint.dataMax > chartPoint.dataMin ? (
         <FormattedMessage
-          id="xpack.fileDataVisualizer.fieldDataCard.metricDistributionChart.tooltipValueBetweenLabel"
+          id="xpack.dataVisualizer.dataGrid.field.metricDistributionChart.tooltipValueBetweenLabel"
           defaultMessage="{percent}% of documents have values between {minValFormatted} and {maxValFormatted}"
           values={{
             percent: chartPoint.percent,
@@ -41,7 +41,7 @@ export const MetricDistributionChartTooltipHeader: FC<Props> = ({
         />
       ) : (
         <FormattedMessage
-          id="xpack.fileDataVisualizer.fieldDataCard.metricDistributionChart.tooltipValueEqualLabel"
+          id="xpack.dataVisualizer.dataGrid.field.metricDistributionChart.tooltipValueEqualLabel"
           defaultMessage="{percent}% of documents have a value of {valFormatted}"
           values={{
             percent: chartPoint.percent,

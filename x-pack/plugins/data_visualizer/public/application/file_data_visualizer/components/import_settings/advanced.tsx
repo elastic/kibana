@@ -69,7 +69,7 @@ export const AdvancedSettings: FC<Props> = ({
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.fileDataVisualizer.advancedImportSettings.indexNameLabel"
+            id="xpack.dataVisualizer.file.advancedImportSettings.indexNameLabel"
             defaultMessage="Index name"
           />
         }
@@ -78,7 +78,7 @@ export const AdvancedSettings: FC<Props> = ({
       >
         <EuiFieldText
           placeholder={i18n.translate(
-            'xpack.fileDataVisualizer.advancedImportSettings.indexNamePlaceholder',
+            'xpack.dataVisualizer.file.advancedImportSettings.indexNamePlaceholder',
             {
               defaultMessage: 'index name',
             }
@@ -88,7 +88,7 @@ export const AdvancedSettings: FC<Props> = ({
           onChange={onIndexChange}
           isInvalid={indexNameError !== ''}
           aria-label={i18n.translate(
-            'xpack.fileDataVisualizer.advancedImportSettings.indexNameAriaLabel',
+            'xpack.dataVisualizer.file.advancedImportSettings.indexNameAriaLabel',
             {
               defaultMessage: 'Index name, required field',
             }
@@ -102,7 +102,7 @@ export const AdvancedSettings: FC<Props> = ({
         id="createIndexPattern"
         label={
           <FormattedMessage
-            id="xpack.fileDataVisualizer.advancedImportSettings.createIndexPatternLabel"
+            id="xpack.dataVisualizer.file.advancedImportSettings.createIndexPatternLabel"
             defaultMessage="Create index pattern"
           />
         }
@@ -116,7 +116,7 @@ export const AdvancedSettings: FC<Props> = ({
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.fileDataVisualizer.advancedImportSettings.indexPatternNameLabel"
+            id="xpack.dataVisualizer.file.advancedImportSettings.indexPatternNameLabel"
             defaultMessage="Index pattern name"
           />
         }
@@ -184,7 +184,7 @@ const IndexSettings: FC<JsonEditorProps> = ({ initialized, data, onChange }) => 
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.fileDataVisualizer.advancedImportSettings.indexSettingsLabel"
+            id="xpack.dataVisualizer.file.advancedImportSettings.indexSettingsLabel"
             defaultMessage="Index settings"
           />
         }
@@ -209,7 +209,7 @@ const Mappings: FC<JsonEditorProps> = ({ initialized, data, onChange }) => {
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.fileDataVisualizer.advancedImportSettings.mappingsLabel"
+            id="xpack.dataVisualizer.file.advancedImportSettings.mappingsLabel"
             defaultMessage="Mappings"
           />
         }
@@ -234,7 +234,7 @@ const IngestPipeline: FC<JsonEditorProps> = ({ initialized, data, onChange }) =>
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.fileDataVisualizer.advancedImportSettings.ingestPipelineLabel"
+            id="xpack.dataVisualizer.file.advancedImportSettings.ingestPipelineLabel"
             defaultMessage="Ingest pipeline"
           />
         }

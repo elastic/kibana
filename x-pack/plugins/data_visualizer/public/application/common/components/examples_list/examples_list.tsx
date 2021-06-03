@@ -23,7 +23,7 @@ export const ExamplesList: FC<Props> = ({ examples }) => {
   if (examples.length === 0) {
     examplesContent = (
       <FormattedMessage
-        id="xpack.fileDataVisualizer.fieldDataCard.examplesList.noExamplesMessage"
+        id="xpack.dataVisualizer.dataGrid.field.examplesList.noExamplesMessage"
         defaultMessage="No examples were obtained for this field"
       />
     );
@@ -44,7 +44,7 @@ export const ExamplesList: FC<Props> = ({ examples }) => {
     <div data-test-subj="mlFieldDataExamplesList">
       <ExpandedRowFieldHeader>
         <FormattedMessage
-          id="xpack.fileDataVisualizer.fieldDataCard.examplesList.title"
+          id="xpack.dataVisualizer.dataGrid.field.examplesList.title"
           defaultMessage="{numExamples, plural, one {Value} other {Examples}}"
           values={{
             numExamples: examples.length,

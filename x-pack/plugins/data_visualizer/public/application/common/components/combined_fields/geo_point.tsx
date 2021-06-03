@@ -119,7 +119,7 @@ export class GeoPointForm extends Component<Props, State> {
     return (
       <Fragment>
         <EuiFormRow
-          label={i18n.translate('xpack.fileDataVisualizer.geoPointForm.latFieldLabel', {
+          label={i18n.translate('xpack.dataVisualizer.file.geoPointForm.latFieldLabel', {
             defaultMessage: 'Latitude field',
           })}
         >
@@ -131,7 +131,7 @@ export class GeoPointForm extends Component<Props, State> {
         </EuiFormRow>
 
         <EuiFormRow
-          label={i18n.translate('xpack.fileDataVisualizer.geoPointForm.lonFieldLabel', {
+          label={i18n.translate('xpack.dataVisualizer.file.geoPointForm.lonFieldLabel', {
             defaultMessage: 'Longitude field',
           })}
         >
@@ -143,7 +143,7 @@ export class GeoPointForm extends Component<Props, State> {
         </EuiFormRow>
 
         <EuiFormRow
-          label={i18n.translate('xpack.fileDataVisualizer.geoPointForm.geoPointFieldLabel', {
+          label={i18n.translate('xpack.dataVisualizer.file.geoPointForm.geoPointFieldLabel', {
             defaultMessage: 'Geo point field',
           })}
           isInvalid={this.state.geoPointFieldError !== ''}
@@ -154,7 +154,7 @@ export class GeoPointForm extends Component<Props, State> {
             onChange={this.onGeoPointFieldChange}
             isInvalid={this.state.geoPointFieldError !== ''}
             aria-label={i18n.translate(
-              'xpack.fileDataVisualizer.geoPointForm.geoPointFieldAriaLabel',
+              'xpack.dataVisualizer.file.geoPointForm.geoPointFieldAriaLabel',
               {
                 defaultMessage: 'Geo point field, required field',
               }
@@ -179,7 +179,7 @@ export class GeoPointForm extends Component<Props, State> {
             onClick={this.onSubmit}
           >
             <FormattedMessage
-              id="xpack.fileDataVisualizer.geoPointForm.submitButtonLabel"
+              id="xpack.dataVisualizer.file.geoPointForm.submitButtonLabel"
               defaultMessage="Add"
             />
           </EuiButton>

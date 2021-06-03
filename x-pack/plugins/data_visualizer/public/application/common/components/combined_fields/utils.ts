@@ -127,7 +127,7 @@ export function createGeoPointCombinedField(
 }
 
 export function getNameCollisionMsg(name: string) {
-  return i18n.translate('xpack.fileDataVisualizer.nameCollisionMsg', {
+  return i18n.translate('xpack.dataVisualizer.nameCollisionMsg', {
     defaultMessage: '"{name}" already exists, please provide a unique name',
     values: { name },
   });

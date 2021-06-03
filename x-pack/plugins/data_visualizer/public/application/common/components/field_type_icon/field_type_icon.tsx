@@ -91,7 +91,7 @@ export const FieldTypeIcon: FC<FieldTypeIconProps> = ({
     return (
       <EuiToolTip
         position="left"
-        content={i18n.translate('xpack.fileDataVisualizer.fieldTypeIcon.fieldTypeTooltip', {
+        content={i18n.translate('xpack.dataVisualizer.fieldTypeIcon.fieldTypeTooltip', {
           defaultMessage: '{type} type',
           values: { type },
         })}
