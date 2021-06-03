@@ -37,14 +37,16 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
     mappings,
     connectorType,
   } = ((actionConnector as unknown) as SwimlaneActionConnector).config;
-  const { hasRuleName, hasAlertSource, hasComments, hasSeverity } = useMemo(
+  const { hasAlertId, hasRuleName, hasAlertSource, hasComments, hasSeverity } = useMemo(
     () => ({
+      hasAlertId: mappings.alertIdConfig != null,
       hasRuleName: mappings.ruleNameConfig != null,
       hasAlertSource: mappings.alertSourceConfig != null,
       hasComments: mappings.commentsConfig != null,
       hasSeverity: mappings.severityConfig != null,
     }),
     [
+      mappings.alertIdConfig,
       mappings.ruleNameConfig,
       mappings.alertSourceConfig,
       mappings.commentsConfig,
@@ -118,10 +120,35 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
 
   return !showMappingWarning ? (
     <>
+      {hasAlertId && (
+        <>
+          <EuiFormRow
+            id="swimlaneAlertId"
+            fullWidth
+            error={errors['subActionParams.incident.alertId'] ?? ''}
+            isInvalid={
+              errors['subActionParams.incident.alertId']?.length > 0 &&
+              incident.ruleName !== undefined
+            }
+            label={i18n.SW_ALERT_ID_FIELD_LABEL}
+          >
+            <TextFieldWithMessageVariables
+              index={index}
+              data-test-subj="alertId"
+              editAction={editSubActionProperty}
+              messageVariables={messageVariables}
+              paramsProperty={'alertId'}
+              inputTargetValue={incident.alertId ?? undefined}
+              errors={errors['subActionParams.incident.alertId'] as string[]}
+            />
+          </EuiFormRow>
+          <EuiSpacer size="m" />
+        </>
+      )}
       {hasRuleName && (
         <>
           <EuiFormRow
-            id="swimlaneAlertName"
+            id="swimlaneRuleName"
             fullWidth
             error={errors['subActionParams.incident.ruleName'] ?? ''}
             isInvalid={

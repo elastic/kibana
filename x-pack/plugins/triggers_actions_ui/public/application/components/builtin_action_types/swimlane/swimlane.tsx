@@ -80,17 +80,21 @@ export function getActionType(): ActionTypeModel<
     validateParams: (actionParams: SwimlaneActionParams): GenericValidationResult<unknown> => {
       const errors = {
         'subActionParams.incident.ruleName': new Array<string>(),
+        'subActionParams.incident.alertId': new Array<string>(),
       };
       const validationResult = {
         errors,
       };
-      if (
-        actionParams.subActionParams &&
-        actionParams.subActionParams.incident &&
-        !actionParams.subActionParams.incident.ruleName?.length
-      ) {
+      const hasIncident = actionParams.subActionParams && actionParams.subActionParams.incident;
+
+      if (hasIncident && !actionParams.subActionParams.incident.ruleName?.length) {
         errors['subActionParams.incident.ruleName'].push(i18n.SW_REQUIRED_RULE_NAME);
       }
+
+      if (hasIncident && !actionParams.subActionParams.incident.alertId?.length) {
+        errors['subActionParams.incident.alertId'].push(i18n.SW_REQUIRED_ALERT_ID);
+      }
+
       return validationResult;
     },
     actionConnectorFields: lazy(() => import('./swimlane_connectors')),
