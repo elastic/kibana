@@ -70,17 +70,23 @@ function getAlertHeader({
 
 export function getAlertAnnotations({
   alerts,
+  chartStartTime,
   getFormatter,
   theme,
 }: {
   alerts?: Alert[];
+  chartStartTime: number;
   getFormatter: ObservabilityRuleTypeRegistry['getFormatter'];
   theme: EuiTheme;
 }) {
   return alerts?.flatMap((alert) => {
     const parsed = parseTechnicalFields(alert);
     const uuid = parsed[ALERT_UUID]!;
-    const start = new Date(parsed[ALERT_START]!).getTime();
+    // Don't start the annotation before the beginning of the chart time range
+    const start = Math.max(
+      chartStartTime,
+      new Date(parsed[ALERT_START]!).getTime()
+    );
     const end = start + parsed[ALERT_DURATION]! / 1000;
     const severityLevel = parsed[ALERT_SEVERITY_LEVEL];
     const color = getAlertColor({ severityLevel, theme });

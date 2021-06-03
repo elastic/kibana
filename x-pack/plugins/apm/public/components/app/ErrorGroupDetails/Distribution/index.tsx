@@ -120,6 +120,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
             alerts: alerts?.filter(
               (alert) => alert[RULE_ID]?.[0] === AlertType.ErrorCount
             ),
+            chartStartTime: buckets[0].x0,
             getFormatter,
             theme,
           })}

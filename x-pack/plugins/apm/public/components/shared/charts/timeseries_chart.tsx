@@ -206,6 +206,7 @@ export function TimeseriesChart({
         )}
         {getAlertAnnotations({
           alerts,
+          chartStartTime: xValues[0],
           getFormatter,
           theme,
         })}

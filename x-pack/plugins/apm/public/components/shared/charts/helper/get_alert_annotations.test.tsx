@@ -42,6 +42,9 @@ const alert: Alert = {
   'event.kind': ['state'],
   'rule.category': ['Latency threshold'],
 };
+const chartStartTime = new Date(
+  alert['kibana.rac.alert.start']![0] as string
+).getTime();
 const getFormatter: ObservabilityRuleTypeRegistry['getFormatter'] = () => () => ({
   link: '/',
   reason: 'a good reason',
@@ -50,31 +53,43 @@ const getFormatter: ObservabilityRuleTypeRegistry['getFormatter'] = () => () => 
 describe('getAlertAnnotations', () => {
   describe('with no alerts', () => {
     it('returns an empty array', () => {
-      expect(getAlertAnnotations({ alerts: [], getFormatter, theme })).toEqual(
-        []
-      );
+      expect(
+        getAlertAnnotations({ alerts: [], chartStartTime, getFormatter, theme })
+      ).toEqual([]);
     });
   });
 
   describe('with an alert with an undefined severity', () => {
     it('uses the danger color', () => {
       expect(
-        getAlertAnnotations({ alerts: [alert], getFormatter, theme })![0].props
-          .style.line.stroke
+        getAlertAnnotations({
+          alerts: [alert],
+          chartStartTime,
+          getFormatter,
+          theme,
+        })![0].props.style.line.stroke
       ).toEqual(euiColorDanger);
     });
 
     it('says "Alert" in the header', () => {
       expect(
-        getAlertAnnotations({ alerts: [alert], getFormatter, theme })![0].props
-          .dataValues[0].header
+        getAlertAnnotations({
+          alerts: [alert],
+          chartStartTime,
+          getFormatter,
+          theme,
+        })![0].props.dataValues[0].header
       ).toEqual('Alert');
     });
 
     it('uses the reason in the annotation details', () => {
       expect(
-        getAlertAnnotations({ alerts: [alert], getFormatter, theme })![0].props
-          .dataValues[0].details
+        getAlertAnnotations({
+          alerts: [alert],
+          chartStartTime,
+          getFormatter,
+          theme,
+        })![0].props.dataValues[0].details
       ).toEqual('a good reason');
     });
 
@@ -86,10 +101,26 @@ describe('getAlertAnnotations', () => {
         expect(
           getAlertAnnotations({
             alerts: [alert],
+            chartStartTime,
             getFormatter: getNoFormatter,
             theme,
           })![0].props.dataValues[0].details
         ).toEqual(alert['rule.name']![0]);
+      });
+    });
+
+    describe('when the alert start time is before the chart start time', () => {
+      it('uses the chart start time', () => {
+        const beforeChartStartTime = 1622565000000;
+
+        expect(
+          getAlertAnnotations({
+            alerts: [alert],
+            chartStartTime: beforeChartStartTime,
+            getFormatter,
+            theme,
+          })![0].props.dataValues[0].dataValue
+        ).toEqual(beforeChartStartTime);
       });
     });
   });
@@ -102,15 +133,23 @@ describe('getAlertAnnotations', () => {
 
     it('uses the warning color', () => {
       expect(
-        getAlertAnnotations({ alerts: [warningAlert], getFormatter, theme })![0]
-          .props.style.line.stroke
+        getAlertAnnotations({
+          alerts: [warningAlert],
+          chartStartTime,
+          getFormatter,
+          theme,
+        })![0].props.style.line.stroke
       ).toEqual(euiColorWarning);
     });
 
     it('says "Warning Alert" in the header', () => {
       expect(
-        getAlertAnnotations({ alerts: [warningAlert], getFormatter, theme })![0]
-          .props.dataValues[0].header
+        getAlertAnnotations({
+          alerts: [warningAlert],
+          chartStartTime,
+          getFormatter,
+          theme,
+        })![0].props.dataValues[0].header
       ).toEqual('Warning Alert');
     });
   });
@@ -125,6 +164,7 @@ describe('getAlertAnnotations', () => {
       expect(
         getAlertAnnotations({
           alerts: [criticalAlert],
+          chartStartTime,
           getFormatter,
           theme,
         })![0].props.style.line.stroke
@@ -135,6 +175,7 @@ describe('getAlertAnnotations', () => {
       expect(
         getAlertAnnotations({
           alerts: [criticalAlert],
+          chartStartTime,
           getFormatter,
           theme,
         })![0].props.dataValues[0].header

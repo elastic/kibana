@@ -116,7 +116,7 @@ Example.args = {
         'kibana.rac.alert.id': ['apm.transaction_duration_All'],
         'processor.event': ['transaction'],
         'kibana.rac.alert.evaluation.threshold': [500000],
-        'kibana.rac.alert.start': ['2021-06-02T06:20:00.000Z'],
+        'kibana.rac.alert.start': ['2021-06-02T04:00:00.000Z'],
         'event.kind': ['state'],
         'rule.category': ['Latency threshold'],
       },
