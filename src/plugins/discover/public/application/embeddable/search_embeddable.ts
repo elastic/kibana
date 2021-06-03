@@ -33,6 +33,7 @@ import { getServices, IndexPattern, ISearchSource } from '../../kibana_services'
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { SavedSearch } from '../..';
 import {
+  DOC_HIDE_TIME_COLUMN_SETTING,
   SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
@@ -256,7 +257,7 @@ export class SearchEmbeddable
     if (this.savedSearch.grid) {
       searchScope.settings = this.savedSearch.grid;
     }
-    searchScope.showTimeCol = !this.services.uiSettings.get('doc_table:hideTimeColumn', false);
+    searchScope.showTimeCol = !this.services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false);
 
     searchScope.filter = async (field, value, operator) => {
       let filters = esFilters.generateFilters(
