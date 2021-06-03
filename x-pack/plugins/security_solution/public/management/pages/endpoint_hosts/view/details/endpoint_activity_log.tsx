@@ -38,7 +38,6 @@ export const EndpointActivityLog = memo(
                 <LogEntry key={logEntry.item.action_id} logEntry={logEntry} />
               ))
             }
-
           </>
         )}
       </>
