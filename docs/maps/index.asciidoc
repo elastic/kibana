@@ -24,7 +24,7 @@ Create beautiful maps from your geographical data. With **Maps**, you can:
 <img
 style="width: 100%; margin: auto; display: block;"
 class="vidyard-player-embed"
-src="https://play.vidyard.com/BYzRDtH4u7RSD8wKhuEW1b.jpg"
+src="https://play.vidyard.com/mBuWenQ2uSLY9YjEkPtzJC.jpg"
 data-uuid="BYzRDtH4u7RSD8wKhuEW1b"
 data-v="4"
 data-type="inline"
