@@ -13,7 +13,6 @@ import type { SaveModalContainerProps } from '../save_modal_container';
 import type { LensAttributeService } from '../../lens_attribute_service';
 import type { LensPluginStartDependencies } from '../../plugin';
 import type { LensAppServices } from '../types';
-import { getLensServices } from '../mounter';
 const SaveModal = React.lazy(() => import('../save_modal_container'));
 
 const LensSavedModalLazy = (props: SaveModalContainerProps) => {
@@ -34,6 +33,7 @@ export function getSaveModalComponent(
 
     useEffect(() => {
       async function loadLensService() {
+        const { getLensServices } = await import('../../async_services');
         const lensServicesT = await getLensServices(coreStart, startDependencies, attributeService);
 
         setLensServices(lensServicesT);

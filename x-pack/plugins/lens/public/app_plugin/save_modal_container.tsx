@@ -130,7 +130,7 @@ export function SaveModalContainer({
 
   const savingToLibraryPermitted = Boolean(isSaveable && application.capabilities.visualize.save);
 
-  return (
+  return lastKnownDoc ? (
     <SaveModal
       isVisible={isVisible}
       originatingApp={originatingApp}
@@ -146,7 +146,7 @@ export function SaveModalContainer({
       lastKnownDoc={lastKnownDoc}
       returnToOriginSwitchLabel={returnToOriginSwitchLabel}
     />
-  );
+  ) : null;
 }
 
 export const runSaveLensVisualization = async (

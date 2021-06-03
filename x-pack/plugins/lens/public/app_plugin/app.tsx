@@ -262,36 +262,34 @@ export function App({
           />
         )}
       </div>
-      {isSaveModalVisible && (
-        <SaveModalContainer
-          isVisible={isSaveModalVisible}
-          lensServices={lensAppServices}
-          originatingApp={
-            appState.isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined
-          }
-          isSaveable={appState.isSaveable}
-          runSave={runSave}
-          onClose={() => {
-            setIsSaveModalVisible(false);
-          }}
-          getAppNameFromId={() => getOriginatingAppName()}
-          lastKnownDoc={lastKnownDoc}
-          onAppLeave={onAppLeave}
-          persistedDoc={appState.persistedDoc}
-          initialInput={initialInput}
-          redirectTo={redirectTo}
-          redirectToDashboard={redirectToDashboard}
-          redirectToOrigin={redirectToOrigin}
-          returnToOriginSwitchLabel={
-            getIsByValueMode() && initialInput
-              ? i18n.translate('xpack.lens.app.updatePanel', {
-                  defaultMessage: 'Update panel on {originatingAppName}',
-                  values: { originatingAppName: getOriginatingAppName() },
-                })
-              : undefined
-          }
-        />
-      )}
+      <SaveModalContainer
+        isVisible={isSaveModalVisible}
+        lensServices={lensAppServices}
+        originatingApp={
+          appState.isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined
+        }
+        isSaveable={appState.isSaveable}
+        runSave={runSave}
+        onClose={() => {
+          setIsSaveModalVisible(false);
+        }}
+        getAppNameFromId={() => getOriginatingAppName()}
+        lastKnownDoc={lastKnownDoc}
+        onAppLeave={onAppLeave}
+        persistedDoc={appState.persistedDoc}
+        initialInput={initialInput}
+        redirectTo={redirectTo}
+        redirectToDashboard={redirectToDashboard}
+        redirectToOrigin={redirectToOrigin}
+        returnToOriginSwitchLabel={
+          getIsByValueMode() && initialInput
+            ? i18n.translate('xpack.lens.app.updatePanel', {
+                defaultMessage: 'Update panel on {originatingAppName}',
+                values: { originatingAppName: getOriginatingAppName() },
+              })
+            : undefined
+        }
+      />
     </>
   );
 }

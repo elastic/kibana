@@ -33,7 +33,6 @@ import {
 } from '../../../../src/plugins/embeddable/public/mocks';
 import { LensAttributeService } from './lens_attribute_service';
 import { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/public';
-import { taggingApiMock } from '../../saved_objects_tagging/public/mocks';
 
 import { makeConfigureStore, getPreloadedState, LensAppState } from './state_management/index';
 import { getResolvedDateRange } from './utils';
@@ -234,7 +233,6 @@ export function makeDefaultServices(
     dashboard: dashboardPluginMock.createStartContract(),
     presentationUtil: presentationUtilPluginMock.createStartContract(core),
     savedObjectsClient: core.savedObjects.client,
-    savedObjectsTagging: taggingApiMock.create(),
     dashboardFeatureFlag: { allowByValueEmbeddables: false },
     stateTransfer: createEmbeddableStateTransferMock() as EmbeddableStateTransfer,
     getOriginatingAppName: jest.fn(() => 'defaultOriginatingApp'),

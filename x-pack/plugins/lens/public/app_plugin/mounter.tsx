@@ -47,11 +47,11 @@ import {
 import { getResolvedDateRange } from '../utils';
 import { getLastKnownDoc } from './save_modal_container';
 
-export const getLensServices = async (
+export async function getLensServices(
   coreStart: CoreStart,
   startDependencies: LensPluginStartDependencies,
   attributeService: () => Promise<LensAttributeService>
-): Promise<LensAppServices> => {
+): Promise<LensAppServices> {
   const { data, navigation, embeddable, savedObjectsTagging } = startDependencies;
 
   const storage = new Storage(localStorage);
@@ -83,7 +83,7 @@ export const getLensServices = async (
     // Temporarily required until the 'by value' paradigm is default.
     dashboardFeatureFlag: startDependencies.dashboard.dashboardFeatureFlagConfig,
   };
-};
+}
 
 export async function mountApp(
   core: CoreSetup<LensPluginStartDependencies, void>,
