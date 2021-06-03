@@ -18,7 +18,6 @@ import {
   APP_MANAGEMENT_PATH,
 } from '../../../common/constants';
 
-// TODO: Move this file into main_navigation to keep all primary navigation logic in one place
 export const navTabs: SiemNavTab = {
   [SecurityPageName.overview]: {
     id: SecurityPageName.overview,

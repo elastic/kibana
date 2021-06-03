@@ -16,7 +16,7 @@ import { useGlobalFullScreen } from '../../../common/containers/use_full_screen'
 import { AppGlobalStyle } from '../../../common/components/page';
 import { gutterTimeline } from '../../../common/lib/helpers';
 import { Flyout } from '../../../timelines/components/flyout';
-import { KQLHeaderGlobal } from '../../../app/home/kql_global';
+import { GlobalKQLHeader } from '../../../app/home/global_kql_header';
 import { IS_DRAGGING_CLASS_NAME } from '../../../common/components/drag_and_drop/drag_classnames';
 import { useThrottledResizeObserver } from '../../../common/components/utils';
 import { useKibana } from '../../../common/lib/kibana';
@@ -172,7 +172,7 @@ export const WrapperPage: React.FC<WrapperPageProps & CommonProps> = React.memo(
         template="default"
       >
         <EuiPanel color="subdued" paddingSize="none">
-          <KQLHeaderGlobal ref={ref} isFixed={headerFixed} />
+          <GlobalKQLHeader ref={ref} isFixed={headerFixed} />
         </EuiPanel>
         <ChildrenWrapper
           $globalFullScreen={globalFullScreen}

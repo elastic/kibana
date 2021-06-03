@@ -17,15 +17,13 @@ import { useKibana } from '../../common/lib/kibana';
 import { DETECTIONS_SUB_PLUGIN_ID } from '../../../common/constants';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useUpgradeEndpointPackage } from '../../common/hooks/endpoint/upgrade';
-import { HeaderGlobal } from './header_global';
-import { useAppMountContext } from '../app_mount_context';
+import { GlobalHeader } from './global_header';
 interface HomePageProps {
   children: React.ReactNode;
 }
 
 const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   const { application } = useKibana().services;
-  const { setHeaderActionMenu } = useAppMountContext();
   const subPluginId = useRef<string>('');
 
   application.currentAppId$.subscribe((appId) => {
@@ -52,7 +50,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
 
   return (
     <SecuritySolutionAppWrapper className="kbnAppWrapper">
-      <HeaderGlobal setHeaderActionMenu={setHeaderActionMenu} />
+      <GlobalHeader />
       <DragDropContextWrapper browserFields={browserFields}>
         <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
         {children}
