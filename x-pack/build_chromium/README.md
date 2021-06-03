@@ -22,6 +22,10 @@ either of those for development, you have a copy of the full build of Chromium, 
 was downloaded from the main [Chromium download
 location](https://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html).
 
+We do this on Mac because Elastic signs the Kibanna release artifact with Apple
+to work with Gatekeeper on Mac OS. Having our own binary of Chromium and
+bundling it with Kibana is integral to the artifact signing process.
+
 ## Build Script Usage
 
 These commands show how to set up an environment to build:
