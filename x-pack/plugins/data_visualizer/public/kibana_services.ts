@@ -6,11 +6,11 @@
  */
 
 import { CoreStart } from 'kibana/public';
-import { FileDataVisualizerStartDependencies } from './plugin';
+import { DataVisualizerStartDependencies } from './plugin';
 
 let coreStart: CoreStart;
-let pluginsStart: FileDataVisualizerStartDependencies;
-export function setStartServices(core: CoreStart, plugins: FileDataVisualizerStartDependencies) {
+let pluginsStart: DataVisualizerStartDependencies;
+export function setStartServices(core: CoreStart, plugins: DataVisualizerStartDependencies) {
   coreStart = core;
   pluginsStart = plugins;
 }

@@ -21,10 +21,10 @@ import { getFileDataVisualizerComponent, getIndexDataVisualizerComponent } from 
 import { getMaxBytesFormatted } from './application/common/util/get_max_bytes';
 import { registerHomeAddData } from './register_home';
 
-export interface FileDataVisualizerSetupDependencies {
+export interface DataVisualizerSetupDependencies {
   home?: HomePublicPluginSetup;
 }
-export interface FileDataVisualizerStartDependencies {
+export interface DataVisualizerStartDependencies {
   data: DataPublicPluginStart;
   fileUpload: FileUploadPluginStart;
   maps: MapsStartApi;
@@ -34,24 +34,24 @@ export interface FileDataVisualizerStartDependencies {
   lens: LensPublicStart;
 }
 
-export type FileDataVisualizerPluginSetup = ReturnType<FileDataVisualizerPlugin['setup']>;
-export type FileDataVisualizerPluginStart = ReturnType<FileDataVisualizerPlugin['start']>;
+export type DataVisualizerPluginSetup = ReturnType<DataVisualizerPlugin['setup']>;
+export type DataVisualizerPluginStart = ReturnType<DataVisualizerPlugin['start']>;
 
-export class FileDataVisualizerPlugin
+export class DataVisualizerPlugin
   implements
     Plugin<
-      FileDataVisualizerPluginSetup,
-      FileDataVisualizerPluginStart,
-      FileDataVisualizerSetupDependencies,
-      FileDataVisualizerStartDependencies
+      DataVisualizerPluginSetup,
+      DataVisualizerPluginStart,
+      DataVisualizerSetupDependencies,
+      DataVisualizerStartDependencies
     > {
-  public setup(core: CoreSetup, plugins: FileDataVisualizerSetupDependencies) {
+  public setup(core: CoreSetup, plugins: DataVisualizerSetupDependencies) {
     if (plugins.home) {
       registerHomeAddData(plugins.home);
     }
   }
 
-  public start(core: CoreStart, plugins: FileDataVisualizerStartDependencies) {
+  public start(core: CoreStart, plugins: DataVisualizerStartDependencies) {
     setStartServices(core, plugins);
     return {
       getFileDataVisualizerComponent,

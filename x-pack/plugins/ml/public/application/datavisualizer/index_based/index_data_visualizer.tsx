@@ -17,7 +17,7 @@ export const IndexDataVisualizerPage: FC = () => {
 
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
-    services: { docLinks, fileDataVisualizer: dataVisualizer },
+    services: { docLinks, dataVisualizer },
   } = useMlKibana();
   const [
     IndexDataVisualizer,

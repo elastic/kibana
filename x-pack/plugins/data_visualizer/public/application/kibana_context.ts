@@ -7,7 +7,7 @@
 
 import { CoreStart } from 'kibana/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import type { FileDataVisualizerStartDependencies } from '../plugin';
+import type { DataVisualizerStartDependencies } from '../plugin';
 
-export type StartServices = CoreStart & FileDataVisualizerStartDependencies;
+export type StartServices = CoreStart & DataVisualizerStartDependencies;
 export const useDataVisualizerKibana = () => useKibana<StartServices>();

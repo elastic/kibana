@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { FileDataVisualizerPlugin } from './plugin';
+import { DataVisualizerPlugin } from './plugin';
 
 export function plugin() {
-  return new FileDataVisualizerPlugin();
+  return new DataVisualizerPlugin();
 }
 
-export { FileDataVisualizerPluginStart } from './plugin';
+export { DataVisualizerPluginStart } from './plugin';
 
 export type { IndexDataVisualizerViewProps } from './application';
