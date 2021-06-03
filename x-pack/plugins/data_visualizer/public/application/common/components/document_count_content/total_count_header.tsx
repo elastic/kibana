@@ -12,13 +12,13 @@ import React from 'react';
 export const TotalCountHeader = ({ totalCount }: { totalCount: number }) => {
   return (
     <EuiFlexItem>
-      <EuiText size="s" data-test-subj="mlDataVisualizerTotalDocCountHeader">
+      <EuiText size="s" data-test-subj="dataVisualizerTotalDocCountHeader">
         <FormattedMessage
           id="xpack.dataVisualizer.searchPanel.totalDocCountLabel"
           defaultMessage="Total documents: {strongTotalCount}"
           values={{
             strongTotalCount: (
-              <strong data-test-subj="mlDataVisualizerTotalDocCount">
+              <strong data-test-subj="dataVisualizerTotalDocCount">
                 <FormattedMessage
                   id="xpack.dataVisualizer.searchPanel.totalDocCountNumber"
                   defaultMessage="{totalCount, plural, one {#} other {#}}"

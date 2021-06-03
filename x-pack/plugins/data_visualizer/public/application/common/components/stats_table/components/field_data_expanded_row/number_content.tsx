@@ -99,7 +99,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
     }
   );
   return (
-    <ExpandedRowContent dataTestSubj={'mlDVNumberContent'}>
+    <ExpandedRowContent dataTestSubj={'dataVisualizerNumberContent'}>
       <DocumentStatsTable config={config} />
       <EuiFlexItem className={'dataVisualizerSummaryTableWrapper'}>
         <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
@@ -109,7 +109,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
           items={summaryTableItems}
           columns={summaryTableColumns}
           tableCaption={summaryTableTitle}
-          data-test-subj={'mlNumberSummaryTable'}
+          data-test-subj={'dataVisualizerNumberSummaryTable'}
         />
       </EuiFlexItem>
 
@@ -117,7 +117,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
         <TopValues stats={stats} fieldFormat={fieldFormat} barColor="secondary" compressed={true} />
       )}
       {distribution && (
-        <EuiFlexItem data-test-subj={'mlMetricDistribution'}>
+        <EuiFlexItem data-test-subj={'dataVisualizerFieldDataMetricDistribution'}>
           <EuiFlexItem grow={false}>
             <ExpandedRowFieldHeader>
               <FormattedMessage

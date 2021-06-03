@@ -1,9 +1,9 @@
-.mlDataGridChart__histogram {
+.dataVisualizerDataGridChart__histogram {
   width: 100%;
   height: $euiSizeXL + $euiSizeXXL;
 }
 
-.mlDataGridChart__legend {
+.dataVisualizerDataGridChart__legend {
   @include euiTextTruncate;
   @include euiFontSizeXS;
 
@@ -16,11 +16,11 @@
   text-align: left;
 }
 
-.mlDataGridChart__legend--numeric {
+.dataVisualizerDataGridChart__legend--numeric {
   text-align: right;
 }
 
-.mlDataGridChart__legendBoolean {
+.dataVisualizerDataGridChart__legendBoolean {
   width: 100%;
   min-width: $euiButtonMinWidth;
   td { text-align: center }

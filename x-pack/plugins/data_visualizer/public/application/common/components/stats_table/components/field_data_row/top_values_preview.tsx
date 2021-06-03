@@ -36,7 +36,7 @@ export const TopValuesPreview: FC<FieldDataRowProps> = ({ config }) => {
     <ColumnChart
       chartData={chartData}
       columnType={columnType}
-      dataTestSubj={`mlDataGridChart-${config.fieldName}`}
+      dataTestSubj={`dataVisualizerDataGridChart-${config.fieldName}`}
       hideLabel={true}
       maxChartColumns={10}
     />

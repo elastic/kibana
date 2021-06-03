@@ -34,12 +34,12 @@ export function getActions(
         const lensAttributes = getLensAttributes(indexPattern, combinedQuery, item);
         if (lensAttributes) {
           lensPlugin.navigateToPrefilledEditor({
-            id: `ml-dataVisualizer-${item.fieldName}`,
+            id: `dataVisualizer-${item.fieldName}`,
             attributes: lensAttributes,
           });
         }
       },
-      'data-test-subj': 'mlActionButtonViewInLens',
+      'data-test-subj': 'dataVisualizerActionViewInLensButton',
     },
   ];
 }

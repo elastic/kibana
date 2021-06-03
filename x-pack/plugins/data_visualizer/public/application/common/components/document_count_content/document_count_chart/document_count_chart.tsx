@@ -72,7 +72,7 @@ export const DocumentCountChart: FC<Props> = ({
   }, [chartPoints, timeRangeEarliest, timeRangeLatest, interval]);
 
   return (
-    <div style={{ width: width ?? '100%' }} data-test-subj="mlFieldDataDocumentCountChart">
+    <div style={{ width: width ?? '100%' }} data-test-subj="dataVisualizerDocumentCountChart">
       <Chart
         size={{
           width: '100%',

@@ -13,4 +13,4 @@ export interface Refresh {
   timeRange?: { start: string; end: string };
 }
 
-export const mlTimefilterRefresh$ = new Subject<Required<Refresh>>();
+export const dataVisualizerTimefilterRefresh$ = new Subject<Required<Refresh>>();

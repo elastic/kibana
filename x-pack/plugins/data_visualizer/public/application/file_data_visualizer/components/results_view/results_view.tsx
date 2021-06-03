@@ -44,16 +44,16 @@ export const ResultsView: FC<Props> = ({
   disableButtons,
 }) => {
   return (
-    <EuiPage data-test-subj="mlPageFileDataVisResults">
+    <EuiPage data-test-subj="dataVisualizerPageFileResults">
       <EuiPageBody>
         <EuiPageContentHeader>
           <EuiTitle>
-            <h1 data-test-subj="mlFileDataVisResultsTitle">{fileName}</h1>
+            <h1 data-test-subj="dataVisualizerFileResultsTitle">{fileName}</h1>
           </EuiTitle>
         </EuiPageContentHeader>
         <EuiSpacer size="m" />
         <div className="results">
-          <EuiPanel data-test-subj="mlFileDataVisFileContentPanel">
+          <EuiPanel data-test-subj="dataVisualizerFileFileContentPanel">
             <FileContents
               data={data}
               format={results.format}
@@ -63,7 +63,7 @@ export const ResultsView: FC<Props> = ({
 
           <EuiSpacer size="m" />
 
-          <EuiPanel data-test-subj="mlFileDataVisSummaryPanel">
+          <EuiPanel data-test-subj="dataVisualizerFileSummaryPanel">
             <AnalysisSummary results={results} />
 
             <EuiSpacer size="m" />
@@ -90,9 +90,9 @@ export const ResultsView: FC<Props> = ({
 
           <EuiSpacer size="m" />
 
-          <EuiPanel data-test-subj="mlFileDataVisFileStatsPanel">
+          <EuiPanel data-test-subj="dataVisualizerFileFileStatsPanel">
             <EuiTitle size="s">
-              <h2 data-test-subj="mlFileDataVisStatsTitle">
+              <h2 data-test-subj="dataVisualizerFileStatsTitle">
                 <FormattedMessage
                   id="xpack.dataVisualizer.file.resultsView.fileStatsName"
                   defaultMessage="File stats"

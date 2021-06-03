@@ -94,7 +94,7 @@ export const getLegendText = (
 
   if (chartData.type === 'boolean') {
     return (
-      <table className="mlDataGridChart__legendBoolean">
+      <table className="dataVisualizerDataGridChart__legendBoolean">
         <tbody>
           <tr>
             {chartData.data[0] !== undefined && <td>{chartData.data[0].key_as_string}</td>}

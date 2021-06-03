@@ -66,7 +66,7 @@ export const DatavisualizerFieldTypeFilter: FC<{
       options={options}
       onChange={setVisibleFieldTypes}
       checkedOptions={visibleFieldTypes}
-      dataTestSubj={'mlDataVisualizerFieldTypeSelect'}
+      dataTestSubj={'dataVisualizerFieldTypeSelect'}
     />
   );
 };

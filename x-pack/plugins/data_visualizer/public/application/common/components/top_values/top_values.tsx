@@ -49,7 +49,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
   } = stats;
   const progressBarMax = isTopValuesSampled === true ? topValuesSampleSize : count;
   return (
-    <EuiFlexItem data-test-subj={'mlTopValues'}>
+    <EuiFlexItem data-test-subj={'dataVisualizerFieldDataTopValues'}>
       <ExpandedRowFieldHeader>
         <FormattedMessage
           id="xpack.dataVisualizer.dataGrid.field.topValuesLabel"
@@ -57,7 +57,10 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
         />
       </ExpandedRowFieldHeader>
 
-      <div data-test-subj="mlFieldDataTopValues" className={'fieldDataTopValuesContainer'}>
+      <div
+        data-test-subj="dataVisualizerFieldDataTopValuesContent"
+        className={'fieldDataTopValuesContainer'}
+      >
         {Array.isArray(topValues) &&
           topValues.map((value) => (
             <EuiFlexGroup gutterSize="xs" alignItems="center" key={value.key}>
@@ -75,7 +78,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
                   </EuiText>
                 </EuiToolTip>
               </EuiFlexItem>
-              <EuiFlexItem data-test-subj="mlFieldDataTopValueBar">
+              <EuiFlexItem data-test-subj="dataVisualizerFieldDataTopValueBar">
                 <EuiProgress
                   value={value.doc_count}
                   max={progressBarMax}

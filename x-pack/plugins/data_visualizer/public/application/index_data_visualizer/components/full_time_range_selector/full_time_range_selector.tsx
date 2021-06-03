@@ -59,7 +59,7 @@ export const FullTimeRangeSelector: FC<Props> = ({
     <EuiButton
       isDisabled={disabled}
       onClick={() => setRange(indexPattern, query)}
-      data-test-subj="mlButtonUseFullData"
+      data-test-subj="dataVisualizerButtonUseFullData"
     >
       <FormattedMessage
         id="xpack.dataVisualizer.index.fullTimeRangeSelector.useFullDataButtonLabel"

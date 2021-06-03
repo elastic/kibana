@@ -28,7 +28,7 @@ export const IndexBasedNumberContentPreview: FC<NumberContentPreviewProps> = ({ 
   const defaultChartData: MetricDistributionChartData[] = [];
   const [distributionChartData, setDistributionChartData] = useState(defaultChartData);
   const [legendText, setLegendText] = useState<{ min: number; max: number } | undefined>();
-  const dataTestSubj = `mlDataGridChart-${fieldName}`;
+  const dataTestSubj = `dataVisualizerDataGridChart-${fieldName}`;
   useEffect(() => {
     const chartData = buildChartDataFromStats(stats, METRIC_DISTRIBUTION_CHART_WIDTH);
     if (

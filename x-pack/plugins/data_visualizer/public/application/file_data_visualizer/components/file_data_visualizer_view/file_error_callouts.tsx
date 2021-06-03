@@ -68,7 +68,7 @@ export const FileTooLarge: FC<FileTooLargeProps> = ({ fileSize, maxFileSize }) =
       }
       color="danger"
       iconType="cross"
-      data-test-subj="mlFileUploadErrorCallout fileTooLarge"
+      data-test-subj="dataVisualizerFileUploadErrorCallout fileTooLarge"
     >
       {errorText}
     </EuiCallOut>
@@ -98,7 +98,7 @@ export const FileCouldNotBeRead: FC<FileCouldNotBeReadProps> = ({
         }
         color="danger"
         iconType="cross"
-        data-test-subj="mlFileUploadErrorCallout fileCouldNotBeRead"
+        data-test-subj="dataVisualizerFileUploadErrorCallout fileCouldNotBeRead"
       >
         {loaded === false && (
           <>

@@ -87,7 +87,7 @@ export const DataVisualizerFieldTypesFilter: FC<Props> = ({
       options={options}
       onChange={setVisibleFieldTypes}
       checkedOptions={visibleFieldTypes}
-      dataTestSubj={'mlDataVisualizerFieldTypeSelect'}
+      dataTestSubj={'dataVisualizerFieldTypeSelect'}
     />
   );
 };

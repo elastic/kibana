@@ -91,7 +91,9 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
     const expanderColumn: EuiTableComputedColumnType<DataVisualizerTableItem> = {
       name: (
         <EuiButtonIcon
-          data-test-subj={`mlToggleDetailsForAllRowsButton ${expandAll ? 'expanded' : 'collapsed'}`}
+          data-test-subj={`dataVisualizerToggleDetailsForAllRowsButton ${
+            expandAll ? 'expanded' : 'collapsed'
+          }`}
           onClick={() => toggleExpandAll(!expandAll)}
           aria-label={
             !expandAll
@@ -113,7 +115,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
         const direction = expandedRowItemIds.includes(item.fieldName) ? 'arrowUp' : 'arrowDown';
         return (
           <EuiButtonIcon
-            data-test-subj={`mlDataVisualizerDetailsToggle-${item.fieldName}-${direction}`}
+            data-test-subj={`dataVisualizerDetailsToggle-${item.fieldName}-${direction}`}
             onClick={() => toggleDetails(item)}
             aria-label={
               expandedRowItemIds.includes(item.fieldName)
@@ -130,7 +132,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
           />
         );
       },
-      'data-test-subj': 'mlDataVisualizerTableColumnDetailsToggle',
+      'data-test-subj': 'dataVisualizerTableColumnDetailsToggle',
     };
 
     const baseColumns = [
@@ -146,7 +148,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
         width: '75px',
         sortable: true,
         align: CENTER_ALIGNMENT as HorizontalAlignment,
-        'data-test-subj': 'mlDataVisualizerTableColumnType',
+        'data-test-subj': 'dataVisualizerTableColumnType',
       },
       {
         field: 'fieldName',
@@ -161,7 +163,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
           </EuiText>
         ),
         align: LEFT_ALIGNMENT as HorizontalAlignment,
-        'data-test-subj': 'mlDataVisualizerTableColumnName',
+        'data-test-subj': 'dataVisualizerTableColumnName',
       },
       {
         field: 'docCount',
@@ -173,7 +175,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
         ),
         sortable: (item: DataVisualizerTableItem) => item?.stats?.count,
         align: LEFT_ALIGNMENT as HorizontalAlignment,
-        'data-test-subj': 'mlDataVisualizerTableColumnDocumentsCount',
+        'data-test-subj': 'dataVisualizerTableColumnDocumentsCount',
       },
       {
         field: 'stats.cardinality',
@@ -183,7 +185,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
         render: (cardinality?: number) => <DistinctValues cardinality={cardinality} />,
         sortable: true,
         align: LEFT_ALIGNMENT as HorizontalAlignment,
-        'data-test-subj': 'mlDataVisualizerTableColumnDistinctValues',
+        'data-test-subj': 'dataVisualizerTableColumnDistinctValues',
       },
       {
         name: (
@@ -230,7 +232,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
           return null;
         },
         align: LEFT_ALIGNMENT as HorizontalAlignment,
-        'data-test-subj': 'mlDataVisualizerTableColumnDistribution',
+        'data-test-subj': 'dataVisualizerTableColumnDistribution',
       },
     ];
     return extendedColumns ? [...baseColumns, ...extendedColumns] : baseColumns;
@@ -247,7 +249,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   }, [expandAll, items, expandedRowItemIds]);
 
   return (
-    <EuiFlexItem data-test-subj="mlDataVisualizerTableContainer">
+    <EuiFlexItem data-test-subj="dataVisualizerTableContainer">
       <EuiInMemoryTable<T>
         className={'dataVisualizer'}
         items={items}
@@ -259,9 +261,9 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         isSelectable={false}
         onTableChange={onTableChange}
-        data-test-subj={'mlDataVisualizerTable'}
+        data-test-subj={'dataVisualizerTable'}
         rowProps={(item) => ({
-          'data-test-subj': `mlDataVisualizerRow row-${item.fieldName}`,
+          'data-test-subj': `dataVisualizerRow row-${item.fieldName}`,
         })}
       />
     </EuiFlexItem>

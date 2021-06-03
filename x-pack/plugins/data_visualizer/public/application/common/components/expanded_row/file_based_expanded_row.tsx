@@ -54,7 +54,7 @@ export const FileBasedDataVisualizerExpandedRow = ({ item }: { item: FileBasedFi
   return (
     <div
       className="dataVisualizerFieldExpandedRow"
-      data-test-subj={`mlDataVisualizerFieldExpandedRow-${fieldName}`}
+      data-test-subj={`dataVisualizerFieldExpandedRow-${fieldName}`}
     >
       {getCardContent()}
     </div>

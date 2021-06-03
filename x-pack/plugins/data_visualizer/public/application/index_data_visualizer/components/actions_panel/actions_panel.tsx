@@ -86,7 +86,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
   // passed the recognizerResults object, and then run the recognizer check which
   // controls whether the recognizer section is ultimately displayed.
   return (
-    <div data-test-subj="mlDataVisualizerActionsPanel">
+    <div data-test-subj="dataVisualizerActionsPanel">
       {discoverLink && (
         <>
           <EuiTitle size="s">
@@ -113,7 +113,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
                 defaultMessage="Discover"
               />
             }
-            data-test-subj="mlDataVisualizerViewInDiscoverCard"
+            data-test-subj="dataVisualizerViewInDiscoverCard"
           />
         </>
       )}

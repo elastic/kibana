@@ -65,7 +65,7 @@ import { kbnTypeToJobType } from '../../../common/util/field_types_utils';
 import { SearchPanel } from '../search_panel';
 import { ActionsPanel } from '../actions_panel';
 import { DatePickerWrapper } from '../../../common/components/date_picker_wrapper';
-import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
+import { dataVisualizerTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
 import { HelpMenu } from '../../../common/components/help_menu';
 import { TimeBuckets } from '../../services/time_buckets';
 
@@ -291,7 +291,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   useEffect(() => {
     const timeUpdateSubscription = merge(
       timefilter.getTimeUpdate$(),
-      mlTimefilterRefresh$
+      dataVisualizerTimefilterRefresh$
     ).subscribe(() => {
       setGlobalState({
         time: timefilter.getTime(),
@@ -778,7 +778,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   const helpLink = docLinks.links.ml.guide;
   return (
     <Fragment>
-      <EuiPage data-test-subj="mlPageIndexDataVisualizer">
+      <EuiPage data-test-subj="dataVisualizerIndexPage">
         <EuiPageBody>
           <EuiFlexGroup gutterSize="m">
             <EuiFlexItem>
@@ -788,7 +788,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                     <h1>{currentIndexPattern.title}</h1>
                   </EuiTitle>
                 </EuiPageContentHeaderSection>
-                <EuiPageContentHeaderSection data-test-subj="mlDataVisualizerTimeRangeSelectorSection">
+                <EuiPageContentHeaderSection data-test-subj="dataVisualizerTimeRangeSelectorSection">
                   <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="s">
                     {currentIndexPattern.timeFieldName !== undefined && (
                       <EuiFlexItem grow={false}>

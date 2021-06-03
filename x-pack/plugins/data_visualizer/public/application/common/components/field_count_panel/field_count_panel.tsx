@@ -29,13 +29,13 @@ export const FieldCountPanel: FC<Props> = ({
       alignItems="center"
       gutterSize="xs"
       style={{ marginLeft: 4 }}
-      data-test-subj="mlDataVisualizerFieldCountPanel"
+      data-test-subj="dataVisualizerFieldCountPanel"
     >
       <TotalFieldsCount fieldsCountStats={fieldsCountStats} />
       <MetricFieldsCount metricsStats={metricsStats} />
       <EuiFlexItem>
         <EuiSwitch
-          data-test-subj="mlDataVisualizerShowEmptyFieldsSwitch"
+          data-test-subj="dataVisualizerShowEmptyFieldsSwitch"
           label={
             <FormattedMessage
               id="xpack.dataVisualizer.searchPanel.showEmptyFields"

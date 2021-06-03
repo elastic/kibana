@@ -57,7 +57,7 @@ export const DataVisualizerFieldNamesFilter: FC<Props> = ({
       options={items}
       onChange={setVisibleFieldNames}
       checkedOptions={visibleFieldNames}
-      dataTestSubj={'mlDataVisualizerFieldNameSelect'}
+      dataTestSubj={'dataVisualizerFieldNameSelect'}
     />
   );
 };

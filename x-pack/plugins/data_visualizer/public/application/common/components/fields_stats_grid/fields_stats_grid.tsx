@@ -85,14 +85,14 @@ export const FieldsStatsGrid: FC<Props> = ({ results }) => {
         alignItems="center"
         gutterSize="xs"
         style={{ marginLeft: 4 }}
-        data-test-subj="mlDataVisualizerFieldCountPanel"
+        data-test-subj="dataVisualizerFieldCountPanel"
       >
         <TotalFieldsCount fieldsCountStats={fieldsCountStats} />
         <MetricFieldsCount metricsStats={metricsStats} />
 
         <EuiFlexGroup
           gutterSize="xs"
-          data-test-subj="mlDataVisualizerFieldCountPanel"
+          data-test-subj="dataVisualizerFieldCountPanel"
           justifyContent={'flexEnd'}
         >
           <DataVisualizerFieldNamesFilter

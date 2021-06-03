@@ -76,8 +76,8 @@ export const IndexBasedDataVisualizerExpandedRow = ({
 
   return (
     <div
-      className="mlDataVisualizerFieldExpandedRow"
-      data-test-subj={`mlDataVisualizerFieldExpandedRow-${fieldName}`}
+      className="dataVisualizerFieldExpandedRow"
+      data-test-subj={`dataVisualizerFieldExpandedRow-${fieldName}`}
     >
       {loading === true ? <LoadingIndicator /> : getCardContent()}
     </div>

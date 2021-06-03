@@ -20,7 +20,7 @@ const searchSizeOptions = [1000, 5000, 10000, 100000, -1].map((v) => {
     value: String(v),
     inputDisplay:
       v > 0 ? (
-        <span data-test-subj={`mlDataVisualizerShardSizeOption ${v}`}>
+        <span data-test-subj={`dataVisualizerShardSizeOption ${v}`}>
           <FormattedMessage
             id="xpack.dataVisualizer.searchPanel.sampleSizeOptionLabel"
             defaultMessage="Sample size (per shard): {wrappedValue}"
@@ -28,7 +28,7 @@ const searchSizeOptions = [1000, 5000, 10000, 100000, -1].map((v) => {
           />
         </span>
       ) : (
-        <span data-test-subj={`mlDataVisualizerShardSizeOption all`}>
+        <span data-test-subj={`dataVisualizerShardSizeOption all`}>
           <FormattedMessage
             id="xpack.dataVisualizer.searchPanel.allOptionLabel"
             defaultMessage="Search all"
@@ -49,7 +49,7 @@ export const ShardSizeFilter: FC<Props> = ({ samplerShardSize, setSamplerShardSi
           aria-label={i18n.translate('xpack.dataVisualizer.searchPanel.sampleSizeAriaLabel', {
             defaultMessage: 'Select number of documents to sample',
           })}
-          data-test-subj="mlDataVisualizerShardSizeSelect"
+          data-test-subj="dataVisualizerShardSizeSelect"
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

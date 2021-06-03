@@ -98,7 +98,7 @@ export const SearchPanel: FC<Props> = ({
   const searchChangeHandler = (query: Query) => setSearchInput(query);
 
   return (
-    <EuiFlexGroup gutterSize="m" alignItems="center" data-test-subj="mlDataVisualizerSearchPanel">
+    <EuiFlexGroup gutterSize="m" alignItems="center" data-test-subj="dataVisualizerSearchPanel">
       <EuiFlexItem>
         <EuiInputPopover
           style={{ maxWidth: '100%' }}
@@ -117,7 +117,7 @@ export const SearchPanel: FC<Props> = ({
                 }
               )}
               disableAutoFocus={true}
-              dataTestSubj="mlDataVisualizerQueryInput"
+              dataTestSubj="dataVisualizerQueryInput"
               languageSwitcherPopoverAnchorPosition="rightDown"
             />
           }

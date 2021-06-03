@@ -19,7 +19,7 @@ export const IpContent: FC<FieldDataRowProps> = ({ config }) => {
   const fieldFormat = 'fieldFormat' in config ? config.fieldFormat : undefined;
 
   return (
-    <ExpandedRowContent dataTestSubj={'mlDVIPContent'}>
+    <ExpandedRowContent dataTestSubj={'dataVisualizerIPContent'}>
       <DocumentStatsTable config={config} />
       <TopValues stats={stats} fieldFormat={fieldFormat} barColor="secondary" />
     </ExpandedRowContent>

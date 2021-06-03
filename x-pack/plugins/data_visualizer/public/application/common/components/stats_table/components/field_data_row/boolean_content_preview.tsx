@@ -29,7 +29,7 @@ export const BooleanContentPreview: FC<FieldDataRowProps> = ({ config }) => {
     id: config.fieldName,
     schema: undefined,
   };
-  const dataTestSubj = `mlDataGridChart-${config.fieldName}`;
+  const dataTestSubj = `dataVisualizerDataGridChart-${config.fieldName}`;
 
   return (
     <ColumnChart

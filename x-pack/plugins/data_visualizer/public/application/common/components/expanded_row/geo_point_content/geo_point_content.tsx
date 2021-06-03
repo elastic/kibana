@@ -60,7 +60,7 @@ export const GeoPointContent: FC<FieldDataRowProps> = ({ config }) => {
     }
   }, [config]);
   return (
-    <ExpandedRowContent dataTestSubj={'mlDVGeoPointContent'}>
+    <ExpandedRowContent dataTestSubj={'dataVisualizerGeoPointContent'}>
       <DocumentStatsTable config={config} />
       {formattedResults && Array.isArray(formattedResults.examples) && (
         <EuiFlexItem>
@@ -70,7 +70,7 @@ export const GeoPointContent: FC<FieldDataRowProps> = ({ config }) => {
       {formattedResults && Array.isArray(formattedResults.layerList) && (
         <EuiFlexItem
           className={'dataVisualizerMapWrapper'}
-          data-test-subj={'mlDataVisualizerEmbeddedMap'}
+          data-test-subj={'dataVisualizerEmbeddedMap'}
         >
           <EmbeddedMapComponent layerList={formattedResults.layerList} />
         </EuiFlexItem>

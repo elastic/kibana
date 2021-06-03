@@ -18,7 +18,7 @@ import {
 
 import { useUrlState } from '../../util/url_state';
 import { useDataVisualizerKibana } from '../../../kibana_context';
-import { mlTimefilterRefresh$ } from '../../../index_data_visualizer/services/timefilter_refresh_service';
+import { dataVisualizerTimefilterRefresh$ } from '../../../index_data_visualizer/services/timefilter_refresh_service';
 
 interface TimePickerQuickRange {
   from: string;
@@ -50,7 +50,7 @@ function getRecentlyUsedRangesFactory(timeHistory: TimeHistoryContract) {
 }
 
 function updateLastRefresh(timeRange: OnRefreshProps) {
-  mlTimefilterRefresh$.next({ lastRefresh: Date.now(), timeRange });
+  dataVisualizerTimefilterRefresh$.next({ lastRefresh: Date.now(), timeRange });
 }
 
 export const DatePickerWrapper: FC = () => {

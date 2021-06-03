@@ -138,7 +138,7 @@ export const DatavisualizerSelector: FC = () => {
                   <EuiButton
                     target="_self"
                     onClick={() => navigateToPath('/filedatavisualizer')}
-                    data-test-subj="mlDataVisualizerUploadFileButton"
+                    data-test-subj="dataVisualizerUploadFileButton"
                   >
                     <FormattedMessage
                       id="xpack.ml.datavisualizer.selector.uploadFileButtonLabel"
@@ -146,7 +146,7 @@ export const DatavisualizerSelector: FC = () => {
                     />
                   </EuiButton>
                 }
-                data-test-subj="mlDataVisualizerCardImportData"
+                data-test-subj="dataVisualizerCardImportData"
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -168,7 +168,7 @@ export const DatavisualizerSelector: FC = () => {
                   <EuiButton
                     target="_self"
                     onClick={() => navigateToPath('/datavisualizer_index_select')}
-                    data-test-subj="mlDataVisualizerSelectIndexButton"
+                    data-test-subj="dataVisualizerSelectIndexButton"
                   >
                     <FormattedMessage
                       id="xpack.ml.datavisualizer.selector.selectIndexButtonLabel"
@@ -176,7 +176,7 @@ export const DatavisualizerSelector: FC = () => {
                     />
                   </EuiButton>
                 }
-                data-test-subj="mlDataVisualizerCardIndexData"
+                data-test-subj="dataVisualizerCardIndexData"
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -198,7 +198,7 @@ export const DatavisualizerSelector: FC = () => {
                       <EuiButton
                         target="_blank"
                         href={`${basePath.get()}/app/management/stack/license_management/home`}
-                        data-test-subj="mlDataVisualizerStartTrialButton"
+                        data-test-subj="dataVisualizerStartTrialButton"
                       >
                         <FormattedMessage
                           id="xpack.ml.datavisualizer.selector.startTrialButtonLabel"
@@ -206,7 +206,7 @@ export const DatavisualizerSelector: FC = () => {
                         />
                       </EuiButton>
                     }
-                    data-test-subj="mlDataVisualizerCardStartTrial"
+                    data-test-subj="dataVisualizerCardStartTrial"
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

@@ -50,7 +50,7 @@ export const KeywordContent: FC<FieldDataRowProps> = ({ config }) => {
   );
 
   return (
-    <ExpandedRowContent dataTestSubj={'mlDVKeywordContent'}>
+    <ExpandedRowContent dataTestSubj={'dataVisualizerKeywordContent'}>
       <DocumentStatsTable config={config} />
       <TopValues stats={stats} fieldFormat={fieldFormat} barColor="secondary" />
       {EMSSuggestion && stats && <ChoroplethMap stats={stats} suggestion={EMSSuggestion} />}

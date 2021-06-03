@@ -62,7 +62,7 @@ export const GeoPointContentWithMap: FC<{
 
   if (stats?.examples === undefined) return null;
   return (
-    <ExpandedRowContent dataTestSubj={'mlDVIndexBasedMapContent'}>
+    <ExpandedRowContent dataTestSubj={'dataVisualizerIndexBasedMapContent'}>
       <DocumentStatsTable config={config} />
 
       <EuiFlexItem style={{ maxWidth: '50%' }}>

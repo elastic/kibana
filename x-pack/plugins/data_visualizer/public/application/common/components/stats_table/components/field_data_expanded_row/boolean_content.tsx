@@ -87,7 +87,7 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
   );
 
   return (
-    <ExpandedRowContent dataTestSubj={'mlDVBooleanContent'}>
+    <ExpandedRowContent dataTestSubj={'dataVisualizerBooleanContent'}>
       <DocumentStatsTable config={config} />
 
       <EuiFlexItem className={'dataVisualizerSummaryTableWrapper'}>

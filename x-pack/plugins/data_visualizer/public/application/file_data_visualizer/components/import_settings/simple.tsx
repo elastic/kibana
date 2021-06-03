@@ -63,7 +63,7 @@ export const SimpleSettings: FC<Props> = ({
               defaultMessage: 'Index name, required field',
             }
           )}
-          data-test-subj="mlFileDataVisIndexNameInput"
+          data-test-subj="dataVisualizerFileIndexNameInput"
         />
       </EuiFormRow>
 
@@ -80,7 +80,7 @@ export const SimpleSettings: FC<Props> = ({
         checked={createIndexPattern === true}
         disabled={initialized === true}
         onChange={onCreateIndexPatternChange}
-        data-test-subj="mlFileDataVisCreateIndexPatternCheckbox"
+        data-test-subj="dataVisualizerFileCreateIndexPatternCheckbox"
       />
 
       <EuiSpacer size="m" />

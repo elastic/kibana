@@ -495,7 +495,7 @@ export class ImportView extends Component {
       checkingValidIndex === true;
 
     return (
-      <EuiPage data-test-subj="mlPageFileDataVisImport">
+      <EuiPage data-test-subj="dataVisualizerPageFileImport">
         <EuiPageBody>
           <EuiPageContentHeader>
             <EuiTitle>
@@ -503,7 +503,7 @@ export class ImportView extends Component {
             </EuiTitle>
           </EuiPageContentHeader>
           <EuiSpacer size="m" />
-          <EuiPanel data-test-subj="mlFileDataVisImportSettingsPanel">
+          <EuiPanel data-test-subj="dataVisualizerFileImportSettingsPanel">
             <EuiTitle size="s">
               <h2>
                 <FormattedMessage
@@ -552,7 +552,7 @@ export class ImportView extends Component {
                 isLoading={importing}
                 iconSide="right"
                 fill
-                data-test-subj="mlFileDataVisImportButton"
+                data-test-subj="dataVisualizerFileImportButton"
               >
                 <FormattedMessage
                   id="xpack.dataVisualizer.file.importView.importButtonLabel"

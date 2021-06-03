@@ -16,7 +16,7 @@ export const OtherContent: FC<FieldDataRowProps> = ({ config }) => {
   const { stats } = config;
   if (stats === undefined) return null;
   return (
-    <ExpandedRowContent dataTestSubj={'mlDVOtherContent'}>
+    <ExpandedRowContent dataTestSubj={'dataVisualizerOtherContent'}>
       <DocumentStatsTable config={config} />
       {Array.isArray(stats.examples) && (
         <EuiFlexItem>

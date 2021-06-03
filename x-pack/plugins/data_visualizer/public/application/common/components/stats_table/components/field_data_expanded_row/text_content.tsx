@@ -25,7 +25,7 @@ export const TextContent: FC<FieldDataRowProps> = ({ config }) => {
   const numExamples = examples.length;
 
   return (
-    <ExpandedRowContent dataTestSubj={'mlDVTextContent'}>
+    <ExpandedRowContent dataTestSubj={'dataVisualizerTextContent'}>
       <EuiFlexItem>
         {numExamples > 0 && <ExamplesList examples={examples} />}
         {numExamples === 0 && (

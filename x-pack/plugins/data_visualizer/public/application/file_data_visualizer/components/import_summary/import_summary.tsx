@@ -51,7 +51,7 @@ export const ImportSummary: FC<Props> = ({
         }
         color="success"
         iconType="check"
-        data-test-subj="mlFileImportSuccessCallout"
+        data-test-subj="dataVisualizerFileImportSuccessCallout"
       >
         <EuiDescriptionList type="column" listItems={items} className="import-summary-list" />
       </EuiCallOut>

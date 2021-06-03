@@ -147,7 +147,7 @@ export function EmbeddedMapComponent({
 
   return (
     <div
-      data-test-subj="mlEmbeddedMapContent"
+      data-test-subj="dataVisualizerEmbeddedMapContent"
       className="embeddedMapContent"
       ref={embeddableRoot}
     />

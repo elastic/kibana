@@ -30,7 +30,7 @@ interface Props {
 
 export const AboutPanel: FC<Props> = ({ onFilePickerChange }) => {
   return (
-    <EuiPage restrictWidth={1000} data-test-subj="mlPageFileDataVisualizerUpload">
+    <EuiPage restrictWidth={1000} data-test-subj="dataVisualizerPageFileUpload">
       <EuiPageBody>
         <EuiPageContent className="file-datavisualizer-about-panel__content">
           <EuiFlexGroup gutterSize="xl">
@@ -63,7 +63,7 @@ export const AboutPanel: FC<Props> = ({ onFilePickerChange }) => {
 
 export const LoadingPanel: FC = () => {
   return (
-    <EuiPage restrictWidth={400} data-test-subj="mlPageFileDataVisLoading">
+    <EuiPage restrictWidth={400} data-test-subj="dataVisualizerPageFileLoading">
       <EuiPageBody>
         <EuiPageContent className="file-datavisualizer-about-panel__content" paddingSize="l">
           <div style={{ textAlign: 'center' }}>
