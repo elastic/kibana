@@ -626,7 +626,7 @@ function trackAlertDurations<
       ? originalAlerts[id].getState()
       : currentAlerts[id].getState();
     const duration = state.start
-      ? new Date(currentTime).valueOf() - new Date(state.start as string).valueOf()
+      ? new Date(currentTime).valueOf() - new Date(state.start as string).valueOf() * 1000 * 1000 // nanoseconds
       : undefined;
     currentAlerts[id].replaceState({
       ...state,
@@ -640,7 +640,7 @@ function trackAlertDurations<
   for (const id of recoveredAlertIds) {
     const state = recoveredAlerts[id].getState();
     const duration = state.start
-      ? new Date(currentTime).valueOf() - new Date(state.start as string).valueOf()
+      ? new Date(currentTime).valueOf() - new Date(state.start as string).valueOf() * 1000 * 1000 // nanoseconds
       : undefined;
     recoveredAlerts[id].replaceState({
       ...state,
@@ -745,7 +745,7 @@ function generateNewAndRecoveredInstanceEvents<
         action,
         ...(state?.start ? { start: state.start as string } : {}),
         ...(state?.end ? { end: state.end as string } : {}),
-        ...(state?.duration ? { duration: state.duration as number } : {}),
+        ...(state?.duration !== undefined ? { duration: state.duration as number } : {}),
         ...(state?.uuid ? { id: state.uuid as string } : {}),
       },
       kibana: {
