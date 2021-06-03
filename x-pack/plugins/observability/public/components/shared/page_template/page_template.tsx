@@ -71,6 +71,8 @@ export function ObservabilityPageTemplate({
             entry.app === currentAppId &&
             matchPath(currentPath, {
               path: entry.path,
+              exact: !!entry.matchFullPath,
+              strict: !entry.ignoreTrailingSlash,
             }) != null;
 
           return {
