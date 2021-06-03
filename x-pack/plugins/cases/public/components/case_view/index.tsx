@@ -14,6 +14,8 @@ import {
   EuiLoadingContent,
   EuiLoadingSpinner,
   EuiHorizontalRule,
+  EuiLink,
+  EuiButton,
 } from '@elastic/eui';
 
 import { CaseStatuses, CaseAttributes, CaseType, Case, CaseConnector, Ecs } from '../../../common';
@@ -346,6 +348,10 @@ export const CaseComponent = React.memo<CaseComponentProps>(
     return (
       <>
         <HeaderWrapper>
+          <EuiLink href={configureCasesNavigation.href}>{`Click click motherfucker`}</EuiLink>
+          <EuiButton
+            onClick={configureCasesNavigation.onClick}
+          >{`Click click motherfucker`}</EuiButton>
           <HeaderPage
             backOptions={backOptions}
             data-test-subj="case-view-title"

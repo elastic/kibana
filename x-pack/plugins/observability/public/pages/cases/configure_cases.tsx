@@ -10,11 +10,12 @@ import styled from 'styled-components';
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import * as i18n from '../../components/app/cases/translations';
-import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 import { CASES_APP_ID, CASES_OWNER } from '../../components/app/cases/constants';
 import { useKibana } from '../../utils/kibana_react';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
+import { casesBreadcrumbs, useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { getCaseUrl, useFormatUrl } from './links';
 
 const ButtonEmpty = styled(EuiButtonEmpty)`
   display: block;
@@ -26,14 +27,16 @@ function ConfigureCasesPageComponent() {
   } = useKibana().services;
   const userPermissions = useGetUserCasesPermissions();
   const { ObservabilityPageTemplate } = usePluginContext();
-  const goTo = useCallback(
-    (ev) => {
+  const onClickGoToCases = useCallback(
+    async (ev) => {
       ev.preventDefault();
-      navigateToApp(`${CASES_APP_ID}`);
+      return navigateToApp(`${CASES_APP_ID}`);
     },
     [navigateToApp]
   );
-
+  const { formatUrl } = useFormatUrl(CASES_APP_ID);
+  const href = formatUrl(getCaseUrl());
+  useBreadcrumbs([{ ...casesBreadcrumbs.cases, href }, casesBreadcrumbs.configure]);
   if (userPermissions != null && !userPermissions.read) {
     navigateToApp(`${CASES_APP_ID}`);
     return null;
@@ -44,10 +47,15 @@ function ConfigureCasesPageComponent() {
       pageHeader={{
         pageTitle: (
           <>
-            <ButtonEmpty onClick={goTo} iconType="arrowLeft" iconSide="left" flush="left">
+            <ButtonEmpty
+              onClick={onClickGoToCases}
+              iconType="arrowLeft"
+              iconSide="left"
+              flush="left"
+            >
               {i18n.BACK_TO_ALL}
             </ButtonEmpty>
-            {i18n.CONFIGURE_CASES_PAGE_TITLE} <ExperimentalBadge />
+            {i18n.CONFIGURE_CASES_PAGE_TITLE}
           </>
         ),
       }}

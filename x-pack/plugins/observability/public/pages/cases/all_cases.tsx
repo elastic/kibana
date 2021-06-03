@@ -9,7 +9,6 @@ import React from 'react';
 
 import { AllCases } from '../../components/app/cases/all_cases';
 import * as i18n from '../../components/app/cases/translations';
-import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 
 import { savedObjectReadOnlyErrorMessage, CaseCallOut } from '../../components/app/cases/callout';
 import { CaseFeatureNoPermissions } from './feature_no_permissions';
@@ -29,11 +28,7 @@ export const AllCasesPage = React.memo(() => {
       )}
       <ObservabilityPageTemplate
         pageHeader={{
-          pageTitle: (
-            <>
-              {i18n.PAGE_TITLE} <ExperimentalBadge />
-            </>
-          ),
+          pageTitle: <>{i18n.PAGE_TITLE}</>,
         }}
       >
         <AllCases userCanCrud={userPermissions?.crud ?? false} />

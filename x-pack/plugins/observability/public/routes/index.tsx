@@ -18,7 +18,7 @@ import { ExploratoryViewPage } from '../components/shared/exploratory_view';
 import { CaseDetailsPage } from '../pages/cases/case_details';
 import { ConfigureCasesPage } from '../pages/cases/configure_cases';
 import { AllCasesPage } from '../pages/cases/all_cases';
-import { casesBreadcrumb } from '../hooks/use_breadcrumbs';
+import { casesBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { alertStatusRt } from '../../common/typings';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
@@ -86,35 +86,21 @@ export const routes = {
       return <AllCasesPage />;
     },
     params: {},
-    breadcrumb: [casesBreadcrumb],
+    breadcrumb: [casesBreadcrumbs.cases],
   },
   '/cases/create': {
     handler: () => {
       return <CreateCasePage />;
     },
     params: {},
-    breadcrumb: [
-      casesBreadcrumb,
-      {
-        text: i18n.translate('xpack.observability.breadcrumbs.observability.cases.create', {
-          defaultMessage: 'Create',
-        }),
-      },
-    ],
+    breadcrumb: [casesBreadcrumbs.cases, casesBreadcrumbs.create],
   },
   '/cases/configure': {
     handler: () => {
       return <ConfigureCasesPage />;
     },
     params: {},
-    breadcrumb: [
-      casesBreadcrumb,
-      {
-        text: i18n.translate('xpack.observability.breadcrumbs.observability.cases.configure', {
-          defaultMessage: 'Configure',
-        }),
-      },
-    ],
+    breadcrumb: [casesBreadcrumbs.cases, casesBreadcrumbs.configure],
   },
   '/cases/:detailName': {
     handler: () => {
@@ -125,7 +111,7 @@ export const routes = {
         detailName: t.string,
       }),
     },
-    breadcrumb: [casesBreadcrumb],
+    breadcrumb: [casesBreadcrumbs.cases],
   },
   '/alerts': {
     handler: (routeParams: any) => {
