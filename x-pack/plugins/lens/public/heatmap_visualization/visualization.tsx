@@ -284,7 +284,9 @@ export const getHeatmapVisualization = ({
                         ? [state.gridConfig.yAxisLabelColor]
                         : [],
                       // X-axis
-                      isXAxisLabelVisible: [state.gridConfig.isXAxisLabelVisible],
+                      isXAxisLabelVisible: state.gridConfig.isXAxisLabelVisible
+                        ? [state.gridConfig.isXAxisLabelVisible]
+                        : [],
                     },
                   },
                 ],
