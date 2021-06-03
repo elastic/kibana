@@ -22,7 +22,7 @@ import { ToolbarOverlay } from './toolbar_overlay';
 test('Should only show set view control', async () => {
   const component = shallow(
     <ToolbarOverlay
-      geoFields={[]}
+      showToolsControl={false}
       showEditButton={false}
       shapeDrawModeActive={false}
       pointDrawModeActive={false}
@@ -36,7 +36,7 @@ test('Should only show set view control', async () => {
 test('Should show all controls', async () => {
   const component = shallow(
     <ToolbarOverlay
-      geoFields={[]}
+      showToolsControl={false}
       showEditButton={false}
       addFilters={async (filters: Filter[], actionId: string) => {}}
       showFitToBoundsButton={true}

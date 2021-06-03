@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import React, { ChangeEvent, Component } from 'react';
 import {
   EuiForm,
   EuiFormRow,
@@ -22,19 +21,29 @@ import { ES_SPATIAL_RELATIONS } from '../../../../common/constants';
 import { getEsSpatialRelationLabel } from '../../../../common/i18n_getters';
 import { ActionSelect } from '../../action_select';
 import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../../src/plugins/data/public';
+import { Action, ActionExecutionContext } from '../../../../../../../src/plugins/ui_actions/public';
 
-export class GeometryFilterForm extends Component {
-  static propTypes = {
-    buttonLabel: PropTypes.string.isRequired,
-    getFilterActions: PropTypes.func,
-    getActionContext: PropTypes.func,
-    intitialGeometryLabel: PropTypes.string.isRequired,
-    onSubmit: PropTypes.func.isRequired,
-    isFilterGeometryClosed: PropTypes.bool,
-    errorMsg: PropTypes.string,
-    className: PropTypes.string,
-  };
+interface Props {
+  buttonLabel: string;
+  getFilterActions?: () => Promise<Action[]>;
+  getActionContext?: () => ActionExecutionContext;
+  intitialGeometryLabel: string;
+  onSubmit: ({
+    actionId,
+    geometryLabel,
+    relation,
+  }: {
+    actionId: string;
+    geometryLabel: string;
+    relation: ES_SPATIAL_RELATIONS;
+  }) => void;
+  isFilterGeometryClosed?: boolean;
+  errorMsg?: string;
+  className?: string;
+  isLoading?: boolean;
+}
 
+export class GeometryFilterForm extends Component<Props> {
   static defaultProps = {
     isFilterGeometryClosed: true,
   };
@@ -45,19 +54,19 @@ export class GeometryFilterForm extends Component {
     relation: ES_SPATIAL_RELATIONS.INTERSECTS,
   };
 
-  _onGeometryLabelChange = (e) => {
+  _onGeometryLabelChange = (e: ChangeEvent<HTMLInputElement>) => {
     this.setState({
       geometryLabel: e.target.value,
     });
   };
 
-  _onRelationChange = (e) => {
+  _onRelationChange = (e: ChangeEvent<HTMLSelectElement>) => {
     this.setState({
       relation: e.target.value,
     });
   };
 
-  _onActionIdChange = (value) => {
+  _onActionIdChange = (value: string) => {
     this.setState({ actionId: value });
   };
 

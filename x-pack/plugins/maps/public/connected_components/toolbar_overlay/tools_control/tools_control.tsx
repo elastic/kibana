@@ -55,7 +55,6 @@ const DRAW_DISTANCE_LABEL_SHORT = i18n.translate(
 export interface Props {
   cancelDraw: () => void;
   filterModeActive: boolean;
-  initiateDraw: (drawState: DrawState) => void;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
   activateDrawFilterMode: (drawState: DrawState) => void;
