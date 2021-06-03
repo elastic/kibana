@@ -139,6 +139,29 @@ describe('top metrics agg config', () => {
       });
     });
 
+    test('preserves unsupported config', () => {
+      // arrange
+      config.field = ['field-01', 'field-02'];
+
+      config.aggConfig = {
+        sortField: 'sort-field',
+        sortDirection: 'asc',
+        // @ts-ignore
+        size: 2,
+      };
+
+      // act and assert
+      expect(config.getEsAggConfig()).toEqual({
+        metrics: [{ field: 'field-01' }, { field: 'field-02' }],
+        sort: {
+          'sort-field': {
+            order: 'asc',
+            size: 2,
+          },
+        },
+      });
+    });
+
     test('converts configs with a special sorting field', () => {
       // arrange
       config.field = ['field-01', 'field-02'];

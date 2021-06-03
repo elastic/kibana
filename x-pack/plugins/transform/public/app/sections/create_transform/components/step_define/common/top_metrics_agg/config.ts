@@ -50,7 +50,7 @@ export function getTopMetricsAggConfig(
       if (isSpecialSortField(sortField)) {
         sort = sortField;
       } else {
-        if (sortMode || numericType) {
+        if (sortMode || numericType || isPopulatedObject(unsupportedConfig)) {
           sort = {
             [sortField!]: {
               order: sortDirection,
