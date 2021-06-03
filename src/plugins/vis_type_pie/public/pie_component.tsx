@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
+import React, { memo, useCallback, useMemo, useState, useEffect, useRef } from 'react';
 
 import {
   Chart,
@@ -30,7 +30,7 @@ import { DataPublicPluginStart, FieldFormat } from '../../data/public';
 import type { PersistedState } from '../../visualizations/public';
 import { Datatable, DatatableColumn, IInterpreterRenderHandlers } from '../../expressions/public';
 import { DEFAULT_PERCENT_DECIMALS } from '../common';
-import { PieVisParams, BucketColumns, ValueFormats } from './types';
+import { PieVisParams, BucketColumns, ValueFormats, PieContainerDimensions } from './types';
 import {
   getColorPicker,
   getLayers,
@@ -75,6 +75,17 @@ const PieComponent = (props: PieComponentProps) => {
       props.visParams.addLegend == null ? false : props.visParams.addLegend;
     return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
   });
+  const [dimensions, setDimensions] = useState<undefined | PieContainerDimensions>();
+
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (parentRef && parentRef.current) {
+      const parentHeight = parentRef.current!.getBoundingClientRect().height;
+      const parentWidth = parentRef.current!.getBoundingClientRect().width;
+      setDimensions({ width: parentWidth, height: parentHeight });
+    }
+  }, [parentRef]);
 
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
@@ -218,7 +229,11 @@ const PieComponent = (props: PieComponentProps) => {
       syncColors,
     ]
   );
-  const config = useMemo(() => getConfig(visParams, chartTheme), [chartTheme, visParams]);
+  const config = useMemo(() => getConfig(visParams, chartTheme, dimensions), [
+    chartTheme,
+    visParams,
+    dimensions,
+  ]);
   const tooltip: TooltipProps = {
     type: visParams.addTooltip ? TooltipType.Follow : TooltipType.None,
   };
@@ -269,7 +284,7 @@ const PieComponent = (props: PieComponentProps) => {
 
   return (
     <div className="pieChart__container" data-test-subj="visTypePieChart">
-      <div className="pieChart__wrapper">
+      <div className="pieChart__wrapper" ref={parentRef}>
         <LegendToggle
           onClick={toggleLegend}
           showLegend={showLegend}

@@ -89,3 +89,8 @@ export interface SplitDimensionParams {
   order?: string;
   orderBy?: string;
 }
+
+export interface PieContainerDimensions {
+  width: number;
+  height: number;
+}

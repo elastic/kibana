@@ -7,16 +7,34 @@
  */
 
 import { PartitionConfig, PartitionLayout, RecursivePartial, Theme } from '@elastic/charts';
-import { LabelPositions, PieVisParams } from '../types';
+import { LabelPositions, PieVisParams, PieContainerDimensions } from '../types';
 
 export const getConfig = (
   visParams: PieVisParams,
-  chartTheme: RecursivePartial<Theme>
+  chartTheme: RecursivePartial<Theme>,
+  dimensions?: PieContainerDimensions
 ): RecursivePartial<PartitionConfig> => {
+  const maxSize = 900;
+  const usingMargin = dimensions
+    ? {
+        margin: {
+          top: (1 - Math.min(1, maxSize / dimensions?.height)) / 2,
+          bottom: (1 - Math.min(1, maxSize / dimensions?.height)) / 2,
+          left: (1 - Math.min(1, maxSize / dimensions?.width)) / 2,
+          right: (1 - Math.min(1, maxSize / dimensions?.width)) / 2,
+        },
+      }
+    : null;
+
+  const usingOuterSizeRatio = dimensions
+    ? {
+        outerSizeRatio: maxSize / Math.min(dimensions?.width, dimensions?.height),
+      }
+    : null;
   const config: RecursivePartial<PartitionConfig> = {
     partitionLayout: PartitionLayout.sunburst,
     fontFamily: chartTheme.barSeriesStyle?.displayValue?.fontFamily,
-    outerSizeRatio: 1,
+    ...usingOuterSizeRatio,
     specialFirstInnermostSector: false,
     minFontSize: 10,
     maxFontSize: 16,
@@ -30,6 +48,7 @@ export const getConfig = (
     sectorLineWidth: 1.5,
     circlePadding: 4,
     emptySizeRatio: visParams.isDonut ? 0.3 : 0,
+    ...usingMargin,
   };
   if (!visParams.labels.show) {
     // Force all labels to be linked, then prevent links from showing
