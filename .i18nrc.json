@@ -1,9 +1,9 @@
 {
   "paths": {
-    "common.ui": "src/legacy/ui",
     "console": "src/plugins/console",
     "core": "src/core",
     "discover": "src/plugins/discover",
+    "bfetch": "src/plugins/bfetch",
     "dashboard": "src/plugins/dashboard",
     "data": "src/plugins/data",
     "embeddableApi": "src/plugins/embeddable",
@@ -61,6 +61,5 @@
     "apmOss": "src/plugins/apm_oss",
     "usageCollection": "src/plugins/usage_collection"
   },
-  "exclude": ["src/legacy/ui/ui_render/ui_render_mixin.js"],
   "translations": []
 }

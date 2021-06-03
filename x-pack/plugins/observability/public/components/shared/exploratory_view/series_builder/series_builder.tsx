@@ -15,7 +15,7 @@ import { ReportTypesCol } from './columns/report_types_col';
 import { ReportDefinitionCol } from './columns/report_definition_col';
 import { ReportFilters } from './columns/report_filters';
 import { ReportBreakdowns } from './columns/report_breakdowns';
-import { NEW_SERIES_KEY, useUrlStorage } from '../hooks/use_url_storage';
+import { NEW_SERIES_KEY, useSeriesStorage } from '../hooks/use_series_storage';
 import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
 import { getDefaultConfigs } from '../configurations/default_configs';
 
@@ -27,6 +27,7 @@ export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; labe
   ux: [
     { id: 'pld', label: 'Performance distribution' },
     { id: 'kpi', label: 'KPI over time' },
+    { id: 'cwv', label: 'Core Web Vitals' },
   ],
   apm: [
     { id: 'svl', label: 'Latency' },
@@ -52,7 +53,9 @@ export function SeriesBuilder({
   seriesId: string;
   seriesBuilderRef: RefObject<HTMLDivElement>;
 }) {
-  const { series, setSeries, removeSeries } = useUrlStorage(seriesId);
+  const { getSeries, setSeries, removeSeries } = useSeriesStorage();
+
+  const series = getSeries(seriesId);
 
   const {
     dataType,
@@ -155,9 +158,8 @@ export function SeriesBuilder({
         reportDefinitions,
       };
 
-      setSeries(newSeriesId, newSeriesN).then(() => {
-        removeSeries(NEW_SERIES_KEY);
-      });
+      setSeries(newSeriesId, newSeriesN);
+      removeSeries(NEW_SERIES_KEY);
     }
   };
 

@@ -7,13 +7,14 @@
 
 import { UpdateDocumentByQueryResponse } from 'elasticsearch';
 import { getCasesFromAlertsUrl } from '../../../../../../cases/common';
-import { HostIsolationResponse } from '../../../../../common/endpoint/types';
+import { HostIsolationResponse, HostMetadataInfo } from '../../../../../common/endpoint/types';
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
   DETECTION_ENGINE_INDEX_URL,
   DETECTION_ENGINE_PRIVILEGES_URL,
 } from '../../../../../common/constants';
+import { HOST_METADATA_GET_API } from '../../../../../common/endpoint/constants';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import {
   BasicSignals,
@@ -24,7 +25,8 @@ import {
   UpdateAlertStatusProps,
   CasesFromAlertsResponse,
 } from './types';
-import { isolateHost } from '../../../../common/lib/host_isolation';
+import { resolvePathVariables } from '../../../../management/common/utils';
+import { isolateHost, unIsolateHost } from '../../../../common/lib/host_isolation';
 
 /**
  * Fetch Alerts by providing a query
@@ -131,6 +133,30 @@ export const createHostIsolation = async ({
   });
 
 /**
+ * Unisolate a host
+ *
+ * @param agent id
+ * @param optional comment for the unisolation action
+ * @param optional case ids if associated with an alert on the host
+ *
+ * @throws An error if response is not OK
+ */
+export const createHostUnIsolation = async ({
+  agentId,
+  comment = '',
+  caseIds,
+}: {
+  agentId: string;
+  comment?: string;
+  caseIds?: string[];
+}): Promise<HostIsolationResponse> =>
+  unIsolateHost({
+    agent_ids: [agentId],
+    comment,
+    case_ids: caseIds,
+  });
+
+/**
  * Get list of associated case ids from alert id
  *
  * @param alert id
@@ -143,3 +169,18 @@ export const getCaseIdsFromAlertId = async ({
   KibanaServices.get().http.fetch<CasesFromAlertsResponse>(getCasesFromAlertsUrl(alertId), {
     method: 'get',
   });
+
+/**
+ * Get Host metadata
+ *
+ * @param host id
+ */
+export const getHostMetadata = async ({
+  agentId,
+}: {
+  agentId: string;
+}): Promise<HostMetadataInfo> =>
+  KibanaServices.get().http.fetch<HostMetadataInfo>(
+    resolvePathVariables(HOST_METADATA_GET_API, { id: agentId }),
+    { method: 'get' }
+  );

@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSuperSelect } from '@elastic/eui';
 
-import { useUrlStorage } from '../../hooks/use_url_storage';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { OperationType } from '../../../../../../../lens/public';
 
 export function OperationTypeSelect({
@@ -19,7 +19,9 @@ export function OperationTypeSelect({
   seriesId: string;
   defaultOperationType?: OperationType;
 }) {
-  const { series, setSeries } = useUrlStorage(seriesId);
+  const { getSeries, setSeries } = useSeriesStorage();
+
+  const series = getSeries(seriesId);
 
   const operationType = series?.operationType;
 

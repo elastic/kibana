@@ -584,6 +584,7 @@ export interface DocLinksStart {
             readonly introduction: string;
             readonly fieldFormattersNumber: string;
             readonly fieldFormattersString: string;
+            readonly runtimeFields: string;
         };
         readonly addData: string;
         readonly kibana: string;

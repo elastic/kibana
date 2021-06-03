@@ -6950,6 +6950,28 @@
                   }
                 }
               }
+            },
+            "deprecatedKeys": {
+              "properties": {
+                "set": {
+                  "type": "array",
+                  "items": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "Config path added during config deprecation."
+                    }
+                  }
+                },
+                "unset": {
+                  "type": "array",
+                  "items": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "Config path removed during config deprecation."
+                    }
+                  }
+                }
+              }
             }
           }
         },
@@ -8191,6 +8213,12 @@
         },
         "search:timeout": {
           "type": "long",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "bfetch:disableCompression": {
+          "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
           }

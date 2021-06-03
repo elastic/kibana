@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { isEmpty } from 'lodash';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
 import { LensAttributes } from '../configurations/lens_attributes';
-import { useUrlStorage } from './use_url_storage';
+import { useSeriesStorage } from './use_series_storage';
 import { getDefaultConfigs } from '../configurations/default_configs';
 
 import { DataSeries, SeriesUrl, UrlFilter } from '../types';
@@ -40,8 +40,8 @@ export const getFiltersFromDefs = (
 export const useLensAttributes = ({
   seriesId,
 }: Props): TypedLensByValueInput['attributes'] | null => {
-  const { series } = useUrlStorage(seriesId);
-
+  const { getSeries } = useSeriesStorage();
+  const series = getSeries(seriesId);
   const { breakdown, seriesType, operationType, reportType, reportDefinitions = {} } = series ?? {};
 
   const { indexPattern } = useAppIndexPatternContext();
@@ -67,7 +67,8 @@ export const useLensAttributes = ({
       seriesType,
       filters,
       operationType,
-      reportDefinitions
+      reportDefinitions,
+      breakdown
     );
 
     if (breakdown) {

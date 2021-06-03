@@ -30,9 +30,9 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
   const testSubjects = getService('testSubjects');
   const { header } = getPageObjects(['header']);
   const kibanaServer = getService('kibanaServer');
-  const MenuToggle = getService('MenuToggle');
+  const menuToggle = getService('menuToggle');
 
-  const quickSelectTimeMenuToggle = new MenuToggle({
+  const quickSelectTimeMenuToggle = menuToggle.create({
     name: 'QuickSelectTime Menu',
     menuTestSubject: 'superDatePickerQuickMenu',
     toggleButtonTestSubject: 'superDatePickerToggleQuickMenuButton',

@@ -14,7 +14,7 @@ jest.mock('./tooltip_popover', () => ({
 import sinon from 'sinon';
 import React from 'react';
 import { mount, shallow } from 'enzyme';
-import { Map as MbMap, MapMouseEvent, MapboxGeoJSONFeature } from 'mapbox-gl';
+import type { Map as MbMap, MapMouseEvent, MapboxGeoJSONFeature } from '@kbn/mapbox-gl';
 import { TooltipControl } from './tooltip_control';
 import { IVectorLayer } from '../../../classes/layers/vector_layer';
 
@@ -77,7 +77,7 @@ const defaultProps = {
   layerList: [mockLayer],
   isDrawingFilter: false,
   addFilters: async () => {},
-  geoFields: [],
+  geoFieldNames: [],
   openTooltips: [],
   hasLockedTooltips: false,
 };
