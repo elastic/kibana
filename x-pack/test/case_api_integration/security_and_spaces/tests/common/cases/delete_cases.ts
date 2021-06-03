@@ -285,10 +285,27 @@ export default ({ getService }: FtrProviderContext): void => {
         );
 
         /**
-         * We expect a 404 because the bulkGet inside the delete
-         * route should return a 404 when requesting a case from
-         * a different space.
-         * */
+         * secOnly does not have access to space2 so it should 403
+         */
+        await deleteCases({
+          supertest: supertestWithoutAuth,
+          caseIDs: [postedCase.id],
+          expectedHttpCode: 403,
+          auth: { user: secOnly, space: 'space2' },
+        });
+      });
+
+      it('should NOT delete a case created in space2 by making a request to space1', async () => {
+        const postedCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          {
+            user: superUser,
+            space: 'space2',
+          }
+        );
+
         await deleteCases({
           supertest: supertestWithoutAuth,
           caseIDs: [postedCase.id],
