@@ -120,19 +120,16 @@ export const isolationRequestHandler = function (
       result = await esClient.index({
         index: AGENT_ACTIONS_INDEX,
         body: {
-          type: 'action',
-          item: {
-            action_id: actionID,
-            '@timestamp': moment().toISOString(),
-            expiration: moment().add(2, 'weeks').toISOString(),
-            type: 'INPUT_ACTION',
-            input_type: 'endpoint',
-            agents: agentIDs,
-            user_id: user?.username,
-            data: {
-              command: isolate ? 'isolate' : 'unisolate',
-              comment: req.body.comment,
-            },
+          action_id: actionID,
+          '@timestamp': moment().toISOString(),
+          expiration: moment().add(2, 'weeks').toISOString(),
+          type: 'INPUT_ACTION',
+          input_type: 'endpoint',
+          agents: agentIDs,
+          user_id: user?.username,
+          data: {
+            command: isolate ? 'isolate' : 'unisolate',
+            comment: req.body.comment,
           },
         } as EndpointAction,
       });

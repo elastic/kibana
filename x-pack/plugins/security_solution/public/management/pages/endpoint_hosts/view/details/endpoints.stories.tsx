@@ -8,7 +8,7 @@
 import React, { ComponentType } from 'react';
 import moment from 'moment';
 
-import { EndpointAction, Immutable } from '../../../../../../common/endpoint/types';
+import { ActivityLog, Immutable } from '../../../../../../common/endpoint/types';
 import { EndpointDetailsFlyoutTabs } from './components/endpoint_details_tabs';
 import { EndpointActivityLog } from './endpoint_activity_log';
 import { EndpointDetailsFlyout } from '.';
@@ -17,7 +17,7 @@ import { AsyncResourceState } from '../../../../state';
 
 export const dummyEndpointActivityLog = (
   selectedEndpoint: string = ''
-): AsyncResourceState<Immutable<EndpointAction[]>> => ({
+): AsyncResourceState<Immutable<ActivityLog>> => ({
   type: 'LoadedResourceState',
   data: [
     {
@@ -112,10 +112,12 @@ export const Tabs = () => (
       {
         id: 'activity_log',
         name: 'Activity Log',
-        content: ActivityLog(),
+        content: ActivityLogMarkup(),
       },
     ]}
   />
 );
 
-export const ActivityLog = () => <EndpointActivityLog activityLog={dummyEndpointActivityLog()} />;
+export const ActivityLogMarkup = () => (
+  <EndpointActivityLog activityLog={dummyEndpointActivityLog()} />
+);

@@ -184,7 +184,7 @@ describe('Host Isolation', () => {
     const ctx = await callRoute(ISOLATE_HOST_ROUTE, {
       body: { agent_ids: [AgentID] },
     });
-    const { item: actionDoc }: EndpointAction = (ctx.core.elasticsearch.client.asCurrentUser
+    const actionDoc: EndpointAction = (ctx.core.elasticsearch.client.asCurrentUser
       .index as jest.Mock).mock.calls[0][0].body;
     expect(actionDoc.agents).toContain(AgentID);
   });
@@ -194,7 +194,7 @@ describe('Host Isolation', () => {
       body: { agent_ids: ['XYZ'] },
       mockUser: testU,
     });
-    const { item: actionDoc }: EndpointAction = (ctx.core.elasticsearch.client.asCurrentUser
+    const actionDoc: EndpointAction = (ctx.core.elasticsearch.client.asCurrentUser
       .index as jest.Mock).mock.calls[0][0].body;
     expect(actionDoc.user_id).toEqual(testU.username);
   });
@@ -203,7 +203,7 @@ describe('Host Isolation', () => {
     const ctx = await callRoute(ISOLATE_HOST_ROUTE, {
       body: { agent_ids: ['XYZ'], comment: CommentText },
     });
-    const { item: actionDoc }: EndpointAction = (ctx.core.elasticsearch.client.asCurrentUser
+    const actionDoc: EndpointAction = (ctx.core.elasticsearch.client.asCurrentUser
       .index as jest.Mock).mock.calls[0][0].body;
     expect(actionDoc.data.comment).toEqual(CommentText);
   });
@@ -211,7 +211,7 @@ describe('Host Isolation', () => {
     const ctx = await callRoute(ISOLATE_HOST_ROUTE, {
       body: { agent_ids: ['XYZ'], comment: 'XYZ' },
     });
-    const { item: actionDoc }: EndpointAction = (ctx.core.elasticsearch.client.asCurrentUser
+    const actionDoc: EndpointAction = (ctx.core.elasticsearch.client.asCurrentUser
       .index as jest.Mock).mock.calls[0][0].body;
     const actionID = actionDoc.action_id;
     expect(mockResponse.ok).toBeCalled();
@@ -232,7 +232,7 @@ describe('Host Isolation', () => {
       body: { endpoint_ids: ['XYZ'] },
       searchResponse: doc,
     });
-    const { item: actionDoc }: EndpointAction = (ctx.core.elasticsearch.client.asCurrentUser
+    const actionDoc: EndpointAction = (ctx.core.elasticsearch.client.asCurrentUser
       .index as jest.Mock).mock.calls[0][0].body;
     expect(actionDoc.agents).toContain(AgentID);
   });
@@ -245,7 +245,7 @@ describe('Host Isolation', () => {
       body: { agent_ids: [explicitAgentID], endpoint_ids: ['XYZ'] },
       searchResponse: doc,
     });
-    const { item: actionDoc }: EndpointAction = (ctx.core.elasticsearch.client.asCurrentUser
+    const actionDoc: EndpointAction = (ctx.core.elasticsearch.client.asCurrentUser
       .index as jest.Mock).mock.calls[0][0].body;
     expect(actionDoc.agents).toContain(explicitAgentID);
     expect(actionDoc.agents).toContain(lookupAgentID);
@@ -255,7 +255,7 @@ describe('Host Isolation', () => {
     const ctx = await callRoute(ISOLATE_HOST_ROUTE, {
       body: { agent_ids: ['XYZ'] },
     });
-    const { item: actionDoc }: EndpointAction = (ctx.core.elasticsearch.client.asCurrentUser
+    const actionDoc: EndpointAction = (ctx.core.elasticsearch.client.asCurrentUser
       .index as jest.Mock).mock.calls[0][0].body;
     expect(actionDoc.data.command).toEqual('isolate');
   });
@@ -263,7 +263,7 @@ describe('Host Isolation', () => {
     const ctx = await callRoute(UNISOLATE_HOST_ROUTE, {
       body: { agent_ids: ['XYZ'] },
     });
-    const { item: actionDoc }: EndpointAction = (ctx.core.elasticsearch.client.asCurrentUser
+    const actionDoc: EndpointAction = (ctx.core.elasticsearch.client.asCurrentUser
       .index as jest.Mock).mock.calls[0][0].body;
     expect(actionDoc.data.command).toEqual('unisolate');
   });

@@ -18,7 +18,6 @@ import {
   Immutable,
   HostResultList,
   HostIsolationResponse,
-  EndpointAction,
   ActivityLog,
 } from '../../../../../common/endpoint/types';
 import { AppAction } from '../../../../common/store/actions';
@@ -260,9 +259,8 @@ describe('endpoint list middleware', () => {
 
       dispatchGetActivityLog();
       const loadedDispatchedResponse = await loadedDispatched;
-      const activityLogData = (loadedDispatchedResponse.payload as LoadedResourceState<
-        EndpointAction[]
-      >).data;
+      const activityLogData = (loadedDispatchedResponse.payload as LoadedResourceState<ActivityLog>)
+        .data;
 
       expect(activityLogData).toEqual(activityLog);
     });

@@ -14,7 +14,7 @@ const ISOLATION_COMMANDS: ISOLATION_ACTIONS[] = ['isolate', 'unisolate'];
 
 export class FleetActionGenerator extends BaseDataGenerator {
   /** Generate an Action */
-  generate(overrides: DeepPartial<EndpointAction['item']> = {}): EndpointAction['item'] {
+  generate(overrides: DeepPartial<EndpointAction> = {}): EndpointAction {
     const timeStamp = new Date(this.randomPastDate());
 
     return merge(
@@ -36,9 +36,7 @@ export class FleetActionGenerator extends BaseDataGenerator {
   }
 
   /** Generates an action response */
-  generateResponse(
-    overrides: DeepPartial<EndpointActionResponse['item']> = {}
-  ): EndpointActionResponse['item'] {
+  generateResponse(overrides: DeepPartial<EndpointActionResponse> = {}): EndpointActionResponse {
     const timeStamp = new Date();
 
     return merge(

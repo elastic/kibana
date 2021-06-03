@@ -10,41 +10,45 @@ import { HostIsolationRequestSchema } from '../schema/actions';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 export interface EndpointAction {
-  type: 'action';
-  item: {
-    action_id: string;
-    '@timestamp': string;
-    expiration: string;
-    type: 'INPUT_ACTION';
-    input_type: 'endpoint';
-    agents: string[];
-    user_id: string;
-    data: {
-      command: ISOLATION_ACTIONS;
-      comment?: string;
-    };
+  action_id: string;
+  '@timestamp': string;
+  expiration: string;
+  type: 'INPUT_ACTION';
+  input_type: 'endpoint';
+  agents: string[];
+  user_id: string;
+  data: {
+    command: ISOLATION_ACTIONS;
+    comment?: string;
   };
 }
 
 export interface EndpointActionResponse {
-  type: 'response';
-  item: {
-    '@timestamp': string;
-    /** The id of the action for which this response is associated with */
-    action_id: string;
-    /** The agent id that sent this action response */
-    agent_id: string;
-    started_at: string;
-    completed_at: string;
-    error: string;
-    action_data: {
-      command: ISOLATION_ACTIONS;
-      comment?: string;
-    };
+  '@timestamp': string;
+  /** The id of the action for which this response is associated with */
+  action_id: string;
+  /** The agent id that sent this action response */
+  agent_id: string;
+  started_at: string;
+  completed_at: string;
+  error: string;
+  action_data: {
+    command: ISOLATION_ACTIONS;
+    comment?: string;
   };
 }
 
-export type ActivityLogEntry = EndpointAction | EndpointActionResponse;
+export interface ActivityLogAction {
+  type: 'action';
+  item: EndpointAction;
+}
+
+export interface ActivityLogActionResponse {
+  type: 'response';
+  item: EndpointActionResponse;
+}
+
+export type ActivityLogEntry = ActivityLogAction | ActivityLogActionResponse;
 
 export type ActivityLog = ActivityLogEntry[];
 
