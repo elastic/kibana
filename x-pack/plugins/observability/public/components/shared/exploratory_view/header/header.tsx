@@ -11,8 +11,8 @@ import { EuiBetaBadge, EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@el
 import { TypedLensByValueInput, LensEmbeddableInput } from '../../../../../../lens/public';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { DataViewLabels } from '../configurations/constants';
-import { useUrlStorage } from '../hooks/use_url_storage';
 import { ObservabilityAppServices } from '../../../../application/types';
+import { useSeriesStorage } from '../hooks/use_series_storage';
 
 interface Props {
   seriesId: string;
@@ -24,7 +24,9 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
 
   const { lens } = kServices;
 
-  const { series } = useUrlStorage(seriesId);
+  const { getSeries } = useSeriesStorage();
+
+  const series = getSeries(seriesId);
 
   const [isSaveOpen, setIsSaveOpen] = useState(false);
 
