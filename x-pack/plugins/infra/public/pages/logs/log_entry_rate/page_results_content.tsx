@@ -258,7 +258,6 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
           <EuiFlexItem grow={false}>
             <AnomaliesResults
               isLoadingAnomaliesResults={isLoadingLogEntryAnomalies}
-              onViewModuleList={showModuleList}
               anomalies={logEntryAnomalies}
               timeRange={timeRange.value}
               page={page}

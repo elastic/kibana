@@ -6,7 +6,7 @@
  */
 
 import datemath from '@elastic/datemath';
-import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPanel, EuiSuperDatePicker } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiSuperDatePicker } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -264,14 +264,8 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <TopCategoriesSection
-              availableDatasets={logEntryCategoryDatasets}
-              hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
-              isLoadingDatasets={isLoadingLogEntryCategoryDatasets}
               isLoadingTopCategories={isLoadingTopLogEntryCategories}
               jobId={jobIds['log-entry-categories-count']}
-              onChangeDatasetSelection={setCategoryQueryDatasets}
-              onRequestRecreateMlJob={onOpenSetup}
-              selectedDatasets={categoryQueryDatasets}
               sourceId={sourceId}
               timeRange={categoryQueryTimeRange.timeRange}
               topCategories={topLogEntryCategories}

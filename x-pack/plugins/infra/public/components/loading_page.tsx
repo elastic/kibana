@@ -28,17 +28,15 @@ export const LoadingPage = ({
   } = useKibanaContextForPlugin();
 
   return (
-    <PageTemplate isEmptyState={true} data-test-subject={dataTestSubj}>
+    <PageTemplate isEmptyState={true} data-test-subj={dataTestSubj}>
       <EuiEmptyPrompt
         body={
-          <>
-            <EuiFlexGroup alignItems="center" gutterSize="none">
-              <EuiFlexItem grow={false}>
-                <EuiLoadingSpinner size="xl" style={{ marginRight: '8px' }} />
-              </EuiFlexItem>
-              <EuiFlexItem>{message}</EuiFlexItem>
-            </EuiFlexGroup>
-          </>
+          <EuiFlexGroup alignItems="center" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="xl" style={{ marginRight: '8px' }} />
+            </EuiFlexItem>
+            <EuiFlexItem>{message}</EuiFlexItem>
+          </EuiFlexGroup>
         }
       />
     </PageTemplate>

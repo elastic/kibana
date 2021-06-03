@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Route, Router, Switch } from 'react-router-dom';
@@ -17,9 +17,12 @@ import {
   createLoadingUseLogSourceMock,
 } from '../../containers/logs/log_source/log_source.mock';
 import { LinkToLogsPage } from './link_to_logs';
+import { createMockPageTemplate } from '../../test_utils/mock_page_template';
 
 jest.mock('../../containers/logs/log_source');
 const useLogSourceMock = useLogSource as jest.MockedFunction<typeof useLogSource>;
+
+const mockPageTemplate = createMockPageTemplate();
 
 const renderRoutes = (routes: React.ReactElement) => {
   const history = createMemoryHistory();
@@ -27,6 +30,11 @@ const renderRoutes = (routes: React.ReactElement) => {
     http: httpServiceMock.createStartContract(),
     data: {
       indexPatterns: {},
+    },
+    observability: {
+      navigation: {
+        PageTemplate: mockPageTemplate,
+      },
     },
   };
   const renderResult = render(
@@ -193,7 +201,7 @@ describe('LinkToLogsPage component', () => {
       expect(searchParams.get('logPosition')).toEqual(null);
     });
 
-    it('renders a loading page while loading the source configuration', () => {
+    it('renders a loading page while loading the source configuration', async () => {
       useLogSourceMock.mockImplementation(createLoadingUseLogSourceMock());
 
       const { history, queryByTestId } = renderRoutes(
@@ -203,8 +211,9 @@ describe('LinkToLogsPage component', () => {
       );
 
       history.push('/link-to/host-logs/HOST_NAME');
-
-      expect(queryByTestId('nodeLoadingPage-host')).not.toBeEmpty();
+      await waitFor(() => {
+        expect(queryByTestId('nodeLoadingPage-host')).not.toBeEmpty();
+      });
     });
   });
 

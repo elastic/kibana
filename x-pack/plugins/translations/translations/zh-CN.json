@@ -11223,7 +11223,6 @@
     "xpack.infra.header.badge.readOnly.text": "只读",
     "xpack.infra.header.badge.readOnly.tooltip": "无法更改源配置",
     "xpack.infra.header.infrastructureHelpAppName": "指标",
-    "xpack.infra.header.infrastructureNavigationTitle": "指标",
     "xpack.infra.header.infrastructureTitle": "指标",
     "xpack.infra.header.logsTitle": "日志",
     "xpack.infra.hideHistory": "隐藏历史记录",

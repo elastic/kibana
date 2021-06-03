@@ -15,8 +15,6 @@ import { IIndexPattern } from 'src/plugins/data/common';
 import { MetricsSourceConfigurationProperties } from '../../../common/metrics_sources';
 import { DocumentTitle } from '../../components/document_title';
 import { HelpCenterContent } from '../../components/help_center_content';
-import { RoutedTabs } from '../../components/navigation/routed_tabs';
-import { ColumnarPage } from '../../components/page';
 import { Header } from '../../components/header';
 import {
   MetricsExplorerOptionsContainer,
@@ -28,7 +26,6 @@ import { Source } from '../../containers/metrics_source';
 import { MetricsExplorerPage } from './metrics_explorer';
 import { SnapshotPage } from './inventory_view';
 import { MetricsSettingsPage } from './settings';
-import { AppNavigation } from '../../components/navigation/app_navigation';
 import { SourceLoadingPage } from '../../components/source_loading_page';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { WaffleOptionsProvider } from './inventory_view/hooks/use_waffle_options';

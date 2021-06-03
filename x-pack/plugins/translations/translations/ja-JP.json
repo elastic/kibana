@@ -11084,7 +11084,6 @@
     "xpack.infra.header.badge.readOnly.text": "読み取り専用",
     "xpack.infra.header.badge.readOnly.tooltip": "ソース構成を変更できません",
     "xpack.infra.header.infrastructureHelpAppName": "メトリック",
-    "xpack.infra.header.infrastructureNavigationTitle": "メトリック",
     "xpack.infra.header.infrastructureTitle": "メトリック",
     "xpack.infra.header.logsTitle": "ログ",
     "xpack.infra.hideHistory": "履歴を表示しない",
