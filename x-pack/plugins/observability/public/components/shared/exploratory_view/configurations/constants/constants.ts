@@ -85,6 +85,7 @@ export const FieldLabels: Record<string, string> = {
   'http.request.method': 'Request Method',
   'labels.net_connection_type': 'Connection Type',
   'host.os.full': 'Host OS',
+  'service.version': 'Service Version',
   'host.os.platform': 'OS Platform',
   'labels.device_model': ' Device Model',
   // eslint-disable-next-line @typescript-eslint/naming-convention
