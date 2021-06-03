@@ -27,7 +27,7 @@ which features.
 style="width: 100%; margin: auto; display: block;"
 class="vidyard-player-embed"
 src="https://play.vidyard.com/iyqMwJcvi8r4YfjeoPMjyH.jpg"
-data-uuid="jW5wP2dmegbs5ThRZ451Gj"
+data-uuid="iyqMwJcvi8r4YfjeoPMjyH"
 data-v="4"
 data-type="inline"
 />
