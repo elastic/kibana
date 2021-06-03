@@ -45,7 +45,8 @@ export const SwimlaneSecretsConfiguration = {
 export const SwimlaneSecretsConfigurationSchema = schema.object(SwimlaneSecretsConfiguration);
 
 const SwimlaneFields = {
-  alertName: schema.nullable(schema.string()),
+  alertId: schema.nullable(schema.string()),
+  ruleName: schema.nullable(schema.string()),
   alertSource: schema.nullable(schema.string()),
   caseId: schema.nullable(schema.string()),
   caseName: schema.nullable(schema.string()),

@@ -13,7 +13,8 @@ describe('Create Record Mapping', () => {
 
   test('Mapping is Successful', () => {
     const params = {
-      alertName: 'Rule Name',
+      alertId: 'al123',
+      ruleName: 'Rule Name',
       severity: 'Critical',
       alertSource: 'Elastic',
       caseName: 'Case Name',
@@ -24,7 +25,7 @@ describe('Create Record Mapping', () => {
     };
     const data = getBodyForEventAction(appId, mappings, params);
     expect(data?.values?.[mappings.alertSourceConfig?.id ?? 0]).toEqual(params.alertSource);
-    expect(data?.values?.[mappings.ruleNameConfig.id]).toEqual(params.alertName);
+    expect(data?.values?.[mappings.ruleNameConfig.id]).toEqual(params.ruleName);
     expect(data?.values?.[mappings.caseNameConfig?.id ?? 0]).toEqual(params.caseName);
     expect(data?.values?.[mappings.caseIdConfig?.id ?? 0]).toEqual(params.caseId);
     expect(data?.values?.[mappings.commentsConfig?.id ?? 0]).toEqual(params.comments);

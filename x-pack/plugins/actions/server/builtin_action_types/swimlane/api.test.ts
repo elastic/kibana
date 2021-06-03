@@ -12,7 +12,8 @@ import { Logger } from '@kbn/logging';
 
 let mockedLogger: jest.Mocked<Logger>;
 const params = {
-  alertName: 'alert name',
+  ruleName: 'rule name',
+  alertId: '123456',
   caseName: 'case name',
   severity: 'critical',
   alertSource: 'elastic',

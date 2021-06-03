@@ -81,7 +81,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
       subAction: 'pushToService',
       subActionParams: {
         incident: {
-          alertName: 'Rule Name',
+          ruleName: 'Rule Name',
           severity: 'Critical',
           alertSource: 'Elastic',
           caseName: 'Case Name',

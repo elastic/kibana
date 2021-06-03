@@ -37,9 +37,9 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
     mappings,
     connectorType,
   } = ((actionConnector as unknown) as SwimlaneActionConnector).config;
-  const { hasAlertName, hasAlertSource, hasComments, hasSeverity } = useMemo(
+  const { hasRuleName, hasAlertSource, hasComments, hasSeverity } = useMemo(
     () => ({
-      hasAlertName: mappings.ruleNameConfig != null,
+      hasRuleName: mappings.ruleNameConfig != null,
       hasAlertSource: mappings.alertSourceConfig != null,
       hasComments: mappings.commentsConfig != null,
       hasSeverity: mappings.severityConfig != null,
@@ -54,7 +54,7 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
 
   const showMappingWarning =
     connectorType === SwimlaneConnectorType.Cases ||
-    (!hasAlertName && !hasAlertSource && !hasComments && !hasSeverity);
+    (!hasRuleName && !hasAlertSource && !hasComments && !hasSeverity);
 
   const editSubActionProperty = useCallback(
     (key: string, value: any) => {
@@ -118,26 +118,26 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
 
   return !showMappingWarning ? (
     <>
-      {hasAlertName && (
+      {hasRuleName && (
         <>
           <EuiFormRow
             id="swimlaneAlertName"
             fullWidth
-            error={errors['subActionParams.incident.alertName'] ?? ''}
+            error={errors['subActionParams.incident.ruleName'] ?? ''}
             isInvalid={
-              errors['subActionParams.incident.alertName']?.length > 0 &&
-              incident.alertName !== undefined
+              errors['subActionParams.incident.ruleName']?.length > 0 &&
+              incident.ruleName !== undefined
             }
-            label={i18n.SW_ALERT_NAME_FIELD_LABEL}
+            label={i18n.SW_RULE_NAME_FIELD_LABEL}
           >
             <TextFieldWithMessageVariables
               index={index}
-              data-test-subj="alertName"
+              data-test-subj="ruleName"
               editAction={editSubActionProperty}
               messageVariables={messageVariables}
-              paramsProperty={'alertName'}
-              inputTargetValue={incident.alertName ?? undefined}
-              errors={errors['subActionParams.incident.alertName'] as string[]}
+              paramsProperty={'ruleName'}
+              inputTargetValue={incident.ruleName ?? undefined}
+              errors={errors['subActionParams.incident.ruleName'] as string[]}
             />
           </EuiFormRow>
           <EuiSpacer size="m" />

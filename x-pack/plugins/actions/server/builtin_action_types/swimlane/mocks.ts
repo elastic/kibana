@@ -50,6 +50,12 @@ export const applicationFields = [
     key: 'description',
     fieldType: 'text',
   },
+  {
+    id: 'dfnkls',
+    name: 'Alert ID',
+    key: 'alert-id',
+    fieldType: 'text',
+  },
 ];
 
 export const mappings = {
@@ -60,6 +66,7 @@ export const mappings = {
   caseNameConfig: applicationFields[4],
   commentsConfig: applicationFields[5],
   descriptionConfig: applicationFields[6],
+  alertIdConfig: applicationFields[7],
 };
 
 export const getApplicationResponse = { fields: applicationFields };
@@ -93,12 +100,13 @@ const externalServiceMock = {
 };
 
 const executorParams = {
-  alertName: 'alert-name',
+  ruleName: 'rule-name',
   alertSource: 'alert-source',
   caseId: 'case-id',
   caseName: 'case-name',
   comments: 'comments',
   severity: 'severity',
+  alertId: 'alert-id',
 };
 
 const apiParams = {

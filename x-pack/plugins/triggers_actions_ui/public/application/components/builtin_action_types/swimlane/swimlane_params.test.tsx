@@ -17,13 +17,14 @@ describe('SwimlaneParamsFields renders', () => {
       subAction: 'pushToService',
       subActionParams: {
         incident: {
-          alertName: 'alert name',
+          ruleName: 'rule name',
           alertSource: 'alert source',
           caseId: '3456789',
           caseName: 'my case name',
           severity: 'critical',
           description: 'case desc',
           externalId: null,
+          alertId: '3456789',
         },
         comments: [],
       },
@@ -42,12 +43,13 @@ describe('SwimlaneParamsFields renders', () => {
       <SwimlaneParamsFields
         actionParams={actionParams}
         errors={{
-          alertName: [],
+          ruleName: [],
           comments: [],
           severity: [],
           caseId: [],
           caseName: [],
           alertSource: [],
+          alertId: [],
         }}
         actionConnector={connector}
         editAction={() => {}}
@@ -57,6 +59,6 @@ describe('SwimlaneParamsFields renders', () => {
     expect(wrapper.find('[data-test-subj="severity"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="comments"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="alertSource"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="alertName"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="ruleName"]').length > 0).toBeTruthy();
   });
 });

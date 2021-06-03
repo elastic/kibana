@@ -79,7 +79,7 @@ export function getActionType(): ActionTypeModel<
     },
     validateParams: (actionParams: SwimlaneActionParams): GenericValidationResult<unknown> => {
       const errors = {
-        'subActionParams.incident.alertName': new Array<string>(),
+        'subActionParams.incident.ruleName': new Array<string>(),
       };
       const validationResult = {
         errors,
@@ -87,9 +87,9 @@ export function getActionType(): ActionTypeModel<
       if (
         actionParams.subActionParams &&
         actionParams.subActionParams.incident &&
-        !actionParams.subActionParams.incident.alertName?.length
+        !actionParams.subActionParams.incident.ruleName?.length
       ) {
-        errors['subActionParams.incident.alertName'].push(i18n.SW_REQUIRED_ALERT_NAME);
+        errors['subActionParams.incident.ruleName'].push(i18n.SW_REQUIRED_RULE_NAME);
       }
       return validationResult;
     },

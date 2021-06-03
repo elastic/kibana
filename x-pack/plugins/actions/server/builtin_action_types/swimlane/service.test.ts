@@ -45,7 +45,7 @@ describe('Swimlane Service', () => {
   };
 
   const incident = {
-    alertName: 'Rule Name',
+    ruleName: 'Rule Name',
     alertSource: 'Alert Source',
     caseId: 'Case Id',
     caseName: 'Case Name',
@@ -53,6 +53,7 @@ describe('Swimlane Service', () => {
     severity: 'Severity',
     externalId: null,
     description: 'Description',
+    alertId: 'Alert Id',
   };
 
   beforeAll(() => {
@@ -189,6 +190,7 @@ describe('Swimlane Service', () => {
             [mappings.commentsConfig.id]: 'Comments',
             [mappings.severityConfig.id]: 'Severity',
             [mappings.descriptionConfig.id]: 'Description',
+            [mappings.alertIdConfig.id]: 'Alert Id',
           },
         },
         url: `${config.apiUrl.slice(0, -1)}/api/app/${config.appId}/record`,

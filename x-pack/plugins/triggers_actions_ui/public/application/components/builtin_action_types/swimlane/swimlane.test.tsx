@@ -66,13 +66,13 @@ describe('swimlane action params validation', () => {
   test('action params validation succeeds when action params is valid', () => {
     const actionParams = {
       subActionParams: {
-        alertName: 'Rule Name',
+        ruleName: 'Rule Name',
       },
     };
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
-        'subActionParams.incident.alertName': [],
+        'subActionParams.incident.ruleName': [],
       },
     });
   });
