@@ -50,13 +50,12 @@ export function getTopMetricsAggConfig(
       if (isSpecialSortField(sortField)) {
         sort = sortField;
       } else {
-        if (sortMode || numericType || isPopulatedObject(unsupportedConfig)) {
+        if (sortMode || numericType) {
           sort = {
             [sortField!]: {
               order: sortDirection,
               ...(sortMode ? { mode: sortMode } : {}),
               ...(numericType ? { numeric_type: numericType } : {}),
-              ...(unsupportedConfig ?? {}),
             },
           };
         } else {
@@ -67,6 +66,7 @@ export function getTopMetricsAggConfig(
       return {
         metrics: (Array.isArray(this.field) ? this.field : [this.field]).map((f) => ({ field: f })),
         sort,
+        ...(unsupportedConfig ?? {}),
       };
     },
     setUiConfigFromEs(esAggDefinition) {

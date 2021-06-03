@@ -156,9 +156,9 @@ describe('top metrics agg config', () => {
         sort: {
           'sort-field': {
             order: 'asc',
-            size: 2,
           },
         },
+        size: 2,
       });
     });
 
