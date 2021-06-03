@@ -5,10 +5,19 @@
  * 2.0.
  */
 
+import { ReactNode } from 'react';
+import { StyledComponent } from 'styled-components';
 import { EuiFlyout } from '@elastic/eui';
-import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
+import {
+  euiStyled,
+  EuiTheme,
+} from '../../../../../../../../../../src/plugins/kibana_react/common';
 
-export const ResponsiveFlyout = euiStyled(EuiFlyout)`
+export const ResponsiveFlyout: StyledComponent<
+  typeof EuiFlyout,
+  EuiTheme,
+  { children?: ReactNode }
+> = euiStyled(EuiFlyout)`
   width: 100%;
 
   @media (min-width: 800px) {

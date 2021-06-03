@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSideNavItemType, ExclusiveUnion } from '@elastic/eui';
+import { EuiSideNavItemType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { matchPath, useLocation } from 'react-router-dom';
@@ -28,12 +28,8 @@ export type WrappedPageTemplateProps = Pick<
   | 'pageContentProps'
   | 'pageHeader'
   | 'restrictWidth'
-> &
-  // recreate the exclusivity of bottomBar-related props
-  ExclusiveUnion<
-    { template?: 'default' } & Pick<KibanaPageTemplateProps, 'bottomBar' | 'bottomBarProps'>,
-    { template: KibanaPageTemplateProps['template'] }
-  >;
+  | 'template'
+>;
 
 export interface ObservabilityPageTemplateDependencies {
   currentAppId$: Observable<string | undefined>;
