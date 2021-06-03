@@ -10,8 +10,8 @@ src="https://play.vidyard.com/embed/v4.js"></script>
 <img
 style="width: 100%; margin: auto; display: block;"
 class="vidyard-player-embed"
-src="https://play.vidyard.com/G6RNjq6U9odYRCYUxY2vfq.jpg"
-data-uuid="G6RNjq6U9odYRCYUxY2vfq"
+src="https://play.vidyard.com/vVJ69WCgUwGNJSDqjPZbaV.jpg"
+data-uuid="vVJ69WCgUwGNJSDqjPZbaV"
 data-v="4"
 data-type="inline"
 />
