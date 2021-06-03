@@ -237,6 +237,13 @@ export const SW_REQUIRED_CASE_NAME = i18n.translate(
   }
 );
 
+export const SW_REQUIRED_CASE_ID = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredCaseID',
+  {
+    defaultMessage: 'Case ID is required.',
+  }
+);
+
 export const SW_REQUIRED_COMMENTS = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredComments',
   {
