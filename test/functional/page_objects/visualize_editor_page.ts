@@ -327,6 +327,14 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       await testSubjects.click('visualizeEditorAutoButton');
     }
 
+    public async togglePieLegend() {
+      await testSubjects.click('visTypePieAddLegendSwitch');
+    }
+
+    public async togglePieNestedLegend() {
+      await testSubjects.click('visTypePieNestedLegendSwitch');
+    }
+
     public async isApplyEnabled() {
       const applyButton = await testSubjects.find('visualizeEditorRenderButton');
       return await applyButton.isEnabled();

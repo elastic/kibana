@@ -32,3 +32,6 @@ export const AGENT_POLICY_SUMMARY_ROUTE = `${BASE_POLICY_ROUTE}/summaries`;
 /** Host Isolation Routes */
 export const ISOLATE_HOST_ROUTE = `/api/endpoint/isolate`;
 export const UNISOLATE_HOST_ROUTE = `/api/endpoint/unisolate`;
+
+/** Endpoint Actions Log Routes */
+export const ENDPOINT_ACTION_LOG_ROUTE = `/api/endpoint/action_log/{agent_id}`;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mockConfig, mockLogger } from '../__mocks__';
+import { mockConfig, mockLogger, mockHttpAgent } from '../__mocks__';
 
 import {
   ENTERPRISE_SEARCH_KIBANA_COOKIE,
@@ -476,6 +476,7 @@ const EnterpriseSearchAPI = {
       headers: { Authorization: 'Basic 123', ...JSON_HEADER },
       method: 'GET',
       body: undefined,
+      agent: mockHttpAgent,
       ...expectedParams,
     });
   },
