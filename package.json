@@ -89,7 +89,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "resolutions": {
-    "**/@types/node": "10.12.27",
+    "**/@types/node": "12.20.14",
     "**/babel-plugin-inline-react-svg/svgo/js-yaml": "^3.13.1",
     "**/cross-fetch/node-fetch": "^2.6.1",
     "**/cypress/lodash": "^4.17.21",
@@ -330,7 +330,7 @@
     "@types/minimatch": "^2.0.29",
     "@types/moment-timezone": "^0.5.8",
     "@types/mustache": "^0.8.31",
-    "@types/node": "^10.12.27",
+    "@types/node": "^12.20.14",
     "@types/opn": "^5.1.0",
     "@types/prop-types": "^15.7.3",
     "@types/puppeteer-core": "^1.9.0",
