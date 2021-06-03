@@ -32,7 +32,7 @@ export function encodeQuery(query: QueryParams, exclude: string[] = []) {
 }
 
 function stringifyWithoutEncoding(query: QueryParams) {
-  return qs.stringify(query, undefined, undefined, {
+  return qs.stringify(query as Record<string, any>, undefined, undefined, {
     encodeURIComponent: (v: string) => v
   });
 }

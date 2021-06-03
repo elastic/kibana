@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { readdir, stat } from 'fs';
+import Fs from 'fs';
 import { resolve } from 'path';
 import { bindNodeCallback, from } from 'rxjs';
 import { catchError, filter, map, mergeMap, shareReplay } from 'rxjs/operators';
@@ -29,8 +29,8 @@ import { PluginsConfig } from '../plugins_config';
 import { PluginDiscoveryError } from './plugin_discovery_error';
 import { parseManifest } from './plugin_manifest_parser';
 
-const fsReadDir$ = bindNodeCallback(readdir);
-const fsStat$ = bindNodeCallback(stat);
+const fsReadDir$ = bindNodeCallback(Fs.readdir);
+const fsStat$ = bindNodeCallback<Fs.PathLike, Fs.Stats>(Fs.stat);
 
 /**
  * Tries to discover all possible plugins based on the provided plugin config.

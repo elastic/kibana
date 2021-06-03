@@ -53,7 +53,7 @@ it('supports changing protocol', () => {
     modifyUrl('http://localhost', parsed => {
       parsed.protocol = 'mail';
       parsed.slashes = false;
-      parsed.pathname = undefined;
+      parsed.pathname = null;
     })
   ).toBe('mail:localhost');
 });

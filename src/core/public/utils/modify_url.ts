@@ -20,14 +20,14 @@
 import { format as formatUrl, parse as parseUrl } from 'url';
 
 interface UrlParts {
-  protocol?: string;
-  slashes?: boolean;
-  auth?: string;
-  hostname?: string;
-  port?: string;
-  pathname?: string;
+  protocol: string | null;
+  slashes: boolean | null;
+  auth: string | null;
+  hostname: string | null;
+  port: string | null;
+  pathname: string | null;
   query: { [key: string]: string | string[] | undefined };
-  hash?: string;
+  hash: string | null;
 }
 
 /**

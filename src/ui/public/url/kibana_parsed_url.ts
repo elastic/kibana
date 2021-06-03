@@ -46,21 +46,21 @@ interface Options {
 
   /**
    * Optional hostname. Uses current window location's hostname if hostname, port,
-   * and protocol are undefined.
+   * and protocol are falsy.
    */
-  hostname?: string;
+  hostname: string | null;
 
   /**
    * Optional port. Uses current window location's port if hostname, port,
-   * and protocol are undefined.
+   * and protocol are falsy.
    */
-  port?: string;
+  port: string | null;
 
   /**
    * Optional protocol. Uses current window location's protocol if hostname, port,
-   * and protocol are undefined.
+   * and protocol are falsy.
    */
-  protocol?: string;
+  protocol: string | null;
 }
 
 /**
@@ -79,9 +79,9 @@ export class KibanaParsedUrl {
   public appId: string;
   public appPath: string;
   public basePath: string;
-  public hostname?: string;
-  public protocol?: string;
-  public port?: string;
+  public hostname: string | null;
+  public protocol: string | null;
+  public port: string | null;
 
   constructor(options: Options) {
     const { appId, basePath = '', appPath = '', hostname, protocol, port } = options;

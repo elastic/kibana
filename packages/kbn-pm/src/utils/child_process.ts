@@ -58,8 +58,8 @@ export function spawnStreaming(
     tag: `${logSymbols.error} ${color.bold(prefix)}:`,
   });
 
-  spawned.stdout.pipe(prefixedStdout).pipe(process.stdout);
-  spawned.stderr.pipe(prefixedStderr).pipe(process.stderr);
+  spawned.stdout!.pipe(prefixedStdout).pipe(process.stdout); // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
+  spawned.stderr!.pipe(prefixedStderr).pipe(process.stderr); // TypeScript note: As long as the proc stdio[2] is 'pipe', then stderr will not be null
 
   return spawned;
 }
