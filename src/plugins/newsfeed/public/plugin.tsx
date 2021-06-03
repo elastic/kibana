@@ -13,7 +13,7 @@ import React from 'react';
 import moment from 'moment';
 import { I18nProvider } from '@kbn/i18n/react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { NewsfeedPluginBrowserConfig } from './types';
+import { NewsfeedPluginBrowserConfig, NewsfeedPluginSetupDependencies } from './types';
 import { NewsfeedNavButton } from './components/newsfeed_header_nav_button';
 import { getApi, NewsfeedApi, NewsfeedApiEndpoint } from './lib/api';
 
@@ -41,12 +41,17 @@ export class NewsfeedPublicPlugin
     return {};
   }
 
-  public start(core: CoreStart) {
-    const api = this.createNewsfeedApi(this.config, NewsfeedApiEndpoint.KIBANA);
-    core.chrome.navControls.registerRight({
-      order: 1000,
-      mount: (target) => this.mount(api, target),
-    });
+  public start(core: CoreStart, { screenshotMode }: NewsfeedPluginSetupDependencies) {
+    const isScreenshotMode = screenshotMode.isScreenshotMode();
+    const shouldMountKibanaNewsfeed = !isScreenshotMode;
+
+    if (shouldMountKibanaNewsfeed) {
+      const api = this.createNewsfeedApi(this.config, NewsfeedApiEndpoint.KIBANA, false);
+      core.chrome.navControls.registerRight({
+        order: 1000,
+        mount: (target) => this.mount(api, target),
+      });
+    }
 
     return {
       createNewsFeed$: (endpoint: NewsfeedApiEndpoint) => {
@@ -56,7 +61,7 @@ export class NewsfeedPublicPlugin
             pathTemplate: `/${endpoint}/v{VERSION}.json`,
           },
         });
-        const { fetchResults$ } = this.createNewsfeedApi(config, endpoint);
+        const { fetchResults$ } = this.createNewsfeedApi(config, endpoint, isScreenshotMode);
         return fetchResults$;
       },
     };
@@ -68,9 +73,10 @@ export class NewsfeedPublicPlugin
 
   private createNewsfeedApi(
     config: NewsfeedPluginBrowserConfig,
-    newsfeedId: NewsfeedApiEndpoint
+    newsfeedId: NewsfeedApiEndpoint,
+    isScreenshotMode: boolean
   ): NewsfeedApi {
-    const api = getApi(config, this.kibanaVersion, newsfeedId);
+    const api = getApi(config, this.kibanaVersion, newsfeedId, isScreenshotMode);
     return {
       markAsRead: api.markAsRead,
       fetchResults$: api.fetchResults$.pipe(
