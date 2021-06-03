@@ -132,7 +132,7 @@ const SortableTextField: FunctionComponent<SortableTextFieldProps> = React.memo(
 
 export const HostsInput: FunctionComponent<Props> = ({
   id,
-  value,
+  value: valueFromProps,
   onChange,
   helpText,
   label,
@@ -140,6 +140,10 @@ export const HostsInput: FunctionComponent<Props> = ({
   errors,
 }) => {
   const [autoFocus, setAutoFocus] = useState(false);
+  const value = useMemo(() => {
+    return valueFromProps.length ? valueFromProps : [''];
+  }, [valueFromProps]);
+
   const rows = useMemo(
     () =>
       value.map((host, idx) => ({
