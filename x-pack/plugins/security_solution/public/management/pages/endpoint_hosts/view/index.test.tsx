@@ -750,27 +750,9 @@ describe('when on the endpoint list page', () => {
       );
     });
 
-    it('should show the Host isolation panel when action is clicked', async () => {
+    it('should show the Take Action button', async () => {
       const renderResult = await renderAndWaitForData();
-
-      act(() => {
-        fireEvent.click(renderResult.getByTestId('endpointDetailsActionsButton'));
-      });
-
-      const changeUrlAction = middlewareSpy.waitForAction('userChangedUrl');
-
-      act(() => {
-        fireEvent.click(
-          reactTestingLibrary
-            .within(renderResult.baseElement as HTMLElement)
-            .getByTestId('isolateLink')
-        );
-      });
-
-      expect((await changeUrlAction).payload).toMatchObject({
-        pathname: '/endpoints',
-        search: '?selected_endpoint=1&show=isolate',
-      });
+      expect(renderResult.getByTestId('endpointDetailsActionsButton')).not.toBeNull();
     });
 
     describe('when link to reassignment in Ingest is clicked', () => {
@@ -1079,9 +1061,19 @@ describe('when on the endpoint list page', () => {
       const { hosts, query_strategy_version: queryStrategyVersion } = mockEndpointResultList();
       hostInfo = {
         host_status: hosts[0].host_status,
-        metadata: hosts[0].metadata,
+        metadata: {
+          ...hosts[0].metadata,
+          Endpoint: {
+            ...hosts[0].metadata.Endpoint,
+            state: {
+              ...hosts[0].metadata.Endpoint.state,
+              isolation: false,
+            },
+          },
+        },
         query_strategy_version: queryStrategyVersion,
       };
+
       const packagePolicy = docGenerator.generatePolicyPackagePolicy();
       packagePolicy.id = hosts[0].metadata.Endpoint.policy.applied.id;
       const agentPolicy = generator.generateAgentPolicy();
@@ -1132,6 +1124,8 @@ describe('when on the endpoint list page', () => {
       expect(isolateLink.getAttribute('href')).toEqual(
         getEndpointDetailsPath({
           name: 'endpointIsolate',
+          page_index: '0',
+          page_size: '10',
           selected_endpoint: hostInfo.metadata.agent.id,
         })
       );
