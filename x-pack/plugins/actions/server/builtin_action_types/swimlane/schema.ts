@@ -18,6 +18,7 @@ export const ConfigMapSchema = schema.object(ConfigMap);
 
 export const ConfigMapping = {
   ruleNameConfig: schema.nullable(ConfigMapSchema),
+  alertIdConfig: schema.nullable(ConfigMapSchema),
   alertSourceConfig: schema.nullable(ConfigMapSchema),
   caseIdConfig: schema.nullable(ConfigMapSchema),
   caseNameConfig: schema.nullable(ConfigMapSchema),
