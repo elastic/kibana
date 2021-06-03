@@ -61,16 +61,16 @@ exports[`policy table should show empty state when there are not any policies 1`
         data-euiicon-type="managementApp"
       />
       <div
-        class="euiSpacer euiSpacer--s"
+        class="euiSpacer euiSpacer--m"
       />
+      <h1
+        class="euiTitle euiTitle--medium"
+      >
+        Create your first index lifecycle policy
+      </h1>
       <span
         class="euiTextColor euiTextColor--subdued"
       >
-        <h1
-          class="euiTitle euiTitle--medium"
-        >
-          Create your first index lifecycle policy
-        </h1>
         <div
           class="euiSpacer euiSpacer--m"
         />
@@ -84,9 +84,6 @@ exports[`policy table should show empty state when there are not any policies 1`
       </span>
       <div
         class="euiSpacer euiSpacer--l"
-      />
-      <div
-        class="euiSpacer euiSpacer--s"
       />
       <button
         class="euiButton euiButton--primary euiButton--fill"
