@@ -19,7 +19,7 @@ interface Arguments {
   values: boolean;
   truncate: number | null;
   valuesFormat: string;
-  last_level: boolean;
+  lastLevel: boolean;
   percentDecimals: number;
 }
 
@@ -76,7 +76,7 @@ export const pieLabels = (): ExpressionFunctionDefinition<
       }),
       default: 2,
     },
-    last_level: {
+    lastLevel: {
       types: ['boolean'],
       help: i18n.translate('visTypePie.function.pieLabels.lastLevel.help', {
         defaultMessage: 'Show top level labels only',
@@ -107,7 +107,7 @@ export const pieLabels = (): ExpressionFunctionDefinition<
       values: args.values,
       truncate: args.truncate,
       valuesFormat: args.valuesFormat,
-      last_level: args.last_level,
+      last_level: args.lastLevel,
     };
   },
 });

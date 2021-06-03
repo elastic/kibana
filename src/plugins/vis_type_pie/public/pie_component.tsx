@@ -237,9 +237,7 @@ const PieComponent = (props: PieComponentProps) => {
   const tooltip: TooltipProps = {
     type: visParams.addTooltip ? TooltipType.Follow : TooltipType.None,
   };
-  const legendPosition = useMemo(() => visParams.legendPosition ?? Position.Right, [
-    visParams.legendPosition,
-  ]);
+  const legendPosition = visParams.legendPosition ?? Position.Right;
 
   const legendColorPicker = useMemo(
     () =>

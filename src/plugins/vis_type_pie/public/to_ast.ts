@@ -26,7 +26,7 @@ const prepareDimension = (params: SchemaConfig) => {
 const prepareLabels = (params: LabelsParams) => {
   const pieLabels = buildExpressionFunction('pielabels', {
     show: params.show,
-    last_level: params.last_level,
+    lastLevel: params.last_level,
     values: params.values,
     truncate: params.truncate,
   });

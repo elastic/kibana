@@ -135,7 +135,7 @@ export const getLayers = (
           if (visParams.labels.truncate && formattedLabel.length <= visParams.labels.truncate) {
             return formattedLabel;
           } else {
-            return `${formattedLabel.slice(0, Number(visParams.labels.truncate))}...`;
+            return `${formattedLabel.slice(0, Number(visParams.labels.truncate))}\u2026`;
           }
         }
         return String(d);

@@ -8,29 +8,33 @@
 
 import { PartitionConfig, PartitionLayout, RecursivePartial, Theme } from '@elastic/charts';
 import { LabelPositions, PieVisParams, PieContainerDimensions } from '../types';
+const MAX_SIZE = 900;
 
 export const getConfig = (
   visParams: PieVisParams,
   chartTheme: RecursivePartial<Theme>,
   dimensions?: PieContainerDimensions
 ): RecursivePartial<PartitionConfig> => {
-  const maxSize = 900;
-  const usingMargin = dimensions
-    ? {
-        margin: {
-          top: (1 - Math.min(1, maxSize / dimensions?.height)) / 2,
-          bottom: (1 - Math.min(1, maxSize / dimensions?.height)) / 2,
-          left: (1 - Math.min(1, maxSize / dimensions?.width)) / 2,
-          right: (1 - Math.min(1, maxSize / dimensions?.width)) / 2,
-        },
-      }
-    : null;
+  // On small multiples we want the labels to only appear inside
+  const isSplitChart = Boolean(visParams.dimensions.splitColumn || visParams.dimensions.splitRow);
+  const usingMargin =
+    dimensions && !isSplitChart
+      ? {
+          margin: {
+            top: (1 - Math.min(1, MAX_SIZE / dimensions?.height)) / 2,
+            bottom: (1 - Math.min(1, MAX_SIZE / dimensions?.height)) / 2,
+            left: (1 - Math.min(1, MAX_SIZE / dimensions?.width)) / 2,
+            right: (1 - Math.min(1, MAX_SIZE / dimensions?.width)) / 2,
+          },
+        }
+      : null;
 
-  const usingOuterSizeRatio = dimensions
-    ? {
-        outerSizeRatio: maxSize / Math.min(dimensions?.width, dimensions?.height),
-      }
-    : null;
+  const usingOuterSizeRatio =
+    dimensions && !isSplitChart
+      ? {
+          outerSizeRatio: MAX_SIZE / Math.min(dimensions?.width, dimensions?.height),
+        }
+      : null;
   const config: RecursivePartial<PartitionConfig> = {
     partitionLayout: PartitionLayout.sunburst,
     fontFamily: chartTheme.barSeriesStyle?.displayValue?.fontFamily,
@@ -62,8 +66,6 @@ export const getConfig = (
     };
   }
 
-  // On small multiples we want the labels to only appear inside
-  const isSplitChart = Boolean(visParams.dimensions.splitColumn || visParams.dimensions.splitRow);
   if (
     (visParams.labels.position === LabelPositions.INSIDE || isSplitChart) &&
     visParams.labels.show
