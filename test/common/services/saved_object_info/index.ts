@@ -14,8 +14,8 @@ import { types } from './saved_object_info';
 export { SavedObjectInfoService } from './saved_object_info';
 
 const expectedFlags = {
-  string: ['esUrl', 'detectionRules'],
-  boolean: ['soTypes'],
+  string: ['esUrl'],
+  boolean: ['soTypes', 'detectionRules'],
   help: `
 --esUrl             Required, tells the app which url to point to
 --soTypes           Not Required, tells the svc to show the types within the .kibana index
