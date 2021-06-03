@@ -21,11 +21,9 @@ Delete any items that are not applicable to this PR.
 
 Delete this section if it is not applicable to this PR.
 
-Before closing this PR, invite QA, stakeholders, and other developers to
-identify risks that should be tested prior to the change/feature release.
+Before closing this PR, invite QA, stakeholders, and other developers to identify risks that should be tested prior to the change/feature release.
 
-When forming the risk matrix, consider some of the following examples and how
-they may potentially impact the change:
+When forming the risk matrix, consider some of the following examples and how they may potentially impact the change:
 
 | Risk                      | Probability | Severity | Mitigation/Notes        |
 |---------------------------|-------------|----------|-------------------------|
