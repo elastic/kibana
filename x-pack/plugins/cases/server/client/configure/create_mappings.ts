@@ -29,7 +29,7 @@ export const createMappings = async (
     });
 
     const theMapping = await connectorMappingsService.post({
-      soClient: unsecuredSavedObjectsClient,
+      unsecuredSavedObjectsClient,
       attributes: {
         mappings: res.defaultMappings,
         owner,

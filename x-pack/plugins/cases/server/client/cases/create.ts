@@ -88,12 +88,12 @@ export const create = async (
     const { username, full_name, email } = user;
     const createdDate = new Date().toISOString();
     const myCaseConfigure = await caseConfigureService.find({
-      soClient: unsecuredSavedObjectsClient,
+      unsecuredSavedObjectsClient,
     });
     const caseConfigureConnector = getConnectorFromConfiguration(myCaseConfigure);
 
     const newCase = await caseService.postNewCase({
-      soClient: unsecuredSavedObjectsClient,
+      unsecuredSavedObjectsClient,
       attributes: transformNewCase({
         createdDate,
         newCase: query,
@@ -106,7 +106,7 @@ export const create = async (
     });
 
     await userActionService.bulkCreate({
-      soClient: unsecuredSavedObjectsClient,
+      unsecuredSavedObjectsClient,
       actions: [
         buildCaseUserActionItem({
           action: 'create',

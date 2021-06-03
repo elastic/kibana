@@ -59,7 +59,7 @@ export async function deleteAll(
 ): Promise<void> {
   const {
     user,
-    unsecuredSavedObjectsClient: soClient,
+    unsecuredSavedObjectsClient,
     caseService,
     attachmentService,
     userActionService,
@@ -73,7 +73,7 @@ export async function deleteAll(
 
     const id = subCaseID ?? caseID;
     const comments = await caseService.getCommentsByAssociation({
-      soClient,
+      unsecuredSavedObjectsClient,
       id,
       associationType: subCaseID ? AssociationType.subCase : AssociationType.case,
     });
@@ -93,7 +93,7 @@ export async function deleteAll(
     await Promise.all(
       comments.saved_objects.map((comment) =>
         attachmentService.delete({
-          soClient,
+          unsecuredSavedObjectsClient,
           attachmentId: comment.id,
         })
       )
@@ -102,7 +102,7 @@ export async function deleteAll(
     const deleteDate = new Date().toISOString();
 
     await userActionService.bulkCreate({
-      soClient,
+      unsecuredSavedObjectsClient,
       actions: comments.saved_objects.map((comment) =>
         buildCommentUserActionItem({
           action: 'delete',
@@ -136,7 +136,7 @@ export async function deleteComment(
 ) {
   const {
     user,
-    unsecuredSavedObjectsClient: soClient,
+    unsecuredSavedObjectsClient,
     attachmentService,
     userActionService,
     logger,
@@ -150,7 +150,7 @@ export async function deleteComment(
     const deleteDate = new Date().toISOString();
 
     const myComment = await attachmentService.get({
-      soClient,
+      unsecuredSavedObjectsClient,
       attachmentId: attachmentID,
     });
 
@@ -175,12 +175,12 @@ export async function deleteComment(
     }
 
     await attachmentService.delete({
-      soClient,
+      unsecuredSavedObjectsClient,
       attachmentId: attachmentID,
     });
 
     await userActionService.bulkCreate({
-      soClient,
+      unsecuredSavedObjectsClient,
       actions: [
         buildCommentUserActionItem({
           action: 'delete',

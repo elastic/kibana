@@ -91,7 +91,7 @@ export async function find(
   clientArgs: CasesClientArgs
 ): Promise<CommentsResponse> {
   const {
-    unsecuredSavedObjectsClient: soClient,
+    unsecuredSavedObjectsClient,
     caseService,
     logger,
     authorization,
@@ -124,7 +124,7 @@ export async function find(
     const args = queryParams
       ? {
           caseService,
-          soClient,
+          unsecuredSavedObjectsClient,
           id,
           options: {
             // We need this because the default behavior of getAllCaseComments is to return all the comments
@@ -141,7 +141,7 @@ export async function find(
         }
       : {
           caseService,
-          soClient,
+          unsecuredSavedObjectsClient,
           id,
           options: {
             page: defaultPage,
@@ -184,7 +184,7 @@ export async function get(
 ): Promise<CommentResponse> {
   const {
     attachmentService,
-    unsecuredSavedObjectsClient: soClient,
+    unsecuredSavedObjectsClient,
     logger,
     authorization,
     auditLogger,
@@ -192,7 +192,7 @@ export async function get(
 
   try {
     const comment = await attachmentService.get({
-      soClient,
+      unsecuredSavedObjectsClient,
       attachmentId: attachmentID,
     });
 
@@ -225,7 +225,7 @@ export async function getAll(
   clientArgs: CasesClientArgs
 ): Promise<AllCommentsResponse> {
   const {
-    unsecuredSavedObjectsClient: soClient,
+    unsecuredSavedObjectsClient,
     caseService,
     logger,
     authorization,
@@ -256,7 +256,7 @@ export async function getAll(
 
     if (subCaseID) {
       comments = await caseService.getAllSubCaseComments({
-        soClient,
+        unsecuredSavedObjectsClient,
         id: subCaseID,
         options: {
           filter,
@@ -265,7 +265,7 @@ export async function getAll(
       });
     } else {
       comments = await caseService.getAllCaseComments({
-        soClient,
+        unsecuredSavedObjectsClient,
         id: caseID,
         includeSubCaseComments,
         options: {

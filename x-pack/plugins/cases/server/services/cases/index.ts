@@ -77,20 +77,20 @@ interface GetSubCasesArgs extends ClientArgs {
 }
 
 interface FindCommentsArgs {
-  soClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
   id: string | string[];
   options?: SavedObjectFindOptionsKueryNode;
 }
 
 interface FindCaseCommentsArgs {
-  soClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
   id: string | string[];
   options?: SavedObjectFindOptionsKueryNode;
   includeSubCaseComments?: boolean;
 }
 
 interface FindSubCaseCommentsArgs {
-  soClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
   id: string | string[];
   options?: SavedObjectFindOptionsKueryNode;
 }
@@ -104,7 +104,7 @@ interface FindSubCasesByIDArgs extends FindCasesArgs {
 }
 
 interface FindSubCasesStatusStats {
-  soClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
   options: SavedObjectFindOptionsKueryNode;
   ids: string[];
 }
@@ -132,15 +132,15 @@ interface PatchCasesArgs extends ClientArgs {
 }
 
 interface PatchSubCase {
-  soClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
   subCaseId: string;
   updatedAttributes: Partial<SubCaseAttributes>;
   version?: string;
 }
 
 interface PatchSubCases {
-  soClient: SavedObjectsClientContract;
-  subCases: Array<Omit<PatchSubCase, 'soClient'>>;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  subCases: Array<Omit<PatchSubCase, 'unsecuredSavedObjectsClient'>>;
 }
 
 interface GetUserArgs {
@@ -160,7 +160,7 @@ interface CaseCommentStats {
 }
 
 interface FindCommentsByAssociationArgs {
-  soClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
   id: string | string[];
   associationType: AssociationType;
   options?: SavedObjectFindOptionsKueryNode;
@@ -181,12 +181,12 @@ interface CasesMapWithPageInfo {
 type FindCaseOptions = CasesFindRequest & SavedObjectFindOptionsKueryNode;
 
 interface GetTagsArgs {
-  soClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
   filter?: KueryNode;
 }
 
 interface GetReportersArgs {
-  soClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
   filter?: KueryNode;
 }
 
@@ -234,7 +234,7 @@ export class CasesService {
   });
 
   public async getCaseIdsByAlertId({
-    soClient,
+    unsecuredSavedObjectsClient,
     alertId,
     filter,
   }: GetCaseIdsByAlertIdArgs): Promise<
@@ -247,7 +247,10 @@ export class CasesService {
         filter,
       ]);
 
-      let response = await soClient.find<CommentAttributes, GetCaseIdsByAlertIdAggs>({
+      let response = await unsecuredSavedObjectsClient.find<
+        CommentAttributes,
+        GetCaseIdsByAlertIdAggs
+      >({
         type: CASE_COMMENT_SAVED_OBJECT,
         fields: includeFieldsRequiredForAuthentication(),
         page: 1,
@@ -257,7 +260,10 @@ export class CasesService {
         filter: combinedFilter,
       });
       if (response.total > 100) {
-        response = await soClient.find<CommentAttributes, GetCaseIdsByAlertIdAggs>({
+        response = await unsecuredSavedObjectsClient.find<
+          CommentAttributes,
+          GetCaseIdsByAlertIdAggs
+        >({
           type: CASE_COMMENT_SAVED_OBJECT,
           fields: includeFieldsRequiredForAuthentication(),
           page: 1,
@@ -287,22 +293,22 @@ export class CasesService {
    * Returns a map of all cases combined with their sub cases if they are collections.
    */
   public async findCasesGroupedByID({
-    soClient,
+    unsecuredSavedObjectsClient,
     caseOptions,
     subCaseOptions,
   }: {
-    soClient: SavedObjectsClientContract;
+    unsecuredSavedObjectsClient: SavedObjectsClientContract;
     caseOptions: FindCaseOptions;
     subCaseOptions?: SavedObjectFindOptionsKueryNode;
   }): Promise<CasesMapWithPageInfo> {
     const cases = await this.findCases({
-      soClient,
+      unsecuredSavedObjectsClient,
       options: caseOptions,
     });
 
     const subCasesResp = ENABLE_CASE_CONNECTOR
       ? await this.findSubCasesGroupByCase({
-          soClient,
+          unsecuredSavedObjectsClient,
           options: subCaseOptions,
           ids: cases.saved_objects
             .filter((caseInfo) => caseInfo.attributes.type === CaseType.collection)
@@ -343,7 +349,7 @@ export class CasesService {
      * in another request (the one below this comment).
      */
     const totalCommentsForCases = await this.getCaseCommentStats({
-      soClient,
+      unsecuredSavedObjectsClient,
       ids: Array.from(casesMap.keys()),
       associationType: AssociationType.case,
     });
@@ -374,18 +380,18 @@ export class CasesService {
    * This also counts sub cases. Parent cases are excluded from the statistics.
    */
   public async findCaseStatusStats({
-    soClient,
+    unsecuredSavedObjectsClient,
     caseOptions,
     subCaseOptions,
     ensureSavedObjectsAreAuthorized,
   }: {
-    soClient: SavedObjectsClientContract;
+    unsecuredSavedObjectsClient: SavedObjectsClientContract;
     caseOptions: SavedObjectFindOptionsKueryNode;
     ensureSavedObjectsAreAuthorized: EnsureSOAuthCallback;
     subCaseOptions?: SavedObjectFindOptionsKueryNode;
   }): Promise<number> {
     const casesStats = await this.findCases({
-      soClient,
+      unsecuredSavedObjectsClient,
       options: {
         ...caseOptions,
         fields: [],
@@ -415,7 +421,7 @@ export class CasesService {
      * don't have the same title and tags, we'd need to account for that as well.
      */
     const cases = await this.findCases({
-      soClient,
+      unsecuredSavedObjectsClient,
       options: {
         ...caseOptions,
         fields: includeFieldsRequiredForAuthentication([caseTypeField]),
@@ -437,7 +443,7 @@ export class CasesService {
 
     if (ENABLE_CASE_CONNECTOR && subCaseOptions) {
       subCasesTotal = await this.findSubCaseStatusStats({
-        soClient,
+        unsecuredSavedObjectsClient,
         options: cloneDeep(subCaseOptions),
         ids: caseIds,
       });
@@ -454,20 +460,20 @@ export class CasesService {
    * Retrieves the comments attached to a case or sub case.
    */
   public async getCommentsByAssociation({
-    soClient,
+    unsecuredSavedObjectsClient,
     id,
     associationType,
     options,
   }: FindCommentsByAssociationArgs): Promise<SavedObjectsFindResponse<CommentAttributes>> {
     if (associationType === AssociationType.subCase) {
       return this.getAllSubCaseComments({
-        soClient,
+        unsecuredSavedObjectsClient,
         id,
         options,
       });
     } else {
       return this.getAllCaseComments({
-        soClient,
+        unsecuredSavedObjectsClient,
         id,
         options,
       });
@@ -478,11 +484,11 @@ export class CasesService {
    * Returns the number of total comments and alerts for a case (or sub case)
    */
   public async getCaseCommentStats({
-    soClient,
+    unsecuredSavedObjectsClient,
     ids,
     associationType,
   }: {
-    soClient: SavedObjectsClientContract;
+    unsecuredSavedObjectsClient: SavedObjectsClientContract;
     ids: string[];
     associationType: AssociationType;
   }): Promise<CaseCommentStats> {
@@ -499,7 +505,7 @@ export class CasesService {
     const allComments = await Promise.all(
       ids.map((id) =>
         this.getCommentsByAssociation({
-          soClient,
+          unsecuredSavedObjectsClient,
           associationType,
           id,
           options: { page: 1, perPage: 1 },
@@ -508,7 +514,7 @@ export class CasesService {
     );
 
     const alerts = await this.getCommentsByAssociation({
-      soClient,
+      unsecuredSavedObjectsClient,
       associationType,
       id: ids,
       options: {
@@ -544,11 +550,11 @@ export class CasesService {
    * Returns all the sub cases for a set of case IDs. Comment statistics are also returned.
    */
   public async findSubCasesGroupByCase({
-    soClient,
+    unsecuredSavedObjectsClient,
     options,
     ids,
   }: {
-    soClient: SavedObjectsClientContract;
+    unsecuredSavedObjectsClient: SavedObjectsClientContract;
     options?: SavedObjectFindOptionsKueryNode;
     ids: string[];
   }): Promise<SubCasesMapWithPageInfo> {
@@ -572,7 +578,7 @@ export class CasesService {
     }
 
     const subCases = await this.findSubCases({
-      soClient,
+      unsecuredSavedObjectsClient,
       options: {
         ...options,
         hasReference: ids.map((id) => {
@@ -585,7 +591,7 @@ export class CasesService {
     });
 
     const subCaseComments = await this.getCaseCommentStats({
-      soClient,
+      unsecuredSavedObjectsClient,
       ids: subCases.saved_objects.map((subCase) => subCase.id),
       associationType: AssociationType.subCase,
     });
@@ -624,7 +630,7 @@ export class CasesService {
    * Calculates the number of sub cases for a given set of options for a set of case IDs.
    */
   public async findSubCaseStatusStats({
-    soClient,
+    unsecuredSavedObjectsClient,
     options,
     ids,
   }: FindSubCasesStatusStats): Promise<number> {
@@ -633,7 +639,7 @@ export class CasesService {
     }
 
     const subCases = await this.findSubCases({
-      soClient,
+      unsecuredSavedObjectsClient,
       options: {
         ...options,
         page: 1,
@@ -652,14 +658,14 @@ export class CasesService {
   }
 
   public async createSubCase({
-    soClient,
+    unsecuredSavedObjectsClient,
     createdAt,
     caseId,
     createdBy,
   }: CreateSubCaseArgs): Promise<SavedObject<SubCaseAttributes>> {
     try {
       this.log.debug(`Attempting to POST a new sub case`);
-      return soClient.create<SubCaseAttributes>(
+      return unsecuredSavedObjectsClient.create<SubCaseAttributes>(
         SUB_CASE_SAVED_OBJECT,
         // ENABLE_CASE_CONNECTOR: populate the owner field correctly
         transformNewSubCase({ createdAt, createdBy, owner: '' }),
@@ -679,10 +685,13 @@ export class CasesService {
     }
   }
 
-  public async getMostRecentSubCase(soClient: SavedObjectsClientContract, caseId: string) {
+  public async getMostRecentSubCase(
+    unsecuredSavedObjectsClient: SavedObjectsClientContract,
+    caseId: string
+  ) {
     try {
       this.log.debug(`Attempting to find most recent sub case for caseID: ${caseId}`);
-      const subCases = await soClient.find<SubCaseAttributes>({
+      const subCases = await unsecuredSavedObjectsClient.find<SubCaseAttributes>({
         perPage: 1,
         sortField: 'created_at',
         sortOrder: 'desc',
@@ -700,20 +709,20 @@ export class CasesService {
     }
   }
 
-  public async deleteSubCase(soClient: SavedObjectsClientContract, id: string) {
+  public async deleteSubCase(unsecuredSavedObjectsClient: SavedObjectsClientContract, id: string) {
     try {
       this.log.debug(`Attempting to DELETE sub case ${id}`);
-      return await soClient.delete(SUB_CASE_SAVED_OBJECT, id);
+      return await unsecuredSavedObjectsClient.delete(SUB_CASE_SAVED_OBJECT, id);
     } catch (error) {
       this.log.error(`Error on DELETE sub case ${id}: ${error}`);
       throw error;
     }
   }
 
-  public async deleteCase({ soClient, id: caseId }: GetCaseArgs) {
+  public async deleteCase({ unsecuredSavedObjectsClient, id: caseId }: GetCaseArgs) {
     try {
       this.log.debug(`Attempting to DELETE case ${caseId}`);
-      return await soClient.delete(CASE_SAVED_OBJECT, caseId);
+      return await unsecuredSavedObjectsClient.delete(CASE_SAVED_OBJECT, caseId);
     } catch (error) {
       this.log.error(`Error on DELETE case ${caseId}: ${error}`);
       throw error;
@@ -721,21 +730,24 @@ export class CasesService {
   }
 
   public async getCase({
-    soClient,
+    unsecuredSavedObjectsClient,
     id: caseId,
   }: GetCaseArgs): Promise<SavedObject<ESCaseAttributes>> {
     try {
       this.log.debug(`Attempting to GET case ${caseId}`);
-      return await soClient.get<ESCaseAttributes>(CASE_SAVED_OBJECT, caseId);
+      return await unsecuredSavedObjectsClient.get<ESCaseAttributes>(CASE_SAVED_OBJECT, caseId);
     } catch (error) {
       this.log.error(`Error on GET case ${caseId}: ${error}`);
       throw error;
     }
   }
-  public async getSubCase({ soClient, id }: GetCaseArgs): Promise<SavedObject<SubCaseAttributes>> {
+  public async getSubCase({
+    unsecuredSavedObjectsClient,
+    id,
+  }: GetCaseArgs): Promise<SavedObject<SubCaseAttributes>> {
     try {
       this.log.debug(`Attempting to GET sub case ${id}`);
-      return await soClient.get<SubCaseAttributes>(SUB_CASE_SAVED_OBJECT, id);
+      return await unsecuredSavedObjectsClient.get<SubCaseAttributes>(SUB_CASE_SAVED_OBJECT, id);
     } catch (error) {
       this.log.error(`Error on GET sub case ${id}: ${error}`);
       throw error;
@@ -743,12 +755,12 @@ export class CasesService {
   }
 
   public async getSubCases({
-    soClient,
+    unsecuredSavedObjectsClient,
     ids,
   }: GetSubCasesArgs): Promise<SavedObjectsBulkResponse<SubCaseAttributes>> {
     try {
       this.log.debug(`Attempting to GET sub cases ${ids.join(', ')}`);
-      return await soClient.bulkGet<SubCaseAttributes>(
+      return await unsecuredSavedObjectsClient.bulkGet<SubCaseAttributes>(
         ids.map((id) => ({ type: SUB_CASE_SAVED_OBJECT, id }))
       );
     } catch (error) {
@@ -758,12 +770,12 @@ export class CasesService {
   }
 
   public async getCases({
-    soClient,
+    unsecuredSavedObjectsClient,
     caseIds,
   }: GetCasesArgs): Promise<SavedObjectsBulkResponse<ESCaseAttributes>> {
     try {
       this.log.debug(`Attempting to GET cases ${caseIds.join(', ')}`);
-      return await soClient.bulkGet<ESCaseAttributes>(
+      return await unsecuredSavedObjectsClient.bulkGet<ESCaseAttributes>(
         caseIds.map((caseId) => ({ type: CASE_SAVED_OBJECT, id: caseId }))
       );
     } catch (error) {
@@ -773,12 +785,12 @@ export class CasesService {
   }
 
   public async findCases({
-    soClient,
+    unsecuredSavedObjectsClient,
     options,
   }: FindCasesArgs): Promise<SavedObjectsFindResponse<ESCaseAttributes>> {
     try {
       this.log.debug(`Attempting to find cases`);
-      return await soClient.find<ESCaseAttributes>({
+      return await unsecuredSavedObjectsClient.find<ESCaseAttributes>({
         sortField: defaultSortField,
         ...cloneDeep(options),
         type: CASE_SAVED_OBJECT,
@@ -790,7 +802,7 @@ export class CasesService {
   }
 
   public async findSubCases({
-    soClient,
+    unsecuredSavedObjectsClient,
     options,
   }: FindCasesArgs): Promise<SavedObjectsFindResponse<SubCaseAttributes>> {
     try {
@@ -798,14 +810,14 @@ export class CasesService {
       // if the page or perPage options are set then respect those instead of trying to
       // grab all sub cases
       if (options?.page !== undefined || options?.perPage !== undefined) {
-        return soClient.find<SubCaseAttributes>({
+        return unsecuredSavedObjectsClient.find<SubCaseAttributes>({
           sortField: defaultSortField,
           ...cloneDeep(options),
           type: SUB_CASE_SAVED_OBJECT,
         });
       }
 
-      const stats = await soClient.find<SubCaseAttributes>({
+      const stats = await unsecuredSavedObjectsClient.find<SubCaseAttributes>({
         fields: [],
         page: 1,
         perPage: 1,
@@ -813,7 +825,7 @@ export class CasesService {
         ...cloneDeep(options),
         type: SUB_CASE_SAVED_OBJECT,
       });
-      return soClient.find<SubCaseAttributes>({
+      return unsecuredSavedObjectsClient.find<SubCaseAttributes>({
         page: 1,
         perPage: stats.total,
         sortField: defaultSortField,
@@ -833,7 +845,7 @@ export class CasesService {
    * @param id the saved object ID of the parent collection to find sub cases for.
    */
   public async findSubCasesByCaseId({
-    soClient,
+    unsecuredSavedObjectsClient,
     ids,
     options,
   }: FindSubCasesByIDArgs): Promise<SavedObjectsFindResponse<SubCaseAttributes>> {
@@ -849,7 +861,7 @@ export class CasesService {
     try {
       this.log.debug(`Attempting to GET sub cases for case collection id ${ids.join(', ')}`);
       return this.findSubCases({
-        soClient,
+        unsecuredSavedObjectsClient,
         options: {
           ...options,
           hasReference: ids.map((id) => ({
@@ -877,21 +889,21 @@ export class CasesService {
   }
 
   private async getAllComments({
-    soClient,
+    unsecuredSavedObjectsClient,
     id,
     options,
   }: FindCommentsArgs): Promise<SavedObjectsFindResponse<CommentAttributes>> {
     try {
       this.log.debug(`Attempting to GET all comments internal for id ${JSON.stringify(id)}`);
       if (options?.page !== undefined || options?.perPage !== undefined) {
-        return soClient.find<CommentAttributes>({
+        return unsecuredSavedObjectsClient.find<CommentAttributes>({
           type: CASE_COMMENT_SAVED_OBJECT,
           sortField: defaultSortField,
           ...cloneDeep(options),
         });
       }
       // get the total number of comments that are in ES then we'll grab them all in one go
-      const stats = await soClient.find<CommentAttributes>({
+      const stats = await unsecuredSavedObjectsClient.find<CommentAttributes>({
         type: CASE_COMMENT_SAVED_OBJECT,
         fields: [],
         page: 1,
@@ -901,7 +913,7 @@ export class CasesService {
         ...cloneDeep(options),
       });
 
-      return soClient.find<CommentAttributes>({
+      return unsecuredSavedObjectsClient.find<CommentAttributes>({
         type: CASE_COMMENT_SAVED_OBJECT,
         page: 1,
         perPage: stats.total,
@@ -922,7 +934,7 @@ export class CasesService {
    *  sub case comments are excluded. If the `filter` field is included in the options, it will override this behavior
    */
   public async getAllCaseComments({
-    soClient,
+    unsecuredSavedObjectsClient,
     id,
     options,
     includeSubCaseComments = false,
@@ -954,7 +966,7 @@ export class CasesService {
 
       this.log.debug(`Attempting to GET all comments for case caseID ${JSON.stringify(id)}`);
       return await this.getAllComments({
-        soClient,
+        unsecuredSavedObjectsClient,
         id,
         options: {
           hasReferenceOperator: 'OR',
@@ -970,7 +982,7 @@ export class CasesService {
   }
 
   public async getAllSubCaseComments({
-    soClient,
+    unsecuredSavedObjectsClient,
     id,
     options,
   }: FindSubCaseCommentsArgs): Promise<SavedObjectsFindResponse<CommentAttributes>> {
@@ -987,7 +999,7 @@ export class CasesService {
 
       this.log.debug(`Attempting to GET all comments for sub case caseID ${JSON.stringify(id)}`);
       return await this.getAllComments({
-        soClient,
+        unsecuredSavedObjectsClient,
         id,
         options: {
           hasReferenceOperator: 'OR',
@@ -1002,12 +1014,12 @@ export class CasesService {
   }
 
   public async getReporters({
-    soClient,
+    unsecuredSavedObjectsClient,
     filter,
   }: GetReportersArgs): Promise<SavedObjectsFindResponse<ESCaseAttributes>> {
     try {
       this.log.debug(`Attempting to GET all reporters`);
-      const firstReporters = await soClient.find({
+      const firstReporters = await unsecuredSavedObjectsClient.find({
         type: CASE_SAVED_OBJECT,
         fields: ['created_by', OWNER_FIELD],
         page: 1,
@@ -1015,7 +1027,7 @@ export class CasesService {
         filter: cloneDeep(filter),
       });
 
-      return await soClient.find<ESCaseAttributes>({
+      return await unsecuredSavedObjectsClient.find<ESCaseAttributes>({
         type: CASE_SAVED_OBJECT,
         fields: ['created_by', OWNER_FIELD],
         page: 1,
@@ -1029,12 +1041,12 @@ export class CasesService {
   }
 
   public async getTags({
-    soClient,
+    unsecuredSavedObjectsClient,
     filter,
   }: GetTagsArgs): Promise<SavedObjectsFindResponse<ESCaseAttributes>> {
     try {
       this.log.debug(`Attempting to GET all cases`);
-      const firstTags = await soClient.find({
+      const firstTags = await unsecuredSavedObjectsClient.find({
         type: CASE_SAVED_OBJECT,
         fields: ['tags', OWNER_FIELD],
         page: 1,
@@ -1042,7 +1054,7 @@ export class CasesService {
         filter: cloneDeep(filter),
       });
 
-      return await soClient.find<ESCaseAttributes>({
+      return await unsecuredSavedObjectsClient.find<ESCaseAttributes>({
         type: CASE_SAVED_OBJECT,
         fields: ['tags', OWNER_FIELD],
         page: 1,
@@ -1080,20 +1092,29 @@ export class CasesService {
     }
   }
 
-  public async postNewCase({ soClient, attributes, id }: PostCaseArgs) {
+  public async postNewCase({ unsecuredSavedObjectsClient, attributes, id }: PostCaseArgs) {
     try {
       this.log.debug(`Attempting to POST a new case`);
-      return await soClient.create<ESCaseAttributes>(CASE_SAVED_OBJECT, attributes, { id });
+      return await unsecuredSavedObjectsClient.create<ESCaseAttributes>(
+        CASE_SAVED_OBJECT,
+        attributes,
+        { id }
+      );
     } catch (error) {
       this.log.error(`Error on POST a new case: ${error}`);
       throw error;
     }
   }
 
-  public async patchCase({ soClient, caseId, updatedAttributes, version }: PatchCaseArgs) {
+  public async patchCase({
+    unsecuredSavedObjectsClient,
+    caseId,
+    updatedAttributes,
+    version,
+  }: PatchCaseArgs) {
     try {
       this.log.debug(`Attempting to UPDATE case ${caseId}`);
-      return await soClient.update<ESCaseAttributes>(
+      return await unsecuredSavedObjectsClient.update<ESCaseAttributes>(
         CASE_SAVED_OBJECT,
         caseId,
         { ...updatedAttributes },
@@ -1105,10 +1126,10 @@ export class CasesService {
     }
   }
 
-  public async patchCases({ soClient, cases }: PatchCasesArgs) {
+  public async patchCases({ unsecuredSavedObjectsClient, cases }: PatchCasesArgs) {
     try {
       this.log.debug(`Attempting to UPDATE case ${cases.map((c) => c.caseId).join(', ')}`);
-      return await soClient.bulkUpdate<ESCaseAttributes>(
+      return await unsecuredSavedObjectsClient.bulkUpdate<ESCaseAttributes>(
         cases.map((c) => ({
           type: CASE_SAVED_OBJECT,
           id: c.caseId,
@@ -1122,10 +1143,15 @@ export class CasesService {
     }
   }
 
-  public async patchSubCase({ soClient, subCaseId, updatedAttributes, version }: PatchSubCase) {
+  public async patchSubCase({
+    unsecuredSavedObjectsClient,
+    subCaseId,
+    updatedAttributes,
+    version,
+  }: PatchSubCase) {
     try {
       this.log.debug(`Attempting to UPDATE sub case ${subCaseId}`);
-      return await soClient.update<SubCaseAttributes>(
+      return await unsecuredSavedObjectsClient.update<SubCaseAttributes>(
         SUB_CASE_SAVED_OBJECT,
         subCaseId,
         { ...updatedAttributes },
@@ -1137,12 +1163,12 @@ export class CasesService {
     }
   }
 
-  public async patchSubCases({ soClient, subCases }: PatchSubCases) {
+  public async patchSubCases({ unsecuredSavedObjectsClient, subCases }: PatchSubCases) {
     try {
       this.log.debug(
         `Attempting to UPDATE sub case ${subCases.map((c) => c.subCaseId).join(', ')}`
       );
-      return await soClient.bulkUpdate<SubCaseAttributes>(
+      return await unsecuredSavedObjectsClient.bulkUpdate<SubCaseAttributes>(
         subCases.map((c) => ({
           type: SUB_CASE_SAVED_OBJECT,
           id: c.subCaseId,
