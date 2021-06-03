@@ -42,9 +42,10 @@ export function getActionType(): ActionTypeModel<
         defaultMessage: 'Send to PagerDuty',
       }
     ),
-    validateConnector: (
+    validateConnector: async (
       action: PagerDutyActionConnector
-    ): ConnectorValidationResult<PagerDutyConfig, PagerDutySecrets> => {
+    ): Promise<ConnectorValidationResult<PagerDutyConfig, PagerDutySecrets>> => {
+      const translations = await import('./translations');
       const secretsErrors = {
         routingKey: new Array<string>(),
       };
@@ -53,22 +54,16 @@ export function getActionType(): ActionTypeModel<
       };
 
       if (!action.secrets.routingKey) {
-        secretsErrors.routingKey.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.error.requiredRoutingKeyText',
-            {
-              defaultMessage: 'An integration key / routing key is required.',
-            }
-          )
-        );
+        secretsErrors.routingKey.push(translations.INTEGRATION_KEY_REQUIRED);
       }
       return validationResult;
     },
-    validateParams: (
+    validateParams: async (
       actionParams: PagerDutyActionParams
-    ): GenericValidationResult<
-      Pick<PagerDutyActionParams, 'summary' | 'timestamp' | 'dedupKey'>
+    ): Promise<
+      GenericValidationResult<Pick<PagerDutyActionParams, 'summary' | 'timestamp' | 'dedupKey'>>
     > => {
+      const translations = await import('./translations');
       const errors = {
         summary: new Array<string>(),
         timestamp: new Array<string>(),
@@ -79,27 +74,13 @@ export function getActionType(): ActionTypeModel<
         !actionParams.dedupKey?.length &&
         (actionParams.eventAction === 'resolve' || actionParams.eventAction === 'acknowledge')
       ) {
-        errors.dedupKey.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.error.requiredDedupKeyText',
-            {
-              defaultMessage: 'DedupKey is required when resolving or acknowledging an incident.',
-            }
-          )
-        );
+        errors.dedupKey.push(translations.DEDUP_KEY_REQUIRED);
       }
       if (
         actionParams.eventAction === EventActionOptions.TRIGGER &&
         !actionParams.summary?.length
       ) {
-        errors.summary.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.error.requiredSummaryText',
-            {
-              defaultMessage: 'Summary is required.',
-            }
-          )
-        );
+        errors.summary.push(translations.SUMMARY_REQUIRED);
       }
       if (actionParams.timestamp && !hasMustacheTokens(actionParams.timestamp)) {
         if (isNaN(Date.parse(actionParams.timestamp))) {
