@@ -20608,8 +20608,6 @@
     "xpack.securitySolution.header.editableTitle.cancel": "キャンセル",
     "xpack.securitySolution.header.editableTitle.editButtonAria": "クリックすると {title} を編集できます",
     "xpack.securitySolution.header.editableTitle.save": "保存",
-    "xpack.securitySolution.headerGlobal.buttonAddData": "データの追加",
-    "xpack.securitySolution.headerGlobal.securitySolution": "セキュリティソリューション",
     "xpack.securitySolution.headerPage.pageSubtitle": "前回のイベント：{beat}",
     "xpack.securitySolution.hooks.useAddToTimeline.addedFieldMessage": "{fieldOrValue}をタイムラインに追加しました",
     "xpack.securitySolution.hooks.useAddToTimeline.template.addedFieldMessage": "{fieldOrValue}をタイムラインテンプレートに追加しました",

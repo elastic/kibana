@@ -57,7 +57,7 @@ describe('HeaderPage', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('.siemHeaderPage__linkBack').first().exists()).toBe(true);
+    expect(wrapper.find('.securitySolutionHeaderPage__linkBack').first().exists()).toBe(true);
   });
 
   test('it DOES NOT render the back link when not provided', () => {
@@ -67,7 +67,7 @@ describe('HeaderPage', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('.siemHeaderPage__linkBack').first().exists()).toBe(false);
+    expect(wrapper.find('.securitySolutionHeaderPage__linkBack').first().exists()).toBe(false);
   });
 
   test('it renders the first subtitle when provided', () => {
@@ -140,10 +140,13 @@ describe('HeaderPage', () => {
         <HeaderPage border title="Test title" />
       </TestProviders>
     );
-    const siemHeaderPage = wrapper.find('.siemHeaderPage').first();
+    const securitySolutionHeaderPage = wrapper.find('.securitySolutionHeaderPage').first();
 
-    expect(siemHeaderPage).toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(siemHeaderPage).toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
+    expect(securitySolutionHeaderPage).toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
+    expect(securitySolutionHeaderPage).toHaveStyleRule(
+      'padding-bottom',
+      euiDarkVars.paddingSizes.l
+    );
   });
 
   test('it DOES NOT apply border styles when border is false', () => {
@@ -152,9 +155,15 @@ describe('HeaderPage', () => {
         <HeaderPage title="Test title" />
       </TestProviders>
     );
-    const siemHeaderPage = wrapper.find('.siemHeaderPage').first();
+    const securitySolutionHeaderPage = wrapper.find('.securitySolutionHeaderPage').first();
 
-    expect(siemHeaderPage).not.toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(siemHeaderPage).not.toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
+    expect(securitySolutionHeaderPage).not.toHaveStyleRule(
+      'border-bottom',
+      euiDarkVars.euiBorderThin
+    );
+    expect(securitySolutionHeaderPage).not.toHaveStyleRule(
+      'padding-bottom',
+      euiDarkVars.paddingSizes.l
+    );
   });
 });

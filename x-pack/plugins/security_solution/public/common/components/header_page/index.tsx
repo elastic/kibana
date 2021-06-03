@@ -25,7 +25,7 @@ interface HeaderProps {
 }
 
 const Header = styled.header.attrs({
-  className: 'siemHeaderPage',
+  className: 'securitySolutionHeaderPage',
 })<HeaderProps>`
   ${({ border, theme }) => css`
     margin-bottom: ${theme.eui.euiSizeL};
@@ -34,7 +34,7 @@ const Header = styled.header.attrs({
 Header.displayName = 'Header';
 
 const LinkBack = styled.div.attrs({
-  className: 'siemHeaderPage__linkBack',
+  className: 'securitySolutionHeaderPage__linkBack',
 })`
   ${({ theme }) => css`
     font-size: ${theme.eui.euiFontSizeXS};
