@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButtonGroup } from '@elastic/eui';
+import { EuiButtonGroup, EuiFieldText, EuiSuperSelect } from '@elastic/eui';
 import { FramePublicAPI, VisualizationDimensionEditorProps } from '../../types';
 import { DatatableVisualizationState } from '../visualization';
 import { createMockDatasource, createMockFramePublicAPI } from '../../editor_frame_service/mocks';
@@ -211,5 +211,45 @@ describe('data table dimension editor', () => {
     );
 
     expect(instance.find(PalettePanelContainer).exists()).toBe(true);
+  });
+
+  it('should show the summary field for non numeric columns', () => {
+    const instance = mountWithIntl(<TableDimensionEditor {...props} />);
+    expect(instance.find('[data-test-subj="lnsDatatable_summaryrow_function"]').exists()).toBe(
+      false
+    );
+    expect(instance.find('[data-test-subj="lnsDatatable_summaryrow_label"]').exists()).toBe(false);
+  });
+
+  it('should set the summary row function default to "none"', () => {
+    frame.activeData!.first.columns[0].meta.type = 'number';
+    const instance = mountWithIntl(<TableDimensionEditor {...props} />);
+    expect(
+      instance
+        .find('[data-test-subj="lnsDatatable_summaryrow_function"]')
+        .find(EuiSuperSelect)
+        .prop('valueOfSelected')
+    ).toEqual('none');
+
+    expect(instance.find('[data-test-subj="lnsDatatable_summaryrow_label"]').exists()).toBe(false);
+  });
+
+  it('should show the summary row label input ony when summary row is different from "none"', () => {
+    frame.activeData!.first.columns[0].meta.type = 'number';
+    state.columns[0].summaryRow = 'sum';
+    const instance = mountWithIntl(<TableDimensionEditor {...props} />);
+    expect(
+      instance
+        .find('[data-test-subj="lnsDatatable_summaryrow_function"]')
+        .find(EuiSuperSelect)
+        .prop('valueOfSelected')
+    ).toEqual('sum');
+
+    expect(
+      instance
+        .find('[data-test-subj="lnsDatatable_summaryrow_label"]')
+        .find(EuiFieldText)
+        .prop('value')
+    ).toBe('Sum');
   });
 });

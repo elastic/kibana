@@ -307,7 +307,12 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         const currentAlignment = alignments && alignments[columnId];
         const alignmentClassName = `lnsTableCell--${currentAlignment}`;
         return summaryLookup[columnId] != null ? (
-          <div className={`lnsTableCell ${alignmentClassName}`}>{summaryLookup[columnId]}</div>
+          <div
+            className={`lnsTableCell ${alignmentClassName}`}
+            data-test-subj={`lnsDataTable-footer-${columnId}`}
+          >
+            {summaryLookup[columnId]}
+          </div>
         ) : null;
       };
     }
