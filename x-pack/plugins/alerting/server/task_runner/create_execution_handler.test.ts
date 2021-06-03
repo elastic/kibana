@@ -95,6 +95,8 @@ const createExecutionHandlerParams: jest.Mocked<
     contextVal: 'My other {{context.value}} goes here',
     stateVal: 'My other {{state.value}} goes here',
   },
+  alertUpdatedBy: 'testUser',
+  alertVersion: '1.1',
 };
 
 beforeEach(() => {
@@ -174,6 +176,20 @@ test('enqueues execution per selected action', async () => {
             ],
           },
           "message": "alert: test:1: 'name-of-alert' instanceId: '2' scheduled actionGroup: 'default' action: test:1",
+          "rule": Object {
+            "author": Array [
+              "testUser",
+            ],
+            "category": "Test",
+            "id": "test",
+            "license": "basic",
+            "name": "name-of-alert",
+            "namespace": undefined,
+            "reference": "https://www.elastic.co/guide/en/kibana/master/stack-rules.html",
+            "ruleset": "alerts",
+            "uuid": "1",
+            "version": "1.1",
+          },
         },
       ],
     ]

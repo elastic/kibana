@@ -165,7 +165,9 @@ export class TaskRunner<
     apiKey: RawAlert['apiKey'],
     kibanaBaseUrl: string | undefined,
     actions: Alert<Params>['actions'],
-    alertParams: Params
+    alertParams: Params,
+    alertUpdatedBy?: string,
+    alertVersion?: string
   ) {
     return createExecutionHandler<
       Params,
@@ -188,6 +190,8 @@ export class TaskRunner<
       eventLogger: this.context.eventLogger,
       request: this.getFakeKibanaRequest(spaceId, apiKey),
       alertParams,
+      alertUpdatedBy,
+      alertVersion,
     });
   }
 
@@ -231,6 +235,7 @@ export class TaskRunner<
       updatedAt,
       enabled,
       actions,
+      version,
     } = alert;
     const {
       params: { alertId },
@@ -304,8 +309,12 @@ export class TaskRunner<
     event.message = `alert executed: ${alertLabel}`;
     event.event = event.event || {};
     event.event.outcome = 'success';
-    event.rule = { ...event.rule, name: alert.name, author: [alert.updatedBy ?? ''], version: alert.version};
-
+    event.rule = {
+      ...event.rule,
+      name: alert.name,
+      author: alert.updatedBy ? [alert.updatedBy] : undefined,
+      version,
+    };
 
     // Cleanup alert instances that are no longer scheduling actions to avoid over populating the alertInstances object
     const instancesWithScheduledActions = pickBy(
@@ -334,6 +343,13 @@ export class TaskRunner<
       alertId,
       alertLabel,
       namespace,
+      ruleTypeId: alertTypeId,
+      ruleUpdatedBy: alert.updatedBy ?? undefined,
+      license: alertType.minimumLicenseRequired,
+      producer: alertType.producer,
+      ruleName: alert.name,
+      ruleTypeName: alertType.name,
+      version: alert.version,
     });
 
     if (!muteAll) {
@@ -422,7 +438,9 @@ export class TaskRunner<
       apiKey,
       this.context.kibanaBaseUrl,
       alert.actions,
-      alert.params
+      alert.params,
+      alert.updatedBy ?? undefined,
+      alert.version
     );
     return this.executeAlertInstances(
       services,
@@ -489,7 +507,11 @@ export class TaskRunner<
       // explicitly set execute timestamp so it will be before other events
       // generated here (new-instance, schedule-action, etc)
       '@timestamp': runDate,
-      event: { action: EVENT_LOG_ACTIONS.execute, kind: 'alert', category: [this.alertType.producer] },
+      event: {
+        action: EVENT_LOG_ACTIONS.execute,
+        kind: 'alert',
+        category: [this.alertType.producer],
+      },
       kibana: {
         saved_objects: [
           {
@@ -501,14 +523,14 @@ export class TaskRunner<
         ],
       },
       rule: {
-        id: alertId,
+        id: this.alertType.id,
         license: this.alertType.minimumLicenseRequired,
-        category: this.alertType.producer,
+        category: this.alertType.name,
         ruleset: this.alertType.producer,
-        uuid: spaceId,
+        uuid: alertId,
         reference: getDocsForRuleTypeByProducer(this.alertType.id, this.alertType.producer),
         namespace,
-      }
+      },
     };
     eventLogger.startTiming(event);
 
@@ -610,6 +632,13 @@ interface GenerateNewAndRecoveredInstanceEventsParams<
   alertId: string;
   alertLabel: string;
   namespace: string | undefined;
+  ruleTypeId?: string;
+  producer?: string;
+  license?: string;
+  ruleTypeName?: string;
+  version?: string;
+  ruleName?: string;
+  ruleUpdatedBy?: string;
 }
 
 function generateNewAndRecoveredInstanceEvents<
@@ -659,11 +688,20 @@ function generateNewAndRecoveredInstanceEvents<
     action: string,
     message: string,
     group?: string,
-    subgroup?: string
+    subgroup?: string,
+    ruleTypeId?: string,
+    producer?: string,
+    license?: string,
+    ruleTypeName?: string,
+    version?: string,
+    ruleName?: string,
+    ruleUpdatedBy?: string
   ) {
     const event: IEvent = {
       event: {
         action,
+        kind: 'alert',
+        category: [producer],
       },
       kibana: {
         alerting: {
@@ -681,6 +719,18 @@ function generateNewAndRecoveredInstanceEvents<
         ],
       },
       message,
+      rule: {
+        id: ruleTypeId,
+        license,
+        category: ruleTypeName,
+        ruleset: producer,
+        uuid: alertId,
+        reference: getDocsForRuleTypeByProducer(producer, ruleTypeId),
+        namespace,
+        name: ruleName,
+        author: ruleUpdatedBy ? [ruleUpdatedBy] : undefined,
+        version,
+      },
     };
     eventLogger.logEvent(event);
   }

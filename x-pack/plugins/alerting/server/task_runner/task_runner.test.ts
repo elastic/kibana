@@ -266,6 +266,10 @@ describe('Task Runner', () => {
         "@timestamp": "1970-01-01T00:00:00.000Z",
         "event": Object {
           "action": "execute",
+          "category": Array [
+            "alerts",
+          ],
+          "kind": "alert",
           "outcome": "success",
         },
         "kibana": Object {
@@ -282,6 +286,20 @@ describe('Task Runner', () => {
           ],
         },
         "message": "alert executed: test:1: 'alert-name'",
+        "rule": Object {
+          "author": Array [
+            "alert-updater",
+          ],
+          "category": "My test alert",
+          "id": "test",
+          "license": "basic",
+          "name": "alert-name",
+          "namespace": undefined,
+          "reference": "https://www.elastic.co/guide/en/kibana/master/stack-rules.html",
+          "ruleset": "alerts",
+          "uuid": "1",
+          "version": undefined,
+        },
       }
     `);
 
@@ -391,23 +409,10 @@ describe('Task Runner', () => {
       message: "test:1: 'alert-name' created new instance: '1'",
     });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
-      event: {
-        action: 'active-instance',
-      },
+      event: { action: 'active-instance' },
       kibana: {
-        alerting: {
-          instance_id: '1',
-          action_group_id: 'default',
-          action_subgroup: 'subDefault',
-        },
-        saved_objects: [
-          {
-            id: '1',
-            namespace: undefined,
-            rel: 'primary',
-            type: 'alert',
-          },
-        ],
+        alerting: { action_group_id: 'default', action_subgroup: 'subDefault', instance_id: '1' },
+        saved_objects: [{ id: '1', namespace: undefined, rel: 'primary', type: 'alert' }],
       },
       message:
         "test:1: 'alert-name' active instance: '1' in actionGroup(subgroup): 'default(subDefault)'",
@@ -438,27 +443,39 @@ describe('Task Runner', () => {
       },
       message:
         "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup(subgroup): 'default(subDefault)' action: action:1",
+      rule: {
+        author: ['alert-updater'],
+        category: 'My test alert',
+        id: 'test',
+        license: 'basic',
+        name: 'alert-name',
+        namespace: undefined,
+        reference: 'https://www.elastic.co/guide/en/kibana/master/stack-rules.html',
+        ruleset: 'alerts',
+        uuid: '1',
+        version: undefined,
+      },
     });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(4, {
       '@timestamp': '1970-01-01T00:00:00.000Z',
-      event: {
-        action: 'execute',
-        outcome: 'success',
-      },
+      event: { action: 'execute', category: ['alerts'], kind: 'alert', outcome: 'success' },
       kibana: {
-        alerting: {
-          status: 'active',
-        },
-        saved_objects: [
-          {
-            id: '1',
-            namespace: undefined,
-            rel: 'primary',
-            type: 'alert',
-          },
-        ],
+        alerting: { status: 'active' },
+        saved_objects: [{ id: '1', namespace: undefined, rel: 'primary', type: 'alert' }],
       },
       message: "alert executed: test:1: 'alert-name'",
+      rule: {
+        author: ['alert-updater'],
+        category: 'My test alert',
+        id: 'test',
+        license: 'basic',
+        name: 'alert-name',
+        namespace: undefined,
+        reference: 'https://www.elastic.co/guide/en/kibana/master/stack-rules.html',
+        ruleset: 'alerts',
+        uuid: '1',
+        version: undefined,
+      },
     });
   });
 

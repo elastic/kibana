@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const getDocsForRuleTypeByProducer = (alertTypeId: string, producer: string) => {
+export const getDocsForRuleTypeByProducer = (producer?: string, alertTypeId?: string) => {
   // TODO:
   return 'https://www.elastic.co/guide/en/kibana/master/stack-rules.html';
-}
+};

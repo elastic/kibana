@@ -224,6 +224,7 @@ describe('update()', () => {
           id: '2',
         },
       ],
+      version: '123',
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -233,6 +234,7 @@ describe('update()', () => {
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
+      version: '123',
     });
     const result = await alertsClient.update({
       id: '1',
@@ -310,6 +312,7 @@ describe('update()', () => {
         },
         "scheduledTaskId": "task-123",
         "updatedAt": 2019-02-12T21:01:22.479Z,
+        "version": "123",
       }
     `);
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
@@ -370,6 +373,7 @@ describe('update()', () => {
         "throttle": null,
         "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
+        "version": "123",
       }
     `);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`

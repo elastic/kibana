@@ -23,6 +23,7 @@ import {
   RawAlert,
 } from '../types';
 import { NormalizedAlertType } from '../alert_type_registry';
+import { getDocsForRuleTypeByProducer } from '../lib/get_docs_for_rule_type_by_producer';
 
 export interface CreateExecutionHandlerOptions<
   Params extends AlertTypeParams,
@@ -52,6 +53,8 @@ export interface CreateExecutionHandlerOptions<
   eventLogger: IEventLogger;
   request: KibanaRequest;
   alertParams: AlertTypeParams;
+  alertUpdatedBy?: string;
+  alertVersion?: string;
 }
 
 interface ExecutionHandlerOptions<ActionGroupIds extends string> {
@@ -87,6 +90,8 @@ export function createExecutionHandler<
   eventLogger,
   request,
   alertParams,
+  alertUpdatedBy,
+  alertVersion,
 }: CreateExecutionHandlerOptions<
   Params,
   State,
@@ -185,6 +190,18 @@ export function createExecutionHandler<
             { rel: SAVED_OBJECT_REL_PRIMARY, type: 'alert', id: alertId, ...namespace },
             { type: 'action', id: action.id, ...namespace },
           ],
+        },
+        rule: {
+          id: alertType.id,
+          license: alertType.minimumLicenseRequired,
+          category: alertType.name,
+          ruleset: alertType.producer,
+          uuid: alertId,
+          reference: getDocsForRuleTypeByProducer(alertType.id, alertType.producer),
+          namespace: spaceId !== 'default' ? spaceId : undefined,
+          name: alertName,
+          author: alertUpdatedBy ? [alertUpdatedBy] : undefined,
+          version: alertVersion,
         },
       };
 
