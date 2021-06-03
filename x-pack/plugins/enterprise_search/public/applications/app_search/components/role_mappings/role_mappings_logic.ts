@@ -57,11 +57,11 @@ interface RoleMappingsActions {
     firstElasticsearchRole: string
   ): { value: AttributeName; firstElasticsearchRole: string };
   handleAttributeValueChange(value: string): { value: string };
-  handleDeleteMapping(roleId: string): { roleId: string };
+  handleDeleteMapping(roleMappingId: string): { roleMappingId: string };
   handleEngineSelectionChange(engineNames: string[]): { engineNames: string[] };
   handleRoleChange(roleType: RoleTypes): { roleType: RoleTypes };
   handleSaveMapping(): void;
-  initializeRoleMapping(roleId?: string): { roleId?: string };
+  initializeRoleMapping(roleMappingId?: string): { roleMappingId?: string };
   initializeRoleMappings(): void;
   resetState(): void;
   setRoleMappingData(data: RoleMappingServerDetails): RoleMappingServerDetails;
@@ -106,8 +106,8 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     handleAccessAllEnginesChange: (selected: boolean) => ({ selected }),
     resetState: true,
     initializeRoleMappings: true,
-    initializeRoleMapping: (roleId) => ({ roleId }),
-    handleDeleteMapping: (roleId: string) => ({ roleId }),
+    initializeRoleMapping: (roleMappingId) => ({ roleMappingId }),
+    handleDeleteMapping: (roleMappingId: string) => ({ roleMappingId }),
     handleSaveMapping: true,
     openRoleMappingFlyout: true,
     closeRoleMappingFlyout: false,
@@ -280,10 +280,10 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         flashAPIErrors(e);
       }
     },
-    initializeRoleMapping: async ({ roleId }) => {
+    initializeRoleMapping: async ({ roleMappingId }) => {
       const { http } = HttpLogic.values;
-      const route = roleId
-        ? `/api/app_search/role_mappings/${roleId}`
+      const route = roleMappingId
+        ? `/api/app_search/role_mappings/${roleMappingId}`
         : '/api/app_search/role_mappings/new';
 
       try {
@@ -297,9 +297,9 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         }
       }
     },
-    handleDeleteMapping: async ({ roleId }) => {
+    handleDeleteMapping: async ({ roleMappingId }) => {
       const { http } = HttpLogic.values;
-      const route = `/api/app_search/role_mappings/${roleId}`;
+      const route = `/api/app_search/role_mappings/${roleMappingId}`;
 
       if (window.confirm(DELETE_ROLE_MAPPING_MESSAGE)) {
         try {

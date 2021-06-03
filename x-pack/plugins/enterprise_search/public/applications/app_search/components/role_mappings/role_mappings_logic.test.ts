@@ -420,7 +420,7 @@ describe('RoleMappingsLogic', () => {
 
     describe('handleDeleteMapping', () => {
       let confirmSpy: any;
-      const roleId = 'r1';
+      const roleMappingId = 'r1';
 
       beforeEach(() => {
         confirmSpy = jest.spyOn(window, 'confirm');
@@ -438,9 +438,9 @@ describe('RoleMappingsLogic', () => {
           'initializeRoleMappings'
         );
         http.delete.mockReturnValue(Promise.resolve({}));
-        RoleMappingsLogic.actions.handleDeleteMapping(roleId);
+        RoleMappingsLogic.actions.handleDeleteMapping(roleMappingId);
 
-        expect(http.delete).toHaveBeenCalledWith(`/api/app_search/role_mappings/${roleId}`);
+        expect(http.delete).toHaveBeenCalledWith(`/api/app_search/role_mappings/${roleMappingId}`);
         await nextTick();
 
         expect(initializeRoleMappingsSpy).toHaveBeenCalled();
@@ -450,7 +450,7 @@ describe('RoleMappingsLogic', () => {
       it('handles error', async () => {
         mount(mappingServerProps);
         http.delete.mockReturnValue(Promise.reject('this is an error'));
-        RoleMappingsLogic.actions.handleDeleteMapping(roleId);
+        RoleMappingsLogic.actions.handleDeleteMapping(roleMappingId);
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
@@ -459,7 +459,7 @@ describe('RoleMappingsLogic', () => {
       it('will do nothing if not confirmed', () => {
         mount(mappingServerProps);
         jest.spyOn(window, 'confirm').mockReturnValueOnce(false);
-        RoleMappingsLogic.actions.handleDeleteMapping(roleId);
+        RoleMappingsLogic.actions.handleDeleteMapping(roleMappingId);
 
         expect(http.delete).not.toHaveBeenCalled();
       });

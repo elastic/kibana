@@ -57,8 +57,8 @@ interface Props {
   addMappingButton: React.ReactNode;
   accessAllEngines?: boolean;
   shouldShowAuthProvider?: boolean;
-  initializeRoleMapping(roleId: string): void;
-  handleDeleteMapping(roleId: string): void;
+  initializeRoleMapping(roleMappingId: string): void;
+  handleDeleteMapping(roleMappingId: string): void;
 }
 
 const MAX_CELL_WIDTH = 24;
