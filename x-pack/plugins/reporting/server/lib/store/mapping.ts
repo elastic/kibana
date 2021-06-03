@@ -7,15 +7,10 @@
 
 export const mapping = {
   meta: {
-    // We are indexing these properties with both text and keyword fields because that's what will be auto generated
-    // when an index already exists. This schema is only used when a reporting index doesn't exist.  This way existing
-    // reporting indexes and new reporting indexes will look the same and the data can be queried in the same
-    // manner.
+    // We are indexing these properties with both text and keyword fields
+    // because that's what will be auto generated when an index already exists.
     properties: {
-      /**
-       * Type of object that is triggering this report. Should be either search, visualization or dashboard.
-       * Used for job listing and telemetry stats only.
-       */
+      // ID of the app this report: search, visualization or dashboard, etc
       objectType: {
         type: 'text',
         fields: {
@@ -25,10 +20,6 @@ export const mapping = {
           },
         },
       },
-      /**
-       * Can be either preserve_layout, print or none (in the case of csv export).
-       * Used for phone home stats only.
-       */
       layout: {
         type: 'text',
         fields: {
@@ -41,9 +32,10 @@ export const mapping = {
     },
   },
   browser_type: { type: 'keyword' },
+  migrationVersion: { type: 'keyword' }, // new field to distinguish reports that were scheduled with Task Manager
   jobtype: { type: 'keyword' },
   payload: { type: 'object', enabled: false },
-  priority: { type: 'byte' }, // NOTE: this is unused, but older data may have a mapping for this field
+  priority: { type: 'byte' }, // TODO: remove: this is unused
   timeout: { type: 'long' },
   process_expiration: { type: 'date' },
   created_by: { type: 'keyword' }, // `null` if security is disabled

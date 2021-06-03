@@ -20,21 +20,18 @@ describe('Class Report', () => {
       timeout: 30000,
     });
 
-    expect(report.toEsDocsJSON()).toMatchObject({
-      _index: '.reporting-test-index-12345',
-      _source: {
-        attempts: 0,
-        browser_type: 'browser_type_test_string',
-        completed_at: undefined,
-        created_by: 'created_by_test_string',
-        jobtype: 'test-report',
-        max_attempts: 50,
-        meta: { objectType: 'test' },
-        payload: { headers: 'payload_test_field', objectType: 'testOt' },
-        started_at: undefined,
-        status: 'pending',
-        timeout: 30000,
-      },
+    expect(report.toReportSource()).toMatchObject({
+      attempts: 0,
+      browser_type: 'browser_type_test_string',
+      completed_at: undefined,
+      created_by: 'created_by_test_string',
+      jobtype: 'test-report',
+      max_attempts: 50,
+      meta: { objectType: 'test' },
+      payload: { headers: 'payload_test_field', objectType: 'testOt' },
+      started_at: undefined,
+      status: 'pending',
+      timeout: 30000,
     });
     expect(report.toReportTaskJSON()).toMatchObject({
       attempts: 0,
@@ -80,22 +77,18 @@ describe('Class Report', () => {
     };
     report.updateWithEsDoc(metadata);
 
-    expect(report.toEsDocsJSON()).toMatchObject({
-      _id: '12342p9o387549o2345',
-      _index: '.reporting-test-update',
-      _source: {
-        attempts: 0,
-        browser_type: 'browser_type_test_string',
-        completed_at: undefined,
-        created_by: 'created_by_test_string',
-        jobtype: 'test-report',
-        max_attempts: 50,
-        meta: { objectType: 'stange' },
-        payload: { objectType: 'testOt' },
-        started_at: undefined,
-        status: 'pending',
-        timeout: 30000,
-      },
+    expect(report.toReportSource()).toMatchObject({
+      attempts: 0,
+      browser_type: 'browser_type_test_string',
+      completed_at: undefined,
+      created_by: 'created_by_test_string',
+      jobtype: 'test-report',
+      max_attempts: 50,
+      meta: { objectType: 'stange' },
+      payload: { objectType: 'testOt' },
+      started_at: undefined,
+      status: 'pending',
+      timeout: 30000,
     });
     expect(report.toReportTaskJSON()).toMatchObject({
       attempts: 0,

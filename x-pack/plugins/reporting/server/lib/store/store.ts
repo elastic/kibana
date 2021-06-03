@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { IndexResponse, UpdateResponse } from '@elastic/elasticsearch/api/types';
 import { ElasticsearchClient } from 'src/core/server';
 import { LevelLogger, statuses } from '../';
 import { ReportingCore } from '../../';
-import { numberToDuration } from '../../../common/schema_utils';
 import { JobStatus } from '../../../common/types';
 import { ReportTaskParams } from '../tasks';
 import { indexTimestamp } from './index_timestamp';
 import { mapping } from './mapping';
-import { Report, ReportDocument, ReportSource } from './report';
+import { MIGRATION_VERSION, Report, ReportDocument, ReportSource } from './report';
 
 /*
  * When searching for long-pending reports, we get a subset of fields
@@ -24,15 +24,38 @@ export interface ReportRecordTimeout {
   _source: {
     status: JobStatus;
     process_expiration?: string;
-    created_at?: string;
   };
 }
 
 const checkReportIsEditable = (report: Report) => {
-  if (!report._id || !report._index) {
-    throw new Error(`Report object is not synced with ES!`);
+  const { _id, _index, _seq_no, _primary_term } = report;
+  if (_id == null || _index == null) {
+    throw new Error(`Report is not editable: Job [${_id}] is not synced with ES!`);
+  }
+
+  if (_seq_no == null || _primary_term == null) {
+    throw new Error(
+      `Report is not editable: Job [${_id}] is missing _seq_no and primary_term fields!`
+    );
   }
 };
+/*
+ * When searching for long-pending reports, we get a subset of fields
+ */
+const sourceDoc = (doc: Partial<ReportSource>): Partial<ReportSource> => {
+  return {
+    ...doc,
+    migration_version: MIGRATION_VERSION,
+  };
+};
+
+const jobDebugMessage = (report: Report) =>
+  report._id +
+  `[_index: ${report._index}] ` +
+  `[_seq_no: ${report._seq_no}]  ` +
+  `[_primary_term: ${report._primary_term}]` +
+  `[attempts: ${report.attempts}] ` +
+  `[process_expiration: ${report.process_expiration}]`;
 
 /*
  * A class to give an interface to historical reports in the reporting.index
@@ -43,7 +66,6 @@ const checkReportIsEditable = (report: Report) => {
 export class ReportingStore {
   private readonly indexPrefix: string; // config setting of index prefix in system index name
   private readonly indexInterval: string; // config setting of index prefix: how often to poll for pending work
-  private readonly queueTimeoutMins: number; // config setting of queue timeout, rounded up to nearest minute
   private client?: ElasticsearchClient;
 
   constructor(private reportingCore: ReportingCore, private logger: LevelLogger) {
@@ -52,7 +74,6 @@ export class ReportingStore {
     this.indexPrefix = config.get('index');
     this.indexInterval = config.get('queue', 'indexInterval');
     this.logger = logger.clone(['store']);
-    this.queueTimeoutMins = Math.ceil(numberToDuration(config.get('queue', 'timeout')).asMinutes());
   }
 
   private async getClient() {
@@ -103,18 +124,20 @@ export class ReportingStore {
   /*
    * Called from addReport, which handles any errors
    */
-  private async indexReport(report: Report) {
+  private async indexReport(report: Report): Promise<IndexResponse> {
     const doc = {
       index: report._index!,
       id: report._id,
+      refresh: true,
       body: {
-        ...report.toEsDocsJSON()._source,
-        process_expiration: new Date(0), // use epoch so the job query works
-        attempts: 0,
-        status: statuses.JOB_STATUS_PENDING,
+        ...report.toReportSource(),
+        ...sourceDoc({
+          process_expiration: new Date(0).toISOString(),
+          attempts: 0,
+          status: statuses.JOB_STATUS_PENDING,
+        }),
       },
     };
-
     const client = await this.getClient();
     const { body } = await client.index(doc);
 
@@ -140,8 +163,7 @@ export class ReportingStore {
     await this.createIndex(index);
 
     try {
-      const doc = await this.indexReport(report);
-      report.updateWithEsDoc(doc);
+      report.updateWithEsDoc(await this.indexReport(report));
 
       await this.refreshIndex(index);
 
@@ -156,7 +178,9 @@ export class ReportingStore {
   /*
    * Search for a report from task data and return back the report
    */
-  public async findReportFromTask(taskJson: ReportTaskParams): Promise<Report> {
+  public async findReportFromTask(
+    taskJson: Pick<ReportTaskParams, 'id' | 'index'>
+  ): Promise<Report> {
     if (!taskJson.index) {
       throw new Error('Task JSON is missing index field!');
     }
@@ -186,41 +210,23 @@ export class ReportingStore {
         timeout: document._source?.timeout,
       });
     } catch (err) {
-      this.logger.error('Error in finding a report! ' + JSON.stringify({ report: taskJson }));
+      this.logger.error(
+        `Error in finding the report from the scheduled task info! ` +
+          `[id: ${taskJson.id}] [index: ${taskJson.index}]`
+      );
       this.logger.error(err);
       throw err;
     }
   }
 
-  public async setReportPending(report: Report) {
-    const doc = { status: statuses.JOB_STATUS_PENDING };
-
-    try {
-      checkReportIsEditable(report);
-
-      const client = await this.getClient();
-      const { body } = await client.update<ReportDocument>({
-        id: report._id,
-        index: report._index!,
-        if_seq_no: report._seq_no,
-        if_primary_term: report._primary_term,
-        refresh: true,
-        body: { doc },
-      });
-
-      return (body as unknown) as ReportDocument;
-    } catch (err) {
-      this.logger.error('Error in setting report pending status!');
-      this.logger.error(err);
-      throw err;
-    }
-  }
-
-  public async setReportClaimed(report: Report, stats: Partial<Report>): Promise<ReportDocument> {
-    const doc = {
+  public async setReportClaimed(
+    report: Report,
+    stats: Partial<Report>
+  ): Promise<UpdateResponse<ReportDocument>> {
+    const doc = sourceDoc({
       ...stats,
       status: statuses.JOB_STATUS_PROCESSING,
-    };
+    });
 
     try {
       checkReportIsEditable(report);
@@ -235,19 +241,24 @@ export class ReportingStore {
         body: { doc },
       });
 
-      return (body as unknown) as ReportDocument;
+      return body;
     } catch (err) {
-      this.logger.error('Error in setting report processing status!');
+      this.logger.error(
+        `Error in updating status to processing! Report: ` + jobDebugMessage(report)
+      );
       this.logger.error(err);
       throw err;
     }
   }
 
-  public async setReportFailed(report: Report, stats: Partial<Report>): Promise<ReportDocument> {
-    const doc = {
+  public async setReportFailed(
+    report: Report,
+    stats: Partial<Report>
+  ): Promise<UpdateResponse<ReportDocument>> {
+    const doc = sourceDoc({
       ...stats,
       status: statuses.JOB_STATUS_FAILED,
-    };
+    });
 
     try {
       checkReportIsEditable(report);
@@ -261,26 +272,29 @@ export class ReportingStore {
         refresh: true,
         body: { doc },
       });
-
-      return (body as unknown) as ReportDocument;
+      return body;
     } catch (err) {
-      this.logger.error('Error in setting report failed status!');
+      this.logger.error(`Error in updating status to failed! Report: ` + jobDebugMessage(report));
       this.logger.error(err);
       throw err;
     }
   }
 
-  public async setReportCompleted(report: Report, stats: Partial<Report>): Promise<ReportDocument> {
+  public async setReportCompleted(
+    report: Report,
+    stats: Partial<Report>
+  ): Promise<UpdateResponse<ReportDocument>> {
+    const { output } = stats;
+    const status =
+      output && output.warnings && output.warnings.length > 0
+        ? statuses.JOB_STATUS_WARNINGS
+        : statuses.JOB_STATUS_COMPLETED;
+    const doc = sourceDoc({
+      ...stats,
+      status,
+    });
+
     try {
-      const { output } = stats;
-      const status =
-        output && output.warnings && output.warnings.length > 0
-          ? statuses.JOB_STATUS_WARNINGS
-          : statuses.JOB_STATUS_COMPLETED;
-      const doc = {
-        ...stats,
-        status,
-      };
       checkReportIsEditable(report);
 
       const client = await this.getClient();
@@ -292,16 +306,20 @@ export class ReportingStore {
         refresh: true,
         body: { doc },
       });
-
-      return (body as unknown) as ReportDocument;
+      return body;
     } catch (err) {
-      this.logger.error('Error in setting report complete status!');
+      this.logger.error(`Error in updating status to complete! Report: ` + jobDebugMessage(report));
       this.logger.error(err);
       throw err;
     }
   }
 
-  public async clearExpiration(report: Report): Promise<ReportDocument> {
+  public async prepareReportForRetry(report: Report): Promise<UpdateResponse<ReportDocument>> {
+    const doc = sourceDoc({
+      status: statuses.JOB_STATUS_PENDING,
+      process_expiration: null,
+    });
+
     try {
       checkReportIsEditable(report);
 
@@ -312,50 +330,54 @@ export class ReportingStore {
         if_seq_no: report._seq_no,
         if_primary_term: report._primary_term,
         refresh: true,
-        body: { doc: { process_expiration: null } },
+        body: { doc },
       });
-
-      return (body as unknown) as ReportDocument;
+      return body;
     } catch (err) {
-      this.logger.error('Error in clearing expiration!');
+      this.logger.error(
+        `Error in clearing expiration and status for retry! Report: ` + jobDebugMessage(report)
+      );
       this.logger.error(err);
       throw err;
     }
   }
 
   /*
-   * A zombie report document is one that isn't completed or failed, isn't
-   * being executed, and isn't scheduled to run. They arise:
-   * - when the cluster has processing documents in ESQueue before upgrading to v7.13 when ESQueue was removed
-   * - if Kibana crashes while a report task is executing and it couldn't be rescheduled on its own
-   *
-   * Pending reports are not included in this search: they may be scheduled in TM just not run yet.
-   * TODO Should we get a list of the reports that are pending and scheduled in TM so we can exclude them from this query?
+   * A report needs to be rescheduled when:
+   *   1. An older version of Kibana created jobs with ESQueue, and they have
+   *   not yet started running.
+   *   2. The report process_expiration field is overdue, which happens if the
+   *   report runs too long or Kibana restarts during execution
    */
-  public async findZombieReportDocuments(): Promise<ReportRecordTimeout[] | null> {
+  public async findStaleReportJob(): Promise<ReportRecordTimeout> {
     const client = await this.getClient();
+
+    const expiredFilter = {
+      bool: {
+        must: [
+          { range: { process_expiration: { lt: `now` } } },
+          { terms: { status: [statuses.JOB_STATUS_PROCESSING] } },
+        ],
+      },
+    };
+    const oldVersionFilter = {
+      bool: {
+        must: [{ terms: { status: [statuses.JOB_STATUS_PENDING] } }],
+        must_not: [{ exists: { field: 'migration_version' } }],
+      },
+    };
+
     const { body } = await client.search<ReportRecordTimeout['_source']>({
+      size: 1,
       index: this.indexPrefix + '-*',
-      filter_path: 'hits.hits',
+      seq_no_primary_term: true,
+      _source_excludes: ['output'],
       body: {
-        sort: { created_at: { order: 'desc' } },
-        query: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  must: [
-                    { range: { process_expiration: { lt: `now-${this.queueTimeoutMins}m` } } },
-                    { terms: { status: [statuses.JOB_STATUS_PROCESSING] } },
-                  ],
-                },
-              },
-            ],
-          },
-        },
+        sort: { created_at: { order: 'asc' as const } }, // find the oldest first
+        query: { bool: { filter: { bool: { should: [expiredFilter, oldVersionFilter] } } } },
       },
     });
 
-    return body.hits?.hits as ReportRecordTimeout[];
+    return body.hits?.hits[0] as ReportRecordTimeout;
   }
 }
