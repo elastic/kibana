@@ -8,9 +8,8 @@
 
 import React, { Fragment, memo, useEffect, useRef, useMemo, useCallback } from 'react';
 import classNames from 'classnames';
-import './context_app_layout.scss';
+import './context_app.scss';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-import './context_app_layout.scss';
 import { EuiText, EuiPageContent, EuiPage, EuiSpacer } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { esFilters } from '../../../../../data/public';
@@ -32,17 +31,13 @@ import { ContextAppContent } from './context_app_content';
 
 const ContextAppContentMemoized = memo(ContextAppContent);
 
-export interface ContextAppLayoutProps {
+export interface ContextAppProps {
   indexPattern: IndexPattern;
   indexPatternId: string;
   anchorId: string;
 }
 
-export const ContextAppLayout = ({
-  indexPattern,
-  indexPatternId,
-  anchorId,
-}: ContextAppLayoutProps) => {
+export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAppProps) => {
   const services = getServices();
   const { uiSettings: config, capabilities, indexPatterns, navigation, filterManager } = services;
 

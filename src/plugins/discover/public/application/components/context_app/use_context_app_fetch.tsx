@@ -24,7 +24,7 @@ import {
 import { AppState } from '../../angular/context_state';
 import { getFirstSortableField } from '../../angular/context/api/utils/sorting';
 
-const createError = (statusKey: string, error: Error) => ({
+const createUnknownError = (statusKey: string, error: Error) => ({
   [statusKey]: { status: LoadingStatus.FAILED, reason: FailureReason.UNKNOWN, error },
 });
 
@@ -155,11 +155,11 @@ export function useContextAppFetch({
       const predecessorsStatus =
         predecessors.status === 'fulfilled'
           ? LoadingStatus.LOADED
-          : createError('predecessorsStatus', predecessors.reason);
+          : createUnknownError('predecessorsStatus', predecessors.reason);
       const successorsStatus =
         successors.status === 'fulfilled'
           ? LoadingStatus.LOADED
-          : createError('successorsStatus', successors.reason);
+          : createUnknownError('successorsStatus', successors.reason);
 
       setState({
         predecessorsStatus,
@@ -185,7 +185,7 @@ export function useContextAppFetch({
         const rows = await fetchSurroundingRows(type);
         setState({ [type]: rows, [statusKey]: LoadingStatus.LOADED });
       } catch (error) {
-        setState(createError(statusKey, error));
+        setState(createUnknownError(statusKey, error));
       }
     },
     [fetchSurroundingRows, setState]

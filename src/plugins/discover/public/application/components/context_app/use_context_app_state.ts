@@ -51,7 +51,7 @@ export function useContextAppState({
     });
 
     return () => unsubscribeAppState();
-  }, [stateContainer, setState, filterManager]);
+  }, [stateContainer, setState]);
 
   /**
    * Take care of filters

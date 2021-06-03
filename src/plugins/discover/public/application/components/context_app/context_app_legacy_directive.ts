@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ContextAppLayout } from './context_app_layout';
+import { ContextApp } from './context_app';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createContextAppLegacy(reactDirective: any) {
-  return reactDirective(ContextAppLayout, [
+  return reactDirective(ContextApp, [
     ['indexPattern', { watchDepth: 'reference' }],
     ['indexPatternId', { watchDepth: 'reference' }],
     ['anchorId', { watchDepth: 'reference' }],
