@@ -76,7 +76,9 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
 
   const xAxisMeta = xAxisColumn.meta;
   const isTimeBasedSwimLane = xAxisMeta.type === 'date';
-  const xScaleType = isTimeBasedSwimLane ? ScaleType.Time : ScaleType.Ordinal;
+
+  const xScaleType =
+    isTimeBasedSwimLane && chartData.length > 1 ? ScaleType.Time : ScaleType.Ordinal;
 
   const xValuesFormatter = formatFactory(xAxisMeta.params);
   const valueFormatter = formatFactory(valueColumn.meta.params);
