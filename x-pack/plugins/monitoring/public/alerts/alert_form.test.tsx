@@ -94,12 +94,12 @@ describe('alert_form', () => {
     id: 'alert-action-type',
     iconClass: '',
     selectMessage: '',
-    validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
-      return {};
+    validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
+      return Promise.resolve({});
     },
-    validateParams: (): GenericValidationResult<unknown> => {
+    validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
-      return validationResult;
+      return Promise.resolve(validationResult);
     },
     actionConnectorFields: null,
     actionParamsFields: mockedActionParamsFields,

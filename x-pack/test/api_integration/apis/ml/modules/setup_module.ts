@@ -241,34 +241,33 @@ export default ({ getService }: FtrProviderContext) => {
         dashboards: [] as string[],
       },
     },
-    // skipping categorization tests, see https://github.com/elastic/kibana/issues/101056
-    // {
-    //   testTitleSuffix:
-    //     'for logs_ui_categories with prefix, startDatafeed true and estimateModelMemory true',
-    //   sourceDataArchive: 'ml/module_logs',
-    //   indexPattern: { name: 'ft_module_logs', timeField: '@timestamp' },
-    //   module: 'logs_ui_categories',
-    //   user: USER.ML_POWERUSER,
-    //   requestBody: {
-    //     prefix: 'pf7_',
-    //     indexPatternName: 'ft_module_logs',
-    //     startDatafeed: true,
-    //     end: Date.now(),
-    //   },
-    //   expected: {
-    //     responseCode: 200,
-    //     jobs: [
-    //       {
-    //         jobId: 'pf7_log-entry-categories-count',
-    //         jobState: JOB_STATE.CLOSED,
-    //         datafeedState: DATAFEED_STATE.STOPPED,
-    //       },
-    //     ],
-    //     searches: [] as string[],
-    //     visualizations: [] as string[],
-    //     dashboards: [] as string[],
-    //   },
-    // },
+    {
+      testTitleSuffix:
+        'for logs_ui_categories with prefix, startDatafeed true and estimateModelMemory true',
+      sourceDataArchive: 'ml/module_logs',
+      indexPattern: { name: 'ft_module_logs', timeField: '@timestamp' },
+      module: 'logs_ui_categories',
+      user: USER.ML_POWERUSER,
+      requestBody: {
+        prefix: 'pf7_',
+        indexPatternName: 'ft_module_logs',
+        startDatafeed: true,
+        end: Date.now(),
+      },
+      expected: {
+        responseCode: 200,
+        jobs: [
+          {
+            jobId: 'pf7_log-entry-categories-count',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+          },
+        ],
+        searches: [] as string[],
+        visualizations: [] as string[],
+        dashboards: [] as string[],
+      },
+    },
     {
       testTitleSuffix: 'for nginx_ecs with prefix, startDatafeed true and estimateModelMemory true',
       sourceDataArchive: 'ml/module_nginx',
