@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/file_data_visualizer'],
+  roots: ['<rootDir>/x-pack/plugins/data_visualizer'],
 };

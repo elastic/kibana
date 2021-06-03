@@ -17,10 +17,6 @@ import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../../common/constants/fiel
 import { ml } from '../../../services/ml_api_service';
 import { FieldHistogramRequestConfig } from '../common/request';
 import { RuntimeMappings } from '../../../../../common/types/fields';
-import {
-  ToastNotificationService,
-  toastNotificationServiceProvider,
-} from '../../../services/toast_notification_service';
 
 // Maximum number of examples to obtain for text type fields.
 const MAX_EXAMPLES_DEFAULT: number = 10;

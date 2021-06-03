@@ -1,5 +1,5 @@
 {
-  "id": "fileDataVisualizer",
+  "id": "dataVisualizer",
   "client": {
     "classes": [],
     "functions": [],
@@ -8,17 +8,17 @@
     "misc": [],
     "objects": [],
     "start": {
-      "parentPluginId": "fileDataVisualizer",
-      "id": "def-public.FileDataVisualizerPluginStart",
+      "parentPluginId": "dataVisualizer",
+      "id": "def-public.DataVisualizerPluginStart",
       "type": "Type",
       "tags": [],
-      "label": "FileDataVisualizerPluginStart",
+      "label": "DataVisualizerPluginStart",
       "description": [],
       "signature": [
         "{ getFileDataVisualizerComponent: () => Promise<React.FC<{}>>; getMaxBytesFormatted: () => string; }"
       ],
       "source": {
-        "path": "x-pack/plugins/file_data_visualizer/public/plugin.ts",
+        "path": "x-pack/plugins/data_visualizer/public/plugin.ts",
         "lineNumber": 33
       },
       "deprecated": false,
@@ -39,72 +39,72 @@
     "functions": [],
     "interfaces": [
       {
-        "parentPluginId": "fileDataVisualizer",
+        "parentPluginId": "dataVisualizer",
         "id": "def-common.DataVisualizerTableState",
         "type": "Interface",
         "tags": [],
         "label": "DataVisualizerTableState",
         "description": [],
         "source": {
-          "path": "x-pack/plugins/file_data_visualizer/common/types.ts",
+          "path": "x-pack/plugins/data_visualizer/common/types.ts",
           "lineNumber": 14
         },
         "deprecated": false,
         "children": [
           {
-            "parentPluginId": "fileDataVisualizer",
+            "parentPluginId": "dataVisualizer",
             "id": "def-common.DataVisualizerTableState.pageSize",
             "type": "number",
             "tags": [],
             "label": "pageSize",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/file_data_visualizer/common/types.ts",
+              "path": "x-pack/plugins/data_visualizer/common/types.ts",
               "lineNumber": 15
             },
             "deprecated": false
           },
           {
-            "parentPluginId": "fileDataVisualizer",
+            "parentPluginId": "dataVisualizer",
             "id": "def-common.DataVisualizerTableState.pageIndex",
             "type": "number",
             "tags": [],
             "label": "pageIndex",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/file_data_visualizer/common/types.ts",
+              "path": "x-pack/plugins/data_visualizer/common/types.ts",
               "lineNumber": 16
             },
             "deprecated": false
           },
           {
-            "parentPluginId": "fileDataVisualizer",
+            "parentPluginId": "dataVisualizer",
             "id": "def-common.DataVisualizerTableState.sortField",
             "type": "string",
             "tags": [],
             "label": "sortField",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/file_data_visualizer/common/types.ts",
+              "path": "x-pack/plugins/data_visualizer/common/types.ts",
               "lineNumber": 17
             },
             "deprecated": false
           },
           {
-            "parentPluginId": "fileDataVisualizer",
+            "parentPluginId": "dataVisualizer",
             "id": "def-common.DataVisualizerTableState.sortDirection",
             "type": "string",
             "tags": [],
             "label": "sortDirection",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/file_data_visualizer/common/types.ts",
+              "path": "x-pack/plugins/data_visualizer/common/types.ts",
               "lineNumber": 18
             },
             "deprecated": false
           },
           {
-            "parentPluginId": "fileDataVisualizer",
+            "parentPluginId": "dataVisualizer",
             "id": "def-common.DataVisualizerTableState.visibleFieldTypes",
             "type": "Array",
             "tags": [],
@@ -114,13 +114,13 @@
               "string[]"
             ],
             "source": {
-              "path": "x-pack/plugins/file_data_visualizer/common/types.ts",
+              "path": "x-pack/plugins/data_visualizer/common/types.ts",
               "lineNumber": 19
             },
             "deprecated": false
           },
           {
-            "parentPluginId": "fileDataVisualizer",
+            "parentPluginId": "dataVisualizer",
             "id": "def-common.DataVisualizerTableState.visibleFieldNames",
             "type": "Array",
             "tags": [],
@@ -130,20 +130,20 @@
               "string[]"
             ],
             "source": {
-              "path": "x-pack/plugins/file_data_visualizer/common/types.ts",
+              "path": "x-pack/plugins/data_visualizer/common/types.ts",
               "lineNumber": 20
             },
             "deprecated": false
           },
           {
-            "parentPluginId": "fileDataVisualizer",
+            "parentPluginId": "dataVisualizer",
             "id": "def-common.DataVisualizerTableState.showDistributions",
             "type": "boolean",
             "tags": [],
             "label": "showDistributions",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/file_data_visualizer/common/types.ts",
+              "path": "x-pack/plugins/data_visualizer/common/types.ts",
               "lineNumber": 21
             },
             "deprecated": false
@@ -155,7 +155,7 @@
     "enums": [],
     "misc": [
       {
-        "parentPluginId": "fileDataVisualizer",
+        "parentPluginId": "dataVisualizer",
         "id": "def-common.ABSOLUTE_MAX_FILE_SIZE_BYTES",
         "type": "number",
         "tags": [],
@@ -165,14 +165,14 @@
           "1073741274"
         ],
         "source": {
-          "path": "x-pack/plugins/file_data_visualizer/common/constants.ts",
+          "path": "x-pack/plugins/data_visualizer/common/constants.ts",
           "lineNumber": 14
         },
         "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "fileDataVisualizer",
+        "parentPluginId": "dataVisualizer",
         "id": "def-common.FILE_SIZE_DISPLAY_FORMAT",
         "type": "string",
         "tags": [],
@@ -182,14 +182,14 @@
           "\"0,0.[0] b\""
         ],
         "source": {
-          "path": "x-pack/plugins/file_data_visualizer/common/constants.ts",
+          "path": "x-pack/plugins/data_visualizer/common/constants.ts",
           "lineNumber": 15
         },
         "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "fileDataVisualizer",
+        "parentPluginId": "dataVisualizer",
         "id": "def-common.INDEX_META_DATA_CREATED_BY",
         "type": "string",
         "tags": [],
@@ -199,14 +199,14 @@
           "\"file-data-visualizer\""
         ],
         "source": {
-          "path": "x-pack/plugins/file_data_visualizer/common/constants.ts",
+          "path": "x-pack/plugins/data_visualizer/common/constants.ts",
           "lineNumber": 19
         },
         "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "fileDataVisualizer",
+        "parentPluginId": "dataVisualizer",
         "id": "def-common.InputData",
         "type": "Type",
         "tags": [],
@@ -216,14 +216,14 @@
           "any[]"
         ],
         "source": {
-          "path": "x-pack/plugins/file_data_visualizer/common/types.ts",
+          "path": "x-pack/plugins/data_visualizer/common/types.ts",
           "lineNumber": 10
         },
         "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "fileDataVisualizer",
+        "parentPluginId": "dataVisualizer",
         "id": "def-common.JobFieldType",
         "type": "Type",
         "tags": [],
@@ -233,14 +233,14 @@
           "\"number\" | \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"geo_point\" | \"geo_shape\" | \"unknown\""
         ],
         "source": {
-          "path": "x-pack/plugins/file_data_visualizer/common/types.ts",
+          "path": "x-pack/plugins/data_visualizer/common/types.ts",
           "lineNumber": 12
         },
         "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "fileDataVisualizer",
+        "parentPluginId": "dataVisualizer",
         "id": "def-common.MAX_FILE_SIZE",
         "type": "string",
         "tags": [],
@@ -250,14 +250,14 @@
           "\"100MB\""
         ],
         "source": {
-          "path": "x-pack/plugins/file_data_visualizer/common/constants.ts",
+          "path": "x-pack/plugins/data_visualizer/common/constants.ts",
           "lineNumber": 11
         },
         "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "fileDataVisualizer",
+        "parentPluginId": "dataVisualizer",
         "id": "def-common.MAX_FILE_SIZE_BYTES",
         "type": "number",
         "tags": [],
@@ -267,28 +267,28 @@
           "104857600"
         ],
         "source": {
-          "path": "x-pack/plugins/file_data_visualizer/common/constants.ts",
+          "path": "x-pack/plugins/data_visualizer/common/constants.ts",
           "lineNumber": 12
         },
         "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "fileDataVisualizer",
+        "parentPluginId": "dataVisualizer",
         "id": "def-common.MB",
         "type": "number",
         "tags": [],
         "label": "MB",
         "description": [],
         "source": {
-          "path": "x-pack/plugins/file_data_visualizer/common/constants.ts",
+          "path": "x-pack/plugins/data_visualizer/common/constants.ts",
           "lineNumber": 10
         },
         "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "fileDataVisualizer",
+        "parentPluginId": "dataVisualizer",
         "id": "def-common.UI_SETTING_MAX_FILE_SIZE",
         "type": "string",
         "tags": [],
@@ -298,7 +298,7 @@
           "\"fileUpload:maxFileSize\""
         ],
         "source": {
-          "path": "x-pack/plugins/file_data_visualizer/common/constants.ts",
+          "path": "x-pack/plugins/data_visualizer/common/constants.ts",
           "lineNumber": 8
         },
         "deprecated": false,
@@ -307,7 +307,7 @@
     ],
     "objects": [
       {
-        "parentPluginId": "fileDataVisualizer",
+        "parentPluginId": "dataVisualizer",
         "id": "def-common.JOB_FIELD_TYPES",
         "type": "Object",
         "tags": [],
@@ -317,7 +317,7 @@
           "{ readonly BOOLEAN: \"boolean\"; readonly DATE: \"date\"; readonly GEO_POINT: \"geo_point\"; readonly GEO_SHAPE: \"geo_shape\"; readonly IP: \"ip\"; readonly KEYWORD: \"keyword\"; readonly NUMBER: \"number\"; readonly TEXT: \"text\"; readonly UNKNOWN: \"unknown\"; }"
         ],
         "source": {
-          "path": "x-pack/plugins/file_data_visualizer/common/constants.ts",
+          "path": "x-pack/plugins/data_visualizer/common/constants.ts",
           "lineNumber": 21
         },
         "deprecated": false,
