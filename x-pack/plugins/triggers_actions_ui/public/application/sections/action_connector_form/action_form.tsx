@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -30,7 +30,7 @@ import {
   ActionTypeRegistryContract,
 } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
-import { ActionTypeForm, ActionTypeFormProps } from './action_type_form';
+import { ActionTypeForm } from './action_type_form';
 import { AddConnectorInline } from './connector_add_inline';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
@@ -357,49 +357,42 @@ export const ActionForm = ({
             );
           }
 
-          const actionParamsErrors: ActionTypeFormProps['actionParamsErrors'] = actionTypeRegistry
-            .get(actionItem.actionTypeId)
-            ?.validateParams(actionItem.params);
-
           return (
-            <Fragment key={`action-form-action-at-${index}`}>
-              <ActionTypeForm
-                actionItem={actionItem}
-                actionConnector={actionConnector}
-                actionParamsErrors={actionParamsErrors}
-                index={index}
-                setActionParamsProperty={setActionParamsProperty}
-                actionTypesIndex={actionTypesIndex}
-                connectors={connectors}
-                defaultActionGroupId={defaultActionGroupId}
-                messageVariables={messageVariables}
-                actionGroups={actionGroups}
-                defaultActionMessage={defaultActionMessage}
-                defaultParams={getDefaultActionParams?.(actionItem.actionTypeId, actionItem.group)}
-                isActionGroupDisabledForActionType={isActionGroupDisabledForActionType}
-                setActionGroupIdByIndex={setActionGroupIdByIndex}
-                onAddConnector={() => {
-                  setActiveActionItem({ actionTypeId: actionItem.actionTypeId, indices: [index] });
-                  setAddModalVisibility(true);
-                }}
-                onConnectorSelected={(id: string) => {
-                  setActionIdByIndex(id, index);
-                }}
-                actionTypeRegistry={actionTypeRegistry}
-                onDeleteAction={() => {
-                  const updatedActions = actions.filter(
-                    (_item: AlertAction, i: number) => i !== index
-                  );
-                  setActions(updatedActions);
-                  setIsAddActionPanelOpen(
-                    updatedActions.filter((item: AlertAction) => item.id !== actionItem.id)
-                      .length === 0
-                  );
-                  setActiveActionItem(undefined);
-                }}
-              />
-              <EuiSpacer size="m" />
-            </Fragment>
+            <ActionTypeForm
+              actionItem={actionItem}
+              actionConnector={actionConnector}
+              index={index}
+              key={`action-form-action-at-${index}`}
+              setActionParamsProperty={setActionParamsProperty}
+              actionTypesIndex={actionTypesIndex}
+              connectors={connectors}
+              defaultActionGroupId={defaultActionGroupId}
+              messageVariables={messageVariables}
+              actionGroups={actionGroups}
+              defaultActionMessage={defaultActionMessage}
+              defaultParams={getDefaultActionParams?.(actionItem.actionTypeId, actionItem.group)}
+              isActionGroupDisabledForActionType={isActionGroupDisabledForActionType}
+              setActionGroupIdByIndex={setActionGroupIdByIndex}
+              onAddConnector={() => {
+                setActiveActionItem({ actionTypeId: actionItem.actionTypeId, indices: [index] });
+                setAddModalVisibility(true);
+              }}
+              onConnectorSelected={(id: string) => {
+                setActionIdByIndex(id, index);
+              }}
+              actionTypeRegistry={actionTypeRegistry}
+              onDeleteAction={() => {
+                const updatedActions = actions.filter(
+                  (_item: AlertAction, i: number) => i !== index
+                );
+                setActions(updatedActions);
+                setIsAddActionPanelOpen(
+                  updatedActions.filter((item: AlertAction) => item.id !== actionItem.id).length ===
+                    0
+                );
+                setActiveActionItem(undefined);
+              }}
+            />
           );
         })}
       <EuiSpacer size="m" />
