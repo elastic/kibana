@@ -88,6 +88,7 @@ pageLoadAssetSize:
   visTypeMarkdown: 30896
   visTypeMetric: 42790
   visTypeTable: 95078
+  visTypePie: 34051
   visTypeTagcloud: 37575
   visTypeTimelion: 68883
   visTypeTimeseries: 55347
