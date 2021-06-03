@@ -1,5 +1,5 @@
 {
-  "id": "fileDataVisualizer",
+  "id": "dataVisualizer",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "server": true,

@@ -51,7 +51,7 @@ import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../triggers_actions_ui/public';
-import { FileDataVisualizerPluginStart } from '../../file_data_visualizer/public';
+import { FileDataVisualizerPluginStart } from '../../data_visualizer/public';
 import { PluginSetupContract as AlertingSetup } from '../../alerting/public';
 import { registerManagementSection } from './application/management';
 

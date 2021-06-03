@@ -10,7 +10,7 @@ import { useMlKibana, useTimefilter } from '../../contexts/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';
 import { HelpMenu } from '../../components/help_menu';
 import { useMlContext } from '../../contexts/ml';
-import { IndexDataVisualizerViewProps } from '../../../../../file_data_visualizer/public';
+import { IndexDataVisualizerViewProps } from '../../../../../data_visualizer/public';
 export const IndexDataVisualizerPage: FC = () => {
   const mlContext = useMlContext();
   const { currentIndexPattern, combinedQuery, currentSavedSearch } = mlContext;
