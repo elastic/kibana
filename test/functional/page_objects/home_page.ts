@@ -12,7 +12,9 @@ export function HomePageProvider({ getService, getPageObjects }: FtrProviderCont
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const find = getService('find');
+  const deployment = getService('deployment');
   const PageObjects = getPageObjects(['common']);
+  let isOss = true;
 
   class HomePage {
     async clickSynopsis(title: string) {
@@ -70,7 +72,10 @@ export function HomePageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async launchSampleDashboard(id: string) {
       await this.launchSampleDataSet(id);
-      await find.clickByLinkText('Dashboard');
+      isOss = await deployment.isOss();
+      if (!isOss) {
+        await find.clickByLinkText('Dashboard');
+      }
     }
 
     async launchSampleDataSet(id: string) {

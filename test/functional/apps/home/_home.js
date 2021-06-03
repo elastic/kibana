@@ -11,7 +11,6 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const globalNav = getService('globalNav');
-  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header', 'home']);
 
   describe('Kibana takes you home', function describeIndexTests() {
@@ -26,8 +25,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('clicking on console on homepage should take you to console app', async () => {
-      await PageObjects.common.navigateToUrl('home');
-      await testSubjects.click('homeDevTools');
+      await PageObjects.home.clickSynopsis('console');
       const url = await browser.getCurrentUrl();
       expect(url.includes('/app/dev_tools#/console')).to.be(true);
     });
