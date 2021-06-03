@@ -2,12 +2,10 @@
 @import 'hackery';
 @import 'main';
 
-// Canvas apps
-@import '../apps/home/home_app/home_app';
-@import '../apps/workpad/workpad_app/workpad_app';
-@import '../apps/export/export/export_app';
-
 // Canvas components
+@import '../components/home_app/home_app';
+@import '../components/workpad_app/workpad_app';
+@import '../components/export_app/export_app';
 @import '../components/arg_add/arg_add';
 @import '../components/arg_add_popover/arg_add_popover';
 @import '../components/arg_form/arg_form';

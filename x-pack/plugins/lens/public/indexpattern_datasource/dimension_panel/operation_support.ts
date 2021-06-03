@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import { DatasourceDimensionDropProps } from '../../types';
 import { OperationType } from '../indexpattern';
 import { memoizedGetAvailableOperationsByMetadata } from '../operations';
