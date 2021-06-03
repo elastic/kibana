@@ -1229,8 +1229,13 @@ export function getReferencedColumnIds(layer: IndexPatternLayer, columnId: strin
   function collect(id: string) {
     const column = layer.columns[id];
     if (column && 'references' in column) {
-      referencedIds.push(...column.references);
-      column.references.forEach(collect);
+      const columnReferences = column.references;
+      // only record references which have created columns yet
+      const existingReferences = columnReferences.filter((reference) =>
+        Boolean(layer.columns[reference])
+      );
+      referencedIds.push(...existingReferences);
+      existingReferences.forEach(collect);
     }
   }
   collect(columnId);

@@ -517,8 +517,11 @@ function createAlternativeMetricSuggestions(
 ) {
   const layer = state.layers[layerId];
   const suggestions: Array<DatasourceSuggestion<IndexPatternPrivateState>> = [];
+  const topLevelMetricColumns = layer.columnOrder.filter(
+    (columnId) => !isReferenced(layer, columnId)
+  );
 
-  layer.columnOrder.forEach((columnId) => {
+  topLevelMetricColumns.forEach((columnId) => {
     const column = layer.columns[columnId];
     if (!hasField(column)) {
       return;
@@ -622,13 +625,16 @@ function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layer
     })
   )
     .concat(
-      topLevelMetricColumns.map((columnId) => {
-        return {
-          ...layer,
-          columnOrder: [columnId, ...getReferencedColumnIds(layer, columnId)],
-          noBuckets: true,
-        };
-      })
+      // if there is just a single top level metric, the unchanged suggestion will take care of this case - only split up if there are multiple metrics or at least one bucket
+      availableBucketedColumns.length > 0 || topLevelMetricColumns.length > 1
+        ? topLevelMetricColumns.map((columnId) => {
+            return {
+              ...layer,
+              columnOrder: [columnId, ...getReferencedColumnIds(layer, columnId)],
+              noBuckets: true,
+            };
+          })
+        : []
     )
     .map(({ noBuckets, ...updatedLayer }) => {
       return buildSuggestion({

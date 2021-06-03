@@ -2496,6 +2496,98 @@ describe('IndexPattern Data Source suggestions', () => {
         ).toBeTruthy();
       });
     });
+
+    it('will leave dangling references in place', () => {
+      const initialState = testInitialState();
+      const state: IndexPatternPrivateState = {
+        ...initialState,
+        layers: {
+          ...initialState.layers,
+          first: {
+            ...initialState.layers.first,
+            columnOrder: ['date', 'ref'],
+
+            columns: {
+              date: {
+                label: '',
+                dataType: 'date',
+                isBucketed: true,
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                params: { interval: 'auto' },
+              },
+              ref: {
+                label: '',
+                dataType: 'number',
+                isBucketed: false,
+                operationType: 'cumulative_sum',
+                references: ['non_existing_metric'],
+              },
+            },
+          },
+        },
+      };
+
+      const result = getDatasourceSuggestionsFromCurrentState(state);
+
+      // only generate suggestions for top level metrics
+      expect(
+        result.filter((suggestion) => suggestion.table.changeType === 'reduced').length
+      ).toEqual(1);
+
+      // top level "ref" column
+      expect(
+        result.some(
+          (suggestion) =>
+            suggestion.table.changeType === 'reduced' &&
+            isEqual(suggestion.state.layers.first.columnOrder, ['ref'])
+        )
+      ).toBeTruthy();
+    });
+
+    it('will not suggest reduced tables if there is just a referenced top level metric', () => {
+      const initialState = testInitialState();
+      const state: IndexPatternPrivateState = {
+        ...initialState,
+        layers: {
+          ...initialState.layers,
+          first: {
+            ...initialState.layers.first,
+            columnOrder: ['ref', 'metric'],
+
+            columns: {
+              ref: {
+                label: '',
+                dataType: 'number',
+                isBucketed: false,
+                operationType: 'math',
+                params: {
+                  tinymathAst: '',
+                },
+                references: ['metric'],
+              },
+              metric: {
+                label: '',
+                dataType: 'number',
+                isBucketed: false,
+                operationType: 'count',
+                sourceField: 'Records',
+              },
+            },
+          },
+        },
+      };
+
+      const result = getDatasourceSuggestionsFromCurrentState(state);
+
+      expect(
+        result.filter((suggestion) => suggestion.table.changeType === 'unchanged').length
+      ).toEqual(1);
+
+      expect(
+        result.filter((suggestion) => suggestion.table.changeType === 'reduced').length
+      ).toEqual(0);
+    });
   });
 });
 
