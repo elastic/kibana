@@ -16,6 +16,7 @@ import {
 } from '../../../../../../common/pivot_aggs';
 import { PivotAggsConfigTopMetrics } from './types';
 import { TopMetricsAggForm } from './components/top_metrics_agg_form';
+import { isPopulatedObject } from '../../../../../../../../common/shared_imports';
 
 /**
  * Gets initial basic configuration of the top_metrics aggregation.
@@ -79,37 +80,34 @@ export function getTopMetricsAggConfig(
       }
 
       const sortField = Object.keys(sort)[0];
+
+      this.aggConfig.sortField = sortField;
+
       const sortDefinition = sort[sortField];
 
-      let sortDirection = null;
-      let sortMode = null;
-      let numericType = null;
       let unsupportedConfig = null;
 
       if (isValidSortDirection(sortDefinition)) {
-        sortDirection = sortDefinition;
+        this.aggConfig.sortDirection = sortDefinition;
       }
 
-      if (typeof sortDefinition === 'object') {
+      if (isPopulatedObject(sortDefinition)) {
         const { order, mode, numeric_type: numType, ...rest } = sortDefinition;
         unsupportedConfig = rest;
 
         if (isValidSortDirection(order)) {
-          sortDirection = order;
+          this.aggConfig.sortDirection = order;
         }
         if (isValidSortMode(mode)) {
-          sortMode = mode;
+          this.aggConfig.sortMode = mode;
         }
         if (isValidSortNumericType(numType)) {
-          numericType = numType;
+          this.aggConfig.numericType = numType;
         }
       }
 
       this.aggConfig = {
-        sortField,
-        sortDirection,
-        ...(sortMode ? { sortMode } : {}),
-        ...(numericType ? { numericType } : {}),
+        ...this.aggConfig,
         ...(unsupportedConfig ?? {}),
       };
     },

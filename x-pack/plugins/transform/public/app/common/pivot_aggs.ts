@@ -115,15 +115,15 @@ export const isSpecialSortField = (sortField: unknown) => {
   return Object.values(TOP_METRICS_SPECIAL_SORT_FIELDS).some((v) => v === sortField);
 };
 
-export const isValidSortDirection = (arg: unknown) => {
+export const isValidSortDirection = (arg: unknown): arg is SortDirection => {
   return Object.values(SORT_DIRECTION).some((v) => v === arg);
 };
 
-export const isValidSortMode = (arg: unknown) => {
+export const isValidSortMode = (arg: unknown): arg is SortMode => {
   return Object.values(SORT_MODE).some((v) => v === arg);
 };
 
-export const isValidSortNumericType = (arg: unknown) => {
+export const isValidSortNumericType = (arg: unknown): arg is SortNumericFieldType => {
   return SORT_NUMERIC_FIELD_TYPES.some((v) => v === arg);
 };
 
