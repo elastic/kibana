@@ -259,7 +259,9 @@ export const AppRoutes = memo(() => {
         </DefaultLayout>
       </Route>
       <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>
-        <CreatePackagePolicyPage />
+        <DefaultLayout section="agent_policy">
+          <CreatePackagePolicyPage />
+        </DefaultLayout>
       </Route>
       <Redirect to="/" />
     </Switch>
