@@ -43,7 +43,9 @@ export interface ReferenceEditorProps {
   selectionStyle: 'full' | 'field' | 'hidden';
   validation: RequiredReference;
   columnId: string;
-  updateLayer: (newLayer: IndexPatternLayer) => void;
+  updateLayer: (
+    setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
+  ) => void;
   currentIndexPattern: IndexPattern;
   existingFields: IndexPatternPrivateState['existingFields'];
   dateRange: DateRange;

@@ -175,6 +175,12 @@ export const ComponentStrings = {
         defaultMessage: 'Asset thumbnail',
       }),
   },
+  CanvasLoading: {
+    getLoadingLabel: () =>
+      i18n.translate('xpack.canvas.canvasLoading.loadingMessage', {
+        defaultMessage: 'Loading',
+      }),
+  },
   ColorManager: {
     getAddAriaLabel: () =>
       i18n.translate('xpack.canvas.colorManager.addAriaLabel', {
@@ -1383,6 +1389,14 @@ export const ComponentStrings = {
     getTitle: () =>
       i18n.translate('xpack.canvas.workpadHeaderKioskControl.controlTitle', {
         defaultMessage: 'Cycle fullscreen pages',
+      }),
+    getAutoplayListDurationManualText: () =>
+      i18n.translate('xpack.canvas.workpadHeaderKioskControl.autoplayListDurationManual', {
+        defaultMessage: 'Manually',
+      }),
+    getDisableTooltip: () =>
+      i18n.translate('xpack.canvas.workpadHeaderKioskControl.disableTooltip', {
+        defaultMessage: 'Disable auto-play',
       }),
   },
   WorkpadHeaderRefreshControlSettings: {
