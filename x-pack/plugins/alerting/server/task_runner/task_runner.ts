@@ -33,6 +33,7 @@ import {
   AlertExecutionStatus,
   AlertExecutionStatusErrorReasons,
   AlertTypeRegistry,
+  AlertType,
 } from '../types';
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
@@ -343,13 +344,8 @@ export class TaskRunner<
       alertId,
       alertLabel,
       namespace,
-      ruleTypeId: alertTypeId,
-      ruleUpdatedBy: alert.updatedBy ?? undefined,
-      license: alertType.minimumLicenseRequired,
-      producer: alertType.producer,
-      ruleName: alert.name,
-      ruleTypeName: alertType.name,
-      version: alert.version,
+      ruleType: alertType,
+      rule: alert,
     });
 
     if (!muteAll) {
@@ -632,13 +628,19 @@ interface GenerateNewAndRecoveredInstanceEventsParams<
   alertId: string;
   alertLabel: string;
   namespace: string | undefined;
-  ruleTypeId?: string;
-  producer?: string;
-  license?: string;
-  ruleTypeName?: string;
-  version?: string;
-  ruleName?: string;
-  ruleUpdatedBy?: string;
+  ruleType: NormalizedAlertType<
+    AlertTypeParams,
+    AlertTypeState,
+    {
+      [x: string]: unknown;
+    },
+    {
+      [x: string]: unknown;
+    },
+    string,
+    string
+  >;
+  rule: SanitizedAlert<AlertTypeParams>;
 }
 
 function generateNewAndRecoveredInstanceEvents<
@@ -652,6 +654,8 @@ function generateNewAndRecoveredInstanceEvents<
     currentAlertInstances,
     originalAlertInstances,
     recoveredAlertInstances,
+    rule,
+    ruleType,
   } = params;
   const originalAlertInstanceIds = Object.keys(originalAlertInstances);
   const currentAlertInstanceIds = Object.keys(currentAlertInstances);
@@ -688,20 +692,13 @@ function generateNewAndRecoveredInstanceEvents<
     action: string,
     message: string,
     group?: string,
-    subgroup?: string,
-    ruleTypeId?: string,
-    producer?: string,
-    license?: string,
-    ruleTypeName?: string,
-    version?: string,
-    ruleName?: string,
-    ruleUpdatedBy?: string
+    subgroup?: string
   ) {
     const event: IEvent = {
       event: {
         action,
         kind: 'alert',
-        category: [producer],
+        category: ruleType.producer ? [ruleType.producer] : undefined,
       },
       kibana: {
         alerting: {
@@ -720,16 +717,16 @@ function generateNewAndRecoveredInstanceEvents<
       },
       message,
       rule: {
-        id: ruleTypeId,
-        license,
-        category: ruleTypeName,
-        ruleset: producer,
+        id: ruleType.id,
+        license: ruleType.minimumLicenseRequired,
+        category: ruleType.name,
+        ruleset: ruleType.producer,
         uuid: alertId,
-        reference: getDocsForRuleTypeByProducer(producer, ruleTypeId),
+        reference: getDocsForRuleTypeByProducer(ruleType.producer, ruleType.id),
         namespace,
-        name: ruleName,
-        author: ruleUpdatedBy ? [ruleUpdatedBy] : undefined,
-        version,
+        name: rule.name,
+        author: rule.updatedBy ? [rule.updatedBy] : undefined,
+        version: rule.version,
       },
     };
     eventLogger.logEvent(event);
