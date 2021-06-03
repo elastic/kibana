@@ -11,11 +11,11 @@ import { ReportManager, METRIC_TYPE, UiCounterMetricType, Report } from '@kbn/an
 import moment from 'moment';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { UsageCountersSavedObject } from '../../../../src/plugins/usage_collection/server';
-import { tryAssertionUntil } from '../telemetry/utils';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const retry = getService('retry');
 
   const createUiCounterEvent = (eventName: string, type: UiCounterMetricType, count = 1) => ({
     eventName,
@@ -69,22 +69,15 @@ export default function ({ getService }: FtrProviderContext) {
 
       await sendReport(report);
 
-      await tryAssertionUntil(
-        async () => await fetchUsageCountersObjects(),
-        (savedObjects) => {
-          if (!savedObjects) {
-            return false;
-          }
-
-          const countTypeEvent = getCounterById(
-            savedObjects,
-            `uiCounter:${dayDate}:${METRIC_TYPE.COUNT}:myApp:my_event`
-          );
-          expect(countTypeEvent.attributes.count).to.eql(1);
-        },
-        4,
-        2000
-      );
+      await retry.waitForWithTimeout('reported events to be stored into ES', 8000, async () => {
+        const savedObjects = await fetchUsageCountersObjects();
+        const countTypeEvent = getCounterById(
+          savedObjects,
+          `uiCounter:${dayDate}:${METRIC_TYPE.COUNT}:myApp:my_event`
+        );
+        expect(countTypeEvent.attributes.count).to.eql(1);
+        return true;
+      });
     });
 
     it('supports multiple events', async () => {
@@ -99,35 +92,27 @@ export default function ({ getService }: FtrProviderContext) {
       ]);
 
       await sendReport(report);
+      await retry.waitForWithTimeout('reported events to be stored into ES', 8000, async () => {
+        const savedObjects = await fetchUsageCountersObjects();
+        const countTypeEvent = getCounterById(
+          savedObjects,
+          `uiCounter:${dayDate}:${METRIC_TYPE.COUNT}:myApp:${uniqueEventName}`
+        );
+        expect(countTypeEvent.attributes.count).to.eql(1);
 
-      await tryAssertionUntil(
-        async () => await fetchUsageCountersObjects(),
-        (savedObjects) => {
-          if (!savedObjects) {
-            return false;
-          }
+        const clickTypeEvent = getCounterById(
+          savedObjects,
+          `uiCounter:${dayDate}:${METRIC_TYPE.CLICK}:myApp:${uniqueEventName}`
+        );
+        expect(clickTypeEvent.attributes.count).to.eql(2);
 
-          const countTypeEvent = getCounterById(
-            savedObjects,
-            `uiCounter:${dayDate}:${METRIC_TYPE.COUNT}:myApp:${uniqueEventName}`
-          );
-          expect(countTypeEvent.attributes.count).to.eql(1);
-
-          const clickTypeEvent = getCounterById(
-            savedObjects,
-            `uiCounter:${dayDate}:${METRIC_TYPE.CLICK}:myApp:${uniqueEventName}`
-          );
-          expect(clickTypeEvent.attributes.count).to.eql(2);
-
-          const secondEvent = getCounterById(
-            savedObjects,
-            `uiCounter:${dayDate}:${METRIC_TYPE.COUNT}:myApp:${uniqueEventName}_2`
-          );
-          expect(secondEvent.attributes.count).to.eql(1);
-        },
-        4,
-        2000
-      );
+        const secondEvent = getCounterById(
+          savedObjects,
+          `uiCounter:${dayDate}:${METRIC_TYPE.COUNT}:myApp:${uniqueEventName}_2`
+        );
+        expect(secondEvent.attributes.count).to.eql(1);
+        return true;
+      });
     });
   });
 }
