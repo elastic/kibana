@@ -126,7 +126,7 @@ export const getPieVisualization = ({
         triggerIcon: 'colorBy',
         palette: paletteService
           .get(state.palette?.name || 'default')
-          .getColors(10, state.palette?.params),
+          .getCategoricalColors(10, state.palette?.params),
       };
     }
 

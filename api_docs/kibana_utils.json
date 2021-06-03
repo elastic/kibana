@@ -2551,7 +2551,9 @@
             "type": "Object",
             "tags": [],
             "label": "storage",
-            "description": [],
+            "description": [
+              "- Option {@link Storage} to use for storing state. By default window.sessionStorage."
+            ],
             "signature": [
               "Storage"
             ],
@@ -2616,7 +2618,9 @@
             "type": "Function",
             "tags": [],
             "label": "accessor",
-            "description": [],
+            "description": [
+              "Asynchronous start service accessor provided by platform."
+            ],
             "signature": [
               {
                 "pluginId": "core",
@@ -3623,7 +3627,9 @@
             "type": "Object",
             "tags": [],
             "label": "promise",
-            "description": [],
+            "description": [
+              "Promise to convert to 3-tuple."
+            ],
             "signature": [
               "Promise<T>"
             ],
@@ -4687,7 +4693,9 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "container",
-            "description": [],
+            "description": [
+              "- {@link StateContainer} which state to track."
+            ],
             "signature": [
               "Container"
             ],
@@ -4704,7 +4712,9 @@
             "type": "Function",
             "tags": [],
             "label": "selector",
-            "description": [],
+            "description": [
+              "- Function used to pick parts of state."
+            ],
             "signature": [
               "(state: ",
               {
@@ -4729,7 +4739,9 @@
             "type": "Function",
             "tags": [],
             "label": "comparator",
-            "description": [],
+            "description": [
+              "- {@link Comparator} function used to memoize previous result, to not\nre-render React component if state did not change. By default uses\n`fast-deep-equal` package."
+            ],
             "signature": [
               {
                 "pluginId": "kibanaUtils",
@@ -4793,7 +4805,9 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "container",
-            "description": [],
+            "description": [
+              "- {@link StateContainer} which state to track."
+            ],
             "signature": [
               "Container"
             ],
@@ -10006,7 +10020,9 @@
             "type": "Object",
             "tags": [],
             "label": "promise",
-            "description": [],
+            "description": [
+              "Promise to convert to 3-tuple."
+            ],
             "signature": [
               "Promise<T>"
             ],
@@ -10069,7 +10085,9 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "container",
-            "description": [],
+            "description": [
+              "- {@link StateContainer} which state to track."
+            ],
             "signature": [
               "Container"
             ],
@@ -10086,7 +10104,9 @@
             "type": "Function",
             "tags": [],
             "label": "selector",
-            "description": [],
+            "description": [
+              "- Function used to pick parts of state."
+            ],
             "signature": [
               "(state: ",
               {
@@ -10111,7 +10131,9 @@
             "type": "Function",
             "tags": [],
             "label": "comparator",
-            "description": [],
+            "description": [
+              "- {@link Comparator} function used to memoize previous result, to not\nre-render React component if state did not change. By default uses\n`fast-deep-equal` package."
+            ],
             "signature": [
               {
                 "pluginId": "kibanaUtils",
@@ -10175,7 +10197,9 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "container",
-            "description": [],
+            "description": [
+              "- {@link StateContainer} which state to track."
+            ],
             "signature": [
               "Container"
             ],

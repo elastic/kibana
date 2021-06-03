@@ -1210,7 +1210,7 @@
                 "plugin": "reporting",
                 "link": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 271
+                  "lineNumber": 269
                 }
               },
               {
@@ -2030,21 +2030,21 @@
               "plugin": "reporting",
               "link": {
                 "path": "x-pack/plugins/reporting/server/core.ts",
-                "lineNumber": 269
+                "lineNumber": 267
               }
             },
             {
               "plugin": "reporting",
               "link": {
                 "path": "x-pack/plugins/reporting/server/core.ts",
-                "lineNumber": 291
+                "lineNumber": 289
               }
             },
             {
               "plugin": "reporting",
               "link": {
                 "path": "x-pack/plugins/reporting/server/core.ts",
-                "lineNumber": 303
+                "lineNumber": 301
               }
             },
             {

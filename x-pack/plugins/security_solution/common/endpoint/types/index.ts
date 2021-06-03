@@ -1095,3 +1095,13 @@ export interface GetAgentSummaryResponse {
     versions_count: { [key: string]: number };
   };
 }
+
+/**
+ * REST API response for retrieving exception summary
+ */
+export interface GetExceptionSummaryResponse {
+  total: number;
+  windows: number;
+  macos: number;
+  linux: number;
+}

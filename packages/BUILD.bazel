@@ -22,6 +22,7 @@ filegroup(
       "//packages/kbn-eslint-plugin-eslint:build",
       "//packages/kbn-expect:build",
       "//packages/kbn-i18n:build",
+      "//packages/kbn-io-ts-utils:build",
       "//packages/kbn-legacy-logging:build",
       "//packages/kbn-logging:build",
       "//packages/kbn-mapbox-gl:build",

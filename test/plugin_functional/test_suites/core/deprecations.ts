@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const PageObjects = getPageObjects(['common']);
   const browser = getService('browser');
 
-  const CorePluginDeprecationsPluginDeprecations = [
+  const CorePluginDeprecationsPluginDeprecations: DomainDeprecationDetails[] = [
     {
       level: 'critical',
       message:
@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           'Replace "corePluginDeprecations.oldProperty" with "corePluginDeprecations.newProperty" in the Kibana config file, CLI flag, or environment variable (in Docker only).',
         ],
       },
+      deprecationType: 'config',
       domainId: 'corePluginDeprecations',
     },
     {
@@ -37,14 +38,20 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           'Remove "corePluginDeprecations.noLongerUsed" from the Kibana config file, CLI flag, or environment variable (in Docker only)',
         ],
       },
+      deprecationType: 'config',
       domainId: 'corePluginDeprecations',
     },
     {
       level: 'critical',
       message:
         'Kibana plugin functional tests will no longer allow corePluginDeprecations.secret config to be set to anything except 42.',
-      correctiveActions: {},
+      correctiveActions: {
+        manualSteps: [
+          'This is an intentional deprecation for testing with no intention for having it fixed!',
+        ],
+      },
       documentationUrl: 'config-secret-doc-url',
+      deprecationType: 'config',
       domainId: 'corePluginDeprecations',
     },
     {
@@ -54,13 +61,16 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       correctiveActions: {
         manualSteps: ['Step a', 'Step b'],
       },
+      deprecationType: 'feature',
       domainId: 'corePluginDeprecations',
     },
     {
       message: 'SavedObject test-deprecations-plugin is still being used.',
       documentationUrl: 'another-test-url',
       level: 'critical',
-      correctiveActions: {},
+      correctiveActions: {
+        manualSteps: ['Step a', 'Step b'],
+      },
       domainId: 'corePluginDeprecations',
     },
   ];
@@ -147,6 +157,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
                       mockFail: true,
                     },
                   },
+                  manualSteps: ['Step a', 'Step b'],
                 },
                 domainId: 'corePluginDeprecations',
               })
@@ -174,6 +185,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
                       mockFail: true,
                     },
                   },
+                  manualSteps: ['Step a', 'Step b'],
                 },
                 domainId: 'corePluginDeprecations',
               })
@@ -209,6 +221,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
                       path: '/api/core_deprecations_resolve/',
                       body: { keyId },
                     },
+                    manualSteps: ['Step a', 'Step b'],
                   },
                   domainId: 'corePluginDeprecations',
                 })

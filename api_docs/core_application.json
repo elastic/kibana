@@ -115,7 +115,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "basePath",
-                "description": [],
+                "description": [
+                  "the URL path scope for the sub history"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -207,7 +209,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "pathOrLocation",
-                "description": [],
+                "description": [
+                  "a string or location descriptor"
+                ],
                 "signature": [
                   "string | ",
                   "LocationDescriptorObject",
@@ -266,7 +270,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "pathOrLocation",
-                "description": [],
+                "description": [
+                  "a string or location descriptor"
+                ],
                 "signature": [
                   "string | ",
                   "LocationDescriptorObject",
@@ -323,7 +329,9 @@
                 "type": "number",
                 "tags": [],
                 "label": "n",
-                "description": [],
+                "description": [
+                  "number of positions in the stack to go. Negative numbers indicate number of entries backward, positive\nnumbers for forwards. If passed 0, the current location will be reloaded. If `n` exceeds the number of\nentries available, this is a no-op."
+                ],
                 "signature": [
                   "number"
                 ],
@@ -449,7 +457,9 @@
                 "type": "Function",
                 "tags": [],
                 "label": "listener",
-                "description": [],
+                "description": [
+                  "a function that receives location updates."
+                ],
                 "signature": [
                   "(location: ",
                   "Location",

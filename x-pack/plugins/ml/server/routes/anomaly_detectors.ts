@@ -522,6 +522,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
             bucket_span: request.body.bucketSpan,
             start: request.body.start !== undefined ? String(request.body.start) : undefined,
             end: request.body.end !== undefined ? String(request.body.end) : undefined,
+            overall_score: request.body.overall_score ?? 0,
           },
         });
         return response.ok({
