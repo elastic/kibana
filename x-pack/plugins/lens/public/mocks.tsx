@@ -46,9 +46,11 @@ const createStartContract = (): Start => {
     EmbeddableComponent: jest.fn(() => {
       return <span>Lens Embeddable Component</span>;
     }),
+    SaveModalComponent: jest.fn(() => {
+      return <span>Lens Save Modal Component</span>;
+    }),
     canUseEditor: jest.fn(() => true),
     navigateToPrefilledEditor: jest.fn(),
-    attributeService: jest.fn(),
     getXyVisTypes: jest.fn().mockReturnValue(new Promise((resolve) => resolve(visualizationTypes))),
   };
   return startContract;
