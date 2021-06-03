@@ -14,7 +14,6 @@ import { Route, Router } from 'react-router-dom';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import type { ObservabilityRuleTypeRegistry } from '../../../observability/public';
-import { euiStyled } from '../../../../../src/plugins/kibana_react/common';
 import {
   KibanaContextProvider,
   RedirectAppLinks,
@@ -29,16 +28,10 @@ import { UrlParamsProvider } from '../context/url_params_context/url_params_cont
 import { ConfigSchema } from '../index';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
-import { px, units } from '../style/variables';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
 import { UXActionMenu } from '../components/app/RumDashboard/ActionMenu';
 import { useBreadcrumbs } from '../../../observability/public';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
-
-const CsmMainContainer = euiStyled.div`
-  padding: ${px(units.plus)};
-  height: 100%;
-`;
 
 export const uxRoutes: APMRouteDefinition[] = [
   {
@@ -72,10 +65,10 @@ function UxApp() {
         darkMode,
       })}
     >
-      <CsmMainContainer data-test-subj="csmMainContainer" role="main">
+      <div data-test-subj="csmMainContainer" role="main">
         <Route component={ScrollToTopOnPathChange} />
         <RumHome />
-      </CsmMainContainer>
+      </div>
     </ThemeProvider>
   );
 }
