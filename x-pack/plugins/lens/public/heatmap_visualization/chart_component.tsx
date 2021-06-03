@@ -50,8 +50,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   const tableId = Object.keys(data.tables)[0];
   const table = data.tables[tableId];
 
-  let chartData = table.rows;
-
   const xAxisColumnIndex = table.columns.findIndex((v) => v.id === args.xAccessor);
   const yAxisColumnIndex = table.columns.findIndex((v) => v.id === args.yAccessor);
 
@@ -63,6 +61,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
     // Chart is not ready
     return null;
   }
+
+  let chartData = table.rows.filter((v) => typeof v[args.valueAccessor!] === 'number');
 
   if (!yAxisColumn) {
     // required for tooltip
@@ -77,6 +77,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   const xAxisMeta = xAxisColumn.meta;
   const isTimeBasedSwimLane = xAxisMeta.type === 'date';
 
+  // Fallback to the ordinal scale type when a single row of data is provided.
+  // Related issue https://github.com/elastic/elastic-charts/issues/1184
   const xScaleType =
     isTimeBasedSwimLane && chartData.length > 1 ? ScaleType.Time : ScaleType.Ordinal;
 
