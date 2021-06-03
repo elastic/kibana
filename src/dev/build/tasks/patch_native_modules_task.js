@@ -31,16 +31,16 @@ const packages = [
     extractMethod: 'gunzip',
     archives: {
       darwin: {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.14.0/darwin-x64-64.gz',
-        sha256: '54c8386cb7cd53895cf379522114bfe82378e300e127e58d392ddd40a77e396f',
+        url: 'https://github.com/uhop/node-re2/releases/download/1.14.0/darwin-x64-72.gz',
+        sha256: '7a8d422fe99052ff8cbe52080b2bbb0128eb84b9c9a14adc5269106716972af1',
       },
       linux: {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.14.0/linux-x64-64.gz',
-        sha256: 'f54f059035e71a7ccb3fa201080e260c41d228d13a8247974b4bb157691b6757',
+        url: 'https://github.com/uhop/node-re2/releases/download/1.14.0/linux-x64-72.gz',
+        sha256: 'b219aaca9424b381ef6c000b6cdd8ff30cb97df1005966e21be3b92a9ebb60e3',
       },
       windows: {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.14.0/win32-x64-64.gz',
-        sha256: 'de708446a8b802f4634c2cfef097c2625a2811fdcd8133dfd7b7c485f966caa9',
+        url: 'https://github.com/uhop/node-re2/releases/download/1.14.0/win32-x64-72.gz',
+        sha256: 'c90995d15a1b1b59724ca2c41b145be67354bd90465a4c1bfe075c62a081ad3f',
       },
     },
   },
