@@ -91,11 +91,11 @@ export class DrawTooltip extends Component<Props, State> {
         defaultMessage: 'Click to start shape. Click to add vertex. Double click to finish.',
       });
     } else if (this.props.drawType === DRAW_TYPE.LINE) {
-      instructions = i18n.translate('xpack.maps.drawTooltip.polygonInstructions', {
+      instructions = i18n.translate('xpack.maps.drawTooltip.lineInstructions', {
         defaultMessage: 'Click to start line. Click to add vertex. Double click to finish.',
       });
     } else if (this.props.drawType === DRAW_TYPE.POINT) {
-      instructions = i18n.translate('xpack.maps.drawTooltip.polygonInstructions', {
+      instructions = i18n.translate('xpack.maps.drawTooltip.pointInstructions', {
         defaultMessage: 'Click to create point.',
       });
     } else {

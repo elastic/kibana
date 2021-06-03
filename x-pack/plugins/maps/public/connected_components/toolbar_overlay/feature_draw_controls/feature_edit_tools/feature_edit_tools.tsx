@@ -77,7 +77,7 @@ export function FeatureEditTools(props: Props) {
                       defaultMessage: 'Draw polygon',
                     }
                   )}
-                  title={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawLineTitle', {
+                  title={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawPolygonTitle', {
                     defaultMessage: 'Draw polygon',
                   })}
                   aria-pressed={drawPolygonSelected}
