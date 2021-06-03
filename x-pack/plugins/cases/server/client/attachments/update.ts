@@ -15,7 +15,7 @@ import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../common/consta
 import { AttachmentService, CasesService } from '../../services';
 import { CaseResponse, CommentPatchRequest } from '../../../common/api';
 import { CasesClientArgs } from '..';
-import { decodeCommentRequest, ensureAuthorized } from '../utils';
+import { decodeCommentRequest } from '../utils';
 import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
 
@@ -105,7 +105,6 @@ export async function update(
     user,
     userActionService,
     authorization,
-    auditLogger,
   } = clientArgs;
 
   try {
@@ -137,12 +136,9 @@ export async function update(
       throw Boom.notFound(`This comment ${queryCommentId} does not exist anymore.`);
     }
 
-    await ensureAuthorized({
-      authorization,
-      auditLogger,
+    await authorization.ensureAuthorized({
+      entities: [{ owner: myComment.attributes.owner, id: myComment.id }],
       operation: Operations.updateComment,
-      savedObjectIDs: [myComment.id],
-      owners: [myComment.attributes.owner],
     });
 
     if (myComment.attributes.type !== queryRestAttributes.type) {

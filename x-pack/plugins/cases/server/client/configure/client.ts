@@ -41,11 +41,7 @@ import { getMappings } from './get_mappings';
 import { FindActionResult } from '../../../../actions/server/types';
 import { ActionType } from '../../../../actions/common';
 import { Operations } from '../../authorization';
-import {
-  combineAuthorizedAndOwnerFilter,
-  ensureAuthorized,
-  getAuthorizationFilter,
-} from '../utils';
+import { combineAuthorizedAndOwnerFilter } from '../utils';
 import {
   ConfigurationGetFields,
   MappingsArgs,
@@ -148,13 +144,7 @@ async function get(
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): Promise<CasesConfigurationsResponse> {
-  const {
-    unsecuredSavedObjectsClient,
-    caseConfigureService,
-    logger,
-    authorization,
-    auditLogger,
-  } = clientArgs;
+  const { unsecuredSavedObjectsClient, caseConfigureService, logger, authorization } = clientArgs;
   try {
     const queryParams = pipe(
       excess(GetConfigureFindRequestRt).decode(params),
@@ -164,12 +154,7 @@ async function get(
     const {
       filter: authorizationFilter,
       ensureSavedObjectsAreAuthorized,
-      logSuccessfulAuthorization,
-    } = await getAuthorizationFilter({
-      authorization,
-      operation: Operations.findConfigurations,
-      auditLogger,
-    });
+    } = await authorization.getAuthorizationFilter(Operations.findConfigurations);
 
     const filter = combineAuthorizedAndOwnerFilter(
       queryParams.owner,
@@ -189,8 +174,6 @@ async function get(
         owner: configuration.attributes.owner,
       }))
     );
-
-    logSuccessfulAuthorization();
 
     const configurations = await Promise.all(
       myCaseConfigure.saved_objects.map(async (configuration) => {
@@ -267,7 +250,6 @@ async function update(
     unsecuredSavedObjectsClient,
     user,
     authorization,
-    auditLogger,
   } = clientArgs;
 
   try {
@@ -295,12 +277,9 @@ async function update(
       configurationId,
     });
 
-    await ensureAuthorized({
+    await authorization.ensureAuthorized({
       operation: Operations.updateConfiguration,
-      owners: [configuration.attributes.owner],
-      authorization,
-      auditLogger,
-      savedObjectIDs: [configuration.id],
+      entities: [{ owner: configuration.attributes.owner, id: configuration.id }],
     });
 
     if (version !== configuration.version) {
@@ -386,7 +365,6 @@ async function create(
     logger,
     user,
     authorization,
-    auditLogger,
   } = clientArgs;
   try {
     let error = null;
@@ -394,17 +372,14 @@ async function create(
     const {
       filter: authorizationFilter,
       ensureSavedObjectsAreAuthorized,
-      logSuccessfulAuthorization,
-    } = await getAuthorizationFilter({
-      authorization,
+    } = await authorization.getAuthorizationFilter(
       /**
        * The operation is createConfiguration because the procedure is part of
        * the create route. The user should have all
        * permissions to delete the results.
        */
-      operation: Operations.createConfiguration,
-      auditLogger,
-    });
+      Operations.createConfiguration
+    );
 
     const filter = combineAuthorizedAndOwnerFilter(
       configuration.owner,
@@ -424,8 +399,6 @@ async function create(
       }))
     );
 
-    logSuccessfulAuthorization();
-
     if (myCaseConfigure.saved_objects.length > 0) {
       await Promise.all(
         myCaseConfigure.saved_objects.map((cc) =>
@@ -436,12 +409,9 @@ async function create(
 
     const savedObjectID = SavedObjectsUtils.generateId();
 
-    await ensureAuthorized({
+    await authorization.ensureAuthorized({
       operation: Operations.createConfiguration,
-      owners: [configuration.owner],
-      authorization,
-      auditLogger,
-      savedObjectIDs: [savedObjectID],
+      entities: [{ owner: configuration.owner, id: savedObjectID }],
     });
 
     const creationDate = new Date().toISOString();

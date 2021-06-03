@@ -36,7 +36,7 @@ import {
   CommentAttributes,
 } from '../../../common/api';
 import { buildCaseUserActions } from '../../services/user_actions/helpers';
-import { ensureAuthorized, getCaseToUpdate } from '../utils';
+import { getCaseToUpdate } from '../utils';
 
 import { CasesService } from '../../services';
 import {
@@ -55,8 +55,7 @@ import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { UpdateAlertRequest } from '../alerts/client';
 import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '..';
-import { Operations } from '../../authorization';
-import { OwnerEntity } from '../types';
+import { Operations, OwnerEntity } from '../../authorization';
 
 /**
  * Throws an error if any of the requests attempt to update a collection style cases' status field.
@@ -406,7 +405,6 @@ export const update = async (
     user,
     logger,
     authorization,
-    auditLogger,
   } = clientArgs;
   const query = pipe(
     excess(CasesPatchRequestRt).decode(cases),
@@ -429,12 +427,9 @@ export const update = async (
       query.cases
     );
 
-    await ensureAuthorized({
-      authorization,
-      auditLogger,
-      owners: casesToAuthorize.map((caseInfo) => caseInfo.owner),
+    await authorization.ensureAuthorized({
+      entities: casesToAuthorize,
       operation: Operations.updateCase,
-      savedObjectIDs: casesToAuthorize.map((caseInfo) => caseInfo.id),
     });
 
     if (nonExistingCases.length > 0) {
