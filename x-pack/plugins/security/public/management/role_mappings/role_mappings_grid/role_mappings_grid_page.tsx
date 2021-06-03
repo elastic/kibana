@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiButton,
   EuiButtonIcon,
@@ -14,15 +13,11 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiPageContent,
-  EuiPageContentBody,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
+  EuiPageHeader,
   EuiSpacer,
-  EuiText,
-  EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -136,42 +131,35 @@ export class RoleMappingsGridPage extends Component<Props, State> {
     }
 
     return (
-      <EuiPageContent>
-        <EuiPageContentHeader>
-          <EuiPageContentHeaderSection>
-            <EuiTitle>
-              <h2>
-                <FormattedMessage
-                  id="xpack.security.management.roleMappings.roleMappingTitle"
-                  defaultMessage="Role Mappings"
-                />
-              </h2>
-            </EuiTitle>
-            <EuiText color="subdued" size="s">
-              <p>
-                <FormattedMessage
-                  id="xpack.security.management.roleMappings.roleMappingDescription"
-                  defaultMessage="Role mappings define which roles are assigned to users from an external identity provider. {learnMoreLink}"
-                  values={{
-                    learnMoreLink: (
-                      <EuiLink
-                        href={this.props.docLinks.links.security.mappingRoles}
-                        external={true}
-                        target="_blank"
-                      >
-                        <FormattedMessage
-                          id="xpack.security.management.roleMappings.learnMoreLinkText"
-                          defaultMessage="Learn more."
-                        />
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </p>
-            </EuiText>
-          </EuiPageContentHeaderSection>
-          <EuiPageContentHeaderSection>
+      <>
+        <EuiPageHeader
+          bottomBorder
+          pageTitle={
+            <FormattedMessage
+              id="xpack.security.management.roleMappings.roleMappingTitle"
+              defaultMessage="Role Mappings"
+            />
+          }
+          description={
+            <FormattedMessage
+              id="xpack.security.management.roleMappings.roleMappingDescription"
+              defaultMessage="Role mappings define which roles are assigned to users from an external identity provider. {learnMoreLink}"
+              values={{
+                learnMoreLink: (
+                  <EuiLink href={this.props.docLinks.links.security.mappingRoles} external={true}>
+                    <FormattedMessage
+                      id="xpack.security.management.roleMappings.learnMoreLinkText"
+                      defaultMessage="Learn more."
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          }
+          rightSideItems={[
             <EuiButton
+              fill
+              iconType="plusInCircleFilled"
               data-test-subj="createRoleMappingButton"
               {...reactRouterNavigate(this.props.history, EDIT_ROLE_MAPPING_PATH)}
             >
@@ -179,21 +167,20 @@ export class RoleMappingsGridPage extends Component<Props, State> {
                 id="xpack.security.management.roleMappings.createRoleMappingButtonLabel"
                 defaultMessage="Create role mapping"
               />
-            </EuiButton>
-          </EuiPageContentHeaderSection>
-        </EuiPageContentHeader>
-        <EuiPageContentBody>
-          <Fragment>
-            {!this.state.hasCompatibleRealms && (
-              <>
-                <NoCompatibleRealms />
-                <EuiSpacer />
-              </>
-            )}
-            {this.renderTable()}
-          </Fragment>
-        </EuiPageContentBody>
-      </EuiPageContent>
+            </EuiButton>,
+          ]}
+        />
+
+        <EuiSpacer size="l" />
+
+        {!this.state.hasCompatibleRealms && (
+          <>
+            <NoCompatibleRealms />
+            <EuiSpacer />
+          </>
+        )}
+        {this.renderTable()}
+      </>
     );
   }
 
