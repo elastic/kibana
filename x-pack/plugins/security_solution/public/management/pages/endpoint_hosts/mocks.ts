@@ -20,8 +20,8 @@ import {
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import {
   BASE_POLICY_RESPONSE_ROUTE,
-  HOST_METADATA_GET_API,
-  HOST_METADATA_LIST_API,
+  HOST_METADATA_GET_ROUTE,
+  HOST_METADATA_LIST_ROUTE,
 } from '../../../../common/endpoint/constants';
 import { AGENT_POLICY_API_ROUTES, GetAgentPoliciesResponse } from '../../../../../fleet/common';
 
@@ -33,7 +33,7 @@ export const endpointMetadataHttpMocks = httpHandlerMockFactory<EndpointMetadata
   [
     {
       id: 'metadataList',
-      path: HOST_METADATA_LIST_API,
+      path: HOST_METADATA_LIST_ROUTE,
       method: 'post',
       handler: () => {
         const generator = new EndpointDocGenerator('seed');
@@ -55,7 +55,7 @@ export const endpointMetadataHttpMocks = httpHandlerMockFactory<EndpointMetadata
     },
     {
       id: 'metadataDetails',
-      path: HOST_METADATA_GET_API,
+      path: HOST_METADATA_GET_ROUTE,
       method: 'get',
       handler: () => {
         const generator = new EndpointDocGenerator('seed');
