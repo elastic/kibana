@@ -48,7 +48,7 @@ export const FLEET_ROUTING_PATHS = {
   policy_details: '/policies/:policyId/:tabId?',
   policy_details_settings: '/policies/:policyId/settings',
   add_integration_from_policy: '/policies/:policyId/add-integration',
-  add_integration_to_policy: '/policies/add-integration/:pkgkey/:integration?',
+  add_integration_to_policy: '/integrations/:pkgkey/add-integration/:integration?',
   edit_integration: '/policies/:policyId/edit-integration/:packagePolicyId',
   fleet: '/fleet',
   fleet_agent_list: '/fleet/agents',
@@ -113,7 +113,7 @@ export const pagePathGetters: {
   ],
   add_integration_to_policy: ({ pkgkey, integration }) => [
     FLEET_BASE_PATH,
-    `/policies/add-integration/${pkgkey}${integration ? `/${integration}` : ''}`,
+    `/integrations/${pkgkey}/add-integration${integration ? `/${integration}` : ''}`,
   ],
   edit_integration: ({ policyId, packagePolicyId }) => [
     FLEET_BASE_PATH,

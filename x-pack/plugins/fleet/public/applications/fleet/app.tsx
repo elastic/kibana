@@ -44,6 +44,7 @@ import { DataStreamApp } from './sections/data_stream';
 import { FleetApp } from './sections/agents';
 import { IngestManagerOverview } from './sections/overview';
 import { ProtectedRoute } from './index';
+import { CreatePackagePolicyPage } from './sections/agent_policy/create_package_policy_page';
 
 const ErrorLayout = ({ children }: { children: JSX.Element }) => (
   <EuiErrorBoundary>
@@ -256,6 +257,9 @@ export const AppRoutes = memo(() => {
         <DefaultLayout section="overview">
           <IngestManagerOverview />
         </DefaultLayout>
+      </Route>
+      <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>
+        <CreatePackagePolicyPage />
       </Route>
       <Redirect to="/" />
     </Switch>

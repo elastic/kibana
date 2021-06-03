@@ -9,9 +9,13 @@ import { i18n } from '@kbn/i18n';
 import type { ChromeBreadcrumb } from 'src/core/public';
 
 import type { Page, DynamicPagePathValues } from '../constants';
-import { FLEET_BASE_PATH, pagePathGetters } from '../constants';
+import { FLEET_BASE_PATH, INTEGRATIONS_BASE_PATH, pagePathGetters } from '../constants';
 
 import { useStartServices } from './';
+
+interface AdditionalBreadcrumbOptions {
+  useIntegrationsBasePath: boolean;
+}
 
 const BASE_BREADCRUMB: ChromeBreadcrumb = {
   href: pagePathGetters.overview()[1],
@@ -21,7 +25,9 @@ const BASE_BREADCRUMB: ChromeBreadcrumb = {
 };
 
 const breadcrumbGetters: {
-  [key in Page]?: (values: DynamicPagePathValues) => ChromeBreadcrumb[];
+  [key in Page]?: (
+    values: DynamicPagePathValues
+  ) => Array<ChromeBreadcrumb & Partial<AdditionalBreadcrumbOptions>>;
 } = {
   base: () => [BASE_BREADCRUMB],
   overview: () => [
@@ -58,6 +64,55 @@ const breadcrumbGetters: {
       }),
     },
     { text: policyName },
+  ],
+  add_integration_from_policy: ({ policyName, policyId }) => [
+    BASE_BREADCRUMB,
+    {
+      href: pagePathGetters.policies()[1],
+      text: i18n.translate('xpack.fleet.breadcrumbs.policiesPageTitle', {
+        defaultMessage: 'Policies',
+      }),
+    },
+    {
+      href: pagePathGetters.policy_details({ policyId })[1],
+      text: policyName,
+    },
+    {
+      text: i18n.translate('xpack.fleet.breadcrumbs.addPackagePolicyPageTitle', {
+        defaultMessage: 'Add integration',
+      }),
+    },
+  ],
+  add_integration_to_policy: ({ pkgTitle, pkgkey }) => [
+    BASE_BREADCRUMB,
+    {
+      href: pagePathGetters.integration_details_overview({ pkgkey })[1],
+      text: pkgTitle,
+      useIntegrationsBasePath: true,
+    },
+    {
+      text: i18n.translate('xpack.fleet.breadcrumbs.addPackagePolicyPageTitle', {
+        defaultMessage: 'Add integration',
+      }),
+    },
+  ],
+  edit_integration: ({ policyName, policyId }) => [
+    BASE_BREADCRUMB,
+    {
+      href: pagePathGetters.policies()[1],
+      text: i18n.translate('xpack.fleet.breadcrumbs.policiesPageTitle', {
+        defaultMessage: 'Policies',
+      }),
+    },
+    {
+      href: pagePathGetters.policy_details({ policyId })[1],
+      text: policyName,
+    },
+    {
+      text: i18n.translate('xpack.fleet.breadcrumbs.editPackagePolicyPageTitle', {
+        defaultMessage: 'Edit integration',
+      }),
+    },
   ],
   fleet: () => [
     BASE_BREADCRUMB,
@@ -111,11 +166,15 @@ const breadcrumbGetters: {
 
 export function useBreadcrumbs(page: Page, values: DynamicPagePathValues = {}) {
   const { chrome, http } = useStartServices();
-  const breadcrumbs: ChromeBreadcrumb[] =
+  const breadcrumbs =
     breadcrumbGetters[page]?.(values).map((breadcrumb) => ({
       ...breadcrumb,
       href: breadcrumb.href
-        ? http.basePath.prepend(`${FLEET_BASE_PATH}#${breadcrumb.href}`)
+        ? http.basePath.prepend(
+            `${breadcrumb.useIntegrationsBasePath ? INTEGRATIONS_BASE_PATH : FLEET_BASE_PATH}#${
+              breadcrumb.href
+            }`
+          )
         : undefined,
     })) || [];
   const docTitle: string[] = [...breadcrumbs]

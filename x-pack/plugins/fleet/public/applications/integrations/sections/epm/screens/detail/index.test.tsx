@@ -170,7 +170,7 @@ describe('when on integration detail', () => {
     it('should link to the create page', () => {
       const addButton = renderResult.getByTestId('addIntegrationPolicyButton') as HTMLAnchorElement;
       expect(addButton.href).toEqual(
-        'http://localhost/mock/app/fleet#/policies/add-integration/nginx-0.3.7'
+        'http://localhost/mock/app/fleet#/integrations/nginx-0.3.7/add-integration'
       );
     });
   });

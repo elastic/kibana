@@ -55,54 +55,6 @@ const breadcrumbGetters: {
     },
     { text: policyName },
   ],
-  add_integration_from_policy: ({ policyName, policyId }) => [
-    BASE_BREADCRUMB,
-    {
-      href: pagePathGetters.policies()[1],
-      text: i18n.translate('xpack.fleet.breadcrumbs.policiesPageTitle', {
-        defaultMessage: 'Policies',
-      }),
-    },
-    {
-      href: pagePathGetters.policy_details({ policyId })[1],
-      text: policyName,
-    },
-    {
-      text: i18n.translate('xpack.fleet.breadcrumbs.addPackagePolicyPageTitle', {
-        defaultMessage: 'Add integration',
-      }),
-    },
-  ],
-  add_integration_to_policy: ({ pkgTitle, pkgkey }) => [
-    BASE_BREADCRUMB,
-    {
-      href: pagePathGetters.integration_details_overview({ pkgkey })[1],
-      text: pkgTitle,
-    },
-    {
-      text: i18n.translate('xpack.fleet.breadcrumbs.addPackagePolicyPageTitle', {
-        defaultMessage: 'Add integration',
-      }),
-    },
-  ],
-  edit_integration: ({ policyName, policyId }) => [
-    BASE_BREADCRUMB,
-    {
-      href: pagePathGetters.policies()[1],
-      text: i18n.translate('xpack.fleet.breadcrumbs.policiesPageTitle', {
-        defaultMessage: 'Policies',
-      }),
-    },
-    {
-      href: pagePathGetters.policy_details({ policyId })[1],
-      text: policyName,
-    },
-    {
-      text: i18n.translate('xpack.fleet.breadcrumbs.editPackagePolicyPageTitle', {
-        defaultMessage: 'Edit integration',
-      }),
-    },
-  ],
 };
 
 export function useBreadcrumbs(page: Page, values: DynamicPagePathValues = {}) {

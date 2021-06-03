@@ -28,9 +28,6 @@ export const AgentPolicyApp: React.FunctionComponent = () => {
         <Route path={FLEET_ROUTING_PATHS.add_integration_from_policy}>
           <CreatePackagePolicyPage />
         </Route>
-        <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>
-          <CreatePackagePolicyPage />
-        </Route>
         <Route path={FLEET_ROUTING_PATHS.policy_details}>
           <AgentPolicyDetailsPage />
         </Route>
