@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { cloneDeep } from 'lodash';
+import { estypes } from '@elastic/elasticsearch';
 import {
   EuiButtonEmpty,
   EuiDatePicker,
@@ -35,9 +36,10 @@ import {
   timeFormatter,
 } from '@elastic/charts';
 
-import { Datafeed } from '../../../../../../common/types/anomaly_detection_jobs';
+import { MLDatafeed } from '../../../../../../common/types/anomaly_detection_jobs';
 import { isResultsSearchBoolQuery } from '../../../../data_frame_analytics/common/analytics';
 import { mlResultsService } from '../../../../services/results_service';
+import { BucketResultsForChart } from '../../../../services/results_service/result_service_rx';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 import { ml } from '../../../../services/ml_api_service';
 import { useCurrentEuiTheme } from '../../../../components/color_range_legend';
@@ -57,30 +59,41 @@ import {
 
 const dateFormatter = timeFormatter('MM-DD HH:mm');
 
-function getQueryBody(query: any, timefield: string, startTimestamp: number, endTimestamp: number) {
+function getQueryBody(
+  query: estypes.QueryContainer,
+  timefield: string,
+  startTimestamp: number,
+  endTimestamp: number
+) {
   const rangeFilter = {
     range: {
       [timefield]: { gte: startTimestamp, lte: endTimestamp },
     },
   };
 
-  const datafeedQueryClone = query !== undefined ? cloneDeep(query) : defaultSearchQuery;
+  let datafeedQueryClone = query !== undefined ? cloneDeep(query) : defaultSearchQuery;
 
   if (isResultsSearchBoolQuery(datafeedQueryClone)) {
     if (datafeedQueryClone.bool.filter === undefined) {
       datafeedQueryClone.bool.filter = [];
     }
-    datafeedQueryClone.bool.filter.push(rangeFilter);
+    if (Array.isArray(datafeedQueryClone.bool.filter)) {
+      datafeedQueryClone.bool.filter.push(rangeFilter);
+    } else {
+      // filter is an object so convert to array so we can add the rangeFilter
+      const filterQuery = cloneDeep(datafeedQueryClone.bool.filter);
+      datafeedQueryClone.bool.filter = [filterQuery, rangeFilter];
+    }
   } else {
     // Not a bool query so convert to a bool query so we can add the range filter
-    datafeedQueryClone.bool = { must: [datafeedQueryClone], filter: [rangeFilter] };
+    datafeedQueryClone = { bool: { must: [datafeedQueryClone], filter: [rangeFilter] } };
   }
 
   return datafeedQueryClone;
 }
 
 interface DatafeedModalProps {
-  datafeedConfig: Datafeed;
+  datafeedConfig: MLDatafeed;
   bucketSpan: string;
   end: number;
   onClose: (deletionApproved?: boolean) => void;
@@ -98,8 +111,8 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({
   const [interval, setInterval] = useState<string>(getIntervalOptions(bucketSpan)[0].value);
   const [selectedTabId, setSelectedTabId] = useState<TabIdsType>(TAB_IDS.CHART);
   const [isLoadingChartData, setIsLoadingChartData] = useState<boolean>(false);
-  const [bucketData, setBucketData] = useState<any>([]);
-  const [sourceData, setSourceData] = useState<any>([]);
+  const [bucketData, setBucketData] = useState<number[]>([]);
+  const [sourceData, setSourceData] = useState<number[][]>([]);
 
   const { displayErrorToast } = useToastNotificationService();
   const { euiTheme } = useCurrentEuiTheme();
@@ -139,10 +152,10 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({
   };
 
   const getChartData = useCallback(async () => {
-    const endTimestamp = moment(endDate).unix() * 1000;
+    const endTimestamp = moment(endDate).valueOf();
     const [count, type] = interval.split(' ');
     const startMoment = endDate.clone().subtract(Number(count), type);
-    const startTimestamp = moment(startMoment).unix() * 1000;
+    const startTimestamp = moment(startMoment).valueOf();
 
     const query = getQueryBody(datafeedConfig.query, timefield, startTimestamp, endTimestamp);
 
@@ -150,6 +163,12 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({
       index: datafeedConfig.indices.join(','),
       body: {
         query,
+        ...(datafeedConfig.runtime_mappings
+          ? { runtime_mappings: datafeedConfig.runtime_mappings }
+          : {}),
+        ...(datafeedConfig.indices_options
+          ? { indices_options: datafeedConfig.indices_options }
+          : {}),
         aggs: {
           doc_count_by_bucket_span: {
             date_histogram: {
@@ -163,7 +182,7 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({
     };
 
     try {
-      const bucketResp = await mlResultsService.getBucketResultsForChart(
+      const bucketResp: BucketResultsForChart = await mlResultsService.getBucketResultsForChart(
         jobId,
         String(startTimestamp),
         String(endTimestamp),
@@ -255,7 +274,7 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     color="primary"
-                    size="xs"
+                    size="l"
                     onClick={() => {
                       handleEndDateChange(CHART_DIRECTION.BACK);
                     }}
@@ -311,7 +330,7 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     color="primary"
-                    size="xs"
+                    size="l"
                     onClick={() => {
                       handleEndDateChange(CHART_DIRECTION.FORWARD);
                     }}

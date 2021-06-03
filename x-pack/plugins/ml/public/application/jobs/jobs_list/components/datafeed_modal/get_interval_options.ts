@@ -8,14 +8,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const getIntervalOptions = (bucketSpan: string) => {
-  const unitMatch = bucketSpan.match(/[d | h| m | s | ms | micros | nanos]/g)!;
+  const unitMatch = bucketSpan.match(/[d | h| m | s]/g)!;
   const unit = unitMatch[0];
   const count = Number(bucketSpan.replace(/[^0-9]/g, ''));
 
   const intervalOptions = [];
 
   if (['s', 'ms', 'micros', 'nanos'].includes(unit)) {
-    intervalOptions.unshift(
+    intervalOptions.push(
       {
         value: '1 hour',
         text: i18n.translate('xpack.ml.jobsList.datafeedModal.1hourOption', {

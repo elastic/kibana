@@ -17,7 +17,7 @@ export type ChartDirectionType = typeof CHART_DIRECTION[keyof typeof CHART_DIREC
 
 export const CHART_SIZE: ChartSizeArray = ['100%', 300];
 
-export const defaultSearchQuery = {
+export const defaultSearchQuery: estypes.QueryContainer = {
   bool: {
     must: [
       {

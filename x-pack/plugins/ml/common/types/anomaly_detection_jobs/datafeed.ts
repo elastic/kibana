@@ -11,6 +11,11 @@ export type DatafeedId = string;
 
 export type Datafeed = estypes.Datafeed;
 
+// Go back to using estypes.Datafeed once definition is updated
+export interface MLDatafeed extends Datafeed {
+  indices_options?: estypes.IndicesOptions;
+}
+
 export type ChunkingConfig = estypes.ChunkingConfig;
 
 export type Aggregation = Record<string, estypes.AggregationContainer>;

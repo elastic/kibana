@@ -93,7 +93,7 @@ export const EditQueryDelay: FC<{
       iconType="pencil"
     >
       <FormattedMessage
-        id="xpack.ml.jobsList.datafeedModal.queryDelayLabel"
+        id="xpack.ml.jobsList.datafeedModal.queryDelayLinkLabel"
         defaultMessage="Query delay: {queryDelay}"
         values={{ queryDelay: newQueryDelay || queryDelay }}
       />
