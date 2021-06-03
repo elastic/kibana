@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -46,11 +46,18 @@ export const TestConnectorForm = ({
   isExecutingAction,
   actionTypeRegistry,
 }: ConnectorAddFlyoutProps) => {
+  const [actionErrors, setActionErrors] = useState<IErrorObject>({});
+  const [hasErrors, setHasErrors] = useState<boolean>(false);
   const actionTypeModel = actionTypeRegistry.get(connector.actionTypeId);
   const ParamsFieldsComponent = actionTypeModel.actionParamsFields;
 
-  const actionErrors = actionTypeModel?.validateParams(actionParams).errors as IErrorObject;
-  const hasErrors = !!Object.values(actionErrors).find((errors) => errors.length > 0);
+  useEffect(() => {
+    (async () => {
+      const res = (await actionTypeModel?.validateParams(actionParams)).errors as IErrorObject;
+      setActionErrors({ ...res });
+      setHasErrors(!!Object.values(res).find((errors) => errors.length > 0));
+    })();
+  }, [actionTypeModel, actionParams]);
 
   const steps = [
     {
