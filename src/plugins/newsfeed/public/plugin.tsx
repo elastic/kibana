@@ -13,7 +13,7 @@ import React from 'react';
 import moment from 'moment';
 import { I18nProvider } from '@kbn/i18n/react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { NewsfeedPluginBrowserConfig, NewsfeedPluginSetupDependencies } from './types';
+import { NewsfeedPluginBrowserConfig, NewsfeedPluginStartDependencies } from './types';
 import { NewsfeedNavButton } from './components/newsfeed_header_nav_button';
 import { getApi, NewsfeedApi, NewsfeedApiEndpoint } from './lib/api';
 
@@ -41,7 +41,7 @@ export class NewsfeedPublicPlugin
     return {};
   }
 
-  public start(core: CoreStart, { screenshotMode }: NewsfeedPluginSetupDependencies) {
+  public start(core: CoreStart, { screenshotMode }: NewsfeedPluginStartDependencies) {
     const isScreenshotMode = screenshotMode.isScreenshotMode();
     const shouldMountKibanaNewsfeed = !isScreenshotMode;
 

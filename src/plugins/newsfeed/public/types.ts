@@ -7,9 +7,9 @@
  */
 
 import { Duration, Moment } from 'moment';
-import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
-export interface NewsfeedPluginSetupDependencies {
-  screenshotMode: ScreenshotModePluginSetup;
+import type { ScreenshotModePluginStart } from 'src/plugins/screenshot_mode/public';
+export interface NewsfeedPluginStartDependencies {
+  screenshotMode: ScreenshotModePluginStart;
 }
 
 // Ideally, we may want to obtain the type from the configSchema and exposeToBrowser keys...
