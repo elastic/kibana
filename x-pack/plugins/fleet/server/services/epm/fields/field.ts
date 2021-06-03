@@ -34,6 +34,10 @@ export interface Field {
   include_in_parent?: boolean;
   include_in_root?: boolean;
 
+  // Meta fields
+  metric_type?: string;
+  unit?: string;
+
   // Kibana specific
   analyzed?: boolean;
   count?: number;
