@@ -100,7 +100,7 @@ export const SubscriptionSplashContent: React.FC = () => {
 
   return (
     <EuiThemeProvider>
-      <EuiFlexGroup>
+      <EuiFlexGroup style={{ maxWidth: '700px' }}>
         <EuiFlexItem>
           <EuiTitle size="m">
             <h2>{title}</h2>

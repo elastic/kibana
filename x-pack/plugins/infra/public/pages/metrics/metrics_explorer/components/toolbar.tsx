@@ -26,7 +26,6 @@ import { MetricsExplorerChartOptions as MetricsExplorerChartOptionsComponent } f
 import { SavedViewsToolbarControls } from '../../../../components/saved_views/toolbar_control';
 import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
 import { mapKibanaQuickRangesToDatePickerRanges } from '../../../../utils/map_timepicker_quickranges_to_datepicker_ranges';
-import { ToolbarPanel } from '../../../../components/toolbar_panel';
 
 interface Props {
   derivedIndexPattern: IIndexPattern;

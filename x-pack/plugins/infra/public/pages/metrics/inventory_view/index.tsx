@@ -26,6 +26,8 @@ import { SavedViewProvider } from '../../../containers/saved_view/saved_view';
 import { DEFAULT_WAFFLE_VIEW_STATE } from './hooks/use_waffle_view_state';
 import { useWaffleOptionsContext } from './hooks/use_waffle_options';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { APP_WRAPPER_CLASS } from '../../../../../../../src/core/public';
 
 const inventoryTitle = i18n.translate('xpack.infra.metrics.inventoryPageTitle', {
   defaultMessage: 'Inventory',
@@ -74,20 +76,25 @@ export const SnapshotPage = () => {
         <SourceLoadingPage />
       ) : metricIndicesExist ? (
         <>
-          {/* <PageTemplate
-            pageHeader={{
-              pageTitle: inventoryTitle
-            }}
-          > */}
-          <FilterBar />
-          <SavedViewProvider
-            shouldLoadDefault={optionsSource === 'default'}
-            viewType={'inventory-view'}
-            defaultViewState={DEFAULT_WAFFLE_VIEW_STATE}
-          >
-            <LayoutView />
-          </SavedViewProvider>
-          {/* </PageTemplate> */}
+          <InventoryPageWrapper className={APP_WRAPPER_CLASS}>
+            <PageTemplate
+              pageHeader={{
+                pageTitle: inventoryTitle,
+              }}
+              pageBodyProps={{
+                paddingSize: 'none',
+              }}
+            >
+              <FilterBar />
+              <SavedViewProvider
+                shouldLoadDefault={optionsSource === 'default'}
+                viewType={'inventory-view'}
+                defaultViewState={DEFAULT_WAFFLE_VIEW_STATE}
+              >
+                <LayoutView />
+              </SavedViewProvider>
+            </PageTemplate>
+          </InventoryPageWrapper>
         </>
       ) : hasFailedLoadingSource ? (
         <SourceErrorPage errorMessage={loadSourceFailureMessage || ''} retry={loadSource} />
@@ -133,3 +140,16 @@ export const SnapshotPage = () => {
     </EuiErrorBoundary>
   );
 };
+
+// This is added to facilitate a full height layout whereby the
+// inner container will set it's own height and be scrollable.
+// The "fullHeight" prop won't help us as it only applies to certain breakpoints.
+export const InventoryPageWrapper = euiStyled.div`
+  .euiPage .euiPageContentBody {
+    display: flex;
+    flex-direction: column;
+    flex: 1 0 auto;
+    width: 100%;
+    height: 100%;
+  }
+`;

@@ -51,6 +51,7 @@ export class Plugin implements InfraClientPluginClass {
       });
     }
 
+    /** !! Need to be kept in sync with the deepLinks in x-pack/plugins/infra/public/plugin.ts */
     pluginsSetup.observability.navigation.registerSections(
       of([
         {
