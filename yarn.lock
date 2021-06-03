@@ -763,6 +763,32 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
+"@elastic/eui@7.0.0":
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-7.0.0.tgz#48fbaf290e60ceae9678b8ddf16eb03bc747876f"
+  integrity sha512-NPbIADwiWBBaIsxb05gYJLVt5xRagIcXQqmzTwGFbUbkIMiNp6j2otWRy3ZrQezRItsMGEIPHmeCrXlV1X7IAw==
+  dependencies:
+    "@types/lodash" "^4.14.116"
+    "@types/numeral" "^0.0.25"
+    classnames "^2.2.5"
+    core-js "^2.5.1"
+    focus-trap-react "^3.0.4"
+    highlight.js "^9.12.0"
+    html "^1.0.0"
+    keymirror "^0.1.1"
+    lodash "^4.17.11"
+    numeral "^2.0.6"
+    prop-types "^15.6.0"
+    react-ace "^5.5.0"
+    react-color "^2.13.8"
+    react-input-autosize "^2.2.1"
+    react-is "~16.3.0"
+    react-virtualized "^9.18.5"
+    react-vis "1.10.2"
+    resize-observer-polyfill "^1.5.0"
+    tabbable "^1.1.0"
+    uuid "^3.1.0"
+
 "@elastic/filesaver@1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@elastic/filesaver/-/filesaver-1.1.2.tgz#1998ffb3cd89c9da4ec12a7793bfcae10e30c77a"
@@ -14139,7 +14165,7 @@ lodash.uniqby@^4.7.0:
   resolved "https://registry.yarnpkg.com/lodash.uniqby/-/lodash.uniqby-4.7.0.tgz#d99c07a669e9e6d24e1362dfe266c67616af1302"
   integrity sha1-2ZwHpmnp5tJOE2Lf4mbGdhavEwI=
 
-lodash@4.17.11, lodash@^4.0.0, lodash@^4.0.1, lodash@^4.11.1, lodash@^4.13.1, lodash@^4.14.0, lodash@^4.15.0, lodash@^4.17.0, lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.14, lodash@^4.17.19, lodash@^4.17.2, lodash@^4.17.21, lodash@^4.17.4, lodash@^4.17.5, lodash@^4.2.0, lodash@^4.2.1, lodash@^4.3.0, lodash@^4.6.1, lodash@^4.8.2, lodash@~4.17.10, lodash@~4.17.5, lodash@~4.3.0:
+lodash@4.17.11, lodash@4.17.21, lodash@^4.0.0, lodash@^4.0.1, lodash@^4.11.1, lodash@^4.13.1, lodash@^4.14.0, lodash@^4.15.0, lodash@^4.17.0, lodash@^4.17.10, lodash@^4.17.14, lodash@^4.17.19, lodash@^4.17.2, lodash@^4.17.21, lodash@^4.17.4, lodash@^4.17.5, lodash@^4.2.0, lodash@^4.2.1, lodash@^4.3.0, lodash@^4.6.1, lodash@^4.8.2, lodash@~4.17.10, lodash@~4.17.5, lodash@~4.3.0:
   version "4.17.21"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
@@ -14149,7 +14175,7 @@ lodash@^3.10.0, lodash@^3.10.1, lodash@^3.3.1, lodash@~3.10.1:
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-3.10.1.tgz#5bf45e8e49ba4189e17d482789dfd15bd140b7b6"
   integrity sha1-W/Rejkm6QYnhfUgnid/RW9FAt7Y=
 
-"lodash@npm:@elastic/lodash@3.10.1-kibana3", "lodash@npm:@elastic/lodash@3.10.1-kibana4":
+lodash@^4.17.11, "lodash@npm:@elastic/lodash@3.10.1-kibana3", "lodash@npm:@elastic/lodash@3.10.1-kibana4":
   version "3.10.1-kibana4"
   resolved "https://registry.yarnpkg.com/@elastic/lodash/-/lodash-3.10.1-kibana4.tgz#d491228fd659b4a1b0dfa08ba9c67a4979b9746d"
   integrity sha512-geQqXd9ZedRCL+kq5cpeahYWYaYRV0BMXhCwzq4DpnGCVs430FTMS3Wcot3XChZZhCvkwHm15bpNjB312vPxaA==

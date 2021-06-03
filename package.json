@@ -128,7 +128,7 @@
   },
   "dependencies": {
     "@elastic/datemath": "5.0.2",
-    "@elastic/eui": "6.10.9",
+    "@elastic/eui": "7.0.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "2.3.2",
@@ -208,7 +208,7 @@
     "leaflet.heat": "0.2.0",
     "less": "npm:@elastic/less@2.7.3-kibana",
     "less-loader": "4.1.0",
-    "lodash": "npm:@elastic/lodash@3.10.1-kibana4",
+    "lodash": "4.17.21",
     "lru-cache": "4.1.1",
     "markdown-it": "^10.0.0",
     "mini-css-extract-plugin": "0.4.4",
