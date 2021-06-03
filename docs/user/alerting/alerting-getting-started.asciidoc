@@ -11,7 +11,7 @@ image::images/alerting-overview.png[Rules and Connectors UI]
 
 [IMPORTANT]
 ==============================================
-To make sure you can access alerting and actions, see the alerting-setup-prerequisites, setup and pre-requisites section.
+To make sure you can access alerting and actions, see the <<alerting-setup-prerequisites, setup and pre-requisites>> section.
 ==============================================
 
 [float]

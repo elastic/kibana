@@ -265,7 +265,7 @@ export class DocLinksService {
           preconfiguredConnectors: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/pre-configured-connectors.html`,
           preconfiguredAlertHistoryConnector: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index-action-type.html#preconfigured-connector-alert-history`,
           serviceNowAction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/servicenow-action-type.html#configuring-servicenow`,
-          setupPrerequisites: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alerting-getting-started.html#alerting-setup-prerequisites`,
+          setupPrerequisites: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alerting-setup.html#alerting-setup-prerequisites`,
           slackAction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/slack-action-type.html#configuring-slack`,
           teamsAction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/teams-action-type.html#configuring-teams`,
         },
