@@ -125,7 +125,7 @@ export const TopMetricsAggForm: PivotAggsConfigTopMetrics['AggFormComponent'] = 
                   helpText={
                     <FormattedMessage
                       id="xpack.transform.agg.popoverForm.sortModeTopMetricsHelpText"
-                      defaultMessage="Only relevant if the sorting field is an array"
+                      defaultMessage="Only relevant if the sorting field is an array."
                     />
                   }
                 >
