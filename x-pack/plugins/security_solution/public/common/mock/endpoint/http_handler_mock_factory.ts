@@ -162,7 +162,7 @@ export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}
     // For debugging purposes.
     // It will provide a stack trace leading back to the location in the test file
     // where the `core.http` mocks were applied from.
-    const testContextStackTrace = new Error().stack;
+    const testContextStackTrace = new Error('HTTP MOCK APPLIED FROM:').stack;
 
     const responseProvider: MockedApi<R>['responseProvider'] = mocks.reduce(
       (providers, routeMock) => {
