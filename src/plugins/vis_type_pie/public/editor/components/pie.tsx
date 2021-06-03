@@ -57,7 +57,7 @@ function DecimalSlider<ParamName extends string>({
       <EuiRange
         value={value}
         min={0}
-        max={10}
+        max={4}
         showInput
         compressed
         onChange={(e) => {
