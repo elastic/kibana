@@ -33,7 +33,6 @@ import {
   AlertExecutionStatus,
   AlertExecutionStatusErrorReasons,
   AlertTypeRegistry,
-  AlertType,
 } from '../types';
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
