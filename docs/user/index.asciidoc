@@ -8,13 +8,6 @@ include::{kib-repo-dir}/getting-started/quick-start-guide.asciidoc[]
 
 include::setup.asciidoc[]
 
-include::monitoring/configuring-monitoring.asciidoc[leveloffset=+1]
-include::monitoring/monitoring-metricbeat.asciidoc[leveloffset=+2]
-include::monitoring/viewing-metrics.asciidoc[leveloffset=+2]
-include::monitoring/monitoring-kibana.asciidoc[leveloffset=+2]
-
-include::security/securing-kibana.asciidoc[]
-
 include::production-considerations/index.asciidoc[]
 
 include::discover.asciidoc[]

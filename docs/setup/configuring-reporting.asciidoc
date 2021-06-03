@@ -1,0 +1,165 @@
+[role="xpack"]
+[[configuring-reporting]]
+= Configure reporting in {kib}
+
+++++
+<titleabbrev>Configure reporting</titleabbrev>
+++++
+
+The {report-features} are automatically enabled in {kib}. Reporting operates by creating and updating documents in {es} in response to
+user actions in {kib}.
+
+[float]
+[[reporting-roles-management-ui]]
+== Grant users access to reporting
+
+When security is enabled, access to the {report-features} is controlled by roles and privileges. 
+
+[[reporting-app-users]]
+In 7.12.0 and earlier, you grant access to the {report-features} by assigning users the `reporting_user` role in {es}. 
+In 7.14.0 and later, you configure *Reporting* to use <<kibana-privileges, {kib} privileges>>. By using {kib} privileges, you can define custom roles that grant *Reporting* privileges as sub-features of {kib} applications.
+
+To grant users access to the reporting features, create and assign the reporting role. When you grant users access to the reporting features, you also grant access to *Reporting*, where users can view and manage reports. 
+
+. Create the reporting role. 
+
+.. Open the main menu, then click *Stack Management*.
+
+.. Click *Roles > Create role*.
+
+. Specify the role settings.
+
+.. Enter the *Role name*. For example, `custom_reporting_user`.
+
+.. Specify the *Indices* and *Privileges*.
++
+Access to data is an index-level privilege. For each index that contains the data you want to include in reports, add a line, then give each index `read` and `view_index_metadata` privileges.
++
+For more information, refer to {ref}/security-privileges.html[Security privileges].
++
+[role="screenshot"]
+image::user/security/images/reporting-privileges-example.png["Reporting privileges"]
+
+.. Click *Add Kibana privilege*.
+
+.. Select one or more *Spaces* that you want to grant reporting privileges to.
+
+.. Click *Customize*, then click *Analytics*.
+
+.. Next to each application you want to grant reporting privileges to, click *All*.
++
+[role="screenshot"]
+image::user/security/images/reporting-custom-role.png["Reporting custom role"]
+
+.. Click *Add {kib} privilege*, then click *Create role*.
+
+. Assign the reporting role to a user.
+
+.. Open the main menu, then click *Stack Management*.
+
+.. Click *Users*, then click the user you want to assign the reporting role to. 
+
+.. From the *Roles* dropdown, select *custom_reporting_user*.
+
+.. Click *Update user*.
+
+[float]
+[[reporting-roles-user-api]]
+=== Grant access with the user API
+You can also use the {ref}/security-api-put-role.html[role API] to grant access to the reporting features. Grant the reporting role to users in combination with other roles that grant read access to the data in {es}, and at least read access in the applications where users can generate reports.
+
+[source, sh]
+---------------------------------------------------------------
+POST /_security/role/custom_reporting_user
+{
+  metadata: {},
+  elasticsearch: { cluster: [], indices: [], run_as: [] },
+  kibana: [
+    {
+      base: [],
+      feature: {
+        dashboard: [
+          'generate_report', <1>
+          'download_csv_report' <2>
+        ],
+        discover: ['generate_report'], <3>
+        canvas: ['generate_report'], <4>
+        visualize: ['generate_report'], <5>
+      },
+      spaces: ['*'],
+    }
+  ]
+}
+---------------------------------------------------------------
+// CONSOLE
+
+<1> Grants access to generate PNG and PDF reports in *Dashboard*.
+<2> Grants access to download CSV files from saved search panels in *Dashboard*.
+<3> Grants access to generate CSV reports from saved searches in *Discover*.
+<4> Grants access to generate PDF reports in *Canvas*.
+<5> Grants access to generate PNG and PDF reports in *Visualize Library*.
+
+[float]
+=== Grant access using an external provider
+
+If you are using an external identity provider, such as LDAP or Active Directory, you can assign roles to individual users or groups of users. Role mappings are configured in {ref}/mapping-roles.html[`config/role_mapping.yml`].
+
+For example, assign the `kibana_admin` and `reporting_user` roles to the Bill Murray user:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+kibana_admin:
+  - "cn=Bill Murray,dc=example,dc=com"
+reporting_user:
+  - "cn=Bill Murray,dc=example,dc=com"
+--------------------------------------------------------------------------------
+
+[float]
+=== Grant access with a custom index
+
+If you are using a custom index, the `xpack.reporting.index` setting must begin with `.reporting-*`. The default {kib} system user has `all` privileges against the `.reporting-*` pattern of indices.
+
+If you use a different pattern for the `xpack.reporting.index` setting, you must create a custom `kibana_system` user with appropriate access to the index.
+
+NOTE: In the next major version of Kibana, granting access with a custom index is unsupported.
+
+. Create the reporting role. 
+
+.. Open the main menu, then click *Stack Management*.
+
+.. Click *Roles > Create role*.
+
+. Specify the role settings.
+
+.. Enter the *Role name*. For example, `custom-reporting-user`.
+
+.. From the *Indices* dropdown, select the custom index. 
+
+.. From the *Privileges* dropdown, select *all*.
+
+.. Click *Add Kibana privilege*.
+
+.. Select one or more *Spaces* that you want to grant reporting privileges to.
+
+.. Click *Customize*, then click *Analytics*.
+
+.. Next to each application you want to grant reporting privileges to, click *All*.
+
+.. Click *Add {kib} privilege*, then click *Create role*.
+
+. Assign the reporting role to a user.
+
+.. Open the main menu, then click *Stack Management*.
+
+.. Click *Users*, then click the user you want to assign the reporting role to. 
+
+.. From the *Roles* dropdown, select *kibana_system* and *custom-reporting-user*.
+
+.. Click *Update user*.
+
+. Configure {kib} to use the new account.
++
+[source,js]
+--------------------------------------------------------------------------------
+elasticsearch.username: 'custom_kibana_system'
+--------------------------------------------------------------------------------

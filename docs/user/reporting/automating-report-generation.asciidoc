@@ -1,9 +1,8 @@
 [role="xpack"]
 [[automating-report-generation]]
-== Automating report generation
-Automatically generate PDF and CSV reports by submitting HTTP `POST` requests using {watcher} or a script.
+== Automatically generate reports
 
-include::report-intervals.asciidoc[]
+To automatically generate PDF and CSV reports, generate a POST URL, then submit the HTTP `POST` request using {watcher} or a script.
 
 [float]
 === Create a POST URL
@@ -12,28 +11,23 @@ Create the POST URL that triggers a report to generate PDF and CSV reports.
 
 To create the POST URL for PDF reports:
 
-. Open the  dashboard, visualization, or **Canvas** workpad.
+. Open the main menu, then click *Dashboard, *Visualize Library*, or *Canvas*.
 
-. From the {kib} toolbar, click *Share*, then select *PDF Reports*.
+. Open the dashboard, visualization, or **Canvas** workpad you want to view as a report.
 
-. If you are using **Canvas**,  click *Advanced options*.
+. From the toolbar, click *Share > PDF Reports*, then choose an option:
 
-. Click *Copy POST URL*.
-+
-[role="screenshot"]
-image::images/report-automate-pdf.png[Automatically generate *Dashboard* and *Visualize Library* reports]
+* If you are using *Dashboard* or *Visulize Library*, click *Copy POST URL*.
 
+* If you are using *Canvas*, click *Advanced options > Copy POST URL*.
 
 To create the POST URL for CSV reports:
 
-. In *Discover*, open the saved search.
+. Open the main menu, then click *Discover*.
 
-. From the {kib} toolbar, click *Share*, then select *CSV Reports*.
+. Open the saved search you want to share.
 
-. Click *Copy POST URL*.
-+
-[role="screenshot"]
-image::images/report-automate-csv.png[Generate Discover reports]
+. In the toolbar, click *Share > CSV Reports > Copy POST URL*.
 
 [float]
 === Use Watcher
@@ -53,17 +47,11 @@ include::response-codes.asciidoc[]
 [float]
 === Deprecated report URLs
 
-The following POST URL paths are deprecated. If there are
-any problems with using these paths after you upgrade {kib}, use
-{kib} to regenerate the POST URL for a particular report.
+If you experience issues with the deprecated report URLs after you upgrade {kib}, regenerate the POST URL for your reports.
 
-* Dashboard reports:  `/api/reporting/generate/dashboard/<dashboard-id>`
-* Visualize reports:  `/api/reporting/generate/visualization/<visualization-id>`
-* Saved Search reports: `/api/reporting/generate/search/<saved-search-id>`
+* *Dashboard* reports:  `/api/reporting/generate/dashboard/<dashboard-id>`
+* *Visualize Library* reports:  `/api/reporting/generate/visualization/<visualization-id>`
+* *Discover* saved search reports: `/api/reporting/generate/search/<saved-search-id>`
 
-[IMPORTANT]
-===================
-Previously there was a `&sync` parameter appended to generation URLs which would hold
-the request open until the document was fully generated. This feature has been removed.
-Existing use of the `&sync` parameter, in Watcher for example, will need to be updated.
-===================
+IMPORTANT:
+In earlier {kib} versions, you could use the `&sync` parameter to append to report URLs that held the request open until the document was fully generated. The `&sync` parameter is now unsupported. If you use the `&sync` parameter in Watcher, you must update the parameter.

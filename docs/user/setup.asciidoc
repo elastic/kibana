@@ -61,3 +61,12 @@ include::{kib-repo-dir}/setup/connect-to-elasticsearch.asciidoc[]
 include::{kib-repo-dir}/setup/upgrade.asciidoc[]
 
 include::{kib-repo-dir}/setup/embedding.asciidoc[]
+
+include::security/securing-kibana.asciidoc[]
+
+include::{kib-repo-dir}/setup/configuring-reporting.asciidoc[]
+
+include::monitoring/configuring-monitoring.asciidoc[leveloffset=+1]
+include::monitoring/monitoring-metricbeat.asciidoc[leveloffset=+2]
+include::monitoring/viewing-metrics.asciidoc[leveloffset=+2]
+include::monitoring/monitoring-kibana.asciidoc[leveloffset=+2]

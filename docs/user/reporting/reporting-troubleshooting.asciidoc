@@ -8,7 +8,6 @@
 Having trouble? Here are solutions to common problems you might encounter while using Reporting.
 
 * <<reporting-diagnostics>>
-* <<reporting-troubleshooting-system-dependencies>>
 * <<reporting-troubleshooting-text-incorrect>>
 * <<reporting-troubleshooting-missing-data>>
 * <<reporting-troubleshooting-file-permissions>>
@@ -25,40 +24,6 @@ Reporting comes with a built-in utility to try to automatically find common issu
 When {kib} is running, navigate to the Report Listing page, and click *Run reporting diagnostics*.
 This will open up a diagnostic tool that checks various parts of the {kib} deployment and
 come up with any relevant recommendations.
-
-[float]
-[[reporting-troubleshooting-system-dependencies]]
-=== System dependencies
-Reporting launches a "headless" web browser called Chromium on the Kibana server. It is a custom build made by Elastic of an open source
-project, and it is intended to have minimal dependencies on OS libraries. However, the Kibana server OS might still require additional
-dependencies to run the Chromium executable.
-
-Make sure Kibana server OS has the appropriate packages installed for the distribution.
-
-If you are using CentOS/RHEL systems, install the following packages:
-
-* `ipa-gothic-fonts`
-* `xorg-x11-fonts-100dpi`
-* `xorg-x11-fonts-75dpi`
-* `xorg-x11-utils`
-* `xorg-x11-fonts-cyrillic`
-* `xorg-x11-fonts-Type1`
-* `xorg-x11-fonts-misc`
-* `fontconfig`
-* `freetype`
-
-If you are using Ubuntu/Debian systems, install the following packages:
-
-* `fonts-liberation`
-* `libfontconfig1`
-
-If the system is missing dependencies, then Reporting will fail in a non-deterministic way. {kib} runs a self-test at server startup, and
-if it encounters errors, logs them in the Console. Unfortunately, the error message does not include
-information about why Chromium failed to run. The most common error message is `Error: connect ECONNREFUSED`, which indicates
-that {kib} could not connect to the Chromium process.
-
-To troubleshoot the problem, start the {kib} server with environment variables that tell Chromium to print verbose logs. See the
-<<reporting-troubleshooting-puppeteer-debug-logs, Puppeteer debug method>> for more information.
 
 [float]
 [[reporting-troubleshooting-text-incorrect]]

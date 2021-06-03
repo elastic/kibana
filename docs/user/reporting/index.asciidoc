@@ -6,40 +6,16 @@
 
 --
 
-You can generate a report that contains a {kib} dashboard, visualization,
-saved search, or Canvas workpad. Depending on the object type, you can export the data as
+Generate reports of your dashboards, visualizations,
+*Discover* saved searches, and *Canvas* workpads. Depending on the object type, you can export the data as
 a PDF, PNG, or CSV document, which you can keep for yourself, or share with others.
 
-Reporting is available from the *Share* menu
+The reporting options are available from the *Share* menu
 in *Discover*, *Dashboard*, *Visualize Library*, and *Canvas*.
 
 [role="screenshot"]
 image::user/reporting/images/share-menu.png["Share"]
 
-[float]
-== Setup
-
-The {report-features} are automatically enabled in {kib}. It runs a custom build of the Chromium web browser, which
-runs on the server in headless mode to load {kib} and capture the rendered {kib} charts as images.
-
-Chromium is an open-source project not related to Elastic, but the Chromium binary for {kib} has been custom-built by Elastic to ensure it
-works with minimal setup. However, the {kib} server OS might still require additional dependencies for Chromium. See the
-<<reporting-troubleshooting-system-dependencies, Reporting troubleshooting>> section for more information about the system dependencies
-for different operating systems.
-
-[float]
-[[reporting-required-privileges]]
-== Roles and privileges
-
-When security is enabled, access to the {report-features} is controlled by security privileges. In versions 7.12 and earlier, you can grant access to the {report-features}
-by assigning users the `reporting_user` role in {es}. In 7.14 and later, you can configure *Reporting* to use
-<<kibana-privileges, {kib} privileges>>. It is recommended that *Reporting* is configured to
-use {kib} privileges by setting <<xpack-reporting-roles-enabled,`xpack.reporting.roles.enabled`>> to `false`. By using {kib} privileges, you can define
-custom roles that grant *Reporting* privileges as sub-features of {kib} applications in *Role Management*.
-
-Users must also have the {kib} privileges to access the saved objects and associated {es} indices included in the generated reports.
-For an example, refer to <<secure-reporting, Reporting and
-security>>.
 
 [float]
 [[manually-generate-reports]]
@@ -110,16 +86,13 @@ image::user/reporting/images/canvas-full-page-layout.png["Full Page Layout"]
 
 [float]
 [[manage-report-history]]
-== View and manage report history
+== View and manage reports
 
-For a list of your reports, open the main menu, then click *Stack Management > Reporting*.
-From this view, you can monitor the status of a report and
-download reports that you previously generated.
+Monitor the status of a report and download reports that you previously generated.
+
+Open the main menu, then click *Stack Management > Reporting*.
 
 --
 
 include::automating-report-generation.asciidoc[]
-include::configuring-reporting.asciidoc[]
-include::chromium-sandbox.asciidoc[]
 include::reporting-troubleshooting.asciidoc[]
-include::development/index.asciidoc[]

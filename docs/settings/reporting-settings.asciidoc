@@ -14,19 +14,59 @@ You can configure `xpack.reporting` settings in your `kibana.yml` to:
 
 [float]
 [[general-reporting-settings]]
-==== General reporting settings
+==== Enable the reporting settings
 
-[cols="2*<"]
-|===
-| [[xpack-enable-reporting]]`xpack.reporting.enabled` {ess-icon}
-  | Set to `false` to disable the {report-features}.
+[[xpack-enable-reporting]]`xpack.reporting.enabled` {ess-icon}::
+When `true`, enables the {report-features}.
 
-|[[xpack-reporting-encryptionKey]] `xpack.reporting.encryptionKey` {ess-icon}
-  | Set to an alphanumeric, at least 32 characters long text string. By default, {kib} will generate a random key when it
-  starts, which will cause pending reports to fail after restart. Configure this
-  setting to preserve the same key across multiple restarts and multiple instances of {kib}.
+[float]
+[[encryption-keys]]
+==== Encryption key setting
 
-|===
+By default, an encryption key is generated for the {report-features} each
+time you start {kib}. If a static encryption key is not persisted in
+the {kib} configuration, any pending reports fail when you restart {kib}.
+
+If you are load balancing across multiple {kib} instances, each instance needs to have
+the same reporting encryption key. Otherwise, report generation fails if a
+report is queued through one instance, and another instance picks up the job
+from the report queue. The instance that picks up the job is unable to decrypt the
+reporting job metadata.
+
+[[xpack-reporting-encryptionKey]] `xpack.reporting.encryptionKey` {ess-icon}::
+The static encryption key for reporting. Use an alphanumeric text string that is at least 32 characters. By default, {kib} generates a random key when it starts, which causes pending reports to fail after restart. Configure `xpack.reporting.encryptionKey` to preserve the same key across multiple restarts and multiple {kib} instances.
+
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.reporting.encryptionKey: "something_secret"
+--------------------------------------------------------------------------------
+
+[float]
+[[report-indices]]
+==== Report index settings
+
+If you divide workspaces in an Elastic cluster using multiple {kib} instances with a different `kibana.index` setting per instance, you must set a unique `xpack.reporting.index` setting per `kibana.index`. Otherwise, report generation periodically fails if a report is queued through an instance with one `kibana.index` setting, and an instance with a different `kibana.index` attempts to claim the job.
+
+`xpack.reporting.index`::
+deprecated:[7.11.0,This setting will be removed in 8.0.0.] Multitenancy by changing `kibana.index` is unsupported starting in 8.0.0. For more details, refer to https://ela.st/kbn-remove-legacy-multitenancy[8.0 Breaking Changes]. Reporting uses a weekly index in {es} to store the reporting job and the report content. The index is automatically created if it does not already exist. Configure a unique value for `xpack.reporting.index`, beginning with `.reporting-`, for every {kib} instance that has a unique <<kibana-index, `kibana.index`>> setting. Defaults to `.reporting`.
+
+{kib} instance A:
+[source,yaml]
+--------------------------------------------------------------------------------
+kibana.index: ".kibana-a"
+xpack.reporting.index: ".reporting-a"
+xpack.reporting.encryptionKey: "something_secret"
+--------------------------------------------------------------------------------
+
+{kib} instance B:
+[source,yaml]
+--------------------------------------------------------------------------------
+kibana.index: ".kibana-b"
+xpack.reporting.index: ".reporting-b"
+xpack.reporting.encryptionKey: "something_secret"
+--------------------------------------------------------------------------------
+
+NOTE: If security is enabled, the `xpack.reporting.index` setting should begin with `.reporting-` for the `kibana_system` role to have the necessary privileges over the index.
 
 [float]
 [[reporting-kibana-server-settings]]
@@ -34,44 +74,37 @@ You can configure `xpack.reporting` settings in your `kibana.yml` to:
 
 Reporting opens the {kib} web interface in a server process to generate
 screenshots of {kib} visualizations. In most cases, the default settings
-will work and you don't need to configure Reporting to communicate with {kib}.
-However, if your client connections must go through a reverse-proxy
-to access {kib}, Reporting configuration must have the proxy port, protocol,
-and hostname set in the `xpack.reporting.kibanaServer.*` settings.
+work and you don't need to configure the {report-features} to communicate with {kib}.
+
+If your {kib} instance requires a reverse proxy (such as NGINX, Apache, etc.) for
+access, because of rewrite rules or special headers being added by the proxy,
+you must configure the `xpack.reporting.kibanaServer` settings to make
+the headless browser process connect to the proxy.
 
 [NOTE]
-====
-If a reverse-proxy carries encrypted traffic from end-user
+============
+If a reverse proxy carries encrypted traffic from user
 clients back to a {kib} server, the proxy port, protocol, and hostname
-in Reporting settings must be valid for the encryption that the Reporting
-browser will receive. Encrypted communications will fail if there are
+in `xpack.reporting.kibanaServer` must be valid for the encryption that the Reporting
+browser receives. Encrypted communications fail if there are
 mismatches in the host information between the request and the certificate on the server.
 
 Configuring the `xpack.reporting.kibanaServer` settings to point to a
 proxy host requires that the {kib} server has network access to the proxy.
-====
-
-[cols="2*<"]
-|===
-| `xpack.reporting.kibanaServer.port`
-  | The port for accessing {kib}, if different from the <<server-port, `server.port`>> value.
-
-| `xpack.reporting.kibanaServer.protocol`
-  | The protocol for accessing {kib}, typically `http` or `https`.
-
-|[[xpack-kibanaServer-hostname]] `xpack.reporting.kibanaServer.hostname`
-  | The hostname for accessing {kib}, if different from the <<server-host, `server.host`>> value.
-
-|===
-
-[NOTE]
 ============
-Reporting authenticates requests on the {kib} page only when the hostname matches the
-<<xpack-kibanaServer-hostname, `xpack.reporting.kibanaServer.hostname`>> setting. Therefore Reporting would fail if the
+
+`xpack.reporting.kibanaServer.port`:: The port for accessing {kib}, if different from the <<server-port, `server.port`>> value.
+
+`xpack.reporting.kibanaServer.protocol`::
+The protocol for accessing {kib}, typically `http` or `https`.
+
+[[xpack-kibanaServer-hostname]] `xpack.reporting.kibanaServer.hostname`::
+The hostname for accessing {kib}, if different from the <<server-host, `server.host`>> value.
+
+NOTE: Reporting authenticates requests on the {kib} page only when the hostname matches the
+<<xpack-kibanaServer-hostname, `xpack.reporting.kibanaServer.hostname`>> setting. Therefore Reporting fails if the
 set value redirects to another server. For that reason, `"0"` is an invalid setting
 because, in the Reporting browser, it becomes an automatic redirect to `"0.0.0.0"`.
-============
-
 
 [float]
 [[reporting-job-queue-settings]]
@@ -81,40 +114,21 @@ Reporting generates reports in the background and jobs are coordinated using doc
 in {es}. Depending on how often you generate reports and the overall number of
 reports, you might need to change the following settings.
 
-[cols="2*<"]
-|===
-| `xpack.reporting.queue.indexInterval`
-  | How often the index that stores reporting jobs rolls over to a new index.
-  Valid values are `year`, `month`, `week`, `day`, and `hour`. Defaults to `week`.
+`xpack.reporting.queue.indexInterval`::
+How often the index that stores reporting jobs rolls over to a new index. Valid values are `year`, `month`, `week`, `day`, and `hour`. Defaults to `week`.
 
-| `xpack.reporting.queue.pollEnabled` {ess-icon}
-  | Set to `true` (default) to enable the {kib} instance to poll the index for
-  pending jobs and claim them for execution. Setting this to `false` allows the
-  {kib} instance to only add new jobs to the reporting queue, list jobs, and
-  provide the downloads to completed report through the UI.
+`xpack.reporting.queue.pollEnabled` {ess-icon}::
+Set to `true` (default) to enable the {kib} instance to poll the index for pending jobs and claim them for execution. Setting this to `false` allows the {kib} instance to only add new jobs to the reporting queue, list jobs, and provide the downloads to completed report through the UI.
 
-|===
-
-[NOTE]
-============
-Running multiple instances of {kib} in a cluster for load balancing of
+NOTE: Running multiple instances of {kib} in a cluster for load balancing of
 reporting requires identical values for <<xpack-reporting-encryptionKey, `xpack.reporting.encryptionKey`>> and, if
 security is enabled, <<xpack-security-encryptionKey, `xpack.security.encryptionKey`>>.
-============
 
-[cols="2*<"]
-|===
-| `xpack.reporting.queue.pollInterval`
-  | Specify the {ref}/common-options.html#time-units[time] that the reporting poller waits between polling the index for any
-  pending Reporting jobs. Can be specified as number of milliseconds. Defaults to `3s`.
+`xpack.reporting.queue.pollInterval`:: 
+Specify the {ref}/common-options.html#time-units[time] that the reporting poller waits between polling the index for any pending Reporting jobs. Can be specified as number of milliseconds. Defaults to `3s`.
 
-| [[xpack-reporting-q-timeout]] `xpack.reporting.queue.timeout` {ess-icon}
-  | {ref}/common-options.html#time-units[How long] each worker has to produce a report. If your machine is slow or under heavy
-  load, you might need to increase this timeout. If a Reporting job execution goes over this time limit, the job is marked as a
-  failure and no download will be available. Can be specified as number of milliseconds.
-  Defaults to `2m`.
-
-|===
+[[xpack-reporting-q-timeout]] `xpack.reporting.queue.timeout` {ess-icon}:: 
+{ref}/common-options.html#time-units[How long] each worker has to produce a report. The interval between report requests must be longer than the time it takes to generate reports. If you are generating reports that contain many complex visualizations, or your machine is slow or under constant heavy load, you might need to increase the timeout. If a Reporting job execution goes over this time limit, the job is marked as a failure and no download becomes available. You can specify the value in milliseconds. Defaults to `2m`.
 
 [float]
 [[reporting-capture-settings]]
@@ -123,56 +137,28 @@ security is enabled, <<xpack-security-encryptionKey, `xpack.security.encryptionK
 Reporting works by capturing screenshots from {kib}. The following settings
 control the capturing process.
 
-[cols="2*<"]
-|===
-a| `xpack.reporting.capture.timeouts`
-`.openUrl` {ess-icon}
-  | Specify the {ref}/common-options.html#time-units[time] to allow the Reporting browser to wait for the "Loading..." screen
-  to dismiss and find the initial data for the page. If the time is exceeded, a screenshot is captured showing the current
-  page, and the download link shows a warning message. Can be specified as number of milliseconds.
-  Defaults to `1m`.
+`xpack.reporting.capture.timeouts.openUrl` {ess-icon}:: 
+Specify the {ref}/common-options.html#time-units[time] to allow the Reporting browser to wait for the "Loading..." screen to dismiss and find the initial data for the page. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `1m`.
 
-a| `xpack.reporting.capture.timeouts`
-`.waitForElements` {ess-icon}
-  | Specify the {ref}/common-options.html#time-units[time] to allow the Reporting browser to wait for all visualization panels
-  to load on the page. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows
-  a warning message. Can be specified as number of milliseconds.
-  Defaults to `30s`.
+`xpack.reporting.capture.timeouts.waitForElements` {ess-icon}:: 
+Specify the {ref}/common-options.html#time-units[time] to allow the Reporting browser to wait for all visualization panels to load on the page. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `30s`.
 
-a| `xpack.reporting.capture.timeouts`
-`.renderComplete` {ess-icon}
-  | Specify the {ref}/common-options.html#time-units[time] to allow the Reporting browser to wait for all visualizations to
-  fetch and render the data. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a
-  warning message. Can be specified as number of milliseconds.
-  Defaults to `30s`.
+`xpack.reporting.capture.timeouts.renderComplete` {ess-icon}:: 
+Specify the {ref}/common-options.html#time-units[time] to allow the Reporting browser to wait for all visualizations to fetch and render the data. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `30s`.
 
-|===
-
-[NOTE]
-============
-If any timeouts from `xpack.reporting.capture.timeouts.*` settings occur when
+NOTE: If any timeouts from `xpack.reporting.capture.timeouts.*` settings occur when
 running a report job, Reporting will log the error and try to continue
 capturing the page with a screenshot. As a result, a download will be
 available, but there will likely be errors in the visualizations in the report.
-============
 
-[cols="2*<"]
-|===
-| `xpack.reporting.capture.maxAttempts` {ess-icon}
-  | If capturing a report fails for any reason, {kib} will re-attempt other reporting
-  job, as many times as this setting. Defaults to `3`.
+`xpack.reporting.capture.maxAttempts` {ess-icon}:: 
+If capturing a report fails for any reason, {kib} will re-attempt other reporting job, as many times as this setting. Defaults to `3`.
 
-| `xpack.reporting.capture.loadDelay`
-  | Specify the {ref}/common-options.html#time-units[amount of time] before taking a screenshot when visualizations are not evented.
-  All visualizations that ship with {kib} are evented, so this setting should not have much effect. If you are seeing empty images
-  instead of visualizations, try increasing this value.
-  Defaults to `3s`.
+`xpack.reporting.capture.loadDelay`::
+Specify the {ref}/common-options.html#time-units[amount of time] before taking a screenshot when visualizations are not evented. All visualizations that ship with {kib} are evented, so this setting should not have much effect. If you are seeing empty images instead of visualizations, try increasing this value. Defaults to `3s`.
 
-| [[xpack-reporting-browser]] `xpack.reporting.capture.browser.type` {ess-icon}
-  | Specifies the browser to use to capture screenshots. This setting exists for
-  backward compatibility. The only valid option is `chromium`.
-
-|===
+[[xpack-reporting-browser]] `xpack.reporting.capture.browser.type` {ess-icon}::
+Specifies the browser to use to capture screenshots. This setting exists for backward compatibility. The only valid option is `chromium`.
 
 [float]
 [[reporting-chromium-settings]]
@@ -180,42 +166,85 @@ available, but there will likely be errors in the visualizations in the report.
 
 When <<xpack-reporting-browser, `xpack.reporting.capture.browser.type`>> is set to `chromium` (default) you can also specify the following settings.
 
-[cols="2*<"]
-|===
-a| `xpack.reporting.capture.browser`
-`.chromium.disableSandbox`
-  | It is recommended that you research the feasibility of enabling unprivileged user namespaces.
-  See Chromium Sandbox for additional information. Defaults to false for all operating systems except Debian,
-  Red Hat Linux, and CentOS which use true.
+`xpack.reporting.capture.browser.chromium.disableSandbox`::
+It is recommended that you research the feasibility of enabling unprivileged user namespaces. An exception is if you are running {kib} in Docker because the container runs in a user namespace with the built-in seccomp/bpf filters. For more information, refer to <<reporting-chromium-sandbox>>. Defaults to `false` for all operating systems except Debian, Red Hat Linux, and CentOS, which use `true`.
 
-a| `xpack.reporting.capture.browser`
-`.chromium.proxy.enabled`
-  | Enables the proxy for Chromium to use. When set to `true`, you must also specify the
-  `xpack.reporting.capture.browser.chromium.proxy.server` setting.
-  Defaults to `false`.
+`xpack.reporting.capture.browser.chromium.proxy.enabled`::
+Enables the proxy for Chromium to use. When set to `true`, you must also specify the `xpack.reporting.capture.browser.chromium.proxy.server` setting. Defaults to `false`.
 
-a| `xpack.reporting.capture.browser`
-`.chromium.proxy.server`
-  | The uri for the proxy server. Providing the username and password for the proxy server via the uri is not supported.
+`xpack.reporting.capture.browser.chromium.proxy.server`::
+The uri for the proxy server. Providing the username and password for the proxy server via the uri is not supported.
 
-a| `xpack.reporting.capture.browser`
-`.chromium.proxy.bypass`
-  | An array of hosts that should not go through the proxy server and should use a direct connection instead.
-  Examples of valid entries are "elastic.co", "*.elastic.co", ".elastic.co", ".elastic.co:5601".
+`xpack.reporting.capture.browser.chromium.proxy.bypass`::
+An array of hosts that should not go through the proxy server and should use a direct connection instead. Examples of valid entries are "elastic.co", "*.elastic.co", ".elastic.co", ".elastic.co:5601".
 
-|===
+[role="xpack"]
+[[reporting-network-policy]]
+=== Network policy settings
+
+To generate PDF reports, *Reporting* uses the Chromium browser to fully load the {kib} page on the server. This potentially involves sending requests to external hosts. For example, a request might go to an external image server to show a field formatted as an image, or to show an image in a Markdown visualization.
+
+If the Chromium browser is asked to send a request that violates the network policy, *Reporting* stops processing the page before the request goes out, and the report is marked as a failure. Additional information about the event is in the {kib} server logs.
+
+NOTE: {kib} installations are not designed to be publicly accessible over the internet. The Reporting network policy and other capabilities of the Elastic Stack security features do not change this condition.
+
+`xpack.reporting.capture.networkPolicy`::
+Capturing a screenshot from a {kib} page involves sending out requests for all the linked web assets. For example, a Markdown visualization can show an image from a remote server.
+
+`xpack.reporting.capture.networkPolicy.enabled`::
+When `false`, disables the *Reporting* network policy. Defaults to `true`.
+
+`xpack.reporting.capture.networkPolicy.rules`::
+A policy is specified as an array of objects that describe what to allow or deny based on a host or protocol. If a host or protocol is not specified, the rule matches any host or protocol.
+
+The rule objects are evaluated sequentially from the beginning to the end of the array, and continue until there is a matching rule. If no rules allow a request, the request is denied.
+
+[source,yaml]
+-------------------------------------------------------
+# Only allow requests to placeholder.com
+xpack.reporting.capture.networkPolicy:
+  rules: [ { allow: true, host: "placeholder.com" } ] 
+-------------------------------------------------------
+
+[source,yaml]
+-------------------------------------------------------
+# Only allow requests to https://placeholder.com 
+xpack.reporting.capture.networkPolicy:
+  rules: [ { allow: true, host: "placeholder.com", protocol: "https:" } ] 
+-------------------------------------------------------
+
+A final `allow` rule with no host or protocol allows all requests that are not explicitly denied:
+
+[source,yaml]
+-------------------------------------------------------
+# Denies requests from http://placeholder.com, but anything else is allowed.
+xpack.reporting.capture.networkPolicy:
+  rules: [{ allow: false, host: "placeholder.com", protocol: "http:" }, { allow: true }];
+-------------------------------------------------------
+
+A network policy can be composed of multiple rules:
+
+[source,yaml]
+-------------------------------------------------------
+# Allow any request to http://placeholder.com but for any other host, https is required
+xpack.reporting.capture.networkPolicy
+  rules: [
+    { allow: true, host: "placeholder.com", protocol: "http:" },
+    { allow: true, protocol: "https:" },
+  ]
+-------------------------------------------------------
+
+[NOTE]
+============
+The `file:` protocol is always denied, even if no network policy is configured.
+============
 
 [float]
 [[reporting-csv-settings]]
 ==== CSV settings
 
-[cols="2*<"]
-|===
-| [[xpack-reporting-csv]] `xpack.reporting.csv.maxSizeBytes` {ess-icon}
-  | The maximum {ref}/common-options.html#byte-units[byte size] of a CSV file before being truncated. This setting exists to
-  prevent large exports from causing performance and storage issues. Can be specified as number of bytes.
-  Defaults to `10mb`.
-|===
+[[xpack-reporting-csv]] `xpack.reporting.csv.maxSizeBytes` {ess-icon}::
+The maximum {ref}/common-options.html#byte-units[byte size] of a CSV file before being truncated. This setting exists to prevent large exports from causing performance and storage issues. Can be specified as number of bytes. Defaults to `10mb`.
 
 [NOTE]
 ============
@@ -230,69 +259,33 @@ on multiple factors:
 For information about {kib} memory limits, see <<production, using {kib} in a production environment>>.
 ============
 
-[cols="2*<"]
-|===
+`xpack.reporting.csv.scroll.size`::
+Number of documents retrieved from {es} for each scroll iteration during a CSV export. Defaults to `500`.
 
-| `xpack.reporting.csv.scroll.size`
-  | Number of documents retrieved from {es} for each scroll iteration during a CSV
-  export.
-  Defaults to `500`.
+`xpack.reporting.csv.scroll.duration`::
+Amount of {ref}/common-options.html#time-units[time] allowed before {kib} cleans the scroll context during a CSV export. Defaults to `30s`.
 
-| `xpack.reporting.csv.scroll.duration`
-  |  Amount of {ref}/common-options.html#time-units[time] allowed before {kib} cleans the scroll context during a CSV export.
-  Defaults to `30s`.
+`xpack.reporting.csv.checkForFormulas`::
+Enables a check that warns you when there's a potential formula involved in the output (=, -, +, and @ chars). See OWASP: https://www.owasp.org/index.php/CSV_Injection. Defaults to `true`.
 
-| `xpack.reporting.csv.checkForFormulas`
-  | Enables a check that warns you when there's a potential formula involved in the output (=, -, +, and @ chars).
-  See OWASP: https://www.owasp.org/index.php/CSV_Injection
-  Defaults to `true`.
-
-| `xpack.reporting.csv` `.enablePanelActionDownload`
-  | Enables CSV export from a saved search on a dashboard. This action is available in the dashboard panel menu for the saved search.
-  *Note:* This setting exists for backwards compatibility, but is unused and hardcoded to `true`. CSV export from a saved search on a dashboard
-  is enabled when Reporting is enabled.
-
-|===
+`xpack.reporting.csv` `.enablePanelActionDownload`::
+Enables CSV export from a saved search on a dashboard. This action is available in the dashboard panel menu for the saved search.
+NOTE: This setting exists for backwards compatibility, but is unused and hardcoded to `true`. CSV export from a saved search on a dashboard is enabled when Reporting is enabled.
 
 [float]
 [[reporting-advanced-settings]]
-==== Advanced settings
+==== Security settings
 
-[cols="2*<"]
-|===
-| `xpack.reporting.capture.networkPolicy`
-  | Capturing a screenshot from a {kib} page involves sending out requests for all the linked web assets. For example, a Markdown
-  visualization can show an image from a remote server. You can configure what type of requests to allow or filter by setting a
-  <<reporting-network-policy, network policy>> for Reporting.
-
-| `xpack.reporting.index`
-  | deprecated:[7.11.0,This setting will be removed in 8.0.] Multitenancy by 
-  changing `kibana.index` will not be supported starting in 8.0. See
-  https://ela.st/kbn-remove-legacy-multitenancy[8.0 Breaking Changes] for more 
-  details. Reporting uses a weekly index in {es} to store the reporting job and
-  the report content. The index is automatically created if it does not already
-  exist. Configure this to a unique value, beginning with `.reporting-`, for
-  every {kib} instance that has a unique <<kibana-index, `kibana.index`>> 
-  setting. Defaults to `.reporting`.
-
-| [[xpack-reporting-roles-enabled]] `xpack.reporting.roles.enabled`
-  | deprecated:[7.14.0,This setting must be set to `false` in 8.0.] When `true`, grants users
-  access to the {report-features} by assigning reporting roles, specified by `xpack.reporting.roles.allow`. 
-  Granting access to users this way is deprecated. Set to `false` and use
-  {kibana-ref}/kibana-privileges.html[{kib} privileges] instead.
-  Defaults to `true`.
-
-| `xpack.reporting.roles.allow`
-  | deprecated:[7.14.0,This setting will be removed in 8.0.] Specifies the roles,
-  in addition to superusers, that can generate reports, using the {ref}/security-api.html#security-role-apis[{es} role management APIs].
-  Requires `xpack.reporting.roles.enabled` to be `true`.
-  Granting access to users this way is deprecated. Use
-  {kibana-ref}/kibana-privileges.html[{kib} privileges] instead.
-  Defaults to `[ "reporting_user" ]`.
-
-|===
+[[xpack-reporting-roles-enabled]] `xpack.reporting.roles.enabled`::
+deprecated:[7.14.0,This setting must be set to `false` in 8.0.] When `true`, grants users access to the {report-features} by assigning reporting roles, specified by `xpack.reporting.roles.allow`. Granting access to users this way is deprecated. Set to `false` and use {kibana-ref}/kibana-privileges.html[{kib} privileges] instead. Defaults to `true`.
 
 [NOTE]
-============
-Each user has access to only their own reports.
-============
+============================================================================
+In 7.x, the default value of `xpack.reporting.roles.enabled` is `true`. To migrate users to the
+new method of securing access to *Reporting*, you must set `xpack.reporting.roles.enabled: false`. In the next major version of {kib}, `false` will be the only valid configuration.
+============================================================================
+
+`xpack.reporting.roles.allow`::
+deprecated:[7.14.0,This setting will be removed in 8.0.] Specifies the roles, in addition to superusers, that can generate reports, using the {ref}/security-api.html#security-role-apis[{es} role management APIs]. Requires `xpack.reporting.roles.enabled` to be `true`. Granting access to users this way is deprecated. Use {kibana-ref}/kibana-privileges.html[{kib} privileges] instead. Defaults to `[ "reporting_user" ]`.
+
+NOTE: Each user has access to only their own reports.
