@@ -53,41 +53,50 @@ export const actionStatusRequestHandler = function (
       : [req.query.agent_ids];
 
     // retrieve the unexpired actions for the given hosts
-    const recentActionResults = await esClient.search<EndpointAction>({
-      index: AGENT_ACTIONS_INDEX,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              { term: { type: 'INPUT_ACTION' } }, // actions that are directed at agent children
-              { term: { input_type: 'endpoint' } }, // filter for agent->endpoint actions
-              { range: { expiration: { gte: 'now' } } }, // that have not expired yet
-              { terms: { agents: agentIDs } }, // for the requested agent IDs
-            ],
+    const recentActionResults = await esClient.search<EndpointAction>(
+      {
+        index: AGENT_ACTIONS_INDEX,
+        body: {
+          query: {
+            bool: {
+              filter: [
+                { term: { type: 'INPUT_ACTION' } }, // actions that are directed at agent children
+                { term: { input_type: 'endpoint' } }, // filter for agent->endpoint actions
+                { range: { expiration: { gte: 'now' } } }, // that have not expired yet
+                { terms: { agents: agentIDs } }, // for the requested agent IDs
+              ],
+            },
           },
         },
       },
-    });
-    const pendingActions = recentActionResults.body.hits.hits.map(
-      (a): EndpointAction => a._source!
+      {
+        ignore: [404],
+      }
     );
+    const pendingActions =
+      recentActionResults.body?.hits?.hits?.map((a): EndpointAction => a._source!) || [];
 
     // retrieve any responses to those action IDs from these agents
     const actionIDs = pendingActions.map((a) => a.action_id);
-    const responseResults = await esClient.search<EndpointActionResponse>({
-      index: '.fleet-actions-results',
-      body: {
-        query: {
-          bool: {
-            filter: [
-              { terms: { action_id: actionIDs } }, // get results for these actions
-              { terms: { agent_id: agentIDs } }, // ignoring responses from agents we're not looking for
-            ],
+    const responseResults = await esClient.search<EndpointActionResponse>(
+      {
+        index: '.fleet-actions-results',
+        body: {
+          query: {
+            bool: {
+              filter: [
+                { terms: { action_id: actionIDs } }, // get results for these actions
+                { terms: { agent_id: agentIDs } }, // ignoring responses from agents we're not looking for
+              ],
+            },
           },
         },
       },
-    });
-    const actionResponses = responseResults.body.hits.hits.map((a) => a._source!);
+      {
+        ignore: [404],
+      }
+    );
+    const actionResponses = responseResults.body?.hits?.hits?.map((a) => a._source!) || [];
 
     // respond with action-count per agent
     const response = agentIDs.map((aid) => {
