@@ -47,6 +47,7 @@ export const IGNORE_FILE_GLOBS = [
   'Dockerfile*',
   'vars/*',
   '.ci/pipeline-library/**/*',
+  'x-pack/typings/@testing-library/react/index.d.ts',
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',

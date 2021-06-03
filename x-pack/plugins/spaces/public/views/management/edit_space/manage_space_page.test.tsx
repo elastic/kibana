@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { wait } from '@testing-library/react';
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { UserProfileProvider } from '../../../../../xpack_main/public/services/user_profile';
@@ -111,9 +112,10 @@ describe('ManageSpacePage', () => {
 
     expect(mockHttp.get).toHaveBeenCalledWith('/api/spaces/space/existing-space');
 
-    await Promise.resolve();
-
-    wrapper.update();
+    await wait(() => {
+      wrapper.update();
+      expect(wrapper.find('input[name="name"]')).toHaveLength(1);
+    });
 
     const nameInput = wrapper.find('input[name="name"]');
     const descriptionInput = wrapper.find('input[name="description"]');

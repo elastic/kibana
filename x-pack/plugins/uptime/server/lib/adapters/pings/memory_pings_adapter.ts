@@ -10,8 +10,8 @@ import { UMPingsAdapter } from './adapter_types';
 
 const sortPings = (sort: string) =>
   sort === 'asc'
-    ? (a: Ping, b: Ping) => (Date.parse(a.timestamp) > Date.parse(b.timestamp) ? 1 : 0)
-    : (a: Ping, b: Ping) => (Date.parse(a.timestamp) > Date.parse(b.timestamp) ? 0 : 1);
+    ? (a: Ping, b: Ping) => Date.parse(a.timestamp) - Date.parse(b.timestamp)
+    : (a: Ping, b: Ping) => Date.parse(b.timestamp) - Date.parse(a.timestamp);
 
 export class MemoryPingsAdapter implements UMPingsAdapter {
   private pingsDB: Ping[];

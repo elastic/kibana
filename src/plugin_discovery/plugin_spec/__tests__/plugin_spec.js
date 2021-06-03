@@ -64,16 +64,16 @@ describe('plugin discovery/plugin spec', () => {
       });
 
       it('throws if spec.publicDir is truthy and not a string', () => {
-        function assert(publicDir) {
+        function assert(publicDir, expected) {
           expect(() => new PluginSpec(fooPack, { publicDir })).to.throwError(error => {
-            expect(error.message).to.contain(`The "path" argument must be of type string. Received type ${typeof publicDir}`);
+            expect(error.message).to.contain(`The "path" argument must be of type string. Received ${expected}`);
           });
         }
 
-        assert(1);
-        assert(function () {});
-        assert([]);
-        assert(/a.*b/);
+        assert(1, 'type number (1)');
+        assert(function () {}, 'type function');
+        assert([], 'an instance of Array');
+        assert(/a.*b/, 'an instance of RegExp');
       });
 
       it('throws if spec.publicDir is not an absolute path', () => {

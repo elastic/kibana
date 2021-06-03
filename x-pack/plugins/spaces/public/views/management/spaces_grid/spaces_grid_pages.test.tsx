@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { wait } from '@testing-library/react';
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { UserProfileProvider } from '../../../../../xpack_main/public/services/user_profile';
@@ -75,13 +76,11 @@ describe('SpacesGridPage', () => {
       />
     );
 
-    // allow spacesManager to load spaces
-    await Promise.resolve();
-    wrapper.update();
-    await Promise.resolve();
-    wrapper.update();
+    await wait(() => {
+      wrapper.update();
+      expect(wrapper.find(SpaceAvatar)).toHaveLength(spaces.length);
+    });
 
-    expect(wrapper.find(SpaceAvatar)).toHaveLength(spaces.length);
     expect(wrapper.find(SpaceAvatar)).toMatchSnapshot();
   });
 });
