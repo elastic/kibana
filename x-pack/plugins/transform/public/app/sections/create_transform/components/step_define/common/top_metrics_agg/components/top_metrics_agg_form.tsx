@@ -8,7 +8,7 @@
 import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFormRow, EuiSelect, EuiButtonGroup } from '@elastic/eui';
+import { EuiFormRow, EuiSelect, EuiButtonGroup, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { PivotAggsConfigTopMetrics } from '../types';
 import { PivotConfigurationContext } from '../../../../pivot_configuration/pivot_configuration';
 import {
@@ -104,62 +104,74 @@ export const TopMetricsAggForm: PivotAggsConfigTopMetrics['AggFormComponent'] = 
                 />
               </EuiFormRow>
 
-              <EuiFormRow
-                label={
+              <EuiSpacer size="s" />
+
+              <EuiAccordion
+                id="sortAdvancedSettings"
+                buttonContent={
                   <FormattedMessage
-                    id="xpack.transform.agg.popoverForm.sortModeTopMetricsLabel"
-                    defaultMessage="Sort mode"
-                  />
-                }
-                helpText={
-                  <FormattedMessage
-                    id="xpack.transform.agg.popoverForm.sortModeTopMetricsHelpText"
-                    defaultMessage="Only relevant if the sorting field is an array"
+                    id="xpack.transform.agg.popoverForm.advancedSortingSettingsLabel"
+                    defaultMessage="Advanced sorting settings"
                   />
                 }
               >
-                <EuiButtonGroup
-                  type="single"
-                  legend={i18n.translate(
-                    'xpack.transform.agg.popoverForm.sortModeTopMetricsLabel',
-                    {
-                      defaultMessage: 'Sort mode',
-                    }
-                  )}
-                  options={sortModeOptions}
-                  idSelected={aggConfig.sortMode ?? ''}
-                  onChange={(id: string) => {
-                    onChange({ ...aggConfig, sortMode: id as SortMode });
-                  }}
-                  color="text"
-                />
-              </EuiFormRow>
-
-              {sortFieldType && NUMERIC_TYPES_OPTIONS.hasOwnProperty(sortFieldType) ? (
                 <EuiFormRow
                   label={
                     <FormattedMessage
-                      id="xpack.transform.agg.popoverForm.numericSortFieldTopMetricsLabel"
-                      defaultMessage="Numeric field"
+                      id="xpack.transform.agg.popoverForm.sortModeTopMetricsLabel"
+                      defaultMessage="Sort mode"
+                    />
+                  }
+                  helpText={
+                    <FormattedMessage
+                      id="xpack.transform.agg.popoverForm.sortModeTopMetricsHelpText"
+                      defaultMessage="Only relevant if the sorting field is an array"
                     />
                   }
                 >
-                  <EuiSelect
-                    options={NUMERIC_TYPES_OPTIONS[sortFieldType as KbnNumericType].map((v) => ({
-                      text: v,
-                      name: v,
-                    }))}
-                    value={aggConfig.numericType}
-                    onChange={(e) => {
-                      onChange({
-                        ...aggConfig,
-                        numericType: e.target.value as SortNumericFieldType,
-                      });
+                  <EuiButtonGroup
+                    type="single"
+                    legend={i18n.translate(
+                      'xpack.transform.agg.popoverForm.sortModeTopMetricsLabel',
+                      {
+                        defaultMessage: 'Sort mode',
+                      }
+                    )}
+                    options={sortModeOptions}
+                    idSelected={aggConfig.sortMode ?? ''}
+                    onChange={(id: string) => {
+                      onChange({ ...aggConfig, sortMode: id as SortMode });
                     }}
-                    data-test-subj="transformSortNumericTypeTopMetricsLabel"
+                    color="text"
                   />
                 </EuiFormRow>
-              ) : null}
+
+                {sortFieldType && NUMERIC_TYPES_OPTIONS.hasOwnProperty(sortFieldType) ? (
+                  <EuiFormRow
+                    label={
+                      <FormattedMessage
+                        id="xpack.transform.agg.popoverForm.numericSortFieldTopMetricsLabel"
+                        defaultMessage="Numeric field"
+                      />
+                    }
+                  >
+                    <EuiSelect
+                      options={NUMERIC_TYPES_OPTIONS[sortFieldType as KbnNumericType].map((v) => ({
+                        text: v,
+                        name: v,
+                      }))}
+                      value={aggConfig.numericType}
+                      onChange={(e) => {
+                        onChange({
+                          ...aggConfig,
+                          numericType: e.target.value as SortNumericFieldType,
+                        });
+                      }}
+                      data-test-subj="transformSortNumericTypeTopMetricsLabel"
+                    />
+                  </EuiFormRow>
+                ) : null}
+              </EuiAccordion>
             </>
           )}
         </>
