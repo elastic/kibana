@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mount, shallow } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
 
 import { TruncatableText } from '.';
@@ -36,8 +36,8 @@ describe('TruncatableText', () => {
 
   test('it can add tooltip', () => {
     const testText = 'Some really really really really really long text.';
-    const wrapper = shallow(<TruncatableText showTooltip={true}>{testText}</TruncatableText>);
+    const wrapper = mount(<TruncatableText tooltipContent={testText}>{testText}</TruncatableText>);
 
-    expect(wrapper.find('EuiToolTip')).toBeTruthy();
+    expect(wrapper.find('EuiToolTip').text()).toEqual(testText);
   });
 });

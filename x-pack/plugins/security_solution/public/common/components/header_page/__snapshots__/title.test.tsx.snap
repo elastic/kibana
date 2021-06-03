@@ -8,7 +8,7 @@ exports[`Title it renders 1`] = `
     data-test-subj="header-page-title"
   >
     <TruncatableText
-      showTooltip={true}
+      tooltipContent="Test title"
     >
       Test title
     </TruncatableText>

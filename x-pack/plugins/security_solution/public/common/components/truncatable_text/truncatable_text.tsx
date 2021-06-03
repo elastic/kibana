@@ -30,16 +30,16 @@ const EllipsisText = styled.span`
 EllipsisText.displayName = 'EllipsisText';
 
 interface Props {
-  showTooltip?: boolean;
+  tooltipContent?: React.ReactNode;
   children: React.ReactNode;
 }
 
-export function TruncatableText({ showTooltip = false, children }: Props) {
-  if (!showTooltip) return <EllipsisText>{children}</EllipsisText>;
+export function TruncatableText({ tooltipContent, children, ...props }: Props) {
+  if (!tooltipContent) return <EllipsisText {...props}>{children}</EllipsisText>;
 
   return (
-    <EuiToolTip display="block" content={children}>
-      <EllipsisText>{children}</EllipsisText>
+    <EuiToolTip display="block" content={tooltipContent}>
+      <EllipsisText {...props}>{children}</EllipsisText>
     </EuiToolTip>
   );
 }
