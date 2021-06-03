@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { parse } from '@kbn/tinymath';
 import { monaco } from '@kbn/monaco';
 import { createMockedIndexPattern } from '../../../../mocks';
 import { GenericOperationDefinition } from '../../index';
@@ -12,7 +13,13 @@ import type { IndexPatternField } from '../../../../types';
 import type { OperationMetadata } from '../../../../../types';
 import { dataPluginMock } from '../../../../../../../../../src/plugins/data/public/mocks';
 import { tinymathFunctions } from '../util';
-import { getSignatureHelp, getHover, suggest, monacoPositionToOffset } from './math_completion';
+import {
+  getSignatureHelp,
+  getHover,
+  suggest,
+  monacoPositionToOffset,
+  getInfoAtZeroIndexedPosition,
+} from './math_completion';
 
 const buildGenericColumn = (type: string) => {
   return ({ field }: { field?: IndexPatternField }) => {
@@ -145,8 +152,9 @@ describe('math completion', () => {
     });
 
     it('should return a signature for a complex tinymath function', () => {
+      // 15 is the whitespace between the two arguments
       expect(
-        unwrapSignatures(getSignatureHelp('clamp(count(), 5)', 7, operationDefinitionMap))
+        unwrapSignatures(getSignatureHelp('clamp(count(), 5)', 15, operationDefinitionMap))
       ).toEqual({
         label: expect.stringContaining('clamp('),
         documentation: { value: '' },
@@ -213,7 +221,7 @@ describe('math completion', () => {
       // some typing
       const results = await suggest({
         expression: '',
-        position: 1,
+        zeroIndexedOffset: 1,
         context: {
           triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
           triggerCharacter: '',
@@ -234,7 +242,7 @@ describe('math completion', () => {
     it('should list all valid sub-functions for a fullReference', async () => {
       const results = await suggest({
         expression: 'moving_average()',
-        position: 15,
+        zeroIndexedOffset: 15,
         context: {
           triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
           triggerCharacter: '(',
@@ -252,7 +260,7 @@ describe('math completion', () => {
     it('should list all valid named arguments for a fullReference', async () => {
       const results = await suggest({
         expression: 'moving_average(count(),)',
-        position: 23,
+        zeroIndexedOffset: 23,
         context: {
           triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
           triggerCharacter: ',',
@@ -267,7 +275,7 @@ describe('math completion', () => {
     it('should not list named arguments when they are already in use', async () => {
       const results = await suggest({
         expression: 'moving_average(count(), window=5, )',
-        position: 34,
+        zeroIndexedOffset: 34,
         context: {
           triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
           triggerCharacter: ',',
@@ -282,7 +290,7 @@ describe('math completion', () => {
     it('should list all valid positional arguments for a tinymath function used by name', async () => {
       const results = await suggest({
         expression: 'divide(count(), )',
-        position: 16,
+        zeroIndexedOffset: 16,
         context: {
           triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
           triggerCharacter: ',',
@@ -303,7 +311,7 @@ describe('math completion', () => {
     it('should list all valid positional arguments for a tinymath function used with alias', async () => {
       const results = await suggest({
         expression: 'count() / ',
-        position: 10,
+        zeroIndexedOffset: 10,
         context: {
           triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
           triggerCharacter: ',',
@@ -324,7 +332,7 @@ describe('math completion', () => {
     it('should not autocomplete any fields for the count function', async () => {
       const results = await suggest({
         expression: 'count()',
-        position: 6,
+        zeroIndexedOffset: 6,
         context: {
           triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
           triggerCharacter: '(',
@@ -339,7 +347,7 @@ describe('math completion', () => {
     it('should autocomplete and validate the right type of field', async () => {
       const results = await suggest({
         expression: 'sum()',
-        position: 4,
+        zeroIndexedOffset: 4,
         context: {
           triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
           triggerCharacter: '(',
@@ -354,7 +362,7 @@ describe('math completion', () => {
     it('should autocomplete only operations that provide numeric output', async () => {
       const results = await suggest({
         expression: 'last_value()',
-        position: 11,
+        zeroIndexedOffset: 11,
         context: {
           triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
           triggerCharacter: '(',
@@ -374,6 +382,17 @@ describe('math completion', () => {
 89')`;
       expect(input[monacoPositionToOffset(input, new monaco.Position(1, 1))]).toEqual('0');
       expect(input[monacoPositionToOffset(input, new monaco.Position(3, 2))]).toEqual('9');
+    });
+  });
+
+  describe('getInfoAtZeroIndexedPosition', () => {
+    it('should return the location for a function inside multiple levels of math', () => {
+      const expression = `count() + 5 + average(LENS_MATH_MARKER)`;
+      const ast = parse(expression);
+      expect(getInfoAtZeroIndexedPosition(ast, 22)).toEqual({
+        ast: expect.objectContaining({ value: 'LENS_MATH_MARKER' }),
+        parent: expect.objectContaining({ name: 'average' }),
+      });
     });
   });
 });

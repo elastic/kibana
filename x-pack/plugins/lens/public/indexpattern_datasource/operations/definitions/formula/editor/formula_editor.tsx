@@ -290,35 +290,23 @@ export function FormulaEditor({
       context: monaco.languages.CompletionContext
     ) => {
       const innerText = model.getValue();
-      const textRange = model.getFullModelRange();
-      let wordRange: monaco.Range;
       let aSuggestions: { list: LensMathSuggestion[]; type: SUGGESTION_TYPE } = {
         list: [],
         type: SUGGESTION_TYPE.FIELD,
       };
-
-      const lengthAfterPosition = model.getValueLengthInRange({
-        startLineNumber: position.lineNumber,
-        startColumn: position.column,
-        endLineNumber: textRange.endLineNumber,
-        endColumn: textRange.endColumn,
-      });
+      const offset = monacoPositionToOffset(innerText, position);
 
       if (context.triggerCharacter === '(') {
+        // Monaco usually inserts the end quote and reports the position is after the end quote
+        if (innerText.slice(offset - 1, offset + 1) === '()') {
+          position = position.delta(0, -1);
+        }
         const wordUntil = model.getWordAtPosition(position.delta(0, -3));
         if (wordUntil) {
-          wordRange = new monaco.Range(
-            position.lineNumber,
-            position.column,
-            position.lineNumber,
-            position.column
-          );
-
           // Retrieve suggestions for subexpressions
-          // TODO: make this work for expressions nested more than one level deep
           aSuggestions = await suggest({
-            expression: innerText.substring(0, innerText.length - lengthAfterPosition) + ')',
-            position: innerText.length - lengthAfterPosition,
+            expression: innerText,
+            zeroIndexedOffset: offset,
             context,
             indexPattern,
             operationDefinitionMap: visibleOperationsMap,
@@ -328,7 +316,7 @@ export function FormulaEditor({
       } else {
         aSuggestions = await suggest({
           expression: innerText,
-          position: innerText.length - lengthAfterPosition,
+          zeroIndexedOffset: offset,
           context,
           indexPattern,
           operationDefinitionMap: visibleOperationsMap,
@@ -338,13 +326,7 @@ export function FormulaEditor({
 
       return {
         suggestions: aSuggestions.list.map((s) =>
-          getSuggestion(
-            s,
-            aSuggestions.type,
-            wordRange,
-            visibleOperationsMap,
-            context.triggerCharacter
-          )
+          getSuggestion(s, aSuggestions.type, visibleOperationsMap, context.triggerCharacter)
         ),
       };
     },

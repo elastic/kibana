@@ -52,21 +52,29 @@ function inLocation(cursorPosition: number, location: TinymathLocation) {
 
 const MARKER = 'LENS_MATH_MARKER';
 
-function getInfoAtPosition(
+export function getInfoAtZeroIndexedPosition(
   ast: TinymathAST,
-  position: number,
+  zeroIndexedPosition: number,
   parent?: TinymathFunction
 ): undefined | { ast: TinymathAST; parent?: TinymathFunction } {
   if (typeof ast === 'number') {
     return;
   }
-  if (!inLocation(position, ast.location)) {
+  // +, -, *, and / do not have location any more
+  if (ast.location && !inLocation(zeroIndexedPosition, ast.location)) {
     return;
   }
   if (ast.type === 'function') {
-    const [match] = ast.args.map((arg) => getInfoAtPosition(arg, position, ast)).filter((a) => a);
+    const [match] = ast.args
+      .map((arg) => getInfoAtZeroIndexedPosition(arg, zeroIndexedPosition, ast))
+      .filter((a) => a);
     if (match) {
-      return match.parent ? match : { ...match, parent: ast };
+      return match;
+    } else if (ast.location) {
+      return { ast };
+    } else {
+      // None of the arguments match, but we don't know the position so it's not a match
+      return;
     }
   }
   return {
@@ -103,24 +111,25 @@ export function monacoPositionToOffset(expression: string, position: monaco.Posi
 
 export async function suggest({
   expression,
-  position,
+  zeroIndexedOffset,
   context,
   indexPattern,
   operationDefinitionMap,
   data,
 }: {
   expression: string;
-  position: number;
+  zeroIndexedOffset: number;
   context: monaco.languages.CompletionContext;
   indexPattern: IndexPattern;
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
   data: DataPublicPluginStart;
 }): Promise<{ list: LensMathSuggestion[]; type: SUGGESTION_TYPE }> {
-  const text = expression.substr(0, position) + MARKER + expression.substr(position);
+  const text =
+    expression.substr(0, zeroIndexedOffset) + MARKER + expression.substr(zeroIndexedOffset);
   try {
     const ast = parse(text);
 
-    const tokenInfo = getInfoAtPosition(ast, position);
+    const tokenInfo = getInfoAtZeroIndexedPosition(ast, zeroIndexedOffset);
     const tokenAst = tokenInfo?.ast;
 
     const isNamedArgument =
@@ -279,11 +288,8 @@ function getArgumentSuggestions(
       ) {
         possibleOperationNames.push(
           ...a.operations
-            .filter(
-              (o) =>
-                operation.requiredReferences.some((requirement) =>
-                  requirement.input.includes(o.type)
-                ) && !operationDefinitionMap[o.operationType].hidden
+            .filter((o) =>
+              operation.requiredReferences.some((requirement) => requirement.input.includes(o.type))
             )
             .map((o) => o.operationType)
         );
@@ -339,7 +345,6 @@ const TRIGGER_SUGGESTION_COMMAND = {
 export function getSuggestion(
   suggestion: LensMathSuggestion,
   type: SUGGESTION_TYPE,
-  range: monaco.Range,
   operationDefinitionMap: Record<string, GenericOperationDefinition>,
   triggerChar: string | undefined
 ): monaco.languages.CompletionItem {
@@ -412,7 +417,8 @@ export function getSuggestion(
     insertTextRules,
     command,
     additionalTextEdits: [],
-    range,
+    // @ts-expect-error Monaco says this type is required, but provides a default value
+    range: undefined,
     sortText,
     filterText,
   };
@@ -513,29 +519,33 @@ export function getSignatureHelp(
   try {
     const ast = parse(text);
 
-    const tokenInfo = getInfoAtPosition(ast, position);
+    const tokenInfo = getInfoAtZeroIndexedPosition(ast, position);
 
+    let signatures: ReturnType<typeof getSignaturesForFunction> = [];
+    let index = 0;
     if (tokenInfo?.parent) {
       const name = tokenInfo.parent.name;
       // reference equality is fine here because of the way the getInfo function works
-      const index = tokenInfo.parent.args.findIndex((arg) => arg === tokenInfo.ast);
-
-      const signatures = getSignaturesForFunction(name, operationDefinitionMap);
-      if (signatures.length) {
-        return {
-          value: {
-            // remove the documentation
-            signatures: signatures.map(({ documentation, ...signature }) => ({
-              ...signature,
-              // extract only the first section (usually few lines)
-              documentation: { value: documentation.value.split('\n\n')[0] },
-            })),
-            activeParameter: index,
-            activeSignature: 0,
-          },
-          dispose: () => {},
-        };
-      }
+      index = tokenInfo.parent.args.findIndex((arg) => arg === tokenInfo.ast);
+      signatures = getSignaturesForFunction(name, operationDefinitionMap);
+    } else if (typeof tokenInfo?.ast === 'object' && tokenInfo.ast.type === 'function') {
+      const name = tokenInfo.ast.name;
+      signatures = getSignaturesForFunction(name, operationDefinitionMap);
+    }
+    if (signatures.length) {
+      return {
+        value: {
+          // remove the documentation
+          signatures: signatures.map(({ documentation, ...signature }) => ({
+            ...signature,
+            // extract only the first section (usually few lines)
+            documentation: { value: documentation.value.split('\n\n')[0] },
+          })),
+          activeParameter: index,
+          activeSignature: 0,
+        },
+        dispose: () => {},
+      };
     }
   } catch (e) {
     // do nothing
@@ -551,7 +561,7 @@ export function getHover(
   try {
     const ast = parse(expression);
 
-    const tokenInfo = getInfoAtPosition(ast, position);
+    const tokenInfo = getInfoAtZeroIndexedPosition(ast, position);
 
     if (!tokenInfo || typeof tokenInfo.ast === 'number' || !('name' in tokenInfo.ast)) {
       return { contents: [] };
@@ -574,7 +584,7 @@ export function getTokenInfo(expression: string, position: number) {
   try {
     const ast = parse(text);
 
-    return getInfoAtPosition(ast, position);
+    return getInfoAtZeroIndexedPosition(ast, position);
   } catch (e) {
     return;
   }

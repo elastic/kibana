@@ -567,7 +567,7 @@ describe('formula', () => {
       ).toEqual({
         col1X0: { min: 15, max: 29 },
         col1X2: { min: 0, max: 41 },
-        col1X3: { min: 43, max: 50 },
+        col1X3: { min: 42, max: 50 },
       });
     });
   });

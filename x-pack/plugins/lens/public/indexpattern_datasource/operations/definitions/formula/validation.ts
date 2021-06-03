@@ -94,7 +94,7 @@ export function hasInvalidOperations(
   return {
     // avoid duplicates
     names: Array.from(new Set(nodes.map(({ name }) => name))),
-    locations: nodes.map(({ location }) => location),
+    locations: nodes.map(({ location }) => location).filter((a) => a) as TinymathLocation[],
   };
 }
 
@@ -438,7 +438,7 @@ function validateNameArguments(
           operation: node.name,
           params: missingParams.map(({ name }) => name).join(', '),
         },
-        locations: [node.location],
+        locations: node.location ? [node.location] : [],
       })
     );
   }
@@ -451,7 +451,7 @@ function validateNameArguments(
           operation: node.name,
           params: wrongTypeParams.map(({ name }) => name).join(', '),
         },
-        locations: [node.location],
+        locations: node.location ? [node.location] : [],
       })
     );
   }
@@ -464,7 +464,7 @@ function validateNameArguments(
           operation: node.name,
           params: duplicateParams.join(', '),
         },
-        locations: [node.location],
+        locations: node.location ? [node.location] : [],
       })
     );
   }
@@ -478,7 +478,7 @@ function validateNameArguments(
       getMessageFromId({
         messageId: 'tooManyQueries',
         values: {},
-        locations: [node.location],
+        locations: node.location ? [node.location] : [],
       })
     );
   }
@@ -525,7 +525,7 @@ function runFullASTValidation(
                     type: 'field',
                     argument: `math operation`,
                   },
-                  locations: [node.location],
+                  locations: node.location ? [node.location] : [],
                 })
               );
             } else {
@@ -537,7 +537,7 @@ function runFullASTValidation(
                     type: 'field',
                     argument: getValueOrName(firstArg),
                   },
-                  locations: [node.location],
+                  locations: node.location ? [node.location] : [],
                 })
               );
             }
@@ -551,7 +551,7 @@ function runFullASTValidation(
                 values: {
                   operation: node.name,
                 },
-                locations: [node.location],
+                locations: node.location ? [node.location] : [],
               })
             );
           }
@@ -563,7 +563,7 @@ function runFullASTValidation(
               values: {
                 operation: node.name,
               },
-              locations: [node.location],
+              locations: node.location ? [node.location] : [],
             })
           );
         } else {
@@ -594,7 +594,7 @@ function runFullASTValidation(
                 type: 'operation',
                 argument: getValueOrName(firstArg),
               },
-              locations: [node.location],
+              locations: node.location ? [node.location] : [],
             })
           );
         }
@@ -605,7 +605,7 @@ function runFullASTValidation(
               values: {
                 operation: node.name,
               },
-              locations: [node.location],
+              locations: node.location ? [node.location] : [],
             })
           );
         } else {
@@ -731,7 +731,7 @@ export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<str
             type: 'operation',
             argument: `()`,
           },
-          locations: [node.location],
+          locations: node.location ? [node.location] : [],
         })
       );
     }
@@ -743,7 +743,7 @@ export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<str
           values: {
             operation: node.name,
           },
-          locations: [node.location],
+          locations: node.location ? [node.location] : [],
         })
       );
     }
@@ -762,7 +762,7 @@ export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<str
           values: {
             operation: node.name,
           },
-          locations: [node.location],
+          locations: node.location ? [node.location] : [],
         })
       );
     }
@@ -781,7 +781,7 @@ export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<str
             count: mandatoryArguments.length - node.args.length,
             params: missingArgs.map(({ name }) => name).join(', '),
           },
-          locations: [node.location],
+          locations: node.location ? [node.location] : [],
         })
       );
     }
