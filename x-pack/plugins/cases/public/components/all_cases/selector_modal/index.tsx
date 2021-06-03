@@ -8,7 +8,12 @@
 import React, { useState, useCallback } from 'react';
 import { EuiModal, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 import styled from 'styled-components';
-import { Case, CaseStatuses, CommentRequestAlertType, SubCase } from '../../../../common';
+import {
+  Case,
+  CaseStatusWithAllStatus,
+  CommentRequestAlertType,
+  SubCase,
+} from '../../../../common';
 import { CasesNavigation } from '../../links';
 import * as i18n from '../../../common/translations';
 import { AllCasesGeneric } from '../all_cases_generic';
@@ -16,7 +21,7 @@ import { AllCasesGeneric } from '../all_cases_generic';
 export interface AllCasesSelectorModalProps {
   alertData?: Omit<CommentRequestAlertType, 'type'>;
   createCaseNavigation: CasesNavigation;
-  disabledStatuses?: CaseStatuses[];
+  hiddenStatuses?: CaseStatusWithAllStatus[];
   onRowClick: (theCase?: Case | SubCase) => void;
   updateCase?: (newCase: Case) => void;
   userCanCrud: boolean;
@@ -32,7 +37,7 @@ const Modal = styled(EuiModal)`
 export const AllCasesSelectorModal: React.FC<AllCasesSelectorModalProps> = ({
   alertData,
   createCaseNavigation,
-  disabledStatuses,
+  hiddenStatuses,
   onRowClick,
   updateCase,
   userCanCrud,
@@ -55,7 +60,7 @@ export const AllCasesSelectorModal: React.FC<AllCasesSelectorModalProps> = ({
         <AllCasesGeneric
           alertData={alertData}
           createCaseNavigation={createCaseNavigation}
-          disabledStatuses={disabledStatuses}
+          hiddenStatuses={hiddenStatuses}
           isSelectorView={true}
           onRowClick={onClick}
           userCanCrud={userCanCrud}

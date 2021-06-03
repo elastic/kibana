@@ -45,6 +45,7 @@ export type AngularScope = IScope & { renderProps?: DocTableLegacyProps };
 export async function injectAngularElement(
   domNode: Element,
   template: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   renderProps: any,
   injector: auto.IInjectorService
 ) {
@@ -64,6 +65,7 @@ export async function injectAngularElement(
   return newScope;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getRenderFn(domNode: Element, props: any) {
   const directive = {
     template: `<doc-table

@@ -52,6 +52,11 @@ describe('#toExpression', () => {
           tickLabelsVisibilitySettings: { x: false, yLeft: true, yRight: true },
           gridlinesVisibilitySettings: { x: false, yLeft: true, yRight: true },
           hideEndzones: true,
+          yRightExtent: {
+            mode: 'custom',
+            lowerBound: 123,
+            upperBound: 456,
+          },
           layers: [
             {
               layerId: 'first',

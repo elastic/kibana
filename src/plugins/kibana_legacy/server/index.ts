@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AddConfigDeprecation, CoreSetup, CoreStart, PluginConfigDescriptor } from 'kibana/server';
+import type { CoreSetup, CoreStart, PluginConfigDescriptor } from 'kibana/server';
 import { get } from 'lodash';
 
 import { configSchema, ConfigSchema } from '../config';
@@ -19,16 +19,12 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   deprecations: ({ renameFromRoot }) => [
     // TODO: Remove deprecation once defaultAppId is deleted
     renameFromRoot('kibana.defaultAppId', 'kibana_legacy.defaultAppId', { silent: true }),
-    (
-      completeConfig: Record<string, any>,
-      rootPath: string,
-      addDeprecation: AddConfigDeprecation
-    ) => {
+    (completeConfig, rootPath, addDeprecation) => {
       if (
         get(completeConfig, 'kibana.defaultAppId') === undefined &&
         get(completeConfig, 'kibana_legacy.defaultAppId') === undefined
       ) {
-        return completeConfig;
+        return;
       }
       addDeprecation({
         message: `kibana.defaultAppId is deprecated and will be removed in 8.0. Please use the \`defaultRoute\` advanced setting instead`,
@@ -40,7 +36,6 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
           ],
         },
       });
-      return completeConfig;
     },
   ],
 };

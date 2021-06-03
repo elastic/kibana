@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { validate } from '../../../../../common/validate';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { queryRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/query_rules_type_dependents';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import {

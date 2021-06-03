@@ -12,7 +12,6 @@ import { useValues } from 'kea';
 import { EuiText, EuiBadge, EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { getAppSearchUrl } from '../../../shared/enterprise_search_url';
 import { SideNavLink, SideNavItem } from '../../../shared/layout';
 import { AppLogic } from '../../app_logic';
 import {
@@ -70,6 +69,7 @@ export const EngineNav: React.FC = () => {
     dataLoading,
     isSampleEngine,
     isMetaEngine,
+    hasSchemaErrors,
     hasSchemaConflicts,
     hasUnconfirmedSchemaFields,
     engine,
@@ -128,9 +128,19 @@ export const EngineNav: React.FC = () => {
           shouldShowActiveForSubroutes
           data-test-subj="EngineSchemaLink"
         >
-          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
+          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
             <EuiFlexItem>{SCHEMA_TITLE}</EuiFlexItem>
             <EuiFlexItem className="appSearchNavIcons">
+              {hasSchemaErrors && (
+                <EuiIcon
+                  type="alert"
+                  color="danger"
+                  title={i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.errors', {
+                    defaultMessage: 'Schema change errors',
+                  })}
+                  data-test-subj="EngineNavSchemaErrors"
+                />
+              )}
               {hasUnconfirmedSchemaFields && (
                 <EuiIcon
                   type="iInCircle"
@@ -159,8 +169,7 @@ export const EngineNav: React.FC = () => {
       )}
       {canViewEngineCrawler && !isMetaEngine && (
         <SideNavLink
-          isExternal
-          to={getAppSearchUrl(generateEnginePath(ENGINE_CRAWLER_PATH))}
+          to={generateEnginePath(ENGINE_CRAWLER_PATH)}
           data-test-subj="EngineCrawlerLink"
         >
           {CRAWLER_TITLE}
@@ -179,7 +188,7 @@ export const EngineNav: React.FC = () => {
           to={generateEnginePath(ENGINE_RELEVANCE_TUNING_PATH)}
           data-test-subj="EngineRelevanceTuningLink"
         >
-          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
+          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
             <EuiFlexItem>{RELEVANCE_TUNING_TITLE}</EuiFlexItem>
             <EuiFlexItem className="appSearchNavIcons">
               {invalidBoosts && (

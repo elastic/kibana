@@ -94,9 +94,6 @@
 /x-pack/plugins/apm/server/projections/rum_page_load_transactions.ts @elastic/uptime
 /x-pack/test/apm_api_integration/tests/csm/ @elastic/uptime
 
-# Beats
-/x-pack/plugins/beats_management/  @elastic/beats
-#CC# /x-pack/plugins/beats_management/ @elastic/beats
 
 # Presentation
 /src/plugins/dashboard/ @elastic/kibana-presentation
@@ -150,6 +147,7 @@
 #CC# /x-pack/plugins/file_upload @elastic/kibana-gis
 /src/plugins/tile_map/ @elastic/kibana-gis
 /src/plugins/region_map/ @elastic/kibana-gis
+/packages/kbn-mapbox-gl @elastic/kibana-gis
 
 # Operations
 /src/dev/ @elastic/kibana-operations
@@ -176,6 +174,7 @@
 /.bazelversion @elastic/kibana-operations
 /WORKSPACE.bazel @elastic/kibana-operations
 #CC# /packages/kbn-expect/ @elastic/kibana-operations
+/.buildkite/ @elastic/kibana-operations
 
 # Quality Assurance
 /src/dev/code_coverage @elastic/kibana-qa
@@ -188,6 +187,7 @@
 /src/core/  @elastic/kibana-core
 /src/plugins/saved_objects_tagging_oss  @elastic/kibana-core
 /config/kibana.yml @elastic/kibana-core
+/x-pack/plugins/banners/  @elastic/kibana-core
 /x-pack/plugins/features/  @elastic/kibana-core
 /x-pack/plugins/licensing/  @elastic/kibana-core
 /x-pack/plugins/global_search/  @elastic/kibana-core
@@ -202,7 +202,6 @@
 /packages/kbn-legacy-logging/ @elastic/kibana-core
 /packages/kbn-crypto/ @elastic/kibana-core
 /packages/kbn-http-tools/ @elastic/kibana-core
-/src/plugins/status_page/ @elastic/kibana-core
 /src/plugins/saved_objects_management/ @elastic/kibana-core
 /src/dev/run_check_published_api_changes.ts @elastic/kibana-core
 /src/plugins/home/public @elastic/kibana-core
@@ -214,7 +213,6 @@
 #CC# /src/plugins/legacy_export/ @elastic/kibana-core
 #CC# /src/plugins/xpack_legacy/ @elastic/kibana-core
 #CC# /src/plugins/saved_objects/ @elastic/kibana-core
-#CC# /src/plugins/status_page/ @elastic/kibana-core
 #CC# /x-pack/plugins/cloud/ @elastic/kibana-core
 #CC# /x-pack/plugins/features/ @elastic/kibana-core
 #CC# /x-pack/plugins/global_search/ @elastic/kibana-core
@@ -342,7 +340,7 @@
 #CC# /x-pack/plugins/security_solution/ @elastic/security-solution
 
 # Security Solution sub teams
-/x-pack/plugins/case @elastic/security-threat-hunting
+/x-pack/plugins/cases @elastic/security-threat-hunting
 /x-pack/plugins/timelines @elastic/security-threat-hunting
 /x-pack/test/case_api_integration @elastic/security-threat-hunting
 /x-pack/plugins/lists @elastic/security-detections-response

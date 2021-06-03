@@ -38,6 +38,7 @@ export function TransactionTypeSelect() {
   return (
     <>
       <EuiSelectWithWidth
+        data-test-subj="headerFilterTransactionType"
         onChange={handleChange}
         options={options}
         value={transactionType}

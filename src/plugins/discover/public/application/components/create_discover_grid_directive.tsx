@@ -33,6 +33,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridProps) {
 /**
  * this is just needed for the embeddable
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createDiscoverGridDirective(reactDirective: any) {
   return reactDirective(DiscoverGridEmbeddable, [
     ['columns', { watchDepth: 'collection' }],

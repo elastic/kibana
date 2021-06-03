@@ -77,6 +77,7 @@ export class SavedObjectsExporter {
     return this.processObjects(objects, byIdAscComparator, {
       request: options.request,
       includeReferencesDeep: options.includeReferencesDeep,
+      includeNamespaces: options.includeNamespaces,
       excludeExportDetails: options.excludeExportDetails,
       namespace: options.namespace,
     });
@@ -99,6 +100,7 @@ export class SavedObjectsExporter {
     return this.processObjects(objects, comparator, {
       request: options.request,
       includeReferencesDeep: options.includeReferencesDeep,
+      includeNamespaces: options.includeNamespaces,
       excludeExportDetails: options.excludeExportDetails,
       namespace: options.namespace,
     });
@@ -111,6 +113,7 @@ export class SavedObjectsExporter {
       request,
       excludeExportDetails = false,
       includeReferencesDeep = false,
+      includeNamespaces = false,
       namespace,
     }: SavedObjectExportBaseOptions
   ) {
@@ -139,9 +142,9 @@ export class SavedObjectsExporter {
     }
 
     // redact attributes that should not be exported
-    const redactedObjects = exportedObjects.map<SavedObject<unknown>>(
-      ({ namespaces, ...object }) => object
-    );
+    const redactedObjects = includeNamespaces
+      ? exportedObjects
+      : exportedObjects.map<SavedObject<unknown>>(({ namespaces, ...object }) => object);
 
     const exportDetails: SavedObjectsExportResultDetails = {
       exportedCount: exportedObjects.length,

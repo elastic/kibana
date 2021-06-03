@@ -12,6 +12,7 @@ import { decodeCloudId, GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '../../common';
 import type { SettingsSOAttributes, Settings, BaseSettings } from '../../common';
 
 import { appContextService } from './app_context';
+import { normalizeHostsForAgents } from './hosts_utils';
 
 export async function getSettings(soClient: SavedObjectsClientContract): Promise<Settings> {
   const res = await soClient.find<SettingsSOAttributes>({
@@ -51,41 +52,17 @@ export async function settingsSetup(soClient: SavedObjectsClientContract) {
   }
 }
 
-function getPortForURL(url: URL) {
-  if (url.port !== '') {
-    return url.port;
-  }
-
-  if (url.protocol === 'http:') {
-    return '80';
-  }
-
-  if (url.protocol === 'https:') {
-    return '443';
-  }
-}
-
-export function normalizeFleetServerHost(host: string) {
-  // Fleet server is not using default port for http|https https://github.com/elastic/beats/issues/25420
-  const fleetServerURL = new URL(host);
-
-  // We are building the URL manualy as url format will not include the port if the port is 80 or 443
-  return `${fleetServerURL.protocol}//${fleetServerURL.hostname}:${getPortForURL(fleetServerURL)}${
-    fleetServerURL.pathname === '/' ? '' : fleetServerURL.pathname
-  }`;
-}
-
 export async function saveSettings(
   soClient: SavedObjectsClientContract,
   newData: Partial<Omit<Settings, 'id'>>
 ): Promise<Partial<Settings> & Pick<Settings, 'id'>> {
+  const data = { ...newData };
+  if (data.fleet_server_hosts) {
+    data.fleet_server_hosts = data.fleet_server_hosts.map(normalizeHostsForAgents);
+  }
+
   try {
     const settings = await getSettings(soClient);
-
-    const data = { ...newData };
-    if (data.fleet_server_hosts) {
-      data.fleet_server_hosts = data.fleet_server_hosts.map(normalizeFleetServerHost);
-    }
 
     const res = await soClient.update<SettingsSOAttributes>(
       GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
@@ -102,7 +79,7 @@ export async function saveSettings(
       const defaultSettings = createDefaultSettings();
       const res = await soClient.create<SettingsSOAttributes>(GLOBAL_SETTINGS_SAVED_OBJECT_TYPE, {
         ...defaultSettings,
-        ...newData,
+        ...data,
       });
 
       return {

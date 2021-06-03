@@ -167,18 +167,11 @@ describe('group_fields', function () {
       aggregatable: true,
       readFromDocValues: false,
     };
-    const fieldsToGroup = [category, currency, currencyKeyword];
+    const fieldsToGroup = [category, currency, currencyKeyword] as IndexPatternField[];
 
     const fieldFilterState = getDefaultFieldFilter();
 
-    const actual = groupFields(
-      fieldsToGroup as any,
-      ['currency'],
-      5,
-      fieldCounts,
-      fieldFilterState,
-      true
-    );
+    const actual = groupFields(fieldsToGroup, ['currency'], 5, fieldCounts, fieldFilterState, true);
 
     expect(actual.popular).toEqual([category]);
     expect(actual.selected).toEqual([currency]);

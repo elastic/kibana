@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { IndexPattern } from './types';
 import { QueryStringInput, Query } from '../../../../../src/plugins/data/public';
+import { useDebouncedValue } from '../shared_components';
 
 export const QueryInput = ({
   value,
@@ -26,13 +26,7 @@ export const QueryInput = ({
   onSubmit: () => void;
   disableAutoFocus?: boolean;
 }) => {
-  const [inputValue, setInputValue] = useState(value);
-
-  useDebounce(() => onChange(inputValue), 256, [inputValue]);
-
-  const handleInputChange = (input: Query) => {
-    setInputValue(input);
-  };
+  const { inputValue, handleInputChange } = useDebouncedValue({ value, onChange });
 
   return (
     <QueryStringInput

@@ -7,13 +7,13 @@
 
 import { SavedObject } from 'src/core/types';
 import { Logger } from 'src/core/server';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
 } from '../../../../../../alerting/server';
 import { ListClient } from '../../../../../../lists/server';
-import { ExceptionListItemSchema } from '../../../../../common/shared_imports';
 import { RefreshTypes } from '../../types';
 import { getFilter } from '../get_filter';
 import { getInputIndex } from '../get_input_output_index';

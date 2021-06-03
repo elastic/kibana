@@ -198,15 +198,6 @@ function buildComponentTemplates(registryElasticsearch: RegistryElasticsearch | 
       template: {
         mappings: {
           ...registryElasticsearch['index_template.mappings'],
-          // temporary change until https://github.com/elastic/elasticsearch/issues/58956 is resolved
-          // hopefully we'll be able to remove the entire properties section once that issue is resolved
-          properties: {
-            // if the timestamp_field changes here: https://github.com/elastic/kibana/blob/master/x-pack/plugins/fleet/server/services/epm/elasticsearch/template/template.ts#L309
-            // we'll need to update this as well
-            '@timestamp': {
-              type: 'date',
-            },
-          },
         },
       },
     };

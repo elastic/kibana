@@ -15,12 +15,14 @@ export const checkAgentTypeMetric = (versions?: string[]) => {
   if (!Legacy.shims.isCloud || !versions) {
     return false;
   }
+  let criteriaPassed = false;
   versions.forEach((version) => {
     const [major, minor] = version.split('.');
     const majorInt = Number(major);
     if (majorInt > 7 || (majorInt === 7 && Number(minor) >= 13)) {
-      return true;
+      criteriaPassed = true;
+      return;
     }
   });
-  return false;
+  return criteriaPassed;
 };

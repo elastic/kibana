@@ -150,7 +150,7 @@ function createLocalStorageModule() {
 }
 
 const createLocalStorageService = function (type: string) {
-  return function ($window: any) {
+  return function ($window: ng.IWindowService) {
     return new Storage($window[type]);
   };
 };

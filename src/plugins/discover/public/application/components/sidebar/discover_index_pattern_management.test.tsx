@@ -9,7 +9,7 @@
 import { getStubIndexPattern } from '../../../../../data/public/index_patterns/index_pattern.stub';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { DiscoverServices } from '../../../build_services';
-// @ts-ignore
+// @ts-expect-error
 import stubbedLogstashFields from '../../../__fixtures__/logstash_fields';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
@@ -56,7 +56,7 @@ const mockServices = ({
 describe('Discover IndexPattern Management', () => {
   const indexPattern = getStubIndexPattern(
     'logstash-*',
-    (cfg: any) => cfg,
+    (cfg: unknown) => cfg,
     'time',
     stubbedLogstashFields(),
     coreMock.createSetup()

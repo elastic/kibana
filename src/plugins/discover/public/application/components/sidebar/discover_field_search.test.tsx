@@ -47,7 +47,7 @@ describe('DiscoverFieldSearch', () => {
     const aggregatableButtonGroup = findButtonGroup(component, 'aggregatable');
 
     act(() => {
-      // @ts-ignore
+      // @ts-expect-error
       (aggregatableButtonGroup.props() as EuiButtonGroupProps).onChange('aggregatable-true', null);
     });
     component.update();
@@ -66,7 +66,7 @@ describe('DiscoverFieldSearch', () => {
     // change value of aggregatable select
     const aggregatableButtonGroup = findButtonGroup(component, 'aggregatable');
     act(() => {
-      // @ts-ignore
+      // @ts-expect-error
       (aggregatableButtonGroup.props() as EuiButtonGroupProps).onChange('aggregatable-true', null);
     });
     component.update();
@@ -74,14 +74,14 @@ describe('DiscoverFieldSearch', () => {
     // change value of searchable select
     const searchableButtonGroup = findButtonGroup(component, 'searchable');
     act(() => {
-      // @ts-ignore
+      // @ts-expect-error
       (searchableButtonGroup.props() as EuiButtonGroupProps).onChange('searchable-true', null);
     });
     component.update();
     expect(badge.text()).toEqual('2');
     // change value of searchable select
     act(() => {
-      // @ts-ignore
+      // @ts-expect-error
       (searchableButtonGroup.props() as EuiButtonGroupProps).onChange('searchable-any', null);
     });
     component.update();
@@ -114,7 +114,7 @@ describe('DiscoverFieldSearch', () => {
     const aggregtableButtonGroup = findButtonGroup(component, 'aggregatable');
     const missingSwitch = findTestSubject(component, 'missingSwitch');
     act(() => {
-      // @ts-ignore
+      // @ts-expect-error
       (aggregtableButtonGroup.props() as EuiButtonGroupProps).onChange('aggregatable-true', null);
     });
     missingSwitch.simulate('click');

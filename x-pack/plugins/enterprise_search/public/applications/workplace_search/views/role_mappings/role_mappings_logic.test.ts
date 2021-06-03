@@ -293,13 +293,13 @@ describe('RoleMappingsLogic', () => {
 
         expect(http.post).toHaveBeenCalledWith('/api/workplace_search/org/role_mappings', {
           body: JSON.stringify({
+            roleType: 'admin',
+            allGroups: false,
+            authProvider: [ANY_AUTH_PROVIDER],
             rules: {
               username: '',
             },
-            roleType: 'admin',
             groups: [],
-            allGroups: false,
-            authProvider: [ANY_AUTH_PROVIDER],
           }),
         });
         await nextTick();
@@ -317,13 +317,13 @@ describe('RoleMappingsLogic', () => {
           `/api/workplace_search/org/role_mappings/${wsRoleMapping.id}`,
           {
             body: JSON.stringify({
+              roleType: 'admin',
+              allGroups: true,
+              authProvider: [ANY_AUTH_PROVIDER, 'other_auth'],
               rules: {
                 username: 'user',
               },
-              roleType: 'admin',
               groups: [],
-              allGroups: true,
-              authProvider: [ANY_AUTH_PROVIDER, 'other_auth'],
             }),
           }
         );

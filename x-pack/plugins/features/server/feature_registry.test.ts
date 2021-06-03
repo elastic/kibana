@@ -158,7 +158,7 @@ describe('FeatureRegistry', () => {
         expect(() =>
           featureRegistry.registerKibanaFeature(feature)
         ).toThrowErrorMatchingInlineSnapshot(
-          `"child \\"category\\" fails because [\\"category\\" is required]"`
+          `"[category.id]: expected value of type [string] but got [undefined]"`
         );
       });
 
@@ -175,7 +175,7 @@ describe('FeatureRegistry', () => {
         expect(() =>
           featureRegistry.registerKibanaFeature(feature)
         ).toThrowErrorMatchingInlineSnapshot(
-          `"child \\"category\\" fails because [child \\"id\\" fails because [\\"id\\" is required]]"`
+          `"[category.id]: expected value of type [string] but got [undefined]"`
         );
       });
 
@@ -192,7 +192,7 @@ describe('FeatureRegistry', () => {
         expect(() =>
           featureRegistry.registerKibanaFeature(feature)
         ).toThrowErrorMatchingInlineSnapshot(
-          `"child \\"category\\" fails because [child \\"label\\" fails because [\\"label\\" is required]]"`
+          `"[category.label]: expected value of type [string] but got [undefined]"`
         );
       });
     });
@@ -209,7 +209,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerKibanaFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"child \\"privileges\\" fails because [\\"privileges\\" is required]"`
+        `"[privileges]: expected at least one defined value but got [undefined]"`
       );
     });
 
@@ -248,7 +248,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerKibanaFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"child \\"subFeatures\\" fails because [\\"subFeatures\\" must contain less than or equal to 0 items]"`
+        `"[subFeatures]: array size is [1], but cannot be greater than [0]"`
       );
     });
 
@@ -488,11 +488,12 @@ describe('FeatureRegistry', () => {
       };
 
       const featureRegistry = new FeatureRegistry();
-      expect(() =>
-        featureRegistry.registerKibanaFeature(feature)
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"child \\"privileges\\" fails because [\\"foo\\" is not allowed]"`
-      );
+      expect(() => featureRegistry.registerKibanaFeature(feature))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[privileges]: types that failed validation:
+        - [privileges.0]: expected value to equal [null]
+        - [privileges.1.foo]: definition for this key is missing"
+      `);
     });
 
     it(`prevents privileges from specifying app entries that don't exist at the root level`, () => {
@@ -827,7 +828,7 @@ describe('FeatureRegistry', () => {
       );
     });
 
-    it(`prevents privileges from specifying alerting entries that don't exist at the root level`, () => {
+    it(`prevents privileges from specifying alerting/rule entries that don't exist at the root level`, () => {
       const feature: KibanaFeatureConfig = {
         id: 'test-feature',
         name: 'Test Feature',
@@ -837,8 +838,10 @@ describe('FeatureRegistry', () => {
         privileges: {
           all: {
             alerting: {
-              all: ['foo', 'bar'],
-              read: ['baz'],
+              rule: {
+                all: ['foo', 'bar'],
+                read: ['baz'],
+              },
             },
             savedObject: {
               all: [],
@@ -848,7 +851,11 @@ describe('FeatureRegistry', () => {
             app: [],
           },
           read: {
-            alerting: { read: ['foo', 'bar', 'baz'] },
+            alerting: {
+              rule: {
+                read: ['foo', 'bar', 'baz'],
+              },
+            },
             savedObject: {
               all: [],
               read: [],
@@ -868,16 +875,21 @@ describe('FeatureRegistry', () => {
       );
     });
 
-    it(`prevents features from specifying alerting entries that don't exist at the privilege level`, () => {
+    it(`prevents privileges from specifying alerting/alert entries that don't exist at the root level`, () => {
       const feature: KibanaFeatureConfig = {
         id: 'test-feature',
         name: 'Test Feature',
         app: [],
         category: { id: 'foo', label: 'foo' },
-        alerting: ['foo', 'bar', 'baz'],
+        alerting: ['bar'],
         privileges: {
           all: {
-            alerting: { all: ['foo'] },
+            alerting: {
+              alert: {
+                all: ['foo', 'bar'],
+                read: ['baz'],
+              },
+            },
             savedObject: {
               all: [],
               read: [],
@@ -886,7 +898,57 @@ describe('FeatureRegistry', () => {
             app: [],
           },
           read: {
-            alerting: { all: ['foo'] },
+            alerting: {
+              alert: {
+                read: ['foo', 'bar', 'baz'],
+              },
+            },
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+            app: [],
+          },
+        },
+      };
+
+      const featureRegistry = new FeatureRegistry();
+
+      expect(() =>
+        featureRegistry.registerKibanaFeature(feature)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Feature privilege test-feature.all has unknown alerting entries: foo, baz"`
+      );
+    });
+
+    it(`prevents features from specifying alerting/rule entries that don't exist at the privilege level`, () => {
+      const feature: KibanaFeatureConfig = {
+        id: 'test-feature',
+        name: 'Test Feature',
+        app: [],
+        category: { id: 'foo', label: 'foo' },
+        alerting: ['foo', 'bar', 'baz'],
+        privileges: {
+          all: {
+            alerting: {
+              rule: {
+                all: ['foo'],
+              },
+            },
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+            app: [],
+          },
+          read: {
+            alerting: {
+              rule: {
+                all: ['foo'],
+              },
+            },
             savedObject: {
               all: [],
               read: [],
@@ -911,7 +973,11 @@ describe('FeatureRegistry', () => {
                       read: [],
                     },
                     ui: [],
-                    alerting: { all: ['bar'] },
+                    alerting: {
+                      rule: {
+                        all: ['bar'],
+                      },
+                    },
                   },
                 ],
               },
@@ -929,7 +995,80 @@ describe('FeatureRegistry', () => {
       );
     });
 
-    it(`prevents reserved privileges from specifying alerting entries that don't exist at the root level`, () => {
+    it(`prevents features from specifying alerting/alert entries that don't exist at the privilege level`, () => {
+      const feature: KibanaFeatureConfig = {
+        id: 'test-feature',
+        name: 'Test Feature',
+        app: [],
+        category: { id: 'foo', label: 'foo' },
+        alerting: ['foo', 'bar', 'baz'],
+        privileges: {
+          all: {
+            alerting: {
+              alert: {
+                all: ['foo'],
+              },
+            },
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+            app: [],
+          },
+          read: {
+            alerting: {
+              alert: {
+                all: ['foo'],
+              },
+            },
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+            app: [],
+          },
+        },
+        subFeatures: [
+          {
+            name: 'my sub feature',
+            privilegeGroups: [
+              {
+                groupType: 'independent',
+                privileges: [
+                  {
+                    id: 'cool-sub-feature-privilege',
+                    name: 'cool privilege',
+                    includeIn: 'none',
+                    savedObject: {
+                      all: [],
+                      read: [],
+                    },
+                    ui: [],
+                    alerting: {
+                      alert: {
+                        all: ['bar'],
+                      },
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const featureRegistry = new FeatureRegistry();
+
+      expect(() =>
+        featureRegistry.registerKibanaFeature(feature)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Feature test-feature specifies alerting entries which are not granted to any privileges: baz"`
+      );
+    });
+
+    it(`prevents reserved privileges from specifying alerting/rule entries that don't exist at the root level`, () => {
       const feature: KibanaFeatureConfig = {
         id: 'test-feature',
         name: 'Test Feature',
@@ -943,7 +1082,11 @@ describe('FeatureRegistry', () => {
             {
               id: 'reserved',
               privilege: {
-                alerting: { all: ['foo', 'bar', 'baz'] },
+                alerting: {
+                  rule: {
+                    all: ['foo', 'bar', 'baz'],
+                  },
+                },
                 savedObject: {
                   all: [],
                   read: [],
@@ -965,7 +1108,47 @@ describe('FeatureRegistry', () => {
       );
     });
 
-    it(`prevents features from specifying alerting entries that don't exist at the reserved privilege level`, () => {
+    it(`prevents reserved privileges from specifying alerting/alert entries that don't exist at the root level`, () => {
+      const feature: KibanaFeatureConfig = {
+        id: 'test-feature',
+        name: 'Test Feature',
+        app: [],
+        category: { id: 'foo', label: 'foo' },
+        alerting: ['bar'],
+        privileges: null,
+        reserved: {
+          description: 'something',
+          privileges: [
+            {
+              id: 'reserved',
+              privilege: {
+                alerting: {
+                  alert: {
+                    all: ['foo', 'bar', 'baz'],
+                  },
+                },
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+                ui: [],
+                app: [],
+              },
+            },
+          ],
+        },
+      };
+
+      const featureRegistry = new FeatureRegistry();
+
+      expect(() =>
+        featureRegistry.registerKibanaFeature(feature)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Feature privilege test-feature.reserved has unknown alerting entries: foo, baz"`
+      );
+    });
+
+    it(`prevents features from specifying alerting/rule entries that don't exist at the reserved privilege level`, () => {
       const feature: KibanaFeatureConfig = {
         id: 'test-feature',
         name: 'Test Feature',
@@ -979,7 +1162,51 @@ describe('FeatureRegistry', () => {
             {
               id: 'reserved',
               privilege: {
-                alerting: { all: ['foo', 'bar'] },
+                alerting: {
+                  rule: {
+                    all: ['foo', 'bar'],
+                  },
+                },
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+                ui: [],
+                app: [],
+              },
+            },
+          ],
+        },
+      };
+
+      const featureRegistry = new FeatureRegistry();
+
+      expect(() =>
+        featureRegistry.registerKibanaFeature(feature)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Feature test-feature specifies alerting entries which are not granted to any privileges: baz"`
+      );
+    });
+
+    it(`prevents features from specifying alerting/alert entries that don't exist at the reserved privilege level`, () => {
+      const feature: KibanaFeatureConfig = {
+        id: 'test-feature',
+        name: 'Test Feature',
+        app: [],
+        category: { id: 'foo', label: 'foo' },
+        alerting: ['foo', 'bar', 'baz'],
+        privileges: null,
+        reserved: {
+          description: 'something',
+          privileges: [
+            {
+              id: 'reserved',
+              privilege: {
+                alerting: {
+                  alert: {
+                    all: ['foo', 'bar'],
+                  },
+                },
                 savedObject: {
                   all: [],
                   read: [],
@@ -1278,7 +1505,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerKibanaFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"child \\"reserved\\" fails because [child \\"privileges\\" fails because [\\"privileges\\" at position 0 fails because [child \\"id\\" fails because [\\"id\\" with value \\"reserved_1\\" fails to match the required pattern: /^(?!reserved_)[a-zA-Z0-9_-]+$/]]]]"`
+        `"[reserved.privileges.0.id]: Does not satisfy regexp /^(?!reserved_)[a-zA-Z0-9_-]+$/"`
       );
     });
 
@@ -1394,9 +1621,11 @@ describe('FeatureRegistry', () => {
       const featureRegistry = new FeatureRegistry();
       expect(() => {
         featureRegistry.registerKibanaFeature(feature1);
-      }).toThrowErrorMatchingInlineSnapshot(
-        `"child \\"subFeatures\\" fails because [\\"subFeatures\\" at position 0 fails because [child \\"privilegeGroups\\" fails because [\\"privilegeGroups\\" at position 0 fails because [child \\"privileges\\" fails because [\\"privileges\\" at position 0 fails because [child \\"minimumLicense\\" fails because [\\"minimumLicense\\" is not allowed]]]]]]]"`
-      );
+      }).toThrowErrorMatchingInlineSnapshot(`
+        "[subFeatures.0.privilegeGroups.0]: types that failed validation:
+        - [subFeatures.0.privilegeGroups.0.0.privileges.0.minimumLicense]: a value wasn't expected to be present
+        - [subFeatures.0.privilegeGroups.0.1.groupType]: expected value to equal [independent]"
+      `);
     });
 
     it('cannot register feature after getAll has been called', () => {
@@ -1575,7 +1804,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerElasticsearchFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"child \\"privileges\\" fails because [\\"privileges\\" is required]"`
+        `"[privileges]: expected value of type [array] but got [undefined]"`
       );
     });
 

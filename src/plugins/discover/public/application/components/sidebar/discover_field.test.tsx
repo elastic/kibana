@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
-// @ts-ignore
+// @ts-expect-error
 import stubbedLogstashFields from '../../../__fixtures__/logstash_fields';
 import { mountWithIntl } from '@kbn/test/jest';
 import { DiscoverField } from './discover_field';
@@ -49,7 +49,7 @@ function getComponent({
 }) {
   const indexPattern = getStubIndexPattern(
     'logstash-*',
-    (cfg: any) => cfg,
+    (cfg: unknown) => cfg,
     'time',
     stubbedLogstashFields(),
     coreMock.createSetup()

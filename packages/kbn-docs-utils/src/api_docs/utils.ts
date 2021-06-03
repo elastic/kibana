@@ -87,7 +87,6 @@ export function getServiceForPath(filePath: string, pluginDirectory: string): st
 
 export function getPluginApiDocId(
   id: string,
-  log: ToolingLog,
   serviceInfo?: {
     serviceFolders: readonly string[];
     apiPath: string;

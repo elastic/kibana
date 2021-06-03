@@ -41,7 +41,7 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
       );
 
       if (!selectedAgents.length) {
-        throw new Error('No agents found for selection, aborting.');
+        return response.badRequest({ body: new Error('No agents found for selection') });
       }
 
       const action = {

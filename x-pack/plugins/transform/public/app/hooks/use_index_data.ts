@@ -14,6 +14,11 @@ import {
   isEsSearchResponse,
   isFieldHistogramsResponseSchema,
 } from '../../../common/api_schemas/type_guards';
+import {
+  hasKeywordDuplicate,
+  isKeywordDuplicate,
+  removeKeywordPostfix,
+} from '../../../common/utils/field_utils';
 import type { EsSorting, UseIndexDataReturnType } from '../../shared_imports';
 
 import { getErrorMessage } from '../../../common/utils/errors';
@@ -209,14 +214,25 @@ export const useIndexData = (
   };
 
   const fetchColumnChartsData = async function () {
+    const allIndexPatternFieldNames = new Set(indexPattern.fields.map((f) => f.name));
     const columnChartsData = await api.getHistogramsForFields(
       indexPattern.title,
       columns
         .filter((cT) => dataGrid.visibleColumns.includes(cT.id))
-        .map((cT) => ({
-          fieldName: cT.id,
-          type: getFieldType(cT.schema),
-        })),
+        .map((cT) => {
+          // If a column field name has a corresponding keyword field,
+          // fetch the keyword field instead to be able to do aggregations.
+          const fieldName = cT.id;
+          return hasKeywordDuplicate(fieldName, allIndexPatternFieldNames)
+            ? {
+                fieldName: `${fieldName}.keyword`,
+                type: getFieldType(undefined),
+              }
+            : {
+                fieldName,
+                type: getFieldType(cT.schema),
+              };
+        }),
       isDefaultQuery(query) ? matchAllQuery : query,
       combinedRuntimeMappings
     );
@@ -226,7 +242,15 @@ export const useIndexData = (
       return;
     }
 
-    setColumnCharts(columnChartsData);
+    setColumnCharts(
+      // revert field names with `.keyword` used to do aggregations to their original column name
+      columnChartsData.map((d) => ({
+        ...d,
+        ...(isKeywordDuplicate(d.id, allIndexPatternFieldNames)
+          ? { id: removeKeywordPostfix(d.id) }
+          : {}),
+      }))
+    );
   };
 
   useEffect(() => {

@@ -54,7 +54,8 @@ const getFilteredIndices = (followerIndices, queryText) => {
     const normalizedSearchText = queryText.toLowerCase();
 
     return followerIndices.filter((followerIndex) => {
-      const { name, remoteCluster, leaderIndex } = followerIndex;
+      // default values to avoid undefined errors
+      const { name = '', remoteCluster = '', leaderIndex = '' } = followerIndex;
 
       if (name.toLowerCase().includes(normalizedSearchText)) {
         return true;

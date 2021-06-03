@@ -696,7 +696,8 @@ export class IndexActionsContextMenu extends Component {
             iconSide = 'right',
             anchorPosition = 'rightUp',
             label = i18n.translate('xpack.idxMgmt.indexActionsMenu.manageButtonLabel', {
-              defaultMessage: 'Manage {selectedIndexCount, plural, one {index} other {indices}}',
+              defaultMessage:
+                'Manage {selectedIndexCount, plural, one {index} other {{selectedIndexCount} indices}}',
               values: { selectedIndexCount },
             }),
             iconType = 'arrowDown',

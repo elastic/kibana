@@ -8,11 +8,10 @@
 import { Search as LocalSearch } from 'js-search';
 import { useEffect, useRef } from 'react';
 
-import type { PackageList, PackageListItem } from '../../../types';
+import type { PackageList } from '../../../types';
 
-export type SearchField = keyof PackageListItem;
-export const searchIdField: SearchField = 'name';
-export const fieldsToSearch: SearchField[] = ['description', 'name', 'title'];
+export const searchIdField = 'id';
+export const fieldsToSearch = ['description', 'name', 'title'];
 
 export function useLocalSearch(packageList: PackageList) {
   const localSearchRef = useRef<LocalSearch | null>(null);

@@ -18,7 +18,7 @@ describe('actions', () => {
     jest.clearAllMocks();
   });
 
-  // Create a mock client that rejects all methods with a 503 statuscode
+  // Create a mock client that rejects all methods with a 503 status code
   // response.
   const retryableError = new EsErrors.ResponseError(
     elasticsearchClientMock.createApiResponse({
@@ -30,9 +30,14 @@ describe('actions', () => {
     elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
   );
 
+  const nonRetryableError = new Error('crash');
+  const clientWithNonRetryableError = elasticsearchClientMock.createInternalClient(
+    elasticsearchClientMock.createErrorTransportRequestPromise(nonRetryableError)
+  );
+
   describe('fetchIndices', () => {
     it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
-      const task = Actions.fetchIndices(client, ['my_index']);
+      const task = Actions.fetchIndices({ client, indices: ['my_index'] });
       try {
         await task();
       } catch (e) {
@@ -44,7 +49,7 @@ describe('actions', () => {
 
   describe('setWriteBlock', () => {
     it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
-      const task = Actions.setWriteBlock(client, 'my_index');
+      const task = Actions.setWriteBlock({ client, index: 'my_index' });
       try {
         await task();
       } catch (e) {
@@ -52,17 +57,37 @@ describe('actions', () => {
       }
       expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(retryableError);
     });
+    it('re-throws non retry-able errors', async () => {
+      const task = Actions.setWriteBlock({
+        client: clientWithNonRetryableError,
+        index: 'my_index',
+      });
+      await task();
+      expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(nonRetryableError);
+    });
   });
 
   describe('cloneIndex', () => {
     it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
-      const task = Actions.cloneIndex(client, 'my_source_index', 'my_target_index');
+      const task = Actions.cloneIndex({
+        client,
+        source: 'my_source_index',
+        target: 'my_target_index',
+      });
       try {
         await task();
       } catch (e) {
         /** ignore */
       }
       expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(retryableError);
+    });
+    it('re-throws non retry-able errors', async () => {
+      const task = Actions.setWriteBlock({
+        client: clientWithNonRetryableError,
+        index: 'my_index',
+      });
+      await task();
+      expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(nonRetryableError);
     });
   });
 
@@ -80,7 +105,7 @@ describe('actions', () => {
 
   describe('openPit', () => {
     it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
-      const task = Actions.openPit(client, 'my_index');
+      const task = Actions.openPit({ client, index: 'my_index' });
       try {
         await task();
       } catch (e) {
@@ -92,7 +117,12 @@ describe('actions', () => {
 
   describe('readWithPit', () => {
     it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
-      const task = Actions.readWithPit(client, 'pitId', Option.none, 10_000);
+      const task = Actions.readWithPit({
+        client,
+        pitId: 'pitId',
+        query: { match_all: {} },
+        batchSize: 10_000,
+      });
       try {
         await task();
       } catch (e) {
@@ -104,19 +134,7 @@ describe('actions', () => {
 
   describe('closePit', () => {
     it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
-      const task = Actions.closePit(client, 'pitId');
-      try {
-        await task();
-      } catch (e) {
-        /** ignore */
-      }
-      expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(retryableError);
-    });
-  });
-
-  describe('transformDocs', () => {
-    it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
-      const task = Actions.transformDocs(client, () => Promise.resolve([]), [], 'my_index', false);
+      const task = Actions.closePit({ client, pitId: 'pitId' });
       try {
         await task();
       } catch (e) {
@@ -128,14 +146,14 @@ describe('actions', () => {
 
   describe('reindex', () => {
     it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
-      const task = Actions.reindex(
+      const task = Actions.reindex({
         client,
-        'my_source_index',
-        'my_target_index',
-        Option.none,
-        false,
-        Option.none
-      );
+        sourceIndex: 'my_source_index',
+        targetIndex: 'my_target_index',
+        reindexScript: Option.none,
+        requireAlias: false,
+        unusedTypesQuery: {},
+      });
       try {
         await task();
       } catch (e) {
@@ -147,7 +165,7 @@ describe('actions', () => {
 
   describe('waitForReindexTask', () => {
     it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
-      const task = Actions.waitForReindexTask(client, 'my task id', '60s');
+      const task = Actions.waitForReindexTask({ client, taskId: 'my task id', timeout: '60s' });
       try {
         await task();
       } catch (e) {
@@ -155,12 +173,24 @@ describe('actions', () => {
       }
 
       expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(retryableError);
+    });
+    it('re-throws non retry-able errors', async () => {
+      const task = Actions.setWriteBlock({
+        client: clientWithNonRetryableError,
+        index: 'my_index',
+      });
+      await task();
+      expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(nonRetryableError);
     });
   });
 
   describe('waitForPickupUpdatedMappingsTask', () => {
     it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
-      const task = Actions.waitForPickupUpdatedMappingsTask(client, 'my task id', '60s');
+      const task = Actions.waitForPickupUpdatedMappingsTask({
+        client,
+        taskId: 'my task id',
+        timeout: '60s',
+      });
       try {
         await task();
       } catch (e) {
@@ -168,12 +198,20 @@ describe('actions', () => {
       }
 
       expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(retryableError);
+    });
+    it('re-throws non retry-able errors', async () => {
+      const task = Actions.setWriteBlock({
+        client: clientWithNonRetryableError,
+        index: 'my_index',
+      });
+      await task();
+      expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(nonRetryableError);
     });
   });
 
   describe('updateAliases', () => {
     it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
-      const task = Actions.updateAliases(client, []);
+      const task = Actions.updateAliases({ client, aliasActions: [] });
       try {
         await task();
       } catch (e) {
@@ -181,12 +219,24 @@ describe('actions', () => {
       }
 
       expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(retryableError);
+    });
+    it('re-throws non retry-able errors', async () => {
+      const task = Actions.setWriteBlock({
+        client: clientWithNonRetryableError,
+        index: 'my_index',
+      });
+      await task();
+      expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(nonRetryableError);
     });
   });
 
   describe('createIndex', () => {
     it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
-      const task = Actions.createIndex(client, 'new_index', { properties: {} });
+      const task = Actions.createIndex({
+        client,
+        indexName: 'new_index',
+        mappings: { properties: {} },
+      });
       try {
         await task();
       } catch (e) {
@@ -195,11 +245,23 @@ describe('actions', () => {
 
       expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(retryableError);
     });
+    it('re-throws non retry-able errors', async () => {
+      const task = Actions.setWriteBlock({
+        client: clientWithNonRetryableError,
+        index: 'my_index',
+      });
+      await task();
+      expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(nonRetryableError);
+    });
   });
 
   describe('updateAndPickupMappings', () => {
     it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
-      const task = Actions.updateAndPickupMappings(client, 'new_index', { properties: {} });
+      const task = Actions.updateAndPickupMappings({
+        client,
+        index: 'new_index',
+        mappings: { properties: {} },
+      });
       try {
         await task();
       } catch (e) {
@@ -253,7 +315,25 @@ describe('actions', () => {
 
   describe('bulkOverwriteTransformedDocuments', () => {
     it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
-      const task = Actions.bulkOverwriteTransformedDocuments(client, 'new_index', [], 'wait_for');
+      const task = Actions.bulkOverwriteTransformedDocuments({
+        client,
+        index: 'new_index',
+        transformedDocs: [],
+        refresh: 'wait_for',
+      });
+      try {
+        await task();
+      } catch (e) {
+        /** ignore */
+      }
+
+      expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(retryableError);
+    });
+  });
+
+  describe('refreshIndex', () => {
+    it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
+      const task = Actions.refreshIndex({ client, targetIndex: 'target_index' });
       try {
         await task();
       } catch (e) {

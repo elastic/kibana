@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_URL } from '../../../../../../common/constants';
@@ -13,7 +14,7 @@ import { ConfigType } from '../../../../..';
 import { SetupPlugins } from '../../../../../plugin';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 
-import { transformError, buildSiemResponse } from '../../../../detection_engine/routes/utils';
+import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { createTimelineSchema } from '../../../schemas/timelines';
 import {

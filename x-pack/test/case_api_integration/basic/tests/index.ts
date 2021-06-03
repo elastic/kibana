@@ -13,6 +13,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     // Fastest ciGroup for the moment.
     this.tags('ciGroup5');
 
+    loadTestFile(require.resolve('./cases/alerts/get_cases'));
     loadTestFile(require.resolve('./cases/comments/delete_comment'));
     loadTestFile(require.resolve('./cases/comments/find_comments'));
     loadTestFile(require.resolve('./cases/comments/get_comment'));

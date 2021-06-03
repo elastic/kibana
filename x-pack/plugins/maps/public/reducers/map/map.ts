@@ -14,6 +14,7 @@ import {
   ADD_LAYER,
   SET_LAYER_ERROR_STATUS,
   ADD_WAITING_FOR_MAP_READY_LAYER,
+  CLEAR_LAYER_PROP,
   CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
   REMOVE_LAYER,
   SET_LAYER_VISIBILITY,
@@ -49,6 +50,7 @@ import {
 
 import { getDefaultMapSettings } from './default_map_settings';
 import {
+  clearLayerProp,
   getLayerIndex,
   removeTrackedLayerState,
   rollbackTrackedLayerState,
@@ -71,6 +73,7 @@ export const DEFAULT_MAP_STATE: MapState = {
     extent: undefined,
     mouseCoordinates: undefined,
     timeFilters: undefined,
+    timeslice: undefined,
     query: undefined,
     filters: [],
     refreshConfig: undefined,
@@ -216,13 +219,21 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
       };
       return { ...state, mapState: { ...state.mapState, ...newMapState } };
     case SET_QUERY:
-      const { query, timeFilters, filters, searchSessionId, searchSessionMapBuffer } = action;
+      const {
+        query,
+        timeFilters,
+        timeslice,
+        filters,
+        searchSessionId,
+        searchSessionMapBuffer,
+      } = action;
       return {
         ...state,
         mapState: {
           ...state.mapState,
           query,
           timeFilters,
+          timeslice,
           filters,
           searchSessionId,
           searchSessionMapBuffer,
@@ -258,6 +269,8 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
       };
     case UPDATE_LAYER_PROP:
       return updateLayerInList(state, action.id, action.propName, action.newValue);
+    case CLEAR_LAYER_PROP:
+      return clearLayerProp(state, action.id, action.propName);
     case UPDATE_SOURCE_PROP:
       return updateLayerSourceDescriptorProp(state, action.layerId, action.propName, action.value);
     case SET_JOINS:

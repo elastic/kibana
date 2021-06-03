@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Route, Redirect, Switch, useRouteMatch } from 'react-router-dom';
 
 import { useValues } from 'kea';
@@ -25,6 +25,7 @@ import { EngineNav, EngineRouter } from './components/engine';
 import { EngineCreation } from './components/engine_creation';
 import { EnginesOverview, ENGINES_TITLE } from './components/engines';
 import { ErrorConnecting } from './components/error_connecting';
+import { KibanaHeaderActions } from './components/layout/kibana_header_actions';
 import { Library } from './components/library';
 import { MetaEngineCreation } from './components/meta_engine_creation';
 import { RoleMappingsRouter } from './components/role_mappings';
@@ -77,7 +78,12 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
   const {
     myRole: { canManageEngines, canManageMetaEngines, canViewRoleMappings },
   } = useValues(AppLogic(props));
+  const { renderHeaderActions } = useValues(KibanaLogic);
   const { readOnlyMode } = useValues(HttpLogic);
+
+  useEffect(() => {
+    renderHeaderActions(KibanaHeaderActions);
+  }, []);
 
   return (
     <Switch>

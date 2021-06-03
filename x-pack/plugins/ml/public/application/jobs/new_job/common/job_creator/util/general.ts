@@ -79,8 +79,9 @@ export function getRichDetectors(
       byField,
       overField,
       partitionField,
-      excludeFrequent: d.exclude_frequent || null,
-      description: d.detector_description || null,
+      excludeFrequent: d.exclude_frequent ?? null,
+      description: d.detector_description ?? null,
+      useNull: d.use_null ?? null,
     };
   });
 }

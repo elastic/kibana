@@ -8,6 +8,8 @@
 import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { act } from '@testing-library/react';
 import { AlertDetails } from './alert_details';
 import { Alert, ActionType, AlertTypeModel, AlertType } from '../../../../types';
 import { EuiTitle, EuiBadge, EuiFlexItem, EuiSwitch, EuiButtonEmpty, EuiText } from '@elastic/eui';
@@ -462,6 +464,74 @@ describe('disable button', () => {
     expect(enableAlert).toHaveBeenCalledTimes(0);
     handler!({} as React.FormEvent);
     expect(enableAlert).toHaveBeenCalledTimes(1);
+  });
+
+  it('should reset error banner dismissal after re-enabling the alert', async () => {
+    const alert = mockAlert({
+      enabled: true,
+      executionStatus: {
+        status: 'error',
+        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        error: {
+          reason: AlertExecutionStatusErrorReasons.Execute,
+          message: 'Fail',
+        },
+      },
+    });
+
+    const alertType: AlertType = {
+      id: '.noop',
+      name: 'No Op',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup,
+      actionVariables: { context: [], state: [], params: [] },
+      defaultActionGroupId: 'default',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
+      minimumLicenseRequired: 'basic',
+      enabledInLicense: true,
+    };
+
+    const disableAlert = jest.fn();
+    const enableAlert = jest.fn();
+    const wrapper = mountWithIntl(
+      <AlertDetails
+        alert={alert}
+        alertType={alertType}
+        actionTypes={[]}
+        {...mockAlertApis}
+        disableAlert={disableAlert}
+        enableAlert={enableAlert}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    // Dismiss the error banner
+    await act(async () => {
+      wrapper.find('[data-test-subj="dismiss-execution-error"]').first().simulate('click');
+      await nextTick();
+    });
+
+    // Disable the alert
+    await act(async () => {
+      wrapper.find('[data-test-subj="disableSwitch"] .euiSwitch__button').first().simulate('click');
+      await nextTick();
+    });
+    expect(disableAlert).toHaveBeenCalled();
+
+    // Enable the alert
+    await act(async () => {
+      wrapper.find('[data-test-subj="disableSwitch"] .euiSwitch__button').first().simulate('click');
+      await nextTick();
+    });
+    expect(enableAlert).toHaveBeenCalled();
+
+    // Ensure error banner is back
+    expect(wrapper.find('[data-test-subj="dismiss-execution-error"]').length).toBeGreaterThan(0);
   });
 });
 

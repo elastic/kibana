@@ -6,7 +6,7 @@
  */
 
 import { FeatureCollection } from 'geojson';
-import { Map as MbMap } from 'mapbox-gl';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
 import {
   EMPTY_FEATURE_COLLECTION,
   SOURCE_BOUNDS_DATA_REQUEST_ID,
@@ -136,6 +136,7 @@ export async function getVectorSourceBounds({
     sourceQuery: sourceQuery ? sourceQuery : undefined,
     query: dataFilters.query,
     timeFilters: dataFilters.timeFilters,
+    timeslice: dataFilters.timeslice,
     filters: dataFilters.filters,
     applyGlobalQuery: source.getApplyGlobalQuery(),
     applyGlobalTime: source.getApplyGlobalTime(),

@@ -25,7 +25,10 @@ export const DEFAULT_TIME_RANGE = 'timepicker:timeDefaults';
 export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults';
 export const DEFAULT_APP_TIME_RANGE = 'securitySolution:timeDefaults';
 export const DEFAULT_APP_REFRESH_INTERVAL = 'securitySolution:refreshIntervalDefaults';
+export const DEFAULT_ALERTS_INDEX = '.alerts-security-solution';
 export const DEFAULT_SIGNALS_INDEX = '.siem-signals';
+export const DEFAULT_LISTS_INDEX = '.lists';
+export const DEFAULT_ITEMS_INDEX = '.items';
 // The DEFAULT_MAX_SIGNALS value exists also in `x-pack/plugins/cases/common/constants.ts`
 // If either changes, engineer should ensure both values are updated
 export const DEFAULT_MAX_SIGNALS = 100;
@@ -50,6 +53,7 @@ export const DEFAULT_RULE_REFRESH_INTERVAL_ON = true;
 export const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000; // ms
 export const DEFAULT_RULE_REFRESH_IDLE_VALUE = 2700000; // ms
 export const DEFAULT_RULE_NOTIFICATION_QUERY_SIZE = 100;
+export const SAVED_OBJECTS_MANAGEMENT_FEATURE_ID = 'Saved Objects Management';
 
 // Document path where threat indicator fields are expected. Fields are used
 // to enrich signals, and are copied to threat.indicator.
@@ -144,6 +148,18 @@ export const DEFAULT_TRANSFORMS_SETTING = JSON.stringify(defaultTransformsSettin
  * Id for the signals alerting type
  */
 export const SIGNALS_ID = `siem.signals`;
+
+/**
+ * Id's for reference rule types
+ */
+export const REFERENCE_RULE_ALERT_TYPE_ID = `siem.referenceRule`;
+export const REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID = `siem.referenceRulePersistence`;
+
+export const CUSTOM_ALERT_TYPE_ID = `siem.customRule`;
+export const EQL_ALERT_TYPE_ID = `siem.eqlRule`;
+export const INDICATOR_ALERT_TYPE_ID = `siem.indicatorRule`;
+export const ML_ALERT_TYPE_ID = `siem.mlRule`;
+export const THRESHOLD_ALERT_TYPE_ID = `siem.thresholdRule`;
 
 /**
  * Id for the notifications alerting type

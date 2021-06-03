@@ -7,7 +7,7 @@
 
 import createContainer from 'constate';
 import { useCallback, useState } from 'react';
-import { useDebounce } from 'react-use';
+import useDebounce from 'react-use/lib/useDebounce';
 import { esQuery, IIndexPattern, Query } from '../../../../../../../src/plugins/data/public';
 
 type ParsedQuery = ReturnType<typeof esQuery.buildEsQuery>;

@@ -16,8 +16,9 @@ function isObject(value: unknown) {
   return value != null && (type === 'object' || type === 'function');
 }
 
-// TODO: Copied from https://github.com/elastic/kibana/blob/master/x-pack/plugins/security_solution/common/format_errors.ts
-// We should figure out a better way to share this
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils/src/format_errors/index.ts
+ */
 export const formatErrors = (errors: t.Errors): string[] => {
   return errors.map((error) => {
     if (error.message != null) {

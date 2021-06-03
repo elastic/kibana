@@ -6,8 +6,7 @@
  */
 
 import './dimension_editor.scss';
-import _ from 'lodash';
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiListGroup,
@@ -27,7 +26,6 @@ import {
   getOperationDisplay,
   insertOrReplaceColumn,
   replaceColumn,
-  deleteColumn,
   updateColumnParam,
   resetIncomplete,
   FieldBasedIndexPatternColumn,
@@ -45,6 +43,8 @@ import { ReferenceEditor } from './reference_editor';
 import { setTimeScaling, TimeScaling } from './time_scaling';
 import { defaultFilter, Filtering, setFilter } from './filtering';
 import { AdvancedOptions } from './advanced_options';
+import { setTimeShift, TimeShift } from './time_shift';
+import { useDebouncedValue } from '../../shared_components';
 
 const operationPanels = getOperationDisplay();
 
@@ -54,39 +54,8 @@ export interface DimensionEditorProps extends IndexPatternDimensionEditorProps {
   currentIndexPattern: IndexPattern;
 }
 
-/**
- * This component shows a debounced input for the label of a dimension. It will update on root state changes
- * if no debounced changes are in flight because the user is currently typing into the input.
- */
 const LabelInput = ({ value, onChange }: { value: string; onChange: (value: string) => void }) => {
-  const [inputValue, setInputValue] = useState(value);
-  const unflushedChanges = useRef(false);
-
-  // Save the initial value
-  const initialValue = useRef(value);
-
-  const onChangeDebounced = useMemo(() => {
-    const callback = _.debounce((val: string) => {
-      onChange(val);
-      unflushedChanges.current = false;
-    }, 256);
-    return (val: string) => {
-      unflushedChanges.current = true;
-      callback(val);
-    };
-  }, [onChange]);
-
-  useEffect(() => {
-    if (!unflushedChanges.current && value !== inputValue) {
-      setInputValue(value);
-    }
-  }, [value, inputValue]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = String(e.target.value);
-    setInputValue(val);
-    onChangeDebounced(val || initialValue.current);
-  };
+  const { inputValue, handleInputChange, initialValue } = useDebouncedValue({ onChange, value });
 
   return (
     <EuiFormRow
@@ -101,8 +70,10 @@ const LabelInput = ({ value, onChange }: { value: string; onChange: (value: stri
         compressed
         data-test-subj="indexPattern-label-edit"
         value={inputValue}
-        onChange={handleInputChange}
-        placeholder={initialValue.current}
+        onChange={(e) => {
+          handleInputChange(e.target.value);
+        }}
+        placeholder={initialValue}
       />
     </EuiFormRow>
   );
@@ -130,15 +101,26 @@ export function DimensionEditor(props: DimensionEditorProps) {
   };
   const { fieldByOperation, operationWithoutField } = operationSupportMatrix;
 
-  const setStateWrapper = (layer: IndexPatternLayer) => {
-    const hasIncompleteColumns = Boolean(layer.incompleteColumns?.[columnId]);
+  const setStateWrapper = (
+    setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
+  ) => {
+    const hypotheticalLayer = typeof setter === 'function' ? setter(state.layers[layerId]) : setter;
+    const hasIncompleteColumns = Boolean(hypotheticalLayer.incompleteColumns?.[columnId]);
     const prevOperationType =
-      operationDefinitionMap[state.layers[layerId].columns[columnId]?.operationType]?.input;
-    setState(mergeLayer({ state, layerId, newLayer: layer }), {
-      shouldReplaceDimension: Boolean(layer.columns[columnId]),
-      // clear the dimension if there's an incomplete column pending && previous operation was a fullReference operation
-      shouldRemoveDimension: Boolean(hasIncompleteColumns && prevOperationType === 'fullReference'),
-    });
+      operationDefinitionMap[hypotheticalLayer.columns[columnId]?.operationType]?.input;
+    setState(
+      (prevState) => {
+        const layer = typeof setter === 'function' ? setter(prevState.layers[layerId]) : setter;
+        return mergeLayer({ state: prevState, layerId, newLayer: layer });
+      },
+      {
+        shouldReplaceDimension: Boolean(hypotheticalLayer.columns[columnId]),
+        // clear the dimension if there's an incomplete column pending && previous operation was a fullReference operation
+        shouldRemoveDimension: Boolean(
+          hasIncompleteColumns && prevOperationType === 'fullReference'
+        ),
+      }
+    );
   };
 
   const selectedOperationDefinition =
@@ -152,6 +134,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const possibleOperations = useMemo(() => {
     return Object.values(operationDefinitionMap)
+      .filter(({ hidden }) => !hidden)
       .sort((op1, op2) => {
         return op1.displayName.localeCompare(op2.displayName);
       })
@@ -160,6 +143,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
   }, [fieldByOperation, operationWithoutField]);
 
   const [filterByOpenInitially, setFilterByOpenInitally] = useState(false);
+  const [timeShiftedFocused, setTimeShiftFocused] = useState(false);
 
   // Operations are compatible if they match inputs. They are always compatible in
   // the empty state. Field-based operations are not compatible with field-less operations.
@@ -243,6 +227,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         onClick() {
           if (
             operationDefinitionMap[operationType].input === 'none' ||
+            operationDefinitionMap[operationType].input === 'managedReference' ||
             operationDefinitionMap[operationType].input === 'fullReference'
           ) {
             // Clear invalid state because we are reseting to a valid column
@@ -320,7 +305,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   // Need to workout early on the error to decide whether to show this or an help text
   const fieldErrorMessage =
-    (selectedOperationDefinition?.input !== 'fullReference' ||
+    ((selectedOperationDefinition?.input !== 'fullReference' &&
+      selectedOperationDefinition?.input !== 'managedReference') ||
       (incompleteOperation && operationDefinitionMap[incompleteOperation].input === 'field')) &&
     getErrorMessage(
       selectedColumn,
@@ -364,8 +350,19 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   key={index}
                   layer={state.layers[layerId]}
                   columnId={referenceId}
-                  updateLayer={(newLayer: IndexPatternLayer) => {
-                    setState(mergeLayer({ state, layerId, newLayer }));
+                  updateLayer={(
+                    setter:
+                      | IndexPatternLayer
+                      | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
+                  ) => {
+                    setState(
+                      mergeLayer({
+                        state,
+                        layerId,
+                        newLayer:
+                          typeof setter === 'function' ? setter(state.layers[layerId]) : setter,
+                      })
+                    );
                   }}
                   validation={validation}
                   currentIndexPattern={currentIndexPattern}
@@ -422,15 +419,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   : (selectedColumn as FieldBasedIndexPatternColumn)?.sourceField
               }
               incompleteOperation={incompleteOperation}
-              onDeleteColumn={() => {
-                setStateWrapper(
-                  deleteColumn({
-                    layer: state.layers[layerId],
-                    columnId,
-                    indexPattern: currentIndexPattern,
-                  })
-                );
-              }}
               onChoose={(choice) => {
                 setStateWrapper(
                   insertOrReplaceColumn({
@@ -457,6 +445,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               currentColumn={state.layers[layerId].columns[columnId]}
               dateRange={dateRange}
               indexPattern={currentIndexPattern}
+              operationDefinitionMap={operationDefinitionMap}
               {...services}
             />
           </>
@@ -516,6 +505,38 @@ export function DimensionEditor(props: DimensionEditorProps) {
                       layer={state.layers[layerId]}
                       updateLayer={setStateWrapper}
                       isInitiallyOpen={filterByOpenInitially}
+                    />
+                  ) : null,
+              },
+              {
+                title: i18n.translate('xpack.lens.indexPattern.timeShift.label', {
+                  defaultMessage: 'Time shift',
+                }),
+                dataTestSubj: 'indexPattern-time-shift-enable',
+                onClick: () => {
+                  setTimeShiftFocused(true);
+                  setStateWrapper(setTimeShift(columnId, state.layers[layerId], ''));
+                },
+                showInPopover: Boolean(
+                  operationDefinitionMap[selectedColumn.operationType].shiftable &&
+                    selectedColumn.timeShift === undefined &&
+                    (currentIndexPattern.timeFieldName ||
+                      Object.values(state.layers[layerId].columns).some(
+                        (col) => col.operationType === 'date_histogram'
+                      ))
+                ),
+                inlineElement:
+                  operationDefinitionMap[selectedColumn.operationType].shiftable &&
+                  selectedColumn.timeShift !== undefined ? (
+                    <TimeShift
+                      indexPattern={currentIndexPattern}
+                      selectedColumn={selectedColumn}
+                      columnId={columnId}
+                      layer={state.layers[layerId]}
+                      updateLayer={setStateWrapper}
+                      isFocused={timeShiftedFocused}
+                      activeData={props.activeData}
+                      layerId={layerId}
                     />
                   ) : null,
               },
@@ -596,7 +617,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
 function getErrorMessage(
   selectedColumn: IndexPatternColumn | undefined,
   incompleteOperation: boolean,
-  input: 'none' | 'field' | 'fullReference' | undefined,
+  input: 'none' | 'field' | 'fullReference' | 'managedReference' | undefined,
   fieldInvalid: boolean
 ) {
   if (selectedColumn && incompleteOperation) {

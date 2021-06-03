@@ -7,7 +7,7 @@
 
 import { resolve } from 'path';
 
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { GatlingTestRunner } from './runner';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {

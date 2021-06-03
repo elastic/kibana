@@ -20,20 +20,16 @@ export function dateHistogram(req, panel, esQueryConfig, seriesIndex, capabiliti
   return (next) => async (doc) => {
     const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
     const { timeField, interval } = getIntervalAndTimefield(panel, {}, seriesIndex);
+    const { from, to } = getTimerange(req);
 
     const meta = {
       timeField,
       index: panel.use_kibana_indexes ? seriesIndex.indexPattern?.id : undefined,
+      panelId: panel.id,
     };
 
-    const getDateHistogramForLastBucketMode = () => {
-      const { bucketSize, intervalString } = getBucketSize(
-        req,
-        interval,
-        capabilities,
-        barTargetUiSettings
-      );
-      const { from, to } = getTimerange(req);
+    const overwriteDateHistogramForLastBucketMode = () => {
+      const { intervalString } = getBucketSize(req, interval, capabilities, barTargetUiSettings);
       const { timezone } = capabilities;
 
       panel.series.forEach((column) => {
@@ -53,12 +49,13 @@ export function dateHistogram(req, panel, esQueryConfig, seriesIndex, capabiliti
         overwrite(doc, aggRoot.replace(/\.aggs$/, '.meta'), {
           ...meta,
           intervalString,
-          bucketSize,
         });
       });
     };
 
-    const getDateHistogramForEntireTimerangeMode = () => {
+    const overwriteDateHistogramForEntireTimerangeMode = () => {
+      const intervalString = `${to.valueOf() - from.valueOf()}ms`;
+
       panel.series.forEach((column) => {
         const aggRoot = calculateAggRoot(doc, column);
 
@@ -67,13 +64,16 @@ export function dateHistogram(req, panel, esQueryConfig, seriesIndex, capabiliti
           buckets: 1,
         });
 
-        overwrite(doc, aggRoot.replace(/\.aggs$/, '.meta'), meta);
+        overwrite(doc, aggRoot.replace(/\.aggs$/, '.meta'), {
+          ...meta,
+          intervalString,
+        });
       });
     };
 
     isLastValueTimerangeMode(panel)
-      ? getDateHistogramForLastBucketMode()
-      : getDateHistogramForEntireTimerangeMode();
+      ? overwriteDateHistogramForLastBucketMode()
+      : overwriteDateHistogramForEntireTimerangeMode();
 
     return next(doc);
   };

@@ -60,7 +60,7 @@ describe('AllCasesSelectorModal', () => {
         index: 'index-id',
         alertId: 'alert-id',
       },
-      disabledStatuses: [],
+      hiddenStatuses: [],
       updateCase,
     };
     mount(
@@ -73,7 +73,7 @@ describe('AllCasesSelectorModal', () => {
       expect.objectContaining({
         alertData: fullProps.alertData,
         createCaseNavigation,
-        disabledStatuses: fullProps.disabledStatuses,
+        hiddenStatuses: fullProps.hiddenStatuses,
         isSelectorView: true,
         userCanCrud: fullProps.userCanCrud,
         updateCase,

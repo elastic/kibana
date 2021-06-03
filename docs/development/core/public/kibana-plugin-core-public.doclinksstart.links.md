@@ -104,10 +104,14 @@ readonly links: {
             readonly painlessWalkthrough: string;
             readonly luceneExpressions: string;
         };
+        readonly search: {
+            readonly sessions: string;
+        };
         readonly indexPatterns: {
             readonly introduction: string;
             readonly fieldFormattersNumber: string;
             readonly fieldFormattersString: string;
+            readonly runtimeFields: string;
         };
         readonly addData: string;
         readonly kibana: string;
@@ -141,6 +145,7 @@ readonly links: {
             createSnapshotLifecyclePolicy: string;
             createRoleMapping: string;
             createRoleMappingTemplates: string;
+            createRollupJobsRequest: string;
             createApiKey: string;
             createPipeline: string;
             createTransformRequest: string;

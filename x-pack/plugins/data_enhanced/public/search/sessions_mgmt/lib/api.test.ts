@@ -87,6 +87,35 @@ describe('Search Sessions Management API', () => {
       `);
     });
 
+    test('completed session with expired time is showed as expired', async () => {
+      sessionsClient.find = jest.fn().mockImplementation(async () => {
+        return {
+          saved_objects: [
+            {
+              id: 'hello-pizza-123',
+              attributes: {
+                name: 'Veggie',
+                appId: 'pizza',
+                status: 'complete',
+                expires: moment().subtract(3, 'days'),
+                initialState: {},
+                restoreState: {},
+              },
+            },
+          ],
+        } as SavedObjectsFindResponse;
+      });
+
+      const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
+        urls: mockUrls,
+        notifications: mockCoreStart.notifications,
+        application: mockCoreStart.application,
+      });
+
+      const res = await api.fetchTableData();
+      expect(res[0].status).toBe(SearchSessionStatus.EXPIRED);
+    });
+
     test('handle error from sessionsClient response', async () => {
       sessionsClient.find = jest.fn().mockRejectedValue(new Error('implementation is so bad'));
 

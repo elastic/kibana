@@ -311,27 +311,6 @@ describe('RoleMappingsLogic', () => {
       });
     });
 
-    describe('handleResetMappings', () => {
-      const callback = jest.fn();
-      it('calls API and executes callback', async () => {
-        http.post.mockReturnValue(Promise.resolve({}));
-        RoleMappingsLogic.actions.handleResetMappings(callback);
-
-        expect(http.post).toHaveBeenCalledWith('/api/app_search/role_mappings/reset');
-        await nextTick();
-        expect(callback).toHaveBeenCalled();
-      });
-
-      it('handles error', async () => {
-        http.post.mockReturnValue(Promise.reject('this is an error'));
-        RoleMappingsLogic.actions.handleResetMappings(callback);
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
-        expect(callback).toHaveBeenCalled();
-      });
-    });
-
     describe('handleSaveMapping', () => {
       const body = {
         roleType: 'owner',

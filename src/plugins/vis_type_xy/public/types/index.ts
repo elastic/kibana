@@ -9,4 +9,4 @@
 export * from './constants';
 export * from './config';
 export * from './param';
-export * from './vis_type';
+export type { VisTypeNames, XyVisTypeDefinition } from './vis_type';

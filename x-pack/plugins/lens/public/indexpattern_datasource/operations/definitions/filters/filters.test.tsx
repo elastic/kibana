@@ -27,6 +27,7 @@ const defaultProps = {
   data: dataPluginMock.createStartContract(),
   http: {} as HttpSetup,
   indexPattern: createMockedIndexPattern(),
+  operationDefinitionMap: {},
 };
 
 // mocking random id generator function

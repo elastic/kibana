@@ -40,13 +40,10 @@ export default function ({ getPageObjects, getService }) {
         maxzoom: 24,
         filter: [
           'all',
+          ['!=', ['get', '__kbn_too_many_features__'], true],
+          ['!=', ['get', '__kbn_is_centroid_feature__'], true],
+          ['any', ['==', ['geometry-type'], 'Point'], ['==', ['geometry-type'], 'MultiPoint']],
           ['==', ['get', '__kbn_isvisibleduetojoin__'], true],
-          [
-            'all',
-            ['!=', ['get', '__kbn_too_many_features__'], true],
-            ['!=', ['get', '__kbn_is_centroid_feature__'], true],
-            ['any', ['==', ['geometry-type'], 'Point'], ['==', ['geometry-type'], 'MultiPoint']],
-          ],
         ],
         layout: { visibility: 'visible' },
         paint: {
@@ -124,17 +121,10 @@ export default function ({ getPageObjects, getService }) {
         maxzoom: 24,
         filter: [
           'all',
+          ['!=', ['get', '__kbn_too_many_features__'], true],
+          ['!=', ['get', '__kbn_is_centroid_feature__'], true],
+          ['any', ['==', ['geometry-type'], 'Polygon'], ['==', ['geometry-type'], 'MultiPolygon']],
           ['==', ['get', '__kbn_isvisibleduetojoin__'], true],
-          [
-            'all',
-            ['!=', ['get', '__kbn_too_many_features__'], true],
-            ['!=', ['get', '__kbn_is_centroid_feature__'], true],
-            [
-              'any',
-              ['==', ['geometry-type'], 'Polygon'],
-              ['==', ['geometry-type'], 'MultiPolygon'],
-            ],
-          ],
         ],
         layout: { visibility: 'visible' },
         paint: {
@@ -208,19 +198,16 @@ export default function ({ getPageObjects, getService }) {
         maxzoom: 24,
         filter: [
           'all',
-          ['==', ['get', '__kbn_isvisibleduetojoin__'], true],
+          ['!=', ['get', '__kbn_too_many_features__'], true],
+          ['!=', ['get', '__kbn_is_centroid_feature__'], true],
           [
-            'all',
-            ['!=', ['get', '__kbn_too_many_features__'], true],
-            ['!=', ['get', '__kbn_is_centroid_feature__'], true],
-            [
-              'any',
-              ['==', ['geometry-type'], 'Polygon'],
-              ['==', ['geometry-type'], 'MultiPolygon'],
-              ['==', ['geometry-type'], 'LineString'],
-              ['==', ['geometry-type'], 'MultiLineString'],
-            ],
+            'any',
+            ['==', ['geometry-type'], 'Polygon'],
+            ['==', ['geometry-type'], 'MultiPolygon'],
+            ['==', ['geometry-type'], 'LineString'],
+            ['==', ['geometry-type'], 'MultiLineString'],
           ],
+          ['==', ['get', '__kbn_isvisibleduetojoin__'], true],
         ],
         layout: { visibility: 'visible' },
         paint: { 'line-color': '#41937c', 'line-opacity': 0.75, 'line-width': 1 },

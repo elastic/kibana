@@ -9,8 +9,7 @@ import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import { TypeAndTimelineOnly, typeAndTimelineOnlySchema } from './type_timeline_only_schema';
-import { exactCheck } from '../../../exact_check';
-import { foldLeftRight, getPaths } from '../../../test_utils';
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('prepackaged_rule_schema', () => {
   test('it should validate a a type and timeline_id together', () => {

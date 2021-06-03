@@ -12,7 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Unusual Process Execution Path - Alternate Data Stream",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.args : \"C:\\\\*:*\"\n",
+  "query": "process where event.type == \"start\" and\n  process.args : \"?:\\\\*:*\" and process.args_count == 1\n",
   "risk_score": 47,
   "rule_id": "4bd1c1af-79d4-4d37-9efa-6e0240640242",
   "severity": "medium",
@@ -42,5 +42,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }

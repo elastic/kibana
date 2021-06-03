@@ -6,7 +6,7 @@
  */
 
 import path from 'path';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 
 // eslint-disable-next-line import/no-default-export

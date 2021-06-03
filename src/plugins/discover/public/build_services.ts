@@ -8,6 +8,7 @@
 
 import { History } from 'history';
 
+import type { auto } from 'angular';
 import {
   Capabilities,
   ChromeStart,
@@ -57,7 +58,7 @@ export interface DiscoverServices {
   toastNotifications: ToastsStart;
   getSavedSearchById: (id: string) => Promise<SavedSearch>;
   getSavedSearchUrlById: (id: string) => Promise<string>;
-  getEmbeddableInjector: any;
+  getEmbeddableInjector: () => Promise<auto.IInjectorService>;
   uiSettings: IUiSettingsClient;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
@@ -67,7 +68,7 @@ export async function buildServices(
   core: CoreStart,
   plugins: DiscoverStartPlugins,
   context: PluginInitializerContext,
-  getEmbeddableInjector: any
+  getEmbeddableInjector: () => Promise<auto.IInjectorService>
 ): Promise<DiscoverServices> {
   const services = {
     savedObjectsClient: core.savedObjects.client,

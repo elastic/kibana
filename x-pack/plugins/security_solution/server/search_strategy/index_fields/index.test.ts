@@ -7,9 +7,19 @@
 
 import { sortBy } from 'lodash/fp';
 
-import { formatIndexFields, formatFirstFields, formatSecondFields, createFieldItem } from './index';
+import {
+  formatIndexFields,
+  formatFirstFields,
+  formatSecondFields,
+  createFieldItem,
+  requestIndexFieldSearch,
+} from './index';
 import { mockAuditbeatIndexField, mockFilebeatIndexField, mockPacketbeatIndexField } from './mock';
 import { fieldsBeat as beatFields } from '../../utils/beat_schema/fields';
+import {
+  IndexPatternsFetcher,
+  SearchStrategyDependencies,
+} from '../../../../../../src/plugins/data/server';
 
 describe('Index Fields', () => {
   describe('formatIndexFields', () => {
@@ -116,7 +126,7 @@ describe('Index Fields', () => {
           },
           {
             description:
-              'Type of the agent. The agent type stays always the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
+              'Type of the agent. The agent type always stays the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
             example: 'filebeat',
             name: 'agent.type',
             type: 'string',
@@ -242,7 +252,7 @@ describe('Index Fields', () => {
         {
           category: 'agent',
           description:
-            'Type of the agent. The agent type stays always the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
+            'Type of the agent. The agent type always stays the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
           example: 'filebeat',
           name: 'agent.type',
           type: 'string',
@@ -416,7 +426,7 @@ describe('Index Fields', () => {
         {
           category: 'agent',
           description:
-            'Type of the agent. The agent type stays always the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
+            'Type of the agent. The agent type always stays the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
           example: 'filebeat',
           name: 'agent.type',
           type: 'string',
@@ -777,6 +787,122 @@ describe('Index Fields', () => {
         readFromDocValues: false,
         esTypes: [],
       });
+    });
+  });
+});
+
+describe('Fields Provider', () => {
+  describe('search', () => {
+    const getFieldsForWildcardMock = jest.fn();
+    const esClientSearchMock = jest.fn();
+
+    const deps = ({
+      esClient: { asCurrentUser: { search: esClientSearchMock } },
+    } as unknown) as SearchStrategyDependencies;
+
+    beforeAll(() => {
+      getFieldsForWildcardMock.mockResolvedValue([]);
+      IndexPatternsFetcher.prototype.getFieldsForWildcard = getFieldsForWildcardMock;
+    });
+
+    beforeEach(() => {
+      getFieldsForWildcardMock.mockClear();
+      esClientSearchMock.mockClear();
+    });
+
+    afterAll(() => {
+      getFieldsForWildcardMock.mockRestore();
+    });
+
+    it('should check index exists', async () => {
+      const indices = ['some-index-pattern-*'];
+      const request = {
+        indices,
+        onlyCheckIfIndicesExist: true,
+      };
+
+      const response = await requestIndexFieldSearch(request, deps, beatFields);
+
+      expect(getFieldsForWildcardMock).toHaveBeenCalledWith({ pattern: indices[0] });
+
+      expect(response.indexFields).toHaveLength(0);
+      expect(response.indicesExist).toEqual(indices);
+    });
+
+    it('should search index fields', async () => {
+      const indices = ['some-index-pattern-*'];
+      const request = {
+        indices,
+        onlyCheckIfIndicesExist: false,
+      };
+
+      const response = await requestIndexFieldSearch(request, deps, beatFields);
+
+      expect(getFieldsForWildcardMock).toHaveBeenCalledWith({ pattern: indices[0] });
+
+      expect(response.indexFields).not.toHaveLength(0);
+      expect(response.indicesExist).toEqual(indices);
+    });
+
+    it('should search apm index fields', async () => {
+      const indices = ['apm-*-transaction*'];
+      const request = {
+        indices,
+        onlyCheckIfIndicesExist: false,
+      };
+
+      const response = await requestIndexFieldSearch(request, deps, beatFields);
+
+      expect(getFieldsForWildcardMock).toHaveBeenCalledWith({ pattern: indices[0] });
+      expect(esClientSearchMock).not.toHaveBeenCalled();
+
+      expect(response.indexFields).not.toHaveLength(0);
+      expect(response.indicesExist).toEqual(indices);
+    });
+
+    it('should check apm index exists with data', async () => {
+      const indices = ['apm-*-transaction*'];
+      const request = {
+        indices,
+        onlyCheckIfIndicesExist: true,
+      };
+
+      esClientSearchMock.mockResolvedValueOnce({
+        body: { hits: { total: { value: 1 } } },
+      });
+      const response = await requestIndexFieldSearch(request, deps, beatFields);
+
+      expect(esClientSearchMock).toHaveBeenCalledWith({
+        index: indices[0],
+        body: { query: { match_all: {} }, size: 0 },
+      });
+      expect(getFieldsForWildcardMock).not.toHaveBeenCalled();
+
+      expect(response.indexFields).toHaveLength(0);
+      expect(response.indicesExist).toEqual(indices);
+    });
+
+    it('should check apm index exists with no data', async () => {
+      const indices = ['apm-*-transaction*'];
+      const request = {
+        indices,
+        onlyCheckIfIndicesExist: true,
+      };
+
+      esClientSearchMock.mockResolvedValueOnce({
+        body: { hits: { total: { value: 0 } } },
+      });
+
+      const response = await requestIndexFieldSearch(request, deps, beatFields);
+
+      expect(esClientSearchMock).toHaveBeenCalledWith({
+        index: indices[0],
+        body: { query: { match_all: {} }, size: 0 },
+      });
+      expect(getFieldsForWildcardMock).not.toHaveBeenCalled();
+
+      expect(response.indexFields).toHaveLength(0);
+      expect(response.indicesExist).toEqual([]);
     });
   });
 });

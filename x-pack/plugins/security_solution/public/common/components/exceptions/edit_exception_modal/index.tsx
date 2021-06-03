@@ -22,6 +22,13 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
+import type {
+  ExceptionListType,
+  OsTypeArray,
+  OsType,
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   hasEqlSequenceQuery,
   isEqlRule,
@@ -30,12 +37,8 @@ import {
 import { useFetchIndex } from '../../../containers/source';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
-import {
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-  ExceptionListType,
-  ExceptionBuilder,
-} from '../../../../../public/shared_imports';
+import { ExceptionBuilder } from '../../../../../public/shared_imports';
+
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
 import { useKibana } from '../../../lib/kibana';
@@ -53,7 +56,6 @@ import {
 import { Loader } from '../../loader';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
 import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
-import { OsTypeArray, OsType } from '../../../../../../lists/common/schemas';
 
 interface EditExceptionModalProps {
   ruleName: string;
@@ -342,27 +344,26 @@ export const EditExceptionModal = memo(function EditExceptionModal({
                   <EuiSpacer />
                 </>
               )}
-              <ExceptionBuilder.ExceptionBuilderComponent
-                allowLargeValueLists={
-                  !isEqlRule(maybeRule?.type) && !isThresholdRule(maybeRule?.type)
-                }
-                httpService={http}
-                autocompleteService={data.autocomplete}
-                exceptionListItems={[exceptionItem]}
-                listType={exceptionListType}
-                listId={exceptionItem.list_id}
-                listNamespaceType={exceptionItem.namespace_type}
-                listTypeSpecificIndexPatternFilter={filterIndexPatterns}
-                ruleName={ruleName}
-                isOrDisabled
-                isAndDisabled={false}
-                osTypes={exceptionItem.os_types}
-                isNestedDisabled={false}
-                data-test-subj="edit-exception-modal-builder"
-                id-aria="edit-exception-modal-builder"
-                onChange={handleBuilderOnChange}
-                indexPatterns={indexPatterns}
-              />
+              {ExceptionBuilder.getExceptionBuilderComponentLazy({
+                allowLargeValueLists:
+                  !isEqlRule(maybeRule?.type) && !isThresholdRule(maybeRule?.type),
+                httpService: http,
+                autocompleteService: data.autocomplete,
+                exceptionListItems: [exceptionItem],
+                listType: exceptionListType,
+                listId: exceptionItem.list_id,
+                listNamespaceType: exceptionItem.namespace_type,
+                listTypeSpecificIndexPatternFilter: filterIndexPatterns,
+                ruleName,
+                isOrDisabled: true,
+                isAndDisabled: false,
+                osTypes: exceptionItem.os_types,
+                isNestedDisabled: false,
+                dataTestSubj: 'edit-exception-modal-builder',
+                idAria: 'edit-exception-modal-builder',
+                onChange: handleBuilderOnChange,
+                indexPatterns,
+              })}
 
               <EuiSpacer />
 

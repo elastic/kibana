@@ -7,6 +7,7 @@
  */
 
 import { schema as s, ObjectType } from '@kbn/config-schema';
+import { sortOrderSchema } from './common_schemas';
 
 /**
  * Schemas for the Bucket aggregations.
@@ -14,6 +15,7 @@ import { schema as s, ObjectType } from '@kbn/config-schema';
  * Currently supported:
  * - filter
  * - histogram
+ * - nested
  * - terms
  *
  * Not implemented:
@@ -32,7 +34,6 @@ import { schema as s, ObjectType } from '@kbn/config-schema';
  * - ip_range
  * - missing
  * - multi_terms
- * - nested
  * - parent
  * - range
  * - rare_terms
@@ -42,6 +43,7 @@ import { schema as s, ObjectType } from '@kbn/config-schema';
  * - significant_text
  * - variable_width_histogram
  */
+
 export const bucketAggsSchemas: Record<string, ObjectType> = {
   filter: s.object({
     term: s.recordOf(s.string(), s.oneOf([s.string(), s.boolean(), s.number()])),
@@ -71,6 +73,9 @@ export const bucketAggsSchemas: Record<string, ObjectType> = {
       })
     ),
   }),
+  nested: s.object({
+    path: s.string(),
+  }),
   terms: s.object({
     field: s.maybe(s.string()),
     collect_mode: s.maybe(s.string()),
@@ -81,6 +86,12 @@ export const bucketAggsSchemas: Record<string, ObjectType> = {
     min_doc_count: s.maybe(s.number({ min: 1 })),
     size: s.maybe(s.number()),
     show_term_doc_count_error: s.maybe(s.boolean()),
-    order: s.maybe(s.oneOf([s.literal('asc'), s.literal('desc')])),
+    order: s.maybe(
+      s.oneOf([
+        sortOrderSchema,
+        s.recordOf(s.string(), sortOrderSchema),
+        s.arrayOf(s.recordOf(s.string(), sortOrderSchema)),
+      ])
+    ),
   }),
 };

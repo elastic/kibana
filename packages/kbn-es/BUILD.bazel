@@ -1,0 +1,90 @@
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
+load("@npm//@babel/cli:index.bzl", "babel")
+
+PKG_BASE_NAME = "kbn-es"
+PKG_REQUIRE_NAME = "@kbn/es"
+
+SOURCE_FILES = glob(
+  [
+    "src/**/*",
+  ],
+  exclude = [
+    "**/*.test.*",
+    "**/integration_tests/**",
+    "**/__fixtures__/**",
+  ],
+)
+
+SRCS = SOURCE_FILES
+
+filegroup(
+  name = "srcs",
+  srcs = SRCS,
+)
+
+NPM_MODULE_EXTRA_FILES = [
+  "package.json",
+  "README.md",
+]
+
+DEPS = [
+  "//packages/kbn-babel-preset",
+  "@npm//@elastic/elasticsearch",
+  "@npm//abort-controller",
+  "@npm//chalk",
+  "@npm//dedent",
+  "@npm//del",
+  "@npm//execa",
+  "@npm//getopts",
+  "@npm//glob",
+  "@npm//node-fetch",
+  "@npm//simple-git",
+  "@npm//tar-fs",
+  "@npm//tree-kill",
+  "@npm//yauzl",
+  "@npm//zlib"
+]
+
+babel(
+  name = "target",
+  data = [
+      ":srcs",
+      ".babelrc",
+  ] + DEPS,
+  output_dir = True,
+  # the following arg paths includes $(execpath) as babel runs on the sandbox root
+  args = [
+      "./%s/src" % package_name(),
+      "--config-file",
+      "./%s/.babelrc" % package_name(),
+      "--out-dir",
+      "$(@D)",
+      "--extensions",
+      ".ts,.js",
+      "--copy-files",
+      "--quiet"
+  ],
+)
+
+js_library(
+  name = PKG_BASE_NAME,
+  srcs = NPM_MODULE_EXTRA_FILES,
+  deps = DEPS + [":target"],
+  package_name = PKG_REQUIRE_NAME,
+  visibility = ["//visibility:public"],
+)
+
+pkg_npm(
+  name = "npm_module",
+  deps = [
+    ":%s" % PKG_BASE_NAME,
+  ]
+)
+
+filegroup(
+  name = "build",
+  srcs = [
+    ":npm_module",
+  ],
+  visibility = ["//visibility:public"],
+)

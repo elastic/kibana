@@ -34,11 +34,11 @@ export const isValidKuery = (query: string) => {
 export const QueryBar = () => {
   const { search: urlValue } = useGetUrlParams();
 
-  const { query, setQuery } = useQueryBar();
+  const { query, setQuery, submitImmediately } = useQueryBar();
 
   const { index_pattern: indexPattern } = useIndexPattern();
 
-  const [inputVal, setInputVal] = useState<string>(query.query);
+  const [inputVal, setInputVal] = useState<string>(query.query as string);
 
   const isInValid = () => {
     if (query.language === SyntaxType.text) {
@@ -66,6 +66,7 @@ export const QueryBar = () => {
         }}
         onSubmit={(queryN) => {
           if (queryN) setQuery({ query: queryN.query as string, language: queryN.language });
+          submitImmediately();
         }}
         query={{ ...query, query: inputVal }}
         aria-label={i18n.translate('xpack.uptime.filterBar.ariaLabel', {

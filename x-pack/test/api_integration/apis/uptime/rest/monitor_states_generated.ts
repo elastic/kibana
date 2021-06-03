@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
     describe('checks with no summaries', async () => {
       const testMonitorId = 'scope-test-id';
       before(async () => {
-        const es = getService('legacyEs');
+        const es = getService('es');
         dateRangeStart = new Date().toISOString();
         await makeChecksWithStatus(es, testMonitorId, 1, numIps, 1, {}, 'up', (d) => {
           delete d.summary;
@@ -64,7 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       before(async () => {
-        const es = getService('legacyEs');
+        const es = getService('es');
         dateRangeStart = new Date().toISOString();
         checks = await makeChecksWithStatus(es, testMonitorId, 1, numIps, 1, {}, 'up', (d) => {
           // turn an all up status into having at least one down
@@ -141,7 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
       before('generate three monitors with up, down, mix state', async () => {
         await getService('esArchiver').load('uptime/blank');
 
-        const es = getService('legacyEs');
+        const es = getService('es');
 
         const observer = {
           geo: {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
+import { GenericFtrProviderContext } from '@kbn/test';
 
 import { pageObjects } from '../functional/page_objects';
 import { services } from './services';

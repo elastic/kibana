@@ -71,6 +71,14 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(actualFields).to.eql(expectedFields);
       });
+
+      it('should return an empty result for indices that do not exist', async () => {
+        await supertest
+          .get('/internal/security/fields/this-index-name-definitely-does-not-exist-*')
+          .set('kbn-xsrf', 'xxx')
+          .send()
+          .expect(200, []);
+      });
     });
   });
 }

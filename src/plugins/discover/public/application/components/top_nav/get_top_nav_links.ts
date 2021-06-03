@@ -7,6 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../helpers/get_sharing_data';
 import { unhashUrl } from '../../../../../kibana_utils/public';
@@ -122,7 +123,13 @@ export const getTopNavLinks = ({
         objectType: 'search',
         sharingData: {
           ...sharingData,
-          title: savedSearch.title,
+          // CSV reports can be generated without a saved search so we provide a fallback title
+          title:
+            savedSearch.title ||
+            i18n.translate('discover.localMenu.fallbackReportTitle', {
+              defaultMessage: 'Discover search [{date}]',
+              values: { date: moment().toISOString(true) },
+            }),
         },
         isDirty: !savedSearch.id || state.isAppStateDirty(),
         showPublicUrlSwitch,

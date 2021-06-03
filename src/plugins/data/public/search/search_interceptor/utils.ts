@@ -7,10 +7,8 @@
  */
 
 import stringify from 'json-stable-stringify';
+import { Sha256 } from '../../../../../core/public/utils';
 
 export async function createRequestHash(keys: Record<string, any>) {
-  const msgBuffer = new TextEncoder().encode(stringify(keys));
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => ('00' + b.toString(16)).slice(-2)).join('');
+  return new Sha256().update(stringify(keys), 'utf8').digest('hex');
 }

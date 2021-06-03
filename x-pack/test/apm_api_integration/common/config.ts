@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import supertest from 'supertest';
 import { format, UrlObject } from 'url';
 import path from 'path';

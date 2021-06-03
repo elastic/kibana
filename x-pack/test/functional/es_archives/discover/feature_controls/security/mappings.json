@@ -161,9 +161,9 @@
         },
         "gis-map" : {
           "properties" : {
-            "bounds" : {
-              "type" : "geo_shape",
-              "tree" : "quadtree"
+            "bounds": {
+              "dynamic": false,
+              "properties": {}
             },
             "description" : {
               "type" : "text"

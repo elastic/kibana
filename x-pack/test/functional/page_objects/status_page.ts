@@ -5,36 +5,18 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function StatusPagePageProvider({ getService }: FtrProviderContext) {
-  const retry = getService('retry');
   const log = getService('log');
-  const browser = getService('browser');
   const find = getService('find');
-  const deployment = getService('deployment');
-
   class StatusPage {
     async initTests() {
       log.debug('StatusPage:initTests');
     }
 
-    async navigateToPage() {
-      return await retry.try(async () => {
-        const url = deployment.getHostPort() + '/status';
-        log.info(`StatusPage:navigateToPage(): ${url}`);
-        await browser.get(url);
-      });
-    }
-
     async expectStatusPage(): Promise<void> {
-      return await retry.try(async () => {
-        log.debug(`expectStatusPage()`);
-        await find.byCssSelector('[data-test-subj="statusPageRoot"]', 20000);
-        const url = await browser.getCurrentUrl();
-        expect(url).to.contain(`/status`);
-      });
+      await find.byCssSelector('[data-test-subj="statusPageRoot"]', 20000);
     }
   }
 

@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+// TODO: This needs to be removed and properly typed
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { flow, get } from 'lodash';
 import { SavedObjectMigrationFn } from 'kibana/server';
 import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';

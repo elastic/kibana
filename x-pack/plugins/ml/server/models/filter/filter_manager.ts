@@ -25,6 +25,12 @@ export interface FormFilter {
   removeItems?: string[];
 }
 
+export interface UpdateFilter {
+  description?: string;
+  addItems?: string[];
+  removeItems?: string[];
+}
+
 export interface FilterRequest {
   filter_id: string;
   description?: string;
@@ -154,7 +160,7 @@ export class FilterManager {
     }
   }
 
-  async updateFilter(filterId: string, filter: FormFilter) {
+  async updateFilter(filterId: string, filter: UpdateFilter) {
     try {
       const body: FilterRequest = { filter_id: filterId };
       if (filter.description !== undefined) {

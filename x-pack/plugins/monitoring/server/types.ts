@@ -25,7 +25,7 @@ import {
   PluginStartContract as AlertingPluginStartContract,
   PluginSetupContract as AlertingPluginSetupContract,
 } from '../../alerting/server';
-import { InfraPluginSetup } from '../../infra/server';
+import { InfraPluginSetup, InfraRequestHandlerContext } from '../../infra/server';
 import { LicensingPluginStart } from '../../licensing/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
@@ -57,6 +57,7 @@ export interface PluginsSetup {
 export interface RequestHandlerContextMonitoringPlugin extends RequestHandlerContext {
   actions?: ActionsApiRequestHandlerContext;
   alerting?: AlertingApiRequestHandlerContext;
+  infra: InfraRequestHandlerContext;
 }
 
 export interface PluginsStart {

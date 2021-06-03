@@ -12,6 +12,7 @@ import { DEFAULT_OUTPUT, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
 import { decodeCloudId } from '../../common';
 
 import { appContextService } from './app_context';
+import { normalizeHostsForAgents } from './hosts_utils';
 
 const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
 
@@ -49,14 +50,6 @@ class OutputService {
     };
   }
 
-  public async updateOutput(
-    soClient: SavedObjectsClientContract,
-    id: string,
-    data: Partial<NewOutput>
-  ) {
-    await soClient.update<OutputSOAttributes>(SAVED_OBJECT_TYPE, id, data);
-  }
-
   public async getDefaultOutputId(soClient: SavedObjectsClientContract) {
     const outputs = await this.getDefaultOutput(soClient);
 
@@ -72,9 +65,15 @@ class OutputService {
     output: NewOutput,
     options?: { id?: string }
   ): Promise<Output> {
+    const data = { ...output };
+
+    if (data.hosts) {
+      data.hosts = data.hosts.map(normalizeHostsForAgents);
+    }
+
     const newSo = await soClient.create<OutputSOAttributes>(
       SAVED_OBJECT_TYPE,
-      output as Output,
+      data as Output,
       options
     );
 
@@ -98,7 +97,13 @@ class OutputService {
   }
 
   public async update(soClient: SavedObjectsClientContract, id: string, data: Partial<Output>) {
-    const outputSO = await soClient.update<OutputSOAttributes>(SAVED_OBJECT_TYPE, id, data);
+    const updateData = { ...data };
+
+    if (updateData.hosts) {
+      updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
+    }
+
+    const outputSO = await soClient.update<OutputSOAttributes>(SAVED_OBJECT_TYPE, id, updateData);
 
     if (outputSO.error) {
       throw new Error(outputSO.error.message);

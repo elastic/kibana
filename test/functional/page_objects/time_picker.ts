@@ -7,7 +7,7 @@
  */
 
 import moment from 'moment';
-import { FtrProviderContext } from '../ftr_provider_context.d';
+import { FtrProviderContext } from '../ftr_provider_context';
 import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 export type CommonlyUsed =
@@ -26,12 +26,13 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
   const log = getService('log');
   const find = getService('find');
   const browser = getService('browser');
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const { header } = getPageObjects(['header']);
   const kibanaServer = getService('kibanaServer');
-  const MenuToggle = getService('MenuToggle');
+  const menuToggle = getService('menuToggle');
 
-  const quickSelectTimeMenuToggle = new MenuToggle({
+  const quickSelectTimeMenuToggle = menuToggle.create({
     name: 'QuickSelectTime Menu',
     menuTestSubject: 'superDatePickerQuickMenu',
     toggleButtonTestSubject: 'superDatePickerToggleQuickMenuButton',
@@ -68,7 +69,9 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
     }
 
     private async getTimePickerPanel() {
-      return await find.byCssSelector('div.euiPopover__panel-isOpen');
+      return await retry.try(async () => {
+        return await find.byCssSelector('div.euiPopover__panel-isOpen');
+      });
     }
 
     private async waitPanelIsGone(panelElement: WebElementWrapper) {

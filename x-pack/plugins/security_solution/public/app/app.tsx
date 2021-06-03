@@ -25,6 +25,7 @@ import { ManageGlobalTimeline } from '../timelines/components/manage_timeline';
 import { StartServices } from '../types';
 import { PageRouter } from './routes';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
+import { UserPrivilegesProvider } from '../detections/components/user_privileges';
 
 interface StartAppComponent {
   children: React.ReactNode;
@@ -45,11 +46,13 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, onAppLeav
             <ReduxStoreProvider store={store}>
               <EuiThemeProvider darkMode={darkMode}>
                 <MlCapabilitiesProvider>
-                  <ManageUserInfo>
-                    <PageRouter history={history} onAppLeave={onAppLeave}>
-                      {children}
-                    </PageRouter>
-                  </ManageUserInfo>
+                  <UserPrivilegesProvider>
+                    <ManageUserInfo>
+                      <PageRouter history={history} onAppLeave={onAppLeave}>
+                        {children}
+                      </PageRouter>
+                    </ManageUserInfo>
+                  </UserPrivilegesProvider>
                 </MlCapabilitiesProvider>
               </EuiThemeProvider>
               <ErrorToastDispatcher />

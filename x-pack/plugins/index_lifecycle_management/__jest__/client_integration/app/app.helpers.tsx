@@ -12,7 +12,6 @@ import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_reac
 import { createBreadcrumbsMock } from '../../../public/application/services/breadcrumbs.mock';
 import { licensingMock } from '../../../../licensing/public/mocks';
 import { App } from '../../../public/application/app';
-import { TestSubjects } from '../helpers';
 
 const breadcrumbService = createBreadcrumbsMock();
 
@@ -37,7 +36,7 @@ const getTestBedConfig = (initialEntries: string[]): TestBedConfig => ({
 const initTestBed = (initialEntries: string[]) =>
   registerTestBed(AppWithContext, getTestBedConfig(initialEntries))();
 
-export interface AppTestBed extends TestBed<TestSubjects> {
+export interface AppTestBed extends TestBed {
   actions: {
     clickPolicyNameLink: () => void;
     clickCreatePolicyButton: () => void;

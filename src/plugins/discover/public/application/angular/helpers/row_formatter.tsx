@@ -30,6 +30,7 @@ const TemplateComponent = ({ defPairs }: Props) => {
   );
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const formatRow = (hit: Record<string, any>, indexPattern: IndexPattern) => {
   const highlights = hit?.highlight ?? {};
   // Keys are sorted in the hits object
@@ -49,7 +50,9 @@ export const formatRow = (hit: Record<string, any>, indexPattern: IndexPattern) 
 };
 
 export const formatTopLevelObject = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   row: Record<string, any>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fields: Record<string, any>,
   indexPattern: IndexPattern
 ) => {

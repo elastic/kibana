@@ -31,7 +31,7 @@ import {
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { isFailedResourceState, isLoadedResourceState } from '../state';
 import { forceHTMLElementOffsetWidth } from './components/effected_policy_select/test_utils';
-import { resolvePathVariables } from '../service/utils';
+import { resolvePathVariables } from '../../../common/utils';
 import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
@@ -45,7 +45,9 @@ const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as j
 
 describe('When on the Trusted Apps Page', () => {
   const expectedAboutInfo =
-    'Add a trusted application to improve performance or alleviate conflicts with other applications running on your hosts. Trusted applications will be applied to hosts running Endpoint Security.';
+    'Add a trusted application to improve performance or alleviate conflicts with other ' +
+    'applications running on your hosts. Trusted applications are applied to hosts running the Endpoint Security ' +
+    'integration on their agents.';
 
   const generator = new EndpointDocGenerator('policy-list');
 
@@ -167,8 +169,13 @@ describe('When on the Trusted Apps Page', () => {
 
     it('should display a Add Trusted App button', async () => {
       const { getByTestId } = await renderWithListData();
-      const addButton = await getByTestId('trustedAppsListAddButton');
+      const addButton = getByTestId('trustedAppsListAddButton');
       expect(addButton.textContent).toBe('Add Trusted Application');
+    });
+
+    it('should display the searchbar', async () => {
+      const renderResult = await renderWithListData();
+      expect(await renderResult.findByTestId('searchBar')).not.toBeNull();
     });
 
     describe('and the Grid view is being displayed', () => {
@@ -553,7 +560,7 @@ describe('When on the Trusted Apps Page', () => {
           // to test the UI behaviours while the API call is in flight
           coreStart.http.post.mockImplementation(
             // @ts-ignore
-            async (path: string, options: HttpFetchOptions) => {
+            async (_, options: HttpFetchOptions) => {
               return new Promise((resolve, reject) => {
                 httpPostBody = options.body as string;
                 resolveHttpPost = resolve;
@@ -859,6 +866,14 @@ describe('When on the Trusted Apps Page', () => {
 
       expect(await renderResult.findByTestId('trustedAppEmptyState')).not.toBeNull();
     });
+
+    it('should not display the searchbar', async () => {
+      const renderResult = render();
+      await act(async () => {
+        await waitForAction('trustedAppsExistStateChanged');
+      });
+      expect(renderResult.queryByTestId('searchBar')).toBeNull();
+    });
   });
 
   describe('and the search is dispatched', () => {
@@ -880,7 +895,7 @@ describe('When on the Trusted Apps Page', () => {
 
     it('search action is dispatched', async () => {
       await act(async () => {
-        fireEvent.click(renderResult.getByTestId('trustedAppSearchButton'));
+        fireEvent.click(renderResult.getByTestId('searchButton'));
         expect(await waitForAction('userChangedUrl')).not.toBeNull();
       });
     });

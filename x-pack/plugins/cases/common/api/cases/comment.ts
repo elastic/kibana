@@ -9,6 +9,21 @@ import * as rt from 'io-ts';
 
 import { UserRT } from '../user';
 
+const BucketsAggs = rt.array(
+  rt.type({
+    key: rt.string,
+  })
+);
+
+export const GetCaseIdsByAlertIdAggsRt = rt.type({
+  references: rt.type({
+    doc_count: rt.number,
+    caseIds: rt.type({
+      buckets: BucketsAggs,
+    }),
+  }),
+});
+
 /**
  * this is used to differentiate between an alert attached to a top-level case and a group of alerts that should only
  * be attached to a sub case. The reason we need this is because an alert group comment will have references to both a case and
@@ -123,3 +138,4 @@ export type CommentPatchRequest = rt.TypeOf<typeof CommentPatchRequestRt>;
 export type CommentPatchAttributes = rt.TypeOf<typeof CommentPatchAttributesRt>;
 export type CommentRequestUserType = rt.TypeOf<typeof ContextTypeUserRt>;
 export type CommentRequestAlertType = rt.TypeOf<typeof AlertCommentRequestRt>;
+export type GetCaseIdsByAlertIdAggs = rt.TypeOf<typeof GetCaseIdsByAlertIdAggsRt>;

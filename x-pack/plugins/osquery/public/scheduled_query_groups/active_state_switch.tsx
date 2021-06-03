@@ -73,6 +73,10 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
               )
         );
       },
+      onError: (error) => {
+        // @ts-expect-error update types
+        toasts.addError(error, { title: error.body.error, toastMessage: error.body.message });
+      },
     }
   );
 

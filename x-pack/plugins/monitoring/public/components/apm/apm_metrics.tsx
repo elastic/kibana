@@ -65,6 +65,7 @@ const getHeading = (isFleetTypeMetric: boolean) => {
         defaultMessage="APM & Fleet Server"
       />
     );
+    return titles;
   }
   titles.title = i18n.translate('xpack.monitoring.apm.metrics.topCharts.title', {
     defaultMessage: 'APM Server - Resource Usage',

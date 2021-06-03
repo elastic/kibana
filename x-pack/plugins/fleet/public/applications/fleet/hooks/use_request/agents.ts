@@ -9,8 +9,6 @@ import { agentRouteService } from '../../services';
 
 import type {
   GetOneAgentResponse,
-  GetOneAgentEventsResponse,
-  GetOneAgentEventsRequest,
   PostAgentUnenrollRequest,
   PostBulkAgentUnenrollRequest,
   PostBulkAgentUnenrollResponse,
@@ -40,19 +38,6 @@ export function useGetOneAgent(agentId: string, options?: RequestOptions) {
   return useRequest<GetOneAgentResponse>({
     path: agentRouteService.getInfoPath(agentId),
     method: 'get',
-    ...options,
-  });
-}
-
-export function useGetOneAgentEvents(
-  agentId: string,
-  query: GetOneAgentEventsRequest['query'],
-  options?: RequestOptions
-) {
-  return useRequest<GetOneAgentEventsResponse>({
-    path: agentRouteService.getEventsPath(agentId),
-    method: 'get',
-    query,
     ...options,
   });
 }

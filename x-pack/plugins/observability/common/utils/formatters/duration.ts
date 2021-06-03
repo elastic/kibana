@@ -201,6 +201,9 @@ export function asDuration(
   const formatter = getDurationFormatter(value);
   return formatter(value, { defaultValue, extended }).formatted;
 }
+
+export type AsDuration = typeof asDuration;
+
 /**
  * Convert a microsecond value to decimal milliseconds. Normally we use
  * `asDuration`, but this is used in places like tables where we always want

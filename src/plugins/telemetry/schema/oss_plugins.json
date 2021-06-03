@@ -11,14 +11,30 @@
         "lensByValue": {
           "properties": {
             "DYNAMIC_KEY": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Collection of telemetry metrics for Lens visualizations, which are added to dashboard by \"value\"."
+              }
             }
           }
         },
         "visualizationByValue": {
           "properties": {
             "DYNAMIC_KEY": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Collection of telemetry metrics for visualizations, which are added to dashboard by \"value\"."
+              }
+            }
+          }
+        },
+        "embeddable": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long",
+              "_meta": {
+                "description": "Collection of telemetry metrics that embeddable service reports. Embeddable service internally calls each embeddable, which in turn calls its dynamic actions, which calls each drill down attached to that embeddable."
+              }
             }
           }
         }
@@ -6950,6 +6966,28 @@
                   }
                 }
               }
+            },
+            "deprecatedKeys": {
+              "properties": {
+                "set": {
+                  "type": "array",
+                  "items": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "Config path added during config deprecation."
+                    }
+                  }
+                },
+                "unset": {
+                  "type": "array",
+                  "items": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "Config path removed during config deprecation."
+                    }
+                  }
+                }
+              }
             }
           }
         },
@@ -7600,76 +7638,6 @@
         }
       }
     },
-    "kibana": {
-      "properties": {
-        "index": {
-          "type": "keyword",
-          "_meta": {
-            "description": "The index storing the saved objects"
-          }
-        },
-        "dashboard": {
-          "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "Total number of dashboard saved objects"
-              }
-            }
-          }
-        },
-        "visualization": {
-          "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "Total number of visualization saved objects"
-              }
-            }
-          }
-        },
-        "search": {
-          "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "Total number of search saved objects"
-              }
-            }
-          }
-        },
-        "index_pattern": {
-          "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "Total number of index_pattern saved objects"
-              }
-            }
-          }
-        },
-        "graph_workspace": {
-          "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "Total number of graph_workspace saved objects"
-              }
-            }
-          }
-        },
-        "timelion_sheet": {
-          "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "Total number of timelion_sheet saved objects"
-              }
-            }
-          }
-        }
-      }
-    },
     "localization": {
       "properties": {
         "locale": {
@@ -8265,6 +8233,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "bfetch:disableCompression": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "visualization:visualize:legacyChartsLibrary": {
           "type": "boolean",
           "_meta": {
@@ -8341,6 +8315,117 @@
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
+          }
+        },
+        "labs:canvas:useDataService": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "labs:dashboard:enable_ui": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "labs:dashboard:deferBelowFold": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        }
+      }
+    },
+    "kibana": {
+      "properties": {
+        "index": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The index storing the saved objects"
+          }
+        },
+        "dashboard": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of dashboard saved objects"
+              }
+            }
+          }
+        },
+        "visualization": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of visualization saved objects"
+              }
+            }
+          }
+        },
+        "search": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of search saved objects"
+              }
+            }
+          }
+        },
+        "index_pattern": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of index_pattern saved objects"
+              }
+            }
+          }
+        },
+        "graph_workspace": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of graph_workspace saved objects"
+              }
+            }
+          }
+        },
+        "timelion_sheet": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of timelion_sheet saved objects"
+              }
+            }
+          }
+        }
+      }
+    },
+    "saved_objects_counts": {
+      "properties": {
+        "by_type": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "type": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The SavedObjects type"
+                }
+              },
+              "count": {
+                "type": "long",
+                "_meta": {
+                  "description": "How many SavedObjects of that type are stored in the cluster across all Spaces"
+                }
+              }
+            }
           }
         }
       }

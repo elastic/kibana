@@ -49,17 +49,24 @@ const complete = jest.fn();
 
 function mockFetchImplementation(responses: any[]) {
   let i = 0;
-  fetchMock.mockImplementation((r) => {
+  fetchMock.mockImplementation((r, abortSignal) => {
     if (!r.request.id) i = 0;
     const { time = 0, value = {}, isError = false } = responses[i++];
     value.meta = {
       size: 10,
     };
-    return new Promise((resolve, reject) =>
+    return new Promise((resolve, reject) => {
       setTimeout(() => {
         return (isError ? reject : resolve)(value);
-      }, time)
-    );
+      }, time);
+
+      if (abortSignal) {
+        if (abortSignal.aborted) reject(new AbortError());
+        abortSignal.addEventListener('abort', () => {
+          reject(new AbortError());
+        });
+      }
+    });
   });
 }
 

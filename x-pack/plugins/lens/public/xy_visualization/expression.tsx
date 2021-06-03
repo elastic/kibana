@@ -55,7 +55,7 @@ import {
 import { EmptyPlaceholder } from '../shared_components';
 import { desanitizeFilterContext } from '../utils';
 import { fittingFunctionDefinitions, getFitOptions } from './fitting_functions';
-import { getAxesConfiguration } from './axes_configuration';
+import { getAxesConfiguration, GroupsConfiguration, validateExtent } from './axes_configuration';
 import { getColorAssignments } from './color_assignment';
 import { getXDomain, XyEndzones } from './x_domain';
 
@@ -135,6 +135,18 @@ export const xyChart: ExpressionFunctionDefinition<
         defaultMessage: 'Y right axis title',
       }),
     },
+    yLeftExtent: {
+      types: ['lens_xy_axisExtentConfig'],
+      help: i18n.translate('xpack.lens.xyChart.yLeftExtent.help', {
+        defaultMessage: 'Y left axis extents',
+      }),
+    },
+    yRightExtent: {
+      types: ['lens_xy_axisExtentConfig'],
+      help: i18n.translate('xpack.lens.xyChart.yRightExtent.help', {
+        defaultMessage: 'Y right axis extents',
+      }),
+    },
     legend: {
       types: ['lens_xy_legendConfig'],
       help: i18n.translate('xpack.lens.xyChart.legend.help', {
@@ -182,6 +194,12 @@ export const xyChart: ExpressionFunctionDefinition<
       options: ['LINEAR', 'CURVE_MONOTONE_X'],
       help: i18n.translate('xpack.lens.xyChart.curveType.help', {
         defaultMessage: 'Define how curve type is rendered for a line chart',
+      }),
+    },
+    fillOpacity: {
+      types: ['number'],
+      help: i18n.translate('xpack.lens.xyChart.fillOpacity.help', {
+        defaultMessage: 'Define the area chart fill opacity',
       }),
     },
     hideEndzones: {
@@ -345,6 +363,8 @@ export function XYChart({
     gridlinesVisibilitySettings,
     valueLabels,
     hideEndzones,
+    yLeftExtent,
+    yRightExtent,
   } = args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
@@ -443,6 +463,33 @@ export function XYChart({
       },
     };
     return style;
+  };
+
+  const getYAxisDomain = (axis: GroupsConfiguration[number]) => {
+    const extent = axis.groupId === 'left' ? yLeftExtent : yRightExtent;
+    const hasBarOrArea = Boolean(
+      axis.series.some((series) => {
+        const seriesType = filteredLayers.find((l) => l.layerId === series.layer)?.seriesType;
+        return seriesType?.includes('bar') || seriesType?.includes('area');
+      })
+    );
+    const fit = !hasBarOrArea && extent.mode === 'dataBounds';
+    let min: undefined | number;
+    let max: undefined | number;
+
+    if (extent.mode === 'custom') {
+      const { inclusiveZeroError, boundaryError } = validateExtent(hasBarOrArea, extent);
+      if (!inclusiveZeroError && !boundaryError) {
+        min = extent.lowerBound;
+        max = extent.upperBound;
+      }
+    }
+
+    return {
+      fit,
+      min,
+      max,
+    };
   };
 
   const shouldShowValueLabels =
@@ -597,24 +644,27 @@ export function XYChart({
         }}
       />
 
-      {yAxesConfiguration.map((axis) => (
-        <Axis
-          key={axis.groupId}
-          id={axis.groupId}
-          groupId={axis.groupId}
-          position={axis.position}
-          title={getYAxesTitles(axis.series, axis.groupId)}
-          gridLine={{
-            visible:
-              axis.groupId === 'right'
-                ? gridlinesVisibilitySettings?.yRight
-                : gridlinesVisibilitySettings?.yLeft,
-          }}
-          hide={filteredLayers[0].hide}
-          tickFormat={(d) => axis.formatter?.convert(d) || ''}
-          style={getYAxesStyle(axis.groupId)}
-        />
-      ))}
+      {yAxesConfiguration.map((axis) => {
+        return (
+          <Axis
+            key={axis.groupId}
+            id={axis.groupId}
+            groupId={axis.groupId}
+            position={axis.position}
+            title={getYAxesTitles(axis.series, axis.groupId)}
+            gridLine={{
+              visible:
+                axis.groupId === 'right'
+                  ? gridlinesVisibilitySettings?.yRight
+                  : gridlinesVisibilitySettings?.yLeft,
+            }}
+            hide={filteredLayers[0].hide}
+            tickFormat={(d) => axis.formatter?.convert(d) || ''}
+            style={getYAxesStyle(axis.groupId)}
+            domain={getYAxisDomain(axis)}
+          />
+        );
+      })}
 
       {!hideEndzones && (
         <XyEndzones
@@ -748,7 +798,7 @@ export function XYChart({
                   ),
                 },
               ];
-              return paletteService.get(palette.name).getColor(
+              return paletteService.get(palette.name).getCategoricalColor(
                 seriesLayers,
                 {
                   maxDepth: 1,
@@ -768,6 +818,7 @@ export function XYChart({
                 visible: !xAccessor,
                 radius: 5,
               },
+              ...(args.fillOpacity && { area: { opacity: args.fillOpacity } }),
             },
             lineSeriesStyle: {
               point: {

@@ -7,7 +7,7 @@
 
 import { capitalize, union } from 'lodash';
 import { useEffect, useState } from 'react';
-import { useDebounce } from 'react-use';
+import useDebounce from 'react-use/lib/useDebounce';
 import { IndexPattern } from '../../../../../src/plugins/data/common';
 import { ESFilter } from '../../../../../typings/elasticsearch';
 import { createEsParams, useEsSearch } from './use_es_search';

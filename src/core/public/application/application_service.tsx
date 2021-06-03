@@ -19,6 +19,7 @@ import { AppRouter } from './ui';
 import { Capabilities, CapabilitiesService } from './capabilities';
 import {
   App,
+  AppDeepLink,
   AppLeaveHandler,
   AppMount,
   AppNavLinkStatus,
@@ -166,6 +167,7 @@ export class ApplicationService {
           ...appProps,
           status: app.status ?? AppStatus.accessible,
           navLinkStatus: app.navLinkStatus ?? AppNavLinkStatus.default,
+          deepLinks: populateDeepLinkDefaults(appProps.deepLinks),
         });
         if (updater$) {
           registerStatusUpdater(app.id, updater$);
@@ -391,4 +393,13 @@ const updateStatus = (app: App, statusUpdaters: AppUpdaterWrapper[]): App => {
     ...app,
     ...changes,
   };
+};
+
+const populateDeepLinkDefaults = (deepLinks?: AppDeepLink[]): AppDeepLink[] => {
+  if (!deepLinks) return [];
+  return deepLinks.map((deepLink) => ({
+    ...deepLink,
+    navLinkStatus: deepLink.navLinkStatus ?? AppNavLinkStatus.default,
+    deepLinks: populateDeepLinkDefaults(deepLink.deepLinks),
+  }));
 };

@@ -8,7 +8,7 @@
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 
 import { appContextService } from './app_context';
-import { getCloudFleetServersHosts, normalizeFleetServerHost, settingsSetup } from './settings';
+import { getCloudFleetServersHosts, settingsSetup } from './settings';
 
 jest.mock('./app_context');
 
@@ -204,23 +204,4 @@ describe('settingsSetup', () => {
     expect(soClientMock.create).not.toBeCalled();
     expect(soClientMock.update).not.toBeCalled();
   });
-});
-
-describe('normalizeFleetServerHost', () => {
-  const scenarios = [
-    { sourceUrl: 'http://test.fr', expectedUrl: 'http://test.fr:80' },
-    { sourceUrl: 'http://test.fr/test/toto', expectedUrl: 'http://test.fr:80/test/toto' },
-    { sourceUrl: 'https://test.fr', expectedUrl: 'https://test.fr:443' },
-    { sourceUrl: 'https://test.fr/test/toto', expectedUrl: 'https://test.fr:443/test/toto' },
-    { sourceUrl: 'https://test.fr:9243', expectedUrl: 'https://test.fr:9243' },
-    { sourceUrl: 'https://test.fr:9243/test/toto', expectedUrl: 'https://test.fr:9243/test/toto' },
-  ];
-
-  for (const scenario of scenarios) {
-    it(`should transform ${scenario.sourceUrl} correctly`, () => {
-      const url = normalizeFleetServerHost(scenario.sourceUrl);
-
-      expect(url).toEqual(scenario.expectedUrl);
-    });
-  }
 });

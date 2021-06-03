@@ -116,10 +116,12 @@ export const NewEnrollmentTokenFlyout: React.FunctionComponent<Props> = ({
             required={true}
             defaultValue={policyIdDefaultValue}
             {...form.policyIdInput.props}
-            options={agentPolicies.map((agentPolicy) => ({
-              value: agentPolicy.id,
-              text: agentPolicy.name,
-            }))}
+            options={agentPolicies
+              .filter((agentPolicy) => !agentPolicy.is_managed)
+              .map((agentPolicy) => ({
+                value: agentPolicy.id,
+                text: agentPolicy.name,
+              }))}
           />
         </EuiFormRow>
         <EuiButton type="submit" fill isLoading={form.isLoading}>

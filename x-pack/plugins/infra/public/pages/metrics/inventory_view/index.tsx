@@ -21,7 +21,7 @@ import { ViewSourceConfigurationButton } from '../../../components/source_config
 import { Source } from '../../../containers/metrics_source';
 import { useTrackPageview } from '../../../../../observability/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { Layout } from './components/layout';
+import { LayoutView } from './components/layout_view';
 import { useLinkProps } from '../../../hooks/use_link_props';
 import { SavedViewProvider } from '../../../containers/saved_view/saved_view';
 import { DEFAULT_WAFFLE_VIEW_STATE } from './hooks/use_waffle_view_state';
@@ -69,7 +69,7 @@ export const SnapshotPage = () => {
               viewType={'inventory-view'}
               defaultViewState={DEFAULT_WAFFLE_VIEW_STATE}
             >
-              <Layout />
+              <LayoutView />
             </SavedViewProvider>
           </>
         ) : hasFailedLoadingSource ? (

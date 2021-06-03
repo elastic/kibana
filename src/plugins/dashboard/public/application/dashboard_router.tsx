@@ -30,6 +30,7 @@ import {
 
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
 import { KibanaContextProvider } from '../services/kibana_react';
+
 import {
   AppMountParameters,
   CoreSetup,
@@ -81,10 +82,12 @@ export async function mountApp({
     kibanaLegacy: { dashboardConfig },
     savedObjectsTaggingOss,
     visualizations,
+    presentationUtil,
   } = pluginsStart;
 
   const spacesApi = pluginsStart.spacesOss?.isSpacesAvailable ? pluginsStart.spacesOss : undefined;
-  const activeSpaceId = spacesApi && (await spacesApi.activeSpace$.pipe(first()).toPromise())?.id;
+  const activeSpaceId =
+    spacesApi && (await spacesApi.getActiveSpace$().pipe(first()).toPromise())?.id;
   let globalEmbedSettings: DashboardEmbedSettings | undefined;
 
   const dashboardServices: DashboardAppServices = {
@@ -195,8 +198,14 @@ export async function mountApp({
     return <DashboardNoMatch history={routeProps.history} />;
   };
 
-  // make sure the index pattern list is up to date
-  await dataStart.indexPatterns.clearCache();
+  const hasEmbeddableIncoming = Boolean(
+    dashboardServices.embeddable
+      .getStateTransfer()
+      .getIncomingEmbeddablePackage(DashboardConstants.DASHBOARDS_ID, false)
+  );
+  if (!hasEmbeddableIncoming) {
+    dataStart.indexPatterns.clearCache();
+  }
 
   // dispatch synthetic hash change event to update hash history objects
   // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
@@ -207,22 +216,24 @@ export async function mountApp({
   const app = (
     <I18nProvider>
       <KibanaContextProvider services={dashboardServices}>
-        <HashRouter>
-          <Switch>
-            <Route
-              path={[
-                DashboardConstants.CREATE_NEW_DASHBOARD_URL,
-                `${DashboardConstants.VIEW_DASHBOARD_URL}/:id`,
-              ]}
-              render={renderDashboard}
-            />
-            <Route exact path={DashboardConstants.LANDING_PAGE_PATH} render={renderListingPage} />
-            <Route exact path="/">
-              <Redirect to={DashboardConstants.LANDING_PAGE_PATH} />
-            </Route>
-            <Route render={renderNoMatch} />
-          </Switch>
-        </HashRouter>
+        <presentationUtil.ContextProvider>
+          <HashRouter>
+            <Switch>
+              <Route
+                path={[
+                  DashboardConstants.CREATE_NEW_DASHBOARD_URL,
+                  `${DashboardConstants.VIEW_DASHBOARD_URL}/:id`,
+                ]}
+                render={renderDashboard}
+              />
+              <Route exact path={DashboardConstants.LANDING_PAGE_PATH} render={renderListingPage} />
+              <Route exact path="/">
+                <Redirect to={DashboardConstants.LANDING_PAGE_PATH} />
+              </Route>
+              <Route render={renderNoMatch} />
+            </Switch>
+          </HashRouter>
+        </presentationUtil.ContextProvider>
       </KibanaContextProvider>
     </I18nProvider>
   );
@@ -237,7 +248,6 @@ export async function mountApp({
   }
   render(app, element);
   return () => {
-    dataStart.search.session.clear();
     unlistenParentHistory();
     unmountComponentAtNode(element);
     appUnMounted();

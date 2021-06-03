@@ -3,6 +3,7 @@
 exports_files(
   [
     "tsconfig.base.json",
+    "tsconfig.browser.json",
     "tsconfig.json",
     "package.json"
   ],

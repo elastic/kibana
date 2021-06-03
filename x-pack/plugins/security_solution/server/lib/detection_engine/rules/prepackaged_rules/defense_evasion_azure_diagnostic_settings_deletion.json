@@ -14,7 +14,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Azure Diagnostic Settings Deletion",
-  "note": "The Azure Filebeat module must be enabled to use this rule.",
+  "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "query": "event.dataset:azure.activitylogs and azure.activitylogs.operation_name:\"MICROSOFT.INSIGHTS/DIAGNOSTICSETTINGS/DELETE\" and event.outcome:(Success or success)",
   "references": [
     "https://docs.microsoft.com/en-us/azure/azure-monitor/platform/diagnostic-settings"
@@ -56,5 +56,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 4
+  "version": 5
 }

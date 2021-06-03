@@ -7,8 +7,9 @@
 
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import { createContext } from 'react';
+import type { ObservabilityRuleTypeRegistry } from '../../../../observability/public';
 import { ConfigSchema } from '../..';
-import { ApmPluginSetupDeps, ApmRuleRegistry } from '../../plugin';
+import { ApmPluginSetupDeps } from '../../plugin';
 import { MapsStartApi } from '../../../../maps/public';
 
 export interface ApmPluginContextValue {
@@ -16,7 +17,7 @@ export interface ApmPluginContextValue {
   config: ConfigSchema;
   core: CoreStart;
   plugins: ApmPluginSetupDeps & { maps?: MapsStartApi };
-  apmRuleRegistry: ApmRuleRegistry;
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
 }
 
 export const ApmPluginContext = createContext({} as ApmPluginContextValue);

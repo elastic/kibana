@@ -14,8 +14,6 @@
     "devOnly": true
   },
   "dependencies": {
-    "@kbn/config": "link:../kbn-config",
-    "@kbn/server-http-tools": "link:../kbn-server-http-tools",
     "@kbn/optimizer": "link:../kbn-optimizer"
   }
 }

@@ -22,12 +22,14 @@ exports[`Intro component renders correctly 1`] = `
         <EuiIcon
           aria-hidden="true"
           className="euiCallOutHeader__icon"
+          color="inherit"
           size="m"
           type="alert"
         >
           <span
             aria-hidden="true"
             className="euiCallOutHeader__icon"
+            color="inherit"
             data-euiicon-type="alert"
             size="m"
           />

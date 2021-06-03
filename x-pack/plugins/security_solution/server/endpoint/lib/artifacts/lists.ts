@@ -7,12 +7,19 @@
 
 import { createHash } from 'crypto';
 import { deflate } from 'zlib';
-import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
-import { validate } from '../../../../common/validate';
+import type {
+  Entry,
+  EntryNested,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 
-import { Entry, EntryNested } from '../../../../../lists/common/schemas/types';
+import {
+  ENDPOINT_EVENT_FILTERS_LIST_ID,
+  ENDPOINT_LIST_ID,
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
+} from '@kbn/securitysolution-list-constants';
 import { ExceptionListClient } from '../../../../../lists/server';
-import { ENDPOINT_LIST_ID, ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../common/shared_imports';
 import {
   internalArtifactCompleteSchema,
   InternalArtifactCompleteSchema,
@@ -30,7 +37,6 @@ import {
   WrappedTranslatedExceptionList,
   wrappedTranslatedExceptionList,
 } from '../../schemas';
-import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '../../../../../lists/common/constants';
 
 export async function buildArtifact(
   exceptions: WrappedTranslatedExceptionList,

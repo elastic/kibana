@@ -1152,6 +1152,56 @@
 {
   "type": "doc",
   "value": {
+    "id": "dashboard:42f6f040-b34f-11eb-8c95-dd19591c63df",
+    "index": ".kibana",
+    "source": {
+      "dashboard": {
+        "title" : "filter by map extent dashboard",
+        "hits" : 0,
+        "description" : "",
+        "panelsJSON" : "[{\"version\":\"8.0.0\",\"type\":\"map\",\"gridData\":{\"x\":0,\"y\":0,\"w\":29,\"h\":21,\"i\":\"24ade730-afe4-42b6-919a-c4e0a98c94f2\"},\"panelIndex\":\"24ade730-afe4-42b6-919a-c4e0a98c94f2\",\"embeddableConfig\":{\"mapCenter\":{\"lat\":38.64679,\"lon\":-120.96481,\"zoom\":7.06},\"mapBuffer\":{\"minLon\":-125.44180499999999,\"minLat\":36.364824999999996,\"maxLon\":-116.603825,\"maxLat\":40.943405},\"isLayerTOCOpen\":true,\"openTOCDetails\":[],\"hiddenLayers\":[],\"enhancements\":{}},\"panelRefName\":\"panel_24ade730-afe4-42b6-919a-c4e0a98c94f2\"},{\"version\":\"8.0.0\",\"type\":\"lens\",\"gridData\":{\"x\":29,\"y\":0,\"w\":10,\"h\":21,\"i\":\"44eb3c47-f6ad-4da8-993b-13c10997d585\"},\"panelIndex\":\"44eb3c47-f6ad-4da8-993b-13c10997d585\",\"embeddableConfig\":{\"attributes\":{\"title\":\"\",\"type\":\"lens\",\"visualizationType\":\"lnsMetric\",\"state\":{\"datasourceStates\":{\"indexpattern\":{\"layers\":{\"3cda3519-055a-4b9c-8759-caa28388298c\":{\"columns\":{\"26acba84-22ca-4625-b2ac-5309945e9b30\":{\"label\":\"Count of records\",\"dataType\":\"number\",\"operationType\":\"count\",\"isBucketed\":false,\"scale\":\"ratio\",\"sourceField\":\"Records\"}},\"columnOrder\":[\"26acba84-22ca-4625-b2ac-5309945e9b30\"],\"incompleteColumns\":{}}}}},\"visualization\":{\"layerId\":\"3cda3519-055a-4b9c-8759-caa28388298c\",\"accessor\":\"26acba84-22ca-4625-b2ac-5309945e9b30\"},\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filters\":[]},\"references\":[{\"type\":\"index-pattern\",\"id\":\"c698b940-e149-11e8-a35a-370a8516603a\",\"name\":\"indexpattern-datasource-current-indexpattern\"},{\"type\":\"index-pattern\",\"id\":\"c698b940-e149-11e8-a35a-370a8516603a\",\"name\":\"indexpattern-datasource-layer-3cda3519-055a-4b9c-8759-caa28388298c\"}]},\"enhancements\":{},\"hidePanelTitles\":false},\"title\":\"Count panel\"}]",
+        "optionsJSON" : "{\"hidePanelTitles\":false,\"useMargins\":true}",
+        "version" : 1,
+        "timeRestore" : true,
+        "timeTo" : "2015-09-20T01:00:00.000Z",
+        "timeFrom" : "2015-09-20T00:00:00.000Z",
+        "refreshInterval" : {
+          "pause" : true,
+          "value" : 1000
+        },
+        "kibanaSavedObjectMeta" : {
+          "searchSourceJSON" : "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
+        }
+      },
+      "type" : "dashboard",
+      "references" : [
+        {
+          "name" : "24ade730-afe4-42b6-919a-c4e0a98c94f2:panel_24ade730-afe4-42b6-919a-c4e0a98c94f2",
+          "type" : "map",
+          "id" : "d2e73f40-e14a-11e8-a35a-370a8516603a"
+        },
+        {
+          "type" : "index-pattern",
+          "id" : "c698b940-e149-11e8-a35a-370a8516603a",
+          "name" : "44eb3c47-f6ad-4da8-993b-13c10997d585:indexpattern-datasource-current-indexpattern"
+        },
+        {
+          "type" : "index-pattern",
+          "id" : "c698b940-e149-11e8-a35a-370a8516603a",
+          "name" : "44eb3c47-f6ad-4da8-993b-13c10997d585:indexpattern-datasource-layer-3cda3519-055a-4b9c-8759-caa28388298c"
+        }
+      ],
+      "migrationVersion" : {
+        "dashboard" : "7.11.0"
+      },
+      "updated_at" : "2021-05-12T18:24:17.228Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
     "index": ".kibana",
     "id": "query:OKJpgs",
     "source": {

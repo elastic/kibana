@@ -8,9 +8,7 @@
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import isEmpty from 'lodash/isEmpty';
+import { isEmpty } from 'lodash';
 
 import { throwErrors } from '../../../../cases/common';
 import {

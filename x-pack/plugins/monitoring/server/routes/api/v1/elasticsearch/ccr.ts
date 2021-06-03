@@ -259,7 +259,7 @@ export function ccrRoute(server: {
             };
           }, {}) ?? {};
 
-        const buckets = response.aggregations.by_follower_index.buckets;
+        const buckets = response.aggregations?.by_follower_index.buckets ?? [];
         const data = buckets.reduce((accum: any, bucket: any) => {
           const leaderIndex = get(bucket, 'leader_index.buckets[0].key');
           const remoteCluster = get(

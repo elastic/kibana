@@ -14,7 +14,7 @@ import { ChangeIndexPattern } from './change_indexpattern';
 import { SavedObject } from 'kibana/server';
 import { DiscoverIndexPattern, DiscoverIndexPatternProps } from './discover_index_pattern';
 import { EuiSelectable } from '@elastic/eui';
-import { IndexPattern } from 'src/plugins/data/public';
+import { IndexPattern, IndexPatternAttributes } from 'src/plugins/data/public';
 import { configMock } from '../../../__mocks__/config';
 import { indexPatternsMock } from '../../../__mocks__/index_patterns';
 
@@ -28,14 +28,14 @@ const indexPattern1 = {
   attributes: {
     title: 'test1 title',
   },
-} as SavedObject<any>;
+} as SavedObject<IndexPatternAttributes>;
 
 const indexPattern2 = {
   id: 'the-index-pattern-id',
   attributes: {
     title: 'test2 title',
   },
-} as SavedObject<any>;
+} as SavedObject<IndexPatternAttributes>;
 
 const defaultProps = {
   config: configMock,
@@ -58,6 +58,7 @@ function getIndexPatternPickerOptions(instance: ShallowWrapper) {
 function selectIndexPatternPickerOption(instance: ShallowWrapper, selectedLabel: string) {
   const options: Array<{ label: string; checked?: 'on' | 'off' }> = getIndexPatternPickerOptions(
     instance
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ).map((option: any) =>
     option.label === selectedLabel
       ? { ...option, checked: 'on' }
@@ -79,6 +80,7 @@ describe('DiscoverIndexPattern', () => {
   test('should list all index patterns', () => {
     const instance = shallow(<DiscoverIndexPattern {...defaultProps} />);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(getIndexPatternPickerOptions(instance)!.map((option: any) => option.label)).toEqual([
       'test1 title',
       'test2 title',

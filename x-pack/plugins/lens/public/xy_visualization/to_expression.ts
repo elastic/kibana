@@ -149,6 +149,51 @@ export const buildExpression = (
           ],
           fittingFunction: [state.fittingFunction || 'None'],
           curveType: [state.curveType || 'LINEAR'],
+          fillOpacity: [state.fillOpacity || 0.3],
+          yLeftExtent: [
+            {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'lens_xy_axisExtentConfig',
+                  arguments: {
+                    mode: [state?.yLeftExtent?.mode || 'full'],
+                    lowerBound:
+                      state?.yLeftExtent?.lowerBound !== undefined
+                        ? [state?.yLeftExtent?.lowerBound]
+                        : [],
+                    upperBound:
+                      state?.yLeftExtent?.upperBound !== undefined
+                        ? [state?.yLeftExtent?.upperBound]
+                        : [],
+                  },
+                },
+              ],
+            },
+          ],
+          yRightExtent: [
+            {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'lens_xy_axisExtentConfig',
+                  arguments: {
+                    mode: [state?.yRightExtent?.mode || 'full'],
+                    lowerBound:
+                      state?.yRightExtent?.lowerBound !== undefined
+                        ? [state?.yRightExtent?.lowerBound]
+                        : [],
+                    upperBound:
+                      state?.yRightExtent?.upperBound !== undefined
+                        ? [state?.yRightExtent?.upperBound]
+                        : [],
+                  },
+                },
+              ],
+            },
+          ],
           axisTitlesVisibilitySettings: [
             {
               type: 'expression',

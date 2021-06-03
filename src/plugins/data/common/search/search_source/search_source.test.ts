@@ -27,7 +27,7 @@ const mockSource2 = { excludes: ['bar-*'] };
 
 const indexPattern = ({
   title: 'foo',
-  fields: [{ name: 'foo-bar' }, { name: 'field1' }, { name: 'field2' }],
+  fields: [{ name: 'foo-bar' }, { name: 'field1' }, { name: 'field2' }, { name: '_id' }],
   getComputedFields,
   getSourceFiltering: () => mockSource,
 } as unknown) as IndexPattern;
@@ -68,7 +68,7 @@ describe('SearchSource', () => {
   beforeEach(() => {
     const getConfigMock = jest
       .fn()
-      .mockImplementation((param) => param === 'metaFields' && ['_type', '_source'])
+      .mockImplementation((param) => param === 'metaFields' && ['_type', '_source', '_id'])
       .mockName('getConfig');
 
     mockSearchMethod = jest
@@ -458,6 +458,28 @@ describe('SearchSource', () => {
         expect(request.fields).toEqual([{ field: 'field1' }, { field: 'field2' }]);
       });
 
+      test('excludes metafields from the request', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: [],
+            docvalueFields: [],
+          }),
+        } as unknown) as IndexPattern);
+        searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
+
+        const request = searchSource.getSearchRequestBody();
+        expect(request.fields).toEqual([{ field: 'field1' }, { field: 'field2' }]);
+
+        searchSource.setField('fields', ['foo-bar', 'foo--bar', 'field1', 'field2']);
+        expect(request.fields).toEqual([{ field: 'field1' }, { field: 'field2' }]);
+
+        searchSource.removeField('fields');
+        searchSource.setField('fieldsFromSource', ['foo-bar', 'foo--bar', 'field1', 'field2']);
+        expect(request.fields).toEqual([{ field: 'field1' }, { field: 'field2' }]);
+      });
+
       test('returns all scripted fields when one fields entry is *', async () => {
         searchSource.setField('index', ({
           ...indexPattern,
@@ -612,6 +634,7 @@ describe('SearchSource', () => {
         searchSource.setField('fields', ['*']);
 
         const request = searchSource.getSearchRequestBody();
+        expect(request.hasOwnProperty('docvalue_fields')).toBe(false);
         expect(request.fields).toEqual([
           { field: 'foo-bar' },
           { field: 'field1' },

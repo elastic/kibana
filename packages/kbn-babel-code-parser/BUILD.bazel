@@ -39,8 +39,11 @@ babel(
       ".babelrc",
   ] + DEPS,
   output_dir = True,
+  # the following arg paths includes $(execpath) as babel runs on the sandbox root
   args = [
       "./%s/src" % package_name(),
+      "--config-file",
+      "./%s/.babelrc" % package_name(),
       "--out-dir",
       "$(@D)",
       "--quiet"
@@ -50,7 +53,7 @@ babel(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = [":target"] + DEPS,
+  deps = DEPS + [":target"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )

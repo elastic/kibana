@@ -257,7 +257,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
           return currentUrl;
         });
 
-        await retry.try(async () => {
+        await retry.tryForTime(defaultFindTimeout, async () => {
           await this.sleep(501);
           const currentUrl = await browser.getCurrentUrl();
           log.debug('in navigateTo url = ' + currentUrl);
@@ -266,10 +266,6 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
             throw new Error('URL changed, waiting for it to settle');
           }
         });
-        if (appName === 'status_page') return;
-        if (await testSubjects.exists('statusPageContainer')) {
-          throw new Error('Navigation ended up at the status page.');
-        }
       });
     }
 

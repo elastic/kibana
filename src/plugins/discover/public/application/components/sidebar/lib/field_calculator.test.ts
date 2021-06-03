@@ -6,15 +6,17 @@
  * Side Public License, v 1.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import _ from 'lodash';
-// @ts-ignore
+// @ts-expect-error
 import realHits from '../../../../__fixtures__/real_hits.js';
-// @ts-ignore
+// @ts-expect-error
 import stubbedLogstashFields from '../../../../__fixtures__/logstash_fields';
 import { coreMock } from '../../../../../../../core/public/mocks';
 import { IndexPattern } from '../../../../../../data/public';
 import { getStubIndexPattern } from '../../../../../../data/public/test_utils';
-// @ts-ignore
+// @ts-expect-error
 import { fieldCalculator } from './field_calculator';
 
 let indexPattern: IndexPattern;
@@ -23,7 +25,7 @@ describe('fieldCalculator', function () {
   beforeEach(function () {
     indexPattern = getStubIndexPattern(
       'logstash-*',
-      (cfg: any) => cfg,
+      (cfg: unknown) => cfg,
       'time',
       stubbedLogstashFields(),
       coreMock.createSetup()

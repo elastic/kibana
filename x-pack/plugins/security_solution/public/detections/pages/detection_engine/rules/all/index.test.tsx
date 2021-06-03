@@ -157,7 +157,7 @@ describe('AllRules', () => {
             gap: null,
             last_failure_at: null,
             last_failure_message: null,
-            last_look_back_date: new Date().toISOString(),
+            last_look_back_date: new Date().toISOString(), // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
             last_success_at: new Date().toISOString(),
             last_success_message: 'it is a success',
             search_after_time_durations: ['616.97'],

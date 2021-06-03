@@ -64,7 +64,6 @@ interface RoleMappingsActions {
     engineName: string;
     selected: boolean;
   };
-  handleResetMappings(callback: () => void): Function;
   handleRoleChange(roleType: RoleTypes): { roleType: RoleTypes };
   handleSaveMapping(): void;
   initializeRoleMapping(roleId?: string): { roleId?: string };
@@ -113,7 +112,6 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     initializeRoleMappings: true,
     initializeRoleMapping: (roleId) => ({ roleId }),
     handleDeleteMapping: true,
-    handleResetMappings: (callback) => callback,
     handleSaveMapping: true,
   },
   reducers: {
@@ -296,17 +294,6 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         } catch (e) {
           flashAPIErrors(e);
         }
-      }
-    },
-    handleResetMappings: async (callback) => {
-      const { http } = HttpLogic.values;
-      try {
-        await http.post('/api/app_search/role_mappings/reset');
-        actions.initializeRoleMappings();
-      } catch (e) {
-        flashAPIErrors(e);
-      } finally {
-        callback();
       }
     },
     handleSaveMapping: async () => {
