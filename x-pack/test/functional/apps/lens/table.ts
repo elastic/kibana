@@ -144,5 +144,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // should also set text color when in cell mode
       expect(styleObj.color).to.be('rgb(0, 0, 0)');
     });
+
+    it('should allow to show a summary table for metric columns', async () => {
+      await PageObjects.lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger');
+      await PageObjects.lens.setTableSummaryRowFunction('sum');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.assertExactText(
+        '[data-test-subj="lnsDataTable-footer-c"]',
+        'Sum: 100'
+      );
+    });
   });
 }

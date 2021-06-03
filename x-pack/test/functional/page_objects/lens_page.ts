@@ -725,6 +725,21 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return buttonEl.click();
     },
 
+    async setTableSummaryRowFunction(
+      summaryFunction: 'none' | 'sum' | 'avg' | 'count' | 'min' | 'max'
+    ) {
+      const target = await testSubjects.find('lnsDatatable_summaryrow_function');
+      await comboBox.openOptionsList(target);
+      await comboBox.setElement(target, summaryFunction);
+    },
+
+    async setTableSummaryRowLabel(newLabel: string) {
+      await testSubjects.setValue('lnsDatatable_summaryrow_label', newLabel, {
+        clearWithKeyboard: true,
+        typeCharByChar: true,
+      });
+    },
+
     async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text') {
       await testSubjects.click('lnsDatatable_dynamicColoring_groups_' + coloringType);
     },
