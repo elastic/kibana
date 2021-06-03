@@ -7,7 +7,12 @@
  */
 
 import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/server';
-import { ExpressionsService, ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
+import {
+  ExpressionsService,
+  ExpressionsServiceSetup,
+  ExpressionsServiceStart,
+  setUiSettingsFactory,
+} from '../common';
 
 export type ExpressionsServerSetup = ExpressionsServiceSetup;
 
@@ -30,6 +35,13 @@ export class ExpressionsServerPlugin
   }
 
   public start(core: CoreStart): ExpressionsServerStart {
+    setUiSettingsFactory(({ getKibanaRequest }) => {
+      const savedObjectClient = core.savedObjects.getScopedClient(getKibanaRequest());
+      const uiSettingsClient = core.uiSettings.asScopedToClient(savedObjectClient);
+
+      return uiSettingsClient;
+    });
+
     const start = this.expressions.start();
 
     return Object.freeze(start);

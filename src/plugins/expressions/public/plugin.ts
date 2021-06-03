@@ -11,7 +11,7 @@ import {
   ExpressionsService,
   ExpressionsServiceSetup,
   ExpressionsServiceStart,
-  setUiSettings,
+  setUiSettingsFactory,
 } from '../common';
 import { setRenderersRegistry, setNotifications, setExpressionsService } from './services';
 import { ReactExpressionRenderer } from './react_expression_renderer';
@@ -63,7 +63,7 @@ export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, Express
 
   public start(core: CoreStart): ExpressionsStart {
     setNotifications(core.notifications);
-    setUiSettings(core.uiSettings);
+    setUiSettingsFactory(() => core.uiSettings);
 
     const { expressions } = this;
     const start = {

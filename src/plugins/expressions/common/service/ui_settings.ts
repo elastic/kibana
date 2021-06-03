@@ -6,7 +6,22 @@
  * Side Public License, v 1.
  */
 
-import type { IUiSettingsClient } from 'src/core/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { KibanaRequest } from 'src/core/server';
+
 import { createGetterSetter } from '../../../kibana_utils/common';
 
-export const [getUiSettings, setUiSettings] = createGetterSetter<IUiSettingsClient>('UiSettings');
+interface UiSettingsClientFactoryParameters {
+  getKibanaRequest(): KibanaRequest;
+}
+
+interface UiSettingsClient {
+  get<T>(key: string, defaultValue?: T): T | Promise<T>;
+}
+
+type UiSettingsClientFactory = (parameters: UiSettingsClientFactoryParameters) => UiSettingsClient;
+
+export const [
+  getUiSettingsFactory,
+  setUiSettingsFactory,
+] = createGetterSetter<UiSettingsClientFactory>('UiSettingsFactory');

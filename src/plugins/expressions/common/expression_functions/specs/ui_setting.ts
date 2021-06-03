@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { getUiSettings } from '../../../common';
+import { getUiSettingsFactory } from '../../../common';
 import { UiSetting } from '../../expression_types/specs/ui_setting';
 
 export interface UiSettingArguments {
@@ -20,7 +20,7 @@ export type ExpressionFunctionUiSetting = ExpressionFunctionDefinition<
   'uiSetting',
   unknown,
   UiSettingArguments,
-  UiSetting
+  Promise<UiSetting>
 >;
 
 export const uiSetting: ExpressionFunctionUiSetting = {
@@ -43,18 +43,34 @@ export const uiSetting: ExpressionFunctionUiSetting = {
       types: ['string'],
     },
   },
-  fn(input, { default: defaultValue, parameter }) {
-    const uiSettings = getUiSettings();
+  async fn(input, { default: defaultValue, parameter }, { getKibanaRequest }) {
+    const uiSettingsFactory = getUiSettingsFactory();
+    const uiSettings = uiSettingsFactory({
+      getKibanaRequest() {
+        const request = getKibanaRequest?.();
+        if (!request) {
+          throw new Error(
+            i18n.translate('expressions.functions.uiSetting.error.kibanaRequest', {
+              defaultMessage:
+                'A KibanaRequest is required to get UI settings on the server. ' +
+                'Please provide a request object to the expression execution params.',
+            })
+          );
+        }
+
+        return request;
+      },
+    });
 
     try {
       return {
         type: 'ui_setting',
         key: parameter,
-        value: uiSettings.get(parameter, defaultValue),
+        value: await uiSettings.get(parameter, defaultValue),
       };
     } catch {
       throw new Error(
-        i18n.translate('expressions.functions.uiSetting.args.parameter.invalid', {
+        i18n.translate('expressions.functions.uiSetting.error.parameter', {
           defaultMessage: 'Invalid parameter "{parameter}".',
           values: { parameter },
         })
