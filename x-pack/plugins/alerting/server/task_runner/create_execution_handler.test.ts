@@ -156,6 +156,10 @@ test('enqueues execution per selected action', async () => {
         Object {
           "event": Object {
             "action": "execute-action",
+            "category": Array [
+              "alerts",
+            ],
+            "kind": "alert",
           },
           "kibana": Object {
             "alerting": Object {

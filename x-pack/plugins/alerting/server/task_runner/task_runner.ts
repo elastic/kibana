@@ -698,7 +698,7 @@ function generateNewAndRecoveredInstanceEvents<
       event: {
         action,
         kind: 'alert',
-        category: ruleType.producer ? [ruleType.producer] : undefined,
+        category: [ruleType.producer],
       },
       kibana: {
         alerting: {

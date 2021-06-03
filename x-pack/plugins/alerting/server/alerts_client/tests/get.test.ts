@@ -83,6 +83,7 @@ describe('get()', () => {
           id: '1',
         },
       ],
+      version: '123',
     });
     const result = await alertsClient.get({ id: '1' });
     expect(result).toMatchInlineSnapshot(`
@@ -107,6 +108,7 @@ describe('get()', () => {
           "interval": "10s",
         },
         "updatedAt": 2019-02-12T21:01:22.479Z,
+        "version": "123",
       }
     `);
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);

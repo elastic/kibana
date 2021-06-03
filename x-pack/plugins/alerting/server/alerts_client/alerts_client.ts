@@ -357,7 +357,12 @@ export class AlertsClient {
       });
       createdAlert.attributes.scheduledTaskId = scheduledTask.id;
     }
-    return this.getAlertFromRaw<Params>(createdAlert.id, createdAlert.attributes, references);
+    return this.getAlertFromRaw<Params>(
+      createdAlert.id,
+      createdAlert.attributes,
+      references,
+      createdAlert.version
+    );
   }
 
   public async get<Params extends AlertTypeParams = never>({
@@ -389,7 +394,12 @@ export class AlertsClient {
         savedObject: { type: 'alert', id },
       })
     );
-    return this.getAlertFromRaw<Params>(result.id, result.attributes, result.references, result.version);
+    return this.getAlertFromRaw<Params>(
+      result.id,
+      result.attributes,
+      result.references,
+      result.version
+    );
   }
 
   public async getAlertState({ id }: { id: string }): Promise<AlertTaskState | void> {
@@ -499,7 +509,7 @@ export class AlertsClient {
       type: 'alert',
     });
 
-    const authorizedData = data.map(({ id, attributes, references }) => {
+    const authorizedData = data.map(({ id, attributes, references, version }) => {
       try {
         ensureRuleTypeIsAuthorized(
           attributes.alertTypeId,
@@ -519,7 +529,8 @@ export class AlertsClient {
       return this.getAlertFromRaw<Params>(
         id,
         fields ? (pick(attributes, fields) as RawAlert) : attributes,
-        references
+        references,
+        version
       );
     });
 
@@ -807,7 +818,12 @@ export class AlertsClient {
       throw e;
     }
 
-    return this.getPartialAlertFromRaw(id, updatedObject.attributes, updatedObject.references);
+    return this.getPartialAlertFromRaw(
+      id,
+      updatedObject.attributes,
+      updatedObject.references,
+      updatedObject.version
+    );
   }
 
   private apiKeyAsAlertAttributes(

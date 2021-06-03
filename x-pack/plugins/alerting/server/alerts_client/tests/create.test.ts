@@ -319,6 +319,7 @@ describe('create()', () => {
           id: '1',
         },
       ],
+      version: '123',
     });
     taskManager.schedule.mockResolvedValueOnce({
       id: 'task-123',
@@ -347,6 +348,7 @@ describe('create()', () => {
           type: 'action',
         },
       ],
+      version: '123',
     });
     const result = await alertsClient.create({ data });
     expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
@@ -439,7 +441,6 @@ describe('create()', () => {
         "throttle": null,
         "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
-        "version": "123",
       }
     `);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
@@ -898,6 +899,7 @@ describe('create()', () => {
           id: '1',
         },
       ],
+      version: '123',
     });
     taskManager.schedule.mockResolvedValueOnce({
       id: 'task-123',
@@ -1278,6 +1280,7 @@ describe('create()', () => {
         "throttle": null,
         "updatedAt": 2019-02-12T21:01:22.479Z,
         "updatedBy": "elastic",
+        "version": undefined,
       }
     `);
   });

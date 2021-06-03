@@ -390,6 +390,8 @@ describe('Task Runner', () => {
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
       event: {
         action: 'new-instance',
+        category: ['alerts'],
+        kind: 'alert',
       },
       kibana: {
         alerting: {
@@ -407,19 +409,45 @@ describe('Task Runner', () => {
         ],
       },
       message: "test:1: 'alert-name' created new instance: '1'",
+      rule: {
+        author: ['alert-updater'],
+        category: 'My test alert',
+        id: 'test',
+        license: 'basic',
+        name: 'alert-name',
+        namespace: undefined,
+        reference: 'https://www.elastic.co/guide/en/kibana/master/stack-rules.html',
+        ruleset: 'alerts',
+        uuid: '1',
+        version: undefined,
+      },
     });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
-      event: { action: 'active-instance' },
+      event: { action: 'active-instance', category: ['alerts'], kind: 'alert' },
       kibana: {
         alerting: { action_group_id: 'default', action_subgroup: 'subDefault', instance_id: '1' },
         saved_objects: [{ id: '1', namespace: undefined, rel: 'primary', type: 'alert' }],
       },
       message:
         "test:1: 'alert-name' active instance: '1' in actionGroup(subgroup): 'default(subDefault)'",
+      rule: {
+        author: ['alert-updater'],
+        category: 'My test alert',
+        id: 'test',
+        license: 'basic',
+        name: 'alert-name',
+        namespace: undefined,
+        reference: 'https://www.elastic.co/guide/en/kibana/master/stack-rules.html',
+        ruleset: 'alerts',
+        uuid: '1',
+        version: undefined,
+      },
     });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(3, {
       event: {
         action: 'execute-action',
+        category: ['alerts'],
+        kind: 'alert',
       },
       kibana: {
         alerting: {
@@ -536,6 +564,8 @@ describe('Task Runner', () => {
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
       event: {
         action: 'new-instance',
+        category: ['alerts'],
+        kind: 'alert',
       },
       kibana: {
         alerting: {
@@ -552,10 +582,24 @@ describe('Task Runner', () => {
         ],
       },
       message: "test:1: 'alert-name' created new instance: '1'",
+      rule: {
+        author: ['alert-updater'],
+        category: 'My test alert',
+        id: 'test',
+        license: 'basic',
+        name: 'alert-name',
+        namespace: undefined,
+        reference: 'https://www.elastic.co/guide/en/kibana/master/stack-rules.html',
+        ruleset: 'alerts',
+        uuid: '1',
+        version: undefined,
+      },
     });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
       event: {
         action: 'active-instance',
+        category: ['alerts'],
+        kind: 'alert',
       },
       kibana: {
         alerting: {
@@ -572,11 +616,25 @@ describe('Task Runner', () => {
         ],
       },
       message: "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+      rule: {
+        author: ['alert-updater'],
+        category: 'My test alert',
+        id: 'test',
+        license: 'basic',
+        name: 'alert-name',
+        namespace: undefined,
+        reference: 'https://www.elastic.co/guide/en/kibana/master/stack-rules.html',
+        ruleset: 'alerts',
+        uuid: '1',
+        version: undefined,
+      },
     });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(3, {
       '@timestamp': '1970-01-01T00:00:00.000Z',
       event: {
         action: 'execute',
+        category: ['alerts'],
+        kind: 'alert',
         outcome: 'success',
       },
       kibana: {
@@ -593,6 +651,18 @@ describe('Task Runner', () => {
         ],
       },
       message: "alert executed: test:1: 'alert-name'",
+      rule: {
+        author: ['alert-updater'],
+        category: 'My test alert',
+        id: 'test',
+        license: 'basic',
+        name: 'alert-name',
+        namespace: undefined,
+        reference: 'https://www.elastic.co/guide/en/kibana/master/stack-rules.html',
+        ruleset: 'alerts',
+        uuid: '1',
+        version: undefined,
+      },
     });
   });
 
@@ -707,6 +777,10 @@ describe('Task Runner', () => {
           Object {
             "event": Object {
               "action": "active-instance",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
             },
             "kibana": Object {
               "alerting": Object {
@@ -723,6 +797,20 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+            "rule": Object {
+              "author": Array [
+                "alert-updater",
+              ],
+              "category": "My test alert",
+              "id": "test",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "reference": "https://www.elastic.co/guide/en/kibana/master/stack-rules.html",
+              "ruleset": "alerts",
+              "uuid": "1",
+              "version": undefined,
+            },
           },
         ],
         Array [
@@ -730,6 +818,10 @@ describe('Task Runner', () => {
             "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
               "outcome": "success",
             },
             "kibana": Object {
@@ -746,6 +838,20 @@ describe('Task Runner', () => {
               ],
             },
             "message": "alert executed: test:1: 'alert-name'",
+            "rule": Object {
+              "author": Array [
+                "alert-updater",
+              ],
+              "category": "My test alert",
+              "id": "test",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "reference": "https://www.elastic.co/guide/en/kibana/master/stack-rules.html",
+              "ruleset": "alerts",
+              "uuid": "1",
+              "version": undefined,
+            },
           },
         ],
       ]
@@ -936,6 +1042,10 @@ describe('Task Runner', () => {
           Object {
             "event": Object {
               "action": "new-instance",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
             },
             "kibana": Object {
               "alerting": Object {
@@ -952,12 +1062,30 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: 'alert-name' created new instance: '1'",
+            "rule": Object {
+              "author": Array [
+                "alert-updater",
+              ],
+              "category": "My test alert",
+              "id": "test",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "reference": "https://www.elastic.co/guide/en/kibana/master/stack-rules.html",
+              "ruleset": "alerts",
+              "uuid": "1",
+              "version": undefined,
+            },
           },
         ],
         Array [
           Object {
             "event": Object {
               "action": "active-instance",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
             },
             "kibana": Object {
               "alerting": Object {
@@ -974,12 +1102,30 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+            "rule": Object {
+              "author": Array [
+                "alert-updater",
+              ],
+              "category": "My test alert",
+              "id": "test",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "reference": "https://www.elastic.co/guide/en/kibana/master/stack-rules.html",
+              "ruleset": "alerts",
+              "uuid": "1",
+              "version": undefined,
+            },
           },
         ],
         Array [
           Object {
             "event": Object {
               "action": "execute-action",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
             },
             "kibana": Object {
               "alerting": Object {
@@ -1002,6 +1148,20 @@ describe('Task Runner', () => {
               ],
             },
             "message": "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup: 'default' action: action:1",
+            "rule": Object {
+              "author": Array [
+                "alert-updater",
+              ],
+              "category": "My test alert",
+              "id": "test",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "reference": "https://www.elastic.co/guide/en/kibana/master/stack-rules.html",
+              "ruleset": "alerts",
+              "uuid": "1",
+              "version": undefined,
+            },
           },
         ],
         Array [
@@ -1009,6 +1169,10 @@ describe('Task Runner', () => {
             "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
               "outcome": "success",
             },
             "kibana": Object {
@@ -1025,6 +1189,20 @@ describe('Task Runner', () => {
               ],
             },
             "message": "alert executed: test:1: 'alert-name'",
+            "rule": Object {
+              "author": Array [
+                "alert-updater",
+              ],
+              "category": "My test alert",
+              "id": "test",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "reference": "https://www.elastic.co/guide/en/kibana/master/stack-rules.html",
+              "ruleset": "alerts",
+              "uuid": "1",
+              "version": undefined,
+            },
           },
         ],
       ]
@@ -1391,6 +1569,10 @@ describe('Task Runner', () => {
           Object {
             "event": Object {
               "action": "recovered-instance",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
             },
             "kibana": Object {
               "alerting": Object {
@@ -1407,12 +1589,30 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: 'alert-name' instance '2' has recovered",
+            "rule": Object {
+              "author": Array [
+                "alert-updater",
+              ],
+              "category": "My test alert",
+              "id": "test",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "reference": "https://www.elastic.co/guide/en/kibana/master/stack-rules.html",
+              "ruleset": "alerts",
+              "uuid": "1",
+              "version": undefined,
+            },
           },
         ],
         Array [
           Object {
             "event": Object {
               "action": "active-instance",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
             },
             "kibana": Object {
               "alerting": Object {
@@ -1429,6 +1629,20 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+            "rule": Object {
+              "author": Array [
+                "alert-updater",
+              ],
+              "category": "My test alert",
+              "id": "test",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "reference": "https://www.elastic.co/guide/en/kibana/master/stack-rules.html",
+              "ruleset": "alerts",
+              "uuid": "1",
+              "version": undefined,
+            },
           },
         ],
         Array [
@@ -1436,6 +1650,10 @@ describe('Task Runner', () => {
             "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
               "outcome": "success",
             },
             "kibana": Object {
@@ -1452,6 +1670,20 @@ describe('Task Runner', () => {
               ],
             },
             "message": "alert executed: test:1: 'alert-name'",
+            "rule": Object {
+              "author": Array [
+                "alert-updater",
+              ],
+              "category": "My test alert",
+              "id": "test",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "reference": "https://www.elastic.co/guide/en/kibana/master/stack-rules.html",
+              "ruleset": "alerts",
+              "uuid": "1",
+              "version": undefined,
+            },
           },
         ],
       ]
@@ -1645,6 +1877,10 @@ describe('Task Runner', () => {
             },
             "event": Object {
               "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
               "outcome": "failure",
               "reason": "execute",
             },
@@ -1662,6 +1898,15 @@ describe('Task Runner', () => {
               ],
             },
             "message": "alert execution failure: test:1: 'alert-name'",
+            "rule": Object {
+              "category": "My test alert",
+              "id": "test",
+              "license": "basic",
+              "namespace": undefined,
+              "reference": "https://www.elastic.co/guide/en/kibana/master/stack-rules.html",
+              "ruleset": "alerts",
+              "uuid": "1",
+            },
           },
         ],
       ]
@@ -1704,6 +1949,10 @@ describe('Task Runner', () => {
             },
             "event": Object {
               "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
               "outcome": "failure",
               "reason": "decrypt",
             },
@@ -1721,6 +1970,15 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: execution failed",
+            "rule": Object {
+              "category": "My test alert",
+              "id": "test",
+              "license": "basic",
+              "namespace": undefined,
+              "reference": "https://www.elastic.co/guide/en/kibana/master/stack-rules.html",
+              "ruleset": "alerts",
+              "uuid": "1",
+            },
           },
         ],
       ]
@@ -1771,6 +2029,10 @@ describe('Task Runner', () => {
             },
             "event": Object {
               "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
               "outcome": "failure",
               "reason": "license",
             },
@@ -1788,6 +2050,15 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: execution failed",
+            "rule": Object {
+              "category": "My test alert",
+              "id": "test",
+              "license": "basic",
+              "namespace": undefined,
+              "reference": "https://www.elastic.co/guide/en/kibana/master/stack-rules.html",
+              "ruleset": "alerts",
+              "uuid": "1",
+            },
           },
         ],
       ]
@@ -1838,6 +2109,10 @@ describe('Task Runner', () => {
             },
             "event": Object {
               "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
               "outcome": "failure",
               "reason": "unknown",
             },
@@ -1855,6 +2130,15 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: execution failed",
+            "rule": Object {
+              "category": "My test alert",
+              "id": "test",
+              "license": "basic",
+              "namespace": undefined,
+              "reference": "https://www.elastic.co/guide/en/kibana/master/stack-rules.html",
+              "ruleset": "alerts",
+              "uuid": "1",
+            },
           },
         ],
       ]
@@ -1904,6 +2188,10 @@ describe('Task Runner', () => {
             },
             "event": Object {
               "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
               "outcome": "failure",
               "reason": "read",
             },
@@ -1921,6 +2209,15 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: execution failed",
+            "rule": Object {
+              "category": "My test alert",
+              "id": "test",
+              "license": "basic",
+              "namespace": undefined,
+              "reference": "https://www.elastic.co/guide/en/kibana/master/stack-rules.html",
+              "ruleset": "alerts",
+              "uuid": "1",
+            },
           },
         ],
       ]

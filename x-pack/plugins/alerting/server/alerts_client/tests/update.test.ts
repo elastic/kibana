@@ -373,7 +373,6 @@ describe('update()', () => {
         "throttle": null,
         "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
-        "version": "123",
       }
     `);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
@@ -508,6 +507,7 @@ describe('update()', () => {
         },
         "scheduledTaskId": "task-123",
         "updatedAt": 2019-02-12T21:01:22.479Z,
+        "version": undefined,
       }
     `);
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(2);
@@ -665,6 +665,7 @@ describe('update()', () => {
         },
         "scheduledTaskId": "task-123",
         "updatedAt": 2019-02-12T21:01:22.479Z,
+        "version": undefined,
       }
     `);
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(2);
