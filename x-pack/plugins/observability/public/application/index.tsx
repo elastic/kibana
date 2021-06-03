@@ -99,14 +99,7 @@ export const renderApp = ({
   element.classList.add(APP_WRAPPER_CLASS);
 
   ReactDOM.render(
-    <KibanaContextProvider
-      services={{
-        ...core,
-        ...plugins,
-        savedObjectsClient: core.savedObjects.client,
-        storage: new Storage(localStorage),
-      }}
-    >
+    <KibanaContextProvider services={{ ...core, ...plugins, storage: new Storage(localStorage) }}>
       <PluginContext.Provider
         value={{
           appMountParameters,

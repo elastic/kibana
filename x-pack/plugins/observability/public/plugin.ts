@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, of } from 'rxjs';
-import { PresentationUtilPluginStart } from 'src/plugins/presentation_util/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
@@ -37,7 +36,6 @@ import { toggleOverviewLinkInNav } from './toggle_overview_link_in_nav';
 import { ConfigSchema } from '.';
 import { createObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
 import { createLazyObservabilityPageTemplate } from './components/shared';
-import { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
 
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
@@ -52,8 +50,6 @@ export interface ObservabilityPublicPluginsStart {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
   lens: LensPublicStart;
-  savedObjectsTagging?: SavedObjectTaggingPluginStart;
-  presentationUtil: PresentationUtilPluginStart;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;

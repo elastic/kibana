@@ -29,7 +29,7 @@ export function getSaveModalComponent(
   startDependencies: LensPluginStartDependencies,
   attributeService: () => Promise<LensAttributeService>
 ) {
-  return (props: SaveModalContainerProps) => {
+  return (props: Omit<SaveModalContainerProps, 'lensServices'>) => {
     const [lensServices, setLensServices] = useState<LensAppServices>();
 
     useEffect(() => {

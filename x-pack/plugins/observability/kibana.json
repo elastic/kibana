@@ -10,16 +10,13 @@
     "licensing",
     "home",
     "usageCollection",
-    "lens",
-    "savedObjectsTagging"
+    "lens"
   ],
   "requiredPlugins": [
     "data",
     "alerting",
     "ruleRegistry",
-    "triggersActionsUi",
-    "presentationUtil",
-    "dashboard"
+    "triggersActionsUi"
   ],
   "ui": true,
   "server": true,

@@ -252,7 +252,7 @@ export class LensPlugin {
 
     return {
       EmbeddableComponent: getEmbeddableComponent(startDependencies.embeddable),
-      SaveModalComponent: getSaveModalComponent(core, startDependencies, this.attributeService),
+      SaveModalComponent: getSaveModalComponent(core, startDependencies, this.attributeService!),
       navigateToPrefilledEditor: (input: LensEmbeddableInput, openInNewTab?: boolean) => {
         // for openInNewTab, we set the time range in url via getEditPath below
         if (input.timeRange && !openInNewTab) {
