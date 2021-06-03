@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient } from '../../../';
-import { InternalCoreStart } from '../../../internal_types';
-import * as kbnTestServer from '../../../../test_helpers/kbn_server';
-import { Root } from '../../../root';
-import { SavedObjectsRawDoc } from '../../serialization';
+import { ElasticsearchClient } from '../../../../';
+import { InternalCoreStart } from '../../../../internal_types';
+import * as kbnTestServer from '../../../../../test_helpers/kbn_server';
+import { Root } from '../../../../root';
+import { SavedObjectsRawDoc } from '../../../serialization';
 import {
   bulkOverwriteTransformedDocuments,
   cloneIndex,
@@ -37,11 +37,11 @@ import {
   removeWriteBlock,
   transformDocs,
   waitForIndexStatusYellow,
-} from '../actions';
+} from '../../actions';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import { DocumentsTransformFailed, DocumentsTransformSuccess } from '../../migrations/core';
+import { DocumentsTransformFailed, DocumentsTransformSuccess } from '../../../migrations/core';
 import { TaskEither } from 'fp-ts/lib/TaskEither';
 
 const { startES } = kbnTestServer.createTestServers({
