@@ -121,24 +121,24 @@ export class FollowerIndexEdit extends PureComponent {
         params: { id: name },
       },
     } = this.props;
+
     const title = i18n.translate(
       'xpack.crossClusterReplication.followerIndexEditForm.loadingErrorTitle',
       {
         defaultMessage: 'Error loading follower index',
       }
     );
+
     const errorMessage =
-      error.status === 404
+      error.body.statusCode === 404
         ? {
-            data: {
-              error: i18n.translate(
-                'xpack.crossClusterReplication.followerIndexEditForm.loadingErrorMessage',
-                {
-                  defaultMessage: `The follower index '{name}' does not exist.`,
-                  values: { name },
-                }
-              ),
-            },
+            error: i18n.translate(
+              'xpack.crossClusterReplication.followerIndexEditForm.loadingErrorMessage',
+              {
+                defaultMessage: `The follower index '{name}' does not exist.`,
+                values: { name },
+              }
+            ),
           }
         : error;
 
