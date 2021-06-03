@@ -129,7 +129,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
 
     if (loadState === 'finished' && roleMappings && roleMappings.length === 0) {
       return (
-        <EuiPageContent>
+        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
           <EmptyPrompt history={this.props.history} />
         </EuiPageContent>
       );
