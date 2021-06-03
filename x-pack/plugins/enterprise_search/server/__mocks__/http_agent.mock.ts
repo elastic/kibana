@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-export { MockRouter } from './router.mock';
-export {
-  mockConfig,
-  mockLogger,
-  mockRequestHandler,
-  mockDependencies,
-} from './routerDependencies.mock';
+export const mockHttpAgent = jest.fn();
 
-export { mockHttpAgent } from './http_agent.mock';
+jest.mock('../lib/enterprise_search_http_agent', () => ({
+  entSearchHttpAgent: {
+    getHttpAgent: () => mockHttpAgent,
+  },
+}));
