@@ -112,7 +112,10 @@ export function getTopMetricsAggConfig(
       };
     },
     isValid() {
-      return this.aggConfig.sortField !== undefined;
+      return (
+        !!this.aggConfig.sortField &&
+        (isSpecialSortField(this.aggConfig.sortField) ? true : !!this.aggConfig.sortDirection)
+      );
     },
   };
 }

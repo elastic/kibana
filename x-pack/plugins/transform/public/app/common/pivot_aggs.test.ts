@@ -72,4 +72,7 @@ describe('isSpecialSortField', () => {
   test('detects special sort field', () => {
     expect(isSpecialSortField('_score')).toBe(true);
   });
+  test('rejects special fields that not supported yet', () => {
+    expect(isSpecialSortField('_doc')).toBe(false);
+  });
 });

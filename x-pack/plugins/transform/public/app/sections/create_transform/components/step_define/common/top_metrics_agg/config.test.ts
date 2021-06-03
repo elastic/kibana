@@ -9,18 +9,18 @@ import { getTopMetricsAggConfig } from './config';
 import { PivotAggsConfigTopMetrics } from './types';
 
 describe('top metrics agg config', () => {
-  describe('#setUiConfigFromEs', () => {
-    let config: PivotAggsConfigTopMetrics;
+  let config: PivotAggsConfigTopMetrics;
 
-    beforeEach(() => {
-      config = getTopMetricsAggConfig({
-        agg: 'top_metrics',
-        aggName: 'test-agg',
-        field: ['test-field'],
-        dropDownName: 'test-agg',
-      });
+  beforeEach(() => {
+    config = getTopMetricsAggConfig({
+      agg: 'top_metrics',
+      aggName: 'test-agg',
+      field: ['test-field'],
+      dropDownName: 'test-agg',
     });
+  });
 
+  describe('#setUiConfigFromEs', () => {
     test('sets config with a special field', () => {
       // act
       config.setUiConfigFromEs({
@@ -95,6 +95,61 @@ describe('top metrics agg config', () => {
             term: { 'offer.color': 'blue' },
           },
         },
+      });
+    });
+  });
+
+  describe('#getEsAggConfig', () => {
+    test('rejects invalid config', () => {
+      // arrange
+      config.field = ['field-01', 'field-02'];
+      config.aggConfig = {
+        sortDirection: 'asc',
+      };
+
+      // act and assert
+      expect(config.getEsAggConfig()).toEqual(null);
+    });
+
+    test('rejects invalid config with missing sort direction', () => {
+      // arrange
+      config.field = ['field-01', 'field-02'];
+      config.aggConfig = {
+        sortField: 'sort-field',
+      };
+
+      // act and assert
+      expect(config.getEsAggConfig()).toEqual(null);
+    });
+
+    test('converts valid config', () => {
+      // arrange
+      config.field = ['field-01', 'field-02'];
+      config.aggConfig = {
+        sortField: 'sort-field',
+        sortDirection: 'asc',
+      };
+
+      // act and assert
+      expect(config.getEsAggConfig()).toEqual({
+        metrics: [{ field: 'field-01' }, { field: 'field-02' }],
+        sort: {
+          'sort-field': 'asc',
+        },
+      });
+    });
+
+    test('converts configs with a special sorting field', () => {
+      // arrange
+      config.field = ['field-01', 'field-02'];
+      config.aggConfig = {
+        sortField: '_score',
+      };
+
+      // act and assert
+      expect(config.getEsAggConfig()).toEqual({
+        metrics: [{ field: 'field-01' }, { field: 'field-02' }],
+        sort: '_score',
       });
     });
   });
