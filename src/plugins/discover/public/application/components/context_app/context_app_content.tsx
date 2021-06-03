@@ -155,7 +155,7 @@ export function ContextAppContent({
   return (
     <Fragment>
       <ActionBar {...actionBarProps(PREDECESSOR_TYPE)} />
-      {loadingFeedback()}
+      {isLegacy && loadingFeedback()}
       <EuiHorizontalRule margin="xs" />
       {isLegacy ? (
         isAnchorLoaded && (

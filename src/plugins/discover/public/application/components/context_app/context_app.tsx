@@ -150,7 +150,7 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
                 <strong>
                   <FormattedMessage
                     id="discover.context.contextOfTitle"
-                    defaultMessage="Context of #{anchorId}"
+                    defaultMessage="Documents surrounding #{anchorId}"
                     values={{ anchorId }}
                   />
                 </strong>
