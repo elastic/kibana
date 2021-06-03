@@ -14,7 +14,7 @@ import { FtrService } from '../ftr_provider_context';
 const xyChartSelector = 'visTypeXyChart';
 const pieChartSelector = 'visTypePieChart';
 
-export class VisualizeChart extends FtrService {
+export class VisualizeChartPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly config = this.ctx.getService('config');
   private readonly find = this.ctx.getService('find');
