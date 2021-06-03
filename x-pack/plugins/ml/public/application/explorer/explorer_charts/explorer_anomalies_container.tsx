@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -56,21 +56,9 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
 }) => {
   return (
     <>
-      <EuiFlexGroup
-        id={id}
-        direction="row"
-        gutterSize="l"
-        responsive={true}
-        className="ml-anomalies-controls"
-      >
-        <EuiFlexItem grow={false} style={{ width: '170px' }}>
-          <EuiFormRow
-            label={i18n.translate('xpack.ml.explorer.severityThresholdLabel', {
-              defaultMessage: 'Severity threshold',
-            })}
-          >
-            <SelectSeverityUI severity={severity} onChange={setSeverity} />
-          </EuiFormRow>
+      <EuiFlexGroup id={id} direction="row" gutterSize="l" responsive={true}>
+        <EuiFlexItem grow={false}>
+          <SelectSeverityUI severity={severity} onChange={setSeverity} />
         </EuiFlexItem>
       </EuiFlexGroup>
 

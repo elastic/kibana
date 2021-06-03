@@ -138,7 +138,8 @@ export function createExecutionHandler<
       .map((action) => ({
         ...action,
         params: injectActionParams({
-          alertId,
+          ruleId: alertId,
+          spaceId,
           actionParams: action.params,
           actionTypeId: action.actionTypeId,
         }),

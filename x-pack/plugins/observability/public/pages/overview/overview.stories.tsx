@@ -24,6 +24,7 @@ import { emptyResponse as emptyMetricsResponse, fetchMetricsData } from './mock/
 import { newsFeedFetchData } from './mock/news_feed.mock';
 import { emptyResponse as emptyUptimeResponse, fetchUptimeData } from './mock/uptime.mock';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
+import { KibanaPageTemplate } from '../../../../../../src/plugins/kibana_react/public';
 
 function unregisterAll() {
   unregisterDataHandler({ appName: 'apm' });
@@ -45,7 +46,7 @@ const withCore = makeDecorator({
             appMountParameters: ({
               setHeaderActionMenu: () => {},
             } as unknown) as AppMountParameters,
-            config: { unsafe: { alertingExperience: { enabled: true } } },
+            config: { unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } } },
             core: options as CoreStart,
             plugins: ({
               data: {
@@ -55,6 +56,7 @@ const withCore = makeDecorator({
               },
             } as unknown) as ObservabilityPublicPluginsStart,
             observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
+            ObservabilityPageTemplate: KibanaPageTemplate,
           }}
         >
           <EuiThemeProvider>

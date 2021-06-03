@@ -7,6 +7,7 @@
 
 import { DEFAULT_INITIAL_APP_DATA } from '../../../common/__mocks__';
 import { setMockValues, rerender } from '../__mocks__';
+import '../__mocks__/shallow_useeffect.mock';
 import '../__mocks__/enterprise_search_url.mock';
 import '../__mocks__/react_router_history.mock';
 
@@ -70,9 +71,10 @@ describe('AppSearchUnconfigured', () => {
 
 describe('AppSearchConfigured', () => {
   let wrapper: ShallowWrapper;
+  const renderHeaderActions = jest.fn();
 
   beforeAll(() => {
-    setMockValues({ myRole: {} });
+    setMockValues({ myRole: {}, renderHeaderActions });
     wrapper = shallow(<AppSearchConfigured {...DEFAULT_INITIAL_APP_DATA} />);
   });
 
@@ -81,6 +83,10 @@ describe('AppSearchConfigured', () => {
     expect(wrapper.find(Layout).prop('readOnlyMode')).toBeFalsy();
     expect(wrapper.find(EnginesOverview)).toHaveLength(1);
     expect(wrapper.find(EngineRouter)).toHaveLength(1);
+  });
+
+  it('renders header actions', () => {
+    expect(renderHeaderActions).toHaveBeenCalled();
   });
 
   it('mounts AppLogic with passed initial data props', () => {

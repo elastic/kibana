@@ -245,7 +245,7 @@ const VisComponent = (props: VisComponentProps) => {
       if (Object.keys(overwriteColors).includes(seriesName)) {
         return overwriteColors[seriesName];
       }
-      const outputColor = palettesRegistry?.get(visParams.palette.name).getColor(
+      const outputColor = palettesRegistry?.get(visParams.palette.name).getCategoricalColor(
         [
           {
             name: seriesName,

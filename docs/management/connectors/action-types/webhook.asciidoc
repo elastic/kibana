@@ -22,6 +22,12 @@ Username::      Username for HTTP basic authentication.
 Password::  Password for HTTP basic authentication.
 
 [float]
+[[webhook-connector-networking-configuration]]
+==== Connector networking configuration
+
+Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+
+[float]
 [[Preconfigured-webhook-configuration]]
 ==== Preconfigured connector type
 

@@ -481,12 +481,12 @@ describe('xy_visualization', () => {
 
       it('should query palette to fill in colors for other dimensions', () => {
         const palette = paletteServiceMock.get('default');
-        (palette.getColor as jest.Mock).mockClear();
+        (palette.getCategoricalColor as jest.Mock).mockClear();
         const accessorConfig = callConfigAndFindYConfig({}, 'c');
         expect(accessorConfig.triggerIcon).toEqual('color');
         // black is the color returned from the palette mock
         expect(accessorConfig.color).toEqual('black');
-        expect(palette.getColor).toHaveBeenCalledWith(
+        expect(palette.getCategoricalColor).toHaveBeenCalledWith(
           [
             {
               name: 'c',
@@ -505,9 +505,9 @@ describe('xy_visualization', () => {
           label: 'Overwritten label',
         });
         const palette = paletteServiceMock.get('default');
-        (palette.getColor as jest.Mock).mockClear();
+        (palette.getCategoricalColor as jest.Mock).mockClear();
         callConfigAndFindYConfig({}, 'c');
-        expect(palette.getColor).toHaveBeenCalledWith(
+        expect(palette.getCategoricalColor).toHaveBeenCalledWith(
           [
             expect.objectContaining({
               name: 'Overwritten label',
@@ -526,7 +526,7 @@ describe('xy_visualization', () => {
           },
           'c'
         );
-        expect(palette.getColor).toHaveBeenCalled();
+        expect(palette.getCategoricalColor).toHaveBeenCalled();
       });
 
       it('should not show any indicator as long as there is no data', () => {
@@ -551,7 +551,7 @@ describe('xy_visualization', () => {
       it('should show current palette for break down by dimension', () => {
         const palette = paletteServiceMock.get('mock');
         const customColors = ['yellow', 'green'];
-        (palette.getColors as jest.Mock).mockReturnValue(customColors);
+        (palette.getCategoricalColors as jest.Mock).mockReturnValue(customColors);
         const breakdownConfig = callConfigForBreakdownConfigs({
           palette: { type: 'palette', name: 'mock', params: {} },
           splitAccessor: 'd',
@@ -570,9 +570,9 @@ describe('xy_visualization', () => {
         paletteGetter.mockReturnValue({
           id: 'default',
           title: '',
-          getColors: jest.fn(),
+          getCategoricalColors: jest.fn(),
           toExpression: jest.fn(),
-          getColor: jest.fn().mockReturnValueOnce('blue').mockReturnValueOnce('green'),
+          getCategoricalColor: jest.fn().mockReturnValueOnce('blue').mockReturnValueOnce('green'),
         });
 
         const yConfigs = callConfigForYConfigs({});

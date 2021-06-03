@@ -15,7 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'settings']);
   const testSubjects = getService('testSubjects');
   const globalNav = getService('globalNav');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   describe('index pattern empty view', () => {
     before(async () => {
@@ -28,7 +28,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     after(async () => {
       await esArchiver.loadIfNeeded('makelogs');
-      // @ts-expect-error
       await es.transport.request({
         path: '/logstash-a',
         method: 'DELETE',
@@ -42,14 +41,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         `\n\nNOTE: If this test fails make sure there aren't any non-system indices in the _cat/indices output (use esArchiver.unload on them)`
       );
       log.debug(
-        // @ts-expect-error
         await es.transport.request({
           path: '/_cat/indices',
           method: 'GET',
         })
       );
       await testSubjects.existOrFail('createAnyway');
-      // @ts-expect-error
+
       await es.transport.request({
         path: '/logstash-a/_doc',
         method: 'POST',
