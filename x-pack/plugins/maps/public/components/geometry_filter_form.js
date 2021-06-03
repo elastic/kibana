@@ -18,16 +18,14 @@ import {
   EuiFormErrorText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../../common/constants';
+import { ES_SPATIAL_RELATIONS } from '../../common/constants';
 import { getEsSpatialRelationLabel } from '../../common/i18n_getters';
-import { MultiIndexGeoFieldSelect } from './multi_index_geo_field_select';
 import { ActionSelect } from './action_select';
 import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../src/plugins/data/public';
 
 export class GeometryFilterForm extends Component {
   static propTypes = {
     buttonLabel: PropTypes.string.isRequired,
-    geoFields: PropTypes.array.isRequired,
     getFilterActions: PropTypes.func,
     getActionContext: PropTypes.func,
     intitialGeometryLabel: PropTypes.string.isRequired,
@@ -42,13 +40,8 @@ export class GeometryFilterForm extends Component {
 
   state = {
     actionId: ACTION_GLOBAL_APPLY_FILTER,
-    selectedField: this.props.geoFields.length ? this.props.geoFields[0] : undefined,
     geometryLabel: this.props.intitialGeometryLabel,
     relation: ES_SPATIAL_RELATIONS.INTERSECTS,
-  };
-
-  _onGeoFieldChange = (selectedField) => {
-    this.setState({ selectedField });
   };
 
   _onGeometryLabelChange = (e) => {
@@ -71,29 +64,12 @@ export class GeometryFilterForm extends Component {
     this.props.onSubmit({
       actionId: this.state.actionId,
       geometryLabel: this.state.geometryLabel,
-      indexPatternId: this.state.selectedField.indexPatternId,
-      geoFieldName: this.state.selectedField.geoFieldName,
       relation: this.state.relation,
     });
   };
 
   _renderRelationInput() {
-    // relationship only used when filtering geo_shape fields
-    if (!this.state.selectedField) {
-      return null;
-    }
-
-    const spatialRelations =
-      this.props.isFilterGeometryClosed &&
-      this.state.selectedField.geoFieldType !== ES_GEO_FIELD_TYPE.GEO_POINT
-        ? Object.values(ES_SPATIAL_RELATIONS)
-        : Object.values(ES_SPATIAL_RELATIONS).filter((relation) => {
-            // - cannot filter by "within"-relation when filtering geometry is not closed
-            // - do not distinguish between intersects/within for filtering for points since they are equivalent
-            return relation !== ES_SPATIAL_RELATIONS.WITHIN;
-          });
-
-    const options = spatialRelations.map((relation) => {
+    const options = Object.values(ES_SPATIAL_RELATIONS).map((relation) => {
       return {
         value: relation,
         text: getEsSpatialRelationLabel(relation),
@@ -137,12 +113,6 @@ export class GeometryFilterForm extends Component {
           />
         </EuiFormRow>
 
-        <MultiIndexGeoFieldSelect
-          selectedField={this.state.selectedField}
-          fields={this.props.geoFields}
-          onChange={this._onGeoFieldChange}
-        />
-
         {this._renderRelationInput()}
 
         <ActionSelect
@@ -161,7 +131,7 @@ export class GeometryFilterForm extends Component {
             size="s"
             fill
             onClick={this._onSubmit}
-            isDisabled={!this.state.geometryLabel || !this.state.selectedField}
+            isDisabled={!this.state.geometryLabel}
             isLoading={this.props.isLoading}
           >
             {this.props.buttonLabel}
