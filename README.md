@@ -54,7 +54,7 @@ See [configuration.md](https://github.com/sqren/backport/blob/master/docs/config
 
 ### CLI options
 
-Please note that dashes between the words are optional,for instance you can type `--targetBranchor` `--target-branch` both are valid options.
+Please note that dashes between the words are optional, for instance you can type `--targetBranch` or `--target-branch` both are valid options.
 
 | Option              | Shorthand notation   | Description                                            | Default        | Type            |
 | ------------------- | -------------------- | ------------------------------------------------------ | -------------- | --------------- |
