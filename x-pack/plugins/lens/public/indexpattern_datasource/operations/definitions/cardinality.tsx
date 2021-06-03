@@ -17,6 +17,7 @@ import {
   getSafeName,
   getFilter,
 } from './helpers';
+import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 
 const supportedTypes = new Set([
   'string',
@@ -33,13 +34,19 @@ const SCALE = 'ratio';
 const OPERATION_TYPE = 'unique_count';
 const IS_BUCKETED = false;
 
-function ofName(name: string) {
-  return i18n.translate('xpack.lens.indexPattern.cardinalityOf', {
-    defaultMessage: 'Unique count of {name}',
-    values: {
-      name,
-    },
-  });
+function ofName(name: string, timeShift: string | undefined) {
+  return adjustTimeScaleLabelSuffix(
+    i18n.translate('xpack.lens.indexPattern.cardinalityOf', {
+      defaultMessage: 'Unique count of {name}',
+      values: {
+        name,
+      },
+    }),
+    undefined,
+    undefined,
+    undefined,
+    timeShift
+  );
 }
 
 export interface CardinalityIndexPatternColumn
@@ -76,21 +83,19 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
     );
   },
   filterable: true,
-
-  operationParams: [
-    { name: 'kql', type: 'string', required: false },
-    { name: 'lucene', type: 'string', required: false },
-  ],
-  getDefaultLabel: (column, indexPattern) => ofName(getSafeName(column.sourceField, indexPattern)),
+  shiftable: true,
+  getDefaultLabel: (column, indexPattern) =>
+    ofName(getSafeName(column.sourceField, indexPattern), column.timeShift),
   buildColumn({ field, previousColumn }, columnParams) {
     return {
-      label: ofName(field.displayName),
+      label: ofName(field.displayName, previousColumn?.timeShift),
       dataType: 'number',
       operationType: OPERATION_TYPE,
       scale: SCALE,
       sourceField: field.name,
       isBucketed: IS_BUCKETED,
       filter: getFilter(previousColumn, columnParams),
+      timeShift: previousColumn?.timeShift,
       params: getFormatFromPreviousColumn(previousColumn),
     };
   },
@@ -100,12 +105,14 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       enabled: true,
       schema: 'metric',
       field: column.sourceField,
+      // time shift is added to wrapping aggFilteredMetric if filter is set
+      timeShift: column.filter ? undefined : column.timeShift,
     }).toAst();
   },
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: ofName(field.displayName),
+      label: ofName(field.displayName, oldColumn.timeShift),
       sourceField: field.name,
     };
   },

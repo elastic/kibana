@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-import type { Map as MapboxMap, MapboxOptions, MapMouseEvent } from 'mapbox-gl';
+import type { Map as MapboxMap, MapboxOptions, MapMouseEvent } from '@kbn/mapbox-gl';
 
 // @ts-expect-error
 import { spritesheet } from '@elastic/maki';
@@ -43,7 +43,6 @@ import {
   // @ts-expect-error
 } from './utils';
 import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
-import { GeoFieldWithIndex } from '../../components/geo_field_with_index';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { MapExtentState } from '../../actions';
 import { TileStatusTracker } from './tile_status_tracker';
@@ -68,7 +67,6 @@ export interface Props {
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
   onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
-  geoFields: GeoFieldWithIndex[];
   renderTooltipContent?: RenderToolTipContent;
   setAreTilesLoaded: (layerId: string, areTilesLoaded: boolean) => void;
 }
@@ -418,11 +416,11 @@ export class MBMap extends Component<Props, State> {
   };
 
   render() {
-    let drawControl;
+    let drawFilterControl;
     let tooltipControl;
     let scaleControl;
     if (this.state.mbMap) {
-      drawControl = this.props.addFilters ? (
+      drawFilterControl = this.props.addFilters ? (
         <DrawFilterControl mbMap={this.state.mbMap} addFilters={this.props.addFilters} />
       ) : null;
       tooltipControl = !this.props.settings.disableTooltipControl ? (
@@ -432,7 +430,6 @@ export class MBMap extends Component<Props, State> {
           getFilterActions={this.props.getFilterActions}
           getActionContext={this.props.getActionContext}
           onSingleValueTrigger={this.props.onSingleValueTrigger}
-          geoFields={this.props.geoFields}
           renderTooltipContent={this.props.renderTooltipContent}
         />
       ) : null;
@@ -447,7 +444,7 @@ export class MBMap extends Component<Props, State> {
         ref={this._setContainerRef}
         data-test-subj="mapContainer"
       >
-        {drawControl}
+        {drawFilterControl}
         {scaleControl}
         {tooltipControl}
       </div>

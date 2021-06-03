@@ -1353,7 +1353,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-          "lineNumber": 473
+          "lineNumber": 474
         },
         "deprecated": false,
         "children": [
@@ -1369,7 +1369,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 474
+              "lineNumber": 475
             },
             "deprecated": false
           },
@@ -1391,7 +1391,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 475
+              "lineNumber": 476
             },
             "deprecated": false
           },
@@ -1407,7 +1407,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 476
+              "lineNumber": 477
             },
             "deprecated": false
           },
@@ -1423,7 +1423,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 477
+              "lineNumber": 478
             },
             "deprecated": false
           },
@@ -1440,7 +1440,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 478
+              "lineNumber": 479
             },
             "deprecated": false
           },
@@ -1457,7 +1457,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 479
+              "lineNumber": 480
             },
             "deprecated": false
           },
@@ -1480,7 +1480,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 480
+              "lineNumber": 481
             },
             "deprecated": false
           },
@@ -1496,7 +1496,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 481
+              "lineNumber": 482
             },
             "deprecated": false
           },
@@ -1512,7 +1512,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 482
+              "lineNumber": 483
             },
             "deprecated": false
           },
@@ -1528,7 +1528,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 483
+              "lineNumber": 484
             },
             "deprecated": false
           },
@@ -1551,7 +1551,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 484
+              "lineNumber": 485
             },
             "deprecated": false
           },
@@ -1574,7 +1574,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 485
+              "lineNumber": 486
             },
             "deprecated": false
           },
@@ -1597,7 +1597,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 486
+              "lineNumber": 487
             },
             "deprecated": false
           },
@@ -1613,7 +1613,23 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 487
+              "lineNumber": 488
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYState.fillOpacity",
+            "type": "number",
+            "tags": [],
+            "label": "fillOpacity",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+              "lineNumber": 489
             },
             "deprecated": false
           },
@@ -1629,7 +1645,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 488
+              "lineNumber": 490
             },
             "deprecated": false
           }
@@ -2093,7 +2109,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/index.ts",
-          "lineNumber": 497
+          "lineNumber": 498
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2280,7 +2296,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-          "lineNumber": 470
+          "lineNumber": 471
         },
         "deprecated": false,
         "initialIsOpen": false

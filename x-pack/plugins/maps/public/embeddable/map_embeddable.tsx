@@ -162,6 +162,11 @@ export class MapEmbeddable
     const store = this._savedMap.getStore();
     store.dispatch(setReadOnly(true));
     store.dispatch(disableScrollZoom());
+    store.dispatch(
+      setMapSettings({
+        showTimesliderToggleButton: false,
+      })
+    );
 
     this._dispatchSetQuery({
       forceRefresh: false,
@@ -456,7 +461,6 @@ export class MapEmbeddable
     this._prevMapExtent = mapExtent;
 
     const mapExtentFilter = createExtentFilter(mapExtent, geoFieldNames);
-    mapExtentFilter.meta.isMultiIndex = true;
     mapExtentFilter.meta.controlledBy = this._controlledBy;
     mapExtentFilter.meta.alias = i18n.translate('xpack.maps.embeddable.boundsFilterLabel', {
       defaultMessage: 'Map bounds at center: {lat}, {lon}, zoom: {zoom}',

@@ -6,53 +6,49 @@
  * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrService } from '../../ftr_provider_context';
 
-export function VegaDebugInspectorViewProvider({ getService }: FtrProviderContext) {
-  const testSubjects = getService('testSubjects');
-  const inspector = getService('inspector');
-  const dataGrid = getService('dataGrid');
+export class VegaDebugInspectorViewService extends FtrService {
+  private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly inspector = this.ctx.getService('inspector');
+  private readonly dataGrid = this.ctx.getService('dataGrid');
 
-  class VegaDebugInspectorView {
-    async openVegaDebugInspectorView() {
-      await inspector.openInspectorView('inspectorViewChooserVega debug');
-    }
-
-    public getOpenDataViewerButton() {
-      return testSubjects.find('vegaDataInspectorDataViewerButton');
-    }
-
-    public getOpenSignalViewerButton() {
-      return testSubjects.find('vegaDataInspectorSignalViewerButton');
-    }
-
-    public getOpenSpecViewerButton() {
-      return testSubjects.find('vegaDataInspectorSpecViewerButton');
-    }
-
-    public getCopyClipboardButton() {
-      return testSubjects.find('vegaDataInspectorCopyClipboardButton');
-    }
-
-    public getGridTableData() {
-      return dataGrid.getDataGridTableData();
-    }
-
-    public async navigateToDataViewerTab() {
-      const dataViewerButton = await this.getOpenDataViewerButton();
-      await dataViewerButton.click();
-    }
-
-    public async navigateToSignalViewerTab() {
-      const signalViewerButton = await this.getOpenSignalViewerButton();
-      await signalViewerButton.click();
-    }
-
-    public async navigateToSpecViewerTab() {
-      const specViewerButton = await this.getOpenSpecViewerButton();
-      await specViewerButton.click();
-    }
+  async openVegaDebugInspectorView() {
+    await this.inspector.openInspectorView('inspectorViewChooserVega debug');
   }
 
-  return new VegaDebugInspectorView();
+  public getOpenDataViewerButton() {
+    return this.testSubjects.find('vegaDataInspectorDataViewerButton');
+  }
+
+  public getOpenSignalViewerButton() {
+    return this.testSubjects.find('vegaDataInspectorSignalViewerButton');
+  }
+
+  public getOpenSpecViewerButton() {
+    return this.testSubjects.find('vegaDataInspectorSpecViewerButton');
+  }
+
+  public getCopyClipboardButton() {
+    return this.testSubjects.find('vegaDataInspectorCopyClipboardButton');
+  }
+
+  public getGridTableData() {
+    return this.dataGrid.getDataGridTableData();
+  }
+
+  public async navigateToDataViewerTab() {
+    const dataViewerButton = await this.getOpenDataViewerButton();
+    await dataViewerButton.click();
+  }
+
+  public async navigateToSignalViewerTab() {
+    const signalViewerButton = await this.getOpenSignalViewerButton();
+    await signalViewerButton.click();
+  }
+
+  public async navigateToSpecViewerTab() {
+    const specViewerButton = await this.getOpenSpecViewerButton();
+    await specViewerButton.click();
+  }
 }

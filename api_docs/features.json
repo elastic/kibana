@@ -1599,13 +1599,6 @@
                   "path": "x-pack/plugins/security/server/authorization/disable_ui_capabilities.ts",
                   "lineNumber": 311
                 }
-              },
-              {
-                "plugin": "beatsManagement",
-                "link": {
-                  "path": "x-pack/plugins/beats_management/server/plugin.ts",
-                  "lineNumber": 61
-                }
               }
             ]
           },
@@ -3297,13 +3290,6 @@
                 "link": {
                   "path": "x-pack/plugins/security/server/authorization/disable_ui_capabilities.ts",
                   "lineNumber": 311
-                }
-              },
-              {
-                "plugin": "beatsManagement",
-                "link": {
-                  "path": "x-pack/plugins/beats_management/server/plugin.ts",
-                  "lineNumber": 61
                 }
               }
             ]

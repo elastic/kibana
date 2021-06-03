@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
-  const es = getService('legacyEs');
+  const es = getService('es');
   const retry = getService('retry');
   const scriptedFiledName = 'versionConflictScript';
   const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'header']);
@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }) {
         },
       });
       log.debug(JSON.stringify(response));
-      expect(response.result).to.be('updated');
+      expect(response.body.result).to.be('updated');
       await PageObjects.settings.setFieldFormat('url');
       await PageObjects.settings.clickSaveScriptedField();
       await retry.try(async function () {
@@ -80,7 +80,7 @@ export default function ({ getService, getPageObjects }) {
         },
       });
       log.debug(JSON.stringify(response));
-      expect(response.result).to.be('updated');
+      expect(response.body.result).to.be('updated');
       await PageObjects.settings.controlChangeSave();
       await retry.try(async function () {
         //await PageObjects.common.sleep(2000);

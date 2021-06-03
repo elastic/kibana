@@ -20,6 +20,7 @@ export function createDiscoverDirective(reactDirective: any) {
     ['opts', { watchDepth: 'reference' }],
     ['resetQuery', { watchDepth: 'reference' }],
     ['resultState', { watchDepth: 'reference' }],
+    ['fetchStatus', { watchDepth: 'reference' }],
     ['rows', { watchDepth: 'reference' }],
     ['savedSearch', { watchDepth: 'reference' }],
     ['searchSource', { watchDepth: 'reference' }],

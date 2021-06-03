@@ -14,7 +14,8 @@ export default function enterSpaceFunctonalTests({
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['security', 'spaceSelector']);
 
-  describe('Enter Space', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/100570
+  describe.skip('Enter Space', function () {
     this.tags('includeFirefox');
     before(async () => {
       await esArchiver.load('spaces/enter_space');

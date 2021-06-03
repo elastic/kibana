@@ -15,6 +15,7 @@ import {
   MapExtent,
   MapQuery,
   MapRefreshConfig,
+  Timeslice,
   TooltipState,
 } from '../../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../../common/constants';
@@ -31,6 +32,7 @@ export type MapContext = {
     lon: number;
   };
   timeFilters?: TimeRange;
+  timeslice?: Timeslice;
   query?: MapQuery;
   filters: Filter[];
   refreshConfig?: MapRefreshConfig;
@@ -61,6 +63,7 @@ export type MapSettings = {
   minZoom: number;
   showScaleControl: boolean;
   showSpatialFilters: boolean;
+  showTimesliderToggleButton: boolean;
   spatialFiltersAlpa: number;
   spatialFiltersFillColor: string;
   spatialFiltersLineColor: string;

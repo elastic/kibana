@@ -26,9 +26,13 @@ import { useTimelineEventsDetails } from '../../../containers/details';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
 import { TakeActionDropdown } from '../../../../detections/components/host_isolation/take_action_dropdown';
-import { ISOLATE_HOST } from '../../../../detections/components/host_isolation/translations';
+import {
+  ISOLATE_HOST,
+  UNISOLATE_HOST,
+} from '../../../../detections/components/host_isolation/translations';
 import { ALERT_DETAILS } from './translations';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useIsolationPrivileges } from '../../../../common/hooks/endpoint/use_isolate_privileges';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -74,13 +78,17 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
 
   const [isHostIsolationPanelOpen, setIsHostIsolationPanel] = useState(false);
 
+  const [isolateAction, setIsolateAction] = useState('isolateHost');
+
   const showAlertDetails = useCallback(() => {
     setIsHostIsolationPanel(false);
   }, []);
 
+  const { isAllowed: isIsolationAllowed } = useIsolationPrivileges();
   const showHostIsolationPanel = useCallback((action) => {
-    if (action === 'isolateHost') {
+    if (action === 'isolateHost' || action === 'unisolateHost') {
       setIsHostIsolationPanel(true);
+      setIsolateAction(action);
     }
   }, []);
 
@@ -89,6 +97,11 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   const isEndpointAlert = useMemo(() => {
     const findEndpointAlert = find({ category: 'agent', field: 'agent.type' }, detailsData)?.values;
     return findEndpointAlert ? findEndpointAlert[0] === 'endpoint' : false;
+  }, [detailsData]);
+
+  const agentId = useMemo(() => {
+    const findAgentId = find({ category: 'agent', field: 'agent.id' }, detailsData)?.values;
+    return findAgentId ? findAgentId[0] : '';
   }, [detailsData]);
 
   const backToAlertDetailsLink = useMemo(() => {
@@ -105,11 +118,11 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           </EuiText>
         </EuiButtonEmpty>
         <EuiTitle>
-          <h2>{ISOLATE_HOST}</h2>
+          <h2>{isolateAction === 'isolateHost' ? ISOLATE_HOST : UNISOLATE_HOST}</h2>
         </EuiTitle>
       </>
     );
-  }, [showAlertDetails]);
+  }, [showAlertDetails, isolateAction]);
 
   if (!expandedEvent?.eventId) {
     return null;
@@ -126,7 +139,11 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
       </EuiFlyoutHeader>
       <StyledEuiFlyoutBody>
         {isHostIsolationPanelOpen ? (
-          <HostIsolationPanel details={detailsData} cancelCallback={showAlertDetails} />
+          <HostIsolationPanel
+            details={detailsData}
+            cancelCallback={showAlertDetails}
+            isolateAction={isolateAction}
+          />
         ) : (
           <ExpandableEvent
             browserFields={browserFields}
@@ -139,17 +156,20 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           />
         )}
       </StyledEuiFlyoutBody>
-      {isHostIsolationEnabled && isEndpointAlert && isHostIsolationPanelOpen === false && (
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <TakeActionDropdown onChange={showHostIsolationPanel} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="l" />
-          <EuiSpacer size="l" />
-        </EuiFlyoutFooter>
-      )}
+      {isIsolationAllowed &&
+        isHostIsolationEnabled &&
+        isEndpointAlert &&
+        isHostIsolationPanelOpen === false && (
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <TakeActionDropdown onChange={showHostIsolationPanel} agentId={agentId} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="l" />
+            <EuiSpacer size="l" />
+          </EuiFlyoutFooter>
+        )}
     </>
   ) : (
     <>
