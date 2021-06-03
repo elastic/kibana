@@ -2703,7 +2703,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/rule-data-utils@link:packages/kbn-rule-data-utils":
+"@kbn/rule-data-utils@link:bazel-bin/packages/kbn-rule-data-utils/npm_module":
   version "0.0.0"
   uid ""
 
