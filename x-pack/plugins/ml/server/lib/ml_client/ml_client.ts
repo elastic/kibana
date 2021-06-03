@@ -242,6 +242,7 @@ export function getMlClient(
         }>(...p);
         const jobs = await jobSavedObjectService.filterJobsForSpace<DataFrameAnalyticsConfig>(
           'data-frame-analytics',
+          // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
           body.data_frame_analytics,
           'id'
         );
