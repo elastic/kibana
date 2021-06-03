@@ -66,3 +66,12 @@ test('it should allow to update existing host with multiple hosts', async () => 
   fireEvent.change(inputEl, { target: { value: 'http://newhost.com' } });
   expect(mockOnChange).toHaveBeenCalledWith(['http://newhost.com', 'http://host2.com']);
 });
+
+test('it should render an input if there is not hosts', async () => {
+  const { utils, mockOnChange } = renderInput([]);
+
+  const inputEl = await utils.findByDisplayValue('');
+  expect(inputEl).toBeDefined();
+  fireEvent.change(inputEl, { target: { value: 'http://newhost.com' } });
+  expect(mockOnChange).toHaveBeenCalledWith(['http://newhost.com']);
+});

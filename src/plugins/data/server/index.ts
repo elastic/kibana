@@ -181,6 +181,7 @@ import {
   tabifyGetColumns,
   calcAutoIntervalLessThan,
 } from '../common';
+import { autocompleteConfigDeprecationProvider } from './config_deprecations';
 
 export {
   // aggs
@@ -301,6 +302,7 @@ export {
 };
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
+  deprecations: autocompleteConfigDeprecationProvider,
   exposeToBrowser: {
     autocomplete: true,
     search: true,

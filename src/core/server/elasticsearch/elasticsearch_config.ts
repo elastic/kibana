@@ -152,23 +152,45 @@ const deprecations: ConfigDeprecationProvider = () => [
     if (es.username === 'elastic') {
       addDeprecation({
         message: `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana_system" user instead.`,
+        correctiveActions: {
+          manualSteps: [`Replace [${fromPath}.username] from "elastic" to "kibana_system".`],
+        },
       });
     } else if (es.username === 'kibana') {
       addDeprecation({
         message: `Setting [${fromPath}.username] to "kibana" is deprecated. You should use the "kibana_system" user instead.`,
+        correctiveActions: {
+          manualSteps: [`Replace [${fromPath}.username] from "kibana" to "kibana_system".`],
+        },
       });
     }
     if (es.ssl?.key !== undefined && es.ssl?.certificate === undefined) {
       addDeprecation({
         message: `Setting [${fromPath}.ssl.key] without [${fromPath}.ssl.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`,
+        correctiveActions: {
+          manualSteps: [
+            `Set [${fromPath}.ssl.certificate] in your kibana configs to enable TLS client authentication to Elasticsearch.`,
+          ],
+        },
       });
     } else if (es.ssl?.certificate !== undefined && es.ssl?.key === undefined) {
       addDeprecation({
         message: `Setting [${fromPath}.ssl.certificate] without [${fromPath}.ssl.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`,
+        correctiveActions: {
+          manualSteps: [
+            `Set [${fromPath}.ssl.key] in your kibana configs to enable TLS client authentication to Elasticsearch.`,
+          ],
+        },
       });
     } else if (es.logQueries === true) {
       addDeprecation({
         message: `Setting [${fromPath}.logQueries] is deprecated and no longer used. You should set the log level to "debug" for the "elasticsearch.queries" context in "logging.loggers" or use "logging.verbose: true".`,
+        correctiveActions: {
+          manualSteps: [
+            `Remove Setting [${fromPath}.logQueries] from your kibana configs`,
+            `Set the log level to "debug" for the "elasticsearch.queries" context in "logging.loggers".`,
+          ],
+        },
       });
     }
     return;

@@ -74,6 +74,7 @@ describe('url state', () => {
     waitForIpsTableToBeLoaded();
     setEndDate(ABSOLUTE_DATE.newEndTimeTyped);
     updateDates();
+    cy.wait(300);
 
     let startDate: string;
     let endDate: string;
