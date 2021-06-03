@@ -16,11 +16,22 @@ describe('RecentCases', () => {
     const createCaseHref = '/create';
     const wrapper = mount(
       <TestProviders>
-        <NoCases createCaseHref={createCaseHref} />
+        <NoCases createCaseHref={createCaseHref} hasWritePermissions={true} />
       </TestProviders>
     );
     expect(wrapper.find(`[data-test-subj="no-cases-create-case"]`).first().prop('href')).toEqual(
       createCaseHref
     );
+  });
+
+  it('displays a message without a link to create a case when the user does not have write permissions', () => {
+    const createCaseHref = '/create';
+    const wrapper = mount(
+      <TestProviders>
+        <NoCases createCaseHref={createCaseHref} hasWritePermissions={false} />
+      </TestProviders>
+    );
+    expect(wrapper.find(`[data-test-subj="no-cases-create-case"]`).exists()).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="no-cases-readonly"]`).exists()).toBeTruthy();
   });
 });

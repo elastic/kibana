@@ -29,6 +29,7 @@ const defaultProps = {
     href: 'create-details-href',
     onClick: jest.fn(),
   },
+  hasWritePermissions: true,
   maxCasesToShow: 10,
   owner: [SECURITY_SOLUTION_OWNER],
 };
