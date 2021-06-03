@@ -30,12 +30,12 @@ export function getActionType(): ActionTypeModel<unknown, unknown, ServerLogActi
         defaultMessage: 'Send to Server log',
       }
     ),
-    validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
-      return { config: { errors: {} }, secrets: { errors: {} } };
+    validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
+      return Promise.resolve({ config: { errors: {} }, secrets: { errors: {} } });
     },
     validateParams: (
       actionParams: ServerLogActionParams
-    ): GenericValidationResult<Pick<ServerLogActionParams, 'message'>> => {
+    ): Promise<GenericValidationResult<Pick<ServerLogActionParams, 'message'>>> => {
       const errors = {
         message: new Array<string>(),
       };
@@ -50,7 +50,7 @@ export function getActionType(): ActionTypeModel<unknown, unknown, ServerLogActi
           )
         );
       }
-      return validationResult;
+      return Promise.resolve(validationResult);
     },
     actionConnectorFields: null,
     actionParamsFields: lazy(() => import('./server_log_params')),

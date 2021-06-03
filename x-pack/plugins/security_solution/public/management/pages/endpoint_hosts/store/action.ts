@@ -37,7 +37,6 @@ export interface ServerFailedToReturnEndpointDetails {
   type: 'serverFailedToReturnEndpointDetails';
   payload: ServerApiError;
 }
-
 export interface ServerReturnedEndpointPolicyResponse {
   type: 'serverReturnedEndpointPolicyResponse';
   payload: GetHostPolicyResponse;
@@ -137,12 +136,16 @@ export interface ServerFailedToReturnEndpointsTotal {
   payload: ServerApiError;
 }
 
-type EndpointIsolationRequest = Action<'endpointIsolationRequest'> & {
+export type EndpointIsolationRequest = Action<'endpointIsolationRequest'> & {
   payload: HostIsolationRequestBody;
 };
 
-type EndpointIsolationRequestStateChange = Action<'endpointIsolationRequestStateChange'> & {
+export type EndpointIsolationRequestStateChange = Action<'endpointIsolationRequestStateChange'> & {
   payload: EndpointState['isolationRequestState'];
+};
+
+export type EndpointDetailsActivityLogChanged = Action<'endpointDetailsActivityLogChanged'> & {
+  payload: EndpointState['endpointDetails']['activityLog'];
 };
 
 export type EndpointAction =
@@ -150,6 +153,7 @@ export type EndpointAction =
   | ServerFailedToReturnEndpointList
   | ServerReturnedEndpointDetails
   | ServerFailedToReturnEndpointDetails
+  | EndpointDetailsActivityLogChanged
   | ServerReturnedEndpointPolicyResponse
   | ServerFailedToReturnEndpointPolicyResponse
   | ServerReturnedPoliciesForOnboarding
