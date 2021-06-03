@@ -18,6 +18,8 @@ import { EventDetailsPanel } from './event_details';
 import { HostDetailsPanel } from './host_details';
 import { NetworkDetailsPanel } from './network_details';
 
+// TODO: EUI team follow up on complex types and styled-components `styled`
+// https://github.com/elastic/eui/issues/4855
 const StyledEuiFlyout: StyledComponent<typeof EuiFlyout, {}, { children?: ReactNode }> = styled(
   EuiFlyout
 )`

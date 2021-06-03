@@ -13,6 +13,8 @@ import {
   EuiTheme,
 } from '../../../../../../../../../../src/plugins/kibana_react/common';
 
+// TODO: EUI team follow up on complex types and styled-components `styled`
+// https://github.com/elastic/eui/issues/4855
 export const ResponsiveFlyout: StyledComponent<
   typeof EuiFlyout,
   EuiTheme,

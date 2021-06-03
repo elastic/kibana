@@ -49,6 +49,8 @@ export const RESPONSE_HEADERS = i18n.translate(
   }
 );
 
+// TODO: EUI team follow up on complex types and styled-components `styled`
+// https://github.com/elastic/eui/issues/4855
 const FlyoutContainer: StyledComponent<typeof EuiFlyout, {}, { children?: ReactNode }> = styled(
   EuiFlyout
 )`

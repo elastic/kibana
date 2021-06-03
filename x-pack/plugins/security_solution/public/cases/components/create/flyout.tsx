@@ -19,6 +19,8 @@ export interface CreateCaseModalProps {
   onSuccess: (theCase: Case) => Promise<void>;
 }
 
+// TODO: EUI team follow up on complex types and styled-components `styled`
+// https://github.com/elastic/eui/issues/4855
 const StyledFlyout: StyledComponent<typeof EuiFlyout, {}, { children?: ReactNode }> = styled(
   EuiFlyout
 )`

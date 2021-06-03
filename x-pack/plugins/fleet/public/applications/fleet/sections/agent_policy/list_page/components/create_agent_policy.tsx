@@ -31,6 +31,8 @@ import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
 import { useCapabilities, useStartServices, sendCreateAgentPolicy } from '../../../../hooks';
 import { AgentPolicyForm, agentPolicyFormValidation } from '../../components';
 
+// TODO: EUI team follow up on complex types and styled-components `styled`
+// https://github.com/elastic/eui/issues/4855
 const FlyoutWithHigherZIndex: StyledComponent<
   typeof EuiFlyout,
   {},
