@@ -14160,8 +14160,8 @@ function spawnStreaming(command, args, opts, { prefix }) {
         mergeMultiline: true,
         tag: `${_logSymbols2.default.error} ${color.bold(prefix)}:`
     });
-    spawned.stdout.pipe(prefixedStdout).pipe(process.stdout);
-    spawned.stderr.pipe(prefixedStderr).pipe(process.stderr);
+    spawned.stdout.pipe(prefixedStdout).pipe(process.stdout); // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
+    spawned.stderr.pipe(prefixedStderr).pipe(process.stderr); // TypeScript note: As long as the proc stdio[2] is 'pipe', then stderr will not be null
     return spawned;
 }
 
@@ -20051,7 +20051,8 @@ const WatchCommand = exports.WatchCommand = {
             }
             yield (0, _parallelize.parallelizeBatches)(batchedProjects, (() => {
                 var _ref = _asyncToGenerator(function* (pkg) {
-                    const completionHint = yield (0, _watch.waitUntilWatchIsReady)(pkg.runScriptStreaming(watchScriptName).stdout);
+                    const completionHint = yield (0, _watch.waitUntilWatchIsReady)(pkg.runScriptStreaming(watchScriptName).stdout // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
+                    );
                     _log.log.write(_chalk2.default.bold(`[${_chalk2.default.green(pkg.name)}] Initial build completed (${completionHint}).`));
                 });
 
