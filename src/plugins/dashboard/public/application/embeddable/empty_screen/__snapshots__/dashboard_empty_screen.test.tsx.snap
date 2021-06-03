@@ -601,7 +601,7 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
             }
           >
             <EuiPageBody>
-              <main
+              <div
                 className="euiPageBody euiPageBody--borderRadiusNone"
               >
                 <EuiPageContent
@@ -673,7 +673,7 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
                     </div>
                   </EuiPanel>
                 </EuiPageContent>
-              </main>
+              </div>
             </EuiPageBody>
           </div>
         </EuiPage>
@@ -946,7 +946,7 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
             }
           >
             <EuiPageBody>
-              <main
+              <div
                 className="euiPageBody euiPageBody--borderRadiusNone"
               >
                 <EuiPageContent
@@ -1054,7 +1054,7 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
                     </div>
                   </EuiPanel>
                 </EuiPageContent>
-              </main>
+              </div>
             </EuiPageBody>
           </div>
         </EuiPage>
