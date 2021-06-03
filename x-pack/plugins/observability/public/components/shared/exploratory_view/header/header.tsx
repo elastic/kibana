@@ -12,7 +12,7 @@ import { TypedLensByValueInput } from '../../../../../../lens/public';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../../plugin';
 import { DataViewLabels } from '../configurations/constants';
-import { useUrlStorage } from '../hooks/use_url_storage';
+import { useSeriesStorage } from '../hooks/use_series_storage';
 
 interface Props {
   seriesId: string;
@@ -24,7 +24,9 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
     services: { lens },
   } = useKibana<ObservabilityPublicPluginsStart>();
 
-  const { series } = useUrlStorage(seriesId);
+  const { getSeries } = useSeriesStorage();
+
+  const series = getSeries(seriesId);
 
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
