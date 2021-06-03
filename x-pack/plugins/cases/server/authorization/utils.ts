@@ -9,7 +9,14 @@ import { remove, uniq } from 'lodash';
 import { nodeBuilder, KueryNode } from '../../../../../src/plugins/data/common';
 import { OWNER_FIELD } from '../../common/api';
 
-export const getOwnersFilter = (savedObjectType: string, owners: string[]): KueryNode => {
+export const getOwnersFilter = (
+  savedObjectType: string,
+  owners: string[]
+): KueryNode | undefined => {
+  if (owners.length <= 0) {
+    return;
+  }
+
   return nodeBuilder.or(
     owners.reduce<KueryNode[]>((query, owner) => {
       ensureFieldIsSafeForQuery(OWNER_FIELD, owner);

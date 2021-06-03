@@ -220,6 +220,10 @@ describe('utils', () => {
   });
 
   describe('getOwnersFilter', () => {
+    it('returns undefined when the owners parameter is an empty array', () => {
+      expect(getOwnersFilter('a', [])).toBeUndefined();
+    });
+
     it('constructs a KueryNode with only a single node', () => {
       expect(getOwnersFilter('a', ['hello'])).toMatchInlineSnapshot(`
         Object {
