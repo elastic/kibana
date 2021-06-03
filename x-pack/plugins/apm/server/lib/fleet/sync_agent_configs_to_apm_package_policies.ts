@@ -14,6 +14,7 @@ import { APMPluginStartDependencies } from '../../types';
 import { getInternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
 import { Setup } from '../helpers/setup_request';
 import { listConfigurations } from '../settings/agent_configuration/list_configurations';
+import { getApmPackgePolicies } from './get_apm_package_policies';
 import { getPackagePolicyWithAgentConfigurations } from './register_fleet_policy_callbacks';
 
 export async function syncAgentConfigsToApmPackagePolicies({
@@ -27,15 +28,18 @@ export async function syncAgentConfigsToApmPackagePolicies({
 }) {
   const coreStart = await core.start();
   const esClient = coreStart.elasticsearch.client.asInternalUser;
-  // @ts-ignore
-  const savedObjectsClient: SavedObjectsClientContract = await getInternalSavedObjectsClient(
-    core.setup
-  );
-  const agentConfigurations = await listConfigurations({ setup });
-  const packagePolicies = await fleetPluginStart.packagePolicyService.list(
+  const [
     savedObjectsClient,
-    { kuery: 'ingest-package-policies.package.name:apm' }
-  );
+    agentConfigurations,
+    packagePolicies,
+  ] = await Promise.all([
+    getInternalSavedObjectsClient(core.setup),
+    listConfigurations({ setup }),
+    getApmPackgePolicies({
+      core,
+      fleetPluginStart,
+    }),
+  ]);
 
   return Promise.all(
     packagePolicies.items.map(async (item) => {
@@ -45,7 +49,7 @@ export async function syncAgentConfigsToApmPackagePolicies({
         agentConfigurations
       );
       return fleetPluginStart.packagePolicyService.update(
-        savedObjectsClient,
+        (savedObjectsClient as unknown) as SavedObjectsClientContract,
         esClient,
         id,
         updatedPackagePolicy
