@@ -25,7 +25,7 @@ interface HttpStart {
   fetch: <T>(...args: any) => any;
 }
 
-import { getIdsAndNamespaces } from '../utils';
+import { getIdsAndNamespaces } from '@kbn/securitysolution-list-utils';
 import { transformInput, transformNewItemOutput, transformOutput } from '../transforms';
 
 export interface ExceptionsApi {

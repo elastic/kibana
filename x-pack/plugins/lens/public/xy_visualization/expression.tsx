@@ -196,6 +196,12 @@ export const xyChart: ExpressionFunctionDefinition<
         defaultMessage: 'Define how curve type is rendered for a line chart',
       }),
     },
+    fillOpacity: {
+      types: ['number'],
+      help: i18n.translate('xpack.lens.xyChart.fillOpacity.help', {
+        defaultMessage: 'Define the area chart fill opacity',
+      }),
+    },
     hideEndzones: {
       types: ['boolean'],
       default: false,
@@ -792,7 +798,7 @@ export function XYChart({
                   ),
                 },
               ];
-              return paletteService.get(palette.name).getColor(
+              return paletteService.get(palette.name).getCategoricalColor(
                 seriesLayers,
                 {
                   maxDepth: 1,
@@ -812,6 +818,7 @@ export function XYChart({
                 visible: !xAccessor,
                 radius: 5,
               },
+              ...(args.fillOpacity && { area: { opacity: args.fillOpacity } }),
             },
             lineSeriesStyle: {
               point: {

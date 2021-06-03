@@ -7,15 +7,10 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-// import { act } from 'react-dom/test-utils';
+import toJson from 'enzyme-to-json';
 import { EuiThemeProvider } from '../../../../../../../../../src/plugins/kibana_react/common';
-import { EuiToolTip } from '@elastic/eui';
 import { ConditionalToolTip } from './conditional_tooltip';
-import {
-  InfraWaffleMapNode,
-  InfraWaffleMapOptions,
-  InfraFormatterType,
-} from '../../../../../lib/lib';
+import { InfraWaffleMapNode } from '../../../../../lib/lib';
 
 jest.mock('../../../../../containers/metrics_source', () => ({
   useSourceContext: () => ({ sourceId: 'default' }),
@@ -38,61 +33,12 @@ const NODE: InfraWaffleMapNode = {
   metrics: [{ name: 'cpu' }],
 };
 
-const OPTIONS: InfraWaffleMapOptions = {
-  formatter: InfraFormatterType.percent,
-  formatTemplate: '{value}',
-  metric: { type: 'cpu' },
-  groupBy: [],
-  legend: {
-    type: 'steppedGradient',
-    rules: [],
-  },
-  sort: { by: 'value', direction: 'desc' },
-};
-
 export const nextTick = () => new Promise((res) => process.nextTick(res));
-const ChildComponent = () => <div>child</div>;
 
 describe('ConditionalToolTip', () => {
-  afterEach(() => {
-    mockedUseSnapshot.mockReset();
-    mockedUseWaffleOptionsContext.mockReset();
-  });
+  const currentTime = Date.now();
 
-  function createWrapper(currentTime: number = Date.now(), hidden: boolean = false) {
-    return mount(
-      <EuiThemeProvider darkMode={false}>
-        <ConditionalToolTip
-          currentTime={currentTime}
-          hidden={hidden}
-          node={NODE}
-          options={OPTIONS}
-          formatter={(v: number) => `${v}`}
-          nodeType="host"
-        >
-          <ChildComponent />
-        </ConditionalToolTip>
-      </EuiThemeProvider>
-    );
-  }
-
-  it('should return children when hidden', () => {
-    mockedUseSnapshot.mockReturnValue({
-      nodes: [],
-      error: null,
-      loading: true,
-      interval: '',
-      reload: jest.fn(() => Promise.resolve()),
-    });
-    mockedUseWaffleOptionsContext.mockReturnValue(mockedUseWaffleOptionsContexReturnValue);
-    const currentTime = Date.now();
-    const wrapper = createWrapper(currentTime, true);
-    expect(wrapper.find(ChildComponent).exists()).toBeTruthy();
-  });
-
-  it('should just work', () => {
-    jest.useFakeTimers();
-    const reloadMock = jest.fn(() => Promise.resolve());
+  it('renders correctly', () => {
     mockedUseSnapshot.mockReturnValue({
       nodes: [
         {
@@ -121,13 +67,9 @@ describe('ConditionalToolTip', () => {
       error: null,
       loading: false,
       interval: '60s',
-      reload: reloadMock,
+      reload: jest.fn(() => Promise.resolve()),
     });
     mockedUseWaffleOptionsContext.mockReturnValue(mockedUseWaffleOptionsContexReturnValue);
-    const currentTime = Date.now();
-    const wrapper = createWrapper(currentTime, false);
-    expect(wrapper.find(ChildComponent).exists()).toBeTruthy();
-    expect(wrapper.find(EuiToolTip).exists()).toBeTruthy();
     const expectedQuery = JSON.stringify({
       bool: {
         filter: {
@@ -154,6 +96,14 @@ describe('ConditionalToolTip', () => {
         type: 'custom',
       },
     ];
+    const wrapper = mount(
+      <EuiThemeProvider darkMode={false}>
+        <ConditionalToolTip currentTime={currentTime} node={NODE} nodeType="host" />
+      </EuiThemeProvider>
+    );
+    const tooltip = wrapper.find('[data-test-subj~="conditionalTooltipContent-host-01"]');
+    expect(toJson(tooltip)).toMatchSnapshot();
+
     expect(mockedUseSnapshot).toBeCalledWith(
       expectedQuery,
       expectedMetrics,
@@ -162,36 +112,8 @@ describe('ConditionalToolTip', () => {
       'default',
       currentTime,
       '',
-      '',
-      false
+      ''
     );
-    wrapper.find('[data-test-subj~="conditionalTooltipMouseHandler"]').simulate('mouseOver');
-    wrapper.find(EuiToolTip).simulate('mouseOver');
-    jest.advanceTimersByTime(500);
-    expect(reloadMock).toHaveBeenCalled();
-    expect(wrapper.find(EuiToolTip).props().content).toMatchSnapshot();
-  });
-
-  it('should not load data if mouse out before 200 ms', () => {
-    jest.useFakeTimers();
-    const reloadMock = jest.fn(() => Promise.resolve());
-    mockedUseSnapshot.mockReturnValue({
-      nodes: [],
-      error: null,
-      loading: true,
-      interval: '',
-      reload: reloadMock,
-    });
-    mockedUseWaffleOptionsContext.mockReturnValue(mockedUseWaffleOptionsContexReturnValue);
-    const currentTime = Date.now();
-    const wrapper = createWrapper(currentTime, false);
-    expect(wrapper.find(ChildComponent).exists()).toBeTruthy();
-    expect(wrapper.find(EuiToolTip).exists()).toBeTruthy();
-    wrapper.find('[data-test-subj~="conditionalTooltipMouseHandler"]').simulate('mouseOver');
-    jest.advanceTimersByTime(100);
-    wrapper.find('[data-test-subj~="conditionalTooltipMouseHandler"]').simulate('mouseOut');
-    jest.advanceTimersByTime(200);
-    expect(reloadMock).not.toHaveBeenCalled();
   });
 });
 

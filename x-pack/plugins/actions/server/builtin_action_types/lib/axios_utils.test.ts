@@ -18,7 +18,7 @@ import { getCustomAgents } from './get_custom_agents';
 const TestUrl = 'https://elastic.co/foo/bar/baz';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
-const configurationUtilities = actionsConfigMock.create();
+let configurationUtilities = actionsConfigMock.create();
 jest.mock('axios');
 const axiosMock = (axios as unknown) as jest.Mock;
 
@@ -42,6 +42,7 @@ describe('request', () => {
       headers: { 'content-type': 'application/json' },
       data: { incidentId: '123' },
     }));
+    configurationUtilities = actionsConfigMock.create();
     configurationUtilities.getResponseSettings.mockReturnValue({
       maxContentLength: 1000000,
       timeout: 360000,
@@ -74,7 +75,9 @@ describe('request', () => {
 
   test('it have been called with proper proxy agent for a valid url', async () => {
     configurationUtilities.getProxySettings.mockReturnValue({
-      proxyRejectUnauthorizedCertificates: true,
+      proxyTLSSettings: {
+        verificationMode: 'full',
+      },
       proxyUrl: 'https://localhost:1212',
       proxyBypassHosts: undefined,
       proxyOnlyHosts: undefined,
@@ -107,7 +110,9 @@ describe('request', () => {
   test('it have been called with proper proxy agent for an invalid url', async () => {
     configurationUtilities.getProxySettings.mockReturnValue({
       proxyUrl: ':nope:',
-      proxyRejectUnauthorizedCertificates: false,
+      proxyTLSSettings: {
+        verificationMode: 'none',
+      },
       proxyBypassHosts: undefined,
       proxyOnlyHosts: undefined,
     });
@@ -136,7 +141,9 @@ describe('request', () => {
 
   test('it bypasses with proxyBypassHosts when expected', async () => {
     configurationUtilities.getProxySettings.mockReturnValue({
-      proxyRejectUnauthorizedCertificates: true,
+      proxyTLSSettings: {
+        verificationMode: 'full',
+      },
       proxyUrl: 'https://elastic.proxy.co',
       proxyBypassHosts: new Set(['elastic.co']),
       proxyOnlyHosts: undefined,
@@ -157,7 +164,9 @@ describe('request', () => {
 
   test('it does not bypass with proxyBypassHosts when expected', async () => {
     configurationUtilities.getProxySettings.mockReturnValue({
-      proxyRejectUnauthorizedCertificates: true,
+      proxyTLSSettings: {
+        verificationMode: 'full',
+      },
       proxyUrl: 'https://elastic.proxy.co',
       proxyBypassHosts: new Set(['not-elastic.co']),
       proxyOnlyHosts: undefined,
@@ -178,7 +187,9 @@ describe('request', () => {
 
   test('it proxies with proxyOnlyHosts when expected', async () => {
     configurationUtilities.getProxySettings.mockReturnValue({
-      proxyRejectUnauthorizedCertificates: true,
+      proxyTLSSettings: {
+        verificationMode: 'full',
+      },
       proxyUrl: 'https://elastic.proxy.co',
       proxyBypassHosts: undefined,
       proxyOnlyHosts: new Set(['elastic.co']),
@@ -199,7 +210,9 @@ describe('request', () => {
 
   test('it does not proxy with proxyOnlyHosts when expected', async () => {
     configurationUtilities.getProxySettings.mockReturnValue({
-      proxyRejectUnauthorizedCertificates: true,
+      proxyTLSSettings: {
+        verificationMode: 'full',
+      },
       proxyUrl: 'https://elastic.proxy.co',
       proxyBypassHosts: undefined,
       proxyOnlyHosts: new Set(['not-elastic.co']),
@@ -252,6 +265,7 @@ describe('patch', () => {
       status: 200,
       headers: { 'content-type': 'application/json' },
     }));
+    configurationUtilities = actionsConfigMock.create();
     configurationUtilities.getResponseSettings.mockReturnValue({
       maxContentLength: 1000000,
       timeout: 360000,

@@ -59,9 +59,9 @@ export type Immutable<T> = T extends undefined | null | boolean | string | numbe
   : ImmutableObject<T>;
 
 export type ImmutableArray<T> = ReadonlyArray<Immutable<T>>;
-type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
-type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
-type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
+export type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
+export type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
+export type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
 
 /**
  * Utility type that will return back a union of the given [T]ype and an Immutable version of it
@@ -414,7 +414,7 @@ export type PolicyInfo = Immutable<{
   id: string;
 }>;
 
-export interface HostMetaDataInfo {
+export interface HostMetadataInfo {
   metadata: HostMetadata;
   query_strategy_version: MetadataQueryStrategyVersions;
 }
@@ -1094,4 +1094,14 @@ export interface GetAgentSummaryResponse {
     policy_id?: string;
     versions_count: { [key: string]: number };
   };
+}
+
+/**
+ * REST API response for retrieving exception summary
+ */
+export interface GetExceptionSummaryResponse {
+  total: number;
+  windows: number;
+  macos: number;
+  linux: number;
 }

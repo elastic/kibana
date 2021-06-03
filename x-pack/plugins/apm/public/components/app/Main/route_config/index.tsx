@@ -173,7 +173,7 @@ export const routes: APMRouteDefinition[] = [
     render: renderAsRedirectTo('/services'),
     breadcrumb: 'APM',
   },
-  // !! Need to be kept in sync with the searchDeepLinks in x-pack/plugins/apm/public/plugin.ts
+  // !! Need to be kept in sync with the deepLinks in x-pack/plugins/apm/public/plugin.ts
   {
     exact: true,
     path: '/services',
@@ -182,7 +182,7 @@ export const routes: APMRouteDefinition[] = [
       defaultMessage: 'Services',
     }),
   },
-  // !! Need to be kept in sync with the searchDeepLinks in x-pack/plugins/apm/public/plugin.ts
+  // !! Need to be kept in sync with the deepLinks in x-pack/plugins/apm/public/plugin.ts
   {
     exact: true,
     path: '/traces',
@@ -328,7 +328,7 @@ export const routes: APMRouteDefinition[] = [
     component: TraceLink,
     breadcrumb: null,
   },
-  // !! Need to be kept in sync with the searchDeepLinks in x-pack/plugins/apm/public/plugin.ts
+  // !! Need to be kept in sync with the deepLinks in x-pack/plugins/apm/public/plugin.ts
   {
     exact: true,
     path: '/service-map',

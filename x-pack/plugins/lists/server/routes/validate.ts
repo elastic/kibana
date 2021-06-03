@@ -15,9 +15,9 @@ import {
   foundExceptionListItemSchema,
   nonEmptyEndpointEntriesArray,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { MAX_EXCEPTION_LIST_SIZE } from '@kbn/securitysolution-list-constants';
 
 import { ExceptionListClient } from '../services/exception_lists/exception_list_client';
-import { MAX_EXCEPTION_LIST_SIZE } from '../../common/constants';
 
 export const validateExceptionListSize = async (
   exceptionLists: ExceptionListClient,

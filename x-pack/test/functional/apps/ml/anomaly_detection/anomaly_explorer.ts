@@ -74,6 +74,10 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.securityUI.loginAsMlPowerUser();
     });
 
+    after(async () => {
+      await ml.testResources.deleteMLTestDashboard();
+    });
+
     for (const testData of testDataList) {
       describe(testData.suiteSuffix, function () {
         before(async () => {

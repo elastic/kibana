@@ -25,7 +25,7 @@ import {
 import { TrustedAppNotFoundError, TrustedAppVersionConflictError } from './errors';
 import { toUpdateTrustedApp } from '../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
 import { updateExceptionListItemImplementationMock } from './test_utils';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common';
+import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
 
 const exceptionsListClient = listMock.getExceptionListClient() as jest.Mocked<ExceptionListClient>;
 

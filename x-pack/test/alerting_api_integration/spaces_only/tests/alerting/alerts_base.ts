@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { omit } from 'lodash';
 import { Response as SupertestResponse } from 'supertest';
 import { RecoveredActionGroup } from '../../../../../plugins/alerting/common';
 import { Space } from '../../../common/types';
@@ -95,18 +96,48 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
         },
         alertInfo: {
           alertId,
+          consumer: 'alertsFixture',
           spaceId: space.id,
           namespace: space.namespace,
           name: 'abc',
+          enabled: true,
+          notifyWhen: 'onActiveAlert',
+          schedule: {
+            interval: '1m',
+          },
           tags: ['tag-A', 'tag-B'],
+          throttle: '1m',
           createdBy: null,
           updatedBy: null,
+          actions: response.body.actions.map((action: any) => {
+            /* eslint-disable @typescript-eslint/naming-convention */
+            const { connector_type_id, group, id, params } = action;
+            return {
+              actionTypeId: connector_type_id,
+              group,
+              id,
+              params,
+            };
+          }),
+          producer: 'alertsFixture',
+          ruleTypeId: 'test.always-firing',
+          ruleTypeName: 'Test: Always Firing',
         },
       };
       if (expected.alertInfo.namespace === undefined) {
         delete expected.alertInfo.namespace;
       }
-      expect(alertTestRecord._source).to.eql(expected);
+      const alertTestRecordWithoutDates = omit(alertTestRecord._source, [
+        'alertInfo.createdAt',
+        'alertInfo.updatedAt',
+      ]);
+      expect(alertTestRecordWithoutDates).to.eql(expected);
+      expect(alertTestRecord._source.alertInfo.createdAt).to.match(
+        /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
+      );
+      expect(alertTestRecord._source.alertInfo.updatedAt).to.match(
+        /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
+      );
       const actionTestRecord = (
         await esTestIndexTool.waitForDocs('action:test.index-record', reference)
       )[0];

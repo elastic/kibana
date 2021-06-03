@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, Fragment, useEffect, useReducer } from 'react';
+import React, { useState, useEffect, useReducer } from 'react';
 import { keyBy } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import {
@@ -136,7 +136,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
               <EuiFlexGroup responsive={false} gutterSize="xs">
                 {hasEditButton ? (
                   <EuiFlexItem grow={false}>
-                    <Fragment>
+                    <>
                       {' '}
                       <EuiButtonEmpty
                         data-test-subj="openEditAlertFlyoutButton"
@@ -162,7 +162,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                           onSave={setAlert}
                         />
                       )}
-                    </Fragment>
+                    </>
                   </EuiFlexItem>
                 ) : null}
                 <EuiFlexItem grow={false}>
@@ -201,7 +201,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
               </EuiFlexItem>
               <EuiFlexItem grow={1}>
                 {uniqueActions && uniqueActions.length ? (
-                  <Fragment>
+                  <>
                     <EuiText size="s">
                       <p>
                         <FormattedMessage
@@ -220,7 +220,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                         </EuiFlexItem>
                       ))}
                     </EuiFlexGroup>
-                  </Fragment>
+                  </>
                 ) : null}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -336,7 +336,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                     readOnly={!canSaveAlert}
                   />
                 ) : (
-                  <Fragment>
+                  <>
                     <EuiSpacer />
                     <EuiCallOut
                       title={i18n.translate(
@@ -355,7 +355,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                         />
                       </p>
                     </EuiCallOut>
-                  </Fragment>
+                  </>
                 )}
               </EuiFlexItem>
             </EuiFlexGroup>

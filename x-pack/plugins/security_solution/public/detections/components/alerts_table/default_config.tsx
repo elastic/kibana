@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { RowRendererId } from '../../../../common/types/timeline';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
 
-import { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
+import { ColumnHeaderOptions, SubsetTimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { columns } from '../../configurations/security_solution_detections/columns';
 
@@ -124,3 +125,76 @@ export const requiredFieldsForActions = [
   'host.os.family',
   'event.code',
 ];
+
+// TODO: Once we are past experimental phase this code should be removed
+export const buildAlertStatusFilterRuleRegistry = (status: Status): Filter[] => [
+  {
+    meta: {
+      alias: null,
+      negate: false,
+      disabled: false,
+      type: 'phrase',
+      key: 'kibana.rac.alert.status',
+      params: {
+        query: status,
+      },
+    },
+    query: {
+      term: {
+        'kibana.rac.alert.status': status,
+      },
+    },
+  },
+];
+
+export const buildShowBuildingBlockFilterRuleRegistry = (
+  showBuildingBlockAlerts: boolean
+): Filter[] =>
+  showBuildingBlockAlerts
+    ? []
+    : [
+        {
+          meta: {
+            alias: null,
+            negate: true,
+            disabled: false,
+            type: 'exists',
+            key: 'kibana.rac.rule.building_block_type',
+            value: 'exists',
+          },
+          // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
+          exists: { field: 'kibana.rac.rule.building_block_type' },
+        },
+      ];
+
+export const requiredFieldMappingsForActionsRuleRegistry = {
+  '@timestamp': '@timestamp',
+  'alert.id': 'kibana.rac.alert.id',
+  'event.kind': 'event.kind',
+  'alert.start': 'kibana.rac.alert.start',
+  'alert.uuid': 'kibana.rac.alert.uuid',
+  'event.action': 'event.action',
+  'alert.status': 'kibana.rac.alert.status',
+  'alert.duration.us': 'kibana.rac.alert.duration.us',
+  'rule.uuid': 'rule.uuid',
+  'rule.id': 'rule.id',
+  'rule.name': 'rule.name',
+  'rule.category': 'rule.category',
+  producer: 'kibana.rac.alert.producer',
+  tags: 'tags',
+};
+
+export const alertsHeadersRuleRegistry: ColumnHeaderOptions[] = Object.entries(
+  requiredFieldMappingsForActionsRuleRegistry
+).map<ColumnHeaderOptions>(([alias, field]) => ({
+  columnHeaderType: defaultColumnHeaderType,
+  displayAsText: alias,
+  id: field,
+}));
+
+export const alertsDefaultModelRuleRegistry: SubsetTimelineModel = {
+  ...timelineDefaults,
+  columns: alertsHeadersRuleRegistry,
+  showCheckboxes: true,
+  excludedRowRendererIds: Object.values(RowRendererId),
+};

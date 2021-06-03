@@ -15,7 +15,6 @@ import { buildRuleMessageFactory } from './rule_messages';
 import { ExceptionListClient } from '../../../../../lists/server';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 
 // @ts-expect-error
 moment.suppressDeprecationWarnings = true;
@@ -40,6 +39,7 @@ import {
   createTotalHitsFromSearchResult,
   lastValidDate,
   calculateThresholdSignalUuid,
+  buildChunkedOrFilter,
 } from './utils';
 import { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
@@ -112,34 +112,6 @@ describe('utils', () => {
     test('it throws given an invalid duration', () => {
       const duration = parseInterval('junk');
       expect(duration).toBeNull();
-    });
-  });
-
-  describe('parseScheduleDates', () => {
-    test('it returns a moment when given an ISO string', () => {
-      const result = parseScheduleDates('2020-01-01T00:00:00.000Z');
-      expect(result).not.toBeNull();
-      expect(result).toEqual(moment('2020-01-01T00:00:00.000Z'));
-    });
-
-    test('it returns a moment when given `now`', () => {
-      const result = parseScheduleDates('now');
-
-      expect(result).not.toBeNull();
-      expect(moment.isMoment(result)).toBeTruthy();
-    });
-
-    test('it returns a moment when given `now-x`', () => {
-      const result = parseScheduleDates('now-6m');
-
-      expect(result).not.toBeNull();
-      expect(moment.isMoment(result)).toBeTruthy();
-    });
-
-    test('it returns null when given a string that is not an ISO string, `now` or `now-x`', () => {
-      const result = parseScheduleDates('invalid');
-
-      expect(result).toBeNull();
     });
   });
 
@@ -1500,6 +1472,28 @@ describe('utils', () => {
       const startedAt = new Date('2019-11-18T13:32:00Z');
       const signalUuid = calculateThresholdSignalUuid('abcd', startedAt, ['host.ip'], '1.2.3.4');
       expect(signalUuid).toEqual('ee8870dc-45ff-5e6c-a2f9-80886651ce03');
+    });
+  });
+
+  describe('buildChunkedOrFilter', () => {
+    test('should return undefined if no values are provided', () => {
+      const filter = buildChunkedOrFilter('field.name', []);
+      expect(filter).toEqual(undefined);
+    });
+
+    test('should return a filter with a single value', () => {
+      const filter = buildChunkedOrFilter('field.name', ['id-1']);
+      expect(filter).toEqual('field.name: ("id-1")');
+    });
+
+    test('should return a filter with a multiple values', () => {
+      const filter = buildChunkedOrFilter('field.name', ['id-1', 'id-2']);
+      expect(filter).toEqual('field.name: ("id-1" OR "id-2")');
+    });
+
+    test('should return a filter with a multiple values chunked', () => {
+      const filter = buildChunkedOrFilter('field.name', ['id-1', 'id-2', 'id-3'], 2);
+      expect(filter).toEqual('field.name: ("id-1" OR "id-2") OR field.name: ("id-3")');
     });
   });
 });

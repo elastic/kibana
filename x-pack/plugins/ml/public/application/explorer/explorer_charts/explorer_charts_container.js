@@ -72,6 +72,7 @@ function ExplorerChartContainer({
   onSelectEntity,
   recentlyAccessed,
   tooManyBucketsCalloutMsg,
+  showSelectedInterval,
 }) {
   const [explorerSeriesLink, setExplorerSeriesLink] = useState('');
 
@@ -199,6 +200,7 @@ function ExplorerChartContainer({
                   seriesConfig={series}
                   severity={severity}
                   tooltipService={tooltipService}
+                  showSelectedInterval={showSelectedInterval}
                 />
               )}
             </MlTooltipComponent>
@@ -214,6 +216,7 @@ function ExplorerChartContainer({
                   seriesConfig={series}
                   severity={severity}
                   tooltipService={tooltipService}
+                  showSelectedInterval={showSelectedInterval}
                 />
               )}
             </MlTooltipComponent>
@@ -237,6 +240,7 @@ export const ExplorerChartsContainerUI = ({
   timefilter,
   onSelectEntity,
   tooManyBucketsCalloutMsg,
+  showSelectedInterval,
 }) => {
   const {
     services: {
@@ -296,6 +300,7 @@ export const ExplorerChartsContainerUI = ({
                 onSelectEntity={onSelectEntity}
                 recentlyAccessed={recentlyAccessed}
                 tooManyBucketsCalloutMsg={tooManyBucketsCalloutMsg}
+                showSelectedInterval={showSelectedInterval}
               />
             </EuiFlexItem>
           ))}

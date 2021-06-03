@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { omit } from 'lodash';
 import { UserAtSpaceScenarios, Superuser } from '../../scenarios';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
@@ -128,7 +129,11 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 reference
               );
               expect(alertSearchResult.hits.total.value).to.eql(1);
-              expect(alertSearchResult.hits.hits[0]._source).to.eql({
+              const alertSearchResultWithoutDates = omit(alertSearchResult.hits.hits[0]._source, [
+                'alertInfo.createdAt',
+                'alertInfo.updatedAt',
+              ]);
+              expect(alertSearchResultWithoutDates).to.eql({
                 source: 'alert:test.always-firing',
                 reference,
                 state: {},
@@ -138,14 +143,40 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 },
                 alertInfo: {
                   alertId,
+                  consumer: 'alertsFixture',
                   spaceId: space.id,
                   namespace: space.id,
                   name: 'abc',
+                  enabled: true,
+                  notifyWhen: 'onActiveAlert',
+                  schedule: {
+                    interval: '1m',
+                  },
                   tags: ['tag-A', 'tag-B'],
+                  throttle: '1m',
                   createdBy: user.fullName,
                   updatedBy: user.fullName,
+                  actions: response.body.actions.map((action: any) => {
+                    /* eslint-disable @typescript-eslint/naming-convention */
+                    const { connector_type_id, group, id, params } = action;
+                    return {
+                      actionTypeId: connector_type_id,
+                      group,
+                      id,
+                      params,
+                    };
+                  }),
+                  producer: 'alertsFixture',
+                  ruleTypeId: 'test.always-firing',
+                  ruleTypeName: 'Test: Always Firing',
                 },
               });
+              expect(alertSearchResult.hits.hits[0]._source.alertInfo.createdAt).to.match(
+                /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
+              );
+              expect(alertSearchResult.hits.hits[0]._source.alertInfo.updatedAt).to.match(
+                /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
+              );
 
               // Ensure only 1 action executed with proper params
               const actionSearchResult = await esTestIndexTool.search(
@@ -243,7 +274,11 @@ instanceStateValue: true
                 reference
               );
               expect(alertSearchResult.hits.total.value).to.eql(1);
-              expect(alertSearchResult.hits.hits[0]._source).to.eql({
+              const alertSearchResultWithoutDates = omit(alertSearchResult.hits.hits[0]._source, [
+                'alertInfo.createdAt',
+                'alertInfo.updatedAt',
+              ]);
+              expect(alertSearchResultWithoutDates).to.eql({
                 source: 'alert:test.always-firing',
                 reference,
                 state: {},
@@ -253,15 +288,41 @@ instanceStateValue: true
                 },
                 alertInfo: {
                   alertId,
+                  consumer: 'alertsFixture',
                   spaceId: space.id,
                   namespace: space.id,
                   name: 'abc',
+                  enabled: true,
+                  notifyWhen: 'onActiveAlert',
+                  schedule: {
+                    interval: '1m',
+                  },
                   tags: ['tag-A', 'tag-B'],
+                  throttle: '1m',
                   createdBy: user.fullName,
                   updatedBy: user.fullName,
+                  actions: response.body.actions.map((action: any) => {
+                    /* eslint-disable @typescript-eslint/naming-convention */
+                    const { connector_type_id, group, id, params } = action;
+                    return {
+                      actionTypeId: connector_type_id,
+                      group,
+                      id,
+                      params,
+                    };
+                  }),
+                  producer: 'alertsFixture',
+                  ruleTypeId: 'test.always-firing',
+                  ruleTypeName: 'Test: Always Firing',
                 },
               });
 
+              expect(alertSearchResult.hits.hits[0]._source.alertInfo.createdAt).to.match(
+                /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
+              );
+              expect(alertSearchResult.hits.hits[0]._source.alertInfo.updatedAt).to.match(
+                /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
+              );
               // Ensure only 1 action executed with proper params
               const actionSearchResult = await esTestIndexTool.search(
                 'action:test.index-record',
@@ -348,15 +409,46 @@ instanceStateValue: true
           );
 
           expect(alertSearchResult.hits.total.value).to.be.greaterThan(0);
-          expect(alertSearchResult.hits.hits[0]._source.alertInfo).to.eql({
+          const alertSearchResultInfoWithoutDates = omit(
+            alertSearchResult.hits.hits[0]._source.alertInfo,
+            ['createdAt', 'updatedAt']
+          );
+          expect(alertSearchResultInfoWithoutDates).to.eql({
             alertId,
+            consumer: 'alertsFixture',
             spaceId: space.id,
             namespace: space.id,
             name: 'def',
+            enabled: true,
+            notifyWhen: 'onActiveAlert',
+            schedule: {
+              interval: '59s',
+            },
             tags: ['fee', 'fi', 'fo'],
+            throttle: '1m',
             createdBy: user.fullName,
             updatedBy: Superuser.fullName,
+            actions: response2.body.actions.map((action: any) => {
+              /* eslint-disable @typescript-eslint/naming-convention */
+              const { connector_type_id, group, id, params } = action;
+              return {
+                actionTypeId: connector_type_id,
+                group,
+                id,
+                params,
+              };
+            }),
+            producer: 'alertsFixture',
+            ruleTypeId: 'test.always-firing',
+            ruleTypeName: 'Test: Always Firing',
           });
+
+          expect(alertSearchResult.hits.hits[0]._source.alertInfo.createdAt).to.match(
+            /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
+          );
+          expect(alertSearchResult.hits.hits[0]._source.alertInfo.updatedAt).to.match(
+            /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
+          );
         });
 
         it('should handle custom retry logic when appropriate', async () => {

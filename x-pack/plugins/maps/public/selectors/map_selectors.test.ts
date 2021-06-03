@@ -57,6 +57,7 @@ describe('getDataFilters', () => {
   };
   const mapZoom = 4;
   const timeFilters = { to: '2001-01-01', from: '2001-12-31' };
+  const timeslice = undefined;
   const refreshTimerLastTriggeredAt = '2001-01-01T00:00:00';
   const query = undefined;
   const filters: Filter[] = [];
@@ -74,6 +75,7 @@ describe('getDataFilters', () => {
       mapBuffer,
       mapZoom,
       timeFilters,
+      timeslice,
       refreshTimerLastTriggeredAt,
       query,
       filters,
@@ -89,6 +91,7 @@ describe('getDataFilters', () => {
       mapBuffer,
       mapZoom,
       timeFilters,
+      timeslice,
       refreshTimerLastTriggeredAt,
       query,
       filters,

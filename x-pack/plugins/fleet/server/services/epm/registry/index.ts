@@ -20,6 +20,7 @@ import type {
   RegistryPackage,
   RegistrySearchResults,
   RegistrySearchResult,
+  GetCategoriesRequest,
 } from '../../../types';
 import {
   getArchiveFilelist,
@@ -42,10 +43,6 @@ import { getRegistryUrl } from './registry_url';
 
 export interface SearchParams {
   category?: CategoryId;
-  experimental?: boolean;
-}
-
-export interface CategoriesParams {
   experimental?: boolean;
 }
 
@@ -150,12 +147,17 @@ function setKibanaVersion(url: URL) {
   }
 }
 
-export async function fetchCategories(params?: CategoriesParams): Promise<CategorySummaryList> {
+export async function fetchCategories(
+  params?: GetCategoriesRequest['query']
+): Promise<CategorySummaryList> {
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/categories`);
   if (params) {
     if (params.experimental) {
       url.searchParams.set('experimental', params.experimental.toString());
+    }
+    if (params.include_policy_templates) {
+      url.searchParams.set('include_policy_templates', params.include_policy_templates.toString());
     }
   }
 

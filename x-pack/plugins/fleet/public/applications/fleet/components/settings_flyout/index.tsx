@@ -20,10 +20,10 @@ import {
   EuiFlyoutFooter,
   EuiForm,
   EuiFormRow,
-  EuiComboBox,
   EuiCode,
   EuiCodeEditor,
   EuiLink,
+  EuiPanel,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText } from '@elastic/eui';
@@ -41,6 +41,7 @@ import { isDiffPathProtocol } from '../../../../../common/';
 
 import { SettingsConfirmModal } from './confirm_modal';
 import type { SettingsConfirmModalProps } from './confirm_modal';
+import { HostsInput } from './hosts_input';
 
 import 'brace/mode/yaml';
 import 'brace/theme/textmate';
@@ -59,37 +60,60 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
   const [isLoading, setIsloading] = React.useState(false);
   const { notifications } = useStartServices();
 
-  const fleetServerHostsInput = useComboInput([], (value) => {
+  const fleetServerHostsInput = useComboInput('fleetServerHostsComboBox', [], (value) => {
     if (value.length === 0) {
       return [
-        i18n.translate('xpack.fleet.settings.fleetServerHostsEmptyError', {
-          defaultMessage: 'At least one URL is required',
-        }),
+        {
+          message: i18n.translate('xpack.fleet.settings.fleetServerHostsEmptyError', {
+            defaultMessage: 'At least one URL is required',
+          }),
+        },
       ];
     }
-    if (value.some((v) => !v.match(URL_REGEX))) {
-      return [
-        i18n.translate('xpack.fleet.settings.fleetServerHostsError', {
-          defaultMessage: 'Invalid URL',
-        }),
-      ];
+
+    const res: Array<{ message: string; index: number }> = [];
+    value.forEach((val, idx) => {
+      if (!val.match(URL_REGEX)) {
+        res.push({
+          message: i18n.translate('xpack.fleet.settings.fleetServerHostsError', {
+            defaultMessage: 'Invalid URL',
+          }),
+          index: idx,
+        });
+      }
+    });
+    if (res.length) {
+      return res;
     }
+
     if (value.length && isDiffPathProtocol(value)) {
       return [
-        i18n.translate('xpack.fleet.settings.fleetServerHostsDifferentPathOrProtocolError', {
-          defaultMessage: 'Protocol and path must be the same for each URL',
-        }),
+        {
+          message: i18n.translate(
+            'xpack.fleet.settings.fleetServerHostsDifferentPathOrProtocolError',
+            {
+              defaultMessage: 'Protocol and path must be the same for each URL',
+            }
+          ),
+        },
       ];
     }
   });
 
-  const elasticsearchUrlInput = useComboInput([], (value) => {
-    if (value.some((v) => !v.match(URL_REGEX))) {
-      return [
-        i18n.translate('xpack.fleet.settings.elasticHostError', {
-          defaultMessage: 'Invalid URL',
-        }),
-      ];
+  const elasticsearchUrlInput = useComboInput('esHostsComboxBox', [], (value) => {
+    const res: Array<{ message: string; index: number }> = [];
+    value.forEach((val, idx) => {
+      if (!val.match(URL_REGEX)) {
+        res.push({
+          message: i18n.translate('xpack.fleet.settings.elasticHostError', {
+            defaultMessage: 'Invalid URL',
+          }),
+          index: idx,
+        });
+      }
+    });
+    if (res.length) {
+      return res;
     }
   });
 
@@ -264,74 +288,72 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
         />
       </EuiText>
       <EuiSpacer size="m" />
-
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate('xpack.fleet.settings.fleetServerHostsLabel', {
-          defaultMessage: 'Fleet Server hosts',
-        })}
-        helpText={
-          <FormattedMessage
-            id="xpack.fleet.settings.fleetServerHostsHelpTect"
-            defaultMessage="Specify the URLs that your agents will use to connect to a Fleet Server. If multiple URLs exist, Fleet shows the first provided URL for enrollment purposes. Refer to the {link}."
-            values={{
-              link: (
-                <EuiLink
-                  href="https://www.elastic.co/guide/en/fleet/current/index.html"
-                  target="_blank"
-                  external
-                >
-                  <FormattedMessage
-                    id="xpack.fleet.settings.userGuideLink"
-                    defaultMessage="Fleet User Guide"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        }
-        {...inputs.fleetServerHosts.formRowProps}
-      >
-        <EuiComboBox fullWidth noSuggestions {...inputs.fleetServerHosts.props} />
-      </EuiFormRow>
-
-      <EuiSpacer size="m" />
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate('xpack.fleet.settings.elasticsearchUrlLabel', {
-          defaultMessage: 'Elasticsearch hosts',
-        })}
-        helpText={i18n.translate('xpack.fleet.settings.elasticsearchUrlsHelpTect', {
-          defaultMessage: 'Specify the Elasticsearch URLs where agents send data.',
-        })}
-        {...inputs.elasticsearchUrl.formRowProps}
-      >
-        <EuiComboBox fullWidth noSuggestions {...inputs.elasticsearchUrl.props} />
-      </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiFormRow
-        {...inputs.additionalYamlConfig.formRowProps}
-        label={i18n.translate('xpack.fleet.settings.additionalYamlConfig', {
-          defaultMessage: 'Elasticsearch output configuration (YAML)',
-        })}
-        fullWidth
-      >
-        <EuiCodeEditor
-          width="100%"
-          mode="yaml"
-          theme="textmate"
-          placeholder="# YAML settings here will be added to the Elasticsearch output section of each policy"
-          setOptions={{
-            minLines: 10,
-            maxLines: 30,
-            tabSize: 2,
-            showGutter: false,
-            showPrintMargin: false,
-          }}
-          {...inputs.additionalYamlConfig.props}
-          onChange={inputs.additionalYamlConfig.setValue}
+      <EuiPanel hasShadow={false} hasBorder={true}>
+        <HostsInput
+          {...inputs.fleetServerHosts.props}
+          label={i18n.translate('xpack.fleet.settings.fleetServerHostsLabel', {
+            defaultMessage: 'Fleet Server hosts',
+          })}
+          helpText={
+            <FormattedMessage
+              id="xpack.fleet.settings.fleetServerHostsHelpTect"
+              defaultMessage="Specify the URLs that your agents will use to connect to a Fleet Server. If multiple URLs exist, Fleet shows the first provided URL for enrollment purposes. Refer to the {link}."
+              values={{
+                link: (
+                  <EuiLink
+                    href="https://www.elastic.co/guide/en/fleet/current/fleet-settings.html#fleet-server-hosts-setting"
+                    target="_blank"
+                    external
+                  >
+                    <FormattedMessage
+                      id="xpack.fleet.settings.userGuideLink"
+                      defaultMessage="Fleet User Guide"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          }
         />
-      </EuiFormRow>
+      </EuiPanel>
+      <EuiSpacer size="m" />
+      <EuiPanel hasShadow={false} hasBorder={true}>
+        <HostsInput
+          {...inputs.elasticsearchUrl.props}
+          label={i18n.translate('xpack.fleet.settings.elasticsearchUrlLabel', {
+            defaultMessage: 'Elasticsearch hosts',
+          })}
+          helpText={i18n.translate('xpack.fleet.settings.elasticsearchUrlsHelpTect', {
+            defaultMessage: 'Specify the Elasticsearch URLs where agents send data.',
+          })}
+        />
+      </EuiPanel>
+      <EuiSpacer size="m" />
+      <EuiPanel hasShadow={false} hasBorder={true}>
+        <EuiFormRow
+          {...inputs.additionalYamlConfig.formRowProps}
+          label={i18n.translate('xpack.fleet.settings.additionalYamlConfig', {
+            defaultMessage: 'Elasticsearch output configuration (YAML)',
+          })}
+          fullWidth
+        >
+          <EuiCodeEditor
+            width="100%"
+            mode="yaml"
+            theme="textmate"
+            placeholder="# YAML settings here will be added to the Elasticsearch output section of each policy"
+            setOptions={{
+              minLines: 10,
+              maxLines: 30,
+              tabSize: 2,
+              showGutter: false,
+              showPrintMargin: false,
+            }}
+            {...inputs.additionalYamlConfig.props}
+            onChange={inputs.additionalYamlConfig.setValue}
+          />
+        </EuiFormRow>
+      </EuiPanel>
     </EuiForm>
   );
 

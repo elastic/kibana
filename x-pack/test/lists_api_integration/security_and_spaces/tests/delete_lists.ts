@@ -7,13 +7,13 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
   LIST_ITEM_URL,
   LIST_URL,
-} from '../../../../plugins/lists/common/constants';
+} from '@kbn/securitysolution-list-constants';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 import {
   getCreateMinimalListSchemaMock,

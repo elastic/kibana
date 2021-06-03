@@ -8,17 +8,11 @@
 import { CoreSetup, SavedObjectsClientContract } from '../../../../../src/core/server';
 import { CollectorFetchContext } from '../../../../../src/plugins/usage_collection/server';
 import { CollectorDependencies } from './types';
-import {
-  DetectionsUsage,
-  fetchDetectionsUsage,
-  defaultDetectionsUsage,
-  fetchDetectionsMetrics,
-} from './detections';
+import { fetchDetectionsMetrics } from './detections';
 import { EndpointUsage, getEndpointTelemetryFromFleet } from './endpoints';
 
 export type RegisterCollector = (deps: CollectorDependencies) => void;
 export interface UsageData {
-  detections: DetectionsUsage;
   endpoints: EndpointUsage | {};
   detectionMetrics: {};
 }
@@ -40,31 +34,10 @@ export const registerCollector: RegisterCollector = ({
   if (!usageCollection) {
     return;
   }
+
   const collector = usageCollection.makeUsageCollector<UsageData>({
     type: 'security_solution',
     schema: {
-      detections: {
-        detection_rules: {
-          custom: {
-            enabled: { type: 'long' },
-            disabled: { type: 'long' },
-          },
-          elastic: {
-            enabled: { type: 'long' },
-            disabled: { type: 'long' },
-          },
-        },
-        ml_jobs: {
-          custom: {
-            enabled: { type: 'long' },
-            disabled: { type: 'long' },
-          },
-          elastic: {
-            enabled: { type: 'long' },
-            disabled: { type: 'long' },
-          },
-        },
-      },
       detectionMetrics: {
         detection_rules: {
           detection_rule_usage: {
@@ -224,172 +197,199 @@ export const registerCollector: RegisterCollector = ({
           },
         },
         ml_jobs: {
-          type: 'array',
-          items: {
-            job_id: {
-              type: 'keyword',
-              _meta: { description: 'Identifier for the anomaly detection job' },
-            },
-            open_time: {
-              type: 'keyword',
-              _meta: {
-                description: 'For open jobs only, the elapsed time for which the job has been open',
+          ml_job_usage: {
+            custom: {
+              enabled: {
+                type: 'long',
+                _meta: { description: 'The number of custom ML jobs rules enabled' },
               },
-            },
-            create_time: {
-              type: 'keyword',
-              _meta: { description: 'The time the job was created' },
-            },
-            finished_time: {
-              type: 'keyword',
-              _meta: {
-                description: 'If the job closed or failed, this is the time the job finished',
+              disabled: {
+                type: 'long',
+                _meta: { description: 'The number of custom ML jobs rules disabled' },
               },
             },
-            state: {
-              type: 'keyword',
-              _meta: { description: 'The status of the anomaly detection job' },
-            },
-            data_counts: {
-              bucket_count: {
+            elastic: {
+              enabled: {
                 type: 'long',
-                _meta: { description: 'The number of buckets processed' },
+                _meta: { description: 'The number of elastic provided ML jobs rules enabled' },
               },
-              empty_bucket_count: {
+              disabled: {
                 type: 'long',
-                _meta: { description: 'The number of buckets which did not contain any data' },
-              },
-              input_bytes: {
-                type: 'long',
-                _meta: {
-                  description:
-                    'The number of bytes of input data posted to the anomaly detection job',
-                },
-              },
-              input_record_count: {
-                type: 'long',
-                _meta: {
-                  description: 'The number of input documents posted to the anomaly detection job',
-                },
-              },
-              last_data_time: {
-                type: 'long',
-                _meta: {
-                  description:
-                    'The timestamp at which data was last analyzed, according to server time',
-                },
-              },
-              processed_record_count: {
-                type: 'long',
-                _meta: {
-                  description:
-                    'The number of input documents that have been processed by the anomaly detection job',
-                },
+                _meta: { description: 'The number of elastic provided ML jobs rules disabled' },
               },
             },
-            model_size_stats: {
-              bucket_allocation_failures_count: {
-                type: 'long',
-                _meta: {
-                  description:
-                    'The number of buckets for which new entities in incoming data were not processed due to insufficient model memory',
-                },
+          },
+          ml_job_metrics: {
+            type: 'array',
+            items: {
+              job_id: {
+                type: 'keyword',
+                _meta: { description: 'Identifier for the anomaly detection job' },
               },
-              model_bytes: {
-                type: 'long',
-                _meta: { description: 'The number of bytes of memory used by the models' },
-              },
-              model_bytes_exceeded: {
-                type: 'long',
-                _meta: {
-                  description:
-                    'The number of bytes over the high limit for memory usage at the last allocation failure',
-                },
-              },
-              model_bytes_memory_limit: {
-                type: 'long',
-                _meta: {
-                  description:
-                    'The upper limit for model memory usage, checked on increasing values',
-                },
-              },
-              peak_model_bytes: {
-                type: 'long',
-                _meta: {
-                  description: 'The peak number of bytes of memory ever used by the models',
-                },
-              },
-            },
-            timing_stats: {
-              bucket_count: {
-                type: 'long',
-                _meta: { description: 'The number of buckets processed' },
-              },
-              exponential_average_bucket_processing_time_ms: {
-                type: 'long',
-                _meta: {
-                  description:
-                    'Exponential moving average of all bucket processing times, in milliseconds',
-                },
-              },
-              exponential_average_bucket_processing_time_per_hour_ms: {
-                type: 'long',
-                _meta: {
-                  description:
-                    'Exponentially-weighted moving average of bucket processing times calculated in a 1 hour time window, in milliseconds',
-                },
-              },
-              maximum_bucket_processing_time_ms: {
-                type: 'long',
-                _meta: {
-                  description: 'Maximum among all bucket processing times, in milliseconds',
-                },
-              },
-              minimum_bucket_processing_time_ms: {
-                type: 'long',
-                _meta: {
-                  description: 'Minimum among all bucket processing times, in milliseconds',
-                },
-              },
-              total_bucket_processing_time_ms: {
-                type: 'long',
-                _meta: { description: 'Sum of all bucket processing times, in milliseconds' },
-              },
-            },
-            datafeed: {
-              datafeed_id: {
+              open_time: {
                 type: 'keyword',
                 _meta: {
-                  description: 'A numerical character string that uniquely identifies the datafeed',
+                  description:
+                    'For open jobs only, the elapsed time for which the job has been open',
+                },
+              },
+              create_time: {
+                type: 'keyword',
+                _meta: { description: 'The time the job was created' },
+              },
+              finished_time: {
+                type: 'keyword',
+                _meta: {
+                  description: 'If the job closed or failed, this is the time the job finished',
                 },
               },
               state: {
                 type: 'keyword',
-                _meta: { description: 'The status of the datafeed' },
+                _meta: { description: 'The status of the anomaly detection job' },
               },
-              timing_stats: {
-                average_search_time_per_bucket_ms: {
-                  type: 'long',
-                  _meta: { description: 'The average search time per bucket, in milliseconds' },
-                },
+              data_counts: {
                 bucket_count: {
                   type: 'long',
                   _meta: { description: 'The number of buckets processed' },
                 },
-                exponential_average_search_time_per_hour_ms: {
+                empty_bucket_count: {
+                  type: 'long',
+                  _meta: { description: 'The number of buckets which did not contain any data' },
+                },
+                input_bytes: {
                   type: 'long',
                   _meta: {
-                    description: 'The exponential average search time per hour, in milliseconds',
+                    description:
+                      'The number of bytes of input data posted to the anomaly detection job',
                   },
                 },
-                search_count: {
-                  type: 'long',
-                  _meta: { description: 'The number of searches run by the datafeed' },
-                },
-                total_search_time_ms: {
+                input_record_count: {
                   type: 'long',
                   _meta: {
-                    description: 'The total time the datafeed spent searching, in milliseconds',
+                    description:
+                      'The number of input documents posted to the anomaly detection job',
+                  },
+                },
+                last_data_time: {
+                  type: 'long',
+                  _meta: {
+                    description:
+                      'The timestamp at which data was last analyzed, according to server time',
+                  },
+                },
+                processed_record_count: {
+                  type: 'long',
+                  _meta: {
+                    description:
+                      'The number of input documents that have been processed by the anomaly detection job',
+                  },
+                },
+              },
+              model_size_stats: {
+                bucket_allocation_failures_count: {
+                  type: 'long',
+                  _meta: {
+                    description:
+                      'The number of buckets for which new entities in incoming data were not processed due to insufficient model memory',
+                  },
+                },
+                model_bytes: {
+                  type: 'long',
+                  _meta: { description: 'The number of bytes of memory used by the models' },
+                },
+                model_bytes_exceeded: {
+                  type: 'long',
+                  _meta: {
+                    description:
+                      'The number of bytes over the high limit for memory usage at the last allocation failure',
+                  },
+                },
+                model_bytes_memory_limit: {
+                  type: 'long',
+                  _meta: {
+                    description:
+                      'The upper limit for model memory usage, checked on increasing values',
+                  },
+                },
+                peak_model_bytes: {
+                  type: 'long',
+                  _meta: {
+                    description: 'The peak number of bytes of memory ever used by the models',
+                  },
+                },
+              },
+              timing_stats: {
+                bucket_count: {
+                  type: 'long',
+                  _meta: { description: 'The number of buckets processed' },
+                },
+                exponential_average_bucket_processing_time_ms: {
+                  type: 'long',
+                  _meta: {
+                    description:
+                      'Exponential moving average of all bucket processing times, in milliseconds',
+                  },
+                },
+                exponential_average_bucket_processing_time_per_hour_ms: {
+                  type: 'long',
+                  _meta: {
+                    description:
+                      'Exponentially-weighted moving average of bucket processing times calculated in a 1 hour time window, in milliseconds',
+                  },
+                },
+                maximum_bucket_processing_time_ms: {
+                  type: 'long',
+                  _meta: {
+                    description: 'Maximum among all bucket processing times, in milliseconds',
+                  },
+                },
+                minimum_bucket_processing_time_ms: {
+                  type: 'long',
+                  _meta: {
+                    description: 'Minimum among all bucket processing times, in milliseconds',
+                  },
+                },
+                total_bucket_processing_time_ms: {
+                  type: 'long',
+                  _meta: { description: 'Sum of all bucket processing times, in milliseconds' },
+                },
+              },
+              datafeed: {
+                datafeed_id: {
+                  type: 'keyword',
+                  _meta: {
+                    description:
+                      'A numerical character string that uniquely identifies the datafeed',
+                  },
+                },
+                state: {
+                  type: 'keyword',
+                  _meta: { description: 'The status of the datafeed' },
+                },
+                timing_stats: {
+                  average_search_time_per_bucket_ms: {
+                    type: 'long',
+                    _meta: { description: 'The average search time per bucket, in milliseconds' },
+                  },
+                  bucket_count: {
+                    type: 'long',
+                    _meta: { description: 'The number of buckets processed' },
+                  },
+                  exponential_average_search_time_per_hour_ms: {
+                    type: 'long',
+                    _meta: {
+                      description: 'The exponential average search time per hour, in milliseconds',
+                    },
+                  },
+                  search_count: {
+                    type: 'long',
+                    _meta: { description: 'The number of searches run by the datafeed' },
+                  },
+                  total_search_time_ms: {
+                    type: 'long',
+                    _meta: {
+                      description: 'The total time the datafeed spent searching, in milliseconds',
+                    },
                   },
                 },
               },
@@ -398,22 +398,52 @@ export const registerCollector: RegisterCollector = ({
         },
       },
       endpoints: {
-        total_installed: { type: 'long' },
-        active_within_last_24_hours: { type: 'long' },
+        total_installed: {
+          type: 'long',
+          _meta: { description: 'The number of installed endpoints' },
+        },
+        active_within_last_24_hours: {
+          type: 'long',
+          _meta: { description: 'The number of active endpoints' },
+        },
         os: {
           type: 'array',
           items: {
-            full_name: { type: 'keyword' },
-            platform: { type: 'keyword' },
-            version: { type: 'keyword' },
-            count: { type: 'long' },
+            full_name: {
+              type: 'keyword',
+              _meta: { description: 'Full name of the operating system' },
+            },
+            platform: {
+              type: 'keyword',
+              _meta: { description: 'OS Platform. eg Centos, Ubuntu' },
+            },
+            version: {
+              type: 'keyword',
+              _meta: {
+                description:
+                  'The version of the operating system, eg 16.04.7 LTS (Xenial Xerus), 8 (Core)',
+              },
+            },
+            count: {
+              type: 'long',
+              _meta: { description: 'The total number of endpoints from that platform' },
+            },
           },
         },
         policies: {
           malware: {
-            active: { type: 'long' },
-            inactive: { type: 'long' },
-            failure: { type: 'long' },
+            active: {
+              type: 'long',
+              _meta: { description: 'The total number of active malware policies' },
+            },
+            inactive: {
+              type: 'long',
+              _meta: { description: 'The total number of inactive malware policies' },
+            },
+            failure: {
+              type: 'long',
+              _meta: { description: 'The total number of failing malware policies' },
+            },
           },
         },
       },
@@ -422,14 +452,12 @@ export const registerCollector: RegisterCollector = ({
     fetch: async ({ esClient }: CollectorFetchContext): Promise<UsageData> => {
       const internalSavedObjectsClient = await getInternalSavedObjectsClient(core);
       const savedObjectsClient = (internalSavedObjectsClient as unknown) as SavedObjectsClientContract;
-      const [detections, detectionMetrics, endpoints] = await Promise.allSettled([
-        fetchDetectionsUsage(kibanaIndex, esClient, ml, savedObjectsClient),
+      const [detectionMetrics, endpoints] = await Promise.allSettled([
         fetchDetectionsMetrics(kibanaIndex, signalsIndex, esClient, ml, savedObjectsClient),
         getEndpointTelemetryFromFleet(savedObjectsClient, endpointAppContext, esClient),
       ]);
 
       return {
-        detections: detections.status === 'fulfilled' ? detections.value : defaultDetectionsUsage,
         detectionMetrics: detectionMetrics.status === 'fulfilled' ? detectionMetrics.value : {},
         endpoints: endpoints.status === 'fulfilled' ? endpoints.value : {},
       };

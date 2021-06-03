@@ -117,8 +117,12 @@ export function getPluginPrivileges() {
         read: savedObjects,
       },
       alerting: {
-        all: Object.values(ML_ALERT_TYPES),
-        read: [],
+        rule: {
+          all: Object.values(ML_ALERT_TYPES),
+        },
+        alert: {
+          all: Object.values(ML_ALERT_TYPES),
+        },
       },
     },
     user: {
@@ -132,8 +136,12 @@ export function getPluginPrivileges() {
         read: savedObjects,
       },
       alerting: {
-        all: [],
-        read: Object.values(ML_ALERT_TYPES),
+        rule: {
+          read: Object.values(ML_ALERT_TYPES),
+        },
+        alert: {
+          read: Object.values(ML_ALERT_TYPES),
+        },
       },
     },
     apmUser: {

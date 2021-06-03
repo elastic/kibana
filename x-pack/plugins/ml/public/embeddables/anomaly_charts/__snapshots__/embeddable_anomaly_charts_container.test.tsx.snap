@@ -19,6 +19,7 @@ Object {
     "val": 75,
   },
   "showCharts": true,
+  "showSelectedInterval": false,
   "timeBuckets": TimeBuckets {
     "_timeBucketsConfig": Object {
       "dateFormat": undefined,

@@ -40,6 +40,21 @@ const getStreamsForInputType = (
   return streams;
 };
 
+// Reduces registry var def into config object entry
+const varsReducer = (
+  configObject: PackagePolicyConfigRecord,
+  registryVar: RegistryVarsEntry
+): PackagePolicyConfigRecord => {
+  const configEntry: PackagePolicyConfigRecordEntry = {
+    value: !registryVar.default && registryVar.multi ? [] : registryVar.default,
+  };
+  if (registryVar.type) {
+    configEntry.type = registryVar.type;
+  }
+  configObject![registryVar.name] = configEntry;
+  return configObject;
+};
+
 /*
  * This service creates a package policy inputs definition from defaults provided in package info
  */
@@ -58,21 +73,6 @@ export const packageToPackagePolicyInputs = (
   if (packagePolicyTemplate?.inputs?.length) {
     // Map each package package policy input to agent policy package policy input
     packagePolicyTemplate.inputs.forEach((packageInput) => {
-      // Reduces registry var def into config object entry
-      const varsReducer = (
-        configObject: PackagePolicyConfigRecord,
-        registryVar: RegistryVarsEntry
-      ): PackagePolicyConfigRecord => {
-        const configEntry: PackagePolicyConfigRecordEntry = {
-          value: !registryVar.default && registryVar.multi ? [] : registryVar.default,
-        };
-        if (registryVar.type) {
-          configEntry.type = registryVar.type;
-        }
-        configObject![registryVar.name] = configEntry;
-        return configObject;
-      };
-
       // Map each package input stream into package policy input stream
       const streams: NewPackagePolicyInputStream[] = getStreamsForInputType(
         packageInput.type,
@@ -121,7 +121,7 @@ export const packageToPackagePolicy = (
   packagePolicyName?: string,
   description?: string
 ): NewPackagePolicy => {
-  return {
+  const packagePolicy: NewPackagePolicy = {
     name: packagePolicyName || `${packageInfo.name}-1`,
     namespace,
     description,
@@ -135,4 +135,10 @@ export const packageToPackagePolicy = (
     output_id: outputId,
     inputs: packageToPackagePolicyInputs(packageInfo),
   };
+
+  if (packageInfo.vars?.length) {
+    packagePolicy.vars = packageInfo.vars.reduce(varsReducer, {});
+  }
+
+  return packagePolicy;
 };

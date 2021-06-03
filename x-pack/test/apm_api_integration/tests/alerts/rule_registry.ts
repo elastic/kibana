@@ -400,6 +400,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               query: {
                 start: new Date(now - 30 * 60 * 1000).toISOString(),
                 end: new Date(now).toISOString(),
+                status: 'all',
               },
             })
           )
@@ -572,6 +573,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               query: {
                 start: new Date(now - 30 * 60 * 1000).toISOString(),
                 end: new Date().toISOString(),
+                status: 'all',
               },
             })
           )

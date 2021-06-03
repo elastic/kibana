@@ -13,7 +13,7 @@ import { Test, Suite } from './fake_mocha_types';
 
 export { Lifecycle, Config, FailureMetadata };
 
-interface AsyncInstance<T> {
+export interface AsyncInstance<T> {
   /**
    * Services that are initialized async are not ready before the tests execute, so you might need
    * to call `init()` and await the promise it returns before interacting with the service
@@ -39,7 +39,11 @@ export type ProvidedType<T extends (...args: any[]) => any> = MaybeAsyncInstance
  * promise types into the async instances that other providers will receive.
  */
 type ProvidedTypeMap<T extends {}> = {
-  [K in keyof T]: T[K] extends (...args: any[]) => any ? ProvidedType<T[K]> : unknown;
+  [K in keyof T]: T[K] extends new (...args: any[]) => infer X
+    ? X
+    : T[K] extends (...args: any[]) => any
+    ? ProvidedType<T[K]>
+    : unknown;
 };
 
 export interface GenericFtrProviderContext<
@@ -82,6 +86,10 @@ export interface GenericFtrProviderContext<
    * @param path
    */
   loadTestFile(path: string): void;
+}
+
+export class GenericFtrService<ProviderContext extends GenericFtrProviderContext<any, any>> {
+  constructor(protected readonly ctx: ProviderContext) {}
 }
 
 export interface FtrConfigProviderContext {

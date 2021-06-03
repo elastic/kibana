@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { ConfigSchema } from '.';
 import {
   AppMountParameters,
+  AppNavLinkStatus,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
@@ -40,7 +41,6 @@ import type {
 } from '../../triggers_actions_ui/public';
 import { registerApmAlerts } from './components/alerting/register_apm_alerts';
 import { featureCatalogueEntry } from './featureCatalogueEntry';
-import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 
@@ -140,32 +140,30 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       appRoute: '/app/apm',
       icon: 'plugins/apm/public/icon.svg',
       category: DEFAULT_APP_CATEGORIES.observability,
-      meta: {
-        // !! Need to be kept in sync with the routes in x-pack/plugins/apm/public/components/app/Main/route_config/index.tsx
-        searchDeepLinks: [
-          {
-            id: 'services',
-            title: i18n.translate('xpack.apm.breadcrumb.servicesTitle', {
-              defaultMessage: 'Services',
-            }),
-            path: '/services',
-          },
-          {
-            id: 'traces',
-            title: i18n.translate('xpack.apm.breadcrumb.tracesTitle', {
-              defaultMessage: 'Traces',
-            }),
-            path: '/traces',
-          },
-          {
-            id: 'service-map',
-            title: i18n.translate('xpack.apm.breadcrumb.serviceMapTitle', {
-              defaultMessage: 'Service Map',
-            }),
-            path: '/service-map',
-          },
-        ],
-      },
+      // !! Need to be kept in sync with the routes in x-pack/plugins/apm/public/components/app/Main/route_config/index.tsx
+      deepLinks: [
+        {
+          id: 'services',
+          title: i18n.translate('xpack.apm.breadcrumb.servicesTitle', {
+            defaultMessage: 'Services',
+          }),
+          path: '/services',
+        },
+        {
+          id: 'traces',
+          title: i18n.translate('xpack.apm.breadcrumb.tracesTitle', {
+            defaultMessage: 'Traces',
+          }),
+          path: '/traces',
+        },
+        {
+          id: 'service-map',
+          title: i18n.translate('xpack.apm.breadcrumb.serviceMapTitle', {
+            defaultMessage: 'Service Map',
+          }),
+          path: '/service-map',
+        },
+      ],
 
       async mount(appMountParameters: AppMountParameters<unknown>) {
         // Load application bundle and Get start services
@@ -193,24 +191,25 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       order: 8500,
       euiIconType: 'logoObservability',
       category: DEFAULT_APP_CATEGORIES.observability,
-      meta: {
-        keywords: [
-          'RUM',
-          'Real User Monitoring',
-          'DEM',
-          'Digital Experience Monitoring',
-          'EUM',
-          'End User Monitoring',
-          'UX',
-          'Javascript',
-          'APM',
-          'Mobile',
-          'digital',
-          'performance',
-          'web performance',
-          'web perf',
-        ],
-      },
+      navLinkStatus: config.ui.enabled
+        ? AppNavLinkStatus.default
+        : AppNavLinkStatus.hidden,
+      keywords: [
+        'RUM',
+        'Real User Monitoring',
+        'DEM',
+        'Digital Experience Monitoring',
+        'EUM',
+        'End User Monitoring',
+        'UX',
+        'Javascript',
+        'APM',
+        'Mobile',
+        'digital',
+        'performance',
+        'web performance',
+        'web perf',
+      ],
       async mount(appMountParameters: AppMountParameters<unknown>) {
         // Load application bundle and Get start service
         const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([
@@ -231,7 +230,5 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     return {};
   }
-  public start(core: CoreStart, plugins: ApmPluginStartDeps) {
-    toggleAppLinkInNav(core, this.initializerContext.config.get());
-  }
+  public start(core: CoreStart, plugins: ApmPluginStartDeps) {}
 }

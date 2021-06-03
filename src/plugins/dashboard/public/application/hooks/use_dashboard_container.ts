@@ -85,6 +85,7 @@ export const useDashboardContainer = ({
     let canceled = false;
     let pendingContainer: DashboardContainer | ErrorEmbeddable | null | undefined;
     (async function createContainer() {
+      const existingSession = searchSession.getSessionId();
       pendingContainer = await dashboardFactory.create(
         getDashboardContainerInput({
           isEmbeddedExternally: Boolean(isEmbeddedExternally),
@@ -92,7 +93,9 @@ export const useDashboardContainer = ({
           dashboardStateManager,
           incomingEmbeddable,
           query,
-          searchSessionId: searchSessionIdFromURL ?? searchSession.start(),
+          searchSessionId:
+            searchSessionIdFromURL ??
+            (existingSession && incomingEmbeddable ? existingSession : searchSession.start()),
         })
       );
 

@@ -308,6 +308,23 @@ export function getCoreUsageCollector(
             },
           },
         },
+
+        deprecatedKeys: {
+          set: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: { description: 'Config path added during config deprecation.' },
+            },
+          },
+          unset: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: { description: 'Config path removed during config deprecation.' },
+            },
+          },
+        },
       },
       environment: {
         memory: {

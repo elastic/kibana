@@ -18,13 +18,13 @@ import {
   SeverityMapping,
   Severity,
 } from '@kbn/securitysolution-io-ts-alerting-types';
+import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { ActionVariables } from '../../../../../../triggers_actions_ui/public';
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import { transformRuleToAlertAction } from '../../../../../common/detection_engine/transform_actions';
 import { Filter } from '../../../../../../../../src/plugins/data/public';
-import { ENDPOINT_LIST_ID } from '../../../../shared_imports';
 import { Rule } from '../../../containers/detection_engine/rules';
 import {
   AboutStepRule,

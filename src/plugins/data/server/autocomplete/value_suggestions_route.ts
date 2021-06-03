@@ -8,7 +8,7 @@
 
 import { get, map } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import { IRouter, SharedGlobalConfig } from 'kibana/server';
+import { IRouter } from 'kibana/server';
 
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -16,11 +16,9 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { IFieldType } from '../index';
 import { findIndexPatternById, getFieldByName } from '../index_patterns';
 import { getRequestAbortedSignal } from '../lib';
+import { ConfigSchema } from '../../config';
 
-export function registerValueSuggestionsRoute(
-  router: IRouter,
-  config$: Observable<SharedGlobalConfig>
-) {
+export function registerValueSuggestionsRoute(router: IRouter, config$: Observable<ConfigSchema>) {
   router.post(
     {
       path: '/api/kibana/suggestions/values/{index}',
@@ -50,8 +48,8 @@ export function registerValueSuggestionsRoute(
       const signal = getRequestAbortedSignal(request.events.aborted$);
 
       const autocompleteSearchOptions = {
-        timeout: `${config.kibana.autocompleteTimeout.asMilliseconds()}ms`,
-        terminate_after: config.kibana.autocompleteTerminateAfter.asMilliseconds(),
+        timeout: `${config.autocomplete.valueSuggestions.timeout.asMilliseconds()}ms`,
+        terminate_after: config.autocomplete.valueSuggestions.terminateAfter.asMilliseconds(),
       };
 
       let field: IFieldType | undefined = fieldMeta;
