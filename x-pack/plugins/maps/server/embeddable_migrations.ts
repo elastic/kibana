@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// import { EmbeddableStateWithType } from '../../../../src/plugins/embeddable/common';
 import { SerializableState } from '../../../../src/plugins/kibana_utils/common';
 import { MapSavedObjectAttributes } from '../common/map_saved_object_type';
 import { moveAttribution } from '../common/migrations/move_attribution';
