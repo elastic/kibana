@@ -75,7 +75,11 @@ export function SaveModalContainer({
   } = lensServices;
 
   useEffect(() => {
-    if (initialInput) {
+    setLastKnownDoc(initLastKnowDoc);
+  }, [initLastKnowDoc]);
+
+  useEffect(() => {
+    if (initialInput && isVisible) {
       async function loadLastKnownDoc() {
         getLastKnownDoc({
           data,
@@ -90,7 +94,7 @@ export function SaveModalContainer({
 
       loadLastKnownDoc();
     }
-  }, [chrome, data, initialInput, notifications, attributeService]);
+  }, [chrome, data, initialInput, notifications, attributeService, isVisible]);
 
   const tagsIds =
     persistedDoc && savedObjectsTagging
@@ -130,7 +134,7 @@ export function SaveModalContainer({
 
   const savingToLibraryPermitted = Boolean(isSaveable && application.capabilities.visualize.save);
 
-  return lastKnownDoc ? (
+  return (
     <SaveModal
       isVisible={isVisible}
       originatingApp={originatingApp}
@@ -146,7 +150,7 @@ export function SaveModalContainer({
       lastKnownDoc={lastKnownDoc}
       returnToOriginSwitchLabel={returnToOriginSwitchLabel}
     />
-  ) : null;
+  );
 }
 
 export const runSaveLensVisualization = async (
