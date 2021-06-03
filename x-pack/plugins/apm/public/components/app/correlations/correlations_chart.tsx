@@ -148,7 +148,7 @@ export function CorrelationsChart({
           xScaleType={ScaleType.Log}
           yScaleType={ScaleType.Log}
           data={histogram}
-          curve={CurveType.CURVE_STEP}
+          curve={CurveType.CURVE_STEP_AFTER}
           xAccessor="key"
           yAccessors={['doc_count_full']}
           color={euiTheme.eui.euiColorVis1}
@@ -167,7 +167,7 @@ export function CorrelationsChart({
           xScaleType={ScaleType.Log}
           yScaleType={ScaleType.Log}
           data={histogram}
-          curve={CurveType.CURVE_STEP}
+          curve={CurveType.CURVE_STEP_AFTER}
           xAccessor="key"
           yAccessors={['doc_count']}
           color={euiTheme.eui.euiColorVis2}

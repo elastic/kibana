@@ -115,7 +115,7 @@ export const fetchTransactionDurationCorrelation = async (
   totalHits: number,
   fieldName?: string,
   fieldValue?: string
-): Promise<any> => {
+): Promise<{ ranges: unknown[]; correlation: number }> => {
   const resp = await esClient.search<ResponseHit>(
     getTransactionDurationCorrelationRequest(
       params,

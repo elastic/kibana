@@ -15,6 +15,8 @@ import { getQueryWithParams } from './get_query_with_params';
 
 const fieldCandidatesFilter = ['parent.id', 'trace.id', 'transaction.id'];
 
+const POPULATED_DOC_COUNT_SAMPLE_SIZE = 500;
+
 export const getRandomDocsRequest = (
   params: SearchServiceParams
 ): estypes.SearchRequest => ({
@@ -31,7 +33,7 @@ export const getRandomDocsRequest = (
     },
     // Required value for later correlation queries
     track_total_hits: true,
-    size: 500,
+    size: POPULATED_DOC_COUNT_SAMPLE_SIZE,
   },
 });
 

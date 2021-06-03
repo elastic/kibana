@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { shuffle } from 'lodash';
+import { descending, group, sum } from 'd3-array';
+import { shuffle, uniqWith, isEqual } from 'lodash';
 
 import type { ElasticsearchClient } from 'src/core/server';
 
@@ -21,6 +22,10 @@ import { fetchTransactionDurationPecentiles } from './query_percentiles';
 import { fetchTransactionDurationCorrelation } from './query_correlation';
 import { fetchTransactionDurationHistogramRangesteps } from './query_histogram_rangesteps';
 import { fetchTransactionDurationRanges } from './query_ranges';
+
+const PERCENTILES = 20;
+const CORRELATION_THRESHOLD = 0.03;
+const KS_TEST_THRESHOLD = 0.1;
 
 export const asyncSearchServiceProvider = (
   esClient: ElasticsearchClient,
@@ -45,7 +50,7 @@ export const asyncSearchServiceProvider = (
       progress.loadedHistograms * 0.8,
   };
 
-  let values: SearchServiceValue[] = [];
+  const values: SearchServiceValue[] = [];
   let percentileThresholdValue: number;
 
   const cancel = () => {
@@ -54,6 +59,7 @@ export const asyncSearchServiceProvider = (
 
   const fetchCorrelations = async () => {
     try {
+      // 95th percentile to be displayed as a marker in the log log chart
       const percentileThreshold = await fetchTransactionDurationPecentiles(
         esClient,
         params,
@@ -94,7 +100,7 @@ export const asyncSearchServiceProvider = (
       const percentiles = await fetchTransactionDurationPecentiles(
         esClient,
         params,
-        [...Array(100).keys()]
+        [...Array(PERCENTILES).keys()]
       );
 
       if (isCancelled) {
@@ -121,14 +127,6 @@ export const asyncSearchServiceProvider = (
             return;
           }
 
-          const logHistogram = await fetchTransactionDurationRanges(
-            esClient,
-            params,
-            histogramRangeSteps,
-            item.field,
-            item.value
-          );
-
           const { correlation } = await fetchTransactionDurationCorrelation(
             esClient,
             params,
@@ -143,33 +141,47 @@ export const asyncSearchServiceProvider = (
             return;
           }
 
-          const fullHistogram = overallLogHistogramChartData.map((h) => {
-            const histogramItem = logHistogram.find((di) => di.key === h.key);
-            const docCount =
-              item !== undefined && histogramItem !== undefined
-                ? histogramItem.doc_count
-                : 0;
-            return {
-              key: h.key,
-              doc_count_full: h.doc_count,
-              doc_count: docCount,
-            };
-          });
+          if (correlation > CORRELATION_THRESHOLD) {
+            const logHistogram = await fetchTransactionDurationRanges(
+              esClient,
+              params,
+              histogramRangeSteps,
+              item.field,
+              item.value
+            );
 
-          yield {
-            ...item,
-            correlation,
-            histogram: fullHistogram,
-          };
+            const fullHistogram = overallLogHistogramChartData.map((h) => {
+              const histogramItem = logHistogram.find((di) => di.key === h.key);
+              const docCount =
+                item !== undefined && histogramItem !== undefined
+                  ? histogramItem.doc_count
+                  : 0;
+              return {
+                key: h.key,
+                doc_count_full: h.doc_count,
+                doc_count: docCount,
+              };
+            });
+
+            yield {
+              ...item,
+              correlation,
+              histogram: fullHistogram,
+            };
+          } else {
+            yield undefined;
+          }
         }
       }
 
       let loadedHistograms = 0;
       for await (const item of fetchTransactionDurationHistograms()) {
-        values.push(item);
-        values = values
-          .sort((a, b) => b.correlation - a.correlation)
-          .slice(0, 15);
+        if (item !== undefined) {
+          values.push(item);
+          // values = values
+          //   .sort((a, b) => b.correlation - a.correlation)
+          //   .slice(0, 1000);
+        }
         loadedHistograms++;
         progress.loadedHistograms = loadedHistograms / fieldValuePairs.length;
       }
@@ -183,13 +195,52 @@ export const asyncSearchServiceProvider = (
   fetchCorrelations();
 
   return () => {
+    function slownessScore(d: SearchServiceValue) {
+      // fast docs for this field/value pair below the percentile threshold
+      const allFastValueCount = sum(
+        d.histogram
+          .filter((h) => h.key < (percentileThresholdValue ?? 0))
+          .map((h) => h.doc_count_full)
+      );
+      const fastValueCount = sum(
+        d.histogram
+          .filter((h) => h.key < (percentileThresholdValue ?? 0))
+          .map((h) => h.doc_count)
+      );
+      // slow docs for this field/value pair above the percentile threshold
+      const allSlowValueCount = sum(
+        d.histogram
+          .filter((h) => h.key >= (percentileThresholdValue ?? 0))
+          .map((h) => h.doc_count_full)
+      );
+      const slowValueCount = sum(
+        d.histogram
+          .filter((h) => h.key >= (percentileThresholdValue ?? 0))
+          .map((h) => h.doc_count)
+      );
+
+      const fastPercent = fastValueCount / allFastValueCount;
+      const slowPercent = slowValueCount / allSlowValueCount;
+      return slowPercent / fastPercent;
+    }
+
+    // group duplicates
+    // const groupedValues = group(values, (d) => JSON.stringify(d.histogram));
+    // console.log('groupedValues', groupedValues);
+
+    const uniqueValues = uniqWith(values, (a, b) =>
+      isEqual(a.histogram, b.histogram)
+    )
+      .sort((a, b) => descending(slownessScore(a), slownessScore(b)))
+      .slice(0, 15);
+
     return {
       error,
       isRunning,
       loaded: Math.floor(progress.getOverallProgress() * 100),
       started: progress.started,
       total: 100,
-      values,
+      values: uniqueValues,
       percentileThresholdValue,
       cancel,
     };

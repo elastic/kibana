@@ -16,6 +16,8 @@ import type {
 
 import { getQueryWithParams } from './get_query_with_params';
 
+const TERMS_SIZE = 100;
+
 interface FieldValuePair {
   field: string;
   value: string;
@@ -32,7 +34,7 @@ export const getTermsAggRequest = (
     size: 0,
     aggs: {
       attribute_terms: {
-        terms: { field, size: 10000 },
+        terms: { field, size: TERMS_SIZE },
       },
     },
   },

@@ -9,6 +9,8 @@ import React, { useEffect, useState } from 'react';
 
 import { useParams } from 'react-router-dom';
 
+import { sum } from 'd3-array';
+
 import {
   EuiButton,
   EuiFlexGroup,
@@ -177,7 +179,6 @@ export function MlCorrelations({ onClose }: Props) {
             markerPercentile={percentileThreshold}
             markerValue={percentileThresholdValue ?? 0}
             {...selectedHistogram}
-            key={`${selectedHistogram.field}:${selectedHistogram.value}`}
           />
 
           <EuiSpacer size="s" />
@@ -187,15 +188,26 @@ export function MlCorrelations({ onClose }: Props) {
               'xpack.apm.correlations.latency.percentageColumnName',
               { defaultMessage: '% of slow transactions' }
             )}
-            significantTerms={histograms.map((d) => ({
-              distribution: [],
-              fieldName: d.field,
-              fieldValue: d.value,
-              score: d.correlation,
-              impact: d.correlation,
-              fieldCount: 0,
-              valueCount: 0,
-            }))}
+            significantTerms={histograms.map((d) => {
+              // all docs for this field/value pair
+              const fieldCount = sum(d.histogram.map((h) => h.doc_count));
+              // docs for this field/value pair above the percentile threshold
+              const valueCount = sum(
+                d.histogram
+                  .filter((h) => h.key > (percentileThresholdValue ?? 0))
+                  .map((h) => h.doc_count)
+              );
+
+              return {
+                distribution: [],
+                fieldName: d.field,
+                fieldValue: d.value,
+                score: d.correlation,
+                impact: d.correlation,
+                fieldCount,
+                valueCount,
+              };
+            })}
             status={FETCH_STATUS.SUCCESS}
             setSelectedSignificantTerm={setSelectedSignificantTerm}
             onFilter={onClose}
