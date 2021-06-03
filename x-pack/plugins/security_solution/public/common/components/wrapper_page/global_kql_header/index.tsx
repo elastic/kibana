@@ -7,7 +7,7 @@
 import React, { forwardRef } from 'react';
 import styled from 'styled-components';
 import { OutPortal } from 'react-reverse-portal';
-import { useGlobalHeaderPortal } from '../../../common/hooks/use_global_header_portal';
+import { useGlobalHeaderPortal } from '../../hooks/use_global_header_portal';
 
 /**
  * This component uses a reverse portal to render the global kql bar within the SecuritySolutionPageWrapper
