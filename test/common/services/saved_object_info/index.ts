@@ -38,7 +38,7 @@ export const runSavedObjInfoSvc = () =>
     {
       description: `
 
-Show information pertaining to the saved objects in the .kibana
+Show information pertaining to the saved objects in the .kibana index
 
 Examples:
 
