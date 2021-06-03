@@ -19,14 +19,8 @@ describe('useBreadcrumbs', () => {
     const [getBreadcrumbs, core] = mockCore();
 
     const expectedCrumbs: ChromeBreadcrumb[] = [
-      {
-        text: 'Crumb: ',
-        href: 'http://href.example.net',
-      },
-      {
-        text: 'Crumb II: Son of Crumb',
-        href: 'http://href2.example.net',
-      },
+      { text: 'Crumb: ', href: 'http://href.example.net' },
+      { text: 'Crumb II: Son of Crumb', href: 'http://href2.example.net' },
     ];
 
     const Component = () => {
@@ -46,7 +40,9 @@ describe('useBreadcrumbs', () => {
 
     const urlParams: UptimeUrlParams = getSupportedUrlParams({});
     expect(JSON.stringify(getBreadcrumbs())).toEqual(
-      JSON.stringify([makeBaseBreadcrumb('/app/uptime', urlParams)].concat(expectedCrumbs))
+      JSON.stringify(
+        makeBaseBreadcrumb('/app/uptime', '/app/observability', urlParams).concat(expectedCrumbs)
+      )
     );
   });
 });
@@ -58,7 +54,7 @@ const mockCore: () => [() => ChromeBreadcrumb[], any] = () => {
   };
   const core = {
     application: {
-      getUrlForApp: () => '/app/uptime',
+      getUrlForApp: (app: string) => (app === 'uptime' ? '/app/uptime' : '/app/observability'),
       navigateToUrl: jest.fn(),
     },
     chrome: {
