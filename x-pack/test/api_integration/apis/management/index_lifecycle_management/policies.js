@@ -48,6 +48,10 @@ export default function ({ getService }) {
           version: 1,
           modified_date: modifiedDate,
           policy: {
+            _meta: {
+              description: 'default policy for the watcher history indices',
+              managed: true,
+            },
             phases: {
               delete: {
                 min_age: '7d',
