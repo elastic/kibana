@@ -9,10 +9,11 @@ import { KibanaRequest, Logger } from 'kibana/server';
 import Boom from '@hapi/boom';
 import { SecurityPluginStart } from '../../../security/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
-import { AuthorizationFilter, GetSpaceFn } from './types';
+import { AuthFilterHelpers, GetSpaceFn } from './types';
 import { getOwnersFilter } from './utils';
 import { AuthorizationAuditLogger, OperationDetails } from '.';
 import { createCaseError } from '../common';
+import { OwnerEntity } from './types';
 
 /**
  * This class handles ensuring that the user making a request has the correct permissions
@@ -90,10 +91,49 @@ export class Authorization {
    * Checks that the user making the request for the passed in owners and operation has the correct authorization. This
    * function will throw if the user is not authorized for the requested operation and owners.
    *
-   * @param owners an array of strings describing the case owners attempting to be authorized
+   * @param entities an array of entities describing the case owners in conjunction with the saved object ID attempting
+   *  to be authorized
    * @param operation information describing the operation attempting to be authorized
    */
-  public async ensureAuthorized(owners: string[], operation: OperationDetails) {
+  public async ensureAuthorized({
+    entities,
+    operation,
+  }: {
+    entities: OwnerEntity[];
+    operation: OperationDetails;
+  }) {
+    const logSavedObjects = (error?: Error) => {
+      for (const entity of entities) {
+        this.auditLogger.log({ operation, error, entity });
+      }
+    };
+
+    try {
+      await this._ensureAuthorized(
+        entities.map((entity) => entity.owner),
+        operation
+      );
+    } catch (error) {
+      logSavedObjects(error);
+      throw error;
+    }
+
+    logSavedObjects();
+  }
+
+  /**
+   * Returns an object to filter the saved object find request to the authorized owners of an entity.
+   */
+  public async getAuthorizationFilter(operation: OperationDetails): Promise<AuthFilterHelpers> {
+    try {
+      return await this._getAuthorizationFilter(operation);
+    } catch (error) {
+      this.auditLogger.log({ error, operation });
+      throw error;
+    }
+  }
+
+  private async _ensureAuthorized(owners: string[], operation: OperationDetails) {
     const { securityAuth } = this;
     const areAllOwnersAvailable = owners.every((owner) => this.featureCaseOwners.has(owner));
 
@@ -103,7 +143,7 @@ export class Authorization {
       );
 
       const checkPrivileges = securityAuth.checkPrivilegesDynamicallyWithRequest(this.request);
-      const { hasAllRequested, username } = await checkPrivileges({
+      const { hasAllRequested } = await checkPrivileges({
         kibana: requiredPrivileges,
       });
 
@@ -115,55 +155,53 @@ export class Authorization {
          * as Privileged.
          * This check will ensure we don't accidentally let these through
          */
-        throw Boom.forbidden(this.auditLogger.failure({ username, owners, operation }));
+        throw Boom.forbidden(AuthorizationAuditLogger.createFailureMessage({ owners, operation }));
       }
 
-      if (hasAllRequested) {
-        this.auditLogger.success({ username, operation, owners });
-      } else {
-        throw Boom.forbidden(this.auditLogger.failure({ owners, operation, username }));
+      if (!hasAllRequested) {
+        throw Boom.forbidden(AuthorizationAuditLogger.createFailureMessage({ owners, operation }));
       }
     } else if (!areAllOwnersAvailable) {
-      throw Boom.forbidden(this.auditLogger.failure({ owners, operation }));
+      throw Boom.forbidden(AuthorizationAuditLogger.createFailureMessage({ owners, operation }));
     }
 
     // else security is disabled so let the operation proceed
   }
 
-  /**
-   * Returns an object to filter the saved object find request to the authorized owners of an entity.
-   */
-  public async getFindAuthorizationFilter(
-    operation: OperationDetails
-  ): Promise<AuthorizationFilter> {
+  private async _getAuthorizationFilter(operation: OperationDetails): Promise<AuthFilterHelpers> {
     const { securityAuth } = this;
     if (securityAuth && this.shouldCheckAuthorization()) {
-      const { username, authorizedOwners } = await this.getAuthorizedOwners([operation]);
+      const { authorizedOwners } = await this.getAuthorizedOwners([operation]);
 
       if (!authorizedOwners.length) {
-        throw Boom.forbidden(this.auditLogger.failure({ username, operation }));
+        throw Boom.forbidden(
+          AuthorizationAuditLogger.createFailureMessage({ owners: authorizedOwners, operation })
+        );
       }
 
       return {
         filter: getOwnersFilter(operation.savedObjectType, authorizedOwners),
-        ensureSavedObjectIsAuthorized: (owner: string) => {
-          if (!authorizedOwners.includes(owner)) {
-            throw Boom.forbidden(
-              this.auditLogger.failure({ username, operation, owners: [owner] })
-            );
-          }
-        },
-        logSuccessfulAuthorization: () => {
-          if (authorizedOwners.length) {
-            this.auditLogger.success({ username, owners: authorizedOwners, operation });
+        ensureSavedObjectsAreAuthorized: (entities: OwnerEntity[]) => {
+          for (const entity of entities) {
+            if (!authorizedOwners.includes(entity.owner)) {
+              const error = Boom.forbidden(
+                AuthorizationAuditLogger.createFailureMessage({
+                  operation,
+                  owners: [entity.owner],
+                })
+              );
+              this.auditLogger.log({ error, operation, entity });
+              throw error;
+            }
+
+            this.auditLogger.log({ operation, entity });
           }
         },
       };
     }
 
     return {
-      ensureSavedObjectIsAuthorized: (owner: string) => {},
-      logSuccessfulAuthorization: () => {},
+      ensureSavedObjectsAreAuthorized: (entities: OwnerEntity[]) => {},
     };
   }
 

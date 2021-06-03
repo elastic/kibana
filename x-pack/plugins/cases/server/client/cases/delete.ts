@@ -12,8 +12,7 @@ import { CasesClientArgs } from '..';
 import { createCaseError } from '../../common/error';
 import { AttachmentService, CasesService } from '../../services';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
-import { Operations } from '../../authorization';
-import { ensureAuthorized } from '../utils';
+import { Operations, OwnerEntity } from '../../authorization';
 import { OWNER_FIELD } from '../../../common/api';
 
 async function deleteSubCases({
@@ -66,13 +65,11 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
     user,
     userActionService,
     logger,
-    authorization: auth,
-    auditLogger,
+    authorization,
   } = clientArgs;
   try {
     const cases = await caseService.getCases({ unsecuredSavedObjectsClient, caseIds: ids });
-    const soIds = new Set<string>();
-    const owners = new Set<string>();
+    const entities = new Map<string, OwnerEntity>();
 
     for (const theCase of cases.saved_objects) {
       // bulkGet can return an error.
@@ -83,17 +80,12 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
           logger,
         });
       }
-
-      soIds.add(theCase.id);
-      owners.add(theCase.attributes.owner);
+      entities.set(theCase.id, { id: theCase.id, owner: theCase.attributes.owner });
     }
 
-    await ensureAuthorized({
+    await authorization.ensureAuthorized({
       operation: Operations.deleteCase,
-      owners: [...owners.values()],
-      authorization: auth,
-      auditLogger,
-      savedObjectIDs: [...soIds.values()],
+      entities: Array.from(entities.values()),
     });
 
     await Promise.all(

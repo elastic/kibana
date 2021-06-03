@@ -51,8 +51,9 @@ import {
   SUB_CASE_SAVED_OBJECT,
 } from '../../../common/constants';
 import { ClientArgs } from '..';
-import { combineFilters, EnsureSOAuthCallback } from '../../client/utils';
+import { combineFilters } from '../../client/utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
+import { EnsureSOAuthCallback } from '../../authorization';
 
 interface GetCaseIdsByAlertIdArgs extends ClientArgs {
   alertId: string;

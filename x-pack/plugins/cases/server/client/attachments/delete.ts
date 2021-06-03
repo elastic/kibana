@@ -13,7 +13,6 @@ import { CasesClientArgs } from '../types';
 import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
 import { createCaseError } from '../../common/error';
 import { checkEnabledCaseConnectorOrThrow } from '../../common';
-import { ensureAuthorized } from '../utils';
 import { Operations } from '../../authorization';
 
 /**
@@ -65,7 +64,6 @@ export async function deleteAll(
     userActionService,
     logger,
     authorization,
-    auditLogger,
   } = clientArgs;
 
   try {
@@ -82,12 +80,12 @@ export async function deleteAll(
       throw Boom.notFound(`No comments found for ${id}.`);
     }
 
-    await ensureAuthorized({
-      authorization,
-      auditLogger,
+    await authorization.ensureAuthorized({
       operation: Operations.deleteAllComments,
-      savedObjectIDs: comments.saved_objects.map((comment) => comment.id),
-      owners: comments.saved_objects.map((comment) => comment.attributes.owner),
+      entities: comments.saved_objects.map((comment) => ({
+        owner: comment.attributes.owner,
+        id: comment.id,
+      })),
     });
 
     await Promise.all(
@@ -141,7 +139,6 @@ export async function deleteComment(
     userActionService,
     logger,
     authorization,
-    auditLogger,
   } = clientArgs;
 
   try {
@@ -158,11 +155,8 @@ export async function deleteComment(
       throw Boom.notFound(`This comment ${attachmentID} does not exist anymore.`);
     }
 
-    await ensureAuthorized({
-      authorization,
-      auditLogger,
-      owners: [myComment.attributes.owner],
-      savedObjectIDs: [myComment.id],
+    await authorization.ensureAuthorized({
+      entities: [{ owner: myComment.attributes.owner, id: myComment.id }],
       operation: Operations.deleteComment,
     });
 

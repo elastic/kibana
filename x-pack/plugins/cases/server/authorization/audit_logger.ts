@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { DATABASE_CATEGORY, ECS_OUTCOMES, OperationDetails } from '.';
-import { AuditLogger } from '../../../security/server';
+import { EcsEventOutcome } from 'kibana/server';
+import { DATABASE_CATEGORY, ECS_OUTCOMES, isWriteOperation, OperationDetails } from '.';
+import { AuditEvent, AuditLogger } from '../../../security/server';
+import { OwnerEntity } from './types';
 
-enum AuthorizationResult {
-  Unauthorized = 'Unauthorized',
-  Authorized = 'Authorized',
+interface CreateAuditMsgParams {
+  operation: OperationDetails;
+  entity?: OwnerEntity;
+  error?: Error;
 }
 
 /**
@@ -19,106 +22,80 @@ enum AuthorizationResult {
 export class AuthorizationAuditLogger {
   private readonly auditLogger?: AuditLogger;
 
-  constructor(logger: AuditLogger | undefined) {
+  constructor(logger?: AuditLogger) {
     this.auditLogger = logger;
   }
 
-  private static createMessage({
-    result,
+  /**
+   * Creates an AuditEvent describing the state of a request.
+   */
+  private static createAuditMsg({ operation, error, entity }: CreateAuditMsgParams): AuditEvent {
+    const doc =
+      entity !== undefined
+        ? `${operation.savedObjectType} [id=${entity.id}]`
+        : `a ${operation.docType}`;
+
+    const ownerText = entity === undefined ? 'as any owners' : `as owner "${entity.owner}"`;
+
+    let message: string;
+    let outcome: EcsEventOutcome;
+
+    if (error) {
+      message = `Failed attempt to ${operation.verbs.present} ${doc} ${ownerText}`;
+      outcome = ECS_OUTCOMES.failure;
+    } else if (isWriteOperation(operation)) {
+      message = `User is ${operation.verbs.progressive} ${doc} ${ownerText}`;
+      outcome = ECS_OUTCOMES.unknown;
+    } else {
+      message = `User has ${operation.verbs.past} ${doc} ${ownerText}`;
+      outcome = ECS_OUTCOMES.success;
+    }
+
+    return {
+      message,
+      event: {
+        action: operation.action,
+        category: DATABASE_CATEGORY,
+        type: [operation.ecsType],
+        outcome,
+      },
+      ...(entity !== undefined && {
+        kibana: {
+          saved_object: { type: operation.savedObjectType, id: entity.id },
+        },
+      }),
+      ...(error !== undefined && {
+        error: {
+          code: error.name,
+          message: error.message,
+        },
+      }),
+    };
+  }
+
+  /**
+   * Creates a message to be passed to an Error or Boom.
+   */
+  public static createFailureMessage({
     owners,
     operation,
   }: {
-    result: AuthorizationResult;
-    owners?: string[];
+    owners: string[];
     operation: OperationDetails;
-  }): string {
-    const ownerMsg = owners == null ? 'of any owner' : `with owners: "${owners.join(', ')}"`;
+  }) {
+    const ownerMsg = owners.length <= 0 ? 'of any owner' : `with owners: "${owners.join(', ')}"`;
     /**
      * This will take the form:
      * `Unauthorized to create case with owners: "securitySolution, observability"`
-     * `Unauthorized to find cases of any owner`.
+     * `Unauthorized to access cases of any owner`
      */
-    return `${result} to ${operation.verbs.present} ${operation.docType} ${ownerMsg}`;
-  }
-
-  private logSuccessEvent({
-    message,
-    operation,
-    username,
-  }: {
-    message: string;
-    operation: OperationDetails;
-    username?: string;
-  }) {
-    this.auditLogger?.log({
-      message: `${username ?? 'unknown user'} ${message}`,
-      event: {
-        action: operation.action,
-        category: DATABASE_CATEGORY,
-        type: [operation.type],
-        outcome: ECS_OUTCOMES.success,
-      },
-      ...(username != null && {
-        user: {
-          name: username,
-        },
-      }),
-    });
+    return `Unauthorized to ${operation.verbs.present} ${operation.docType} ${ownerMsg}`;
   }
 
   /**
-   * Creates a audit message describing a failure to authorize
+   * Logs an audit event based on the status of an operation.
    */
-  public failure({
-    username,
-    owners,
-    operation,
-  }: {
-    username?: string;
-    owners?: string[];
-    operation: OperationDetails;
-  }): string {
-    const message = AuthorizationAuditLogger.createMessage({
-      result: AuthorizationResult.Unauthorized,
-      owners,
-      operation,
-    });
-    this.auditLogger?.log({
-      message: `${username ?? 'unknown user'} ${message}`,
-      event: {
-        action: operation.action,
-        category: DATABASE_CATEGORY,
-        type: [operation.type],
-        outcome: ECS_OUTCOMES.failure,
-      },
-      // add the user information if we have it
-      ...(username != null && {
-        user: {
-          name: username,
-        },
-      }),
-    });
-    return message;
-  }
-
-  /**
-   * Creates a audit message describing a successful authorization
-   */
-  public success({
-    username,
-    operation,
-    owners,
-  }: {
-    username?: string;
-    owners: string[];
-    operation: OperationDetails;
-  }): string {
-    const message = AuthorizationAuditLogger.createMessage({
-      result: AuthorizationResult.Authorized,
-      owners,
-      operation,
-    });
-    this.logSuccessEvent({ message, operation, username });
-    return message;
+  public log(auditMsgParams: CreateAuditMsgParams) {
+    this.auditLogger?.log(AuthorizationAuditLogger.createAuditMsg(auditMsgParams));
   }
 }

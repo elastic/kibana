@@ -109,7 +109,6 @@ export class CasesClientFactory {
       attachmentService: new AttachmentService(this.logger),
       logger: this.logger,
       authorization: auth,
-      auditLogger,
       actionsClient: await this.options.actionsPluginStart.getActionsClientWithRequest(request),
     });
   }
