@@ -54,9 +54,13 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
     ]
   );
 
+  /**
+   * If the type of the connector is cases
+   * or there is no rule name or rule id
+   * a warning message is being shown to the user
+   */
   const showMappingWarning =
-    connectorType === SwimlaneConnectorType.Cases ||
-    (!hasRuleName && !hasAlertSource && !hasComments && !hasSeverity);
+    connectorType === SwimlaneConnectorType.Cases || !hasRuleName || !hasAlertId;
 
   const editSubActionProperty = useCallback(
     (key: string, value: any) => {

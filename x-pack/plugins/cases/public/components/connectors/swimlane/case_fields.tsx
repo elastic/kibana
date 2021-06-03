@@ -13,9 +13,15 @@ import { ConnectorTypes, SwimlaneFieldsType, SwimlaneConnectorType } from '../..
 import { ConnectorFieldsProps } from '../types';
 import { ConnectorCard } from '../card';
 
-const casesRequiredFields = ['caseNameConfig', 'descriptionConfig', 'commentsConfig'];
-const isMappingEmpty = (mapping: Record<string, unknown> | undefined) =>
-  !casesRequiredFields.every((field) => mapping != null && mapping[field] != null);
+const casesRequiredFields = [
+  'caseIdConfig',
+  'caseNameConfig',
+  'descriptionConfig',
+  'commentsConfig',
+];
+
+const isAnyRequiredFieldNotSet = (mapping: Record<string, unknown> | undefined) =>
+  !casesRequiredFields.some((field) => mapping != null && mapping[field] != null);
 
 const SwimlaneComponent: React.FunctionComponent<ConnectorFieldsProps<SwimlaneFieldsType>> = ({
   connector,
@@ -25,7 +31,12 @@ const SwimlaneComponent: React.FunctionComponent<ConnectorFieldsProps<SwimlaneFi
     config: { mappings, connectorType },
   } = connector;
   const showMappingWarning = useMemo(
-    () => connectorType !== SwimlaneConnectorType.Cases || isMappingEmpty(mappings),
+    /**
+     * If the type of the connector is not cases
+     * or there any of the required fields is not set
+     * a warning message is being shown to the user
+     */
+    () => connectorType !== SwimlaneConnectorType.Cases || isAnyRequiredFieldNotSet(mappings),
     [mappings, connectorType]
   );
 
