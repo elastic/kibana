@@ -69,8 +69,6 @@ Dashboard::
 * Fixes JSON editor height in Inspector on Safari {kibana-pull}99032[#99032]
 Fleet::
 * Adds missing install button for integrations that aren't installed yet {kibana-pull}100370[#100370]
-Lens & Visualizations::
-* Fixes an issue where upgrading from 7.12.1 to 7.13.0 breaks *TSVB* vizualizations with no timefield defined {kibana-pull}100864[#100864]
 Machine Learning::
 * Fixes field used in remote desktop protocol (RDP) anomaly detection job to event.type {kibana-pull}100000[#100000]
 Management::
