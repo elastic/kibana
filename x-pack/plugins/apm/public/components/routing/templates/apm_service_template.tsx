@@ -66,7 +66,6 @@ export function ApmServiceTemplate({
 }) {
   return (
     <ApmMainTemplate
-      environmentSelector={true}
       pageTitle={
         <>
           <EuiFlexGroup alignItems="center">

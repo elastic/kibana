@@ -21,11 +21,9 @@ import { EnvironmentFilter } from '../../shared/EnvironmentFilter';
  */
 export function ApmMainTemplate({
   pageTitle,
-  environmentSelector = true,
   children,
 }: {
   pageTitle: React.ReactNode;
-  environmentSelector?: boolean;
   children: React.ReactNode;
 }) {
   const { services } = useKibana<ApmPluginStartDeps>();
@@ -36,7 +34,7 @@ export function ApmMainTemplate({
     <ObservabilityPageTemplate
       pageHeader={{
         pageTitle,
-        rightSideItems: environmentSelector ? [<EnvironmentFilter />] : [],
+        rightSideItems: [<EnvironmentFilter />],
       }}
     >
       {children}
