@@ -70,7 +70,7 @@ export interface DashboardState {
 export type RawDashboardState = Omit<DashboardState, 'panels'> & { panels: SavedDashboardPanel[] };
 
 export interface DashboardContainerInput extends ContainerInput {
-  dashboardCapabilities?: DashboardCapabilities;
+  dashboardCapabilities?: DashboardAppCapabilities;
   refreshConfig?: RefreshInterval;
   isEmbeddedExternally?: boolean;
   isFullScreenMode: boolean;
@@ -161,7 +161,7 @@ export interface DashboardSaveOptions {
   isTitleDuplicateConfirmed: boolean;
 }
 
-export interface DashboardCapabilities {
+export interface DashboardAppCapabilities {
   show: boolean;
   createNew: boolean;
   saveQuery: boolean;
@@ -189,7 +189,7 @@ export interface DashboardAppServices {
   indexPatterns: IndexPatternsContract;
   usageCollection?: UsageCollectionSetup;
   navigation: NavigationPublicPluginStart;
-  dashboardCapabilities: DashboardCapabilities;
+  dashboardCapabilities: DashboardAppCapabilities;
   initializerContext: PluginInitializerContext;
   onAppLeave: AppMountParameters['onAppLeave'];
   savedObjectsTagging?: SavedObjectsTaggingApi;

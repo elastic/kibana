@@ -15,7 +15,7 @@ import { setStateToKbnUrl, unhashUrl } from '../../services/kibana_utils';
 import { SharePluginStart } from '../../services/share';
 import { dashboardUrlParams } from '../dashboard_router';
 import { shareModalStrings } from '../../dashboard_strings';
-import { DashboardCapabilities, DashboardState } from '../../types';
+import { DashboardAppCapabilities, DashboardState } from '../../types';
 import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
 
 const showFilterBarId = 'showFilterBar';
@@ -27,13 +27,13 @@ interface ShowShareModalProps {
   anchorElement: HTMLElement;
   savedDashboard: DashboardSavedObject;
   currentDashboardState: DashboardState;
-  dashboardCapabilities: DashboardCapabilities;
+  dashboardCapabilities: DashboardAppCapabilities;
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
   if (!anonymousUserCapabilities.dashboard) return false;
 
-  const dashboard = (anonymousUserCapabilities.dashboard as unknown) as DashboardCapabilities;
+  const dashboard = (anonymousUserCapabilities.dashboard as unknown) as DashboardAppCapabilities;
 
   return !!dashboard.show;
 };

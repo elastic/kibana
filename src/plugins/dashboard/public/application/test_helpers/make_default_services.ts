@@ -11,7 +11,7 @@ import { dataPluginMock } from '../../../../data/public/mocks';
 import { getSavedDashboardMock } from './get_saved_dashboard_mock';
 import { UrlForwardingStart } from '../../../../url_forwarding/public';
 import { NavigationPublicPluginStart } from '../../services/navigation';
-import { DashboardAppServices, DashboardCapabilities } from '../../types';
+import { DashboardAppServices, DashboardAppCapabilities } from '../../types';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
 import { IndexPatternsContract, SavedQueryService } from '../../services/data';
 import { savedObjectsPluginMock } from '../../../../saved_objects/public/mocks';
@@ -57,7 +57,7 @@ export function makeDefaultServices(): DashboardAppServices {
   } as unknown) as DashboardSessionStorage;
   dashboardSessionStorage.clearState = jest.fn();
 
-  const defaultCapabilities: DashboardCapabilities = {
+  const defaultCapabilities: DashboardAppCapabilities = {
     show: true,
     createNew: true,
     saveQuery: true,

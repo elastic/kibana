@@ -41,7 +41,11 @@ export function DashboardEmptyScreen({
 
   const page = (mainText: string, showAdditionalParagraph?: boolean, additionalText?: string) => {
     return (
-      <EuiPage className="dshStartScreen" restrictWidth="500px">
+      <EuiPage
+        data-test-subj={isReadonlyMode ? 'dashboardEmptyReadOnly' : 'dashboardEmptyReadWrite'}
+        className="dshStartScreen"
+        restrictWidth="500px"
+      >
         <EuiPageBody>
           <EuiPageContent
             verticalPosition="center"

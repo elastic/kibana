@@ -36,7 +36,7 @@ import {
   KibanaReactContextValue,
 } from '../../services/kibana_react';
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
-import { DashboardCapabilities, DashboardContainerInput } from '../../types';
+import { DashboardAppCapabilities, DashboardContainerInput } from '../../types';
 import { PresentationUtilPluginStart } from '../../services/presentation_util';
 import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
 
@@ -73,7 +73,7 @@ export interface InheritedChildInput extends IndexSignature {
 export type DashboardReactContextValue = KibanaReactContextValue<DashboardContainerServices>;
 export type DashboardReactContext = KibanaReactContext<DashboardContainerServices>;
 
-const defaultCapabilities: DashboardCapabilities = {
+const defaultCapabilities: DashboardAppCapabilities = {
   show: false,
   createNew: false,
   saveQuery: false,

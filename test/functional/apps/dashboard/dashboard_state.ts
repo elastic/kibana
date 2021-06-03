@@ -309,11 +309,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const newUrl = isNewChartsLibraryEnabled
             ? currentUrl.replace(`'80000':%23FFFFFF`, '')
             : currentUrl.replace(`vis:(colors:('80,000':%23FFFFFF))`, '');
+
           await hardRefresh(newUrl);
           await PageObjects.header.waitUntilLoadingHasFinished();
 
           await retry.try(async () => {
-            const pieSliceStyle = await pieChart.getPieSliceStyle('80,000');
+            const pieSliceStyle = await pieChart.getPieSliceStyle(`80,000`);
 
             // After removing all overrides, pie slice style should match original.
             expect(pieSliceStyle).to.be(originalPieSliceStyle);
