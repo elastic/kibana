@@ -440,7 +440,7 @@
     "tslint-config-prettier": "^1.15.0",
     "tslint-microsoft-contrib": "^6.0.0",
     "tslint-plugin-prettier": "^2.0.0",
-    "typescript": "^3.0.3",
+    "typescript": "^3.9.9",
     "vinyl-fs": "^3.0.2",
     "xml2js": "^0.4.19",
     "xmlbuilder": "9.0.4",

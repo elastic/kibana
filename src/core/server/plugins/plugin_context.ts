@@ -106,7 +106,10 @@ export function createPluginInitializerContext(
  * @param plugin The plugin we're building these values for.
  * @internal
  */
-export function createPluginStartContext<TPluginContract, TPluginDependencies>(
+export function createPluginStartContext<
+  TPluginContract,
+  TPluginDependencies extends Record<string, unknown>
+>(
   coreContext: CoreContext,
   plugin: Plugin<TPluginContract, TPluginDependencies>
 ): PluginStartContext {
