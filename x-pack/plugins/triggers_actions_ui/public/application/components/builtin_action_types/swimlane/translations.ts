@@ -110,7 +110,7 @@ export const SW_MAPPING_TITLE_TEXT_FIELD_LABEL = i18n.translate(
 export const SW_ALERT_SOURCE_FIELD_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.alertSourceFieldLabel',
   {
-    defaultMessage: 'Source',
+    defaultMessage: 'Alert Source',
   }
 );
 

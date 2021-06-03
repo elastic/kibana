@@ -150,6 +150,48 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
           buttonSize="compressed"
         />
       </EuiFormRow>
+      {isValidFieldForConnector(connectorType as SwimlaneConnectorType.All, 'alertIdConfig') && (
+        <>
+          <EuiFormRow
+            id="alertIdConfig"
+            fullWidth
+            label={i18n.SW_ALERT_ID_FIELD_LABEL}
+            error={mappingErrors?.alertIdConfig}
+            isInvalid={mappingErrors?.alertIdConfig != null}
+          >
+            <EuiComboBox
+              fullWidth
+              selectedOptions={state.alertIdConfig}
+              options={textOptions}
+              singleSelection={SINGLE_SELECTION}
+              data-test-subj="swimlaneAlertIdInput"
+              onChange={(e) => editMappings('alertIdConfig', e)}
+              isInvalid={mappingErrors?.alertIdConfig != null}
+            />
+          </EuiFormRow>
+        </>
+      )}
+      {isValidFieldForConnector(connectorType as SwimlaneConnectorType, 'ruleNameConfig') && (
+        <>
+          <EuiFormRow
+            id="ruleNameConfig"
+            fullWidth
+            label={i18n.SW_RULE_NAME_FIELD_LABEL}
+            error={mappingErrors?.ruleNameConfig}
+            isInvalid={mappingErrors?.ruleNameConfig != null}
+          >
+            <EuiComboBox
+              fullWidth
+              selectedOptions={state.ruleNameConfig}
+              options={textOptions}
+              singleSelection={SINGLE_SELECTION}
+              data-test-subj="swimlaneAlertNameInput"
+              onChange={(e) => editMappings('ruleNameConfig', e)}
+              isInvalid={mappingErrors?.ruleNameConfig != null}
+            />
+          </EuiFormRow>
+        </>
+      )}
       {isValidFieldForConnector(
         connectorType as SwimlaneConnectorType.All,
         'alertSourceConfig'
@@ -191,48 +233,6 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
               data-test-subj="swimlaneSeverityInput"
               onChange={(e) => editMappings('severityConfig', e)}
               isInvalid={mappingErrors?.severityConfig != null}
-            />
-          </EuiFormRow>
-        </>
-      )}
-      {isValidFieldForConnector(connectorType as SwimlaneConnectorType, 'ruleNameConfig') && (
-        <>
-          <EuiFormRow
-            id="ruleNameConfig"
-            fullWidth
-            label={i18n.SW_RULE_NAME_FIELD_LABEL}
-            error={mappingErrors?.ruleNameConfig}
-            isInvalid={mappingErrors?.ruleNameConfig != null}
-          >
-            <EuiComboBox
-              fullWidth
-              selectedOptions={state.ruleNameConfig}
-              options={textOptions}
-              singleSelection={SINGLE_SELECTION}
-              data-test-subj="swimlaneAlertNameInput"
-              onChange={(e) => editMappings('ruleNameConfig', e)}
-              isInvalid={mappingErrors?.ruleNameConfig != null}
-            />
-          </EuiFormRow>
-        </>
-      )}
-      {isValidFieldForConnector(connectorType as SwimlaneConnectorType.All, 'alertIdConfig') && (
-        <>
-          <EuiFormRow
-            id="alertIdConfig"
-            fullWidth
-            label={i18n.SW_ALERT_ID_FIELD_LABEL}
-            error={mappingErrors?.alertIdConfig}
-            isInvalid={mappingErrors?.alertIdConfig != null}
-          >
-            <EuiComboBox
-              fullWidth
-              selectedOptions={state.alertIdConfig}
-              options={textOptions}
-              singleSelection={SINGLE_SELECTION}
-              data-test-subj="swimlaneAlertIdInput"
-              onChange={(e) => editMappings('alertIdConfig', e)}
-              isInvalid={mappingErrors?.alertIdConfig != null}
             />
           </EuiFormRow>
         </>
