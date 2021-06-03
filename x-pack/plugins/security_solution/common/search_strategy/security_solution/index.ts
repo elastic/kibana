@@ -66,6 +66,7 @@ import {
   MatrixHistogramStrategyResponse,
 } from './matrix_histogram';
 import { TimerangeInput, SortField, PaginationInput, PaginationInputPaginated } from '../common';
+import { CtiQueries } from './cti';
 
 export * from './hosts';
 export * from './matrix_histogram';
@@ -76,6 +77,7 @@ export type FactoryQueryTypes =
   | HostsKpiQueries
   | NetworkQueries
   | NetworkKpiQueries
+  | CtiQueries
   | typeof MatrixHistogramQuery
   | typeof MatrixHistogramQueryEntities;
 
