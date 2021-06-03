@@ -225,7 +225,7 @@ export const getHeatmapVisualization = ({
     const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
     // When we add a column it could be empty, and therefore have no order
 
-    if (!originalOrder) {
+    if (!originalOrder || !state.valueAccessor) {
       return null;
     }
 
@@ -379,23 +379,6 @@ export const getHeatmapVisualization = ({
         longMessage: i18n.translate('xpack.lens.heatmapVisualization.missingXAccessorLongMessage', {
           defaultMessage: 'Configuration for the horizontal axis is missing.',
         }),
-      });
-    }
-
-    if (!state.valueAccessor) {
-      errors.push({
-        shortMessage: i18n.translate(
-          'xpack.lens.heatmapVisualization.missingValueAccessorShortMessage',
-          {
-            defaultMessage: 'Missing cell value.',
-          }
-        ),
-        longMessage: i18n.translate(
-          'xpack.lens.heatmapVisualization.missingValueAccessorLongMessage',
-          {
-            defaultMessage: 'Configuration for computing cell value is missing.',
-          }
-        ),
       });
     }
 

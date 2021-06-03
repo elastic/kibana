@@ -241,6 +241,7 @@ describe('heatmap', () => {
         ...exampleState(),
         layerId: 'first',
         xAccessor: 'x-accessor',
+        valueAccessor: 'value-accessor',
       };
       const attributes = {
         title: 'Test',
@@ -258,7 +259,7 @@ describe('heatmap', () => {
                 description: [''],
                 xAccessor: ['x-accessor'],
                 yAccessor: [''],
-                valueAccessor: [''],
+                valueAccessor: ['value-accessor'],
                 legend: [
                   {
                     type: 'expression',
@@ -304,6 +305,21 @@ describe('heatmap', () => {
             },
           ],
         }
+      );
+    });
+
+    test('returns null with a missing value accessor', () => {
+      const state: HeatmapVisualizationState = {
+        ...exampleState(),
+        layerId: 'first',
+        xAccessor: 'x-accessor',
+      };
+      const attributes = {
+        title: 'Test',
+      };
+
+      expect(getHeatmapVisualization({}).toExpression(state, datasourceLayers, attributes)).toEqual(
+        null
       );
     });
   });
