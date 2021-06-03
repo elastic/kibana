@@ -361,6 +361,8 @@ export const getDatatableVisualization = ({
                 reverse: false, // managed at UI level
               };
 
+              const HasNoSummaryRow = column.summaryRow == null || column.summaryRow === 'none';
+
               return {
                 type: 'expression',
                 chain: [
@@ -379,14 +381,10 @@ export const getDatatableVisualization = ({
                       alignment: typeof column.alignment === 'undefined' ? [] : [column.alignment],
                       colorMode: [column.colorMode ?? 'none'],
                       palette: [paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams)],
-                      summaryRow:
-                        column.summaryRow == null || column.summaryRow === 'none'
-                          ? []
-                          : [column.summaryRow],
-                      summaryLabel:
-                        column.summaryRow == null || column.summaryRow === 'none'
-                          ? []
-                          : [column.summaryLabel || getDefaultSummaryLabel(column.summaryRow)],
+                      summaryRow: HasNoSummaryRow ? [] : [column.summaryRow!],
+                      summaryLabel: HasNoSummaryRow
+                        ? []
+                        : [column.summaryLabel ?? getDefaultSummaryLabel(column.summaryRow!)],
                     },
                   },
                 ],

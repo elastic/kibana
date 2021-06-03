@@ -43,6 +43,7 @@ import {
 } from './table_actions';
 import { findMinMaxByColumnId } from './shared_utils';
 import { CUSTOM_PALETTE } from '../../shared_components/coloring/constants';
+import { getFinalSummaryConfiguration } from '../summary';
 
 export const DataContext = React.createContext<DataContextType>({});
 
@@ -287,13 +288,19 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   );
 
   const renderSummaryRow = useMemo(() => {
-    const columnsWithSummary = columnConfig.columns.filter(({ summaryRow }) => summaryRow);
+    const columnsWithSummary = columnConfig.columns
+      .map((config) => ({
+        columnId: config.columnId,
+        summaryRowValue: config.summaryRowValue,
+        ...getFinalSummaryConfiguration(config.columnId, config, firstTable),
+      }))
+      .filter(({ summaryRow }) => summaryRow !== 'none');
 
     if (columnsWithSummary.length) {
       const summaryLookup = Object.fromEntries(
         columnsWithSummary.map(({ summaryRowValue, summaryLabel, columnId }) => [
           columnId,
-          `${summaryLabel}: ${summaryRowValue}`,
+          summaryLabel === '' ? `${summaryRowValue}` : `${summaryLabel}: ${summaryRowValue}`,
         ])
       );
       return ({ columnId }: { columnId: string }) => {
@@ -304,7 +311,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         ) : null;
       };
     }
-  }, [columnConfig.columns, alignments]);
+  }, [columnConfig.columns, alignments, firstTable]);
 
   if (isEmpty) {
     return <EmptyPlaceholder icon={LensIconChartDatatable} />;

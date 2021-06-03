@@ -34,7 +34,8 @@ import {
 import { PalettePanelContainer } from './palette_panel_container';
 import { findMinMaxByColumnId } from './shared_utils';
 import './dimension_editor.scss';
-import { getDefaultSummaryLabel, getSummaryRowOptions } from '../summary';
+import { getFinalSummaryConfiguration, getSummaryRowOptions } from '../summary';
+import { isNumericField } from '../utils';
 
 const idPrefix = htmlIdGenerator()();
 
@@ -72,14 +73,15 @@ export function TableDimensionEditor(
     },
     [accessor, setState, state]
   );
-  const {
-    inputValue: summaryLabel,
-    handleInputChange: onSummaryLabelChange,
-    initialValue,
-  } = useDebouncedValue<string | undefined>({
-    onChange: onSummaryLabelChangeToDebounce,
-    value: column?.summaryLabel,
-  });
+  const { inputValue: summaryLabel, handleInputChange: onSummaryLabelChange } = useDebouncedValue<
+    string | undefined
+  >(
+    {
+      onChange: onSummaryLabelChangeToDebounce,
+      value: column?.summaryLabel,
+    },
+    { allowEmptyString: true } // empty string is a valid label for this feature
+  );
 
   if (!column) return null;
   if (column.isTransposed) return null;
@@ -87,22 +89,16 @@ export function TableDimensionEditor(
   const currentData = frame.activeData?.[state.layerId];
 
   // either read config state or use same logic as chart itself
-  const isNumericField =
-    currentData?.columns.find((col) => col.id === accessor || getOriginalId(col.id) === accessor)
-      ?.meta.type === 'number';
-
-  // check for array values
-  const hasFieldNumericValues =
-    isNumericField &&
-    currentData?.rows.every(({ [accessor]: value }) => typeof value === 'number' || value == null);
-
-  const currentAlignment = column?.alignment || (isNumericField ? 'right' : 'left');
+  const { isNumeric, hasAllNumericValues } = isNumericField(currentData, accessor);
+  const currentAlignment = column?.alignment || (isNumeric ? 'right' : 'left');
   const currentColorMode = column?.colorMode || 'none';
   const hasDynamicColoring = currentColorMode !== 'none';
-  const summaryRowOptions = getSummaryRowOptions();
   // when switching from one operation to another, make sure to keep the configuration consistent
-  const summaryRowType = column?.summaryRow || 'none';
-  const fallbackSummaryLabel = getDefaultSummaryLabel(summaryRowType);
+  const { summaryRow, summaryLabel: fallbackSummaryLabel } = getFinalSummaryConfiguration(
+    accessor,
+    column,
+    currentData
+  );
 
   const visibleColumnsCount = state.columns.filter((c) => !c.hidden).length;
 
@@ -206,7 +202,7 @@ export function TableDimensionEditor(
           />
         </EuiFormRow>
       )}
-      {hasFieldNumericValues && (
+      {hasAllNumericValues && (
         <>
           <EuiFormRow
             fullWidth
@@ -217,8 +213,8 @@ export function TableDimensionEditor(
           >
             <EuiSuperSelect<SummaryRowType>
               data-test-subj="lnsDatatable_summaryrow_function"
-              valueOfSelected={summaryRowType}
-              options={summaryRowOptions}
+              valueOfSelected={summaryRow}
+              options={getSummaryRowOptions()}
               compressed
               onChange={(newValue) => {
                 setState({
@@ -228,7 +224,7 @@ export function TableDimensionEditor(
               }}
             />
           </EuiFormRow>
-          {summaryRowType !== 'none' && (
+          {summaryRow !== 'none' && (
             <EuiFormRow
               display="columnCompressed"
               fullWidth
@@ -239,17 +235,16 @@ export function TableDimensionEditor(
               <EuiFieldText
                 compressed
                 data-test-subj="lnsDatatable_summaryrow_label"
-                value={summaryLabel || fallbackSummaryLabel}
+                value={summaryLabel ?? fallbackSummaryLabel}
                 onChange={(e) => {
                   onSummaryLabelChange(e.target.value);
                 }}
-                placeholder={initialValue || fallbackSummaryLabel}
               />
             </EuiFormRow>
           )}
         </>
       )}
-      {isNumericField && (
+      {isNumeric && (
         <>
           <EuiFormRow
             display="columnCompressed"

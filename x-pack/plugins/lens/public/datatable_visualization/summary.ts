@@ -10,8 +10,25 @@ import { FieldFormat } from 'src/plugins/data/public';
 import { Datatable } from 'src/plugins/expressions/public';
 import { ColumnConfigArg } from './datatable_visualization';
 import { getOriginalId } from './transpose_helpers';
+import { isNumericField } from './utils';
 
 type SummaryRowType = Extract<ColumnConfigArg['summaryRow'], string>;
+
+export function getFinalSummaryConfiguration(
+  columnId: string,
+  columnArgs: Pick<ColumnConfigArg, 'summaryRow' | 'summaryLabel'> | undefined,
+  table: Datatable | undefined
+) {
+  const { hasAllNumericValues } = isNumericField(table, columnId);
+
+  const summaryRow = hasAllNumericValues ? columnArgs?.summaryRow || 'none' : 'none';
+  const summaryLabel = columnArgs?.summaryLabel ?? getDefaultSummaryLabel(summaryRow);
+
+  return {
+    summaryRow,
+    summaryLabel,
+  };
+}
 
 export function getDefaultSummaryLabel(type: SummaryRowType) {
   return getSummaryRowOptions().find(({ value }) => type === value)!.inputDisplay!;
@@ -28,7 +45,7 @@ export function getSummaryRowOptions(): Array<{ value: SummaryRowType; inputDisp
     {
       value: 'count',
       inputDisplay: i18n.translate('xpack.lens.table.summaryRow.count', {
-        defaultMessage: 'Count',
+        defaultMessage: 'Value count',
       }),
     },
     {
