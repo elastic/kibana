@@ -7,6 +7,7 @@
 
 import { HttpStart } from 'kibana/public';
 import {
+  EndpointAction,
   HostInfo,
   HostIsolationRequestBody,
   HostIsolationResponse,
@@ -18,6 +19,7 @@ import { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../
 import {
   isOnEndpointPage,
   hasSelectedEndpoint,
+  selectedAgent,
   uiQueryParams,
   listData,
   endpointPackageInfo,
@@ -27,6 +29,7 @@ import {
   isTransformEnabled,
   getIsIsolationRequestPending,
   getCurrentIsolationRequestState,
+  getActivityLogData,
 } from './selectors';
 import { EndpointState, PolicyIds } from '../types';
 import {
@@ -37,12 +40,13 @@ import {
 } from '../../policy/store/services/ingest';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../fleet/common';
 import {
+  ENDPOINT_ACTION_LOG_ROUTE,
   HOST_METADATA_GET_API,
   HOST_METADATA_LIST_API,
   metadataCurrentIndexPattern,
 } from '../../../../../common/endpoint/constants';
 import { IIndexPattern, Query } from '../../../../../../../../src/plugins/data/public';
-import { resolvePathVariables } from '../../trusted_apps/service/utils';
+import { resolvePathVariables } from '../../../common/utils';
 import {
   createFailedResourceState,
   createLoadedResourceState,
@@ -333,6 +337,29 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
         dispatch({
           type: 'serverFailedToReturnEndpointDetails',
           payload: error,
+        });
+      }
+
+      // call the activity log api
+      dispatch({
+        type: 'endpointDetailsActivityLogChanged',
+        // ts error to be fixed when AsyncResourceState is refactored (#830)
+        // @ts-expect-error
+        payload: createLoadingResourceState<EndpointAction[]>(getActivityLogData(getState())),
+      });
+
+      try {
+        const activityLog = await coreStart.http.get<EndpointAction[]>(
+          resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, { agent_id: selectedAgent(getState()) })
+        );
+        dispatch({
+          type: 'endpointDetailsActivityLogChanged',
+          payload: createLoadedResourceState<EndpointAction[]>(activityLog),
+        });
+      } catch (error) {
+        dispatch({
+          type: 'endpointDetailsActivityLogChanged',
+          payload: createFailedResourceState<EndpointAction[]>(error.body ?? error),
         });
       }
 

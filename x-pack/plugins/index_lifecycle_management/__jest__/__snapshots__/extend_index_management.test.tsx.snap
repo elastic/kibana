@@ -289,12 +289,14 @@ exports[`extend index management ilm summary extension should return extension w
         <EuiIcon
           aria-hidden="true"
           className="euiCallOutHeader__icon"
+          color="inherit"
           size="m"
           type="cross"
         >
           <span
             aria-hidden="true"
             className="euiCallOutHeader__icon"
+            color="inherit"
             data-euiicon-type="cross"
             size="m"
           />
@@ -367,6 +369,7 @@ exports[`extend index management ilm summary extension should return extension w
                     <EuiButtonContent
                       className="euiButtonEmpty__content"
                       iconSide="left"
+                      iconSize="m"
                       textProps={
                         Object {
                           "className": "euiButtonEmpty__text",

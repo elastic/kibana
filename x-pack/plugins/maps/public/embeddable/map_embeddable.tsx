@@ -461,7 +461,6 @@ export class MapEmbeddable
     this._prevMapExtent = mapExtent;
 
     const mapExtentFilter = createExtentFilter(mapExtent, geoFieldNames);
-    mapExtentFilter.meta.isMultiIndex = true;
     mapExtentFilter.meta.controlledBy = this._controlledBy;
     mapExtentFilter.meta.alias = i18n.translate('xpack.maps.embeddable.boundsFilterLabel', {
       defaultMessage: 'Map bounds at center: {lat}, {lon}, zoom: {zoom}',
