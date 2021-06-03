@@ -11,16 +11,16 @@ import React, { PureComponent, Fragment } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
+  EuiSplitPanel,
   EuiLink,
-  EuiPanel,
+  EuiCallOut,
   EuiSpacer,
-  EuiText,
   EuiTextColor,
   EuiBottomBar,
   EuiButton,
   EuiToolTip,
   EuiButtonEmpty,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isEmpty } from 'lodash';
@@ -47,6 +47,7 @@ interface FormProps {
   dockLinks: DocLinksStart['links'];
   toasts: ToastsStart;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
+  queryText: string;
 }
 
 interface FormState {
@@ -241,17 +242,18 @@ export class Form extends PureComponent<FormProps> {
   renderCategory(category: Category, settings: FieldSetting[], totalSettings: number) {
     return (
       <Fragment key={category}>
-        <EuiPanel paddingSize="l">
-          <EuiForm>
-            <EuiText>
-              <EuiFlexGroup alignItems="baseline">
-                <EuiFlexItem grow={false}>
+        <EuiSplitPanel.Outer hasBorder>
+          <EuiSplitPanel.Inner color="subdued">
+            <EuiFlexGroup alignItems="baseline">
+              <EuiFlexItem grow={false}>
+                <EuiTitle>
                   <h2>{getCategoryName(category)}</h2>
-                </EuiFlexItem>
-                {this.renderClearQueryLink(totalSettings, settings.length)}
-              </EuiFlexGroup>
-            </EuiText>
-            <EuiSpacer size="m" />
+                </EuiTitle>
+              </EuiFlexItem>
+              {this.renderClearQueryLink(totalSettings, settings.length)}
+            </EuiFlexGroup>
+          </EuiSplitPanel.Inner>
+          <EuiSplitPanel.Inner>
             {settings.map((setting) => {
               return (
                 <Field
@@ -266,8 +268,8 @@ export class Form extends PureComponent<FormProps> {
                 />
               );
             })}
-          </EuiForm>
-        </EuiPanel>
+          </EuiSplitPanel.Inner>
+        </EuiSplitPanel.Outer>
         <EuiSpacer size="l" />
       </Fragment>
     );
@@ -276,22 +278,28 @@ export class Form extends PureComponent<FormProps> {
   maybeRenderNoSettings(clearQuery: FormProps['clearQuery']) {
     if (this.props.showNoResultsMessage) {
       return (
-        <EuiPanel paddingSize="l">
-          <FormattedMessage
-            id="advancedSettings.form.noSearchResultText"
-            defaultMessage="No settings found {clearSearch}"
-            values={{
-              clearSearch: (
-                <EuiLink onClick={clearQuery}>
-                  <FormattedMessage
-                    id="advancedSettings.form.clearNoSearchResultText"
-                    defaultMessage="(clear search)"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiPanel>
+        <EuiCallOut
+          color="danger"
+          title={
+            <>
+              <FormattedMessage
+                id="advancedSettings.form.noSearchResultText"
+                defaultMessage="No settings found for {queryText} {clearSearch}"
+                values={{
+                  clearSearch: (
+                    <EuiLink onClick={clearQuery}>
+                      <FormattedMessage
+                        id="advancedSettings.form.clearNoSearchResultText"
+                        defaultMessage="(clear search)"
+                      />
+                    </EuiLink>
+                  ),
+                  queryText: <strong>{this.props.queryText}</strong>,
+                }}
+              />
+            </>
+          }
+        />
       );
     }
     return null;
