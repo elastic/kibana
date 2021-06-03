@@ -49,8 +49,8 @@ describe('Summary row helpers', () => {
       expect(
         getFinalSummaryConfiguration('myColumn', { summaryRow: 'sum' }, mockNumericTableWithArray)
       ).toEqual({
-        summaryRow: 'none',
-        summaryLabel: 'None',
+        summaryRow: 'sum',
+        summaryLabel: 'Sum',
       });
     });
 
@@ -101,6 +101,18 @@ describe('Summary row helpers', () => {
           }
         )
       ).toBe(1);
+    });
+
+    it('should count numeric arrays as valid and distinct values', () => {
+      expect(
+        computeSummaryRowForColumn(
+          { summaryRow: 'count', columnId: 'myColumn', type: 'lens_datatable_column' },
+          mockNumericTableWithArray,
+          {
+            myColumn: { convert: (x) => x } as IFieldFormat,
+          }
+        )
+      ).toBe(2);
     });
   });
 });

@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { Ast } from '@kbn/interpreter/common';
-import { I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { DatatableColumn } from 'src/plugins/expressions/public';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
@@ -444,6 +444,38 @@ export const getDatatableVisualization = ({
       default:
         return state;
     }
+  },
+  getWarningMessages(state, frame) {
+    if (state?.columns.length === 0 || !frame.activeData) {
+      return;
+    }
+
+    const metricColumnsWithArrayValues = [];
+
+    for (const { columnId, summaryRow } of state.columns) {
+      const rows = frame.activeData[state.layerId] && frame.activeData[state.layerId].rows;
+      if (!rows || summaryRow == null || summaryRow === 'none') {
+        continue;
+      }
+      const columnToLabel = frame.datasourceLayers[state.layerId].getOperationForColumnId(columnId)
+        ?.label;
+
+      const hasArrayValues = rows.some((row) => Array.isArray(row[columnId]));
+      if (hasArrayValues) {
+        metricColumnsWithArrayValues.push(columnToLabel || columnId);
+      }
+    }
+    return metricColumnsWithArrayValues.map((label) => (
+      <FormattedMessage
+        key={label}
+        id="xpack.lens.pie.arrayValues"
+        defaultMessage="{label} contains array values. Your visualization may not render as
+              expected."
+        values={{
+          label: <strong>{label}</strong>,
+        }}
+      />
+    ));
   },
 });
 

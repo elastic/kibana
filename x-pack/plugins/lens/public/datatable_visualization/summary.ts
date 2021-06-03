@@ -19,9 +19,9 @@ export function getFinalSummaryConfiguration(
   columnArgs: Pick<ColumnConfigArg, 'summaryRow' | 'summaryLabel'> | undefined,
   table: Datatable | undefined
 ) {
-  const { hasAllNumericValues } = isNumericField(table, columnId);
+  const { hasNumericValues } = isNumericField(table, columnId);
 
-  const summaryRow = hasAllNumericValues ? columnArgs?.summaryRow || 'none' : 'none';
+  const summaryRow = hasNumericValues ? columnArgs?.summaryRow || 'none' : 'none';
   const summaryLabel = columnArgs?.summaryLabel ?? getDefaultSummaryLabel(summaryRow);
 
   return {
@@ -93,9 +93,12 @@ function computeFinalValue(
   columnId: string,
   rows: Datatable['rows']
 ) {
-  const validRows = rows.filter((v) => v[columnId] != null);
+  // flatten the row structure, to easier handle numeric arrays
+  const validRows = rows.filter((v) => v[columnId] != null).flatMap((v) => v[columnId]);
   const count = validRows.length;
-  const sum = validRows.reduce<number>((partialSum, v) => partialSum + (v[columnId] as number), 0);
+  const sum = validRows.reduce<number>((partialSum: number, value: number) => {
+    return partialSum + value;
+  }, 0);
   switch (type) {
     case 'sum':
       return sum;
@@ -104,9 +107,9 @@ function computeFinalValue(
     case 'avg':
       return sum / count;
     case 'min':
-      return Math.min(...validRows.map((v) => v[columnId]));
+      return Math.min(...validRows);
     case 'max':
-      return Math.max(...validRows.map((v) => v[columnId]));
+      return Math.max(...validRows);
     default:
       throw Error('No summary function found');
   }
