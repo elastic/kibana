@@ -6,12 +6,16 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
 >
   <div
     className="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
+    onMouseDown={[Function]}
+    onMouseUp={[Function]}
+    onTouchEnd={[Function]}
+    onTouchStart={[Function]}
     role="dialog"
-    tabIndex={0}
+    tabIndex={-1}
   >
     <button
       aria-label="Closes keyboard shortcuts reference"
-      className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton"
+      className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton euiFlyout__closeButton--inside"
       data-test-subj="euiFlyoutCloseButton"
       disabled={false}
       onClick={[Function]}
@@ -39,6 +43,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
     >
       <div
         className="euiFlyoutBody__overflow"
+        tabIndex={0}
       >
         <div
           className="euiFlyoutBody__overflowContent"

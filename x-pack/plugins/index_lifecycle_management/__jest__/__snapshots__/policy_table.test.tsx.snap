@@ -46,7 +46,7 @@ Array [
 `;
 
 exports[`policy table should show empty state when there are not any policies 1`] = `
-<main
+<div
   class="euiPageBody euiPageBody--borderRadiusNone"
 >
   <div
@@ -110,7 +110,7 @@ exports[`policy table should show empty state when there are not any policies 1`
       </button>
     </div>
   </div>
-</main>
+</div>
 `;
 
 exports[`policy table should sort when linked indices header is clicked 1`] = `

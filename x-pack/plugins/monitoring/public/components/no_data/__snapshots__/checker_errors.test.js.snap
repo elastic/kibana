@@ -22,33 +22,37 @@ Array [
     <div
       class="euiText euiText--small"
     >
-      <p>
-        There were some errors encountered in trying to check Elasticsearch settings. You need administrator rights to check the settings and, if needed, to enable the monitoring collection setting.
-      </p>
-      <dl
-        class="euiDescriptionList euiDescriptionList--row"
+      <div
+        class="euiTextColor euiTextColor--default"
       >
-        <dt
-          class="euiDescriptionList__title"
+        <p>
+          There were some errors encountered in trying to check Elasticsearch settings. You need administrator rights to check the settings and, if needed, to enable the monitoring collection setting.
+        </p>
+        <dl
+          class="euiDescriptionList euiDescriptionList--row"
         >
-          403 Forbidden
-        </dt>
-        <dd
-          class="euiDescriptionList__description"
-        >
-          no access for you
-        </dd>
-        <dt
-          class="euiDescriptionList__title"
-        >
-          500 Internal Server Error
-        </dt>
-        <dd
-          class="euiDescriptionList__description"
-        >
-          An internal server error occurred
-        </dd>
-      </dl>
+          <dt
+            class="euiDescriptionList__title"
+          >
+            403 Forbidden
+          </dt>
+          <dd
+            class="euiDescriptionList__description"
+          >
+            no access for you
+          </dd>
+          <dt
+            class="euiDescriptionList__title"
+          >
+            500 Internal Server Error
+          </dt>
+          <dd
+            class="euiDescriptionList__description"
+          >
+            An internal server error occurred
+          </dd>
+        </dl>
+      </div>
     </div>
   </div>,
 ]
