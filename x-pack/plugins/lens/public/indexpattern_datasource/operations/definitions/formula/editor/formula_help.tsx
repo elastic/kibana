@@ -224,6 +224,7 @@ function FormulaHelp({
             className="lnsFormula__docsSidebarInner"
             direction="column"
             gutterSize="none"
+            responsive={false}
           >
             <EuiFlexItem className="lnsFormula__docsSearch" grow={false}>
               <EuiFieldSearch
