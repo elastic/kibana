@@ -15,7 +15,6 @@ import {
   PolicyData,
   MetadataQueryStrategyVersions,
   HostStatus,
-  EndpointAction,
   HostIsolationResponse,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
