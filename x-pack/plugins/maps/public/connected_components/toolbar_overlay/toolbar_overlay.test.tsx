@@ -23,30 +23,24 @@ test('Should only show set view control', async () => {
   const component = shallow(
     <ToolbarOverlay
       geoFields={[]}
-      showFitToBoundsButton={false}
-      showTimesliderButton={false}
       showEditButton={false}
       shapeDrawModeActive={false}
       pointDrawModeActive={false}
+      showFitToBoundsButton={false}
+      showTimesliderButton={false}
     />
   );
   expect(component).toMatchSnapshot();
 });
 
 test('Should show all controls', async () => {
-  const geoFieldWithIndex = {
-    geoFieldName: 'myGeoFieldName',
-    geoFieldType: 'geo_point',
-    indexPatternTitle: 'myIndex',
-    indexPatternId: '1',
-  };
   const component = shallow(
     <ToolbarOverlay
+      geoFields={[]}
+      showEditButton={false}
       addFilters={async (filters: Filter[], actionId: string) => {}}
-      geoFields={[geoFieldWithIndex]}
       showFitToBoundsButton={true}
       showTimesliderButton={true}
-      showEditButton={false}
       shapeDrawModeActive={false}
       pointDrawModeActive={false}
     />

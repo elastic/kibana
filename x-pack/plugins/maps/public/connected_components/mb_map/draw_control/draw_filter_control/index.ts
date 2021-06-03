@@ -10,15 +10,16 @@ import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { DrawFilterControl } from './draw_filter_control';
 import { setDrawMode, updateDrawState } from '../../../../actions';
-import { getDrawState } from '../../../../selectors/map_selectors';
+import { getDrawState, getGeoFieldNames } from '../../../../selectors/map_selectors';
+import { DRAW_MODE } from '../../../../../common';
 import { MapStoreState } from '../../../../reducers/store';
 import { getDrawMode } from '../../../../selectors/ui_selectors';
-import { DRAW_MODE } from '../../../../../common';
 
 function mapStateToProps(state: MapStoreState) {
   return {
     drawState: getDrawState(state),
     filterModeActive: getDrawMode(state) === DRAW_MODE.DRAW_FILTERS,
+    geoFieldNames: getGeoFieldNames(state),
   };
 }
 

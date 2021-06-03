@@ -21,7 +21,6 @@ import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { DRAW_TYPE, ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../../../../common/constants';
 import { GeometryFilterForm } from '../../../components/draw_forms/geometry_filter_form/geometry_filter_form';
 import { DistanceFilterForm } from '../../../components/draw_forms/distance_filter_form';
-import { GeoFieldWithIndex } from '../../../components/geo_field_with_index';
 // @ts-expect-error
 import { IndexGeometrySelectPopoverForm } from '../../../components/draw_forms/index_geometry_select_popover_form';
 import { DrawState } from '../../../../common/descriptor_types';
@@ -55,8 +54,8 @@ const DRAW_DISTANCE_LABEL_SHORT = i18n.translate(
 
 export interface Props {
   cancelDraw: () => void;
-  geoFields: GeoFieldWithIndex[];
   filterModeActive: boolean;
+  initiateDraw: (drawState: DrawState) => void;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
   activateDrawFilterMode: (drawState: DrawState) => void;
@@ -118,8 +117,6 @@ export class ToolsControl extends Component<Props, State> {
   _initiateDistanceDraw = (options: {
     actionId: string;
     filterLabel: string;
-    indexPatternId: string;
-    geoFieldName: string;
   }) => {
     this.props.activateDrawFilterMode({
       drawType: DRAW_TYPE.DISTANCE,
@@ -159,7 +156,6 @@ export class ToolsControl extends Component<Props, State> {
           <GeometryFilterForm
             className="mapDrawControl__geometryFilterForm"
             buttonLabel={DRAW_SHAPE_LABEL_SHORT}
-            geoFields={this.props.geoFields}
             getFilterActions={this.props.getFilterActions}
             getActionContext={this.props.getActionContext}
             intitialGeometryLabel={i18n.translate(
@@ -179,7 +175,6 @@ export class ToolsControl extends Component<Props, State> {
           <GeometryFilterForm
             className="mapDrawControl__geometryFilterForm"
             buttonLabel={DRAW_BOUNDS_LABEL_SHORT}
-            geoFields={this.props.geoFields}
             getFilterActions={this.props.getFilterActions}
             getActionContext={this.props.getActionContext}
             intitialGeometryLabel={i18n.translate(
@@ -199,7 +194,6 @@ export class ToolsControl extends Component<Props, State> {
           <DistanceFilterForm
             className="mapDrawControl__geometryFilterForm"
             buttonLabel={DRAW_DISTANCE_LABEL_SHORT}
-            geoFields={this.props.geoFields}
             getFilterActions={this.props.getFilterActions}
             getActionContext={this.props.getActionContext}
             onSubmit={this._initiateDistanceDraw}

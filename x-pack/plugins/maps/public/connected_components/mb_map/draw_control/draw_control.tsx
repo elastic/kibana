@@ -43,8 +43,6 @@ export interface Props {
   mbMap: MbMap;
   drawActive: boolean;
   setShapeToDraw: (shapeToDraw: DRAW_TYPE) => void;
-  indexPatternId: string | undefined;
-  geoField: string | undefined;
 }
 
 export class DrawControl extends Component<Props> {
@@ -149,13 +147,6 @@ export class DrawControl extends Component<Props> {
       return null;
     }
 
-    return (
-      <DrawTooltip
-        mbMap={this.props.mbMap}
-        drawType={this.props.drawType}
-        indexPatternId={this.props.indexPatternId}
-        geoField={this.props.geoField}
-      />
-    );
+    return <DrawTooltip mbMap={this.props.mbMap} drawType={this.props.drawType} />;
   }
 }

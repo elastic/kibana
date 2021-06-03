@@ -41,7 +41,6 @@ import {
   // @ts-expect-error
 } from './utils';
 import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
-import { GeoFieldWithIndex } from '../../components/geo_field_with_index';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { MapExtentState } from '../../actions';
 import { TileStatusTracker } from './tile_status_tracker';
@@ -67,7 +66,6 @@ export interface Props {
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
   onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
-  geoFields: GeoFieldWithIndex[];
   renderTooltipContent?: RenderToolTipContent;
   setAreTilesLoaded: (layerId: string, areTilesLoaded: boolean) => void;
   featureModeActive: boolean;
@@ -438,7 +436,6 @@ export class MBMap extends Component<Props, State> {
           getFilterActions={this.props.getFilterActions}
           getActionContext={this.props.getActionContext}
           onSingleValueTrigger={this.props.onSingleValueTrigger}
-          geoFields={this.props.geoFields}
           renderTooltipContent={this.props.renderTooltipContent}
         />
       ) : null;

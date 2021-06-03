@@ -17,8 +17,6 @@ const noop = () => {};
 interface Props {
   mbMap: MbMap;
   drawType: DRAW_TYPE;
-  indexPatternId: string | undefined;
-  geoField: string | undefined;
 }
 
 interface State {

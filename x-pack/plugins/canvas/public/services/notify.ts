@@ -12,7 +12,8 @@ import { ToastInputFields } from '../../../../../src/core/public';
 
 const getToast = (err: Error | string, opts: ToastInputFields = {}) => {
   const errData = (get(err, 'response') || err) as Error | string;
-  const errMsg = formatMsg(errData);
+  const errBody = get(err, 'body', undefined);
+  const errMsg = formatMsg(errBody !== undefined ? err : errData);
   const { title, ...rest } = opts;
   let text;
 
