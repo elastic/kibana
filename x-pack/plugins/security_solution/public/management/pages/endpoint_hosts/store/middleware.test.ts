@@ -18,6 +18,7 @@ import {
   Immutable,
   HostResultList,
   HostIsolationResponse,
+  EndpointAction,
   ISOLATION_ACTIONS,
 } from '../../../../../common/endpoint/types';
 import { AppAction } from '../../../../common/store/actions';
@@ -26,8 +27,9 @@ import { listData } from './selectors';
 import { EndpointState } from '../types';
 import { endpointListReducer } from './reducer';
 import { endpointMiddlewareFactory } from './middleware';
-import { getEndpointListPath } from '../../../common/routing';
+import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/routing';
 import {
+  createLoadedResourceState,
   FailedResourceState,
   isFailedResourceState,
   isLoadedResourceState,
@@ -40,6 +42,7 @@ import {
   hostIsolationRequestBodyMock,
   hostIsolationResponseMock,
 } from '../../../../common/lib/host_isolation/mocks';
+import { FleetActionGenerator } from '../../../../../common/endpoint/data_generators/fleet_action_generator';
 
 jest.mock('../../policy/store/services/ingest', () => ({
   sendGetAgentConfigList: () => Promise.resolve({ items: [] }),
@@ -211,6 +214,67 @@ describe('endpoint list middleware', () => {
       const failedAction = (await failedDispatched)
         .payload as FailedResourceState<HostIsolationResponse>;
       expect(failedAction.error).toBe(apiError);
+    });
+  });
+
+  describe('handle ActivityLog State Change actions', () => {
+    const endpointList = getEndpointListApiResponse();
+    const search = getEndpointDetailsPath({
+      name: 'endpointDetails',
+      selected_endpoint: endpointList.hosts[0].metadata.agent.id,
+    });
+    const dispatchUserChangedUrl = () => {
+      dispatch({
+        type: 'userChangedUrl',
+        payload: {
+          ...history.location,
+          pathname: '/endpoints',
+          search: `?${search.split('?').pop()}`,
+        },
+      });
+    };
+    const fleetActionGenerator = new FleetActionGenerator(Math.random().toString());
+    const activityLog = [
+      fleetActionGenerator.generate({
+        agents: [endpointList.hosts[0].metadata.agent.id],
+      }),
+    ];
+    const dispatchGetActivityLog = () => {
+      dispatch({
+        type: 'endpointDetailsActivityLogChanged',
+        payload: createLoadedResourceState(activityLog),
+      });
+    };
+
+    it('should set ActivityLog state to loading', async () => {
+      dispatchUserChangedUrl();
+
+      const loadingDispatched = waitForAction('endpointDetailsActivityLogChanged', {
+        validate(action) {
+          return isLoadingResourceState(action.payload);
+        },
+      });
+
+      const loadingDispatchedResponse = await loadingDispatched;
+      expect(loadingDispatchedResponse.payload.type).toEqual('LoadingResourceState');
+    });
+
+    it('should set ActivityLog state to loaded when fetching activity log is successful', async () => {
+      dispatchUserChangedUrl();
+
+      const loadedDispatched = waitForAction('endpointDetailsActivityLogChanged', {
+        validate(action) {
+          return isLoadedResourceState(action.payload);
+        },
+      });
+
+      dispatchGetActivityLog();
+      const loadedDispatchedResponse = await loadedDispatched;
+      const activityLogData = (loadedDispatchedResponse.payload as LoadedResourceState<
+        EndpointAction[]
+      >).data;
+
+      expect(activityLogData).toEqual(activityLog);
     });
   });
 });

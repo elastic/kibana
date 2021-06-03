@@ -46,11 +46,16 @@ export const listLoading = (state: Immutable<EndpointState>): boolean => state.l
 
 export const listError = (state: Immutable<EndpointState>) => state.error;
 
-export const detailsData = (state: Immutable<EndpointState>) => state.details;
+export const detailsData = (state: Immutable<EndpointState>) =>
+  state.endpointDetails.hostDetails.details;
 
-export const detailsLoading = (state: Immutable<EndpointState>): boolean => state.detailsLoading;
+export const detailsLoading = (state: Immutable<EndpointState>): boolean =>
+  state.endpointDetails.hostDetails.detailsLoading;
 
-export const detailsError = (state: Immutable<EndpointState>) => state.detailsError;
+export const detailsError = (
+  state: Immutable<EndpointState>
+): EndpointState['endpointDetails']['hostDetails']['detailsError'] =>
+  state.endpointDetails.hostDetails.detailsError;
 
 export const policyItems = (state: Immutable<EndpointState>) => state.policyItems;
 
@@ -205,6 +210,7 @@ export const uiQueryParams: (
         'details',
         'isolate',
         'unisolate',
+        'activity_log',
       ];
 
       for (const key of keys) {
@@ -247,6 +253,19 @@ export const showView: (
 ) => EndpointIndexUIQueryParams['show'] = createSelector(uiQueryParams, (searchParams) => {
   return searchParams.show ?? 'details';
 });
+
+/**
+ * Returns the selected endpoint's elastic agent Id
+ * used for fetching endpoint actions log
+ */
+export const selectedAgent = (state: Immutable<EndpointState>): string => {
+  const hostList = state.hosts;
+  const { selected_endpoint: selectedEndpoint } = uiQueryParams(state);
+  return (
+    hostList.find((host) => host.metadata.agent.id === selectedEndpoint)?.metadata.elastic.agent
+      .id || ''
+  );
+};
 
 /**
  * Returns the Host Status which is connected the fleet agent
@@ -337,6 +356,30 @@ export const getIsolationRequestError: (
 ) => ServerApiError | undefined = createSelector(getCurrentIsolationRequestState, (isolateHost) => {
   if (isFailedResourceState(isolateHost)) {
     return isolateHost.error;
+  }
+});
+
+export const getActivityLogData = (
+  state: Immutable<EndpointState>
+): Immutable<EndpointState['endpointDetails']['activityLog']> => state.endpointDetails.activityLog;
+
+export const getActivityLogRequestLoading: (
+  state: Immutable<EndpointState>
+) => boolean = createSelector(getActivityLogData, (activityLog) =>
+  isLoadingResourceState(activityLog)
+);
+
+export const getActivityLogRequestLoaded: (
+  state: Immutable<EndpointState>
+) => boolean = createSelector(getActivityLogData, (activityLog) =>
+  isLoadedResourceState(activityLog)
+);
+
+export const getActivityLogError: (
+  state: Immutable<EndpointState>
+) => ServerApiError | undefined = createSelector(getActivityLogData, (activityLog) => {
+  if (isFailedResourceState(activityLog)) {
+    return activityLog.error;
   }
 });
 

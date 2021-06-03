@@ -9,10 +9,10 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { EngineLogic } from '../engine';
+import { QueryTesterButton } from '../query_tester';
 
 export const KibanaHeaderActions: React.FC = () => {
   const { engineName } = useValues(EngineLogic);
@@ -21,11 +21,7 @@ export const KibanaHeaderActions: React.FC = () => {
     <EuiFlexGroup gutterSize="s">
       {engineName && (
         <EuiFlexItem>
-          <EuiButtonEmpty iconType="beaker" size="s">
-            {i18n.translate('xpack.enterpriseSearch.appSearch.engine.queryTesterButtonLabel', {
-              defaultMessage: 'Query tester',
-            })}
-          </EuiButtonEmpty>
+          <QueryTesterButton />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
