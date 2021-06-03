@@ -373,6 +373,19 @@ export const TimeseriesConfig = injectI18n(function (props) {
             />
           </EuiFormRow>
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
+            label={i18n.translate('visTypeTimeseries.timeSeries.ignoreFieldFormatting', {
+              defaultMessage: 'Ignore global formatting?',
+            })}
+          >
+            <YesNo
+              value={model.ignore_field_formatting}
+              name="ignore_field_formatting"
+              onChange={props.onChange}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiHorizontalRule margin="s" />

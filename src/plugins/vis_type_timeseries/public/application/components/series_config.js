@@ -37,7 +37,22 @@ export const SeriesConfig = (props) => {
 
   return (
     <div className="tvbAggRow">
-      <DataFormatPicker onChange={handleSelectChange('formatter')} value={model.formatter} />
+      <EuiFlexGroup gutterSize="s">
+        <DataFormatPicker onChange={handleSelectChange('formatter')} value={model.formatter} />
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
+            label={i18n.translate('visTypeTimeseries.seriesConfig.ignoreFieldFormatting', {
+              defaultMessage: 'Ignore global formatting?',
+            })}
+          >
+            <YesNo
+              value={model.ignore_field_formatting}
+              name="ignore_field_formatting"
+              onChange={props.onChange}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       <EuiHorizontalRule margin="s" />
 

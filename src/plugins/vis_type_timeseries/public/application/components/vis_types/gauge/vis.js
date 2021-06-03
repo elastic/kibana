@@ -35,7 +35,7 @@ function getColors(props) {
 }
 
 function GaugeVisualization(props) {
-  const { backgroundColor, model, visData } = props;
+  const { backgroundColor, model, visData, getCustomFieldFormatter } = props;
   const colors = getColors(props);
 
   const series = get(visData, `${model.id}.series`, [])
@@ -44,11 +44,9 @@ function GaugeVisualization(props) {
       const seriesDef = model.series.find((s) => includes(row.id, s.id));
       const newProps = {};
       if (seriesDef) {
-        newProps.formatter = createTickFormatter(
-          seriesDef.formatter,
-          seriesDef.value_template,
-          props.getConfig
-        );
+        newProps.formatter = seriesDef.ignore_field_formatting
+          ? createTickFormatter(seriesDef.formatter, seriesDef.value_template, props.getConfig)
+          : getCustomFieldFormatter(seriesDef.metrics[0]?.field);
       }
       if (i === 0 && colors.gauge) newProps.color = colors.gauge;
       return assign({}, row, newProps);

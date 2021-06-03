@@ -50,6 +50,7 @@ export const metricsVisDefinition = {
           point_size: 1,
           fill: 0.5,
           stacked: 'none',
+          ignore_field_formatting: true,
         },
       ],
       time_field: '',

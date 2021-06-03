@@ -15,7 +15,7 @@ import { getSplitByTermsColor } from '../lib/get_split_by_terms_color';
 
 export function visWithSplits(WrappedComponent) {
   function SplitVisComponent(props) {
-    const { model, visData, syncColors, palettesService } = props;
+    const { model, visData, syncColors, palettesService, getCustomFieldFormatter } = props;
 
     const getSeriesColor = useCallback(
       (seriesName, seriesId, baseColor) => {
@@ -34,10 +34,11 @@ export function visWithSplits(WrappedComponent) {
           seriesPalette: palette,
           palettesRegistry: palettesService,
           syncColors,
+          getCustomFieldFormatter,
         };
         return getSplitByTermsColor(props) || null;
       },
-      [model, palettesService, syncColors, visData]
+      [getCustomFieldFormatter, model.id, model.series, palettesService, syncColors, visData]
     );
 
     if (!model || !visData || !visData[model.id]) return <WrappedComponent {...props} />;
@@ -113,6 +114,7 @@ export function visWithSplits(WrappedComponent) {
             additionalLabel={additionalLabel || emptyLabel}
             backgroundColor={props.backgroundColor}
             getConfig={props.getConfig}
+            getCustomFieldFormatter={props.getCustomFieldFormatter}
           />
         </div>
       );

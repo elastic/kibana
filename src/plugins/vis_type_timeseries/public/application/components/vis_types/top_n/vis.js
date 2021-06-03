@@ -38,17 +38,15 @@ function sortSeries(visData, model) {
 }
 
 function TopNVisualization(props) {
-  const { backgroundColor, model, visData } = props;
+  const { backgroundColor, model, visData, getCustomFieldFormatter } = props;
 
   const series = sortSeries(visData, model).map((item) => {
     const id = first(item.id.split(/:/));
     const seriesConfig = model.series.find((s) => s.id === id);
     if (seriesConfig) {
-      const tickFormatter = createTickFormatter(
-        seriesConfig.formatter,
-        seriesConfig.value_template,
-        props.getConfig
-      );
+      const tickFormatter = seriesConfig.ignore_field_formatting
+        ? createTickFormatter(seriesConfig.formatter, seriesConfig.value_template, props.getConfig)
+        : getCustomFieldFormatter(seriesConfig.metrics[0]?.field);
       const value = getLastValue(item.data);
       let color = item.color || seriesConfig.color;
       if (model.bar_color_rules) {
