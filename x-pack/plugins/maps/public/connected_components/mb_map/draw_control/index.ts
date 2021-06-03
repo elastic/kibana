@@ -8,15 +8,15 @@
 import { ThunkDispatch } from 'redux-thunk';
 import { AnyAction } from 'redux';
 import { connect } from 'react-redux';
-import { setShapeToDraw } from '../../../actions';
+import { updateEditShape } from '../../../actions';
 import { MapStoreState } from '../../../reducers/store';
 import { DrawControl } from './draw_control';
-import { DRAW_TYPE } from '../../../../common';
+import { DRAW_SHAPE } from '../../../../common';
 
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
-    setShapeToDraw(shapeToDraw: DRAW_TYPE) {
-      dispatch(setShapeToDraw(shapeToDraw));
+    updateEditShape(shapeToDraw: DRAW_SHAPE) {
+      dispatch(updateEditShape(shapeToDraw));
     },
   };
 }

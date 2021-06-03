@@ -12,7 +12,7 @@ import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
 import { Filter, Query, TimeRange } from 'src/plugins/data/public';
 import { Geometry, Position } from 'geojson';
-import { DRAW_TYPE } from '../../common/constants';
+import { DRAW_SHAPE } from '../../common/constants';
 import { MapStoreState } from '../reducers/store';
 import {
   getDataFilters,
@@ -47,9 +47,9 @@ import {
   TRACK_MAP_SETTINGS,
   TRIGGER_REFRESH_TIMER,
   UPDATE_DRAW_STATE,
-  SET_SHAPE_TO_DRAW,
+  UPDATE_EDIT_STATE_SHAPE,
   UPDATE_MAP_SETTING,
-  UPDATE_EDIT_LAYER,
+  UPDATE_EDIT_STATE_LAYER,
 } from './map_action_constants';
 import { autoFitToBounds, syncDataForAllLayers, syncDataForLayer } from './data_request_actions';
 import { addLayer, addLayerWithoutDataSync } from './layer_actions';
@@ -339,15 +339,6 @@ export function triggerRefreshTimer() {
   };
 }
 
-export function setShapeToDraw(shapeToDraw: DRAW_TYPE | null) {
-  return (dispatch: Dispatch) => {
-    dispatch({
-      type: SET_SHAPE_TO_DRAW,
-      shapeToDraw,
-    });
-  };
-}
-
 export function updateDrawState(drawState: DrawState | null) {
   return (dispatch: Dispatch) => {
     if (drawState !== null) {
@@ -360,13 +351,22 @@ export function updateDrawState(drawState: DrawState | null) {
   };
 }
 
+export function updateEditShape(shapeToDraw: DRAW_SHAPE | null) {
+  return (dispatch: Dispatch) => {
+    dispatch({
+      type: UPDATE_EDIT_STATE_SHAPE,
+      shapeToDraw,
+    });
+  };
+}
+
 export function updateEditLayer(layerId: string | null) {
   return (dispatch: Dispatch) => {
     if (layerId !== null) {
-      dispatch({ type: SET_OPEN_TOOLTIPS, openTooltips: [] }); // tooltips just get in the way
+      dispatch({ type: SET_OPEN_TOOLTIPS, openTooltips: [] });
     }
     dispatch({
-      type: UPDATE_EDIT_LAYER,
+      type: UPDATE_EDIT_STATE_LAYER,
       layerId,
     });
   };

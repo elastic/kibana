@@ -12,13 +12,7 @@ import { Adapters } from 'src/plugins/inspector/public';
 import { GeoJsonProperties } from 'geojson';
 import { copyPersistentState } from '../../reducers/copy_persistent_state';
 import { IField } from '../fields/field';
-import {
-  FieldFormatter,
-  LAYER_TYPE,
-  MAX_ZOOM,
-  MIN_ZOOM,
-  SOURCE_TYPES,
-} from '../../../common/constants';
+import { FieldFormatter, LAYER_TYPE, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
 import { AbstractSourceDescriptor, Attribution } from '../../../common/descriptor_types';
 import { LICENSED_FEATURES } from '../../licensed_features';
 import { PreIndexedShape } from '../../../common/elasticsearch_util';
@@ -60,7 +54,6 @@ export interface ISource {
   getJoinsDisabledReason(): string | null;
   cloneDescriptor(): AbstractSourceDescriptor;
   getFieldNames(): string[];
-  getType(): SOURCE_TYPES;
   getApplyGlobalQuery(): boolean;
   getApplyGlobalTime(): boolean;
   getIndexPatternIds(): string[];
@@ -135,10 +128,6 @@ export class AbstractSource implements ISource {
 
   getFieldNames(): string[] {
     return [];
-  }
-
-  getType(): SOURCE_TYPES {
-    return this._descriptor.type as SOURCE_TYPES;
   }
 
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null {

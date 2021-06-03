@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
-import { DRAW_TYPE, ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../../../../common/constants';
+import { DRAW_SHAPE, ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../../../../common/constants';
 import { GeometryFilterForm } from '../../../components/draw_forms/geometry_filter_form/geometry_filter_form';
 import { DistanceFilterForm } from '../../../components/draw_forms/distance_filter_form';
 // @ts-expect-error
@@ -57,7 +57,7 @@ export interface Props {
   filterModeActive: boolean;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
-  activateDrawFilterMode: (drawState: DrawState) => void;
+  initiateDraw: (drawState: DrawState) => void;
   deactivateDrawMode: () => void;
 }
 
@@ -91,8 +91,8 @@ export class ToolsControl extends Component<Props, State> {
     geoFieldType?: ES_GEO_FIELD_TYPE;
     relation?: ES_SPATIAL_RELATIONS;
   }) => {
-    this.props.activateDrawFilterMode({
-      drawType: DRAW_TYPE.POLYGON,
+    this.props.initiateDraw({
+      drawShape: DRAW_SHAPE.POLYGON,
       ...options,
     });
     this._closePopover();
@@ -106,16 +106,16 @@ export class ToolsControl extends Component<Props, State> {
     geoFieldType?: ES_GEO_FIELD_TYPE;
     relation?: ES_SPATIAL_RELATIONS;
   }) => {
-    this.props.activateDrawFilterMode({
-      drawType: DRAW_TYPE.BOUNDS,
+    this.props.initiateDraw({
+      drawShape: DRAW_SHAPE.BOUNDS,
       ...options,
     });
     this._closePopover();
   };
 
   _initiateDistanceDraw = (options: { actionId: string; filterLabel: string }) => {
-    this.props.activateDrawFilterMode({
-      drawType: DRAW_TYPE.DISTANCE,
+    this.props.initiateDraw({
+      drawShape: DRAW_SHAPE.DISTANCE,
       ...options,
     });
     this._closePopover();
@@ -205,7 +205,7 @@ export class ToolsControl extends Component<Props, State> {
         <EuiButtonIcon
           size="s"
           color="text"
-          iconType="gear"
+          iconType="wrench"
           onClick={this._togglePopover}
           aria-label={i18n.translate('xpack.maps.toolbarOverlay.toolsControlTitle', {
             defaultMessage: 'Tools',
@@ -232,7 +232,7 @@ export class ToolsControl extends Component<Props, State> {
       </EuiPopover>
     );
 
-    if (!this.props.filterModeActive || this.state.isPopoverOpen) {
+    if (!this.props.filterModeActive) {
       return toolsPopoverButton;
     }
 

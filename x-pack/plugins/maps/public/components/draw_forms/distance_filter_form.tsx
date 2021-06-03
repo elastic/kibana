@@ -16,10 +16,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
-import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../src/plugins/data/public';
 import { ActionSelect } from '../action_select';
+import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../src/plugins/data/public';
 
-export interface Props {
+interface Props {
   className?: string;
   buttonLabel: string;
   getFilterActions?: () => Promise<Action[]>;

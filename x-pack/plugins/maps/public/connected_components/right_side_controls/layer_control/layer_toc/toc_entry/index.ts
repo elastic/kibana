@@ -43,7 +43,7 @@ function mapStateToProps(state: MapStoreState, ownProps: OwnProps): ReduxStatePr
     isLegendDetailsOpen: getOpenTOCDetails(state).includes(ownProps.layer.getId()),
     isEditButtonDisabled:
       flyoutDisplay !== FLYOUT_STATE.NONE && flyoutDisplay !== FLYOUT_STATE.LAYER_PANEL,
-    layerIsInEditMode:
+    editModeActiveForLayer:
       (getDrawMode(state) === DRAW_MODE.DRAW_SHAPES ||
         getDrawMode(state) === DRAW_MODE.DRAW_POINTS) &&
       getEditingLayer(state) === ownProps.layer.getId(),

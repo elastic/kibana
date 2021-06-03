@@ -9,13 +9,12 @@ import { connect } from 'react-redux';
 import { ToolbarOverlay } from './toolbar_overlay';
 import { MapStoreState } from '../../reducers/store';
 import { getDrawMode } from '../../selectors/ui_selectors';
-import { getGeoFieldNames, getLayersBySourceType } from '../../selectors/map_selectors';
-import { DRAW_MODE, SOURCE_TYPES } from '../../../common';
+import { getGeoFieldNames } from '../../selectors/map_selectors';
+import { DRAW_MODE } from '../../../common';
 
 function mapStateToProps(state: MapStoreState) {
   return {
     showToolsControl: getGeoFieldNames(state).length !== 0,
-    showEditButton: !!getLayersBySourceType(SOURCE_TYPES.ES_SEARCH, state).length,
     shapeDrawModeActive: getDrawMode(state) === DRAW_MODE.DRAW_SHAPES,
     pointDrawModeActive: getDrawMode(state) === DRAW_MODE.DRAW_POINTS,
   };

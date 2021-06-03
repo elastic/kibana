@@ -14,14 +14,14 @@ import {
   ReduxStateProps,
   OwnProps,
 } from './feature_edit_tools';
-import { setDrawMode, setShapeToDraw } from '../../../../actions';
+import { setDrawMode, updateEditShape } from '../../../../actions';
 import { MapStoreState } from '../../../../reducers/store';
-import { DRAW_MODE, DRAW_TYPE } from '../../../../../common';
+import { DRAW_MODE, DRAW_SHAPE } from '../../../../../common';
 import { getShapeToDraw } from '../../../../selectors/map_selectors';
 
 function mapStateToProps(state: MapStoreState): ReduxStateProps {
   return {
-    drawType: getShapeToDraw(state),
+    drawShape: getShapeToDraw(state),
   };
 }
 
@@ -29,8 +29,8 @@ function mapDispatchToProps(
   dispatch: ThunkDispatch<MapStoreState, void, AnyAction>
 ): ReduxDispatchProps {
   return {
-    setDrawShape: (shapeToDraw: DRAW_TYPE) => {
-      dispatch(setShapeToDraw(shapeToDraw));
+    setDrawShape: (shapeToDraw: DRAW_SHAPE) => {
+      dispatch(updateEditShape(shapeToDraw));
     },
     cancelEditing: () => {
       dispatch(setDrawMode(DRAW_MODE.NONE));

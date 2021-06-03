@@ -15,15 +15,14 @@ import {
   ReduxStateProps,
   OwnProps,
 } from './draw_feature_control';
-import { addNewFeatureToIndex, setShapeToDraw } from '../../../../actions';
+import { addNewFeatureToIndex, updateEditShape } from '../../../../actions';
 import { MapStoreState } from '../../../../reducers/store';
-import { getDrawState, getShapeToDraw } from '../../../../selectors/map_selectors';
+import { getShapeToDraw } from '../../../../selectors/map_selectors';
 import { getDrawMode } from '../../../../selectors/ui_selectors';
 
 function mapStateToProps(state: MapStoreState): ReduxStateProps {
   return {
-    drawType: getShapeToDraw(state),
-    drawState: getDrawState(state),
+    drawShape: getShapeToDraw(state),
     drawMode: getDrawMode(state),
   };
 }
@@ -36,7 +35,7 @@ function mapDispatchToProps(
       dispatch(addNewFeatureToIndex(geometry));
     },
     disableDrawState() {
-      dispatch(setShapeToDraw(null));
+      dispatch(updateEditShape(null));
     },
   };
 }

@@ -28,7 +28,7 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
       dispatch(updateDrawState(null));
       dispatch(setDrawMode(DRAW_MODE.NONE));
     },
-    activateDrawFilterMode: (drawState: DrawState) => {
+    initiateDraw: (drawState: DrawState) => {
       dispatch(setDrawMode(DRAW_MODE.DRAW_FILTERS));
       dispatch(updateDrawState(drawState));
     },

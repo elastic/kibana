@@ -15,14 +15,12 @@ import { i18n } from '@kbn/i18n';
 import * as jsts from 'jsts';
 import { getToasts } from '../../../../kibana_services';
 import { DrawControl } from '../';
-import { DRAW_MODE, DRAW_TYPE } from '../../../../../common';
-import { DrawState } from '../../../../../common/descriptor_types';
+import { DRAW_MODE, DRAW_SHAPE } from '../../../../../common';
 
 const geoJSONReader = new jsts.io.GeoJSONReader();
 
 export interface ReduxStateProps {
-  drawType?: DRAW_TYPE;
-  drawState?: DrawState;
+  drawShape?: DRAW_SHAPE;
   drawMode: DRAW_MODE;
 }
 
@@ -72,7 +70,7 @@ export class DrawFeatureControl extends Component<Props, {}> {
       try {
         mbDrawControl.deleteAll();
       } catch (_e) {
-        // Fail silently. Always works, but sometimes produces an upstream error in the draw tool
+        // Fail silently. Always works, but sometimes produces an upstream error in the mb draw lib
       }
     }
   };
@@ -80,7 +78,7 @@ export class DrawFeatureControl extends Component<Props, {}> {
   render() {
     return (
       <DrawControl
-        drawType={this.props.drawType}
+        drawShape={this.props.drawShape}
         onDraw={this._onDraw}
         mbMap={this.props.mbMap}
         drawActive={true}

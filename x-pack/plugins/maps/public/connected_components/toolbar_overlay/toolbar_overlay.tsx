@@ -20,7 +20,6 @@ export interface Props {
   showToolsControl: boolean;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
-  showEditButton: boolean;
   shapeDrawModeActive: boolean;
   pointDrawModeActive: boolean;
   showFitToBoundsButton: boolean;

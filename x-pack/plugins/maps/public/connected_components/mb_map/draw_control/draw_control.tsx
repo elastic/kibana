@@ -13,7 +13,7 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import DrawRectangle from 'mapbox-gl-draw-rectangle-mode';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { Feature } from 'geojson';
-import { DRAW_TYPE } from '../../../../common/constants';
+import { DRAW_SHAPE } from '../../../../common/constants';
 import { DrawCircle } from './draw_circle';
 import { DrawTooltip } from './draw_tooltip';
 
@@ -38,11 +38,11 @@ mbDrawModes[DRAW_RECTANGLE] = DrawRectangle;
 mbDrawModes[DRAW_CIRCLE] = DrawCircle;
 
 export interface Props {
-  drawType?: DRAW_TYPE;
+  drawShape?: DRAW_SHAPE;
   onDraw: (drawControl: MapboxDraw) => (event: { features: Feature[] }) => void;
   mbMap: MbMap;
   drawActive: boolean;
-  setShapeToDraw: (shapeToDraw: DRAW_TYPE) => void;
+  updateEditShape: (shapeToDraw: DRAW_SHAPE) => void;
 }
 
 export class DrawControl extends Component<Props> {
@@ -85,7 +85,7 @@ export class DrawControl extends Component<Props> {
 
   _onModeChange = ({ mode }: { mode: string }) => {
     if (mbModeEquivalencies.has(mode)) {
-      this.props.setShapeToDraw(mbModeEquivalencies.get(mode) as DRAW_TYPE);
+      this.props.updateEditShape(mbModeEquivalencies.get(mode) as DRAW_SHAPE);
     }
   };
 
@@ -104,7 +104,7 @@ export class DrawControl extends Component<Props> {
   }
 
   _updateDrawControl() {
-    if (!this.props.drawType) {
+    if (!this.props.drawShape) {
       return;
     }
 
@@ -118,35 +118,27 @@ export class DrawControl extends Component<Props> {
       }
     }
 
-    if (this.props.drawType === DRAW_TYPE.TRASH) {
-      // There is no way to deselect shapes other than changing modes,
-      // this deselects shapes to avoid leaving shapes in an unwanted
-      // edit mode
-      this._mbDrawControl.changeMode('simple_select');
-      return;
-    }
-
     const drawMode = this._mbDrawControl.getMode();
-    if (drawMode !== DRAW_RECTANGLE && this.props.drawType === DRAW_TYPE.BOUNDS) {
+    if (drawMode !== DRAW_RECTANGLE && this.props.drawShape === DRAW_SHAPE.BOUNDS) {
       this._mbDrawControl.changeMode(DRAW_RECTANGLE);
-    } else if (drawMode !== DRAW_CIRCLE && this.props.drawType === DRAW_TYPE.DISTANCE) {
+    } else if (drawMode !== DRAW_CIRCLE && this.props.drawShape === DRAW_SHAPE.DISTANCE) {
       this._mbDrawControl.changeMode(DRAW_CIRCLE);
-    } else if (drawMode !== DRAW_POLYGON && this.props.drawType === DRAW_TYPE.POLYGON) {
+    } else if (drawMode !== DRAW_POLYGON && this.props.drawShape === DRAW_SHAPE.POLYGON) {
       this._mbDrawControl.changeMode(DRAW_POLYGON);
-    } else if (drawMode !== DRAW_LINE && this.props.drawType === DRAW_TYPE.LINE) {
+    } else if (drawMode !== DRAW_LINE && this.props.drawShape === DRAW_SHAPE.LINE) {
       this._mbDrawControl.changeMode(DRAW_LINE);
-    } else if (drawMode !== DRAW_POINT && this.props.drawType === DRAW_TYPE.POINT) {
+    } else if (drawMode !== DRAW_POINT && this.props.drawShape === DRAW_SHAPE.POINT) {
       this._mbDrawControl.changeMode(DRAW_POINT);
-    } else if (drawMode !== SIMPLE_SELECT && this.props.drawType === DRAW_TYPE.SIMPLE_SELECT) {
+    } else if (drawMode !== SIMPLE_SELECT && this.props.drawShape === DRAW_SHAPE.SIMPLE_SELECT) {
       this._mbDrawControl.changeMode(SIMPLE_SELECT);
     }
   }
 
   render() {
-    if (!this.props.drawType) {
+    if (!this.props.drawShape) {
       return null;
     }
 
-    return <DrawTooltip mbMap={this.props.mbMap} drawType={this.props.drawType} />;
+    return <DrawTooltip mbMap={this.props.mbMap} drawShape={this.props.drawShape} />;
   }
 }

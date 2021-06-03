@@ -162,14 +162,13 @@ export enum DRAW_MODE {
   NONE = 'NONE',
 }
 
-export enum DRAW_TYPE {
+export enum DRAW_SHAPE {
   BOUNDS = 'BOUNDS',
   DISTANCE = 'DISTANCE',
   POLYGON = 'POLYGON',
   POINT = 'POINT',
   LINE = 'LINE',
   SIMPLE_SELECT = 'SIMPLE_SELECT',
-  TRASH = 'TRASH',
 }
 
 export const AGG_DELIMITER = '_of_';

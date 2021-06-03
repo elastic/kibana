@@ -8,16 +8,16 @@
 import React from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DRAW_TYPE } from '../../../../../common/constants';
+import { DRAW_SHAPE } from '../../../../../common/constants';
 // @ts-expect-error
 import { GeometryFilterForm } from '../../../../components/draw_forms/geometry_filter_form/geometry_filter_form';
 
 export interface ReduxStateProps {
-  drawType?: string;
+  drawShape?: string;
 }
 
 export interface ReduxDispatchProps {
-  setDrawShape: (shapeToDraw: DRAW_TYPE) => void;
+  setDrawShape: (shapeToDraw: DRAW_SHAPE) => void;
   cancelEditing: () => void;
 }
 
@@ -28,11 +28,11 @@ export interface OwnProps {
 type Props = ReduxStateProps & ReduxDispatchProps & OwnProps;
 
 export function FeatureEditTools(props: Props) {
-  const drawLineSelected = props.drawType === DRAW_TYPE.LINE;
-  const drawPolygonSelected = props.drawType === DRAW_TYPE.POLYGON;
-  const drawCircleSelected = props.drawType === DRAW_TYPE.DISTANCE;
-  const drawBBoxSelected = props.drawType === DRAW_TYPE.BOUNDS;
-  const drawPointSelected = props.drawType === DRAW_TYPE.POINT;
+  const drawLineSelected = props.drawShape === DRAW_SHAPE.LINE;
+  const drawPolygonSelected = props.drawShape === DRAW_SHAPE.POLYGON;
+  const drawCircleSelected = props.drawShape === DRAW_SHAPE.DISTANCE;
+  const drawBBoxSelected = props.drawShape === DRAW_SHAPE.BOUNDS;
+  const drawPointSelected = props.drawShape === DRAW_SHAPE.POINT;
 
   return (
     <EuiPanel paddingSize="none" style={{ display: 'inline-block' }}>
@@ -46,7 +46,7 @@ export function FeatureEditTools(props: Props) {
               >
                 <EuiButtonIcon
                   size="s"
-                  onClick={() => props.setDrawShape(DRAW_TYPE.LINE)}
+                  onClick={() => props.setDrawShape(DRAW_SHAPE.LINE)}
                   iconType="minus"
                   aria-label={i18n.translate(
                     'xpack.maps.toolbarOverlay.featureDraw.drawLineLabel',
@@ -69,7 +69,7 @@ export function FeatureEditTools(props: Props) {
               >
                 <EuiButtonIcon
                   size="s"
-                  onClick={() => props.setDrawShape(DRAW_TYPE.POLYGON)}
+                  onClick={() => props.setDrawShape(DRAW_SHAPE.POLYGON)}
                   iconType="node"
                   aria-label={i18n.translate(
                     'xpack.maps.toolbarOverlay.featureDraw.drawPolygonLabel',
@@ -92,7 +92,7 @@ export function FeatureEditTools(props: Props) {
               >
                 <EuiButtonIcon
                   size="s"
-                  onClick={() => props.setDrawShape(DRAW_TYPE.DISTANCE)}
+                  onClick={() => props.setDrawShape(DRAW_SHAPE.DISTANCE)}
                   iconType="plusInCircle"
                   aria-label={i18n.translate(
                     'xpack.maps.toolbarOverlay.featureDraw.drawCircleLabel',
@@ -115,7 +115,7 @@ export function FeatureEditTools(props: Props) {
               >
                 <EuiButtonIcon
                   size="s"
-                  onClick={() => props.setDrawShape(DRAW_TYPE.BOUNDS)}
+                  onClick={() => props.setDrawShape(DRAW_SHAPE.BOUNDS)}
                   iconType="stop"
                   aria-label={i18n.translate(
                     'xpack.maps.toolbarOverlay.featureDraw.drawBBoxLabel',
@@ -140,7 +140,7 @@ export function FeatureEditTools(props: Props) {
           >
             <EuiButtonIcon
               size="s"
-              onClick={() => props.setDrawShape(DRAW_TYPE.POINT)}
+              onClick={() => props.setDrawShape(DRAW_SHAPE.POINT)}
               iconType="dot"
               aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawPointLabel', {
                 defaultMessage: 'Draw point',

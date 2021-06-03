@@ -167,7 +167,7 @@ export const addFeatureToIndex = async (
   return await getHttp().fetch({
     path: `${INDEX_FEATURE_PATH}`,
     method: 'POST',
-    body: convertObjectToBlob({
+    body: JSON.stringify({
       index: indexName,
       data,
     }),
@@ -183,10 +183,6 @@ const convertDotNotationStringToObj = (
     container[k] = i === values.length - 1 ? value : {};
   });
   return container;
-};
-
-const convertObjectToBlob = (obj: unknown) => {
-  return new Blob([JSON.stringify(obj)], { type: 'application/json' });
 };
 
 export const getMatchingIndexes = async (indexPattern: string) => {

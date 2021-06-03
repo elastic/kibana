@@ -27,9 +27,8 @@ import { InnerJoin } from '../classes/joins/inner_join';
 import { getSourceByType } from '../classes/sources/source_registry';
 import { GeoJsonFileSource } from '../classes/sources/geojson_file_source';
 import {
-  DRAW_TYPE,
+  DRAW_SHAPE,
   SOURCE_DATA_REQUEST_ID,
-  SOURCE_TYPES,
   SPATIAL_FILTERS_LAYER_ID,
   STYLE_TYPE,
   VECTOR_STYLES,
@@ -199,8 +198,8 @@ export const isUsingSearch = (state: MapStoreState): boolean => {
 export const getDrawState = ({ map }: MapStoreState): DrawState | undefined =>
   map.mapState.drawState;
 
-export const getShapeToDraw = ({ map }: MapStoreState): DRAW_TYPE | undefined =>
-  map.mapState.editState ? map.mapState.editState.drawType : undefined;
+export const getShapeToDraw = ({ map }: MapStoreState): DRAW_SHAPE | undefined =>
+  map.mapState.editState ? map.mapState.editState.drawShape : undefined;
 
 export const getEditingLayer = ({ map }: MapStoreState): string | undefined =>
   map.mapState.editState ? map.mapState.editState.layerId : undefined;
@@ -335,10 +334,6 @@ export function getLayerById(layerId: string | null, state: MapStoreState): ILay
   return getLayerList(state).find((layer) => {
     return layerId === layer.getId();
   });
-}
-
-export function getLayersBySourceType(sourceType: SOURCE_TYPES, state: MapStoreState): ILayer[] {
-  return getLayerList(state).filter((layer) => layer.getSource().getType() === sourceType);
 }
 
 export const getHiddenLayerIds = createSelector(getLayerListRaw, (layers) =>

@@ -46,8 +46,8 @@ import {
   ROLLBACK_MAP_SETTINGS,
   TRACK_MAP_SETTINGS,
   UPDATE_MAP_SETTING,
-  SET_SHAPE_TO_DRAW,
-  UPDATE_EDIT_LAYER,
+  UPDATE_EDIT_STATE_SHAPE,
+  UPDATE_EDIT_STATE_LAYER,
 } from '../../actions';
 
 import { getDefaultMapSettings } from './default_map_settings';
@@ -100,7 +100,7 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
           drawState: action.drawState,
         },
       };
-    case UPDATE_EDIT_LAYER:
+    case UPDATE_EDIT_STATE_LAYER:
       return {
         ...state,
         mapState: {
@@ -111,14 +111,14 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
           },
         },
       };
-    case SET_SHAPE_TO_DRAW:
+    case UPDATE_EDIT_STATE_SHAPE:
       return {
         ...state,
         mapState: {
           ...state.mapState,
           editState: {
             ...state.mapState.editState,
-            drawType: action.shapeToDraw,
+            drawShape: action.shapeToDraw,
           },
         },
       };
