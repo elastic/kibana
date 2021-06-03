@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { ComponentType } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiHorizontalRule, EuiPageTemplate } from '@elastic/eui';
-import { KibanaPageTemplate } from '../../../../../../src/plugins/kibana_react/public';
+import { EuiEmptyPrompt, EuiHorizontalRule, EuiPageContent } from '@elastic/eui';
 
 interface ManagementLandingPageProps {
   version: string;
@@ -20,33 +19,37 @@ export const ManagementLandingPage = ({ version, setBreadcrumbs }: ManagementLan
   setBreadcrumbs();
 
   return (
-    <KibanaPageTemplate
-      data-test-subj="managementHome"
-      isEmptyState
-      template="centeredContent"
-      pageHeader={{
-        iconType: 'managementApp',
-        pageTitle: (
-          <FormattedMessage
-            id="management.landing.header"
-            defaultMessage="Welcome to Stack Management {version}"
-            values={{ version }}
-          />
-        ),
-        description: (
+    <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiEmptyPrompt
+        data-test-subj="managementHome"
+        iconType="managementApp"
+        title={
+          <h1>
+            <FormattedMessage
+              id="management.landing.header"
+              defaultMessage="Welcome to Stack Management {version}"
+              values={{ version }}
+            />
+          </h1>
+        }
+        body={
           <>
-            <FormattedMessage
-              id="management.landing.subhead"
-              defaultMessage="Manage your indices, index patterns, saved objects, Kibana settings, and more."
-            />
+            <p>
+              <FormattedMessage
+                id="management.landing.subhead"
+                defaultMessage="Manage your indices, index patterns, saved objects, Kibana settings, and more."
+              />
+            </p>
             <EuiHorizontalRule />
-            <FormattedMessage
-              id="management.landing.text"
-              defaultMessage="A complete list of apps is in the menu on the left."
-            />
+            <p>
+              <FormattedMessage
+                id="management.landing.text"
+                defaultMessage="A complete list of apps is in the menu on the left."
+              />
+            </p>
           </>
-        ),
-      }}
-    />
+        }
+      />
+    </EuiPageContent>
   );
 };

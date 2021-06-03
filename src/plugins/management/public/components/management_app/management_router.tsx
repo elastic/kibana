@@ -8,7 +8,6 @@
 
 import React, { memo } from 'react';
 import { Route, Router, Switch } from 'react-router-dom';
-import { EuiPageBody } from '@elastic/eui';
 import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from 'kibana/public';
 import { ManagementAppWrapper } from '../management_app_wrapper';
 import { ManagementLandingPage } from '../landing';
