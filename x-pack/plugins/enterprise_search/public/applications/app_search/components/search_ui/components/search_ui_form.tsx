@@ -11,6 +11,7 @@ import { useValues, useActions } from 'kea';
 
 import { EuiForm, EuiFormRow, EuiSelect, EuiComboBox, EuiButton } from '@elastic/eui';
 
+import { EngineLogic } from '../../engine';
 import {
   TITLE_FIELD_LABEL,
   TITLE_FIELD_HELP_TEXT,
@@ -27,6 +28,7 @@ import { ActiveField } from '../types';
 import { generatePreviewUrl } from '../utils';
 
 export const SearchUIForm: React.FC = () => {
+  const { searchKey } = useValues(EngineLogic);
   const {
     validFields,
     validSortFields,
@@ -70,7 +72,8 @@ export const SearchUIForm: React.FC = () => {
   const selectedFacetOptions = formatMultiOptions(facetFields);
 
   return (
-    <EuiForm>
+    <EuiForm component="form" action={previewHref} target="_blank" method="POST">
+      <input type="hidden" id="searchKey" name="searchKey" value={searchKey} />
       <EuiFormRow label={TITLE_FIELD_LABEL} helpText={TITLE_FIELD_HELP_TEXT} fullWidth>
         <EuiSelect
           options={optionFields}
@@ -119,8 +122,7 @@ export const SearchUIForm: React.FC = () => {
         />
       </EuiFormRow>
       <EuiButton
-        href={previewHref}
-        target="_blank"
+        type="submit"
         fill
         iconType="popout"
         iconSide="right"

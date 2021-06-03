@@ -13,7 +13,9 @@ import { setMockValues, setMockActions } from '../../../../__mocks__';
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
+
+import { EuiForm } from '@elastic/eui';
 
 import { ActiveField } from '../types';
 import { generatePreviewUrl } from '../utils';
@@ -43,10 +45,6 @@ describe('SearchUIForm', () => {
     setMockActions(actions);
   });
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   it('renders', () => {
     const wrapper = shallow(<SearchUIForm />);
     expect(wrapper.find('[data-test-subj="selectTitle"]').exists()).toBe(true);
@@ -56,6 +54,7 @@ describe('SearchUIForm', () => {
   });
 
   describe('title field', () => {
+    beforeEach(() => jest.clearAllMocks());
     const subject = () => shallow(<SearchUIForm />).find('[data-test-subj="selectTitle"]');
 
     it('renders with its value set from state', () => {
@@ -84,6 +83,7 @@ describe('SearchUIForm', () => {
   });
 
   describe('url field', () => {
+    beforeEach(() => jest.clearAllMocks());
     const subject = () => shallow(<SearchUIForm />).find('[data-test-subj="selectUrl"]');
 
     it('renders with its value set from state', () => {
@@ -112,6 +112,7 @@ describe('SearchUIForm', () => {
   });
 
   describe('filters field', () => {
+    beforeEach(() => jest.clearAllMocks());
     const subject = () => shallow(<SearchUIForm />).find('[data-test-subj="selectFilters"]');
 
     it('renders with its value set from state', () => {
@@ -145,6 +146,7 @@ describe('SearchUIForm', () => {
   });
 
   describe('sorts field', () => {
+    beforeEach(() => jest.clearAllMocks());
     const subject = () => shallow(<SearchUIForm />).find('[data-test-subj="selectSort"]');
 
     it('renders with its value set from state', () => {
@@ -177,26 +179,48 @@ describe('SearchUIForm', () => {
     });
   });
 
-  it('includes a link to generate the preview', () => {
-    (generatePreviewUrl as jest.Mock).mockReturnValue('http://www.example.com?foo=bar');
+  describe('generate preview button', () => {
+    let wrapper: ShallowWrapper;
 
-    setMockValues({
-      ...values,
-      urlField: 'foo',
-      titleField: 'bar',
-      facetFields: ['baz'],
-      sortFields: ['qux'],
+    beforeAll(() => {
+      jest.clearAllMocks();
+      (generatePreviewUrl as jest.Mock).mockReturnValue('http://www.example.com?foo=bar');
+      setMockValues({
+        ...values,
+        urlField: 'foo',
+        titleField: 'bar',
+        facetFields: ['baz'],
+        sortFields: ['qux'],
+        searchKey: 'search-123abc',
+      });
+      wrapper = shallow(<SearchUIForm />);
     });
 
-    const subject = () =>
-      shallow(<SearchUIForm />).find('[data-test-subj="generateSearchUiPreview"]');
+    it('should be a submit button', () => {
+      expect(wrapper.find('[data-test-subj="generateSearchUiPreview"]').prop('type')).toBe(
+        'submit'
+      );
+    });
 
-    expect(subject().prop('href')).toBe('http://www.example.com?foo=bar');
-    expect(generatePreviewUrl).toHaveBeenCalledWith({
-      urlField: 'foo',
-      titleField: 'bar',
-      facets: ['baz'],
-      sortFields: ['qux'],
+    it('should be wrapped in a form configured to POST to the preview screen in a new tab', () => {
+      const form = wrapper.find(EuiForm);
+      expect(generatePreviewUrl).toHaveBeenCalledWith({
+        urlField: 'foo',
+        titleField: 'bar',
+        facets: ['baz'],
+        sortFields: ['qux'],
+      });
+      expect(form.prop('action')).toBe('http://www.example.com?foo=bar');
+      expect(form.prop('target')).toBe('_blank');
+      expect(form.prop('method')).toBe('POST');
+      expect(form.prop('component')).toBe('form');
+    });
+
+    it('should include a searchKey in that form POST', () => {
+      const form = wrapper.find(EuiForm);
+      const hiddenInput = form.find('input[type="hidden"]');
+      expect(hiddenInput.prop('id')).toBe('searchKey');
+      expect(hiddenInput.prop('value')).toBe('search-123abc');
     });
   });
 });
