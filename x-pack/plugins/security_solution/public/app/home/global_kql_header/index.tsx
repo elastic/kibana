@@ -9,6 +9,9 @@ import styled from 'styled-components';
 import { OutPortal } from 'react-reverse-portal';
 import { useGlobalHeaderPortal } from '../../../common/hooks/use_global_header_portal';
 
+/**
+ * This component uses a reverse portal to render the global kql bar within the SecuritySolutionPageWrapper
+ */
 const Wrapper = styled.header<{ $isFixed: boolean }>`
   ${({ theme, $isFixed }) => `
     background: ${theme.eui.euiPageBackgroundColor};
@@ -28,12 +31,12 @@ const Wrapper = styled.header<{ $isFixed: boolean }>`
 `;
 Wrapper.displayName = 'Wrapper';
 
-interface KQLHeaderGlobalProps {
+interface GlobalKQLHeaderProps {
   isFixed?: boolean;
 }
 
-export const KQLHeaderGlobal = React.memo(
-  forwardRef<HTMLDivElement, KQLHeaderGlobalProps>(({ isFixed = true }, ref) => {
+export const GlobalKQLHeader = React.memo(
+  forwardRef<HTMLDivElement, GlobalKQLHeaderProps>(({ isFixed = true }, ref) => {
     const { globalKQLHeaderPortalNode } = useGlobalHeaderPortal();
     return (
       <Wrapper ref={ref} $isFixed={isFixed}>
@@ -42,4 +45,4 @@ export const KQLHeaderGlobal = React.memo(
     );
   })
 );
-KQLHeaderGlobal.displayName = 'KQLHeaderGlobal';
+GlobalKQLHeader.displayName = 'GlobalKQLHeader';

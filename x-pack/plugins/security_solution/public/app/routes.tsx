@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import { History } from 'history';
 import React, { FC, memo, useEffect } from 'react';
 import { Route, Router, Switch } from 'react-router-dom';
@@ -23,7 +21,7 @@ interface RouterProps {
   history: History;
 }
 
-const PageRouterComponent: FC<RouterProps> = React.memo(({ children, history }) => {
+const PageRouterComponent: FC<RouterProps> = ({ children, history }) => {
   const dispatch = useDispatch<(action: AppAction) => void>();
   useEffect(() => {
     return () => {
@@ -52,6 +50,6 @@ const PageRouterComponent: FC<RouterProps> = React.memo(({ children, history }) 
       </Router>
     </ManageRoutesSpy>
   );
-});
+};
 
 export const PageRouter = memo(PageRouterComponent);

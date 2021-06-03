@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-// TODO: This can be a generic constants file, but for right now making it classnames
-// As these were causing circular dependencies when in './helpers'
-
 /** This class is added to the document body while dragging */
 export const IS_DRAGGING_CLASS_NAME = 'is-dragging';
 
