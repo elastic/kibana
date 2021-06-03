@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useEffect } from 'react';
+import React, { useMemo, useCallback, useEffect, useRef } from 'react';
 import {
   EuiButton,
   EuiFormRow,
@@ -56,6 +56,9 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
   errors,
 }) => {
   const { mappings, connectorType = SwimlaneConnectorType.All } = action.config;
+  const prevConnectorType = useRef<SwimlaneConnectorType>(connectorType);
+  const hasChangedConnectorType = connectorType !== prevConnectorType.current;
+
   const [fieldTypeMap, fieldIdMap] = useMemo(
     () =>
       fields.reduce(
@@ -138,6 +141,12 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => editActionConfig('connectorType', connectorType), []);
 
+  useEffect(() => {
+    if (connectorType !== prevConnectorType.current) {
+      prevConnectorType.current = connectorType;
+    }
+  }, [connectorType]);
+
   return (
     <>
       <EuiFormRow id="connectorType" fullWidth label={i18n.SW_CONNECTOR_TYPE_LABEL}>
@@ -157,7 +166,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
             fullWidth
             label={i18n.SW_ALERT_ID_FIELD_LABEL}
             error={mappingErrors?.alertIdConfig}
-            isInvalid={mappingErrors?.alertIdConfig != null}
+            isInvalid={mappingErrors?.alertIdConfig != null && !hasChangedConnectorType}
           >
             <EuiComboBox
               fullWidth
@@ -166,7 +175,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
               singleSelection={SINGLE_SELECTION}
               data-test-subj="swimlaneAlertIdInput"
               onChange={(e) => editMappings('alertIdConfig', e)}
-              isInvalid={mappingErrors?.alertIdConfig != null}
+              isInvalid={mappingErrors?.alertIdConfig != null && !hasChangedConnectorType}
             />
           </EuiFormRow>
         </>
@@ -178,7 +187,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
             fullWidth
             label={i18n.SW_RULE_NAME_FIELD_LABEL}
             error={mappingErrors?.ruleNameConfig}
-            isInvalid={mappingErrors?.ruleNameConfig != null}
+            isInvalid={mappingErrors?.ruleNameConfig != null && !hasChangedConnectorType}
           >
             <EuiComboBox
               fullWidth
@@ -187,7 +196,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
               singleSelection={SINGLE_SELECTION}
               data-test-subj="swimlaneAlertNameInput"
               onChange={(e) => editMappings('ruleNameConfig', e)}
-              isInvalid={mappingErrors?.ruleNameConfig != null}
+              isInvalid={mappingErrors?.ruleNameConfig != null && !hasChangedConnectorType}
             />
           </EuiFormRow>
         </>
@@ -202,7 +211,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
             fullWidth
             label={i18n.SW_ALERT_SOURCE_FIELD_LABEL}
             error={mappingErrors?.alertSourceConfig}
-            isInvalid={mappingErrors?.alertSourceConfig != null}
+            isInvalid={mappingErrors?.alertSourceConfig != null && !hasChangedConnectorType}
           >
             <EuiComboBox
               fullWidth
@@ -211,7 +220,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
               singleSelection={SINGLE_SELECTION}
               data-test-subj="swimlaneAlertSourceInput"
               onChange={(e) => editMappings('alertSourceConfig', e)}
-              isInvalid={mappingErrors?.alertSourceConfig != null}
+              isInvalid={mappingErrors?.alertSourceConfig != null && !hasChangedConnectorType}
             />
           </EuiFormRow>
         </>
@@ -223,7 +232,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
             fullWidth
             label={i18n.SW_SEVERITY_FIELD_LABEL}
             error={mappingErrors?.severityConfig}
-            isInvalid={mappingErrors?.severityConfig != null}
+            isInvalid={mappingErrors?.severityConfig != null && !hasChangedConnectorType}
           >
             <EuiComboBox
               fullWidth
@@ -232,7 +241,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
               singleSelection={SINGLE_SELECTION}
               data-test-subj="swimlaneSeverityInput"
               onChange={(e) => editMappings('severityConfig', e)}
-              isInvalid={mappingErrors?.severityConfig != null}
+              isInvalid={mappingErrors?.severityConfig != null && !hasChangedConnectorType}
             />
           </EuiFormRow>
         </>
@@ -244,7 +253,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
             fullWidth
             label={i18n.SW_CASE_ID_FIELD_LABEL}
             error={mappingErrors?.caseIdConfig}
-            isInvalid={mappingErrors?.caseIdConfig != null}
+            isInvalid={mappingErrors?.caseIdConfig != null && !hasChangedConnectorType}
           >
             <EuiComboBox
               fullWidth
@@ -253,7 +262,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
               singleSelection={SINGLE_SELECTION}
               data-test-subj="swimlaneCaseIdConfig"
               onChange={(e) => editMappings('caseIdConfig', e)}
-              isInvalid={mappingErrors?.caseIdConfig != null}
+              isInvalid={mappingErrors?.caseIdConfig != null && !hasChangedConnectorType}
             />
           </EuiFormRow>
         </>
@@ -265,7 +274,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
             fullWidth
             label={i18n.SW_CASE_NAME_FIELD_LABEL}
             error={mappingErrors?.caseNameConfig}
-            isInvalid={mappingErrors?.caseNameConfig != null}
+            isInvalid={mappingErrors?.caseNameConfig != null && !hasChangedConnectorType}
           >
             <EuiComboBox
               fullWidth
@@ -274,7 +283,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
               singleSelection={SINGLE_SELECTION}
               data-test-subj="swimlaneCaseNameConfig"
               onChange={(e) => editMappings('caseNameConfig', e)}
-              isInvalid={mappingErrors?.caseNameConfig != null}
+              isInvalid={mappingErrors?.caseNameConfig != null && !hasChangedConnectorType}
             />
           </EuiFormRow>
         </>
@@ -286,7 +295,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
             fullWidth
             label={i18n.SW_COMMENTS_FIELD_LABEL}
             error={mappingErrors?.commentsConfig}
-            isInvalid={mappingErrors?.commentsConfig != null}
+            isInvalid={mappingErrors?.commentsConfig != null && !hasChangedConnectorType}
           >
             <EuiComboBox
               fullWidth
@@ -295,7 +304,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
               singleSelection={SINGLE_SELECTION}
               data-test-subj="swimlaneCommentsConfig"
               onChange={(e) => editMappings('commentsConfig', e)}
-              isInvalid={mappingErrors?.commentsConfig != null}
+              isInvalid={mappingErrors?.commentsConfig != null && !hasChangedConnectorType}
             />
           </EuiFormRow>
         </>
@@ -307,7 +316,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
             fullWidth
             label={i18n.SW_DESCRIPTION_FIELD_LABEL}
             error={mappingErrors?.descriptionConfig}
-            isInvalid={mappingErrors?.descriptionConfig != null}
+            isInvalid={mappingErrors?.descriptionConfig != null && !hasChangedConnectorType}
           >
             <EuiComboBox
               fullWidth
@@ -316,7 +325,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
               singleSelection={SINGLE_SELECTION}
               data-test-subj="swimlaneDescriptionConfig"
               onChange={(e) => editMappings('descriptionConfig', e)}
-              isInvalid={mappingErrors?.descriptionConfig != null}
+              isInvalid={mappingErrors?.descriptionConfig != null && !hasChangedConnectorType}
             />
           </EuiFormRow>
         </>

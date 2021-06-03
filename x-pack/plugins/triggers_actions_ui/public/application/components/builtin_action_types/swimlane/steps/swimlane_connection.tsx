@@ -94,27 +94,43 @@ const SwimlaneConnectionComponent: React.FunctionComponent<Props> = ({
     }
   }, [apiToken, editActionSecrets]);
 
-  const isInvalid = errors.apiToken.length > 0 && apiToken !== undefined;
+  const isApiUrlInvalid = errors.apiUrl.length > 0 && apiToken !== undefined;
+  const isAppIdInvalid = errors.appId.length > 0 && apiToken !== undefined;
+  const isApiTokenInvalid = errors.apiToken.length > 0 && apiToken !== undefined;
 
   return (
     <>
-      <EuiFormRow id="apiUrl" fullWidth label={i18n.SW_API_URL_TEXT_FIELD_LABEL}>
+      <EuiFormRow
+        id="apiUrl"
+        fullWidth
+        label={i18n.SW_API_URL_TEXT_FIELD_LABEL}
+        error={errors.apiUrl}
+        isInvalid={isApiUrlInvalid}
+      >
         <EuiFieldText
           fullWidth
           name="apiUrl"
           value={apiUrl ?? ''}
           readOnly={readOnly}
+          isInvalid={isApiUrlInvalid}
           data-test-subj="swimlaneApiUrlInput"
           onChange={(e) => onChangeConfig(e, 'apiUrl')}
           onBlur={() => onBlurConfig('apiUrl')}
         />
       </EuiFormRow>
-      <EuiFormRow id="appId" fullWidth label={i18n.SW_APP_ID_TEXT_FIELD_LABEL}>
+      <EuiFormRow
+        id="appId"
+        fullWidth
+        label={i18n.SW_APP_ID_TEXT_FIELD_LABEL}
+        error={errors.appId}
+        isInvalid={isAppIdInvalid}
+      >
         <EuiFieldText
           fullWidth
           name="appId"
           value={appId ?? ''}
           readOnly={readOnly}
+          isInvalid={isAppIdInvalid}
           data-test-subj="swimlaneAppIdInput"
           onChange={(e) => onChangeConfig(e, 'appId')}
           onBlur={() => onBlurConfig('appId')}
@@ -135,7 +151,7 @@ const SwimlaneConnectionComponent: React.FunctionComponent<Props> = ({
           </EuiLink>
         }
         error={errors.apiToken}
-        isInvalid={isInvalid}
+        isInvalid={isApiTokenInvalid}
         label={i18n.SW_API_TOKEN_TEXT_FIELD_LABEL}
       >
         <>
@@ -161,7 +177,7 @@ const SwimlaneConnectionComponent: React.FunctionComponent<Props> = ({
           )}
           <EuiFieldText
             fullWidth
-            isInvalid={isInvalid}
+            isInvalid={isApiTokenInvalid}
             readOnly={readOnly}
             value={apiToken ?? ''}
             data-test-subj="swimlaneApiTokenInput"

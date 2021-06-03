@@ -50,18 +50,19 @@ export const isValidFieldForConnector = (
 export const validateMappingForConnector = (
   connector: SwimlaneConnectorType,
   mapping: SwimlaneMappingConfig
-): Record<string, string> =>
-  Object.keys(mapping ?? {}).reduce((errors, key) => {
-    if (connector !== SwimlaneConnectorType.All) {
-      const isFieldRequired =
-        connector === SwimlaneConnectorType.Alerts
-          ? alertsRequiredFields.includes(key)
-          : casesRequiredFields.includes(key);
+): Record<string, string> => {
+  if (connector === SwimlaneConnectorType.All) {
+    return {};
+  }
 
-      if (isFieldRequired && mapping != null && mapping[key] == null) {
-        errors = { ...errors, [key]: translationMapping[key] };
-      }
+  const requiredFields =
+    connector === SwimlaneConnectorType.Alerts ? alertsRequiredFields : casesRequiredFields;
+
+  return requiredFields.reduce((errors, field) => {
+    if (mapping == null || (mapping != null && mapping[field] == null)) {
+      errors = { ...errors, [field]: translationMapping[field] };
     }
 
     return errors;
   }, {} as Record<string, string>);
+};
