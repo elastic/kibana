@@ -7,7 +7,7 @@
  */
 
 import { IUiSettingsClient } from 'kibana/public';
-import { DEFAULT_COLUMNS_SETTING, SAMPLE_SIZE_SETTING } from '../../common';
+import { DEFAULT_COLUMNS_SETTING, DOC_TABLE_LEGACY, SAMPLE_SIZE_SETTING } from '../../common';
 
 export const uiSettingsMock = ({
   get: (key: string) => {
@@ -15,6 +15,8 @@ export const uiSettingsMock = ({
       return 10;
     } else if (key === DEFAULT_COLUMNS_SETTING) {
       return ['default_column'];
+    } else if (key === DOC_TABLE_LEGACY) {
+      return true;
     }
   },
 } as unknown) as IUiSettingsClient;

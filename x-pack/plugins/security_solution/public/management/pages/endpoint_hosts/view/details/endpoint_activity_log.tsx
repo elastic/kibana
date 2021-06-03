@@ -32,13 +32,13 @@ export const EndpointActivityLog = memo(
           <>
             <SearchBar onSearch={onSearch} placeholder={i18.SEARCH_ACTIVITY_LOG} />
             <EuiSpacer size="l" />
-
             {
               // @ts-ignore
               activityLog.data.map((logEntry) => (
                 <LogEntry key={logEntry.item.action_id} logEntry={logEntry} />
               ))
             }
+
           </>
         )}
       </>

@@ -42,6 +42,7 @@ import {
   hostIsolationRequestBodyMock,
   hostIsolationResponseMock,
 } from '../../../../common/lib/host_isolation/mocks';
+import { FleetActionGenerator } from '../../../../../common/endpoint/data_generators/fleet_action_generator';
 
 jest.mock('../../policy/store/services/ingest', () => ({
   sendGetAgentConfigList: () => Promise.resolve({ items: [] }),
@@ -213,11 +214,16 @@ describe('endpoint list middleware', () => {
       });
     };
 
-    const activityLog = mockActivityLogResponse(endpointList.hosts[0].metadata.agent.id);
+    const fleetActionGenerator = new FleetActionGenerator(Math.random().toString());
+    const activityLog = [
+      fleetActionGenerator.generate({
+        agents: [endpointList.hosts[0].metadata.agent.id],
+      }),
+    ];
     const dispatchGetActivityLog = () => {
       dispatch({
         type: 'endpointDetailsActivityLogChanged',
-        payload: createLoadedResourceState(activityLog.filter((e) => e.type === 'action')),
+        payload: createLoadedResourceState(activityLog),
       });
     };
 
