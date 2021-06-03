@@ -21,6 +21,7 @@ import { AppLeaveHandler, AppStatus, AppUnmount, Mounter } from '../types';
 import { AppNotFound } from './app_not_found_screen';
 import { ScopedHistory } from '../scoped_history';
 import './app_container.scss';
+import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
 
 interface Props {
   /** Path application is mounted on without the global basePath */
@@ -107,12 +108,14 @@ export const AppContainer: FunctionComponent<Props> = ({
   return (
     <Fragment>
       {appNotFound && <AppNotFound />}
-      {showSpinner && (
-        <div className="appContainer__loading">
-          <EuiLoadingElastic aria-label="Loading application" size="xxl" />
-        </div>
+      {showSpinner && appNotFound && (
+        <EuiLoadingElastic
+          className="appContainer__loading"
+          aria-label="Loading application"
+          size="xxl"
+        />
       )}
-      <div key={appId} ref={elementRef} />
+      <div className={APP_WRAPPER_CLASS} key={appId} ref={elementRef} />
     </Fragment>
   );
 };
