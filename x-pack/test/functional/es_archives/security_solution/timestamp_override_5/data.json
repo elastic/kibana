@@ -1,12 +1,12 @@
 {
   "type": "doc",
   "value": {
-    "index": "myfakeindex-4",
+    "index": "myfakeindex-5",
     "source": {
+      "@timestamp": 1608131778,
       "message": "hello world 4",
-      "@timestamp": "2020-12-16T15:16:18.570Z",
       "event": {
-        "ingested": "2020-12-16T16:16:18.570Z"
+        "ingested": 1622676795
       }
     },
     "type": "_doc"

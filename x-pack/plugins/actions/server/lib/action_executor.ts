@@ -147,6 +147,7 @@ export class ActionExecutor {
                 rel: SAVED_OBJECT_REL_PRIMARY,
                 type: 'action',
                 id: actionId,
+                type_id: actionTypeId,
                 ...namespace,
               },
             ],
