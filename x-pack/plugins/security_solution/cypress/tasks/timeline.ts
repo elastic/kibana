@@ -137,7 +137,7 @@ export const addNotesToTimeline = (notes: string) => {
         $el.find(ADD_NOTE_BUTTON).trigger('click');
         return $el.find(NOTES_TAB_BUTTON).find('.euiBadge');
       })
-      .should('have.text', 1);
+      .should('have.text', '1');
   });
 
   goToQueryTab();
