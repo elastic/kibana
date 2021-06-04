@@ -57,6 +57,19 @@ ts_project(
   tsconfig = ":tsconfig",
 )
 
+peggy(
+  name = "grammar",
+  data = [
+    ":src/common/lib/grammar.peg"
+  ],
+  output_dir = True,
+  args = [
+    "-o",
+    "$(@D)/index.js",
+    "./%s/grammar/grammar.peggy" % package_name()
+  ],
+)
+
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
