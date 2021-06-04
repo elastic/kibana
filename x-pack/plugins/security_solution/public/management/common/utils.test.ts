@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parseQueryFilterToKQL, resolvePathVariables } from './utils';
+import { parseQueryFilterToKQL } from './utils';
 
 describe('utils', () => {
   const searchableFields = [`name`, `description`, `entries.value`, `entries.entries.value`];
@@ -37,41 +37,6 @@ describe('utils', () => {
       ).toBe(
         "exception-list-agnostic.attributes.name:(*this'is%&query\\{\\}[]!¿?with.,-+`´special\\<\\>ºª@#|·chars*) OR exception-list-agnostic.attributes.description:(*this'is%&query\\{\\}[]!¿?with.,-+`´special\\<\\>ºª@#|·chars*) OR exception-list-agnostic.attributes.entries.value:(*this'is%&query\\{\\}[]!¿?with.,-+`´special\\<\\>ºª@#|·chars*) OR exception-list-agnostic.attributes.entries.entries.value:(*this'is%&query\\{\\}[]!¿?with.,-+`´special\\<\\>ºª@#|·chars*)"
       );
-    });
-  });
-
-  describe('resolvePathVariables', () => {
-    it('should resolve defined variables', () => {
-      expect(resolvePathVariables('/segment1/{var1}/segment2', { var1: 'value1' })).toBe(
-        '/segment1/value1/segment2'
-      );
-    });
-
-    it('should not resolve undefined variables', () => {
-      expect(resolvePathVariables('/segment1/{var1}/segment2', {})).toBe(
-        '/segment1/{var1}/segment2'
-      );
-    });
-
-    it('should ignore unused variables', () => {
-      expect(resolvePathVariables('/segment1/{var1}/segment2', { var2: 'value2' })).toBe(
-        '/segment1/{var1}/segment2'
-      );
-    });
-
-    it('should replace multiple variable occurences', () => {
-      expect(resolvePathVariables('/{var1}/segment1/{var1}', { var1: 'value1' })).toBe(
-        '/value1/segment1/value1'
-      );
-    });
-
-    it('should replace multiple variables', () => {
-      const path = resolvePathVariables('/{var1}/segment1/{var2}', {
-        var1: 'value1',
-        var2: 'value2',
-      });
-
-      expect(path).toBe('/value1/segment1/value2');
     });
   });
 });
