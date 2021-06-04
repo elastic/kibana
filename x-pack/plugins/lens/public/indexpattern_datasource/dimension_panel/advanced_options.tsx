@@ -74,7 +74,7 @@ export function AdvancedOptions(props: {
           <EuiSpacer size="s" />
           {inlineOptions.map((option, index) => (
             <React.Fragment key={option.dataTestSubj}>
-              {React.cloneElement(option.inlineElement!, { key: option.dataTestSubj })}
+              {option.inlineElement}
               {index !== inlineOptions.length - 1 && <EuiSpacer size="s" />}
             </React.Fragment>
           ))}
