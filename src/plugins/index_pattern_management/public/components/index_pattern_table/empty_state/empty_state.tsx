@@ -8,7 +8,6 @@
 
 import './empty_state.scss';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DocLinksStart, ApplicationStart } from 'kibana/public';
 import {
