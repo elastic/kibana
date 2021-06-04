@@ -625,28 +625,14 @@ function generateNewAndRecoveredInstanceEvents<
     const { group: actionGroup, subgroup: actionSubgroup } =
       recoveredAlertInstances[id].getLastScheduledActions() ?? {};
     const message = `${params.alertLabel} instance '${id}' has recovered`;
-    logInstanceEvent(
-      id,
-      EVENT_LOG_ACTIONS.recoveredInstance,
-      message,
-      ruleTypeId,
-      actionGroup,
-      actionSubgroup
-    );
+    logInstanceEvent(id, EVENT_LOG_ACTIONS.recoveredInstance, message, actionGroup, actionSubgroup);
   }
 
   for (const id of newIds) {
     const { actionGroup, subgroup: actionSubgroup } =
       currentAlertInstances[id].getScheduledActionOptions() ?? {};
     const message = `${params.alertLabel} created new instance: '${id}'`;
-    logInstanceEvent(
-      id,
-      EVENT_LOG_ACTIONS.newInstance,
-      message,
-      ruleTypeId,
-      actionGroup,
-      actionSubgroup
-    );
+    logInstanceEvent(id, EVENT_LOG_ACTIONS.newInstance, message, actionGroup, actionSubgroup);
   }
 
   for (const id of currentAlertInstanceIds) {
@@ -657,21 +643,13 @@ function generateNewAndRecoveredInstanceEvents<
         ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
         : `actionGroup: '${actionGroup}'`
     }`;
-    logInstanceEvent(
-      id,
-      EVENT_LOG_ACTIONS.activeInstance,
-      message,
-      ruleTypeId,
-      actionGroup,
-      actionSubgroup
-    );
+    logInstanceEvent(id, EVENT_LOG_ACTIONS.activeInstance, message, actionGroup, actionSubgroup);
   }
 
   function logInstanceEvent(
     instanceId: string,
     action: string,
     message: string,
-    ruleId: string,
     group?: string,
     subgroup?: string
   ) {
@@ -690,7 +668,7 @@ function generateNewAndRecoveredInstanceEvents<
             rel: SAVED_OBJECT_REL_PRIMARY,
             type: 'alert',
             id: alertId,
-            type_id: ruleId,
+            type_id: ruleTypeId,
             namespace,
           },
         ],
