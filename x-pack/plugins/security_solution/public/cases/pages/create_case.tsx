@@ -11,7 +11,7 @@ import { useHistory } from 'react-router-dom';
 import { SecurityPageName } from '../../app/types';
 import { getCaseUrl } from '../../common/components/link_to';
 import { useGetUrlSearch } from '../../common/components/navigation/use_get_url_search';
-import { WrapperPage } from '../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useGetUserCasesPermissions } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { navTabs } from '../../app/home/home_navigations';
@@ -40,10 +40,10 @@ export const CreateCasePage = React.memo(() => {
 
   return (
     <>
-      <WrapperPage>
+      <SecuritySolutionPageWrapper>
         <CaseHeaderPage backOptions={backOptions} title={i18n.CREATE_TITLE} />
         <Create />
-      </WrapperPage>
+      </SecuritySolutionPageWrapper>
       <SpyRoute pageName={SecurityPageName.case} />
     </>
   );

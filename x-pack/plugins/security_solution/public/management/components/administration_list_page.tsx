@@ -9,7 +9,7 @@ import React, { FC, memo } from 'react';
 import { EuiPanel, EuiSpacer, CommonProps } from '@elastic/eui';
 import styled from 'styled-components';
 import { SecurityPageName } from '../../../common/constants';
-import { WrapperPage } from '../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { HeaderPage } from '../../common/components/header_page';
 import { SiemNavigation } from '../../common/components/navigation';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
@@ -46,7 +46,7 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
     const badgeOptions = !beta ? undefined : { beta: true, text: BETA_BADGE_LABEL };
 
     return (
-      <WrapperPage noTimeline {...otherProps}>
+      <SecuritySolutionPageWrapper noTimeline {...otherProps}>
         <HeaderPage
           hideSourcerer={true}
           title={title}
@@ -91,7 +91,7 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
         <EuiPanelStyled>{children}</EuiPanelStyled>
 
         <SpyRoute pageName={SecurityPageName.administration} />
-      </WrapperPage>
+      </SecuritySolutionPageWrapper>
     );
   }
 );

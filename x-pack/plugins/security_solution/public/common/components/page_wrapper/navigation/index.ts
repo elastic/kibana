@@ -44,7 +44,7 @@ export const useSecurityPageTemplateNav = (): KibanaPageTemplateProps['solutionN
 
   const navItems = [
     {
-      name: null,
+      name: '',
       id: APP_ID,
       items: topLevelNavItems,
     },

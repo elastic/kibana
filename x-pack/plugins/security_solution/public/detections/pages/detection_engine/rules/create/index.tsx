@@ -26,7 +26,7 @@ import {
   getRuleDetailsUrl,
   getRulesUrl,
 } from '../../../../../common/components/link_to/redirect_to_detection_engine';
-import { WrapperPage } from '../../../../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../../../../common/components/page_wrapper';
 import { displaySuccessToast, useStateToaster } from '../../../../../common/components/toasters';
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../../components/user_info';
@@ -287,7 +287,7 @@ const CreateRulePageComponent: React.FC = () => {
 
   return (
     <>
-      <WrapperPage>
+      <SecuritySolutionPageWrapper>
         <EuiFlexGroup direction="row" justifyContent="spaceAround">
           <MaxWidthEuiFlexItem>
             <DetectionEngineHeaderPage
@@ -436,7 +436,7 @@ const CreateRulePageComponent: React.FC = () => {
             </MyEuiPanel>
           </MaxWidthEuiFlexItem>
         </EuiFlexGroup>
-      </WrapperPage>
+      </SecuritySolutionPageWrapper>
 
       <SpyRoute pageName={SecurityPageName.detections} />
     </>
