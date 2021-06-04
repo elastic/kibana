@@ -18,6 +18,7 @@ import type { ListArray, ExceptionListItemSchema } from '@kbn/securitysolution-i
 import { MAX_EXCEPTION_LIST_SIZE } from '@kbn/securitysolution-list-constants';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
+import { ElasticsearchClient } from '@kbn/securitysolution-es-utils';
 import {
   TimestampOverrideOrUndefined,
   Privilege,
@@ -51,6 +52,7 @@ import {
   ThreatRuleParams,
   ThresholdRuleParams,
 } from '../schemas/rule_schemas';
+import { ESClient } from '../../../../../apm/target/types/scripts/shared/get_es_client';
 
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
@@ -164,8 +166,14 @@ export const checkPrivileges = async (
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>,
   indices: string[]
 ): Promise<Privilege> =>
+  checkPrivilegesFromEsClient(services.scopedClusterClient.asCurrentUser, indices);
+
+export const checkPrivilegesFromEsClient = async (
+  esClient: ElasticsearchClient,
+  indices: string[]
+): Promise<Privilege> =>
   (
-    await services.scopedClusterClient.asCurrentUser.transport.request({
+    await esClient.transport.request({
       path: '/_security/user/_has_privileges',
       method: 'POST',
       body: {
