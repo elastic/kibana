@@ -61,8 +61,6 @@ export function LayerPanels(
   );
   const updateDatasource = useMemo(
     () => (datasourceId: string, newState: unknown) => {
-      // React will synchronously update if this is triggered from a third party component,
-      // which we don't want. The timeout lets user interaction have priority, then React updates.
       dispatch({
         type: 'UPDATE_DATASOURCE_STATE',
         updater: (prevState: unknown) =>
