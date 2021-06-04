@@ -7,7 +7,6 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { UI_SETTINGS } from '../../../../src/plugins/data/common';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
@@ -21,18 +20,15 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     before(async () => {
       log.debug('Starting visualize before method');
       await browser.setWindowSize(1280, 800);
+      await esArchiver.load('empty_kibana');
+
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.loadIfNeeded('long_window_logstash');
-      await esArchiver.load('visualize');
-      await kibanaServer.uiSettings.replace({
-        defaultIndex: 'logstash-*',
-        [UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
-      });
       isOss = await deployment.isOss();
     });
 
     // TODO: Remove when vislib is removed
-    describe('new charts library', function () {
+    describe('new charts library visualize ciGroup7', function () {
       this.tags('ciGroup7');
 
       before(async () => {
@@ -59,7 +55,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_pie_chart'));
     });
 
-    describe('', function () {
+    describe('visualize ciGroup9', function () {
       this.tags('ciGroup9');
 
       loadTestFile(require.resolve('./_embedding_chart'));
@@ -74,7 +70,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       }
     });
 
-    describe('', function () {
+    describe('visualize ciGroup10', function () {
       this.tags('ciGroup10');
 
       loadTestFile(require.resolve('./_inspector'));
@@ -86,7 +82,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_metric_chart'));
     });
 
-    describe('', function () {
+    describe('visualize ciGroup4', function () {
       this.tags('ciGroup4');
 
       loadTestFile(require.resolve('./_line_chart_split_series'));
@@ -106,7 +102,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       }
     });
 
-    describe('', function () {
+    describe('visualize ciGroup12', function () {
       this.tags('ciGroup12');
 
       loadTestFile(require.resolve('./_tag_cloud'));
