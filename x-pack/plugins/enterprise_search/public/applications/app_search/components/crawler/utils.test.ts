@@ -17,7 +17,7 @@ const DEFAULT_CRAWL_RULE: CrawlRule = {
 };
 
 describe('crawlerDomainServerToClient', () => {
-  test('return valuess', () => {
+  it('converts the API payload into properties matching our code style', () => {
     const id = '507f1f77bcf86cd799439011';
     const name = 'moviedatabase.com';
 
@@ -58,7 +58,7 @@ describe('crawlerDomainServerToClient', () => {
 });
 
 describe('crawlerDataServerToClient', () => {
-  test('return value', () => {
+  it('converts all domains from the server form to their client form', () => {
     const domains: CrawlerDomainFromServer[] = [
       {
         id: 'x',
@@ -81,10 +81,13 @@ describe('crawlerDataServerToClient', () => {
         crawl_rules: [],
       },
     ];
+
     const output = crawlerDataServerToClient({
       domains,
     });
+
     expect(output.domains).toHaveLength(2);
-    expect(output.domains[0].id).toStrictEqual(domains[0].id);
+    expect(output.domains[0]).toEqual(crawlerDomainServerToClient(domains[0]));
+    expect(output.domains[1]).toEqual(crawlerDomainServerToClient(domains[1]));
   });
 });
