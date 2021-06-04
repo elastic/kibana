@@ -522,7 +522,6 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
           start: request.body.start !== undefined ? String(request.body.start) : undefined,
           end: request.body.end !== undefined ? String(request.body.end) : undefined,
           overall_score: request.body.overall_score ?? 0,
-          body: {},
         });
         return response.ok({
           body,
