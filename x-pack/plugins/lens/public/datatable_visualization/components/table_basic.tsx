@@ -306,17 +306,19 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       return ({ columnId }: { columnId: string }) => {
         const currentAlignment = alignments && alignments[columnId];
         const alignmentClassName = `lnsTableCell--${currentAlignment}`;
+        const columnName =
+          columns.find(({ id }) => id === columnId)?.displayAsText?.replace(/ /g, '-') || columnId;
         return summaryLookup[columnId] != null ? (
           <div
             className={`lnsTableCell ${alignmentClassName}`}
-            data-test-subj={`lnsDataTable-footer-${columnId}`}
+            data-test-subj={`lnsDataTable-footer-${columnName}`}
           >
             {summaryLookup[columnId]}
           </div>
         ) : null;
       };
     }
-  }, [columnConfig.columns, alignments, firstTable]);
+  }, [columnConfig.columns, alignments, firstTable, columns]);
 
   if (isEmpty) {
     return <EmptyPlaceholder icon={LensIconChartDatatable} />;

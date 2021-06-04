@@ -747,9 +747,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async setTableSummaryRowFunction(
       summaryFunction: 'none' | 'sum' | 'avg' | 'count' | 'min' | 'max'
     ) {
-      const target = await testSubjects.find('lnsDatatable_summaryrow_function');
-      await comboBox.openOptionsList(target);
-      await comboBox.setElement(target, summaryFunction);
+      await testSubjects.click('lnsDatatable_summaryrow_function');
+      await testSubjects.click('lns-datatable-summary-' + summaryFunction);
     },
 
     async setTableSummaryRowLabel(newLabel: string) {
@@ -765,6 +764,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async openTablePalettePanel() {
       await testSubjects.click('lnsDatatable_dynamicColoring_trigger');
+    },
+
+    async closeTablePalettePanel() {
+      await testSubjects.click('lns-indexPattern-PalettePanelContainerBack');
     },
 
     // different picker from the next one
