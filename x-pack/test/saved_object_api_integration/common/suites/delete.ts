@@ -6,7 +6,7 @@
  */
 
 import { SuperTest } from 'supertest';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
 import { expectResponses, getUrlPrefix, getTestTitle } from '../lib/saved_object_test_utils';
