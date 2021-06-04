@@ -30,7 +30,7 @@ import type {
 } from './constants';
 
 export interface Scale {
-  boundsMargin?: number | '';
+  boundsMargin?: number;
   defaultYExtents?: boolean;
   max?: number | null;
   min?: number | null;
