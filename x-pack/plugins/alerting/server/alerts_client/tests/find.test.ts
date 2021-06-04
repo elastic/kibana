@@ -163,7 +163,6 @@ describe('find()', () => {
               "interval": "10s",
             },
             "updatedAt": 2019-02-12T21:01:22.479Z,
-            "version": undefined,
           },
         ],
         "page": 1,
@@ -244,7 +243,6 @@ describe('find()', () => {
             },
             score: 1,
             references: [],
-            version: '1.1',
           },
         ],
       });
@@ -261,7 +259,6 @@ describe('find()', () => {
               "tags": Array [
                 "myTag",
               ],
-              "version": "1.1",
             },
           ],
           "page": 1,

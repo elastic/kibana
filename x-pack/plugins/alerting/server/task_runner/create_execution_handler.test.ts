@@ -96,7 +96,7 @@ const createExecutionHandlerParams: jest.Mocked<
     stateVal: 'My other {{state.value}} goes here',
   },
   alertUpdatedBy: 'testUser',
-  alertVersion: '1.1',
+  kibanaVersion: '1.1',
 };
 
 beforeEach(() => {

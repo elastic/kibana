@@ -357,12 +357,7 @@ export class AlertsClient {
       });
       createdAlert.attributes.scheduledTaskId = scheduledTask.id;
     }
-    return this.getAlertFromRaw<Params>(
-      createdAlert.id,
-      createdAlert.attributes,
-      references,
-      createdAlert.version
-    );
+    return this.getAlertFromRaw<Params>(createdAlert.id, createdAlert.attributes, references);
   }
 
   public async get<Params extends AlertTypeParams = never>({
@@ -394,12 +389,7 @@ export class AlertsClient {
         savedObject: { type: 'alert', id },
       })
     );
-    return this.getAlertFromRaw<Params>(
-      result.id,
-      result.attributes,
-      result.references,
-      result.version
-    );
+    return this.getAlertFromRaw<Params>(result.id, result.attributes, result.references);
   }
 
   public async getAlertState({ id }: { id: string }): Promise<AlertTaskState | void> {
@@ -509,7 +499,7 @@ export class AlertsClient {
       type: 'alert',
     });
 
-    const authorizedData = data.map(({ id, attributes, references, version }) => {
+    const authorizedData = data.map(({ id, attributes, references }) => {
       try {
         ensureRuleTypeIsAuthorized(
           attributes.alertTypeId,
@@ -529,8 +519,7 @@ export class AlertsClient {
       return this.getAlertFromRaw<Params>(
         id,
         fields ? (pick(attributes, fields) as RawAlert) : attributes,
-        references,
-        version
+        references
       );
     });
 
@@ -760,7 +749,7 @@ export class AlertsClient {
 
   private async updateAlert<Params extends AlertTypeParams>(
     { id, data }: UpdateOptions<Params>,
-    { attributes, version }: SavedObject<RawAlert>
+    { attributes }: SavedObject<RawAlert>
   ): Promise<PartialAlert<Params>> {
     const alertType = this.alertTypeRegistry.get(attributes.alertTypeId);
 
@@ -804,7 +793,6 @@ export class AlertsClient {
         {
           id,
           overwrite: true,
-          version,
           references,
         }
       );
@@ -818,12 +806,7 @@ export class AlertsClient {
       throw e;
     }
 
-    return this.getPartialAlertFromRaw(
-      id,
-      updatedObject.attributes,
-      updatedObject.references,
-      updatedObject.version
-    );
+    return this.getPartialAlertFromRaw(id, updatedObject.attributes, updatedObject.references);
   }
 
   private apiKeyAsAlertAttributes(
@@ -1453,13 +1436,12 @@ export class AlertsClient {
   private getAlertFromRaw<Params extends AlertTypeParams>(
     id: string,
     rawAlert: RawAlert,
-    references: SavedObjectReference[] | undefined,
-    version?: string
+    references: SavedObjectReference[] | undefined
   ): Alert {
     // In order to support the partial update API of Saved Objects we have to support
     // partial updates of an Alert, but when we receive an actual RawAlert, it is safe
     // to cast the result to an Alert
-    return this.getPartialAlertFromRaw<Params>(id, rawAlert, references, version) as Alert;
+    return this.getPartialAlertFromRaw<Params>(id, rawAlert, references) as Alert;
   }
 
   private getPartialAlertFromRaw<Params extends AlertTypeParams>(
@@ -1485,7 +1467,6 @@ export class AlertsClient {
       // we currently only support the Interval Schedule type
       // Once we support additional types, this type signature will likely change
       schedule: rawAlert.schedule as IntervalSchedule,
-      version,
       actions: rawAlert.actions
         ? this.injectReferencesIntoActions(id, rawAlert.actions, references || [])
         : [],

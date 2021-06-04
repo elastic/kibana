@@ -87,7 +87,6 @@ describe('update()', () => {
       ],
     },
     references: [],
-    version: '123',
   };
   const existingDecryptedAlert = {
     ...existingAlert,
@@ -224,7 +223,6 @@ describe('update()', () => {
           id: '2',
         },
       ],
-      version: '123',
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -234,7 +232,6 @@ describe('update()', () => {
         createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
-      version: '123',
     });
     const result = await alertsClient.update({
       id: '1',
@@ -312,7 +309,6 @@ describe('update()', () => {
         },
         "scheduledTaskId": "task-123",
         "updatedAt": 2019-02-12T21:01:22.479Z,
-        "version": "123",
       }
     `);
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
@@ -396,7 +392,6 @@ describe('update()', () => {
             "type": "action",
           },
         ],
-        "version": "123",
       }
     `);
     expect(actionsClient.isActionTypeEnabled).toHaveBeenCalledWith('test', { notifyUsage: true });
@@ -507,7 +502,6 @@ describe('update()', () => {
         },
         "scheduledTaskId": "task-123",
         "updatedAt": 2019-02-12T21:01:22.479Z,
-        "version": undefined,
       }
     `);
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(2);
@@ -561,7 +555,6 @@ describe('update()', () => {
             "type": "action",
           },
         ],
-        "version": "123",
       }
     `);
   });
@@ -665,7 +658,6 @@ describe('update()', () => {
         },
         "scheduledTaskId": "task-123",
         "updatedAt": 2019-02-12T21:01:22.479Z,
-        "version": undefined,
       }
     `);
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(2);
@@ -719,7 +711,6 @@ describe('update()', () => {
             "type": "action",
           },
         ],
-        "version": "123",
       }
     `);
   });
@@ -1116,7 +1107,6 @@ describe('update()', () => {
           scheduledTaskId: 'task-123',
         },
         references: [],
-        version: '123',
       });
 
       taskManager.schedule.mockResolvedValueOnce({

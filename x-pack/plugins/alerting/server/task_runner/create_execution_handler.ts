@@ -54,7 +54,7 @@ export interface CreateExecutionHandlerOptions<
   request: KibanaRequest;
   alertParams: AlertTypeParams;
   alertUpdatedBy?: string;
-  alertVersion?: string;
+  kibanaVersion: string;
 }
 
 interface ExecutionHandlerOptions<ActionGroupIds extends string> {
@@ -91,7 +91,7 @@ export function createExecutionHandler<
   request,
   alertParams,
   alertUpdatedBy,
-  alertVersion,
+  kibanaVersion,
 }: CreateExecutionHandlerOptions<
   Params,
   State,
@@ -205,7 +205,7 @@ export function createExecutionHandler<
           namespace: spaceId !== 'default' ? spaceId : undefined,
           name: alertName,
           author: alertUpdatedBy ? [alertUpdatedBy] : undefined,
-          version: alertVersion,
+          version: kibanaVersion,
         },
       };
 

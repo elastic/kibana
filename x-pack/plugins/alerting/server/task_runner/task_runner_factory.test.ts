@@ -78,6 +78,7 @@ describe('Task Runner Factory', () => {
     internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
     alertTypeRegistry: alertTypeRegistryMock.create(),
     kibanaBaseUrl: 'https://localhost:5601',
+    kibanaVersion: '1.0.0',
   };
 
   beforeEach(() => {

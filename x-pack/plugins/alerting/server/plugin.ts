@@ -363,6 +363,7 @@ export class AlertingPlugin {
       internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
       alertTypeRegistry: this.alertTypeRegistry!,
       kibanaBaseUrl: this.kibanaBaseUrl,
+      kibanaVersion: this.kibanaVersion,
     });
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {

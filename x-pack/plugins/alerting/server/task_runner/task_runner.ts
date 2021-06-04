@@ -166,8 +166,7 @@ export class TaskRunner<
     kibanaBaseUrl: string | undefined,
     actions: Alert<Params>['actions'],
     alertParams: Params,
-    alertUpdatedBy?: string,
-    alertVersion?: string
+    alertUpdatedBy?: string
   ) {
     return createExecutionHandler<
       Params,
@@ -191,7 +190,7 @@ export class TaskRunner<
       request: this.getFakeKibanaRequest(spaceId, apiKey),
       alertParams,
       alertUpdatedBy,
-      alertVersion,
+      kibanaVersion: this.context.kibanaVersion,
     });
   }
 
@@ -235,7 +234,6 @@ export class TaskRunner<
       updatedAt,
       enabled,
       actions,
-      version,
     } = alert;
     const {
       params: { alertId },
@@ -313,7 +311,7 @@ export class TaskRunner<
       ...event.rule,
       name: alert.name,
       author: alert.updatedBy ? [alert.updatedBy] : undefined,
-      version,
+      version: this.context.kibanaVersion,
     };
 
     // Cleanup alert instances that are no longer scheduling actions to avoid over populating the alertInstances object
@@ -345,6 +343,7 @@ export class TaskRunner<
       namespace,
       ruleType: alertType,
       rule: alert,
+      kibanaVersion: this.context.kibanaVersion,
     });
 
     if (!muteAll) {
@@ -434,8 +433,7 @@ export class TaskRunner<
       this.context.kibanaBaseUrl,
       alert.actions,
       alert.params,
-      alert.updatedBy ?? undefined,
-      alert.version
+      alert.updatedBy ?? undefined
     );
     return this.executeAlertInstances(
       services,
@@ -640,6 +638,7 @@ interface GenerateNewAndRecoveredInstanceEventsParams<
     string
   >;
   rule: SanitizedAlert<AlertTypeParams>;
+  kibanaVersion: string;
 }
 
 function generateNewAndRecoveredInstanceEvents<
@@ -655,6 +654,7 @@ function generateNewAndRecoveredInstanceEvents<
     recoveredAlertInstances,
     rule,
     ruleType,
+    kibanaVersion,
   } = params;
   const originalAlertInstanceIds = Object.keys(originalAlertInstances);
   const currentAlertInstanceIds = Object.keys(currentAlertInstances);
@@ -725,7 +725,7 @@ function generateNewAndRecoveredInstanceEvents<
         namespace,
         name: rule.name,
         author: rule.updatedBy ? [rule.updatedBy] : undefined,
-        version: rule.version,
+        version: kibanaVersion,
       },
     };
     eventLogger.logEvent(event);
