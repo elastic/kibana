@@ -626,7 +626,7 @@ function trackAlertDurations<
       ? originalAlerts[id].getState()
       : currentAlerts[id].getState();
     const duration = state.start
-      ? new Date(currentTime).valueOf() - new Date(state.start as string).valueOf() * 1000 * 1000 // nanoseconds
+      ? (new Date(currentTime).valueOf() - new Date(state.start as string).valueOf()) * 1000 * 1000 // nanoseconds
       : undefined;
     currentAlerts[id].replaceState({
       ...state,
@@ -640,7 +640,7 @@ function trackAlertDurations<
   for (const id of recoveredAlertIds) {
     const state = recoveredAlerts[id].getState();
     const duration = state.start
-      ? new Date(currentTime).valueOf() - new Date(state.start as string).valueOf() * 1000 * 1000 // nanoseconds
+      ? (new Date(currentTime).valueOf() - new Date(state.start as string).valueOf()) * 1000 * 1000 // nanoseconds
       : undefined;
     recoveredAlerts[id].replaceState({
       ...state,
