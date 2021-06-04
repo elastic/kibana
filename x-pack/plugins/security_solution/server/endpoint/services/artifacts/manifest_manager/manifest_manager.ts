@@ -25,9 +25,7 @@ import {
   getEndpointEventFiltersList,
   getEndpointExceptionList,
   getEndpointTrustedAppsList,
-  isCompressed,
   Manifest,
-  maybeCompressArtifact,
 } from '../../../lib/artifacts';
 import {
   InternalArtifactCompleteSchema,
@@ -372,16 +370,10 @@ export class ManifestManager {
 
     for (const result of results) {
       await iterateArtifactsBuildResult(result, async (artifact, policyId) => {
-        let artifactToAdd = baselineManifest.getArtifact(getArtifactId(artifact)) || artifact;
-
-        if (!isCompressed(artifactToAdd)) {
-          artifactToAdd = await maybeCompressArtifact(artifactToAdd);
-
-          if (!isCompressed(artifactToAdd)) {
-            throw new Error(`Unable to compress artifact: ${getArtifactId(artifactToAdd)}`);
-          } else if (!internalArtifactCompleteSchema.is(artifactToAdd)) {
-            throw new Error(`Incomplete artifact detected: ${getArtifactId(artifactToAdd)}`);
-          }
+        const artifactToAdd = baselineManifest.getArtifact(getArtifactId(artifact)) || artifact;
+        artifactToAdd.compressionAlgorithm = 'none';
+        if (!internalArtifactCompleteSchema.is(artifactToAdd)) {
+          throw new Error(`Incomplete artifact detected: ${getArtifactId(artifactToAdd)}`);
         }
 
         manifest.addEntry(artifactToAdd, policyId);
