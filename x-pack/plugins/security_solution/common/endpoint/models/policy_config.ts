@@ -164,4 +164,4 @@ export const policyFactoryWithSupportedFeatures = (
 /**
  * Reflects what string the Endpoint will use when message field is default/empty
  */
-export const DefaultMalwareMessage = 'Elastic Security {action} {filename}';
+export const DefaultPolicyNotificationMessage = 'Elastic Security {action} {filename}';

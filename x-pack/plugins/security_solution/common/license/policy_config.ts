@@ -9,7 +9,7 @@ import { ILicense } from '../../../licensing/common/types';
 import { isAtLeast } from './license';
 import { PolicyConfig } from '../endpoint/types';
 import {
-  DefaultMalwareMessage,
+  DefaultPolicyNotificationMessage,
   policyFactoryWithoutPaidFeatures,
   policyFactoryWithSupportedFeatures,
 } from '../endpoint/models/policy_config';
@@ -46,7 +46,9 @@ export const isEndpointPolicyValidForLicense = (
   // Only Platinum or higher may change the malware message (which can be blank or what Endpoint defaults)
   if (
     [policy.windows, policy.mac].some(
-      (p) => p.popup.malware.message !== '' && p.popup.malware.message !== DefaultMalwareMessage
+      (p) =>
+        p.popup.malware.message !== '' &&
+        p.popup.malware.message !== DefaultPolicyNotificationMessage
     )
   ) {
     return false;
@@ -65,7 +67,7 @@ export const isEndpointPolicyValidForLicense = (
   // Only Platinum or higher may change the ransomware message (which can be blank or what Endpoint defaults)
   if (
     policy.windows.popup.ransomware.message !== '' &&
-    policy.windows.popup.ransomware.message !== DefaultMalwareMessage
+    policy.windows.popup.ransomware.message !== DefaultPolicyNotificationMessage
   ) {
     return false;
   }

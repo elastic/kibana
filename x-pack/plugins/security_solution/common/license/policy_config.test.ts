@@ -10,7 +10,7 @@ import {
   unsetPolicyFeaturesAccordingToLicenseLevel,
 } from './policy_config';
 import {
-  DefaultMalwareMessage,
+  DefaultPolicyNotificationMessage,
   policyFactory,
   policyFactoryWithSupportedFeatures,
   policyFactoryWithoutPaidFeatures,
@@ -177,7 +177,9 @@ describe('policy_config and licenses', () => {
       expect(retPolicy.windows.popup.malware.message).not.toEqual(popupMessage);
 
       // need to invert the test, since it could be either value
-      expect(['', DefaultMalwareMessage]).toContain(retPolicy.windows.popup.malware.message);
+      expect(['', DefaultPolicyNotificationMessage]).toContain(
+        retPolicy.windows.popup.malware.message
+      );
     });
 
     it('resets Platinum-paid ransomware fields for lower license tiers', () => {
@@ -195,7 +197,9 @@ describe('policy_config and licenses', () => {
       expect(retPolicy.windows.popup.ransomware.message).not.toEqual(popupMessage);
 
       // need to invert the test, since it could be either value
-      expect(['', DefaultMalwareMessage]).toContain(retPolicy.windows.popup.ransomware.message);
+      expect(['', DefaultPolicyNotificationMessage]).toContain(
+        retPolicy.windows.popup.ransomware.message
+      );
     });
 
     it('sets ransomware supported field to false when license is below Platinum', () => {
