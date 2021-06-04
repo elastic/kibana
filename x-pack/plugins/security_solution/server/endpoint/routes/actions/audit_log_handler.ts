@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler } from 'kibana/server';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../../../fleet/common';
-import { EndpointActionLogRequestSchema } from '../../../../common/endpoint/schema/actions';
+import {
+  EndpointActionLogRequestParams,
+  EndpointActionLogRequestQuery,
+} from '../../../../common/endpoint/schema/actions';
 
 import { SecuritySolutionRequestHandlerContext } from '../../../types';
 import { EndpointAppContext } from '../../types';
@@ -16,14 +18,18 @@ import { EndpointAppContext } from '../../types';
 export const actionsLogRequestHandler = (
   endpointContext: EndpointAppContext
 ): RequestHandler<
-  TypeOf<typeof EndpointActionLogRequestSchema.params>,
-  unknown,
+  EndpointActionLogRequestParams,
+  EndpointActionLogRequestQuery,
   unknown,
   SecuritySolutionRequestHandlerContext
 > => {
   const logger = endpointContext.logFactory.get('audit_log');
+
   return async (context, req, res) => {
-    const elasticAgentId = req.params.agent_id;
+    const {
+      params: { agent_id: elasticAgentId },
+      query: { page, page_size: pageSize },
+    } = req;
     const options = {
       headers: {
         'X-elastic-product-origin': 'fleet',
@@ -31,11 +37,13 @@ export const actionsLogRequestHandler = (
     };
     const esClient = context.core.elasticsearch.client.asCurrentUser;
     let result;
+
     try {
       result = await esClient.search(
         {
           index: [AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX],
-          size: 20,
+          size: pageSize,
+          from: page,
           body: {
             query: {
               bool: {
