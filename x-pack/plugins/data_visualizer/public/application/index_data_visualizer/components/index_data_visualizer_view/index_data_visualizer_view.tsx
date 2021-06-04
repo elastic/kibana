@@ -117,7 +117,6 @@ export const getDefaultDataVisualizerListState = (): Required<DataVisualizerInde
 });
 
 export interface IndexDataVisualizerViewProps {
-  query: Query;
   currentIndexPattern: IndexPattern;
   currentSavedSearch: SavedSearchSavedObject | null;
 }
@@ -139,7 +138,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     dataVisualizerProps.currentSavedSearch
   );
 
-  const { query, currentIndexPattern } = dataVisualizerProps;
+  const { currentIndexPattern } = dataVisualizerProps;
 
   useEffect(() => {
     if (dataVisualizerProps?.currentSavedSearch !== undefined) {
@@ -776,7 +775,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                       <EuiFlexItem grow={false}>
                         <FullTimeRangeSelector
                           indexPattern={currentIndexPattern}
-                          query={query}
+                          query={undefined}
                           disabled={false}
                           timefilter={timefilter}
                         />

@@ -17,8 +17,8 @@ import { useDataVisualizerKibana } from '../../../kibana_context';
 interface Props {
   timefilter: TimefilterContract;
   indexPattern: IndexPattern;
-  query: Query;
   disabled: boolean;
+  query?: Query;
   callback?: (a: any) => void;
 }
 

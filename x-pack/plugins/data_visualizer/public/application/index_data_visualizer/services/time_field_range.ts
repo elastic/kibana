@@ -8,6 +8,7 @@
 import { estypes } from '@elastic/elasticsearch';
 import { lazyLoadModules } from '../../../lazy_load_bundle';
 import { GetTimeFieldRangeResponse } from '../../../../common/types/time_field_request';
+import { Query } from '../../../../../../../src/plugins/data/common/query';
 
 export async function getTimeFieldRange({
   index,
@@ -17,7 +18,7 @@ export async function getTimeFieldRange({
 }: {
   index: string;
   timeFieldName?: string;
-  query: any;
+  query?: Query;
   runtimeMappings?: estypes.RuntimeFields;
 }) {
   const body = JSON.stringify({ index, timeFieldName, query, runtimeMappings });

@@ -33,13 +33,12 @@ import { IndexPattern } from '../../../../../../src/plugins/data/common/index_pa
 
 export type IndexDataVisualizerSpec = typeof IndexDataVisualizer;
 
-export interface DataVisualizerUrlStateContextProviderProps extends IndexDataVisualizerViewProps {
+export interface DataVisualizerUrlStateContextProviderProps {
   IndexDataVisualizerComponent: FC<IndexDataVisualizerViewProps>;
 }
 
 export const DataVisualizerUrlStateContextProvider: FC<DataVisualizerUrlStateContextProviderProps> = ({
   IndexDataVisualizerComponent,
-  ...restProps
 }) => {
   const {
     services: {
@@ -167,7 +166,6 @@ export const DataVisualizerUrlStateContextProvider: FC<DataVisualizerUrlStateCon
     <UrlStateContextProvider value={{ searchString, setUrlState }}>
       {currentIndexPattern ? (
         <IndexDataVisualizerComponent
-          {...restProps}
           currentIndexPattern={currentIndexPattern}
           currentSavedSearch={currentSavedSearch}
         />
@@ -178,7 +176,7 @@ export const DataVisualizerUrlStateContextProvider: FC<DataVisualizerUrlStateCon
   );
 };
 
-export const IndexDataVisualizer: FC<IndexDataVisualizerViewProps> = (props) => {
+export const IndexDataVisualizer: FC = () => {
   const coreStart = getCoreStart();
   const {
     data,
@@ -204,7 +202,6 @@ export const IndexDataVisualizer: FC<IndexDataVisualizerViewProps> = (props) => 
     <KibanaContextProvider services={{ ...services }}>
       <DataVisualizerUrlStateContextProvider
         IndexDataVisualizerComponent={IndexDataVisualizerView}
-        {...props}
       />
     </KibanaContextProvider>
   );

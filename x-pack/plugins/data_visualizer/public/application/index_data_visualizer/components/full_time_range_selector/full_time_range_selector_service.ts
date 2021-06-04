@@ -22,7 +22,7 @@ export interface TimeRange {
 export async function setFullTimeRange(
   timefilter: TimefilterContract,
   indexPattern: IndexPattern,
-  query: Query
+  query?: Query
 ): Promise<GetTimeFieldRangeResponse> {
   const runtimeMappings = indexPattern.getComputedFields().runtimeFields as estypes.RuntimeFields;
   const resp = await getTimeFieldRange({
