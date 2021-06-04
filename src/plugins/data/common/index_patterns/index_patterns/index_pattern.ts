@@ -7,7 +7,7 @@
  */
 
 import _, { each, reject } from 'lodash';
-import { FieldAttrs, FieldAttrSet } from '../..';
+import { FieldAttrs, FieldAttrSet, IndexPatternAttributes } from '../..';
 import type { RuntimeField } from '../types';
 import { DuplicateField } from '../../../../kibana_utils/common';
 
@@ -240,6 +240,7 @@ export class IndexPattern implements IIndexPattern {
    * @param script script code
    * @param fieldType
    * @param lang
+   * @deprecated use runtime field instead
    */
   async addScriptedField(name: string, script: string, fieldType: string = 'string') {
     const scriptedFields = this.getScriptedFields();
@@ -265,6 +266,7 @@ export class IndexPattern implements IIndexPattern {
   /**
    * Remove scripted field from field list
    * @param fieldName
+   * @deprecated use runtime field instead
    */
 
   removeScriptedField(fieldName: string) {
@@ -274,10 +276,18 @@ export class IndexPattern implements IIndexPattern {
     }
   }
 
+  /**
+   *
+   * @deprecated use runtime field instead
+   */
   getNonScriptedFields() {
     return [...this.fields.getAll().filter((field) => !field.scripted)];
   }
 
+  /**
+   *
+   * @deprecated use runtime field instead
+   */
   getScriptedFields() {
     return [...this.fields.getAll().filter((field) => field.scripted)];
   }
@@ -308,7 +318,7 @@ export class IndexPattern implements IIndexPattern {
   /**
    * Returns index pattern as saved object body for saving
    */
-  getAsSavedObjectBody() {
+  getAsSavedObjectBody(): IndexPatternAttributes {
     const fieldFormatMap = _.isEmpty(this.fieldFormatMap)
       ? undefined
       : JSON.stringify(this.fieldFormatMap);
@@ -321,12 +331,10 @@ export class IndexPattern implements IIndexPattern {
       timeFieldName: this.timeFieldName,
       intervalName: this.intervalName,
       sourceFilters: this.sourceFilters ? JSON.stringify(this.sourceFilters) : undefined,
-      fields: this.fields
-        ? JSON.stringify(this.fields.filter((field) => field.scripted))
-        : undefined,
+      fields: JSON.stringify(this.fields?.filter((field) => field.scripted) ?? []),
       fieldFormatMap,
-      type: this.type,
-      typeMeta: this.typeMeta ? JSON.stringify(this.typeMeta) : undefined,
+      type: this.type!,
+      typeMeta: JSON.stringify(this.typeMeta ?? {}),
       allowNoIndex: this.allowNoIndex ? this.allowNoIndex : undefined,
       runtimeFieldMap: runtimeFieldMap ? JSON.stringify(runtimeFieldMap) : undefined,
     };

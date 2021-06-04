@@ -27,13 +27,28 @@ describe('math', () => {
     expect(fn(-103, { expression: 'abs(value)' })).toBe(103);
   });
 
-  it('evaluates math expressions with references to columns in a datatable', () => {
+  it('evaluates math expressions with references to columns by id in a datatable', () => {
     expect(fn(testTable, { expression: 'unique(in_stock)' })).toBe(2);
     expect(fn(testTable, { expression: 'sum(quantity)' })).toBe(2508);
     expect(fn(testTable, { expression: 'mean(price)' })).toBe(320);
     expect(fn(testTable, { expression: 'min(price)' })).toBe(67);
     expect(fn(testTable, { expression: 'median(quantity)' })).toBe(256);
     expect(fn(testTable, { expression: 'max(price)' })).toBe(605);
+  });
+
+  it('does not use the name for math', () => {
+    expect(() => fn(testTable, { expression: 'unique("in_stock label")' })).toThrow(
+      'Unknown variable'
+    );
+    expect(() => fn(testTable, { expression: 'sum("quantity label")' })).toThrow(
+      'Unknown variable'
+    );
+    expect(() => fn(testTable, { expression: 'mean("price label")' })).toThrow('Unknown variable');
+    expect(() => fn(testTable, { expression: 'min("price label")' })).toThrow('Unknown variable');
+    expect(() => fn(testTable, { expression: 'median("quantity label")' })).toThrow(
+      'Unknown variable'
+    );
+    expect(() => fn(testTable, { expression: 'max("price label")' })).toThrow('Unknown variable');
   });
 
   describe('args', () => {

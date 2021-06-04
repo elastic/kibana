@@ -11,6 +11,19 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { CustomStops, CustomStopsProps } from './color_stops';
 
+// mocking random id generator function
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    htmlIdGenerator: (fn: unknown) => {
+      let counter = 0;
+      return () => counter++;
+    },
+  };
+});
+
 describe('Color Stops component', () => {
   let props: CustomStopsProps;
   beforeEach(() => {
