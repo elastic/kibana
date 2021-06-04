@@ -20,6 +20,7 @@ import { settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
 import { ensureAgentActionPolicyChangeExists } from './agents';
 import { awaitIfFleetServerSetupPending } from './fleet_server';
+import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_pipeline/install';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -41,6 +42,8 @@ async function createSetupSideEffects(
     outputService.ensureDefaultOutput(soClient),
     settingsService.settingsSetup(soClient),
   ]);
+
+  await ensureFleetFinalPipelineIsInstalled(esClient);
 
   await awaitIfFleetServerSetupPending();
 

@@ -28,6 +28,7 @@ describe('agg_expression_functions', () => {
               "customBucket": undefined,
               "customLabel": undefined,
               "customMetric": undefined,
+              "timeShift": undefined,
             },
             "schema": undefined,
             "type": "filtered_metric",
@@ -40,10 +41,12 @@ describe('agg_expression_functions', () => {
               "customBucket": undefined,
               "customLabel": undefined,
               "customMetric": undefined,
+              "timeShift": undefined,
             },
             "schema": undefined,
             "type": "filtered_metric",
           },
+          "timeShift": undefined,
         }
       `);
     });
