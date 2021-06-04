@@ -7,7 +7,7 @@
  */
 
 import { render } from 'react-dom';
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { getServices } from '../../../kibana_services';
 import { AngularScope, DocTableLegacyProps, injectAngularElement } from './create_doc_table_react';
