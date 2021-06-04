@@ -296,46 +296,47 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
                     prepend: (
                       <EuiIcon className="lnsChartSwitch__chartIcon" type={v.icon || 'empty'} />
                     ),
-                    append: (
-                      <EuiFlexGroup
-                        gutterSize="xs"
-                        responsive={false}
-                        style={{ display: 'inline-flex' }}
-                      >
-                        {v.selection.dataLoss !== 'nothing' ? (
-                          <EuiFlexItem grow={false}>
-                            <EuiIconTip
-                              aria-label={i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
-                                defaultMessage: 'Warning',
-                              })}
-                              type="alert"
-                              color="warning"
-                              content={i18n.translate(
-                                'xpack.lens.chartSwitch.dataLossDescription',
-                                {
-                                  defaultMessage:
-                                    'Selecting this chart type will result in a partial loss of currently applied configuration selections.',
-                                }
-                              )}
-                              iconProps={{
-                                className: 'lnsChartSwitch__chartIcon',
-                                'data-test-subj': `lnsChartSwitchPopoverAlert_${v.id}`,
-                              }}
-                            />
-                          </EuiFlexItem>
-                        ) : null}
-                        {v.showBetaBadge ? (
-                          <EuiFlexItem grow={false}>
-                            <EuiBadge color="hollow">
-                              <FormattedMessage
-                                id="xpack.lens.chartSwitch.betaLabel"
-                                defaultMessage="Beta"
+                    append:
+                      v.selection.dataLoss !== 'nothing' || v.showBetaBadge ? (
+                        <EuiFlexGroup
+                          gutterSize="xs"
+                          responsive={false}
+                          className="lnsChartSwitch__append"
+                        >
+                          {v.selection.dataLoss !== 'nothing' ? (
+                            <EuiFlexItem grow={false}>
+                              <EuiIconTip
+                                aria-label={i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
+                                  defaultMessage: 'Warning',
+                                })}
+                                type="alert"
+                                color="warning"
+                                content={i18n.translate(
+                                  'xpack.lens.chartSwitch.dataLossDescription',
+                                  {
+                                    defaultMessage:
+                                      'Selecting this chart type will result in a partial loss of currently applied configuration selections.',
+                                  }
+                                )}
+                                iconProps={{
+                                  className: 'lnsChartSwitch__chartIcon',
+                                  'data-test-subj': `lnsChartSwitchPopoverAlert_${v.id}`,
+                                }}
                               />
-                            </EuiBadge>
-                          </EuiFlexItem>
-                        ) : null}
-                      </EuiFlexGroup>
-                    ),
+                            </EuiFlexItem>
+                          ) : null}
+                          {v.showBetaBadge ? (
+                            <EuiFlexItem grow={false}>
+                              <EuiBadge color="hollow">
+                                <FormattedMessage
+                                  id="xpack.lens.chartSwitch.betaLabel"
+                                  defaultMessage="Beta"
+                                />
+                              </EuiBadge>
+                            </EuiFlexItem>
+                          ) : null}
+                        </EuiFlexGroup>
+                      ) : null,
                     // Apparently checked: null is not valid for TS
                     ...(subVisualizationId === v.id && { checked: 'on' }),
                   })
