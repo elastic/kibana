@@ -12,6 +12,12 @@ import { UptimeSettingsContext } from '../../../contexts';
 import { CLIENT_DEFAULTS } from '../../../../common/constants';
 import * as redux from 'react-redux';
 
+jest.mock('@elastic/eui/lib/components/flyout/flyout', () => {
+  return {
+    EuiFlyout: (props: any) => <div data-test-subj={props['data-test-subj']}>{props.children}</div>,
+  };
+});
+
 describe('ML Flyout component', () => {
   const createJob = () => {};
   const onClose = () => {};
