@@ -73,6 +73,13 @@ export const ATTRIBUTE_VALUE_LABEL = i18n.translate(
   }
 );
 
+export const ATTRIBUTE_VALUE_ERROR = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.attributeValueLabel',
+  {
+    defaultMessage: 'Attribute value is required',
+  }
+);
+
 export const DELETE_ROLE_MAPPING_TITLE = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.deleteRoleMappingTitle',
   {

@@ -67,6 +67,7 @@ export const RoleMapping: React.FC = () => {
 
   const isNew = !roleMapping;
   const hasEngineAssignment = selectedEngines.size > 0 || accessAllEngines;
+  const attributeValueInvalid = attributeName !== 'role' && !attributeValue;
 
   const mapRoleOptions = ({ id, description }: AdvanceRoleType) => ({
     id,
@@ -107,6 +108,7 @@ export const RoleMapping: React.FC = () => {
       <AttributeSelector
         attributeName={attributeName}
         attributeValue={attributeValue}
+        attributeValueInvalid={attributeValueInvalid}
         attributes={attributes}
         availableAuthProviders={availableAuthProviders}
         elasticsearchRoles={elasticsearchRoles}

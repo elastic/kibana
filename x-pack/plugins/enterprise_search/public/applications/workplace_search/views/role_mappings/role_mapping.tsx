@@ -93,6 +93,7 @@ export const RoleMapping: React.FC = () => {
   const isNew = !roleMapping;
 
   const hasGroupAssignment = selectedGroups.size > 0 || includeInAllGroups;
+  const attributeValueInvalid = attributeName !== 'role' && !attributeValue;
 
   return (
     <RoleMappingFlyout
@@ -104,6 +105,7 @@ export const RoleMapping: React.FC = () => {
       <AttributeSelector
         attributeName={attributeName}
         attributeValue={attributeValue}
+        attributeValueInvalid={attributeValueInvalid}
         attributes={attributes}
         elasticsearchRoles={elasticsearchRoles}
         disabled={!isNew}
