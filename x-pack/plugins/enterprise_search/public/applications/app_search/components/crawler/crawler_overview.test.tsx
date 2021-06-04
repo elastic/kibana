@@ -12,10 +12,9 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiCode } from '@elastic/eui';
-
 import { Loading } from '../../../shared/loading';
 
+import { DomainsTable } from './components/domains_table';
 import { CrawlerOverview } from './crawler_overview';
 
 const actions = {
@@ -37,16 +36,13 @@ describe('CrawlerOverview', () => {
     wrapper = shallow(<CrawlerOverview />);
   });
 
-  it('renders', () => {
-    expect(wrapper.find(EuiCode)).toHaveLength(1);
-  });
-
   it('calls fetchCrawlerData on page load', () => {
     expect(actions.fetchCrawlerData).toHaveBeenCalledTimes(1);
   });
 
-  // TODO after DomainsTable is built in a future PR
-  // it('contains a DomainsTable', () => {})
+  it('contains a DomainsTable', () => {
+    expect(wrapper.find(DomainsTable)).toHaveLength(1);
+  });
 
   // TODO after CrawlRequestsTable is built in a future PR
   // it('containss a CrawlRequestsTable,() => {})
