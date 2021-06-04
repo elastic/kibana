@@ -33,6 +33,7 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
+import { TimeSeriesExplorerHelpPopover } from './timeseriesexplorer_help_popover';
 
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 import {
@@ -1134,6 +1135,9 @@ export class TimeSeriesExplorer extends React.Component {
                     )}
                   </h2>
                 </EuiTitle>
+                <EuiFlexItem grow={false}>
+                  <TimeSeriesExplorerHelpPopover />
+                </EuiFlexItem>
 
                 <EuiFlexGroup style={{ float: 'right' }}>
                   {showModelBoundsCheckbox && (
