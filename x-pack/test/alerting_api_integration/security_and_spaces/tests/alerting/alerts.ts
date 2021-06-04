@@ -1303,26 +1303,18 @@ instanceStateValue: true
       },
     ]);
 
-    expect(event?.rule).to.eql([
-      {
-        rel: 'primary',
-        type: 'alert',
-        id: alertId,
-        namespace: spaceId,
-        rule: {
-          author: alertSearchResultWithoutDates.updatedBy,
-          category: alertSearchResultWithoutDates.producer,
-          id: alertSearchResultWithoutDates.ruleTypeId,
-          license: 'basic',
-          name: alertSearchResultWithoutDates.name,
-          namespace: spaceId,
-          reference: 'https://www.elastic.co/guide/en/kibana/master/stack-rules.html',
-          ruleset: 'alerts',
-          uuid: alertSearchResultWithoutDates.alertId,
-          version: undefined,
-        },
-      },
-    ]);
+    expect(event?.rule).to.eql({
+      id: alertSearchResultWithoutDates.alertInfo.ruleTypeId,
+      license: 'basic',
+      category: alertSearchResultWithoutDates.alertInfo.ruleTypeName,
+      ruleset: alertSearchResultWithoutDates.alertInfo.producer,
+      uuid: alertId,
+      reference: 'https://www.elastic.co/guide/en/kibana/master/stack-rules.html',
+      namespace: spaceId,
+      name: alertSearchResultWithoutDates.alertInfo.name,
+      author: [alertSearchResultWithoutDates.alertInfo.updatedBy],
+      version: '8.0.0',
+    });
 
     expect(event?.message).to.eql(message);
 

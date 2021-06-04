@@ -132,6 +132,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               outcome: 'success',
               message: `alert executed: test.patternFiring:${alertId}: 'abc'`,
               status: executeStatuses[executeCount++],
+              rule: {},
             });
             break;
           case 'execute-action':
@@ -144,6 +145,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               message: `alert: test.patternFiring:${alertId}: 'abc' instanceId: 'instance' scheduled actionGroup: 'default' action: test.noop:${createdAction.id}`,
               instanceId: 'instance',
               actionGroupId: 'default',
+              rule: response.body,
             });
             break;
           case 'new-instance':
@@ -168,6 +170,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           message: `test.patternFiring:${alertId}: 'abc' ${subMessage}`,
           instanceId: 'instance',
           actionGroupId: 'default',
+          rule: {},
         });
       }
     });
@@ -264,6 +267,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               outcome: 'success',
               message: `alert executed: test.patternFiring:${alertId}: 'abc'`,
               status: executeStatuses[executeCount++],
+              rule: {},
             });
             break;
           case 'execute-action':
@@ -279,6 +283,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               message: `alert: test.patternFiring:${alertId}: 'abc' instanceId: 'instance' scheduled actionGroup(subgroup): 'default(${event?.kibana?.alerting?.action_subgroup})' action: test.noop:${createdAction.id}`,
               instanceId: 'instance',
               actionGroupId: 'default',
+              rule: {},
             });
             break;
           case 'new-instance':
@@ -309,6 +314,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           message: `test.patternFiring:${alertId}: 'abc' ${subMessage}`,
           instanceId: 'instance',
           actionGroupId: 'default',
+          rule: {},
         });
       }
     });
@@ -351,6 +357,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
         errorMessage: 'this alert is intended to fail',
         status: 'error',
         reason: 'execute',
+        rule: {},
       });
     });
   });
@@ -372,6 +379,14 @@ interface ValidateEventLogParams {
   actionGroupId?: string;
   instanceId?: string;
   reason?: string;
+  rule: {
+    id?: string;
+    name?: string;
+    version?: string;
+    category?: string;
+    reference?: string;
+    author?: string[];
+  };
 }
 
 export function validateEvent(event: IValidatedEvent, params: ValidateEventLogParams): void {

@@ -98,6 +98,7 @@ describe('Task Runner', () => {
     internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
     alertTypeRegistry,
     kibanaBaseUrl: 'https://localhost:5601',
+    kibanaVersion: '1.0.0',
   };
 
   const mockDate = new Date('2019-02-12T21:01:22.479Z');
