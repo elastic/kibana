@@ -134,4 +134,7 @@ Functionally, {kib} alerting differs in that:
 At a higher level, {kib} alerting allows rich integrations across use cases like <<xpack-apm,*APM*>>, <<metrics-app,*Metrics*>>, <<xpack-siem,*Security*>>, and <<uptime-app,*Uptime*>>.
 Pre-packaged *rule types* simplify setup and hide the details of complex, domain-specific detections, while providing a consistent interface across {kib}.
 
+[float]
+[[alerting-setup-prerequisites]]
+
 --
