@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { act } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Observable } from 'rxjs';
@@ -15,6 +16,7 @@ import { renderApp } from './';
 import { disableConsoleWarning } from '../utils/testHelpers';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+import { ApmPluginStartDeps } from '../plugin';
 
 jest.mock('../services/rest/index_pattern', () => ({
   createStaticIndexPattern: () => Promise.resolve(undefined),
@@ -44,6 +46,7 @@ describe('renderApp', () => {
       config,
       observabilityRuleTypeRegistry,
     } = mockApmPluginContextValue;
+
     const plugins = {
       licensing: { license$: new Observable() },
       triggersActionsUi: { actionTypeRegistry: {}, alertTypeRegistry: {} },
@@ -56,7 +59,7 @@ describe('renderApp', () => {
         },
       },
     };
-    const params = {
+    const appMountParameters = {
       element: document.createElement('div'),
       history: createMemoryHistory(),
       setHeaderActionMenu: () => {},
@@ -64,7 +67,16 @@ describe('renderApp', () => {
 
     const data = dataPluginMock.createStartContract();
     const embeddable = embeddablePluginMock.createStartContract();
-    const startDeps = {
+
+    const pluginsStart = ({
+      observability: {
+        navigation: {
+          registerSections: () => jest.fn(),
+          PageTemplate: ({ children }: { children: React.ReactNode }) => (
+            <div>hello worlds {children}</div>
+          ),
+        },
+      },
       triggersActionsUi: {
         actionTypeRegistry: {},
         alertTypeRegistry: {},
@@ -73,7 +85,8 @@ describe('renderApp', () => {
       },
       data,
       embeddable,
-    };
+    } as unknown) as ApmPluginStartDeps;
+
     jest.spyOn(window, 'scrollTo').mockReturnValueOnce(undefined);
     createCallApmApi((core as unknown) as CoreStart);
 
@@ -93,8 +106,8 @@ describe('renderApp', () => {
       unmount = renderApp({
         coreStart: core as any,
         pluginsSetup: plugins as any,
-        appMountParameters: params as any,
-        pluginsStart: startDeps as any,
+        appMountParameters: appMountParameters as any,
+        pluginsStart,
         config,
         observabilityRuleTypeRegistry,
       });
