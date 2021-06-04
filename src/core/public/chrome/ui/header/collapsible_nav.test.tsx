@@ -17,11 +17,11 @@ import { httpServiceMock } from '../../../http/http_service.mock';
 import { ChromeRecentlyAccessedHistoryItem } from '../../recently_accessed';
 import { CollapsibleNav } from './collapsible_nav';
 
-// jest.mock('@elastic/eui/lib/components/flyout/flyout', () => {
-//   return {
-//     EuiFlyout: (props: any) => <div data-test-subj={props['data-test-subj']}>{props.children}</div>,
-//   };
-// });
+jest.mock('@elastic/eui/lib/components/flyout/flyout', () => {
+  return {
+    EuiFlyout: (props: any) => <div data-test-subj={props['data-test-subj']}>{props.children}</div>,
+  };
+});
 
 const { kibana, observability, security, management } = DEFAULT_APP_CATEGORIES;
 
