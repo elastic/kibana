@@ -29,9 +29,10 @@ import {
 export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const { jobCreator, jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
   const [nextActive, setNextActive] = useState(false);
+  const [selectionValid, setSelectionValid] = useState(false);
 
   useEffect(() => {
-    setNextActive(jobValidator.isPickFieldsStepValid);
+    setNextActive(selectionValid && jobValidator.isPickFieldsStepValid);
   }, [jobValidatorUpdated]);
 
   return (
@@ -39,22 +40,22 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
       {isCurrentStep && (
         <Fragment>
           {isSingleMetricJobCreator(jobCreator) && (
-            <SingleMetricView isActive={isCurrentStep} setCanProceed={setNextActive} />
+            <SingleMetricView isActive={isCurrentStep} setCanProceed={setSelectionValid} />
           )}
           {isMultiMetricJobCreator(jobCreator) && (
-            <MultiMetricView isActive={isCurrentStep} setCanProceed={setNextActive} />
+            <MultiMetricView isActive={isCurrentStep} setCanProceed={setSelectionValid} />
           )}
           {isPopulationJobCreator(jobCreator) && (
-            <PopulationView isActive={isCurrentStep} setCanProceed={setNextActive} />
+            <PopulationView isActive={isCurrentStep} setCanProceed={setSelectionValid} />
           )}
           {isAdvancedJobCreator(jobCreator) && (
-            <AdvancedView isActive={isCurrentStep} setCanProceed={setNextActive} />
+            <AdvancedView isActive={isCurrentStep} setCanProceed={setSelectionValid} />
           )}
           {isCategorizationJobCreator(jobCreator) && (
-            <CategorizationView isActive={isCurrentStep} setCanProceed={setNextActive} />
+            <CategorizationView isActive={isCurrentStep} setCanProceed={setSelectionValid} />
           )}
           {isRareJobCreator(jobCreator) && (
-            <RareView isActive={isCurrentStep} setCanProceed={setNextActive} />
+            <RareView isActive={isCurrentStep} setCanProceed={setSelectionValid} />
           )}
           <WizardNav
             previous={() =>

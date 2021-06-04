@@ -21,7 +21,7 @@ interface Props {
 export const RareDetector: FC<Props> = ({ onChange }) => {
   const { jobCreator: jc, jobCreatorUpdate } = useContext(JobCreatorContext);
   const jobCreator = jc as RareJobCreator;
-  const [rareDetectorType, setRareDetectorType] = useState(RARE_DETECTOR_TYPE.RARE);
+  const [rareDetectorType, setRareDetectorType] = useState<RARE_DETECTOR_TYPE | null>(null);
 
   useEffect(() => {
     if (jobCreator.rareField !== null) {
@@ -34,16 +34,20 @@ export const RareDetector: FC<Props> = ({ onChange }) => {
             : RARE_DETECTOR_TYPE.RARE_POPULATION
         );
       }
+    } else {
+      setRareDetectorType(RARE_DETECTOR_TYPE.RARE);
     }
   }, []);
 
   useEffect(() => {
-    onChange(rareDetectorType);
-    if (rareDetectorType === RARE_DETECTOR_TYPE.RARE && jobCreator.populationField !== null) {
-      jobCreator.removePopulationField();
+    if (rareDetectorType !== null) {
+      onChange(rareDetectorType);
+      if (rareDetectorType === RARE_DETECTOR_TYPE.RARE && jobCreator.populationField !== null) {
+        jobCreator.removePopulationField();
+      }
+      jobCreator.frequentlyRare = rareDetectorType === RARE_DETECTOR_TYPE.FREQ_RARE_POPULATION;
+      jobCreatorUpdate();
     }
-    jobCreator.frequentlyRare = rareDetectorType === RARE_DETECTOR_TYPE.FREQ_RARE_POPULATION;
-    jobCreatorUpdate();
   }, [rareDetectorType]);
 
   function onRareSelection() {

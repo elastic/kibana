@@ -14,11 +14,11 @@ import {
   filterCategoryFields,
 } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { Description } from './description';
-import { PopulationJobCreator } from '../../../../../common/job_creator';
+import { PopulationJobCreator, RareJobCreator } from '../../../../../common/job_creator';
 
 export const PopulationFieldSelector: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
-  const jobCreator = jc as PopulationJobCreator;
+  const jobCreator = jc as PopulationJobCreator | RareJobCreator;
 
   const runtimeCategoryFields = useMemo(() => filterCategoryFields(jobCreator.runtimeFields), []);
   const categoryFields = useMemo(

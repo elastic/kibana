@@ -14,7 +14,7 @@ import {
   filterCategoryFields,
 } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { Description } from './description';
-import { RareJobCreator, isRareJobCreator } from '../../../../../common/job_creator';
+import { RareJobCreator } from '../../../../../common/job_creator';
 
 export const RareFieldSelector: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
