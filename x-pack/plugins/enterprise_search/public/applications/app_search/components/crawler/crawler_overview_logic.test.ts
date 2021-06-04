@@ -6,12 +6,9 @@
  */
 
 import { LogicMounter, mockHttpValues, mockFlashMessageHelpers } from '../../../__mocks__';
+import '../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
-
-jest.mock('../engine', () => ({
-  EngineLogic: { values: { engineName: 'some-engine' } },
-}));
 
 import { CrawlerOverviewLogic } from './crawler_overview_logic';
 import { CrawlerPolicies, CrawlerRules, CrawlRule } from './types';
@@ -33,11 +30,8 @@ describe('CrawlerOverviewLogic', () => {
   const { flashAPIErrors } = mockFlashMessageHelpers;
 
   beforeEach(() => {
-    mount();
-  });
-
-  afterEach(() => {
     jest.clearAllMocks();
+    mount();
   });
 
   it('has expected default values', () => {
@@ -112,11 +106,11 @@ describe('CrawlerOverviewLogic', () => {
       });
 
       it('calls flashApiErrors when there is an error', async () => {
-        http.get.mockReturnValue(Promise.reject());
+        http.get.mockReturnValue(Promise.reject('error'));
         CrawlerOverviewLogic.actions.fetchCrawlerData();
         await nextTick();
 
-        expect(flashAPIErrors).toHaveBeenCalled();
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
   });
