@@ -208,19 +208,21 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
 
   return (
     <>
-      <ActionIconItem>
-        <EuiPopover
-          id="attachAlertToCasePanel"
-          button={button}
-          isOpen={isPopoverOpen}
-          closePopover={closePopover}
-          panelPaddingSize="none"
-          anchorPosition="downLeft"
-          repositionOnScroll
-        >
-          <EuiContextMenuPanel items={items} />
-        </EuiPopover>
-      </ActionIconItem>
+      {userCanCrud && (
+        <ActionIconItem>
+          <EuiPopover
+            id="attachAlertToCasePanel"
+            button={button}
+            isOpen={isPopoverOpen}
+            closePopover={closePopover}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+            repositionOnScroll
+          >
+            <EuiContextMenuPanel items={items} />
+          </EuiPopover>
+        </ActionIconItem>
+      )}
       {isCreateCaseFlyoutOpen && (
         <CreateCaseFlyout
           afterCaseCreated={attachAlertToCase}
