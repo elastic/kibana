@@ -45,7 +45,7 @@ describe('Overview page', () => {
 
     const kibanaDeprecationsMockResponse: DomainDeprecationDetails[] = [
       {
-        correctiveActions: {},
+        correctiveActions: { manualSteps: ['test-step'] },
         domainId: 'xpack.spaces',
         level: 'critical',
         message:

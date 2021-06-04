@@ -534,7 +534,7 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
     },
 
     async installFleetPackage(packageIdentifier: string) {
-      log.debug(`Installing Fleet package'${packageIdentifier}'`);
+      log.debug(`Installing Fleet package '${packageIdentifier}'`);
 
       await supertest
         .post(`/api/fleet/epm/packages/${packageIdentifier}`)
@@ -545,7 +545,7 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
     },
 
     async removeFleetPackage(packageIdentifier: string) {
-      log.debug(`Removing Fleet package'${packageIdentifier}'`);
+      log.debug(`Removing Fleet package '${packageIdentifier}'`);
 
       await supertest
         .delete(`/api/fleet/epm/packages/${packageIdentifier}`)

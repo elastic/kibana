@@ -30,7 +30,7 @@ describe('actionTypeRegistry.get() works', () => {
 });
 
 describe('slack connector validation', () => {
-  test('connector validation succeeds when connector config is valid', () => {
+  test('connector validation succeeds when connector config is valid', async () => {
     const actionConnector = {
       secrets: {
         webhookUrl: 'https:\\test',
@@ -41,7 +41,7 @@ describe('slack connector validation', () => {
       config: {},
     } as SlackActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {},
       },
@@ -53,7 +53,7 @@ describe('slack connector validation', () => {
     });
   });
 
-  test('connector validation fails when connector config is not valid - no webhook url', () => {
+  test('connector validation fails when connector config is not valid - no webhook url', async () => {
     const actionConnector = {
       secrets: {},
       id: 'test',
@@ -62,7 +62,7 @@ describe('slack connector validation', () => {
       config: {},
     } as SlackActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {},
       },
@@ -74,7 +74,7 @@ describe('slack connector validation', () => {
     });
   });
 
-  test('connector validation fails when connector config is not valid - invalid webhook protocol', () => {
+  test('connector validation fails when connector config is not valid - invalid webhook protocol', async () => {
     const actionConnector = {
       secrets: {
         webhookUrl: 'http:\\test',
@@ -85,7 +85,7 @@ describe('slack connector validation', () => {
       config: {},
     } as SlackActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {},
       },
@@ -97,7 +97,7 @@ describe('slack connector validation', () => {
     });
   });
 
-  test('connector validation fails when connector config is not valid - invalid webhook url', () => {
+  test('connector validation fails when connector config is not valid - invalid webhook url', async () => {
     const actionConnector = {
       secrets: {
         webhookUrl: 'h',
@@ -108,7 +108,7 @@ describe('slack connector validation', () => {
       config: {},
     } as SlackActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {},
       },
@@ -122,22 +122,22 @@ describe('slack connector validation', () => {
 });
 
 describe('slack action params validation', () => {
-  test('if action params validation succeeds when action params is valid', () => {
+  test('if action params validation succeeds when action params is valid', async () => {
     const actionParams = {
       message: 'message {test}',
     };
 
-    expect(actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: { message: [] },
     });
   });
 
-  test('params validation fails when message is not valid', () => {
+  test('params validation fails when message is not valid', async () => {
     const actionParams = {
       message: '',
     };
 
-    expect(actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         message: ['Message is required.'],
       },
