@@ -18,18 +18,26 @@ export type CollectorDependencies = {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const usageSchema: MakeSchemaFrom<any> = {
   live_query_usage: {
-    // session is an awkward name for this
     session: {
       count: {
         type: 'long',
+        _meta: {
+          description: 'Number of osquery action requests',
+        },
       },
       errors: {
         type: 'long',
+        _meta: {
+          description: 'Number of osquery action requests that resulted in errors',
+        },
       },
     },
     cumulative: {
       queries: {
         type: 'long',
+        _meta: {
+          description: 'Number of osquery actions stored in Elasticsearch',
+        },
       },
     },
   },
@@ -37,42 +45,67 @@ export const usageSchema: MakeSchemaFrom<any> = {
     queryGroups: {
       total: {
         type: 'long',
+        _meta: {
+          description: 'Number of osquery policies/query groups',
+        },
       },
       empty: {
         type: 'long',
+        _meta: {
+          description: 'Number of empty osquery policies/query groups',
+        },
       },
     },
   },
   agent_info: {
     enrolled: {
       type: 'long',
+      _meta: {
+        description: 'Number of agents enrolled in a policy with an osquery integration',
+      },
     },
   },
   beat_metrics: {
     usage: {
       cpu: {
-        // TODO?: break out into system/user usage
         latest: {
           type: 'long',
+          _meta: {
+            description: 'Latest cpu usage sample in ms',
+          },
         },
         max: {
           type: 'long',
+          _meta: {
+            description: 'Max cpu usage sample over 24 hours in ms',
+          },
         },
         avg: {
           type: 'long',
+          _meta: {
+            description: 'Mean cpu usage over 24 hours in ms',
+          },
         },
       },
       memory: {
         rss: {
-          // ???: add a dimension on these for agent instance
           latest: {
             type: 'long',
+            _meta: {
+              description: 'Latest resident set size sample',
+            },
           },
           max: {
             type: 'long',
+            _meta: {
+              description: 'Max resident set size sample over 24 hours',
+            },
           },
           avg: {
             type: 'long',
+            _meta: {
+              description: 'Mean resident set size sample over 24 hours',
+            },
           },
         },
       },

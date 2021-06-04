@@ -141,8 +141,6 @@ export async function getLiveQueryUsage(
 }
 
 export async function getBeatUsage(esClient: ElasticsearchClient) {
-  // ???: currently cpu is recorded as a duration rather than a load %. this might make it difficult to reason about the metrics in parallel systems.
-  // ???: these metrics would be more actionable with some facets of them (e.g. platform, architecture, etc)
   const { body: metricResponse } = await esClient.search({
     body: {
       size: 0,

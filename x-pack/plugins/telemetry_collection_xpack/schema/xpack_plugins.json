@@ -3599,45 +3599,94 @@
       }
     },
     "osquery": {
-      "_meta": {
-        "description": "TODO: UPDATE THIS TO MATCH EXPORTED METRICS SCHEMA BEFORE PR"
-      },
-      "properties": {
-        "query_metrics": {
-          "properties": {
-            "live_query_usage": {
-              "properties": {
-                "call_count": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Number of ad hoc queries dispatched"
-                  }
-                },
-                "error_count": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Number of ad hoc queries which resulted in an error"
-                  }
-                }
-              }
+      "live_query_usage": {
+        "session": {
+          "count": {
+            "type": "long",
+            "_meta": {
+              "description": "Number of osquery action requests"
+            }
+          },
+          "errors": {
+            "type": "long",
+            "_meta": {
+              "description": "Number of osquery action requests that resulted in errors"
             }
           }
         },
-        "beat_metrics": {
-          "properties": {
-            "usage": {
-              "properties": {
-                "cpu": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "CPU usage reported by osquery beat"
-                  }
-                },
-                "rss": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Memory usage reported by osquery beat"
-                  }
+        "cumulative": {
+          "queries": {
+            "type": "long",
+            "_meta": {
+              "description": "Number of osquery actions stored in Elasticsearch"
+            }
+          }
+        }
+      },
+      "scheduled_queries": {
+        "queryGroups": {
+          "total": {
+            "type": "long",
+            "_meta": {
+              "description": "Number of osquery policies/query groups"
+            }
+          },
+          "empty": {
+            "type": "long",
+            "_meta": {
+              "description": "Number of empty osquery policies/query groups"
+            }
+          }
+        }
+      },
+      "agent_info": {
+        "enrolled": {
+          "type": "long",
+          "_meta": {
+            "description": "Number of agents enrolled in a policy with an osquery integration"
+          }
+        }
+      },
+      "beat_metrics": {
+        "usage": {
+          "cpu": {
+            "latest": {
+              "type": "long",
+              "_meta": {
+                "description": "Latest cpu usage sample in ms"
+              }
+            },
+            "max": {
+              "type": "long",
+              "_meta": {
+                "description": "Max cpu usage sample over 24 hours in ms"
+              }
+            },
+            "avg": {
+              "type": "long",
+              "_meta": {
+                "description": "Mean cpu usage over 24 hours in ms"
+              }
+            }
+          },
+          "memory": {
+            "rss": {
+              "latest": {
+                "type": "long",
+                "_meta": {
+                  "description": "Latest resident set size sample"
+                }
+              },
+              "max": {
+                "type": "long",
+                "_meta": {
+                  "description": "Max resident set size sample over 24 hours"
+                }
+              },
+              "avg": {
+                "type": "long",
+                "_meta": {
+                  "description": "Mean resident set size sample over 24 hours"
                 }
               }
             }
