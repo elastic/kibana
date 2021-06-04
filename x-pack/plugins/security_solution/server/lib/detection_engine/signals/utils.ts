@@ -52,6 +52,7 @@ import {
   ThreatRuleParams,
   ThresholdRuleParams,
 } from '../schemas/rule_schemas';
+import { ESClient } from '../../../../../apm/target/types/scripts/shared/get_es_client';
 
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
