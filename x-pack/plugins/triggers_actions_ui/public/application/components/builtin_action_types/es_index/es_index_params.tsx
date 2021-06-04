@@ -117,7 +117,11 @@ export const IndexParamsFields = ({
       <EuiFormRow
         fullWidth
         error={errors.indexOverride as string[]}
-        isInvalid={(errors.indexOverride as string[]) && errors.indexOverride.length > 0}
+        isInvalid={
+          errors.indexOverride !== undefined &&
+          (errors.indexOverride as string[]) &&
+          errors.indexOverride.length > 0
+        }
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.preconfiguredIndex',
           {

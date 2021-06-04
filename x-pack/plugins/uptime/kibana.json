@@ -8,7 +8,6 @@
   "optionalPlugins": [
     "data",
     "home",
-    "observability",
     "ml",
     "fleet"
   ],
@@ -18,7 +17,8 @@
     "features",
     "licensing",
     "triggersActionsUi",
-    "usageCollection"
+    "usageCollection",
+    "observability"
   ],
   "server": true,
   "ui": true,
