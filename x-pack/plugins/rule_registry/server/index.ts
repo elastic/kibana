@@ -9,6 +9,7 @@ import { PluginInitializerContext } from 'src/core/server';
 import { RuleRegistryPlugin } from './plugin';
 
 export * from './config';
+export * from './types';
 export type { RuleRegistryPluginSetupContract, RuleRegistryPluginStartContract } from './plugin';
 export { RuleDataClient } from './rule_data_client';
 export { IRuleDataClient } from './rule_data_client/types';

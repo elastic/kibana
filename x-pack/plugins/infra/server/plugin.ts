@@ -33,6 +33,7 @@ import { UsageCollector } from './usage/usage_collector';
 import { createGetLogQueryFields } from './services/log_queries/get_log_query_fields';
 import { handleEsError } from '../../../../src/plugins/es_ui_shared/server';
 import { initializeAlertClient } from './initialize_alert_client';
+import { createLifecycleRuleTypeFactory } from '../../rule_registry/server';
 
 export const config = {
   schema: schema.object({
@@ -144,7 +145,15 @@ export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
       getLogQueryFields: createGetLogQueryFields(sources, framework),
       handleEsError,
       logsAlertClient,
+      createLogsLifecycleRuleType: createLifecycleRuleTypeFactory({
+        ruleDataClient: logsAlertClient,
+        logger: this.logger,
+      }),
       metricsAlertClient,
+      createMetricsLifecycleRuleType: createLifecycleRuleTypeFactory({
+        ruleDataClient: metricsAlertClient,
+        logger: this.logger,
+      }),
     };
 
     plugins.features.registerKibanaFeature(METRICS_FEATURE);
