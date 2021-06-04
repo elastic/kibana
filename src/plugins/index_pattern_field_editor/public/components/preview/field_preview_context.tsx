@@ -48,6 +48,7 @@ interface Context {
     value: Params;
     update: (updated: Partial<Params>) => void;
   };
+  isLoadingPreview: boolean;
   currentDocument: {
     value?: EsDocument;
     loadSingle: (id: string) => Promise<void>;
@@ -107,6 +108,8 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   const [isPanelVisible, setIsPanelVisible] = useState(false);
   /** Flag to indicate if we are loading document from cluster */
   const [isFetchingDocument, setIsFetchingDocument] = useState(false);
+  /** Flag to indicate if we are calling the _execute API */
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   /** Define if we provide the document to preview from the cluster or from a custom JSON */
   const [from, setFrom] = useState<From>('cluster');
 
@@ -212,12 +215,16 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       return;
     }
 
+    setIsLoadingPreview(true);
+
     const response = await getFieldPreview({
       index: currentDocIndex,
       document: params.document!,
       context: `${params.type!}_field` as FieldPreviewContext,
       script: params.script!,
     });
+
+    setIsLoadingPreview(false);
 
     const { error: serverError } = response;
 
@@ -267,6 +274,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     () => ({
       fields: previewResponse.fields,
       error: previewResponse.error,
+      isLoadingPreview,
       params: {
         value: params,
         update: updateParams,
@@ -295,6 +303,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     [
       previewResponse,
       params,
+      isLoadingPreview,
       updateParams,
       currentDocument,
       loadDocument,

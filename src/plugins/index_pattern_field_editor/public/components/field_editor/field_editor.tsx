@@ -155,8 +155,6 @@ const FieldEditorComponent = ({ field, onChange, syntaxError }: Props) => {
     fieldTypeToProcess,
   } = useFieldEditorContext();
   const {
-    fields,
-    error,
     params: { update: updatePreviewParams },
     panel: { setIsVisible: setIsPanelVisible },
   } = useFieldPreviewContext();
@@ -193,15 +191,6 @@ const FieldEditorComponent = ({ field, onChange, syntaxError }: Props) => {
     // error as it is possibly stale.
     clearSyntaxError();
   }, [type, clearSyntaxError]);
-
-  useEffect(() => {
-    // TODO: remove console.log
-    if (error) {
-      console.log('Preview error', error); // eslint-disable-line no-console
-    } else {
-      console.log('Field preview:', JSON.stringify(fields[0], null, 4)); // eslint-disable-line no-console
-    }
-  }, [fields, error]);
 
   useEffect(() => {
     updatePreviewParams({

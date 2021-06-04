@@ -7,7 +7,14 @@
  */
 
 import React from 'react';
-import { EuiTitle, EuiText, EuiTextColor } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiText,
+  EuiTextColor,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { useFieldEditorContext } from '../field_editor_context';
@@ -17,28 +24,55 @@ const i18nTexts = {
   customData: i18n.translate('indexPatternFieldEditor.fieldPreview.subTitle.customData', {
     defaultMessage: 'Custom data',
   }),
+  updatingLabel: i18n.translate('indexPatternFieldEditor.fieldPreview.updatingPreviewLabel', {
+    defaultMessage: 'Updating...',
+  }),
 };
 
 export const FieldPreviewHeader = () => {
   const { indexPattern } = useFieldEditorContext();
-  const { from } = useFieldPreviewContext();
+  const {
+    from,
+    isLoadingPreview,
+    currentDocument: { isLoading },
+  } = useFieldPreviewContext();
+
+  const isUpdating = isLoadingPreview || isLoading;
+
   return (
-    <>
-      <EuiTitle size="s">
-        <h2>
-          {i18n.translate('indexPatternFieldEditor.fieldPreview.title', {
-            defaultMessage: 'Preview',
-          })}
-        </h2>
-      </EuiTitle>
+    <div>
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="s">
+            <h2>
+              {i18n.translate('indexPatternFieldEditor.fieldPreview.title', {
+                defaultMessage: 'Preview',
+              })}
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+
+        {isUpdating && (
+          <EuiFlexItem>
+            <EuiFlexGroup gutterSize="xs">
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="m" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{i18nTexts.updatingLabel}</EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
       <EuiText>
         <EuiTextColor color="subdued">
           {i18n.translate('indexPatternFieldEditor.fieldPreview.subTitle', {
             defaultMessage: 'From: {from}',
-            values: { from: from.value === 'cluster' ? indexPattern.title : i18nTexts.customData },
+            values: {
+              from: from.value === 'cluster' ? indexPattern.title : i18nTexts.customData,
+            },
           })}
         </EuiTextColor>
       </EuiText>
-    </>
+    </div>
   );
 };

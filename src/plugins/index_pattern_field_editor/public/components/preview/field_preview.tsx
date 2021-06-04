@@ -42,8 +42,12 @@ export const FieldPreview = () => {
     fields: { getAll: getAllFields },
   } = indexPattern;
 
-  // To show the preview we at least need a name to be defined and the script or the format
-  const isEmptyPromptVisible = name === null || (script !== null && format !== null);
+  // To show the preview we at least need a name to be defined, the script or the format
+  // and a response from the _execute API
+  const isEmptyPromptVisible =
+    name === null ||
+    (script === null && format === null) ||
+    (fields.length === 0 && error === null);
 
   const indexPatternFields = useMemo(() => {
     return getAllFields();
