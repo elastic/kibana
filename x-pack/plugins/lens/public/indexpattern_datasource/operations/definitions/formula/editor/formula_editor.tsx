@@ -68,6 +68,7 @@ export function FormulaEditor({
   >([]);
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(isFullscreen);
   const [isWarningOpen, setIsWarningOpen] = useState<boolean>(false);
+  const [isWordWrapped, toggleWordWrap] = useState<boolean>(false);
   const editorModel = React.useRef<monaco.editor.ITextModel>();
   const overflowDiv1 = React.useRef<HTMLElement>();
   const disposables = React.useRef<monaco.IDisposable[]>([]);
@@ -482,8 +483,6 @@ export function FormulaEditor({
     []
   );
 
-  const isWordWrapped = editor1.current?.getOption(monaco.editor.EditorOption.wordWrap) !== 'off';
-
   const codeEditorOptions: CodeEditorProps = {
     languageId: LANGUAGE_ID,
     value: text ?? '',
@@ -570,12 +569,9 @@ export function FormulaEditor({
                       isSelected={!isWordWrapped}
                       onClick={() => {
                         editor1.current?.updateOptions({
-                          wordWrap:
-                            editor1.current?.getOption(monaco.editor.EditorOption.wordWrap) ===
-                            'off'
-                              ? 'on'
-                              : 'off',
+                          wordWrap: isWordWrapped ? 'off' : 'on',
                         });
+                        toggleWordWrap(!isWordWrapped);
                       }}
                     />
                   </EuiToolTip>
