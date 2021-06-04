@@ -84,8 +84,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   const xValuesFormatter = formatFactory(xAxisMeta.params);
   const valueFormatter = formatFactory(valueColumn.meta.params);
 
-  // @ts-ignore
-  const onElementClick: ElementClickListener = (e: HeatmapElementEvent[]) => {
+  const onElementClick = ((e: HeatmapElementEvent[]) => {
     const cell = e[0][0];
     const { x, y } = cell.datum;
 
@@ -119,7 +118,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
       timeFieldName,
     };
     onClickValue(desanitizeFilterContext(context));
-  };
+  }) as ElementClickListener;
 
   const onBrushEnd = (e: HeatmapBrushEvent) => {
     const { x, y } = e;
