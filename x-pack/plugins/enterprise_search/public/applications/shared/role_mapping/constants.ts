@@ -74,7 +74,7 @@ export const ATTRIBUTE_VALUE_LABEL = i18n.translate(
 );
 
 export const ATTRIBUTE_VALUE_ERROR = i18n.translate(
-  'xpack.enterpriseSearch.roleMapping.attributeValueLabel',
+  'xpack.enterpriseSearch.roleMapping.attributeValueError',
   {
     defaultMessage: 'Attribute value is required',
   }
