@@ -68,7 +68,7 @@ export function FormulaEditor({
   >([]);
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(isFullscreen);
   const [isWarningOpen, setIsWarningOpen] = useState<boolean>(false);
-  const [isWordWrapped, toggleWordWrap] = useState<boolean>(false);
+  const [isWordWrapped, toggleWordWrap] = useState<boolean>(true);
   const editorModel = React.useRef<monaco.editor.ITextModel>();
   const overflowDiv1 = React.useRef<HTMLElement>();
   const disposables = React.useRef<monaco.IDisposable[]>([]);
