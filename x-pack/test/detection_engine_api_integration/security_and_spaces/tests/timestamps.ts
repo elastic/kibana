@@ -32,19 +32,21 @@ export default ({ getService }: FtrProviderContext) => {
    * partial errors happen correctly
    */
   describe('timestamp tests', () => {
-    describe('Signals generated from events with a timestamp in milliseconds', () => {
+    describe('Signals generated from events with a timestamp in seconds is converted correctly into the forced ISO8601 format when copying', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
         await esArchiver.load('security_solution/timestamp_in_seconds');
+        await esArchiver.load('security_solution/timestamp_override_5');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
         await esArchiver.unload('security_solution/timestamp_in_seconds');
+        await esArchiver.unload('security_solution/timestamp_override_5');
       });
 
-      it('should convert the timestamp which is epoch_seconds into the correct ISO format', async () => {
+      it('should convert the @timestamp which is epoch_seconds into the correct ISO format', async () => {
         const rule = getRuleForSignalTesting(['timestamp_in_seconds']);
         const { id } = await createRule(supertest, rule);
         await waitForRuleSuccessOrStatus(supertest, id);
@@ -52,6 +54,19 @@ export default ({ getService }: FtrProviderContext) => {
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source.signal.original_time).sort();
         expect(hits).to.eql(['2021-06-02T23:33:15.000Z']);
+      });
+
+      it('should still use the @timestamp field even with an override field. It should never use the override field', async () => {
+        const rule: QueryCreateSchema = {
+          ...getRuleForSignalTesting(['myfakeindex-5']),
+          timestamp_override: 'event.ingested',
+        };
+        const { id } = await createRule(supertest, rule);
+        await waitForRuleSuccessOrStatus(supertest, id);
+        await waitForSignalsToBePresent(supertest, 1, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, [id]);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source.signal.original_time).sort();
+        expect(hits).to.eql(['2020-12-16T15:16:18.000Z']);
       });
     });
 

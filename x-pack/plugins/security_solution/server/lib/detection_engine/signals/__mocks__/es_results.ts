@@ -562,7 +562,9 @@ export const sampleBulkCreateErrorResult = {
 
 export const sampleDocSearchResultsNoSortId = (
   someUuid: string = sampleIdGuid
-): SignalSearchResponse => ({
+): SignalSearchResponse & {
+  hits: { hits: Array<ReturnType<typeof sampleDocNoSortId>> };
+} => ({
   took: 10,
   timed_out: false,
   _shards: {
