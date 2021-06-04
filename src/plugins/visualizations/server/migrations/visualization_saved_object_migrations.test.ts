@@ -2114,4 +2114,32 @@ describe('migration visualization', () => {
       checkRuleIsNotAddedToArray('gauge_color_rules', params, migratedParams, rule4);
     });
   });
+
+  describe.only('7.14.0 tsvb - set ignore field formatting param to true for series by default', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.14.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    const testDoc = {
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: '{"type": "metrics", "params": {"series": [{"metrics": []}, {"metrics": []}] } }',
+      },
+    };
+
+    it('should set ignore_field_formatting param to true to all series', () => {
+      const migratedTestDoc = migrate(testDoc);
+
+      const {
+        series: [firstSeries, secondSeries],
+      } = JSON.parse(migratedTestDoc.attributes.visState).params;
+
+      expect(firstSeries).toHaveProperty('ignore_field_formatting');
+      expect(firstSeries.ignore_field_formatting).toBeTruthy();
+      expect(secondSeries.ignore_field_formatting).toBeTruthy();
+    });
+  });
 });

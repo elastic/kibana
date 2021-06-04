@@ -174,11 +174,11 @@ class TimeseriesVisualization extends Component {
             seriesGroup.value_template === seriesModel[0].value_template
         );
       } else {
-        const usedFields = seriesModel.map(
+        const seriesFieldFormats = seriesModel.map(
           (seriesGroup) => fieldFormatMap[seriesGroup.metrics[0]?.field]
         );
-        allSeriesHaveSameFormatters = usedFields.every(
-          (fieldFormat) => JSON.stringify(fieldFormat) === JSON.stringify(usedFields[0])
+        allSeriesHaveSameFormatters = seriesFieldFormats.every(
+          (fieldFormat) => JSON.stringify(fieldFormat) === JSON.stringify(seriesFieldFormats[0])
         );
       }
     }

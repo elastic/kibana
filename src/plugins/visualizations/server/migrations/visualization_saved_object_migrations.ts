@@ -10,6 +10,7 @@ import { cloneDeep, get, omit, has, flow, forOwn } from 'lodash';
 
 import { SavedObjectMigrationFn } from 'kibana/server';
 
+import { doc } from 'prettier';
 import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
 import {
   commonAddSupportOfDualIndexSelectionModeInTSVB,
@@ -943,6 +944,31 @@ const hideTSVBLastValueIndicator: SavedObjectMigrationFn<any, any> = (doc) => {
   return doc;
 };
 
+/**
+ * [TSVB] Set ignore field formatting param to true for series by default
+ */
+const addTSVBIgnoreFilterFormatting: SavedObjectMigrationFn<any, any> = (doc) => {
+  try {
+    const visState = JSON.parse(doc.attributes.visState);
+    if (visState && visState.type === 'metrics') {
+      const series: any[] = get(visState, 'params.series') || [];
+
+      series.forEach((item) => (item.ignore_field_formatting = true));
+
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          visState: JSON.stringify(visState),
+        },
+      };
+    }
+  } catch (e) {
+    // Let it go, the data is invalid and we'll leave it as is
+  }
+  return doc;
+};
+
 const removeDefaultIndexPatternAndTimeFieldFromTSVBModel: SavedObjectMigrationFn<any, any> = (
   doc
 ) => {
@@ -1036,5 +1062,5 @@ export const visualizationSavedObjectTypeMigrations = {
     hideTSVBLastValueIndicator,
     removeDefaultIndexPatternAndTimeFieldFromTSVBModel
   ),
-  '7.14.0': flow(addEmptyValueColorRule),
+  '7.14.0': flow(addEmptyValueColorRule, addTSVBIgnoreFilterFormatting),
 };
