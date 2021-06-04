@@ -10,9 +10,10 @@ import { Dispatch } from 'redux';
 import { Feature } from 'geojson';
 import { getOpenTooltips } from '../selectors/map_selectors';
 import { SET_OPEN_TOOLTIPS } from './map_action_constants';
-import { FEATURE_ID_PROPERTY_NAME } from '../../common/constants';
+import { DRAW_MODE, FEATURE_ID_PROPERTY_NAME } from '../../common/constants';
 import { TooltipState } from '../../common/descriptor_types';
 import { MapStoreState } from '../reducers/store';
+import { getDrawMode } from '../selectors/ui_selectors';
 
 export function closeOnClickTooltip(tooltipId: string) {
   return (dispatch: Dispatch, getState: () => MapStoreState) => {
@@ -27,6 +28,12 @@ export function closeOnClickTooltip(tooltipId: string) {
 
 export function openOnClickTooltip(tooltipState: TooltipState) {
   return (dispatch: Dispatch, getState: () => MapStoreState) => {
+    if (
+      getDrawMode(getState()) === DRAW_MODE.DRAW_SHAPES ||
+      getDrawMode(getState()) === DRAW_MODE.DRAW_POINTS
+    ) {
+      return;
+    }
     const openTooltips = getOpenTooltips(getState()).filter(({ features, location, isLocked }) => {
       return (
         isLocked &&
@@ -56,9 +63,17 @@ export function closeOnHoverTooltip() {
 }
 
 export function openOnHoverTooltip(tooltipState: TooltipState) {
-  return {
-    type: SET_OPEN_TOOLTIPS,
-    openTooltips: [tooltipState],
+  return (dispatch: Dispatch, getState: () => MapStoreState) => {
+    if (
+      getDrawMode(getState()) === DRAW_MODE.DRAW_SHAPES ||
+      getDrawMode(getState()) === DRAW_MODE.DRAW_POINTS
+    ) {
+      return;
+    }
+    dispatch({
+      type: SET_OPEN_TOOLTIPS,
+      openTooltips: [tooltipState],
+    });
   };
 }
 
