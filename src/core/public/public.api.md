@@ -65,6 +65,7 @@ export interface App<HistoryLocationState = unknown> extends AppNavOptions {
     keywords?: string[];
     mount: AppMount<HistoryLocationState>;
     navLinkStatus?: AppNavLinkStatus;
+    searchable?: boolean;
     status?: AppStatus;
     title: string;
     updater$?: Observable<AppUpdater>;
@@ -88,6 +89,7 @@ export type AppDeepLink = {
     title: string;
     keywords?: string[];
     navLinkStatus?: AppNavLinkStatus;
+    searchable?: boolean;
 } & AppNavOptions & ({
     path: string;
     deepLinks?: AppDeepLink[];
@@ -193,7 +195,7 @@ export enum AppStatus {
 export type AppUnmount = () => void;
 
 // @public
-export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath' | 'deepLinks'>;
+export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'searchable' | 'tooltip' | 'defaultPath' | 'deepLinks'>;
 
 // @public
 export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
@@ -1069,19 +1071,21 @@ export interface PluginInitializerContext<ConfigSchema extends object = object> 
 export type PluginOpaqueId = symbol;
 
 // @public
-export type PublicAppDeepLinkInfo = Omit<AppDeepLink, 'deepLinks' | 'keywords' | 'navLinkStatus'> & {
+export type PublicAppDeepLinkInfo = Omit<AppDeepLink, 'deepLinks' | 'keywords' | 'navLinkStatus' | 'searchable'> & {
     deepLinks: PublicAppDeepLinkInfo[];
     keywords: string[];
     navLinkStatus: AppNavLinkStatus;
+    searchable: boolean;
 };
 
 // @public
-export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'keywords' | 'deepLinks'> & {
+export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'keywords' | 'deepLinks' | 'searchable'> & {
     status: AppStatus;
     navLinkStatus: AppNavLinkStatus;
     appRoute: string;
     keywords: string[];
     deepLinks: PublicAppDeepLinkInfo[];
+    searchable: boolean;
 };
 
 // @public

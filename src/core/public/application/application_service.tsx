@@ -418,9 +418,7 @@ const populateDeepLinkDefaults = (deepLinks?: AppDeepLink[]): AppDeepLink[] => {
   if (!deepLinks) return [];
   return deepLinks.map((deepLink) => ({
     ...deepLink,
-    navLinkStatus: deepLink.path
-      ? deepLink.navLinkStatus ?? AppNavLinkStatus.default
-      : AppNavLinkStatus.hidden,
+    navLinkStatus: deepLink.navLinkStatus ?? AppNavLinkStatus.default,
     deepLinks: populateDeepLinkDefaults(deepLink.deepLinks),
   }));
 };

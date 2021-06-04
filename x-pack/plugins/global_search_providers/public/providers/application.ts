@@ -21,7 +21,7 @@ export const createApplicationResultProvider = (
     map((apps) =>
       [...apps.values()].filter(
         // only include non-chromeless enabled apps with visible navLinks
-        (app) => app.status === 0 && app.navLinkStatus === 1 && app.chromeless !== true
+        (app) => app.status === 0 && app.chromeless !== true
       )
     ),
     shareReplay(1)

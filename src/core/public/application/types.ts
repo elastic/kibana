@@ -63,7 +63,7 @@ export enum AppNavLinkStatus {
  */
 export type AppUpdatableFields = Pick<
   App,
-  'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath' | 'deepLinks'
+  'status' | 'navLinkStatus' | 'searchable' | 'tooltip' | 'defaultPath' | 'deepLinks'
 >;
 
 /**
@@ -134,6 +134,12 @@ export interface App<HistoryLocationState = unknown> extends AppNavOptions {
    * See {@link AppNavLinkStatus}
    */
   navLinkStatus?: AppNavLinkStatus;
+
+  /**
+   * The initial flag to determine if the application is searchable in the global search.
+   * Defaulting to `true` if `navLinkStatus` is `visible` or omitted.
+   */
+  searchable?: boolean;
 
   /**
    * Allow to define the default path a user should be directed to when navigating to the app.
@@ -267,11 +273,12 @@ export interface App<HistoryLocationState = unknown> extends AppNavOptions {
  */
 export type PublicAppDeepLinkInfo = Omit<
   AppDeepLink,
-  'deepLinks' | 'keywords' | 'navLinkStatus'
+  'deepLinks' | 'keywords' | 'navLinkStatus' | 'searchable'
 > & {
   deepLinks: PublicAppDeepLinkInfo[];
   keywords: string[];
   navLinkStatus: AppNavLinkStatus;
+  searchable: boolean;
 };
 
 /**
@@ -291,6 +298,8 @@ export type AppDeepLink = {
   keywords?: string[];
   /** Optional status of the chrome navigation, defaults to `hidden` */
   navLinkStatus?: AppNavLinkStatus;
+  /** Optional flag to determine if the link is searchable in the global search. Defaulting to `true` if `navLinkStatus` is `visible` or omitted */
+  searchable?: boolean;
 } & AppNavOptions &
   (
     | {
@@ -312,13 +321,17 @@ export type AppDeepLink = {
  *
  * @public
  */
-export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'keywords' | 'deepLinks'> & {
+export type PublicAppInfo = Omit<
+  App,
+  'mount' | 'updater$' | 'keywords' | 'deepLinks' | 'searchable'
+> & {
   // remove optional on fields populated with default values
   status: AppStatus;
   navLinkStatus: AppNavLinkStatus;
   appRoute: string;
   keywords: string[];
   deepLinks: PublicAppDeepLinkInfo[];
+  searchable: boolean;
 };
 
 /**

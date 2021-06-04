@@ -16,6 +16,7 @@ export declare type AppDeepLink = {
     title: string;
     keywords?: string[];
     navLinkStatus?: AppNavLinkStatus;
+    searchable?: boolean;
 } & AppNavOptions & ({
     path: string;
     deepLinks?: AppDeepLink[];
