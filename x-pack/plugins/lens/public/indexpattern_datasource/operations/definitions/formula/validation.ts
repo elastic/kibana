@@ -537,7 +537,7 @@ function runFullASTValidation(
                     type: 'field',
                     argument:
                       getValueOrName(firstArg) ||
-                      i18n.translate('xpack.lens.indexPattern.formulaOperationWrongFirstArgument', {
+                      i18n.translate('xpack.lens.indexPattern.formulaNoFieldForOperation', {
                         defaultMessage: 'no field',
                       }),
                   },
