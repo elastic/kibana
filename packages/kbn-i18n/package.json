@@ -25,7 +25,7 @@
     "del": "^3.0.0",
     "getopts": "^2.2.3",
     "supports-color": "^6.1.0",
-    "typescript": "^3.0.3"
+    "typescript": "~3.1.0"
   },
   "dependencies": {
     "intl-format-cache": "^2.1.0",
