@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './constants';
-export * from './utils';
-export * from './mock';
+export * from './mock_event_details';

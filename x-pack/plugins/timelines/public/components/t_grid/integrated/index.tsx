@@ -20,7 +20,6 @@ import {
   ControlColumnProps,
   DataProvider,
   RowRenderer,
-  Sort,
   TimelineId,
   TimelineTabs,
 } from '../../../../common/types/timeline';
@@ -41,6 +40,8 @@ import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from '../styles';
 import * as i18n from './translations';
+import { ExitFullScreen } from '../../exit_full_screen';
+import { Sort } from '../body/sort';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const UTILITY_BAR_HEIGHT = 19; // px
@@ -178,17 +179,17 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   }, [dispatch, id, isQueryLoading]);
 
   const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
-  // const titleWithExitFullScreen = useMemo(
-  //   () => (
-  //     <TitleFlexGroup alignItems="center" data-test-subj="title-flex-group" gutterSize="none">
-  //       <EuiFlexItem grow={false}>{justTitle}</EuiFlexItem>
-  //       <EuiFlexItem grow={false}>
-  //         <ExitFullScreen fullScreen={globalFullScreen} setFullScreen={setGlobalFullScreen} />
-  //       </EuiFlexItem>
-  //     </TitleFlexGroup>
-  //   ),
-  //   [globalFullScreen, justTitle, setGlobalFullScreen]
-  // );
+  const titleWithExitFullScreen = useMemo(
+    () => (
+      <TitleFlexGroup alignItems="center" data-test-subj="title-flex-group" gutterSize="none">
+        <EuiFlexItem grow={false}>{justTitle}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ExitFullScreen fullScreen={globalFullScreen} setFullScreen={setGlobalFullScreen} />
+        </EuiFlexItem>
+      </TitleFlexGroup>
+    ),
+    [globalFullScreen, justTitle, setGlobalFullScreen]
+  );
 
   const combinedQueries = combineQueries({
     config: esQuery.getEsQueryConfig(uiSettings),
@@ -288,8 +289,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
             id={!resolverIsShowing(graphEventId) ? id : undefined}
             height={headerFilterGroup ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT}
             subtitle={utilityBar ? undefined : subtitle}
-            title={justTitle}
-            // title={globalFullScreen ? titleWithExitFullScreen : justTitle}
+            title={globalFullScreen ? titleWithExitFullScreen : justTitle}
           >
             {HeaderSectionContent}
           </HeaderSection>

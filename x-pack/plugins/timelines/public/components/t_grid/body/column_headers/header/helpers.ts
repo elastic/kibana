@@ -34,7 +34,7 @@ export const getNextSortDirection = (currentSort: Sort): Direction => {
     case 'none':
       return Direction.desc;
     default:
-      return assertUnreachable(currentSort.sortDirection, 'Unhandled sort direction');
+      return assertUnreachable(currentSort.sortDirection as never, 'Unhandled sort direction');
   }
 };
 

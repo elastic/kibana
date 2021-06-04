@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { eventHit } from '@kbn/securitysolution-t-grid';
 import { EventHit } from '../../../../../../common/search_strategy';
 import { TIMELINE_EVENTS_FIELDS } from './constants';
 import { buildObjectForFieldPath, formatTimelineData } from './helpers';
@@ -289,7 +291,6 @@ describe('#formatTimelineData', () => {
       },
       _type: '',
       sort: ['1610199700517'],
-      aggregations: {},
     };
 
     expect(

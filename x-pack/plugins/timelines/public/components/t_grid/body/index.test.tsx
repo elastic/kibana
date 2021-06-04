@@ -12,13 +12,12 @@ import '../../../../common/mock/match_media';
 
 import { BodyComponent, StatefulBodyProps } from '.';
 import { Sort } from './sort';
-import { defaultControlColumn } from './control_columns';
 import { Direction } from '../../../../common/search_strategy';
-import { mockTimelineModel } from '../../../../public/common/mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { defaultHeaders, mockBrowserFields, mockTimelineData, TestProviders } from '../../../mock';
 import { TimelineTabs } from '../../../../common/types/timeline';
 import { TestCellRenderer } from '../../../mock/cell_renderer';
+import { mockGlobalState } from '../../../mock/global_state';
 
 const mockSort: Sort[] = [
   {
@@ -39,8 +38,8 @@ jest.mock('react-redux', () => {
 });
 
 jest.mock('../../../../common/hooks/use_selector', () => ({
-  useShallowEqualSelector: () => mockTimelineModel,
-  useDeepEqualSelector: () => mockTimelineModel,
+  useShallowEqualSelector: () => mockGlobalState.timelineById.test,
+  useDeepEqualSelector: () => mockGlobalState.timelineById.test,
 }));
 
 jest.mock('../../../../common/components/link_to');
@@ -74,14 +73,14 @@ describe('Body', () => {
     isSelectAllChecked: false,
     loadingEventIds: [],
     renderCellValue: TestCellRenderer,
-    rowRenderers: defaultRowRenderers,
+    rowRenderers: [],
     selectedEventIds: {},
     setSelected: (jest.fn() as unknown) as StatefulBodyProps['setSelected'],
     sort: mockSort,
     showCheckboxes: false,
     tabType: TimelineTabs.query,
     totalPages: 1,
-    leadingControlColumns: [defaultControlColumn],
+    leadingControlColumns: [],
     trailingControlColumns: [],
   };
 

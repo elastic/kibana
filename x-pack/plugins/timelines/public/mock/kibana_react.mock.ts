@@ -10,11 +10,11 @@ import React from 'react';
 import { RecursivePartial } from '@elastic/eui/src/components/common';
 import { coreMock } from '../../../../../src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { StartServices } from '../../../types';
 import { EuiTheme } from '../../../../../src/plugins/kibana_react/common';
+import { CoreStart } from '../../../../../src/core/public';
 
-export const createStartServicesMock = (): StartServices =>
-  (coreMock.createStart() as unknown) as StartServices;
+export const createStartServicesMock = (): CoreStart =>
+  (coreMock.createStart() as unknown) as CoreStart;
 
 export const createWithKibanaMock = () => {
   const services = createStartServicesMock();

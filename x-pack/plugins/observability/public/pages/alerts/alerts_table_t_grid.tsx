@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { EuiButton, EuiDataGridColumn } from '@elastic/eui';
+import { EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 
 import type { TimelinesUIStart } from '../../../../timelines/public';
-import { usePluginContext } from '../../hooks/use_plugin_context';
 import type { TopAlert } from './';
 import { AlertsFlyout } from './alerts_flyout';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
@@ -78,20 +77,10 @@ export const columns: Array<
 const NO_ROW_RENDER: RowRenderer[] = [];
 
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
-  const { rangeFrom, rangeTo, kuery, status } = props;
+  const { rangeFrom, rangeTo, kuery } = props;
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
   const handleFlyoutClose = () => setFlyoutAlert(undefined);
-  const { core } = usePluginContext();
-  const { prepend } = core.http.basePath;
   const { timelines } = useKibana<{ timelines: TimelinesUIStart }>().services;
-
-  const Actions = (
-    <EuiButton href="#" size="s">
-      {i18n.translate('xpack.observability.alertsTable.viewInAppButtonLabel', {
-        defaultMessage: 'View in app',
-      })}
-    </EuiButton>
-  );
 
   const trailingControlColumns = [
     {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
 import { mount } from 'enzyme';
 import React from 'react';
 
@@ -14,7 +13,6 @@ import * as i18n from '../translations';
 
 import { EventColumnView } from './event_column_view';
 import { TestCellRenderer } from '../../../../mock/cell_renderer';
-import { defaultControlColumn } from '../control_columns';
 import { useShallowEqualSelector } from '../../../../hooks/use_selector';
 import { TimelineId, TimelineTabs, TimelineType } from '../../../../../common/types/timeline';
 import { TestProviders } from '../../../../mock/test_providers';
@@ -68,7 +66,7 @@ describe('EventColumnView', () => {
     toggleShowNotes: jest.fn(),
     updateNote: jest.fn(),
     isEventPinned: false,
-    leadingControlColumns: [defaultControlColumn],
+    leadingControlColumns: [],
     trailingControlColumns: [],
   };
 
@@ -165,7 +163,7 @@ describe('EventColumnView', () => {
       <EventColumnView
         {...props}
         timelineId="timeline-test"
-        leadingControlColumns={[testLeadingControlColumn, defaultControlColumn]}
+        leadingControlColumns={[testLeadingControlColumn]}
       />,
       {
         wrappingComponent: TestProviders,

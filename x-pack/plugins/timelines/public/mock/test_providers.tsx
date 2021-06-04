@@ -14,14 +14,13 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 import { Store } from 'redux';
 import { BehaviorSubject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
-
-import { createStore, State } from '../store';
+import { createStore, TimelineState } from '../types';
 import { mockGlobalState } from './global_state';
+
 import { createKibanaContextProviderMock, createStartServicesMock } from './kibana_react.mock';
-import { SUB_PLUGINS_REDUCER } from './utils';
 import { createSecuritySolutionStorageMock, localStorageMock } from './mock_local_storage';
 
-const state: State = mockGlobalState;
+const state: TimelineState = mockGlobalState;
 
 interface Props {
   children: React.ReactNode;
@@ -41,7 +40,7 @@ const { storage } = createSecuritySolutionStorageMock();
 /** A utility for wrapping children in the providers required to run most tests */
 const TestProvidersComponent: React.FC<Props> = ({
   children,
-  store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage),
+  store = createStore(state, storage),
   onDragEnd = jest.fn(),
 }) => (
   <I18nProvider>

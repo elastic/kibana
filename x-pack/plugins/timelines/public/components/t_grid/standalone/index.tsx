@@ -65,10 +65,6 @@ const StyledEuiPanel = styled(EuiPanel)<{ $isFullScreen: boolean }>`
   `}
 `;
 
-const TitleFlexGroup = styled(EuiFlexGroup)`
-  margin-top: 8px;
-`;
-
 const EventsContainerLoading = styled.div.attrs(({ className = '' }) => ({
   className: `${SELECTOR_TIMELINE_GLOBAL_CONTAINER} ${className}`,
 }))`
@@ -98,60 +94,40 @@ const HeaderFilterGroupWrapper = styled.header<{ show: boolean }>`
 `;
 
 export interface TGridStandaloneProps {
-  // browserFields: BrowserFields;
   columns: ColumnHeaderOptions[];
-  // dataProviders: DataProvider[];
   deletedEventIds: Readonly<string[]>;
-  // docValueFields: DocValueFields[];
   end: string;
   filters: Filter[];
-  // globalFullScreen: boolean;
   headerFilterGroup?: React.ReactNode;
   height?: number;
-  // id: TimelineId;
   indexNames: string[];
-  // indexPattern: IIndexPattern;
-  // isLive: boolean;
-  // isLoadingIndexPattern: boolean;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
-  // kqlMode: 'filter' | 'search';
   query: Query;
   onRuleChange?: () => void;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
-  // setGlobalFullScreen: (fullscreen: boolean) => void;
   start: string;
   sort: SortColumnTimeline[];
   utilityBar?: (refetch: Refetch, totalCount: number) => React.ReactNode;
-  // If truthy, the graph viewer (Resolver) is showing
   graphEventId?: string;
   leadingControlColumns: ControlColumnProps[];
   trailingControlColumns: ControlColumnProps[];
 }
 
 const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
-  // browserFields,
   columns,
-  // dataProviders,
   deletedEventIds,
-  // docValueFields,
   end,
   filters,
-  // globalFullScreen,
   headerFilterGroup,
-  // id,
   indexNames,
-  // indexPattern,
-  // isLoadingIndexPattern,
   itemsPerPage,
   itemsPerPageOptions,
-  // kqlMode,
   onRuleChange,
   query,
   renderCellValue,
   rowRenderers,
-  // setGlobalFullScreen,
   start,
   sort,
   utilityBar,

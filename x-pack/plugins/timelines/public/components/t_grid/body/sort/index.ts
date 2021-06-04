@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  SortColumnTimeline,
-  SortDirection,
-} from '../../../../../common/types/timeline';
+import { SortColumnTimeline, SortDirection } from '../../../../../common/types/timeline';
 
 // TODO: Cleanup this type to match SortColumnTimeline
 export { SortDirection };

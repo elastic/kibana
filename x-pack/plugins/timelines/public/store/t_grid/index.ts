@@ -26,6 +26,12 @@ import { TimelineState, tGridSelectors, TGridEpicDependencies } from '../../type
 import { tGridReducer } from './reducer';
 
 type State = CombinedState<TimelineState>;
+type ComposeType = typeof compose;
+declare global {
+  interface Window {
+    __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: ComposeType;
+  }
+}
 
 /**
  * Factory for Security App's redux store.

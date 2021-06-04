@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import { DEFAULT_INDEX_PATTERN } from '../../common/constants';
 import { DocValueFields } from '../../common/search_strategy';
 import { BrowserFields } from '../../common/search_strategy/index_fields';
 
-// import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
-// import { DocValueFields } from '../../../../common/search_strategy';
-// import { BrowserFields } from '../../../../common/search_strategy/index_fields';
+const DEFAULT_INDEX_PATTERN = [
+  'apm-*-transaction*',
+  'auditbeat-*',
+  'endgame-*',
+  'filebeat-*',
+  'logs-*',
+  'packetbeat-*',
+  'winlogbeat-*',
+];
 
 export const mocksSource = {
   indexFields: [

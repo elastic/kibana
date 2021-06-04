@@ -7,8 +7,6 @@
 
 import { DropResult, FluidDragActions, Position } from 'react-beautiful-dnd';
 import { KEYBOARD_DRAG_OFFSET } from '@kbn/securitysolution-t-grid';
-
-import { ActionCreator } from 'typescript-fsa';
 import { Dispatch } from 'redux';
 import { isString, keyBy } from 'lodash/fp';
 import {

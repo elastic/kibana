@@ -15,7 +15,6 @@ import { Sort } from '../sort';
 
 import { ColumnHeadersComponent } from '.';
 import { cloneDeep } from 'lodash/fp';
-import { defaultControlColumn } from '../control_columns';
 import { useMountAppended } from '../../../utils/use_mount_appended';
 import { mockBrowserFields } from '../../../../mock/browser_fields';
 import { Direction } from '../../../../../common/search_strategy';
@@ -61,7 +60,7 @@ describe('ColumnHeaders', () => {
             sort={sort}
             tabType={TimelineTabs.query}
             timelineId={timelineId}
-            leadingControlColumns={[defaultControlColumn]}
+            leadingControlColumns={[]}
             trailingControlColumns={[]}
           />
         </TestProviders>
@@ -83,7 +82,7 @@ describe('ColumnHeaders', () => {
             sort={sort}
             tabType={TimelineTabs.query}
             timelineId={timelineId}
-            leadingControlColumns={[defaultControlColumn]}
+            leadingControlColumns={[]}
             trailingControlColumns={[]}
           />
         </TestProviders>
@@ -106,7 +105,7 @@ describe('ColumnHeaders', () => {
             sort={sort}
             tabType={TimelineTabs.query}
             timelineId={timelineId}
-            leadingControlColumns={[defaultControlColumn]}
+            leadingControlColumns={[]}
             trailingControlColumns={[]}
           />
         </TestProviders>
@@ -167,7 +166,7 @@ describe('ColumnHeaders', () => {
             sort={mockSort}
             tabType={TimelineTabs.query}
             timelineId={timelineId}
-            leadingControlColumns={[defaultControlColumn]}
+            leadingControlColumns={[]}
             trailingControlColumns={[]}
           />
         </TestProviders>
@@ -211,7 +210,7 @@ describe('ColumnHeaders', () => {
             sort={mockSort}
             tabType={TimelineTabs.query}
             timelineId={timelineId}
-            leadingControlColumns={[defaultControlColumn]}
+            leadingControlColumns={[]}
             trailingControlColumns={[]}
           />
         </TestProviders>
@@ -250,7 +249,7 @@ describe('ColumnHeaders', () => {
             sort={mockSort}
             tabType={TimelineTabs.query}
             timelineId={timelineId}
-            leadingControlColumns={[defaultControlColumn]}
+            leadingControlColumns={[]}
             trailingControlColumns={[]}
           />
         </TestProviders>

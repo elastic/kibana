@@ -24,8 +24,9 @@ import { asDuration, asPercent } from '../../../common/utils/formatters';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 
 export function RowCellActionsRender({ data }: ActionProps) {
-  const { observabilityRuleTypeRegistry } = usePluginContext();
+  const { core, observabilityRuleTypeRegistry } = usePluginContext();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const { prepend } = core.http.basePath;
   const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
   const parsedFields = parseTechnicalFields(dataFieldEs);
   const formatter = observabilityRuleTypeRegistry.getFormatter(parsedFields[RULE_ID]!);
@@ -64,7 +65,7 @@ export function RowCellActionsRender({ data }: ActionProps) {
       >
         <EuiPopoverTitle>Actions</EuiPopoverTitle>
         <div style={{ width: 150 }}>
-          <EuiButtonEmpty href={link}>
+          <EuiButtonEmpty href={prepend(link ?? '')}>
             <EuiFlexGroup alignItems="center" component="span" gutterSize="s">
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon aria-label="view in app" iconType="link" color="text" />

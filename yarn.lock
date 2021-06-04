@@ -2743,15 +2743,11 @@
   version "0.0.0"
   uid ""
 
-<<<<<<< HEAD
-"@kbn/securitysolution-t-grid@link:bazel-bin/packages/kbn-securitysolution-t-grid/npm_module":
+"@kbn/securitysolution-t-grid@link:bazel-bin/packages/kbn-securitysolution-t-grid":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-utils@link:bazel-bin/packages/kbn-securitysolution-utils/npm_module":
-=======
 "@kbn/securitysolution-utils@link:bazel-bin/packages/kbn-securitysolution-utils":
->>>>>>> 8f83090d74d0254a870ce3540999a7e40ecfea91
   version "0.0.0"
   uid ""
 
