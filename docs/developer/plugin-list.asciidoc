@@ -365,10 +365,6 @@ The client-side plugin configures following values:
 |The data_enhanced plugin is the x-pack counterpart to the src/plguins/data plugin.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/data_visualizer[dataVisualizer]
-|The data_visualizer plugin enables you to explore the fields in your data.
-
-
 |{kib-repo}blob/{branch}/x-pack/plugins/discover_enhanced/README.md[discoverEnhanced]
 |Contains the enhancements to the OSS discover app.
 
@@ -394,6 +390,10 @@ actitivies.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/features/README.md[features]
 |The features plugin enhance Kibana with a per-feature privilege system.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/file_data_visualizer[fileDataVisualizer]
+|WARNING: Missing README.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/file_upload[fileUpload]
