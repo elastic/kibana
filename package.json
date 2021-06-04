@@ -99,7 +99,7 @@
   "dependencies": {
     "@elastic/apm-rum": "^5.6.1",
     "@elastic/apm-rum-react": "^1.2.5",
-    "@elastic/charts": "29.2.0",
+    "@elastic/charts": "30.0.0",
     "@elastic/datemath": "link:bazel-bin/packages/elastic-datemath",
     "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@^8.0.0-canary.4",
     "@elastic/ems-client": "7.13.0",
