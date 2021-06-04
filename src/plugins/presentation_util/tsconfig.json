@@ -10,6 +10,7 @@
   "include": [
     "common/**/*",
     "public/**/*",
+    "public/**/*.json",
     "server/**/*",
     "storybook/**/*",
     "../../../typings/**/*"
