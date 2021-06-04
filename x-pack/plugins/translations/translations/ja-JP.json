@@ -20414,7 +20414,6 @@
     "xpack.securitySolution.endpoint.policy.details.detectionRulesMessage": "{detectionRulesLink}を表示します。事前構築済みルールは、［検出ルール］ページで「Elastic」というタグが付けられています。",
     "xpack.securitySolution.endpoint.policy.details.eventCollection": "イベント収集",
     "xpack.securitySolution.endpoint.policy.details.eventCollectionsEnabled": "{selected} / {total} 件のイベント収集が有効です",
-    "xpack.securitySolution.endpoint.policy.details.lockedCard": "ランサムウェア対策をオンにするには、ライセンスをプラチナに更新するか、30日間の無料トライアルを開始するか、AWS、GCP、またはAzureで{cloudDeploymentLink}にサインアップしてください。",
     "xpack.securitySolution.endpoint.policy.details.malware": "マルウェア",
     "xpack.securitySolution.endpoint.policy.details.platinum": "プラチナ",
     "xpack.securitySolution.endpoint.policy.details.prevent": "防御",

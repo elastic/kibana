@@ -17,6 +17,16 @@ import { Ransomware } from './policy_forms/protections/ransomware';
 import { LockedPolicyCard } from './policy_forms/locked_card';
 import { useLicense } from '../../../../common/hooks/use_license';
 
+const LOCKED_CARD_RAMSOMWARE_TITLE = {
+  id: 'xpack.securitySolution.endpoint.policy.details.ransomware',
+  defaultMessage: 'Ransomware',
+};
+
+const LOCKED_CARD_MEMORY_TITLE = {
+  id: 'xpack.securitySolution.endpoint.policy.details.memory',
+  defaultMessage: 'Memory',
+};
+
 export const PolicyDetailsForm = memo(() => {
   const [showAdvancedPolicy, setShowAdvancedPolicy] = useState<boolean>(false);
   const handleAdvancedPolicyClick = useCallback(() => {
@@ -38,9 +48,13 @@ export const PolicyDetailsForm = memo(() => {
       <EuiSpacer size="xs" />
       <MalwareProtections />
       <EuiSpacer size="m" />
-      {isPlatinumPlus ? <MemoryProtection /> : <LockedPolicyCard />}
+      {isPlatinumPlus ? (
+        <MemoryProtection />
+      ) : (
+        <LockedPolicyCard title={LOCKED_CARD_MEMORY_TITLE} />
+      )}
       <EuiSpacer size="m" />
-      {isPlatinumPlus ? <Ransomware /> : <LockedPolicyCard />}
+      {isPlatinumPlus ? <Ransomware /> : <LockedPolicyCard title={LOCKED_CARD_RAMSOMWARE_TITLE} />}
       <EuiSpacer size="l" />
 
       <EuiText size="xs" color="subdued">

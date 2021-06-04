@@ -30,7 +30,7 @@ const LockedPolicyDiv = styled.div`
   }
 `;
 
-export const LockedPolicyCard = memo(() => {
+export const LockedPolicyCard = memo(({ title }: { title: FormattedMessage.MessageDescriptor }) => {
   return (
     <LockedPolicyDiv>
       <EuiCard
@@ -43,10 +43,7 @@ export const LockedPolicyCard = memo(() => {
         title={
           <h3>
             <strong>
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.policy.details.ransomware"
-                defaultMessage="Ransomware"
-              />
+              <FormattedMessage {...title} />
             </strong>
           </h3>
         }
@@ -67,8 +64,8 @@ export const LockedPolicyCard = memo(() => {
             <EuiFlexItem>
               <p>
                 <FormattedMessage
-                  id="xpack.securitySolution.endpoint.policy.details.lockedCard"
-                  defaultMessage="To turn on Ransomware protection, you must upgrade your license to Platinum, start a
+                  id="xpack.securitySolution.endpoint.policy.details.lockedCardUpgradeMessage"
+                  defaultMessage="To turn on this protection, you must upgrade your license to Platinum, start a
               free 30-day trial, or spin up a {cloudDeploymentLink} on AWS, GCP, or Azure."
                   values={{
                     cloudDeploymentLink: (

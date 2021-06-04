@@ -20716,7 +20716,6 @@
     "xpack.securitySolution.endpoint.policy.details.detectionRulesMessage": "请查看{detectionRulesLink}。在“检测规则”页面上，预置规则标记有“Elastic”。",
     "xpack.securitySolution.endpoint.policy.details.eventCollection": "事件收集",
     "xpack.securitySolution.endpoint.policy.details.eventCollectionsEnabled": "{selected} / {total} 个事件收集已启用",
-    "xpack.securitySolution.endpoint.policy.details.lockedCard": "要打开勒索软件防护，必须将您的许可证升级到白金级、开始 30 天免费试用或在 AWS、GCP 或 Azure 中实施{cloudDeploymentLink}。",
     "xpack.securitySolution.endpoint.policy.details.malware": "恶意软件",
     "xpack.securitySolution.endpoint.policy.details.platinum": "白金级",
     "xpack.securitySolution.endpoint.policy.details.prevent": "防御",
