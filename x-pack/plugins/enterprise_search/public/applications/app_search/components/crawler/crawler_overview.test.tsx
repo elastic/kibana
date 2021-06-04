@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockActions, setMockValues } from '../../../__mocks__';
+import { rerender, setMockActions, setMockValues } from '../../../__mocks__';
 import '../../../__mocks__/shallow_useeffect.mock';
 
 import React from 'react';
@@ -14,6 +14,8 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiCode } from '@elastic/eui';
 
+import { Loading } from '../../../shared/loading';
+
 import { CrawlerOverview } from './crawler_overview';
 
 const actions = {
@@ -21,6 +23,7 @@ const actions = {
 };
 
 const values = {
+  dataLoading: false,
   domains: [],
 };
 
@@ -56,4 +59,11 @@ describe('CrawlerOverview', () => {
 
   // TODO after empty state is added in a future PR
   // it('has an empty state',  () => {} )
+
+  it('shows an empty state when data is loading', () => {
+    setMockValues({ dataLoading: true });
+    rerender(wrapper);
+
+    expect(wrapper.find(Loading)).toHaveLength(1);
+  });
 });

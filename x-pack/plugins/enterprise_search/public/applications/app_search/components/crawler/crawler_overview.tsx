@@ -13,17 +13,23 @@ import { EuiCode, EuiPageHeader } from '@elastic/eui';
 
 import { FlashMessages } from '../../../shared/flash_messages';
 
+import { Loading } from '../../../shared/loading';
+
 import { CRAWLER_TITLE } from './constants';
 import { CrawlerOverviewLogic } from './crawler_overview_logic';
 
 export const CrawlerOverview: React.FC = () => {
-  const { domains } = useValues(CrawlerOverviewLogic);
+  const { dataLoading, domains } = useValues(CrawlerOverviewLogic);
 
   const { fetchCrawlerData } = useActions(CrawlerOverviewLogic);
 
   useEffect(() => {
     fetchCrawlerData();
   }, []);
+
+  if (dataLoading) {
+    return <Loading />;
+  }
 
   return (
     <>

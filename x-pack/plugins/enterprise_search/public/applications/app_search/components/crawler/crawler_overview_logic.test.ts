@@ -14,6 +14,7 @@ import { CrawlerOverviewLogic } from './crawler_overview_logic';
 import { CrawlerPolicies, CrawlerRules, CrawlRule } from './types';
 
 const DEFAULT_VALUES = {
+  dataLoading: true,
   domains: [],
 };
 
@@ -40,28 +41,31 @@ describe('CrawlerOverviewLogic', () => {
 
   describe('actions', () => {
     describe('onFetchCrawlerData', () => {
-      it('should set all received data as top-level values', () => {
-        const crawlerData = {
-          domains: [
-            {
-              id: '507f1f77bcf86cd799439011',
-              createdOn: 'Mon, 31 Aug 2020 17:00:00 +0000',
-              url: 'moviedatabase.com',
-              documentCount: 13,
-              sitemaps: [],
-              entryPoints: [],
-              crawlRules: [],
-              defaultCrawlRule: DEFAULT_CRAWL_RULE,
-            },
-          ],
-        };
+      const crawlerData = {
+        domains: [
+          {
+            id: '507f1f77bcf86cd799439011',
+            createdOn: 'Mon, 31 Aug 2020 17:00:00 +0000',
+            url: 'moviedatabase.com',
+            documentCount: 13,
+            sitemaps: [],
+            entryPoints: [],
+            crawlRules: [],
+            defaultCrawlRule: DEFAULT_CRAWL_RULE,
+          },
+        ],
+      };
 
+      beforeEach(() => {
         CrawlerOverviewLogic.actions.onFetchCrawlerData(crawlerData);
+      });
 
-        expect(CrawlerOverviewLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          ...crawlerData,
-        });
+      it('should set all received data as top-level values', () => {
+        expect(CrawlerOverviewLogic.values.domains).toEqual(crawlerData.domains);
+      });
+
+      it('should set dataLoading to false', () => {
+        expect(CrawlerOverviewLogic.values.dataLoading).toEqual(false);
       });
     });
   });

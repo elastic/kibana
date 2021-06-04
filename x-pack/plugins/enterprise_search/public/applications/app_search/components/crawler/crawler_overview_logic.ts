@@ -16,6 +16,7 @@ import { CrawlerData, CrawlerDataFromServer, CrawlerDomain } from './types';
 import { crawlerDataServerToClient } from './utils';
 
 interface CrawlerOverviewValues {
+  dataLoading: boolean;
   domains: CrawlerDomain[];
 }
 
@@ -33,6 +34,12 @@ export const CrawlerOverviewLogic = kea<
     onFetchCrawlerData: (data) => ({ data }),
   },
   reducers: {
+    dataLoading: [
+      true,
+      {
+        onFetchCrawlerData: () => false,
+      },
+    ],
     domains: [
       [],
       {
