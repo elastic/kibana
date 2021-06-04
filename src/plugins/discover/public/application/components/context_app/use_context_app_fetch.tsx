@@ -24,8 +24,8 @@ import {
 import { AppState } from '../../angular/context_state';
 import { getFirstSortableField } from '../../angular/context/api/utils/sorting';
 
-const createUnknownError = (statusKey: string, error: Error) => ({
-  [statusKey]: { status: LoadingStatus.FAILED, reason: FailureReason.UNKNOWN, error },
+const createError = (statusKey: string, reason: FailureReason, error?: Error) => ({
+  [statusKey]: { value: LoadingStatus.FAILED, error, reason },
 });
 
 export function useContextAppFetch({
@@ -68,21 +68,38 @@ export function useContextAppFetch({
     setFetchedState((prevState) => ({ ...prevState, ...values }));
   }, []);
 
+  const sendInvalidTieBreakerFeedback = useCallback(() => {
+    const message = i18n.translate('discover.context.invalidTieBreakerFiledSetting', {
+      defaultMessage: 'Invalid tie breaker field setting',
+    });
+    toastNotifications.addDanger({
+      title: i18n.translate('discover.context.unableToLoadAnchorDocumentDescription', {
+        defaultMessage: 'Unable to load documents',
+      }),
+      text: toMountPoint(<MarkdownSimple>{message}</MarkdownSimple>),
+    });
+  }, [toastNotifications]);
+
   const fetchAnchorRow = useCallback(async () => {
     const { sort } = appState;
     const [[, sortDir]] = sort;
 
+    if (!tieBreakerField) {
+      setState(createError('anchorStatus', FailureReason.INVALID_TIEBREAKER));
+      sendInvalidTieBreakerFeedback();
+      return;
+    }
+
     try {
+      setState({ anchorStatus: { value: LoadingStatus.LOADING } });
       const anchor = await fetchAnchor(indexPatternId, anchorId, [
         fromPairs(sort),
         { [tieBreakerField]: sortDir },
       ]);
-      setState({ anchor, anchorStatus: LoadingStatus.LOADED });
+      setState({ anchor, anchorStatus: { value: LoadingStatus.LOADED } });
       return anchor;
     } catch (error) {
-      setState({
-        anchorStatus: { status: LoadingStatus.FAILED, reason: FailureReason.UNKNOWN, error },
-      });
+      setState(createError('anchorStatus', FailureReason.UNKNOWN, error));
       toastNotifications.addDanger({
         title: i18n.translate('discover.context.unableToLoadAnchorDocumentDescription', {
           defaultMessage: 'Unable to load the anchor document',
@@ -92,11 +109,12 @@ export function useContextAppFetch({
     }
   }, [
     appState,
+    tieBreakerField,
+    setState,
+    sendInvalidTieBreakerFeedback,
     fetchAnchor,
     indexPatternId,
     anchorId,
-    tieBreakerField,
-    setState,
     toastNotifications,
   ]);
 
@@ -108,9 +126,17 @@ export function useContextAppFetch({
 
       const count = type === 'predecessors' ? appState.predecessorCount : appState.successorCount;
       const anchor = fetchedAnchor || fetchedState.anchor;
+      const statusKey = `${type}Status`;
+
+      if (!tieBreakerField) {
+        setState(createError(statusKey, FailureReason.INVALID_TIEBREAKER));
+        sendInvalidTieBreakerFeedback();
+        return;
+      }
 
       try {
-        return await fetchSurroundingDocs(
+        setState({ [statusKey]: { value: LoadingStatus.LOADING } });
+        const rows = await fetchSurroundingDocs(
           type,
           indexPatternId,
           anchor as EsHitRecord,
@@ -120,7 +146,9 @@ export function useContextAppFetch({
           count,
           filters
         );
+        setState({ [type]: rows, [statusKey]: { value: LoadingStatus.LOADED } });
       } catch (error) {
+        setState(createError(statusKey, FailureReason.UNKNOWN, error));
         toastNotifications.addDanger({
           title: i18n.translate('discover.context.unableToLoadDocumentDescription', {
             defaultMessage: 'Unable to load documents',
@@ -133,42 +161,22 @@ export function useContextAppFetch({
       filterManager,
       appState,
       fetchedState.anchor,
+      tieBreakerField,
+      setState,
+      sendInvalidTieBreakerFeedback,
       fetchSurroundingDocs,
       indexPatternId,
-      tieBreakerField,
       toastNotifications,
     ]
   );
 
   const fetchContextRows = useCallback(
-    async (anchor?: EsHitRecord) => {
-      setState({
-        predecessorsStatus: LoadingStatus.LOADING,
-        successorsStatus: LoadingStatus.LOADING,
-      });
-
-      const [predecessors, successors] = await Promise.allSettled([
+    (anchor?: EsHitRecord) =>
+      Promise.allSettled([
         fetchSurroundingRows('predecessors', anchor),
         fetchSurroundingRows('successors', anchor),
-      ]);
-
-      const predecessorsStatus =
-        predecessors.status === 'fulfilled'
-          ? LoadingStatus.LOADED
-          : createUnknownError('predecessorsStatus', predecessors.reason);
-      const successorsStatus =
-        successors.status === 'fulfilled'
-          ? LoadingStatus.LOADED
-          : createUnknownError('successorsStatus', successors.reason);
-
-      setState({
-        predecessorsStatus,
-        successorsStatus,
-        successors: successors.status === 'fulfilled' ? successors.value : [],
-        predecessors: predecessors.status === 'fulfilled' ? predecessors.value : [],
-      });
-    },
-    [fetchSurroundingRows, setState]
+      ]),
+    [fetchSurroundingRows]
   );
 
   const fetchAllRows = useCallback(
@@ -176,25 +184,10 @@ export function useContextAppFetch({
     [fetchAnchorRow, fetchContextRows]
   );
 
-  const fetchMoreRows = useCallback(
-    async (type) => {
-      const statusKey = `${type}Status`;
-      setState({ [statusKey]: LoadingStatus.LOADING });
-
-      try {
-        const rows = await fetchSurroundingRows(type);
-        setState({ [type]: rows, [statusKey]: LoadingStatus.LOADED });
-      } catch (error) {
-        setState(createUnknownError(statusKey, error));
-      }
-    },
-    [fetchSurroundingRows, setState]
-  );
-
   return {
     fetchedState,
-    fetchMoreRows,
-    fetchContextRows,
     fetchAllRows,
+    fetchContextRows,
+    fetchSurroundingRows,
   };
 }

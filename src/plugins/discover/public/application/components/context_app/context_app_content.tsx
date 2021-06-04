@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, Fragment } from 'react';
+import React, { useState, Fragment, useMemo, useCallback } from 'react';
 import './context_app_content.scss';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiHorizontalRule, EuiText } from '@elastic/eui';
@@ -16,8 +16,8 @@ import {
   DocTableLegacyProps,
 } from '../../angular/doc_table/create_doc_table_react';
 import { IndexPattern, IndexPatternField } from '../../../../../data/common/index_patterns';
-import { LoadingState, LoadingStatus } from '../../angular/context_query_state';
-import { ActionBar, ActionBarProps } from '../../angular/context/components/action_bar/action_bar';
+import { LoadingStatus } from '../../angular/context_query_state';
+import { ActionBar } from '../../angular/context/components/action_bar/action_bar';
 import { DiscoverGrid, DiscoverGridProps } from '../discover_grid/discover_grid';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { AppState } from '../../angular/context_state';
@@ -38,9 +38,9 @@ export interface ContextAppContentProps {
   sort: SortPairArr[];
   predecessors: EsHitRecordList;
   successors: EsHitRecordList;
-  anchorStatus: LoadingState;
-  predecessorsStatus: LoadingState;
-  successorsStatus: LoadingState;
+  anchorStatus: LoadingStatus;
+  predecessorsStatus: LoadingStatus;
+  successorsStatus: LoadingStatus;
   useNewFieldsApi: boolean;
   defaultStepSize: number;
   isLegacy: boolean;
@@ -53,12 +53,6 @@ export interface ContextAppContentProps {
 }
 
 const DataGridMemoized = React.memo(DiscoverGrid);
-const PREDECESSOR_TYPE = 'predecessors';
-const SUCCESSOR_TYPE = 'successors';
-
-function isLoading(status: LoadingState) {
-  return status !== LoadingStatus.LOADED && status !== LoadingStatus.FAILED;
-}
 
 export function ContextAppContent({
   columns,
@@ -83,26 +77,20 @@ export function ContextAppContent({
   addFilter,
 }: ContextAppContentProps) {
   const { uiSettings: config } = services;
+
   const [expandedDoc, setExpandedDoc] = useState<EsHitRecord | undefined>(undefined);
   const isAnchorLoaded = anchorStatus === LoadingStatus.LOADED;
+  const isAnchorLoading = anchorStatus === LoadingStatus.LOADING;
+  const arePredecessorsLoading =
+    predecessorsStatus === LoadingStatus.LOADING ||
+    predecessorsStatus === LoadingStatus.UNINITIALIZED;
+  const areSuccessorsLoading =
+    successorsStatus === LoadingStatus.LOADING || successorsStatus === LoadingStatus.UNINITIALIZED;
 
-  const actionBarProps = (type: string) => {
-    const isPredecessorType = type === PREDECESSOR_TYPE;
-    return {
-      defaultStepSize,
-      docCount: isPredecessorType ? predecessorCount : successorCount || defaultStepSize,
-      docCountAvailable: isPredecessorType ? predecessors.length : successors.length,
-      onChangeCount: (count) => {
-        const countKey = type === PREDECESSOR_TYPE ? 'predecessorCount' : 'successorCount';
-        setAppState({ [countKey]: count });
-      },
-      isLoading: isPredecessorType
-        ? isLoading(predecessorsStatus || LoadingStatus.UNINITIALIZED)
-        : isLoading(successorsStatus || LoadingStatus.UNINITIALIZED),
-      type,
-      isDisabled: !isAnchorLoaded,
-    } as ActionBarProps;
-  };
+  const showTimeCol = useMemo(
+    () => !config.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!indexPattern.timeFieldName,
+    [config, indexPattern]
+  );
 
   const docTableProps = () => {
     return {
@@ -111,11 +99,11 @@ export function ContextAppContent({
       rows: rows as ElasticSearchHit[],
       indexPattern,
       expandedDoc,
-      isLoading: isLoading(anchorStatus || LoadingStatus.UNINITIALIZED),
+      isLoading: isAnchorLoading,
       sampleSize: 0,
       sort,
       isSortEnabled: false,
-      showTimeCol: !config.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!indexPattern.timeFieldName,
+      showTimeCol,
       services,
       useNewFieldsApi,
       isPaginationEnabled: false,
@@ -144,7 +132,10 @@ export function ContextAppContent({
   };
 
   const loadingFeedback = () => {
-    if (anchorStatus === LoadingStatus.UNINITIALIZED || anchorStatus === LoadingStatus.LOADING) {
+    if (
+      isLegacy &&
+      (anchorStatus === LoadingStatus.UNINITIALIZED || anchorStatus === LoadingStatus.LOADING)
+    ) {
       return (
         <EuiText textAlign="center" data-test-subj="contextApp_loadingIndicator">
           <FormattedMessage id="discover.context.loadingDescription" defaultMessage="Loading..." />
@@ -154,24 +145,47 @@ export function ContextAppContent({
     return null;
   };
 
+  const onChangeCount = useCallback(
+    (type, count) => {
+      const countKey = type === 'successors' ? 'successorCount' : 'predecessorCount';
+      setAppState({ [countKey]: count });
+    },
+    [setAppState]
+  );
+
   return (
     <Fragment>
-      <ActionBar {...actionBarProps(PREDECESSOR_TYPE)} />
-      {isLegacy && loadingFeedback()}
+      <ActionBar
+        type="predecessors"
+        defaultStepSize={defaultStepSize}
+        docCount={predecessorCount}
+        docCountAvailable={predecessors.length}
+        onChangeCount={onChangeCount}
+        isLoading={arePredecessorsLoading}
+        isDisabled={!isAnchorLoaded}
+      />
+      {loadingFeedback()}
       <EuiHorizontalRule margin="xs" />
-      {isLegacy ? (
-        isAnchorLoaded && (
-          <div className="discover-table">
-            <DocTableLegacy {...legacyDocTableProps()} />
-          </div>
-        )
-      ) : (
+      {isLegacy && isAnchorLoaded && (
+        <div className="discover-table">
+          <DocTableLegacy {...legacyDocTableProps()} />
+        </div>
+      )}
+      {!isLegacy && (
         <div className="dscDocsGrid">
           <DataGridMemoized {...docTableProps()} />
         </div>
       )}
       <EuiHorizontalRule margin="xs" />
-      <ActionBar {...actionBarProps(SUCCESSOR_TYPE)} />
+      <ActionBar
+        type="successors"
+        defaultStepSize={defaultStepSize}
+        docCount={successorCount}
+        docCountAvailable={successors.length}
+        onChangeCount={onChangeCount}
+        isLoading={areSuccessorsLoading}
+        isDisabled={!isAnchorLoaded}
+      />
     </Fragment>
   );
 }

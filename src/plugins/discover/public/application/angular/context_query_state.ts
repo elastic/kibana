@@ -25,15 +25,15 @@ export interface ContextFetchState {
   /**
    * Anchor fetch status
    */
-  anchorStatus: LoadingState;
+  anchorStatus: LoadingStatusEntry;
   /**
    * Predecessors fetch status
    */
-  predecessorsStatus: LoadingState;
+  predecessorsStatus: LoadingStatusEntry;
   /**
    * Successors fetch status
    */
-  successorsStatus: LoadingState;
+  successorsStatus: LoadingStatusEntry;
 }
 
 export enum LoadingStatus {
@@ -48,19 +48,24 @@ export enum FailureReason {
   INVALID_TIEBREAKER = 'invalid_tiebreaker',
 }
 
-export type LoadingStatusEntry = Partial<{
-  status: LoadingStatus;
-  reason: FailureReason;
-  error: Error;
-}>;
+export interface LoadingStatusEntry {
+  value: LoadingStatus;
+  error?: Error;
+  reason?: FailureReason;
+}
 
-export type LoadingState = LoadingStatus | LoadingStatusEntry;
+export enum FetchType {
+  ALL,
+  CONTEXT,
+  PREDECESSORS,
+  SUCCESSORS,
+}
 
 export const getInitialContextQueryState = (): ContextFetchState => ({
   anchor: {} as EsHitRecord,
   predecessors: [],
   successors: [],
-  anchorStatus: LoadingStatus.UNINITIALIZED,
-  predecessorsStatus: LoadingStatus.UNINITIALIZED,
-  successorsStatus: LoadingStatus.UNINITIALIZED,
+  anchorStatus: { value: LoadingStatus.UNINITIALIZED },
+  predecessorsStatus: { value: LoadingStatus.UNINITIALIZED },
+  successorsStatus: { value: LoadingStatus.UNINITIALIZED },
 });

@@ -8,7 +8,6 @@
 
 import React, { Fragment, memo, useEffect, useRef, useMemo, useCallback } from 'react';
 import classNames from 'classnames';
-import './context_app.scss';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { EuiText, EuiPageContent, EuiPage, EuiSpacer } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
@@ -20,7 +19,7 @@ import {
 } from '../../../../common';
 import { ContextErrorMessage } from '../context_error_message';
 import { IndexPattern, IndexPatternField } from '../../../../../data/common/index_patterns';
-import { LoadingStatus, LoadingStatusEntry } from '../../angular/context_query_state';
+import { LoadingStatus } from '../../angular/context_query_state';
 import { getServices } from '../../../kibana_services';
 import { AppState, isEqualFilters } from '../../angular/context_state';
 import { useDataGridColumns } from '../../helpers/use_data_grid_columns';
@@ -60,14 +59,16 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
   /**
    * Context fetched state
    */
-  const { fetchedState, fetchMoreRows, fetchContextRows, fetchAllRows } = useContextAppFetch({
-    anchorId,
-    indexPatternId,
-    indexPattern,
-    appState,
-    useNewFieldsApi,
-    services,
-  });
+  const { fetchedState, fetchContextRows, fetchAllRows, fetchSurroundingRows } = useContextAppFetch(
+    {
+      anchorId,
+      indexPatternId,
+      indexPattern,
+      appState,
+      useNewFieldsApi,
+      services,
+    }
+  );
 
   /**
    * Fetch docs on ui changes
@@ -76,15 +77,15 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
     if (!prevState.current) {
       fetchAllRows();
     } else if (prevState.current.predecessorCount !== appState.predecessorCount) {
-      fetchMoreRows('predecessors');
+      fetchSurroundingRows('predecessors');
     } else if (prevState.current.successorCount !== appState.successorCount) {
-      fetchMoreRows('successors');
+      fetchSurroundingRows('successors');
     } else if (!isEqualFilters(prevState.current.filters, appState.filters)) {
       fetchContextRows();
     }
 
     prevState.current = cloneDeep(appState);
-  }, [appState, indexPatternId, anchorId, fetchContextRows, fetchAllRows, fetchMoreRows]);
+  }, [appState, indexPatternId, anchorId, fetchContextRows, fetchAllRows, fetchSurroundingRows]);
 
   const { columns, onAddColumn, onRemoveColumn, onSetColumns } = useDataGridColumns({
     capabilities,
@@ -135,11 +136,8 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
 
   return (
     <I18nProvider>
-      {fetchedState.anchorStatus === LoadingStatus.FAILED ? (
-        <ContextErrorMessage
-          status={fetchedState.anchorStatus as string}
-          reason={(fetchedState.anchorStatus as LoadingStatusEntry).reason}
-        />
+      {fetchedState.anchorStatus.value === LoadingStatus.FAILED ? (
+        <ContextErrorMessage status={fetchedState.anchorStatus} />
       ) : (
         <Fragment>
           <TopNavMenu {...getNavBarProps()} />
@@ -169,9 +167,9 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
                 sort={appState.sort}
                 predecessors={fetchedState.predecessors}
                 successors={fetchedState.successors}
-                anchorStatus={fetchedState.anchorStatus}
-                predecessorsStatus={fetchedState.predecessorsStatus}
-                successorsStatus={fetchedState.successorsStatus}
+                anchorStatus={fetchedState.anchorStatus.value}
+                predecessorsStatus={fetchedState.predecessorsStatus.value}
+                successorsStatus={fetchedState.successorsStatus.value}
                 defaultStepSize={defaultStepSize}
                 useNewFieldsApi={useNewFieldsApi}
                 isLegacy={isLegacy}

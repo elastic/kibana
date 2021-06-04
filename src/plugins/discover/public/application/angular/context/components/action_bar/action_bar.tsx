@@ -47,7 +47,7 @@ export interface ActionBarProps {
    * is triggered when the input containing count is changed
    * @param count
    */
-  onChangeCount: (count: number) => void;
+  onChangeCount: (type: string, count: number) => void;
   /**
    * can be `predecessors` or `successors`, usage in context:
    * predecessors action bar + records (these are newer records)
@@ -73,7 +73,7 @@ export function ActionBar({
   const onSubmit = (ev: React.FormEvent<HTMLFormElement>) => {
     ev.preventDefault();
     if (newDocCount !== docCount && isValid(newDocCount)) {
-      onChangeCount(newDocCount);
+      onChangeCount(type, newDocCount);
     }
   };
   useEffect(() => {
@@ -100,7 +100,7 @@ export function ActionBar({
                 const value = newDocCount + defaultStepSize;
                 if (isValid(value)) {
                   setNewDocCount(value);
-                  onChangeCount(value);
+                  onChangeCount(type, value);
                 }
               }}
               flush="right"
@@ -131,7 +131,7 @@ export function ActionBar({
                 }}
                 onBlur={() => {
                   if (newDocCount !== docCount && isValid(newDocCount)) {
-                    onChangeCount(newDocCount);
+                    onChangeCount(type, newDocCount);
                   }
                 }}
                 type="number"
