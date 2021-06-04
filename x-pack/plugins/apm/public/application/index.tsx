@@ -62,7 +62,7 @@ export const renderApp = ({
     console.log('Error creating static index pattern', e);
   });
 
-  // ensure all divs are .kbnAppWrappers
+  // add .kbnAppWrappers class to root element
   element.classList.add(APP_WRAPPER_CLASS);
 
   ReactDOM.render(
