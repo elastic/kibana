@@ -51,16 +51,16 @@ Then(`should display percentile for page load chart`, () => {
   cy.get(pMarkers).eq(3).should('have.text', '95th');
 });
 
-Then(`should display chart legend`, () => {
-  const chartLegend = 'button.echLegendItem__label';
+// Then(`should display chart legend`, () => {
+//   const chartLegend = 'button.echLegendItem__label';
 
-  waitForLoadingToFinish();
-  cy.get('.euiLoadingChart').should('not.exist');
+//   waitForLoadingToFinish();
+//   cy.get('.euiLoadingChart').should('not.exist');
 
-  cy.get('[data-cy=pageLoadDist]').within(() => {
-    cy.get(chartLegend, DEFAULT_TIMEOUT).eq(0).should('have.text', 'Overall');
-  });
-});
+//   cy.get('[data-cy=pageLoadDist]').within(() => {
+//     cy.get(chartLegend, DEFAULT_TIMEOUT).eq(0).should('have.text', 'Overall');
+//   });
+// });
 
 Then(`should display tooltip on hover`, () => {
   cy.get('.euiLoadingChart').should('not.exist');
