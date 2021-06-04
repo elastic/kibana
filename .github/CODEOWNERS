@@ -89,7 +89,7 @@
 # Client Side Monitoring / Uptime (lives in APM directories but owned by Uptime)
 /x-pack/plugins/apm/e2e/cypress/support/step_definitions/csm @elastic/uptime
 /x-pack/plugins/apm/e2e/cypress/integration/csm_dashboard.feature @elastic/uptime
-/x-pack/plugins/apm/public/application/csmApp.tsx @elastic/uptime
+/x-pack/plugins/apm/public/application/uxApp.tsx @elastic/uptime
 /x-pack/plugins/apm/public/components/app/RumDashboard @elastic/uptime
 /x-pack/plugins/apm/server/lib/rum_client @elastic/uptime
 /x-pack/plugins/apm/server/routes/rum_client.ts @elastic/uptime

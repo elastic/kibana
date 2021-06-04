@@ -67,8 +67,8 @@ export interface ApmPluginStartDeps {
   licensing: void;
   maps?: MapsStartApi;
   ml?: MlPluginStart;
-  observability: ObservabilityPublicStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  observability: ObservabilityPublicStart;
 }
 
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
@@ -149,6 +149,26 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         return await dataHelper.fetchUxOverviewDate(params);
       },
     });
+
+    plugins.observability.navigation.registerSections(
+      of([
+        {
+          label: 'User Experience',
+          sortKey: 201,
+          entries: [
+            {
+              label: i18n.translate('xpack.apm.ux.overview.heading', {
+                defaultMessage: 'Overview',
+              }),
+              app: 'ux',
+              path: '/',
+              matchFullPath: true,
+              ignoreTrailingSlash: true,
+            },
+          ],
+        },
+      ])
+    );
 
     core.application.register({
       id: 'apm',
@@ -231,7 +251,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       async mount(appMountParameters: AppMountParameters<unknown>) {
         // Load application bundle and Get start service
         const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([
-          import('./application/csmApp'),
+          import('./application/uxApp'),
           core.getStartServices(),
         ]);
 
