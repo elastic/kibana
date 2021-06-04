@@ -139,7 +139,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       });
     });
 
-    describe('FOO nested export transforms', () => {
+    describe('nested export transforms', () => {
       before(async () => {
         await esArchiver.load(
           '../functional/fixtures/es_archiver/saved_objects_management/nested_export_transform'
