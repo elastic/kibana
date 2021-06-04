@@ -15,6 +15,53 @@ export type CollectorDependencies = {
   core: CoreSetup;
 } & Pick<SetupPlugins, 'usageCollection'>;
 
+export interface LiveQuerySessionUsage {
+  count: number;
+  errors: number;
+}
+export interface LiveQueryCumulativeUsage {
+  queries: number;
+}
+
+export interface LiveQueryUsage {
+  session: LiveQuerySessionUsage;
+  cumulative?: LiveQueryCumulativeUsage;
+}
+
+export interface ScheduledQueryUsage {
+  queryGroups: {
+    total: number;
+    empty: number;
+  };
+}
+export interface AgentInfo {
+  enrolled: number;
+}
+
+export interface MetricEntry {
+  max?: number;
+  latest?: number;
+  avg?: number;
+}
+
+export interface BeatMetricsUsage {
+  cpu: MetricEntry;
+  memory: {
+    rss: MetricEntry;
+  };
+}
+
+export interface BeatMetrics {
+  usage: BeatMetricsUsage;
+}
+
+export interface UsageData {
+  live_query_usage?: LiveQueryUsage;
+  scheduled_queries?: ScheduledQueryUsage;
+  agent_info?: AgentInfo;
+  beat_metrics?: BeatMetrics;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const usageSchema: MakeSchemaFrom<any> = {
   live_query_usage: {

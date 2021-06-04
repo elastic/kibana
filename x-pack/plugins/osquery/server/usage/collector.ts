@@ -9,7 +9,7 @@ import { CoreSetup, SavedObjectsClientContract } from '../../../../../src/core/s
 import { CollectorFetchContext } from '../../../../../src/plugins/usage_collection/server';
 import { createMetricObjects } from '../routes/usage';
 import { getBeatUsage, getLiveQueryUsage, getPolicyLevelUsage } from './fetchers';
-import { CollectorDependencies, usageSchema } from './types';
+import { CollectorDependencies, usageSchema, UsageData } from './types';
 
 export type RegisterCollector = (deps: CollectorDependencies) => void;
 export async function getInternalSavedObjectsClient(core: CoreSetup) {
@@ -31,8 +31,7 @@ export const registerCollector: RegisterCollector = ({ core, osqueryContext, usa
       const savedObjectsClient = (internalSavedObjectsClient as unknown) as SavedObjectsClientContract;
       return await createMetricObjects(savedObjectsClient);
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    fetch: async ({ esClient }: CollectorFetchContext): Promise<any> => {
+    fetch: async ({ esClient }: CollectorFetchContext): Promise<UsageData> => {
       const internalSavedObjectsClient = await getInternalSavedObjectsClient(core);
       const savedObjectsClient = (internalSavedObjectsClient as unknown) as SavedObjectsClientContract;
       return {

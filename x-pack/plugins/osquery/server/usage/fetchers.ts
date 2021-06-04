@@ -16,21 +16,11 @@ import { ElasticsearchClient, SavedObjectsClientContract } from '../../../../../
 import { ListResult, PackagePolicy, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../fleet/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import { METRICS_INDICES } from './constants';
-
-export interface MetricEntry {
-  max?: number;
-  latest?: number;
-  avg?: number;
-}
-
-export interface BeatMetricAggregation {
-  rss: MetricEntry;
-  cpuMs: MetricEntry;
-}
+import { AgentInfo, BeatMetricsUsage, LiveQueryUsage } from './types';
 
 interface PolicyLevelUsage {
-  scheduled_queries?: {};
-  agent_info?: {};
+  scheduled_queries?: ScheduledQueryUsageMetrics;
+  agent_info?: AgentInfo;
 }
 
 export async function getPolicyLevelUsage(
@@ -66,9 +56,10 @@ export async function getPolicyLevelUsage(
     },
     index: '.fleet-agents',
   });
-  if (agentResponse.statusCode === 200) {
+  const policied = agentResponse.body.aggregations?.policied as SingleBucketAggregate;
+  if (policied && typeof policied.doc_count === 'number') {
     result.agent_info = {
-      enrolled: (agentResponse.body.aggregations?.policied as SingleBucketAggregate).doc_count,
+      enrolled: policied.doc_count,
     };
   }
   return result;
@@ -127,15 +118,17 @@ export async function getLiveQueryUsage(
     },
     index: '.fleet-actions',
   });
-  const esQueries = (metricResponse.aggregations?.queries as SingleBucketAggregate).doc_count;
-  const result = {
+  const result: LiveQueryUsage = {
     session: await getRouteMetric(soClient, 'live_query'),
+  };
+  const esQueries = metricResponse.aggregations?.queries as SingleBucketAggregate;
+  if (esQueries && typeof esQueries.doc_count === 'number') {
     // getting error stats out of ES is difficult due to a lack of error info on .fleet-actions
     // and a lack of indexable osquery specific info on .fleet-actions-results
-    cumulative: {
-      queries: esQueries,
-    },
-  };
+    result.cumulative = {
+      queries: esQueries.doc_count,
+    };
+  }
 
   return result;
 }
@@ -194,32 +187,34 @@ export async function getBeatUsage(esClient: ElasticsearchClient) {
     index: METRICS_INDICES,
   });
   const lastDayAggs = metricResponse.aggregations?.lastDay as SingleBucketAggregate;
-  const result: BeatMetricAggregation = {
-    rss: {},
-    cpuMs: {},
+  const result: BeatMetricsUsage = {
+    memory: {
+      rss: {},
+    },
+    cpu: {},
   };
 
   if ('max_rss' in lastDayAggs) {
-    result.rss.max = (lastDayAggs.max_rss as ValueAggregate).value;
+    result.memory.rss.max = (lastDayAggs.max_rss as ValueAggregate).value;
   }
 
   if ('avg_rss' in lastDayAggs) {
-    result.rss.avg = (lastDayAggs.max_rss as ValueAggregate).value;
+    result.memory.rss.avg = (lastDayAggs.max_rss as ValueAggregate).value;
   }
 
   if ('max_cpu' in lastDayAggs) {
-    result.cpuMs.max = (lastDayAggs.max_cpu as ValueAggregate).value;
+    result.cpu.max = (lastDayAggs.max_cpu as ValueAggregate).value;
   }
 
   if ('avg_cpu' in lastDayAggs) {
-    result.cpuMs.avg = (lastDayAggs.max_cpu as ValueAggregate).value;
+    result.cpu.avg = (lastDayAggs.max_cpu as ValueAggregate).value;
   }
 
   if ('latest' in lastDayAggs) {
     const latest = (lastDayAggs.latest as TopHitsAggregate).hits.hits[0]?._source?.monitoring
       .metrics.beat;
-    result.cpuMs.latest = latest.cpu.total.time.ms;
-    result.rss.latest = latest.memstats.rss;
+    result.cpu.latest = latest.cpu.total.time.ms;
+    result.memory.rss.latest = latest.memstats.rss;
   }
 
   return result;

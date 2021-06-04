@@ -7,6 +7,7 @@
 
 import { SavedObjectsClientContract } from 'kibana/server';
 import { usageMetricSavedObjectType } from '../../../common/types';
+import { LiveQuerySessionUsage } from '../../usage/types';
 
 export interface RouteUsageMetric {
   queries: number;
@@ -38,7 +39,7 @@ export async function createMetricObjects(soClient: SavedObjectsClientContract) 
 }
 
 export async function getCount(soClient: SavedObjectsClientContract, route: RouteString) {
-  return await soClient.get(usageMetricSavedObjectType, route);
+  return await soClient.get<LiveQuerySessionUsage>(usageMetricSavedObjectType, route);
 }
 
 export async function incrementCount(
