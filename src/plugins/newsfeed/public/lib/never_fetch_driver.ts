@@ -6,21 +6,20 @@
  * Side Public License, v 1.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { Observable } from 'rxjs';
-import type { NewsfeedApiDriver } from './driver';
-import type { FetchResult } from '../types';
+import { FetchResult } from '../types';
+import { INewsfeedApiDriver } from './types';
 
 /**
  * NewsfeedApiDriver variant that never fetches results. This is useful for instances where Kibana is started
  * without any user interaction like when generating a PDF or PNG report.
  */
-export class NeverFetchNewsfeedApiDriver implements PublicMethodsOf<NewsfeedApiDriver> {
+export class NeverFetchNewsfeedApiDriver implements INewsfeedApiDriver {
   shouldFetch(): boolean {
     return false;
   }
 
-  public fetchNewsfeedItems(): Observable<FetchResult> {
+  fetchNewsfeedItems(): Observable<FetchResult> {
     throw new Error('Not implemented!');
   }
 }

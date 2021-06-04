@@ -43,15 +43,12 @@ export class NewsfeedPublicPlugin
 
   public start(core: CoreStart, { screenshotMode }: NewsfeedPluginStartDependencies) {
     const isScreenshotMode = screenshotMode.isScreenshotMode();
-    const shouldMountKibanaNewsfeed = !isScreenshotMode;
 
-    if (shouldMountKibanaNewsfeed) {
-      const api = this.createNewsfeedApi(this.config, NewsfeedApiEndpoint.KIBANA, false);
-      core.chrome.navControls.registerRight({
-        order: 1000,
-        mount: (target) => this.mount(api, target),
-      });
-    }
+    const api = this.createNewsfeedApi(this.config, NewsfeedApiEndpoint.KIBANA, isScreenshotMode);
+    core.chrome.navControls.registerRight({
+      order: 1000,
+      mount: (target) => this.mount(api, target),
+    });
 
     return {
       createNewsFeed$: (endpoint: NewsfeedApiEndpoint) => {

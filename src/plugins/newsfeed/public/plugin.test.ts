@@ -31,62 +31,50 @@ describe('Newsfeed plugin', () => {
       plugin.setup(coreMock.createSetup());
     });
 
-    describe('screenshot mode', () => {
-      it('mounts chrome nav UI', () => {
-        const coreStart = coreMock.createStart();
-        plugin.start(coreStart, { screenshotMode: { isScreenshotMode: () => false } });
-        expect(coreStart.chrome.navControls.registerRight).toHaveBeenCalled();
+    /**
+     * We assume for these tests that the newsfeed stream exposed by start will fetch newsfeed items
+     * on the first tick for new subscribers
+     */
+    let fakeFetch: jest.Mock;
+    let realFetch: typeof window.fetch;
+
+    beforeEach(() => {
+      realFetch = window.fetch;
+      fakeFetch = jest.fn();
+      window.fetch = fakeFetch;
+    });
+
+    afterEach(() => {
+      window.fetch = realFetch;
+    });
+
+    describe('base case', () => {
+      it('makes fetch requests', async () => {
+        const startContract = plugin.start(coreMock.createStart(), {
+          screenshotMode: { isScreenshotMode: () => false },
+        });
+        const sub = startContract
+          .createNewsFeed$(NewsfeedApiEndpoint.KIBANA) // Any endpoint will do
+          .pipe(take(1))
+          .subscribe(() => {});
+        jest.runOnlyPendingTimers();
+        expect(fakeFetch).toHaveBeenCalled();
+        sub.unsubscribe();
       });
+    });
 
-      it('does not mount chrome nav UI when in screenshot mode', () => {
-        const coreStart = coreMock.createStart();
-        plugin.start(coreStart, { screenshotMode: { isScreenshotMode: () => true } });
-        expect(coreStart.chrome.navControls.registerRight).not.toHaveBeenCalled();
-      });
-
-      /**
-       * We assume for these tests that the newsfeed stream exposed by start will fetch newsfeed items
-       * on the first tick for new subscribers
-       */
-      describe('fetch newsfeed requests', () => {
-        let fakeFetch: jest.Mock;
-        let realFetch: typeof window.fetch;
-
-        beforeEach(() => {
-          realFetch = window.fetch;
-          fakeFetch = jest.fn();
-          window.fetch = fakeFetch;
+    describe('when in screenshot mode', () => {
+      it('makes no fetch requests in screenshot mode', async () => {
+        const startContract = plugin.start(coreMock.createStart(), {
+          screenshotMode: { isScreenshotMode: () => true },
         });
-
-        afterEach(() => {
-          window.fetch = realFetch;
-        });
-
-        it('makes fetch requests', async () => {
-          const startContract = plugin.start(coreMock.createStart(), {
-            screenshotMode: { isScreenshotMode: () => false },
-          });
-          const sub = startContract
-            .createNewsFeed$(NewsfeedApiEndpoint.KIBANA) // Any endpoint will do
-            .pipe(take(1))
-            .subscribe(() => {});
-          jest.runOnlyPendingTimers();
-          expect(fakeFetch).toHaveBeenCalled();
-          sub.unsubscribe();
-        });
-
-        it('makes no fetch requests in screenshot mode', async () => {
-          const startContract = plugin.start(coreMock.createStart(), {
-            screenshotMode: { isScreenshotMode: () => true },
-          });
-          const sub = startContract
-            .createNewsFeed$(NewsfeedApiEndpoint.KIBANA) // Any endpoint will do
-            .pipe(take(1))
-            .subscribe(() => {});
-          jest.runOnlyPendingTimers();
-          expect(fakeFetch).not.toHaveBeenCalled();
-          sub.unsubscribe();
-        });
+        const sub = startContract
+          .createNewsFeed$(NewsfeedApiEndpoint.KIBANA) // Any endpoint will do
+          .pipe(take(1))
+          .subscribe(() => {});
+        jest.runOnlyPendingTimers();
+        expect(fakeFetch).not.toHaveBeenCalled();
+        sub.unsubscribe();
       });
     });
   });
