@@ -20,8 +20,47 @@
 // TODO: Remove once typescript definitions are in EUI
 
 declare module '@elastic/eui' {
-  export const EuiWrappingPopover: React.SFC<any>;
+  export const EuiButton: React.SFC<any>;
+  export const EuiButtonEmpty: React.SFC<any>;
+  export const EuiButtonIcon: React.SFC<any>;
+  export const EuiCallOut: React.SFC<any>;
+  export const EuiCodeBlock: React.SFC<any>;
+  export const EuiContextMenu: React.SFC<any>;
   export const EuiCopy: React.SFC<any>;
+  export const EuiEmptyPrompt: React.SFC<any>;
+  export const EuiFieldSearch: React.SFC<any>;
+  export const EuiFieldText: React.SFC<any>;
+  export const EuiFlexGroup: React.SFC<any>;
+  export const EuiFlexItem: React.SFC<any>;
+  export const EuiFlyout: React.SFC<any>;
+  export const EuiFlyoutBody: React.SFC<any>;
+  export const EuiForm: React.SFC<any>;
+  export const EuiFormRow: React.SFC<any>;
+  export const EuiGlobalToastList: React.SFC<any>;
+  export const EuiIconTip: React.SFC<any>;
+  export const EuiKeyPadMenu: React.SFC<any>;
+  export const EuiKeyPadMenuItemButton: React.SFC<any>;
+  export const EuiLink: React.SFC<any>;
+  export const EuiLoadingSpinner: React.SFC<any>;
+  export const EuiModal: React.SFC<any>;
+  export const EuiModalHeader: React.SFC<any>;
+  export const EuiModalHeaderTitle: React.SFC<any>;
   export const EuiOutsideClickDetector: React.SFC<any>;
+  export const EuiOverlayMask: React.SFC<any>;
+  export const EuiPage: React.SFC<any>;
+  export const EuiPageBody: React.SFC<any>;
+  export const EuiPageContent: React.SFC<any>;
+  export const EuiPopover: React.SFC<any>;
+  export const EuiPopoverTitle: React.SFC<any>;
+  export const EuiRadioGroup: React.SFC<any>;
   export const EuiSideNav: React.SFC<any>;
+  export const EuiSwitch: React.SFC<any>;
+  export const EuiText: React.SFC<any>;
+  export const EuiTitle: React.SFC<any>;
+  export const EuiWrappingPopover: React.SFC<any>;
+
+  export type EuiContextMenuItemIcon = any;
+  export type EuiContextMenuPanelDescriptor = any;
+  export type EuiContextMenuPanelItemDescriptor = any;
+  export type Toast = any;
 }

@@ -4,11 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// TODO: Remove once typescript definitions are in EUI
-declare module '@elastic/eui' {
-  export const EuiCopy: React.SFC<any>;
-}
-
 import { EuiButton, EuiCopy, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, ReactElement } from 'react';
