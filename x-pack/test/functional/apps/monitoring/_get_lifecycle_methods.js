@@ -8,12 +8,15 @@
 export const getLifecycleMethods = (getService, getPageObjects) => {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const PageObjects = getPageObjects(['monitoring', 'timePicker', 'security']);
+  const PageObjects = getPageObjects(['monitoring', 'timePicker', 'security', 'common']);
   let _archive;
 
   return {
     async setup(archive, { from, to, useSuperUser = false }) {
       _archive = archive;
+      if (!useSuperUser) {
+        await security.testUser.setRoles(['monitoring_user', 'kibana_admin']);
+      }
 
       const kibanaServer = getService('kibanaServer');
       const browser = getService('browser');
@@ -24,7 +27,7 @@ export const getLifecycleMethods = (getService, getPageObjects) => {
       await esArchiver.load(archive);
       await kibanaServer.uiSettings.replace({});
 
-      await PageObjects.monitoring.navigateTo(useSuperUser);
+      await PageObjects.common.navigateToApp('monitoring');
 
       // pause autorefresh in the time filter because we don't wait any ticks,
       // and we don't want ES to log a warning when data gets wiped out
@@ -34,8 +37,7 @@ export const getLifecycleMethods = (getService, getPageObjects) => {
     },
 
     async tearDown() {
-      await PageObjects.security.forceLogout();
-      await security.user.delete('basic_monitoring_user');
+      await security.testUser.restoreDefaults();
       return esArchiver.unload(_archive);
     },
   };

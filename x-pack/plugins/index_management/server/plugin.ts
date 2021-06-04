@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
   Plugin,
-  Logger,
   PluginInitializerContext,
   ILegacyCustomClusterClient,
 } from 'src/core/server';
@@ -17,7 +15,7 @@ import {
 import { PLUGIN } from '../common/constants/plugin';
 import { Dependencies } from './types';
 import { ApiRoutes } from './routes';
-import { License, IndexDataEnricher } from './services';
+import { IndexDataEnricher } from './services';
 import { isEsError, handleEsError, parseEsError } from './shared_imports';
 import { elasticsearchJsPlugin } from './client/elasticsearch';
 import type { IndexManagementRequestHandlerContext } from './types';
@@ -36,37 +34,19 @@ async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']
 
 export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup, void, any, any> {
   private readonly apiRoutes: ApiRoutes;
-  private readonly license: License;
-  private readonly logger: Logger;
   private readonly indexDataEnricher: IndexDataEnricher;
   private dataManagementESClient?: ILegacyCustomClusterClient;
 
   constructor(initContext: PluginInitializerContext) {
-    this.logger = initContext.logger.get();
     this.apiRoutes = new ApiRoutes();
-    this.license = new License();
     this.indexDataEnricher = new IndexDataEnricher();
   }
 
   setup(
     { http, getStartServices }: CoreSetup,
-    { features, licensing, security }: Dependencies
+    { features, security }: Dependencies
   ): IndexManagementPluginSetup {
     const router = http.createRouter<IndexManagementRequestHandlerContext>();
-
-    this.license.setup(
-      {
-        pluginId: PLUGIN.id,
-        minimumLicenseType: PLUGIN.minimumLicenseType,
-        defaultErrorMessage: i18n.translate('xpack.idxMgmt.licenseCheckErrorMessage', {
-          defaultMessage: 'License check failed',
-        }),
-      },
-      {
-        licensing,
-        logger: this.logger,
-      }
-    );
 
     features.registerElasticsearchFeature({
       id: PLUGIN.id,
@@ -97,7 +77,6 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
 
     this.apiRoutes.setup({
       router,
-      license: this.license,
       config: {
         isSecurityEnabled: () => security !== undefined && security.license.isEnabled(),
       },

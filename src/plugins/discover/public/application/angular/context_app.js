@@ -34,6 +34,8 @@ getAngularModule().directive('contextApp', function ContextApp() {
       anchorId: '=',
       columns: '=',
       indexPattern: '=',
+      appState: '=',
+      stateContainer: '=',
       filters: '=',
       predecessorCount: '=',
       successorCount: '=',
@@ -55,7 +57,6 @@ function ContextAppController($scope, Private) {
   );
   this.state.useNewFieldsApi = useNewFieldsApi;
   this.topNavMenu = navigation.ui.TopNavMenu;
-
   this.actions = _.mapValues(
     {
       ...queryParameterActions,
