@@ -14,6 +14,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'canvas', 'error', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
+  const testSubjects = getService('testSubjects');
 
   describe('security feature controls', function () {
     this.tags(['skipFirefox']);
@@ -84,10 +85,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`allows a workpad to be created`, async () => {
-        await PageObjects.common.navigateToActualUrl('canvas', 'workpad/create', {
-          ensureCurrentUrl: true,
-          shouldLoginIfPrompted: false,
-        });
+        await PageObjects.common.navigateToActualUrl('canvas');
+
+        await testSubjects.click('create-workpad-button');
 
         await PageObjects.canvas.expectAddElementButton();
       });

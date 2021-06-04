@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiLink } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+  EuiLink,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { useSelector } from 'react-redux';
@@ -95,26 +103,26 @@ export const MonitorPageTitle: React.FC = () => {
       <EuiSpacer size="s" />
       <EuiFlexGroup wrap={false} gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          {type && (
+          {isBrowser && type && (
             <EuiBadge color="hollow">
               {renderMonitorType(type)}{' '}
-              {isBrowser && (
-                <FormattedMessage
-                  id="xpack.uptime.monitorDetails.title.disclaimer.description"
-                  defaultMessage="(BETA)"
-                />
-              )}
+              <FormattedMessage
+                id="xpack.uptime.monitorDetails.title.disclaimer.description"
+                defaultMessage="(BETA)"
+              />
             </EuiBadge>
           )}
         </EuiFlexItem>
         {isBrowser && (
           <EuiFlexItem grow={false}>
-            <EuiLink href="https://www.elastic.co/what-is/synthetic-monitoring" target="_blank">
-              <FormattedMessage
-                id="xpack.uptime.monitorDetails.title.disclaimer.link"
-                defaultMessage="See more"
-              />
-            </EuiLink>
+            <EuiText>
+              <EuiLink href="https://www.elastic.co/what-is/synthetic-monitoring" target="_blank">
+                <FormattedMessage
+                  id="xpack.uptime.monitorDetails.title.disclaimer.link"
+                  defaultMessage="See more"
+                />
+              </EuiLink>
+            </EuiText>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
