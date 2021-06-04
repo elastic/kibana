@@ -13,10 +13,13 @@ import { getGeoFieldNames } from '../../selectors/map_selectors';
 import { DRAW_MODE } from '../../../common';
 
 function mapStateToProps(state: MapStoreState) {
+  const shapeDrawModeActive = getDrawMode(state) === DRAW_MODE.DRAW_SHAPES;
+  const pointDrawModeActive = getDrawMode(state) === DRAW_MODE.DRAW_POINTS;
   return {
-    showToolsControl: getGeoFieldNames(state).length !== 0,
-    shapeDrawModeActive: getDrawMode(state) === DRAW_MODE.DRAW_SHAPES,
-    pointDrawModeActive: getDrawMode(state) === DRAW_MODE.DRAW_POINTS,
+    showToolsControl:
+      getGeoFieldNames(state).length !== 0 && !(shapeDrawModeActive || pointDrawModeActive),
+    shapeDrawModeActive,
+    pointDrawModeActive,
   };
 }
 
