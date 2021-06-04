@@ -19,6 +19,7 @@ import {
   EDIT_FEATURES_LABEL,
 } from '../action_labels';
 import { ESSearchSource } from '../../../../../../classes/sources/es_search_source';
+import { getMapAppConfig } from '../../../../../../kibana_services';
 
 export interface Props {
   cloneLayer: (layerId: string) => void;
@@ -129,7 +130,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
     ];
 
     if (!this.props.isReadOnly) {
-      if (this.state.isLayerEditable) {
+      if (getMapAppConfig().enableDrawingFeature && this.state.isLayerEditable) {
         actionItems.push({
           name: EDIT_FEATURES_LABEL,
           icon: <EuiIcon type="pencil" size="m" />,
