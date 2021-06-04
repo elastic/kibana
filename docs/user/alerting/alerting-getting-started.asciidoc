@@ -115,7 +115,6 @@ image::images/rule-concepts-summary.svg[Rules, connectors, alerts and actions wo
 . {kib} invokes the actions, sending them to a third party *integration* like an email service.
 . If the third party integration has connection parameters or credentials, {kib} will fetch these from the *connector* referenced in the action.
 
-
 [float]
 [[alerting-concepts-differences]]
 == Differences from Watcher
@@ -136,5 +135,7 @@ Pre-packaged *rule types* simplify setup and hide the details of complex, domain
 
 [float]
 [[alerting-setup-prerequisites]]
+== Prerequisites
+<<alerting-prerequisites, Alerting prerequisites>> 
 
 --
