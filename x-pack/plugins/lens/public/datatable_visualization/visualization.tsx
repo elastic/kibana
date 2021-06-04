@@ -445,37 +445,6 @@ export const getDatatableVisualization = ({
         return state;
     }
   },
-  getWarningMessages(state, frame) {
-    if (state?.columns.length === 0 || !frame.activeData) {
-      return;
-    }
-
-    const metricColumnsWithArrayValues = [];
-
-    for (const { columnId, summaryRow } of state.columns) {
-      const rows = frame.activeData[state.layerId] && frame.activeData[state.layerId].rows;
-      if (!rows || summaryRow == null || summaryRow === 'none') {
-        continue;
-      }
-      const columnToLabel = frame.datasourceLayers[state.layerId].getOperationForColumnId(columnId)
-        ?.label;
-
-      const hasArrayValues = rows.some((row) => Array.isArray(row[columnId]));
-      if (hasArrayValues) {
-        metricColumnsWithArrayValues.push(columnToLabel || columnId);
-      }
-    }
-    return metricColumnsWithArrayValues.map((label) => (
-      <FormattedMessage
-        key={label}
-        id="xpack.lens.datatables.arrayValues"
-        defaultMessage="{label} contains array values. Summary rows will take into account each numeric value within the arrays."
-        values={{
-          label: <strong>{label}</strong>,
-        }}
-      />
-    ));
-  },
 });
 
 function getDataSourceAndSortedColumns(
