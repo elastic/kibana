@@ -27,10 +27,29 @@ image::images/rule-flyout-general-details.png[alt='All rules have name, tags, ch
 Name::      The name of the rule. While this name does not have to be unique, the name can be referenced in actions and also appears in the searchable rule listing in the management UI. A distinctive name can help identify and find a rule.
 Tags::      A list of tag names that can be applied to a rule. Tags can help you organize and find rules, because tags appear in the rule listing in the management UI which is searchable by tag.
 Check every::      This value determines how frequently the rule conditions below are checked. Note that the timing of background rule checks are not guaranteed, particularly for intervals of less than 10 seconds. See <<alerting-production-considerations, Alerting production considerations>> for more information.
-Notify::      This value limits how often actions are repeated when an alert remains active across rule checks. See alerting-concepts-suppressing-duplicate-notifications for more information. +
+Notify::      This value limits how often actions are repeated when an alert remains active across rule checks. See <<alerting-concepts-suppressing-duplicate-notifications>> for more information. +
 - **Only on status change**: Actions are not repeated when an alert remains active across checks. Actions run only when the alert status changes.
 - **Every time alert is active**: Actions are repeated when an alert remains active across checks.
 - **On a custom action interval**: Actions are suppressed for the throttle interval, but repeat when an alert remains active across checks for a duration longer than the throttle interval.
+
+[float]
+[[alerting-concepts-suppressing-duplicate-notifications]]
+[NOTE]
+==============================================
+Since actions are executed per alert, a rule can end up generating a large number of actions. Take the following example where a rule is monitoring three servers every minute for CPU usage > 0.9, and the rule is set to notify **Every time alert is active**:
+
+* Minute 1: server X123 > 0.9. *One email* is sent for server X123.
+* Minute 2: X123 and Y456 > 0.9. *Two emails* are sent, one for X123 and one for Y456.
+* Minute 3: X123, Y456, Z789 > 0.9. *Three emails* are sent, one for each of X123, Y456, Z789.
+
+In the above example, three emails are sent for server X123 in the span of 3 minutes for the same rule. Often, it's desirable to suppress these re-notifications. If we set the rule **Notify** setting to **On a custom action interval** with an interval of 5 minutes, we reduce noise by only getting emails every 5 minutes for servers that continue to exceed the threshold:
+
+* Minute 1: server X123 > 0.9. *One email* is sent for server X123.
+* Minute 2: X123 and Y456 > 0.9. *One email* is sent for Y456.
+* Minute 3: X123, Y456, Z789 > 0.9. *One email* is sent for Z789.
+
+Finally, if we want to get notified **only once** when a server exceeds the threshold, we can set the rule's **Notify** setting to **Only on status change**. 
+==============================================
 
 
 [float]

@@ -43,7 +43,7 @@ As rules and actions leverage background tasks to perform the majority of work, 
 When estimating the required task throughput, keep the following in mind:
 
 * Each rule uses a single recurring task that is scheduled to run at the cadence defined by its <<defining-alerts-general-details,check interval>>.
-* Each action uses a single task. However, because alerting-concepts-suppressing-duplicate-notifications,actions are taken per instance, alerts can generate a large number of non-recurring tasks.
+* Each action uses a single task. However, because <<alerting-concepts-suppressing-duplicate-notifications,actions are taken per instance>>, alerts can generate a large number of non-recurring tasks.
 
 It is difficult to predict how much throughput is needed to ensure all rules and actions are executed at consistent schedules.
 By counting rules as recurring tasks and actions as non-recurring tasks, a rough throughput <<task-manager-rough-throughput-estimation,can be estimated>> as a _tasks per minute_ measurement.
