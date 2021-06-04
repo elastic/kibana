@@ -5,63 +5,47 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useMemo } from 'react';
+import React from 'react';
 import VirtualList from 'react-tiny-virtual-list';
-import { get } from 'lodash';
 
-import { useFieldEditorContext } from '../../field_editor_context';
 import { useFieldPreviewContext } from '../field_preview_context';
 import { PreviewListItem } from './field_list_item';
 
 import './field_list.scss';
 
-const ITEM_HEIGHT = 64;
+export const ITEM_HEIGHT = 64;
+
+export interface Field {
+  key: string;
+  value: string;
+}
 
 interface Props {
+  fields: Field[];
   height: number;
 }
 
-export const PreviewFieldList: React.FC<Props> = ({ height }) => {
-  const { indexPattern } = useFieldEditorContext();
+export const PreviewFieldList: React.FC<Props> = ({ height, fields }) => {
   const {
     currentDocument: { value: currentDocument },
   } = useFieldPreviewContext();
-
-  const {
-    fields: { getAll: getAllFields },
-  } = indexPattern;
-
-  const fields = useMemo(() => {
-    return getAllFields();
-  }, [getAllFields]);
-
-  const fieldsValues = useMemo(
-    () =>
-      fields
-        .map((field) => ({
-          key: field.displayName,
-          value: JSON.stringify(get(currentDocument?._source, field.name)),
-        }))
-        .filter(({ value }) => value !== undefined),
-    [fields, currentDocument?._source]
-  );
 
   if (currentDocument === undefined || height === -1) {
     return null;
   }
 
-  const listHeight = Math.min(fieldsValues.length * ITEM_HEIGHT, height);
+  const listHeight = Math.min(fields.length * ITEM_HEIGHT, height);
 
   return (
     <VirtualList
       style={{ overflowX: 'hidden' }}
       width="100%"
       height={listHeight}
-      itemCount={fieldsValues.length}
+      itemCount={fields.length}
       itemSize={ITEM_HEIGHT}
       overscanCount={4}
       renderItem={({ index, style }) => {
-        const field = fieldsValues[index];
+        const field = fields[index];
 
         return (
           <div key={field.key} style={style}>
