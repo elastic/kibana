@@ -42,6 +42,7 @@ export function LayerPanel(
     isOnlyLayer: boolean;
     updateVisualization: StateSetter<unknown>;
     updateDatasource: (datasourceId: string, newState: unknown) => void;
+    updateDatasourceAsync: (datasourceId: string, newState: unknown) => void;
     updateAll: (
       datasourceId: string,
       newDatasourcestate: unknown,
@@ -481,7 +482,7 @@ export function LayerPanel(
                             })
                       );
                     } else {
-                      props.updateDatasource(datasourceId, newState);
+                      props.updateDatasourceAsync(datasourceId, newState);
                     }
                     if (!shouldClose) {
                       setActiveDimension({
