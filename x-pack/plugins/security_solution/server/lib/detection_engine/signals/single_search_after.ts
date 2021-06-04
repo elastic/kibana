@@ -32,7 +32,7 @@ interface SingleSearchAfterParams {
   logger: Logger;
   pageSize: number;
   sortOrder?: SortOrderOrUndefined;
-  filter?: estypes.QueryContainer;
+  filter: estypes.QueryContainer;
   timestampOverride: TimestampOverrideOrUndefined;
   buildRuleMessage: BuildRuleMessage;
 }
