@@ -11,6 +11,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { RedirectAppLinks } from '../../../../../../kibana_react/public';
 import { createTickFormatter } from '../../lib/tick_formatter';
+import { createCustomFieldFormatter } from '../../lib/create_custom_field_formatter';
 import { isSortable } from './is_sortable';
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import { replaceVars } from '../../lib/replace_vars';
@@ -48,7 +49,7 @@ class TableVis extends Component {
   }
 
   renderRow = (row) => {
-    const { model, createCustomFieldFormatter } = this.props;
+    const { model, fieldFormatMap } = this.props;
     let rowDisplay = model.pivot_type === 'date' ? this.dateFormatter.convert(row.key) : row.key;
     if (model.drilldown_url) {
       const url = replaceVars(model.drilldown_url, {}, { key: row.key });
@@ -61,7 +62,7 @@ class TableVis extends Component {
         if (!column) return null;
         const formatter = column.ignore_field_formatting
           ? createTickFormatter(column.formatter, column.value_template, this.props.getConfig)
-          : createCustomFieldFormatter(column.metrics[0]?.field);
+          : createCustomFieldFormatter(last(column.metrics)?.field, fieldFormatMap);
         const value = formatter(item.last);
         let trend;
         if (column.trend_arrows) {

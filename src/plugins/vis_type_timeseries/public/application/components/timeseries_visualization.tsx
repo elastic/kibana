@@ -159,12 +159,6 @@ function TimeseriesVisualization({
 
   const series = (isVisTableData(visData) ? visData.series : visData?.[model.id]?.series) ?? [];
 
-  const fieldFormatMap = indexPattern?.fieldFormatMap;
-  const createCustomFieldFormatter = (fieldName: string) => (value: number) =>
-    fieldFormatMap && fieldName
-      ? getFieldFormats().deserialize(fieldFormatMap[fieldName]).convert(value)
-      : value;
-
   if (VisComponent) {
     return (
       <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
@@ -190,7 +184,6 @@ function TimeseriesVisualization({
             syncColors={syncColors}
             palettesService={palettesService}
             fieldFormatMap={indexPattern?.fieldFormatMap}
-            createCustomFieldFormatter={createCustomFieldFormatter}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

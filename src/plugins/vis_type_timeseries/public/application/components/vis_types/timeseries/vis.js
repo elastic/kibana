@@ -9,11 +9,12 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { startsWith, get, cloneDeep, map } from 'lodash';
+import { startsWith, get, cloneDeep, map, last } from 'lodash';
 import { htmlIdGenerator } from '@elastic/eui';
 import { ScaleType } from '@elastic/charts';
 
 import { createTickFormatter } from '../../lib/tick_formatter';
+import { createCustomFieldFormatter } from '../../lib/create_custom_field_formatter';
 import { TimeSeries } from '../../../visualizations/views/timeseries';
 import { MarkdownSimple } from '../../../../../../../plugins/kibana_react/public';
 import { replaceVars } from '../../lib/replace_vars';
@@ -145,7 +146,6 @@ class TimeseriesVisualization extends Component {
       syncColors,
       palettesService,
       fieldFormatMap,
-      createCustomFieldFormatter,
     } = this.props;
     const series = get(visData, `${model.id}.series`, []);
     const interval = getInterval(visData, model);
@@ -174,11 +174,12 @@ class TimeseriesVisualization extends Component {
             seriesGroup.value_template === seriesModel[0].value_template
         );
       } else {
-        const seriesFieldFormats = seriesModel.map(
-          (seriesGroup) => fieldFormatMap[seriesGroup.metrics[0]?.field]
+        const seriesUsedFieldFormats = seriesModel.map(
+          (seriesGroup) => fieldFormatMap[last(seriesGroup.metrics)?.field]
         );
-        allSeriesHaveSameFormatters = seriesFieldFormats.every(
-          (fieldFormat) => JSON.stringify(fieldFormat) === JSON.stringify(seriesFieldFormats[0])
+        allSeriesHaveSameFormatters = seriesUsedFieldFormats.every(
+          (usedFieldFormat) =>
+            JSON.stringify(usedFieldFormat) === JSON.stringify(seriesUsedFieldFormats[0])
         );
       }
     }
@@ -194,11 +195,9 @@ class TimeseriesVisualization extends Component {
         : undefined;
       const isCustomDomain = groupId !== mainAxisGroupId;
 
-      const fieldName = seriesGroup.metrics[0]?.field;
-
       const seriesGroupTickFormatter = seriesGroup.ignore_field_formatting
         ? TimeseriesVisualization.getTickFormatter(seriesGroup, this.props.getConfig)
-        : createCustomFieldFormatter(fieldName);
+        : createCustomFieldFormatter(last(seriesGroup.metrics)?.field, fieldFormatMap);
 
       const palette = {
         ...seriesGroup.palette,
