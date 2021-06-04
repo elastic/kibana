@@ -7,7 +7,6 @@
 
 import { fork } from 'redux-saga/effects';
 import { fetchMonitorDetailsEffect } from './monitor';
-import { fetchOverviewFiltersEffect } from './overview_filters';
 import { fetchMonitorListEffect } from './monitor_list';
 import { fetchMonitorStatusEffect } from './monitor_status';
 import { fetchDynamicSettingsEffect, setDynamicSettingsEffect } from './dynamic_settings';
@@ -23,7 +22,6 @@ import { fetchNetworkEventsEffect } from './network_events';
 
 export function* rootEffect() {
   yield fork(fetchMonitorDetailsEffect);
-  yield fork(fetchOverviewFiltersEffect);
   yield fork(fetchMonitorListEffect);
   yield fork(fetchMonitorStatusEffect);
   yield fork(fetchDynamicSettingsEffect);

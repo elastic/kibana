@@ -24,8 +24,11 @@ export function FieldValueSuggestions({
   time,
   width,
   forceOpen,
+  setForceOpen,
   anchorPosition,
   singleSelection,
+  compressed,
+  asFilterButton,
   asCombobox = true,
   onChange: onSelectionChange,
 }: FieldValueSuggestionsProps) {
@@ -63,8 +66,11 @@ export function FieldValueSuggestions({
       selectedValue={selectedValue}
       button={button}
       forceOpen={forceOpen}
+      setForceOpen={setForceOpen}
       anchorPosition={anchorPosition}
       width={width}
+      compressed={compressed}
+      asFilterButton={asFilterButton}
     />
   );
 }

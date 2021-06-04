@@ -8,6 +8,7 @@
 import React, { FormEvent, useEffect, useState } from 'react';
 import {
   EuiButton,
+  EuiFilterButton,
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
@@ -36,8 +37,11 @@ export function FieldValueSelection({
   button,
   width,
   forceOpen,
+  setForceOpen,
   anchorPosition,
   singleSelection,
+  asFilterButton,
+  compressed = true,
   onChange: onSelectionChange,
 }: FieldValueSelectionProps) {
   const [options, setOptions] = useState<EuiSelectableOption[]>(
@@ -56,6 +60,7 @@ export function FieldValueSelection({
 
   const closePopover = () => {
     setIsPopoverOpen(false);
+    setForceOpen?.(false);
   };
 
   const onChange = (optionsN: EuiSelectableOption[]) => {
@@ -69,7 +74,7 @@ export function FieldValueSelection({
   const anchorButton = (
     <EuiButton
       style={width ? { width } : {}}
-      size="s"
+      size="m"
       color="text"
       iconType="arrowDown"
       iconSide="right"
@@ -79,6 +84,22 @@ export function FieldValueSelection({
     >
       {label}
     </EuiButton>
+  );
+
+  const filterButton = (
+    <EuiFilterButton
+      aria-label={i18n.translate('xpack.observability.filterButton.label', {
+        defaultMessage: 'expands filter group for {label} filter',
+        values: { label },
+      })}
+      hasActiveFilters={selectedValue.length !== 0}
+      iconType="arrowDown"
+      numActiveFilters={selectedValue.length}
+      numFilters={values.length}
+      onClick={onButtonClick}
+    >
+      {label}
+    </EuiFilterButton>
   );
 
   const applyDisabled = () => {
@@ -94,7 +115,7 @@ export function FieldValueSelection({
       <EuiPopover
         id="popover"
         panelPaddingSize="none"
-        button={button || anchorButton}
+        button={button || (asFilterButton ? filterButton : anchorButton)}
         isOpen={isPopoverOpen || forceOpen}
         closePopover={closePopover}
         anchorPosition={anchorPosition}
@@ -108,7 +129,7 @@ export function FieldValueSelection({
               defaultMessage: 'Filter {label}',
               values: { label },
             }),
-            compressed: true,
+            compressed,
             onInput: onValueChange,
           }}
           options={options}
@@ -128,6 +149,7 @@ export function FieldValueSelection({
                     const selectedValuesN = options.filter((opt) => opt?.checked === 'on');
                     onSelectionChange(selectedValuesN.map(({ label: lbl }) => lbl));
                     setIsPopoverOpen(false);
+                    setForceOpen?.(false);
                   }}
                 >
                   {i18n.translate('xpack.observability.fieldValueSelection.apply', {
@@ -147,7 +169,6 @@ const Wrapper = styled.div`
   &&& {
     div.euiPopover__anchor {
       width: 100%;
-      max-width: 250px;
       .euiButton {
         width: 100%;
       }

@@ -12,6 +12,7 @@ import { selectIndexPattern } from '../../../state/selectors';
 
 export const useIndexPattern = () => {
   const dispatch = useDispatch();
+
   const indexPattern = useSelector(selectIndexPattern);
 
   useEffect(() => {

@@ -31,6 +31,7 @@ import { kibanaService } from '../state/kibana_service';
 import { ActionMenu } from '../components/common/header/action_menu';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { UptimeIndexPatternContextProvider } from '../contexts/uptime_index_pattern_context';
 
 export interface UptimeAppColors {
   danger: string;
@@ -118,15 +119,17 @@ const Application = (props: UptimeAppProps) => {
                   <UptimeSettingsContextProvider {...props}>
                     <UptimeThemeContextProvider darkMode={darkMode}>
                       <UptimeStartupPluginsContextProvider {...startPlugins}>
-                        <div data-test-subj="uptimeApp">
-                          <RedirectAppLinks application={core.application}>
-                            <main>
-                              <UptimeAlertsFlyoutWrapper />
-                              <PageRouter />
-                              <ActionMenu appMountParameters={appMountParameters} />
-                            </main>
-                          </RedirectAppLinks>
-                        </div>
+                        <UptimeIndexPatternContextProvider data={startPlugins.data}>
+                          <StyledPage data-test-subj="uptimeApp">
+                            <RedirectAppLinks application={core.application}>
+                              <main>
+                                <UptimeAlertsFlyoutWrapper />
+                                <PageRouter />
+                                <ActionMenu appMountParameters={appMountParameters} />
+                              </main>
+                            </RedirectAppLinks>
+                          </StyledPage>
+                        </UptimeIndexPatternContextProvider>
                       </UptimeStartupPluginsContextProvider>
                     </UptimeThemeContextProvider>
                   </UptimeSettingsContextProvider>
