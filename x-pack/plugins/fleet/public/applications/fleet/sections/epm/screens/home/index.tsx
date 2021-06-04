@@ -21,12 +21,15 @@ import { PackageListGrid } from '../../components/package_list_grid';
 
 import { CategoryFacets } from './category_facets';
 import { HeroCopy, HeroImage } from './header';
+import { UpgradeCallout } from './upgrade_callout';
 
 export const EPMHomePage: React.FC = memo(() => {
   const {
     params: { tabId },
   } = useRouteMatch<{ tabId?: string }>();
   const { getHref } = useLink();
+
+  const { allPackages, allInstalledPackages, updatablePackages, isLoadingPackages } = usePackages();
 
   return (
     <WithHeaderLayout
@@ -53,12 +56,20 @@ export const EPMHomePage: React.FC = memo(() => {
         ] as unknown) as EuiTabProps[]
       }
     >
+      <UpgradeCallout updatablePackages={updatablePackages} />
       <Switch>
         <Route path={PAGE_ROUTING_PATHS.integrations_installed}>
-          <InstalledPackages />
+          <InstalledPackages
+            allInstalledPackages={allInstalledPackages}
+            updatablePackages={updatablePackages}
+            isLoadingPackages={isLoadingPackages}
+          />
         </Route>
         <Route path={PAGE_ROUTING_PATHS.integrations_all}>
-          <AvailablePackages />
+          <AvailablePackages
+            allPackagesRes={allPackages}
+            isLoadingAllPackages={isLoadingPackages}
+          />
         </Route>
       </Switch>
     </WithHeaderLayout>
@@ -92,13 +103,10 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
   }, []);
 };
 
-const InstalledPackages: React.FC = memo(() => {
-  useBreadcrumbs('integrations_installed');
+const usePackages = () => {
   const { data: allPackages, isLoading: isLoadingPackages } = useGetPackages({
     experimental: true,
   });
-  const [selectedCategory, setSelectedCategory] = useState('');
-
   const allInstalledPackages = useMemo(
     () =>
       (allPackages?.response || []).filter((pkg) => pkg.status === installationStatuses.Installed),
@@ -114,62 +122,70 @@ const InstalledPackages: React.FC = memo(() => {
     [allInstalledPackages]
   );
 
-  const title = useMemo(
-    () =>
-      i18n.translate('xpack.fleet.epmList.installedTitle', {
-        defaultMessage: 'Installed integrations',
-      }),
-    []
-  );
+  return { allPackages, allInstalledPackages, updatablePackages, isLoadingPackages };
+};
 
-  const categories = useMemo(
-    () => [
-      {
-        id: '',
-        title: i18n.translate('xpack.fleet.epmList.allFilterLinkText', {
-          defaultMessage: 'All',
-        }),
-        count: allInstalledPackages.length,
-      },
-      {
-        id: 'updates_available',
-        title: i18n.translate('xpack.fleet.epmList.updatesAvailableFilterLinkText', {
-          defaultMessage: 'Updates available',
-        }),
-        count: updatablePackages.length,
-      },
-    ],
-    [allInstalledPackages.length, updatablePackages.length]
-  );
+const InstalledPackages: React.FC = memo(
+  ({ allInstalledPackages, updatablePackages, isLoadingPackages }) => {
+    useBreadcrumbs('integrations_installed');
+    const [selectedCategory, setSelectedCategory] = useState('');
 
-  const controls = useMemo(
-    () => (
-      <CategoryFacets
-        categories={categories}
-        selectedCategory={selectedCategory}
-        onCategoryChange={({ id }: CategorySummaryItem) => setSelectedCategory(id)}
+    const title = useMemo(
+      () =>
+        i18n.translate('xpack.fleet.epmList.installedTitle', {
+          defaultMessage: 'Installed integrations',
+        }),
+      []
+    );
+
+    const categories = useMemo(
+      () => [
+        {
+          id: '',
+          title: i18n.translate('xpack.fleet.epmList.allFilterLinkText', {
+            defaultMessage: 'All',
+          }),
+          count: allInstalledPackages.length,
+        },
+        {
+          id: 'updates_available',
+          title: i18n.translate('xpack.fleet.epmList.updatesAvailableFilterLinkText', {
+            defaultMessage: 'Updates available',
+          }),
+          count: updatablePackages.length,
+        },
+      ],
+      [allInstalledPackages.length, updatablePackages.length]
+    );
+
+    const controls = useMemo(
+      () => (
+        <CategoryFacets
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onCategoryChange={({ id }: CategorySummaryItem) => setSelectedCategory(id)}
+        />
+      ),
+      [categories, selectedCategory]
+    );
+
+    return (
+      <PackageListGrid
+        isLoading={isLoadingPackages}
+        controls={controls}
+        title={title}
+        list={selectedCategory === 'updates_available' ? updatablePackages : allInstalledPackages}
       />
-    ),
-    [categories, selectedCategory]
-  );
+    );
+  }
+);
 
-  return (
-    <PackageListGrid
-      isLoading={isLoadingPackages}
-      controls={controls}
-      title={title}
-      list={selectedCategory === 'updates_available' ? updatablePackages : allInstalledPackages}
-    />
-  );
-});
-
-const AvailablePackages: React.FC = memo(() => {
+const AvailablePackages: React.FC = memo(({ allPackagesRes, isLoadingAllPackages }) => {
   useBreadcrumbs('integrations_all');
   const history = useHistory();
   const queryParams = new URLSearchParams(useLocation().search);
   const initialCategory = queryParams.get('category') || '';
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
-  const { data: allPackagesRes, isLoading: isLoadingAllPackages } = useGetPackages();
   const { data: categoryPackagesRes, isLoading: isLoadingCategoryPackages } = useGetPackages({
     category: selectedCategory,
   });

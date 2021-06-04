@@ -6,7 +6,7 @@
  */
 
 import { Search as LocalSearch } from 'js-search';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 
 import type { PackageList } from '../../../types';
 
@@ -16,12 +16,10 @@ export const fieldsToSearch = ['description', 'name', 'title'];
 export function useLocalSearch(packageList: PackageList) {
   const localSearchRef = useRef<LocalSearch | null>(null);
 
-  useEffect(() => {
-    const localSearch = new LocalSearch(searchIdField);
-    fieldsToSearch.forEach((field) => localSearch.addIndex(field));
-    localSearch.addDocuments(packageList);
-    localSearchRef.current = localSearch;
-  }, [packageList]);
+  const localSearch = new LocalSearch(searchIdField);
+  fieldsToSearch.forEach((field) => localSearch.addIndex(field));
+  localSearch.addDocuments(packageList);
+  localSearchRef.current = localSearch;
 
   return localSearchRef;
 }
