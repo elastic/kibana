@@ -236,7 +236,10 @@ export function App({
             setIsSaveModalVisible(false);
           }
         },
-        () => {}
+        () => {
+          // error is handled inside the modal
+          // so ignoring it here
+        }
       );
     }
   };
