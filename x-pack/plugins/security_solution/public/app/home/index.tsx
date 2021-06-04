@@ -18,6 +18,8 @@ import { DETECTIONS_SUB_PLUGIN_ID } from '../../../common/constants';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useUpgradeEndpointPackage } from '../../common/hooks/endpoint/upgrade';
 import { GlobalHeader } from './global_header';
+import { SecuritySolutionTemplateWrapper } from './template_wrapper';
+
 interface HomePageProps {
   children: React.ReactNode;
 }
@@ -53,7 +55,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
       <GlobalHeader />
       <DragDropContextWrapper browserFields={browserFields}>
         <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
-        {children}
+        <SecuritySolutionTemplateWrapper>{children}</SecuritySolutionTemplateWrapper>
       </DragDropContextWrapper>
       <HelpMenu />
     </SecuritySolutionAppWrapper>

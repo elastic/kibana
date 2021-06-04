@@ -134,21 +134,6 @@ describe('HeaderPage', () => {
     expect(wrapper.find('[data-test-subj="header-page-supplements"]').first().exists()).toBe(false);
   });
 
-  test('it applies border styles when border is true', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <HeaderPage border title="Test title" />
-      </TestProviders>
-    );
-    const securitySolutionHeaderPage = wrapper.find('.securitySolutionHeaderPage').first();
-
-    expect(securitySolutionHeaderPage).toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(securitySolutionHeaderPage).toHaveStyleRule(
-      'padding-bottom',
-      euiDarkVars.paddingSizes.l
-    );
-  });
-
   test('it DOES NOT apply border styles when border is false', () => {
     const wrapper = mount(
       <TestProviders>
