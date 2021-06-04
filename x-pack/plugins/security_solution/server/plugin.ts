@@ -132,16 +132,22 @@ export interface PluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginStart {}
 
-const securitySubPlugins = [
+const casesSubPlugin = `${APP_ID}:${SecurityPageName.case}`;
+
+/**
+ * Don't include cases here so that the sub feature can govern whether Cases is enabled in the navigation
+ */
+const securitySubPluginsNoCases = [
   APP_ID,
   `${APP_ID}:${SecurityPageName.overview}`,
   `${APP_ID}:${SecurityPageName.detections}`,
   `${APP_ID}:${SecurityPageName.hosts}`,
   `${APP_ID}:${SecurityPageName.network}`,
   `${APP_ID}:${SecurityPageName.timelines}`,
-  `${APP_ID}:${SecurityPageName.case}`,
   `${APP_ID}:${SecurityPageName.administration}`,
 ];
+
+const allSecuritySubPlugins = [...securitySubPluginsNoCases, casesSubPlugin];
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private readonly logger: Logger;
@@ -305,7 +311,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }),
       order: 1100,
       category: DEFAULT_APP_CATEGORIES.security,
-      app: [...securitySubPlugins, 'kibana'],
+      app: [...allSecuritySubPlugins, 'kibana'],
       catalogue: ['securitySolution'],
       management: {
         insightsAndAlerting: ['triggersActions'],
@@ -320,6 +326,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               groupType: 'mutually_exclusive',
               privileges: [
                 {
+                  // if the user is granted access to the cases feature than the global nav will show the cases
+                  // sub plugin within the security solution navigation
+                  app: [casesSubPlugin],
                   id: 'cases_all',
                   includeIn: 'all',
                   name: 'All',
@@ -335,6 +344,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
                   },
                 },
                 {
+                  app: [casesSubPlugin],
                   id: 'cases_read',
                   includeIn: 'read',
                   name: 'Read',
@@ -356,7 +366,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       ],
       privileges: {
         all: {
-          app: [...securitySubPlugins, 'kibana'],
+          app: [...securitySubPluginsNoCases, 'kibana'],
           catalogue: ['securitySolution'],
           api: ['securitySolution', 'lists-all', 'lists-read'],
           savedObject: {
@@ -377,7 +387,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ui: ['show', 'crud'],
         },
         read: {
-          app: [...securitySubPlugins, 'kibana'],
+          app: [...securitySubPluginsNoCases, 'kibana'],
           catalogue: ['securitySolution'],
           api: ['securitySolution', 'lists-read'],
           savedObject: {
