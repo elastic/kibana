@@ -62,8 +62,7 @@ export interface UsageData {
   beat_metrics?: BeatMetrics;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const usageSchema: MakeSchemaFrom<any> = {
+export const usageSchema: MakeSchemaFrom<UsageData> = {
   live_query_usage: {
     session: {
       count: {

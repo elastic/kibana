@@ -22,8 +22,7 @@ export const registerCollector: RegisterCollector = ({ core, osqueryContext, usa
   if (!usageCollection) {
     return;
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const collector = usageCollection.makeUsageCollector<any>({
+  const collector = usageCollection.makeUsageCollector<UsageData>({
     type: 'osquery',
     schema: usageSchema,
     isReady: async () => {
