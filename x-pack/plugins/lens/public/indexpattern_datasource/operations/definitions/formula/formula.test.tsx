@@ -1045,6 +1045,19 @@ invalid: "
       ).toEqual(['Use only one of kql= or lucene=, not both']);
     });
 
+    it("returns a clear error when there's a missing field for a function", () => {
+      for (const fn of ['average', 'terms', 'max', 'sum']) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(`${fn}()`),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual([`The first argument for ${fn} should be a field name. Found no field`]);
+      }
+    });
+
     it('returns no error if a math operation is passed to fullReference operations', () => {
       const formulas = [
         'derivative(7+1)',
