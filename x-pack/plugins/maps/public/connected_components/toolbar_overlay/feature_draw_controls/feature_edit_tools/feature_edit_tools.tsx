@@ -11,6 +11,9 @@ import { i18n } from '@kbn/i18n';
 import { DRAW_SHAPE } from '../../../../../common/constants';
 // @ts-expect-error
 import { GeometryFilterForm } from '../../../../components/draw_forms/geometry_filter_form/geometry_filter_form';
+import { VectorCircleIcon } from '../../icons/vector_circle_icon';
+import { VectorLineIcon } from '../../icons/vector_line_icon';
+import { VectorSquareIcon } from '../../icons/vector_square_icon';
 
 export interface ReduxStateProps {
   drawShape?: string;
@@ -47,7 +50,7 @@ export function FeatureEditTools(props: Props) {
                 <EuiButtonIcon
                   size="s"
                   onClick={() => props.setDrawShape(DRAW_SHAPE.LINE)}
-                  iconType="minus"
+                  iconType={VectorLineIcon}
                   aria-label={i18n.translate(
                     'xpack.maps.toolbarOverlay.featureDraw.drawLineLabel',
                     {
@@ -93,7 +96,7 @@ export function FeatureEditTools(props: Props) {
                 <EuiButtonIcon
                   size="s"
                   onClick={() => props.setDrawShape(DRAW_SHAPE.DISTANCE)}
-                  iconType="plusInCircle"
+                  iconType={VectorCircleIcon}
                   aria-label={i18n.translate(
                     'xpack.maps.toolbarOverlay.featureDraw.drawCircleLabel',
                     {
@@ -116,7 +119,7 @@ export function FeatureEditTools(props: Props) {
                 <EuiButtonIcon
                   size="s"
                   onClick={() => props.setDrawShape(DRAW_SHAPE.BOUNDS)}
-                  iconType="stop"
+                  iconType={VectorSquareIcon}
                   aria-label={i18n.translate(
                     'xpack.maps.toolbarOverlay.featureDraw.drawBBoxLabel',
                     {
