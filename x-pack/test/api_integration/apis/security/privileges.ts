@@ -7,7 +7,7 @@
 
 import util from 'util';
 import { isEqual, isEqualWith } from 'lodash';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { RawKibanaPrivileges } from '../../../../plugins/security/common/model';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
