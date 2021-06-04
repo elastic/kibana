@@ -7,8 +7,7 @@
 import React, { useEffect } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { Router } from 'react-router-dom';
-import styled from 'styled-components';
-import { EuiPage, EuiErrorBoundary } from '@elastic/eui';
+import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { I18nStart, ChromeBreadcrumb, CoreStart, AppMountParameters } from 'kibana/public';
 import {
@@ -61,18 +60,6 @@ export interface UptimeAppProps {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   appMountParameters: AppMountParameters;
 }
-
-const StyledPage = styled(EuiPage)`
-  display: flex;
-  flex-grow: 1;
-  flex-shrink: 0;
-  flex-basis: auto;
-  flex-direction: column;
-
-  > * {
-    flex-shrink: 0;
-  }
-`;
 
 const Application = (props: UptimeAppProps) => {
   const {
@@ -131,7 +118,7 @@ const Application = (props: UptimeAppProps) => {
                   <UptimeSettingsContextProvider {...props}>
                     <UptimeThemeContextProvider darkMode={darkMode}>
                       <UptimeStartupPluginsContextProvider {...startPlugins}>
-                        <StyledPage data-test-subj="uptimeApp">
+                        <div data-test-subj="uptimeApp">
                           <RedirectAppLinks application={core.application}>
                             <main>
                               <UptimeAlertsFlyoutWrapper />
@@ -139,7 +126,7 @@ const Application = (props: UptimeAppProps) => {
                               <ActionMenu appMountParameters={appMountParameters} />
                             </main>
                           </RedirectAppLinks>
-                        </StyledPage>
+                        </div>
                       </UptimeStartupPluginsContextProvider>
                     </UptimeThemeContextProvider>
                   </UptimeSettingsContextProvider>
