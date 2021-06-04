@@ -7,8 +7,7 @@
 
 import React from 'react';
 import _ from 'lodash';
-import { from } from 'rxjs';
-import { debounceTime, finalize, first, switchMap, tap } from 'rxjs/operators';
+import { finalize, switchMap, tap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { AppLeaveAction, AppMountParameters } from 'kibana/public';
 import { Adapters } from 'src/plugins/embeddable/public';
@@ -55,6 +54,7 @@ import {
   unsavedChangesWarning,
 } from '../saved_map';
 import { getLayerList } from '../../../selectors/map_selectors';
+import { waitUntilTimeLayersLoad$ } from './wait_until_time_layers_load';
 
 interface MapRefreshConfig {
   isPaused: boolean;
@@ -122,8 +122,6 @@ export class MapApp extends React.Component<Props, State> {
   componentDidMount() {
     this._isMounted = true;
 
-    // @ts-expect-error
-    const reduxState$ = from(this.props.savedMap.getStore());
     this._autoRefreshSubscription = getTimeFilter()
       .getAutoRefreshFetch$()
       .pipe(
@@ -131,28 +129,7 @@ export class MapApp extends React.Component<Props, State> {
           this.props.setQuery({ forceRefresh: true });
         }),
         switchMap((done) =>
-          reduxState$
-            .pipe(
-              debounceTime(300),
-              // using switchMap since switchMap will discard promise from previous state iterations in progress
-              switchMap(async (state) => {
-                const promises = getLayerList(state).map(async (layer) => {
-                  return {
-                    isFilteredByGlobalTime: await layer.isFilteredByGlobalTime(),
-                    layer,
-                  };
-                });
-                const layersWithMeta = await Promise.all(promises);
-                return layersWithMeta;
-              }),
-              first((layersWithMeta) => {
-                const areTimeLayersStillLoading = layersWithMeta
-                  .filter(({ isFilteredByGlobalTime }) => isFilteredByGlobalTime)
-                  .some(({ layer }) => layer.isLayerLoading());
-                return !areTimeLayersStillLoading;
-              })
-            )
-            .pipe(finalize(done))
+          waitUntilTimeLayersLoad$(this.props.savedMap.getStore()).pipe(finalize(done))
         )
       )
       .subscribe();
@@ -215,16 +192,7 @@ export class MapApp extends React.Component<Props, State> {
       return;
     }
 
-    if (changes.time) {
-      this._onQueryChange({ time: globalState.time });
-    }
-
-    if (changes.refreshInterval && globalState.refreshInterval) {
-      this._onRefreshConfigChange({
-        isPaused: globalState.refreshInterval.pause,
-        interval: globalState.refreshInterval.value,
-      });
-    }
+    this._onQueryChange({ time: globalState.time });
   };
 
   async _updateIndexPatterns() {
