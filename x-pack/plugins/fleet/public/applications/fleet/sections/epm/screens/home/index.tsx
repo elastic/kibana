@@ -16,7 +16,7 @@ import { PAGE_ROUTING_PATHS } from '../../../../constants';
 import { useLink, useGetCategories, useGetPackages, useBreadcrumbs } from '../../../../hooks';
 import { doesPackageHaveIntegrations } from '../../../../services';
 import { WithHeaderLayout } from '../../../../layouts';
-import type { CategorySummaryItem, PackageList } from '../../../../types';
+import type { CategorySummaryItem, PackageList, PackageListItem } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
 
 import { CategoryFacets } from './category_facets';
@@ -67,7 +67,7 @@ export const EPMHomePage: React.FC = memo(() => {
         </Route>
         <Route path={PAGE_ROUTING_PATHS.integrations_all}>
           <AvailablePackages
-            allPackagesRes={allPackages}
+            allPackages={allPackages?.response ?? []}
             isLoadingAllPackages={isLoadingPackages}
           />
         </Route>
@@ -125,7 +125,12 @@ const usePackages = () => {
   return { allPackages, allInstalledPackages, updatablePackages, isLoadingPackages };
 };
 
-const InstalledPackages: React.FC = memo(
+interface InstalledPackagesProps {
+  allInstalledPackages: PackageListItem[];
+  updatablePackages: PackageListItem[];
+  isLoadingPackages: boolean;
+}
+const InstalledPackages: React.FC<InstalledPackagesProps> = memo(
   ({ allInstalledPackages, updatablePackages, isLoadingPackages }) => {
     useBreadcrumbs('integrations_installed');
     const [selectedCategory, setSelectedCategory] = useState('');
@@ -180,68 +185,74 @@ const InstalledPackages: React.FC = memo(
   }
 );
 
-const AvailablePackages: React.FC = memo(({ allPackagesRes, isLoadingAllPackages }) => {
-  useBreadcrumbs('integrations_all');
-  const history = useHistory();
-  const queryParams = new URLSearchParams(useLocation().search);
-  const initialCategory = queryParams.get('category') || '';
-  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
-  const { data: categoryPackagesRes, isLoading: isLoadingCategoryPackages } = useGetPackages({
-    category: selectedCategory,
-  });
-  const { data: categoriesRes, isLoading: isLoadingCategories } = useGetCategories({
-    include_policy_templates: true,
-  });
-  const packages = useMemo(
-    () => packageListToIntegrationsList(categoryPackagesRes?.response || []),
-    [categoryPackagesRes]
-  );
+interface AvailablePackagesProps {
+  allPackages: PackageListItem[];
+  isLoadingAllPackages: boolean;
+}
+const AvailablePackages: React.FC<AvailablePackagesProps> = memo(
+  ({ allPackages, isLoadingAllPackages }) => {
+    useBreadcrumbs('integrations_all');
+    const history = useHistory();
+    const queryParams = new URLSearchParams(useLocation().search);
+    const initialCategory = queryParams.get('category') || '';
+    const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+    const { data: categoryPackagesRes, isLoading: isLoadingCategoryPackages } = useGetPackages({
+      category: selectedCategory,
+    });
+    const { data: categoriesRes, isLoading: isLoadingCategories } = useGetCategories({
+      include_policy_templates: true,
+    });
+    const packages = useMemo(
+      () => packageListToIntegrationsList(categoryPackagesRes?.response || []),
+      [categoryPackagesRes]
+    );
 
-  const title = useMemo(
-    () =>
-      i18n.translate('xpack.fleet.epmList.allTitle', {
-        defaultMessage: 'Browse by category',
-      }),
-    []
-  );
-
-  const categories = useMemo(
-    () => [
-      {
-        id: '',
-        title: i18n.translate('xpack.fleet.epmList.allPackagesFilterLinkText', {
-          defaultMessage: 'All',
+    const title = useMemo(
+      () =>
+        i18n.translate('xpack.fleet.epmList.allTitle', {
+          defaultMessage: 'Browse by category',
         }),
-        count: allPackagesRes?.response?.length || 0,
-      },
-      ...(categoriesRes ? categoriesRes.response : []),
-    ],
-    [allPackagesRes?.response?.length, categoriesRes]
-  );
+      []
+    );
 
-  const controls = categories ? (
-    <CategoryFacets
-      isLoading={isLoadingCategories || isLoadingAllPackages}
-      categories={categories}
-      selectedCategory={selectedCategory}
-      onCategoryChange={({ id }: CategorySummaryItem) => {
-        // clear category query param in the url
-        if (queryParams.get('category')) {
-          history.push({});
-        }
-        setSelectedCategory(id);
-      }}
-    />
-  ) : null;
+    const categories = useMemo(
+      () => [
+        {
+          id: '',
+          title: i18n.translate('xpack.fleet.epmList.allPackagesFilterLinkText', {
+            defaultMessage: 'All',
+          }),
+          count: allPackages?.length || 0,
+        },
+        ...(categoriesRes ? categoriesRes.response : []),
+      ],
+      [allPackages?.length, categoriesRes]
+    );
 
-  return (
-    <PackageListGrid
-      isLoading={isLoadingCategoryPackages}
-      title={title}
-      controls={controls}
-      list={packages}
-      setSelectedCategory={setSelectedCategory}
-      showMissingIntegrationMessage
-    />
-  );
-});
+    const controls = categories ? (
+      <CategoryFacets
+        isLoading={isLoadingCategories || isLoadingAllPackages}
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onCategoryChange={({ id }: CategorySummaryItem) => {
+          // clear category query param in the url
+          if (queryParams.get('category')) {
+            history.push({});
+          }
+          setSelectedCategory(id);
+        }}
+      />
+    ) : null;
+
+    return (
+      <PackageListGrid
+        isLoading={isLoadingCategoryPackages}
+        title={title}
+        controls={controls}
+        list={packages}
+        setSelectedCategory={setSelectedCategory}
+        showMissingIntegrationMessage
+      />
+    );
+  }
+);
