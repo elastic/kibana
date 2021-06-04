@@ -846,10 +846,26 @@ describe('xy_expression', () => {
       expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(false);
     });
 
-    test('enables legend extra', () => {
+    test('ignores legend extra for ordinal chart', () => {
       const { data, args } = sampleArgs();
       const component = shallow(
         <XYChart {...defaultProps} data={data} args={{ ...args, valuesInLegend: true }} />
+      );
+      expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(false);
+    });
+
+    test('shows legend extra for histogram chart', () => {
+      const { args } = sampleArgs();
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          data={dateHistogramData}
+          args={{
+            ...args,
+            layers: [dateHistogramLayer],
+            valuesInLegend: true,
+          }}
+        />
       );
       expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(true);
     });

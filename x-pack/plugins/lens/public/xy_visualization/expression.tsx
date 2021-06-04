@@ -629,7 +629,7 @@ export function XYChart({
         xDomain={xDomain}
         onBrushEnd={renderMode !== 'noInteractivity' ? brushHandler : undefined}
         onElementClick={renderMode !== 'noInteractivity' ? clickHandler : undefined}
-        showLegendExtra={valuesInLegend}
+        showLegendExtra={isHistogramViz && valuesInLegend}
       />
 
       <Axis

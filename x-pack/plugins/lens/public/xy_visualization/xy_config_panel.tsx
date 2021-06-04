@@ -227,6 +227,15 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
     });
   };
 
+  const nonOrdinalXAxis = state?.layers.every(
+    (layer) =>
+      !layer.xAccessor ||
+      getScaleType(
+        props.frame.datasourceLayers[layer.layerId].getOperationForColumnId(layer.xAccessor),
+        ScaleType.Linear
+      ) !== 'ordinal'
+  );
+
   // only allow changing endzone visibility if it could show up theoretically (if it's a time viz)
   const onChangeEndzoneVisiblity = state?.layers.every(
     (layer) =>
@@ -323,7 +332,7 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
                 legend: { ...state.legend, position: id as Position },
               });
             }}
-            renderValueInLegendSwitch={!!state}
+            renderValueInLegendSwitch={nonOrdinalXAxis}
             valueInLegend={state?.valuesInLegend}
             onValueInLegendChange={() => {
               setState({
