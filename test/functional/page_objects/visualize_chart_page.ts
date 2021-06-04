@@ -7,10 +7,12 @@
  */
 
 import { Position } from '@elastic/charts';
+import Color from 'color';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-const elasticChartSelector = 'visTypeXyChart';
+const xyChartSelector = 'visTypeXyChart';
+const pieChartSelector = 'visTypePieChart';
 
 export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -25,8 +27,8 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
   const { common } = getPageObjects(['common']);
 
   class VisualizeChart {
-    private async getDebugState() {
-      return await elasticChart.getChartDebugData(elasticChartSelector);
+    public async getEsChartDebugState(chartSelector: string) {
+      return await elasticChart.getChartDebugData(chartSelector);
     }
 
     /**
@@ -45,32 +47,32 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     /**
      * Is new charts library enabled and an area, line or histogram chart exists
      */
-    private async isVisTypeXYChart(): Promise<boolean> {
+    public async isNewLibraryChart(chartSelector: string): Promise<boolean> {
       const enabled = await this.isNewChartsLibraryEnabled();
 
       if (!enabled) {
-        log.debug(`-- isVisTypeXYChart = false`);
+        log.debug(`-- isNewLibraryChart = false`);
         return false;
       }
 
-      // check if enabled but not a line, area or histogram chart
+      // check if enabled but not a line, area, histogram or pie chart
       if (await find.existsByCssSelector('.visLib__chart', 1)) {
         const chart = await find.byCssSelector('.visLib__chart');
         const chartType = await chart.getAttribute('data-vislib-chart-type');
 
-        if (!['line', 'area', 'histogram'].includes(chartType)) {
-          log.debug(`-- isVisTypeXYChart = false`);
+        if (!['line', 'area', 'histogram', 'pie'].includes(chartType)) {
+          log.debug(`-- isNewLibraryChart = false`);
           return false;
         }
       }
 
-      if (!(await elasticChart.hasChart(elasticChartSelector, 1))) {
+      if (!(await elasticChart.hasChart(chartSelector, 1))) {
         // not be a vislib chart type
-        log.debug(`-- isVisTypeXYChart = false`);
+        log.debug(`-- isNewLibraryChart = false`);
         return false;
       }
 
-      log.debug(`-- isVisTypeXYChart = true`);
+      log.debug(`-- isNewLibraryChart = true`);
       return true;
     }
 
@@ -81,7 +83,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
      * @param elasticChartsValue value expected for `@elastic/charts` chart
      */
     public async getExpectedValue<T>(vislibValue: T, elasticChartsValue: T): Promise<T> {
-      if (await this.isVisTypeXYChart()) {
+      if (await this.isNewLibraryChart(xyChartSelector)) {
         return elasticChartsValue;
       }
 
@@ -89,8 +91,8 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     }
 
     public async getYAxisTitle() {
-      if (await this.isVisTypeXYChart()) {
-        const xAxis = (await this.getDebugState())?.axes?.y ?? [];
+      if (await this.isNewLibraryChart(xyChartSelector)) {
+        const xAxis = (await this.getEsChartDebugState(xyChartSelector))?.axes?.y ?? [];
         return xAxis[0]?.title;
       }
 
@@ -99,8 +101,8 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     }
 
     public async getXAxisLabels() {
-      if (await this.isVisTypeXYChart()) {
-        const [xAxis] = (await this.getDebugState())?.axes?.x ?? [];
+      if (await this.isNewLibraryChart(xyChartSelector)) {
+        const [xAxis] = (await this.getEsChartDebugState(xyChartSelector))?.axes?.x ?? [];
         return xAxis?.labels;
       }
 
@@ -112,8 +114,8 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     }
 
     public async getYAxisLabels() {
-      if (await this.isVisTypeXYChart()) {
-        const [yAxis] = (await this.getDebugState())?.axes?.y ?? [];
+      if (await this.isNewLibraryChart(xyChartSelector)) {
+        const [yAxis] = (await this.getEsChartDebugState(xyChartSelector))?.axes?.y ?? [];
         return yAxis?.labels;
       }
 
@@ -125,8 +127,8 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     }
 
     public async getYAxisLabelsAsNumbers() {
-      if (await this.isVisTypeXYChart()) {
-        const [yAxis] = (await this.getDebugState())?.axes?.y ?? [];
+      if (await this.isNewLibraryChart(xyChartSelector)) {
+        const [yAxis] = (await this.getEsChartDebugState(xyChartSelector))?.axes?.y ?? [];
         return yAxis?.values;
       }
 
@@ -141,8 +143,8 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
      * Returns an array of height values
      */
     public async getAreaChartData(dataLabel: string, axis = 'ValueAxis-1') {
-      if (await this.isVisTypeXYChart()) {
-        const areas = (await this.getDebugState())?.areas ?? [];
+      if (await this.isNewLibraryChart(xyChartSelector)) {
+        const areas = (await this.getEsChartDebugState(xyChartSelector))?.areas ?? [];
         const points = areas.find(({ name }) => name === dataLabel)?.lines.y1.points ?? [];
         return points.map(({ y }) => y);
       }
@@ -183,8 +185,8 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
      * @param dataLabel data-label value
      */
     public async getAreaChartPaths(dataLabel: string) {
-      if (await this.isVisTypeXYChart()) {
-        const areas = (await this.getDebugState())?.areas ?? [];
+      if (await this.isNewLibraryChart(xyChartSelector)) {
+        const areas = (await this.getEsChartDebugState(xyChartSelector))?.areas ?? [];
         const path = areas.find(({ name }) => name === dataLabel)?.path ?? '';
         return path.split('L');
       }
@@ -208,9 +210,9 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
      * @param axis axis value, 'ValueAxis-1' by default
      */
     public async getLineChartData(dataLabel = 'Count', axis = 'ValueAxis-1') {
-      if (await this.isVisTypeXYChart()) {
+      if (await this.isNewLibraryChart(xyChartSelector)) {
         // For now lines are rendered as areas to enable stacking
-        const areas = (await this.getDebugState())?.areas ?? [];
+        const areas = (await this.getEsChartDebugState(xyChartSelector))?.areas ?? [];
         const lines = areas.map(({ lines: { y1 }, name, color }) => ({ ...y1, name, color }));
         const points = lines.find(({ name }) => name === dataLabel)?.points ?? [];
         return points.map(({ y }) => y);
@@ -248,8 +250,8 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
      * @param axis axis value, 'ValueAxis-1' by default
      */
     public async getBarChartData(dataLabel = 'Count', axis = 'ValueAxis-1') {
-      if (await this.isVisTypeXYChart()) {
-        const bars = (await this.getDebugState())?.bars ?? [];
+      if (await this.isNewLibraryChart(xyChartSelector)) {
+        const bars = (await this.getEsChartDebugState(xyChartSelector))?.bars ?? [];
         const values = bars.find(({ name }) => name === dataLabel)?.bars ?? [];
         return values.map(({ y }) => y);
       }
@@ -293,8 +295,9 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     }
 
     public async toggleLegend(show = true) {
-      const isVisTypeXYChart = await this.isVisTypeXYChart();
-      const legendSelector = isVisTypeXYChart ? '.echLegend' : '.visLegend';
+      const isVisTypeXYChart = await this.isNewLibraryChart(xyChartSelector);
+      const isVisTypePieChart = await this.isNewLibraryChart(pieChartSelector);
+      const legendSelector = isVisTypeXYChart || isVisTypePieChart ? '.echLegend' : '.visLegend';
 
       await retry.try(async () => {
         const isVisible = await find.existsByCssSelector(legendSelector);
@@ -321,16 +324,25 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     }
 
     public async doesSelectedLegendColorExist(color: string) {
-      if (await this.isVisTypeXYChart()) {
-        const items = (await this.getDebugState())?.legend?.items ?? [];
+      if (await this.isNewLibraryChart(xyChartSelector)) {
+        const items = (await this.getEsChartDebugState(xyChartSelector))?.legend?.items ?? [];
         return items.some(({ color: c }) => c === color);
+      }
+
+      if (await this.isNewLibraryChart(pieChartSelector)) {
+        const slices =
+          (await this.getEsChartDebugState(pieChartSelector))?.partition?.[0]?.partitions ?? [];
+        return slices.some(({ color: c }) => {
+          const rgbColor = new Color(color).rgb().toString();
+          return c === rgbColor;
+        });
       }
 
       return await testSubjects.exists(`legendSelectedColor-${color}`);
     }
 
     public async expectError() {
-      if (!this.isVisTypeXYChart()) {
+      if (!this.isNewLibraryChart(xyChartSelector)) {
         await testSubjects.existOrFail('vislibVisualizeError');
       }
     }
@@ -371,15 +383,23 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     public async waitForVisualization() {
       await this.waitForVisualizationRenderingStabilized();
 
-      if (!(await this.isVisTypeXYChart())) {
+      if (!(await this.isNewLibraryChart(xyChartSelector))) {
         await find.byCssSelector('.visualization');
       }
     }
 
     public async getLegendEntries() {
-      if (await this.isVisTypeXYChart()) {
-        const items = (await this.getDebugState())?.legend?.items ?? [];
+      const isVisTypeXYChart = await this.isNewLibraryChart(xyChartSelector);
+      const isVisTypePieChart = await this.isNewLibraryChart(pieChartSelector);
+      if (isVisTypeXYChart) {
+        const items = (await this.getEsChartDebugState(xyChartSelector))?.legend?.items ?? [];
         return items.map(({ name }) => name);
+      }
+
+      if (isVisTypePieChart) {
+        const slices =
+          (await this.getEsChartDebugState(pieChartSelector))?.partition?.[0]?.partitions ?? [];
+        return slices.map(({ name }) => name);
       }
 
       const legendEntries = await find.allByCssSelector(
@@ -391,10 +411,13 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       );
     }
 
-    public async openLegendOptionColors(name: string, chartSelector = elasticChartSelector) {
+    public async openLegendOptionColors(name: string, chartSelector: string) {
       await this.waitForVisualizationRenderingStabilized();
       await retry.try(async () => {
-        if (await this.isVisTypeXYChart()) {
+        if (
+          (await this.isNewLibraryChart(xyChartSelector)) ||
+          (await this.isNewLibraryChart(pieChartSelector))
+        ) {
           const chart = await find.byCssSelector(chartSelector);
           const legendItemColor = await chart.findByCssSelector(
             `[data-ech-series-name="${name}"] .echLegendItem__color`
@@ -408,7 +431,9 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
 
         await this.waitForVisualizationRenderingStabilized();
         // arbitrary color chosen, any available would do
-        const arbitraryColor = (await this.isVisTypeXYChart()) ? '#d36086' : '#EF843C';
+        const arbitraryColor = (await this.isNewLibraryChart(xyChartSelector))
+          ? '#d36086'
+          : '#EF843C';
         const isOpen = await this.doesLegendColorChoiceExist(arbitraryColor);
         if (!isOpen) {
           throw new Error('legend color selector not open');
@@ -524,8 +549,8 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     }
 
     public async getRightValueAxesCount() {
-      if (await this.isVisTypeXYChart()) {
-        const yAxes = (await this.getDebugState())?.axes?.y ?? [];
+      if (await this.isNewLibraryChart(xyChartSelector)) {
+        const yAxes = (await this.getEsChartDebugState(xyChartSelector))?.axes?.y ?? [];
         return yAxes.filter(({ position }) => position === Position.Right).length;
       }
       const axes = await find.allByCssSelector('.visAxis__column--right g.axis');
@@ -544,8 +569,8 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     }
 
     public async getHistogramSeriesCount() {
-      if (await this.isVisTypeXYChart()) {
-        const bars = (await this.getDebugState())?.bars ?? [];
+      if (await this.isNewLibraryChart(xyChartSelector)) {
+        const bars = (await this.getEsChartDebugState(xyChartSelector))?.bars ?? [];
         return bars.filter(({ visible }) => visible).length;
       }
 
@@ -554,8 +579,11 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     }
 
     public async getGridLines(): Promise<Array<{ x: number; y: number }>> {
-      if (await this.isVisTypeXYChart()) {
-        const { x, y } = (await this.getDebugState())?.axes ?? { x: [], y: [] };
+      if (await this.isNewLibraryChart(xyChartSelector)) {
+        const { x, y } = (await this.getEsChartDebugState(xyChartSelector))?.axes ?? {
+          x: [],
+          y: [],
+        };
         return [...x, ...y].flatMap(({ gridlines }) => gridlines);
       }
 
@@ -574,8 +602,8 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     }
 
     public async getChartValues() {
-      if (await this.isVisTypeXYChart()) {
-        const barSeries = (await this.getDebugState())?.bars ?? [];
+      if (await this.isNewLibraryChart(xyChartSelector)) {
+        const barSeries = (await this.getEsChartDebugState(xyChartSelector))?.bars ?? [];
         return barSeries.filter(({ visible }) => visible).flatMap((bars) => bars.labels);
       }
 

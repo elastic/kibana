@@ -224,8 +224,18 @@ export interface Datasource<T = unknown, P = unknown> {
   getPublicAPI: (props: PublicAPIProps<T>) => DatasourcePublicAPI;
   getErrorMessages: (
     state: T,
-    layersGroups?: Record<string, VisualizationDimensionGroupConfig[]>
-  ) => Array<{ shortMessage: string; longMessage: string }> | undefined;
+    layersGroups?: Record<string, VisualizationDimensionGroupConfig[]>,
+    dateRange?: {
+      fromDate: string;
+      toDate: string;
+    }
+  ) =>
+    | Array<{
+        shortMessage: string;
+        longMessage: string;
+        fixAction?: { label: string; newState: () => Promise<T> };
+      }>
+    | undefined;
   /**
    * uniqueLabels of dimensions exposed for aria-labels of dragged dimensions
    */
@@ -234,6 +244,10 @@ export interface Datasource<T = unknown, P = unknown> {
    * Check the internal state integrity and returns a list of missing references
    */
   checkIntegrity: (state: T) => string[];
+  /**
+   * The frame calls this function to display warnings about visualization
+   */
+  getWarningMessages?: (state: T, frame: FramePublicAPI) => React.ReactNode[] | undefined;
 }
 
 /**
@@ -673,7 +687,12 @@ export interface Visualization<T = unknown> {
   getErrorMessages: (
     state: T,
     datasourceLayers?: Record<string, DatasourcePublicAPI>
-  ) => Array<{ shortMessage: string; longMessage: string }> | undefined;
+  ) =>
+    | Array<{
+        shortMessage: string;
+        longMessage: string;
+      }>
+    | undefined;
 
   /**
    * The frame calls this function to display warnings about visualization
