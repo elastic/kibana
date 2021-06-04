@@ -104,7 +104,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       // TODO: Fix this bug and make this work. We currently do not write out the dataset name when it is not in _source
-      it.skip('should detect the "dataset_name_1" from "event.dataset"', async () => {
+      it.skip('should copy the "dataset_name_1" from "event.dataset"', async () => {
         const rule: EqlCreateSchema = {
           ...getRuleForSignalTesting(['keyword', 'const_keyword']),
           rule_id: 'eql-rule',
