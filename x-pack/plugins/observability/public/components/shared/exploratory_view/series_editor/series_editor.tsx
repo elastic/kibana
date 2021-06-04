@@ -11,7 +11,7 @@ import { EuiBasicTable, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SeriesFilter } from './columns/series_filter';
 import { DataSeries } from '../types';
-import { NEW_SERIES_KEY, useUrlStorage } from '../hooks/use_url_storage';
+import { NEW_SERIES_KEY, useSeriesStorage } from '../hooks/use_series_storage';
 import { getDefaultConfigs } from '../configurations/default_configs';
 import { DatePickerCol } from './columns/date_picker_col';
 import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
@@ -19,7 +19,7 @@ import { SeriesActions } from './columns/series_actions';
 import { ChartEditOptions } from './chart_edit_options';
 
 export function SeriesEditor() {
-  const { allSeries, firstSeriesId } = useUrlStorage();
+  const { allSeries, firstSeriesId } = useSeriesStorage();
 
   const columns = [
     {
