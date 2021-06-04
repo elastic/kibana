@@ -73,7 +73,7 @@ export function Instruction({
     commandBlock = (
       <div>
         <EuiSpacer size="m" />
-        <EuiCodeBlock language="sh">{cmdText}</EuiCodeBlock>
+        <EuiCodeBlock language="bash">{cmdText}</EuiCodeBlock>
       </div>
     );
   }
