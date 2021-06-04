@@ -1,4 +1,5 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
+load("@npm//peggy:index.bzl", "peggy")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
 
 PKG_BASE_NAME = "kbn-interpreter"
@@ -6,12 +7,13 @@ PKG_REQUIRE_NAME = "@kbn/interpreter"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*.ts",
-    "src/**/*.js",
+    "src/**/*",
   ]
 )
 
-SRCS = SOURCE_FILES
+TYPE_FILES = []
+
+SRCS = SOURCE_FILES + TYPE_FILES
 
 filegroup(
   name = "srcs",
@@ -34,6 +36,19 @@ TYPES_DEPS = [
 
 DEPS = SRC_DEPS + TYPES_DEPS
 
+peggy(
+  name = "grammar",
+  data = [
+    ":src/common/lib/grammar.peggy"
+  ],
+  output_dir = True,
+  args = [
+    "-o",
+    "$(@D)/grammar.js",
+    "./%s/src/common/lib/grammar.peggy" % package_name()
+  ],
+)
+
 ts_config(
   name = "tsconfig",
   src = "tsconfig.json",
@@ -55,19 +70,6 @@ ts_project(
   source_map = True,
   root_dir = "src",
   tsconfig = ":tsconfig",
-)
-
-peggy(
-  name = "grammar",
-  data = [
-    ":src/common/lib/grammar.peg"
-  ],
-  output_dir = True,
-  args = [
-    "-o",
-    "$(@D)/index.js",
-    "./%s/grammar/grammar.peggy" % package_name()
-  ],
 )
 
 js_library(
