@@ -119,17 +119,15 @@ const Application = (props: UptimeAppProps) => {
                   <UptimeSettingsContextProvider {...props}>
                     <UptimeThemeContextProvider darkMode={darkMode}>
                       <UptimeStartupPluginsContextProvider {...startPlugins}>
-                        <UptimeIndexPatternContextProvider data={startPlugins.data}>
-                          <StyledPage data-test-subj="uptimeApp">
-                            <RedirectAppLinks application={core.application}>
-                              <main>
-                                <UptimeAlertsFlyoutWrapper />
-                                <PageRouter />
-                                <ActionMenu appMountParameters={appMountParameters} />
-                              </main>
-                            </RedirectAppLinks>
-                          </StyledPage>
-                        </UptimeIndexPatternContextProvider>
+                        <div data-test-subj="uptimeApp">
+                          <RedirectAppLinks application={core.application}>
+                            <main>
+                              <UptimeAlertsFlyoutWrapper />
+                              <PageRouter />
+                              <ActionMenu appMountParameters={appMountParameters} />
+                            </main>
+                          </RedirectAppLinks>
+                        </div>
                       </UptimeStartupPluginsContextProvider>
                     </UptimeThemeContextProvider>
                   </UptimeSettingsContextProvider>
