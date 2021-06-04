@@ -57,21 +57,24 @@ Review important information about the {kib} 7.13.x releases.
 [[release-notes-7.13.1]]
 == {kib} 7.13.1
 
-coming::[7.13.1]
-
 The 7.13.1 release includes the following bug fixes.
 
 [float]
 [[fixes-v7.13.1]]
 === Bug Fixes
+Alerting::
+* Adds ignore_above to alerts params mappings to handle immense params {kibana-pull}100726[#100726]
+Dashboard::
+* Moves the by value migrations for 7.13 {kibana-pull}100622[#100622]
+* Fixes JSON editor height in Inspector on Safari {kibana-pull}99032[#99032]
 Fleet::
 * Adds missing install button for integrations that aren't installed yet {kibana-pull}100370[#100370]
-Lens & Visualizations::
-* Fixes an issue where upgrading from 7.12.1 to 7.13.0 breaks *TSVB* vizualizations with no timefield defined {kibana-pull}100864[#100864]
 Machine Learning::
 * Fixes field used in remote desktop protocol (RDP) anomaly detection job to event.type {kibana-pull}100000[#100000]
+Management::
+* Fixes large integer formatting with decimal part using numeral-js {kibana-pull}99609[#99609]
 Querying & Filtering::
-* Fixes bug with scripted number range filters {kibana-pull}99554[#99554]
+* Using a range query in KQL against a scripted number field now works properly {kibana-pull}99554[#99554]
 Sharing::
 * Adds appropriate table caption for table listing generated reports {kibana-pull}100118[#100118]
 Security::
@@ -318,12 +321,16 @@ APM::
 * Color by span type when there's only one service {kibana-pull}90424[#90424]
 * Break down error table api removing the sparklines {kibana-pull}89138[#89138]
 Canvas::
+* Fixes bug with plot sorting {kibana-pull}98084[#98084]
 * Creates a Labs service for Presentation Solutions {kibana-pull}95435[#95435]
 Dashboard::
+* Only Apply Explicit Input On Copy To {kibana-pull}98083[#98083]
 * Makes *Lens* the default editor for creating new panels {kibana-pull}96181[#96181]
 * Adds shared toolbar component {kibana-pull}94139[#94139]
 * Adds ability to clone drilldowns {kibana-pull}91959[#91959]
 Discover::
+* Do not set fieldsFromSource when not using fields API {kibana-pull}98575[#98575]
+* Fixes wrong sort order with empty sort URL parameter {kibana-pull}97434[#97434]
 * Adds an Options menu for switching between the two table modes {kibana-pull}97120[#97120]
 * Discover: Limit document table rendering {kibana-pull}96765[#96765]
 * Adds runtime field editor to Discover {kibana-pull}96762[#96762]
@@ -364,6 +371,8 @@ Logs::
 * Adds error.stack_trace to the default log formatter {kibana-pull}94906[#94906]
 * Support Kibana index patterns in the Logs app settings {kibana-pull}94849[#94849]
 Machine Learning::
+* Fixes pagination and sorting on trained models list page {kibana-pull}99061[#99061]
+* Data Frame Analytics results: ensure model evaluation stats are shown {kibana-pull}97486[#97486]
 * UI enhancements for anomaly detection rule type {kibana-pull}97626[#97626]
 * Persist apply time range switch setting in anomaly detection job selector flyout {kibana-pull}97407[#97407]
 * Anomaly detection rule lookback interval improvements {kibana-pull}97370[#97370]
@@ -384,6 +393,12 @@ Machine Learning::
 * Rename advanced setting ml:fileDataVisualizerMaxFileSize to fileUpload:maxFileSize and increase max geojson upload size to 1GB {kibana-pull}92620[#92620]
 * Use indices options in anomaly detection job wizards {kibana-pull}91830[#91830]
 Management::
+* Fixes search sessions docs link {kibana-pull}98918[#98918]
+* Fixes display of expired session state in management {kibana-pull}98915[#98915]
+* Transforms/Data Frame Analytics: Fix freezing wizard for indices with massive amounts of fields {kibana-pull}98259[#98259]
+* Fixes handling of switching modes & handling of non JSON data {kibana-pull}97983[#97983]
+* Fixes copy as cURL {kibana-pull}97968[#97968]
+* Fixes field filtering {kibana-pull}97189[#97189]
 * Fixes runtime mapping texts to runtime fields, add transform switch modal {kibana-pull}97008[#97008]
 * Support max primary shard size rollover field {kibana-pull}96545[#96545]
 * Move other bucket into Search Source {kibana-pull}96384[#96384]
@@ -430,6 +445,7 @@ Platform::
 Reporting::
 * Re-write CSV Export using SearchSource {kibana-pull}88303[#88303]
 Security::
+* Forbid setting the Location and Refresh custom response headers {kibana-pull}98129[#98129]
 * Adds config properties for HTTP security headers {kibana-pull}97158[#97158]
 * Added ability to create API keys {kibana-pull}92610[#92610]
 * Expose session invalidation API {kibana-pull}92376[#92376]
