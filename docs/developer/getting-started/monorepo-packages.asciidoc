@@ -86,6 +86,7 @@ yarn kbn watch-bazel
 - @kbn/logging
 - @kbn/mapbox-gl
 - @kbn/monaco
+- @kbn/rule-data-utils
 - @kbn/securitysolution-es-utils
 - @kbn/securitysolution-io-ts-alerting-types
 - @kbn/securitysolution-io-ts-list-types
