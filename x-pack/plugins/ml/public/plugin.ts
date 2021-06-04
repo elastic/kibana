@@ -30,7 +30,6 @@ import type { SpacesPluginStart } from '../../spaces/public';
 import { AppStatus, AppUpdater, DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import type { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import type { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
-import { MlCardState } from '../../../../src/plugins/index_pattern_management/public';
 
 import type { LicenseManagementUIPluginSetup } from '../../license_management/public';
 import type { LicensingPluginSetup } from '../../licensing/public';
