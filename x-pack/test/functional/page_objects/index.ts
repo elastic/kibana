@@ -38,7 +38,7 @@ import { RoleMappingsPageProvider } from './role_mappings_page';
 import { SpaceSelectorPageObject } from './space_selector_page';
 import { IngestPipelinesPageProvider } from './ingest_pipelines_page';
 import { TagManagementPageObject } from './tag_management_page';
-import { NavigationalSearchPageObject } from './navigational_search_page';
+import { NavigationalSearchPageObject } from './navigational_search';
 import { SearchSessionsPageProvider } from './search_sessions_management_page';
 import { DetectionsPageObject } from '../../security_solution_ftr/page_objects/detections';
 import { BannersPageObject } from './banners_page';
