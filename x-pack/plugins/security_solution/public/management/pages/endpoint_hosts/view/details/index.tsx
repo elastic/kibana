@@ -11,6 +11,7 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiFlyoutFooter,
   EuiLoadingContent,
   EuiTitle,
   EuiText,
@@ -55,10 +56,11 @@ import {
 } from './components/endpoint_details_tabs';
 
 import { PreferenceFormattedDateFromPrimitive } from '../../../../../common/components/formatted_date';
-import { EndpointIsolateFlyoutPanel } from './components/endpoint_isolate_flyout_panel';
+import { EndpointIsolationFlyoutPanel } from './components/endpoint_isolate_flyout_panel';
 import { BackToEndpointDetailsFlyoutSubHeader } from './components/back_to_endpoint_details_flyout_subheader';
 import { FlyoutBodyNoTopPadding } from './components/flyout_body_no_top_padding';
 import { getEndpointListPath } from '../../../../common/routing';
+import { ActionsMenu } from './components/actions_menu';
 
 const DetailsFlyoutBody = styled(EuiFlyoutBody)`
   overflow-y: hidden;
@@ -127,6 +129,9 @@ export const EndpointDetailsFlyout = memo(() => {
       ),
     },
   ];
+
+  const showFlyoutFooter =
+    show === 'details' || show === 'policy_response' || show === 'activity_log';
 
   const handleFlyoutClose = useCallback(() => {
     const { show: _show, ...urlSearchParams } = queryParamsWithoutSelectedEndpoint;
@@ -203,7 +208,15 @@ export const EndpointDetailsFlyout = memo(() => {
 
           {show === 'policy_response' && <PolicyResponseFlyoutPanel hostMeta={hostDetails} />}
 
-          {show === 'isolate' && <EndpointIsolateFlyoutPanel hostMeta={hostDetails} />}
+          {(show === 'isolate' || show === 'unisolate') && (
+            <EndpointIsolationFlyoutPanel hostMeta={hostDetails} />
+          )}
+
+          {showFlyoutFooter && (
+            <EuiFlyoutFooter className="eui-textRight" data-test-subj="endpointDetailsFlyoutFooter">
+              <ActionsMenu />
+            </EuiFlyoutFooter>
+          )}
         </>
       )}
     </EuiFlyout>
