@@ -38,6 +38,7 @@ import {
   Signal,
   WrappedSignalHit,
   RuleRangeTuple,
+  BaseSignalHit,
 } from './types';
 import { BuildRuleMessage } from './rule_messages';
 import { ShardError } from '../../types';
@@ -577,7 +578,7 @@ export const lastValidDate = ({
   searchResult,
   timestampOverride,
 }: {
-  searchResult: estypes.SearchResponse;
+  searchResult: SignalSearchResponse;
   timestampOverride: TimestampOverrideOrUndefined;
 }): Date | undefined => {
   if (searchResult.hits.hits.length === 0) {
@@ -600,15 +601,16 @@ export const getValidDateFromDoc = ({
   doc,
   timestampOverride,
 }: {
-  doc: estypes.Hit<unknown>;
+  doc: BaseSignalHit;
   timestampOverride: TimestampOverrideOrUndefined;
 }): Date | undefined => {
   const timestamp = timestampOverride ?? '@timestamp';
   const timestampValue =
     doc.fields != null && doc.fields[timestamp] != null
       ? doc.fields[timestamp][0]
-      : // @ts-expect-error @elastic/elasticsearch _source is optional
-        doc._source[timestamp];
+      : doc._source != null
+      ? doc._source[timestamp]
+      : undefined;
   const lastTimestamp =
     typeof timestampValue === 'string' || typeof timestampValue === 'number'
       ? timestampValue
@@ -627,7 +629,7 @@ export const createSearchAfterReturnTypeFromResponse = ({
   searchResult,
   timestampOverride,
 }: {
-  searchResult: estypes.SearchResponse;
+  searchResult: SignalSearchResponse;
   timestampOverride: TimestampOverrideOrUndefined;
 }): SearchAfterAndBulkCreateReturnType => {
   return createSearchAfterReturnType({

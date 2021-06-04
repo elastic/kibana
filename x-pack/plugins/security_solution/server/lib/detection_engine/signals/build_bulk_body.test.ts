@@ -24,6 +24,7 @@ import { SignalHit, SignalSourceHit } from './types';
 import { SIGNALS_TEMPLATE_VERSION } from '../routes/index/get_signals_template';
 import { getQueryRuleParams, getThresholdRuleParams } from '../schemas/rule_schemas.mock';
 
+// This allows us to not have to use ts-expect-error with delete in the code.
 type SignalHitOptionalTimestamp = Omit<SignalHit, '@timestamp'> & {
   '@timestamp'?: SignalHit['@timestamp'];
 };
@@ -623,9 +624,7 @@ describe('buildSignalFromEvent', () => {
     const ancestor = sampleDocWithAncestors().hits.hits[0];
     delete ancestor._source.source;
     const ruleSO = sampleRuleSO(getQueryRuleParams());
-    const signal: Omit<SignalHit, '@timestamp'> & {
-      '@timestamp'?: SignalHit['@timestamp'];
-    } = buildSignalFromEvent(ancestor, ruleSO, true);
+    const signal: SignalHitOptionalTimestamp = buildSignalFromEvent(ancestor, ruleSO, true);
 
     // Timestamp will potentially always be different so remove it for the test
     delete signal['@timestamp'];
