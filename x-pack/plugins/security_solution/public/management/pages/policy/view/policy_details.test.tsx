@@ -308,6 +308,20 @@ describe('Policy Details', () => {
         expect(tooltip).toHaveLength(1);
       });
 
+      it('memory popup, message customization options and tooltip are shown', () => {
+        // use query for finding stuff, if it doesn't find it, just returns null
+        const userNotificationCheckbox = policyView.find(
+          'EuiCheckbox[data-test-subj="memoryUserNotificationCheckbox"]'
+        );
+        const userNotificationCustomMessageTextArea = policyView.find(
+          'EuiTextArea[data-test-subj="memoryUserNotificationCustomMessage"]'
+        );
+        const tooltip = policyView.find('EuiIconTip[data-test-subj="memoryTooltip"]');
+        expect(userNotificationCheckbox).toHaveLength(1);
+        expect(userNotificationCustomMessageTextArea).toHaveLength(1);
+        expect(tooltip).toHaveLength(1);
+      });
+
       it('ransomware card is shown', () => {
         const ransomware = policyView.find('EuiPanel[data-test-subj="ransomwareProtectionsForm"]');
         expect(ransomware).toHaveLength(1);
@@ -332,6 +346,19 @@ describe('Policy Details', () => {
         expect(tooltip).toHaveLength(0);
       });
 
+      it('memory popup, message customization options, and tooltip are hidden', () => {
+        const userNotificationCheckbox = policyView.find(
+          'EuiCheckbox[data-test-subj="memoryUserNotificationCheckbox"]'
+        );
+        const userNotificationCustomMessageTextArea = policyView.find(
+          'EuiTextArea[data-test-subj="memoryUserNotificationCustomMessage"]'
+        );
+        const tooltip = policyView.find('EuiIconTip[data-test-subj="memoryTooltip"]');
+        expect(userNotificationCheckbox).toHaveLength(0);
+        expect(userNotificationCustomMessageTextArea).toHaveLength(0);
+        expect(tooltip).toHaveLength(0);
+      });
+
       it('ransomware card is hidden', () => {
         const ransomware = policyView.find('EuiPanel[data-test-subj="ransomwareProtectionsForm"]');
         expect(ransomware).toHaveLength(0);
@@ -339,7 +366,7 @@ describe('Policy Details', () => {
 
       it('shows the locked card in place of 1 paid feature', () => {
         const lockedCard = policyView.find('EuiCard[data-test-subj="lockedPolicyCard"]');
-        expect(lockedCard).toHaveLength(1);
+        expect(lockedCard).toHaveLength(2);
       });
     });
   });
