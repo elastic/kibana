@@ -12,7 +12,7 @@ import { useParams } from 'react-router-dom';
 
 import { TimelineId, TimelineType } from '../../../common/types/timeline';
 import { HeaderPage } from '../../common/components/header_page';
-import { WrapperPage } from '../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useKibana } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { OverviewEmpty } from '../../overview/components/overview_empty';
@@ -45,7 +45,7 @@ export const TimelinesPageComponent: React.FC = () => {
     <>
       {indicesExist ? (
         <>
-          <WrapperPage>
+          <SecuritySolutionPageWrapper>
             <HeaderPage border hideSourcerer={true} title={i18n.PAGE_TITLE}>
               <EuiFlexGroup gutterSize="s" alignItems="center">
                 <EuiFlexItem>
@@ -89,13 +89,13 @@ export const TimelinesPageComponent: React.FC = () => {
                 data-test-subj="stateful-open-timeline"
               />
             </TimelinesContainer>
-          </WrapperPage>
+          </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <WrapperPage>
+        <SecuritySolutionPageWrapper>
           <HeaderPage hideSourcerer={true} border title={i18n.PAGE_TITLE} />
           <OverviewEmpty />
-        </WrapperPage>
+        </SecuritySolutionPageWrapper>
       )}
 
       <SpyRoute pageName={SecurityPageName.timelines} />
