@@ -9331,7 +9331,6 @@
     "xpack.fleet.namespaceValidation.requiredErrorMessage": "“命名空间”必填",
     "xpack.fleet.namespaceValidation.tooLongErrorMessage": "命名空间不能超过 100 个字节",
     "xpack.fleet.newEnrollmentKey.cancelButtonLabel": "取消",
-    "xpack.fleet.newEnrollmentKey.flyoutTitle": "创建注册令牌",
     "xpack.fleet.newEnrollmentKey.keyCreatedToasts": "注册令牌已创建。",
     "xpack.fleet.newEnrollmentKey.nameLabel": "名称",
     "xpack.fleet.newEnrollmentKey.policyLabel": "策略",
