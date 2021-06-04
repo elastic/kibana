@@ -65,6 +65,9 @@ export const IGNORE_FILE_GLOBS = [
   // Bazel default files
   '**/WORKSPACE.bazel',
   '**/BUILD.bazel',
+
+  // Buildkite
+  '.buildkite/hooks/*',
 ];
 
 /**
