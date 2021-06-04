@@ -26,10 +26,10 @@ export const CrawlerOverview: React.FC = () => {
   }, []);
 
   return (
-    <div data-test-subj="CrawlerOverview">
+    <>
       <EuiPageHeader pageTitle={CRAWLER_TITLE} />
       <FlashMessages />
       <EuiCode language="json">{JSON.stringify(domains, null, 2)}</EuiCode>
-    </div>
+    </>
   );
 };
