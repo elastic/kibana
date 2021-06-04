@@ -16,7 +16,7 @@ interface CollectExportedObjectOptions {
   savedObjectsClient: SavedObjectsClientContract;
   objects: SavedObject[];
   /** flag to also include all related saved objects in the export stream. */
-  includeReferences: boolean;
+  includeReferences?: boolean;
   /** optional namespace to override the namespace used by the savedObjectsClient. */
   namespace?: string;
   /** The http request initiating the export. */
@@ -32,7 +32,7 @@ interface CollectExportedObjectResult {
 
 export const collectExportedObjects = async ({
   objects,
-  includeReferences,
+  includeReferences = true,
   namespace,
   request,
   exportTransforms,
@@ -44,12 +44,14 @@ export const collectExportedObjects = async ({
 
   let currentObjects = objects;
   do {
-    const transformed = await applyTransforms({
-      objects: currentObjects,
-      alreadyProcessed,
-      exportTransforms,
-      request,
-    });
+    const transformed = (
+      await applyExportTransforms({
+        request,
+        objects: currentObjects,
+        transforms: exportTransforms,
+      })
+    ).filter((object) => !alreadyProcessed.has(objKey(object)));
+
     transformed.forEach((obj) => alreadyProcessed.add(objKey(obj)));
     collectedObjects.push(...transformed);
 
@@ -78,28 +80,6 @@ export const collectExportedObjects = async ({
 };
 
 const objKey = (obj: { type: string; id: string }) => `${obj.type}:${obj.id}`;
-
-interface ProcessCurrentLevelOptions {
-  objects: SavedObject[];
-  alreadyProcessed: Set<string>;
-  request: KibanaRequest;
-  exportTransforms: Record<string, SavedObjectsExportTransform>;
-}
-
-const applyTransforms = async ({
-  objects,
-  alreadyProcessed,
-  exportTransforms,
-  request,
-}: ProcessCurrentLevelOptions) => {
-  const transformed = await applyExportTransforms({
-    request,
-    objects,
-    transforms: exportTransforms,
-  });
-  // remove potential additions from the hooks that are already included in the export
-  return transformed.filter((object) => !alreadyProcessed.has(objKey(object)));
-};
 
 type ObjectKey = string;
 
