@@ -6,7 +6,7 @@
 ++++
 
 [float]
-[[alerting-setup-prerequisites]]
+[[alerting-prerequisites]]
 === Prerequisites
 If you are using an *on-premises* Elastic Stack deployment:
 

@@ -308,3 +308,7 @@ This content has moved. Refer to <<discover-view-surrounding-documents>>.
 
 This content has moved. Refer to <<string-field-formatters>>.
 
+[role="exclude",id="alerting-setup-prerequisites"]
+== Alerting prerequisites
+
+This content has moved to the <<alerting-prerequisites, Alerting Prerequisites>> page.
