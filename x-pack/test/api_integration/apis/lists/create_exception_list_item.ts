@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect.js';
+import expect from '@kbn/expect/expect';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
