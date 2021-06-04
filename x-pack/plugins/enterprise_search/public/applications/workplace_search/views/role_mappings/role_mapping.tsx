@@ -97,7 +97,7 @@ export const RoleMapping: React.FC = () => {
 
   return (
     <RoleMappingFlyout
-      disabled={!hasGroupAssignment}
+      disabled={attributeValueInvalid || !hasGroupAssignment}
       isNew={isNew}
       closeRoleMappingFlyout={closeRoleMappingFlyout}
       handleSaveMapping={handleSaveMapping}

@@ -100,7 +100,7 @@ export const RoleMapping: React.FC = () => {
 
   return (
     <RoleMappingFlyout
-      disabled={!hasEngineAssignment}
+      disabled={attributeValueInvalid || !hasEngineAssignment}
       isNew={isNew}
       closeRoleMappingFlyout={closeRoleMappingFlyout}
       handleSaveMapping={handleSaveMapping}
