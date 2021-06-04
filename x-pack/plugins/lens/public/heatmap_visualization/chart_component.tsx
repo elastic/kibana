@@ -22,7 +22,6 @@ import { HeatmapRenderProps } from './types';
 import './index.scss';
 import { LensBrushEvent, LensFilterEvent } from '../types';
 import { desanitizeFilterContext } from '../utils';
-import { search } from '../../../../../src/plugins/data/public';
 import { EmptyPlaceholder } from '../shared_components';
 import { LensIconChartHeatmap } from '../assets/chart_heatmap';
 
@@ -84,31 +83,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
 
   const xValuesFormatter = formatFactory(xAxisMeta.params);
   const valueFormatter = formatFactory(valueColumn.meta.params);
-
-  // Enable xDomain when https://github.com/elastic/elastic-charts/issues/1165 is resolved.
-  // @ts-ignore
-  const xDomain = (() => {
-    if (!isTimeBasedSwimLane) return null;
-    const dateInterval = search.aggs.getDateHistogramMetaDataByDatatableColumn(xAxisColumn)
-      ?.interval;
-    if (!dateInterval) return null;
-    const intervalDuration = search.aggs.parseInterval(dateInterval);
-    if (!intervalDuration) return null;
-    const minInterval = intervalDuration.as('milliseconds');
-    const dateRangeMin = data.dateRange?.fromDate.getTime();
-
-    if (!dateRangeMin) {
-      return;
-    }
-
-    const actualMin = dateRangeMin - (dateRangeMin % minInterval);
-
-    return {
-      min: actualMin,
-      max: data.dateRange?.toDate.getTime(),
-      minInterval,
-    };
-  })();
 
   // @ts-ignore
   const onElementClick: ElementClickListener = (e: HeatmapElementEvent[]) => {
