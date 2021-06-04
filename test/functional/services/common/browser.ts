@@ -297,13 +297,13 @@ class BrowserService extends FtrService {
           dispatchEvent(target, dropEvent, dragStartEvent.dataTransfer);
           const dragEndEvent = createEvent('dragend');
           dispatchEvent(origin, dragEndEvent, dropEvent.dataTransfer);
-        }, 250);
+        }, 100);
     `,
       from,
       to
     );
     // wait for 150ms to make sure the script has run
-    await delay(350);
+    await delay(150);
   }
 
   /**
