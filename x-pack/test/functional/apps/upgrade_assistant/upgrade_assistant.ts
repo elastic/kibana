@@ -16,6 +16,7 @@ export default function upgradeAssistantFunctionalTests({
   const PageObjects = getPageObjects(['upgradeAssistant', 'common']);
   const log = getService('log');
   const retry = getService('retry');
+  const security = getService('security');
   const testSubjects = getService('testSubjects');
 
   // Updated for the hiding of the UA UI.
