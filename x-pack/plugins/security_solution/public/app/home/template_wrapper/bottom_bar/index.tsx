@@ -40,7 +40,7 @@ export const SecuritySolutionBottomBar = React.memo(() => {
   return indicesExist && showTimeline ? (
     <>
       <AutoSaveWarningMsg />
-      <Flyout timelineId={TimelineId.active} onAppLeave={onAppLeave} />
+      {onAppLeave && <Flyout timelineId={TimelineId.active} onAppLeave={onAppLeave} />}
     </>
   ) : null;
 });
