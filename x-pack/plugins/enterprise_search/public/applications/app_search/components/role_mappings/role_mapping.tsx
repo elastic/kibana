@@ -9,7 +9,14 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiComboBox, EuiFormRow, EuiHorizontalRule, EuiRadioGroup, EuiSpacer } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiForm,
+  EuiFormRow,
+  EuiHorizontalRule,
+  EuiRadioGroup,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import {
   AttributeSelector,
@@ -63,6 +70,7 @@ export const RoleMapping: React.FC = () => {
     selectedEngines,
     selectedAuthProviders,
     selectedOptions,
+    roleMappingErrors,
   } = useValues(RoleMappingsLogic);
 
   const isNew = !roleMapping;
@@ -105,56 +113,58 @@ export const RoleMapping: React.FC = () => {
       closeRoleMappingFlyout={closeRoleMappingFlyout}
       handleSaveMapping={handleSaveMapping}
     >
-      <AttributeSelector
-        attributeName={attributeName}
-        attributeValue={attributeValue}
-        attributeValueInvalid={attributeValueInvalid}
-        attributes={attributes}
-        availableAuthProviders={availableAuthProviders}
-        elasticsearchRoles={elasticsearchRoles}
-        selectedAuthProviders={selectedAuthProviders}
-        disabled={!!roleMapping}
-        handleAttributeSelectorChange={handleAttributeSelectorChange}
-        handleAttributeValueChange={handleAttributeValueChange}
-        handleAuthProviderChange={handleAuthProviderChange}
-        multipleAuthProvidersConfig={multipleAuthProvidersConfig}
-      />
-      <EuiSpacer size="m" />
-      <RoleSelector
-        roleType={roleType}
-        roleOptions={roleOptions}
-        onChange={handleRoleChange}
-        label="Role"
-      />
+      <EuiForm isInvalid={roleMappingErrors.length > 0} error={roleMappingErrors}>
+        <AttributeSelector
+          attributeName={attributeName}
+          attributeValue={attributeValue}
+          attributeValueInvalid={attributeValueInvalid}
+          attributes={attributes}
+          availableAuthProviders={availableAuthProviders}
+          elasticsearchRoles={elasticsearchRoles}
+          selectedAuthProviders={selectedAuthProviders}
+          disabled={!!roleMapping}
+          handleAttributeSelectorChange={handleAttributeSelectorChange}
+          handleAttributeValueChange={handleAttributeValueChange}
+          handleAuthProviderChange={handleAuthProviderChange}
+          multipleAuthProvidersConfig={multipleAuthProvidersConfig}
+        />
+        <EuiSpacer size="m" />
+        <RoleSelector
+          roleType={roleType}
+          roleOptions={roleOptions}
+          onChange={handleRoleChange}
+          label="Role"
+        />
 
-      {hasAdvancedRoles && (
-        <>
-          <EuiHorizontalRule />
-          <EuiFormRow>
-            <EuiRadioGroup
-              options={engineOptions}
-              disabled={!roleHasScopedEngines(roleType)}
-              idSelected={accessAllEngines ? 'all' : 'specific'}
-              onChange={(id) => handleAccessAllEnginesChange(id === 'all')}
-              legend={{
-                children: <span>{ENGINE_ASSIGNMENT_LABEL}</span>,
-              }}
-            />
-          </EuiFormRow>
-          <EuiFormRow isInvalid={!hasEngineAssignment} error={[ENGINE_REQUIRED_ERROR]}>
-            <EuiComboBox
-              data-test-subj="enginesSelect"
-              selectedOptions={selectedOptions}
-              options={availableEngines.map(({ name }) => ({ label: name, value: name }))}
-              onChange={(options) => {
-                handleEngineSelectionChange(options.map(({ value }) => value as string));
-              }}
-              fullWidth
-              isDisabled={accessAllEngines || !roleHasScopedEngines(roleType)}
-            />
-          </EuiFormRow>
-        </>
-      )}
+        {hasAdvancedRoles && (
+          <>
+            <EuiHorizontalRule />
+            <EuiFormRow>
+              <EuiRadioGroup
+                options={engineOptions}
+                disabled={!roleHasScopedEngines(roleType)}
+                idSelected={accessAllEngines ? 'all' : 'specific'}
+                onChange={(id) => handleAccessAllEnginesChange(id === 'all')}
+                legend={{
+                  children: <span>{ENGINE_ASSIGNMENT_LABEL}</span>,
+                }}
+              />
+            </EuiFormRow>
+            <EuiFormRow isInvalid={!hasEngineAssignment} error={[ENGINE_REQUIRED_ERROR]}>
+              <EuiComboBox
+                data-test-subj="enginesSelect"
+                selectedOptions={selectedOptions}
+                options={availableEngines.map(({ name }) => ({ label: name, value: name }))}
+                onChange={(options) => {
+                  handleEngineSelectionChange(options.map(({ value }) => value as string));
+                }}
+                fullWidth
+                isDisabled={accessAllEngines || !roleHasScopedEngines(roleType)}
+              />
+            </EuiFormRow>
+          </>
+        )}
+      </EuiForm>
     </RoleMappingFlyout>
   );
 };

@@ -58,6 +58,7 @@ describe('RoleMapping', () => {
     myRole: {
       availableRoleTypes: mockRole.ability.availableRoleTypes,
     },
+    roleMappingErrors: [],
   };
 
   beforeEach(() => {

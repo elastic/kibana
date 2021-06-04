@@ -56,6 +56,7 @@ describe('RoleMapping', () => {
     availableAuthProviders: [],
     multipleAuthProvidersConfig: true,
     selectedAuthProviders: [],
+    roleMappingErrors: [],
   };
 
   beforeEach(() => {
