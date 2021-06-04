@@ -14,6 +14,7 @@ import { MemoizedFormulaEditor } from './editor';
 import { regenerateLayerFromAst } from './parse';
 import { generateFormula } from './generate';
 import { filterByVisibleOperation } from './util';
+import { getManagedColumnsFrom } from '../../layer_helpers';
 
 const defaultLabel = i18n.translate('xpack.lens.indexPattern.formulaLabel', {
   defaultMessage: 'Formula',
@@ -51,6 +52,7 @@ export const formulaOperation: OperationDefinition<
     if (!column.params.formula || !operationDefinitionMap) {
       return;
     }
+
     const visibleOperationsMap = filterByVisibleOperation(operationDefinitionMap);
     const { root, error } = tryToParse(column.params.formula, visibleOperationsMap);
     if (error || !root) {
@@ -58,7 +60,24 @@ export const formulaOperation: OperationDefinition<
     }
 
     const errors = runASTValidation(root, layer, indexPattern, visibleOperationsMap);
-    return errors.length ? errors.map(({ message }) => message) : undefined;
+
+    if (errors.length) {
+      return errors.map(({ message }) => message);
+    }
+
+    const managedColumns = getManagedColumnsFrom(columnId, layer.columns);
+    const innerErrors = managedColumns
+      .flatMap(([id, col]) => {
+        const def = visibleOperationsMap[col.operationType];
+        if (def?.getErrorMessage) {
+          const messages = def.getErrorMessage(layer, id, indexPattern, visibleOperationsMap);
+          return messages ? { message: messages.join(', ') } : [];
+        }
+        return [];
+      })
+      .filter((marker) => marker);
+
+    return innerErrors.length ? innerErrors.map(({ message }) => message) : undefined;
   },
   getPossibleOperation() {
     return {

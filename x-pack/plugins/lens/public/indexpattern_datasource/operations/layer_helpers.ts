@@ -1175,8 +1175,20 @@ export function getErrorMessages(
         }
     >
   | undefined {
-  const errors = Object.entries(layer.columns)
+  const columns = Object.entries(layer.columns);
+  const visibleManagedReferences = columns.filter(
+    ([columnId, column]) =>
+      !isReferenced(layer, columnId) &&
+      operationDefinitionMap[column.operationType].input === 'managedReference'
+  );
+  const skippedColumns = visibleManagedReferences.flatMap(([columnId]) =>
+    getManagedColumnsFrom(columnId, layer.columns).map(([id]) => id)
+  );
+  const errors = columns
     .flatMap(([columnId, column]) => {
+      if (skippedColumns.includes(columnId)) {
+        return;
+      }
       const def = operationDefinitionMap[column.operationType];
       if (def.getErrorMessage) {
         return def.getErrorMessage(layer, columnId, indexPattern, operationDefinitionMap);

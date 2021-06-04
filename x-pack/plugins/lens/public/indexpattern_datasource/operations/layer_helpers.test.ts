@@ -2694,6 +2694,36 @@ describe('state_helpers', () => {
       expect(errors).toHaveLength(1);
     });
 
+    it('should only collect the top level errors from managed references', () => {
+      const notCalledMock = jest.fn();
+      const mock = jest.fn().mockReturnValue(['error 1']);
+      operationDefinitionMap.testReference.getErrorMessage = notCalledMock;
+      operationDefinitionMap.managedReference.getErrorMessage = mock;
+      const errors = getErrorMessages(
+        {
+          indexPatternId: '1',
+          columnOrder: [],
+          columns: {
+            col1:
+              // @ts-expect-error not statically analyzed
+              { operationType: 'managedReference', references: ['col2'] },
+            col2: {
+              // @ts-expect-error not statically analyzed
+              operationType: 'testReference',
+              references: [],
+            },
+          },
+        },
+        indexPattern,
+        {},
+        '1',
+        {}
+      );
+      expect(notCalledMock).not.toHaveBeenCalled();
+      expect(mock).toHaveBeenCalledTimes(1);
+      expect(errors).toHaveLength(1);
+    });
+
     it('should ignore incompleteColumns when checking for errors', () => {
       const savedRef = jest.fn().mockReturnValue(['error 1']);
       const incompleteRef = jest.fn();

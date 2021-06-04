@@ -14,8 +14,10 @@ import { tinymathFunctions } from './util';
 
 jest.mock('../../layer_helpers', () => {
   return {
-    getColumnOrder: ({ columns }: { columns: Record<string, IndexPatternColumn> }) =>
-      Object.keys(columns),
+    getColumnOrder: jest.fn(({ columns }: { columns: Record<string, IndexPatternColumn> }) =>
+      Object.keys(columns)
+    ),
+    getManagedColumnsFrom: jest.fn().mockReturnValue([]),
   };
 });
 
