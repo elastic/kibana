@@ -229,39 +229,4 @@ describe('curations routes', () => {
       });
     });
   });
-
-  describe('GET /api/app_search/engines/{engineName}/curation_search', () => {
-    let mockRouter: MockRouter;
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-      mockRouter = new MockRouter({
-        method: 'get',
-        path: '/api/app_search/engines/{engineName}/curation_search',
-      });
-
-      registerCurationsRoutes({
-        ...mockDependencies,
-        router: mockRouter.router,
-      });
-    });
-
-    it('creates a request handler', () => {
-      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v1/engines/:engineName/search.json',
-      });
-    });
-
-    describe('validates', () => {
-      it('required query param', () => {
-        const request = { query: { query: 'some query' } };
-        mockRouter.shouldValidate(request);
-      });
-
-      it('missing query', () => {
-        const request = { query: {} };
-        mockRouter.shouldThrow(request);
-      });
-    });
-  });
 });
