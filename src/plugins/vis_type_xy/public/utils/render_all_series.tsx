@@ -129,6 +129,8 @@ export const renderAllSeries = (
               stackMode={stackMode}
               minBarHeight={2}
               displayValueSettings={{
+                isAlternatingValueLabel: false,
+                isValueContainedInElement: true,
                 showValueLabel,
                 hideClippedValue: true,
               }}
