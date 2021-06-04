@@ -16,7 +16,10 @@ import { FieldPreviewHeader } from './field_preview_header';
 import { FieldPreviewEmptyPrompt } from './field_preview_empty_prompt';
 import { PreviewDocumentsNav } from './preview_documents_nav';
 import { FieldPreviewError } from './field_preview_error';
+import { PreviewListItem } from './field_list/field_list_item';
 import { PreviewFieldList, Field, ITEM_HEIGHT } from './field_list/field_list';
+
+import './field_preview.scss';
 
 const INITIAL_MAX_NUMBER_OF_FIELDS = 7;
 
@@ -30,6 +33,7 @@ export const FieldPreview = () => {
     params: {
       value: { name, script, format },
     },
+    fields,
     currentDocument: { value: currentDocument },
     error,
   } = useFieldPreviewContext();
@@ -41,19 +45,19 @@ export const FieldPreview = () => {
   // To show the preview we at least need a name to be defined and the script or the format
   const isEmptyPromptVisible = name === null || (script !== null && format !== null);
 
-  const fields = useMemo(() => {
+  const indexPatternFields = useMemo(() => {
     return getAllFields();
   }, [getAllFields]);
 
   const fieldsValues: Field[] = useMemo(
     () =>
-      fields
+      indexPatternFields
         .map((field) => ({
           key: field.displayName,
           value: JSON.stringify(get(currentDocument?._source, field.name)),
         }))
         .filter(({ value }) => value !== undefined),
-    [fields, currentDocument?._source]
+    [indexPatternFields, currentDocument?._source]
   );
 
   const filteredFields = useMemo(
@@ -71,6 +75,21 @@ export const FieldPreview = () => {
   const toggleShowAllFields = useCallback(() => {
     setShowAllFields((prev) => !prev);
   }, []);
+
+  const renderPinnedFields = () => {
+    if (fields.length === 0) {
+      return null;
+    }
+
+    return (
+      <div className="indexPatternFieldEditor__previewPinnedFields">
+        <PreviewListItem
+          field={{ key: fields[0].key, value: JSON.stringify(fields[0].value) }}
+          highlighted
+        />
+      </div>
+    );
+  };
 
   const renderToggleFieldsButton = () => (
     <EuiButtonEmpty onClick={toggleShowAllFields} flush="left">
@@ -97,27 +116,33 @@ export const FieldPreview = () => {
           <EuiSpacer />
 
           {error === null ? (
-            filteredFields.length > 0 && (
-              <>
-                <EuiResizeObserver onResize={onFieldListResize}>
-                  {(resizeRef) => (
-                    <div
-                      ref={resizeRef}
-                      style={{
-                        flex: 1,
-                        flexGrow: showAllFields ? 1 : 0,
-                        minHeight: showAllFields
-                          ? undefined
-                          : `${ITEM_HEIGHT * filteredFields.length}px`,
-                      }}
-                    >
-                      <PreviewFieldList height={fieldListHeight} fields={filteredFields} />
-                    </div>
-                  )}
-                </EuiResizeObserver>
-                <div>{renderToggleFieldsButton()}</div>
-              </>
-            )
+            <>
+              {/* The current field(s) the user is creating and fields he decided to pin */}
+              {renderPinnedFields()}
+
+              {/* List of other fields in the document */}
+              {filteredFields.length > 0 && (
+                <>
+                  <EuiResizeObserver onResize={onFieldListResize}>
+                    {(resizeRef) => (
+                      <div
+                        ref={resizeRef}
+                        style={{
+                          flex: 1,
+                          flexGrow: showAllFields ? 1 : 0,
+                          minHeight: showAllFields
+                            ? undefined
+                            : `${ITEM_HEIGHT * filteredFields.length}px`,
+                        }}
+                      >
+                        <PreviewFieldList height={fieldListHeight} fields={filteredFields} />
+                      </div>
+                    )}
+                  </EuiResizeObserver>
+                  <div>{renderToggleFieldsButton()}</div>
+                </>
+              )}
+            </>
           ) : (
             <FieldPreviewError />
           )}

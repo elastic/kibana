@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import classnames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 
 interface Props {
@@ -14,11 +15,18 @@ interface Props {
     key: string;
     value: string;
   };
+  highlighted?: boolean;
 }
 
-export const PreviewListItem: React.FC<Props> = ({ field: { key, value } }) => {
+export const PreviewListItem: React.FC<Props> = ({ field: { key, value }, highlighted }) => {
+  /* eslint-disable @typescript-eslint/naming-convention */
+  const classes = classnames('indexPatternFieldEditor__previewFieldList__item', {
+    'indexPatternFieldEditor__previewFieldList__item--highlighted': highlighted,
+  });
+  /* eslint-enable @typescript-eslint/naming-convention */
+
   return (
-    <EuiFlexGroup className="indexPatternFieldEditor__previewFieldList__item">
+    <EuiFlexGroup className={classes}>
       <EuiFlexItem className="indexPatternFieldEditor__previewFieldList__item__key">
         <div className="indexPatternFieldEditor__previewFieldList__item__key__wrapper">{key}</div>
       </EuiFlexItem>

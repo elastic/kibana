@@ -5,6 +5,11 @@
     align-items: center;
     width: 100%;
 
+    &--highlighted {
+      $backgroundColor: tintOrShade($euiColorWarning, 90%, 70%);
+      background: $backgroundColor;
+    }
+
     &__key, &__value {
       flex-basis: calc(50% - 16px);
       display: flex;
