@@ -22,8 +22,6 @@ it('set correct defaults ', () => {
   const configValue = config.schema.validate({});
   expect(configValue).toMatchInlineSnapshot(`
     Object {
-      "autocompleteTerminateAfter": "PT1M40S",
-      "autocompleteTimeout": "PT1S",
       "enabled": true,
       "index": ".kibana",
     }
