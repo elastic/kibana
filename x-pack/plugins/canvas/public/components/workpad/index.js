@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import React, { useContext, useCallback } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { pure, compose, withState, withProps, getContext, withHandlers } from 'recompose';
 import { transitionsRegistry } from '../../lib/transitions_registry';
-import { undoHistory, redoHistory } from '../../state/actions/history';
 import { fetchAllRenderables } from '../../state/actions/elements';
-import { setZoomScale, setFullscreen } from '../../state/actions/transient';
+import { setZoomScale } from '../../state/actions/transient';
 import { getFullscreen, getZoomScale } from '../../state/selectors/app';
 import {
   getSelectedPageIndex,
@@ -22,7 +21,8 @@ import {
 import { zoomHandlerCreators } from '../../lib/app_handler_creators';
 import { trackCanvasUiMetric, METRIC_TYPE } from '../../lib/ui_metric';
 import { LAUNCHED_FULLSCREEN, LAUNCHED_FULLSCREEN_AUTOPLAY } from '../../../common/lib/constants';
-import { Workpad as Component } from './workpad';
+import { WorkpadRoutingContext } from '../../routes/workpad';
+import { Workpad as WorkpadComponent } from './workpad';
 
 const mapStateToProps = (state) => {
   const { width, height, id: workpadId, css: workpadCss } = getWorkpad(state);
@@ -40,11 +40,8 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = {
-  undoHistory,
-  redoHistory,
   fetchAllRenderables,
   setZoomScale,
-  setFullscreen,
 };
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
@@ -52,19 +49,38 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     ...ownProps,
     ...stateProps,
     ...dispatchProps,
-    setFullscreen: (value) => {
-      dispatchProps.setFullscreen(value);
+  };
+};
 
-      if (value === true) {
+const AddContexts = (props) => {
+  const { isFullscreen, setFullscreen, undo, redo, autoplayInterval } = useContext(
+    WorkpadRoutingContext
+  );
+
+  const setFullscreenWithEffect = useCallback(
+    (fullscreen) => {
+      setFullscreen(fullscreen);
+      if (fullscreen === true) {
         trackCanvasUiMetric(
           METRIC_TYPE.COUNT,
-          stateProps.autoplayEnabled
+          autoplayInterval > 0
             ? [LAUNCHED_FULLSCREEN, LAUNCHED_FULLSCREEN_AUTOPLAY]
             : LAUNCHED_FULLSCREEN
         );
       }
     },
-  };
+    [setFullscreen, autoplayInterval]
+  );
+
+  return (
+    <WorkpadComponent
+      {...props}
+      setFullscreen={setFullscreenWithEffect}
+      isFullscreen={isFullscreen}
+      undoHistory={undo}
+      redoHistory={redo}
+    />
+  );
 };
 
 export const Workpad = compose(
@@ -119,4 +135,4 @@ export const Workpad = compose(
     },
   }),
   withHandlers(zoomHandlerCreators)
-)(Component);
+)(AddContexts);

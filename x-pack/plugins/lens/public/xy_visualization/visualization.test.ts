@@ -929,12 +929,17 @@ describe('xy_visualization', () => {
       );
       expect(warningMessages).toHaveLength(1);
       expect(warningMessages && warningMessages[0]).toMatchInlineSnapshot(`
-        <React.Fragment>
-          <strong>
-            Label B
-          </strong>
-           contains array values. Your visualization may not render as expected.
-        </React.Fragment>
+        <FormattedMessage
+          defaultMessage="{label} contains array values. Your visualization may not render as expected."
+          id="xpack.lens.xyVisualization.arrayValues"
+          values={
+            Object {
+              "label": <strong>
+                Label B
+              </strong>,
+            }
+          }
+        />
       `);
     });
   });
