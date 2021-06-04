@@ -1,7 +1,7 @@
 env:
   ELASTICSEARCH_BRANCH: 'master' # TODO remove after testing branch / before merge
 steps:
-  - command: .buildkite/scripts/es_snapshots/build.sh
+  - command: .buildkite/scripts/steps/es_snapshots/build.sh
     label: Build ES Snapshot
     agents:
       queue: c2-8

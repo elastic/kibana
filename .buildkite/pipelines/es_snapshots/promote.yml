@@ -1,12 +1,12 @@
 steps:
   - block: 'Promote'
     prompt: "Enter the details for the snapshot you'd like to promote"
-    if: "build.env('SNAPSHOT_MANIFEST') == null"
+    if: "build.env('ES_SNAPSHOT_MANIFEST') == null"
     # TODO make this dropbox with auto-fill?
     fields:
-      - text: 'SNAPSHOT_MANIFEST'
-        key: 'SNAPSHOT_MANIFEST'
+      - text: 'ES_SNAPSHOT_MANIFEST'
+        key: 'ES_SNAPSHOT_MANIFEST'
         hint: 'URL pointing to the manifest to promote'
         required: true
   - label: Promote Snapshot
-    command: .buildkite/scripts/es_snapshots/promote.sh
+    command: .buildkite/scripts/steps/es_snapshots/promote.sh
