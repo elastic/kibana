@@ -8,8 +8,10 @@
 
 import { Client } from '@elastic/elasticsearch';
 import url from 'url';
-import { Either, fromNullable, chain, getOrElse } from 'fp-ts/Either';
-import { flow } from 'fp-ts/function';
+import { Either, fromNullable, chain, getOrElse, toError } from 'fp-ts/Either';
+import { flow, pipe } from 'fp-ts/function';
+import * as TE from 'fp-ts/lib/TaskEither';
+import * as T from 'fp-ts/lib/Task';
 import { FtrService } from '../../ftr_provider_context';
 import { format } from './utils';
 
@@ -26,30 +28,29 @@ const query = {
   },
 };
 
-const buckets = (body: unknown) =>
-  flow(
-    pluck('aggregations'),
-    chain(pluck('savedobjs')),
-    chain(pluck('buckets')),
-    getOrElse((err) => `${err.message}`)
-  )(body);
-
-export const types = (node: string) => async (index: string = '.kibana') => {
-  let res: unknown;
-  try {
-    const { body } = await new Client({ node }).search({
-      index,
-      size: 0,
-      body: query,
-    });
-
-    res = buckets(body);
-  } catch (err) {
-    throw new Error(`Error while searching for saved object types: ${err}`);
-  }
-
-  return res;
-};
+export const types = (node: string) => async (index: string = '.kibana') =>
+  await pipe(
+    TE.tryCatch(
+      async () => {
+        const { body } = await new Client({ node }).search({
+          index,
+          size: 0,
+          body: query,
+        });
+        return body;
+      },
+      (reason: any) => toError(reason)
+    ),
+    TE.map((resp: any) =>
+      flow(
+        pluck('aggregations'),
+        chain(pluck('savedobjs')),
+        chain(pluck('buckets')),
+        getOrElse((err: Error) => err.message)
+      )(resp)
+    ),
+    TE.fold((x) => T.of(`Error while searching for saved object types: ${x}`), T.of)
+  )();
 
 export class SavedObjectInfoService extends FtrService {
   private readonly config = this.ctx.getService('config');
