@@ -12,7 +12,10 @@ import { FieldMapping, FieldMappingProps } from './field_mapping';
 import { mappings } from './__mock__';
 import { TestProviders } from '../../common/mock';
 import { FieldMappingRowStatic } from './field_mapping_row_static';
+import { useKibana } from '../../common/lib/kibana';
+
 jest.mock('../../common/lib/kibana');
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('FieldMappingRow', () => {
   let wrapper: ReactWrapper;
@@ -23,8 +26,13 @@ describe('FieldMappingRow', () => {
   };
 
   beforeAll(() => {
+    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
+      actionTypeTitle: '.servicenow',
+      iconClass: 'logoSecurity',
+    });
     wrapper = mount(<FieldMapping {...props} />, { wrappingComponent: TestProviders });
   });
+
   test('it renders', () => {
     expect(
       wrapper.find('[data-test-subj="case-configure-field-mappings-row-wrapper"]').first().exists()

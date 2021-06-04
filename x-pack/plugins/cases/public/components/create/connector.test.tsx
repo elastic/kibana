@@ -29,6 +29,7 @@ jest.mock('../../common/lib/kibana', () => {
           actionTypeRegistry: {
             get: jest.fn().mockReturnValue({
               actionTypeTitle: 'test',
+              iconClass: 'logoSecurity',
             }),
           },
         },

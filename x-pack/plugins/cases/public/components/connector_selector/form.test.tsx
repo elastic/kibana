@@ -23,10 +23,10 @@ describe('ConnectorSelector', () => {
   const formHookMock = getFormMock({ connectorId: connectorsMock[0].id });
 
   beforeEach(() => {
-    jest.resetAllMocks();
     useFormMock.mockImplementation(() => ({ form: formHookMock }));
     useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
       actionTypeTitle: 'test',
+      iconClass: 'logoSecurity',
     });
   });
 

@@ -7,7 +7,8 @@
 
 import { lazy } from 'react';
 
-import { ActionTypeModel } from '../../../../../triggers_actions_ui/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ActionTypeModel } from '../../../../../triggers_actions_ui/public/types';
 import { CaseActionParams } from './types';
 import * as i18n from './translations';
 

@@ -7,32 +7,18 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
+import { waitFor } from '@testing-library/react';
 
 import { EditConnector } from './index';
 import { getFormMock, useFormMock } from '../__mock__/form';
 import { TestProviders } from '../../common/mock';
 import { connectorsMock } from '../../containers/configure/mock';
-import { waitFor } from '@testing-library/react';
 import { caseUserActions } from '../../containers/mock';
+import { useKibana } from '../../common/lib/kibana';
 
 jest.mock('../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form');
-jest.mock('../../common/lib/kibana', () => {
-  return {
-    useKibana: () => ({
-      services: {
-        notifications: {},
-        http: {},
-        triggersActionsUi: {
-          actionTypeRegistry: {
-            get: jest.fn().mockReturnValue({
-              actionTypeTitle: 'test',
-            }),
-          },
-        },
-      },
-    }),
-  };
-});
+jest.mock('../../common/lib/kibana');
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 const onSubmit = jest.fn();
 const defaultProps = {
@@ -50,8 +36,11 @@ describe('EditConnector ', () => {
   const formHookMock = getFormMock({ connectorId: sampleConnector });
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.resetAllMocks();
     useFormMock.mockImplementation(() => ({ form: formHookMock }));
+    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
+      actionTypeTitle: '.servicenow',
+      iconClass: 'logoSecurity',
+    });
   });
 
   it('Renders no connector, and then edit', async () => {

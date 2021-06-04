@@ -11,7 +11,10 @@ import { mount } from 'enzyme';
 import { TestProviders } from '../../common/mock';
 import { Mapping, MappingProps } from './mapping';
 import { mappings } from './__mock__';
+import { useKibana } from '../../common/lib/kibana';
+
 jest.mock('../../common/lib/kibana');
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('Mapping', () => {
   const props: MappingProps = {
@@ -22,7 +25,12 @@ describe('Mapping', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
+      actionTypeTitle: 'ServiceNow ITSM',
+      iconClass: 'logoSecurity',
+    });
   });
+
   test('it shows mapping form group', () => {
     const wrapper = mount(<Mapping {...props} />, { wrappingComponent: TestProviders });
     expect(wrapper.find('[data-test-subj="static-mappings"]').first().exists()).toBe(true);
