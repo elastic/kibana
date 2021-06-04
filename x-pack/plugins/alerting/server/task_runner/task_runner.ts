@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Dictionary, pickBy, mapValues, without, cloneDeep } from 'lodash';
 import type { Request } from '@hapi/hapi';
@@ -617,7 +617,7 @@ function trackAlertDurations<
   // Inject start time into instance state of new instances
   for (const id of newAlertIds) {
     const state = currentAlerts[id].getState();
-    currentAlerts[id].replaceState({ ...state, start: currentTime, uuid: uuid.v4() });
+    currentAlerts[id].replaceState({ ...state, start: currentTime, uuid: uuidv4() });
   }
 
   // Calculate duration to date for active instances
@@ -681,7 +681,7 @@ function generateNewAndRecoveredInstanceEvents<
   const newIds = without(currentAlertInstanceIds, ...originalAlertInstanceIds);
 
   for (const id of recoveredAlertInstanceIds) {
-    console.log(`recovered instance: ${JSON.stringify(recoveredAlertInstances[id])}`);
+    // console.log(`recovered instance: ${JSON.stringify(recoveredAlertInstances[id])}`);
     const { group: actionGroup, subgroup: actionSubgroup } =
       recoveredAlertInstances[id].getLastScheduledActions() ?? {};
     const state = recoveredAlertInstances[id].getState();
@@ -697,7 +697,7 @@ function generateNewAndRecoveredInstanceEvents<
   }
 
   for (const id of newIds) {
-    console.log(`new instance: ${JSON.stringify(currentAlertInstances[id])}`);
+    // console.log(`new instance: ${JSON.stringify(currentAlertInstances[id])}`);
     const { actionGroup, subgroup: actionSubgroup } =
       currentAlertInstances[id].getScheduledActionOptions() ?? {};
     const state = currentAlertInstances[id].getState();
@@ -713,7 +713,7 @@ function generateNewAndRecoveredInstanceEvents<
   }
 
   for (const id of currentAlertInstanceIds) {
-    console.log(`active instance: ${JSON.stringify(currentAlertInstances[id])}`);
+    // console.log(`active instance: ${JSON.stringify(currentAlertInstances[id])}`);
     const { actionGroup, subgroup: actionSubgroup } =
       currentAlertInstances[id].getScheduledActionOptions() ?? {};
     const state = currentAlertInstances[id].getState();

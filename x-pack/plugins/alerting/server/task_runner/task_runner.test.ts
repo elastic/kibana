@@ -49,9 +49,7 @@ const alertType: jest.Mocked<UntypedNormalizedAlertType> = {
   producer: 'alerts',
 };
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),
-}));
+jest.mock('uuid', () => ({ v4: () => '00000000-0000-0000-0000-000000000000' }));
 
 let fakeTimer: sinon.SinonFakeTimers;
 
@@ -377,6 +375,7 @@ describe('Task Runner', () => {
       event: {
         action: 'new-instance',
         duration: 0,
+        id: '00000000-0000-0000-0000-000000000000',
         start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
@@ -400,6 +399,7 @@ describe('Task Runner', () => {
       event: {
         action: 'active-instance',
         duration: 0,
+        id: '00000000-0000-0000-0000-000000000000',
         start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
@@ -528,6 +528,7 @@ describe('Task Runner', () => {
       event: {
         action: 'new-instance',
         duration: 0,
+        id: '00000000-0000-0000-0000-000000000000',
         start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
@@ -550,6 +551,7 @@ describe('Task Runner', () => {
       event: {
         action: 'active-instance',
         duration: 0,
+        id: '00000000-0000-0000-0000-000000000000',
         start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
@@ -675,6 +677,8 @@ describe('Task Runner', () => {
               state: {
                 bar: false,
                 start: '1969-12-31T00:00:00.000Z',
+                duration: 86400000000000,
+                uuid: '33333333-0000-0000-0000-000000000000',
               },
             },
           },
@@ -706,6 +710,7 @@ describe('Task Runner', () => {
             "event": Object {
               "action": "active-instance",
               "duration": 86400000000000,
+              "id": "33333333-0000-0000-0000-000000000000",
               "start": "1969-12-31T00:00:00.000Z",
             },
             "kibana": Object {
@@ -937,6 +942,7 @@ describe('Task Runner', () => {
           "event": Object {
             "action": "new-instance",
             "duration": 0,
+            "id": "00000000-0000-0000-0000-000000000000",
             "start": "1970-01-01T00:00:00.000Z",
           },
           "kibana": Object {
@@ -961,6 +967,7 @@ describe('Task Runner', () => {
           "event": Object {
             "action": "active-instance",
             "duration": 0,
+            "id": "00000000-0000-0000-0000-000000000000",
             "start": "1970-01-01T00:00:00.000Z",
           },
           "kibana": Object {
@@ -1061,11 +1068,21 @@ describe('Task Runner', () => {
           alertInstances: {
             '1': {
               meta: {},
-              state: { bar: false, start: '1969-12-31T00:00:00.000Z', duration: 80000000000 },
+              state: {
+                bar: false,
+                start: '1969-12-31T00:00:00.000Z',
+                duration: 80000000000,
+                uuid: '33333333-0000-0000-0000-000000000000',
+              },
             },
             '2': {
               meta: {},
-              state: { bar: false, start: '1969-12-31T06:00:00.000Z', duration: 70000000000 },
+              state: {
+                bar: false,
+                start: '1969-12-31T06:00:00.000Z',
+                duration: 70000000000,
+                uuid: '44444444-0000-0000-0000-000000000000',
+              },
             },
           },
         },
@@ -1096,6 +1113,7 @@ describe('Task Runner', () => {
         "bar": false,
         "duration": 86400000000000,
         "start": "1969-12-31T00:00:00.000Z",
+        "uuid": "33333333-0000-0000-0000-000000000000",
       },
     },
   }
@@ -1127,6 +1145,7 @@ describe('Task Runner', () => {
               "action": "recovered-instance",
               "duration": 64800000000000,
               "end": "1970-01-01T00:00:00.000Z",
+              "id": "44444444-0000-0000-0000-000000000000",
               "start": "1969-12-31T06:00:00.000Z",
             },
             "kibana": Object {
@@ -1150,6 +1169,7 @@ describe('Task Runner', () => {
             "event": Object {
               "action": "active-instance",
               "duration": 86400000000000,
+              "id": "33333333-0000-0000-0000-000000000000",
               "start": "1969-12-31T00:00:00.000Z",
             },
             "kibana": Object {
@@ -1489,11 +1509,21 @@ describe('Task Runner', () => {
           alertInstances: {
             '1': {
               meta: { lastScheduledActions: { group: 'default', date } },
-              state: { bar: false, start: '1969-12-31T00:00:00.000Z', duration: 80000000000 },
+              state: {
+                bar: false,
+                start: '1969-12-31T00:00:00.000Z',
+                duration: 80000000000,
+                uuid: '33333333-0000-0000-0000-000000000000',
+              },
             },
             '2': {
               meta: { lastScheduledActions: { group: 'default', date } },
-              state: { bar: false, start: '1969-12-31T06:00:00.000Z', duration: 70000000000 },
+              state: {
+                bar: false,
+                start: '1969-12-31T06:00:00.000Z',
+                duration: 70000000000,
+                uuid: '22222222-0000-0000-0000-000000000000',
+              },
             },
           },
         },
@@ -1524,6 +1554,7 @@ describe('Task Runner', () => {
             "bar": false,
             "duration": 86400000000000,
             "start": "1969-12-31T00:00:00.000Z",
+            "uuid": "33333333-0000-0000-0000-000000000000",
           },
         },
       }
@@ -1539,6 +1570,7 @@ describe('Task Runner', () => {
               "action": "recovered-instance",
               "duration": 64800000000000,
               "end": "1970-01-01T00:00:00.000Z",
+              "id": "22222222-0000-0000-0000-000000000000",
               "start": "1969-12-31T06:00:00.000Z",
             },
             "kibana": Object {
@@ -1563,6 +1595,7 @@ describe('Task Runner', () => {
             "event": Object {
               "action": "active-instance",
               "duration": 86400000000000,
+              "id": "33333333-0000-0000-0000-000000000000",
               "start": "1969-12-31T00:00:00.000Z",
             },
             "kibana": Object {
@@ -2237,6 +2270,7 @@ describe('Task Runner', () => {
             "event": Object {
               "action": "new-instance",
               "duration": 0,
+              "id": "00000000-0000-0000-0000-000000000000",
               "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
@@ -2261,6 +2295,7 @@ describe('Task Runner', () => {
             "event": Object {
               "action": "new-instance",
               "duration": 0,
+              "id": "00000000-0000-0000-0000-000000000000",
               "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
@@ -2285,6 +2320,7 @@ describe('Task Runner', () => {
             "event": Object {
               "action": "active-instance",
               "duration": 0,
+              "id": "00000000-0000-0000-0000-000000000000",
               "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
@@ -2309,6 +2345,7 @@ describe('Task Runner', () => {
             "event": Object {
               "action": "active-instance",
               "duration": 0,
+              "id": "00000000-0000-0000-0000-000000000000",
               "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
@@ -2381,11 +2418,21 @@ describe('Task Runner', () => {
           alertInstances: {
             '1': {
               meta: {},
-              state: { bar: false, start: '1969-12-31T00:00:00.000Z', duration: 80000000000 },
+              state: {
+                bar: false,
+                start: '1969-12-31T00:00:00.000Z',
+                duration: 80000000000,
+                uuid: '11111111-0000-0000-0000-000000000000',
+              },
             },
             '2': {
               meta: {},
-              state: { bar: false, start: '1969-12-31T06:00:00.000Z', duration: 70000000000 },
+              state: {
+                bar: false,
+                start: '1969-12-31T06:00:00.000Z',
+                duration: 70000000000,
+                uuid: '22222222-0000-0000-0000-000000000000',
+              },
             },
           },
         },
@@ -2416,6 +2463,7 @@ describe('Task Runner', () => {
             "event": Object {
               "action": "active-instance",
               "duration": 86400000000000,
+              "id": "11111111-0000-0000-0000-000000000000",
               "start": "1969-12-31T00:00:00.000Z",
             },
             "kibana": Object {
@@ -2440,6 +2488,7 @@ describe('Task Runner', () => {
             "event": Object {
               "action": "active-instance",
               "duration": 64800000000000,
+              "id": "22222222-0000-0000-0000-000000000000",
               "start": "1969-12-31T06:00:00.000Z",
             },
             "kibana": Object {
@@ -2616,17 +2665,7 @@ describe('Task Runner', () => {
   test('end is logged for active alerts when alert state contains start time and alert recovers', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
-    alertType.executor.mockImplementation(
-      async ({
-        services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
-        AlertInstanceState,
-        AlertInstanceContext,
-        string
-      >) => {}
-    );
+    alertType.executor.mockImplementation(async () => {});
     const taskRunner = new TaskRunner(
       alertType,
       {
@@ -2636,11 +2675,21 @@ describe('Task Runner', () => {
           alertInstances: {
             '1': {
               meta: {},
-              state: { bar: false, start: '1969-12-31T00:00:00.000Z', duration: 80000000000 },
+              state: {
+                bar: false,
+                start: '1969-12-31T00:00:00.000Z',
+                duration: 80000000000,
+                uuid: '11111111-0000-0000-0000-000000000000',
+              },
             },
             '2': {
               meta: {},
-              state: { bar: false, start: '1969-12-31T06:00:00.000Z', duration: 70000000000 },
+              state: {
+                bar: false,
+                start: '1969-12-31T06:00:00.000Z',
+                duration: 70000000000,
+                uuid: '22222222-0000-0000-0000-000000000000',
+              },
             },
           },
         },
@@ -2672,6 +2721,7 @@ describe('Task Runner', () => {
               "action": "recovered-instance",
               "duration": 86400000000000,
               "end": "1970-01-01T00:00:00.000Z",
+              "id": "11111111-0000-0000-0000-000000000000",
               "start": "1969-12-31T00:00:00.000Z",
             },
             "kibana": Object {
@@ -2696,6 +2746,7 @@ describe('Task Runner', () => {
               "action": "recovered-instance",
               "duration": 64800000000000,
               "end": "1970-01-01T00:00:00.000Z",
+              "id": "22222222-0000-0000-0000-000000000000",
               "start": "1969-12-31T06:00:00.000Z",
             },
             "kibana": Object {
