@@ -25,6 +25,7 @@ import { WithSource } from '../../containers/with_source';
 import { Source } from '../../containers/metrics_source';
 import { MetricsExplorerPage } from './metrics_explorer';
 import { SnapshotPage } from './inventory_view';
+import { MetricDetail } from './metric_detail';
 import { MetricsSettingsPage } from './settings';
 import { SourceLoadingPage } from '../../components/source_loading_page';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
@@ -143,6 +144,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                         </WithSource>
                       )}
                     />
+                    <Route path="/detail/:type/:node" component={MetricDetail} />
                     <Route path={'/settings'} component={MetricsSettingsPage} />
                   </Switch>
                 </InfraMLCapabilitiesProvider>

@@ -7,9 +7,8 @@
 
 import { EuiHideFor, EuiPageSideBar, EuiShowFor, EuiSideNav } from '@elastic/eui';
 import React, { useState, useCallback } from 'react';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { NavItem } from '../lib/side_nav_context';
-
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 interface Props {
   loading: boolean;
   name: string;
@@ -32,22 +31,23 @@ export const MetricsSideNav = ({ loading, name, items }: Props) => {
       isOpenOnMobile={isOpenOnMobile}
     />
   );
+
   return (
-    <EuiPageSideBar>
-      <EuiHideFor sizes={['xs', 's']}>
-        <SideNavContainer>{content}</SideNavContainer>
+    <>
+      <EuiHideFor sizes={['xs', 's', 'm']}>
+        <StickyPageSideBar>{content}</StickyPageSideBar>
       </EuiHideFor>
-      <EuiShowFor sizes={['xs', 's']}>{mobileContent}</EuiShowFor>
-    </EuiPageSideBar>
+      <EuiShowFor sizes={['xs', 's', 'm']}>
+        <EuiPageSideBar>{mobileContent}</EuiPageSideBar>
+      </EuiShowFor>
+    </>
   );
 };
 
-const SideNavContainer = euiStyled.div`
-  position: fixed;
-  z-index: 1;
-  height: 88vh;
-  padding-left: 16px;
-  margin-left: -16px;
-  overflow-y: auto;
-  overflow-x: hidden;
+const StickyPageSideBar = euiStyled(EuiPageSideBar)`
+  position: sticky;
+  top: ${(props) =>
+    parseFloat(props.theme.eui.euiHeaderHeightCompensation) * 2 +
+    parseFloat(props.theme.eui.paddingSizes.s) +
+    'px'};
 `;
