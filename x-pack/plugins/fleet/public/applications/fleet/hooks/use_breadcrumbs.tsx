@@ -28,7 +28,7 @@ const BASE_BREADCRUMB: Breadcrumb = {
 
 const INTEGRATIONS_BASE_BREADCRUMB: Breadcrumb = {
   href: pagePathGetters.integrations()[1],
-  text: i18n.translate('xpack.integrations.breadcrumbs.appTitle', {
+  text: i18n.translate('xpack.fleet.breadcrumbs.integrationsAppTitle', {
     defaultMessage: 'Integrations',
   }),
   useIntegrationsBasePath: true,
