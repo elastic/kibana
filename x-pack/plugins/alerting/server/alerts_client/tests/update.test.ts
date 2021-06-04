@@ -87,6 +87,7 @@ describe('update()', () => {
       ],
     },
     references: [],
+    version: '123',
   };
   const existingDecryptedAlert = {
     ...existingAlert,
@@ -392,6 +393,7 @@ describe('update()', () => {
             "type": "action",
           },
         ],
+        "version": "123",
       }
     `);
     expect(actionsClient.isActionTypeEnabled).toHaveBeenCalledWith('test', { notifyUsage: true });
@@ -555,6 +557,7 @@ describe('update()', () => {
             "type": "action",
           },
         ],
+        "version": "123",
       }
     `);
   });
@@ -711,6 +714,7 @@ describe('update()', () => {
             "type": "action",
           },
         ],
+        "version": "123",
       }
     `);
   });
@@ -1107,6 +1111,7 @@ describe('update()', () => {
           scheduledTaskId: 'task-123',
         },
         references: [],
+        version: '123',
       });
 
       taskManager.schedule.mockResolvedValueOnce({

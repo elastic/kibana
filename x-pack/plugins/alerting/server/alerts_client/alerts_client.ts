@@ -749,7 +749,7 @@ export class AlertsClient {
 
   private async updateAlert<Params extends AlertTypeParams>(
     { id, data }: UpdateOptions<Params>,
-    { attributes }: SavedObject<RawAlert>
+    { attributes, version }: SavedObject<RawAlert>
   ): Promise<PartialAlert<Params>> {
     const alertType = this.alertTypeRegistry.get(attributes.alertTypeId);
 
@@ -793,6 +793,7 @@ export class AlertsClient {
         {
           id,
           overwrite: true,
+          version,
           references,
         }
       );
@@ -1447,8 +1448,7 @@ export class AlertsClient {
   private getPartialAlertFromRaw<Params extends AlertTypeParams>(
     id: string,
     { createdAt, updatedAt, meta, notifyWhen, scheduledTaskId, ...rawAlert }: Partial<RawAlert>,
-    references: SavedObjectReference[] | undefined,
-    version?: string
+    references: SavedObjectReference[] | undefined
   ): PartialAlert<Params> {
     // Not the prettiest code here, but if we want to use most of the
     // alert fields from the rawAlert using `...rawAlert` kind of access, we
