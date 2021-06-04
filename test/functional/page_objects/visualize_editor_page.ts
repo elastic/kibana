@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import expect from '@kbn/expect/expect.js';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrProviderContext) {
@@ -325,6 +325,14 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
 
     public async toggleAutoMode() {
       await testSubjects.click('visualizeEditorAutoButton');
+    }
+
+    public async togglePieLegend() {
+      await testSubjects.click('visTypePieAddLegendSwitch');
+    }
+
+    public async togglePieNestedLegend() {
+      await testSubjects.click('visTypePieNestedLegendSwitch');
     }
 
     public async isApplyEnabled() {

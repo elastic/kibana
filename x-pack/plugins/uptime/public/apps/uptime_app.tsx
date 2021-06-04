@@ -122,6 +122,7 @@ const Application = (props: UptimeAppProps) => {
               storage,
               data: startPlugins.data,
               triggersActionsUi: startPlugins.triggersActionsUi,
+              observability: startPlugins.observability,
             }}
           >
             <Router history={appMountParameters.history}>

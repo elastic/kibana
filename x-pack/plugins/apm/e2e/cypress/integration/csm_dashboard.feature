@@ -29,7 +29,6 @@ Feature: CSM Dashboard
     When a user browses the APM UI application for RUM Data
     Then should display percentile for page load chart
       And should display tooltip on hover
-      And should display chart legend
 
   Scenario: Breakdown filter
     Given a user clicks the page load breakdown filter
