@@ -14,7 +14,7 @@ const FILE_DATA_VIS_TAB_ID = 'fileDataViz';
 
 export function registerHomeAddData(home: HomePublicPluginSetup) {
   home.addData.registerAddDataTab({
-    id: 'fileDataViz',
+    id: FILE_DATA_VIS_TAB_ID,
     name: i18n.translate('xpack.fileDataVisualizer.embeddedTabTitle', {
       defaultMessage: 'Upload file',
     }),
