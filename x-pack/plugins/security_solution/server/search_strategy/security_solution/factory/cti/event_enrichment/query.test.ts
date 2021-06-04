@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { eventEnrichment } from './factory';
+describe('buildEventEnrichmentQuery', () => {
+  it('makes each query filter named based on its field');
+});

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { eventEnrichment } from './factory';
+export const parseEventEnrichmentResponse = (a: unknown) => a;

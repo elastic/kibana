@@ -5,6 +5,17 @@
  * 2.0.
  */
 
+import { IEsSearchResponse } from 'src/plugins/data/public';
+import { Inspect } from '../../common';
+import { RequestBasicOptions } from '..';
+
 export enum CtiQueries {
   eventEnrichment = 'eventEnrichment',
+}
+
+export interface CtiEventEnrichmentRequestOptions extends RequestBasicOptions {}
+
+export interface CtiEventEnrichmentStrategyResponse extends IEsSearchResponse {
+  inspect?: Inspect;
+  totalCount: number;
 }

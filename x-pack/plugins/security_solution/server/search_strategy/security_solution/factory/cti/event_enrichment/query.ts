@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-import { CtiQueries } from '../../../../../../common/search_strategy/security_solution/cti';
-import { SecuritySolutionFactory } from '../../types';
-
-const ident = (a: unknown) => a;
-
-export const eventEnrichment: SecuritySolutionFactory<CtiQueries.eventEnrichment> = {
-  buildDsl: ident,
-  parse: ident,
-};
+export const buildEventEnrichmentQuery = (a: unknown) => a;

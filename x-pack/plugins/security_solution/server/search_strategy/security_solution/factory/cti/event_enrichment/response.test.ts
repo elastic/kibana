@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { eventEnrichment } from './factory';
+describe('parseEventEnrichmentResponse', () => {
+  it('adds matched.* enrichment fields based on the named query');
+});
