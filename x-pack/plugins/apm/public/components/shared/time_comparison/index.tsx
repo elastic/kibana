@@ -154,14 +154,7 @@ export function TimeComparison() {
   const history = useHistory();
   const { isMedium, isLarge } = useBreakPoints();
   const {
-    urlParams: {
-      start,
-      end,
-      comparisonEnabled,
-      comparisonType,
-      exactStart,
-      exactEnd,
-    },
+    urlParams: { comparisonEnabled, comparisonType, exactStart, exactEnd },
   } = useUrlParams();
 
   const comparisonTypes = getComparisonTypes({
