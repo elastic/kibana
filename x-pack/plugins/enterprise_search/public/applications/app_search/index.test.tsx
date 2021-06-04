@@ -26,6 +26,7 @@ import { EngineRouter, EngineNav } from './components/engine';
 import { EngineCreation } from './components/engine_creation';
 import { EnginesOverview } from './components/engines';
 import { ErrorConnecting } from './components/error_connecting';
+import { Library } from './components/library';
 import { MetaEngineCreation } from './components/meta_engine_creation';
 import { RoleMappingsRouter } from './components/role_mappings';
 import { SetupGuide } from './components/setup_guide';
@@ -145,6 +146,28 @@ describe('AppSearchConfigured', () => {
 
         expect(wrapper.find(MetaEngineCreation)).toHaveLength(0);
       });
+    });
+  });
+
+  describe('library', () => {
+    it('renders a library page in development', () => {
+      const OLD_ENV = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'development';
+
+      rerender(wrapper);
+
+      expect(wrapper.find(Library)).toHaveLength(1);
+      process.env.NODE_ENV = OLD_ENV;
+    });
+
+    it("doesn't in production", () => {
+      const OLD_ENV = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'production';
+
+      rerender(wrapper);
+
+      expect(wrapper.find(Library)).toHaveLength(0);
+      process.env.NODE_ENV = OLD_ENV;
     });
   });
 });
