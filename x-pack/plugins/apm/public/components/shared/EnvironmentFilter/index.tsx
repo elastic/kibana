@@ -13,6 +13,7 @@ import { useHistory, useLocation, useParams } from 'react-router-dom';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
+  omitEsFieldValue,
 } from '../../../../common/environment_filter_values';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -51,9 +52,9 @@ function getOptions(environments: string[]) {
     }));
 
   return [
-    ENVIRONMENT_ALL,
+    omitEsFieldValue(ENVIRONMENT_ALL),
     ...(environments.includes(ENVIRONMENT_NOT_DEFINED.value)
-      ? [ENVIRONMENT_NOT_DEFINED]
+      ? [omitEsFieldValue(ENVIRONMENT_NOT_DEFINED)]
       : []),
     ...(environmentOptions.length > 0 ? [SEPARATOR_OPTION] : []),
     ...environmentOptions,
@@ -78,12 +79,14 @@ export function EnvironmentFilter() {
   // the contents.
   const minWidth = 200;
 
+  const options = getOptions(environments);
+
   return (
     <EuiSelect
       prepend={i18n.translate('xpack.apm.filter.environment.label', {
         defaultMessage: 'Environment',
       })}
-      options={getOptions(environments)}
+      options={options}
       value={environment || ENVIRONMENT_ALL.value}
       onChange={(event) => {
         updateEnvironmentUrl(history, location, event.target.value);
