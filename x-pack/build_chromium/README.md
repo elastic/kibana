@@ -1,30 +1,29 @@
 # Chromium build
 
-We ship our own headless build of Chromium which is significantly smaller than
-the standard binaries shipped by Google. The scripts in this folder can be used
-to accept a commit hash from the Chromium repository, and initialize the build
-on Ubuntu Linux.
+We ship our own headless build of Chromium for Linux and Mac OS, using a
+version of the source that corresponds to the requirements of the Puppeteer
+node module. The scripts in this folder can be used to accept a commit hash
+from the Chromium repository, and initialize the build in a workspace.
 
 ## Why do we do this
 
-By default, Puppeteer will download a zip file containing the Chromium browser for any
-OS. This creates problems on Linux, because Chromium has a dependency on X11, which
-is often not installed for a server environment. We don't want to make a requirement
-for Linux that you need X11 to run Kibana. To work around this, we create our own Chromium
-build, using the
+**Linux**: By default, Puppeteer will download a zip file containing the
+Chromium browser for any OS. This creates problems on Linux, because Chromium
+has a dependency on X11, which is often not installed for a server environment.
+We don't want to make a requirement for Linux that you need X11 to run Kibana.
+To work around this, we create our own Chromium build, using the
 [`headless_shell`](https://chromium.googlesource.com/chromium/src/+/5cf4b8b13ed518472038170f8de9db2f6c258fe4/headless)
-build target. There are no (trustworthy) sources of these builds available elsewhere.
+build target. There are no (trustworthy) sources of these builds available
+elsewhere.
 
-Fortunately, creating the custom builds is only necessary for Linux. When you have a build
-of Kibana for Linux, or if you use a Linux desktop to develop Kibana, you have a copy of
-`headless_shell` bundled inside. When you have a Windows or Mac build of Kibana, or use
-either of those for development, you have a copy of the full build of Chromium, which
-was downloaded from the main [Chromium download
-location](https://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html).
+**Mac**: We do this on Mac because Elastic signs the Kibanna release artifact
+with Apple to work with Gatekeeper on Mac OS. Having our own binary of Chromium
+and bundling it with Kibana is integral to the artifact signing process.
 
-We do this on Mac because Elastic signs the Kibanna release artifact with Apple
-to work with Gatekeeper on Mac OS. Having our own binary of Chromium and
-bundling it with Kibana is integral to the artifact signing process.
+**Windows**: No custom build is necessary for Windows. We are able to use the
+full build of Chromium, downloaded from the main [Chromium download
+location](https://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html),
+using the revision that corresponds with the Puppeteer dependency.
 
 ## Build Script Usage
 
