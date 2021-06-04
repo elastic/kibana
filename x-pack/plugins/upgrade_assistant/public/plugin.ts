@@ -20,7 +20,7 @@ interface Dependencies {
 export class UpgradeAssistantUIPlugin implements Plugin {
   constructor(private ctx: PluginInitializerContext) {}
   setup(coreSetup: CoreSetup, { management }: Dependencies) {
-    const { enabled } = this.ctx.config.get<Config>();
+    const { enabled, readonly } = this.ctx.config.get<Config>();
 
     if (!enabled) {
       return;
@@ -57,7 +57,8 @@ export class UpgradeAssistantUIPlugin implements Plugin {
         const unmountAppCallback = await mountManagementSection(
           coreSetup,
           params,
-          kibanaVersionInfo
+          kibanaVersionInfo,
+          readonly
         );
 
         return () => {

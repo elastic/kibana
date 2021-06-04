@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiPage, EuiPanel } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import React from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -50,16 +50,13 @@ export function TraceOverview() {
   return (
     <>
       <SearchBar />
-      <EuiPage>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiPanel>
-            <TraceList
-              items={data.items}
-              isLoading={status === FETCH_STATUS.LOADING}
-            />
-          </EuiPanel>
-        </EuiFlexGroup>
-      </EuiPage>
+
+      <EuiPanel hasShadow={false}>
+        <TraceList
+          items={data.items}
+          isLoading={status === FETCH_STATUS.LOADING}
+        />
+      </EuiPanel>
     </>
   );
 }
