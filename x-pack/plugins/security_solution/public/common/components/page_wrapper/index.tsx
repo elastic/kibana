@@ -37,7 +37,8 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
 }>`
   .${BOTTOM_BAR_CLASSNAME} {
     animation: 'none !important'; // disable the default bottom bar slide animation
-    background: #ffffff; // Override bottom bar black background
+    background: ${({ theme }) =>
+      theme.eui.euiColorEmptyShade}; // Override bottom bar black background
     color: inherit; // Necessary to override the bottom bar 'white text'
     transform: ${(
       { $isShowingTimelineOverlay } // Since the bottom bar wraps the whole overlay now, need to override any transforms when it is open
