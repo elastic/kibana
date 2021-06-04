@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     this.tags('includeFirefox');
 
     before(async () => {
+      await PageObjects.visualize.initTests();
       await PageObjects.common.navigateToApp('visualize');
       await PageObjects.visualize.loadSavedVisualization('chained input control', {
         navigateToVisualize: false,

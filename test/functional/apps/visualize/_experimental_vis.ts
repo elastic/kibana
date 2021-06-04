@@ -15,6 +15,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize']);
 
   describe('experimental visualizations in visualize app ', function () {
+    before(async () => {
+      await PageObjects.visualize.initTests();
+    });
+
     describe('experimental visualizations', () => {
       beforeEach(async () => {
         log.debug('navigateToApp visualize');
