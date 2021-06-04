@@ -13,7 +13,6 @@ import type { estypes } from '@elastic/elasticsearch';
 import { chunk, isEmpty, partition } from 'lodash';
 import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
 
-import { SortResults } from '@elastic/elasticsearch/api/types';
 import type { ListArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { MAX_EXCEPTION_LIST_SIZE } from '@kbn/securitysolution-list-constants';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
@@ -855,10 +854,10 @@ export const isMachineLearningParams = (params: RuleParams): params is MachineLe
  * Ref: https://github.com/elastic/elasticsearch/issues/28806#issuecomment-369303620
  *
  * return stringified Long.MAX_VALUE if we receive Number.MAX_SAFE_INTEGER
- * @param sortIds SortResults | undefined
+ * @param sortIds estypes.SearchSortResults | undefined
  * @returns SortResults
  */
-export const getSafeSortIds = (sortIds: SortResults | undefined) => {
+export const getSafeSortIds = (sortIds: estypes.SearchSortResults | undefined) => {
   return sortIds?.map((sortId) => {
     // haven't determined when we would receive a null value for a sort id
     // but in case we do, default to sending the stringified Java max_int

@@ -6,7 +6,6 @@
  */
 import type { estypes } from '@elastic/elasticsearch';
 import { performance } from 'perf_hooks';
-import { SearchRequest, SortResults } from '@elastic/elasticsearch/api/types';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -24,7 +23,7 @@ import {
 
 interface SingleSearchAfterParams {
   aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
-  searchAfterSortIds: SortResults | undefined;
+  searchAfterSortIds: estypes.SearchSortResults | undefined;
   index: string[];
   from: string;
   to: string;
@@ -73,7 +72,7 @@ export const singleSearchAfter = async ({
     const {
       body: nextSearchAfterResult,
     } = await services.scopedClusterClient.asCurrentUser.search<SignalSource>(
-      searchAfterQuery as SearchRequest
+      searchAfterQuery as estypes.SearchRequest
     );
     const end = performance.now();
     const searchErrors = createErrorsFromShard({
