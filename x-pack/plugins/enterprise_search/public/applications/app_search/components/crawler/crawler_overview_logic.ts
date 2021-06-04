@@ -21,7 +21,7 @@ interface CrawlerOverviewValues {
 
 interface CrawlerOverviewActions {
   fetchCrawlerData(): void;
-  setCrawlerData(data: CrawlerData): { data: CrawlerData };
+  onFetchCrawlerData(data: CrawlerData): { data: CrawlerData };
 }
 
 export const CrawlerOverviewLogic = kea<
@@ -30,13 +30,13 @@ export const CrawlerOverviewLogic = kea<
   path: ['enterprise_search', 'app_search', 'crawler', 'crawler_overview'],
   actions: {
     fetchCrawlerData: () => null,
-    setCrawlerData: (data) => ({ data }),
+    onFetchCrawlerData: (data) => ({ data }),
   },
   reducers: {
     domains: [
       [],
       {
-        setCrawlerData: (_, { data: { domains } }) => domains,
+        onFetchCrawlerData: (_, { data: { domains } }) => domains,
       },
     ],
   },
@@ -48,7 +48,7 @@ export const CrawlerOverviewLogic = kea<
       try {
         const response = await http.get(`/api/app_search/engines/${engineName}/crawler`);
         const crawlerData = crawlerDataServerToClient(response as CrawlerDataFromServer);
-        actions.setCrawlerData(crawlerData);
+        actions.onFetchCrawlerData(crawlerData);
       } catch (e) {
         flashAPIErrors(e);
       }

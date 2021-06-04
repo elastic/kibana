@@ -45,7 +45,7 @@ describe('CrawlerOverviewLogic', () => {
   });
 
   describe('actions', () => {
-    describe('setCrawlerData', () => {
+    describe('onFetchCrawlerData', () => {
       it('should set all received data as top-level values', () => {
         const crawlerData = {
           domains: [
@@ -62,7 +62,7 @@ describe('CrawlerOverviewLogic', () => {
           ],
         };
 
-        CrawlerOverviewLogic.actions.setCrawlerData(crawlerData);
+        CrawlerOverviewLogic.actions.onFetchCrawlerData(crawlerData);
 
         expect(CrawlerOverviewLogic.values).toEqual({
           ...DEFAULT_VALUES,
@@ -74,8 +74,8 @@ describe('CrawlerOverviewLogic', () => {
 
   describe('listeners', () => {
     describe('fetchCrawlerData', () => {
-      it('calls setCrawlerData with retrieved data that has been converted from server to client', async () => {
-        jest.spyOn(CrawlerOverviewLogic.actions, 'setCrawlerData');
+      it('calls onFetchCrawlerData with retrieved data that has been converted from server to client', async () => {
+        jest.spyOn(CrawlerOverviewLogic.actions, 'onFetchCrawlerData');
 
         http.get.mockReturnValue(
           Promise.resolve({
@@ -96,7 +96,7 @@ describe('CrawlerOverviewLogic', () => {
         await nextTick();
 
         expect(http.get).toHaveBeenCalledWith('/api/app_search/engines/some-engine/crawler');
-        expect(CrawlerOverviewLogic.actions.setCrawlerData).toHaveBeenCalledWith({
+        expect(CrawlerOverviewLogic.actions.onFetchCrawlerData).toHaveBeenCalledWith({
           domains: [
             {
               id: '507f1f77bcf86cd799439011',
