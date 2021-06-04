@@ -60,15 +60,6 @@ export function DiscoverDocTableEmbeddable(props: DocTableEmbeddableProps) {
 
 function DocTableLegacyInner(renderProps: DocTableEmbeddableProps) {
   const scope = useRef<AngularScope | undefined>();
-  const [rows, setRows] = useState(renderProps.rows);
-  const [minimumVisibleRows, setMinimumVisibleRows] = useState(50);
-
-  useEffect(() => {
-    if (minimumVisibleRows > 50) {
-      setMinimumVisibleRows(50);
-    }
-    setRows(renderProps.rows);
-  }, [renderProps.rows, minimumVisibleRows, setMinimumVisibleRows]);
 
   useEffect(() => {
     if (renderProps.refs) {
@@ -81,7 +72,7 @@ function DocTableLegacyInner(renderProps: DocTableEmbeddableProps) {
         scope.current = newScope;
       });
     }
-  }, [renderProps, minimumVisibleRows, rows]);
+  }, [renderProps]);
 
   useEffect(() => {
     return () => {

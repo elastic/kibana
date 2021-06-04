@@ -15,19 +15,21 @@ import { Container, Embeddable } from '../../../../embeddable/public';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SavedSearch } from '../../saved_searches';
 import { Adapters, RequestAdapter } from '../../../../inspector/common';
-import { ISearchSource } from '../../../../data/common';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { APPLY_FILTER_TRIGGER, esFilters, FilterManager } from '../../../../data/public';
 import { DiscoverServices } from '../../build_services';
-import { Query, TimeRange } from '../../../../data/common/query';
-import { Filter } from '../../../../data/common/es_query/filters';
+import {
+  Query,
+  TimeRange,
+  Filter,
+  IFieldType,
+  IndexPattern,
+  ISearchSource,
+} from '../../../../data/common';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
-import { IFieldType } from '../../../../data/common/index_patterns/fields';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
-import { IndexPattern } from '../../../../data/common/index_patterns/index_patterns';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import { UiActionsStart } from '../../../../ui_actions/public';
-import { getDefaultSort } from '../angular/doc_table/lib/get_default_sort';
 import { getServices } from '../../kibana_services';
 import {
   SAMPLE_SIZE_SETTING,
@@ -35,7 +37,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../common';
 import * as columnActions from '../angular/doc_table/actions/columns';
-import { getSortForSearchSource } from '../angular/doc_table';
+import { getSortForSearchSource, getDefaultSort } from '../angular/doc_table';
 import { handleSourceColumnState } from '../angular/helpers';
 import { DiscoverGridProps } from '../components/discover_grid/discover_grid';
 import { DiscoverGridSettings } from '../components/discover_grid/types';

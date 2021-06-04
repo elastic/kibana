@@ -378,7 +378,7 @@ export const DiscoverGrid = ({
         data-title={searchTitle}
         data-description={searchDescription}
         data-document-number={displayedRows.length}
-        className={className || ''}
+        className={className}
       >
         <KibanaContextProvider services={{ uiSettings: services.uiSettings }}>
           <EuiDataGridMemoized
