@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { sortBy, slice, get } from 'lodash';
+import { each, sortBy, slice, get, cloneDeep } from 'lodash';
 import moment from 'moment';
 import Boom from '@hapi/boom';
+import { IScopedClusterClient } from 'kibana/server';
 import { buildAnomalyTableItems } from './build_anomaly_table_items';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
@@ -17,7 +18,12 @@ import {
   AnomalyRecordDoc,
 } from '../../../common/types/anomalies';
 import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../common/constants/anomalies';
-import { GetStoppedPartitionResult } from '../../../common/types/results';
+import {
+  GetStoppedPartitionResult,
+  GetDatafeedResultsChartDataResult,
+  defaultSearchQuery,
+  DatafeedResultsChartDataParams,
+} from '../../../common/types/results';
 import { MlJobsResponse } from '../../../common/types/job_service';
 import type { MlClient } from '../../lib/ml_client';
 
@@ -37,7 +43,7 @@ interface Influencer {
   fieldValue: any;
 }
 
-export function resultsServiceProvider(mlClient: MlClient) {
+export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClusterClient) {
   // Obtains data for the anomalies table, aggregating anomalies by day or hour as requested.
   // Return an Object with properties 'anomalies' and 'interval' (interval used to aggregate anomalies,
   // one of day, hour or second. Note 'auto' can be provided as the aggregationInterval in the request,
@@ -605,6 +611,94 @@ export function resultsServiceProvider(mlClient: MlClient) {
     return finalResults;
   }
 
+  async function getDatafeedResultsChartData({
+    jobId,
+    timefield,
+    bucketSpan,
+    start,
+    end,
+    desc = true,
+    datafeedConfig,
+  }: DatafeedResultsChartDataParams): Promise<GetDatafeedResultsChartDataResult> {
+    const finalResults: GetDatafeedResultsChartDataResult = {
+      bucketResults: [],
+      datafeedResults: [],
+    };
+
+    const rangeFilter = {
+      range: {
+        [timefield]: { gte: start, lte: end },
+      },
+    };
+
+    let datafeedQueryClone =
+      datafeedConfig.query !== undefined ? cloneDeep(datafeedConfig.query) : defaultSearchQuery;
+
+    if (datafeedQueryClone.bool !== undefined) {
+      if (datafeedQueryClone.bool.filter === undefined) {
+        datafeedQueryClone.bool.filter = [];
+      }
+      if (Array.isArray(datafeedQueryClone.bool.filter)) {
+        datafeedQueryClone.bool.filter.push(rangeFilter);
+      } else {
+        // filter is an object so convert to array so we can add the rangeFilter
+        const filterQuery = cloneDeep(datafeedQueryClone.bool.filter);
+        datafeedQueryClone.bool.filter = [filterQuery, rangeFilter];
+      }
+    } else {
+      // Not a bool query so convert to a bool query so we can add the range filter
+      datafeedQueryClone = { bool: { must: [datafeedQueryClone], filter: [rangeFilter] } };
+    }
+
+    const esSearchRequest = {
+      index: datafeedConfig.indices.join(','),
+      body: {
+        query: datafeedQueryClone,
+        ...(datafeedConfig.runtime_mappings
+          ? { runtime_mappings: datafeedConfig.runtime_mappings }
+          : {}),
+        aggs: {
+          doc_count_by_bucket_span: {
+            date_histogram: {
+              field: timefield,
+              fixed_interval: bucketSpan,
+            },
+          },
+        },
+        size: 0,
+      },
+      // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
+      ...(datafeedConfig?.indices_options ?? {}),
+    };
+
+    if (client) {
+      const {
+        body: { aggregations },
+      } = await client.asCurrentUser.search(esSearchRequest);
+
+      finalResults.datafeedResults =
+        // @ts-expect-error incorrect search response type
+        aggregations?.doc_count_by_bucket_span?.buckets.map((result) => [
+          result.key,
+          result.doc_count,
+        ]) || [];
+    }
+
+    const bucketResp = await mlClient.getBuckets({
+      job_id: jobId,
+      body: { desc, start: String(start), end: String(end), page: { from: 0, size: 1000 } },
+    });
+
+    const bucketResults = get(bucketResp, ['body', 'buckets'], []);
+    each(bucketResults, (dataForTime) => {
+      const timestamp = Number(get(dataForTime, ['timestamp']));
+      const eventCount = get(dataForTime, ['event_count']);
+      finalResults.bucketResults.push([timestamp, eventCount]);
+    });
+
+    return finalResults;
+  }
+
   return {
     getAnomaliesTableData,
     getCategoryDefinition,
@@ -614,5 +708,6 @@ export function resultsServiceProvider(mlClient: MlClient) {
     getPartitionFieldsValues: getPartitionFieldsValuesFactory(mlClient),
     getCategorizerStats,
     getCategoryStoppedPartitions,
+    getDatafeedResultsChartData,
   };
 }

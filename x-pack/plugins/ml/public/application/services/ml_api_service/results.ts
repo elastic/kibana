@@ -141,4 +141,29 @@ export const resultsApiProvider = (httpService: HttpService) => ({
       body,
     });
   },
+
+  getDatafeedResultChartData(
+    jobId: string,
+    timefield: string,
+    bucketSpan: string,
+    start: number,
+    end: number,
+    datafeedConfig: any,
+    desc: boolean = true
+  ) {
+    const body = JSON.stringify({
+      jobId,
+      timefield,
+      bucketSpan,
+      start,
+      end,
+      datafeedConfig,
+      desc,
+    });
+    return httpService.http<any>({
+      path: `${basePath()}/results/datafeed_results_chart`,
+      method: 'POST',
+      body,
+    });
+  },
 });

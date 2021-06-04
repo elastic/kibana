@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
 import { ChartSizeArray } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 
@@ -16,31 +15,6 @@ export const CHART_DIRECTION = {
 export type ChartDirectionType = typeof CHART_DIRECTION[keyof typeof CHART_DIRECTION];
 
 export const CHART_SIZE: ChartSizeArray = ['100%', 300];
-
-export const defaultSearchQuery: estypes.QueryContainer = {
-  bool: {
-    must: [
-      {
-        match_all: {},
-      },
-    ],
-  },
-};
-
-type MLSearchResp = Omit<estypes.SearchResponse, 'aggregations'>;
-
-interface AggResult {
-  key_as_string: string;
-  key: number;
-  doc_count: number;
-}
-export interface MLAggSearchResp extends MLSearchResp {
-  aggregations: {
-    doc_count_by_bucket_span: {
-      buckets: AggResult[];
-    };
-  };
-}
 
 export const TAB_IDS = {
   CHART: 'chart',

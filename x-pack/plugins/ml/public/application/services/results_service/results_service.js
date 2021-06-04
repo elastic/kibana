@@ -475,39 +475,6 @@ export function resultsServiceProvider(mlApiServices) {
       });
     },
 
-    getBucketResultsForChart(jobId, start, end, desc) {
-      return new Promise((resolve, reject) => {
-        const obj = {
-          success: true,
-          results: {
-            data: [],
-          },
-        };
-
-        mlApiServices
-          .bucketsResults({
-            jobId,
-            desc,
-            start,
-            end,
-          })
-          .then((resp) => {
-            const bucketResults = get(resp, ['buckets'], []);
-            each(bucketResults, (dataForTime) => {
-              const timestamp = get(dataForTime, ['timestamp']);
-              const eventCount = get(dataForTime, ['event_count']);
-
-              obj.results.data.push([timestamp, eventCount]);
-            });
-
-            resolve(obj);
-          })
-          .catch((resp) => {
-            reject(resp);
-          });
-      });
-    },
-
     // Obtains the overall bucket scores for the specified job ID(s).
     // Pass ['*'] to search over all job IDs.
     // Returned response contains a results property as an object of max score by time.

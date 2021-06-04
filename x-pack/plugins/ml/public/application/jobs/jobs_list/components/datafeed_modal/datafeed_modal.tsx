@@ -9,8 +9,6 @@ import React, { FC, useCallback, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { cloneDeep } from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
 import {
   EuiButtonEmpty,
   EuiDatePicker,
@@ -36,10 +34,7 @@ import {
   timeFormatter,
 } from '@elastic/charts';
 
-import { MLDatafeed } from '../../../../../../common/types/anomaly_detection_jobs';
-import { isResultsSearchBoolQuery } from '../../../../data_frame_analytics/common/analytics';
-import { mlResultsService } from '../../../../services/results_service';
-import { BucketResultsForChart } from '../../../../services/results_service/result_service_rx';
+import { Datafeed } from '../../../../../../common/types/anomaly_detection_jobs';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 import { ml } from '../../../../services/ml_api_service';
 import { useCurrentEuiTheme } from '../../../../components/color_range_legend';
@@ -50,8 +45,6 @@ import {
   CHART_DIRECTION,
   ChartDirectionType,
   CHART_SIZE,
-  defaultSearchQuery,
-  MLAggSearchResp,
   tabs,
   TAB_IDS,
   TabIdsType,
@@ -59,41 +52,8 @@ import {
 
 const dateFormatter = timeFormatter('MM-DD HH:mm');
 
-function getQueryBody(
-  query: estypes.QueryContainer,
-  timefield: string,
-  startTimestamp: number,
-  endTimestamp: number
-) {
-  const rangeFilter = {
-    range: {
-      [timefield]: { gte: startTimestamp, lte: endTimestamp },
-    },
-  };
-
-  let datafeedQueryClone = query !== undefined ? cloneDeep(query) : defaultSearchQuery;
-
-  if (isResultsSearchBoolQuery(datafeedQueryClone)) {
-    if (datafeedQueryClone.bool.filter === undefined) {
-      datafeedQueryClone.bool.filter = [];
-    }
-    if (Array.isArray(datafeedQueryClone.bool.filter)) {
-      datafeedQueryClone.bool.filter.push(rangeFilter);
-    } else {
-      // filter is an object so convert to array so we can add the rangeFilter
-      const filterQuery = cloneDeep(datafeedQueryClone.bool.filter);
-      datafeedQueryClone.bool.filter = [filterQuery, rangeFilter];
-    }
-  } else {
-    // Not a bool query so convert to a bool query so we can add the range filter
-    datafeedQueryClone = { bool: { must: [datafeedQueryClone], filter: [rangeFilter] } };
-  }
-
-  return datafeedQueryClone;
-}
-
 interface DatafeedModalProps {
-  datafeedConfig: MLDatafeed;
+  datafeedConfig: Datafeed;
   bucketSpan: string;
   end: number;
   onClose: (deletionApproved?: boolean) => void;
@@ -111,7 +71,7 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({
   const [interval, setInterval] = useState<string>(getIntervalOptions(bucketSpan)[0].value);
   const [selectedTabId, setSelectedTabId] = useState<TabIdsType>(TAB_IDS.CHART);
   const [isLoadingChartData, setIsLoadingChartData] = useState<boolean>(false);
-  const [bucketData, setBucketData] = useState<number[]>([]);
+  const [bucketData, setBucketData] = useState<number[][]>([]);
   const [sourceData, setSourceData] = useState<number[][]>([]);
 
   const { displayErrorToast } = useToastNotificationService();
@@ -157,47 +117,20 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({
     const startMoment = endDate.clone().subtract(Number(count), type);
     const startTimestamp = moment(startMoment).valueOf();
 
-    const query = getQueryBody(datafeedConfig.query, timefield, startTimestamp, endTimestamp);
-
-    const esSearchRequest = {
-      index: datafeedConfig.indices.join(','),
-      body: {
-        query,
-        ...(datafeedConfig.runtime_mappings
-          ? { runtime_mappings: datafeedConfig.runtime_mappings }
-          : {}),
-        ...(datafeedConfig.indices_options
-          ? { indices_options: datafeedConfig.indices_options }
-          : {}),
-        aggs: {
-          doc_count_by_bucket_span: {
-            date_histogram: {
-              field: timefield,
-              fixed_interval: bucketSpan,
-            },
-          },
-        },
-        size: 0,
-      },
-    };
-
     try {
-      const bucketResp: BucketResultsForChart = await mlResultsService.getBucketResultsForChart(
+      const chartData = await ml.results.getDatafeedResultChartData(
         jobId,
-        String(startTimestamp),
-        String(endTimestamp),
-        true
+        timefield,
+        bucketSpan,
+        startTimestamp,
+        endTimestamp,
+        datafeedConfig
       );
 
-      const searchResp: MLAggSearchResp = await ml.esSearch(esSearchRequest);
-      const sourceResults =
-        searchResp.aggregations?.doc_count_by_bucket_span?.buckets.map((result) => [
-          result.key,
-          result.doc_count,
-        ]) || [];
-      setSourceData(sourceResults);
-
-      setBucketData(bucketResp.results.data);
+      if (chartData.success) {
+        setSourceData(chartData.datafeedResults);
+        setBucketData(chartData.bucketResults);
+      }
     } catch (error) {
       const title = i18n.translate('xpack.ml.jobsList.datafeedModal.errorToastTitle', {
         defaultMessage: 'Error fetching data',
@@ -304,7 +237,7 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({
                     <LineSeries
                       color={euiTheme.euiColorPrimary}
                       id={i18n.translate('xpack.ml.jobsList.datafeedModal.sourceSeriesId', {
-                        defaultMessage: 'Source doc count by bucket span',
+                        defaultMessage: 'Source indices',
                       })}
                       xScaleType={ScaleType.Time}
                       yScaleType={ScaleType.Linear}
@@ -316,7 +249,7 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({
                     <LineSeries
                       color={euiTheme.euiColorAccentText}
                       id={i18n.translate('xpack.ml.jobsList.datafeedModal.bucketSeriesId', {
-                        defaultMessage: 'Doc count per bucket',
+                        defaultMessage: 'Job results',
                       })}
                       xScaleType={ScaleType.Time}
                       yScaleType={ScaleType.Linear}
