@@ -33,3 +33,12 @@ export const EndpointActionLogRequestSchema = {
 
 export type EndpointActionLogRequestParams = TypeOf<typeof EndpointActionLogRequestSchema.params>;
 export type EndpointActionLogRequestQuery = TypeOf<typeof EndpointActionLogRequestSchema.query>;
+
+export const ActionStatusRequestSchema = {
+  query: schema.object({
+    agent_ids: schema.oneOf([
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1, maxSize: 50 }),
+      schema.string({ minLength: 1 }),
+    ]),
+  }),
+};

@@ -9,6 +9,12 @@ import { TypeOf } from '@kbn/config-schema';
 import { HostIsolationRequestSchema } from '../schema/actions';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
+
+export interface EndpointActionData {
+  command: ISOLATION_ACTIONS;
+  comment?: string;
+}
+
 export interface EndpointAction {
   action_id: string;
   '@timestamp': string;
@@ -17,10 +23,7 @@ export interface EndpointAction {
   input_type: 'endpoint';
   agents: string[];
   user_id: string;
-  data: {
-    command: ISOLATION_ACTIONS;
-    comment?: string;
-  };
+  data: EndpointActionData;
 }
 
 export interface EndpointActionResponse {
@@ -31,11 +34,8 @@ export interface EndpointActionResponse {
   agent_id: string;
   started_at: string;
   completed_at: string;
-  error: string;
-  action_data: {
-    command: ISOLATION_ACTIONS;
-    comment?: string;
-  };
+  error?: string;
+  action_data: EndpointActionData;
 }
 
 export interface ActivityLogAction {
@@ -56,4 +56,11 @@ export type HostIsolationRequestBody = TypeOf<typeof HostIsolationRequestSchema.
 
 export interface HostIsolationResponse {
   action: string;
+}
+
+export interface PendingActionsResponse {
+  agent_id: string;
+  pending_actions: {
+    [key: string]: number;
+  };
 }

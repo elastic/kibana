@@ -24,6 +24,7 @@
 /src/plugins/vis_type_vega/ @elastic/kibana-app
 /src/plugins/vis_type_vislib/ @elastic/kibana-app
 /src/plugins/vis_type_xy/ @elastic/kibana-app
+/src/plugins/vis_type_pie/ @elastic/kibana-app
 /src/plugins/visualize/ @elastic/kibana-app
 /src/plugins/visualizations/ @elastic/kibana-app
 /packages/kbn-tinymath/ @elastic/kibana-app
@@ -54,6 +55,7 @@
 /src/plugins/share/ @elastic/kibana-app-services
 /src/plugins/ui_actions/ @elastic/kibana-app-services
 /src/plugins/index_pattern_field_editor @elastic/kibana-app-services
+/src/plugins/screenshot_mode @elastic/kibana-app-services
 /x-pack/examples/ui_actions_enhanced_examples/ @elastic/kibana-app-services
 /x-pack/plugins/data_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/embeddable_enhanced/ @elastic/kibana-app-services
