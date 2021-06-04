@@ -31,13 +31,10 @@ describe('CrawlerOverview', () => {
   let wrapper: ShallowWrapper;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     setMockValues(values);
     setMockActions(actions);
     wrapper = shallow(<CrawlerOverview />);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
   });
 
   it('renders', () => {

@@ -21,11 +21,11 @@ describe('CrawlerRouter', () => {
   const OLD_ENV = process.env;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     setMockValues({ ...mockEngineValues });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
     process.env = OLD_ENV;
   });
 
