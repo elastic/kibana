@@ -29,7 +29,7 @@ export const CrawlerOverviewLogic = kea<
 >({
   path: ['enterprise_search', 'app_search', 'crawler', 'crawler_overview'],
   actions: {
-    fetchCrawlerData: () => null,
+    fetchCrawlerData: true,
     onFetchCrawlerData: (data) => ({ data }),
   },
   reducers: {
