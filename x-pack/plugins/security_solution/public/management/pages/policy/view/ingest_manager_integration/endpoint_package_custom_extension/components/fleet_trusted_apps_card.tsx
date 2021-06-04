@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useState, useEffect } from 'react';
+import React, { memo, useMemo, useState, useEffect, useRef } from 'react';
 import { ApplicationStart, CoreStart } from 'kibana/public';
 import { EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -38,12 +38,16 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
   const toasts = useToasts();
   const [stats, setStats] = useState<GetExceptionSummaryResponse | undefined>();
   const trustedAppsApi = useMemo(() => new TrustedAppsHttpService(http), [http]);
+  const isMounted = useRef<boolean>();
 
   useEffect(() => {
+    isMounted.current = true;
     const fetchStats = async () => {
       try {
         const response = await trustedAppsApi.getTrustedAppsSummary();
-        setStats(response);
+        if (isMounted) {
+          setStats(response);
+        }
       } catch (error) {
         toasts.addDanger(
           i18n.translate(
@@ -57,6 +61,9 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
       }
     };
     fetchStats();
+    return () => {
+      isMounted.current = false;
+    };
   }, [toasts, trustedAppsApi]);
   const trustedAppsListUrlPath = getTrustedAppsListPath();
 
@@ -82,7 +89,7 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
   return (
     <EuiPanel paddingSize="l">
       <StyledEuiFlexGridGroup alignItems="baseline" justifyContent="center">
-        <StyledEuiFlexGridItem gridArea="title" alignItems="flex-start">
+        <StyledEuiFlexGridItem gridarea="title" alignitems="flex-start">
           <EuiText>
             <h4>
               <FormattedMessage
@@ -92,10 +99,10 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
             </h4>
           </EuiText>
         </StyledEuiFlexGridItem>
-        <StyledEuiFlexGridItem gridArea="summary">
+        <StyledEuiFlexGridItem gridarea="summary">
           <ExceptionItemsSummary stats={stats} />
         </StyledEuiFlexGridItem>
-        <StyledEuiFlexGridItem gridArea="link" alignItems="flex-end">
+        <StyledEuiFlexGridItem gridarea="link" alignitems="flex-end">
           <>
             <LinkWithIcon
               appId={MANAGEMENT_APP_ID}

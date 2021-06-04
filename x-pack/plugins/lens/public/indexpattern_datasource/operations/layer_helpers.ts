@@ -6,8 +6,12 @@
  */
 
 import { partition, mapValues, pickBy } from 'lodash';
-import { getSortScoreByPriority } from './operations';
-import type { OperationMetadata, VisualizationDimensionGroupConfig } from '../../types';
+import { CoreStart } from 'kibana/public';
+import type {
+  FramePublicAPI,
+  OperationMetadata,
+  VisualizationDimensionGroupConfig,
+} from '../../types';
 import {
   operationDefinitionMap,
   operationDefinitions,
@@ -15,7 +19,13 @@ import {
   IndexPatternColumn,
   RequiredReference,
 } from './definitions';
-import type { IndexPattern, IndexPatternField, IndexPatternLayer } from '../types';
+import type {
+  IndexPattern,
+  IndexPatternField,
+  IndexPatternLayer,
+  IndexPatternPrivateState,
+} from '../types';
+import { getSortScoreByPriority } from './operations';
 import { generateId } from '../../id_generator';
 import { ReferenceBasedIndexPatternColumn } from './definitions/column_types';
 import { FormulaIndexPatternColumn, regenerateLayerFromAst } from './definitions/formula';
@@ -674,6 +684,7 @@ function applyReferenceTransition({
             // drop the filter for the referenced column because the wrapping operation
             // is filterable as well and will handle it one level higher.
             filter: operationDefinition.filterable ? undefined : previousColumn.filter,
+            timeShift: operationDefinition.shiftable ? undefined : previousColumn.timeShift,
           },
         },
       };
@@ -827,12 +838,14 @@ function applyReferenceTransition({
   );
 }
 
-function copyCustomLabel(
-  newColumn: IndexPatternColumn,
-  previousOptions: { customLabel?: boolean; label: string }
-) {
+function copyCustomLabel(newColumn: IndexPatternColumn, previousOptions: IndexPatternColumn) {
   const adjustedColumn = { ...newColumn };
-  if (previousOptions.customLabel) {
+  const operationChanged = newColumn.operationType !== previousOptions.operationType;
+  const fieldChanged =
+    ('sourceField' in newColumn && newColumn.sourceField) !==
+    ('sourceField' in previousOptions && previousOptions.sourceField);
+  // only copy custom label if either used operation or used field stayed the same
+  if (previousOptions.customLabel && (!operationChanged || !fieldChanged)) {
     adjustedColumn.customLabel = true;
     adjustedColumn.label = previousOptions.label;
   }
@@ -1135,20 +1148,65 @@ export function updateLayerIndexPattern(
  * - All columns have complete references
  * - All column references are valid
  * - All prerequisites are met
+ * - If timeshift is used, terms go before date histogram
+ * - If timeshift is used, only a single date histogram can be used
  */
 export function getErrorMessages(
   layer: IndexPatternLayer,
-  indexPattern: IndexPattern
-): string[] | undefined {
-  const errors: string[] = Object.entries(layer.columns)
+  indexPattern: IndexPattern,
+  state: IndexPatternPrivateState,
+  layerId: string,
+  core: CoreStart
+):
+  | Array<
+      | string
+      | {
+          message: string;
+          fixAction?: {
+            label: string;
+            newState: (frame: FramePublicAPI) => Promise<IndexPatternPrivateState>;
+          };
+        }
+    >
+  | undefined {
+  const errors = Object.entries(layer.columns)
     .flatMap(([columnId, column]) => {
       const def = operationDefinitionMap[column.operationType];
       if (def.getErrorMessage) {
         return def.getErrorMessage(layer, columnId, indexPattern, operationDefinitionMap);
       }
     })
+    .map((errorMessage) => {
+      if (typeof errorMessage !== 'object') {
+        return errorMessage;
+      }
+      return {
+        ...errorMessage,
+        fixAction: errorMessage.fixAction
+          ? {
+              ...errorMessage.fixAction,
+              newState: async (frame: FramePublicAPI) => ({
+                ...state,
+                layers: {
+                  ...state.layers,
+                  [layerId]: await errorMessage.fixAction!.newState(core, frame, layerId),
+                },
+              }),
+            }
+          : undefined,
+      };
+    })
     // remove the undefined values
-    .filter((v: string | undefined): v is string => v != null);
+    .filter((v) => v != null) as Array<
+    | string
+    | {
+        message: string;
+        fixAction?: {
+          label: string;
+          newState: (framePublicAPI: FramePublicAPI) => Promise<IndexPatternPrivateState>;
+        };
+      }
+  >;
 
   return errors.length ? errors : undefined;
 }
