@@ -66,12 +66,12 @@ export function AnomalyDetection() {
 
   return (
     <>
-      <EuiTitle size="l">
-        <h1>
+      <EuiTitle>
+        <h2>
           {i18n.translate('xpack.apm.settings.anomalyDetection.titleText', {
             defaultMessage: 'Anomaly detection',
           })}
-        </h1>
+        </h2>
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiText color="subdued">
