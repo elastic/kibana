@@ -535,7 +535,11 @@ function runFullASTValidation(
                   values: {
                     operation: node.name,
                     type: 'field',
-                    argument: getValueOrName(firstArg),
+                    argument:
+                      getValueOrName(firstArg) ||
+                      i18n.translate('xpack.lens.indexPattern.formulaOperationWrongFirstArgument', {
+                        defaultMessage: 'no field',
+                      }),
                   },
                   locations: node.location ? [node.location] : [],
                 })
