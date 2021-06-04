@@ -1,11 +1,30 @@
 [role="xpack"]
-[[defining-alerts]]
-== Defining rules
+[[create-and-manage-rules]]
+== Create and manage rules
 
-{kib} alerting rules can be created in a variety of apps including <<xpack-apm,*APM*>>, <<xpack-ml,*{ml-app}*>>, <<metrics-app,*Metrics*>>, <<xpack-siem,*Security*>>, <<uptime-app,*Uptime*>> and from the <<management,*Management*>> UI. While alerting details may differ from app to app, they share a common interface for defining and configuring rules that this section describes in more detail.
+The *Rules* UI provides a cross-app view of alerting. Different {kib} apps like {observability-guide}/create-alerts.html[*Observability*], {security-guide}/prebuilt-rules.html[*Security*], <<geo-alerting, *Maps*>> and <<xpack-ml, *Machine Learning*>> can offer their own rules. The *Rules* UI provides a central place to:
+
+* <<create-edit-rules, Create and edit>> rules
+* <<controlling-rules, Manage rules>> including enabling/disabling, muting/unmuting, and deleting
+* Drill-down to <<rule-details, rule details>>
+
+[role="screenshot"]
+image:images/rules-and-connectors-ui.png[Example rule listing in the Rules and Connectors UI]
+
+For more information on alerting concepts and the types of rules and connectors available, see <<alerting-getting-started>>.
 
 [float]
-=== Create a rule
+=== Required permissions
+
+Access to rules is granted based on your privileges to alerting-enabled features. See <<alerting-security, Alerting Security>> for more information.
+
+[float]
+[[create-edit-rules]]
+=== Create and edit rules
+
+Many rules must be created within the context of a {kib} app like <<metrics-app, Metrics>>, <<xpack-apm, APM>>, or <<uptime-app, Uptime>>, but others are generic. Generic rule types can be created in the *Rules* management UI by clicking the *Create* button. This will launch a flyout that guides you through selecting a rule type and configuring its properties. Refer to <<stack-rules, Stack rules>> for details on what types of rules are available and how to configure them.
+
+After a rule is created, you can re-open the flyout and change a rule's properties by clicking the *Edit* button shown on each row of the rule listing.
 
 When you create a rule, you must define the rule details, conditions, and actions.
 
@@ -32,7 +51,6 @@ Notify::      This value limits how often actions are repeated when an alert rem
 - **Every time alert is active**: Actions are repeated when an alert remains active across checks.
 - **On a custom action interval**: Actions are suppressed for the throttle interval, but repeat when an alert remains active across checks for a duration longer than the throttle interval.
 
-
 [float]
 [[defining-alerts-type-conditions]]
 === Rule type and conditions
@@ -49,7 +67,7 @@ image::images/rule-flyout-rule-conditions.png[UI for defining rule conditions on
 
 [float]
 [[defining-alerts-actions-details]]
-=== Action type and action details
+=== Action type and details
 
 To add an action to a rule, you first select the type of connector:
 
@@ -110,6 +128,46 @@ Actions are not required on rules. You can run a rule without actions to underst
 ==============================================
 
 [float]
-=== Manage rules
+[[controlling-rules]]
+=== Managing rules
 
-To modify a rule after it was created, including muting or disabling it, use the <<alert-management, rule listing in the Management UI>>.
+The rule listing allows you to quickly mute/unmute, disable/enable, and delete individual rules by clicking the action button. 
+
+[role="screenshot"]
+image:images/individual-mute-disable.png[The actions button allows an individual rule to be muted, disabled, or deleted]
+
+These operations can also be performed in bulk by multi-selecting rules and clicking the *Manage rules* button:
+
+[role="screenshot"]
+image:images/bulk-mute-disable.png[The Manage rules button lets you mute/unmute, enable/disable, and delete in bulk]
+
+[float]
+[[rule-details]]
+=== Drilldown to rule details
+
+The *Rule details* page tells you about the state of the rule and provides granular control over the actions it is taking. 
+
+[role="screenshot"]
+image::images/rule-details-alerts-active.png[Rule details page with three alerts]
+
+In this example, the rule detects when a site serves more than a threshold number of bytes in a 24 hour period. Three sites are above the threshold. These are called alerts - occurrences of the condition being detected - and the alert name, status, time of detection, and duration of the condition are shown in this view.
+
+Upon detection, each alert can trigger one or more actions. If the condition persists, the same actions will trigger either on the next scheduled rule check, or (if defined) after the re-notify period on the rule has passed. To prevent re-notification, you can suppress future actions by clicking on the eye icon to mute an individual alert. Muting means that the rule checks continue to run on a schedule, but that alert will not trigger any action.
+
+[role="screenshot"]
+image::images/rule-details-alert-muting.png[Muting an alert]
+
+Alerts will come and go from the list depending on whether they meet the rule conditions or not - unless they are muted. If a muted instance no longer meets the rule conditions, it will appear as inactive in the list. This prevents an alert from triggering actions if it reappears in the future.
+
+[role="screenshot"]
+image::images/rule-details-alerts-inactive.png[Rule details page with three inactive alerts]
+
+If you want to suppress actions on all current and future alerts, you can mute the entire rule. Rule checks continue to run and the alert list will update as alerts activate or deactivate, but no actions will be triggered.
+
+[role="screenshot"]
+image::images/rule-details-muting.png[Use the mute toggle to suppress all actions on current and future alerts]
+
+You can also disable a rule altogether. When disabled, the rule stops running checks altogether and will clear any alerts it is tracking. You may want to disable rules that are not currently needed to reduce the load on {kib} and {es}.
+
+[role="screenshot"]
+image::images/rule-details-disabling.png[Use the disable toggle to turn off rule checks and clear alerts tracked]

@@ -30,7 +30,7 @@ than the current time minus the amount of the interval. If data older than
 
 [float]
 ==== Creating a geo rule
-Click the *Create* button in the <<alert-management, rule management UI>>.
+Click the *Create* button in the <<create-and-manage-rules, rule management UI>>.
 Complete the <<defining-alerts-general-details, general rule details>>.
 
 [role="screenshot"]
