@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { Ast } from '@kbn/interpreter/common';
 import { Position } from '@elastic/charts';
 import { PaletteRegistry } from '../../../../../src/plugins/charts/public';
@@ -385,5 +385,31 @@ export const getHeatmapVisualization = ({
     }
 
     return errors.length ? errors : undefined;
+  },
+
+  getWarningMessages(state, frame) {
+    if (!state?.layerId || !frame.activeData || !state.valueAccessor) {
+      return;
+    }
+
+    const rows = frame.activeData[state.layerId] && frame.activeData[state.layerId].rows;
+    if (!rows) {
+      return;
+    }
+
+    const hasArrayValues = rows.some((row) => Array.isArray(row[state.valueAccessor!]));
+
+    const datasource = frame.datasourceLayers[state.layerId];
+    const operation = datasource.getOperationForColumnId(state.valueAccessor);
+
+    return hasArrayValues
+      ? [
+          <FormattedMessage
+            id="xpack.lens.heatmapVisualization.arrayValuesWarningMessage"
+            defaultMessage="{label} contains array values. Your visualization may not render as expected."
+            values={{ label: <strong>{operation?.label}</strong> }}
+          />,
+        ]
+      : undefined;
   },
 });
