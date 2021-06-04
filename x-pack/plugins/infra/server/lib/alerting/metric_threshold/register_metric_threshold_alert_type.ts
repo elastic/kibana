@@ -9,13 +9,6 @@ import { first, last } from 'lodash';
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import {
-  AlertType,
-  AlertInstanceState,
-  AlertInstanceContext,
-  AlertExecutorOptions,
-  ActionGroupIdsOf,
-} from '../../../../../alerting/server';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api/metrics_explorer';
 import {
   mapToConditionsLookup,
@@ -44,30 +37,9 @@ import {
   // buildRecoveredAlertReason,
   stateToAlertMessage,
 } from '../common/messages';
-import { evaluateAlert, EvaluatedAlertParams } from './lib/evaluate_alert';
+import { evaluateAlert } from './lib/evaluate_alert';
 
-export type MetricThresholdAlertType = AlertType<
-  /**
-   * TODO: Remove this use of `any` by utilizing a proper type
-   */
-  Record<string, any>,
-  Record<string, any>,
-  AlertInstanceState,
-  AlertInstanceContext,
-  ActionGroupIdsOf<typeof FIRED_ACTIONS | typeof WARNING_ACTIONS>
->;
-export type MetricThresholdAlertExecutorOptions = AlertExecutorOptions<
-  /**
-   * TODO: Remove this use of `any` by utilizing a proper type
-   */
-  Record<string, any>,
-  Record<string, any>,
-  AlertInstanceState,
-  AlertInstanceContext,
-  ActionGroupIdsOf<typeof FIRED_ACTIONS | typeof WARNING_ACTIONS>
->;
-
-export function registerMetricThresholdAlertType(libs: InfraBackendLibs): MetricThresholdAlertType {
+export function registerMetricThresholdAlertType(libs: InfraBackendLibs) {
   const baseCriterion = {
     threshold: schema.arrayOf(schema.number()),
     comparator: oneOfLiterals(Object.values(Comparator)),
@@ -89,7 +61,7 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs): Metric
     metric: schema.never(),
   });
 
-  return {
+  return libs.createMetricsLifecycleRuleType({
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
     name: i18n.translate('xpack.infra.metrics.alertName', {
       defaultMessage: 'Metric threshold',
@@ -113,15 +85,11 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs): Metric
     defaultActionGroupId: FIRED_ACTIONS.id,
     actionGroups: [FIRED_ACTIONS, WARNING_ACTIONS],
     minimumLicenseRequired: 'basic',
-    executor: async (options: MetricThresholdAlertExecutorOptions) => {
-      const { services, params } = options;
+    executor: async ({ services, params }) => {
       const { criteria } = params;
       if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
 
-      const { sourceId, alertOnNoData } = params as {
-        sourceId?: string;
-        alertOnNoData: boolean;
-      };
+      const { sourceId, alertOnNoData } = params;
 
       const source = await libs.sources.getSourceConfiguration(
         services.savedObjectsClient,
@@ -130,7 +98,8 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs): Metric
       const config = source.configuration;
       const alertResults = await evaluateAlert(
         services.scopedClusterClient.asCurrentUser,
-        params as EvaluatedAlertParams,
+        // @ts-expect-error
+        params,
         config
       );
 
@@ -199,26 +168,31 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs): Metric
               : nextState === AlertStates.WARNING
               ? WARNING_ACTIONS.id
               : FIRED_ACTIONS.id;
-          const alertInstance = services.alertInstanceFactory(`${group}`);
 
-          alertInstance.scheduleActions(actionGroupId, {
-            group,
-            alertState: stateToAlertMessage[nextState],
-            reason,
-            timestamp,
-            value: mapToConditionsLookup(
-              alertResults,
-              (result) => formatAlertResult(result[group]).currentValue
-            ),
-            threshold: mapToConditionsLookup(
-              alertResults,
-              (result) => formatAlertResult(result[group]).threshold
-            ),
-            metric: mapToConditionsLookup(criteria, (c) => c.metric),
-          });
+          services
+            .alertWithLifecycle({
+              id: `${group}`,
+              fields: {},
+            })
+            .scheduleActions(actionGroupId, {
+              group,
+              alertState: stateToAlertMessage[nextState],
+              reason,
+              timestamp,
+              value: mapToConditionsLookup(
+                alertResults,
+                (result) => formatAlertResult(result[group]).currentValue
+              ),
+              threshold: mapToConditionsLookup(
+                alertResults,
+                (result) => formatAlertResult(result[group]).threshold
+              ),
+              metric: mapToConditionsLookup(criteria, (c) => c.metric),
+            });
         }
       }
     },
+    // executor: createMetricThresholdExecutor(libs),
     actionVariables: {
       context: [
         { name: 'group', description: groupActionVariableDescription },
@@ -231,5 +205,5 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs): Metric
       ],
     },
     producer: 'infrastructure',
-  };
+  });
 }
