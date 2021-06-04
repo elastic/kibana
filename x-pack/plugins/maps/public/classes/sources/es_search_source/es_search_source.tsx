@@ -12,7 +12,12 @@ import { i18n } from '@kbn/i18n';
 import { IFieldType, IndexPattern } from 'src/plugins/data/public';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import { AbstractESSource } from '../es_source';
-import { getFileUpload, getHttp, getSearchService } from '../../../kibana_services';
+import {
+  getFileUpload,
+  getHttp,
+  getMapAppConfig,
+  getSearchService,
+} from '../../../kibana_services';
 import {
   addFieldToDSL,
   getField,
@@ -391,6 +396,10 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   }
 
   async isEditable(): Promise<boolean> {
+    if (!getMapAppConfig().enableDrawingFeature) {
+      this._isEditable = false;
+      return this._isEditable;
+    }
     if (this._isEditable === undefined) {
       if (!this.indexPattern) {
         await this.getIndexPattern();
