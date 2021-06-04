@@ -53,7 +53,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
   private savedObjectsServiceStart?: SavedObjectsServiceStart;
   private worker?: ReindexWorker;
 
-  constructor({ logger, env, config }: PluginInitializerContext) {
+  constructor({ logger, env }: PluginInitializerContext) {
     this.logger = logger.get();
     this.credentialStore = credentialStoreFactory();
     this.kibanaVersion = env.packageInfo.version;
