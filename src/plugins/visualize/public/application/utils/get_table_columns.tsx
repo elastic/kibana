@@ -20,11 +20,11 @@ import { getVisualizeListItemLink } from './get_visualize_list_item_link';
 import { getUsageCollector } from '../../services';
 import { APP_NAME } from '../visualize_constants';
 
-const doTelemetryForOpenEvent = (visType?: string) => {
+const doTelemetryForAddEvent = (visType?: string) => {
   const usageCollection = getUsageCollector();
 
   if (usageCollection && visType) {
-    usageCollection.reportUiCounter(APP_NAME, METRIC_TYPE.CLICK, `${visType}:open`);
+    usageCollection.reportUiCounter(APP_NAME, METRIC_TYPE.CLICK, `${visType}:add`);
   }
 };
 
@@ -101,7 +101,7 @@ export const getTableColumns = (
           <EuiLink
             href={getVisualizeListItemLink(application, kbnUrlStateStorage, editApp, editUrl)}
             onClick={() => {
-              doTelemetryForOpenEvent(typeof type === 'string' ? type : type?.name);
+              doTelemetryForAddEvent(typeof type === 'string' ? type : type?.name);
             }}
             data-test-subj={`visListingTitleLink-${title.split(' ').join('-')}`}
           >

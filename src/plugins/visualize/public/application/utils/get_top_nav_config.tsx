@@ -99,9 +99,13 @@ export const getTopNavConfig = (
   const { vis, embeddableHandler } = visInstance;
   const savedVis = visInstance.savedVis;
 
-  const doTelemetryForSaveEvent = (appName: string, visType: string) => {
+  const doTelemetryForSaveEvent = (visType: string) => {
     if (usageCollection) {
-      usageCollection.reportUiCounter(appName, METRIC_TYPE.CLICK, `${visType}:save`);
+      usageCollection.reportUiCounter(
+        originatingApp ?? APP_NAME,
+        METRIC_TYPE.CLICK,
+        `${visType}:save`
+      );
     }
   };
 
@@ -403,7 +407,7 @@ export const getTopNavConfig = (
                   return { id: true };
                 }
 
-                doTelemetryForSaveEvent(APP_NAME, vis.type.name);
+                doTelemetryForSaveEvent(vis.type.name);
 
                 // We're adding the viz to a library so we need to save it and then
                 // add to a dashboard if necessary
@@ -514,7 +518,7 @@ export const getTopNavConfig = (
               }
             },
             run: async () => {
-              doTelemetryForSaveEvent('dashboard', vis.type.name);
+              doTelemetryForSaveEvent(vis.type.name);
 
               if (!savedVis?.id) {
                 return createVisReference();

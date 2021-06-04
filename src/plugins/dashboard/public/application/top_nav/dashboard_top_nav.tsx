@@ -154,6 +154,7 @@ export function DashboardTopNav({
           notifications: core.notifications,
           overlays: core.overlays,
           SavedObjectFinder: getSavedObjectFinder(core.savedObjects, uiSettings),
+          reportUiCounter: usageCollection?.reportUiCounter,
         }),
       }));
     }
@@ -165,6 +166,7 @@ export function DashboardTopNav({
     core.savedObjects,
     core.overlays,
     uiSettings,
+    usageCollection,
   ]);
 
   const createNewVisType = useCallback(
