@@ -323,6 +323,14 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
                 legend: { ...state.legend, position: id as Position },
               });
             }}
+            renderValueInLegendSwitch={!!state}
+            valueInLegend={state?.valuesInLegend}
+            onValueInLegendChange={() => {
+              setState({
+                ...state,
+                valuesInLegend: !state.valuesInLegend,
+              });
+            }}
           />
         </EuiFlexGroup>
       </EuiFlexItem>
