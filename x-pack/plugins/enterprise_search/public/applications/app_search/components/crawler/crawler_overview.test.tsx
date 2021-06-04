@@ -45,11 +45,15 @@ describe('CrawlerOverview', () => {
     expect(actions.fetchCrawlerData).toHaveBeenCalledTimes(1);
   });
 
+  // TODO after DomainsTable is built in a future PR
   // it('contains a DomainsTable', () => {})
 
+  // TODO after CrawlRequestsTable is built in a future PR
   // it('containss a CrawlRequestsTable,() => {})
 
+  // TODO after AddDomainForm is built in a future PR
   // it('contains an AddDomainForm' () => {})
 
+  // TODO after empty state is added in a future PR
   // it('has an empty state',  () => {} )
 });
