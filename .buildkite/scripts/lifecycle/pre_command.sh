@@ -65,3 +65,8 @@ if [[ "${SKIP_CI_SETUP:-}" != "true" ]]; then
     source .buildkite/scripts/common/setup_bazel.sh
   fi
 fi
+
+PIPELINE_PRE_COMMAND=${PIPELINE_PRE_COMMAND:-".buildkite/scripts/lifecycle/pipelines/$BUILDKITE_PIPELINE_SLUG/pre_command.sh"}
+if [[ -f "$PIPELINE_PRE_COMMAND" ]]; then
+  source "$PIPELINE_PRE_COMMAND"
+fi
