@@ -11,7 +11,6 @@ import { sortBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { UiCounterMetricType } from '@kbn/analytics';
-import { IUiSettingsClient } from 'kibana/public';
 import {
   EuiTitle,
   EuiHideFor,
@@ -28,7 +27,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { DiscoverIndexPattern } from './discover_index_pattern';
-import { IndexPatternAttributes, IndexPatternsContract } from '../../../../../../../data/common';
+import { IndexPatternAttributes } from '../../../../../../../data/common';
 import { SavedObject } from '../../../../../../../../core/types';
 import { IndexPatternField, IndexPattern } from '../../../../../../../data/public';
 import { getDefaultFieldFilter } from './lib/field_filter';
@@ -48,10 +47,6 @@ export interface DiscoverSidebarResponsiveProps {
    */
   columns: string[];
   /**
-   * Client of uiSettings
-   */
-  config: IUiSettingsClient;
-  /**
    * a statistics of the distribution of fields in the given hits
    */
   fieldCounts: Record<string, number>;
@@ -63,10 +58,6 @@ export interface DiscoverSidebarResponsiveProps {
    * List of available index patterns
    */
   indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
-  /**
-   * Index patterns service
-   */
-  indexPatterns: IndexPatternsContract;
   /**
    * Has been toggled closed
    */
@@ -80,6 +71,10 @@ export interface DiscoverSidebarResponsiveProps {
    */
   onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
   /**
+   * Callback function when changing an index pattern
+   */
+  onChangeIndexPattern: (id: string) => void;
+  /**
    * Callback function when removing a field
    * @param fieldName
    */
@@ -92,10 +87,6 @@ export interface DiscoverSidebarResponsiveProps {
    * Discover plugin services;
    */
   services: DiscoverServices;
-  /**
-   * Function to set the current state
-   */
-  setAppState: (state: Partial<AppState>) => void;
   /**
    * Discover App state
    */
@@ -114,7 +105,6 @@ export interface DiscoverSidebarResponsiveProps {
    * Read from the Fields API
    */
   useNewFieldsApi?: boolean;
-
   /**
    * an object containing properties for proper handling of unmapped fields
    */
@@ -215,12 +205,9 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={true}>
                 <DiscoverIndexPattern
-                  config={props.config}
+                  onChangeIndexPattern={props.onChangeIndexPattern}
                   selectedIndexPattern={props.selectedIndexPattern}
                   indexPatternList={sortBy(props.indexPatternList, (o) => o.attributes.title)}
-                  indexPatterns={props.indexPatterns}
-                  state={props.state}
-                  setAppState={props.setAppState}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>

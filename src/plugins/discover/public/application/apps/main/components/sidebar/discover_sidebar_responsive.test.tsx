@@ -25,8 +25,6 @@ import {
 } from './discover_sidebar_responsive';
 import { DiscoverServices } from '../../../../../build_services';
 import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
-import { configMock } from '../../../../../__mocks__/config';
-import { indexPatternsMock } from '../../../../../__mocks__/index_patterns';
 import { DiscoverSidebar } from './discover_sidebar';
 
 const mockServices = ({
@@ -89,17 +87,15 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
   }
   return {
     columns: ['extension'],
-    config: configMock,
     fieldCounts,
     hits,
     indexPatternList,
-    indexPatterns: indexPatternsMock,
+    onChangeIndexPattern: jest.fn(),
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
     selectedIndexPattern: indexPattern,
     services: mockServices,
-    setAppState: jest.fn(),
     state: {},
     trackUiMetric: jest.fn(),
     onEditRuntimeField: jest.fn(),

@@ -15,7 +15,6 @@ import { SavedObject } from 'kibana/server';
 import { DiscoverIndexPattern, DiscoverIndexPatternProps } from './discover_index_pattern';
 import { EuiSelectable } from '@elastic/eui';
 import { IndexPattern, IndexPatternAttributes } from 'src/plugins/data/public';
-import { configMock } from '../../../../../__mocks__/config';
 import { indexPatternsMock } from '../../../../../__mocks__/index_patterns';
 
 const indexPattern = {
@@ -38,13 +37,11 @@ const indexPattern2 = {
 } as SavedObject<IndexPatternAttributes>;
 
 const defaultProps = {
-  config: configMock,
   indexPatternList: [indexPattern1, indexPattern2],
   selectedIndexPattern: indexPattern,
-  state: {},
-  setAppState: jest.fn(),
   useNewFieldsApi: true,
   indexPatterns: indexPatternsMock,
+  onChangeIndexPattern: jest.fn(),
 };
 
 function getIndexPatternPickerList(instance: ShallowWrapper) {
@@ -72,7 +69,7 @@ describe('DiscoverIndexPattern', () => {
     const props = ({
       indexPatternList: null,
       selectedIndexPattern: null,
-      setIndexPattern: jest.fn(),
+      onChangeIndexPattern: jest.fn(),
     } as unknown) as DiscoverIndexPatternProps;
 
     expect(shallow(<DiscoverIndexPattern {...props} />)).toMatchSnapshot(`""`);
@@ -92,10 +89,6 @@ describe('DiscoverIndexPattern', () => {
     await act(async () => {
       selectIndexPatternPickerOption(instance, 'test2 title');
     });
-    expect(defaultProps.setAppState).toHaveBeenCalledWith({
-      index: 'the-index-pattern-id',
-      columns: [],
-      sort: [],
-    });
+    expect(defaultProps.onChangeIndexPattern).toHaveBeenCalledWith('the-index-pattern-id');
   });
 });

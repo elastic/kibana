@@ -68,25 +68,22 @@ export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
 export function DiscoverSidebar({
   alwaysShowActionButtons = false,
   columns,
-  config,
   fieldCounts,
   fieldFilter,
   hits,
   indexPatternList,
-  indexPatterns,
   onAddField,
   onAddFilter,
   onRemoveField,
   selectedIndexPattern,
   services,
-  setAppState,
   setFieldFilter,
-  state,
   trackUiMetric,
   useNewFieldsApi = false,
   useFlyout = false,
   unmappedFieldsConfig,
   onEditRuntimeField,
+  onChangeIndexPattern,
   setFieldEditorRef,
   closeFlyout,
   editField,
@@ -283,12 +280,9 @@ export function DiscoverSidebar({
         <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={true}>
             <DiscoverIndexPattern
-              config={config}
               selectedIndexPattern={selectedIndexPattern}
               indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
-              indexPatterns={indexPatterns}
-              state={state}
-              setAppState={setAppState}
+              onChangeIndexPattern={onChangeIndexPattern}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -324,12 +318,9 @@ export function DiscoverSidebar({
           <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
             <EuiFlexItem grow={true} className="dscSidebar__indexPatternSwitcher">
               <DiscoverIndexPattern
-                config={config}
                 selectedIndexPattern={selectedIndexPattern}
                 indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
-                indexPatterns={indexPatterns}
-                state={state}
-                setAppState={setAppState}
+                onChangeIndexPattern={onChangeIndexPattern}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

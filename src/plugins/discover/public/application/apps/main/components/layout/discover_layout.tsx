@@ -35,8 +35,10 @@ import { DiscoverLayoutProps } from './types';
 import { SortPairArr } from '../../../../angular/doc_table/lib/get_sort';
 import {
   DOC_TABLE_LEGACY,
+  MODIFY_COLUMNS_ON_SWITCH,
   SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
+  SORT_DEFAULT_ORDER_SETTING,
 } from '../../../../../../common';
 import { popularizeField } from '../../../../helpers/popularize_field';
 import { DocViewFilterFn } from '../../../../doc_views/doc_views_types';
@@ -49,6 +51,8 @@ import { InspectorSession } from '../../../../../../../inspector/public';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
 import { SavedSearchDataMessage } from '../../services/use_saved_search';
 import { useDataGridColumns } from '../../../../helpers/use_data_grid_columns';
+import { getSwitchIndexPatternAppState } from '../../utils/get_switch_index_pattern_app_state';
+import { FetchStatus } from '../../../../types';
 
 const DocTableLegacyMemoized = React.memo(DocTableLegacy);
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -235,6 +239,34 @@ export function DiscoverLayout({
     [config, indexPattern.timeFieldName]
   );
 
+  const onChangeIndexPattern = useCallback(
+    async (id: string) => {
+      const nextIndexPattern = await indexPatterns.get(id);
+      if (nextIndexPattern && indexPattern) {
+        savedSearchData$.next({ rows: [], state: FetchStatus.LOADING });
+
+        const nextAppState = getSwitchIndexPatternAppState(
+          indexPattern,
+          nextIndexPattern,
+          state.columns || [],
+          (state.sort || []) as SortPairArr[],
+          config.get(MODIFY_COLUMNS_ON_SWITCH),
+          config.get(SORT_DEFAULT_ORDER_SETTING)
+        );
+        stateContainer.setAppState(nextAppState);
+      }
+    },
+    [
+      config,
+      indexPattern,
+      indexPatterns,
+      savedSearchData$,
+      state.columns,
+      state.sort,
+      stateContainer,
+    ]
+  );
+
   return (
     <I18nProvider>
       <EuiPage className="dscPage" data-fetch-counter={fetchCounter}>
@@ -257,18 +289,16 @@ export function DiscoverLayout({
           <EuiFlexGroup className="dscPageBody__contents" gutterSize="none">
             <EuiFlexItem grow={false}>
               <SidebarMemoized
-                config={config}
                 columns={columns}
                 fieldCounts={fetchState.fieldCounts!}
                 hits={rows!}
                 indexPatternList={indexPatternList}
-                indexPatterns={indexPatterns}
                 onAddField={onAddColumn}
                 onAddFilter={onAddFilter}
                 onRemoveField={onRemoveColumn}
+                onChangeIndexPattern={onChangeIndexPattern}
                 selectedIndexPattern={indexPattern}
                 services={services}
-                setAppState={stateContainer.setAppState}
                 state={state}
                 isClosed={isSidebarClosed}
                 trackUiMetric={trackUiMetric}

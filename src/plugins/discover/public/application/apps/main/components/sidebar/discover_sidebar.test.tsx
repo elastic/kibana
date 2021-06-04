@@ -23,8 +23,6 @@ import { SavedObject } from '../../../../../../../../core/types';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
 import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
-import { configMock } from '../../../../../__mocks__/config';
-import { indexPatternsMock } from '../../../../../__mocks__/index_patterns';
 import { discoverServiceMock as mockDiscoverServices } from '../../../../../__mocks__/services';
 
 jest.mock('../../../../../kibana_services', () => ({
@@ -63,12 +61,11 @@ function getCompProps(): DiscoverSidebarProps {
     }
   }
   return {
-    config: configMock,
     columns: ['extension'],
     fieldCounts,
     hits,
     indexPatternList,
-    indexPatterns: indexPatternsMock,
+    onChangeIndexPattern: jest.fn(),
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
@@ -78,7 +75,6 @@ function getCompProps(): DiscoverSidebarProps {
     trackUiMetric: jest.fn(),
     fieldFilter: getDefaultFieldFilter(),
     setFieldFilter: jest.fn(),
-    setAppState: jest.fn(),
     onEditRuntimeField: jest.fn(),
     editField: jest.fn(),
   };
