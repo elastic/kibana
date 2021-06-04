@@ -115,9 +115,24 @@ export function CustomizablePalette({
           />
         </EuiFormRow>
         <EuiFormRow
-          label={i18n.translate('xpack.lens.table.dynamicColoring.continuity.label', {
-            defaultMessage: 'Color continuity',
-          })}
+          label={
+            <>
+              {i18n.translate('xpack.lens.table.dynamicColoring.continuity.label', {
+                defaultMessage: 'Color continuity',
+              })}{' '}
+              <EuiIconTip
+                content={i18n.translate(
+                  'xpack.lens.table.dynamicColoring.customPalette.continuityHelp',
+                  {
+                    defaultMessage:
+                      'Decide how colors extends before or after the defined color stops.',
+                  }
+                )}
+                position="top"
+                size="s"
+              />
+            </>
+          }
           display="rowCompressed"
         >
           <EuiSuperSelect
