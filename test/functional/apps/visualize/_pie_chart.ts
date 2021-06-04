@@ -33,6 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const vizName1 = 'Visualization PieChart';
     before(async function () {
       isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled();
+      await PageObjects.visualize.initTests();
       if (isNewChartsLibraryEnabled) {
         await kibanaServer.uiSettings.update({
           'visualization:visualize:legacyChartsLibrary': false,
