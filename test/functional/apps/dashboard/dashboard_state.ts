@@ -34,6 +34,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
+  const enableNewChartLibraryDebug = async () => {
+    if (await PageObjects.visChart.isNewChartsLibraryEnabled()) {
+      await elasticChart.setNewChartUiDebugFlag();
+      await queryBar.submitQuery();
+    }
+  };
+
   describe('dashboard state', function describeIndexTests() {
     // Used to track flag before and after reset
     let isNewChartsLibraryEnabled = false;
@@ -84,10 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.loadSavedDashboard(dashboarName);
 
-      if (await PageObjects.visChart.isNewChartsLibraryEnabled()) {
-        await elasticChart.setNewChartUiDebugFlag();
-        await queryBar.submitQuery();
-      }
+      await enableNewChartLibraryDebug();
 
       const colorChoiceRetained = await PageObjects.visChart.doesSelectedLegendColorExist(
         overwriteColor
@@ -205,15 +209,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.get(newUrl.toString());
       const alert = await browser.getAlert();
       await alert?.accept();
+      await enableNewChartLibraryDebug();
       await PageObjects.dashboard.waitForRenderComplete();
     };
 
     describe('Directly modifying url updates dashboard state', () => {
-      it('for query parameter', async function () {
+      before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.timePicker.setHistoricalDataRange();
+      });
 
+      it('for query parameter', async function () {
         const currentQuery = await queryBar.getQueryString();
         expect(currentQuery).to.equal('');
         const currentUrl = await getUrlFromShare();
@@ -270,10 +277,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       describe('for embeddable config color parameters on a visualization', () => {
         let originalPieSliceStyle = '';
 
-        it('updates a pie slice color on a hard refresh', async function () {
+        before(async () => {
           await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
-
+          await enableNewChartLibraryDebug();
           originalPieSliceStyle = await pieChart.getPieSliceStyle(`80,000`);
+        });
+
+        it('updates a pie slice color on a hard refresh', async function () {
           await PageObjects.visChart.openLegendOptionColors(
             '80,000',
             `[data-title="${PIE_CHART_VIS_NAME}"]`
@@ -314,7 +324,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.header.waitUntilLoadingHasFinished();
 
           await retry.try(async () => {
-            const pieSliceStyle = await pieChart.getPieSliceStyle(`80,000`);
+            const pieSliceStyle = await pieChart.getPieSliceStyle('80,000');
 
             // After removing all overrides, pie slice style should match original.
             expect(pieSliceStyle).to.be(originalPieSliceStyle);
