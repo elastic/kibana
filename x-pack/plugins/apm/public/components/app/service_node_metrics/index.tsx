@@ -117,55 +117,60 @@ export function ServiceNodeMetrics({
           />
         </EuiCallOut>
       ) : (
-        <MetadataFlexGroup gutterSize="xl">
-          <EuiFlexItem grow={false}>
-            <EuiStat
-              titleSize="s"
-              description={i18n.translate(
-                'xpack.apm.serviceNodeMetrics.serviceName',
-                {
-                  defaultMessage: 'Service name',
+        <EuiPanel hasShadow={false}>
+          <EuiFlexGroup gutterSize="xl">
+            <EuiFlexItem grow={false}>
+              <EuiStat
+                titleSize="s"
+                description={i18n.translate(
+                  'xpack.apm.serviceNodeMetrics.serviceName',
+                  {
+                    defaultMessage: 'Service name',
+                  }
+                )}
+                title={
+                  <EuiToolTip content={serviceName}>
+                    <Truncate>{serviceName}</Truncate>
+                  </EuiToolTip>
                 }
-              )}
-              title={
-                <EuiToolTip content={serviceName}>
-                  <Truncate>{serviceName}</Truncate>
-                </EuiToolTip>
-              }
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiStat
-              titleSize="s"
-              isLoading={isLoading}
-              description={i18n.translate('xpack.apm.serviceNodeMetrics.host', {
-                defaultMessage: 'Host',
-              })}
-              title={
-                <EuiToolTip content={host}>
-                  <Truncate>{host}</Truncate>
-                </EuiToolTip>
-              }
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiStat
-              titleSize="s"
-              isLoading={isLoading}
-              description={i18n.translate(
-                'xpack.apm.serviceNodeMetrics.containerId',
-                {
-                  defaultMessage: 'Container ID',
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiStat
+                titleSize="s"
+                isLoading={isLoading}
+                description={i18n.translate(
+                  'xpack.apm.serviceNodeMetrics.host',
+                  {
+                    defaultMessage: 'Host',
+                  }
+                )}
+                title={
+                  <EuiToolTip content={host}>
+                    <Truncate>{host}</Truncate>
+                  </EuiToolTip>
                 }
-              )}
-              title={
-                <EuiToolTip content={containerId}>
-                  <Truncate>{containerId}</Truncate>
-                </EuiToolTip>
-              }
-            />
-          </EuiFlexItem>
-        </MetadataFlexGroup>
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiStat
+                titleSize="s"
+                isLoading={isLoading}
+                description={i18n.translate(
+                  'xpack.apm.serviceNodeMetrics.containerId',
+                  {
+                    defaultMessage: 'Container ID',
+                  }
+                )}
+                title={
+                  <EuiToolTip content={containerId}>
+                    <Truncate>{containerId}</Truncate>
+                  </EuiToolTip>
+                }
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
       )}
 
       {agentName && (

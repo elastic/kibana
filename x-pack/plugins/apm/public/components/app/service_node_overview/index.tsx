@@ -142,7 +142,7 @@ function ServiceNodeOverview({ serviceName }: ServiceNodeOverviewProps) {
   ];
 
   return (
-    <EuiPanel hasShadow={false}>
+    <EuiPanel hasShadow={false} paddingSize="none">
       <ManagedTable
         noItemsMessage={i18n.translate('xpack.apm.jvmsTable.noJvmsLabel', {
           defaultMessage: 'No JVMs were found',

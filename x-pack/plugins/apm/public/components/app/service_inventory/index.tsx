@@ -127,7 +127,7 @@ export function ServiceInventory() {
           </EuiFlexItem>
         )}
         <EuiFlexItem>
-          <EuiPanel hasShadow={false}>
+          <EuiPanel hasShadow={false} paddingSize="none">
             <ServiceList
               items={servicesData.items}
               noItemsMessage={

@@ -51,7 +51,7 @@ export function TraceOverview() {
     <>
       <SearchBar />
 
-      <EuiPanel hasShadow={false}>
+      <EuiPanel hasShadow={false} paddingSize="none">
         <TraceList
           items={data.items}
           isLoading={status === FETCH_STATUS.LOADING}
