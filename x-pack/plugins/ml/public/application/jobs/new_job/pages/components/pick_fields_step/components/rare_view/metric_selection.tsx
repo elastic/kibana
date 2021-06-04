@@ -14,22 +14,17 @@ import { RareJobCreator } from '../../../../../common/job_creator';
 import { RareDetector } from '../rare_detector';
 import { PopulationFieldSelector } from '../population_field';
 import { DetectorDescription } from './detector_description';
-
-export enum RARE_DETECTOR_TYPE {
-  RARE,
-  RARE_POPULATION,
-  FREQ_RARE_POPULATION,
-}
+import { RARE_DETECTOR_TYPE } from './rare_view';
 
 interface Props {
   setIsValid: (na: boolean) => void;
+  setRareDetectorType(t: RARE_DETECTOR_TYPE): void;
+  rareDetectorType: RARE_DETECTOR_TYPE;
 }
 
-export const RareDetectors: FC<Props> = ({ setIsValid }) => {
+export const RareDetectors: FC<Props> = ({ setIsValid, rareDetectorType, setRareDetectorType }) => {
   const { jobCreator: jc, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as RareJobCreator;
-  // const [rareField, setRareField] = useState(jobCreator.rareField);
-  const [rareDetectorType, setRareDetectorType] = useState(RARE_DETECTOR_TYPE.RARE);
   const [detectorValid, setDetectorValid] = useState(false);
 
   useEffect(() => {

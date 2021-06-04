@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useEffect, useState } from 'react';
+import React, { FC } from 'react';
+import { RARE_DETECTOR_TYPE } from './rare_view';
+import { DetectorDescription } from './detector_description';
 
-export const RareDetectorsSummary: FC = () => {
-  return null;
+interface Props {
+  rareDetectorType: RARE_DETECTOR_TYPE;
+}
+
+export const RareDetectorsSummary: FC<Props> = ({ rareDetectorType }) => {
+  return <DetectorDescription detectorType={rareDetectorType} />;
 };

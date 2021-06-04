@@ -10,7 +10,7 @@ import { EuiText } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { RareJobCreator } from '../../../../../common/job_creator';
-import { RARE_DETECTOR_TYPE } from './metric_selection';
+import { RARE_DETECTOR_TYPE } from './rare_view';
 
 interface Props {
   detectorType: RARE_DETECTOR_TYPE;

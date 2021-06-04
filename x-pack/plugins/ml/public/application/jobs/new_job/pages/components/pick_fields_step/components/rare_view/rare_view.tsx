@@ -12,6 +12,12 @@ import { RareDetectors } from './metric_selection';
 import { RareDetectorsSummary } from './metric_selection_summary';
 import { RareSettings } from './settings';
 
+export enum RARE_DETECTOR_TYPE {
+  RARE,
+  RARE_POPULATION,
+  FREQ_RARE_POPULATION,
+}
+
 interface Props {
   isActive: boolean;
   setCanProceed?: (proceed: boolean) => void;
@@ -20,6 +26,7 @@ interface Props {
 export const RareView: FC<Props> = ({ isActive, setCanProceed }) => {
   const [rareFieldValid, setRareFieldValid] = useState(false);
   const [settingsValid, setSettingsValid] = useState(false);
+  const [rareDetectorType, setRareDetectorType] = useState(RARE_DETECTOR_TYPE.RARE);
 
   useEffect(() => {
     if (typeof setCanProceed === 'function') {
@@ -28,10 +35,14 @@ export const RareView: FC<Props> = ({ isActive, setCanProceed }) => {
   }, [rareFieldValid, settingsValid]);
 
   return isActive === false ? (
-    <RareDetectorsSummary />
+    <RareDetectorsSummary rareDetectorType={rareDetectorType} />
   ) : (
     <>
-      <RareDetectors setIsValid={setRareFieldValid} />
+      <RareDetectors
+        setIsValid={setRareFieldValid}
+        rareDetectorType={rareDetectorType}
+        setRareDetectorType={setRareDetectorType}
+      />
       {rareFieldValid && (
         <>
           <EuiHorizontalRule margin="l" />
