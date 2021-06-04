@@ -51,7 +51,6 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
               uiCapabilities.value!.catalogue,
               (enabled, catalogueId) =>
                 catalogueId !== 'ml' &&
-                catalogueId !== 'ml_file_data_visualizer' &&
                 catalogueId !== 'monitoring' &&
                 !esFeatureExceptions.includes(catalogueId)
             );
@@ -68,7 +67,6 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
             // (easier to say: all "proper" Kibana features are enabled)
             const exceptions = [
               'ml',
-              'ml_file_data_visualizer',
               'monitoring',
               'enterpriseSearch',
               'appSearch',

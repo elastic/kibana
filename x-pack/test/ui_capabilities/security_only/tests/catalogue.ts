@@ -52,7 +52,6 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
               (enabled, catalogueId) =>
                 catalogueId !== 'ml' &&
                 catalogueId !== 'monitoring' &&
-                catalogueId !== 'ml_file_data_visualizer' &&
                 !esFeatureExceptions.includes(catalogueId)
             );
             expect(uiCapabilities.value!.catalogue).to.eql(expected);
@@ -65,7 +64,6 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
             // everything except ml and monitoring and enterprise search is enabled
             const exceptions = [
               'ml',
-              'ml_file_data_visualizer',
               'monitoring',
               'enterpriseSearch',
               'appSearch',
