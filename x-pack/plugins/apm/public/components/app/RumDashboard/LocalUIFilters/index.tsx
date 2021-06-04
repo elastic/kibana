@@ -12,6 +12,7 @@ import {
   EuiHorizontalRule,
   EuiButtonEmpty,
   EuiAccordion,
+  EuiFilterGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
@@ -60,7 +61,7 @@ function LocalUIFilters({
   );
 
   const content = (
-    <>
+    <EuiFilterGroup>
       {children}
       {filters.map((filter) => {
         return (
@@ -94,7 +95,7 @@ function LocalUIFilters({
           </ButtonWrapper>
         </>
       ) : null}
-    </>
+    </EuiFilterGroup>
   );
 
   return isSmall ? (

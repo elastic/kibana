@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
 import { LocalUIFilters } from './LocalUIFilters';
@@ -25,16 +25,12 @@ export function RumOverview() {
   }, []);
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={1}>
-        <LocalUIFilters {...localUIFiltersConfig} showCount={true}>
-          <URLFilter />
-          <EuiSpacer size="s" />
-        </LocalUIFilters>
-      </EuiFlexItem>
-      <EuiFlexItem grow={7}>
-        <RumDashboard />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <LocalUIFilters {...localUIFiltersConfig} showCount={true}>
+        <URLFilter />
+        <EuiSpacer size="s" />
+      </LocalUIFilters>
+      <RumDashboard />
+    </>
   );
 }
