@@ -23,6 +23,7 @@ export interface UsageStats {
   /**
    * non-sensitive settings
    */
+  'bfetch:disableCompression': boolean;
   'autocomplete:useTimeRange': boolean;
   'search:timeout': number;
   'visualization:visualize:legacyChartsLibrary': boolean;
@@ -122,4 +123,6 @@ export interface UsageStats {
   'labs:canvas:enable_ui': boolean;
   'labs:canvas:useDataService': boolean;
   'labs:presentation:timeToPresent': boolean;
+  'labs:dashboard:enable_ui': boolean;
+  'labs:dashboard:deferBelowFold': boolean;
 }

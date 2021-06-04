@@ -12,7 +12,8 @@ import { waitFor } from '@testing-library/react';
 
 import { AddExceptionModal } from './';
 import { useCurrentUser } from '../../../../common/lib/kibana';
-import { useAsync, ExceptionBuilder } from '../../../../shared_imports';
+import { ExceptionBuilder } from '../../../../shared_imports';
+import { useAsync } from '@kbn/securitysolution-list-hooks';
 import { getExceptionListSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_schema.mock';
 import { useFetchIndex } from '../../../containers/source';
 import { stubIndexPattern } from 'src/plugins/data/common/index_patterns/index_pattern.stub';
@@ -21,9 +22,8 @@ import { useFetchOrCreateRuleExceptionList } from '../use_fetch_or_create_rule_e
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import * as helpers from '../helpers';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { EntriesArray } from '@kbn/securitysolution-io-ts-utils';
+import type { EntriesArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { ExceptionListItemSchema } from '../../../../../../lists/common';
 import {
   getRulesEqlSchemaMock,
   getRulesSchemaMock,
@@ -49,7 +49,10 @@ jest.mock('../../../containers/source');
 jest.mock('../../../../detections/containers/detection_engine/rules');
 jest.mock('../use_add_exception');
 jest.mock('../use_fetch_or_create_rule_exception_list');
-jest.mock('../../../../shared_imports');
+jest.mock('@kbn/securitysolution-list-hooks', () => ({
+  ...jest.requireActual('@kbn/securitysolution-list-hooks'),
+  useAsync: jest.fn(),
+}));
 jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_async');
 
 describe('When the add exception modal is opened', () => {

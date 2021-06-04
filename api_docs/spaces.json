@@ -449,7 +449,13 @@
         "\nStart contract for the Spaces plugin."
       ],
       "signature": [
-        "SpacesApi"
+        {
+          "pluginId": "spacesOss",
+          "scope": "public",
+          "docId": "kibSpacesOssPluginApi",
+          "section": "def-public.SpacesApi",
+          "text": "SpacesApi"
+        }
       ],
       "source": {
         "path": "x-pack/plugins/spaces/public/plugin.tsx",
@@ -1204,14 +1210,7 @@
                 "plugin": "reporting",
                 "link": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 244
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 193
+                  "lineNumber": 249
                 }
               },
               {
@@ -1240,6 +1239,13 @@
                 "link": {
                   "path": "x-pack/plugins/infra/server/plugin.ts",
                   "lineNumber": 153
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/plugin.ts",
+                  "lineNumber": 212
                 }
               },
               {
@@ -1363,14 +1369,14 @@
                 "plugin": "security",
                 "link": {
                   "path": "x-pack/plugins/security/server/saved_objects/secure_saved_objects_client_wrapper.ts",
-                  "lineNumber": 784
+                  "lineNumber": 1000
                 }
               },
               {
                 "plugin": "security",
                 "link": {
                   "path": "x-pack/plugins/security/server/saved_objects/secure_saved_objects_client_wrapper.ts",
-                  "lineNumber": 811
+                  "lineNumber": 1027
                 }
               },
               {
@@ -1551,7 +1557,35 @@
               "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
               "lineNumber": 56
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-server.request",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [
+                  "the request."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-server.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
+                  "lineNumber": 56
+                },
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "spaces",
@@ -1867,7 +1901,7 @@
             "section": "def-server.SavedObjectsRepository",
             "text": "SavedObjectsRepository"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
+          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
         ],
         "source": {
           "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client_service.ts",
@@ -1996,28 +2030,21 @@
               "plugin": "reporting",
               "link": {
                 "path": "x-pack/plugins/reporting/server/core.ts",
-                "lineNumber": 242
+                "lineNumber": 247
               }
             },
             {
               "plugin": "reporting",
               "link": {
                 "path": "x-pack/plugins/reporting/server/core.ts",
-                "lineNumber": 264
+                "lineNumber": 269
               }
             },
             {
               "plugin": "reporting",
               "link": {
                 "path": "x-pack/plugins/reporting/server/core.ts",
-                "lineNumber": 276
-              }
-            },
-            {
-              "plugin": "securitySolution",
-              "link": {
-                "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 193
+                "lineNumber": 281
               }
             },
             {
@@ -2053,6 +2080,13 @@
               "link": {
                 "path": "x-pack/plugins/infra/server/plugin.ts",
                 "lineNumber": 153
+              }
+            },
+            {
+              "plugin": "securitySolution",
+              "link": {
+                "path": "x-pack/plugins/security_solution/server/plugin.ts",
+                "lineNumber": 212
               }
             }
           ]

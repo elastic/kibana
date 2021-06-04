@@ -776,10 +776,11 @@ export class DataRecognizer {
         this._request
       );
       if (canCreateGlobalJobs === true) {
-        await this._jobSavedObjectService.assignJobsToSpaces(
+        await this._jobSavedObjectService.updateJobsSpaces(
           'anomaly-detector',
           jobs.map((j) => j.id),
-          ['*']
+          ['*'], // spacesToAdd
+          [] // spacesToRemove
         );
       }
     }

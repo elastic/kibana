@@ -1,13 +1,13 @@
 [[create-panels-with-editors]]
 == Create panels with editors
 
-{kib} provides several editors that you can use to create dashboard panels.
+{kib} provides several editors that you can use to create panels of your data.
 
 [cols="2"]
 |===
 
 | <<lens,*Lens*>>
-| Create visualizations with the drag and drop editor. *Lens* is recommended for most users.
+| Create visualizations with the drag and drop editor.
 
 | <<maps,*Maps*>>
 | Create visualizations with your geographical data.

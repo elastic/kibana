@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { combineLatest } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import {
@@ -32,7 +31,6 @@ import { createApmAgentConfigurationIndex } from './lib/settings/agent_configura
 import { getApmIndices } from './lib/settings/apm_indices/get_apm_indices';
 import { createApmCustomLinkIndex } from './lib/settings/custom_link/create_custom_link_index';
 import { apmIndices, apmTelemetry } from './saved_objects';
-import { createElasticCloudInstructions } from './tutorial/elastic_cloud';
 import { uiSettings } from './ui_settings';
 import type {
   ApmPluginRequestHandlerContext,
@@ -51,6 +49,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../common/elasticsearch_fieldnames';
+import { tutorialProvider } from './tutorial';
 
 export class APMPlugin
   implements
@@ -103,45 +102,39 @@ export class APMPlugin
       });
     }
 
-    const ossTutorialProvider = plugins.apmOss.getRegisteredTutorialProvider();
-    plugins.home?.tutorials.unregisterTutorial(ossTutorialProvider);
-    plugins.home?.tutorials.registerTutorial(() => {
-      const ossPart = ossTutorialProvider({});
-      if (this.currentConfig!['xpack.apm.ui.enabled'] && ossPart.artifacts) {
-        ossPart.artifacts.application = {
-          path: '/app/apm',
-          label: i18n.translate(
-            'xpack.apm.tutorial.specProvider.artifacts.application.label',
-            {
-              defaultMessage: 'Launch APM',
-            }
-          ),
-        };
-      }
-
-      return {
-        ...ossPart,
-        elasticCloud: createElasticCloudInstructions(plugins.cloud),
-      };
-    });
+    plugins.home?.tutorials.registerTutorial(
+      tutorialProvider({
+        isEnabled: this.currentConfig['xpack.apm.ui.enabled'],
+        indexPatternTitle: this.currentConfig['apm_oss.indexPattern'],
+        cloud: plugins.cloud,
+        indices: {
+          errorIndices: this.currentConfig['apm_oss.errorIndices'],
+          metricsIndices: this.currentConfig['apm_oss.metricsIndices'],
+          onboardingIndices: this.currentConfig['apm_oss.onboardingIndices'],
+          sourcemapIndices: this.currentConfig['apm_oss.sourcemapIndices'],
+          transactionIndices: this.currentConfig['apm_oss.transactionIndices'],
+        },
+      })
+    );
 
     plugins.features.registerKibanaFeature(APM_FEATURE);
 
     registerFeaturesUsage({ licensingPlugin: plugins.licensing });
 
+    const { ruleDataService } = plugins.ruleRegistry;
     const getCoreStart = () =>
       core.getStartServices().then(([coreStart]) => coreStart);
 
     const ready = once(async () => {
-      const componentTemplateName = plugins.ruleRegistry.getFullAssetName(
+      const componentTemplateName = ruleDataService.getFullAssetName(
         'apm-mappings'
       );
 
-      if (!plugins.ruleRegistry.isWriteEnabled()) {
+      if (!ruleDataService.isWriteEnabled()) {
         return;
       }
 
-      await plugins.ruleRegistry.createOrUpdateComponentTemplate({
+      await ruleDataService.createOrUpdateComponentTemplate({
         name: componentTemplateName,
         body: {
           template: {
@@ -166,16 +159,14 @@ export class APMPlugin
         },
       });
 
-      await plugins.ruleRegistry.createOrUpdateIndexTemplate({
-        name: plugins.ruleRegistry.getFullAssetName('apm-index-template'),
+      await ruleDataService.createOrUpdateIndexTemplate({
+        name: ruleDataService.getFullAssetName('apm-index-template'),
         body: {
           index_patterns: [
-            plugins.ruleRegistry.getFullAssetName('observability-apm*'),
+            ruleDataService.getFullAssetName('observability-apm*'),
           ],
           composed_of: [
-            plugins.ruleRegistry.getFullAssetName(
-              TECHNICAL_COMPONENT_TEMPLATE_NAME
-            ),
+            ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
             componentTemplateName,
           ],
         },
@@ -187,7 +178,7 @@ export class APMPlugin
     });
 
     const ruleDataClient = new RuleDataClient({
-      alias: plugins.ruleRegistry.getFullAssetName('observability-apm'),
+      alias: ruleDataService.getFullAssetName('observability-apm'),
       getClusterClient: async () => {
         const coreStart = await getCoreStart();
         return coreStart.elasticsearch.client.asInternalUser;

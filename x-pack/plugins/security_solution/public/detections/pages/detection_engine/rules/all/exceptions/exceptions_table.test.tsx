@@ -14,12 +14,12 @@ import { getExceptionListSchemaMock } from '../../../../../../../../lists/common
 
 import { ExceptionListsTable } from './exceptions_table';
 import { useKibana } from '../../../../../../common/lib/kibana';
-import { useApi, useExceptionLists } from '../../../../../../shared_imports';
+import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import { useAllExceptionLists } from './use_all_exception_lists';
 
 jest.mock('../../../../../../common/lib/kibana');
 jest.mock('./use_all_exception_lists');
-jest.mock('../../../../../../shared_imports');
+jest.mock('@kbn/securitysolution-list-hooks');
 jest.mock('@kbn/i18n/react', () => {
   const originalModule = jest.requireActual('@kbn/i18n/react');
   const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');

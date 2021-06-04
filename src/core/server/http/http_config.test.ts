@@ -36,6 +36,11 @@ test('accepts valid hostnames', () => {
   }
 });
 
+test('accepts `0` as hostname', () => {
+  const { host } = config.schema.validate({ host: '0' });
+  expect(host).toEqual('0');
+});
+
 test('throws if invalid hostname', () => {
   const httpSchema = config.schema;
   const obj = {

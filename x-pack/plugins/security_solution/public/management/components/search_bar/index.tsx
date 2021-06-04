@@ -11,10 +11,11 @@ import { i18n } from '@kbn/i18n';
 
 export interface SearchBarProps {
   defaultValue?: string;
+  placeholder: string;
   onSearch(value: string): void;
 }
 
-export const SearchBar = memo<SearchBarProps>(({ defaultValue = '', onSearch }) => {
+export const SearchBar = memo<SearchBarProps>(({ defaultValue = '', onSearch, placeholder }) => {
   const [query, setQuery] = useState<string>(defaultValue);
 
   const handleOnChangeSearchField = useCallback(
@@ -24,13 +25,11 @@ export const SearchBar = memo<SearchBarProps>(({ defaultValue = '', onSearch }) 
   const handleOnSearch = useCallback(() => onSearch(query), [query, onSearch]);
 
   return (
-    <EuiFlexGroup direction="row" alignItems="center" gutterSize="l">
+    <EuiFlexGroup data-test-subj="searchBar" direction="row" alignItems="center" gutterSize="l">
       <EuiFlexItem>
         <EuiFieldSearch
           defaultValue={defaultValue}
-          placeholder={i18n.translate('xpack.securitySolution.management.search.placeholder', {
-            defaultMessage: 'Search',
-          })}
+          placeholder={placeholder}
           onChange={handleOnChangeSearchField}
           onSearch={onSearch}
           isClearable

@@ -10,7 +10,8 @@ import { extname } from 'path';
 import { schema } from '@kbn/config-schema';
 import { createPromiseFromStreams } from '@kbn/utils';
 
-import { validate } from '../../../../../common/validate';
+import { transformError, getIndexExists } from '@kbn/securitysolution-es-utils';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import {
   importRulesQuerySchema,
   ImportRulesQuerySchemaDecoded,
@@ -29,16 +30,15 @@ import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
 import { createRules } from '../../rules/create_rules';
 import { readRules } from '../../rules/read_rules';
-import { getIndexExists } from '../../index/get_index_exists';
 import {
   createBulkErrorObject,
   ImportRuleResponse,
   BulkError,
   isBulkError,
   isImportRegular,
-  transformError,
   buildSiemResponse,
 } from '../utils';
+
 import { patchRules } from '../../rules/patch_rules';
 import { getTupleDuplicateErrorsAndUniqueRules } from './utils';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';

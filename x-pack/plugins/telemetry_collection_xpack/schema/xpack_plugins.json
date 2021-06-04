@@ -3216,6 +3216,122 @@
             }
           }
         },
+        "resolutions": {
+          "properties": {
+            "coarse": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of grid-agg layers with coarse resolution"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of grid-agg layers with coarse resolution"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of grid-agg layers with coarse resolution"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of grid-agg layers with coarse resolution"
+                  }
+                }
+              }
+            },
+            "fine": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of grid-agg layers with fine resolution"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of grid-agg layers with fine resolution"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of grid-agg layers with fine resolution"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of grid-agg layers with fine resolution"
+                  }
+                }
+              }
+            },
+            "most_fine": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of grid-agg layers with most_fine resolution"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of grid-agg layers with most_fine resolution"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of grid-agg layers with most_fine resolution"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of grid-agg layers with most_fine resolution"
+                  }
+                }
+              }
+            },
+            "super_fine": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of grid-agg layers with super_fine resolution"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of grid-agg layers with super_fine resolution"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of grid-agg layers with super_fine resolution"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of grid-agg layers with super_fine resolution"
+                  }
+                }
+              }
+            }
+          }
+        },
         "joins": {
           "properties": {
             "term": {
@@ -4548,58 +4664,6 @@
     },
     "security_solution": {
       "properties": {
-        "detections": {
-          "properties": {
-            "detection_rules": {
-              "properties": {
-                "custom": {
-                  "properties": {
-                    "enabled": {
-                      "type": "long"
-                    },
-                    "disabled": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "elastic": {
-                  "properties": {
-                    "enabled": {
-                      "type": "long"
-                    },
-                    "disabled": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "ml_jobs": {
-              "properties": {
-                "custom": {
-                  "properties": {
-                    "enabled": {
-                      "type": "long"
-                    },
-                    "disabled": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "elastic": {
-                  "properties": {
-                    "enabled": {
-                      "type": "long"
-                    },
-                    "disabled": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
         "detectionMetrics": {
           "properties": {
             "detection_rules": {
@@ -4862,10 +4926,10 @@
                           "description": "The number of daily alerts generated by a rule"
                         }
                       },
-                      "cases_count_daily": {
+                      "cases_count_total": {
                         "type": "long",
                         "_meta": {
-                          "description": "The number of daily cases generated by a rule"
+                          "description": "The number of total cases generated by a rule"
                         }
                       }
                     }
@@ -4874,111 +4938,238 @@
               }
             },
             "ml_jobs": {
-              "type": "array",
-              "items": {
-                "properties": {
-                  "job_id": {
-                    "type": "keyword"
-                  },
-                  "open_time": {
-                    "type": "keyword"
-                  },
-                  "create_time": {
-                    "type": "keyword"
-                  },
-                  "finished_time": {
-                    "type": "keyword"
-                  },
-                  "state": {
-                    "type": "keyword"
-                  },
-                  "data_counts": {
-                    "properties": {
-                      "bucket_count": {
-                        "type": "long"
-                      },
-                      "empty_bucket_count": {
-                        "type": "long"
-                      },
-                      "input_bytes": {
-                        "type": "long"
-                      },
-                      "input_record_count": {
-                        "type": "long"
-                      },
-                      "last_data_time": {
-                        "type": "long"
-                      },
-                      "processed_record_count": {
-                        "type": "long"
+              "properties": {
+                "ml_job_usage": {
+                  "properties": {
+                    "custom": {
+                      "properties": {
+                        "enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "The number of custom ML jobs rules enabled"
+                          }
+                        },
+                        "disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "The number of custom ML jobs rules disabled"
+                          }
+                        }
+                      }
+                    },
+                    "elastic": {
+                      "properties": {
+                        "enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "The number of elastic provided ML jobs rules enabled"
+                          }
+                        },
+                        "disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "The number of elastic provided ML jobs rules disabled"
+                          }
+                        }
                       }
                     }
-                  },
-                  "model_size_stats": {
+                  }
+                },
+                "ml_job_metrics": {
+                  "type": "array",
+                  "items": {
                     "properties": {
-                      "bucket_allocation_failures_count": {
-                        "type": "long"
+                      "job_id": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "Identifier for the anomaly detection job"
+                        }
                       },
-                      "model_bytes": {
-                        "type": "long"
+                      "open_time": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "For open jobs only, the elapsed time for which the job has been open"
+                        }
                       },
-                      "model_bytes_exceeded": {
-                        "type": "long"
+                      "create_time": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "The time the job was created"
+                        }
                       },
-                      "model_bytes_memory_limit": {
-                        "type": "long"
-                      },
-                      "peak_model_bytes": {
-                        "type": "long"
-                      }
-                    }
-                  },
-                  "timing_stats": {
-                    "properties": {
-                      "bucket_count": {
-                        "type": "long"
-                      },
-                      "exponential_average_bucket_processing_time_ms": {
-                        "type": "long"
-                      },
-                      "exponential_average_bucket_processing_time_per_hour_ms": {
-                        "type": "long"
-                      },
-                      "maximum_bucket_processing_time_ms": {
-                        "type": "long"
-                      },
-                      "minimum_bucket_processing_time_ms": {
-                        "type": "long"
-                      },
-                      "total_bucket_processing_time_ms": {
-                        "type": "long"
-                      }
-                    }
-                  },
-                  "datafeed": {
-                    "properties": {
-                      "datafeed_id": {
-                        "type": "keyword"
+                      "finished_time": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "If the job closed or failed, this is the time the job finished"
+                        }
                       },
                       "state": {
-                        "type": "keyword"
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "The status of the anomaly detection job"
+                        }
+                      },
+                      "data_counts": {
+                        "properties": {
+                          "bucket_count": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of buckets processed"
+                            }
+                          },
+                          "empty_bucket_count": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of buckets which did not contain any data"
+                            }
+                          },
+                          "input_bytes": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of bytes of input data posted to the anomaly detection job"
+                            }
+                          },
+                          "input_record_count": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of input documents posted to the anomaly detection job"
+                            }
+                          },
+                          "last_data_time": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The timestamp at which data was last analyzed, according to server time"
+                            }
+                          },
+                          "processed_record_count": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of input documents that have been processed by the anomaly detection job"
+                            }
+                          }
+                        }
+                      },
+                      "model_size_stats": {
+                        "properties": {
+                          "bucket_allocation_failures_count": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of buckets for which new entities in incoming data were not processed due to insufficient model memory"
+                            }
+                          },
+                          "model_bytes": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of bytes of memory used by the models"
+                            }
+                          },
+                          "model_bytes_exceeded": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of bytes over the high limit for memory usage at the last allocation failure"
+                            }
+                          },
+                          "model_bytes_memory_limit": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The upper limit for model memory usage, checked on increasing values"
+                            }
+                          },
+                          "peak_model_bytes": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The peak number of bytes of memory ever used by the models"
+                            }
+                          }
+                        }
                       },
                       "timing_stats": {
                         "properties": {
-                          "average_search_time_per_bucket_ms": {
-                            "type": "long"
-                          },
                           "bucket_count": {
-                            "type": "long"
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of buckets processed"
+                            }
                           },
-                          "exponential_average_search_time_per_hour_ms": {
-                            "type": "long"
+                          "exponential_average_bucket_processing_time_ms": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "Exponential moving average of all bucket processing times, in milliseconds"
+                            }
                           },
-                          "search_count": {
-                            "type": "long"
+                          "exponential_average_bucket_processing_time_per_hour_ms": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "Exponentially-weighted moving average of bucket processing times calculated in a 1 hour time window, in milliseconds"
+                            }
                           },
-                          "total_search_time_ms": {
-                            "type": "long"
+                          "maximum_bucket_processing_time_ms": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "Maximum among all bucket processing times, in milliseconds"
+                            }
+                          },
+                          "minimum_bucket_processing_time_ms": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "Minimum among all bucket processing times, in milliseconds"
+                            }
+                          },
+                          "total_bucket_processing_time_ms": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "Sum of all bucket processing times, in milliseconds"
+                            }
+                          }
+                        }
+                      },
+                      "datafeed": {
+                        "properties": {
+                          "datafeed_id": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "A numerical character string that uniquely identifies the datafeed"
+                            }
+                          },
+                          "state": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "The status of the datafeed"
+                            }
+                          },
+                          "timing_stats": {
+                            "properties": {
+                              "average_search_time_per_bucket_ms": {
+                                "type": "long",
+                                "_meta": {
+                                  "description": "The average search time per bucket, in milliseconds"
+                                }
+                              },
+                              "bucket_count": {
+                                "type": "long",
+                                "_meta": {
+                                  "description": "The number of buckets processed"
+                                }
+                              },
+                              "exponential_average_search_time_per_hour_ms": {
+                                "type": "long",
+                                "_meta": {
+                                  "description": "The exponential average search time per hour, in milliseconds"
+                                }
+                              },
+                              "search_count": {
+                                "type": "long",
+                                "_meta": {
+                                  "description": "The number of searches run by the datafeed"
+                                }
+                              },
+                              "total_search_time_ms": {
+                                "type": "long",
+                                "_meta": {
+                                  "description": "The total time the datafeed spent searching, in milliseconds"
+                                }
+                              }
+                            }
                           }
                         }
                       }
@@ -4992,26 +5183,44 @@
         "endpoints": {
           "properties": {
             "total_installed": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of installed endpoints"
+              }
             },
             "active_within_last_24_hours": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of active endpoints"
+              }
             },
             "os": {
               "type": "array",
               "items": {
                 "properties": {
                   "full_name": {
-                    "type": "keyword"
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "Full name of the operating system"
+                    }
                   },
                   "platform": {
-                    "type": "keyword"
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "OS Platform. eg Centos, Ubuntu"
+                    }
                   },
                   "version": {
-                    "type": "keyword"
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The version of the operating system, eg 16.04.7 LTS (Xenial Xerus), 8 (Core)"
+                    }
                   },
                   "count": {
-                    "type": "long"
+                    "type": "long",
+                    "_meta": {
+                      "description": "The total number of endpoints from that platform"
+                    }
                   }
                 }
               }
@@ -5021,13 +5230,22 @@
                 "malware": {
                   "properties": {
                     "active": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "The total number of active malware policies"
+                      }
                     },
                     "inactive": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "The total number of inactive malware policies"
+                      }
                     },
                     "failure": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "The total number of failing malware policies"
+                      }
                     }
                   }
                 }

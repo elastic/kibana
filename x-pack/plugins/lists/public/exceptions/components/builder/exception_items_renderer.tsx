@@ -10,32 +10,33 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { HttpStart } from 'kibana/public';
 import { addIdToItem } from '@kbn/securitysolution-utils';
-import { OsTypeArray } from '@kbn/securitysolution-io-ts-utils';
-
-import { AutocompleteStart, IIndexPattern } from '../../../../../../../src/plugins/data/public';
 import {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
   ExceptionListType,
   NamespaceType,
-  OperatorEnum,
-  OperatorTypeEnum,
+  ListOperatorEnum as OperatorEnum,
+  ListOperatorTypeEnum as OperatorTypeEnum,
+  OsTypeArray,
   entriesNested,
   exceptionListItemSchema,
-} from '../../../../common';
-import { AndOrBadge } from '../and_or_badge';
-
-import { CreateExceptionListItemBuilderSchema, ExceptionsBuilderExceptionItem } from './types';
-import { BuilderExceptionListItemComponent } from './exception_item_renderer';
-import { BuilderLogicButtons } from './logic_buttons';
-import { State, exceptionsBuilderReducer } from './reducer';
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
+  CreateExceptionListItemBuilderSchema,
+  ExceptionsBuilderExceptionItem,
   containsValueListEntry,
   filterExceptionItems,
   getDefaultEmptyEntry,
   getDefaultNestedEmptyEntry,
   getNewExceptionItem,
-} from './helpers';
+} from '@kbn/securitysolution-list-utils';
+
+import { AutocompleteStart, IIndexPattern } from '../../../../../../../src/plugins/data/public';
+import { AndOrBadge } from '../and_or_badge';
+
+import { BuilderExceptionListItemComponent } from './exception_item_renderer';
+import { BuilderLogicButtons } from './logic_buttons';
+import { State, exceptionsBuilderReducer } from './reducer';
 
 const MyInvisibleAndBadge = styled(EuiFlexItem)`
   visibility: hidden;

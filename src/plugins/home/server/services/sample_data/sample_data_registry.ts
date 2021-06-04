@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import Joi from 'joi';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { SavedObject } from 'src/core/public';
 import {
@@ -55,11 +54,13 @@ export class SampleDataRegistry {
 
     return {
       registerSampleDataset: (specProvider: SampleDatasetProvider) => {
-        const { error, value } = Joi.validate(specProvider(), sampleDataSchema);
-
-        if (error) {
+        let value: SampleDatasetSchema;
+        try {
+          value = sampleDataSchema.validate(specProvider());
+        } catch (error) {
           throw new Error(`Unable to register sample dataset spec because it's invalid. ${error}`);
         }
+
         const defaultIndexSavedObjectJson = value.savedObjects.find((savedObjectJson: any) => {
           return (
             savedObjectJson.type === 'index-pattern' && savedObjectJson.id === value.defaultIndex

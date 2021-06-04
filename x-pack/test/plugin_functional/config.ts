@@ -9,7 +9,7 @@ import { resolve } from 'path';
 import fs from 'fs';
 // @ts-expect-error https://github.com/elastic/kibana/issues/95679
 import { KIBANA_ROOT } from '@kbn/test';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 import { pageObjects } from './page_objects';
 

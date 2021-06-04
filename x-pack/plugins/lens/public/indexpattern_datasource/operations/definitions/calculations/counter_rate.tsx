@@ -17,7 +17,7 @@ import {
 } from './utils';
 import { DEFAULT_TIME_SCALE } from '../../time_scale_utils';
 import { OperationDefinition } from '..';
-import { getFormatFromPreviousColumn } from '../helpers';
+import { getFormatFromPreviousColumn, getFilter } from '../helpers';
 
 const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.CounterRateOf', {
@@ -50,7 +50,7 @@ export const counterRateOperation: OperationDefinition<
   selectionStyle: 'field',
   requiredReferences: [
     {
-      input: ['field'],
+      input: ['field', 'managedReference'],
       specificOperations: ['max'],
       validateMetadata: (meta) => meta.dataType === 'number' && !meta.isBucketed,
     },
@@ -70,13 +70,14 @@ export const counterRateOperation: OperationDefinition<
       ref && 'sourceField' in ref
         ? indexPattern.getFieldByName(ref.sourceField)?.displayName
         : undefined,
-      column.timeScale
+      column.timeScale,
+      column.timeShift
     );
   },
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'lens_counter_rate');
   },
-  buildColumn: ({ referenceIds, previousColumn, layer, indexPattern }) => {
+  buildColumn: ({ referenceIds, previousColumn, layer, indexPattern }, columnParams) => {
     const metric = layer.columns[referenceIds[0]];
     const timeScale = previousColumn?.timeScale || DEFAULT_TIME_SCALE;
     return {
@@ -84,7 +85,8 @@ export const counterRateOperation: OperationDefinition<
         metric && 'sourceField' in metric
           ? indexPattern.getFieldByName(metric.sourceField)?.displayName
           : undefined,
-        timeScale
+        timeScale,
+        previousColumn?.timeShift
       ),
       dataType: 'number',
       operationType: 'counter_rate',
@@ -92,7 +94,8 @@ export const counterRateOperation: OperationDefinition<
       scale: 'ratio',
       references: referenceIds,
       timeScale,
-      filter: previousColumn?.filter,
+      timeShift: previousColumn?.timeShift,
+      filter: getFilter(previousColumn, columnParams),
       params: getFormatFromPreviousColumn(previousColumn),
     };
   },
@@ -118,4 +121,5 @@ export const counterRateOperation: OperationDefinition<
   },
   timeScalingMode: 'mandatory',
   filterable: true,
+  shiftable: true,
 };

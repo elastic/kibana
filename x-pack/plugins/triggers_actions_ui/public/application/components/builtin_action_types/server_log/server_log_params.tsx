@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSelect, EuiFormRow } from '@elastic/eui';
 import { ActionParamsProps } from '../../../../types';
@@ -48,7 +48,7 @@ export const ServerLogParamsFields: React.FunctionComponent<
   }, [defaultMessage]);
 
   return (
-    <Fragment>
+    <>
       <EuiFormRow
         id="loggingLevel"
         fullWidth
@@ -85,7 +85,7 @@ export const ServerLogParamsFields: React.FunctionComponent<
         )}
         errors={errors.message as string[]}
       />
-    </Fragment>
+    </>
   );
 };
 

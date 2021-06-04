@@ -112,7 +112,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               expect(failedUpdateKeyDueToAlertsPrivilegesResponse.body).to.eql({
                 error: 'Forbidden',
                 message:
-                  'Unauthorized to updateApiKey a "test.always-firing" alert for "alertsFixture"',
+                  'Unauthorized to updateApiKey a "test.always-firing" rule for "alertsFixture"',
                 statusCode: 403,
               });
               break;

@@ -23,5 +23,4 @@ export interface ChromeNavLinks
 |  [getNavLinks$()](./kibana-plugin-core-public.chromenavlinks.getnavlinks_.md) | Get an observable for a sorted list of navlinks. |
 |  [has(id)](./kibana-plugin-core-public.chromenavlinks.has.md) | Check whether or not a navlink exists. |
 |  [showOnly(id)](./kibana-plugin-core-public.chromenavlinks.showonly.md) | Remove all navlinks except the one matching the given id. |
-|  [update(id, values)](./kibana-plugin-core-public.chromenavlinks.update.md) | Update the navlink for the given id with the updated attributes. Returns the updated navlink or <code>undefined</code> if it does not exist. |
 

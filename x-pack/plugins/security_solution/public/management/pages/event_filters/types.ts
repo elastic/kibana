@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import {
+import type {
+  FoundExceptionListItemSchema,
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
   UpdateExceptionListItemSchema,
-} from '../../../shared_imports';
+  ExceptionListSummarySchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { AsyncResourceState } from '../../state/async_resource_state';
 import { Immutable } from '../../../../common/endpoint/types';
-import { FoundExceptionListItemSchema } from '../../../../../lists/common/schemas';
 
 export interface EventFiltersPageLocation {
   page_index: number;
@@ -49,6 +50,7 @@ export interface EventFiltersService {
   getOne(id: string): Promise<ExceptionListItemSchema>;
   updateOne(exception: Immutable<UpdateExceptionListItemSchema>): Promise<ExceptionListItemSchema>;
   deleteOne(id: string): Promise<ExceptionListItemSchema>;
+  getSummary(): Promise<ExceptionListSummarySchema>;
 }
 
 export interface EventFiltersListPageData {

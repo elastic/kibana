@@ -20,34 +20,17 @@ import { PresentationLabsService, isEnabledByStorageValue, applyProjectStatus } 
 
 export type LabsServiceFactory = PluginServiceFactory<PresentationLabsService>;
 
+type Statuses = {
+  [id in ProjectID]: {
+    defaultValue: boolean;
+    session: boolean | null;
+    browser: boolean | null;
+    kibana: boolean;
+  };
+};
+
 export const labsServiceFactory: LabsServiceFactory = () => {
-  const reset = () =>
-    projectIDs.reduce((acc, id) => {
-      const project = getProject(id);
-      const defaultValue = project.isActive;
-
-      acc[id] = {
-        defaultValue,
-        session: null,
-        browser: null,
-        kibana: defaultValue,
-      };
-      return acc;
-    }, {} as { [id in ProjectID]: { defaultValue: boolean; session: boolean | null; browser: boolean | null; kibana: boolean } });
-
-  let statuses = reset();
-
-  const getProjects = (solutions: SolutionName[] = []) =>
-    projectIDs.reduce((acc, id) => {
-      const project = getProject(id);
-      if (
-        solutions.length === 0 ||
-        solutions.some((solution) => project.solutions.includes(solution))
-      ) {
-        acc[id] = project;
-      }
-      return acc;
-    }, {} as { [id in ProjectID]: Project });
+  let statuses = {} as Statuses;
 
   const getProject = (id: ProjectID) => {
     const project = projects[id];
@@ -61,9 +44,38 @@ export const labsServiceFactory: LabsServiceFactory = () => {
     return applyProjectStatus(project, status);
   };
 
+  const reset = () =>
+    projectIDs.reduce((acc, id) => {
+      const project = projects[id];
+      const defaultValue = project.isActive;
+
+      acc[id] = {
+        defaultValue,
+        session: null,
+        browser: null,
+        kibana: defaultValue,
+      };
+      return acc;
+    }, {} as Statuses);
+
+  statuses = reset();
+
+  const getProjects = (solutions: SolutionName[] = []) =>
+    projectIDs.reduce((acc, id) => {
+      const project = getProject(id);
+      if (
+        solutions.length === 0 ||
+        solutions.some((solution) => project.solutions.includes(solution))
+      ) {
+        acc[id] = project;
+      }
+      return acc;
+    }, {} as { [id in ProjectID]: Project });
+
   const setProjectStatus = (id: ProjectID, env: EnvironmentName, value: boolean) => {
     statuses[id] = { ...statuses[id], [env]: value };
   };
+
   const isProjectEnabled = (id: ProjectID) => getProject(id).status.isEnabled;
 
   return {

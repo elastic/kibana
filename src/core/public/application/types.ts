@@ -63,7 +63,7 @@ export enum AppNavLinkStatus {
  */
 export type AppUpdatableFields = Pick<
   App,
-  'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath' | 'meta'
+  'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath' | 'deepLinks'
 >;
 
 /**
@@ -211,106 +211,92 @@ export interface App<HistoryLocationState = unknown> {
    */
   exactRoute?: boolean;
 
+  /** Optional keywords to match with in deep links search. Omit if this part of the hierarchy does not have a page URL. */
+  keywords?: string[];
+
   /**
-   * Meta data for an application that represent additional information for the app.
-   * See {@link AppMeta}
+   * Input type for registering secondary in-app locations for an application.
    *
-   * @remarks
-   * Used to populate navigational search results (where available).
-   * Can be updated using the {@link App.updater$} observable. See {@link PublicAppSearchDeepLinkInfo} for more details.
+   * Deep links must include at least one of `path` or `deepLinks`. A deep link that does not have a `path`
+   * represents a topological level in the application's hierarchy, but does not have a destination URL that is
+   * user-accessible.
    *
    * @example
    * ```ts
    * core.application.register({
    *   id: 'my_app',
    *   title: 'Translated title',
-   *   meta: {
-   *     keywords: ['translated keyword1', 'translated keyword2'],
-   *     searchDeepLinks: [
-   *     { id: 'sub1', title: 'Sub1', path: '/sub1', keywords: ['subpath1'] },
+   *   keywords: ['translated keyword1', 'translated keyword2'],
+   *   deepLinks: [
+   *     {
+   *       id: 'sub1',
+   *       title: 'Sub1',
+   *       path: '/sub1',
+   *       keywords: ['subpath1'],
+   *     },
    *     {
    *       id: 'sub2',
    *       title: 'Sub2',
-   *       searchDeepLinks: [
-   *         { id: 'subsub', title: 'SubSub', path: '/sub2/sub', keywords: ['subpath2'] }
-   *       ]
-   *     }
+   *       deepLinks: [
+   *         {
+   *           id: 'subsub',
+   *           title: 'SubSub',
+   *           path: '/sub2/sub',
+   *           keywords: ['subpath2'],
+   *         },
+   *       ],
+   *     },
    *   ],
-   *   },
    *   mount: () => { ... }
    * })
    * ```
    */
-  meta?: AppMeta;
+  deepLinks?: AppDeepLink[];
 }
 
 /**
- * Input type for meta data for an application.
- *
- * Meta fields include `keywords` and `searchDeepLinks`
- * Keywords is an array of string with which to associate the app, must include at least one unique string as an array.
- * `searchDeepLinks` is an array of links that represent secondary in-app locations for the app.
- * @public
- */
-export interface AppMeta {
-  /** Keywords to represent this application */
-  keywords?: string[];
-  /** Array of links that represent secondary in-app locations for the app. */
-  searchDeepLinks?: AppSearchDeepLink[];
-}
-
-/**
- * Public information about a registered app's {@link AppMeta | keywords }
+ * Public information about a registered app's {@link AppDeepLink | deepLinks}
  *
  * @public
  */
-export type PublicAppMetaInfo = Omit<AppMeta, 'keywords' | 'searchDeepLinks'> & {
-  keywords: string[];
-  searchDeepLinks: PublicAppSearchDeepLinkInfo[];
-};
-
-/**
- * Public information about a registered app's {@link AppSearchDeepLink | searchDeepLinks}
- *
- * @public
- */
-export type PublicAppSearchDeepLinkInfo = Omit<
-  AppSearchDeepLink,
-  'searchDeepLinks' | 'keywords'
+export type PublicAppDeepLinkInfo = Omit<
+  AppDeepLink,
+  'deepLinks' | 'keywords' | 'navLinkStatus'
 > & {
-  searchDeepLinks: PublicAppSearchDeepLinkInfo[];
+  deepLinks: PublicAppDeepLinkInfo[];
   keywords: string[];
+  navLinkStatus: AppNavLinkStatus;
 };
 
 /**
  * Input type for registering secondary in-app locations for an application.
  *
- * Deep links must include at least one of `path` or `searchDeepLinks`. A deep link that does not have a `path`
+ * Deep links must include at least one of `path` or `deepLinks`. A deep link that does not have a `path`
  * represents a topological level in the application's hierarchy, but does not have a destination URL that is
  * user-accessible.
  * @public
  */
-export type AppSearchDeepLink = {
+export type AppDeepLink = {
   /** Identifier to represent this sublink, should be unique for this application */
   id: string;
   /** Title to label represent this deep link */
   title: string;
+  /** Optional keywords to match with in deep links search. Omit if this part of the hierarchy does not have a page URL. */
+  keywords?: string[];
+  /** Optional status of the chrome navigation, defaults to `hidden` */
+  navLinkStatus?: AppNavLinkStatus;
 } & (
   | {
       /** URL path to access this link, relative to the application's appRoute. */
       path: string;
       /** Optional array of links that are 'underneath' this section in the hierarchy */
-      searchDeepLinks?: AppSearchDeepLink[];
-      /** Optional keywords to match with in deep links search for the page at the path */
-      keywords?: string[];
+      deepLinks?: AppDeepLink[];
     }
   | {
       /** Optional path to access this section. Omit if this part of the hierarchy does not have a page URL. */
       path?: string;
       /** Array links that are 'underneath' this section in this hierarchy. */
-      searchDeepLinks: AppSearchDeepLink[];
-      /** Optional keywords to match with in deep links search. Omit if this part of the hierarchy does not have a page URL. */
-      keywords?: string[];
+      deepLinks: AppDeepLink[];
     }
 );
 
@@ -319,12 +305,13 @@ export type AppSearchDeepLink = {
  *
  * @public
  */
-export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'meta'> & {
+export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'keywords' | 'deepLinks'> & {
   // remove optional on fields populated with default values
   status: AppStatus;
   navLinkStatus: AppNavLinkStatus;
   appRoute: string;
-  meta: PublicAppMetaInfo;
+  keywords: string[];
+  deepLinks: PublicAppDeepLinkInfo[];
 };
 
 /**

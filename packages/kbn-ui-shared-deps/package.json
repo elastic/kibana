@@ -7,9 +7,5 @@
     "build": "node scripts/build",
     "kbn:bootstrap": "node scripts/build --dev",
     "kbn:watch": "node scripts/build --dev --watch"
-  },
-  "dependencies": {
-    "@kbn/i18n": "link:../kbn-i18n",
-    "@kbn/monaco": "link:../kbn-monaco"
   }
 }

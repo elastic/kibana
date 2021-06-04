@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntryExists } from '@kbn/securitysolution-io-ts-utils';
+import type { EntryExists } from '@kbn/securitysolution-io-ts-list-types';
 
 import { EXISTS, FIELD, OPERATOR } from '../../constants.mock';
 

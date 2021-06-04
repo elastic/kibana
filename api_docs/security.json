@@ -442,7 +442,7 @@
             "label": "iconType",
             "description": [],
             "signature": [
-              "IconType"
+              "string | React.ComponentClass<{}, any> | React.FunctionComponent<{}>"
             ],
             "source": {
               "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
@@ -510,7 +510,11 @@
       "label": "SecurityPluginSetup",
       "description": [],
       "signature": [
-        "{ authc: AuthenticationServiceSetup; sessionTimeout: ISessionTimeout; license: Readonly<{ isLicenseAvailable: () => boolean; isEnabled: () => boolean; getType: () => \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; getFeatures: () => ",
+        "{ authc: ",
+        "AuthenticationServiceSetup",
+        "; sessionTimeout: ",
+        "SessionTimeout",
+        "; license: Readonly<{ isLicenseAvailable: () => boolean; isEnabled: () => boolean; getType: () => \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; getFeatures: () => ",
         "SecurityLicenseFeatures",
         "; features$: ",
         "Observable",
@@ -520,7 +524,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/security/public/plugin.tsx",
-        "lineNumber": 171
+        "lineNumber": 164
       },
       "deprecated": false,
       "lifecycle": "setup",
@@ -536,11 +540,13 @@
       "signature": [
         "{ navControlService: ",
         "SecurityNavControlServiceStart",
-        "; authc: AuthenticationServiceSetup; }"
+        "; authc: ",
+        "AuthenticationServiceSetup",
+        "; }"
       ],
       "source": {
         "path": "x-pack/plugins/security/public/plugin.tsx",
-        "lineNumber": 172
+        "lineNumber": 165
       },
       "deprecated": false,
       "lifecycle": "start",
@@ -644,7 +650,33 @@
               "path": "x-pack/plugins/security/server/audit/audit_service.ts",
               "lineNumber": 37
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "security",
+                "id": "def-server.event",
+                "type": "Object",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "security",
+                    "scope": "server",
+                    "docId": "kibSecurityPluginApi",
+                    "section": "def-server.AuditEvent",
+                    "text": "AuditEvent"
+                  },
+                  " | undefined"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+                  "lineNumber": 37
+                },
+                "deprecated": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -800,7 +832,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-          "lineNumber": 56
+          "lineNumber": 62
         },
         "deprecated": false,
         "children": [
@@ -815,7 +847,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 60
+              "lineNumber": 66
             },
             "deprecated": false
           },
@@ -830,7 +862,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 64
+              "lineNumber": 70
             },
             "deprecated": false
           },
@@ -848,7 +880,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 68
+              "lineNumber": 74
             },
             "deprecated": false
           },
@@ -863,7 +895,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 72
+              "lineNumber": 78
             },
             "deprecated": false
           }
@@ -879,7 +911,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-          "lineNumber": 75
+          "lineNumber": 81
         },
         "deprecated": false,
         "children": [
@@ -894,7 +926,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 79
+              "lineNumber": 85
             },
             "deprecated": false
           },
@@ -909,7 +941,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 83
+              "lineNumber": 89
             },
             "deprecated": false
           },
@@ -924,7 +956,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 87
+              "lineNumber": 93
             },
             "deprecated": false
           }
@@ -942,7 +974,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-          "lineNumber": 93
+          "lineNumber": 99
         },
         "deprecated": false,
         "children": [
@@ -960,7 +992,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 97
+              "lineNumber": 103
             },
             "deprecated": false
           },
@@ -978,7 +1010,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 101
+              "lineNumber": 107
             },
             "deprecated": false
           },
@@ -993,7 +1025,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 105
+              "lineNumber": 111
             },
             "deprecated": false
           },
@@ -1011,7 +1043,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 109
+              "lineNumber": 115
             },
             "deprecated": false
           }
@@ -1029,7 +1061,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-          "lineNumber": 46
+          "lineNumber": 52
         },
         "deprecated": false,
         "children": [
@@ -1045,7 +1077,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 47
+              "lineNumber": 53
             },
             "deprecated": false
           }
@@ -1127,14 +1159,14 @@
             "plugin": "alerting",
             "link": {
               "path": "x-pack/plugins/alerting/server/alerts_client_factory.test.ts",
-              "lineNumber": 24
+              "lineNumber": 23
             }
           },
           {
             "plugin": "alerting",
             "link": {
               "path": "x-pack/plugins/alerting/server/alerts_client_factory.test.ts",
-              "lineNumber": 90
+              "lineNumber": 98
             }
           }
         ],
@@ -1153,7 +1185,52 @@
               "path": "x-pack/plugins/security/server/audit/audit_service.ts",
               "lineNumber": 33
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "security",
+                "id": "def-server.eventType",
+                "type": "string",
+                "tags": [],
+                "label": "eventType",
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+                  "lineNumber": 33
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "security",
+                "id": "def-server.message",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+                  "lineNumber": 33
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "security",
+                "id": "def-server.data",
+                "type": "Object",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "Record<string, any> | undefined"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+                  "lineNumber": 33
+                },
+                "deprecated": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -1237,41 +1314,6 @@
                 }
               },
               {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/timeline/utils/common.ts",
-                  "lineNumber": 28
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/create_signals_migration_route.ts",
-                  "lineNumber": 48
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/delete_signals_migration_route.ts",
-                  "lineNumber": 43
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/finalize_signals_migration_route.ts",
-                  "lineNumber": 44
-                }
-              },
-              {
-                "plugin": "beatsManagement",
-                "link": {
-                  "path": "x-pack/plugins/beats_management/server/lib/adapters/framework/kibana_framework_adapter.ts",
-                  "lineNumber": 44
-                }
-              },
-              {
                 "plugin": "cases",
                 "link": {
                   "path": "x-pack/plugins/cases/server/plugin.ts",
@@ -1298,6 +1340,34 @@
                   "path": "x-pack/plugins/logstash/server/routes/pipeline/save.ts",
                   "lineNumber": 41
                 }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/create_signals_migration_route.ts",
+                  "lineNumber": 48
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/delete_signals_migration_route.ts",
+                  "lineNumber": 45
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/finalize_signals_migration_route.ts",
+                  "lineNumber": 45
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/lib/timeline/utils/common.ts",
+                  "lineNumber": 28
+                }
               }
             ]
           },
@@ -1311,9 +1381,15 @@
             "label": "authz",
             "description": [],
             "signature": [
-              "Pick<",
-              "AuthorizationServiceSetup",
-              ", \"mode\" | \"actions\" | \"checkPrivilegesDynamicallyWithRequest\" | \"checkPrivilegesWithRequest\">"
+              "{ mode: ",
+              "AuthorizationMode",
+              "; actions: ",
+              "Actions",
+              "; checkPrivilegesDynamicallyWithRequest: ",
+              "CheckPrivilegesDynamicallyWithRequest",
+              "; checkPrivilegesWithRequest: ",
+              "CheckPrivilegesWithRequest",
+              "; }"
             ],
             "source": {
               "path": "x-pack/plugins/security/server/plugin.ts",
@@ -1437,9 +1513,19 @@
             "label": "authc",
             "description": [],
             "signature": [
-              "Pick<",
-              "AuthenticationServiceStart",
-              ", \"getCurrentUser\" | \"apiKeys\">"
+              "{ getCurrentUser: (request: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>) => ",
+              "AuthenticatedUser",
+              " | null; apiKeys: Pick<",
+              "APIKeys",
+              ", \"create\" | \"areAPIKeysEnabled\" | \"invalidate\" | \"grantAsInternalUser\" | \"invalidateAsInternalUser\">; }"
             ],
             "source": {
               "path": "x-pack/plugins/security/server/plugin.ts",
@@ -1455,9 +1541,15 @@
             "label": "authz",
             "description": [],
             "signature": [
-              "Pick<",
-              "AuthorizationServiceSetup",
-              ", \"mode\" | \"actions\" | \"checkPrivilegesDynamicallyWithRequest\" | \"checkPrivilegesWithRequest\">"
+              "{ mode: ",
+              "AuthorizationMode",
+              "; actions: ",
+              "Actions",
+              "; checkPrivilegesDynamicallyWithRequest: ",
+              "CheckPrivilegesDynamicallyWithRequest",
+              "; checkPrivilegesWithRequest: ",
+              "CheckPrivilegesWithRequest",
+              "; }"
             ],
             "source": {
               "path": "x-pack/plugins/security/server/plugin.ts",
@@ -1471,6 +1563,31 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "security",
+        "id": "def-server.AuthorizationServiceSetup",
+        "type": "Type",
+        "tags": [],
+        "label": "AuthorizationServiceSetup",
+        "description": [],
+        "signature": [
+          "{ mode: ",
+          "AuthorizationMode",
+          "; actions: ",
+          "Actions",
+          "; checkPrivilegesDynamicallyWithRequest: ",
+          "CheckPrivilegesDynamicallyWithRequest",
+          "; checkPrivilegesWithRequest: ",
+          "CheckPrivilegesWithRequest",
+          "; }"
+        ],
+        "source": {
+          "path": "x-pack/plugins/security/server/index.ts",
+          "lineNumber": 30
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "security",
         "id": "def-server.ROUTE_TAG_CAN_REDIRECT",

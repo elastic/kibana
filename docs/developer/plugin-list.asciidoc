@@ -177,6 +177,10 @@ Content is fetched from the remote (https://feeds.elastic.co and https://feeds-s
 oss plugins.
 
 
+|{kib-repo}blob/{branch}/src/plugins/screenshot_mode/README.md[screenshotMode]
+|The service exposed by this plugin informs consumers whether they should optimize for non-interactivity. In this way plugins can avoid loading unnecessary code, data or other services.
+
+
 |{kib-repo}blob/{branch}/src/plugins/security_oss/README.md[securityOss]
 |securityOss is responsible for educating users about Elastic's free security features,
 so they can properly protect the data within their clusters.
@@ -257,6 +261,10 @@ The plugin exposes the static DefaultEditorController class to consume.
 |Contains the metric visualization.
 
 
+|{kib-repo}blob/{branch}/src/plugins/vis_type_pie/README.md[visTypePie]
+|Contains the pie chart implementation using the elastic-charts library. The goal is to eventually deprecate the old implementation and keep only this. Until then, the library used is defined by the Legacy charts library advanced setting.
+
+
 |{kib-repo}blob/{branch}/src/plugins/vis_type_table/README.md[visTypeTable]
 |Contains the data table visualization, that allows presenting data in a simple table format.
 
@@ -313,7 +321,7 @@ which will load the visualization's editor.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/alerting/README.md[alerting]
-|The Kibana alerting plugin provides a common place to set up alerts. You can:
+|The Kibana Alerting plugin provides a common place to set up rules. You can:
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/apm/readme.md[apm]
@@ -322,11 +330,6 @@ which will load the visualization's editor.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/banners/README.md[banners]
 |Allow to add a header banner that will be displayed on every page of the Kibana application
-
-
-|{kib-repo}blob/{branch}/x-pack/plugins/beats_management/readme.md[beatsManagement]
-|Notes:
-Failure to have auth enabled in Kibana will make for a broken UI. UI-based errors not yet in place
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/canvas/README.md[canvas]

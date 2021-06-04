@@ -186,14 +186,14 @@ describe('event filters selectors', () => {
   });
 
   describe('getListPageDoesDataExist()', () => {
-    it('should return true (default) until we get a Loaded Resource state', () => {
-      expect(getListPageDoesDataExist(initialState)).toBe(true);
+    it('should return false (default) until we get a Loaded Resource state', () => {
+      expect(getListPageDoesDataExist(initialState)).toBe(false);
 
       // Set DataExists to Loading
       // ts-ignore will be fixed when AsyncResourceState is refactored (#830)
       // @ts-ignore
       initialState.listPage.dataExist = createLoadingResourceState(initialState.listPage.dataExist);
-      expect(getListPageDoesDataExist(initialState)).toBe(true);
+      expect(getListPageDoesDataExist(initialState)).toBe(false);
 
       // Set DataExists to Failure
       initialState.listPage.dataExist = createFailedResourceState({
@@ -201,7 +201,7 @@ describe('event filters selectors', () => {
         error: 'Internal Server Error',
         message: 'Something is not right',
       });
-      expect(getListPageDoesDataExist(initialState)).toBe(true);
+      expect(getListPageDoesDataExist(initialState)).toBe(false);
     });
 
     it('should return false if no data exists', () => {

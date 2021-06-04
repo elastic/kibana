@@ -177,6 +177,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
           : null,
       description: descriptionOption !== '' ? descriptionOption : null,
       customRules: null,
+      useNull: null,
     };
     setDetector(dtr);
     setDescriptionPlaceholder(dtr);

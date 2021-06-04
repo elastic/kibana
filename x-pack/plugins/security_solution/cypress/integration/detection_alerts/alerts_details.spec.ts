@@ -23,7 +23,7 @@ import { unmappedRule } from '../../objects/rule';
 import { DETECTIONS_URL } from '../../urls/navigation';
 
 describe('Alert details with unmapped fields', () => {
-  before(() => {
+  beforeEach(() => {
     cleanKibana();
     esArchiverLoad('unmapped_fields');
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);

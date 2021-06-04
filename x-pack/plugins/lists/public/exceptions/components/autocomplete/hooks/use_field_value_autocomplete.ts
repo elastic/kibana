@@ -7,10 +7,10 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { debounce } from 'lodash';
+import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import { AutocompleteStart } from '../../../../../../../../src/plugins/data/public';
 import { IFieldType, IIndexPattern } from '../../../../../../../../src/plugins/data/common';
-import { OperatorTypeEnum } from '../../../../../common';
 
 interface FuncArgs {
   fieldSelected: IFieldType | undefined;

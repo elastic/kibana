@@ -22,8 +22,8 @@ import { analyzeFile } from './analyze_file';
 
 import { updateTelemetry } from './telemetry';
 import { importFileBodySchema, importFileQuerySchema, analyzeFileQuerySchema } from './schemas';
-import { CheckPrivilegesPayload } from '../../security/server';
 import { StartDeps } from './types';
+import { checkFileUploadPrivileges } from './check_privileges';
 
 function importData(
   client: IScopedClusterClient,
@@ -60,29 +60,15 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
         const [, pluginsStart] = await coreSetup.getStartServices();
         const { indexName, checkCreateIndexPattern, checkHasManagePipeline } = request.query;
 
-        const authorizationService = pluginsStart.security?.authz;
-        const requiresAuthz = authorizationService?.mode.useRbacForRequest(request) ?? false;
+        const { hasImportPermission } = await checkFileUploadPrivileges({
+          authorization: pluginsStart.security?.authz,
+          request,
+          indexName,
+          checkCreateIndexPattern,
+          checkHasManagePipeline,
+        });
 
-        if (!authorizationService || !requiresAuthz) {
-          return response.ok({ body: { hasImportPermission: true } });
-        }
-
-        const checkPrivilegesPayload: CheckPrivilegesPayload = {
-          elasticsearch: {
-            cluster: checkHasManagePipeline ? ['manage_pipeline'] : [],
-            index: indexName ? { [indexName]: ['create', 'create_index'] } : {},
-          },
-        };
-        if (checkCreateIndexPattern) {
-          checkPrivilegesPayload.kibana = [
-            authorizationService.actions.savedObject.get('index-pattern', 'create'),
-          ];
-        }
-
-        const checkPrivileges = authorizationService.checkPrivilegesDynamicallyWithRequest(request);
-        const checkPrivilegesResp = await checkPrivileges(checkPrivilegesPayload);
-
-        return response.ok({ body: { hasImportPermission: checkPrivilegesResp.hasAllRequested } });
+        return response.ok({ body: { hasImportPermission } });
       } catch (e) {
         logger.warn(`Unable to check import permission, error: ${e.message}`);
         return response.ok({ body: { hasImportPermission: false } });

@@ -18,12 +18,14 @@ import {
   Logger,
 } from '../../../core/server';
 
-import { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';
+import { VISUALIZE_ENABLE_LABS_SETTING, LEGACY_CHARTS_LIBRARY } from '../common/constants';
 
 import { visualizationSavedObjectType } from './saved_objects';
 
 import { VisualizationsPluginSetup, VisualizationsPluginStart } from './types';
 import { registerVisualizationsCollector } from './usage_collector';
+import { EmbeddableSetup } from '../../embeddable/server';
+import { visualizeEmbeddableFactory } from './embeddable/visualize_embeddable_factory';
 
 export class VisualizationsPlugin
   implements Plugin<VisualizationsPluginSetup, VisualizationsPluginStart> {
@@ -35,7 +37,10 @@ export class VisualizationsPlugin
     this.config = initializerContext.config.legacy.globalConfig$;
   }
 
-  public setup(core: CoreSetup, plugins: { usageCollection?: UsageCollectionSetup }) {
+  public setup(
+    core: CoreSetup,
+    plugins: { usageCollection?: UsageCollectionSetup; embeddable: EmbeddableSetup }
+  ) {
     this.logger.debug('visualizations: Setup');
 
     core.savedObjects.registerType(visualizationSavedObjectType);
@@ -53,11 +58,34 @@ export class VisualizationsPlugin
         category: ['visualization'],
         schema: schema.boolean(),
       },
+      // TODO: Remove this when vis_type_vislib is removed
+      // https://github.com/elastic/kibana/issues/56143
+      [LEGACY_CHARTS_LIBRARY]: {
+        name: i18n.translate(
+          'visualizations.advancedSettings.visualization.legacyChartsLibrary.name',
+          {
+            defaultMessage: 'Legacy charts library',
+          }
+        ),
+        requiresPageReload: true,
+        value: false,
+        description: i18n.translate(
+          'visualizations.advancedSettings.visualization.legacyChartsLibrary.description',
+          {
+            defaultMessage:
+              'Enables legacy charts library for area, line, bar, pie charts in visualize.',
+          }
+        ),
+        category: ['visualization'],
+        schema: schema.boolean(),
+      },
     });
 
     if (plugins.usageCollection) {
       registerVisualizationsCollector(plugins.usageCollection, this.config);
     }
+
+    plugins.embeddable.registerEmbeddableFactory(visualizeEmbeddableFactory());
 
     return {};
   }

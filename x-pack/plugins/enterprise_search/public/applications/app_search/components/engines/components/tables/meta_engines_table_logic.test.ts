@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../../../__mocks__';
-
-import { nextTick } from '@kbn/test/jest';
+import { LogicMounter } from '../../../../../__mocks__';
+import { mockRecursivelyFetchEngines } from '../../../../__mocks__/recursively_fetch_engines.mock';
 
 import { EngineDetails } from '../../../engine/types';
 
 import { MetaEnginesTableLogic } from './meta_engines_table_logic';
 
 describe('MetaEnginesTableLogic', () => {
+  const { mount } = new LogicMounter(MetaEnginesTableLogic);
+
   const DEFAULT_VALUES = {
     expandedRows: {},
     sourceEngines: {},
@@ -44,15 +45,11 @@ describe('MetaEnginesTableLogic', () => {
     metaEngines: [...SOURCE_ENGINES, ...META_ENGINES] as EngineDetails[],
   };
 
-  const { http } = mockHttpValues;
-  const { mount } = new LogicMounter(MetaEnginesTableLogic);
-  const { flashAPIErrors } = mockFlashMessageHelpers;
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('has expected default values', async () => {
+  it('has expected default values', () => {
     mount({}, DEFAULT_PROPS);
     expect(MetaEnginesTableLogic.values).toEqual(DEFAULT_VALUES);
   });
@@ -122,16 +119,6 @@ describe('MetaEnginesTableLogic', () => {
       });
 
       it('calls fetchSourceEngines when it needs to fetch data for the itemId', () => {
-        http.get.mockReturnValueOnce(
-          Promise.resolve({
-            meta: {
-              page: {
-                total_pages: 1,
-              },
-            },
-            results: [{ name: 'source-engine-1' }, { name: 'source-engine-2' }],
-          })
-        );
         mount();
         jest.spyOn(MetaEnginesTableLogic.actions, 'fetchSourceEngines');
 
@@ -142,88 +129,22 @@ describe('MetaEnginesTableLogic', () => {
     });
 
     describe('fetchSourceEngines', () => {
-      it('calls addSourceEngines and displayRow when it has retrieved all pages', async () => {
+      it('calls addSourceEngines and displayRow when it has retrieved all pages', () => {
         mount();
-        http.get.mockReturnValueOnce(
-          Promise.resolve({
-            meta: {
-              page: {
-                total_pages: 1,
-              },
-            },
-            results: [{ name: 'source-engine-1' }, { name: 'source-engine-2' }],
-          })
-        );
         jest.spyOn(MetaEnginesTableLogic.actions, 'displayRow');
         jest.spyOn(MetaEnginesTableLogic.actions, 'addSourceEngines');
 
         MetaEnginesTableLogic.actions.fetchSourceEngines('test-engine-1');
-        await nextTick();
 
-        expect(http.get).toHaveBeenCalledWith(
-          '/api/app_search/engines/test-engine-1/source_engines',
-          {
-            query: {
-              'page[current]': 1,
-              'page[size]': 25,
-            },
-          }
+        expect(mockRecursivelyFetchEngines).toHaveBeenCalledWith(
+          expect.objectContaining({
+            endpoint: '/api/app_search/engines/test-engine-1/source_engines',
+          })
         );
         expect(MetaEnginesTableLogic.actions.addSourceEngines).toHaveBeenCalledWith({
           'test-engine-1': [{ name: 'source-engine-1' }, { name: 'source-engine-2' }],
         });
         expect(MetaEnginesTableLogic.actions.displayRow).toHaveBeenCalledWith('test-engine-1');
-      });
-
-      it('display a flash message on error', async () => {
-        http.get.mockReturnValueOnce(Promise.reject());
-        mount();
-
-        MetaEnginesTableLogic.actions.fetchSourceEngines('test-engine-1');
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledTimes(1);
-      });
-
-      it('recursively fetches a number of pages', async () => {
-        mount();
-        jest.spyOn(MetaEnginesTableLogic.actions, 'addSourceEngines');
-
-        // First page
-        http.get.mockReturnValueOnce(
-          Promise.resolve({
-            meta: {
-              page: {
-                total_pages: 2,
-              },
-            },
-            results: [{ name: 'source-engine-1' }],
-          })
-        );
-
-        // Second and final page
-        http.get.mockReturnValueOnce(
-          Promise.resolve({
-            meta: {
-              page: {
-                total_pages: 2,
-              },
-            },
-            results: [{ name: 'source-engine-2' }],
-          })
-        );
-
-        MetaEnginesTableLogic.actions.fetchSourceEngines('test-engine-1');
-        await nextTick();
-
-        expect(MetaEnginesTableLogic.actions.addSourceEngines).toHaveBeenCalledWith({
-          'test-engine-1': [
-            // First page
-            { name: 'source-engine-1' },
-            // Second and final page
-            { name: 'source-engine-2' },
-          ],
-        });
       });
     });
   });

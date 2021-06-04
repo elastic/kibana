@@ -14,10 +14,21 @@ export interface GetJourneyScreenshotParams {
   stepIndex: number;
 }
 
+export interface GetJourneyScreenshotResults {
+  blob: string | null;
+  mimeType: string | null;
+  stepName: string;
+  totalSteps: number;
+}
+
 export const getJourneyScreenshot: UMElasticsearchQueryFn<
   GetJourneyScreenshotParams,
   any
-> = async ({ uptimeEsClient, checkGroup, stepIndex }) => {
+> = async ({
+  uptimeEsClient,
+  checkGroup,
+  stepIndex,
+}): Promise<GetJourneyScreenshotResults | null> => {
   const params = {
     track_total_hits: true,
     size: 0,
@@ -48,7 +59,7 @@ export const getJourneyScreenshot: UMElasticsearchQueryFn<
           image: {
             top_hits: {
               size: 1,
-              _source: ['synthetics.blob', 'synthetics.step.name'],
+              _source: ['synthetics.blob', 'synthetics.blob_mime', 'synthetics.step.name'],
             },
           },
         },
@@ -65,6 +76,7 @@ export const getJourneyScreenshot: UMElasticsearchQueryFn<
 
   return {
     blob: stepHit?.synthetics?.blob ?? null,
+    mimeType: stepHit?.synthetics?.blob_mime ?? null,
     stepName: stepHit?.synthetics?.step?.name ?? '',
     totalSteps: result?.hits?.total.value,
   };

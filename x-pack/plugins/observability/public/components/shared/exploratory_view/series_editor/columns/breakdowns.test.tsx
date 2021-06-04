@@ -23,7 +23,13 @@ describe('Breakdowns', function () {
   it('should render properly', async function () {
     mockUrlStorage({});
 
-    render(<Breakdowns seriesId={'series-id'} breakdowns={dataViewSeries.breakdowns} />);
+    render(
+      <Breakdowns
+        seriesId={'series-id'}
+        breakdowns={dataViewSeries.breakdowns}
+        reportViewConfig={dataViewSeries}
+      />
+    );
 
     screen.getAllByText('Browser family');
   });
@@ -31,7 +37,13 @@ describe('Breakdowns', function () {
   it('should call set series on change', function () {
     const { setSeries } = mockUrlStorage({ breakdown: USER_AGENT_OS });
 
-    render(<Breakdowns seriesId={'series-id'} breakdowns={dataViewSeries.breakdowns} />);
+    render(
+      <Breakdowns
+        seriesId={'series-id'}
+        breakdowns={dataViewSeries.breakdowns}
+        reportViewConfig={dataViewSeries}
+      />
+    );
 
     screen.getAllByText('Operating system');
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import _ from 'lodash';
+import { flatten } from 'lodash';
 import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Datatable } from 'src/plugins/expressions';
@@ -79,7 +79,7 @@ export function getSuggestions({
   );
 
   // Collect all table suggestions from available datasources
-  const datasourceTableSuggestions = _.flatten(
+  const datasourceTableSuggestions = flatten(
     datasources.map(([datasourceId, datasource]) => {
       const datasourceState = datasourceStates[datasourceId].state;
       let dataSourceSuggestions;
@@ -103,9 +103,9 @@ export function getSuggestions({
 
   // Pass all table suggestions to all visualization extensions to get visualization suggestions
   // and rank them by score
-  return _.flatten(
+  return flatten(
     Object.entries(visualizationMap).map(([visualizationId, visualization]) =>
-      _.flatten(
+      flatten(
         datasourceTableSuggestions.map((datasourceSuggestion) => {
           const table = datasourceSuggestion.table;
           const currentVisualizationState =

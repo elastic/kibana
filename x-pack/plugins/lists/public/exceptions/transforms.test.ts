@@ -5,26 +5,31 @@
  * 2.0.
  */
 
-import { Entry, EntryMatch, EntryNested } from '@kbn/securitysolution-io-ts-utils';
-
-import { ExceptionListItemSchema } from '../../common/schemas/response/exception_list_item_schema';
-import { UpdateExceptionListItemSchema } from '../../common/schemas/request/update_exception_list_item_schema';
-import { CreateExceptionListItemSchema } from '../../common/schemas/request/create_exception_list_item_schema';
-import { getCreateExceptionListItemSchemaMock } from '../../common/schemas/request/create_exception_list_item_schema.mock';
-import { getUpdateExceptionListItemSchemaMock } from '../../common/schemas/request/update_exception_list_item_schema.mock';
-import { getExceptionListItemSchemaMock } from '../../common/schemas/response/exception_list_item_schema.mock';
-import { ENTRIES_WITH_IDS } from '../../common/constants.mock';
-
+import type {
+  CreateExceptionListItemSchema,
+  Entry,
+  EntryMatch,
+  EntryNested,
+  ExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   addIdToExceptionItemEntries,
   removeIdFromExceptionItemsEntries,
   transformInput,
   transformOutput,
-} from './transforms';
+} from '@kbn/securitysolution-list-hooks';
+
+import { getCreateExceptionListItemSchemaMock } from '../../common/schemas/request/create_exception_list_item_schema.mock';
+import { getUpdateExceptionListItemSchemaMock } from '../../common/schemas/request/update_exception_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from '../../common/schemas/response/exception_list_item_schema.mock';
+import { ENTRIES_WITH_IDS } from '../../common/constants.mock';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),
 }));
+
+// TODO: Once mocks are figured out, move this test to the kbn package of: kbn-securitysolution-list-hooks/src/transforms/index.test.ts
 
 describe('Exceptions transforms', () => {
   describe('transformOutput', () => {

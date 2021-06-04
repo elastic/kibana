@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { once } from 'lodash';
 import { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import LRU from 'lru-cache';
@@ -27,7 +28,17 @@ import {
   PluginSetupContract as AlertingSetup,
   PluginStartContract as AlertPluginStartContract,
 } from '../../alerting/server';
+
+import {
+  ECS_COMPONENT_TEMPLATE_NAME,
+  TECHNICAL_COMPONENT_TEMPLATE_NAME,
+} from '../../rule_registry/common/assets';
 import { SecurityPluginSetup as SecuritySetup, SecurityPluginStart } from '../../security/server';
+import {
+  RuleDataClient,
+  RuleRegistryPluginSetupContract,
+  RuleRegistryPluginStartContract,
+} from '../../rule_registry/server';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { MlPluginSetup as MlSetup } from '../../ml/server';
 import { ListPluginSetup } from '../../lists/server';
@@ -37,6 +48,9 @@ import { ILicense, LicensingPluginStart } from '../../licensing/server';
 import { FleetStartContract } from '../../fleet/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { compose } from './lib/compose/kibana';
+import { createQueryAlertType } from './lib/detection_engine/reference_rules/query';
+import { createEqlAlertType } from './lib/detection_engine/reference_rules/eql';
+import { createThresholdAlertType } from './lib/detection_engine/reference_rules/threshold';
 import { initRoutes } from './routes';
 import { isAlertExecutor } from './lib/detection_engine/signals/types';
 import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
@@ -53,12 +67,14 @@ import {
   SecurityPageName,
   SIGNALS_ID,
   NOTIFICATIONS_ID,
+  REFERENCE_RULE_ALERT_TYPE_ID,
+  REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
 import { registerResolverRoutes } from './endpoint/routes/resolver';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
-import { registerHostIsolationRoutes } from './endpoint/routes/actions';
+import { registerActionRoutes } from './endpoint/routes/actions';
 import { EndpointArtifactClient, ManifestManager } from './endpoint/services';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import { EndpointAppContext } from './endpoint/types';
@@ -86,6 +102,7 @@ export interface SetupPlugins {
   features: FeaturesSetup;
   lists?: ListPluginSetup;
   ml?: MlSetup;
+  ruleRegistry: RuleRegistryPluginSetupContract;
   security?: SecuritySetup;
   spaces?: SpacesSetup;
   taskManager?: TaskManagerSetupContract;
@@ -98,6 +115,7 @@ export interface StartPlugins {
   data: DataPluginStart;
   fleet?: FleetStartContract;
   licensing: LicensingPluginStart;
+  ruleRegistry: RuleRegistryPluginStartContract;
   taskManager?: TaskManagerStartContract;
   telemetry?: TelemetryPluginStart;
   security: SecurityPluginStart;
@@ -133,6 +151,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private readonly config: ConfigType;
   private context: PluginInitializerContext;
   private appClientFactory: AppClientFactory;
+  private setupPlugins?: SetupPlugins;
   private readonly endpointAppContextService = new EndpointAppContextService();
   private readonly telemetryEventsSender: TelemetryEventsSender;
 
@@ -157,6 +176,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
     this.logger.debug('plugin setup');
+    this.setupPlugins = plugins;
 
     const config = this.config;
     const globalConfig = this.context.config.legacy.get();
@@ -193,20 +213,92 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       config,
     });
 
+    // TODO: Once we are past experimental phase this check can be removed along with legacy registration of rules
+    let ruleDataClient: RuleDataClient | null = null;
+    if (experimentalFeatures.ruleRegistryEnabled) {
+      const { ruleDataService } = plugins.ruleRegistry;
+      const start = () => core.getStartServices().then(([coreStart]) => coreStart);
+
+      const ready = once(async () => {
+        const componentTemplateName = ruleDataService.getFullAssetName(
+          'security-solution-mappings'
+        );
+
+        if (!ruleDataService.isWriteEnabled()) {
+          return;
+        }
+
+        await ruleDataService.createOrUpdateComponentTemplate({
+          name: componentTemplateName,
+          body: {
+            template: {
+              settings: {
+                number_of_shards: 1,
+              },
+              mappings: {}, // TODO: Add mappings here via `mappingFromFieldMap()`
+            },
+          },
+        });
+
+        await ruleDataService.createOrUpdateIndexTemplate({
+          name: ruleDataService.getFullAssetName('security-solution-index-template'),
+          body: {
+            index_patterns: [ruleDataService.getFullAssetName('security-solution*')],
+            composed_of: [
+              ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
+              ruleDataService.getFullAssetName(ECS_COMPONENT_TEMPLATE_NAME),
+              componentTemplateName,
+            ],
+          },
+        });
+      });
+
+      ready().catch((err) => {
+        this.logger!.error(err);
+      });
+
+      ruleDataClient = new RuleDataClient({
+        alias: plugins.ruleRegistry.ruleDataService.getFullAssetName('security-solution'),
+        getClusterClient: async () => {
+          const coreStart = await start();
+          return coreStart.elasticsearch.client.asInternalUser;
+        },
+        ready,
+      });
+
+      // Register reference rule types via rule-registry
+      this.setupPlugins.alerting.registerType(createQueryAlertType(ruleDataClient, this.logger));
+      this.setupPlugins.alerting.registerType(createEqlAlertType(ruleDataClient, this.logger));
+      this.setupPlugins.alerting.registerType(
+        createThresholdAlertType(ruleDataClient, this.logger)
+      );
+    }
+
     // TO DO We need to get the endpoint routes inside of initRoutes
     initRoutes(
       router,
       config,
       plugins.encryptedSavedObjects?.canEncrypt === true,
       plugins.security,
-      plugins.ml
+      plugins.ml,
+      ruleDataClient
     );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);
     registerResolverRoutes(router);
     registerPolicyRoutes(router, endpointContext);
     registerTrustedAppsRoutes(router, endpointContext);
-    registerHostIsolationRoutes(router, endpointContext);
+    registerActionRoutes(router, endpointContext);
+
+    const referenceRuleTypes = [
+      REFERENCE_RULE_ALERT_TYPE_ID,
+      REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID,
+    ];
+    const ruleTypes = [
+      SIGNALS_ID,
+      NOTIFICATIONS_ID,
+      ...(experimentalFeatures.ruleRegistryEnabled ? referenceRuleTypes : []),
+    ];
 
     plugins.features.registerKibanaFeature({
       id: SERVER_APP_ID,
@@ -220,7 +312,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       management: {
         insightsAndAlerting: ['triggersActions'],
       },
-      alerting: [SIGNALS_ID, NOTIFICATIONS_ID],
+      alerting: ruleTypes,
       privileges: {
         all: {
           app: [...securitySubPlugins, 'kibana'],
@@ -237,7 +329,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             read: ['config'],
           },
           alerting: {
-            all: [SIGNALS_ID, NOTIFICATIONS_ID],
+            rule: {
+              all: ruleTypes,
+            },
+            alert: {
+              all: ruleTypes,
+            },
           },
           management: {
             insightsAndAlerting: ['triggersActions'],
@@ -259,7 +356,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ],
           },
           alerting: {
-            read: [SIGNALS_ID, NOTIFICATIONS_ID],
+            rule: {
+              read: ruleTypes,
+            },
+            alert: {
+              read: ruleTypes,
+            },
           },
           management: {
             insightsAndAlerting: ['triggersActions'],
@@ -269,7 +371,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     });
 
-    if (plugins.alerting != null) {
+    // Continue to register legacy rules against alerting client exposed through rule-registry
+    if (this.setupPlugins.alerting != null) {
       const signalRuleType = signalRulesAlertType({
         logger: this.logger,
         eventsTelemetry: this.telemetryEventsSender,
@@ -282,11 +385,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
 
       if (isAlertExecutor(signalRuleType)) {
-        plugins.alerting.registerType(signalRuleType);
+        this.setupPlugins.alerting.registerType(signalRuleType);
       }
 
       if (isNotificationAlertExecutor(ruleNotificationType)) {
-        plugins.alerting.registerType(ruleNotificationType);
+        this.setupPlugins.alerting.registerType(ruleNotificationType);
       }
     }
 

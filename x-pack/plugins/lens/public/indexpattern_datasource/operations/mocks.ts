@@ -8,7 +8,7 @@
 import type { OperationMetadata } from '../../types';
 import type { OperationType } from './definitions';
 
-export const createMockedReferenceOperation = () => {
+export const createMockedFullReference = () => {
   return {
     input: 'fullReference',
     displayName: 'Reference test',

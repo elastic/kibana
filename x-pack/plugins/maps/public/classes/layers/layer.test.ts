@@ -162,11 +162,20 @@ describe('isFittable', () => {
       fitToBounds: false,
       canFit: false,
     },
+    {
+      isVisible: true,
+      fitToBounds: true,
+      includeInFitToBounds: false,
+      canFit: false,
+    },
   ].forEach((test) => {
     it(`Should take into account layer visibility and bounds-retrieval: ${JSON.stringify(
       test
     )}`, async () => {
-      const layerDescriptor = AbstractLayer.createDescriptor({ visible: test.isVisible });
+      const layerDescriptor = AbstractLayer.createDescriptor({
+        visible: test.isVisible,
+        includeInFitToBounds: test.includeInFitToBounds,
+      });
       const layer = new MockLayer({
         layerDescriptor,
         source: (new MockSource({ fitToBounds: test.fitToBounds }) as unknown) as ISource,

@@ -25,7 +25,6 @@ import { SecurityPageName } from '../../../common/constants';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
 import { EventFiltersContainer } from './event_filters';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 const NoPermissions = memo(() => {
   return (
@@ -58,7 +57,6 @@ NoPermissions.displayName = 'NoPermissions';
 
 export const ManagementContainer = memo(() => {
   const history = useHistory();
-  const isEventFilteringEnabled = useIsExperimentalFeatureEnabled('eventFilteringEnabled');
   const { allEnabled: isIngestEnabled } = useIngestEnabledCheck();
 
   if (!isIngestEnabled) {
@@ -70,10 +68,7 @@ export const ManagementContainer = memo(() => {
       <Route path={MANAGEMENT_ROUTING_ENDPOINTS_PATH} component={EndpointsContainer} />
       <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} component={PolicyContainer} />
       <Route path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH} component={TrustedAppsContainer} />
-
-      {isEventFilteringEnabled && (
-        <Route path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH} component={EventFiltersContainer} />
-      )}
+      <Route path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH} component={EventFiltersContainer} />
 
       <Route
         path={MANAGEMENT_ROUTING_ROOT_PATH}

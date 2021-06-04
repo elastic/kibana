@@ -6,65 +6,24 @@
  */
 
 import Boom from '@hapi/boom';
-import Joi from 'joi';
-import { errors } from '@elastic/elasticsearch';
 import { has, snakeCase } from 'lodash/fp';
+import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { SanitizedAlert } from '../../../../../alerting/common';
 
 import {
   RouteValidationFunction,
   KibanaResponseFactory,
   CustomHttpResponseOptions,
-  SavedObjectsFindResult,
 } from '../../../../../../../src/core/server';
 import { AlertsClient } from '../../../../../alerting/server';
-import { BadRequestError } from '../errors/bad_request_error';
 import { RuleStatusResponse, IRuleStatusSOAttributes } from '../rules/types';
+
+import { RuleParams } from '../schemas/rule_schemas';
 
 export interface OutputError {
   message: string;
   statusCode: number;
 }
-
-/**
- * @deprecated Use kbn-securitysolution-es-utils version
- */
-export const transformError = (err: Error & Partial<errors.ResponseError>): OutputError => {
-  if (Boom.isBoom(err)) {
-    return {
-      message: err.output.payload.message,
-      statusCode: err.output.statusCode,
-    };
-  } else {
-    if (err.statusCode != null) {
-      if (err.body?.error != null) {
-        return {
-          statusCode: err.statusCode,
-          message: `${err.body.error.type}: ${err.body.error.reason}`,
-        };
-      } else {
-        return {
-          statusCode: err.statusCode,
-          message: err.message,
-        };
-      }
-    } else if (err instanceof BadRequestError) {
-      // allows us to throw request validation errors in the absence of Boom
-      return {
-        message: err.message,
-        statusCode: 400,
-      };
-    } else {
-      // natively return the err and allow the regular framework
-      // to deal with the error when it is a non Boom
-      return {
-        message: err.message ?? '(unknown error message)',
-        statusCode: 500,
-      };
-    }
-  }
-};
-
 export interface BulkError {
   id?: string;
   rule_id?: string;
@@ -236,7 +195,12 @@ export const transformBulkError = (
   }
 };
 
-export const buildRouteValidation = <T>(schema: Joi.Schema): RouteValidationFunction<T> => (
+interface Schema {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  validate: (input: any) => { value: any; error?: Error };
+}
+
+export const buildRouteValidation = <T>(schema: Schema): RouteValidationFunction<T> => (
   payload: T,
   { ok, badRequest }
 ) => {
@@ -314,7 +278,7 @@ export const convertToSnakeCase = <T extends Record<string, unknown>>(
  */
 export const mergeStatuses = (
   id: string,
-  currentStatusAndFailures: Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>,
+  currentStatusAndFailures: IRuleStatusSOAttributes[],
   acc: RuleStatusResponse
 ): RuleStatusResponse => {
   if (currentStatusAndFailures.length === 0) {
@@ -323,7 +287,7 @@ export const mergeStatuses = (
     };
   }
   const convertedCurrentStatus = convertToSnakeCase<IRuleStatusSOAttributes>(
-    currentStatusAndFailures[0].attributes
+    currentStatusAndFailures[0]
   );
   return {
     ...acc,
@@ -331,12 +295,12 @@ export const mergeStatuses = (
       current_status: convertedCurrentStatus,
       failures: currentStatusAndFailures
         .slice(1)
-        .map((errorItem) => convertToSnakeCase<IRuleStatusSOAttributes>(errorItem.attributes)),
+        .map((errorItem) => convertToSnakeCase<IRuleStatusSOAttributes>(errorItem)),
     },
   } as RuleStatusResponse;
 };
 
-export type GetFailingRulesResult = Record<string, SanitizedAlert>;
+export type GetFailingRulesResult = Record<string, SanitizedAlert<RuleParams>>;
 
 export const getFailingRules = async (
   ids: string[],
@@ -353,13 +317,11 @@ export const getFailingRules = async (
     return errorRules
       .filter((rule) => rule.executionStatus.status === 'error')
       .reduce<GetFailingRulesResult>((acc, failingRule) => {
-        const accum = acc;
-        const theRule = failingRule;
         return {
-          [theRule.id]: {
-            ...theRule,
+          [failingRule.id]: {
+            ...failingRule,
           },
-          ...accum,
+          ...acc,
         };
       }, {});
   } catch (exc) {

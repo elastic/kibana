@@ -76,6 +76,7 @@ export const CustomFields = memo<Props>(
               defaultMessage="Configure your monitor with the following options."
             />
           }
+          data-test-subj="monitorSettingsSection"
         >
           <EuiFlexGroup>
             <EuiFlexItem>
@@ -104,6 +105,7 @@ export const CustomFields = memo<Props>(
                         configKey: ConfigKeys.MONITOR_TYPE,
                       })
                     }
+                    data-test-subj="syntheticsMonitorTypeField"
                   />
                 </EuiFormRow>
               )}
@@ -128,6 +130,7 @@ export const CustomFields = memo<Props>(
                     onChange={(event) =>
                       handleInputChange({ value: event.target.value, configKey: ConfigKeys.URLS })
                     }
+                    data-test-subj="syntheticsUrlField"
                   />
                 </EuiFormRow>
               )}
@@ -155,6 +158,7 @@ export const CustomFields = memo<Props>(
                         configKey: ConfigKeys.HOSTS,
                       })
                     }
+                    data-test-subj="syntheticsTCPHostField"
                   />
                 </EuiFormRow>
               )}
@@ -182,6 +186,7 @@ export const CustomFields = memo<Props>(
                         configKey: ConfigKeys.HOSTS,
                       })
                     }
+                    data-test-subj="syntheticsICMPHostField"
                   />
                 </EuiFormRow>
               )}
@@ -268,6 +273,7 @@ export const CustomFields = memo<Props>(
                       configKey: ConfigKeys.APM_SERVICE_NAME,
                     })
                   }
+                  data-test-subj="syntheticsAPMServiceName"
                 />
               </EuiFormRow>
               {isHTTP && (
@@ -364,6 +370,7 @@ export const CustomFields = memo<Props>(
                 <ComboBox
                   selectedOptions={fields[ConfigKeys.TAGS]}
                   onChange={(value) => handleInputChange({ value, configKey: ConfigKeys.TAGS })}
+                  data-test-subj="syntheticsTags"
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -385,6 +392,7 @@ export const CustomFields = memo<Props>(
                 defaultMessage="Configure TLS options, including verification mode, certificate authorities, and client certificates."
               />
             }
+            data-test-subj="syntheticsIsTLSEnabled"
           >
             <EuiCheckbox
               id={'uptimeFleetIsTLSEnabled'}

@@ -8,7 +8,7 @@
 import Fs from 'fs';
 import { resolve, join } from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { pageObjects } from './page_objects';
 
 // .server-log is specifically not enabled

@@ -4,6 +4,11 @@
 
 ## IFieldType interface
 
+> Warning: This API is now obsolete.
+> 
+> Use IndexPatternField or FieldSpec instead
+> 
+
 <b>Signature:</b>
 
 ```typescript

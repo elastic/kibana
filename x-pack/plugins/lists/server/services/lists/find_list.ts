@@ -6,15 +6,15 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-
-import {
+import type {
   Filter,
   FoundListSchema,
   Page,
   PerPage,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+
 import { SearchEsListSchema } from '../../schemas/elastic_response';
 import {
   encodeCursor,

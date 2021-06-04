@@ -392,6 +392,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'bfetch:disableCompression': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'visualization:visualize:legacyChartsLibrary': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -445,6 +449,14 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'labs:canvas:useDataService': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'labs:dashboard:enable_ui': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'labs:dashboard:deferBelowFold': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

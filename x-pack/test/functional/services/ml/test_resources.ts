@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ProvidedType } from '@kbn/test/types/ftr';
+import { ProvidedType } from '@kbn/test';
 import { savedSearches, dashboards } from './test_resources_data';
 import { COMMON_REQUEST_HEADERS } from './common_api';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -305,6 +305,10 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       await this.createDashboardIfNeeded(dashboards.mlTestDashboard);
     },
 
+    async deleteMLTestDashboard() {
+      await this.deleteDashboardByTitle(dashboards.mlTestDashboard.requestBody.attributes.title);
+    },
+
     async createDashboardIfNeeded(dashboard: any) {
       const title = dashboard.requestBody.attributes.title;
       const dashboardId = await this.getDashboardId(title);
@@ -530,7 +534,7 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
     },
 
     async installFleetPackage(packageIdentifier: string) {
-      log.debug(`Installing Fleet package'${packageIdentifier}'`);
+      log.debug(`Installing Fleet package '${packageIdentifier}'`);
 
       await supertest
         .post(`/api/fleet/epm/packages/${packageIdentifier}`)
@@ -541,7 +545,7 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
     },
 
     async removeFleetPackage(packageIdentifier: string) {
-      log.debug(`Removing Fleet package'${packageIdentifier}'`);
+      log.debug(`Removing Fleet package '${packageIdentifier}'`);
 
       await supertest
         .delete(`/api/fleet/epm/packages/${packageIdentifier}`)

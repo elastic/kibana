@@ -84,9 +84,8 @@ const configSchema = schema.object(
         }
       },
     }),
-    host: schema.string({
+    host: schema.oneOf([schema.string({ hostname: true }), schema.literal('0')], {
       defaultValue: 'localhost',
-      hostname: true,
     }),
     maxPayload: schema.byteSize({
       defaultValue: '1048576b',

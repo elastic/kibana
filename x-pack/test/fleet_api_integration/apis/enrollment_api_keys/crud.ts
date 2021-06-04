@@ -103,7 +103,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
       });
 
-      it('should allow to create an enrollment api key with an agent policy', async () => {
+      it('should allow to create an enrollment api key with only an agent policy', async () => {
         const { body: apiResponse } = await supertest
           .post(`/api/fleet/enrollment-api-keys`)
           .set('kbn-xsrf', 'xxx')
@@ -113,6 +113,55 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(apiResponse.item).to.have.keys('id', 'api_key', 'api_key_id', 'name', 'policy_id');
+      });
+
+      it('should allow to create an enrollment api key with agent policy and unique name', async () => {
+        const { body: noSpacesRes } = await supertest
+          .post(`/api/fleet/enrollment-api-keys`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            policy_id: 'policy1',
+            name: 'something',
+          });
+        expect(noSpacesRes.item).to.have.keys('id', 'api_key', 'api_key_id', 'name', 'policy_id');
+
+        const { body: hasSpacesRes } = await supertest
+          .post(`/api/fleet/enrollment-api-keys`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            policy_id: 'policy1',
+            name: 'something else',
+          });
+        expect(hasSpacesRes.item).to.have.keys('id', 'api_key', 'api_key_id', 'name', 'policy_id');
+
+        const { body: noSpacesDupe } = await supertest
+          .post(`/api/fleet/enrollment-api-keys`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            policy_id: 'policy1',
+            name: 'something',
+          })
+          .expect(400);
+
+        expect(noSpacesDupe).to.eql({
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'An enrollment key named something already exists for agent policy policy1',
+        });
+
+        const { body: hasSpacesDupe } = await supertest
+          .post(`/api/fleet/enrollment-api-keys`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            policy_id: 'policy1',
+            name: 'something else',
+          })
+          .expect(400);
+        expect(hasSpacesDupe).to.eql({
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'An enrollment key named something else already exists for agent policy policy1',
+        });
       });
 
       it('should create an ES ApiKey with metadata', async () => {

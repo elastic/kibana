@@ -38,12 +38,11 @@ export class ChromiumArchivePaths {
     {
       platform: 'darwin',
       architecture: 'x64',
-      archiveFilename: 'chrome-mac.zip',
-      archiveChecksum: '6aad6fa5a26d83e24e2f0d52de5230bf',
-      binaryChecksum: '2dc7a7250d849df4cab60f3b4a70c1ea',
-      binaryRelativePath: 'chrome-mac/Chromium.app/Contents/MacOS/Chromium',
-      location: 'common',
-      archivePath: 'Mac',
+      archiveFilename: 'chromium-d163fd7-darwin_x64.zip',
+      archiveChecksum: '19aa88bd59e2575816425bf72786c53f',
+      binaryChecksum: 'dfcd6e007214175997663c50c8d871ea',
+      binaryRelativePath: 'headless_shell-darwin_x64/headless_shell',
+      location: 'custom',
     },
     {
       platform: 'linux',

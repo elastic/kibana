@@ -70,6 +70,11 @@ module.exports = {
           to: '@kbn/tinymath',
           disallowedMessage: `Don't use 'tinymath', use '@kbn/tinymath'`
         },
+        {
+          from: '@kbn/test/types/ftr',
+          to: '@kbn/test',
+          disallowedMessage: `import from the root of @kbn/test instead`
+        },
       ],
     ],
   },

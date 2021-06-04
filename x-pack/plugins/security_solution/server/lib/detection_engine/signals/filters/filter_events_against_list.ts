@@ -6,10 +6,10 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { entriesList } from '@kbn/securitysolution-io-ts-utils';
+import { entriesList, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas';
-import { hasLargeValueList } from '../../../../../common/detection_engine/utils';
+import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
+
 import { FilterEventsAgainstListOptions } from './types';
 import { filterEvents } from './filter_events';
 import { createFieldAndSetTuples } from './create_field_and_set_tuples';

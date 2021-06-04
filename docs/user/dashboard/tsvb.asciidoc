@@ -11,9 +11,7 @@ To create *TSVB* visualization panels, your data must have a time field.
 
 Open *TSVB*, then make sure the required settings are configured.
 
-. On the dashboard, click *Create panel*.
-
-. On the *New visualization* window, click *TSVB*.
+. On the dashboard, click *All types*, then select *TSVB*.
 
 . In *TSVB*, click *Panel options*, then specify the required *Data* settings.
 

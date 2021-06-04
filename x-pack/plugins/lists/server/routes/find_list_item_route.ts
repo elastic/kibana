@@ -7,14 +7,14 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
-import type { ListsPluginRouter } from '../types';
-import { LIST_ITEM_URL } from '../../common/constants';
 import {
   FindListItemSchemaDecoded,
   findListItemSchema,
   foundListItemSchema,
-} from '../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+
+import type { ListsPluginRouter } from '../types';
 import { decodeCursor } from '../services/utils';
 
 import { buildRouteValidation, buildSiemResponse, getListClient } from './utils';

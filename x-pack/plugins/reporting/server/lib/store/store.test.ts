@@ -7,7 +7,8 @@
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { ElasticsearchClient } from 'src/core/server';
-import { ReportingCore } from '../..';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { ReportingCore } from '../../';
 import {
   createMockConfigSchema,
   createMockLevelLogger,
@@ -15,6 +16,8 @@ import {
 } from '../../test_helpers';
 import { Report } from './report';
 import { ReportingStore } from './store';
+
+const { createApiResponse } = elasticsearchServiceMock;
 
 describe('ReportingStore', () => {
   const mockLogger = createMockLevelLogger();
@@ -338,5 +341,41 @@ describe('ReportingStore', () => {
         },
       ]
     `);
+  });
+
+  describe('start', () => {
+    it('creates an ILM policy for managing reporting indices if there is not already one', async () => {
+      mockEsClient.ilm.getLifecycle.mockRejectedValueOnce(createApiResponse({ statusCode: 404 }));
+      mockEsClient.ilm.putLifecycle.mockResolvedValueOnce(createApiResponse());
+
+      const store = new ReportingStore(mockCore, mockLogger);
+      await store.start();
+
+      expect(mockEsClient.ilm.getLifecycle).toHaveBeenCalledWith({ policy: 'kibana-reporting' });
+      expect(mockEsClient.ilm.putLifecycle.mock.calls[0][0]).toMatchInlineSnapshot(`
+        Object {
+          "body": Object {
+            "policy": Object {
+              "phases": Object {
+                "hot": Object {
+                  "actions": Object {},
+                },
+              },
+            },
+          },
+          "policy": "kibana-reporting",
+        }
+      `);
+    });
+
+    it('does not create an ILM policy for managing reporting indices if one already exists', async () => {
+      mockEsClient.ilm.getLifecycle.mockResolvedValueOnce(createApiResponse());
+
+      const store = new ReportingStore(mockCore, mockLogger);
+      await store.start();
+
+      expect(mockEsClient.ilm.getLifecycle).toHaveBeenCalledWith({ policy: 'kibana-reporting' });
+      expect(mockEsClient.ilm.putLifecycle).not.toHaveBeenCalled();
+    });
   });
 });

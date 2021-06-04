@@ -7,9 +7,9 @@
 
 import { KibanaResponseFactory } from 'kibana/server';
 
-import { xpackMocks } from '../../../../../../mocks';
+import { xpackMocks } from '../../../fixtures';
 import { loggingSystemMock, httpServerMock } from '../../../../../../../src/core/server/mocks';
-import { ExceptionListItemSchema } from '../../../../../lists/common/schemas/response';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { listMock } from '../../../../../lists/server/mocks';
 import { ExceptionListClient } from '../../../../../lists/server';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';

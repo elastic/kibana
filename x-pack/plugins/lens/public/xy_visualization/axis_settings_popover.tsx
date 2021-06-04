@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,16 +14,21 @@ import {
   EuiSpacer,
   EuiFieldText,
   IconType,
+  EuiFormRow,
+  EuiButtonGroup,
+  htmlIdGenerator,
+  EuiFieldNumber,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { XYLayerConfig, AxesSettingsConfig } from './types';
-import { ToolbarPopover } from '../shared_components';
+import { XYLayerConfig, AxesSettingsConfig, AxisExtentConfig } from './types';
+import { ToolbarPopover, useDebouncedValue } from '../shared_components';
 import { isHorizontalChart } from './state_helpers';
 import { EuiIconAxisBottom } from '../assets/axis_bottom';
 import { EuiIconAxisLeft } from '../assets/axis_left';
 import { EuiIconAxisRight } from '../assets/axis_right';
 import { EuiIconAxisTop } from '../assets/axis_top';
 import { ToolbarButtonProps } from '../../../../../src/plugins/kibana_react/public';
+import { validateExtent } from './axes_configuration';
 
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
 export interface AxisSettingsPopoverProps {
@@ -79,6 +84,16 @@ export interface AxisSettingsPopoverProps {
    * Flag whether endzones are visible
    */
   endzonesVisible?: boolean;
+  /**
+   *  axis extent
+   */
+  extent?: AxisExtentConfig;
+  /**
+   * set axis extent
+   */
+  setExtent?: (extent: AxisExtentConfig | undefined) => void;
+  hasBarOrAreaOnAxis: boolean;
+  dataBounds?: { min: number; max: number };
 }
 const popoverConfig = (
   axis: AxesSettingsConfigKeys,
@@ -134,6 +149,8 @@ const popoverConfig = (
   }
 };
 
+const noop = () => {};
+const idPrefix = htmlIdGenerator()();
 export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverProps> = ({
   layers,
   axis,
@@ -148,16 +165,49 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   toggleAxisTitleVisibility,
   setEndzoneVisibility,
   endzonesVisible,
+  extent,
+  setExtent,
+  hasBarOrAreaOnAxis,
+  dataBounds,
 }) => {
-  const [title, setTitle] = useState<string | undefined>(axisTitle);
-
   const isHorizontal = layers?.length ? isHorizontalChart(layers) : false;
   const config = popoverConfig(axis, isHorizontal);
 
-  const onTitleChange = (value: string): void => {
-    setTitle(value);
-    updateTitleState(value);
-  };
+  const { inputValue: debouncedExtent, handleInputChange: setDebouncedExtent } = useDebouncedValue<
+    AxisExtentConfig | undefined
+  >({
+    value: extent,
+    onChange: setExtent || noop,
+  });
+
+  const [localExtent, setLocalExtent] = useState(debouncedExtent);
+
+  const { inclusiveZeroError, boundaryError } = validateExtent(hasBarOrAreaOnAxis, localExtent);
+
+  useEffect(() => {
+    // set global extent if local extent is not invalid
+    if (
+      setExtent &&
+      !inclusiveZeroError &&
+      !boundaryError &&
+      localExtent &&
+      localExtent !== debouncedExtent
+    ) {
+      setDebouncedExtent(localExtent);
+    }
+  }, [
+    localExtent,
+    inclusiveZeroError,
+    boundaryError,
+    setDebouncedExtent,
+    debouncedExtent,
+    setExtent,
+  ]);
+
+  const { inputValue: title, handleInputChange: onTitleChange } = useDebouncedValue<string>({
+    value: axisTitle || '',
+    onChange: updateTitleState,
+  });
   return (
     <ToolbarPopover
       title={config.popoverTitle}
@@ -234,6 +284,177 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
             onChange={() => setEndzoneVisibility(!Boolean(endzonesVisible))}
             checked={Boolean(endzonesVisible)}
           />
+        </>
+      )}
+      {localExtent && setExtent && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiFormRow
+            display="rowCompressed"
+            fullWidth
+            label={i18n.translate('xpack.lens.xyChart.axisExtent.label', {
+              defaultMessage: 'Bounds',
+            })}
+            helpText={
+              hasBarOrAreaOnAxis
+                ? i18n.translate('xpack.lens.xyChart.axisExtent.disabledDataBoundsMessage', {
+                    defaultMessage: 'Only line charts can be fit to the data bounds',
+                  })
+                : undefined
+            }
+          >
+            <EuiButtonGroup
+              isFullWidth
+              legend={i18n.translate('xpack.lens.xyChart.axisExtent.label', {
+                defaultMessage: 'Bounds',
+              })}
+              data-test-subj="lnsXY_axisBounds_groups"
+              name="axisBounds"
+              buttonSize="compressed"
+              options={[
+                {
+                  id: `${idPrefix}full`,
+                  label: i18n.translate('xpack.lens.xyChart.axisExtent.full', {
+                    defaultMessage: 'Full',
+                  }),
+                  'data-test-subj': 'lnsXY_axisExtent_groups_full',
+                },
+                {
+                  id: `${idPrefix}dataBounds`,
+                  label: i18n.translate('xpack.lens.xyChart.axisExtent.dataBounds', {
+                    defaultMessage: 'Data bounds',
+                  }),
+                  'data-test-subj': 'lnsXY_axisExtent_groups_DataBounds',
+                  isDisabled: hasBarOrAreaOnAxis,
+                },
+                {
+                  id: `${idPrefix}custom`,
+                  label: i18n.translate('xpack.lens.xyChart.axisExtent.custom', {
+                    defaultMessage: 'Custom',
+                  }),
+                  'data-test-subj': 'lnsXY_axisExtent_groups_custom',
+                },
+              ]}
+              idSelected={`${idPrefix}${
+                hasBarOrAreaOnAxis && localExtent.mode === 'dataBounds' ? 'full' : localExtent.mode
+              }`}
+              onChange={(id) => {
+                const newMode = id.replace(idPrefix, '') as AxisExtentConfig['mode'];
+                setLocalExtent({
+                  ...localExtent,
+                  mode: newMode,
+                  lowerBound:
+                    newMode === 'custom' && dataBounds ? Math.min(0, dataBounds.min) : undefined,
+                  upperBound: newMode === 'custom' && dataBounds ? dataBounds.max : undefined,
+                });
+              }}
+            />
+          </EuiFormRow>
+          {localExtent.mode === 'custom' && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem>
+                  <EuiFormRow
+                    display="rowCompressed"
+                    fullWidth
+                    label={i18n.translate('xpack.lens.xyChart.lowerBoundLabel', {
+                      defaultMessage: 'Lower bound',
+                    })}
+                    isInvalid={inclusiveZeroError || boundaryError}
+                    helpText={
+                      hasBarOrAreaOnAxis && !inclusiveZeroError
+                        ? i18n.translate('xpack.lens.xyChart.inclusiveZero', {
+                            defaultMessage: 'Bounds must include zero.',
+                          })
+                        : undefined
+                    }
+                    error={
+                      hasBarOrAreaOnAxis && inclusiveZeroError
+                        ? i18n.translate('xpack.lens.xyChart.inclusiveZero', {
+                            defaultMessage: 'Bounds must include zero.',
+                          })
+                        : undefined
+                    }
+                  >
+                    <EuiFieldNumber
+                      compressed
+                      value={localExtent.lowerBound ?? ''}
+                      isInvalid={inclusiveZeroError || boundaryError}
+                      data-test-subj="lnsXY_axisExtent_lowerBound"
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        if (e.target.value === '' || Number.isNaN(Number(val))) {
+                          setLocalExtent({
+                            ...localExtent,
+                            lowerBound: undefined,
+                          });
+                        } else {
+                          setLocalExtent({
+                            ...localExtent,
+                            lowerBound: val,
+                          });
+                        }
+                      }}
+                      onBlur={() => {
+                        if (localExtent.lowerBound === undefined && dataBounds) {
+                          setLocalExtent({
+                            ...localExtent,
+                            lowerBound: Math.min(0, dataBounds.min),
+                          });
+                        }
+                      }}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFormRow
+                    display="rowCompressed"
+                    fullWidth
+                    label={i18n.translate('xpack.lens.xyChart.upperBoundLabel', {
+                      defaultMessage: 'Upper bound',
+                    })}
+                    isInvalid={inclusiveZeroError || boundaryError}
+                    error={
+                      boundaryError
+                        ? i18n.translate('xpack.lens.xyChart.boundaryError', {
+                            defaultMessage: 'Lower bound has to be larger than upper bound',
+                          })
+                        : undefined
+                    }
+                  >
+                    <EuiFieldNumber
+                      compressed
+                      value={localExtent.upperBound ?? ''}
+                      data-test-subj="lnsXY_axisExtent_upperBound"
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        if (e.target.value === '' || Number.isNaN(Number(val))) {
+                          setLocalExtent({
+                            ...localExtent,
+                            upperBound: undefined,
+                          });
+                        } else {
+                          setLocalExtent({
+                            ...localExtent,
+                            upperBound: val,
+                          });
+                        }
+                      }}
+                      onBlur={() => {
+                        if (localExtent.upperBound === undefined && dataBounds) {
+                          setLocalExtent({
+                            ...localExtent,
+                            upperBound: dataBounds.max,
+                          });
+                        }
+                      }}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          )}
         </>
       )}
     </ToolbarPopover>

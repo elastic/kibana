@@ -172,7 +172,9 @@
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 142
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "licensing",
@@ -208,7 +210,9 @@
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 152
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "licensing",
@@ -377,7 +381,7 @@
               "\nThe state of checking the results of a license type meeting the license minimum."
             ],
             "signature": [
-              "LicenseCheckState"
+              "\"valid\" | \"invalid\" | \"expired\" | \"unavailable\""
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
@@ -488,7 +492,7 @@
               "\nThe validity status of the license."
             ],
             "signature": [
-              "LicenseStatus"
+              "\"active\" | \"invalid\" | \"expired\""
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
@@ -549,76 +553,6 @@
             },
             "deprecated": true,
             "references": [
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts",
-                  "lineNumber": 21
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts",
-                  "lineNumber": 22
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts",
-                  "lineNumber": 23
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts",
-                  "lineNumber": 159
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts",
-                  "lineNumber": 161
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts",
-                  "lineNumber": 42
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts",
-                  "lineNumber": 43
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts",
-                  "lineNumber": 44
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts",
-                  "lineNumber": 47
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts",
-                  "lineNumber": 48
-                }
-              },
               {
                 "plugin": "apm",
                 "link": {
@@ -722,6 +656,90 @@
                 "link": {
                   "path": "x-pack/plugins/security/common/licensing/license_service.test.ts",
                   "lineNumber": 219
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts",
+                  "lineNumber": 22
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts",
+                  "lineNumber": 23
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts",
+                  "lineNumber": 24
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts",
+                  "lineNumber": 47
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts",
+                  "lineNumber": 48
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts",
+                  "lineNumber": 42
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts",
+                  "lineNumber": 43
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts",
+                  "lineNumber": 44
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts",
+                  "lineNumber": 54
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts",
+                  "lineNumber": 55
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts",
+                  "lineNumber": 159
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts",
+                  "lineNumber": 161
                 }
               }
             ]
@@ -874,7 +892,9 @@
           "\nProvides information about feature availability for the current license."
         ],
         "signature": [
-          "{ [x: string]: LicenseFeature; }"
+          "{ [x: string]: ",
+          "LicenseFeature",
+          "; }"
         ],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
@@ -922,17 +942,17 @@
           "deprecated": true,
           "references": [
             {
-              "plugin": "security",
-              "link": {
-                "path": "x-pack/plugins/security/public/plugin.tsx",
-                "lineNumber": 89
-              }
-            },
-            {
               "plugin": "licenseManagement",
               "link": {
                 "path": "x-pack/plugins/license_management/public/plugin.ts",
                 "lineNumber": 61
+              }
+            },
+            {
+              "plugin": "security",
+              "link": {
+                "path": "x-pack/plugins/security/public/plugin.tsx",
+                "lineNumber": 82
               }
             },
             {
@@ -946,14 +966,7 @@
               "plugin": "ml",
               "link": {
                 "path": "x-pack/plugins/ml/public/plugin.ts",
-                "lineNumber": 136
-              }
-            },
-            {
-              "plugin": "fleet",
-              "link": {
-                "path": "x-pack/plugins/fleet/public/plugin.ts",
-                "lineNumber": 97
+                "lineNumber": 141
               }
             },
             {
@@ -999,17 +1012,17 @@
               }
             },
             {
-              "plugin": "beatsManagement",
-              "link": {
-                "path": "x-pack/plugins/beats_management/public/lib/adapters/framework/kibana_framework_adapter.ts",
-                "lineNumber": 65
-              }
-            },
-            {
               "plugin": "crossClusterReplication",
               "link": {
                 "path": "x-pack/plugins/cross_cluster_replication/public/plugin.ts",
                 "lineNumber": 75
+              }
+            },
+            {
+              "plugin": "fleet",
+              "link": {
+                "path": "x-pack/plugins/fleet/public/plugin.ts",
+                "lineNumber": 97
               }
             },
             {
@@ -1234,7 +1247,352 @@
             "text": "CustomHttpResponseOptions"
           },
           "<T>) => ",
-          "KibanaResponse"
+          "KibanaResponse",
+          "<T>; badRequest: (options?: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.ErrorHttpResponseOptions",
+            "text": "ErrorHttpResponseOptions"
+          },
+          ") => ",
+          "KibanaResponse",
+          "<",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.ResponseError",
+            "text": "ResponseError"
+          },
+          ">; unauthorized: (options?: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.ErrorHttpResponseOptions",
+            "text": "ErrorHttpResponseOptions"
+          },
+          ") => ",
+          "KibanaResponse",
+          "<",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.ResponseError",
+            "text": "ResponseError"
+          },
+          ">; forbidden: (options?: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.ErrorHttpResponseOptions",
+            "text": "ErrorHttpResponseOptions"
+          },
+          ") => ",
+          "KibanaResponse",
+          "<",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.ResponseError",
+            "text": "ResponseError"
+          },
+          ">; notFound: (options?: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.ErrorHttpResponseOptions",
+            "text": "ErrorHttpResponseOptions"
+          },
+          ") => ",
+          "KibanaResponse",
+          "<",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.ResponseError",
+            "text": "ResponseError"
+          },
+          ">; conflict: (options?: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.ErrorHttpResponseOptions",
+            "text": "ErrorHttpResponseOptions"
+          },
+          ") => ",
+          "KibanaResponse",
+          "<",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.ResponseError",
+            "text": "ResponseError"
+          },
+          ">; customError: (options: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.CustomHttpResponseOptions",
+            "text": "CustomHttpResponseOptions"
+          },
+          "<",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.ResponseError",
+            "text": "ResponseError"
+          },
+          ">) => ",
+          "KibanaResponse",
+          "<",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.ResponseError",
+            "text": "ResponseError"
+          },
+          ">; redirected: (options: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.RedirectResponseOptions",
+            "text": "RedirectResponseOptions"
+          },
+          ") => ",
+          "KibanaResponse",
+          "<string | Record<string, any> | Buffer | ",
+          "Stream",
+          ">; ok: (options?: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.HttpResponseOptions",
+            "text": "HttpResponseOptions"
+          },
+          ") => ",
+          "KibanaResponse",
+          "<string | Record<string, any> | Buffer | ",
+          "Stream",
+          ">; accepted: (options?: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.HttpResponseOptions",
+            "text": "HttpResponseOptions"
+          },
+          ") => ",
+          "KibanaResponse",
+          "<string | Record<string, any> | Buffer | ",
+          "Stream",
+          ">; noContent: (options?: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.HttpResponseOptions",
+            "text": "HttpResponseOptions"
+          },
+          ") => ",
+          "KibanaResponse",
+          "<undefined>; }>) => ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.RequestHandler",
+            "text": "RequestHandler"
+          },
+          "<P, Q, B, Context, any, { custom: <T extends string | Record<string, any> | Error | { message: string | Error; attributes?: Record<string, any> | undefined; } | Buffer | ",
+          "Stream",
+          " | undefined>(options: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.CustomHttpResponseOptions",
+            "text": "CustomHttpResponseOptions"
+          },
+          "<T>) => ",
+          "KibanaResponse",
+          "<T>; badRequest: (options?: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.ErrorHttpResponseOptions",
+            "text": "ErrorHttpResponseOptions"
+          },
+          ") => ",
+          "KibanaResponse",
+          "<",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.ResponseError",
+            "text": "ResponseError"
+          },
+          ">; unauthorized: (options?: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.ErrorHttpResponseOptions",
+            "text": "ErrorHttpResponseOptions"
+          },
+          ") => ",
+          "KibanaResponse",
+          "<",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.ResponseError",
+            "text": "ResponseError"
+          },
+          ">; forbidden: (options?: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.ErrorHttpResponseOptions",
+            "text": "ErrorHttpResponseOptions"
+          },
+          ") => ",
+          "KibanaResponse",
+          "<",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.ResponseError",
+            "text": "ResponseError"
+          },
+          ">; notFound: (options?: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.ErrorHttpResponseOptions",
+            "text": "ErrorHttpResponseOptions"
+          },
+          ") => ",
+          "KibanaResponse",
+          "<",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.ResponseError",
+            "text": "ResponseError"
+          },
+          ">; conflict: (options?: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.ErrorHttpResponseOptions",
+            "text": "ErrorHttpResponseOptions"
+          },
+          ") => ",
+          "KibanaResponse",
+          "<",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.ResponseError",
+            "text": "ResponseError"
+          },
+          ">; customError: (options: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.CustomHttpResponseOptions",
+            "text": "CustomHttpResponseOptions"
+          },
+          "<",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.ResponseError",
+            "text": "ResponseError"
+          },
+          ">) => ",
+          "KibanaResponse",
+          "<",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.ResponseError",
+            "text": "ResponseError"
+          },
+          ">; redirected: (options: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.RedirectResponseOptions",
+            "text": "RedirectResponseOptions"
+          },
+          ") => ",
+          "KibanaResponse",
+          "<string | Record<string, any> | Buffer | ",
+          "Stream",
+          ">; ok: (options?: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.HttpResponseOptions",
+            "text": "HttpResponseOptions"
+          },
+          ") => ",
+          "KibanaResponse",
+          "<string | Record<string, any> | Buffer | ",
+          "Stream",
+          ">; accepted: (options?: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.HttpResponseOptions",
+            "text": "HttpResponseOptions"
+          },
+          ") => ",
+          "KibanaResponse",
+          "<string | Record<string, any> | Buffer | ",
+          "Stream",
+          ">; noContent: (options?: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.HttpResponseOptions",
+            "text": "HttpResponseOptions"
+          },
+          ") => ",
+          "KibanaResponse",
+          "<undefined>; }>"
         ],
         "source": {
           "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
@@ -1299,7 +1657,162 @@
                 "docId": "kibCoreHttpPluginApi",
                 "section": "def-server.ErrorHttpResponseOptions",
                 "text": "ErrorHttpResponseOptions"
-              }
+              },
+              ") => ",
+              "KibanaResponse",
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.ResponseError",
+                "text": "ResponseError"
+              },
+              ">; unauthorized: (options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.ErrorHttpResponseOptions",
+                "text": "ErrorHttpResponseOptions"
+              },
+              ") => ",
+              "KibanaResponse",
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.ResponseError",
+                "text": "ResponseError"
+              },
+              ">; forbidden: (options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.ErrorHttpResponseOptions",
+                "text": "ErrorHttpResponseOptions"
+              },
+              ") => ",
+              "KibanaResponse",
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.ResponseError",
+                "text": "ResponseError"
+              },
+              ">; notFound: (options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.ErrorHttpResponseOptions",
+                "text": "ErrorHttpResponseOptions"
+              },
+              ") => ",
+              "KibanaResponse",
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.ResponseError",
+                "text": "ResponseError"
+              },
+              ">; conflict: (options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.ErrorHttpResponseOptions",
+                "text": "ErrorHttpResponseOptions"
+              },
+              ") => ",
+              "KibanaResponse",
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.ResponseError",
+                "text": "ResponseError"
+              },
+              ">; customError: (options: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.CustomHttpResponseOptions",
+                "text": "CustomHttpResponseOptions"
+              },
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.ResponseError",
+                "text": "ResponseError"
+              },
+              ">) => ",
+              "KibanaResponse",
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.ResponseError",
+                "text": "ResponseError"
+              },
+              ">; redirected: (options: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.RedirectResponseOptions",
+                "text": "RedirectResponseOptions"
+              },
+              ") => ",
+              "KibanaResponse",
+              "<string | Record<string, any> | Buffer | ",
+              "Stream",
+              ">; ok: (options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.HttpResponseOptions",
+                "text": "HttpResponseOptions"
+              },
+              ") => ",
+              "KibanaResponse",
+              "<string | Record<string, any> | Buffer | ",
+              "Stream",
+              ">; accepted: (options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.HttpResponseOptions",
+                "text": "HttpResponseOptions"
+              },
+              ") => ",
+              "KibanaResponse",
+              "<string | Record<string, any> | Buffer | ",
+              "Stream",
+              ">; noContent: (options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.HttpResponseOptions",
+                "text": "HttpResponseOptions"
+              },
+              ") => ",
+              "KibanaResponse",
+              "<undefined>; }>"
             ],
             "source": {
               "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
@@ -1692,7 +2205,9 @@
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 142
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "licensing",
@@ -1728,7 +2243,9 @@
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 152
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "licensing",
@@ -1897,7 +2414,7 @@
               "\nThe state of checking the results of a license type meeting the license minimum."
             ],
             "signature": [
-              "LicenseCheckState"
+              "\"valid\" | \"invalid\" | \"expired\" | \"unavailable\""
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
@@ -2064,7 +2581,7 @@
               "\nThe validity status of the license."
             ],
             "signature": [
-              "LicenseStatus"
+              "\"active\" | \"invalid\" | \"expired\""
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
@@ -2125,76 +2642,6 @@
             },
             "deprecated": true,
             "references": [
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts",
-                  "lineNumber": 21
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts",
-                  "lineNumber": 22
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts",
-                  "lineNumber": 23
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts",
-                  "lineNumber": 159
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts",
-                  "lineNumber": 161
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts",
-                  "lineNumber": 42
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts",
-                  "lineNumber": 43
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts",
-                  "lineNumber": 44
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts",
-                  "lineNumber": 47
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts",
-                  "lineNumber": 48
-                }
-              },
               {
                 "plugin": "apm",
                 "link": {
@@ -2298,6 +2745,90 @@
                 "link": {
                   "path": "x-pack/plugins/security/common/licensing/license_service.test.ts",
                   "lineNumber": 219
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts",
+                  "lineNumber": 22
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts",
+                  "lineNumber": 23
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts",
+                  "lineNumber": 24
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts",
+                  "lineNumber": 47
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts",
+                  "lineNumber": 48
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts",
+                  "lineNumber": 42
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts",
+                  "lineNumber": 43
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts",
+                  "lineNumber": 44
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts",
+                  "lineNumber": 54
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts",
+                  "lineNumber": 55
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts",
+                  "lineNumber": 159
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts",
+                  "lineNumber": 161
                 }
               }
             ]
@@ -2469,7 +3000,9 @@
           "\nProvides information about feature availability for the current license."
         ],
         "signature": [
-          "{ [x: string]: LicenseFeature; }"
+          "{ [x: string]: ",
+          "LicenseFeature",
+          "; }"
         ],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
@@ -2520,7 +3053,7 @@
               "plugin": "spaces",
               "link": {
                 "path": "x-pack/plugins/spaces/server/usage_collection/spaces_usage_collector.ts",
-                "lineNumber": 442
+                "lineNumber": 431
               }
             },
             {
@@ -2569,7 +3102,7 @@
               "plugin": "alerting",
               "link": {
                 "path": "x-pack/plugins/alerting/server/plugin.ts",
-                "lineNumber": 162
+                "lineNumber": 168
               }
             },
             {
@@ -2587,24 +3120,17 @@
               }
             },
             {
-              "plugin": "fleet",
-              "link": {
-                "path": "x-pack/plugins/fleet/server/plugin.ts",
-                "lineNumber": 211
-              }
-            },
-            {
-              "plugin": "indexManagement",
-              "link": {
-                "path": "x-pack/plugins/index_management/server/services/license.ts",
-                "lineNumber": 36
-              }
-            },
-            {
               "plugin": "remoteClusters",
               "link": {
                 "path": "x-pack/plugins/remote_clusters/server/plugin.ts",
                 "lineNumber": 73
+              }
+            },
+            {
+              "plugin": "fleet",
+              "link": {
+                "path": "x-pack/plugins/fleet/server/plugin.ts",
+                "lineNumber": 213
               }
             },
             {
@@ -2619,13 +3145,6 @@
               "link": {
                 "path": "x-pack/plugins/index_lifecycle_management/server/services/license.ts",
                 "lineNumber": 41
-              }
-            },
-            {
-              "plugin": "ingestPipelines",
-              "link": {
-                "path": "x-pack/plugins/ingest_pipelines/server/services/license.ts",
-                "lineNumber": 40
               }
             },
             {
@@ -2786,7 +3305,79 @@
             "lineNumber": 84
           },
           "deprecated": true,
-          "references": []
+          "references": [],
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "licensing",
+              "id": "def-server.clusterClient",
+              "type": "Object",
+              "tags": [],
+              "label": "clusterClient",
+              "description": [],
+              "signature": [
+                "{ callAsInternalUser: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCorePluginApi",
+                  "section": "def-server.LegacyAPICaller",
+                  "text": "LegacyAPICaller"
+                },
+                "; asScoped: (request?: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreHttpPluginApi",
+                  "section": "def-server.KibanaRequest",
+                  "text": "KibanaRequest"
+                },
+                "<unknown, unknown, unknown, any> | ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreHttpPluginApi",
+                  "section": "def-server.LegacyRequest",
+                  "text": "LegacyRequest"
+                },
+                " | ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCorePluginApi",
+                  "section": "def-server.FakeRequest",
+                  "text": "FakeRequest"
+                },
+                " | undefined) => Pick<",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCorePluginApi",
+                  "section": "def-server.LegacyScopedClusterClient",
+                  "text": "LegacyScopedClusterClient"
+                },
+                ", \"callAsCurrentUser\" | \"callAsInternalUser\">; }"
+              ],
+              "source": {
+                "path": "x-pack/plugins/licensing/server/types.ts",
+                "lineNumber": 85
+              },
+              "deprecated": false
+            },
+            {
+              "parentPluginId": "licensing",
+              "id": "def-server.pollingFrequency",
+              "type": "number",
+              "tags": [],
+              "label": "pollingFrequency",
+              "description": [],
+              "source": {
+                "path": "x-pack/plugins/licensing/server/types.ts",
+                "lineNumber": 86
+              },
+              "deprecated": false
+            }
+          ]
         },
         {
           "parentPluginId": "licensing",
@@ -2902,7 +3493,79 @@
             "path": "x-pack/plugins/licensing/server/types.ts",
             "lineNumber": 109
           },
-          "deprecated": false
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "licensing",
+              "id": "def-server.clusterClient",
+              "type": "Object",
+              "tags": [],
+              "label": "clusterClient",
+              "description": [],
+              "signature": [
+                "{ callAsInternalUser: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCorePluginApi",
+                  "section": "def-server.LegacyAPICaller",
+                  "text": "LegacyAPICaller"
+                },
+                "; asScoped: (request?: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreHttpPluginApi",
+                  "section": "def-server.KibanaRequest",
+                  "text": "KibanaRequest"
+                },
+                "<unknown, unknown, unknown, any> | ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreHttpPluginApi",
+                  "section": "def-server.LegacyRequest",
+                  "text": "LegacyRequest"
+                },
+                " | ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCorePluginApi",
+                  "section": "def-server.FakeRequest",
+                  "text": "FakeRequest"
+                },
+                " | undefined) => Pick<",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCorePluginApi",
+                  "section": "def-server.LegacyScopedClusterClient",
+                  "text": "LegacyScopedClusterClient"
+                },
+                ", \"callAsCurrentUser\" | \"callAsInternalUser\">; }"
+              ],
+              "source": {
+                "path": "x-pack/plugins/licensing/server/types.ts",
+                "lineNumber": 110
+              },
+              "deprecated": false
+            },
+            {
+              "parentPluginId": "licensing",
+              "id": "def-server.pollingFrequency",
+              "type": "number",
+              "tags": [],
+              "label": "pollingFrequency",
+              "description": [],
+              "source": {
+                "path": "x-pack/plugins/licensing/server/types.ts",
+                "lineNumber": 111
+              },
+              "deprecated": false
+            }
+          ]
         },
         {
           "parentPluginId": "licensing",

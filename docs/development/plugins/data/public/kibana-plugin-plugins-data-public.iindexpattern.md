@@ -4,7 +4,10 @@
 
 ## IIndexPattern interface
 
-IIndexPattern allows for an IndexPattern OR an index pattern saved object too ambiguous, should be avoided
+> Warning: This API is now obsolete.
+> 
+> IIndexPattern allows for an IndexPattern OR an index pattern saved object Use IndexPattern or IndexPatternSpec instead
+> 
 
 <b>Signature:</b>
 

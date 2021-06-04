@@ -38,6 +38,9 @@ import {
 } from '../../../../../core/public/mocks';
 import { inspectorPluginMock } from '../../../../inspector/public/mocks';
 import { uiActionsPluginMock } from '../../../../ui_actions/public/mocks';
+import { getStubPluginServices } from '../../../../presentation_util/public';
+
+const presentationUtil = getStubPluginServices();
 
 const options: DashboardContainerServices = {
   application: {} as any,
@@ -50,6 +53,7 @@ const options: DashboardContainerServices = {
   uiActions: {} as any,
   uiSettings: uiSettingsServiceMock.createStartContract(),
   http: coreMock.createStart().http,
+  presentationUtil,
 };
 
 beforeEach(() => {
@@ -233,17 +237,19 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
   const component = mount(
     <I18nProvider>
       <KibanaContextProvider services={options}>
-        <EmbeddablePanel
-          embeddable={embeddable}
-          getActions={() => Promise.resolve([])}
-          getAllEmbeddableFactories={(() => []) as any}
-          getEmbeddableFactory={(() => null) as any}
-          notifications={{} as any}
-          application={options.application}
-          overlays={{} as any}
-          inspector={inspector}
-          SavedObjectFinder={() => null}
-        />
+        <presentationUtil.ContextProvider>
+          <EmbeddablePanel
+            embeddable={embeddable}
+            getActions={() => Promise.resolve([])}
+            getAllEmbeddableFactories={(() => []) as any}
+            getEmbeddableFactory={(() => null) as any}
+            notifications={{} as any}
+            application={options.application}
+            overlays={{} as any}
+            inspector={inspector}
+            SavedObjectFinder={() => null}
+          />
+        </presentationUtil.ContextProvider>
       </KibanaContextProvider>
     </I18nProvider>
   );

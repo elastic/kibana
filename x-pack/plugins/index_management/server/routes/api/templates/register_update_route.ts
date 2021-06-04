@@ -21,13 +21,13 @@ const querySchema = schema.object({
   include_type_name: schema.maybe(schema.string()),
 });
 
-export function registerUpdateRoute({ router, license, lib }: RouteDependencies) {
+export function registerUpdateRoute({ router, lib }: RouteDependencies) {
   router.put(
     {
       path: addBasePath('/index_templates/{name}'),
       validate: { body: bodySchema, params: paramsSchema, query: querySchema },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
+    async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.dataManagement!.client;
       const { name } = req.params as typeof paramsSchema.type;
       // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -68,6 +68,6 @@ export function registerUpdateRoute({ router, license, lib }: RouteDependencies)
         // Case: default
         throw e;
       }
-    })
+    }
   );
 }

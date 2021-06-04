@@ -118,3 +118,35 @@ it('Function inside interface has a label', () => {
   expect(fn?.label).toBe('aFn');
   expect(fn?.type).toBe(TypeKind.FunctionKind);
 });
+
+it('Test ReactElement signature', () => {
+  const node = nodes.find((n) => getNodeName(n) === 'AReactElementFn');
+  expect(node).toBeDefined();
+  const def = buildApiDeclaration({
+    node: node!,
+    plugins,
+    log,
+    currentPluginId: plugins[0].manifest.id,
+    scope: ApiScope.CLIENT,
+    captureReferences: false,
+  });
+  expect(def.signature).toBeDefined();
+  expect(def.signature!.length).toBe(3);
+  // There is a terrible hack to achieve this, but without it, ReactElement<Props> expands to include the second default generic type
+  // (ReactElement<Props, string | (any) crazy code here with lots of anys that comes from react types >) and
+  // it looks awful.
+  expect(def.signature![2]).toBe('>');
+  expect(def.signature!).toMatchInlineSnapshot(`
+    Array [
+      "() => React.ReactElement<",
+      Object {
+        "docId": "kibPluginAPluginApi",
+        "pluginId": "pluginA",
+        "scope": "public",
+        "section": "def-public.MyProps",
+        "text": "MyProps",
+      },
+      ">",
+    ]
+  `);
+});

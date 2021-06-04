@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { RuleDataClient } from '../../../../../../rule_registry/server';
 import { queryRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/query_rules_type_dependents';
 import {
   queryRulesSchema,
@@ -15,12 +17,16 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { deleteRules } from '../../rules/delete_rules';
 import { getIdError, transform } from './utils';
-import { transformError, buildSiemResponse } from '../utils';
+import { buildSiemResponse } from '../utils';
+
 import { deleteNotifications } from '../../notifications/delete_notifications';
 import { deleteRuleActionsSavedObject } from '../../rule_actions/delete_rule_actions_saved_object';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 
-export const deleteRulesRoute = (router: SecuritySolutionPluginRouter) => {
+export const deleteRulesRoute = (
+  router: SecuritySolutionPluginRouter,
+  ruleDataClient?: RuleDataClient | null
+) => {
   router.delete(
     {
       path: DETECTION_ENGINE_RULES_URL,
