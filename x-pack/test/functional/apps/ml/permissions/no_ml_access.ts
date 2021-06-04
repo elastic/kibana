@@ -43,6 +43,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         it('should not display the ML entry in Kibana app menu', async () => {
           await ml.testExecution.logTestStep('should open the Kibana app menu');
+          await ml.navigation.navigateToKibanaHome();
           await ml.navigation.openKibanaNav();
 
           await ml.testExecution.logTestStep('should not display the ML nav link');
