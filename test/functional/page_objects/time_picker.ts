@@ -28,7 +28,7 @@ export class TimePickerPageObject extends FtrService {
   private readonly browser = this.ctx.getService('browser');
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
-  private readonly header = this.ctx.getPageObjects(['header']).header;
+  private readonly header = this.ctx.getPageObject('header');
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
 
   private readonly quickSelectTimeMenuToggle = this.ctx.getService('menuToggle').create({

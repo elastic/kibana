@@ -13,7 +13,7 @@ export class DiscoverPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
   private readonly flyout = this.ctx.getService('flyout');
-  private readonly header = this.ctx.getPageObjects(['header']).header;
+  private readonly header = this.ctx.getPageObject('header');
   private readonly browser = this.ctx.getService('browser');
   private readonly globalNav = this.ctx.getService('globalNav');
   private readonly elasticChart = this.ctx.getService('elasticChart');

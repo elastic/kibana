@@ -16,14 +16,15 @@ export class SavedObjectsPageObject extends FtrService {
   private readonly browser = this.ctx.getService('browser');
   private readonly find = this.ctx.getService('find');
   private readonly testSubjects = this.ctx.getService('testSubjects');
-  private readonly PageObjects = this.ctx.getPageObjects(['header', 'common']);
+  private readonly common = this.ctx.getPageObject('common');
+  private readonly header = this.ctx.getPageObject('header');
 
   async searchForObject(objectName: string) {
     const searchBox = await this.testSubjects.find('savedObjectSearchBar');
     await searchBox.clearValue();
     await searchBox.type(objectName);
     await searchBox.pressKeys(this.browser.keys.ENTER);
-    await this.PageObjects.header.waitUntilLoadingHasFinished();
+    await this.header.waitUntilLoadingHasFinished();
     await this.waitTableIsLoaded();
   }
 
@@ -37,7 +38,7 @@ export class SavedObjectsPageObject extends FtrService {
 
     this.log.debug(`Clicking importObjects`);
     await this.testSubjects.click('importObjects');
-    await this.PageObjects.common.setFileInputPath(path);
+    await this.common.setFileInputPath(path);
 
     if (!overwriteAll) {
       this.log.debug(`Toggling overwriteAll`);
@@ -55,7 +56,7 @@ export class SavedObjectsPageObject extends FtrService {
     this.log.debug(`done importing the file`);
 
     // Wait for all the saves to happen
-    await this.PageObjects.header.waitUntilLoadingHasFinished();
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   async checkImportSucceeded() {

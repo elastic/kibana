@@ -15,7 +15,7 @@ export class TileMapPageObject extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly inspector = this.ctx.getService('inspector');
   private readonly monacoEditor = this.ctx.getService('monacoEditor');
-  private readonly header = this.ctx.getPageObjects(['header']).header;
+  private readonly header = this.ctx.getPageObject('header');
 
   public async getZoomSelectors(zoomSelector: string) {
     return await this.find.allByCssSelector(zoomSelector);

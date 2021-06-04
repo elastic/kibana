@@ -19,7 +19,8 @@ export class ContextPageObject extends FtrService {
   private readonly config = this.ctx.getService('config');
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
-  private readonly PageObjects = this.ctx.getPageObjects(['header', 'common']);
+  private readonly header = this.ctx.getPageObject('header');
+  private readonly common = this.ctx.getPageObject('common');
   private readonly log = this.ctx.getService('log');
 
   public async navigateTo(indexPattern: string, anchorId: string, overrideInitialState = {}) {
@@ -36,10 +37,10 @@ export class ContextPageObject extends FtrService {
     this.log.debug(`browser.get(${appUrl})`);
 
     await this.browser.get(appUrl);
-    await this.PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+    await this.header.awaitGlobalLoadingIndicatorHidden();
     await this.waitUntilContextLoadingHasFinished();
     // For lack of a better way, using a sleep to ensure page is loaded before proceeding
-    await this.PageObjects.common.sleep(1000);
+    await this.common.sleep(1000);
   }
 
   public async getPredecessorCountPicker() {
@@ -65,7 +66,7 @@ export class ContextPageObject extends FtrService {
       await predecessorButton.click();
     });
     await this.waitUntilContextLoadingHasFinished();
-    await this.PageObjects.header.waitUntilLoadingHasFinished();
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   public async clickSuccessorLoadMoreButton() {
@@ -75,7 +76,7 @@ export class ContextPageObject extends FtrService {
       await sucessorButton.click();
     });
     await this.waitUntilContextLoadingHasFinished();
-    await this.PageObjects.header.waitUntilLoadingHasFinished();
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   public async waitUntilContextLoadingHasFinished() {

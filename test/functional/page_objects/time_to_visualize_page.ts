@@ -25,8 +25,8 @@ export class TimeToVisualizePageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly log = this.ctx.getService('log');
   private readonly find = this.ctx.getService('find');
-  private readonly common = this.ctx.getPageObjects(['common']).common;
-  private readonly dashboard = this.ctx.getPageObjects(['dashboard']).dashboard;
+  private readonly common = this.ctx.getPageObject('common');
+  private readonly dashboard = this.ctx.getPageObject('dashboard');
 
   public async ensureSaveModalIsOpen() {
     await this.testSubjects.exists('savedObjectSaveModal', { timeout: 5000 });

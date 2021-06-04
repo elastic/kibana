@@ -14,14 +14,14 @@ export class HeaderPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly appsMenu = this.ctx.getService('appsMenu');
-  private readonly PageObjects = this.ctx.getPageObjects(['common']);
+  private readonly common = this.ctx.getPageObject('common');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
   public async clickDiscover(ignoreAppLeaveWarning = false) {
     await this.appsMenu.clickLink('Discover', { category: 'kibana' });
     await this.onAppLeaveWarning(ignoreAppLeaveWarning);
-    await this.PageObjects.common.waitForTopNavToBeVisible();
+    await this.common.waitForTopNavToBeVisible();
     await this.awaitGlobalLoadingIndicatorHidden();
   }
 

@@ -36,24 +36,22 @@ export class DashboardPageObject extends FtrService {
   private readonly renderable = this.ctx.getService('renderable');
   private readonly listingTable = this.ctx.getService('listingTable');
   private readonly elasticChart = this.ctx.getService('elasticChart');
-  private readonly PageObjects = this.ctx.getPageObjects([
-    'common',
-    'header',
-    'visualize',
-    'discover',
-  ]);
+  private readonly common = this.ctx.getPageObject('common');
+  private readonly header = this.ctx.getPageObject('header');
+  private readonly visualize = this.ctx.getPageObject('visualize');
+  private readonly discover = this.ctx.getPageObject('discover');
 
   async initTests({ kibanaIndex = 'dashboard/legacy', defaultIndex = 'logstash-*' } = {}) {
     this.log.debug('load kibana index with visualizations and log data');
     await this.esArchiver.load(kibanaIndex);
     await this.kibanaServer.uiSettings.replace({ defaultIndex });
-    await this.PageObjects.common.navigateToApp('dashboard');
+    await this.common.navigateToApp('dashboard');
   }
 
   public async preserveCrossAppState() {
     const url = await this.browser.getCurrentUrl();
     await this.browser.get(url, false);
-    await this.PageObjects.header.waitUntilLoadingHasFinished();
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   public async clickFullScreenMode() {
@@ -138,9 +136,9 @@ export class DashboardPageObject extends FtrService {
     await this.testSubjects.existOrFail(`discard-unsaved-${title.split(' ').join('-')}`);
     await this.testSubjects.click(`discard-unsaved-${title.split(' ').join('-')}`);
     if (confirmDiscard) {
-      await this.PageObjects.common.clickConfirmOnModal();
+      await this.common.clickConfirmOnModal();
     } else {
-      await this.PageObjects.common.clickCancelOnModal();
+      await this.common.clickCancelOnModal();
     }
   }
 
@@ -227,7 +225,7 @@ export class DashboardPageObject extends FtrService {
 
    */
   public async expectToolbarPaginationDisplayed() {
-    const isLegacyDefault = this.PageObjects.discover.useLegacyTable();
+    const isLegacyDefault = this.discover.useLegacyTable();
     if (isLegacyDefault) {
       const subjects = ['btnPrevPage', 'btnNextPage', 'toolBarPagerText'];
       await Promise.all(subjects.map(async (subj) => await this.testSubjects.existOrFail(subj)));
@@ -334,9 +332,9 @@ export class DashboardPageObject extends FtrService {
 
   // avoids any 'Object with id x not found' errors when switching tests.
   public async clearSavedObjectsFromAppLinks() {
-    await this.PageObjects.header.clickVisualize();
-    await this.PageObjects.visualize.gotoLandingPage();
-    await this.PageObjects.header.clickDashboard();
+    await this.header.clickVisualize();
+    await this.visualize.gotoLandingPage();
+    await this.header.clickDashboard();
     await this.gotoDashboardLandingPage();
   }
 
@@ -402,15 +400,15 @@ export class DashboardPageObject extends FtrService {
       // Confirm that the Dashboard has actually been saved
       await this.testSubjects.existOrFail('saveDashboardSuccess');
     });
-    const message = await this.PageObjects.common.closeToast();
-    await this.PageObjects.header.waitUntilLoadingHasFinished();
-    await this.PageObjects.common.waitForSaveModalToClose();
+    const message = await this.common.closeToast();
+    await this.header.waitUntilLoadingHasFinished();
+    await this.common.waitForSaveModalToClose();
 
     const isInViewMode = await this.testSubjects.exists('dashboardEditMode');
     if (saveOptions.exitFromEditMode && !isInViewMode) {
       await this.clickCancelOutOfEditMode();
     }
-    await this.PageObjects.header.waitUntilLoadingHasFinished();
+    await this.header.waitUntilLoadingHasFinished();
 
     return message;
   }
@@ -481,7 +479,7 @@ export class DashboardPageObject extends FtrService {
     this.log.debug('entering new title');
     await this.testSubjects.setValue('savedObjectTitle', dashboardTitle);
 
-    await this.PageObjects.common.pressEnterKey();
+    await this.common.pressEnterKey();
     await this.testSubjects.waitForDeleted(modalDialog);
   }
 
@@ -495,7 +493,7 @@ export class DashboardPageObject extends FtrService {
     await this.listingTable.searchForItemWithName(dashboardName);
     await this.retry.try(async () => {
       await this.listingTable.clickItemLink('dashboard', dashboardName);
-      await this.PageObjects.header.waitUntilLoadingHasFinished();
+      await this.header.waitUntilLoadingHasFinished();
       // check Dashboard landing page is not present
       await this.testSubjects.missingOrFail('dashboardLandingPage', { timeout: 10000 });
     });

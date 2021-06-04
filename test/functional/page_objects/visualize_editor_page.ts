@@ -23,9 +23,9 @@ export class VisualizeEditorPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly comboBox = this.ctx.getService('comboBox');
   private readonly elasticChart = this.ctx.getService('elasticChart');
-  private readonly common = this.ctx.getPageObjects(['common']).common;
-  private readonly header = this.ctx.getPageObjects(['header']).header;
-  private readonly visChart = this.ctx.getPageObjects(['visChart']).visChart;
+  private readonly common = this.ctx.getPageObject('common');
+  private readonly header = this.ctx.getPageObject('header');
+  private readonly visChart = this.ctx.getPageObject('visChart');
 
   public async clickDataTab() {
     await this.testSubjects.click('visEditorTab__data');

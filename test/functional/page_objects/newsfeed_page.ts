@@ -14,10 +14,10 @@ export class NewsfeedPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly flyout = this.ctx.getService('flyout');
   private readonly testSubjects = this.ctx.getService('testSubjects');
-  private readonly PageObjects = this.ctx.getPageObjects(['common']);
+  private readonly common = this.ctx.getPageObject('common');
 
   async resetPage() {
-    await this.PageObjects.common.navigateToUrl('home', '', { useActualUrl: true });
+    await this.common.navigateToUrl('home', '', { useActualUrl: true });
   }
 
   async closeNewsfeedPanel() {

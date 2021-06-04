@@ -12,7 +12,7 @@ export class HomePageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
-  private readonly PageObjects = this.ctx.getPageObjects(['common']);
+  private readonly common = this.ctx.getPageObject('common');
 
   async clickSynopsis(title: string) {
     await this.testSubjects.click(`homeSynopsisLink${title}`);
@@ -52,7 +52,7 @@ export class HomePageObject extends FtrService {
     // https://github.com/elastic/kibana/issues/65949
     // Even after waiting for the "Remove" button to be enabled we still have failures
     // where it appears the click just didn't work.
-    await this.PageObjects.common.sleep(1010);
+    await this.common.sleep(1010);
     await this.testSubjects.click(`removeSampleDataSet${id}`);
     await this._waitForSampleDataLoadingAction(id);
   }

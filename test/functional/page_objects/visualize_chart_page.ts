@@ -23,7 +23,7 @@ export class VisualizeChartPageObject extends FtrService {
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
   private readonly elasticChart = this.ctx.getService('elasticChart');
   private readonly dataGrid = this.ctx.getService('dataGrid');
-  private readonly common = this.ctx.getPageObjects(['common']).common;
+  private readonly common = this.ctx.getPageObject('common');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 

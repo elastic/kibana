@@ -18,7 +18,9 @@ export class SettingsPageObject extends FtrService {
   private readonly flyout = this.ctx.getService('flyout');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly comboBox = this.ctx.getService('comboBox');
-  private readonly PageObjects = this.ctx.getPageObjects(['header', 'common', 'savedObjects']);
+  private readonly header = this.ctx.getPageObject('header');
+  private readonly common = this.ctx.getPageObject('common');
+  private readonly savedObjects = this.ctx.getPageObject('savedObjects');
 
   async clickNavigation() {
     await this.find.clickDisplayedByCssSelector('.app-link:nth-child(5) a');
@@ -30,20 +32,20 @@ export class SettingsPageObject extends FtrService {
 
   async clickKibanaSettings() {
     await this.testSubjects.click('settings');
-    await this.PageObjects.header.waitUntilLoadingHasFinished();
+    await this.header.waitUntilLoadingHasFinished();
     await this.testSubjects.existOrFail('managementSettingsTitle');
   }
 
   async clickKibanaSavedObjects() {
     await this.testSubjects.click('objects');
-    await this.PageObjects.savedObjects.waitTableIsLoaded();
+    await this.savedObjects.waitTableIsLoaded();
   }
 
   async clickKibanaIndexPatterns() {
     this.log.debug('clickKibanaIndexPatterns link');
     await this.testSubjects.click('indexPatterns');
 
-    await this.PageObjects.header.waitUntilLoadingHasFinished();
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   async getAdvancedSettings(propertyName: string) {
@@ -70,18 +72,18 @@ export class SettingsPageObject extends FtrService {
 
   async clearAdvancedSettings(propertyName: string) {
     await this.testSubjects.click(`advancedSetting-resetField-${propertyName}`);
-    await this.PageObjects.header.waitUntilLoadingHasFinished();
+    await this.header.waitUntilLoadingHasFinished();
     await this.testSubjects.click(`advancedSetting-saveButton`);
-    await this.PageObjects.header.waitUntilLoadingHasFinished();
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   async setAdvancedSettingsSelect(propertyName: string, propertyValue: string) {
     await this.find.clickByCssSelector(
       `[data-test-subj="advancedSetting-editField-${propertyName}"] option[value="${propertyValue}"]`
     );
-    await this.PageObjects.header.waitUntilLoadingHasFinished();
+    await this.header.waitUntilLoadingHasFinished();
     await this.testSubjects.click(`advancedSetting-saveButton`);
-    await this.PageObjects.header.waitUntilLoadingHasFinished();
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   async setAdvancedSettingsInput(propertyName: string, propertyValue: string) {
@@ -89,7 +91,7 @@ export class SettingsPageObject extends FtrService {
     await input.clearValue();
     await input.type(propertyValue);
     await this.testSubjects.click(`advancedSetting-saveButton`);
-    await this.PageObjects.header.waitUntilLoadingHasFinished();
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   async setAdvancedSettingsTextArea(propertyName: string, propertyValue: string) {
@@ -105,18 +107,18 @@ export class SettingsPageObject extends FtrService {
       propertyValue
     );
     await this.testSubjects.click(`advancedSetting-saveButton`);
-    await this.PageObjects.header.waitUntilLoadingHasFinished();
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   async toggleAdvancedSettingCheckbox(propertyName: string) {
     await this.testSubjects.click(`advancedSetting-editField-${propertyName}`);
-    await this.PageObjects.header.waitUntilLoadingHasFinished();
+    await this.header.waitUntilLoadingHasFinished();
     await this.testSubjects.click(`advancedSetting-saveButton`);
-    await this.PageObjects.header.waitUntilLoadingHasFinished();
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   async navigateTo() {
-    await this.PageObjects.common.navigateToApp('settings');
+    await this.common.navigateToApp('settings');
   }
 
   async getIndexPatternField() {
@@ -136,7 +138,7 @@ export class SettingsPageObject extends FtrService {
     await this.clickTimeFieldNameField();
     // close dropdown, keep focus
     await this.clickTimeFieldNameField();
-    await this.PageObjects.header.waitUntilLoadingHasFinished();
+    await this.header.waitUntilLoadingHasFinished();
     return await this.retry.try(async () => {
       this.log.debug(`selectTimeFieldOption(${selection})`);
       const timeFieldOption = await this.getTimeFieldOption(selection);
@@ -160,7 +162,7 @@ export class SettingsPageObject extends FtrService {
 
   async clickDefaultIndexButton() {
     await this.testSubjects.click('setDefaultIndexPatternButton');
-    await this.PageObjects.header.waitUntilLoadingHasFinished();
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   async clickDeletePattern() {
@@ -186,7 +188,7 @@ export class SettingsPageObject extends FtrService {
       const chartString = await chart.getVisibleText();
       if (chartString === columnName) {
         await chart.click();
-        await this.PageObjects.header.waitUntilLoadingHasFinished();
+        await this.header.waitUntilLoadingHasFinished();
       }
     };
 
@@ -284,12 +286,12 @@ export class SettingsPageObject extends FtrService {
 
   async controlChangeCancel() {
     await this.testSubjects.click('fieldCancelButton');
-    await this.PageObjects.header.waitUntilLoadingHasFinished();
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   async controlChangeSave() {
     await this.testSubjects.click('fieldSaveButton');
-    await this.PageObjects.header.waitUntilLoadingHasFinished();
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   async hasIndexPattern(name: string) {
@@ -337,7 +339,7 @@ export class SettingsPageObject extends FtrService {
     isStandardIndexPattern = true
   ) {
     await this.retry.try(async () => {
-      await this.PageObjects.header.waitUntilLoadingHasFinished();
+      await this.header.waitUntilLoadingHasFinished();
       await this.clickKibanaIndexPatterns();
       const exists = await this.hasIndexPattern(indexPatternName);
 
@@ -346,12 +348,12 @@ export class SettingsPageObject extends FtrService {
         return;
       }
 
-      await this.PageObjects.header.waitUntilLoadingHasFinished();
+      await this.header.waitUntilLoadingHasFinished();
       await this.clickAddNewIndexPatternButton();
       if (!isStandardIndexPattern) {
         await this.clickCreateNewRollupButton();
       }
-      await this.PageObjects.header.waitUntilLoadingHasFinished();
+      await this.header.waitUntilLoadingHasFinished();
       await this.retry.try(async () => {
         await this.setIndexPatternField(indexPatternName);
       });
@@ -362,13 +364,13 @@ export class SettingsPageObject extends FtrService {
       });
       await btn.click();
 
-      await this.PageObjects.common.sleep(2000);
+      await this.common.sleep(2000);
       if (timefield) {
         await this.selectTimeFieldOption(timefield);
       }
       await (await this.getCreateIndexPatternButton()).click();
     });
-    await this.PageObjects.header.waitUntilLoadingHasFinished();
+    await this.header.waitUntilLoadingHasFinished();
     await this.retry.try(async () => {
       const currentUrl = await this.browser.getCurrentUrl();
       this.log.info('currentUrl', currentUrl);
@@ -383,7 +385,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async clickAddNewIndexPatternButton() {
-    await this.PageObjects.common.scrollKibanaBodyTop();
+    await this.common.scrollKibanaBodyTop();
     await this.testSubjects.click('createIndexPatternButton');
   }
 
@@ -591,7 +593,7 @@ export class SettingsPageObject extends FtrService {
   async clickSaveScriptedField() {
     this.log.debug('click Save Scripted Field');
     await this.testSubjects.click('fieldSaveButton');
-    await this.PageObjects.header.waitUntilLoadingHasFinished();
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   async setScriptedFieldName(name: string) {

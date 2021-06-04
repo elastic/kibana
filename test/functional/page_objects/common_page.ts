@@ -28,7 +28,7 @@ export class CommonPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly globalNav = this.ctx.getService('globalNav');
   private readonly testSubjects = this.ctx.getService('testSubjects');
-  private readonly PageObjects = this.ctx.getPageObjects(['login']);
+  private readonly loginPage = this.ctx.getPageObject('login');
 
   private readonly defaultTryTimeout = this.config.get('timeouts.try');
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
@@ -52,12 +52,12 @@ export class CommonPageObject extends FtrService {
     if (loginPage && !wantedLoginPage) {
       this.log.debug('Found login page');
       if (this.config.get('security.disableTestUser')) {
-        await this.PageObjects.login.login(
+        await this.loginPage.login(
           this.config.get('servers.kibana.username'),
           this.config.get('servers.kibana.password')
         );
       } else {
-        await this.PageObjects.login.login('test_user', 'changeme');
+        await this.loginPage.login('test_user', 'changeme');
       }
 
       await this.find.byCssSelector(

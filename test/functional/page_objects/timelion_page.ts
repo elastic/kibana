@@ -11,7 +11,7 @@ import { FtrService } from '../ftr_provider_context';
 export class TimelionPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly log = this.ctx.getService('log');
-  private readonly PageObjects = this.ctx.getPageObjects(['common', 'header']);
+  private readonly common = this.ctx.getPageObject('common');
   private readonly esArchiver = this.ctx.getService('esArchiver');
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
 
@@ -23,7 +23,7 @@ export class TimelionPageObject extends FtrService {
     this.log.debug('load kibana index');
     await this.esArchiver.load('timelion');
 
-    await this.PageObjects.common.navigateToApp('timelion');
+    await this.common.navigateToApp('timelion');
   }
 
   public async setExpression(expression: string) {
@@ -35,7 +35,7 @@ export class TimelionPageObject extends FtrService {
   public async updateExpression(updates: string) {
     const input = await this.testSubjects.find('timelionExpressionTextArea');
     await input.type(updates);
-    await this.PageObjects.common.sleep(1000);
+    await this.common.sleep(1000);
   }
 
   public async getExpression() {
@@ -57,7 +57,7 @@ export class TimelionPageObject extends FtrService {
     }
     await elements[suggestionIndex].click();
     // Wait for timelion expression to be updated after clicking suggestions
-    await this.PageObjects.common.sleep(waitTime);
+    await this.common.sleep(waitTime);
   }
 
   public async saveTimelionSheet() {

@@ -12,8 +12,8 @@ import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 export class TagCloudPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly testSubjects = this.ctx.getService('testSubjects');
-  private readonly header = this.ctx.getPageObjects(['header']).header;
-  private readonly visChart = this.ctx.getPageObjects(['visChart']).visChart;
+  private readonly header = this.ctx.getPageObject('header');
+  private readonly visChart = this.ctx.getPageObject('visChart');
 
   public async selectTagCloudTag(tagDisplayText: string) {
     await this.testSubjects.click(tagDisplayText);

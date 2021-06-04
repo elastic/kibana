@@ -37,10 +37,10 @@ export class VisualizePageObject extends FtrService {
   private readonly listingTable = this.ctx.getService('listingTable');
   private readonly queryBar = this.ctx.getService('queryBar');
   private readonly elasticChart = this.ctx.getService('elasticChart');
-  private readonly common = this.ctx.getPageObjects(['common']).common;
-  private readonly header = this.ctx.getPageObjects(['header']).header;
-  private readonly visEditor = this.ctx.getPageObjects(['visEditor']).visEditor;
-  private readonly visChart = this.ctx.getPageObjects(['visChart']).visChart;
+  private readonly common = this.ctx.getPageObject('common');
+  private readonly header = this.ctx.getPageObject('header');
+  private readonly visEditor = this.ctx.getPageObject('visEditor');
+  private readonly visChart = this.ctx.getPageObject('visChart');
 
   index = {
     LOGSTASH_TIME_BASED: 'logstash-*',

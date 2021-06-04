@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
 export class ErrorPageObject extends FtrService {
-  private readonly common = this.ctx.getPageObjects(['common']).common;
+  private readonly common = this.ctx.getPageObject('common');
 
   public async expectForbidden() {
     const messageText = await this.common.getBodyText();
