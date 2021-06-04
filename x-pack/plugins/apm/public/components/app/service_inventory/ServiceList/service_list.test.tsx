@@ -82,9 +82,7 @@ describe('ServiceList', () => {
         wrapper: Wrapper,
       });
 
-      expect(
-        await findByTitle('Throughput; Sorted in descending order')
-      ).toBeInTheDocument();
+      expect(await findByTitle('Throughput')).toBeInTheDocument();
     });
   });
 
@@ -100,9 +98,7 @@ describe('ServiceList', () => {
         { wrapper: Wrapper }
       );
 
-      expect(
-        await findByTitle('Health; Sorted in descending order')
-      ).toBeInTheDocument();
+      expect(await findByTitle('Health')).toBeInTheDocument();
     });
   });
 });

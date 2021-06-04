@@ -872,7 +872,7 @@ export interface DeprecationsDetails {
                 [key: string]: any;
             };
         };
-        manualSteps?: string[];
+        manualSteps: string[];
     };
     deprecationType?: 'config' | 'feature';
     // (undocumented)
