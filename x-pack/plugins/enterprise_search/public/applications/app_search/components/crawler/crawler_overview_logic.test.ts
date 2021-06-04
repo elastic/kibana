@@ -19,7 +19,7 @@ const DEFAULT_VALUES = {
 
 const DEFAULT_CRAWL_RULE: CrawlRule = {
   id: '-',
-  policy: CrawlerPolicies.Allow,
+  policy: CrawlerPolicies.allow,
   rule: CrawlerRules.regex,
   pattern: '.*',
 };

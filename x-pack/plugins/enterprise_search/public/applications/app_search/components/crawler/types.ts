@@ -6,8 +6,8 @@
  */
 
 export enum CrawlerPolicies {
-  Allow = 'allow',
-  Deny = 'deny',
+  allow = 'allow',
+  deny = 'deny',
 }
 
 export enum CrawlerRules {
