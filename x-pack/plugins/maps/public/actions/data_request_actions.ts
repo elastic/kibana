@@ -115,7 +115,7 @@ function getDataRequestContext(
   dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
   getState: () => MapStoreState,
   layerId: string,
-  forceRefresh: boolean = false,
+  forceRefresh: boolean = false
 ): DataRequestContext {
   return {
     dataFilters: getDataFilters(getState()),

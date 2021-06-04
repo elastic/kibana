@@ -29,9 +29,6 @@ exports[`Should show all controls 1`] = `
     <Connect(FitToData) />
   </EuiFlexItem>
   <EuiFlexItem>
-    <Connect(ToolsControl) />
-  </EuiFlexItem>
-  <EuiFlexItem>
     <Connect(TimesliderToggleButton) />
   </EuiFlexItem>
 </EuiFlexGroup>
