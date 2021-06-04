@@ -28,11 +28,6 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  interface EventModule {
-    module: string;
-    dataset: string;
-  }
-
   describe('Tests involving aliases of source indexes and the signals index', () => {
     beforeEach(async () => {
       await createSignalsIndex(supertest);
