@@ -297,17 +297,11 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
                       <EuiIcon className="lnsChartSwitch__chartIcon" type={v.icon || 'empty'} />
                     ),
                     append: (
-                      <EuiFlexGroup gutterSize="xs" responsive={false}>
-                        {v.showBetaBadge ? (
-                          <EuiFlexItem grow={false}>
-                            <EuiBadge color="hollow">
-                              <FormattedMessage
-                                id="xpack.lens.chartSwitch.betaLabel"
-                                defaultMessage="Beta"
-                              />
-                            </EuiBadge>
-                          </EuiFlexItem>
-                        ) : null}
+                      <EuiFlexGroup
+                        gutterSize="xs"
+                        responsive={false}
+                        style={{ display: 'inline-flex' }}
+                      >
                         {v.selection.dataLoss !== 'nothing' ? (
                           <EuiFlexItem grow={false}>
                             <EuiIconTip
@@ -328,6 +322,16 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
                                 'data-test-subj': `lnsChartSwitchPopoverAlert_${v.id}`,
                               }}
                             />
+                          </EuiFlexItem>
+                        ) : null}
+                        {v.showBetaBadge ? (
+                          <EuiFlexItem grow={false}>
+                            <EuiBadge color="hollow">
+                              <FormattedMessage
+                                id="xpack.lens.chartSwitch.betaLabel"
+                                defaultMessage="Beta"
+                              />
+                            </EuiBadge>
                           </EuiFlexItem>
                         ) : null}
                       </EuiFlexGroup>
