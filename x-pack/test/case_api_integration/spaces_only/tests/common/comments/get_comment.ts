@@ -46,7 +46,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(comment).to.eql(patchedCase.comments![0]);
     });
 
-    it('should not get a comment in space2', async () => {
+    it('should not get a comment in space2 when it was created in space1', async () => {
       const postedCase = await createCase(supertest, postCaseReq, 200, authSpace1);
       const patchedCase = await createComment({
         supertest,

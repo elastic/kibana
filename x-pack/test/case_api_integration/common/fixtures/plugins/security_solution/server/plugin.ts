@@ -54,6 +54,39 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         },
       },
     });
+
+    features.registerKibanaFeature({
+      id: 'testDisabledFixtureID',
+      name: 'TestDisabledFixture',
+      app: ['kibana'],
+      category: { id: 'cases-fixtures', label: 'Cases Fixtures' },
+      // testDisabledFixture is disabled in space1
+      cases: ['testDisabledFixture'],
+      privileges: {
+        all: {
+          app: ['kibana'],
+          cases: {
+            all: ['testDisabledFixture'],
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+        read: {
+          app: ['kibana'],
+          cases: {
+            read: ['testDisabledFixture'],
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+      },
+    });
   }
   public start() {}
   public stop() {}
