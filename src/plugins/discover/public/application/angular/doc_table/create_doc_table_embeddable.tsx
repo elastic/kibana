@@ -63,11 +63,7 @@ function DocTableLegacyInner(renderProps: DocTableEmbeddableProps) {
 
   useEffect(() => {
     if (renderProps.refs) {
-      const fn = getRenderFn(renderProps.refs, {
-        ...renderProps,
-        rows,
-        minimumVisibleRows,
-      });
+      const fn = getRenderFn(renderProps.refs, renderProps);
       fn().then((newScope) => {
         scope.current = newScope;
       });
