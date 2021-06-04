@@ -350,7 +350,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await retry.try(async () => {
         await testSubjects.click('lns-palettePicker');
         const currentPalette = await (
-          await find.byCssSelector('[aria-selected=true]')
+          await find.byCssSelector('[role=option][aria-selected=true]')
         ).getAttribute('id');
         expect(currentPalette).to.equal(palette);
       });
