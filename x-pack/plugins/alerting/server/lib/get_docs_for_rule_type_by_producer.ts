@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-export const getDocsForRuleTypeByProducer = (producer?: string, alertTypeId?: string) => {
-  // TODO:
+export const getDocsForRuleTypeByProducer = (
+  kibanaVersion?: string,
+  producer?: string,
+  alertTypeId?: string
+) => {
+  // TODO: import type { DocLinksStart } from 'kibana/public';
   return 'https://www.elastic.co/guide/en/kibana/master/stack-rules.html';
 };
