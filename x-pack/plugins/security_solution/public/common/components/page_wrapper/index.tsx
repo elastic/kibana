@@ -5,128 +5,65 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import classNames from 'classnames';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import { CommonProps, EuiPanel } from '@elastic/eui';
-import { useKibana } from '../../../common/lib/kibana';
-import { KibanaPageTemplate } from '../../../../../../../src/plugins/kibana_react/public';
-import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
-import { AppGlobalStyle } from '../../../common/components/page';
-import { gutterTimeline } from '../../../common/lib/helpers';
-import { TimelineId } from '../../../../common/types/timeline';
-import { IS_DRAGGING_CLASS_NAME } from '../../../common/components/drag_and_drop/drag_classnames';
-import { getTimelineShowStatusByIdSelector } from '../../../timelines/components/flyout/selectors';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { useThrottledResizeObserver } from '../../../common/components/utils';
-import { GlobalKQLHeader } from './global_kql_header';
-import {
-  BOTTOM_BAR_CLASSNAME,
-  SecuritySolutionBottomBar,
-  SecuritySolutionBottomBarProps,
-} from './bottom_bar';
-import { useSecurityPageTemplateNav } from './navigation';
+import { CommonProps } from '@elastic/eui';
 
-/* eslint-disable react/display-name */
+import { useGlobalFullScreen } from '../../containers/use_full_screen';
+import { gutterTimeline } from '../../lib/helpers';
+import { AppGlobalStyle } from '../page/index';
 
-/**
- * Need to apply the styles via a className to effect the containing bottom bar
- * rather than applying them to the timeline bar directly
- */
-const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
-  $isShowingTimelineOverlay?: boolean;
-}>`
-  .${BOTTOM_BAR_CLASSNAME} {
-    animation: 'none !important'; // disable the default bottom bar slide animation
-    background: ${({ theme }) =>
-      theme.eui.euiColorEmptyShade}; // Override bottom bar black background
-    color: inherit; // Necessary to override the bottom bar 'white text'
-    transform: ${(
-      { $isShowingTimelineOverlay } // Since the bottom bar wraps the whole overlay now, need to override any transforms when it is open
-    ) => ($isShowingTimelineOverlay ? 'none' : 'translateY(calc(100% - 50px))')};
-    z-index: ${({ theme }) => theme.eui.euiZLevel8};
-
-    .${IS_DRAGGING_CLASS_NAME} & {
-      // When a drag is in process the bottom flyout should slide up to allow a drop
-      transform: none;
-    }
+const Wrapper = styled.div`
+  padding: ${(props) => `${props.theme.eui.paddingSizes.l}`};
+  &.securitySolutionWrapper--fullHeight {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+  }
+  &.securitySolutionWrapper--noPadding {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+  }
+  &.securitySolutionWrapper--withTimeline {
+    padding-bottom: ${gutterTimeline};
   }
 `;
 
-const StyledEuiPanel = styled(EuiPanel)<{
-  $paddingTop: number;
-  $noPadding?: boolean;
-  $withTimeline?: boolean;
-  $globalFullScreen?: boolean;
-}>`
-  height: ${({ $globalFullScreen }) => ($globalFullScreen ? '100%' : undefined)};
-  overflow: auto;
-  padding: ${({ $noPadding }) => ($noPadding ? 0 : undefined)};
-  padding-top: ${({ $paddingTop }) => $paddingTop}px;
-  padding-bottom: ${({ $withTimeline }) => ($withTimeline ? gutterTimeline : undefined)};
-`;
+Wrapper.displayName = 'Wrapper';
 
 interface SecuritySolutionPageWrapperProps {
   children: React.ReactNode;
-  noPadding?: boolean;
-  noTimeline?: boolean;
-  pageHeaderChildren?: React.ReactNode;
   restrictWidth?: boolean | number | string;
   style?: Record<string, string>;
+  noPadding?: boolean;
+  noTimeline?: boolean;
 }
 
-export const SecuritySolutionPageWrapper: React.FC<
+const SecuritySolutionPageWrapperComponent: React.FC<
   SecuritySolutionPageWrapperProps & CommonProps
-> = React.memo(
-  ({ children, className, noPadding, noTimeline, pageHeaderChildren, style, ...otherProps }) => {
-    const securityPageTemplateNav = useSecurityPageTemplateNav();
-    const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
-    useEffect(() => {
-      setGlobalFullScreen(false); // exit full screen mode on page load
-    }, [setGlobalFullScreen]);
-    const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
-    const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
-      getTimelineShowStatus(state, TimelineId.active)
-    );
+> = ({ children, className, style, noPadding, noTimeline, ...otherProps }) => {
+  const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
+  useEffect(() => {
+    setGlobalFullScreen(false); // exit full screen mode on page load
+  }, [setGlobalFullScreen]);
 
-    const { overlays } = useKibana().services;
-    const { ref, height = 0 } = useThrottledResizeObserver(300);
-    const banners$ = overlays.banners.get$();
-    const [headerFixed, setHeaderFixed] = useState<boolean>(true);
-    const mainPaddingTop = headerFixed ? height : 0;
+  const classes = classNames(className, {
+    securitySolutionWrapper: true,
+    'securitySolutionWrapper--noPadding': noPadding,
+    'securitySolutionWrapper--withTimeline': !noTimeline,
+    'securitySolutionWrapper--fullHeight': globalFullScreen,
+  });
 
-    // If there are any banners, the kql header should not be fixed
-    useEffect(() => {
-      const subscription = banners$.subscribe((banners) => setHeaderFixed(!banners.length));
-      return () => subscription.unsubscribe();
-    }, [banners$]); // Only un/re-subscribe if the Observable changes
+  return (
+    <Wrapper className={classes} style={style} {...otherProps}>
+      {children}
+      <AppGlobalStyle />
+    </Wrapper>
+  );
+};
 
-    return (
-      <StyledKibanaPageTemplate
-        $isShowingTimelineOverlay={isShowingTimelineOverlay}
-        bottomBarProps={SecuritySolutionBottomBarProps}
-        bottomBar={<SecuritySolutionBottomBar />}
-        paddingSize="none"
-        pageHeader={{ children: pageHeaderChildren }}
-        restrictWidth={false}
-        solutionNav={securityPageTemplateNav}
-        template="default"
-      >
-        <EuiPanel color="subdued" paddingSize="none">
-          <GlobalKQLHeader ref={ref} isFixed={headerFixed} />
-        </EuiPanel>
-        <StyledEuiPanel
-          $globalFullScreen={globalFullScreen}
-          $noPadding={noPadding}
-          $paddingTop={mainPaddingTop}
-          $withTimeline={!noTimeline}
-          className="securityPageWrapper"
-          data-test-subj="pageContainer"
-          {...otherProps}
-        >
-          {children}
-          <AppGlobalStyle />
-        </StyledEuiPanel>
-      </StyledKibanaPageTemplate>
-    );
-  }
-);
+export const SecuritySolutionPageWrapper = React.memo(SecuritySolutionPageWrapperComponent);
