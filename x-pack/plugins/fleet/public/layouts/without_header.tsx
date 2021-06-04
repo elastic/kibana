@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
+
+export const Wrapper = styled.div`
+  background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
+`;
 
 export const Page = styled(EuiPage)`
   background: ${(props) => props.theme.eui.euiColorEmptyShade};
@@ -27,7 +31,7 @@ interface Props {
 }
 
 export const WithoutHeaderLayout: React.FC<Props> = ({ restrictWidth, children }) => (
-  <Fragment>
+  <Wrapper>
     <Page restrictWidth={restrictWidth || 1200}>
       <EuiPageBody>
         <ContentWrapper>
@@ -36,5 +40,5 @@ export const WithoutHeaderLayout: React.FC<Props> = ({ restrictWidth, children }
         </ContentWrapper>
       </EuiPageBody>
     </Page>
-  </Fragment>
+  </Wrapper>
 );

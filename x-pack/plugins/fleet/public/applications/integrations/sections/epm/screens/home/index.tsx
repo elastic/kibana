@@ -14,7 +14,7 @@ import { installationStatuses } from '../../../../../../../common/constants';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import { useGetCategories, useGetPackages, useBreadcrumbs } from '../../../../hooks';
 import { doesPackageHaveIntegrations } from '../../../../services';
-import { WithoutHeaderLayout } from '../../../../layouts';
+import { DefaultLayout } from '../../../../layouts';
 import type { CategorySummaryItem, PackageList } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
 
@@ -22,7 +22,7 @@ import { CategoryFacets } from './category_facets';
 
 export const EPMHomePage: React.FC = memo(() => {
   return (
-    <WithoutHeaderLayout>
+    <DefaultLayout>
       <Switch>
         <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_installed}>
           <InstalledPackages />
@@ -31,7 +31,7 @@ export const EPMHomePage: React.FC = memo(() => {
           <AvailablePackages />
         </Route>
       </Switch>
-    </WithoutHeaderLayout>
+    </DefaultLayout>
   );
 });
 

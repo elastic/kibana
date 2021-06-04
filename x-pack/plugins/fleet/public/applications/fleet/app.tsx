@@ -259,7 +259,7 @@ export const AppRoutes = memo(() => {
         </DefaultLayout>
       </Route>
       <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>
-        <DefaultLayout section="agent_policy">
+        <DefaultLayout showNav={false}>
           <CreatePackagePolicyPage />
         </DefaultLayout>
       </Route>

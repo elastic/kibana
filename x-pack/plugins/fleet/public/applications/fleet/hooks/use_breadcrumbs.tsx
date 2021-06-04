@@ -17,17 +17,25 @@ interface AdditionalBreadcrumbOptions {
   useIntegrationsBasePath: boolean;
 }
 
-const BASE_BREADCRUMB: ChromeBreadcrumb = {
+type Breadcrumb = ChromeBreadcrumb & Partial<AdditionalBreadcrumbOptions>;
+
+const BASE_BREADCRUMB: Breadcrumb = {
   href: pagePathGetters.overview()[1],
   text: i18n.translate('xpack.fleet.breadcrumbs.appTitle', {
     defaultMessage: 'Fleet',
   }),
 };
 
+const INTEGRATIONS_BASE_BREADCRUMB: Breadcrumb = {
+  href: pagePathGetters.integrations()[1],
+  text: i18n.translate('xpack.integrations.breadcrumbs.appTitle', {
+    defaultMessage: 'Integrations',
+  }),
+  useIntegrationsBasePath: true,
+};
+
 const breadcrumbGetters: {
-  [key in Page]?: (
-    values: DynamicPagePathValues
-  ) => Array<ChromeBreadcrumb & Partial<AdditionalBreadcrumbOptions>>;
+  [key in Page]?: (values: DynamicPagePathValues) => Breadcrumb[];
 } = {
   base: () => [BASE_BREADCRUMB],
   overview: () => [
@@ -84,7 +92,7 @@ const breadcrumbGetters: {
     },
   ],
   add_integration_to_policy: ({ pkgTitle, pkgkey }) => [
-    BASE_BREADCRUMB,
+    INTEGRATIONS_BASE_BREADCRUMB,
     {
       href: pagePathGetters.integration_details_overview({ pkgkey })[1],
       text: pkgTitle,

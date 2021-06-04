@@ -34,7 +34,7 @@ const breadcrumbGetters: {
     BASE_BREADCRUMB,
     {
       text: i18n.translate('xpack.fleet.breadcrumbs.allIntegrationsPageTitle', {
-        defaultMessage: 'All',
+        defaultMessage: 'Browse',
       }),
     },
   ],
@@ -42,7 +42,7 @@ const breadcrumbGetters: {
     BASE_BREADCRUMB,
     {
       text: i18n.translate('xpack.fleet.breadcrumbs.installedIntegrationsPageTitle', {
-        defaultMessage: 'Installed',
+        defaultMessage: 'Manage',
       }),
     },
   ],

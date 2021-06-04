@@ -220,13 +220,11 @@ export const IntegrationsAppContext: React.FC<{
 
 export const AppRoutes = memo(() => {
   return (
-    <DefaultLayout>
-      <Switch>
-        <Route path={INTEGRATIONS_ROUTING_PATHS.integrations}>
-          <EPMApp />
-        </Route>
-        <Redirect to={INTEGRATIONS_ROUTING_PATHS.integrations_all} />
-      </Switch>
-    </DefaultLayout>
+    <Switch>
+      <Route path={INTEGRATIONS_ROUTING_PATHS.integrations}>
+        <EPMApp />
+      </Route>
+      <Redirect to={INTEGRATIONS_ROUTING_PATHS.integrations_all} />
+    </Switch>
   );
 });
