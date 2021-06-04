@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-import { Subject } from 'rxjs';
-
-export interface Refresh {
-  lastRefresh: number;
-  timeRange?: { start: string; end: string };
-}
-
-export const dataVisualizerRefresh$ = new Subject<Refresh>();
+export { DataVisualizerIndexPatternManagement } from './index_pattern_management';
