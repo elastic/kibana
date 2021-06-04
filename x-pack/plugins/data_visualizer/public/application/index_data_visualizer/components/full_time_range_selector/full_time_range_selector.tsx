@@ -38,7 +38,7 @@ export const FullTimeRangeSelector: FC<Props> = ({
   } = useDataVisualizerKibana();
 
   // wrapper around setFullTimeRange to allow for the calling of the optional callBack prop
-  async function setRange(i: IndexPattern, q: Query) {
+  async function setRange(i: IndexPattern, q?: Query) {
     try {
       const fullTimeRange = await setFullTimeRange(timefilter, i, q);
       if (typeof callback === 'function') {

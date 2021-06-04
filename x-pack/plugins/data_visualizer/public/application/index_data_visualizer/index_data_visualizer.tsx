@@ -88,7 +88,7 @@ export const DataVisualizerUrlStateContextProvider: FC<DataVisualizerUrlStateCon
           setCurrentSavedSearch(savedSearch);
         } catch (e) {
           toasts.addError(e, {
-            title: i18n.translate('xpack.dataVisualizer.index.indexPatternErrorMessage', {
+            title: i18n.translate('xpack.dataVisualizer.index.savedSearchErrorMessage', {
               defaultMessage: 'Error retrieving saved search {savedSearchId}',
               values: { savedSearchId },
             }),

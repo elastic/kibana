@@ -36,7 +36,6 @@ import {
 } from './types/field_vis_config';
 import { FileBasedNumberContentPreview } from '../field_data_row';
 import { BooleanContentPreview } from './components/field_data_row';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 const FIELD_NAME = 'fieldName';
 
