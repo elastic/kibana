@@ -28,6 +28,7 @@ steps:
       queue: ci-group-6
     artifact_paths: target/junit/**/*.xml
     depends_on: build
+    key: default-cigroup
 
   - command: CI_GROUP=Docker .buildkite/scripts/steps/functional/xpack-cigroup.sh
     label: 'Docker CI Group'
@@ -35,6 +36,7 @@ steps:
       queue: ci-group-6
     artifact_paths: target/junit/**/*.xml
     depends_on: build
+    key: default-cigroup-docker
 
   - command: .buildkite/scripts/steps/functional/oss-cigroup.sh
     label: 'OSS CI Group'
@@ -43,20 +45,21 @@ steps:
       queue: ci-group-4d
     artifact_paths: target/junit/**/*.xml
     depends_on: build
+    key: oss-cigroup
 
   - command: .buildkite/scripts/steps/test/jest_integration.sh
     label: 'Jest Integration Tests'
     agents:
       queue: jest
     artifact_paths: target/junit/**/*.xml
+    key: jest-integration
 
   - command: .buildkite/scripts/steps/test/api_integration.sh
     label: 'API Integration Tests'
     agents:
       queue: jest
     artifact_paths: target/junit/**/*.xml
-
-  - wait
+    key: api-integration
 
   - trigger: 'kibana-elasticsearch-snapshot-promote'
     async: true
@@ -64,6 +67,12 @@ steps:
       env:
         ES_SNAPSHOT_MANIFEST: '$ES_SNAPSHOT_MANIFEST'
       branch: '$BUILDKITE_BRANCH'
+    depends_on:
+      - default-cigroup
+      - default-cigroup-docker
+      - oss-cigroup
+      - jest-integration
+      - api-integration
 
   - wait: ~
     continue_on_failure: true

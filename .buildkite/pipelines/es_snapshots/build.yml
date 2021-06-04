@@ -4,4 +4,4 @@ steps:
   - command: .buildkite/scripts/steps/es_snapshots/build.sh
     label: Build ES Snapshot
     agents:
-      queue: c2-16
+      queue: c2-8
