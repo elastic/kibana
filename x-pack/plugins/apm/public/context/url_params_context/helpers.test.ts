@@ -10,6 +10,9 @@ import moment from 'moment-timezone';
 import * as helpers from './helpers';
 
 describe('url_params_context helpers', () => {
+  beforeEach(() => {
+    jest.restoreAllMocks();
+  });
   describe('getDateRange', () => {
     describe('with non-rounded dates', () => {
       describe('one minute', () => {
@@ -22,7 +25,9 @@ describe('url_params_context helpers', () => {
             })
           ).toEqual({
             start: '2021-01-28T05:47:00.000Z',
+            exactStart: '2021-01-28T05:47:00.000Z',
             end: '2021-01-28T05:48:55.304Z',
+            exactEnd: '2021-01-28T05:48:55.304Z',
           });
         });
       });
@@ -36,7 +41,9 @@ describe('url_params_context helpers', () => {
             })
           ).toEqual({
             start: '2021-01-27T05:46:00.000Z',
+            exactStart: '2021-01-27T05:46:00.000Z',
             end: '2021-01-28T05:46:13.367Z',
+            exactEnd: '2021-01-28T05:46:13.367Z',
           });
         });
       });
@@ -51,7 +58,9 @@ describe('url_params_context helpers', () => {
             })
           ).toEqual({
             start: '2020-01-28T05:52:00.000Z',
+            exactStart: '2020-01-28T05:52:00.000Z',
             end: '2021-01-28T05:52:39.741Z',
+            exactEnd: '2021-01-28T05:52:39.741Z',
           });
         });
       });
@@ -66,13 +75,17 @@ describe('url_params_context helpers', () => {
               rangeTo: 'now',
               start: '1970-01-01T00:00:00.000Z',
               end: '1971-01-01T00:00:00.000Z',
+              exactStart: '1970-01-01T00:00:00.000Z',
+              exactEnd: '1971-01-01T00:00:00.000Z',
             },
             rangeFrom: 'now-1m',
             rangeTo: 'now',
           })
         ).toEqual({
           start: '1970-01-01T00:00:00.000Z',
+          exactStart: '1970-01-01T00:00:00.000Z',
           end: '1971-01-01T00:00:00.000Z',
+          exactEnd: '1971-01-01T00:00:00.000Z',
         });
       });
     });
@@ -93,25 +106,35 @@ describe('url_params_context helpers', () => {
           })
         ).toEqual({
           start: '1972-01-01T00:00:00.000Z',
+          exactStart: '1972-01-01T00:00:00.000Z',
           end: '1973-01-01T00:00:00.000Z',
+          exactEnd: '1973-01-01T00:00:00.000Z',
         });
       });
     });
 
     describe('when the start or end are invalid', () => {
       it('returns the previous state', () => {
+        jest
+          .spyOn(datemath, 'parse')
+          .mockReturnValueOnce(undefined)
+          .mockReturnValueOnce(moment('2021-06-04T18:03:24.211Z'));
         expect(
           helpers.getDateRange({
             state: {
               start: '1972-01-01T00:00:00.000Z',
               end: '1973-01-01T00:00:00.000Z',
+              exactStart: '1972-01-01T00:00:00.000Z',
+              exactEnd: '1973-01-01T00:00:00.000Z',
             },
             rangeFrom: 'nope',
             rangeTo: 'now',
           })
         ).toEqual({
           start: '1972-01-01T00:00:00.000Z',
+          exactStart: '1972-01-01T00:00:00.000Z',
           end: '1973-01-01T00:00:00.000Z',
+          exactEnd: '1973-01-01T00:00:00.000Z',
         });
       });
     });
@@ -134,8 +157,35 @@ describe('url_params_context helpers', () => {
         ).toEqual({
           start: '1970-01-01T00:00:00.000Z',
           end: '1970-01-01T00:00:00.000Z',
+          exactStart: '1970-01-01T00:00:00.000Z',
+          exactEnd: '1970-01-01T00:00:00.000Z',
         });
       });
+    });
+  });
+
+  describe('getExactDate', () => {
+    it('returns undefined when date in not provided', () => {
+      expect(helpers.getExactDate()).toBeUndefined();
+    });
+    it('returns undefined when date in not relative', () => {
+      expect(helpers.getExactDate('2021-01-28T05:47:52.134Z')).toBeUndefined();
+    });
+    it('returns exact date', () => {
+      jest
+        .spyOn(datemath, 'parse')
+        .mockReturnValue(moment('2021-06-02T17:56:49.260Z').utc());
+      expect(helpers.getExactDate('now-24h/h')?.toISOString()).toEqual(
+        '2021-06-02T17:56:49.260Z'
+      );
+    });
+    it('returns original date when now/d is passed', () => {
+      jest
+        .spyOn(datemath, 'parse')
+        .mockReturnValue(moment('2021-06-02T17:00:00.000Z').utc());
+      expect(helpers.getExactDate('now/d')?.toISOString()).toEqual(
+        '2021-06-02T17:00:00.000Z'
+      );
     });
   });
 });

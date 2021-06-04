@@ -19,6 +19,27 @@ function getParsedDate(rawDate?: string, options = {}) {
   }
 }
 
+export function getExactDate(rawDate?: string, options = {}) {
+  if (rawDate) {
+    const isRelativeDate = rawDate.substring(0, 3) === 'now';
+    if (isRelativeDate) {
+      const isSubtractingDate = rawDate.indexOf('-') > 0;
+      const isRoundingDate = rawDate.indexOf('/') > 0;
+
+      const rawDateWithouRounding =
+        // When relative time is subtracting a period and rounding the result (e.g. now-24h/h)
+        // removed the rounding part in order to get the exact time.
+        // This is needed because of of "Today"(now/d) and "This week"(now/w) options, it rounds the values up and down
+        // so the exact time is the rounded value.
+        isSubtractingDate && isRoundingDate
+          ? rawDate.substring(0, rawDate.indexOf('/'))
+          : rawDate;
+
+      return getParsedDate(rawDateWithouRounding, options);
+    }
+  }
+}
+
 export function getDateRange({
   state,
   rangeFrom,
@@ -30,16 +51,25 @@ export function getDateRange({
 }) {
   // If the previous state had the same range, just return that instead of calculating a new range.
   if (state.rangeFrom === rangeFrom && state.rangeTo === rangeTo) {
-    return { start: state.start, end: state.end };
+    return {
+      start: state.start,
+      end: state.end,
+      exactStart: state.exactStart,
+      exactEnd: state.exactEnd,
+    };
   }
-
   const start = getParsedDate(rangeFrom);
   const end = getParsedDate(rangeTo, { roundUp: true });
 
   // `getParsedDate` will return undefined for invalid or empty dates. We return
   // the previous state if either date is undefined.
   if (!start || !end) {
-    return { start: state.start, end: state.end };
+    return {
+      start: state.start,
+      exactStart: state.start,
+      end: state.end,
+      exactEnd: state.end,
+    };
   }
 
   // rounds down start to minute
@@ -47,7 +77,12 @@ export function getDateRange({
 
   return {
     start: roundedStart.toISOString(),
+    exactStart:
+      getExactDate(rangeFrom)?.toISOString() || roundedStart.toISOString(),
     end: end.toISOString(),
+    exactEnd:
+      getExactDate(rangeTo, { roundUp: true })?.toISOString() ||
+      end.toISOString(),
   };
 }
 
