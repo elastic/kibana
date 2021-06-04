@@ -439,7 +439,7 @@
     "@babel/traverse": "^7.12.12",
     "@babel/types": "^7.12.12",
     "@bazel/ibazel": "^0.15.10",
-    "@bazel/typescript": "^3.5.0",
+    "@bazel/typescript": "^3.5.1",
     "@cypress/snapshot": "^2.1.7",
     "@cypress/webpack-preprocessor": "^5.6.0",
     "@elastic/apm-rum": "^5.6.1",
