@@ -62,6 +62,7 @@ import {
   TIMELINE_CREATE_TIMELINE_FROM_TEMPLATE_BTN,
   TIMELINE_CREATE_TEMPLATE_FROM_TIMELINE_BTN,
   TIMELINE_COLLAPSED_ITEMS_BTN,
+  TIMELINE_TAB_CONTENT_EQL,
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
 
@@ -109,7 +110,7 @@ export const goToCorrelationTab = () => {
   cy.root()
     .pipe(($el) => {
       $el.find(TIMELINE_CORRELATION_TAB).trigger('click');
-      return $el.find(TIMELINE_CORRELATION_INPUT);
+      return $el.find(`${TIMELINE_TAB_CONTENT_EQL} ${TIMELINE_CORRELATION_INPUT}`);
     })
     .should('be.visible');
   return cy.root().find(TIMELINE_CORRELATION_TAB);

@@ -12,9 +12,11 @@ import {
   LOCKED_ICON,
   NOTES_TEXT,
   PIN_EVENT,
+  SERVER_SIDE_EVENT_COUNT,
   TIMELINE_FILTER,
   TIMELINE_FLYOUT_WRAPPER,
   TIMELINE_PANEL,
+  TIMELINE_TAB_CONTENT_EQL,
 } from '../../screens/timeline';
 import { createTimelineTemplate } from '../../tasks/api_calls/timelines';
 
@@ -95,6 +97,19 @@ describe('Timelines', (): void => {
       cy.get(NOTES_TEXT).should('have.text', timeline.notes);
     });
 
+    it('should update timeline after adding eql', () => {
+      cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
+      const eql = 'any where process.name == "which"';
+      addEqlToTimeline(eql);
+
+      cy.wait('@updateTimeline', { timeout: 10000 }).its('response.statusCode').should('eq', 200);
+
+      cy.get(`${TIMELINE_TAB_CONTENT_EQL} ${SERVER_SIDE_EVENT_COUNT}`)
+        .invoke('text')
+        .then(parseInt)
+        .should('be.gt', 0);
+    });
+
     it('can be marked as favorite', () => {
       markAsFavorite();
       waitForTimelineChanges();
@@ -102,18 +117,6 @@ describe('Timelines', (): void => {
       cy.visit(OVERVIEW_URL);
       cy.get(OVERVIEW_REVENT_TIMELINES).should('contain', timeline.title);
       openTimelineUsingToggle();
-    });
-
-    it('should update timeline after adding eql', () => {
-      cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
-      const eql = 'any where process.name == "which"';
-      addEqlToTimeline(eql);
-      cy.wait('@updateTimeline').then(({ response }) => {
-        expect(response!.body.data.persistTimeline.timeline.eqlOptions).to.haveOwnProperty(
-          'query',
-          eql
-        );
-      });
     });
   });
 });

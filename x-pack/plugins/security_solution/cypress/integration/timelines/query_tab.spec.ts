@@ -7,7 +7,13 @@
 
 import { timeline } from '../../objects/timeline';
 
-import { UNLOCKED_ICON, PIN_EVENT, TIMELINE_FILTER, TIMELINE_QUERY } from '../../screens/timeline';
+import {
+  UNLOCKED_ICON,
+  PIN_EVENT,
+  TIMELINE_FILTER,
+  TIMELINE_QUERY,
+  NOTE_CARD_CONTENT,
+} from '../../screens/timeline';
 import { addNoteToTimeline } from '../../tasks/api_calls/notes';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 
@@ -61,7 +67,7 @@ describe('Timeline query tab', () => {
     });
 
     it('should be able to add event note', () => {
-      cy.get('[data-test-subj="notes"]').should('contain', 'event note');
+      cy.get(NOTE_CARD_CONTENT).should('contain', 'event note');
     });
 
     it('should display timeline filter', () => {

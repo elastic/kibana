@@ -58,6 +58,8 @@ export const UNLOCKED_ICON = '[data-test-subj="timeline-date-picker-unlock-butto
 
 export const NOTES = '[data-test-subj="note-card-body"]';
 
+export const NOTE_CARD_CONTENT = '[data-test-subj="notes"]';
+
 export const EVENT_NOTE = '[data-test-subj="timeline-notes-button-small"]';
 
 export const NOTE_BY_NOTE_ID = (noteId: string) =>
@@ -251,3 +253,12 @@ export const TIMELINE_ROW_RENDERERS_SEARCHBOX = `${TIMELINE_ROW_RENDERERS_MODAL}
 export const TIMELINE_SHOW_ROW_RENDERERS_GEAR = '[data-test-subj="show-row-renderers-gear"]';
 
 export const TIMELINE_TABS = '[data-test-subj="timeline"] .euiTabs';
+
+export const TIMELINE_TAB_CONTENT_EQL = '[data-test-subj="timeline-tab-content-eql"]';
+
+export const TIMELINE_TAB_CONTENT_QUERY = '[data-test-subj="timeline-tab-content-query"]';
+
+export const TIMELINE_TAB_CONTENT_PINNED = '[data-test-subj="timeline-tab-content-pinned"]';
+
+export const TIMELINE_TAB_CONTENT_GRAPHS_NOTES =
+  '[data-test-subj="timeline-tab-content-graph-notes"]';
