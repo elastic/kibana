@@ -171,6 +171,8 @@ export const useSavedSearch = ({
         // when runtime field was added, changed, deleted, index pattern was switched
         loadingMessage.rows = [];
         loadingMessage.fieldCounts = {};
+        loadingMessage.chartData = undefined;
+        loadingMessage.bucketInterval = undefined;
       }
       data$.next(loadingMessage);
       refs.current.fetchStatus = loadingMessage.state;
