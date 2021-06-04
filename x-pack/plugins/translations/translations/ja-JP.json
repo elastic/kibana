@@ -9260,7 +9260,6 @@
     "xpack.fleet.namespaceValidation.requiredErrorMessage": "名前空間は必須です",
     "xpack.fleet.namespaceValidation.tooLongErrorMessage": "名前空間は100バイト以下でなければなりません",
     "xpack.fleet.newEnrollmentKey.cancelButtonLabel": "キャンセル",
-    "xpack.fleet.newEnrollmentKey.flyoutTitle": "登録トークンを作成",
     "xpack.fleet.newEnrollmentKey.keyCreatedToasts": "登録トークンが作成されました。",
     "xpack.fleet.newEnrollmentKey.nameLabel": "名前",
     "xpack.fleet.newEnrollmentKey.policyLabel": "ポリシー",
