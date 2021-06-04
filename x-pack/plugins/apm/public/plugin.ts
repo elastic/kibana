@@ -50,24 +50,24 @@ export type ApmPluginStart = void;
 
 export interface ApmPluginSetupDeps {
   alerting?: AlertingPluginPublicSetup;
-  ml?: MlPluginSetup;
   data: DataPublicPluginSetup;
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  ml?: MlPluginSetup;
   observability: ObservabilityPublicSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }
 
 export interface ApmPluginStartDeps {
   alerting?: AlertingPluginPublicStart;
-  ml?: MlPluginStart;
   data: DataPublicPluginStart;
+  embeddable: EmbeddableStart;
   home: void;
   licensing: void;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  embeddable: EmbeddableStart;
   maps?: MapsStartApi;
+  ml?: MlPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   observability: ObservabilityPublicStart;
 }
 
@@ -85,6 +85,21 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       pluginSetupDeps.home.environment.update({ apmUi: true });
       pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
     }
+
+    // register observability nav
+    plugins.observability.navigation.registerSections(
+      of([
+        {
+          label: 'APM',
+          sortKey: 200,
+          entries: [
+            { label: 'Services', app: 'apm', path: '/services' },
+            { label: 'Traces', app: 'apm', path: '/traces' },
+            { label: 'Service Map', app: 'apm', path: '/service-map' },
+          ],
+        },
+      ])
+    );
 
     const getApmDataHelper = async () => {
       const {

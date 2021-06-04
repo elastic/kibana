@@ -20,7 +20,6 @@ import {
   useUiSetting$,
 } from '../../../../../src/plugins/kibana_react/public';
 import { APMRouteDefinition } from '../application/routes';
-import { renderAsRedirectTo } from '../components/app/Main/route_config';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
 import { RumHome, UX_LABEL } from '../components/app/RumDashboard/RumHome';
 import { ApmPluginContext } from '../context/apm_plugin/apm_plugin_context';
@@ -30,6 +29,7 @@ import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
 import { UXActionMenu } from '../components/app/RumDashboard/ActionMenu';
+import { redirectTo } from '../components/routing/redirect_to';
 import { useBreadcrumbs } from '../../../observability/public';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 
@@ -37,7 +37,7 @@ export const uxRoutes: APMRouteDefinition[] = [
   {
     exact: true,
     path: '/',
-    render: renderAsRedirectTo('/ux'),
+    render: redirectTo('/ux'),
     breadcrumb: UX_LABEL,
   },
 ];
