@@ -303,3 +303,22 @@ Pagination in a data table is unsupported in *Lens*. However, the <<types-of-vis
 ===== Is it possible to have more than one y-axis scale in visualizations?
 
 *Lens* lets you pick, for each Y dimension, up to two distinct axis: *left* and *right*. Each axis can have a different scale.
+
+[float]
+[[why-my-value-is-not-of-the-right-color-using-dynamic-coloring]]
+===== Why mt value is not of the right color when using dynamic coloring?
+
+There could be various reason for a specific value in the table to have a different color than expected.
+
+Here's a short list of few different aspects to check:
+* Make sure the value falls within the desidered color stop value defined in the panel. Color stop values are "inclusive".
+
+* Make sure to have the right value precision setup: value formatters could round up or down numeric values.
+
+* Make sure the right color continuity option is selected: if the number is below the first color stop value a continuity of type `Below` or `Above and below range` is required
+
+* The values set by default by the Value type are based on the current data range displayed on the data table.
+
+** If a `Number` custom configuration is used, check the color stops value are covering the current data range.
+
+** If a `Percent` configuration is used, when the data range changes this has an effect on colors displayed.
