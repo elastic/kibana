@@ -137,14 +137,14 @@ export interface ServerFailedToReturnEndpointsTotal {
   payload: ServerApiError;
 }
 
-type EndpointIsolationRequest = Action<'endpointIsolationRequest'> & {
+export type EndpointIsolationRequest = Action<'endpointIsolationRequest'> & {
   payload: {
     type: ISOLATION_ACTIONS;
     data: HostIsolationRequestBody;
   };
 };
 
-type EndpointIsolationRequestStateChange = Action<'endpointIsolationRequestStateChange'> & {
+export type EndpointIsolationRequestStateChange = Action<'endpointIsolationRequestStateChange'> & {
   payload: EndpointState['isolationRequestState'];
 };
 
