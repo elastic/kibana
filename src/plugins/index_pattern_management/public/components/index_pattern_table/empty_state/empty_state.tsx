@@ -28,60 +28,18 @@ import {
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { reactRouterNavigate } from '../../../../../../plugins/kibana_react/public';
-import { MlCardState } from '../../../types';
 
 export const EmptyState = ({
   onRefresh,
   navigateToApp,
   docLinks,
-  getMlCardState,
   canSave,
 }: {
   onRefresh: () => void;
   navigateToApp: ApplicationStart['navigateToApp'];
   docLinks: DocLinksStart;
-  getMlCardState: () => MlCardState;
   canSave: boolean;
 }) => {
-  const mlCard = (
-    <EuiFlexItem>
-      <EuiCard
-        onClick={() => navigateToApp('ml', { path: '#/filedatavisualizer' })}
-        className="inpEmptyState__card"
-        betaBadgeLabel={
-          getMlCardState() === MlCardState.ENABLED
-            ? undefined
-            : i18n.translate(
-                'indexPatternManagement.createIndexPattern.emptyState.basicLicenseLabel',
-                {
-                  defaultMessage: 'Basic',
-                }
-              )
-        }
-        betaBadgeTooltipContent={i18n.translate(
-          'indexPatternManagement.createIndexPattern.emptyState.basicLicenseDescription',
-          {
-            defaultMessage: 'This feature requires a Basic license.',
-          }
-        )}
-        isDisabled={getMlCardState() === MlCardState.DISABLED}
-        icon={<EuiIcon size="xl" type="document" color="subdued" />}
-        title={
-          <FormattedMessage
-            id="indexPatternManagement.createIndexPattern.emptyState.uploadCardTitle"
-            defaultMessage="Upload a file"
-          />
-        }
-        description={
-          <FormattedMessage
-            id="indexPatternManagement.createIndexPattern.emptyState.uploadCardDescription"
-            defaultMessage="Import a CSV, NDJSON, or log file."
-          />
-        }
-      />
-    </EuiFlexItem>
-  );
-
   const createAnyway = (
     <EuiText color="subdued" textAlign="center" size="xs">
       <FormattedMessage
@@ -143,7 +101,25 @@ export const EmptyState = ({
                 }
               />
             </EuiFlexItem>
-            {getMlCardState() !== MlCardState.HIDDEN ? mlCard : <></>}
+            <EuiFlexItem>
+              <EuiCard
+                onClick={() => navigateToApp('home', { path: '#/tutorial_directory/fileDataViz' })}
+                className="inpEmptyState__card"
+                icon={<EuiIcon size="xl" type="document" color="subdued" />}
+                title={
+                  <FormattedMessage
+                    id="indexPatternManagement.createIndexPattern.emptyState.uploadCardTitle"
+                    defaultMessage="Upload a file"
+                  />
+                }
+                description={
+                  <FormattedMessage
+                    id="indexPatternManagement.createIndexPattern.emptyState.uploadCardDescription"
+                    defaultMessage="Import a CSV, NDJSON, or log file."
+                  />
+                }
+              />
+            </EuiFlexItem>
             <EuiFlexItem>
               <EuiCard
                 className="inpEmptyState__card"

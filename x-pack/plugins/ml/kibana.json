@@ -16,7 +16,6 @@
     "embeddable",
     "uiActions",
     "kibanaLegacy",
-    "indexPatternManagement",
     "discover",
     "triggersActionsUi"
   ],

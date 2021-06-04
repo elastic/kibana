@@ -18,6 +18,7 @@
     "home"
   ],
   "requiredBundles": [
+    "home",
     "kibanaReact",
     "maps",
     "esUiShared"

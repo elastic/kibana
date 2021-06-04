@@ -24,7 +24,6 @@ import type {
 } from 'src/plugins/share/public';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import type { HomePublicPluginSetup } from 'src/plugins/home/public';
-import type { IndexPatternManagementSetup } from 'src/plugins/index_pattern_management/public';
 import type { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
 import type { SpacesPluginStart } from '../../spaces/public';
 
@@ -78,7 +77,6 @@ export interface MlSetupDependencies {
   uiActions: UiActionsSetup;
   kibanaVersion: string;
   share: SharePluginSetup;
-  indexPatternManagement: IndexPatternManagementSetup;
   triggersActionsUi?: TriggersAndActionsUIPublicPluginSetup;
   alerting?: AlertingSetup;
 }
@@ -148,12 +146,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         if (pluginsSetup.home) {
           registerFeature(pluginsSetup.home);
         }
-
-        // register ML for the index pattern management no data screen.
-        pluginsSetup.indexPatternManagement.environment.update({
-          ml: () =>
-            capabilities.ml.canFindFileStructure ? MlCardState.ENABLED : MlCardState.HIDDEN,
-        });
       } else {
         // if ml is disabled in elasticsearch, disable ML in kibana
         this.appUpdater$.next(() => ({

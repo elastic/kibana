@@ -18,7 +18,7 @@ import type { MapsStartApi } from '../../maps/public';
 import type { SecurityPluginSetup } from '../../security/public';
 import { getFileDataVisualizerComponent } from './api';
 import { getMaxBytesFormatted } from './application/util/get_max_bytes';
-import { registerHomeAddData } from './register_home';
+import { registerHomeAddData, registerHomeFeatureCatalogue } from './register_home';
 
 export interface FileDataVisualizerSetupDependencies {
   home?: HomePublicPluginSetup;
@@ -46,6 +46,7 @@ export class FileDataVisualizerPlugin
   public setup(core: CoreSetup, plugins: FileDataVisualizerSetupDependencies) {
     if (plugins.home) {
       registerHomeAddData(plugins.home);
+      registerHomeFeatureCatalogue(plugins.home);
     }
   }
 
