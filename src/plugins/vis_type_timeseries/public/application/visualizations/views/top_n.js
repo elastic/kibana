@@ -8,7 +8,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { getLastValue } from '../../../../common/get_last_value';
+import { getLastValue, isEmptyValue } from '../../../../common/last_value_utils';
 import { labelDateFormatter } from '../../components/lib/label_date_formatter';
 import { emptyLabel } from '../../../../common/empty_label';
 import reactcss from 'reactcss';
@@ -97,15 +97,16 @@ export class TopN extends Component {
       const renderMode = TopN.getRenderMode(min, max);
       const key = `${item.id || item.label}`;
       const lastValue = getLastValue(item.data);
+      // if result is empty, all bar need to be colored.
+      const lastValueFormatted = isEmptyValue(lastValue) ? 1 : lastValue;
       const formatter = item.tickFormatter || this.props.tickFormatter;
-      const isPositiveValue = lastValue >= 0;
+      const isPositiveValue = lastValueFormatted >= 0;
 
       const intervalLength = TopN.calcDomain(renderMode, min, max);
       // if both are 0, the division returns NaN causing unexpected behavior.
       // For this it defaults to 0
-      const width = 100 * (Math.abs(lastValue) / intervalLength) || 0;
+      const width = 100 * (Math.abs(lastValueFormatted) / intervalLength) || 0;
       const label = item.labelFormatted ? labelDateFormatter(item.labelFormatted) : item.label;
-
       const styles = reactcss(
         {
           default: {
@@ -150,7 +151,7 @@ export class TopN extends Component {
 
     const intervalSettings = this.props.series.reduce(
       (acc, series, index) => {
-        const value = getLastValue(series.data);
+        const value = getLastValue(series.data) ?? 1;
 
         return {
           min: !index || value < acc.min ? value : acc.min,
