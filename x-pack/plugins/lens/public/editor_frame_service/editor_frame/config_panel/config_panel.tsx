@@ -63,17 +63,25 @@ export function LayerPanels(
     () => (datasourceId: string, newState: unknown) => {
       // React will synchronously update if this is triggered from a third party component,
       // which we don't want. The timeout lets user interaction have priority, then React updates.
-      setTimeout(() => {
-        dispatch({
-          type: 'UPDATE_DATASOURCE_STATE',
-          updater: (prevState: unknown) =>
-            typeof newState === 'function' ? newState(prevState) : newState,
-          datasourceId,
-          clearStagedPreview: false,
-        });
-      }, 0);
+      dispatch({
+        type: 'UPDATE_DATASOURCE_STATE',
+        updater: (prevState: unknown) =>
+          typeof newState === 'function' ? newState(prevState) : newState,
+        datasourceId,
+        clearStagedPreview: false,
+      });
     },
     [dispatch]
+  );
+  const updateDatasourceAsync = useMemo(
+    () => (datasourceId: string, newState: unknown) => {
+      // React will synchronously update if this is triggered from a third party component,
+      // which we don't want. The timeout lets user interaction have priority, then React updates.
+      setTimeout(() => {
+        updateDatasource(datasourceId, newState);
+      }, 0);
+    },
+    [updateDatasource]
   );
   const updateAll = useMemo(
     () => (datasourceId: string, newDatasourceState: unknown, newVisualizationState: unknown) => {
@@ -134,6 +142,7 @@ export function LayerPanels(
             visualizationState={visualizationState}
             updateVisualization={setVisualizationState}
             updateDatasource={updateDatasource}
+            updateDatasourceAsync={updateDatasourceAsync}
             updateAll={updateAll}
             isOnlyLayer={layerIds.length === 1}
             onRemoveLayer={() => {
