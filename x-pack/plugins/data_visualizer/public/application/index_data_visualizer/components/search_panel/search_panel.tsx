@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { EuiCode, EuiFlexItem, EuiFlexGroup, EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -71,6 +71,13 @@ export const SearchPanel: FC<Props> = ({
     language: searchQueryLanguage,
   });
   const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>(undefined);
+
+  useEffect(() => {
+    setSearchInput({
+      query: searchString || '',
+      language: searchQueryLanguage,
+    });
+  }, [searchQueryLanguage, searchString]);
 
   const searchHandler = (query: Query) => {
     let filterQuery;

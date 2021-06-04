@@ -5,12 +5,14 @@
  * 2.0.
  */
 import '../_index.scss';
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
 import { isEqual } from 'lodash';
 // @ts-ignore
 import { encode } from 'rison-node';
+import { SimpleSavedObject } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import {
@@ -26,18 +28,78 @@ import {
   getNestedProperty,
   isRisonSerializationRequired,
 } from '../common/util/url_state';
+import { useDataVisualizerKibana } from '../kibana_context';
+import { IndexPattern } from '../../../../../../src/plugins/data/common/index_patterns/index_patterns';
 
 export type IndexDataVisualizerSpec = typeof IndexDataVisualizer;
 
 export interface DataVisualizerUrlStateContextProviderProps extends IndexDataVisualizerViewProps {
   IndexDataVisualizerComponent: FC<IndexDataVisualizerViewProps>;
 }
+
 export const DataVisualizerUrlStateContextProvider: FC<DataVisualizerUrlStateContextProviderProps> = ({
   IndexDataVisualizerComponent,
   ...restProps
 }) => {
+  const {
+    services: {
+      data: { indexPatterns },
+      savedObjects: { client: savedObjectsClient },
+      notifications: { toasts },
+    },
+  } = useDataVisualizerKibana();
   const history = useHistory();
+
+  const [currentIndexPattern, setCurrentIndexPattern] = useState<IndexPattern | undefined>(
+    undefined
+  );
+  const [currentSavedSearch, setCurrentSavedSearch] = useState<SimpleSavedObject<unknown> | null>(
+    null
+  );
   const { search: searchString } = useLocation();
+
+  useEffect(() => {
+    const prevSearchString = searchString;
+    const parsedQueryString = parse(prevSearchString, { sort: false });
+
+    const getIndexPattern = async () => {
+      if (typeof parsedQueryString?.index === 'string') {
+        const indexPattern = await indexPatterns.get(parsedQueryString.index);
+        setCurrentIndexPattern(indexPattern);
+      }
+
+      if (typeof parsedQueryString?.savedSearchId === 'string') {
+        const savedSearchId = parsedQueryString.savedSearchId;
+        try {
+          const savedSearch = await savedObjectsClient.get('search', savedSearchId);
+          const indexPatternId = savedSearch.references.find((ref) => ref.type === 'index-pattern')
+            ?.id;
+          if (indexPatternId !== undefined) {
+            try {
+              const indexPattern = await indexPatterns.get(indexPatternId);
+              setCurrentIndexPattern(indexPattern);
+            } catch (e) {
+              toasts.addError(e, {
+                title: i18n.translate('xpack.dataVisualizer.index.indexPatternErrorMessage', {
+                  defaultMessage: 'Error finding index pattern',
+                }),
+              });
+            }
+          }
+          setCurrentSavedSearch(savedSearch);
+        } catch (e) {
+          toasts.addError(e, {
+            title: i18n.translate('xpack.dataVisualizer.index.indexPatternErrorMessage', {
+              defaultMessage: 'Error retrieving saved search {savedSearchId}',
+              values: { savedSearchId },
+            }),
+          });
+        }
+      }
+    };
+    getIndexPattern();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [savedObjectsClient, toasts, indexPatterns]);
 
   const setUrlState: SetUrlState = useCallback(
     (
@@ -103,15 +165,40 @@ export const DataVisualizerUrlStateContextProvider: FC<DataVisualizerUrlStateCon
 
   return (
     <UrlStateContextProvider value={{ searchString, setUrlState }}>
-      <IndexDataVisualizerComponent {...restProps} />
+      {currentIndexPattern ? (
+        <IndexDataVisualizerComponent
+          {...restProps}
+          currentIndexPattern={currentIndexPattern}
+          currentSavedSearch={currentSavedSearch}
+        />
+      ) : (
+        <div />
+      )}
     </UrlStateContextProvider>
   );
 };
 
 export const IndexDataVisualizer: FC<IndexDataVisualizerViewProps> = (props) => {
   const coreStart = getCoreStart();
-  const { data, maps, embeddable, share, security, fileUpload } = getPluginsStart();
-  const services = { data, maps, embeddable, share, security, fileUpload, ...coreStart };
+  const {
+    data,
+    maps,
+    embeddable,
+    share,
+    security,
+    fileUpload,
+    indexPatternFieldEditor,
+  } = getPluginsStart();
+  const services = {
+    data,
+    maps,
+    embeddable,
+    share,
+    security,
+    fileUpload,
+    indexPatternFieldEditor,
+    ...coreStart,
+  };
 
   return (
     <KibanaContextProvider services={{ ...services }}>

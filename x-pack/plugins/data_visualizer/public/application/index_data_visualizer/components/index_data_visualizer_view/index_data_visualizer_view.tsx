@@ -26,14 +26,11 @@ import { i18n } from '@kbn/i18n';
 import {
   IndexPatternField,
   KBN_FIELD_TYPES,
-  esQuery,
-  esKuery,
   UI_SETTINGS,
   Query,
   IndexPattern,
 } from '../../../../../../../../src/plugins/data/public';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
-import { getQueryFromSavedSearch } from '../../../common/util/index_utils';
 import { usePageUrlState, useUrlState } from '../../../common/util/url_state';
 import {
   DataVisualizerTable,
@@ -68,6 +65,7 @@ import { DatePickerWrapper } from '../../../common/components/date_picker_wrappe
 import { dataVisualizerTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
 import { HelpMenu } from '../../../common/components/help_menu';
 import { TimeBuckets } from '../../services/time_buckets';
+import { extractSearchData } from '../../utils/saved_search_utils';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;
@@ -120,7 +118,7 @@ export const getDefaultDataVisualizerListState = (): Required<DataVisualizerInde
 
 export interface IndexDataVisualizerViewProps {
   query: Query;
-  currentIndexPattern: IndexPattern; // TODO this should be IndexPattern or null
+  currentIndexPattern: IndexPattern;
   currentSavedSearch: SavedSearchSavedObject | null;
 }
 const restorableDefaults = getDefaultDataVisualizerListState();
@@ -135,11 +133,19 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     DATA_VISUALIZER_INDEX_VIEWER,
     restorableDefaults
   );
+  const [globalState, setGlobalState] = useUrlState('_g');
+
   const [currentSavedSearch, setCurrentSavedSearch] = useState(
     dataVisualizerProps.currentSavedSearch
   );
 
   const { query, currentIndexPattern } = dataVisualizerProps;
+
+  useEffect(() => {
+    if (dataVisualizerProps?.currentSavedSearch !== undefined) {
+      setCurrentSavedSearch(dataVisualizerProps?.currentSavedSearch);
+    }
+  }, [dataVisualizerProps?.currentSavedSearch]);
 
   const getTimeBuckets = useCallback(() => {
     return new TimeBuckets({
@@ -151,7 +157,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   }, [uiSettings]);
 
   const timefilter = useTimefilter({
-    timeRangeSelector: currentIndexPattern.timeFieldName !== undefined,
+    timeRangeSelector: currentIndexPattern?.timeFieldName !== undefined,
     autoRefreshSelector: true,
   });
 
@@ -160,7 +166,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     toasts,
   ]);
 
-  const [globalState, setGlobalState] = useUrlState('_g');
   useEffect(() => {
     if (globalState?.time !== undefined) {
       timefilter.setTime({
@@ -214,7 +219,11 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   const defaults = getDefaultPageState();
 
   const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
-    const searchData = extractSearchData(currentSavedSearch);
+    const searchData = extractSearchData(
+      currentSavedSearch,
+      currentIndexPattern,
+      uiSettings.get(UI_SETTINGS.QUERY_STRING_OPTIONS)
+    );
 
     if (searchData === undefined || dataVisualizerListState.searchString !== '') {
       return {
@@ -230,7 +239,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentSavedSearch, dataVisualizerListState]);
+  }, [currentSavedSearch, currentIndexPattern, dataVisualizerListState]);
 
   const setSearchParams = (searchParams: {
     searchQuery: Query['query'];
@@ -334,33 +343,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     createNonMetricCards();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nonMetricsLoaded]);
-
-  /**
-   * Extract query data from the saved search object.
-   */
-  function extractSearchData(savedSearch: SavedSearchSavedObject | null) {
-    if (!savedSearch) {
-      return undefined;
-    }
-
-    const { query: extractedQuery } = getQueryFromSavedSearch(savedSearch);
-    const queryLanguage = extractedQuery.language as SearchQueryLanguage;
-    const qryString = extractedQuery.query;
-    let qry;
-    if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
-      const ast = esKuery.fromKueryExpression(qryString);
-      qry = esKuery.toElasticsearchQuery(ast, currentIndexPattern);
-    } else {
-      qry = esQuery.luceneStringToDsl(qryString);
-      esQuery.decorateQuery(qry, uiSettings.get(UI_SETTINGS.QUERY_STRING_OPTIONS));
-    }
-
-    return {
-      searchQuery: qry,
-      searchString: qryString,
-      queryLanguage,
-    };
-  }
 
   async function loadOverallStats() {
     const tf = timefilter as any;

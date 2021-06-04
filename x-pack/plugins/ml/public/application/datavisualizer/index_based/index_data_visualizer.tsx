@@ -9,12 +9,8 @@ import React, { FC, Fragment, useEffect, useState } from 'react';
 import { useMlKibana, useTimefilter } from '../../contexts/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';
 import { HelpMenu } from '../../components/help_menu';
-import { useMlContext } from '../../contexts/ml';
-import { IndexDataVisualizerViewProps } from '../../../../../data_visualizer/public';
+import type { IndexDataVisualizerViewProps } from '../../../../../data_visualizer/public';
 export const IndexDataVisualizerPage: FC = () => {
-  const mlContext = useMlContext();
-  const { currentIndexPattern, combinedQuery, currentSavedSearch } = mlContext;
-
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
     services: { docLinks, dataVisualizer },
@@ -33,17 +29,7 @@ export const IndexDataVisualizerPage: FC = () => {
   return IndexDataVisualizer ? (
     <Fragment>
       <NavigationMenu tabId="datavisualizer" />
-      {
-        // Need to inject required props from ml context
-        // @ts-ignore FC IndexDataVisualizer does have props type
-        React.Children.map(IndexDataVisualizer.props.children, (child) => {
-          return React.cloneElement(child, {
-            query: combinedQuery,
-            currentIndexPattern,
-            currentSavedSearch,
-          });
-        })
-      }
+      {IndexDataVisualizer}
       <HelpMenu docLink={docLinks.links.ml.guide} />
     </Fragment>
   ) : (
