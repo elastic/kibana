@@ -34,7 +34,7 @@ pageLoadAssetSize:
   indexManagement: 140608
   indexPatternManagement: 28222
   infra: 184320
-  fleet: 415849
+  fleet: 417849
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
@@ -87,7 +87,6 @@ pageLoadAssetSize:
   visDefaultEditor: 50178
   visTypeMarkdown: 30896
   visTypeMetric: 42790
-  visTypePie: 34051
   visTypeTable: 94934
   visTypeTagcloud: 37575
   visTypeTimelion: 68883
