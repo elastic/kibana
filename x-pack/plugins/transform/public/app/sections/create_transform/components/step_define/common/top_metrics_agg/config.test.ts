@@ -57,7 +57,9 @@ describe('top metrics agg config', () => {
       expect(config.field).toEqual(['test-field-01', 'test-field-02']);
       expect(config.aggConfig).toEqual({
         sortField: 'sort-field',
-        sortDirection: 'asc',
+        sortSettings: {
+          order: 'asc',
+        },
       });
     });
 
@@ -87,12 +89,14 @@ describe('top metrics agg config', () => {
       expect(config.field).toEqual(['test-field-01']);
       expect(config.aggConfig).toEqual({
         sortField: 'offer.price',
-        sortDirection: 'desc',
-        sortMode: 'avg',
-        nested: {
-          path: 'offer',
-          filter: {
-            term: { 'offer.color': 'blue' },
+        sortSettings: {
+          order: 'desc',
+          mode: 'avg',
+          nested: {
+            path: 'offer',
+            filter: {
+              term: { 'offer.color': 'blue' },
+            },
           },
         },
       });
@@ -104,7 +108,9 @@ describe('top metrics agg config', () => {
       // arrange
       config.field = ['field-01', 'field-02'];
       config.aggConfig = {
-        sortDirection: 'asc',
+        sortSettings: {
+          order: 'asc',
+        },
       };
 
       // act and assert
@@ -127,7 +133,9 @@ describe('top metrics agg config', () => {
       config.field = ['field-01', 'field-02'];
       config.aggConfig = {
         sortField: 'sort-field',
-        sortDirection: 'asc',
+        sortSettings: {
+          order: 'asc',
+        },
       };
 
       // act and assert
@@ -145,7 +153,13 @@ describe('top metrics agg config', () => {
 
       config.aggConfig = {
         sortField: 'sort-field',
-        sortDirection: 'asc',
+        sortSettings: {
+          order: 'asc',
+          // @ts-ignore
+          nested: {
+            path: 'order',
+          },
+        },
         // @ts-ignore
         size: 2,
       };
@@ -156,6 +170,9 @@ describe('top metrics agg config', () => {
         sort: {
           'sort-field': {
             order: 'asc',
+            nested: {
+              path: 'order',
+            },
           },
         },
         size: 2,

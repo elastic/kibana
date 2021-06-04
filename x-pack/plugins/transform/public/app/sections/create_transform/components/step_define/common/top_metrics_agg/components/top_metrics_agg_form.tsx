@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useContext } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormRow, EuiSelect, EuiButtonGroup, EuiAccordion, EuiSpacer } from '@elastic/eui';
-import { PivotAggsConfigTopMetrics } from '../types';
+import { PivotAggsConfigTopMetrics, TopMetricsAggConfig } from '../types';
 import { PivotConfigurationContext } from '../../../../pivot_configuration/pivot_configuration';
 import {
   isSpecialSortField,
@@ -55,6 +55,21 @@ export const TopMetricsAggForm: PivotAggsConfigTopMetrics['AggFormComponent'] = 
 
   const sortFieldType = fields.find((f) => f.name === aggConfig.sortField)?.type;
 
+  const sortSettings = aggConfig.sortSettings ?? {};
+
+  const updateSortSettings = useCallback(
+    (update: Partial<TopMetricsAggConfig['sortSettings']>) => {
+      onChange({
+        ...aggConfig,
+        sortSettings: {
+          ...(aggConfig.sortSettings ?? {}),
+          ...update,
+        },
+      });
+    },
+    [aggConfig, onChange]
+  );
+
   return (
     <>
       <EuiFormRow
@@ -96,10 +111,10 @@ export const TopMetricsAggForm: PivotAggsConfigTopMetrics['AggFormComponent'] = 
                     }
                   )}
                   options={sortDirectionOptions}
-                  idSelected={aggConfig.sortDirection ?? ''}
-                  onChange={(id: string) =>
-                    onChange({ ...aggConfig, sortDirection: id as SortDirection })
-                  }
+                  idSelected={sortSettings.order ?? ''}
+                  onChange={(id: string) => {
+                    updateSortSettings({ order: id as SortDirection });
+                  }}
                   color="text"
                 />
               </EuiFormRow>
@@ -138,9 +153,9 @@ export const TopMetricsAggForm: PivotAggsConfigTopMetrics['AggFormComponent'] = 
                       }
                     )}
                     options={sortModeOptions}
-                    idSelected={aggConfig.sortMode ?? ''}
+                    idSelected={sortSettings.mode ?? ''}
                     onChange={(id: string) => {
-                      onChange({ ...aggConfig, sortMode: id as SortMode });
+                      updateSortSettings({ mode: id as SortMode });
                     }}
                     color="text"
                   />
@@ -160,10 +175,9 @@ export const TopMetricsAggForm: PivotAggsConfigTopMetrics['AggFormComponent'] = 
                         text: v,
                         name: v,
                       }))}
-                      value={aggConfig.numericType}
+                      value={sortSettings.numericType}
                       onChange={(e) => {
-                        onChange({
-                          ...aggConfig,
+                        updateSortSettings({
                           numericType: e.target.value as SortNumericFieldType,
                         });
                       }}

@@ -37,29 +37,26 @@ export function getTopMetricsAggConfig(
         return null;
       }
 
-      const {
-        sortField,
-        sortDirection,
-        sortMode,
-        numericType,
-        ...unsupportedConfig
-      } = this.aggConfig;
+      const { sortField, sortSettings = {}, ...unsupportedConfig } = this.aggConfig;
 
       let sort = null;
 
       if (isSpecialSortField(sortField)) {
         sort = sortField;
       } else {
-        if (sortMode || numericType) {
+        const { mode, numericType, order, ...rest } = sortSettings;
+
+        if (mode || numericType || isPopulatedObject(rest)) {
           sort = {
             [sortField!]: {
-              order: sortDirection,
-              ...(sortMode ? { mode: sortMode } : {}),
+              ...rest,
+              order,
+              ...(mode ? { mode } : {}),
               ...(numericType ? { numeric_type: numericType } : {}),
             },
           };
         } else {
-          sort = { [sortField!]: sortDirection };
+          sort = { [sortField!]: sortSettings.order };
         }
       }
 
@@ -70,7 +67,7 @@ export function getTopMetricsAggConfig(
       };
     },
     setUiConfigFromEs(esAggDefinition) {
-      const { metrics, sort } = esAggDefinition;
+      const { metrics, sort, ...unsupportedConfig } = esAggDefinition;
 
       this.field = (Array.isArray(metrics) ? metrics : [metrics]).map((v) => v.field);
 
@@ -85,24 +82,24 @@ export function getTopMetricsAggConfig(
 
       const sortDefinition = sort[sortField];
 
-      let unsupportedConfig = null;
+      this.aggConfig.sortSettings = this.aggConfig.sortSettings ?? {};
 
       if (isValidSortDirection(sortDefinition)) {
-        this.aggConfig.sortDirection = sortDefinition;
+        this.aggConfig.sortSettings.order = sortDefinition;
       }
 
       if (isPopulatedObject(sortDefinition)) {
         const { order, mode, numeric_type: numType, ...rest } = sortDefinition;
-        unsupportedConfig = rest;
+        this.aggConfig.sortSettings = rest;
 
         if (isValidSortDirection(order)) {
-          this.aggConfig.sortDirection = order;
+          this.aggConfig.sortSettings.order = order;
         }
         if (isValidSortMode(mode)) {
-          this.aggConfig.sortMode = mode;
+          this.aggConfig.sortSettings.mode = mode;
         }
         if (isValidSortNumericType(numType)) {
-          this.aggConfig.numericType = numType;
+          this.aggConfig.sortSettings.numericType = numType;
         }
       }
 
@@ -114,7 +111,7 @@ export function getTopMetricsAggConfig(
     isValid() {
       return (
         !!this.aggConfig.sortField &&
-        (isSpecialSortField(this.aggConfig.sortField) ? true : !!this.aggConfig.sortDirection)
+        (isSpecialSortField(this.aggConfig.sortField) ? true : !!this.aggConfig.sortSettings?.order)
       );
     },
   };

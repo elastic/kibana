@@ -14,9 +14,11 @@ import type {
 
 export interface TopMetricsAggConfig {
   sortField: string;
-  sortDirection?: SortDirection;
-  sortMode?: SortMode;
-  numericType?: SortNumericFieldType;
+  sortSettings?: {
+    order?: SortDirection;
+    mode?: SortMode;
+    numericType?: SortNumericFieldType;
+  };
 }
 
 export type PivotAggsConfigTopMetrics = PivotAggsConfigWithExtra<TopMetricsAggConfig>;
