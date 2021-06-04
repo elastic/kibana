@@ -148,10 +148,6 @@ export interface DiscoverGridProps {
    * List of used control columns (available: 'openDetails', 'select')
    */
   controlColumnIds?: string[];
-  /**
-   * Optional class name to apply
-   */
-  className?: string;
 }
 
 export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => {

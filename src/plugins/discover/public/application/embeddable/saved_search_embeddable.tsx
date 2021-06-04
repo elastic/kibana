@@ -32,6 +32,7 @@ import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_compon
 import { UiActionsStart } from '../../../../ui_actions/public';
 import { getServices } from '../../kibana_services';
 import {
+  DOC_HIDE_TIME_COLUMN_SETTING,
   SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
@@ -281,7 +282,7 @@ export class SavedSearchEmbeddable
         });
       },
       useNewFieldsApi: !this.services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false),
-      showTimeCol: !this.services.uiSettings.get('doc_table:hideTimeColumn', false),
+      showTimeCol: !this.services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
       ariaLabelledBy: 'documentsAriaLabel',
       useLegacyTable: this.services.uiSettings.get('doc_table:legacy'),
     };
