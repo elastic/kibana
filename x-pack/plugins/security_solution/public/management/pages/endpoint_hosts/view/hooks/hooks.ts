@@ -7,13 +7,14 @@
 
 import { useSelector } from 'react-redux';
 import { useMemo } from 'react';
-import { useKibana } from '../../../../common/lib/kibana';
-import { EndpointState } from '../types';
+import { EndpointState } from '../../types';
+import { State } from '../../../../../common/store';
 import {
   MANAGEMENT_STORE_ENDPOINTS_NAMESPACE,
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
-} from '../../../common/constants';
-import { State } from '../../../../common/store';
+} from '../../../../common/constants';
+import { useKibana } from '../../../../../common/lib/kibana';
+
 export function useEndpointSelector<TSelected>(selector: (state: EndpointState) => TSelected) {
   return useSelector(function (state: State) {
     return selector(
@@ -38,7 +39,6 @@ export const useIngestUrl = (subpath: string): { url: string; appId: string; app
     };
   }, [services.application, subpath]);
 };
-
 /**
  * Returns an object that contains Fleet app and URL information
  */
