@@ -12,8 +12,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router } from 'react-router-dom';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
+import { i18n } from '@kbn/i18n';
 import type { ObservabilityRuleTypeRegistry } from '../../../observability/public';
-import { euiStyled } from '../../../../../src/plugins/kibana_react/common';
 import {
   KibanaContextProvider,
   RedirectAppLinks,
@@ -24,21 +24,16 @@ import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPat
 import { RumHome, UX_LABEL } from '../components/app/RumDashboard/RumHome';
 import { ApmPluginContext } from '../context/apm_plugin/apm_plugin_context';
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
-import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { ConfigSchema } from '../index';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
-import { px, units } from '../style/variables';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
 import { UXActionMenu } from '../components/app/RumDashboard/ActionMenu';
 import { redirectTo } from '../components/routing/redirect_to';
+import { useBreadcrumbs } from '../../../observability/public';
+import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 
-const CsmMainContainer = euiStyled.div`
-  padding: ${px(units.plus)};
-  height: 100%;
-`;
-
-export const rumRoutes: APMRouteDefinition[] = [
+export const uxRoutes: APMRouteDefinition[] = [
   {
     exact: true,
     path: '/',
@@ -47,10 +42,20 @@ export const rumRoutes: APMRouteDefinition[] = [
   },
 ];
 
-function CsmApp() {
+function UxApp() {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
-  useBreadcrumbs(rumRoutes);
+  const { core } = useApmPluginContext();
+  const basePath = core.http.basePath.get();
+
+  useBreadcrumbs([
+    { text: UX_LABEL, href: basePath + '/app/ux' },
+    {
+      text: i18n.translate('xpack.apm.ux.overview', {
+        defaultMessage: 'Overview',
+      }),
+    },
+  ]);
 
   return (
     <ThemeProvider
@@ -60,20 +65,20 @@ function CsmApp() {
         darkMode,
       })}
     >
-      <CsmMainContainer data-test-subj="csmMainContainer" role="main">
+      <div data-test-subj="csmMainContainer" role="main">
         <Route component={ScrollToTopOnPathChange} />
         <RumHome />
-      </CsmMainContainer>
+      </div>
     </ThemeProvider>
   );
 }
 
-export function CsmAppRoot({
+export function UXAppRoot({
   appMountParameters,
   core,
   deps,
   config,
-  corePlugins: { embeddable, maps },
+  corePlugins: { embeddable, maps, observability },
   observabilityRuleTypeRegistry,
 }: {
   appMountParameters: AppMountParameters;
@@ -91,6 +96,7 @@ export function CsmAppRoot({
     config,
     core,
     plugins,
+    observability,
     observabilityRuleTypeRegistry,
   };
 
@@ -101,7 +107,7 @@ export function CsmAppRoot({
           <i18nCore.Context>
             <Router history={history}>
               <UrlParamsProvider>
-                <CsmApp />
+                <UxApp />
                 <UXActionMenu appMountParameters={appMountParameters} />
               </UrlParamsProvider>
             </Router>
@@ -142,7 +148,7 @@ export const renderApp = ({
   });
 
   ReactDOM.render(
-    <CsmAppRoot
+    <UXAppRoot
       appMountParameters={appMountParameters}
       core={core}
       deps={deps}

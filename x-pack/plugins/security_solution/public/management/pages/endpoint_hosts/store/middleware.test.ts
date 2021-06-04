@@ -19,6 +19,7 @@ import {
   HostResultList,
   HostIsolationResponse,
   ActivityLog,
+  ISOLATION_ACTIONS,
 } from '../../../../../common/endpoint/types';
 import { AppAction } from '../../../../common/store/actions';
 import { mockEndpointResultList } from './mock_endpoint_result_list';
@@ -135,10 +136,13 @@ describe('endpoint list middleware', () => {
 
   describe('handling of IsolateEndpointHost action', () => {
     const getKibanaServicesMock = KibanaServices.get as jest.Mock;
-    const dispatchIsolateEndpointHost = () => {
+    const dispatchIsolateEndpointHost = (action: ISOLATION_ACTIONS = 'isolate') => {
       dispatch({
         type: 'endpointIsolationRequest',
-        payload: hostIsolationRequestBodyMock(),
+        payload: {
+          type: action,
+          data: hostIsolationRequestBodyMock(),
+        },
       });
     };
     let isolateApiResponseHandlers: ReturnType<typeof hostIsolationHttpMocks>;
@@ -161,7 +165,24 @@ describe('endpoint list middleware', () => {
 
     it('should call isolate api', async () => {
       dispatchIsolateEndpointHost();
-      expect(fakeHttpServices.post).toHaveBeenCalled();
+      await waitForAction('endpointIsolationRequestStateChange', {
+        validate(action) {
+          return isLoadedResourceState(action.payload);
+        },
+      });
+
+      expect(isolateApiResponseHandlers.responseProvider.isolateHost).toHaveBeenCalled();
+    });
+
+    it('should call unisolate api', async () => {
+      dispatchIsolateEndpointHost('unisolate');
+      await waitForAction('endpointIsolationRequestStateChange', {
+        validate(action) {
+          return isLoadedResourceState(action.payload);
+        },
+      });
+
+      expect(isolateApiResponseHandlers.responseProvider.unIsolateHost).toHaveBeenCalled();
     });
 
     it('should set Isolation state to loaded if api is successful', async () => {
