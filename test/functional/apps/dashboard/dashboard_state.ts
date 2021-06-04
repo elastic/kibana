@@ -256,8 +256,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       describe('for embeddable config color parameters on a visualization', () => {
+        let originalPieSliceStyle = '';
         it('updates a pie slice color on a soft refresh', async function () {
           await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
+
+          originalPieSliceStyle = await pieChart.getPieSliceStyle(`80,000`);
           await PageObjects.visChart.openLegendOptionColors(
             '80,000',
             `[data-title="${PIE_CHART_VIS_NAME}"]`
@@ -272,7 +275,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             const allPieSlicesColor = await pieChart.getAllPieSliceStyles('80,000');
             let whitePieSliceCounts = 0;
             allPieSlicesColor.forEach((style) => {
-              if (style.indexOf('rgb(255, 255, 255)') > 0) {
+              if (style.indexOf('rgb(255, 255, 255)') > -1) {
                 whitePieSliceCounts++;
               }
             });
@@ -290,14 +293,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('resets a pie slice color to the original when removed', async function () {
           const currentUrl = await getUrlFromShare();
-          const newUrl = currentUrl.replace(`vis:(colors:('80,000':%23FFFFFF))`, '');
+          const newUrl = isNewChartsLibraryEnabled
+            ? currentUrl.replace(`'80000':%23FFFFFF`, '')
+            : currentUrl.replace(`vis:(colors:('80,000':%23FFFFFF))`, '');
           await browser.get(newUrl.toString(), false);
           await PageObjects.header.waitUntilLoadingHasFinished();
 
           await retry.try(async () => {
-            const pieSliceStyle = await pieChart.getPieSliceStyle(`80,000`);
-            // The default green color that was stored with the visualization before any dashboard overrides.
-            expect(pieSliceStyle.indexOf('rgb(87, 193, 123)')).to.be.greaterThan(0);
+            const pieSliceStyle = await pieChart.getPieSliceStyle('80,000');
+
+            // After removing all overrides, pie slice style should match original.
+            expect(pieSliceStyle).to.be(originalPieSliceStyle);
           });
         });
 
