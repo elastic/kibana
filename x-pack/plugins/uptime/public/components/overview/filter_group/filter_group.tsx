@@ -9,19 +9,29 @@ import React, { useState } from 'react';
 import { EuiFilterGroup } from '@elastic/eui';
 import styled from 'styled-components';
 import { useRouteMatch } from 'react-router-dom';
+import { FilterPopoverProps, FilterPopover } from './filter_popover';
+import { OverviewFilters } from '../../../../common/runtime_types/overview_filters';
 import { filterLabels } from './translations';
 import { useFilterUpdate } from '../../../hooks/use_filter_update';
 import { MONITOR_ROUTE } from '../../../../common/constants';
 import { useSelectedFilters } from '../../../hooks/use_selected_filters';
-import { FieldValueSuggestions } from '../../../../../observability/public';
-import { SelectedFilters } from './selected_filters';
-import { useIndexPattern } from '../../../contexts/uptime_index_pattern_context';
+
+interface Props {
+  loading: boolean;
+  overviewFilters: OverviewFilters;
+}
 
 const Container = styled(EuiFilterGroup)`
   margin-bottom: 10px;
 `;
 
-export const FilterGroup = () => {
+function isDisabled<T>(array?: T[]) {
+  return array ? array.length === 0 : true;
+}
+
+export const FilterGroupComponent: React.FC<Props> = ({ overviewFilters, loading }) => {
+  const { locations, ports, schemes, tags } = overviewFilters;
+
   const [updatedFieldValues, setUpdatedFieldValues] = useState<{
     fieldName: string;
     values: string[];
@@ -37,10 +47,13 @@ export const FilterGroup = () => {
 
   const isMonitorPage = useRouteMatch(MONITOR_ROUTE);
 
-  const filterPopoverProps = [
+  const filterPopoverProps: FilterPopoverProps[] = [
     {
+      loading,
       onFilterFieldChange,
       fieldName: 'observer.geo.name',
+      id: 'location',
+      items: locations || [],
       selectedItems: selectedLocations,
       title: filterLabels.LOCATION,
     },
@@ -48,20 +61,32 @@ export const FilterGroup = () => {
     ...(!isMonitorPage
       ? [
           {
+            loading,
             onFilterFieldChange,
             fieldName: 'url.port',
+            id: 'port',
+            disabled: isDisabled(ports),
+            items: ports?.map((p: number) => p.toString()) ?? [],
             selectedItems: selectedPorts,
             title: filterLabels.PORT,
           },
           {
+            loading,
             onFilterFieldChange,
             fieldName: 'monitor.type',
+            id: 'scheme',
+            disabled: isDisabled(schemes),
+            items: schemes ?? [],
             selectedItems: selectedSchemes,
             title: filterLabels.SCHEME,
           },
           {
+            loading,
             onFilterFieldChange,
             fieldName: 'tags',
+            id: 'tags',
+            disabled: isDisabled(tags),
+            items: tags ?? [],
             selectedItems: selectedTags,
             title: filterLabels.TAG,
           },
@@ -69,37 +94,11 @@ export const FilterGroup = () => {
       : []),
   ];
 
-  const indexPattern = useIndexPattern();
-
-  const [isOpen, setIsOpen] = useState('');
-
   return (
-    <>
-      <Container>
-        {indexPattern &&
-          filterPopoverProps.map(({ fieldName, title, selectedItems }) => (
-            <FieldValueSuggestions
-              key={fieldName}
-              compressed={false}
-              indexPattern={indexPattern}
-              sourceField={fieldName}
-              label={title}
-              selectedValue={selectedItems}
-              onChange={(values) => {
-                setUpdatedFieldValues({ fieldName, values });
-                setIsOpen('');
-              }}
-              asCombobox={false}
-              asFilterButton={true}
-              forceOpen={isOpen === fieldName}
-              setForceOpen={() => {
-                setIsOpen('');
-              }}
-              filters={[]}
-            />
-          ))}
-      </Container>
-      <SelectedFilters onChange={onFilterFieldChange} />
-    </>
+    <Container>
+      {filterPopoverProps.map((item) => (
+        <FilterPopover key={item.id} {...item} />
+      ))}
+    </Container>
   );
 };

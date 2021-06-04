@@ -31,7 +31,6 @@ import { kibanaService } from '../state/kibana_service';
 import { ActionMenu } from '../components/common/header/action_menu';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
-import { UptimeIndexPatternContextProvider } from '../contexts/uptime_index_pattern_context';
 
 export interface UptimeAppColors {
   danger: string;

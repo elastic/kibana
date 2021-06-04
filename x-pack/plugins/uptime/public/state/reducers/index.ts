@@ -7,6 +7,7 @@
 
 import { combineReducers } from 'redux';
 import { monitorReducer } from './monitor';
+import { overviewFiltersReducer } from './overview_filters';
 import { uiReducer } from './ui';
 import { monitorStatusReducer } from './monitor_status';
 import { monitorListReducer } from './monitor_list';
@@ -25,6 +26,7 @@ import { networkEventsReducer } from './network_events';
 
 export const rootReducer = combineReducers({
   monitor: monitorReducer,
+  overviewFilters: overviewFiltersReducer,
   ui: uiReducer,
   monitorList: monitorListReducer,
   monitorStatus: monitorStatusReducer,
