@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { AlertsByCategory } from '../components/alerts_by_category';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { SiemSearchBar } from '../../common/components/search_bar';
-import { WrapperPage } from '../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { useFetchIndex } from '../../common/containers/source';
 
@@ -73,7 +73,7 @@ const OverviewComponent = () => {
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
 
-          <WrapperPage>
+          <SecuritySolutionPageWrapper>
             {!dismissMessage && !metadataIndexExists && isIngestEnabled && (
               <>
                 <EndpointNotice onDismiss={dismissEndpointNotice} />
@@ -139,7 +139,7 @@ const OverviewComponent = () => {
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </WrapperPage>
+          </SecuritySolutionPageWrapper>
         </>
       ) : (
         <OverviewEmpty />

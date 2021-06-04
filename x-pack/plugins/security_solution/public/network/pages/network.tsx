@@ -23,7 +23,7 @@ import { SiemNavigation } from '../../common/components/navigation';
 
 import { NetworkKpiComponent } from '../components/kpi_network';
 import { SiemSearchBar } from '../../common/components/search_bar';
-import { WrapperPage } from '../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { LastEventIndexKey } from '../../../common/search_strategy';
@@ -155,7 +155,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
               <SiemSearchBar indexPattern={indexPattern} id="global" />
             </FiltersGlobal>
 
-            <WrapperPage noPadding={globalFullScreen}>
+            <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
               <Display show={!globalFullScreen}>
                 <HeaderPage
                   border
@@ -217,13 +217,13 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
               ) : (
                 <NetworkRoutesLoading />
               )}
-            </WrapperPage>
+            </SecuritySolutionPageWrapper>
           </StyledFullHeightContainer>
         ) : (
-          <WrapperPage>
+          <SecuritySolutionPageWrapper>
             <HeaderPage border title={i18n.PAGE_TITLE} />
             <OverviewEmpty />
-          </WrapperPage>
+          </SecuritySolutionPageWrapper>
         )}
 
         <SpyRoute pageName={SecurityPageName.network} />

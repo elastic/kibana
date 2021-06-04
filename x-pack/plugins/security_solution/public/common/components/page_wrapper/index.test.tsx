@@ -9,18 +9,18 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../mock';
-import { WrapperPage } from './index';
+import { SecuritySolutionPageWrapper } from './index';
 
-describe('WrapperPage', () => {
+describe('SecuritySolutionPageWrapper', () => {
   test('it renders', () => {
     const wrapper = shallow(
       <TestProviders>
-        <WrapperPage>
+        <SecuritySolutionPageWrapper>
           <p>{'Test page'}</p>
-        </WrapperPage>
+        </SecuritySolutionPageWrapper>
       </TestProviders>
     );
 
-    expect(wrapper.find('Memo(WrapperPageComponent)')).toMatchSnapshot();
+    expect(wrapper.find('Memo(SecuritySolutionPageWrapperComponent)')).toMatchSnapshot();
   });
 });

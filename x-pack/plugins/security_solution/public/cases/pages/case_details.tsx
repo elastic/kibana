@@ -10,7 +10,7 @@ import { useParams, useHistory } from 'react-router-dom';
 
 import { SecurityPageName } from '../../app/types';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { WrapperPage } from '../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useGetUrlSearch } from '../../common/components/navigation/use_get_url_search';
 import { useGetUserCasesPermissions } from '../../common/lib/kibana';
 import { getCaseUrl } from '../../common/components/link_to';
@@ -34,7 +34,7 @@ export const CaseDetailsPage = React.memo(() => {
 
   return caseId != null ? (
     <>
-      <WrapperPage noPadding>
+      <SecuritySolutionPageWrapper noPadding>
         {userPermissions != null && !userPermissions?.crud && userPermissions?.read && (
           <CaseCallOut
             title={permissionsReadOnlyErrorMessage.title}
@@ -46,7 +46,7 @@ export const CaseDetailsPage = React.memo(() => {
           subCaseId={subCaseId}
           userCanCrud={userPermissions?.crud ?? false}
         />
-      </WrapperPage>
+      </SecuritySolutionPageWrapper>
       <SpyRoute pageName={SecurityPageName.case} />
     </>
   ) : null;
