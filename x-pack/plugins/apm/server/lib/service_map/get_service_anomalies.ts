@@ -74,7 +74,9 @@ export async function getServiceAnomalies({
               sources: [
                 { serviceName: { terms: { field: 'partition_field_value' } } },
                 { jobId: { terms: { field: 'job_id' } } },
-              ] as Array<Record<string, estypes.CompositeAggregationSource>>,
+              ] as Array<
+                Record<string, estypes.AggregationsCompositeAggregationSource>
+              >,
             },
             aggs: {
               metrics: {
