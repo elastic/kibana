@@ -55,14 +55,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.securityUI.logout();
         });
 
-        it('should display the ML file data vis link on the Kibana home page', async () => {
-          await ml.testExecution.logTestStep('should load the Kibana home page');
-          await ml.navigation.navigateToKibanaHome();
-
-          await ml.testExecution.logTestStep('should display the ML file data vis link');
-          await ml.commonUI.assertKibanaHomeFileDataVisLinkExists();
-        });
-
         it('should display the ML entry in Kibana app menu', async () => {
           await ml.testExecution.logTestStep('should open the Kibana app menu');
           await ml.navigation.openKibanaNav();
