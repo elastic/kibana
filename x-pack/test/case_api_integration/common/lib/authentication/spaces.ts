@@ -10,7 +10,7 @@ import { Space } from './types';
 const space1: Space = {
   id: 'space1',
   name: 'Space 1',
-  disabledFeatures: [],
+  disabledFeatures: ['testDisabledFixtureID'],
 };
 
 const space2: Space = {

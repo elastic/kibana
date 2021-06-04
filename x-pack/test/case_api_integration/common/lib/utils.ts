@@ -273,12 +273,17 @@ export const createSubCaseComment = async ({
   return { newSubCaseInfo: caseConnector.body.data, modifiedSubCases: closedSubCases };
 };
 
+type ConfigRequestParams = Partial<CaseConnector> & {
+  overrides?: Record<string, unknown>;
+};
+
 export const getConfigurationRequest = ({
   id = 'none',
   name = 'none',
   type = ConnectorTypes.none,
   fields = null,
-}: Partial<CaseConnector> = {}): CasesConfigureRequest => {
+  overrides,
+}: ConfigRequestParams = {}): CasesConfigureRequest => {
   return {
     connector: {
       id,
@@ -288,6 +293,7 @@ export const getConfigurationRequest = ({
     } as CaseConnector,
     closure_type: 'close-by-user',
     owner: 'securitySolutionFixture',
+    ...overrides,
   };
 };
 
