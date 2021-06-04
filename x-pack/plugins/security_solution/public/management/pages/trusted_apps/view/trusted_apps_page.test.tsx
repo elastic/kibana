@@ -900,4 +900,34 @@ describe('When on the Trusted Apps Page', () => {
       });
     });
   });
+
+  describe('and the back button is present', () => {
+    let renderResult: ReturnType<AppContextTestRender['render']>;
+    beforeEach(async () => {
+      renderResult = render();
+      await act(async () => {
+        await waitForAction('trustedAppsListResourceStateChanged');
+      });
+      reactTestingLibrary.act(() => {
+        history.push('/trusted_apps', {
+          onBackButtonNavigateTo: [{ appId: 'appId' }],
+          backButtonLabel: 'back to fleet',
+          backButtonUrl: '/fleet',
+        });
+      });
+    });
+
+    it('back button is present', () => {
+      const button = renderResult.queryByTestId('backToOrigin');
+      expect(button).not.toBeNull();
+      expect(button).toHaveAttribute('href', '/fleet');
+    });
+
+    it('back button is not present', () => {
+      reactTestingLibrary.act(() => {
+        history.push('/trusted_apps');
+      });
+      expect(renderResult.queryByTestId('backToOrigin')).toBeNull();
+    });
+  });
 });
