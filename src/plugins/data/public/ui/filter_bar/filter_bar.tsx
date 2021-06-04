@@ -42,7 +42,10 @@ function FilterBarUI(props: Props) {
   const groupRef = useRef<HTMLDivElement>(null);
   const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
   const kibana = useKibana<IDataPluginServices>();
-  const { appName, usageCollection, uiSettings } = kibana.services;
+  const { appName, usageCollection, uiSettings, storage } = kibana.services;
+  const [isCollapsed, setIsCollapsed] = useState(() =>
+    Boolean(storage.get('FILTER_BAR_COLLAPSED'))
+  );
   if (!uiSettings) return null;
 
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
@@ -183,7 +186,9 @@ function FilterBarUI(props: Props) {
     onFiltersUpdated([]);
   }
 
-  const classes = classNames('globalFilterBar', props.className);
+  const classes = classNames('globalFilterBar', props.className, {
+    'globalFilterBar-collapsed': isCollapsed,
+  });
 
   return (
     <EuiFlexGroup
@@ -201,6 +206,11 @@ function FilterBarUI(props: Props) {
           onToggleAllNegated={onToggleAllNegated}
           onToggleAllDisabled={onToggleAllDisabled}
           onRemoveAll={onRemoveAll}
+          onCollapse={(collapsed: boolean) => {
+            storage.set('FILTER_BAR_COLLAPSED', collapsed);
+            setIsCollapsed(collapsed);
+          }}
+          isCollapsed={isCollapsed}
         />
       </EuiFlexItem>
 
@@ -208,14 +218,15 @@ function FilterBarUI(props: Props) {
         <EuiFlexGroup
           ref={groupRef}
           className={classes}
-          wrap={true}
+          wrap={!isCollapsed}
           responsive={false}
           gutterSize="xs"
           alignItems="center"
           tabIndex={-1}
         >
+          {isCollapsed && renderAddFilter()}
           {renderItems()}
-          {renderAddFilter()}
+          {!isCollapsed && renderAddFilter()}
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

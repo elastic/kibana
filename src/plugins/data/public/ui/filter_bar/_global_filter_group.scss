@@ -42,6 +42,10 @@
   max-width: calc(100% - #{$euiSizeXS}); // Width minus margin around each flex itm
 }
 
+.globalFilterBar-collapsed {
+  overflow-y: auto;
+}
+
 @include euiBreakpoint('xs', 's') {
   .globalFilterGroup__wrapper-isVisible {
     // EUI Flexbox adds too much margin between responded items, this just moves it up

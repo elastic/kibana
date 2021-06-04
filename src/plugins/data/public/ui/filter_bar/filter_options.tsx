@@ -19,7 +19,9 @@ interface Props {
   onToggleAllNegated: () => void;
   onToggleAllDisabled: () => void;
   onRemoveAll: () => void;
+  onCollapse: (isCollapsed: boolean) => void;
   intl: InjectedIntl;
+  isCollapsed: boolean;
 }
 
 interface State {
@@ -131,6 +133,23 @@ class FilterOptionsUI extends Component<Props, State> {
             this.props.onRemoveAll();
           },
           'data-test-subj': 'removeAllFilters',
+        },
+        {
+          name: this.props.isCollapsed
+            ? this.props.intl.formatMessage({
+                id: 'data.filter.options.expandFiltersBar',
+                defaultMessage: 'Expand bar',
+              })
+            : this.props.intl.formatMessage({
+                id: 'data.filter.options.collapseFiltersBar',
+                defaultMessage: 'Collapse bar',
+              }),
+          icon: this.props.isCollapsed ? 'expand' : 'fold',
+          onClick: () => {
+            this.closePopover();
+            this.props.onCollapse(!this.props.isCollapsed);
+          },
+          'data-test-subj': 'collapseBar',
         },
       ],
     };
