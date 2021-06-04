@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { estypes } from '@elastic/elasticsearch';
 
 import {
   ElasticsearchClient,
@@ -570,7 +571,10 @@ const previewTransformHandler: RequestHandler<
         return acc;
       }, {} as Record<string, { type: string }>);
 
-      body.generated_dest_index.mappings.properties = fields;
+      body.generated_dest_index.mappings!.properties = fields as Record<
+        string,
+        estypes.MappingProperty
+      >;
     }
     return res.ok({ body });
   } catch (e) {
