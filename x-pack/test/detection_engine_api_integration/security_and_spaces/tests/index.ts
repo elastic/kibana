@@ -13,6 +13,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     describe('', function () {
       this.tags('ciGroup11');
 
+      loadTestFile(require.resolve('./aliases'));
       loadTestFile(require.resolve('./add_actions'));
       loadTestFile(require.resolve('./update_actions'));
       loadTestFile(require.resolve('./add_prepackaged_rules'));
