@@ -13,7 +13,9 @@ export enum CtiQueries {
   eventEnrichment = 'eventEnrichment',
 }
 
-export interface CtiEventEnrichmentRequestOptions extends RequestBasicOptions {}
+export interface CtiEventEnrichmentRequestOptions extends RequestBasicOptions {
+  eventFields: Record<string, unknown>;
+}
 
 export interface CtiEventEnrichmentStrategyResponse extends IEsSearchResponse {
   inspect?: Inspect;

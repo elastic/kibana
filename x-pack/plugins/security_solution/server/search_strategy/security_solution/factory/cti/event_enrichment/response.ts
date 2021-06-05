@@ -5,4 +5,11 @@
  * 2.0.
  */
 
-export const parseEventEnrichmentResponse = (a: unknown) => a;
+import { CtiQueries } from '../../../../../../common/search_strategy/security_solution/cti';
+import { SecuritySolutionFactory } from '../../types';
+
+export const parseEventEnrichmentResponse: SecuritySolutionFactory<CtiQueries.eventEnrichment>['parse'] = async (
+  options,
+  response,
+  deps
+) => ({});

@@ -5,4 +5,46 @@
  * 2.0.
  */
 
-export const buildEventEnrichmentQuery = (a: unknown) => a;
+import { isEmpty } from 'lodash';
+import { CtiQueries } from '../../../../../../common/search_strategy/security_solution/cti';
+import { createQueryFilterClauses } from '../../../../../utils/build_query';
+import { SecuritySolutionFactory } from '../../types';
+import { buildIndicatorShouldClauses } from './helpers';
+
+export const buildEventEnrichmentQuery: SecuritySolutionFactory<CtiQueries.eventEnrichment>['buildDsl'] = ({
+  defaultIndex,
+  docValueFields,
+  eventFields,
+  filterQuery,
+  timerange: { from, to },
+}) => {
+  const filter = [
+    ...createQueryFilterClauses(filterQuery),
+    { term: { 'event.type': 'indicator' } },
+    {
+      range: {
+        '@timestamp': {
+          gte: from,
+          lte: to,
+          format: 'strict_date_optional_time',
+        },
+      },
+    },
+  ];
+
+  return {
+    allowNoIndices: true,
+    index: defaultIndex,
+    ignoreUnavailable: true,
+    body: {
+      ...(!isEmpty(docValueFields) && { docvalue_fields: docValueFields }),
+      query: {
+        bool: {
+          should: buildIndicatorShouldClauses(eventFields),
+          filter,
+          minimum_should_match: 1,
+        },
+      },
+    },
+  };
+};

@@ -5,6 +5,16 @@
  * 2.0.
  */
 
+import { buildRequestOptionsMock } from '../../../../../../common/search_strategy/security_solution/cti/index.mock';
+import { buildEventEnrichmentQuery } from './query';
+
 describe('buildEventEnrichmentQuery', () => {
-  it('makes each query filter named based on its field');
+  it('converts each event field/value into a named filter', () => {
+    const options = buildRequestOptionsMock();
+    const query = buildEventEnrichmentQuery(options);
+    expect(query.body?.query?.bool?.filter).toEqual(expect.objectContaining({ foo: 'bar' }));
+  });
+
+  it.todo('filters on indicator events');
+  it.todo('includes the specified timerange');
 });

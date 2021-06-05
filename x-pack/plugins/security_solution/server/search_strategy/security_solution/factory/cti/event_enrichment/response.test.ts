@@ -7,4 +7,5 @@
 
 describe('parseEventEnrichmentResponse', () => {
   it('adds matched.* enrichment fields based on the named query');
+  it('includes an accurate inspect response');
 });
