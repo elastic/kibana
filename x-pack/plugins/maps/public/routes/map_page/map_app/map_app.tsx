@@ -53,7 +53,6 @@ import {
   unsavedChangesTitle,
   unsavedChangesWarning,
 } from '../saved_map';
-import { getLayerList } from '../../../selectors/map_selectors';
 import { waitUntilTimeLayersLoad$ } from './wait_until_time_layers_load';
 
 interface MapRefreshConfig {
