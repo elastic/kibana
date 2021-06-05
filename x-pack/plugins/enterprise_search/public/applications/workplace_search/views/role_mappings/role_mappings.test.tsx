@@ -12,16 +12,19 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 
 import { Loading } from '../../../shared/loading';
 import { RoleMappingsTable } from '../../../shared/role_mapping';
 import { wsRoleMapping } from '../../../shared/role_mapping/__mocks__/roles';
 
+import { RoleMapping } from './role_mapping';
 import { RoleMappings } from './role_mappings';
 
 describe('RoleMappings', () => {
   const initializeRoleMappings = jest.fn();
+  const initializeRoleMapping = jest.fn();
+  const handleDeleteMapping = jest.fn();
   const mockValues = {
     roleMappings: [wsRoleMapping],
     dataLoading: false,
@@ -31,6 +34,8 @@ describe('RoleMappings', () => {
   beforeEach(() => {
     setMockActions({
       initializeRoleMappings,
+      initializeRoleMapping,
+      handleDeleteMapping,
     });
     setMockValues(mockValues);
   });
@@ -53,5 +58,20 @@ describe('RoleMappings', () => {
     const wrapper = shallow(<RoleMappings />);
 
     expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
+  });
+
+  it('renders RoleMapping flyout', () => {
+    setMockValues({ ...mockValues, roleMappingFlyoutOpen: true });
+    const wrapper = shallow(<RoleMappings />);
+
+    expect(wrapper.find(RoleMapping)).toHaveLength(1);
+  });
+
+  it('handles button click', () => {
+    setMockValues({ ...mockValues, roleMappings: [] });
+    const wrapper = shallow(<RoleMappings />);
+    wrapper.find(EuiEmptyPrompt).dive().find(EuiButton).simulate('click');
+
+    expect(initializeRoleMapping).toHaveBeenCalled();
   });
 });
