@@ -32,7 +32,6 @@ export interface DocProps {
    * IndexPatternService to get a given index pattern by ID
    */
   indexPatternService: IndexPatternsContract;
-
   /**
    * If set, will always request fields from source, regardless of the global `fieldsFromSource` setting
    */

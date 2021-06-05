@@ -7,19 +7,15 @@
  */
 import React, { useEffect, useState } from 'react';
 import { monaco } from '@kbn/monaco';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 import { ElasticRequestState, useEsDocSearch } from '../doc/use_es_doc_search';
 import { DocProps } from '../doc/doc';
 import { JsonCodeEditorCommon } from '../json_code_editor/json_code_editor_common';
 
 interface SourceViewerProps {
-  data: DataPublicPluginStart;
   docProps: DocProps;
   hasLineNumbers: boolean;
   width?: number;
-  filter: DocViewFilterFn;
 }
 
 export const SourceViewer = ({ docProps, width, hasLineNumbers }: SourceViewerProps) => {
@@ -59,7 +55,7 @@ export const SourceViewer = ({ docProps, width, hasLineNumbers }: SourceViewerPr
       jsonValue={jsonValue}
       width={width}
       hasLineNumbers={hasLineNumbers}
-      onEditorDidMount={(editorNode) => setEditor(editorNode)}
+      onEditorDidMount={(editorNode: monaco.editor.IStandaloneCodeEditor) => setEditor(editorNode)}
     />
   );
 };

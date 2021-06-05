@@ -23,7 +23,7 @@ const copyToClipboardLabel = i18n.translate('discover.json.copyToClipboardLabel'
 
 interface JsonCodeEditorCommonProps {
   jsonValue: string;
-  onEditorDidMount: (editor: monaco.IStandaloneCodeEditor) => void;
+  onEditorDidMount: (editor: monaco.editor.IStandaloneCodeEditor) => void;
   width?: string | number;
   hasLineNumbers?: boolean;
 }
