@@ -81,6 +81,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
         errorMessage: 'Unable to decrypt attribute "apiKey"',
         status: 'error',
         reason: 'decrypt',
+        rule: {
+          id: response.body.rule_type_id,
+          author: response.body.updated_by,
+          uuid: alertId,
+          category: response.body.rule_type_id,
+        },
       });
     });
   });

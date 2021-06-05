@@ -132,7 +132,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               outcome: 'success',
               message: `alert executed: test.patternFiring:${alertId}: 'abc'`,
               status: executeStatuses[executeCount++],
-              rule: {},
+              rule: {
+                id: response.body.rule_type_id,
+                uuid: alertId,
+                author: response.body.updated_by,
+                category: response.body.rule_type_id,
+              },
             });
             break;
           case 'execute-action':
@@ -145,7 +150,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               message: `alert: test.patternFiring:${alertId}: 'abc' instanceId: 'instance' scheduled actionGroup: 'default' action: test.noop:${createdAction.id}`,
               instanceId: 'instance',
               actionGroupId: 'default',
-              rule: response.body,
+              rule: {
+                id: response.body.rule_type_id,
+                uuid: alertId,
+                author: response.body.updated_by,
+                category: response.body.rule_type_id,
+              },
             });
             break;
           case 'new-instance':
@@ -170,7 +180,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           message: `test.patternFiring:${alertId}: 'abc' ${subMessage}`,
           instanceId: 'instance',
           actionGroupId: 'default',
-          rule: {},
+          rule: {
+            id: response.body.rule_type_id,
+            uuid: alertId,
+            author: response.body.updated_by,
+            category: response.body.rule_type_id,
+          },
         });
       }
     });
@@ -267,7 +282,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               outcome: 'success',
               message: `alert executed: test.patternFiring:${alertId}: 'abc'`,
               status: executeStatuses[executeCount++],
-              rule: {},
+              rule: {
+                id: response.body.rule_type_id,
+                uuid: alertId,
+                author: response.body.updated_by,
+                category: response.body.rule_type_id,
+              },
             });
             break;
           case 'execute-action':
@@ -283,7 +303,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               message: `alert: test.patternFiring:${alertId}: 'abc' instanceId: 'instance' scheduled actionGroup(subgroup): 'default(${event?.kibana?.alerting?.action_subgroup})' action: test.noop:${createdAction.id}`,
               instanceId: 'instance',
               actionGroupId: 'default',
-              rule: {},
+              rule: {
+                id: response.body.rule_type_id,
+                uuid: alertId,
+                author: response.body.updated_by,
+                category: response.body.rule_type_id,
+              },
             });
             break;
           case 'new-instance':
@@ -314,7 +339,10 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           message: `test.patternFiring:${alertId}: 'abc' ${subMessage}`,
           instanceId: 'instance',
           actionGroupId: 'default',
-          rule: {},
+          rule: {
+            id: response.body.rule_type_id,
+            uuid: alertId,
+          },
         });
       }
     });
@@ -357,7 +385,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
         errorMessage: 'this alert is intended to fail',
         status: 'error',
         reason: 'execute',
-        rule: {},
+        rule: {
+          id: response.body.rule_type_id,
+          uuid: alertId,
+          author: response.body.updated_by,
+          category: response.body.rule_type_id,
+        },
       });
     });
   });
@@ -380,17 +413,21 @@ interface ValidateEventLogParams {
   instanceId?: string;
   reason?: string;
   rule: {
-    id?: string;
+    id: string;
+    uuid: string;
     name?: string;
     version?: string;
     category?: string;
     reference?: string;
     author?: string[];
+    license?: string;
+    ruleset?: string;
+    namespace?: string;
   };
 }
 
 export function validateEvent(event: IValidatedEvent, params: ValidateEventLogParams): void {
-  const { spaceId, savedObjects, outcome, message, errorMessage } = params;
+  const { spaceId, savedObjects, outcome, message, errorMessage, rule } = params;
   const { status, actionGroupId, instanceId, reason } = params;
 
   if (status) {
@@ -438,6 +475,8 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
   }
 
   expect(event?.message).to.eql(message);
+
+  expect(event?.rule).to.eql(rule);
 
   if (errorMessage) {
     expect(event?.error?.message).to.eql(errorMessage);
