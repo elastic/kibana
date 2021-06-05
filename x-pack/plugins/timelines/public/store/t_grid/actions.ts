@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiDataGridColumn } from '@elastic/eui';
 import actionCreatorFactory from 'typescript-fsa';
 import { FilterManager } from '../../../../../../src/plugins/data/public';
 import { TimelineNonEcsData } from '../../../common/search_strategy';
@@ -98,7 +99,12 @@ export const clearEventsDeleted = actionCreator<{
 
 export const initializeTGrid = actionCreator<{
   id: string;
+  defaultColumns?: Array<
+    Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> &
+      ColumnHeaderOptions
+  >;
   documentType?: string;
+  excludedRowRendererIds?: string[];
   filterManager?: FilterManager;
   footerText?: string;
   isLoading?: boolean;
@@ -106,7 +112,7 @@ export const initializeTGrid = actionCreator<{
   queryFields?: string[];
   selectAll?: boolean;
   title?: string;
-  unit?: string;
+  unit?: (n: number) => string;
 }>('INITIALIZE_TGRID');
 
 export const setTGridIsLoading = actionCreator<{ id: string; isTGridLoading: boolean }>(

@@ -79,6 +79,30 @@ export interface TGridModel {
   // END
 }
 
+export type TGridModelForTimeline = Pick<
+  TGridModel,
+  | 'columns'
+  | 'dateRange'
+  | 'deletedEventIds'
+  | 'excludedRowRendererIds'
+  | 'expandedDetail'
+  | 'filters'
+  | 'graphEventId'
+  | 'kqlQuery'
+  | 'id'
+  | 'indexNames'
+  | 'isLoading'
+  | 'isSelectAllChecked'
+  | 'itemsPerPage'
+  | 'itemsPerPageOptions'
+  | 'loadingEventIds'
+  | 'showCheckboxes'
+  | 'sort'
+  | 'selectedEventIds'
+  | 'savedObjectId'
+  | 'version'
+>;
+
 export type SubsetTGridModel = Readonly<
   Pick<
     TGridModel,

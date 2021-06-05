@@ -8,9 +8,10 @@
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
-import { sequenceResponse } from '../../../search_strategy/timeline/eql/__mocks__';
+// import { sequenceResponse } from '../../../search_strategy/timeline/eql/__mocks__';
 
 import { createEqlAlertType } from './eql';
+import { sequenceResponse } from './__mocks__/eql';
 import { createRuleTypeMocks } from './__mocks__/rule_type';
 
 describe('EQL alerts', () => {

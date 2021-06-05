@@ -67,7 +67,6 @@ import {
   mockEndpointSecurityLogOffEvent,
 } from '../../../../../../common/mock/mock_endgame_ecs_data';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
-import { RowRenderer } from '../row_renderer';
 import {
   createDnsRowRenderer,
   createEndgameProcessRowRenderer,
@@ -82,6 +81,7 @@ import {
   EndpointAlertCriteria,
 } from './generic_row_renderer';
 import * as i18n from './translations';
+import { RowRenderer } from '../../../../../../../common';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');

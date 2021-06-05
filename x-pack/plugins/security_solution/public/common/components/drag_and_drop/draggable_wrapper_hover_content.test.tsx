@@ -17,10 +17,6 @@ import { TestProviders } from '../../mock';
 import { FilterManager } from '../../../../../../../src/plugins/data/public';
 import { useSourcererScope } from '../../containers/sourcerer';
 import { DraggableWrapperHoverContent } from './draggable_wrapper_hover_content';
-import {
-  ManageGlobalTimeline,
-  getTimelineDefaults,
-} from '../../../timelines/components/manage_timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 
 jest.mock('../link_to');
@@ -144,15 +140,10 @@ describe('DraggableWrapperHoverContent', () => {
 
         beforeEach(() => {
           onFilterAdded = jest.fn();
-          const manageTimelineForTesting = {
-            [timelineId]: getTimelineDefaults(timelineId),
-          };
 
           wrapper = mount(
             <TestProviders>
-              <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
-                <DraggableWrapperHoverContent {...{ ...defaultProps, onFilterAdded }} />
-              </ManageGlobalTimeline>
+              <DraggableWrapperHoverContent {...{ ...defaultProps, onFilterAdded }} />
             </TestProviders>
           );
         });
@@ -237,18 +228,9 @@ describe('DraggableWrapperHoverContent', () => {
           filterManager.addFilters = jest.fn();
           onFilterAdded = jest.fn();
 
-          const manageTimelineForTesting = {
-            [timelineId]: {
-              ...getTimelineDefaults(timelineId),
-              filterManager,
-            },
-          };
-
           wrapper = mount(
             <TestProviders>
-              <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
-                <DraggableWrapperHoverContent {...{ ...defaultProps, onFilterAdded, value: '' }} />
-              </ManageGlobalTimeline>
+              <DraggableWrapperHoverContent {...{ ...defaultProps, onFilterAdded, value: '' }} />
             </TestProviders>
           );
         });

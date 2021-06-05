@@ -9,7 +9,13 @@ import { PluginInitializerContext } from '../../../../src/core/public';
 import './index.scss';
 import { TimelinesPlugin } from './plugin';
 
-export { tGridActions, tGridSelectors, TGridModel, TimelinesUIStart } from './types';
+export {
+  tGridActions,
+  tGridSelectors,
+  TGridModelForTimeline,
+  TimelineState,
+  TimelinesUIStart,
+} from './types';
 export {
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,

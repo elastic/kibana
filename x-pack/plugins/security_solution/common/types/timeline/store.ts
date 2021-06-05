@@ -9,7 +9,6 @@ import {
   ColumnHeaderOptions,
   ColumnId,
   RowRendererId,
-  Sort,
   TimelineExpandedDetail,
   TimelineTypeLiteral,
 } from '.';
@@ -31,7 +30,7 @@ export interface SerializedFilterQuery {
   serializedQuery: string;
 }
 
-export type SortDirection = 'none' | Direction;
+export type SortDirection = 'none' | 'asc' | 'desc' | Direction;
 export interface SortColumnTimeline {
   columnId: string;
   columnType: string;
@@ -55,7 +54,7 @@ export interface TimelinePersistInput {
     filterQuery: SerializedFilterQuery | null;
   };
   show?: boolean;
-  sort?: Sort[];
+  sort?: SortColumnTimeline[];
   showCheckboxes?: boolean;
   timelineType?: TimelineTypeLiteral;
   templateTimelineId?: string | null;

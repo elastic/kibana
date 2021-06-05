@@ -8,33 +8,18 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { DroppableWrapper } from '../../../../common/components/drag_and_drop/droppable_wrapper';
-import { FilterManager } from '../../../../../../../../src/plugins/data/public';
 
 import { timelineActions } from '../../../store/timeline';
 import { mockDataProviders } from './mock/mock_data_providers';
 import { Providers } from './providers';
 import { DELETE_CLASS_NAME, ENABLE_CLASS_NAME, EXCLUDE_CLASS_NAME } from './provider_item_actions';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
-import { ManageGlobalTimeline, getTimelineDefaults } from '../../manage_timeline';
-
-const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
 describe('Providers', () => {
-  const isLoading: boolean = true;
   const mount = useMountAppended();
-  const filterManager = new FilterManager(mockUiSettingsForFilterManager);
   const mockOnDataProviderRemoved = jest.spyOn(timelineActions, 'removeProvider');
-
-  const manageTimelineForTesting = {
-    test: {
-      ...getTimelineDefaults('test'),
-      filterManager,
-      isLoading,
-    },
-  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -84,11 +69,9 @@ describe('Providers', () => {
     test('while loading data, it does NOT invoke the onDataProviderRemoved callback when the close button is clicked', () => {
       const wrapper = mount(
         <TestProviders>
-          <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
-            <DroppableWrapper droppableId="unitTest">
-              <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
-            </DroppableWrapper>
-          </ManageGlobalTimeline>
+          <DroppableWrapper droppableId="unitTest">
+            <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
+          </DroppableWrapper>
         </TestProviders>
       );
 
@@ -122,11 +105,9 @@ describe('Providers', () => {
     test('while loading data, it does NOT invoke the onDataProviderRemoved callback when you click on the option "Delete" in the provider menu', () => {
       const wrapper = mount(
         <TestProviders>
-          <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
-            <DroppableWrapper droppableId="unitTest">
-              <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
-            </DroppableWrapper>
-          </ManageGlobalTimeline>
+          <DroppableWrapper droppableId="unitTest">
+            <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
+          </DroppableWrapper>
         </TestProviders>
       );
       wrapper.find('button[data-test-subj="providerBadge"]').first().simulate('click');
@@ -178,11 +159,9 @@ describe('Providers', () => {
       );
       const wrapper = mount(
         <TestProviders>
-          <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
-            <DroppableWrapper droppableId="unitTest">
-              <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
-            </DroppableWrapper>
-          </ManageGlobalTimeline>
+          <DroppableWrapper droppableId="unitTest">
+            <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
+          </DroppableWrapper>
         </TestProviders>
       );
 
@@ -238,11 +217,9 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
-            <DroppableWrapper droppableId="unitTest">
-              <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
-            </DroppableWrapper>
-          </ManageGlobalTimeline>
+          <DroppableWrapper droppableId="unitTest">
+            <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
+          </DroppableWrapper>
         </TestProviders>
       );
 
@@ -316,11 +293,9 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
-            <DroppableWrapper droppableId="unitTest">
-              <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
-            </DroppableWrapper>
-          </ManageGlobalTimeline>
+          <DroppableWrapper droppableId="unitTest">
+            <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
+          </DroppableWrapper>
         </TestProviders>
       );
 
@@ -384,11 +359,9 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
-            <DroppableWrapper droppableId="unitTest">
-              <Providers browserFields={{}} dataProviders={dataProviders} timelineId="test" />
-            </DroppableWrapper>
-          </ManageGlobalTimeline>
+          <DroppableWrapper droppableId="unitTest">
+            <Providers browserFields={{}} dataProviders={dataProviders} timelineId="test" />
+          </DroppableWrapper>
         </TestProviders>
       );
 
@@ -457,11 +430,9 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
-            <DroppableWrapper droppableId="unitTest">
-              <Providers browserFields={{}} dataProviders={dataProviders} timelineId="test" />
-            </DroppableWrapper>
-          </ManageGlobalTimeline>
+          <DroppableWrapper droppableId="unitTest">
+            <Providers browserFields={{}} dataProviders={dataProviders} timelineId="test" />
+          </DroppableWrapper>
         </TestProviders>
       );
 

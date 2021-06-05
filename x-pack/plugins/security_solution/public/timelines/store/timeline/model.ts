@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { Filter } from '../../../../../../../src/plugins/data/public';
-
 import { DataProvider } from '../../components/timeline/data_providers/data_provider';
 import { EqlOptionsSelected } from '../../../../common/search_strategy/timeline';
 import type {
@@ -14,16 +12,15 @@ import type {
   TimelineType,
   TimelineStatus,
   TimelineTabs,
-  SerializedFilterQuery,
 } from '../../../../common/types/timeline';
 import { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
-import type { TGridModel } from '../../../../../timelines/public';
+import type { TGridModelForTimeline } from '../../../../../timelines/public';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 
-export type TimelineModel = TGridModel & {
+export type TimelineModel = TGridModelForTimeline & {
   /** The selected tab to displayed in the timeline */
   activeTab: TimelineTabs;
   prevActiveTab: TimelineTabs;
