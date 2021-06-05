@@ -6,10 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  EqlCreateSchema,
-  ThresholdCreateSchema,
-} from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
@@ -27,6 +23,9 @@ import {
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  interface HostAlias {
+    name: string;
+  }
 
   describe('Tests involving aliases of source indexes and the signals index', () => {
     beforeEach(async () => {
@@ -46,7 +45,9 @@ export default ({ getService }: FtrProviderContext) => {
       await waitForRuleSuccessOrStatus(supertest, id);
       await waitForSignalsToBePresent(supertest, 4, [id]);
       const signalsOpen = await getSignalsById(supertest, id);
-      const hits = signalsOpen.hits.hits.map((signal) => signal._source.host_alias.name);
+      const hits = signalsOpen.hits.hits.map(
+        (signal) => (signal._source.host_alias as HostAlias).name
+      );
       expect(hits).to.eql(['host name 1', 'host name 2', 'host name 3', 'host name 4']);
     });
 
@@ -57,7 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
       await waitForRuleSuccessOrStatus(supertest, id);
       await waitForSignalsToBePresent(supertest, 4, [id]);
       const signalsOpen = await getSignalsById(supertest, id);
-      const hits = signalsOpen.hits.hits.map((signal) => signal._source.host.name);
+      const hits = signalsOpen.hits.hits.map((signal) => (signal._source.host as HostAlias).name);
       expect(hits).to.eql(['host name 1', 'host name 2', 'host name 3', 'host name 4']);
     });
   });
