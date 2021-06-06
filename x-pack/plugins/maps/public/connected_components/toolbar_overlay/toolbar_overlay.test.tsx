@@ -21,22 +21,20 @@ import { ToolbarOverlay } from './toolbar_overlay';
 
 test('Should only show set view control', async () => {
   const component = shallow(
-    <ToolbarOverlay geoFields={[]} showFitToBoundsButton={false} showTimesliderButton={false} />
+    <ToolbarOverlay
+      showToolsControl={false}
+      showFitToBoundsButton={false}
+      showTimesliderButton={false}
+    />
   );
   expect(component).toMatchSnapshot();
 });
 
 test('Should show all controls', async () => {
-  const geoFieldWithIndex = {
-    geoFieldName: 'myGeoFieldName',
-    geoFieldType: 'geo_point',
-    indexPatternTitle: 'myIndex',
-    indexPatternId: '1',
-  };
   const component = shallow(
     <ToolbarOverlay
       addFilters={async (filters: Filter[], actionId: string) => {}}
-      geoFields={[geoFieldWithIndex]}
+      showToolsControl={true}
       showFitToBoundsButton={true}
       showTimesliderButton={true}
     />

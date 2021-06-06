@@ -49,6 +49,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_point_series_options'));
       loadTestFile(require.resolve('./_vertical_bar_chart'));
       loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
+      loadTestFile(require.resolve('./_pie_chart'));
     });
 
     describe('visualize ciGroup9', function () {
