@@ -39,13 +39,6 @@ const Truncate = euiStyled.span`
   ${truncate(px(unit * 12))}
 `;
 
-const MetadataFlexGroup = euiStyled(EuiFlexGroup)`
-  border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
-  margin-bottom: ${({ theme }) => theme.eui.paddingSizes.m};
-  padding: ${({ theme }) =>
-    `${theme.eui.paddingSizes.m} 0 0 ${theme.eui.paddingSizes.m}`};
-`;
-
 interface ServiceNodeMetricsProps {
   serviceName: string;
   serviceNodeName: string;
