@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { orderBy } from 'lodash';
 import { ConfirmModal } from '../confirm_modal';
-import { Link } from '../link';
+import { RoutingLink } from '../routing';
 import { Paginate } from '../paginate';
 import { ComponentStrings } from '../../../i18n';
 import { WorkpadDropzone } from './workpad_dropzone';
@@ -186,14 +186,13 @@ export class WorkpadLoader extends React.PureComponent {
           const workpadName = getDisplayName(name, workpad, loadedWorkpad);
 
           return (
-            <Link
+            <RoutingLink
               data-test-subj="canvasWorkpadLoaderWorkpad"
-              name="loadWorkpad"
-              params={{ id: workpad.id }}
+              to={`/workpad/${workpad.id}`}
               aria-label={strings.getLoadWorkpadArialLabel()}
             >
               {workpadName}
-            </Link>
+            </RoutingLink>
           );
         },
       },

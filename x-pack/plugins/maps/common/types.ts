@@ -6,6 +6,7 @@
  */
 
 export interface CreateDocSourceResp {
+  indexPatternId?: string;
   success: boolean;
   error?: Error;
 }

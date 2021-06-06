@@ -96,34 +96,36 @@ export const TrustedAppsPage = memo(() => {
         />
       )}
 
-      <SearchBar
-        defaultValue={location.filter}
-        onSearch={handleOnSearch}
-        placeholder={SEARCH_TRUSTED_APP_PLACEHOLDER}
-      />
       {doEntriesExist ? (
-        <EuiFlexGroup
-          direction="column"
-          gutterSize="none"
-          data-test-subj="trustedAppsListPageContent"
-        >
-          <EuiSpacer size="m" />
-          <EuiFlexItem grow={false}>
-            <ControlPanel
-              totalItemCount={totalItemsCount}
-              currentViewType={location.view_type}
-              onViewTypeChange={handleViewTypeChange}
-            />
-
+        <>
+          <SearchBar
+            defaultValue={location.filter}
+            onSearch={handleOnSearch}
+            placeholder={SEARCH_TRUSTED_APP_PLACEHOLDER}
+          />
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="none"
+            data-test-subj="trustedAppsListPageContent"
+          >
             <EuiSpacer size="m" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiHorizontalRule margin="none" />
+            <EuiFlexItem grow={false}>
+              <ControlPanel
+                totalItemCount={totalItemsCount}
+                currentViewType={location.view_type}
+                onViewTypeChange={handleViewTypeChange}
+              />
 
-            {location.view_type === 'grid' && <TrustedAppsGrid />}
-            {location.view_type === 'list' && <TrustedAppsList />}
-          </EuiFlexItem>
-        </EuiFlexGroup>
+              <EuiSpacer size="m" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiHorizontalRule margin="none" />
+
+              {location.view_type === 'grid' && <TrustedAppsGrid />}
+              {location.view_type === 'list' && <TrustedAppsList />}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
       ) : (
         <EmptyState onAdd={handleAddButtonClick} isAddDisabled={showCreateFlyout} />
       )}

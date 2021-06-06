@@ -25,7 +25,6 @@ import { Loading } from '../../../components';
 
 import type { PackagePolicyValidationResults } from './services';
 import { PackagePolicyInputPanel } from './components';
-import type { CreatePackagePolicyFrom } from './types';
 
 const findStreamsForInputType = (
   inputType: string,
@@ -50,22 +49,12 @@ const findStreamsForInputType = (
 };
 
 export const StepConfigurePackagePolicy: React.FunctionComponent<{
-  from?: CreatePackagePolicyFrom;
   packageInfo: PackageInfo;
   packagePolicy: NewPackagePolicy;
-  packagePolicyId?: string;
   updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
   validationResults: PackagePolicyValidationResults;
   submitAttempted: boolean;
-}> = ({
-  from = 'policy',
-  packageInfo,
-  packagePolicy,
-  packagePolicyId,
-  updatePackagePolicy,
-  validationResults,
-  submitAttempted,
-}) => {
+}> = ({ packageInfo, packagePolicy, updatePackagePolicy, validationResults, submitAttempted }) => {
   // Configure inputs (and their streams)
   // Assume packages only export one config template for now
   const renderConfigureInputs = () =>
