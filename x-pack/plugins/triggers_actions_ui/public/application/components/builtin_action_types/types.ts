@@ -41,7 +41,7 @@ export interface PagerDutyActionParams {
 }
 
 export interface IndexActionParams {
-  documents: Array<Record<string, any>>;
+  documents: Array<Record<string, any>> | null;
   indexOverride?: string;
 }
 

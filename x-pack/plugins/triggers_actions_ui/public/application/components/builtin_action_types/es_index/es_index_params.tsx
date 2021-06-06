@@ -44,7 +44,7 @@ export const IndexParamsFields = ({
     ''
   );
 
-  const getDocumentToIndex = (doc: Array<Record<string, any>> | undefined) =>
+  const getDocumentToIndex = (doc: Array<Record<string, any>> | undefined | null) =>
     doc && doc.length > 0 ? ((doc[0] as unknown) as string) : undefined;
 
   const [documentToIndex, setDocumentToIndex] = useState<string | undefined>(
@@ -57,6 +57,9 @@ export const IndexParamsFields = ({
 
   useEffect(() => {
     setDocumentToIndex(getDocumentToIndex(documents));
+    if (documents === null) {
+      setDocumentToIndex('{}');
+    }
   }, [documents]);
 
   useEffect(() => {
@@ -79,7 +82,7 @@ export const IndexParamsFields = ({
       setDocumentToIndex(updatedDocuments);
     } catch (e) {
       // set document as empty to turn on the validation for non empty valid JSON object
-      editAction('documents', [{}], index);
+      editAction('documents', undefined, index);
       setDocumentToIndex(undefined);
     }
   };
