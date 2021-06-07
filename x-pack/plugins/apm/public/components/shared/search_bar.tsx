@@ -15,7 +15,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 import { enableInspectEsQueries } from '../../../../observability/public';
 import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
 import { useKibanaUrl } from '../../hooks/useKibanaUrl';
@@ -26,12 +25,9 @@ import { KueryBar } from './KueryBar';
 import { TimeComparison } from './time_comparison';
 import { TransactionTypeSelect } from './transaction_type_select';
 
-const EuiFlexGroupSpaced = euiStyled(EuiFlexGroup)`
-  margin: ${({ theme }) =>
-    `${theme.eui.euiSizeS} ${theme.eui.euiSizeS} -${theme.eui.gutterTypes.gutterMedium} ${theme.eui.euiSizeS}`};
-`;
-
 interface Props {
+  hidden?: boolean;
+  showKueryBar?: boolean;
   showTimeComparison?: boolean;
   showTransactionTypeSelector?: boolean;
 }
@@ -49,7 +45,7 @@ function DebugQueryCallout() {
   }
 
   return (
-    <EuiFlexGroupSpaced>
+    <EuiFlexGroup>
       <EuiFlexItem>
         <EuiCallOut
           title={i18n.translate(
@@ -78,19 +74,26 @@ function DebugQueryCallout() {
           />
         </EuiCallOut>
       </EuiFlexItem>
-    </EuiFlexGroupSpaced>
+    </EuiFlexGroup>
   );
 }
 
 export function SearchBar({
+  hidden = false,
+  showKueryBar = true,
   showTimeComparison = false,
   showTransactionTypeSelector = false,
 }: Props) {
   const { isSmall, isMedium, isLarge, isXl, isXXL } = useBreakPoints();
+
+  if (hidden) {
+    return null;
+  }
+
   return (
     <>
       <DebugQueryCallout />
-      <EuiFlexGroupSpaced
+      <EuiFlexGroup
         gutterSize="s"
         responsive={false}
         direction={isXXL ? 'row' : 'column'}
@@ -106,9 +109,12 @@ export function SearchBar({
                 <TransactionTypeSelect />
               </EuiFlexItem>
             )}
-            <EuiFlexItem>
-              <KueryBar />
-            </EuiFlexItem>
+
+            {showKueryBar && (
+              <EuiFlexItem>
+                <KueryBar />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={showTimeComparison && !isXXL}>
@@ -128,7 +134,7 @@ export function SearchBar({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-      </EuiFlexGroupSpaced>
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
     </>
   );

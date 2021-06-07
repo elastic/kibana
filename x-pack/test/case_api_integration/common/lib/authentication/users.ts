@@ -16,6 +16,7 @@ import {
   securitySolutionOnlyReadSpacesAll,
   observabilityOnlyAllSpacesAll,
   observabilityOnlyReadSpacesAll,
+  testDisabledPluginAll,
 } from './roles';
 import { User } from './types';
 
@@ -23,6 +24,12 @@ export const superUser: User = {
   username: 'superuser',
   password: 'superuser',
   roles: ['superuser'],
+};
+
+export const testDisabled: User = {
+  username: 'test_disabled',
+  password: 'test_disabled',
+  roles: [testDisabledPluginAll.name],
 };
 
 export const secOnly: User = {
@@ -83,6 +90,7 @@ export const users = [
   obsSecRead,
   globalRead,
   noKibanaPrivileges,
+  testDisabled,
 ];
 
 /**

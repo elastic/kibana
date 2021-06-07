@@ -324,6 +324,37 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest: supertestWithoutAuth,
           caseId: postedCase.id,
           commentId: commentResp.comments![0].id,
+          auth: { user: secOnly, space: 'space2' },
+          expectedHttpCode: 403,
+        });
+
+        await deleteAllComments({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          auth: { user: secOnly, space: 'space2' },
+          expectedHttpCode: 403,
+        });
+      });
+
+      it('should NOT delete a comment created in space2 by making a request to space1', async () => {
+        const postedCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          { user: superUser, space: 'space2' }
+        );
+
+        const commentResp = await createComment({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+          auth: { user: superUser, space: 'space2' },
+        });
+
+        await deleteComment({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          commentId: commentResp.comments![0].id,
           auth: { user: secOnly, space: 'space1' },
           expectedHttpCode: 404,
         });
