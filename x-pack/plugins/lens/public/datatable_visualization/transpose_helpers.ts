@@ -7,9 +7,9 @@
 
 import type { FieldFormat } from 'src/plugins/data/public';
 import type { Datatable, DatatableColumn, DatatableRow } from 'src/plugins/expressions';
+import { ColumnConfig } from './components/table_basic';
 
-import { Args } from './expression';
-import { ColumnState } from './visualization';
+import { Args, ColumnConfigArg } from './expression';
 
 const TRANSPOSE_SEPARATOR = '---';
 
@@ -87,11 +87,11 @@ export function transposeTable(
 
 function transposeRows(
   firstTable: Datatable,
-  bucketsColumnArgs: Array<ColumnState & { type: 'lens_datatable_column' }>,
+  bucketsColumnArgs: ColumnConfigArg[],
   formatters: Record<string, FieldFormat>,
   transposedColumnFormatter: FieldFormat,
   transposedColumnId: string,
-  metricsColumnArgs: Array<ColumnState & { type: 'lens_datatable_column' }>
+  metricsColumnArgs: ColumnConfigArg[]
 ) {
   const rowsByBucketColumns: Record<string, DatatableRow[]> = groupRowsByBucketColumns(
     firstTable,
@@ -113,8 +113,8 @@ function transposeRows(
  */
 function updateColumnArgs(
   args: Args,
-  bucketsColumnArgs: Array<ColumnState & { type: 'lens_datatable_column' }>,
-  transposedColumnGroups: Array<Array<ColumnState & { type: 'lens_datatable_column' }>>
+  bucketsColumnArgs: ColumnConfig['columns'],
+  transposedColumnGroups: Array<ColumnConfig['columns']>
 ) {
   args.columns = [...bucketsColumnArgs];
   // add first column from each group, then add second column for each group, ...
@@ -151,8 +151,8 @@ function getUniqueValues(table: Datatable, formatter: FieldFormat, columnId: str
  */
 function transposeColumns(
   args: Args,
-  bucketsColumnArgs: Array<ColumnState & { type: 'lens_datatable_column' }>,
-  metricColumns: Array<ColumnState & { type: 'lens_datatable_column' }>,
+  bucketsColumnArgs: ColumnConfig['columns'],
+  metricColumns: ColumnConfig['columns'],
   firstTable: Datatable,
   uniqueValues: string[],
   uniqueRawValues: unknown[],
@@ -196,10 +196,10 @@ function transposeColumns(
  */
 function mergeRowGroups(
   rowsByBucketColumns: Record<string, DatatableRow[]>,
-  bucketColumns: ColumnState[],
+  bucketColumns: ColumnConfigArg[],
   formatter: FieldFormat,
   transposedColumnId: string,
-  metricColumns: ColumnState[]
+  metricColumns: ColumnConfigArg[]
 ) {
   return Object.values(rowsByBucketColumns).map((rows) => {
     const mergedRow: DatatableRow = {};
@@ -222,7 +222,7 @@ function mergeRowGroups(
  */
 function groupRowsByBucketColumns(
   firstTable: Datatable,
-  bucketColumns: ColumnState[],
+  bucketColumns: ColumnConfigArg[],
   formatters: Record<string, FieldFormat>
 ) {
   const rowsByBucketColumns: Record<string, DatatableRow[]> = {};

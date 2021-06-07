@@ -27,7 +27,7 @@ import {
 } from '../../../common/components/link_to';
 import { useStateToaster } from '../../../common/components/toasters';
 import { useControl } from '../../../common/hooks/use_control';
-import { useGetUserSavedObjectPermissions, useKibana } from '../../../common/lib/kibana';
+import { useGetUserCasesPermissions, useKibana } from '../../../common/lib/kibana';
 import { ActionIconItem } from '../../../timelines/components/timeline/body/actions/action_icon_item';
 import { CreateCaseFlyout } from '../create/flyout';
 import { createUpdateSuccessToaster } from './helpers';
@@ -45,6 +45,7 @@ interface PostCommentArg {
     alertId: string | string[];
     index: string | string[];
     rule: { id: string | null; name: string | null };
+    owner: string;
   };
   updateCase?: (newCase: Case) => void;
   subCaseId?: string;
@@ -66,7 +67,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const openPopover = useCallback(() => setIsPopoverOpen(true), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
-  const userPermissions = useGetUserSavedObjectPermissions();
+  const userPermissions = useGetUserCasesPermissions();
 
   const isEventSupported = !isEmpty(ecsRowData.signal?.rule?.id);
   const userCanCrud = userPermissions?.crud ?? false;
@@ -110,6 +111,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
               id: rule?.id != null ? rule.id[0] : null,
               name: rule?.name != null ? rule.name[0] : null,
             },
+            owner: APP_ID,
           },
           updateCase,
         });
@@ -235,6 +237,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
               id: rule?.id != null ? rule.id[0] : null,
               name: rule?.name != null ? rule.name[0] : null,
             },
+            owner: APP_ID,
           },
           createCaseNavigation: {
             href: formatUrl(getCreateCaseUrl()),
@@ -244,6 +247,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
           onRowClick: onCaseClicked,
           updateCase: onCaseSuccess,
           userCanCrud: userPermissions?.crud ?? false,
+          owner: [APP_ID],
         })}
     </>
   );

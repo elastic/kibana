@@ -4,14 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import expect from '@kbn/expect';
 
+import { omit } from 'lodash';
+import expect from '@kbn/expect';
 import type { ApiResponse, estypes } from '@elastic/elasticsearch';
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 
 import * as st from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
-import { CASES_URL, SUB_CASES_PATCH_DEL_URL } from '../../../../plugins/cases/common/constants';
+import { ObjectRemover as ActionsRemover } from '../../../alerting_api_integration/common/lib';
+import {
+  CASES_URL,
+  CASE_CONFIGURE_CONNECTORS_URL,
+  CASE_CONFIGURE_URL,
+  CASE_REPORTERS_URL,
+  CASE_STATUS_URL,
+  CASE_TAGS_URL,
+  SUB_CASES_PATCH_DEL_URL,
+} from '../../../../plugins/cases/common/constants';
 import {
   CasesConfigureRequest,
   CasesConfigureResponse,
@@ -23,11 +33,26 @@ import {
   CaseStatuses,
   SubCasesResponse,
   CasesResponse,
+  CasesFindResponse,
+  CommentRequest,
+  CaseUserActionResponse,
+  SubCaseResponse,
+  CommentResponse,
+  CasesPatchRequest,
+  AllCommentsResponse,
+  CommentPatchRequest,
+  CasesConfigurePatch,
+  CasesStatusResponse,
+  CasesConfigurationsResponse,
+  CaseUserActionsResponse,
 } from '../../../../plugins/cases/common/api';
-import { postCollectionReq, postCommentGenAlertReq } from './mock';
-import { getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
+import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
+import { getCaseUserActionUrl, getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
 import { ContextTypeGeneratedAlertType } from '../../../../plugins/cases/server/connectors';
 import { SignalHit } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
+import { ActionResult, FindActionResult } from '../../../../plugins/actions/server/types';
+import { User } from './authentication/types';
+import { superUser } from './authentication/users';
 
 function toArray<T>(input: T | T[]): T[] {
   if (Array.isArray(input)) {
@@ -144,11 +169,11 @@ export const createSubCase = async (args: {
  */
 export const createCaseAction = async (supertest: st.SuperTest<supertestAsPromised.Test>) => {
   const { body: createdAction } = await supertest
-    .post('/api/actions/action')
+    .post('/api/actions/connector')
     .set('kbn-xsrf', 'foo')
     .send({
       name: 'A case connector',
-      actionTypeId: '.case',
+      connector_type_id: '.case',
       config: {},
     })
     .expect(200);
@@ -162,7 +187,7 @@ export const deleteCaseAction = async (
   supertest: st.SuperTest<supertestAsPromised.Test>,
   id: string
 ) => {
-  await supertest.delete(`/api/actions/action/${id}`).set('kbn-xsrf', 'foo');
+  await supertest.delete(`/api/actions/connector/${id}`).set('kbn-xsrf', 'foo');
 };
 
 /**
@@ -231,7 +256,7 @@ export const createSubCaseComment = async ({
   }
 
   const caseConnector = await supertest
-    .post(`/api/actions/action/${actionIDToUse}/_execute`)
+    .post(`/api/actions/connector/${actionIDToUse}/_execute`)
     .set('kbn-xsrf', 'foo')
     .send({
       params: {
@@ -248,12 +273,17 @@ export const createSubCaseComment = async ({
   return { newSubCaseInfo: caseConnector.body.data, modifiedSubCases: closedSubCases };
 };
 
-export const getConfiguration = ({
+type ConfigRequestParams = Partial<CaseConnector> & {
+  overrides?: Record<string, unknown>;
+};
+
+export const getConfigurationRequest = ({
   id = 'none',
   name = 'none',
   type = ConnectorTypes.none,
   fields = null,
-}: Partial<CaseConnector> = {}): CasesConfigureRequest => {
+  overrides,
+}: ConfigRequestParams = {}): CasesConfigureRequest => {
   return {
     connector: {
       id,
@@ -262,22 +292,28 @@ export const getConfiguration = ({
       fields,
     } as CaseConnector,
     closure_type: 'close-by-user',
+    owner: 'securitySolutionFixture',
+    ...overrides,
   };
 };
 
-export const getConfigurationOutput = (update = false): Partial<CasesConfigureResponse> => {
+export const getConfigurationOutput = (
+  update = false,
+  overwrite = {}
+): Partial<CasesConfigureResponse> => {
   return {
-    ...getConfiguration(),
+    ...getConfigurationRequest(),
     error: null,
     mappings: [],
     created_by: { email: null, full_name: null, username: 'elastic' },
     updated_by: update ? { email: null, full_name: null, username: 'elastic' } : null,
+    ...overwrite,
   };
 };
 
 export const getServiceNowConnector = () => ({
   name: 'ServiceNow Connector',
-  actionTypeId: '.servicenow',
+  connector_type_id: '.servicenow',
   secrets: {
     username: 'admin',
     password: 'password',
@@ -289,7 +325,7 @@ export const getServiceNowConnector = () => ({
 
 export const getJiraConnector = () => ({
   name: 'Jira Connector',
-  actionTypeId: '.jira',
+  connector_type_id: '.jira',
   secrets: {
     email: 'elastic@elastic.co',
     apiToken: 'token',
@@ -320,7 +356,7 @@ export const getMappings = () => [
 
 export const getResilientConnector = () => ({
   name: 'Resilient Connector',
-  actionTypeId: '.resilient',
+  connector_type_id: '.resilient',
   secrets: {
     apiKeyId: 'id',
     apiKeySecret: 'secret',
@@ -331,21 +367,106 @@ export const getResilientConnector = () => ({
   },
 });
 
-export const removeServerGeneratedPropertiesFromConfigure = (
-  config: Partial<CasesConfigureResponse>
-): Partial<CasesConfigureResponse> => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { created_at, updated_at, version, ...rest } = config;
-  return rest;
+export const getServiceNowSIRConnector = () => ({
+  name: 'ServiceNow Connector',
+  connector_type_id: '.servicenow-sir',
+  secrets: {
+    username: 'admin',
+    password: 'password',
+  },
+  config: {
+    apiUrl: 'http://some.non.existent.com',
+  },
+});
+
+export const getWebhookConnector = () => ({
+  name: 'A generic Webhook action',
+  connector_type_id: '.webhook',
+  secrets: {
+    user: 'user',
+    password: 'password',
+  },
+  config: {
+    headers: {
+      'Content-Type': 'text/plain',
+    },
+    url: 'http://some.non.existent.com',
+  },
+});
+
+interface CommonSavedObjectAttributes {
+  id?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  version?: string | null;
+  [key: string]: unknown;
+}
+
+const savedObjectCommonAttributes = ['created_at', 'updated_at', 'version', 'id'];
+
+const removeServerGeneratedPropertiesFromObject = <T extends object, K extends keyof T>(
+  object: T,
+  keys: K[]
+): Omit<T, K> => {
+  return omit<T, K>(object, keys);
+};
+export const removeServerGeneratedPropertiesFromSavedObject = <
+  T extends CommonSavedObjectAttributes
+>(
+  attributes: T,
+  keys: Array<keyof T> = []
+): Omit<T, typeof savedObjectCommonAttributes[number] | typeof keys[number]> => {
+  return removeServerGeneratedPropertiesFromObject(attributes, [
+    ...savedObjectCommonAttributes,
+    ...keys,
+  ]);
+};
+
+export const removeServerGeneratedPropertiesFromUserAction = (
+  attributes: CaseUserActionResponse
+) => {
+  const keysToRemove: Array<keyof CaseUserActionResponse> = ['action_id', 'action_at'];
+  return removeServerGeneratedPropertiesFromObject<
+    CaseUserActionResponse,
+    typeof keysToRemove[number]
+  >(attributes, keysToRemove);
+};
+
+export const removeServerGeneratedPropertiesFromSubCase = (
+  subCase: SubCaseResponse | undefined
+) => {
+  if (!subCase) {
+    return;
+  }
+
+  return removeServerGeneratedPropertiesFromSavedObject<SubCaseResponse>(subCase, [
+    'closed_at',
+    'comments',
+  ]);
+};
+
+export const removeServerGeneratedPropertiesFromCase = (
+  theCase: CaseResponse
+): Partial<CaseResponse> => {
+  return removeServerGeneratedPropertiesFromSavedObject<CaseResponse>(theCase, ['closed_at']);
+};
+
+export const removeServerGeneratedPropertiesFromComments = (
+  comments: CommentResponse[] | undefined
+): Array<Partial<CommentResponse>> | undefined => {
+  return comments?.map((comment) => {
+    return removeServerGeneratedPropertiesFromSavedObject<CommentResponse>(comment, []);
+  });
 };
 
 export const deleteAllCaseItems = async (es: KibanaClient) => {
   await Promise.all([
-    deleteCases(es),
+    deleteCasesByESQuery(es),
     deleteSubCases(es),
     deleteCasesUserActions(es),
     deleteComments(es),
     deleteConfiguration(es),
+    deleteMappings(es),
   ]);
 };
 
@@ -357,10 +478,11 @@ export const deleteCasesUserActions = async (es: KibanaClient): Promise<void> =>
     wait_for_completion: true,
     refresh: true,
     body: {},
+    conflicts: 'proceed',
   });
 };
 
-export const deleteCases = async (es: KibanaClient): Promise<void> => {
+export const deleteCasesByESQuery = async (es: KibanaClient): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
     // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
@@ -368,6 +490,7 @@ export const deleteCases = async (es: KibanaClient): Promise<void> => {
     wait_for_completion: true,
     refresh: true,
     body: {},
+    conflicts: 'proceed',
   });
 };
 
@@ -383,6 +506,7 @@ export const deleteSubCases = async (es: KibanaClient): Promise<void> => {
     wait_for_completion: true,
     refresh: true,
     body: {},
+    conflicts: 'proceed',
   });
 };
 
@@ -394,6 +518,7 @@ export const deleteComments = async (es: KibanaClient): Promise<void> => {
     wait_for_completion: true,
     refresh: true,
     body: {},
+    conflicts: 'proceed',
   });
 };
 
@@ -405,5 +530,581 @@ export const deleteConfiguration = async (es: KibanaClient): Promise<void> => {
     wait_for_completion: true,
     refresh: true,
     body: {},
+    conflicts: 'proceed',
   });
+};
+
+export const deleteMappings = async (es: KibanaClient): Promise<void> => {
+  await es.deleteByQuery({
+    index: '.kibana',
+    // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
+    q: 'type:cases-connector-mappings',
+    wait_for_completion: true,
+    refresh: true,
+    body: {},
+    conflicts: 'proceed',
+  });
+};
+
+export const superUserSpace1Auth = getAuthWithSuperUser();
+
+/**
+ * Returns an auth object with the specified space and user set as super user. The result can be passed to other utility
+ * functions.
+ */
+export function getAuthWithSuperUser(
+  space: string | null = 'space1'
+): { user: User; space: string | null } {
+  return { user: superUser, space };
+}
+
+/**
+ * Converts the space into the appropriate string for use by the actions remover utility object.
+ */
+export function getActionsSpace(space: string | null) {
+  return space ?? 'default';
+}
+
+export const getSpaceUrlPrefix = (spaceId: string | undefined | null) => {
+  return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
+};
+
+interface OwnerEntity {
+  owner: string;
+}
+
+export const ensureSavedObjectIsAuthorized = (
+  entities: OwnerEntity[],
+  numberOfExpectedCases: number,
+  owners: string[]
+) => {
+  expect(entities.length).to.eql(numberOfExpectedCases);
+  entities.forEach((entity) => expect(owners.includes(entity.owner)).to.be(true));
+};
+
+export const createCaseWithConnector = async ({
+  supertest,
+  configureReq = {},
+  servicenowSimulatorURL,
+  actionsRemover,
+  auth = { user: superUser, space: null },
+  createCaseReq = getPostCaseRequest(),
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  servicenowSimulatorURL: string;
+  actionsRemover: ActionsRemover;
+  configureReq?: Record<string, unknown>;
+  auth?: { user: User; space: string | null };
+  createCaseReq?: CasePostRequest;
+}): Promise<{
+  postedCase: CaseResponse;
+  connector: CreateConnectorResponse;
+}> => {
+  const connector = await createConnector({
+    supertest,
+    req: {
+      ...getServiceNowConnector(),
+      config: { apiUrl: servicenowSimulatorURL },
+    },
+    auth,
+  });
+
+  actionsRemover.add(auth.space ?? 'default', connector.id, 'action', 'actions');
+  await createConfiguration(
+    supertest,
+    {
+      ...getConfigurationRequest({
+        id: connector.id,
+        name: connector.name,
+        type: connector.connector_type_id as ConnectorTypes,
+      }),
+      ...configureReq,
+    },
+    200,
+    auth
+  );
+
+  const postedCase = await createCase(
+    supertest,
+    {
+      ...createCaseReq,
+      connector: {
+        id: connector.id,
+        name: connector.name,
+        type: connector.connector_type_id,
+        fields: {
+          urgency: '2',
+          impact: '2',
+          severity: '2',
+          category: 'software',
+          subcategory: 'os',
+        },
+      } as CaseConnector,
+    },
+    200,
+    auth
+  );
+
+  return { postedCase, connector };
+};
+
+export const createCase = async (
+  supertest: st.SuperTest<supertestAsPromised.Test>,
+  params: CasePostRequest,
+  expectedHttpCode: number = 200,
+  auth: { user: User; space: string | null } = { user: superUser, space: null }
+): Promise<CaseResponse> => {
+  const { body: theCase } = await supertest
+    .post(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}`)
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
+    .send(params)
+    .expect(expectedHttpCode);
+
+  return theCase;
+};
+
+/**
+ * Sends a delete request for the specified case IDs.
+ */
+export const deleteCases = async ({
+  supertest,
+  caseIDs,
+  expectedHttpCode = 204,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  caseIDs: string[];
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}) => {
+  const { body } = await supertest
+    .delete(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}`)
+    .auth(auth.user.username, auth.user.password)
+    // we need to json stringify here because just passing in the array of case IDs will cause a 400 with Kibana
+    // not being able to parse the array correctly. The format ids=["1", "2"] seems to work, which stringify outputs.
+    .query({ ids: JSON.stringify(caseIDs) })
+    .set('kbn-xsrf', 'true')
+    .send()
+    .expect(expectedHttpCode);
+
+  return body;
+};
+
+export const createComment = async ({
+  supertest,
+  caseId,
+  params,
+  auth = { user: superUser, space: null },
+  expectedHttpCode = 200,
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  caseId: string;
+  params: CommentRequest;
+  auth?: { user: User; space: string | null };
+  expectedHttpCode?: number;
+}): Promise<CaseResponse> => {
+  const { body: theCase } = await supertest
+    .post(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/comments`)
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
+    .send(params)
+    .expect(expectedHttpCode);
+
+  return theCase;
+};
+
+export const updateCase = async ({
+  supertest,
+  params,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  params: CasesPatchRequest;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CaseResponse[]> => {
+  const { body: cases } = await supertest
+    .patch(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}`)
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
+    .send(params)
+    .expect(expectedHttpCode);
+
+  return cases;
+};
+
+export const getCaseUserActions = async ({
+  supertest,
+  caseID,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  caseID: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CaseUserActionsResponse> => {
+  const { body: userActions } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${getCaseUserActionUrl(caseID)}`)
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+  return userActions;
+};
+
+export const deleteComment = async ({
+  supertest,
+  caseId,
+  commentId,
+  expectedHttpCode = 204,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  caseId: string;
+  commentId: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<{} | Error> => {
+  const { body: comment } = await supertest
+    .delete(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/comments/${commentId}`)
+    .set('kbn-xsrf', 'true')
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode)
+    .send();
+
+  return comment;
+};
+
+export const deleteAllComments = async ({
+  supertest,
+  caseId,
+  expectedHttpCode = 204,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  caseId: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<{} | Error> => {
+  const { body: comment } = await supertest
+    .delete(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/comments`)
+    .set('kbn-xsrf', 'true')
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode)
+    .send();
+
+  return comment;
+};
+
+export const getAllComments = async ({
+  supertest,
+  caseId,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  caseId: string;
+  auth?: { user: User; space: string | null };
+  expectedHttpCode?: number;
+}): Promise<AllCommentsResponse> => {
+  const { body: comments } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/comments`)
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return comments;
+};
+
+export const getComment = async ({
+  supertest,
+  caseId,
+  commentId,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  caseId: string;
+  commentId: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CommentResponse> => {
+  const { body: comment } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/comments/${commentId}`)
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return comment;
+};
+
+export const updateComment = async ({
+  supertest,
+  caseId,
+  req,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  caseId: string;
+  req: CommentPatchRequest;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CaseResponse> => {
+  const { body: res } = await supertest
+    .patch(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/comments`)
+    .set('kbn-xsrf', 'true')
+    .send(req)
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return res;
+};
+
+export const getConfiguration = async ({
+  supertest,
+  query = { owner: 'securitySolutionFixture' },
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  query?: Record<string, unknown>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CasesConfigurationsResponse> => {
+  const { body: configuration } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${CASE_CONFIGURE_URL}`)
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
+    .query(query)
+    .expect(expectedHttpCode);
+
+  return configuration;
+};
+
+export const createConfiguration = async (
+  supertest: st.SuperTest<supertestAsPromised.Test>,
+  req: CasesConfigureRequest = getConfigurationRequest(),
+  expectedHttpCode: number = 200,
+  auth: { user: User; space: string | null } = { user: superUser, space: null }
+): Promise<CasesConfigureResponse> => {
+  const { body: configuration } = await supertest
+    .post(`${getSpaceUrlPrefix(auth.space)}${CASE_CONFIGURE_URL}`)
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
+    .send(req)
+    .expect(expectedHttpCode);
+
+  return configuration;
+};
+
+export type CreateConnectorResponse = Omit<ActionResult, 'actionTypeId'> & {
+  connector_type_id: string;
+};
+
+export const createConnector = async ({
+  supertest,
+  req,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  req: Record<string, unknown>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CreateConnectorResponse> => {
+  const { body: connector } = await supertest
+    .post(`${getSpaceUrlPrefix(auth.space)}/api/actions/connector`)
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
+    .send(req)
+    .expect(expectedHttpCode);
+
+  return connector;
+};
+
+export const getCaseConnectors = async ({
+  supertest,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<FindActionResult[]> => {
+  const { body: connectors } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${CASE_CONFIGURE_CONNECTORS_URL}/_find`)
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return connectors;
+};
+
+export const updateConfiguration = async (
+  supertest: st.SuperTest<supertestAsPromised.Test>,
+  id: string,
+  req: CasesConfigurePatch,
+  expectedHttpCode: number = 200,
+  auth: { user: User; space: string | null } = { user: superUser, space: null }
+): Promise<CasesConfigureResponse> => {
+  const { body: configuration } = await supertest
+    .patch(`${getSpaceUrlPrefix(auth.space)}${CASE_CONFIGURE_URL}/${id}`)
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
+    .send(req)
+    .expect(expectedHttpCode);
+
+  return configuration;
+};
+
+export const getAllCasesStatuses = async ({
+  supertest,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+  query = {},
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+  query?: Record<string, unknown>;
+}): Promise<CasesStatusResponse> => {
+  const { body: statuses } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${CASE_STATUS_URL}`)
+    .auth(auth.user.username, auth.user.password)
+    .query({ ...query })
+    .expect(expectedHttpCode);
+
+  return statuses;
+};
+
+export const getCase = async ({
+  supertest,
+  caseId,
+  includeComments = false,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  caseId: string;
+  includeComments?: boolean;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CaseResponse> => {
+  const { body: theCase } = await supertest
+    .get(
+      `${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}?includeComments=${includeComments}`
+    )
+    .set('kbn-xsrf', 'true')
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return theCase;
+};
+
+export const findCases = async ({
+  supertest,
+  query = {},
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  query?: Record<string, unknown>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CasesFindResponse> => {
+  const { body: res } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/_find`)
+    .auth(auth.user.username, auth.user.password)
+    .query({ sortOrder: 'asc', ...query })
+    .set('kbn-xsrf', 'true')
+    .send()
+    .expect(expectedHttpCode);
+
+  return res;
+};
+
+export const getCaseIDsByAlert = async ({
+  supertest,
+  alertID,
+  query = {},
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  alertID: string;
+  query?: Record<string, unknown>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<string[]> => {
+  const { body: res } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/alerts/${alertID}`)
+    .auth(auth.user.username, auth.user.password)
+    .query(query)
+    .expect(expectedHttpCode);
+
+  return res;
+};
+
+export const getTags = async ({
+  supertest,
+  query = {},
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  query?: Record<string, unknown>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CasesFindResponse> => {
+  const { body: res } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${CASE_TAGS_URL}`)
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
+    .query({ ...query })
+    .expect(expectedHttpCode);
+
+  return res;
+};
+
+export const getReporters = async ({
+  supertest,
+  query = {},
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  query?: Record<string, unknown>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CasesFindResponse> => {
+  const { body: res } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${CASE_REPORTERS_URL}`)
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
+    .query({ ...query })
+    .expect(expectedHttpCode);
+
+  return res;
+};
+
+export const pushCase = async ({
+  supertest,
+  caseId,
+  connectorId,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  caseId: string;
+  connectorId: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CaseResponse> => {
+  const { body: res } = await supertest
+    .post(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/connector/${connectorId}/_push`)
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
+    .send({})
+    .expect(expectedHttpCode);
+
+  return res;
 };

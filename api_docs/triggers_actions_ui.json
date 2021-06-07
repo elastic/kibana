@@ -45,7 +45,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-          "lineNumber": 77
+          "lineNumber": 80
         },
         "deprecated": false,
         "children": [
@@ -61,7 +61,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-              "lineNumber": 88
+              "lineNumber": 91
             },
             "deprecated": false,
             "children": [],
@@ -94,7 +94,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-              "lineNumber": 93
+              "lineNumber": 96
             },
             "deprecated": false,
             "children": [
@@ -117,7 +117,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-                  "lineNumber": 93
+                  "lineNumber": 96
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -134,7 +134,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-                  "lineNumber": 93
+                  "lineNumber": 96
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -161,7 +161,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-              "lineNumber": 169
+              "lineNumber": 172
             },
             "deprecated": false,
             "children": [],
@@ -179,7 +179,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-              "lineNumber": 203
+              "lineNumber": 206
             },
             "deprecated": false,
             "children": [],
@@ -205,44 +205,6 @@
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/index.ts",
           "lineNumber": 17
-        },
-        "deprecated": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.props",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "T"
-            ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
-              "lineNumber": 16
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.AlertAdd",
-        "type": "Function",
-        "tags": [],
-        "label": "AlertAdd",
-        "description": [],
-        "signature": [
-          "(props: ",
-          "AlertAddProps",
-          "<Record<string, any>>) => JSX.Element"
-        ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alert_form/index.tsx",
-          "lineNumber": 11
         },
         "deprecated": false,
         "returnComment": [],
@@ -340,44 +302,6 @@
             "source": {
               "path": "node_modules/@types/react/index.d.ts",
               "lineNumber": 359
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.AlertEdit",
-        "type": "Function",
-        "tags": [],
-        "label": "AlertEdit",
-        "description": [],
-        "signature": [
-          "(props: ",
-          "AlertEditProps",
-          "<Record<string, any>>) => JSX.Element"
-        ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/index.tsx",
-          "lineNumber": 17
-        },
-        "deprecated": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.props",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "T"
-            ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
-              "lineNumber": 16
             },
             "deprecated": false
           }
@@ -518,7 +442,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/jira/jira.tsx",
-          "lineNumber": 63
+          "lineNumber": 62
         },
         "deprecated": false,
         "children": [],
@@ -545,7 +469,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/resilient/resilient.tsx",
-          "lineNumber": 68
+          "lineNumber": 67
         },
         "deprecated": false,
         "children": [],
@@ -752,7 +676,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/servicenow/servicenow.tsx",
-          "lineNumber": 64
+          "lineNumber": 63
         },
         "deprecated": false,
         "children": [],
@@ -779,7 +703,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/servicenow/servicenow.tsx",
-          "lineNumber": 99
+          "lineNumber": 98
         },
         "deprecated": false,
         "children": [],
@@ -1459,7 +1383,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 234
+          "lineNumber": 235
         },
         "deprecated": false,
         "children": [
@@ -1472,7 +1396,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 235
+              "lineNumber": 236
             },
             "deprecated": false
           },
@@ -1485,7 +1409,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 236
+              "lineNumber": 237
             },
             "deprecated": false
           },
@@ -1498,7 +1422,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 237
+              "lineNumber": 238
             },
             "deprecated": false
           },
@@ -1522,7 +1446,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 238
+              "lineNumber": 239
             },
             "deprecated": false
           },
@@ -1545,7 +1469,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 239
+              "lineNumber": 240
             },
             "deprecated": false,
             "returnComment": [],
@@ -1562,7 +1486,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-                  "lineNumber": 239
+                  "lineNumber": 240
                 },
                 "deprecated": false
               }
@@ -1588,7 +1512,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 240
+              "lineNumber": 241
             },
             "deprecated": false,
             "returnComment": [],
@@ -1620,7 +1544,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 243
+              "lineNumber": 244
             },
             "deprecated": false
           },
@@ -1636,7 +1560,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 244
+              "lineNumber": 245
             },
             "deprecated": false
           }
@@ -1662,7 +1586,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 212
+          "lineNumber": 213
         },
         "deprecated": false,
         "children": [
@@ -1678,7 +1602,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 217
+              "lineNumber": 218
             },
             "deprecated": false
           },
@@ -1691,7 +1615,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 218
+              "lineNumber": 219
             },
             "deprecated": false
           },
@@ -1704,7 +1628,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 219
+              "lineNumber": 220
             },
             "deprecated": false
           },
@@ -1720,7 +1644,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 220
+              "lineNumber": 221
             },
             "deprecated": false
           },
@@ -1736,7 +1660,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 221
+              "lineNumber": 222
             },
             "deprecated": false,
             "returnComment": [],
@@ -1753,7 +1677,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-                  "lineNumber": 221
+                  "lineNumber": 222
                 },
                 "deprecated": false
               },
@@ -1769,7 +1693,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-                  "lineNumber": 221
+                  "lineNumber": 222
                 },
                 "deprecated": false
               }
@@ -1795,7 +1719,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 222
+              "lineNumber": 223
             },
             "deprecated": false,
             "returnComment": [],
@@ -1812,7 +1736,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-                  "lineNumber": 223
+                  "lineNumber": 224
                 },
                 "deprecated": false
               },
@@ -1836,7 +1760,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-                  "lineNumber": 224
+                  "lineNumber": 225
                 },
                 "deprecated": false
               }
@@ -1860,7 +1784,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 226
+              "lineNumber": 227
             },
             "deprecated": false
           },
@@ -1873,7 +1797,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 227
+              "lineNumber": 228
             },
             "deprecated": false
           },
@@ -1896,7 +1820,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 228
+              "lineNumber": 229
             },
             "deprecated": false
           },
@@ -1912,7 +1836,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 229
+              "lineNumber": 230
             },
             "deprecated": false
           },
@@ -1934,7 +1858,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 230
+              "lineNumber": 231
             },
             "deprecated": false
           },
@@ -1956,7 +1880,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 231
+              "lineNumber": 232
             },
             "deprecated": false
           }
@@ -2098,7 +2022,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 247
+          "lineNumber": 248
         },
         "deprecated": false,
         "children": [
@@ -2114,7 +2038,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 248
+              "lineNumber": 249
             },
             "deprecated": false
           }
@@ -2483,7 +2407,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 127
+          "lineNumber": 128
         },
         "deprecated": false,
         "children": [
@@ -2499,7 +2423,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 128
+              "lineNumber": 129
             },
             "deprecated": false
           }
@@ -2531,7 +2455,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 79
+          "lineNumber": 80
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2581,7 +2505,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 161
+          "lineNumber": 162
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2637,7 +2561,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 64
+          "lineNumber": 65
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2654,7 +2578,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 179
+          "lineNumber": 180
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2695,7 +2619,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 40
+          "lineNumber": 41
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2753,7 +2677,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 68
+          "lineNumber": 69
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -3782,7 +3706,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-        "lineNumber": 41
+        "lineNumber": 44
       },
       "deprecated": false,
       "children": [
@@ -3801,7 +3725,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-            "lineNumber": 42
+            "lineNumber": 45
           },
           "deprecated": false
         },
@@ -3826,7 +3750,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-            "lineNumber": 43
+            "lineNumber": 46
           },
           "deprecated": false
         }
@@ -3843,7 +3767,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-        "lineNumber": 46
+        "lineNumber": 49
       },
       "deprecated": false,
       "children": [
@@ -3862,7 +3786,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-            "lineNumber": 47
+            "lineNumber": 50
           },
           "deprecated": false
         },
@@ -3887,7 +3811,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-            "lineNumber": 48
+            "lineNumber": 51
           },
           "deprecated": false
         },
@@ -3907,7 +3831,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-            "lineNumber": 49
+            "lineNumber": 52
           },
           "deprecated": false,
           "returnComment": [],
@@ -3948,7 +3872,7 @@
               ],
               "source": {
                 "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-                "lineNumber": 50
+                "lineNumber": 53
               },
               "deprecated": false
             }
@@ -3970,7 +3894,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-            "lineNumber": 52
+            "lineNumber": 55
           },
           "deprecated": false,
           "returnComment": [],
@@ -4005,7 +3929,7 @@
               ],
               "source": {
                 "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-                "lineNumber": 53
+                "lineNumber": 56
               },
               "deprecated": false
             }
@@ -4027,7 +3951,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-            "lineNumber": 55
+            "lineNumber": 58
           },
           "deprecated": false,
           "returnComment": [],
@@ -4060,7 +3984,7 @@
               ],
               "source": {
                 "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-                "lineNumber": 56
+                "lineNumber": 59
               },
               "deprecated": false
             }
@@ -4082,7 +4006,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-            "lineNumber": 58
+            "lineNumber": 61
           },
           "deprecated": false,
           "returnComment": [],
@@ -4115,7 +4039,7 @@
               ],
               "source": {
                 "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-                "lineNumber": 59
+                "lineNumber": 62
               },
               "deprecated": false
             }

@@ -3088,7 +3088,7 @@
               "plugin": "reporting",
               "link": {
                 "path": "x-pack/plugins/reporting/server/core.ts",
-                "lineNumber": 228
+                "lineNumber": 226
               }
             },
             {
