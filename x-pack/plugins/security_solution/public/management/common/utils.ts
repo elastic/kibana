@@ -19,8 +19,3 @@ export const parseQueryFilterToKQL = (filter: string, fields: Readonly<string[]>
 
   return kuery;
 };
-
-export const resolvePathVariables = (path: string, variables: { [K: string]: string | number }) =>
-  Object.keys(variables).reduce((acc, paramName) => {
-    return acc.replace(new RegExp(`\{${paramName}\}`, 'g'), String(variables[paramName]));
-  }, path);

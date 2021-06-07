@@ -13,7 +13,8 @@ export class QueryBarService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
   private readonly log = this.ctx.getService('log');
-  private readonly PageObjects = this.ctx.getPageObjects(['header', 'common']);
+  private readonly common = this.ctx.getPageObject('common');
+  private readonly header = this.ctx.getPageObject('header');
   private readonly find = this.ctx.getService('find');
   private readonly browser = this.ctx.getService('browser');
 
@@ -42,15 +43,15 @@ export class QueryBarService extends FtrService {
 
   public async clearQuery(): Promise<void> {
     await this.setQuery('');
-    await this.PageObjects.common.pressTabKey(); // move outside of input into language switcher
-    await this.PageObjects.common.pressTabKey(); // move outside of language switcher so time picker appears
+    await this.common.pressTabKey(); // move outside of input into language switcher
+    await this.common.pressTabKey(); // move outside of language switcher so time picker appears
   }
 
   public async submitQuery(): Promise<void> {
     this.log.debug('QueryBar.submitQuery');
     await this.testSubjects.click('queryInput');
-    await this.PageObjects.common.pressEnterKey();
-    await this.PageObjects.header.waitUntilLoadingHasFinished();
+    await this.common.pressEnterKey();
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   public async clickQuerySubmitButton(): Promise<void> {

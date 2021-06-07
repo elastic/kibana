@@ -5,32 +5,19 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiPage,
-  EuiPageBody,
-  EuiPageSideBar,
-  EuiSideNav,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageSideBar, EuiSideNav } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode, useState } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
-import { HeaderMenuPortal } from '../../../../../observability/public';
-import { ActionMenu } from '../../../application/action_menu';
+import { useHistory } from 'react-router-dom';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { getAPMHref } from '../../shared/Links/apm/APMLink';
-import { HomeLink } from '../../shared/Links/apm/HomeLink';
 
-interface SettingsProps extends RouteComponentProps<{}> {
-  children: ReactNode;
-}
-
-export function Settings({ children, location }: SettingsProps) {
-  const { appMountParameters, core } = useApmPluginContext();
+export function Settings({ children }: { children: ReactNode }) {
+  const { core } = useApmPluginContext();
+  const history = useHistory();
   const { basePath } = core.http;
   const canAccessML = !!core.application.capabilities.ml?.canAccessML;
-  const { search, pathname } = location;
+  const { search, pathname } = history.location;
 
   const [isSideNavOpenOnMobile, setisSideNavOpenOnMobile] = useState(false);
 
@@ -43,86 +30,65 @@ export function Settings({ children, location }: SettingsProps) {
   }
 
   return (
-    <>
-      <HeaderMenuPortal
-        setHeaderActionMenu={appMountParameters.setHeaderActionMenu}
-      >
-        <ActionMenu />
-      </HeaderMenuPortal>
-      <EuiPage>
-        <EuiPageSideBar>
-          <HomeLink>
-            <EuiButtonEmpty
-              flush="left"
-              size="s"
-              color="primary"
-              iconType="arrowLeft"
-            >
-              {i18n.translate('xpack.apm.settings.returnLinkLabel', {
-                defaultMessage: 'Return to inventory',
-              })}
-            </EuiButtonEmpty>
-            <EuiSpacer size="s" />
-          </HomeLink>
-          <EuiSideNav
-            toggleOpenOnMobile={() => toggleOpenOnMobile()}
-            isOpenOnMobile={isSideNavOpenOnMobile}
-            items={[
-              {
-                name: i18n.translate('xpack.apm.settings.pageTitle', {
-                  defaultMessage: 'Settings',
-                }),
-                id: 0,
-                items: [
-                  {
-                    name: i18n.translate('xpack.apm.settings.agentConfig', {
-                      defaultMessage: 'Agent Configuration',
-                    }),
-                    id: '1',
-                    href: getSettingsHref('/agent-configuration'),
-                    isSelected: pathname.startsWith(
-                      '/settings/agent-configuration'
-                    ),
-                  },
-                  ...(canAccessML
-                    ? [
-                        {
-                          name: i18n.translate(
-                            'xpack.apm.settings.anomalyDetection',
-                            {
-                              defaultMessage: 'Anomaly detection',
-                            }
-                          ),
-                          id: '4',
-                          href: getSettingsHref('/anomaly-detection'),
-                          isSelected:
-                            pathname === '/settings/anomaly-detection',
-                        },
-                      ]
-                    : []),
-                  {
-                    name: i18n.translate('xpack.apm.settings.customizeApp', {
-                      defaultMessage: 'Customize app',
-                    }),
-                    id: '3',
-                    href: getSettingsHref('/customize-ui'),
-                    isSelected: pathname === '/settings/customize-ui',
-                  },
-                  {
-                    name: i18n.translate('xpack.apm.settings.indices', {
-                      defaultMessage: 'Indices',
-                    }),
-                    id: '2',
-                    href: getSettingsHref('/apm-indices'),
-                    isSelected: pathname === '/settings/apm-indices',
-                  },
-                ],
-              },
-            ]}
-          />
-        </EuiPageSideBar>
-        <EuiPageBody>{children}</EuiPageBody>
-      </EuiPage>
-    </>
+    <EuiPage>
+      <EuiPageSideBar>
+        <EuiSideNav
+          toggleOpenOnMobile={() => toggleOpenOnMobile()}
+          isOpenOnMobile={isSideNavOpenOnMobile}
+          items={[
+            {
+              name: i18n.translate('xpack.apm.settings.pageTitle', {
+                defaultMessage: 'Settings',
+              }),
+              id: 0,
+              items: [
+                {
+                  name: i18n.translate('xpack.apm.settings.agentConfig', {
+                    defaultMessage: 'Agent Configuration',
+                  }),
+                  id: '1',
+                  href: getSettingsHref('/agent-configuration'),
+                  isSelected: pathname.startsWith(
+                    '/settings/agent-configuration'
+                  ),
+                },
+                ...(canAccessML
+                  ? [
+                      {
+                        name: i18n.translate(
+                          'xpack.apm.settings.anomalyDetection',
+                          {
+                            defaultMessage: 'Anomaly detection',
+                          }
+                        ),
+                        id: '4',
+                        href: getSettingsHref('/anomaly-detection'),
+                        isSelected: pathname === '/settings/anomaly-detection',
+                      },
+                    ]
+                  : []),
+                {
+                  name: i18n.translate('xpack.apm.settings.customizeApp', {
+                    defaultMessage: 'Customize app',
+                  }),
+                  id: '3',
+                  href: getSettingsHref('/customize-ui'),
+                  isSelected: pathname === '/settings/customize-ui',
+                },
+                {
+                  name: i18n.translate('xpack.apm.settings.indices', {
+                    defaultMessage: 'Indices',
+                  }),
+                  id: '2',
+                  href: getSettingsHref('/apm-indices'),
+                  isSelected: pathname === '/settings/apm-indices',
+                },
+              ],
+            },
+          ]}
+        />
+      </EuiPageSideBar>
+      <EuiPageBody>{children}</EuiPageBody>
+    </EuiPage>
   );
 }
