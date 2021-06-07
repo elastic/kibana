@@ -361,7 +361,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
             <CaseActionBar
               currentExternalIncident={currentExternalIncident}
               caseData={caseData}
-              disabled={!userCanCrud}
+              userCanCrud={userCanCrud}
               isLoading={isLoading && (updateKey === 'status' || updateKey === 'settings')}
               onRefresh={handleRefresh}
               onUpdateField={onUpdateField}
@@ -403,7 +403,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                       useFetchAlertData={useFetchAlertData}
                       userCanCrud={userCanCrud}
                     />
-                    {(caseData.type !== CaseType.collection || hasDataToPush) && (
+                    {(caseData.type !== CaseType.collection || hasDataToPush) && userCanCrud && (
                       <>
                         <MyEuiHorizontalRule
                           margin="s"
@@ -415,7 +415,6 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                               <StatusActionButton
                                 status={caseData.status}
                                 onStatusChanged={changeStatus}
-                                disabled={!userCanCrud}
                                 isLoading={isLoading && updateKey === 'status'}
                               />
                             </EuiFlexItem>

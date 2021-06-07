@@ -18,14 +18,10 @@ import { CaseService } from '../../containers/use_get_case_user_actions';
 interface CaseViewActions {
   caseData: Case;
   currentExternalIncident: CaseService | null;
-  disabled?: boolean;
+  userCanCrud?: boolean;
 }
 
-const ActionsComponent: React.FC<CaseViewActions> = ({
-  caseData,
-  currentExternalIncident,
-  disabled = false,
-}) => {
+const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternalIncident }) => {
   const history = useHistory();
   // Delete case
   const {
@@ -38,7 +34,6 @@ const ActionsComponent: React.FC<CaseViewActions> = ({
   const propertyActions = useMemo(
     () => [
       {
-        disabled,
         iconType: 'trash',
         label: i18n.DELETE_CASE,
         onClick: handleToggleModal,
@@ -53,7 +48,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({
           ]
         : []),
     ],
-    [disabled, handleToggleModal, currentExternalIncident]
+    [handleToggleModal, currentExternalIncident]
   );
 
   if (isDeleted) {

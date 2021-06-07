@@ -53,14 +53,15 @@ export const CasesTableHeader: FunctionComponent<Props> = ({
       <FlexItemDivider grow={false}>
         <Count refresh={refresh} />
       </FlexItemDivider>
-      <EuiFlexItem grow={false}>
-        <NavButtons
-          actionsErrors={actionsErrors}
-          configureCasesNavigation={configureCasesNavigation}
-          createCaseNavigation={createCaseNavigation}
-          userCanCrud={userCanCrud}
-        />
-      </EuiFlexItem>
+      {userCanCrud && (
+        <EuiFlexItem grow={false}>
+          <NavButtons
+            actionsErrors={actionsErrors}
+            configureCasesNavigation={configureCasesNavigation}
+            createCaseNavigation={createCaseNavigation}
+          />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   </CaseHeaderPage>
 );

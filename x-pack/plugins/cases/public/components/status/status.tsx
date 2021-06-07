@@ -29,18 +29,17 @@ const StatusComponent: React.FC<Props> = ({
   const props = useMemo(
     () => ({
       color: type === StatusAll ? allCaseStatus[StatusAll].color : statuses[type].color,
-      ...(withArrow ? { iconType: 'arrowDown', iconSide: 'right' as const } : {}),
+      ...(withArrow && !disabled ? { iconType: 'arrowDown', iconSide: 'right' as const } : {}),
+      ...(!disabled ? { iconOnClick: onClick } : { iconOnClick: noop }),
     }),
-    [withArrow, type]
+    [disabled, onClick, withArrow, type]
   );
 
   return (
     <EuiBadge
       {...props}
-      iconOnClick={onClick}
       iconOnClickAriaLabel={i18n.STATUS_ICON_ARIA}
       data-test-subj={`status-badge-${type}`}
-      isDisabled={disabled}
     >
       {type === StatusAll ? allCaseStatus[StatusAll].label : statuses[type].label}
     </EuiBadge>
