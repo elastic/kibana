@@ -37,7 +37,7 @@ export function updateSearchSource(
     indexPattern,
     uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
   );
-  const usedSearchSource = persist ? searchSource : (searchSource!.getParent() as SearchSource);
+  const usedSearchSource = persist ? searchSource : searchSource.getParent()!;
 
   usedSearchSource
     .setField('index', indexPattern)
