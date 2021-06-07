@@ -103,7 +103,7 @@ export function getTemplate({
  *
  * @param fields
  */
-export function generateMappings(fields: Field[]): IndexTemplateMappings {
+export function generateMappings(fields?: Field[]): IndexTemplateMappings {
   const props: Properties = {};
   // TODO: this can happen when the fields property in fields.yml is present but empty
   // Maybe validation should be moved to fields/field.ts
@@ -150,7 +150,12 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
           fieldProps = { ...fieldProps, ...generateDynamicAndEnabled(field), type: 'object' };
           break;
         case 'nested':
-          fieldProps = { ...fieldProps, ...generateNestedProps(field), type: 'nested' };
+          fieldProps = {
+            ...fieldProps,
+            ...generateMappings(field.fields),
+            ...generateNestedProps(field),
+            type: 'nested',
+          };
           break;
         case 'array':
           // this assumes array fields were validated in an earlier step
