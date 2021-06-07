@@ -114,6 +114,14 @@ describe('AttributeSelector', () => {
       expect(handleAuthProviderChange).toHaveBeenCalledWith(['kbn_saml']);
     });
 
+    it('should call the "handleAuthProviderChange" prop with fallback when a value not present', () => {
+      const wrapper = shallow(<AttributeSelector {...baseProps} />);
+      const select = findAuthProvidersSelect(wrapper);
+      select.simulate('change', [{ label: 'kbn_saml' }]);
+
+      expect(handleAuthProviderChange).toHaveBeenCalledWith(['']);
+    });
+
     it('should call the "handleAttributeSelectorChange" prop when a value is selected', () => {
       const wrapper = shallow(<AttributeSelector {...baseProps} />);
       const select = wrapper.find('[data-test-subj="ExternalAttributeSelect"]');

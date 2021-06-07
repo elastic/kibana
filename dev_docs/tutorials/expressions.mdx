@@ -9,23 +9,24 @@ tags: ['kibana', 'onboarding', 'dev', 'architecture']
 
 ## Expressions service
 
-Expression service exposes a registry of reusable functions primary used for fetching and transposing data and a registry of renderer functions that can render data into a DOM element. 
-Adding functions is easy and so is reusing them. An expression is a chain of functions with provided arguments, which given a single input translates to a single output. 
+Expression service exposes a registry of reusable functions primary used for fetching and transposing data and a registry of renderer functions that can render data into a DOM element.
+Adding functions is easy and so is reusing them. An expression is a chain of functions with provided arguments, which given a single input translates to a single output.
 Each expression is representable by a human friendly string which a user can type.
 
 ### creating expressions
 
 Here is a very simple expression string:
 
-    essql 'select column1, column2 from myindex' | mapColumn name=column3 fn='{ column1 + 3 }' | table
-
+```
+essql 'select column1, column2 from myindex' | mapColumn name=column3 fn='{ column1 + 3 }' | table
+```
 
 It consists of 3 functions:
 
  - essql which runs given sql query against elasticsearch and returns the results
  - `mapColumn`, which computes a new column from existing ones;
  - `table`, which prepares the data for rendering in a tabular format.
- 
+
 The same expression could also be constructed in the code:
 
 ```ts
@@ -61,7 +62,7 @@ In addition, on the browser side, there are two additional ways to run expressio
 
 #### React expression renderer component
 
-This is the easiest way to get expressions rendered inside your application.  
+This is the easiest way to get expressions rendered inside your application.
 
 ```ts
 <ReactExpressionRenderer expression={expression} />
