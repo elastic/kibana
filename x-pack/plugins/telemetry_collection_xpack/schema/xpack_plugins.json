@@ -2055,6 +2055,28 @@
             }
           }
         },
+        "fleet_server": {
+          "properties": {
+            "total_all_statuses": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of Fleet Server agents in any state, both enrolled and inactive."
+              }
+            },
+            "healthy": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents in a healthy state."
+              }
+            },
+            "num_host_urls": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of Fleet Server hosts configured in Fleet settings."
+              }
+            }
+          }
+        },
         "packages": {
           "type": "array",
           "items": {
