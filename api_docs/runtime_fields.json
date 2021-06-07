@@ -171,26 +171,7 @@
               "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
               "lineNumber": 42
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "runtimeFields",
-                "id": "def-public.e",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "e",
-                "description": [],
-                "signature": [
-                  "React.FormEvent<HTMLFormElement> | React.MouseEvent<Element, MouseEvent> | undefined"
-                ],
-                "source": {
-                  "path": "src/plugins/es_ui_shared/static/forms/hook_form_lib/types.ts",
-                  "lineNumber": 29
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -232,32 +213,7 @@
               "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
               "lineNumber": 59
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "runtimeFields",
-                "id": "def-public.field",
-                "type": "Object",
-                "tags": [],
-                "label": "field",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "runtimeFields",
-                    "scope": "public",
-                    "docId": "kibRuntimeFieldsPluginApi",
-                    "section": "def-public.RuntimeField",
-                    "text": "RuntimeField"
-                  }
-                ],
-                "source": {
-                  "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
-                  "lineNumber": 59
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           },
           {
             "parentPluginId": "runtimeFields",
@@ -275,9 +231,7 @@
               "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
               "lineNumber": 63
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "deprecated": false
           },
           {
             "parentPluginId": "runtimeFields",
@@ -383,7 +337,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\""
+              "\"boolean\" | \"date\" | \"keyword\" | \"long\" | \"ip\" | \"double\""
             ],
             "source": {
               "path": "x-pack/plugins/runtime_fields/public/types.ts",
@@ -422,7 +376,7 @@
         "description": [],
         "signature": [
           "ComboBoxOption",
-          "<\"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\">[]"
+          "<\"boolean\" | \"date\" | \"keyword\" | \"long\" | \"ip\" | \"double\">[]"
         ],
         "source": {
           "path": "x-pack/plugins/runtime_fields/public/constants.ts",
@@ -439,7 +393,7 @@
         "label": "RuntimeType",
         "description": [],
         "signature": [
-          "\"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\""
+          "\"boolean\" | \"date\" | \"keyword\" | \"long\" | \"ip\" | \"double\""
         ],
         "source": {
           "path": "x-pack/plugins/runtime_fields/public/types.ts",
