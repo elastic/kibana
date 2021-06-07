@@ -9,6 +9,8 @@
 import expect from '@kbn/expect';
 import { FtrService } from '../../ftr_provider_context';
 
+const pieChartSelector = 'visTypePieChart';
+
 export class PieChartService extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
@@ -18,20 +20,42 @@ export class PieChartService extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly panelActions = this.ctx.getService('dashboardPanelActions');
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
+  private readonly visChart = this.ctx.getPageObject('visChart');
 
   private readonly filterActionText = 'Apply filter to current view';
 
   async clickOnPieSlice(name?: string) {
     this.log.debug(`PieChart.clickOnPieSlice(${name})`);
-    if (name) {
-      await this.testSubjects.click(`pieSlice-${name.split(' ').join('-')}`);
+    if (await this.visChart.isNewLibraryChart(pieChartSelector)) {
+      const slices =
+        (await this.visChart.getEsChartDebugState(pieChartSelector))?.partition?.[0]?.partitions ??
+        [];
+      let sliceLabel = name || slices[0].name;
+      if (name === 'Other') {
+        sliceLabel = '__other__';
+      }
+      const pieSlice = slices.find((slice) => slice.name === sliceLabel);
+      const pie = await this.testSubjects.find(pieChartSelector);
+      if (pieSlice) {
+        const pieSize = await pie.getSize();
+        const pieHeight = pieSize.height;
+        const pieWidth = pieSize.width;
+        await pie.clickMouseButton({
+          xOffset: pieSlice.coords[0] - Math.floor(pieWidth / 2),
+          yOffset: Math.floor(pieHeight / 2) - pieSlice.coords[1],
+        });
+      }
     } else {
-      // If no pie slice has been provided, find the first one available.
-      await this.retry.try(async () => {
-        const slices = await this.find.allByCssSelector('svg > g > g.arcs > path.slice');
-        this.log.debug('Slices found:' + slices.length);
-        return slices[0].click();
-      });
+      if (name) {
+        await this.testSubjects.click(`pieSlice-${name.split(' ').join('-')}`);
+      } else {
+        // If no pie slice has been provided, find the first one available.
+        await this.retry.try(async () => {
+          const slices = await this.find.allByCssSelector('svg > g > g.arcs > path.slice');
+          this.log.debug('Slices found:' + slices.length);
+          return slices[0].click();
+        });
+      }
     }
   }
 
@@ -63,12 +87,30 @@ export class PieChartService extends FtrService {
 
   async getPieSliceStyle(name: string) {
     this.log.debug(`VisualizePage.getPieSliceStyle(${name})`);
+    if (await this.visChart.isNewLibraryChart(pieChartSelector)) {
+      const slices =
+        (await this.visChart.getEsChartDebugState(pieChartSelector))?.partition?.[0]?.partitions ??
+        [];
+      const selectedSlice = slices.filter((slice) => {
+        return slice.name.toString() === name.replace(',', '');
+      });
+      return selectedSlice[0].color;
+    }
     const pieSlice = await this.getPieSlice(name);
     return await pieSlice.getAttribute('style');
   }
 
   async getAllPieSliceStyles(name: string) {
     this.log.debug(`VisualizePage.getAllPieSliceStyles(${name})`);
+    if (await this.visChart.isNewLibraryChart(pieChartSelector)) {
+      const slices =
+        (await this.visChart.getEsChartDebugState(pieChartSelector))?.partition?.[0]?.partitions ??
+        [];
+      const selectedSlice = slices.filter((slice) => {
+        return slice.name.toString() === name.replace(',', '');
+      });
+      return selectedSlice.map((slice) => slice.color);
+    }
     const pieSlices = await this.getAllPieSlices(name);
     return await Promise.all(
       pieSlices.map(async (pieSlice) => await pieSlice.getAttribute('style'))
@@ -87,6 +129,24 @@ export class PieChartService extends FtrService {
   }
 
   async getPieChartLabels() {
+    if (await this.visChart.isNewLibraryChart(pieChartSelector)) {
+      const slices =
+        (await this.visChart.getEsChartDebugState(pieChartSelector))?.partition?.[0]?.partitions ??
+        [];
+      return slices.map((slice) => {
+        if (slice.name === '__missing__') {
+          return 'Missing';
+        } else if (slice.name === '__other__') {
+          return 'Other';
+        } else if (typeof slice.name === 'number') {
+          // debugState of escharts returns the numbers without comma
+          const val = slice.name as number;
+          return val.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',');
+        } else {
+          return slice.name;
+        }
+      });
+    }
     const chartTypes = await this.find.allByCssSelector('path.slice', this.defaultFindTimeout * 2);
     return await Promise.all(
       chartTypes.map(async (chart) => await chart.getAttribute('data-label'))
@@ -95,8 +155,21 @@ export class PieChartService extends FtrService {
 
   async getPieSliceCount() {
     this.log.debug('PieChart.getPieSliceCount');
+    if (await this.visChart.isNewLibraryChart(pieChartSelector)) {
+      const slices =
+        (await this.visChart.getEsChartDebugState(pieChartSelector))?.partition?.[0]?.partitions ??
+        [];
+      return slices?.length;
+    }
     const slices = await this.find.allByCssSelector('svg > g > g.arcs > path.slice');
     return slices.length;
+  }
+
+  async expectPieSliceCountEsCharts(expectedCount: number) {
+    const slices =
+      (await this.visChart.getEsChartDebugState(pieChartSelector))?.partition?.[0]?.partitions ??
+      [];
+    expect(slices.length).to.be(expectedCount);
   }
 
   async expectPieSliceCount(expectedCount: number) {
@@ -111,7 +184,7 @@ export class PieChartService extends FtrService {
     this.log.debug(`PieChart.expectPieChartLabels(${expectedLabels.join(',')})`);
     await this.retry.try(async () => {
       const pieData = await this.getPieChartLabels();
-      expect(pieData).to.eql(expectedLabels);
+      expect(pieData.sort()).to.eql(expectedLabels);
     });
   }
 }
