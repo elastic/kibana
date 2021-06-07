@@ -6,7 +6,6 @@
  */
 
 import pMap from 'p-map';
-import { cloneDeep } from 'lodash';
 import {
   KibanaRequest,
   Logger,
@@ -450,7 +449,7 @@ export class CasesService {
     if (ENABLE_CASE_CONNECTOR && subCaseOptions) {
       subCasesTotal = await this.findSubCaseStatusStats({
         unsecuredSavedObjectsClient,
-        options: cloneDeep(subCaseOptions),
+        options: subCaseOptions,
         ids: caseIds,
       });
     }
@@ -800,7 +799,7 @@ export class CasesService {
       this.log.debug(`Attempting to find cases`);
       return await unsecuredSavedObjectsClient.find<ESCaseAttributes>({
         sortField: defaultSortField,
-        ...cloneDeep(options),
+        ...options,
         type: CASE_SAVED_OBJECT,
       });
     } catch (error) {
@@ -820,7 +819,7 @@ export class CasesService {
       if (options?.page !== undefined || options?.perPage !== undefined) {
         return unsecuredSavedObjectsClient.find<SubCaseAttributes>({
           sortField: defaultSortField,
-          ...cloneDeep(options),
+          ...options,
           type: SUB_CASE_SAVED_OBJECT,
         });
       }
@@ -829,7 +828,7 @@ export class CasesService {
         page: 1,
         perPage: MAX_DOCS_PER_PAGE,
         sortField: defaultSortField,
-        ...cloneDeep(options),
+        ...options,
         type: SUB_CASE_SAVED_OBJECT,
       });
     } catch (error) {
@@ -899,7 +898,7 @@ export class CasesService {
         return unsecuredSavedObjectsClient.find<CommentAttributes>({
           type: CASE_COMMENT_SAVED_OBJECT,
           sortField: defaultSortField,
-          ...cloneDeep(options),
+          ...options,
         });
       }
 
@@ -908,7 +907,7 @@ export class CasesService {
         page: 1,
         perPage: MAX_DOCS_PER_PAGE,
         sortField: defaultSortField,
-        ...cloneDeep(options),
+        ...options,
       });
     } catch (error) {
       this.log.error(`Error on GET all comments internal for ${JSON.stringify(id)}: ${error}`);
@@ -1015,7 +1014,7 @@ export class CasesService {
         fields: ['created_by', OWNER_FIELD],
         page: 1,
         perPage: MAX_DOCS_PER_PAGE,
-        filter: cloneDeep(filter),
+        filter,
       });
     } catch (error) {
       this.log.error(`Error on GET all reporters: ${error}`);
@@ -1035,7 +1034,7 @@ export class CasesService {
         fields: ['tags', OWNER_FIELD],
         page: 1,
         perPage: MAX_DOCS_PER_PAGE,
-        filter: cloneDeep(filter),
+        filter,
       });
     } catch (error) {
       this.log.error(`Error on GET tags: ${error}`);
