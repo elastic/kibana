@@ -89,6 +89,7 @@ describe('checkNonPersistedSessions', () => {
             attributes: {
               persisted: false,
               status: SearchSessionStatus.IN_PROGRESS,
+              expires: moment().add(moment.duration(3, 'm')),
               created: moment().subtract(moment.duration(3, 'm')),
               touched: moment().subtract(moment.duration(10, 's')),
               idMapping: {},
@@ -154,6 +155,7 @@ describe('checkNonPersistedSessions', () => {
             attributes: {
               persisted: false,
               status: SearchSessionStatus.IN_PROGRESS,
+              expires: moment().add(moment.duration(3, 'm')),
               created: moment().subtract(moment.duration(3, 'm')),
               touched: moment().subtract(moment.duration(2, 'm')),
               idMapping: {
@@ -234,6 +236,7 @@ describe('checkNonPersistedSessions', () => {
             attributes: {
               persisted: false,
               status: SearchSessionStatus.COMPLETE,
+              expires: moment().add(moment.duration(3, 'm')),
               created: moment().subtract(moment.duration(30, 'm')),
               touched: moment().subtract(moment.duration(6, 'm')),
               idMapping: {
@@ -283,6 +286,7 @@ describe('checkNonPersistedSessions', () => {
             attributes: {
               persisted: false,
               status: SearchSessionStatus.COMPLETE,
+              expires: moment().add(moment.duration(3, 'm')),
               created: moment().subtract(moment.duration(30, 'm')),
               touched: moment().subtract(moment.duration(6, 'm')),
               idMapping: {
@@ -367,6 +371,7 @@ describe('checkNonPersistedSessions', () => {
         id: '123',
         attributes: {
           status: SearchSessionStatus.ERROR,
+          expires: moment().add(moment.duration(3, 'm')),
           idMapping: {
             'search-hash': {
               id: 'search-id',
@@ -497,6 +502,7 @@ describe('checkNonPersistedSessions', () => {
       savedObjectsClient.bulkUpdate = jest.fn();
       const so = {
         attributes: {
+          expires: moment().add(moment.duration(3, 'm')),
           idMapping: {
             'search-hash': {
               id: 'search-id',
