@@ -148,22 +148,14 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose} flush="left">
+            <EuiButtonEmpty onClick={onClose}>
               <FormattedMessage
-                id="xpack.fleet.agentEnrollment.cancelButtonLabel"
-                defaultMessage="Cancel"
+                id="xpack.fleet.agentEnrollment.closeFlyoutButtonLabel"
+                defaultMessage="Close"
               />
             </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={onClose}>
-              <FormattedMessage
-                id="xpack.fleet.agentEnrollment.continueButtonLabel"
-                defaultMessage="Continue"
-              />
-            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
