@@ -27,14 +27,25 @@ export function isNumericField(currentData: Datatable | undefined, accessor: str
     currentData?.columns.find((col) => col.id === accessor || getOriginalId(col.id) === accessor)
       ?.meta.type === 'number';
 
+  // if the field type is not numeric, do not proceed any further
+  if (!isNumeric) {
+    return {
+      isNumeric,
+      hasNumberValues: false,
+      hasNumericValues: false,
+    };
+  }
+
   let hasFieldOnlyNumberValues = isNumeric;
   let hasFieldNumericValues = isNumeric;
   for (const row of currentData?.rows || []) {
     const value = row[accessor];
-    hasFieldOnlyNumberValues = hasFieldOnlyNumberValues && isValidNumber(value);
-    hasFieldNumericValues =
-      (hasFieldNumericValues && hasFieldOnlyNumberValues) ||
-      (Array.isArray(value) && value.every(isValidNumber));
+    if (!hasFieldOnlyNumberValues) {
+      hasFieldOnlyNumberValues = hasFieldOnlyNumberValues && isValidNumber(value);
+      hasFieldNumericValues =
+        hasFieldNumericValues &&
+        (hasFieldOnlyNumberValues || (Array.isArray(value) && value.every(isValidNumber)));
+    }
   }
 
   return {
