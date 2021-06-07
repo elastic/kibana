@@ -570,8 +570,11 @@ export function getHover(
     const name = tokenInfo.ast.name;
     const signatures = getSignaturesForFunction(name, operationDefinitionMap);
     if (signatures.length) {
-      const { label, documentation } = signatures[0];
-      return { contents: [{ value: label }, documentation] };
+      const { label } = signatures[0];
+
+      return {
+        contents: [{ value: label }],
+      };
     }
   } catch (e) {
     // do nothing

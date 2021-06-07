@@ -1060,6 +1060,19 @@ invalid: "
       }
     });
 
+    it("returns a clear error when there's a missing function for a fullReference operation", () => {
+      for (const fn of ['cumulative_sum', 'derivative']) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(`${fn}()`),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual([`The first argument for ${fn} should be a operation name. Found no operation`]);
+      }
+    });
+
     it('returns no error if a math operation is passed to fullReference operations', () => {
       const formulas = [
         'derivative(7+1)',

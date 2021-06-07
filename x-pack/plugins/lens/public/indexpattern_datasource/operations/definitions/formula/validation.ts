@@ -596,7 +596,11 @@ function runFullASTValidation(
               values: {
                 operation: node.name,
                 type: 'operation',
-                argument: getValueOrName(firstArg),
+                argument:
+                  getValueOrName(firstArg) ||
+                  i18n.translate('xpack.lens.indexPattern.formulaNoOperation', {
+                    defaultMessage: 'no operation',
+                  }),
               },
               locations: node.location ? [node.location] : [],
             })
