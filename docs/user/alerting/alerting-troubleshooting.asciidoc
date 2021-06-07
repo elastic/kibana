@@ -2,234 +2,200 @@
 [[alerting-troubleshooting]]
 == Alerting Troubleshooting
 
-This page describes how to resolve common problems you might encounter with Alerting.
-If your problem isn’t described here, please review open issues in the following GitHub repositories:
-
-* https://github.com/elastic/kibana/issues[kibana] (https://github.com/elastic/kibana/issues?q=is%3Aopen+is%3Aissue+label%3AFeature%3AAlerting[Alerting issues])
-
-Have a question? Contact us in the https://discuss.elastic.co/[discuss forum].
+Alerting framework provides the different options for diagnosing problems with Rules and Connectors:
 
 [float]
-[[rules-small-check-interval-run-late]]
-=== Rules with small check intervals run late
+[[alerting-kibana-log]]
+=== Kibana Log
 
-*Problem*:
-
-Rules with a small check interval, such as every two seconds, run later than scheduled.
-
-*Resolution*:
-
-Rules run as background tasks at a cadence defined by their *check interval*.
-When a Rule *check interval* is smaller than the Task Manager <<task-manager-settings,`poll_interval`>> the rule will run late.
-
-Either tweak the <<task-manager-settings,{kib} Task Manager settings>> or increase the *check interval* of the rules in question.
-
-For more details, see <<task-manager-health-scheduled-tasks-small-schedule-interval-run-late>>.
-
-
-[float]
-[[scheduled-rules-run-late]]
-=== Rules run late
-
-*Problem*:
-
-Scheduled rules run at an inconsistent cadence, often running late.
-
-Actions run long after the status of a rule changes, sending a notification of the change too late.
-
-*Solution*:
-
-Rules and actions run as background tasks by each {kib} instance at a default rate of ten tasks every three seconds.
-
-If many rules or actions are scheduled to run at the same time, pending tasks will queue in {es}. Each {kib} instance then polls for pending tasks at a rate of up to ten tasks at a time, at three second intervals. Because rules and actions are backed by tasks, it is possible for pending tasks in the queue to exceed this capacity and run late.
-
-For details on diagnosing the underlying causes of such delays, see <<task-manager-health-tasks-run-late>>.
-
-Alerting and action tasks are identified by their type.
-
-* Alerting tasks always begin with `alerting:`. For example, the `alerting:.index-threshold` tasks back the <<rule-type-index-threshold, index threshold stack rule>>.
-* Action tasks always begin with `actions:`. For example, the `actions:.index` tasks back the <<index-action-type, index action>>.
-
-When diagnosing issues related to Alerting, focus on the tasks that begin with `alerting:` and `actions:`.
-
-For more details on monitoring and diagnosing task execution in Task Manager, see <<task-manager-health-monitoring>>.
-
-[float]
-[[connector-tls-settings]]
-=== Connectors have TLS errors when executing actions
-
-*Problem*:
-
-When executing actions, a connector gets a TLS socket error when connecting to
-the server.
-
-*Resolution*:
-
-Configuration options are available to specialize connections to TLS servers,
-including ignoring server certificate validation, and providing certificate
-authority data to verify servers using custom certificates.  For more details, 
-see <<action-settings,Action settings>>.
-
-[float]
-[[rules-long-execution-time]]
-=== Identify long-running rules
-
-The following query can help you identify rules that are taking a long time to execute and might impact the overall health of your deployment.
-
-[IMPORTANT]
-==============================================
-By default, only users with a `superuser` role can query the {kib} event log because it is a system index. To enable additional users to execute this query, assign `read` privileges to the `.kibana-event-log*` index.
-==============================================
-
-Query for a list of rule ids, bucketed by their execution times:
+Rules and connectors will log to the Kibana logger with tags of [alerting] and [actions], respectively.  Generally the messages are warnings and errors, and in many cases are false positives, which we are trying to reduce. As an example, when a connector is deleted, there could be a rule being run at the time:
 
 [source,console]
 --------------------------------------------------
-GET /.kibana-event-log*/_search
+server    log   [11:39:40.389] [error][alerting][alerting][plugins][plugins] Executing Alert "5b6237b0-c6f6-11eb-b0ff-a1a0cbcf29b6" has resulted in Error: Saved object [action/fdbc8610-c6f5-11eb-b0ff-a1a0cbcf29b6] not found
+--------------------------------------------------
+
+Some of the resources like saved objects, api keys, may no longer be available or valid, yielding error messages about those missing resources. If {kib} logs is not clearly describing the problem, best to ask someone from the alerting team to determine whether errors/warnings are of which class.
+
+[float]
+[[alerting-kibana-version]]
+=== Kibana Version
+The version can help to determine what debugging tools which can be used at our disposal.
+
+7.10+
+<< ,Test connector>> functionality in the UI.
+
+7.11+
+Better webhook error messages.
+Better overall debug logging for actions/connectors.
+Task manager << ,diagnostics endpoint>>.
+
+[float]
+[[alerting-managment-detail]]
+=== Kibana Rules and Connectors Management
+The page for Rules and Connectors in the Kibana section of the management page provides a list view of rules and connectors available in the space you’re currently in. For rules, when you click on the rule name in the list, you will be taken to a <<rule-details,details page>> for the rule, where you can see currently active instances. 
+The start date on this page will indicate when a rule is being triggered, and for what alert instances, at that moment in time. In addition there is duration of the condition to indicate how long the instance is active.
+
+[float]
+[[alerting-index-threshold-chart]]
+=== Preview Index Threshold Rule Chart
+
+When creating or editing an Index threshold rule, you will see a graph of the data the rule will be operating against, from some date in the past, to now, updated every 5 seconds.  
+[role="screenshot"]
+image::images/rule-details-alerts-inactive.png[Index Threshold chart]
+
+The end date is related to the alert interval (IIRC, 30 “intervals” worth of time). You can use this view to see if the rule is getting the data you expect, and visually compare to the threshold value (a horizontal line in the graph). If the graph does not contain any lines at all except for the threshold line, then the rule is having an issue of some kind. Either there is no data available given the index and fields specified, a permission error, etc.
+Diagnosing these may be difficult - but there may be log messages for error conditions. 
+
+[float]
+[[alerting-rest-api]]
+=== Using REST APIs
+
+There is a fairly rich set of HTTP endpoints to introspect and manage rules and connectors.  
+In addition, there is a command-line client that uses legacy Rules and Connectors APIs, which be easier to to use, but it needs to be updated for the new APIs:
+
+https://github.com/pmuellr/kbn-action
+executing an action ad-hoc
+One of the http endpoints available for actions is the POST _execute API (reference).  You can use this to “test” an action.  For instance, if you have a server log action created, you can execute it via curling the endpoint:
+[source,console]
+--------------------------------------------------
+curl -X POST -k \
+ -H 'kbn-xsrf: foo' \
+ -H 'content-type: application/json' \
+ https://elastic:changeme@localhost:5601/api/actions/connector/a692dc89-15b9-4a3c-9e47-9fb6872e49ce/_execute \
+ -d '{"params":{"subject":"hallo","message":"hallo!","to":["me@example.com"]}}'
+--------------------------------------------------
+
+Another option is CLI tools to list / create / edit / delete alerts and actions are available in https://github.com/pmuellr/kbn-action[kbn-action]. Install via command:
+[source,console]
+--------------------------------------------------
+    npm install -g pmuellr/kbn-action  
+--------------------------------------------------
+
+and the same REST execute command will be:
+[source,console]
+--------------------------------------------------
+kbn-action execute a692dc89-15b9-4a3c-9e47-9fb6872e49ce ‘{"params":{"subject":"hallo","message":"hallo!","to":["me@example.com"]}}’
+--------------------------------------------------
+
+The result of this http request (and printed to stdout by https://github.com/pmuellr/kbn-action[kbn-action]) will be data returned by the action execution, along with error messages if errors were encountered.
+
+[float]
+[[alerting-framework-health-ui]]
+=== Alerting Framework Health
+
+Rule Management and Rule Details pages contains an error banner, which helps to identify the errors for the rules:
+[role="screenshot"]
+image::images/rules-management-health.png[Rule management page with the errors banner]
+
+[role="screenshot"]
+image::images/rules-details-health.png[Rule details page with the errors banner]
+
+[float]
+[[task-manager-diagnostics]]
+=== Task Manager diagnostics
+
+Under the hood, Rules and Connectors use another plugin called Task Manager, which handles the scheduling, execution and error handling of the tasks that drive the Rules and Connectors features.
+This means that failure cases in Rules or Connectors will, at times, be revealed by the Task Manager mechanism, rather than the Rules mechanism.
+
+Task Manager provides a visible status which can be used to diagnose issues and is very well documented health monitoring and troubleshooting. 
+Task Manager uses the `.kibana_task_manager index`, which is an internal index we use to contain all the saved objects that represent the tasks in the system.
+
+[float]
+==== Getting from a Rule, to its Task
+When a Rule is created a Task is created which is scheduled to run at the interval specified. This means that if, for example, when a rule is created its configured to check every 5 minutes, then the underlying will be expected to run every 5 minutes (in practice, after each time the alert is ran, we’ll schedule the task to run again in 5 minutes, rather than it being scheduled to run itself every 5 minutes indefinitely).
+
+If you use the <<alerting-apis,Alerting REST APIs>> to fetch the underlying rule, you’ll get an object like so:
+[source,console]
+--------------------------------------------------
 {
-  "size": 0,
-  "query": {
-    "bool": {
-      "filter": [
-        {
-          "range": {
-            "@timestamp": {
-              "gte": "now-1d", <1>
-              "lte": "now"
-            }
-          }
-        },
-        {
-          "term": {
-            "event.action": {
-              "value": "execute"
-            }
-          }
-        },
-        {
-          "term": {
-            "event.provider": {
-              "value": "alerting" <2>
-            }
-          }
-        }
-      ]
-    }
+  "id": "0a037d60-6b62-11eb-9e0d-85d233e3ee35",
+  "notify_when": "onActionGroupChange",
+  "params": {
+    "aggType": "avg",
   },
-  "runtime_mappings": { <3>
-    "event.duration_in_seconds": {
-      "type": "double",
-      "script": {
-        "source": "emit(doc['event.duration'].value / 1E9)"
-      }
-    }
+  "consumer": "alerts",
+  "rule_type_id": "test.rule.type",
+  "schedule": {
+    "interval": "1m"
   },
-  "aggs": {
-    "ruleIdsByExecutionDuration": {
-      "histogram": {
-        "field": "event.duration_in_seconds",
-        "min_doc_count": 1,
-        "interval": 1 <4>
-      },
-      "aggs": {
-        "ruleId": {
-          "nested": {
-            "path": "kibana.saved_objects"
-          },
-          "aggs": {
-            "ruleId": {
-              "terms": {
-                "field": "kibana.saved_objects.id",
-                "size": 10 <5>
-              }
-            }
-          }
-        }
-      }
-    }
+  "actions": [],
+  "tags": [],
+  "name": "test rule",
+  "enabled": true,
+  "throttle": null,
+  "api_key_owner": "elastic",
+  "created_by": "elastic",
+  "updated_by": "elastic",
+  "mute_all": false,
+  "muted_alert_ids": [],
+  "updated_at": "2021-02-10T05:37:19.086Z",
+  "created_at": "2021-02-10T05:37:19.086Z",
+  "scheduled_task_id": "31563950-b14b-11eb-9a7c-9df284da9f99",
+  "execution_status": {
+    "last_execution_date": "2021-02-10T17:55:14.262Z",
+    "status": "ok"
   }
 }
 --------------------------------------------------
-// TEST
 
-<1> This queries for rules executed in the last day. Update the values of `lte` and `gte` to query over a different time range.
-<2> Use `event.provider: actions` to query for long-running action executions.
-<3> Execution durations are stored as nanoseconds. This adds a runtime field to convert that duration into seconds.
-<4> This interval buckets the event.duration_in_seconds runtime field into 1 second intervals. Update this value to change the granularity of the buckets. If you are unable to use runtime fields, make sure this aggregation targets `event.duration` and use nanoseconds for the interval.
-<5> This retrieves the top 10 rule ids for this duration interval. Update this value to retrieve more rule ids.
+The field we’re looking for is the one called scheduled_task_id which includes the _id of the Task Manager task, so if we then go to the Console and run the following query we’ll get the underlying task.
+GET .kibana_task_manager/_doc/task:31563950-b14b-11eb-9a7c-9df284da9f99
 
-This query returns the following:
+[NOTE]
+==============================================
+The task: in the ID of the doc. We have to add that to the UUID.
+==============================================
 
-[source,json]
+[source,console]
 --------------------------------------------------
 {
-  "took" : 322,
-  "timed_out" : false,
-  "_shards" : {
-    "total" : 1,
-    "successful" : 1,
-    "skipped" : 0,
-    "failed" : 0
-  },
-  "hits" : {
-    "total" : {
-      "value" : 326,
-      "relation" : "eq"
+  "_index" : ".kibana_task_manager_8.0.0_001",
+  "_id" : "task:31563950-b14b-11eb-9a7c-9df284da9f99",
+  "_version" : 838,
+  "_seq_no" : 8791,
+  "_primary_term" : 1,
+  "found" : true,
+  "_source" : {
+    "migrationVersion" : {
+      "task" : "7.6.0"
     },
-    "max_score" : null,
-    "hits" : [ ]
-  },
-  "aggregations" : {
-    "ruleIdsByExecutionDuration" : {
-      "buckets" : [
-        {
-          "key" : 0.0, <1>
-          "doc_count" : 320,
-          "ruleId" : {
-            "doc_count" : 320,
-            "ruleId" : {
-              "doc_count_error_upper_bound" : 0,
-              "sum_other_doc_count" : 0,
-              "buckets" : [
-                {
-                  "key" : "1923ada0-a8f3-11eb-a04b-13d723cdfdc5",
-                  "doc_count" : 140
-                },
-                {
-                  "key" : "15415ecf-cdb0-4fef-950a-f824bd277fe4",
-                  "doc_count" : 130
-                },
-                {
-                  "key" : "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2",
-                  "doc_count" : 50
-                }
-              ]
-            }
-          }
-        },
-        {
-          "key" : 30.0, <2>
-          "doc_count" : 6,
-          "ruleId" : {
-            "doc_count" : 6,
-            "ruleId" : {
-              "doc_count_error_upper_bound" : 0,
-              "sum_other_doc_count" : 0,
-              "buckets" : [
-                {
-                  "key" : "41893910-6bca-11eb-9e0d-85d233e3ee35",
-                  "doc_count" : 6
-                }
-              ]
-            }
-          }
-        }
-      ]
-    }
+    "task" : {
+      "schedule" : {
+        "interval" : "5s"
+      },
+      "taskType" : "alerting:.index-threshold",
+      "retryAt" : null,
+      "runAt" : "2021-05-10T05:18:02.704Z",
+      "scope" : [
+        "alerting"
+      ],
+      "startedAt" : null,
+      "state" : """{"alertInstances":{},"previousStartedAt":"2021-05-10T05:17:45.671Z"}""",
+      "params" : """{"alertId":"30d856c0-b14b-11eb-9a7c-9df284da9f99","spaceId":"default"}""",
+      "ownerId" : null,
+      "scheduledAt" : "2021-05-10T04:50:07.333Z",
+      "attempts" : 0,
+      "status" : "idle"
+    },
+    "references" : [ ],
+    "updated_at" : "2021-05-10T05:17:58.000Z",
+    "coreMigrationVersion" : "8.0.0",
+    "type" : "task"
   }
 }
 --------------------------------------------------
-<1> Most rule execution durations fall within the first bucket (0 - 1 seconds).
-<2> A single rule with id `41893910-6bca-11eb-9e0d-85d233e3ee35` took between 30 and 31 seconds to execute.
 
-Use the <<get-rule-api,Get Rule API>> to retrieve additional information about rules that take a long time to execute.
+What you can see above is the Task that backs the rule, and for the rule to work, this task must be in a healthy state. This information is available via <<task-manager-api-health, health API>> or via verbose logs if debug logging is enabled.
+When diagnosing the health state of the task, you will most likely be interested in the following fields:
+
+`status` This is the tasks’s current status - is it running, meaning Task Manager is currently running it; or is it idle, meaning we’re waiting for Task Manager to run it at some point in the future; or is it failed, meaning Task Manager has tried to run it and failed?
+runAt This is when the task is scheduled to run next. If this is in the past and the status is idle, this means Task Manager has fallen behind or isn’t in fact running at all. If it’s in the past but the status is running, then that means Task Manager has picked it up and is working on it as we speak, which is fine and considered healthy.
+retryAt Another time field, like runAt. If this field is populated, it means that Task Manager is currently running the task and if, for whether reason, the task doesn’t complete (and hasn’t been marked as failed) then Task Manager will give it another attempt at the time specified under retryAt.
+
+Hopefully investigating the underlying Task can help you gauge whether the problem you’re seeing is rooted in the Alert not running at all, whether it’s running and failing or whether it is running, but exhibiting behaviour that is different than what was expected (at which point you should focus on the Alert itself, rather than the Task).
+
+
+include::troubleshooting/event-log-index.asciidoc[]
+include::troubleshooting/testing-connectors.asciidoc[]
+include::troubleshooting/alerting-common-issues.asciidoc[]

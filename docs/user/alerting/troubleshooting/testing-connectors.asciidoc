@@ -1,0 +1,72 @@
+[role="xpack"]
+[[testing-connectors]]
+=== Testing Connectors
+
+
+By using Kibana Management UI you can test you newly created Connector by getting to the Test tab of Connector Edit flyout, by clicking "Save & test" button on Create flyout:
+[role="screenshot"]
+image::user/alerting/images/connector-save-and-test.png[Rule management page with the errors banner]
+
+or by direct opnening the proper connector Edit flyout:
+[role="screenshot"]
+image::user/alerting/images/email-connector-test.png[Rule management page with the errors banner]
+
+[role="screenshot"]
+image::user/alerting/images/teams-connector-test.png[Five clauses define the condition to detect]
+
+[float]
+==== Troubleshooting Connectors with `kbn-action` tool
+
+Executing an Email action via https://github.com/pmuellr/kbn-action[kbn-action]. In this example, is using a cloud deployment of the stack:
+
+[source,console]
+--------------------------------------------------
+$ npm -g install pmuellr/kbn-action
+
+$ export KBN_URLBASE=https://elastic:<password>@<cloud-host>.us-east-1.aws.found.io:9243
+
+$ kbn-action ls
+[
+    {
+        "id": "a692dc89-15b9-4a3c-9e47-9fb6872e49ce",
+        "actionTypeId": ".email",
+        "name": "gmail",
+        "config": {
+            "from": "test@gmail.com",
+            "host": "smtp.gmail.com",
+            "port": 465,
+            "secure": true,
+            "service": null
+        },
+        "isPreconfigured": false,
+        "referencedByCount": 0
+    }
+]
+--------------------------------------------------
+and the execute this:
+
+[source,console]
+--------------------------------------------------
+$ kbn-action execute a692dc89-15b9-4a3c-9e47-9fb6872e49ce '{subject: "hallo", message: "hallo!", to:["test@yahoo.com"]}'
+{
+    "status": "ok",
+    "data": {
+        "accepted": [
+            "test@yahoo.com"
+        ],
+        "rejected": [],
+        "envelopeTime": 100,
+        "messageTime": 955,
+        "messageSize": 521,
+        "response": "250 2.0.0 OK  1593144408 r5sm8625873qtc.20 - gsmtp",
+        "envelope": {
+            "from": "test@gmail.com",
+            "to": [
+                "test@yahoo.com"
+            ]
+        },
+        "messageId": "<cf9fec58-600f-64fb-5f66-6e55985b935d@gmail.com>"
+    },
+    "actionId": "a692dc89-15b9-4a3c-9e47-9fb6872e49ce"
+}
+--------------------------------------------------

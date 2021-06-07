@@ -1,0 +1,235 @@
+[role="xpack"]
+[[alerting-troubleshooting]]
+== Alerting Common Issues
+
+This page describes how to resolve common problems you might encounter with Alerting.
+If your problem isn’t described here, please review open issues in the following GitHub repositories:
+
+* https://github.com/elastic/kibana/issues[kibana] (https://github.com/elastic/kibana/issues?q=is%3Aopen+is%3Aissue+label%3AFeature%3AAlerting[Alerting issues])
+
+Have a question? Contact us in the https://discuss.elastic.co/[discuss forum].
+
+[float]
+[[rules-small-check-interval-run-late]]
+=== Rules with small check intervals run late
+
+*Problem*:
+
+Rules with a small check interval, such as every two seconds, run later than scheduled.
+
+*Resolution*:
+
+Rules run as background tasks at a cadence defined by their *check interval*.
+When a Rule *check interval* is smaller than the Task Manager <<task-manager-settings,`poll_interval`>> the rule will run late.
+
+Either tweak the <<task-manager-settings,{kib} Task Manager settings>> or increase the *check interval* of the rules in question.
+
+For more details, see <<task-manager-health-scheduled-tasks-small-schedule-interval-run-late>>.
+
+
+[float]
+[[scheduled-rules-run-late]]
+=== Rules run late
+
+*Problem*:
+
+Scheduled rules run at an inconsistent cadence, often running late.
+
+Actions run long after the status of a rule changes, sending a notification of the change too late.
+
+*Solution*:
+
+Rules and actions run as background tasks by each {kib} instance at a default rate of ten tasks every three seconds.
+
+If many rules or actions are scheduled to run at the same time, pending tasks will queue in {es}. Each {kib} instance then polls for pending tasks at a rate of up to ten tasks at a time, at three second intervals. Because rules and actions are backed by tasks, it is possible for pending tasks in the queue to exceed this capacity and run late.
+
+For details on diagnosing the underlying causes of such delays, see <<task-manager-health-tasks-run-late>>.
+
+Alerting and action tasks are identified by their type.
+
+* Alerting tasks always begin with `alerting:`. For example, the `alerting:.index-threshold` tasks back the <<rule-type-index-threshold, index threshold stack rule>>.
+* Action tasks always begin with `actions:`. For example, the `actions:.index` tasks back the <<index-action-type, index action>>.
+
+When diagnosing issues related to Alerting, focus on the tasks that begin with `alerting:` and `actions:`.
+
+For more details on monitoring and diagnosing task execution in Task Manager, see <<task-manager-health-monitoring>>.
+
+[float]
+[[connector-tls-settings]]
+=== Connectors have TLS errors when executing actions
+
+*Problem*:
+
+When executing actions, a connector gets a TLS socket error when connecting to
+the server.
+
+*Resolution*:
+
+Configuration options are available to specialize connections to TLS servers,
+including ignoring server certificate validation, and providing certificate
+authority data to verify servers using custom certificates.  For more details, 
+see <<action-settings,Action settings>>.
+
+[float]
+[[rules-long-execution-time]]
+=== Identify long-running rules
+
+The following query can help you identify rules that are taking a long time to execute and might impact the overall health of your deployment.
+
+[IMPORTANT]
+==============================================
+By default, only users with a `superuser` role can query the {kib} event log because it is a system index. To enable additional users to execute this query, assign `read` privileges to the `.kibana-event-log*` index.
+==============================================
+
+Query for a list of rule ids, bucketed by their execution times:
+
+[source,console]
+--------------------------------------------------
+GET /.kibana-event-log*/_search
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "range": {
+            "@timestamp": {
+              "gte": "now-1d", <1>
+              "lte": "now"
+            }
+          }
+        },
+        {
+          "term": {
+            "event.action": {
+              "value": "execute"
+            }
+          }
+        },
+        {
+          "term": {
+            "event.provider": {
+              "value": "alerting" <2>
+            }
+          }
+        }
+      ]
+    }
+  },
+  "runtime_mappings": { <3>
+    "event.duration_in_seconds": {
+      "type": "double",
+      "script": {
+        "source": "emit(doc['event.duration'].value / 1E9)"
+      }
+    }
+  },
+  "aggs": {
+    "ruleIdsByExecutionDuration": {
+      "histogram": {
+        "field": "event.duration_in_seconds",
+        "min_doc_count": 1,
+        "interval": 1 <4>
+      },
+      "aggs": {
+        "ruleId": {
+          "nested": {
+            "path": "kibana.saved_objects"
+          },
+          "aggs": {
+            "ruleId": {
+              "terms": {
+                "field": "kibana.saved_objects.id",
+                "size": 10 <5>
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+--------------------------------------------------
+// TEST
+
+<1> This queries for rules executed in the last day. Update the values of `lte` and `gte` to query over a different time range.
+<2> Use `event.provider: actions` to query for long-running action executions.
+<3> Execution durations are stored as nanoseconds. This adds a runtime field to convert that duration into seconds.
+<4> This interval buckets the event.duration_in_seconds runtime field into 1 second intervals. Update this value to change the granularity of the buckets. If you are unable to use runtime fields, make sure this aggregation targets `event.duration` and use nanoseconds for the interval.
+<5> This retrieves the top 10 rule ids for this duration interval. Update this value to retrieve more rule ids.
+
+This query returns the following:
+
+[source,json]
+--------------------------------------------------
+{
+  "took" : 322,
+  "timed_out" : false,
+  "_shards" : {
+    "total" : 1,
+    "successful" : 1,
+    "skipped" : 0,
+    "failed" : 0
+  },
+  "hits" : {
+    "total" : {
+      "value" : 326,
+      "relation" : "eq"
+    },
+    "max_score" : null,
+    "hits" : [ ]
+  },
+  "aggregations" : {
+    "ruleIdsByExecutionDuration" : {
+      "buckets" : [
+        {
+          "key" : 0.0, <1>
+          "doc_count" : 320,
+          "ruleId" : {
+            "doc_count" : 320,
+            "ruleId" : {
+              "doc_count_error_upper_bound" : 0,
+              "sum_other_doc_count" : 0,
+              "buckets" : [
+                {
+                  "key" : "1923ada0-a8f3-11eb-a04b-13d723cdfdc5",
+                  "doc_count" : 140
+                },
+                {
+                  "key" : "15415ecf-cdb0-4fef-950a-f824bd277fe4",
+                  "doc_count" : 130
+                },
+                {
+                  "key" : "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2",
+                  "doc_count" : 50
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key" : 30.0, <2>
+          "doc_count" : 6,
+          "ruleId" : {
+            "doc_count" : 6,
+            "ruleId" : {
+              "doc_count_error_upper_bound" : 0,
+              "sum_other_doc_count" : 0,
+              "buckets" : [
+                {
+                  "key" : "41893910-6bca-11eb-9e0d-85d233e3ee35",
+                  "doc_count" : 6
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+--------------------------------------------------
+<1> Most rule execution durations fall within the first bucket (0 - 1 seconds).
+<2> A single rule with id `41893910-6bca-11eb-9e0d-85d233e3ee35` took between 30 and 31 seconds to execute.
+
+Use the <<get-rule-api,Get Rule API>> to retrieve additional information about rules that take a long time to execute.
