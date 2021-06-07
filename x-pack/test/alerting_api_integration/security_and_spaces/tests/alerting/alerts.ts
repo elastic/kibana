@@ -214,6 +214,7 @@ instanceStateValue: true
               await validateEventLog({
                 spaceId: space.id,
                 alertId,
+                ruleTypeId: 'test.always-firing',
                 outcome: 'success',
                 message: `alert executed: test.always-firing:${alertId}: 'abc'`,
                 alertSearchResultWithoutDates,
@@ -1245,6 +1246,7 @@ instanceStateValue: true
   interface ValidateEventLogParams {
     spaceId: string;
     alertId: string;
+    ruleTypeId: string;
     outcome: string;
     message: string;
     errorMessage?: string;
@@ -1300,6 +1302,7 @@ instanceStateValue: true
         type: 'alert',
         id: alertId,
         namespace: spaceId,
+        type_id: alertSearchResultWithoutDates.alertInfo.ruleTypeId,
       },
     ]);
 

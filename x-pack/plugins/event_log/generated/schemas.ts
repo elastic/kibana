@@ -117,6 +117,7 @@ export const EventSchema = schema.maybe(
               namespace: ecsString(),
               id: ecsString(),
               type: ecsString(),
+              type_id: ecsString(),
             })
           )
         ),

@@ -172,10 +172,12 @@ test('enqueues execution per selected action', async () => {
                 "id": "1",
                 "rel": "primary",
                 "type": "alert",
+                "type_id": "test",
               },
               Object {
                 "id": "1",
                 "type": "action",
+                "type_id": "test",
               },
             ],
           },
