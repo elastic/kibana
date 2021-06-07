@@ -1,9 +1,20 @@
+/**
+[1] This corresponds to the ITEM_HEIGHT declared in "field_list.tsx"
+[2] This corresponds to the SHOW_MORE_HEIGHT declared in "field_list.tsx"
+[3] We need the tooltip <span /> to be 100% to display the text ellipsis of the field value
+*/
+
+$previewFieldItemHeight: 64px; /* [1] */
+$previewShowMoreHeight: 48px; /* [2] */
+
 .indexPatternFieldEditor__previewFieldList {
+  position: relative;
+
   &__item {
     border-bottom: $euiBorderThin;
-    height: 64px;
+    height: $previewFieldItemHeight;
     align-items: center;
-    width: 100%;
+    overflow: hidden;
 
     &--highlighted {
       $backgroundColor: tintOrShade($euiColorWarning, 90%, 70%);
@@ -11,17 +22,28 @@
     }
 
     &__key, &__value {
-      flex-basis: calc(50% - 16px);
-      display: flex;
-      flex-shrink: 0;
-      flex-grow: 0;
       overflow: hidden;
+    }
+
+    &__value .euiToolTipAnchor {
+      width: 100%; /* [3] */
     }
 
     &__key__wrapper, &__value__wrapper {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      display: block;
+      width: 100%;
     }
+  }
+
+  &__showMore {
+    position: absolute;
+    width: 100%;
+    height: $previewShowMoreHeight;
+    bottom: $previewShowMoreHeight * -1;
+    display: flex;
+    align-items: flex-end;
   }
 }

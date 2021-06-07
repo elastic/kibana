@@ -13,6 +13,7 @@ import React, {
   useMemo,
   useCallback,
   useEffect,
+  useRef,
   FunctionComponent,
 } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -44,6 +45,8 @@ interface Params {
 interface Context {
   fields: Array<{ key: string; value: unknown }>;
   error: PreviewError | null;
+  // The preview count will help us decide when to display the empty prompt
+  previewCount: number;
   params: {
     value: Params;
     update: (updated: Partial<Params>) => void;
@@ -83,6 +86,7 @@ const defaultParams: Params = {
 };
 
 export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
+  const previewCount = useRef(0);
   const {
     indexPattern,
     fieldTypeToProcess,
@@ -134,6 +138,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     async (limit = 50) => {
       setPreviewResponse({ fields: [], error: null });
       setIsFetchingDocument(true);
+      setIsLoadingPreview(true);
 
       const response = await search
         .search({
@@ -224,6 +229,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       script: params.script!,
     });
 
+    previewCount.current = ++previewCount.current;
     setIsLoadingPreview(false);
 
     const { error: serverError } = response;
@@ -242,7 +248,11 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     const { values, error } = data;
 
     if (error) {
-      const fallBackError = { message: 'Error executing the script.' };
+      const fallBackError = {
+        message: i18n.translate('indexPatternFieldEditor.fieldPreview.defaultErrorTitle', {
+          defaultMessage: 'Error executing the script.',
+        }),
+      };
 
       setPreviewResponse({
         fields: [],
@@ -261,6 +271,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       setNavDocsIndex(0);
     }
     setNavDocsIndex((prev) => prev + 1);
+    setIsLoadingPreview(true);
   }, [navDocsIndex, totalDocs]);
 
   const goToPrevDoc = useCallback(() => {
@@ -268,6 +279,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       setNavDocsIndex(totalDocs - 1);
     }
     setNavDocsIndex((prev) => prev - 1);
+    setIsLoadingPreview(true);
   }, [navDocsIndex, totalDocs]);
 
   const ctx = useMemo<Context>(
@@ -275,6 +287,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       fields: previewResponse.fields,
       error: previewResponse.error,
       isLoadingPreview,
+      previewCount: previewCount.current,
       params: {
         value: params,
         update: updateParams,

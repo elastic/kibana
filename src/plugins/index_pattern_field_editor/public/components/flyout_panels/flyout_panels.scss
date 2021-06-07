@@ -3,6 +3,7 @@
 
   &__column {
     height: 100%;
+    overflow: hidden;
   }
 }
 
@@ -10,8 +11,6 @@
   height: 100%;
   overflow-y: auto;
   padding: $euiSizeL;
-  display: flex;
-  flex-direction: column;
 
   &--pageBackground {
     background-color: $euiPageBackgroundColor;

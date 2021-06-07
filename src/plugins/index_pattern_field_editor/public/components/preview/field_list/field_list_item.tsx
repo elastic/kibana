@@ -26,19 +26,17 @@ export const PreviewListItem: React.FC<Props> = ({ field: { key, value }, highli
   /* eslint-enable @typescript-eslint/naming-convention */
 
   return (
-    <EuiFlexGroup className={classes}>
+    <EuiFlexGroup className={classes} gutterSize="none">
       <EuiFlexItem className="indexPatternFieldEditor__previewFieldList__item__key">
         <div className="indexPatternFieldEditor__previewFieldList__item__key__wrapper">{key}</div>
       </EuiFlexItem>
-      <EuiToolTip
-        anchorClassName="indexPatternFieldEditor__previewFieldList__item__value"
-        position="top"
-        content={value}
-      >
-        <div className="indexPatternFieldEditor__previewFieldList__item__value__wrapper">
-          {value}
-        </div>
-      </EuiToolTip>
+      <EuiFlexItem className="indexPatternFieldEditor__previewFieldList__item__value">
+        <EuiToolTip position="top" content={value}>
+          <span className="indexPatternFieldEditor__previewFieldList__item__value__wrapper">
+            {value}
+          </span>
+        </EuiToolTip>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

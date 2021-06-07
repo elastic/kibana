@@ -19,9 +19,7 @@ import {
 
 import { useFieldPreviewContext } from './field_preview_context';
 
-import './preview_documents_nav.scss';
-
-export const PreviewDocumentsNav = () => {
+export const DocumentsNavPreview = () => {
   const {
     currentDocument: { value: currentDocument, loadSingle, loadFromCluster, isLoading },
     navigation: { prev, next },
@@ -84,73 +82,75 @@ export const PreviewDocumentsNav = () => {
   );
 
   return (
-    <EuiFlexGroup className="indexPatternFieldEditor__documentsNav" gutterSize="s">
-      <EuiFlexItem>
-        <EuiFormRow
-          label={i18n.translate('indexPatternFieldEditor.fieldPreview.documentIdField.label', {
-            defaultMessage: 'Document ID',
-          })}
-          error={errorMessage}
-          isInvalid={isInvalid}
-          fullWidth
-        >
-          <EuiFieldText
+    <div>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormRow
+            label={i18n.translate('indexPatternFieldEditor.fieldPreview.documentIdField.label', {
+              defaultMessage: 'Document ID',
+            })}
+            error={errorMessage}
             isInvalid={isInvalid}
-            value={documentId}
-            onChange={onDocumentIdChange}
-            isLoading={isLoading}
             fullWidth
-            data-test-subj="documentIdField"
-          />
-        </EuiFormRow>
-        {isCustomID && (
-          <span>
-            <EuiButtonEmpty color="primary" size="xs" flush="left" onClick={loadDocFromCluster}>
-              {i18n.translate(
-                'indexPatternFieldEditor.fieldPreview.documentIdField.loadDocumentsFromCluster',
-                {
-                  defaultMessage: 'Load documents from cluster',
-                }
-              )}
-            </EuiButtonEmpty>
-          </span>
-        )}
-      </EuiFlexItem>
-
-      {showNavButtons && (
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s" alignItems="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                display="base"
-                size="m"
-                onClick={prev}
-                iconType="arrowLeft"
-                aria-label={i18n.translate(
-                  'indexPatternFieldEditor.fieldPreview.documentNav.previousArialabel',
+          >
+            <EuiFieldText
+              isInvalid={isInvalid}
+              value={documentId}
+              onChange={onDocumentIdChange}
+              isLoading={isLoading}
+              fullWidth
+              data-test-subj="documentIdField"
+            />
+          </EuiFormRow>
+          {isCustomID && (
+            <span>
+              <EuiButtonEmpty color="primary" size="xs" flush="left" onClick={loadDocFromCluster}>
+                {i18n.translate(
+                  'indexPatternFieldEditor.fieldPreview.documentIdField.loadDocumentsFromCluster',
                   {
-                    defaultMessage: 'Previous',
+                    defaultMessage: 'Load documents from cluster',
                   }
                 )}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                display="base"
-                size="m"
-                onClick={next}
-                iconType="arrowRight"
-                aria-label={i18n.translate(
-                  'indexPatternFieldEditor.fieldPreview.documentNav.nextArialabel',
-                  {
-                    defaultMessage: 'Next',
-                  }
-                )}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+              </EuiButtonEmpty>
+            </span>
+          )}
         </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
+
+        {showNavButtons && (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s" alignItems="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  display="base"
+                  size="m"
+                  onClick={prev}
+                  iconType="arrowLeft"
+                  aria-label={i18n.translate(
+                    'indexPatternFieldEditor.fieldPreview.documentNav.previousArialabel',
+                    {
+                      defaultMessage: 'Previous',
+                    }
+                  )}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  display="base"
+                  size="m"
+                  onClick={next}
+                  iconType="arrowRight"
+                  aria-label={i18n.translate(
+                    'indexPatternFieldEditor.fieldPreview.documentNav.nextArialabel',
+                    {
+                      defaultMessage: 'Next',
+                    }
+                  )}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </div>
   );
 };
