@@ -12,7 +12,7 @@ import { SecurityPageName } from '../../app/types';
 import { getCaseUrl } from '../../common/components/link_to';
 import { useGetUrlSearch } from '../../common/components/navigation/use_get_url_search';
 import { WrapperPage } from '../../common/components/wrapper_page';
-import { useGetUserSavedObjectPermissions } from '../../common/lib/kibana';
+import { useGetUserCasesPermissions } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { navTabs } from '../../app/home/home_navigations';
 import { CaseHeaderPage } from '../components/case_header_page';
@@ -21,7 +21,7 @@ import * as i18n from './translations';
 
 export const CreateCasePage = React.memo(() => {
   const history = useHistory();
-  const userPermissions = useGetUserSavedObjectPermissions();
+  const userPermissions = useGetUserCasesPermissions();
   const search = useGetUrlSearch(navTabs.case);
 
   const backOptions = useMemo(

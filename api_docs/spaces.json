@@ -449,13 +449,7 @@
         "\nStart contract for the Spaces plugin."
       ],
       "signature": [
-        {
-          "pluginId": "spacesOss",
-          "scope": "public",
-          "docId": "kibSpacesOssPluginApi",
-          "section": "def-public.SpacesApi",
-          "text": "SpacesApi"
-        }
+        "SpacesApi"
       ],
       "source": {
         "path": "x-pack/plugins/spaces/public/plugin.tsx",
@@ -1245,7 +1239,7 @@
                 "plugin": "securitySolution",
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 194
+                  "lineNumber": 206
                 }
               },
               {
@@ -1557,35 +1551,7 @@
               "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
               "lineNumber": 56
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "spaces",
-                "id": "def-server.request",
-                "type": "Object",
-                "tags": [],
-                "label": "request",
-                "description": [
-                  "the request."
-                ],
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
-                  "<unknown, unknown, unknown, any>"
-                ],
-                "source": {
-                  "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-                  "lineNumber": 56
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           },
           {
             "parentPluginId": "spaces",
@@ -2086,7 +2052,7 @@
               "plugin": "securitySolution",
               "link": {
                 "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 194
+                "lineNumber": 206
               }
             }
           ]

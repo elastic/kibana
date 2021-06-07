@@ -9,7 +9,14 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiComboBox, EuiFormRow, EuiHorizontalRule, EuiRadioGroup, EuiSpacer } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiForm,
+  EuiFormRow,
+  EuiHorizontalRule,
+  EuiRadioGroup,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import {
   AttributeSelector,
@@ -88,62 +95,67 @@ export const RoleMapping: React.FC = () => {
     selectedAuthProviders,
     selectedOptions,
     roleMapping,
+    roleMappingErrors,
   } = useValues(RoleMappingsLogic);
 
   const isNew = !roleMapping;
 
   const hasGroupAssignment = selectedGroups.size > 0 || includeInAllGroups;
+  const attributeValueInvalid = attributeName !== 'role' && !attributeValue;
 
   return (
     <RoleMappingFlyout
-      disabled={!hasGroupAssignment}
+      disabled={attributeValueInvalid || !hasGroupAssignment}
       isNew={isNew}
       closeRoleMappingFlyout={closeRoleMappingFlyout}
       handleSaveMapping={handleSaveMapping}
     >
-      <AttributeSelector
-        attributeName={attributeName}
-        attributeValue={attributeValue}
-        attributes={attributes}
-        elasticsearchRoles={elasticsearchRoles}
-        disabled={!isNew}
-        handleAttributeSelectorChange={handleAttributeSelectorChange}
-        handleAttributeValueChange={handleAttributeValueChange}
-        availableAuthProviders={availableAuthProviders}
-        selectedAuthProviders={selectedAuthProviders}
-        multipleAuthProvidersConfig={multipleAuthProvidersConfig}
-        handleAuthProviderChange={handleAuthProviderChange}
-      />
-      <EuiSpacer size="m" />
-      <RoleSelector
-        roleOptions={roleOptions}
-        roleType={roleType}
-        onChange={handleRoleChange}
-        label="Role"
-      />
-      <EuiHorizontalRule />
-      <EuiFormRow>
-        <EuiRadioGroup
-          options={groupOptions}
-          idSelected={includeInAllGroups ? 'all' : 'specific'}
-          onChange={(id) => handleAllGroupsSelectionChange(id === 'all')}
-          legend={{
-            children: <span>{GROUP_ASSIGNMENT_LABEL}</span>,
-          }}
+      <EuiForm isInvalid={roleMappingErrors.length > 0} error={roleMappingErrors}>
+        <AttributeSelector
+          attributeName={attributeName}
+          attributeValue={attributeValue}
+          attributeValueInvalid={attributeValueInvalid}
+          attributes={attributes}
+          elasticsearchRoles={elasticsearchRoles}
+          disabled={!isNew}
+          handleAttributeSelectorChange={handleAttributeSelectorChange}
+          handleAttributeValueChange={handleAttributeValueChange}
+          availableAuthProviders={availableAuthProviders}
+          selectedAuthProviders={selectedAuthProviders}
+          multipleAuthProvidersConfig={multipleAuthProvidersConfig}
+          handleAuthProviderChange={handleAuthProviderChange}
         />
-      </EuiFormRow>
-      <EuiFormRow isInvalid={!hasGroupAssignment} error={[GROUP_ASSIGNMENT_INVALID_ERROR]}>
-        <EuiComboBox
-          data-test-subj="groupsSelect"
-          selectedOptions={selectedOptions}
-          options={availableGroups.map(({ name, id }) => ({ label: name, value: id }))}
-          onChange={(options) => {
-            handleGroupSelectionChange(options.map(({ value }) => value as string));
-          }}
-          fullWidth
-          isDisabled={includeInAllGroups}
+        <EuiSpacer size="m" />
+        <RoleSelector
+          roleOptions={roleOptions}
+          roleType={roleType}
+          onChange={handleRoleChange}
+          label="Role"
         />
-      </EuiFormRow>
+        <EuiHorizontalRule />
+        <EuiFormRow>
+          <EuiRadioGroup
+            options={groupOptions}
+            idSelected={includeInAllGroups ? 'all' : 'specific'}
+            onChange={(id) => handleAllGroupsSelectionChange(id === 'all')}
+            legend={{
+              children: <span>{GROUP_ASSIGNMENT_LABEL}</span>,
+            }}
+          />
+        </EuiFormRow>
+        <EuiFormRow isInvalid={!hasGroupAssignment} error={[GROUP_ASSIGNMENT_INVALID_ERROR]}>
+          <EuiComboBox
+            data-test-subj="groupsSelect"
+            selectedOptions={selectedOptions}
+            options={availableGroups.map(({ name, id }) => ({ label: name, value: id }))}
+            onChange={(options) => {
+              handleGroupSelectionChange(options.map(({ value }) => value as string));
+            }}
+            fullWidth
+            isDisabled={includeInAllGroups}
+          />
+        </EuiFormRow>
+      </EuiForm>
     </RoleMappingFlyout>
   );
 };
