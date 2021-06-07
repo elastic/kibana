@@ -20,11 +20,13 @@ import type { FeaturesPluginStart } from '../../features/public';
 import type { LicensingPluginSetup } from '../../licensing/public';
 import type { SpacesPluginStart } from '../../spaces/public';
 import { SecurityLicenseService } from '../common/licensing';
+import type { SecurityLicense } from '../common/licensing';
 import { accountManagementApp } from './account_management';
 import type { AuthenticationServiceSetup, AuthenticationServiceStart } from './authentication';
 import { AuthenticationService } from './authentication';
 import type { ConfigType } from './config';
 import { ManagementService } from './management';
+import type { SecurityNavControlServiceStart } from './nav_control';
 import { SecurityNavControlService } from './nav_control';
 import { SecurityCheckupService } from './security_checkup';
 import { SessionExpired, SessionTimeout, UnauthorizedResponseHttpInterceptor } from './session';
@@ -134,7 +136,6 @@ export class SecurityPlugin
       authc: this.authc,
       sessionTimeout: this.sessionTimeout,
       license,
-      __legacyCompat: { logoutUrl, tenant },
     };
   }
 
@@ -161,5 +162,13 @@ export class SecurityPlugin
   }
 }
 
-export type SecurityPluginSetup = ReturnType<SecurityPlugin['setup']>;
-export type SecurityPluginStart = ReturnType<SecurityPlugin['start']>;
+export interface SecurityPluginSetup {
+  authc: AuthenticationServiceSetup;
+  sessionTimeout: SessionTimeout;
+  license: Readonly<SecurityLicense>;
+}
+
+export interface SecurityPluginStart {
+  navControlService: SecurityNavControlServiceStart;
+  authc: AuthenticationServiceStart;
+}
