@@ -2332,3 +2332,411 @@ export const INVALID_AWS_POLICY = {
     endpoint: { value: 'amazonaws.com', type: 'text' },
   },
 };
+
+export const VALID_AWS_POLICY = {
+  name: 'aws-1',
+  namespace: 'default',
+  package: { name: 'aws', title: 'AWS', version: '0.5.3' },
+  enabled: true,
+  policy_id: 'some-agent-policy-id',
+  output_id: 'some-output-id',
+  inputs: [
+    {
+      type: 'aws/metrics',
+      policy_template: 'billing',
+      enabled: true,
+      streams: [
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.billing' },
+          vars: {
+            period: { value: '12h', type: 'text' },
+            latency: { type: 'text' },
+            'cost_explorer_config.group_by_dimension_keys': {
+              value: ['AZ', 'INSTANCE_TYPE', 'SERVICE'],
+              type: 'text',
+            },
+            'cost_explorer_config.group_by_tag_keys': { value: ['aws:createdBy'], type: 'text' },
+          },
+        },
+      ],
+    },
+    {
+      type: 's3',
+      policy_template: 'cloudtrail',
+      enabled: true,
+      streams: [
+        {
+          enabled: true,
+          data_stream: { type: 'logs', dataset: 'aws.cloudtrail' },
+          vars: {
+            visibility_timeout: { type: 'text' },
+            api_timeout: { type: 'text' },
+            queue_url: { type: 'text', value: 'http://localhost' },
+            fips_enabled: { value: false, type: 'bool' },
+          },
+        },
+      ],
+    },
+    {
+      type: 'httpjson',
+      policy_template: 'cloudtrail',
+      enabled: false,
+      streams: [
+        {
+          enabled: false,
+          data_stream: { type: 'logs', dataset: 'aws.cloudtrail' },
+          vars: {
+            url: { value: 'https://server.example.com:8089', type: 'text' },
+            username: { type: 'text' },
+            password: { type: 'password' },
+            ssl: { type: 'yaml' },
+            interval: { value: '10s', type: 'text' },
+            search: { value: 'search sourcetype=aws:cloudtrail', type: 'text' },
+            tags: { value: ['forwarded'], type: 'text' },
+          },
+        },
+      ],
+    },
+    {
+      type: 's3',
+      policy_template: 'cloudwatch',
+      enabled: true,
+      streams: [
+        {
+          enabled: true,
+          data_stream: { type: 'logs', dataset: 'aws.cloudwatch_logs' },
+          vars: {
+            visibility_timeout: { type: 'text' },
+            api_timeout: { type: 'text' },
+            queue_url: { type: 'text', value: 'http://localhost' },
+            fips_enabled: { value: false, type: 'bool' },
+          },
+        },
+      ],
+    },
+    {
+      type: 'aws/metrics',
+      policy_template: 'cloudwatch',
+      enabled: true,
+      streams: [
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.cloudwatch_metrics' },
+          vars: {
+            period: { value: '300s', type: 'text' },
+            regions: { value: [], type: 'text' },
+            latency: { type: 'text' },
+            metrics: {
+              value:
+                '- namespace: AWS/EC2\n  resource_type: ec2:instance\n  name:\n    - CPUUtilization\n    - DiskWriteOps\n  statistic:\n    - Average\n    - Maximum\n  # dimensions:\n   # - name: InstanceId\n      # value: i-123456\n  # tags:\n    # - key: created-by\n      # value: foo\n',
+              type: 'yaml',
+            },
+          },
+        },
+      ],
+    },
+    {
+      type: 'aws/metrics',
+      policy_template: 'dynamodb',
+      enabled: true,
+      streams: [
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.dynamodb' },
+          vars: {
+            period: { value: '5m', type: 'text' },
+            regions: { value: [], type: 'text' },
+            latency: { type: 'text' },
+            tags_filter: { value: '# - key: "created-by"\n  # value: "foo"\n', type: 'yaml' },
+          },
+        },
+      ],
+    },
+    {
+      type: 'aws/metrics',
+      policy_template: 'ebs',
+      enabled: true,
+      streams: [
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.ebs' },
+          vars: {
+            period: { value: '5m', type: 'text' },
+            regions: { value: [], type: 'text' },
+            latency: { type: 'text' },
+            tags_filter: { value: '# - key: "created-by"\n  # value: "foo"\n', type: 'yaml' },
+          },
+        },
+      ],
+    },
+    {
+      type: 's3',
+      policy_template: 'ec2',
+      enabled: true,
+      streams: [
+        {
+          enabled: true,
+          data_stream: { type: 'logs', dataset: 'aws.ec2_logs' },
+          vars: {
+            visibility_timeout: { type: 'text' },
+            api_timeout: { type: 'text' },
+            queue_url: { type: 'text', value: 'http://localhost' },
+            fips_enabled: { value: false, type: 'bool' },
+          },
+        },
+      ],
+    },
+    {
+      type: 'aws/metrics',
+      policy_template: 'ec2',
+      enabled: true,
+      streams: [
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.ec2_metrics' },
+          vars: {
+            period: { value: '5m', type: 'text' },
+            regions: { value: [], type: 'text' },
+            latency: { type: 'text' },
+            tags_filter: { value: '# - key: "created-by"\n  # value: "foo"\n', type: 'yaml' },
+          },
+        },
+      ],
+    },
+    {
+      type: 's3',
+      policy_template: 'elb',
+      enabled: true,
+      streams: [
+        {
+          enabled: true,
+          data_stream: { type: 'logs', dataset: 'aws.elb_logs' },
+          vars: {
+            visibility_timeout: { type: 'text' },
+            api_timeout: { type: 'text' },
+            queue_url: { type: 'text', value: 'http://localhost' },
+            fips_enabled: { value: false, type: 'bool' },
+          },
+        },
+      ],
+    },
+    {
+      type: 'aws/metrics',
+      policy_template: 'elb',
+      enabled: true,
+      streams: [
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.elb_metrics' },
+          vars: {
+            period: { value: '1m', type: 'text' },
+            regions: { value: [], type: 'text' },
+            latency: { type: 'text' },
+            tags_filter: { value: '# - key: "created-by"\n  # value: "foo"\n', type: 'yaml' },
+          },
+        },
+      ],
+    },
+    {
+      type: 'aws/metrics',
+      policy_template: 'lambda',
+      enabled: true,
+      streams: [
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.lambda' },
+          vars: {
+            period: { value: '5m', type: 'text' },
+            regions: { value: [], type: 'text' },
+            latency: { type: 'text' },
+            tags_filter: { value: '# - key: "created-by"\n  # value: "foo"\n', type: 'yaml' },
+          },
+        },
+      ],
+    },
+    {
+      type: 'aws/metrics',
+      policy_template: 'natgateway',
+      enabled: true,
+      streams: [
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.natgateway' },
+          vars: {
+            period: { value: '1m', type: 'text' },
+            regions: { value: [], type: 'text' },
+            latency: { type: 'text' },
+          },
+        },
+      ],
+    },
+    {
+      type: 'aws/metrics',
+      policy_template: 'rds',
+      enabled: true,
+      streams: [
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.rds' },
+          vars: {
+            period: { value: '1m', type: 'text' },
+            regions: { value: [], type: 'text' },
+            latency: { type: 'text' },
+            tags_filter: { value: '# - key: "created-by"\n  # value: "foo"\n', type: 'yaml' },
+          },
+        },
+      ],
+    },
+    {
+      type: 's3',
+      policy_template: 's3',
+      enabled: true,
+      streams: [
+        {
+          enabled: true,
+          data_stream: { type: 'logs', dataset: 'aws.s3access' },
+          vars: {
+            visibility_timeout: { type: 'text' },
+            api_timeout: { type: 'text' },
+            queue_url: { type: 'text', value: 'http://localhost' },
+            fips_enabled: { value: false, type: 'bool' },
+          },
+        },
+      ],
+    },
+    {
+      type: 'aws/metrics',
+      policy_template: 's3',
+      enabled: true,
+      streams: [
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.s3_daily_storage' },
+          vars: {
+            period: { value: '24h', type: 'text' },
+            regions: { value: [], type: 'text' },
+            latency: { type: 'text' },
+          },
+        },
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.s3_request' },
+          vars: {
+            period: { value: '1m', type: 'text' },
+            regions: { value: [], type: 'text' },
+            latency: { type: 'text' },
+          },
+        },
+      ],
+    },
+    {
+      type: 'aws/metrics',
+      policy_template: 'sns',
+      enabled: true,
+      streams: [
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.sns' },
+          vars: {
+            period: { value: '5m', type: 'text' },
+            regions: { value: [], type: 'text' },
+            latency: { type: 'text' },
+            tags_filter: { value: '# - key: "created-by"\n  # value: "foo"\n', type: 'yaml' },
+          },
+        },
+      ],
+    },
+    {
+      type: 'aws/metrics',
+      policy_template: 'sqs',
+      enabled: true,
+      streams: [
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.sqs' },
+          vars: {
+            period: { value: '5m', type: 'text' },
+            regions: { value: [], type: 'text' },
+            latency: { type: 'text' },
+          },
+        },
+      ],
+    },
+    {
+      type: 'aws/metrics',
+      policy_template: 'transitgateway',
+      enabled: true,
+      streams: [
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.transitgateway' },
+          vars: {
+            period: { value: '1m', type: 'text' },
+            regions: { value: [], type: 'text' },
+            latency: { type: 'text' },
+          },
+        },
+      ],
+    },
+    {
+      type: 'aws/metrics',
+      policy_template: 'usage',
+      enabled: true,
+      streams: [
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.usage' },
+          vars: {
+            period: { value: '1m', type: 'text' },
+            regions: { value: [], type: 'text' },
+            latency: { type: 'text' },
+          },
+        },
+      ],
+    },
+    {
+      type: 's3',
+      policy_template: 'vpcflow',
+      enabled: true,
+      streams: [
+        {
+          enabled: true,
+          data_stream: { type: 'logs', dataset: 'aws.vpcflow' },
+          vars: {
+            visibility_timeout: { type: 'text' },
+            api_timeout: { type: 'text' },
+            queue_url: { type: 'text', value: 'http://localhost' },
+            fips_enabled: { value: false, type: 'bool' },
+          },
+        },
+      ],
+    },
+    {
+      type: 'aws/metrics',
+      policy_template: 'vpn',
+      enabled: true,
+      streams: [
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.vpn' },
+          vars: {
+            period: { value: '1m', type: 'text' },
+            regions: { value: [], type: 'text' },
+            latency: { type: 'text' },
+            tags_filter: { value: '# - key: "created-by"\n  # value: "foo"\n', type: 'yaml' },
+          },
+        },
+      ],
+    },
+  ],
+  vars: {
+    shared_credential_file: { type: 'text' },
+    credential_profile_name: { type: 'text' },
+    access_key_id: { type: 'text' },
+    secret_access_key: { type: 'text' },
+    session_token: { type: 'text' },
+    role_arn: { type: 'text' },
+    endpoint: { value: 'amazonaws.com', type: 'text' },
+  },
+};

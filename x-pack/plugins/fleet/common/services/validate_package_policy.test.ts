@@ -9,7 +9,7 @@ import { installationStatuses } from '../constants';
 import type { PackageInfo, NewPackagePolicy, RegistryPolicyTemplate } from '../types';
 
 import { validatePackagePolicy, validationHasErrors } from './validate_package_policy';
-import { AWS_PACKAGE, INVALID_AWS_POLICY } from './fixtures/aws_package';
+import { AWS_PACKAGE, INVALID_AWS_POLICY, VALID_AWS_POLICY } from './fixtures/aws_package';
 
 describe('Fleet - validatePackagePolicy()', () => {
   describe('works for packages with single policy template (aka no integrations)', () => {
@@ -519,6 +519,17 @@ describe('Fleet - validatePackagePolicy()', () => {
           (AWS_PACKAGE as unknown) as PackageInfo
         )
       ).toMatchSnapshot();
+    });
+
+    it('returns no errors for valid package policy', () => {
+      expect(
+        validationHasErrors(
+          validatePackagePolicy(
+            VALID_AWS_POLICY as NewPackagePolicy,
+            (AWS_PACKAGE as unknown) as PackageInfo
+          )
+        )
+      ).toBe(false);
     });
   });
 });
