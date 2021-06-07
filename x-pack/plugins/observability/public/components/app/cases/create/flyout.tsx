@@ -27,6 +27,7 @@ const StyledFlyout = styled(EuiFlyout)`
 `;
 // Adding bottom padding because timeline's
 // bottom bar gonna hide the submit button.
+// might not need for obs, test this when implementing this component
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   ${({ theme }) => `
     && .euiFlyoutBody__overflow {
@@ -45,6 +46,7 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
 const FormWrapper = styled.div`
   width: 100%;
 `;
+
 function CreateCaseFlyoutComponent({
   afterCaseCreated,
   onCloseFlyout,
@@ -72,7 +74,8 @@ function CreateCaseFlyoutComponent({
     </StyledFlyout>
   );
 }
-
+// not yet used
+// committing for use with alerting #RAC
 export const CreateCaseFlyout = memo(CreateCaseFlyoutComponent);
 
 CreateCaseFlyout.displayName = 'CreateCaseFlyout';

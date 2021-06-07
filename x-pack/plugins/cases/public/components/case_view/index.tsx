@@ -14,8 +14,6 @@ import {
   EuiLoadingContent,
   EuiLoadingSpinner,
   EuiHorizontalRule,
-  EuiLink,
-  EuiButton,
 } from '@elastic/eui';
 
 import { CaseStatuses, CaseAttributes, CaseType, Case, CaseConnector, Ecs } from '../../../common';
