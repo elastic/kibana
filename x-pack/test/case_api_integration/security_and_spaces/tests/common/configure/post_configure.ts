@@ -28,10 +28,7 @@ import {
   globalRead,
   obsSecRead,
   superUser,
-<<<<<<< HEAD
-=======
   testDisabled,
->>>>>>> b6c982c3b073c215aa5bfa09887048ca549e2147
 } from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
