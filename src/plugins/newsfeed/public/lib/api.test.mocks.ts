@@ -21,7 +21,5 @@ jest.doMock('./driver', () => ({
 }));
 
 jest.doMock('./never_fetch_driver', () => ({
-  NeverFetchNewsfeedApiDriver: jest
-    .fn()
-    .mockImplementation(() => new NeverFetchNewsfeedApiDriver()),
+  NeverFetchNewsfeedApiDriver: jest.fn(() => new NeverFetchNewsfeedApiDriver()),
 }));
