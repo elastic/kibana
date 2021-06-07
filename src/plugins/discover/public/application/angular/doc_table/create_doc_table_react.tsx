@@ -119,11 +119,9 @@ export function DocTableLegacy(renderProps: DocTableLegacyProps) {
   }, [setMinimumVisibleRows, renderProps.rows]);
 
   useEffect(() => {
-    if (minimumVisibleRows > 50) {
-      setMinimumVisibleRows(50);
-    }
+    setMinimumVisibleRows(50);
     setRows(renderProps.rows);
-  }, [renderProps.rows, minimumVisibleRows, setMinimumVisibleRows]);
+  }, [renderProps.rows, setMinimumVisibleRows]);
 
   useEffect(() => {
     if (ref && ref.current && !scope.current) {
@@ -132,9 +130,8 @@ export function DocTableLegacy(renderProps: DocTableLegacyProps) {
         scope.current = newScope;
       });
     } else if (scope && scope.current) {
-      scope.current.$evalAsync((subscope: AngularScope) => {
-        subscope.renderProps = { ...renderProps, rows, minimumVisibleRows };
-      });
+      scope.current.renderProps = { ...renderProps, rows, minimumVisibleRows };
+      scope.current.$applyAsync();
     }
   }, [renderProps, minimumVisibleRows, rows]);
 

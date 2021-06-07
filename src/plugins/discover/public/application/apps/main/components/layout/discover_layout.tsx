@@ -60,6 +60,13 @@ const DataGridMemoized = React.memo(DiscoverGrid);
 const TopNavMemoized = React.memo(DiscoverTopNav);
 const DiscoverChartMemoized = React.memo(DiscoverChart);
 
+interface DiscoverLayoutFetchState extends SavedSearchDataMessage {
+  state: FetchStatus;
+  fetchCounter: number;
+  fieldCounts: Record<string, number>;
+  rows: ElasticSearchHit[];
+}
+
 export function DiscoverLayout({
   indexPattern,
   indexPatternList,
@@ -89,7 +96,7 @@ export function DiscoverLayout({
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const collapseIcon = useRef<HTMLButtonElement>(null);
 
-  const [fetchState, setFetchState] = useState<SavedSearchDataMessage>({
+  const [fetchState, setFetchState] = useState<DiscoverLayoutFetchState>({
     state: savedSearchData$.getValue().state,
     fetchCounter: 0,
     fieldCounts: {},
@@ -290,8 +297,8 @@ export function DiscoverLayout({
             <EuiFlexItem grow={false}>
               <SidebarMemoized
                 columns={columns}
-                fieldCounts={fetchState.fieldCounts!}
-                hits={rows!}
+                fieldCounts={fetchState.fieldCounts}
+                hits={rows}
                 indexPatternList={indexPatternList}
                 onAddField={onAddColumn}
                 onAddFilter={onAddFilter}
@@ -339,7 +346,7 @@ export function DiscoverLayout({
                 {resultState === 'none' && (
                   <DiscoverNoResults
                     timeFieldName={timeField}
-                    queryLanguage={state.query?.language || ''}
+                    queryLanguage={state.query?.language ?? ''}
                     data={data}
                     error={fetchState.fetchError}
                   />
