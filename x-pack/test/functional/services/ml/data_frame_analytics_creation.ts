@@ -146,25 +146,21 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await retry.tryForTime(5000, async () => {
         for (const expected of expectedHistogramCharts.values()) {
           const id = expected.id;
-          await testSubjects.existOrFail(`dataVisualizerDataGridChart-${id}`);
+          await testSubjects.existOrFail(`mlDataGridChart-${id}`);
 
           if (expected.chartAvailable) {
-            await testSubjects.existOrFail(`dataVisualizerDataGridChart-${id}-histogram`);
+            await testSubjects.existOrFail(`mlDataGridChart-${id}-histogram`);
           } else {
-            await testSubjects.missingOrFail(`dataVisualizerDataGridChart-${id}-histogram`);
+            await testSubjects.missingOrFail(`mlDataGridChart-${id}-histogram`);
           }
 
-          const actualLegend = await testSubjects.getVisibleText(
-            `dataVisualizerDataGridChart-${id}-legend`
-          );
+          const actualLegend = await testSubjects.getVisibleText(`mlDataGridChart-${id}-legend`);
           expect(actualLegend).to.eql(
             expected.legend,
             `Legend text for column '${id}' should be '${expected.legend}' (got '${actualLegend}')`
           );
 
-          const actualId = await testSubjects.getVisibleText(
-            `dataVisualizerDataGridChart-${id}-id`
-          );
+          const actualId = await testSubjects.getVisibleText(`mlDataGridChart-${id}-id`);
           expect(actualId).to.eql(
             expected.id,
             `Id text for column '${id}' should be '${expected.id}' (got '${actualId}')`
