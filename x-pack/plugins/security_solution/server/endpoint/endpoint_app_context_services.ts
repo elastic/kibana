@@ -41,6 +41,10 @@ import {
   ExperimentalFeatures,
   parseExperimentalConfigValue,
 } from '../../common/experimental_features';
+import {
+  CasesClient,
+  PluginStartContract as CasesPluginStartContract,
+} from '../../../cases/server';
 
 export interface MetadataService {
   queryStrategy(
@@ -98,6 +102,7 @@ export type EndpointAppContextServiceStartContract = Partial<
   savedObjectsStart: SavedObjectsServiceStart;
   licenseService: LicenseService;
   exceptionListsClient: ExceptionListClient | undefined;
+  cases: CasesPluginStartContract | undefined;
 };
 
 /**
@@ -114,6 +119,7 @@ export class EndpointAppContextService {
   private config: ConfigType | undefined;
   private license: LicenseService | undefined;
   public security: SecurityPluginStart | undefined;
+  private cases: CasesPluginStartContract | undefined;
 
   private experimentalFeatures: ExperimentalFeatures | undefined;
 
@@ -127,6 +133,7 @@ export class EndpointAppContextService {
     this.config = dependencies.config;
     this.license = dependencies.licenseService;
     this.security = dependencies.security;
+    this.cases = dependencies.cases;
 
     this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental);
 
@@ -190,5 +197,12 @@ export class EndpointAppContextService {
       throw new Error(`must call start on ${EndpointAppContextService.name} to call getter`);
     }
     return this.license;
+  }
+
+  public async getCasesClient(req: KibanaRequest): Promise<CasesClient> {
+    if (!this.cases) {
+      throw new Error(`must call start on ${EndpointAppContextService.name} to call getter`);
+    }
+    return this.cases.getCasesClientWithRequest(req);
   }
 }
