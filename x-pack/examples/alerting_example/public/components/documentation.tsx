@@ -17,7 +17,6 @@ import {
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiTitle,
-  EuiIcon,
   EuiCallOut,
   EuiSpacer,
 } from '@elastic/eui';
