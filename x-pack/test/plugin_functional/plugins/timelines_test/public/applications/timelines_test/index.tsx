@@ -25,7 +25,7 @@ export function renderApp(
     <AppRoot
       coreStart={coreStart}
       parameters={parameters}
-      timelinesPluginSetup={timelinesPluginSetup}
+      timelinesPluginSetup={TimelinesUIStart}
     />,
     parameters.element
   );
