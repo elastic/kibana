@@ -22,17 +22,9 @@ Access to rules is granted based on your privileges to alerting-enabled features
 [[create-edit-rules]]
 === Create and edit rules
 
-Many rules must be created within the context of a {kib} app like <<metrics-app, Metrics>>, <<xpack-apm, APM>>, or <<uptime-app, Uptime>>, but others are generic. Generic rule types can be created in the *Rules* management UI by clicking the *Create* button. This will launch a flyout that guides you through selecting a rule type and configuring its properties. Refer to <<stack-rules, Stack rules>> for details on what types of rules are available and how to configure them.
+Many rules must be created within the context of a {kib} app like <<metrics-app, Metrics>>, <<xpack-apm, APM>>, or <<uptime-app, Uptime>>, but others are generic. Generic rule types can be created in the *Rules* management UI by clicking the *Create* button. This will launch a flyout that guides you through selecting a rule type and configuring its conditions and action type. Refer to <<stack-rules, Stack rules>> for details on what types of rules are available and how to configure them.
 
 After a rule is created, you can re-open the flyout and change a rule's properties by clicking the *Edit* button shown on each row of the rule listing.
-
-When you create a rule, you must define the rule details, conditions, and actions.
-
-. <<defining-rules-general-details, General rule details>>
-. <<defining-rules-type-conditions, Rule type and conditions>>
-. <<defining-rules-actions-details, Action type and action details>>
-
-image::images/rule-flyout-sections.png[The three sections of a rule definition]
 
 [float]
 [[defining-rules-general-details]]
