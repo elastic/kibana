@@ -75,6 +75,8 @@ export {
   GetEnrollmentAPIKeysResponse,
   GetEnrollmentAPIKeysRequest,
   GetOneEnrollmentAPIKeyResponse,
+  PostEnrollmentAPIKeyRequest,
+  PostEnrollmentAPIKeyResponse,
   // API schemas - Outputs
   GetOutputsResponse,
   PutOutputRequest,
