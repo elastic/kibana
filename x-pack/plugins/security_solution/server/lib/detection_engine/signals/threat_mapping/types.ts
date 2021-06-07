@@ -5,12 +5,7 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
-import { ListClient } from '../../../../../../lists/server';
-import {
-  Type,
-  LanguageOrUndefined,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
-import {
+import type {
   ThreatQuery,
   ThreatMapping,
   ThreatMappingEntries,
@@ -19,13 +14,16 @@ import {
   ConcurrentSearches,
   ItemsPerSearch,
   ThreatIndicatorPathOrUndefined,
-} from '../../../../../common/detection_engine/schemas/types/threat_mapping';
+  LanguageOrUndefined,
+  Type,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { ListClient } from '../../../../../../lists/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
 } from '../../../../../../alerting/server';
-import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas';
 import { ElasticsearchClient, Logger, SavedObject } from '../../../../../../../../src/core/server';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';

@@ -92,8 +92,7 @@ const ANNOTATION_DEFAULT_LEVEL = 1;
 const ANNOTATION_LEVEL_HEIGHT = 28;
 const ANNOTATION_UPPER_RECT_MARGIN = 0;
 const ANNOTATION_UPPER_TEXT_MARGIN = -7;
-export const ANNOTATION_MIN_WIDTH = 2;
-const ANNOTATION_RECT_BORDER_RADIUS = 2;
+export const ANNOTATION_MIN_WIDTH = 8;
 const ANNOTATION_TEXT_VERTICAL_OFFSET = 26;
 const ANNOTATION_TEXT_RECT_VERTICAL_OFFSET = 12;
 const ANNOTATION_TEXT_RECT_WIDTH = 24;
@@ -157,8 +156,6 @@ export function renderAnnotations(
   rects
     .enter()
     .append('rect')
-    .attr('rx', ANNOTATION_RECT_BORDER_RADIUS)
-    .attr('ry', ANNOTATION_RECT_BORDER_RADIUS)
     .classed('mlAnnotationRect', true)
     .attr('mask', `url(#${ANNOTATION_MASK_ID})`)
     .on('mouseover', onAnnotationMouseOver)
@@ -199,8 +196,6 @@ export function renderAnnotations(
     .classed('mlAnnotationTextRect', true)
     .attr('width', ANNOTATION_TEXT_RECT_WIDTH)
     .attr('height', ANNOTATION_TEXT_RECT_HEIGHT)
-    .attr('rx', ANNOTATION_RECT_BORDER_RADIUS)
-    .attr('ry', ANNOTATION_RECT_BORDER_RADIUS)
     .on('mouseover', onAnnotationMouseOver)
     .on('mouseout', hideFocusChartTooltip)
     .on('click', onAnnotationClick);

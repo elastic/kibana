@@ -36,9 +36,6 @@ export const TimeseriesConfig = injectI18n(function (props) {
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
   const defaults = {
-    fill: '',
-    line_width: '',
-    point_size: '',
     value_template: '{{value}}',
     offset_time: '',
     axis_min: '',

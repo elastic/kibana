@@ -7,7 +7,6 @@
 
 export default function ({ loadTestFile }) {
   describe('Fleet Endpoints', function () {
-    this.tags('ciGroupDocker');
     // EPM
     loadTestFile(require.resolve('./epm/index'));
 

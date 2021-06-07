@@ -6,7 +6,6 @@
  */
 
 import type { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 import type {
   CoreSetup,
   CoreStart,
@@ -110,6 +109,7 @@ export interface FleetAppContext {
   encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
   security?: SecurityPluginStart;
   config$?: Observable<FleetConfigType>;
+  configInitialValue: FleetConfigType;
   savedObjects: SavedObjectsServiceStart;
   isProductionMode: PluginInitializerContext['env']['mode']['prod'];
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
@@ -189,6 +189,7 @@ export class FleetPlugin
   implements AsyncPlugin<FleetSetupContract, FleetStartContract, FleetSetupDeps, FleetStartDeps> {
   private licensing$!: Observable<ILicense>;
   private config$: Observable<FleetConfigType>;
+  private configInitialValue: FleetConfigType;
   private cloud: CloudSetup | undefined;
   private logger: Logger | undefined;
 
@@ -204,15 +205,15 @@ export class FleetPlugin
     this.kibanaVersion = this.initializerContext.env.packageInfo.version;
     this.kibanaBranch = this.initializerContext.env.packageInfo.branch;
     this.logger = this.initializerContext.logger.get();
+    this.configInitialValue = this.initializerContext.config.get();
   }
 
-  public async setup(core: CoreSetup, deps: FleetSetupDeps) {
+  public setup(core: CoreSetup, deps: FleetSetupDeps) {
     this.httpSetup = core.http;
     this.licensing$ = deps.licensing.license$;
     this.encryptedSavedObjectsSetup = deps.encryptedSavedObjects;
     this.cloud = deps.cloud;
-
-    const config = await this.config$.pipe(first()).toPromise();
+    const config = this.configInitialValue;
 
     registerSavedObjects(core.savedObjects, deps.encryptedSavedObjects);
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
@@ -279,13 +280,14 @@ export class FleetPlugin
     }
   }
 
-  public async start(core: CoreStart, plugins: FleetStartDeps): Promise<FleetStartContract> {
-    await appContextService.start({
+  public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
+    appContextService.start({
       elasticsearch: core.elasticsearch,
       data: plugins.data,
       encryptedSavedObjectsStart: plugins.encryptedSavedObjects,
       encryptedSavedObjectsSetup: this.encryptedSavedObjectsSetup,
       security: plugins.security,
+      configInitialValue: this.configInitialValue,
       config$: this.config$,
       savedObjects: core.savedObjects,
       isProductionMode: this.isProductionMode,

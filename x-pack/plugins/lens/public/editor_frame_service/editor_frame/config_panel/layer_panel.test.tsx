@@ -78,6 +78,7 @@ describe('LayerPanel', () => {
       visualizationState: 'state',
       updateVisualization: jest.fn(),
       updateDatasource: jest.fn(),
+      updateDatasourceAsync: jest.fn(),
       updateAll: jest.fn(),
       framePublicAPI: frame,
       isOnlyLayer: true,

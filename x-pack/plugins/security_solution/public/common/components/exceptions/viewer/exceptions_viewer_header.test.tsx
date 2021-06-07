@@ -9,7 +9,8 @@ import React from 'react';
 import { mount } from 'enzyme';
 
 import { ExceptionsViewerHeader } from './exceptions_viewer_header';
-import { ExceptionListTypeEnum } from '../../../../../public/lists_plugin_deps';
+
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 describe('ExceptionsViewerHeader', () => {
   it('it renders all disabled if "isInitLoading" is true', () => {

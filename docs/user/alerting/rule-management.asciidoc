@@ -58,12 +58,6 @@ These operations can also be performed in bulk by multi-selecting rules and clic
 image:images/bulk-mute-disable.png[The Manage rules button lets you mute/unmute, enable/disable, and delete in bulk]
 
 [float]
-[[importing-and-exporting-rules]]
-=== Importing and exporting rules
-
-To import and export rules, use the <<managing-saved-objects, Saved Objects Management UI>>.
-
-[float]
 === Required permissions
 
 Access to rules is granted based on your privileges to alerting-enabled features. See <<alerting-security, Alerting Security>> for more information.

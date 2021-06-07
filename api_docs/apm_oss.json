@@ -7,47 +7,53 @@
     "enums": [],
     "misc": [
       {
-        "tags": [],
+        "parentPluginId": "apmOss",
         "id": "def-public.APM_STATIC_INDEX_PATTERN_ID",
         "type": "string",
+        "tags": [],
         "label": "APM_STATIC_INDEX_PATTERN_ID",
         "description": [],
+        "signature": [
+          "\"apm_static_index_pattern_id\""
+        ],
         "source": {
           "path": "src/plugins/apm_oss/common/index_pattern_constants.ts",
           "lineNumber": 9
         },
-        "signature": [
-          "\"apm_static_index_pattern_id\""
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "objects": [],
     "setup": {
+      "parentPluginId": "apmOss",
       "id": "def-public.ApmOssPluginSetup",
       "type": "Interface",
+      "tags": [],
       "label": "ApmOssPluginSetup",
       "description": [],
-      "tags": [],
-      "children": [],
       "source": {
         "path": "src/plugins/apm_oss/public/types.ts",
         "lineNumber": 10
       },
+      "deprecated": false,
+      "children": [],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
     "start": {
+      "parentPluginId": "apmOss",
       "id": "def-public.ApmOssPluginStart",
       "type": "Interface",
+      "tags": [],
       "label": "ApmOssPluginStart",
       "description": [],
-      "tags": [],
-      "children": [],
       "source": {
         "path": "src/plugins/apm_oss/public/types.ts",
         "lineNumber": 13
       },
+      "deprecated": false,
+      "children": [],
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -56,448 +62,525 @@
     "classes": [],
     "functions": [
       {
+        "parentPluginId": "apmOss",
         "id": "def-server.createDjangoAgentInstructions",
         "type": "Function",
-        "children": [
-          {
-            "id": "def-server.createDjangoAgentInstructions.$1",
-            "type": "string",
-            "label": "apmServerUrl",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 88
-            }
-          },
-          {
-            "id": "def-server.createDjangoAgentInstructions.$2",
-            "type": "string",
-            "label": "secretToken",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 88
-            }
-          }
-        ],
+        "tags": [],
+        "label": "createDjangoAgentInstructions",
+        "description": [],
         "signature": [
           "(apmServerUrl?: string, secretToken?: string) => ({ title: string; textPre: string; commands: string[]; textPost?: undefined; } | { title: string; textPre: string; commands: string[]; textPost: string; })[]"
         ],
-        "description": [],
-        "label": "createDjangoAgentInstructions",
         "source": {
           "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
           "lineNumber": 88
         },
-        "tags": [],
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "apmOss",
+            "id": "def-server.createDjangoAgentInstructions.$1",
+            "type": "string",
+            "tags": [],
+            "label": "apmServerUrl",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 88
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "apmOss",
+            "id": "def-server.createDjangoAgentInstructions.$2",
+            "type": "string",
+            "tags": [],
+            "label": "secretToken",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 88
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "apmOss",
         "id": "def-server.createDotNetAgentInstructions",
         "type": "Function",
-        "children": [
-          {
-            "id": "def-server.createDotNetAgentInstructions.$1",
-            "type": "string",
-            "label": "apmServerUrl",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 631
-            }
-          },
-          {
-            "id": "def-server.createDotNetAgentInstructions.$2",
-            "type": "string",
-            "label": "secretToken",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 631
-            }
-          }
-        ],
+        "tags": [],
+        "label": "createDotNetAgentInstructions",
+        "description": [],
         "signature": [
           "(apmServerUrl?: string, secretToken?: string) => ({ title: string; textPre: string; commands?: undefined; textPost?: undefined; } | { title: string; textPre: string; commands: string[]; textPost: string; } | { title: string; commands: string[]; textPost: string; textPre?: undefined; })[]"
         ],
-        "description": [],
-        "label": "createDotNetAgentInstructions",
         "source": {
           "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
           "lineNumber": 631
         },
-        "tags": [],
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "apmOss",
+            "id": "def-server.createDotNetAgentInstructions.$1",
+            "type": "string",
+            "tags": [],
+            "label": "apmServerUrl",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 631
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "apmOss",
+            "id": "def-server.createDotNetAgentInstructions.$2",
+            "type": "string",
+            "tags": [],
+            "label": "secretToken",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 631
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "apmOss",
         "id": "def-server.createFlaskAgentInstructions",
         "type": "Function",
-        "children": [
-          {
-            "id": "def-server.createFlaskAgentInstructions.$1",
-            "type": "string",
-            "label": "apmServerUrl",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 173
-            }
-          },
-          {
-            "id": "def-server.createFlaskAgentInstructions.$2",
-            "type": "string",
-            "label": "secretToken",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 173
-            }
-          }
-        ],
+        "tags": [],
+        "label": "createFlaskAgentInstructions",
+        "description": [],
         "signature": [
           "(apmServerUrl?: string, secretToken?: string) => ({ title: string; textPre: string; commands: string[]; textPost?: undefined; } | { title: string; textPre: string; commands: string[]; textPost: string; })[]"
         ],
-        "description": [],
-        "label": "createFlaskAgentInstructions",
         "source": {
           "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
           "lineNumber": 173
         },
-        "tags": [],
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "apmOss",
+            "id": "def-server.createFlaskAgentInstructions.$1",
+            "type": "string",
+            "tags": [],
+            "label": "apmServerUrl",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 173
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "apmOss",
+            "id": "def-server.createFlaskAgentInstructions.$2",
+            "type": "string",
+            "tags": [],
+            "label": "secretToken",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 173
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "apmOss",
         "id": "def-server.createGoAgentInstructions",
         "type": "Function",
-        "children": [
-          {
-            "id": "def-server.createGoAgentInstructions.$1",
-            "type": "string",
-            "label": "apmServerUrl",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 492
-            }
-          },
-          {
-            "id": "def-server.createGoAgentInstructions.$2",
-            "type": "string",
-            "label": "secretToken",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 492
-            }
-          }
-        ],
+        "tags": [],
+        "label": "createGoAgentInstructions",
+        "description": [],
         "signature": [
           "(apmServerUrl?: string, secretToken?: string) => ({ title: string; textPre: string; commands: string[]; textPost?: undefined; } | { title: string; textPre: string; commands: string[]; textPost: string; })[]"
         ],
-        "description": [],
-        "label": "createGoAgentInstructions",
         "source": {
           "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
           "lineNumber": 492
         },
-        "tags": [],
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "apmOss",
+            "id": "def-server.createGoAgentInstructions.$1",
+            "type": "string",
+            "tags": [],
+            "label": "apmServerUrl",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 492
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "apmOss",
+            "id": "def-server.createGoAgentInstructions.$2",
+            "type": "string",
+            "tags": [],
+            "label": "secretToken",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 492
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "apmOss",
         "id": "def-server.createJavaAgentInstructions",
         "type": "Function",
-        "children": [
-          {
-            "id": "def-server.createJavaAgentInstructions.$1",
-            "type": "string",
-            "label": "apmServerUrl",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 585
-            }
-          },
-          {
-            "id": "def-server.createJavaAgentInstructions.$2",
-            "type": "string",
-            "label": "secretToken",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 585
-            }
-          }
-        ],
+        "tags": [],
+        "label": "createJavaAgentInstructions",
+        "description": [],
         "signature": [
           "(apmServerUrl?: string, secretToken?: string) => ({ title: string; textPre: string; commands?: undefined; textPost?: undefined; } | { title: string; textPre: string; commands: string[]; textPost: string; })[]"
         ],
-        "description": [],
-        "label": "createJavaAgentInstructions",
         "source": {
           "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
           "lineNumber": 585
         },
-        "tags": [],
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "apmOss",
+            "id": "def-server.createJavaAgentInstructions.$1",
+            "type": "string",
+            "tags": [],
+            "label": "apmServerUrl",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 585
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "apmOss",
+            "id": "def-server.createJavaAgentInstructions.$2",
+            "type": "string",
+            "tags": [],
+            "label": "secretToken",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 585
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "apmOss",
         "id": "def-server.createJsAgentInstructions",
         "type": "Function",
-        "children": [
-          {
-            "id": "def-server.createJsAgentInstructions.$1",
-            "type": "string",
-            "label": "apmServerUrl",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 393
-            }
-          }
-        ],
+        "tags": [],
+        "label": "createJsAgentInstructions",
+        "description": [],
         "signature": [
           "(apmServerUrl?: string) => ({ title: string; textPre: string; commands?: undefined; textPost?: undefined; } | { title: string; textPre: string; commands: string[]; textPost: string; } | { title: string; textPre: string; commands: string[]; textPost?: undefined; })[]"
         ],
-        "description": [],
-        "label": "createJsAgentInstructions",
         "source": {
           "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
           "lineNumber": 393
         },
-        "tags": [],
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "apmOss",
+            "id": "def-server.createJsAgentInstructions.$1",
+            "type": "string",
+            "tags": [],
+            "label": "apmServerUrl",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 393
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "apmOss",
         "id": "def-server.createNodeAgentInstructions",
         "type": "Function",
-        "children": [
-          {
-            "id": "def-server.createNodeAgentInstructions.$1",
-            "type": "string",
-            "label": "apmServerUrl",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 11
-            }
-          },
-          {
-            "id": "def-server.createNodeAgentInstructions.$2",
-            "type": "string",
-            "label": "secretToken",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 11
-            }
-          }
-        ],
+        "tags": [],
+        "label": "createNodeAgentInstructions",
+        "description": [],
         "signature": [
           "(apmServerUrl?: string, secretToken?: string) => ({ title: string; textPre: string; commands: string[]; textPost?: undefined; } | { title: string; textPre: string; commands: string[]; textPost: string; })[]"
         ],
-        "description": [],
-        "label": "createNodeAgentInstructions",
         "source": {
           "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
           "lineNumber": 11
         },
-        "tags": [],
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "apmOss",
+            "id": "def-server.createNodeAgentInstructions.$1",
+            "type": "string",
+            "tags": [],
+            "label": "apmServerUrl",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 11
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "apmOss",
+            "id": "def-server.createNodeAgentInstructions.$2",
+            "type": "string",
+            "tags": [],
+            "label": "secretToken",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 11
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "apmOss",
         "id": "def-server.createPhpAgentInstructions",
         "type": "Function",
-        "children": [
-          {
-            "id": "def-server.createPhpAgentInstructions.$1",
-            "type": "string",
-            "label": "apmServerUrl",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 705
-            }
-          },
-          {
-            "id": "def-server.createPhpAgentInstructions.$2",
-            "type": "string",
-            "label": "secretToken",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 705
-            }
-          }
-        ],
+        "tags": [],
+        "label": "createPhpAgentInstructions",
+        "description": [],
         "signature": [
           "(apmServerUrl?: string, secretToken?: string) => ({ title: string; textPre: string; commands?: undefined; textPost?: undefined; } | { title: string; textPre: string; commands: string[]; textPost: string; })[]"
         ],
-        "description": [],
-        "label": "createPhpAgentInstructions",
         "source": {
           "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
           "lineNumber": 705
         },
-        "tags": [],
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "apmOss",
+            "id": "def-server.createPhpAgentInstructions.$1",
+            "type": "string",
+            "tags": [],
+            "label": "apmServerUrl",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 705
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "apmOss",
+            "id": "def-server.createPhpAgentInstructions.$2",
+            "type": "string",
+            "tags": [],
+            "label": "secretToken",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 705
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "apmOss",
         "id": "def-server.createRackAgentInstructions",
         "type": "Function",
-        "children": [
-          {
-            "id": "def-server.createRackAgentInstructions.$1",
-            "type": "string",
-            "label": "apmServerUrl",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 298
-            }
-          },
-          {
-            "id": "def-server.createRackAgentInstructions.$2",
-            "type": "string",
-            "label": "secretToken",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 298
-            }
-          }
-        ],
+        "tags": [],
+        "label": "createRackAgentInstructions",
+        "description": [],
         "signature": [
           "(apmServerUrl?: string, secretToken?: string) => ({ title: string; textPre: string; commands: string[]; textPost?: undefined; } | { title: string; textPre: string; commands: string[]; textPost: string; })[]"
         ],
-        "description": [],
-        "label": "createRackAgentInstructions",
         "source": {
           "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
           "lineNumber": 298
         },
-        "tags": [],
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "apmOss",
+            "id": "def-server.createRackAgentInstructions.$1",
+            "type": "string",
+            "tags": [],
+            "label": "apmServerUrl",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 298
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "apmOss",
+            "id": "def-server.createRackAgentInstructions.$2",
+            "type": "string",
+            "tags": [],
+            "label": "secretToken",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 298
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "apmOss",
         "id": "def-server.createRailsAgentInstructions",
         "type": "Function",
-        "children": [
-          {
-            "id": "def-server.createRailsAgentInstructions.$1",
-            "type": "string",
-            "label": "apmServerUrl",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 255
-            }
-          },
-          {
-            "id": "def-server.createRailsAgentInstructions.$2",
-            "type": "string",
-            "label": "secretToken",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 255
-            }
-          }
-        ],
+        "tags": [],
+        "label": "createRailsAgentInstructions",
+        "description": [],
         "signature": [
           "(apmServerUrl?: string, secretToken?: string) => ({ title: string; textPre: string; commands: string[]; textPost?: undefined; } | { title: string; textPre: string; commands: string[]; textPost: string; })[]"
         ],
-        "description": [],
-        "label": "createRailsAgentInstructions",
         "source": {
           "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
           "lineNumber": 255
         },
-        "tags": [],
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "apmOss",
+            "id": "def-server.createRailsAgentInstructions.$1",
+            "type": "string",
+            "tags": [],
+            "label": "apmServerUrl",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 255
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "apmOss",
+            "id": "def-server.createRailsAgentInstructions.$2",
+            "type": "string",
+            "tags": [],
+            "label": "secretToken",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 255
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -506,77 +589,94 @@
     "enums": [],
     "misc": [
       {
-        "tags": [],
+        "parentPluginId": "apmOss",
         "id": "def-server.APM_STATIC_INDEX_PATTERN_ID",
         "type": "string",
+        "tags": [],
         "label": "APM_STATIC_INDEX_PATTERN_ID",
         "description": [],
+        "signature": [
+          "\"apm_static_index_pattern_id\""
+        ],
         "source": {
           "path": "src/plugins/apm_oss/common/index_pattern_constants.ts",
           "lineNumber": 9
         },
-        "signature": [
-          "\"apm_static_index_pattern_id\""
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "apmOss",
         "id": "def-server.APMOSSConfig",
         "type": "Type",
-        "label": "APMOSSConfig",
         "tags": [],
+        "label": "APMOSSConfig",
         "description": [],
+        "signature": [
+          "{ readonly enabled: boolean; readonly transactionIndices: string; readonly spanIndices: string; readonly errorIndices: string; readonly metricsIndices: string; readonly sourcemapIndices: string; readonly onboardingIndices: string; readonly indexPattern: string; readonly fleetMode: boolean; }"
+        ],
         "source": {
           "path": "src/plugins/apm_oss/server/index.ts",
           "lineNumber": 32
         },
-        "signature": [
-          "{ readonly enabled: boolean; readonly transactionIndices: string; readonly spanIndices: string; readonly errorIndices: string; readonly metricsIndices: string; readonly sourcemapIndices: string; readonly onboardingIndices: string; readonly indexPattern: string; readonly fleetMode: boolean; }"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "objects": [],
     "setup": {
+      "parentPluginId": "apmOss",
       "id": "def-server.APMOSSPluginSetup",
       "type": "Interface",
+      "tags": [],
       "label": "APMOSSPluginSetup",
       "description": [],
-      "tags": [],
+      "source": {
+        "path": "src/plugins/apm_oss/server/plugin.ts",
+        "lineNumber": 47
+      },
+      "deprecated": false,
       "children": [
         {
-          "tags": [],
+          "parentPluginId": "apmOss",
           "id": "def-server.APMOSSPluginSetup.config",
           "type": "Object",
+          "tags": [],
           "label": "config",
           "description": [],
+          "signature": [
+            "{ readonly enabled: boolean; readonly transactionIndices: string; readonly spanIndices: string; readonly errorIndices: string; readonly metricsIndices: string; readonly sourcemapIndices: string; readonly onboardingIndices: string; readonly indexPattern: string; readonly fleetMode: boolean; }"
+          ],
           "source": {
             "path": "src/plugins/apm_oss/server/plugin.ts",
             "lineNumber": 48
           },
-          "signature": [
-            "Readonly<{} & { enabled: boolean; transactionIndices: string; spanIndices: string; errorIndices: string; metricsIndices: string; sourcemapIndices: string; onboardingIndices: string; indexPattern: string; fleetMode: boolean; }>"
-          ]
+          "deprecated": false
         },
         {
-          "tags": [],
+          "parentPluginId": "apmOss",
           "id": "def-server.APMOSSPluginSetup.config$",
           "type": "Object",
+          "tags": [],
           "label": "config$",
           "description": [],
+          "signature": [
+            "Observable",
+            "<Readonly<{} & { enabled: boolean; transactionIndices: string; spanIndices: string; errorIndices: string; metricsIndices: string; sourcemapIndices: string; onboardingIndices: string; indexPattern: string; fleetMode: boolean; }>>"
+          ],
           "source": {
             "path": "src/plugins/apm_oss/server/plugin.ts",
             "lineNumber": 49
           },
-          "signature": [
-            "Observable",
-            "<Readonly<{} & { enabled: boolean; transactionIndices: string; spanIndices: string; errorIndices: string; metricsIndices: string; sourcemapIndices: string; onboardingIndices: string; indexPattern: string; fleetMode: boolean; }>>"
-          ]
+          "deprecated": false
         },
         {
+          "parentPluginId": "apmOss",
           "id": "def-server.APMOSSPluginSetup.getRegisteredTutorialProvider",
           "type": "Function",
+          "tags": [],
           "label": "getRegisteredTutorialProvider",
+          "description": [],
           "signature": [
             "() => ",
             {
@@ -587,20 +687,15 @@
               "text": "TutorialProvider"
             }
           ],
-          "description": [],
-          "children": [],
-          "tags": [],
-          "returnComment": [],
           "source": {
             "path": "src/plugins/apm_oss/server/plugin.ts",
             "lineNumber": 50
-          }
+          },
+          "deprecated": false,
+          "children": [],
+          "returnComment": []
         }
       ],
-      "source": {
-        "path": "src/plugins/apm_oss/server/plugin.ts",
-        "lineNumber": 47
-      },
       "lifecycle": "setup",
       "initialIsOpen": true
     }

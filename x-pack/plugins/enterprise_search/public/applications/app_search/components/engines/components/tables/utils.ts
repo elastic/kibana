@@ -10,7 +10,7 @@ import { EngineDetails } from '../../../engine/types';
 
 export const getConflictingEnginesFromConflictingField = (
   conflictingField: SchemaConflictFieldTypes
-): string[] => Object.values(conflictingField).flat();
+) => Object.values(conflictingField).flat() as string[];
 
 export const getConflictingEnginesFromSchemaConflicts = (
   schemaConflicts: SchemaConflicts

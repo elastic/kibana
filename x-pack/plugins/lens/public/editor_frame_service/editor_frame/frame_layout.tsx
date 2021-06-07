@@ -22,28 +22,33 @@ export interface FrameLayoutProps {
 
 export function FrameLayout(props: FrameLayoutProps) {
   return (
-    <EuiPage className="lnsFrameLayout">
+    <EuiPage
+      className={classNames('lnsFrameLayout', {
+        'lnsFrameLayout-isFullscreen': props.isFullscreen,
+      })}
+    >
       <EuiPageBody
         restrictWidth={false}
         className="lnsFrameLayout__pageContent"
         aria-labelledby="lns_ChartTitle"
       >
-        {!props.isFullscreen ? (
-          <section className="lnsFrameLayout__sidebar" aria-labelledby="dataPanelId">
-            <EuiScreenReaderOnly>
-              <h2 id="dataPanelId">
-                {i18n.translate('xpack.lens.section.dataPanelLabel', {
-                  defaultMessage: 'Data panel',
-                })}
-              </h2>
-            </EuiScreenReaderOnly>
-            {props.dataPanel}
-          </section>
-        ) : null}
+        <section
+          className={classNames('lnsFrameLayout__sidebar lnsFrameLayout__sidebar--left', {})}
+          aria-labelledby="dataPanelId"
+        >
+          <EuiScreenReaderOnly>
+            <h2 id="dataPanelId">
+              {i18n.translate('xpack.lens.section.dataPanelLabel', {
+                defaultMessage: 'Data panel',
+              })}
+            </h2>
+          </EuiScreenReaderOnly>
+          {props.dataPanel}
+        </section>
         <section
           className={classNames('lnsFrameLayout__pageBody', {
             // eslint-disable-next-line @typescript-eslint/naming-convention
-            'lnsFrameLayout__pageBody--fullscreen': props.isFullscreen,
+            'lnsFrameLayout__pageBody-isFullscreen': props.isFullscreen,
           })}
           aria-labelledby="workspaceId"
         >
@@ -55,12 +60,12 @@ export function FrameLayout(props: FrameLayoutProps) {
             </h2>
           </EuiScreenReaderOnly>
           {props.workspacePanel}
-          {!props.isFullscreen ? props.suggestionsPanel : null}
+          <div className="lnsFrameLayout__suggestionPanel">{props.suggestionsPanel}</div>
         </section>
         <section
           className={classNames('lnsFrameLayout__sidebar lnsFrameLayout__sidebar--right', {
             // eslint-disable-next-line @typescript-eslint/naming-convention
-            'lnsFrameLayout__sidebar--fullscreen': props.isFullscreen,
+            'lnsFrameLayout__sidebar-isFullscreen': props.isFullscreen,
           })}
           aria-labelledby="configPanel"
         >

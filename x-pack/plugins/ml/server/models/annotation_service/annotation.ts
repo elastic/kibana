@@ -40,8 +40,8 @@ export interface FieldToBucket {
 
 export interface IndexAnnotationArgs {
   jobIds: string[];
-  earliestMs: number;
-  latestMs: number;
+  earliestMs: number | null;
+  latestMs: number | null;
   maxAnnotations: number;
   fields?: FieldToBucket[];
   detectorIndex?: number;

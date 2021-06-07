@@ -7,7 +7,7 @@
 
 import { flatMap, isEqual } from 'lodash';
 import semver from 'semver';
-import { validate } from '../../../../common';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import {
   InternalArtifactSchema,
   InternalManifestSchema,

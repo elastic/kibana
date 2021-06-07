@@ -11,8 +11,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { RulesBulkSchema, rulesBulkSchema } from './rules_bulk_schema';
 import { RulesSchema } from './rules_schema';
 import { ErrorSchema } from './error_schema';
-import { exactCheck } from '../../../exact_check';
-import { foldLeftRight, getPaths } from '../../../test_utils';
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { getRulesSchemaMock } from './rules_schema.mocks';
 import { getErrorSchemaMock } from './error_schema.mocks';

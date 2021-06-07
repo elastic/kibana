@@ -11,7 +11,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Multi-Factor Authentication Disabled for an Azure User",
-  "note": "The Azure Filebeat module must be enabled to use this rule.",
+  "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "query": "event.dataset:azure.auditlogs and azure.auditlogs.operation_name:\"Disable Strong Authentication\" and event.outcome:(Success or success)",
   "risk_score": 47,
   "rule_id": "dafa3235-76dc-40e2-9f71-1773b96d24cf",
@@ -43,5 +43,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 4
+  "version": 5
 }

@@ -3,11 +3,10 @@
   "client": {
     "classes": [
       {
+        "parentPluginId": "core",
         "id": "def-public.ScopedHistory",
         "type": "Class",
-        "tags": [
-          "public"
-        ],
+        "tags": [],
         "label": "ScopedHistory",
         "description": [
           "\nA wrapper around a `History` instance that is scoped to a particular base path of the history stack. Behaves\nsimilarly to the `basename` option except that this wrapper hides any history stack entries from outside the scope\nof this base path.\n\nThis wrapper also allows Core and Plugins to share a single underlying global `History` instance without exposing\nthe history of other applications.\n\nThe {@link ScopedHistory.createSubHistory | createSubHistory} method is particularly useful for applications that\ncontain any number of \"sub-apps\" which should not have access to the main application's history or basePath.\n"
@@ -24,71 +23,74 @@
           "History",
           "<HistoryLocationState>"
         ],
+        "source": {
+          "path": "src/core/public/application/scoped_history.ts",
+          "lineNumber": 34
+        },
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "core",
             "id": "def-public.ScopedHistory.Unnamed",
             "type": "Function",
+            "tags": [],
             "label": "Constructor",
+            "description": [],
             "signature": [
               "any"
             ],
-            "description": [],
+            "source": {
+              "path": "src/core/public/application/scoped_history.ts",
+              "lineNumber": 59
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "core",
                 "id": "def-public.ScopedHistory.Unnamed.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "parentHistory",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "History",
                   "<any>"
                 ],
-                "description": [],
                 "source": {
                   "path": "src/core/public/application/scoped_history.ts",
                   "lineNumber": 59
-                }
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
+                "parentPluginId": "core",
                 "id": "def-public.ScopedHistory.Unnamed.$2",
                 "type": "string",
+                "tags": [],
                 "label": "basePath",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "string"
                 ],
-                "description": [],
                 "source": {
                   "path": "src/core/public/application/scoped_history.ts",
                   "lineNumber": 59
-                }
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/public/application/scoped_history.ts",
-              "lineNumber": 59
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "core",
             "id": "def-public.ScopedHistory.createSubHistory",
             "type": "Function",
-            "children": [
-              {
-                "id": "def-public.ScopedHistory.createSubHistory.$1",
-                "type": "string",
-                "label": "basePath",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 78
-                }
-              }
+            "tags": [],
+            "label": "createSubHistory",
+            "description": [
+              "\nCreates a `ScopedHistory` for a subpath of this `ScopedHistory`. Useful for applications that may have sub-apps\nthat do not need access to the containing application's history.\n"
             ],
             "signature": [
               "<SubHistoryLocationState = unknown>(basePath: string) => ",
@@ -101,254 +103,296 @@
               },
               "<SubHistoryLocationState>"
             ],
-            "description": [
-              "\nCreates a `ScopedHistory` for a subpath of this `ScopedHistory`. Useful for applications that may have sub-apps\nthat do not need access to the containing application's history.\n"
-            ],
-            "label": "createSubHistory",
             "source": {
               "path": "src/core/public/application/scoped_history.ts",
               "lineNumber": 77
             },
-            "tags": [],
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.ScopedHistory.createSubHistory.$1",
+                "type": "string",
+                "tags": [],
+                "label": "basePath",
+                "description": [
+                  "the URL path scope for the sub history"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "src/core/public/application/scoped_history.ts",
+                  "lineNumber": 78
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
+            "parentPluginId": "core",
             "id": "def-public.ScopedHistory.length",
             "type": "number",
-            "label": "length",
             "tags": [],
+            "label": "length",
             "description": [
               "\nThe number of entries in the history stack, including all entries forwards and backwards from the current location."
             ],
             "source": {
               "path": "src/core/public/application/scoped_history.ts",
               "lineNumber": 86
-            }
+            },
+            "deprecated": false
           },
           {
+            "parentPluginId": "core",
             "id": "def-public.ScopedHistory.location",
             "type": "Object",
-            "label": "location",
             "tags": [],
+            "label": "location",
             "description": [
               "\nThe current location of the history stack."
+            ],
+            "signature": [
+              "Location",
+              "<HistoryLocationState>"
             ],
             "source": {
               "path": "src/core/public/application/scoped_history.ts",
               "lineNumber": 94
             },
-            "signature": [
-              "Location",
-              "<HistoryLocationState>"
-            ]
+            "deprecated": false
           },
           {
+            "parentPluginId": "core",
             "id": "def-public.ScopedHistory.action",
             "type": "CompoundType",
-            "label": "action",
             "tags": [],
+            "label": "action",
             "description": [
               "\nThe last action dispatched on the history stack."
+            ],
+            "signature": [
+              "\"PUSH\" | \"POP\" | \"REPLACE\""
             ],
             "source": {
               "path": "src/core/public/application/scoped_history.ts",
               "lineNumber": 102
             },
-            "signature": [
-              "Action"
-            ]
+            "deprecated": false
           },
           {
+            "parentPluginId": "core",
             "id": "def-public.ScopedHistory.push",
             "type": "Function",
-            "children": [
-              {
-                "id": "def-public.ScopedHistory.push.$1",
-                "type": "CompoundType",
-                "label": "pathOrLocation",
-                "isRequired": true,
-                "signature": [
-                  "string | ",
-                  "LocationDescriptorObject",
-                  "<HistoryLocationState>"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 114
-                }
-              },
-              {
-                "id": "def-public.ScopedHistory.push.$2",
-                "type": "Uncategorized",
-                "label": "state",
-                "isRequired": false,
-                "signature": [
-                  "HistoryLocationState | undefined"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 115
-                }
-              }
+            "tags": [],
+            "label": "push",
+            "description": [
+              "\nPushes a new location onto the history stack. If there are forward entries in the stack, they will be removed.\n"
             ],
             "signature": [
               "(pathOrLocation: string | ",
               "LocationDescriptorObject",
               "<HistoryLocationState>, state?: HistoryLocationState | undefined) => void"
             ],
-            "description": [
-              "\nPushes a new location onto the history stack. If there are forward entries in the stack, they will be removed.\n"
-            ],
-            "label": "push",
             "source": {
               "path": "src/core/public/application/scoped_history.ts",
               "lineNumber": 113
             },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-public.ScopedHistory.replace",
-            "type": "Function",
+            "deprecated": false,
             "children": [
               {
-                "id": "def-public.ScopedHistory.replace.$1",
+                "parentPluginId": "core",
+                "id": "def-public.ScopedHistory.push.$1",
                 "type": "CompoundType",
+                "tags": [],
                 "label": "pathOrLocation",
-                "isRequired": true,
+                "description": [
+                  "a string or location descriptor"
+                ],
                 "signature": [
                   "string | ",
                   "LocationDescriptorObject",
                   "<HistoryLocationState>"
                 ],
-                "description": [],
                 "source": {
                   "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 132
-                }
+                  "lineNumber": 114
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
-                "id": "def-public.ScopedHistory.replace.$2",
+                "parentPluginId": "core",
+                "id": "def-public.ScopedHistory.push.$2",
                 "type": "Uncategorized",
+                "tags": [],
                 "label": "state",
-                "isRequired": false,
+                "description": [],
                 "signature": [
                   "HistoryLocationState | undefined"
                 ],
-                "description": [],
                 "source": {
                   "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 133
-                }
+                  "lineNumber": 115
+                },
+                "deprecated": false,
+                "isRequired": false
               }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ScopedHistory.replace",
+            "type": "Function",
+            "tags": [],
+            "label": "replace",
+            "description": [
+              "\nReplaces the current location in the history stack. Does not remove forward or backward entries.\n"
             ],
             "signature": [
               "(pathOrLocation: string | ",
               "LocationDescriptorObject",
               "<HistoryLocationState>, state?: HistoryLocationState | undefined) => void"
             ],
-            "description": [
-              "\nReplaces the current location in the history stack. Does not remove forward or backward entries.\n"
-            ],
-            "label": "replace",
             "source": {
               "path": "src/core/public/application/scoped_history.ts",
               "lineNumber": 131
             },
-            "tags": [],
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.ScopedHistory.replace.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "pathOrLocation",
+                "description": [
+                  "a string or location descriptor"
+                ],
+                "signature": [
+                  "string | ",
+                  "LocationDescriptorObject",
+                  "<HistoryLocationState>"
+                ],
+                "source": {
+                  "path": "src/core/public/application/scoped_history.ts",
+                  "lineNumber": 132
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-public.ScopedHistory.replace.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "HistoryLocationState | undefined"
+                ],
+                "source": {
+                  "path": "src/core/public/application/scoped_history.ts",
+                  "lineNumber": 133
+                },
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
+            "parentPluginId": "core",
             "id": "def-public.ScopedHistory.go",
             "type": "Function",
-            "children": [
-              {
-                "id": "def-public.ScopedHistory.go.$1",
-                "type": "number",
-                "label": "n",
-                "isRequired": true,
-                "signature": [
-                  "number"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 150
-                }
-              }
+            "tags": [],
+            "label": "go",
+            "description": [
+              "\nSend the user forward or backwards in the history stack.\n"
             ],
             "signature": [
               "(n: number) => void"
             ],
-            "description": [
-              "\nSend the user forward or backwards in the history stack.\n"
-            ],
-            "label": "go",
             "source": {
               "path": "src/core/public/application/scoped_history.ts",
               "lineNumber": 150
             },
-            "tags": [],
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.ScopedHistory.go.$1",
+                "type": "number",
+                "tags": [],
+                "label": "n",
+                "description": [
+                  "number of positions in the stack to go. Negative numbers indicate number of entries backward, positive\nnumbers for forwards. If passed 0, the current location will be reloaded. If `n` exceeds the number of\nentries available, this is a no-op."
+                ],
+                "signature": [
+                  "number"
+                ],
+                "source": {
+                  "path": "src/core/public/application/scoped_history.ts",
+                  "lineNumber": 150
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
+            "parentPluginId": "core",
             "id": "def-public.ScopedHistory.goBack",
             "type": "Function",
-            "children": [],
-            "signature": [
-              "() => void"
-            ],
+            "tags": [],
+            "label": "goBack",
             "description": [
               "\nSend the user one location back in the history stack. Equivalent to calling\n{@link ScopedHistory.go | ScopedHistory.go(-1)}. If no more entries are available backwards, this is a no-op."
             ],
-            "label": "goBack",
+            "signature": [
+              "() => void"
+            ],
             "source": {
               "path": "src/core/public/application/scoped_history.ts",
               "lineNumber": 168
             },
-            "tags": [],
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           },
           {
+            "parentPluginId": "core",
             "id": "def-public.ScopedHistory.goForward",
             "type": "Function",
-            "children": [],
-            "signature": [
-              "() => void"
-            ],
+            "tags": [],
+            "label": "goForward",
             "description": [
               "\nSend the user one location forward in the history stack. Equivalent to calling\n{@link ScopedHistory.go | ScopedHistory.go(1)}. If no more entries are available forwards, this is a no-op."
             ],
-            "label": "goForward",
+            "signature": [
+              "() => void"
+            ],
             "source": {
               "path": "src/core/public/application/scoped_history.ts",
               "lineNumber": 177
             },
-            "tags": [],
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           },
           {
+            "parentPluginId": "core",
             "id": "def-public.ScopedHistory.block",
             "type": "Function",
-            "children": [
-              {
-                "id": "def-public.ScopedHistory.block.$1",
-                "type": "CompoundType",
-                "label": "prompt",
-                "isRequired": false,
-                "signature": [
-                  "string | boolean | ",
-                  "History",
-                  ".TransitionPromptHook<HistoryLocationState> | undefined"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 186
-                }
-              }
+            "tags": [],
+            "label": "block",
+            "description": [
+              "\nAdd a block prompt requesting user confirmation when navigating away from the current page."
             ],
             "signature": [
               "(prompt?: string | boolean | ",
@@ -356,39 +400,42 @@
               ".TransitionPromptHook<HistoryLocationState> | undefined) => ",
               "UnregisterCallback"
             ],
-            "description": [
-              "\nAdd a block prompt requesting user confirmation when navigating away from the current page."
-            ],
-            "label": "block",
             "source": {
               "path": "src/core/public/application/scoped_history.ts",
               "lineNumber": 185
             },
-            "tags": [],
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.ScopedHistory.block.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "prompt",
+                "description": [],
+                "signature": [
+                  "string | boolean | ",
+                  "History",
+                  ".TransitionPromptHook<HistoryLocationState> | undefined"
+                ],
+                "source": {
+                  "path": "src/core/public/application/scoped_history.ts",
+                  "lineNumber": 186
+                },
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
+            "parentPluginId": "core",
             "id": "def-public.ScopedHistory.listen",
             "type": "Function",
-            "children": [
-              {
-                "id": "def-public.ScopedHistory.listen.$1",
-                "type": "Function",
-                "label": "listener",
-                "isRequired": true,
-                "signature": [
-                  "(location: ",
-                  "Location",
-                  "<HistoryLocationState>, action: ",
-                  "Action",
-                  ") => void"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 206
-                }
-              }
+            "tags": [],
+            "label": "listen",
+            "description": [
+              "\nAdds a listener for location updates.\n"
             ],
             "signature": [
               "(listener: (location: ",
@@ -398,96 +445,125 @@
               ") => void) => ",
               "UnregisterCallback"
             ],
-            "description": [
-              "\nAdds a listener for location updates.\n"
-            ],
-            "label": "listen",
             "source": {
               "path": "src/core/public/application/scoped_history.ts",
               "lineNumber": 205
             },
-            "tags": [],
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.ScopedHistory.listen.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "listener",
+                "description": [
+                  "a function that receives location updates."
+                ],
+                "signature": [
+                  "(location: ",
+                  "Location",
+                  "<HistoryLocationState>, action: ",
+                  "Action",
+                  ") => void"
+                ],
+                "source": {
+                  "path": "src/core/public/application/scoped_history.ts",
+                  "lineNumber": 206
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": [
               "an function to unsubscribe the listener."
             ]
           },
           {
+            "parentPluginId": "core",
             "id": "def-public.ScopedHistory.createHref",
             "type": "Function",
-            "children": [
-              {
-                "id": "def-public.ScopedHistory.createHref.$1",
-                "type": "Object",
-                "label": "location",
-                "isRequired": true,
-                "signature": [
-                  "LocationDescriptorObject",
-                  "<HistoryLocationState>"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 223
-                }
-              },
-              {
-                "id": "def-public.ScopedHistory.createHref.$2.prependBasePathtrue",
-                "type": "Object",
-                "label": "{ prependBasePath = true }",
-                "tags": [],
-                "description": [],
-                "children": [
-                  {
-                    "tags": [],
-                    "id": "def-public.ScopedHistory.createHref.$2.prependBasePathtrue.prependBasePath",
-                    "type": "CompoundType",
-                    "label": "prependBasePath",
-                    "description": [],
-                    "source": {
-                      "path": "src/core/public/application/scoped_history.ts",
-                      "lineNumber": 224
-                    },
-                    "signature": [
-                      "boolean | undefined"
-                    ]
-                  }
-                ],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 224
-                }
-              }
+            "tags": [],
+            "label": "createHref",
+            "description": [
+              "\nCreates an href (string) to the location.\nIf `prependBasePath` is true (default), it will prepend the location's path with the scoped history basePath.\n"
             ],
             "signature": [
               "(location: ",
               "LocationDescriptorObject",
               "<HistoryLocationState>, { prependBasePath }?: { prependBasePath?: boolean | undefined; }) => string"
             ],
-            "description": [
-              "\nCreates an href (string) to the location.\nIf `prependBasePath` is true (default), it will prepend the location's path with the scoped history basePath.\n"
-            ],
-            "label": "createHref",
             "source": {
               "path": "src/core/public/application/scoped_history.ts",
               "lineNumber": 222
             },
-            "tags": [],
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.ScopedHistory.createHref.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "location",
+                "description": [],
+                "signature": [
+                  "LocationDescriptorObject",
+                  "<HistoryLocationState>"
+                ],
+                "source": {
+                  "path": "src/core/public/application/scoped_history.ts",
+                  "lineNumber": 223
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-public.ScopedHistory.createHref.$2.prependBasePathtrue",
+                "type": "Object",
+                "tags": [],
+                "label": "{ prependBasePath = true }",
+                "description": [],
+                "source": {
+                  "path": "src/core/public/application/scoped_history.ts",
+                  "lineNumber": 224
+                },
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "core",
+                    "id": "def-public.ScopedHistory.createHref.$2.prependBasePathtrue.prependBasePath",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "prependBasePath",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "source": {
+                      "path": "src/core/public/application/scoped_history.ts",
+                      "lineNumber": 224
+                    },
+                    "deprecated": false
+                  }
+                ]
+              }
+            ],
             "returnComment": []
           }
         ],
-        "source": {
-          "path": "src/core/public/application/scoped_history.ts",
-          "lineNumber": 34
-        },
         "initialIsOpen": false
       }
     ],
     "functions": [],
     "interfaces": [
       {
+        "parentPluginId": "core",
         "id": "def-public.App",
         "type": "Interface",
+        "tags": [],
         "label": "App",
+        "description": [],
         "signature": [
           {
             "pluginId": "core",
@@ -498,15 +574,17 @@
           },
           "<HistoryLocationState>"
         ],
-        "description": [],
-        "tags": [
-          "public"
-        ],
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 79
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "core",
             "id": "def-public.App.id",
             "type": "string",
+            "tags": [],
             "label": "id",
             "description": [
               "\nThe unique identifier of the application"
@@ -514,12 +592,14 @@
             "source": {
               "path": "src/core/public/application/types.ts",
               "lineNumber": 83
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "core",
             "id": "def-public.App.title",
             "type": "string",
+            "tags": [],
             "label": "title",
             "description": [
               "\nThe title of the application."
@@ -527,37 +607,37 @@
             "source": {
               "path": "src/core/public/application/types.ts",
               "lineNumber": 88
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "core",
             "id": "def-public.App.category",
             "type": "Object",
+            "tags": [],
             "label": "category",
             "description": [
               "\nThe category definition of the product\nSee {@link AppCategory}\nSee DEFAULT_APP_CATEGORIES for more reference"
+            ],
+            "signature": [
+              "AppCategory",
+              " | undefined"
             ],
             "source": {
               "path": "src/core/public/application/types.ts",
               "lineNumber": 95
             },
-            "signature": [
-              "AppCategory",
-              " | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "core",
             "id": "def-public.App.status",
             "type": "CompoundType",
+            "tags": [],
             "label": "status",
             "description": [
               "\nThe initial status of the application.\nDefaulting to `accessible`"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 101
-            },
             "signature": [
               {
                 "pluginId": "core",
@@ -567,20 +647,22 @@
                 "text": "AppStatus"
               },
               " | undefined"
-            ]
+            ],
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 101
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "core",
             "id": "def-public.App.navLinkStatus",
             "type": "CompoundType",
+            "tags": [],
             "label": "navLinkStatus",
             "description": [
               "\nThe initial status of the application's navLink.\nDefaulting to `visible` if `status` is `accessible` and `hidden` if status is `inaccessible`\nSee {@link AppNavLinkStatus}"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 108
-            },
             "signature": [
               {
                 "pluginId": "core",
@@ -590,36 +672,40 @@
                 "text": "AppNavLinkStatus"
               },
               " | undefined"
-            ]
+            ],
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 108
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "core",
             "id": "def-public.App.defaultPath",
             "type": "string",
+            "tags": [],
             "label": "defaultPath",
             "description": [
               "\nAllow to define the default path a user should be directed to when navigating to the app.\nWhen defined, this value will be used as a default for the `path` option when calling {@link ApplicationStart.navigateToApp | navigateToApp}`,\nand will also be appended to the {@link ChromeNavLink | application navLink} in the navigation bar."
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "source": {
               "path": "src/core/public/application/types.ts",
               "lineNumber": 115
             },
-            "signature": [
-              "string | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "core",
             "id": "def-public.App.updater$",
             "type": "Object",
+            "tags": [],
             "label": "updater$",
             "description": [
               "\nAn {@link AppUpdater} observable that can be used to update the application {@link AppUpdatableFields} at runtime.\n"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 149
-            },
             "signature": [
               "Observable",
               "<",
@@ -631,212 +717,295 @@
                 "text": "AppUpdater"
               },
               "> | undefined"
-            ]
+            ],
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 149
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "core",
             "id": "def-public.App.order",
             "type": "number",
+            "tags": [],
             "label": "order",
             "description": [
               "\nAn ordinal used to sort nav links relative to one another for display."
+            ],
+            "signature": [
+              "number | undefined"
             ],
             "source": {
               "path": "src/core/public/application/types.ts",
               "lineNumber": 154
             },
-            "signature": [
-              "number | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "core",
             "id": "def-public.App.tooltip",
             "type": "string",
+            "tags": [],
             "label": "tooltip",
             "description": [
               "\nA tooltip shown when hovering over app link."
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "source": {
               "path": "src/core/public/application/types.ts",
               "lineNumber": 159
             },
-            "signature": [
-              "string | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "core",
             "id": "def-public.App.euiIconType",
             "type": "string",
+            "tags": [],
             "label": "euiIconType",
             "description": [
               "\nA EUI iconType that will be used for the app's icon. This icon\ntakes precendence over the `icon` property."
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "source": {
               "path": "src/core/public/application/types.ts",
               "lineNumber": 165
             },
-            "signature": [
-              "string | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "core",
             "id": "def-public.App.icon",
             "type": "string",
+            "tags": [],
             "label": "icon",
             "description": [
               "\nA URL to an image file used as an icon. Used as a fallback\nif `euiIconType` is not provided."
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "source": {
               "path": "src/core/public/application/types.ts",
               "lineNumber": 171
             },
-            "signature": [
-              "string | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "core",
             "id": "def-public.App.capabilities",
             "type": "Object",
+            "tags": [],
             "label": "capabilities",
             "description": [
               "\nCustom capabilities defined by the app."
+            ],
+            "signature": [
+              "Partial<",
+              "Capabilities",
+              "> | undefined"
             ],
             "source": {
               "path": "src/core/public/application/types.ts",
               "lineNumber": 176
             },
-            "signature": [
-              "Partial<",
-              "Capabilities",
-              "> | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "core",
             "id": "def-public.App.chromeless",
             "type": "CompoundType",
+            "tags": [],
             "label": "chromeless",
             "description": [
               "\nHide the UI chrome when the application is mounted. Defaults to `false`.\nTakes precedence over chrome service visibility settings."
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "source": {
               "path": "src/core/public/application/types.ts",
               "lineNumber": 182
             },
-            "signature": [
-              "boolean | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "core",
             "id": "def-public.App.mount",
             "type": "Function",
+            "tags": [],
             "label": "mount",
             "description": [
               "\nA mount function called when the user navigates to this app's route."
+            ],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreApplicationPluginApi",
+                "section": "def-public.AppMountParameters",
+                "text": "AppMountParameters"
+              },
+              "<HistoryLocationState>) => ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreApplicationPluginApi",
+                "section": "def-public.AppUnmount",
+                "text": "AppUnmount"
+              },
+              " | Promise<",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreApplicationPluginApi",
+                "section": "def-public.AppUnmount",
+                "text": "AppUnmount"
+              },
+              ">"
             ],
             "source": {
               "path": "src/core/public/application/types.ts",
               "lineNumber": 187
             },
-            "signature": [
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
               {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreApplicationPluginApi",
-                "section": "def-public.AppMount",
-                "text": "AppMount"
-              },
-              "<HistoryLocationState>"
+                "parentPluginId": "core",
+                "id": "def-public.params",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreApplicationPluginApi",
+                    "section": "def-public.AppMountParameters",
+                    "text": "AppMountParameters"
+                  },
+                  "<HistoryLocationState>"
+                ],
+                "source": {
+                  "path": "src/core/public/application/types.ts",
+                  "lineNumber": 326
+                },
+                "deprecated": false
+              }
             ]
           },
           {
-            "tags": [],
+            "parentPluginId": "core",
             "id": "def-public.App.appRoute",
             "type": "string",
+            "tags": [],
             "label": "appRoute",
             "description": [
               "\nOverride the application's routing path from `/app/${id}`.\nMust be unique across registered applications. Should not include the\nbase path from HTTP."
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "source": {
               "path": "src/core/public/application/types.ts",
               "lineNumber": 194
             },
-            "signature": [
-              "string | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "core",
             "id": "def-public.App.exactRoute",
             "type": "CompoundType",
+            "tags": [],
             "label": "exactRoute",
             "description": [
               "\nIf set to true, the application's route will only be checked against an exact match. Defaults to `false`.\n"
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "source": {
               "path": "src/core/public/application/types.ts",
               "lineNumber": 212
             },
-            "signature": [
-              "boolean | undefined"
-            ]
+            "deprecated": false
           },
           {
+            "parentPluginId": "core",
+            "id": "def-public.App.keywords",
+            "type": "Array",
             "tags": [],
-            "id": "def-public.App.meta",
-            "type": "Object",
-            "label": "meta",
+            "label": "keywords",
             "description": [
-              "\nMeta data for an application that represent additional information for the app.\nSee {@link AppMeta}\n"
+              "Optional keywords to match with in deep links search. Omit if this part of the hierarchy does not have a page URL."
+            ],
+            "signature": [
+              "string[] | undefined"
             ],
             "source": {
               "path": "src/core/public/application/types.ts",
-              "lineNumber": 244
+              "lineNumber": 215
             },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.App.deepLinks",
+            "type": "Array",
+            "tags": [],
+            "label": "deepLinks",
+            "description": [
+              "\nInput type for registering secondary in-app locations for an application.\n\nDeep links must include at least one of `path` or `deepLinks`. A deep link that does not have a `path`\nrepresents a topological level in the application's hierarchy, but does not have a destination URL that is\nuser-accessible.\n"
+            ],
             "signature": [
               {
                 "pluginId": "core",
                 "scope": "public",
                 "docId": "kibCoreApplicationPluginApi",
-                "section": "def-public.AppMeta",
-                "text": "AppMeta"
+                "section": "def-public.AppDeepLink",
+                "text": "AppDeepLink"
               },
-              " | undefined"
-            ]
+              "[] | undefined"
+            ],
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 254
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 79
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "core",
         "id": "def-public.AppLeaveConfirmAction",
         "type": "Interface",
+        "tags": [],
         "label": "AppLeaveConfirmAction",
         "description": [
           "\nAction to return from a {@link AppLeaveHandler} to show a confirmation\nmessage when trying to leave an application.\n\nSee {@link AppLeaveActionFactory}\n"
         ],
-        "tags": [
-          "public"
-        ],
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 552
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "core",
             "id": "def-public.AppLeaveConfirmAction.type",
             "type": "string",
+            "tags": [],
             "label": "type",
             "description": [],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 566
-            },
             "signature": [
               {
                 "pluginId": "core",
@@ -846,75 +1015,83 @@
                 "text": "AppLeaveActionType"
               },
               ".confirm"
-            ]
+            ],
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 553
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "core",
             "id": "def-public.AppLeaveConfirmAction.text",
             "type": "string",
+            "tags": [],
             "label": "text",
-            "description": [],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 567
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.AppLeaveConfirmAction.title",
-            "type": "string",
-            "label": "title",
-            "description": [],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 568
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.AppLeaveConfirmAction.callback",
-            "type": "Function",
-            "label": "callback",
-            "description": [],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 569
-            },
-            "signature": [
-              "(() => void) | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 565
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.AppLeaveDefaultAction",
-        "type": "Interface",
-        "label": "AppLeaveDefaultAction",
-        "description": [
-          "\nAction to return from a {@link AppLeaveHandler} to execute the default\nbehaviour when leaving the application.\n\nSee {@link AppLeaveActionFactory}\n"
-        ],
-        "tags": [
-          "public"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.AppLeaveDefaultAction.type",
-            "type": "string",
-            "label": "type",
             "description": [],
             "source": {
               "path": "src/core/public/application/types.ts",
               "lineNumber": 554
             },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.AppLeaveConfirmAction.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 555
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.AppLeaveConfirmAction.callback",
+            "type": "Function",
+            "tags": [],
+            "label": "callback",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 556
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.AppLeaveDefaultAction",
+        "type": "Interface",
+        "tags": [],
+        "label": "AppLeaveDefaultAction",
+        "description": [
+          "\nAction to return from a {@link AppLeaveHandler} to execute the default\nbehaviour when leaving the application.\n\nSee {@link AppLeaveActionFactory}\n"
+        ],
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 540
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.AppLeaveDefaultAction.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
             "signature": [
               {
                 "pluginId": "core",
@@ -924,28 +1101,38 @@
                 "text": "AppLeaveActionType"
               },
               ".default"
-            ]
+            ],
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 541
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 553
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "core",
         "id": "def-public.ApplicationSetup",
         "type": "Interface",
+        "tags": [],
         "label": "ApplicationSetup",
         "description": [],
-        "tags": [
-          "public"
-        ],
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 607
+        },
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "core",
             "id": "def-public.ApplicationSetup.register",
             "type": "Function",
+            "tags": [],
             "label": "register",
+            "description": [
+              "\nRegister an mountable application to the system."
+            ],
             "signature": [
               "<HistoryLocationState = unknown>(app: ",
               {
@@ -957,15 +1144,21 @@
               },
               "<HistoryLocationState>) => void"
             ],
-            "description": [
-              "\nRegister an mountable application to the system."
-            ],
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 613
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "core",
                 "id": "def-public.ApplicationSetup.register.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "app",
-                "isRequired": true,
+                "description": [
+                  "- an {@link App}"
+                ],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -976,26 +1169,25 @@
                   },
                   "<HistoryLocationState>"
                 ],
-                "description": [
-                  "- an {@link App}"
-                ],
                 "source": {
                   "path": "src/core/public/application/types.ts",
-                  "lineNumber": 626
-                }
+                  "lineNumber": 613
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 626
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "core",
             "id": "def-public.ApplicationSetup.registerAppUpdater",
             "type": "Function",
+            "tags": [],
             "label": "registerAppUpdater",
+            "description": [
+              "\nRegister an application updater that can be used to change the {@link AppUpdatableFields} fields\nof all applications at runtime.\n\nThis is meant to be used by plugins that needs to updates the whole list of applications.\nTo only updates a specific application, use the `updater$` property of the registered application instead.\n"
+            ],
             "signature": [
               "(appUpdater$: ",
               "Observable",
@@ -1009,15 +1201,19 @@
               },
               ">) => void"
             ],
-            "description": [
-              "\nRegister an application updater that can be used to change the {@link AppUpdatableFields} fields\nof all applications at runtime.\n\nThis is meant to be used by plugins that needs to updates the whole list of applications.\nTo only updates a specific application, use the `updater$` property of the registered application instead.\n"
-            ],
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 642
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "core",
                 "id": "def-public.ApplicationSetup.registerAppUpdater.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "appUpdater$",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "Observable",
                   "<",
@@ -1030,64 +1226,59 @@
                   },
                   ">"
                 ],
-                "description": [],
                 "source": {
                   "path": "src/core/public/application/types.ts",
-                  "lineNumber": 655
-                }
+                  "lineNumber": 642
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 655
-            }
+            "returnComment": []
           }
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 620
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "core",
         "id": "def-public.ApplicationStart",
         "type": "Interface",
+        "tags": [],
         "label": "ApplicationStart",
         "description": [],
-        "tags": [
-          "public"
-        ],
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 683
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "core",
             "id": "def-public.ApplicationStart.capabilities",
             "type": "Object",
+            "tags": [],
             "label": "capabilities",
             "description": [
               "\nGets the read-only capabilities."
             ],
+            "signature": [
+              "{ readonly [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; readonly navLinks: Readonly<{ [x: string]: boolean; }>; readonly management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; readonly catalogue: Readonly<{ [x: string]: boolean; }>; }"
+            ],
             "source": {
               "path": "src/core/public/application/types.ts",
-              "lineNumber": 695
+              "lineNumber": 687
             },
-            "signature": [
-              "Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; }>"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "core",
             "id": "def-public.ApplicationStart.applications$",
             "type": "Object",
+            "tags": [],
             "label": "applications$",
             "description": [
               "\nObservable emitting the list of currently registered apps and their associated status.\n"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 704
-            },
             "signature": [
               "Observable",
               "<ReadonlyMap<string, ",
@@ -1099,12 +1290,22 @@
                 "text": "PublicAppInfo"
               },
               ">>"
-            ]
+            ],
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 696
+            },
+            "deprecated": false
           },
           {
+            "parentPluginId": "core",
             "id": "def-public.ApplicationStart.navigateToApp",
             "type": "Function",
+            "tags": [],
             "label": "navigateToApp",
+            "description": [
+              "\nNavigate to a given app\n"
+            ],
             "signature": [
               "(appId: string, options?: ",
               {
@@ -1116,29 +1317,38 @@
               },
               " | undefined) => Promise<void>"
             ],
-            "description": [
-              "\nNavigate to a given app\n"
-            ],
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 704
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "core",
                 "id": "def-public.ApplicationStart.navigateToApp.$1",
                 "type": "string",
+                "tags": [],
                 "label": "appId",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "string"
                 ],
-                "description": [],
                 "source": {
                   "path": "src/core/public/application/types.ts",
-                  "lineNumber": 712
-                }
+                  "lineNumber": 704
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
+                "parentPluginId": "core",
                 "id": "def-public.ApplicationStart.navigateToApp.$2",
                 "type": "Object",
+                "tags": [],
                 "label": "options",
-                "isRequired": false,
+                "description": [
+                  "- navigation options"
+                ],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -1149,216 +1359,170 @@
                   },
                   " | undefined"
                 ],
-                "description": [
-                  "- navigation options"
-                ],
                 "source": {
                   "path": "src/core/public/application/types.ts",
-                  "lineNumber": 712
-                }
+                  "lineNumber": 704
+                },
+                "deprecated": false,
+                "isRequired": false
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 712
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "core",
             "id": "def-public.ApplicationStart.navigateToUrl",
             "type": "Function",
+            "tags": [],
             "label": "navigateToUrl",
-            "signature": [
-              "(url: string) => Promise<void>"
-            ],
             "description": [
               "\nNavigate to given URL in a SPA friendly way when possible (when the URL will redirect to a valid application\nwithin the current basePath).\n\nThe method resolves pathnames the same way browsers do when resolving a `<a href>` value. The provided `url` can be:\n- an absolute URL\n- an absolute path\n- a path relative to the current URL (window.location.href)\n\nIf all these criteria are true for the given URL:\n- (only for absolute URLs) The origin of the URL matches the origin of the browser's current location\n- The resolved pathname of the provided URL/path starts with the current basePath (eg. /mybasepath/s/my-space)\n- The pathname segment after the basePath matches any known application route (eg. /app/<id>/ or any application's `appRoute` configuration)\n\nThen a SPA navigation will be performed using `navigateToApp` using the corresponding application and path.\nOtherwise, fallback to a full page reload to navigate to the url using `window.location.assign`\n"
             ],
+            "signature": [
+              "(url: string) => Promise<void>"
+            ],
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 742
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "core",
                 "id": "def-public.ApplicationStart.navigateToUrl.$1",
                 "type": "string",
+                "tags": [],
                 "label": "url",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
                 "description": [
                   "- an absolute URL, an absolute path or a relative path, to navigate to."
                 ],
-                "source": {
-                  "path": "src/core/public/application/types.ts",
-                  "lineNumber": 750
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 750
-            }
-          },
-          {
-            "id": "def-public.ApplicationStart.getUrlForApp",
-            "type": "Function",
-            "label": "getUrlForApp",
-            "signature": [
-              "(appId: string, options?: { path?: string | undefined; absolute?: boolean | undefined; } | undefined) => string"
-            ],
-            "description": [
-              "\nReturns the absolute path (or URL) to a given app, including the global base path.\n\nBy default, it returns the absolute path of the application (e.g `/basePath/app/my-app`).\nUse the `absolute` option to generate an absolute url instead (e.g `http://host:port/basePath/app/my-app`)\n\nNote that when generating absolute urls, the origin (protocol, host and port) are determined from the browser's current location.\n"
-            ],
-            "children": [
-              {
-                "id": "def-public.ApplicationStart.getUrlForApp.$1",
-                "type": "string",
-                "label": "appId",
-                "isRequired": true,
                 "signature": [
                   "string"
                 ],
-                "description": [],
                 "source": {
                   "path": "src/core/public/application/types.ts",
-                  "lineNumber": 764
-                }
-              },
+                  "lineNumber": 742
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ApplicationStart.getUrlForApp",
+            "type": "Function",
+            "tags": [],
+            "label": "getUrlForApp",
+            "description": [
+              "\nReturns the absolute path (or URL) to a given app, including the global base path.\n\nBy default, it returns the absolute path of the application (e.g `/basePath/app/my-app`).\nUse the `absolute` option to generate an absolute url instead (e.g `http://host:port/basePath/app/my-app`)\n\nNote that when generating absolute urls, the origin (protocol, host and port) are determined from the browser's current location.\n"
+            ],
+            "signature": [
+              "(appId: string, options?: { path?: string | undefined; absolute?: boolean | undefined; } | undefined) => string"
+            ],
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 756
+            },
+            "deprecated": false,
+            "children": [
               {
-                "id": "def-public.ApplicationStart.getUrlForApp.$2.options",
-                "type": "Object",
-                "label": "options",
+                "parentPluginId": "core",
+                "id": "def-public.ApplicationStart.getUrlForApp.$1",
+                "type": "string",
                 "tags": [],
+                "label": "appId",
                 "description": [],
-                "children": [
-                  {
-                    "tags": [],
-                    "id": "def-public.ApplicationStart.getUrlForApp.$2.options.path",
-                    "type": "string",
-                    "label": "path",
-                    "description": [],
-                    "source": {
-                      "path": "src/core/public/application/types.ts",
-                      "lineNumber": 764
-                    },
-                    "signature": [
-                      "string | undefined"
-                    ]
-                  },
-                  {
-                    "tags": [],
-                    "id": "def-public.ApplicationStart.getUrlForApp.$2.options.absolute",
-                    "type": "CompoundType",
-                    "label": "absolute",
-                    "description": [],
-                    "source": {
-                      "path": "src/core/public/application/types.ts",
-                      "lineNumber": 764
-                    },
-                    "signature": [
-                      "boolean | undefined"
-                    ]
-                  }
+                "signature": [
+                  "string"
                 ],
                 "source": {
                   "path": "src/core/public/application/types.ts",
-                  "lineNumber": 764
-                }
+                  "lineNumber": 756
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-public.ApplicationStart.getUrlForApp.$2.options",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "source": {
+                  "path": "src/core/public/application/types.ts",
+                  "lineNumber": 756
+                },
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "core",
+                    "id": "def-public.ApplicationStart.getUrlForApp.$2.options.path",
+                    "type": "string",
+                    "tags": [],
+                    "label": "path",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "source": {
+                      "path": "src/core/public/application/types.ts",
+                      "lineNumber": 756
+                    },
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "core",
+                    "id": "def-public.ApplicationStart.getUrlForApp.$2.options.absolute",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "absolute",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "source": {
+                      "path": "src/core/public/application/types.ts",
+                      "lineNumber": 756
+                    },
+                    "deprecated": false
+                  }
+                ]
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 764
-            }
+            "returnComment": []
           },
           {
-            "tags": [],
+            "parentPluginId": "core",
             "id": "def-public.ApplicationStart.currentAppId$",
             "type": "Object",
+            "tags": [],
             "label": "currentAppId$",
             "description": [
               "\nAn observable that emits the current application id and each subsequent id update."
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 769
-            },
             "signature": [
               "Observable",
               "<string | undefined>"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 691
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.AppMeta",
-        "type": "Interface",
-        "label": "AppMeta",
-        "description": [
-          "\nInput type for meta data for an application.\n\nMeta fields include `keywords` and `searchDeepLinks`\nKeywords is an array of string with which to associate the app, must include at least one unique string as an array.\n`searchDeepLinks` is an array of links that represent secondary in-app locations for the app."
-        ],
-        "tags": [
-          "public"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.AppMeta.keywords",
-            "type": "Array",
-            "label": "keywords",
-            "description": [
-              "Keywords to represent this application"
             ],
             "source": {
               "path": "src/core/public/application/types.ts",
-              "lineNumber": 257
+              "lineNumber": 761
             },
-            "signature": [
-              "string[] | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.AppMeta.searchDeepLinks",
-            "type": "Array",
-            "label": "searchDeepLinks",
-            "description": [
-              "Array of links that represent secondary in-app locations for the app."
-            ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 259
-            },
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreApplicationPluginApi",
-                "section": "def-public.AppSearchDeepLink",
-                "text": "AppSearchDeepLink"
-              },
-              "[] | undefined"
-            ]
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 255
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "core",
         "id": "def-public.AppMountParameters",
         "type": "Interface",
+        "tags": [],
         "label": "AppMountParameters",
+        "description": [],
         "signature": [
           {
             "pluginId": "core",
@@ -1369,39 +1533,39 @@
           },
           "<HistoryLocationState>"
         ],
-        "description": [],
-        "tags": [
-          "public"
-        ],
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 336
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "core",
             "id": "def-public.AppMountParameters.element",
             "type": "Object",
+            "tags": [],
             "label": "element",
             "description": [
               "\nThe container element to render the application into."
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 353
-            },
             "signature": [
               "HTMLElement"
-            ]
+            ],
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 340
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "core",
             "id": "def-public.AppMountParameters.history",
             "type": "Object",
+            "tags": [],
             "label": "history",
             "description": [
               "\nA scoped history instance for your application. Should be used to wire up\nyour applications Router.\n"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 399
-            },
             "signature": [
               {
                 "pluginId": "core",
@@ -1411,37 +1575,106 @@
                 "text": "ScopedHistory"
               },
               "<HistoryLocationState>"
-            ]
+            ],
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 386
+            },
+            "deprecated": false
           },
           {
+            "parentPluginId": "core",
+            "id": "def-public.AppMountParameters.appBasePath",
+            "type": "string",
             "tags": [
               "deprecated"
             ],
-            "id": "def-public.AppMountParameters.appBasePath",
-            "type": "string",
             "label": "appBasePath",
             "description": [
               "\nThe route path for configuring navigation to the application.\nThis string should not include the base path from HTTP.\n"
             ],
             "source": {
               "path": "src/core/public/application/types.ts",
-              "lineNumber": 449
-            }
+              "lineNumber": 436
+            },
+            "deprecated": true,
+            "references": [
+              {
+                "plugin": "management",
+                "link": {
+                  "path": "src/plugins/management/public/application.tsx",
+                  "lineNumber": 16
+                }
+              },
+              {
+                "plugin": "fleet",
+                "link": {
+                  "path": "x-pack/plugins/fleet/public/applications/fleet/index.tsx",
+                  "lineNumber": 67
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/public/account_management/account_management_app.test.ts",
+                  "lineNumber": 57
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_app.test.ts",
+                  "lineNumber": 50
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_app.test.ts",
+                  "lineNumber": 48
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/public/authentication/login/login_app.test.ts",
+                  "lineNumber": 53
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/public/authentication/logout/logout_app.test.ts",
+                  "lineNumber": 54
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_app.test.ts",
+                  "lineNumber": 55
+                }
+              },
+              {
+                "plugin": "fleet",
+                "link": {
+                  "path": "x-pack/plugins/fleet/target/types/public/applications/fleet/index.d.ts",
+                  "lineNumber": 11
+                }
+              }
+            ]
           },
           {
+            "parentPluginId": "core",
+            "id": "def-public.AppMountParameters.onAppLeave",
+            "type": "Function",
             "tags": [
               "deprecated"
             ],
-            "id": "def-public.AppMountParameters.onAppLeave",
-            "type": "Function",
             "label": "onAppLeave",
             "description": [
               "\nA function that can be used to register a handler that will be called\nwhen the user is leaving the current application, allowing to\nprompt a confirmation message before actually changing the page.\n\nThis will be called either when the user goes to another application, or when\ntrying to close the tab or manually changing the url.\n"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 484
-            },
             "signature": [
               "(handler: ",
               {
@@ -1452,20 +1685,185 @@
                 "text": "AppLeaveHandler"
               },
               ") => void"
+            ],
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 471
+            },
+            "deprecated": true,
+            "references": [
+              {
+                "plugin": "dashboard",
+                "link": {
+                  "path": "src/plugins/dashboard/public/application/types.ts",
+                  "lineNumber": 82
+                }
+              },
+              {
+                "plugin": "dashboard",
+                "link": {
+                  "path": "src/plugins/dashboard/public/application/dashboard_router.tsx",
+                  "lineNumber": 56
+                }
+              },
+              {
+                "plugin": "dashboard",
+                "link": {
+                  "path": "src/plugins/dashboard/public/plugin.tsx",
+                  "lineNumber": 298
+                }
+              },
+              {
+                "plugin": "maps",
+                "link": {
+                  "path": "x-pack/plugins/maps/public/render_app.tsx",
+                  "lineNumber": 68
+                }
+              },
+              {
+                "plugin": "maps",
+                "link": {
+                  "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx",
+                  "lineNumber": 59
+                }
+              },
+              {
+                "plugin": "maps",
+                "link": {
+                  "path": "x-pack/plugins/maps/public/routes/map_page/map_page.tsx",
+                  "lineNumber": 19
+                }
+              },
+              {
+                "plugin": "lens",
+                "link": {
+                  "path": "x-pack/plugins/lens/public/app_plugin/types.ts",
+                  "lineNumber": 71
+                }
+              },
+              {
+                "plugin": "lens",
+                "link": {
+                  "path": "x-pack/plugins/lens/public/app_plugin/mounter.tsx",
+                  "lineNumber": 171
+                }
+              },
+              {
+                "plugin": "ml",
+                "link": {
+                  "path": "x-pack/plugins/ml/public/application/app.tsx",
+                  "lineNumber": 131
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/public/app/index.tsx",
+                  "lineNumber": 17
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/public/account_management/account_management_app.test.ts",
+                  "lineNumber": 58
+                }
+              },
+              {
+                "plugin": "maps",
+                "link": {
+                  "path": "x-pack/plugins/maps/target/types/public/render_app.d.ts",
+                  "lineNumber": 5
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_app.test.ts",
+                  "lineNumber": 51
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_app.test.ts",
+                  "lineNumber": 49
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/public/authentication/login/login_app.test.ts",
+                  "lineNumber": 54
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/public/authentication/logout/logout_app.test.ts",
+                  "lineNumber": 55
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_app.test.ts",
+                  "lineNumber": 56
+                }
+              },
+              {
+                "plugin": "maps",
+                "link": {
+                  "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_page.d.ts",
+                  "lineNumber": 9
+                }
+              },
+              {
+                "plugin": "maps",
+                "link": {
+                  "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts",
+                  "lineNumber": 13
+                }
+              }
+            ],
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.handler",
+                "type": "Function",
+                "tags": [],
+                "label": "handler",
+                "description": [],
+                "signature": [
+                  "(factory: ",
+                  "AppLeaveActionFactory",
+                  ", nextAppId?: string | undefined) => ",
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreApplicationPluginApi",
+                    "section": "def-public.AppLeaveAction",
+                    "text": "AppLeaveAction"
+                  }
+                ],
+                "source": {
+                  "path": "src/core/public/application/types.ts",
+                  "lineNumber": 471
+                },
+                "deprecated": false
+              }
             ]
           },
           {
-            "tags": [],
+            "parentPluginId": "core",
             "id": "def-public.AppMountParameters.setHeaderActionMenu",
             "type": "Function",
+            "tags": [],
             "label": "setHeaderActionMenu",
             "description": [
               "\nA function that can be used to set the mount point used to populate the application action container\nin the chrome header.\n\nCalling the handler multiple time will erase the current content of the action menu with the mount from the latest call.\nCalling the handler with `undefined` will unmount the current mount point.\nCalling the handler after the application has been unmounted will have no effect.\n"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 515
-            },
             "signature": [
               "(menuMount: ",
               {
@@ -1476,104 +1874,156 @@
                 "text": "MountPoint"
               },
               "<HTMLElement> | undefined) => void"
+            ],
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 502
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.menuMount",
+                "type": "Function",
+                "tags": [],
+                "label": "menuMount",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.MountPoint",
+                    "text": "MountPoint"
+                  },
+                  "<HTMLElement> | undefined"
+                ],
+                "source": {
+                  "path": "src/core/public/application/types.ts",
+                  "lineNumber": 502
+                },
+                "deprecated": false
+              }
             ]
           }
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 349
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "core",
         "id": "def-public.NavigateToAppOptions",
         "type": "Interface",
+        "tags": [],
         "label": "NavigateToAppOptions",
         "description": [
           "\nOptions for the {@link ApplicationStart.navigateToApp | navigateToApp API}"
         ],
-        "tags": [],
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 661
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "core",
             "id": "def-public.NavigateToAppOptions.path",
             "type": "string",
+            "tags": [],
             "label": "path",
             "description": [
               "\noptional path inside application to deep link to.\nIf undefined, will use {@link App.defaultPath | the app's default path}` as default."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 666
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.NavigateToAppOptions.state",
+            "type": "Unknown",
+            "tags": [],
+            "label": "state",
+            "description": [
+              "\noptional state to forward to the application"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 670
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.NavigateToAppOptions.replace",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "replace",
+            "description": [
+              "\nif true, will not create a new history entry when navigating (using `replace` instead of `push`)"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 674
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.NavigateToAppOptions.openInNewTab",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "openInNewTab",
+            "description": [
+              "\nif true, will open the app in new tab, will share session information via window.open if base"
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "source": {
               "path": "src/core/public/application/types.ts",
               "lineNumber": 679
             },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.NavigateToAppOptions.state",
-            "type": "Unknown",
-            "label": "state",
-            "description": [
-              "\noptional state to forward to the application"
-            ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 683
-            },
-            "signature": [
-              "unknown"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.NavigateToAppOptions.replace",
-            "type": "CompoundType",
-            "label": "replace",
-            "description": [
-              "\nif true, will not create a new history entry when navigating (using `replace` instead of `push`)"
-            ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 687
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 674
-        },
         "initialIsOpen": false
       }
     ],
     "enums": [
       {
+        "parentPluginId": "core",
         "id": "def-public.AppLeaveActionType",
         "type": "Enum",
+        "tags": [],
         "label": "AppLeaveActionType",
-        "tags": [
-          "public"
-        ],
         "description": [
           "\nPossible type of actions on application leave.\n"
         ],
         "source": {
           "path": "src/core/public/application/types.ts",
-          "lineNumber": 540
+          "lineNumber": 527
         },
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "core",
         "id": "def-public.AppNavLinkStatus",
         "type": "Enum",
+        "tags": [],
         "label": "AppNavLinkStatus",
-        "tags": [
-          "public"
-        ],
         "description": [
           "\nStatus of the application's navLink.\n"
         ],
@@ -1581,15 +2031,15 @@
           "path": "src/core/public/application/types.ts",
           "lineNumber": 40
         },
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "core",
         "id": "def-public.AppStatus",
         "type": "Enum",
+        "tags": [],
         "label": "AppStatus",
-        "tags": [
-          "public"
-        ],
         "description": [
           "\nAccessibility status of an application.\n"
         ],
@@ -1597,24 +2047,71 @@
           "path": "src/core/public/application/types.ts",
           "lineNumber": 24
         },
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "misc": [
       {
-        "id": "def-public.AppLeaveAction",
+        "parentPluginId": "core",
+        "id": "def-public.AppDeepLink",
         "type": "Type",
-        "label": "AppLeaveAction",
-        "tags": [
-          "public"
-        ],
+        "tags": [],
+        "label": "AppDeepLink",
         "description": [
-          "\nPossible actions to return from a {@link AppLeaveHandler}\n\nSee {@link AppLeaveConfirmAction} and {@link AppLeaveDefaultAction}\n"
+          "\nInput type for registering secondary in-app locations for an application.\n\nDeep links must include at least one of `path` or `deepLinks`. A deep link that does not have a `path`\nrepresents a topological level in the application's hierarchy, but does not have a destination URL that is\nuser-accessible."
+        ],
+        "signature": [
+          "({ id: string; title: string; keywords?: string[] | undefined; navLinkStatus?: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppNavLinkStatus",
+            "text": "AppNavLinkStatus"
+          },
+          " | undefined; } & { path: string; deepLinks?: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppDeepLink",
+            "text": "AppDeepLink"
+          },
+          "[] | undefined; }) | ({ id: string; title: string; keywords?: string[] | undefined; navLinkStatus?: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppNavLinkStatus",
+            "text": "AppNavLinkStatus"
+          },
+          " | undefined; } & { path?: string | undefined; deepLinks: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppDeepLink",
+            "text": "AppDeepLink"
+          },
+          "[]; })"
         ],
         "source": {
           "path": "src/core/public/application/types.ts",
-          "lineNumber": 579
+          "lineNumber": 279
         },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.AppLeaveAction",
+        "type": "Type",
+        "tags": [],
+        "label": "AppLeaveAction",
+        "description": [
+          "\nPossible actions to return from a {@link AppLeaveHandler}\n\nSee {@link AppLeaveConfirmAction} and {@link AppLeaveDefaultAction}\n"
+        ],
         "signature": [
           {
             "pluginId": "core",
@@ -1632,27 +2129,28 @@
             "text": "AppLeaveConfirmAction"
           }
         ],
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 566
+        },
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "core",
         "id": "def-public.AppLeaveHandler",
         "type": "Type",
-        "label": "AppLeaveHandler",
         "tags": [
-          "public",
           "deprecated"
         ],
+        "label": "AppLeaveHandler",
         "description": [
           "\nA handler that will be executed before leaving the application, either when\ngoing to another application or when closing the browser tab or manually changing\nthe url.\nShould return `confirm` to prompt a message to the user before leaving the page, or `default`\nto keep the default behavior (doing nothing).\n\nSee {@link AppMountParameters} for detailed usage examples.\n"
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 530
-        },
         "signature": [
           "(factory: ",
           "AppLeaveActionFactory",
-          ", nextAppId: string | undefined) => ",
+          ", nextAppId?: string | undefined) => ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -1661,22 +2159,87 @@
             "text": "AppLeaveAction"
           }
         ],
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 517
+        },
+        "deprecated": true,
+        "references": [
+          {
+            "plugin": "securitySolution",
+            "link": {
+              "path": "x-pack/plugins/security_solution/public/timelines/components/flyout/index.tsx",
+              "lineNumber": 14
+            }
+          },
+          {
+            "plugin": "securitySolution",
+            "link": {
+              "path": "x-pack/plugins/security_solution/public/timelines/components/flyout/index.tsx",
+              "lineNumber": 30
+            }
+          },
+          {
+            "plugin": "securitySolution",
+            "link": {
+              "path": "x-pack/plugins/security_solution/public/app/home/index.tsx",
+              "lineNumber": 27
+            }
+          },
+          {
+            "plugin": "securitySolution",
+            "link": {
+              "path": "x-pack/plugins/security_solution/public/app/home/index.tsx",
+              "lineNumber": 44
+            }
+          },
+          {
+            "plugin": "securitySolution",
+            "link": {
+              "path": "x-pack/plugins/security_solution/public/app/routes.tsx",
+              "lineNumber": 13
+            }
+          },
+          {
+            "plugin": "securitySolution",
+            "link": {
+              "path": "x-pack/plugins/security_solution/public/app/routes.tsx",
+              "lineNumber": 23
+            }
+          },
+          {
+            "plugin": "securitySolution",
+            "link": {
+              "path": "x-pack/plugins/security_solution/public/app/app.tsx",
+              "lineNumber": 14
+            }
+          },
+          {
+            "plugin": "securitySolution",
+            "link": {
+              "path": "x-pack/plugins/security_solution/public/app/app.tsx",
+              "lineNumber": 33
+            }
+          },
+          {
+            "plugin": "securitySolution",
+            "link": {
+              "path": "x-pack/plugins/security_solution/public/app/app.tsx",
+              "lineNumber": 73
+            }
+          }
+        ],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "core",
         "id": "def-public.AppMount",
         "type": "Type",
+        "tags": [],
         "label": "AppMount",
-        "tags": [
-          "public"
-        ],
         "description": [
           "\nA mount function called when the user navigates to this app's route.\n"
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 338
-        },
         "signature": [
           "(params: ",
           {
@@ -1704,95 +2267,84 @@
           },
           ">"
         ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.AppSearchDeepLink",
-        "type": "Type",
-        "label": "AppSearchDeepLink",
-        "tags": [
-          "public"
-        ],
-        "description": [
-          "\nInput type for registering secondary in-app locations for an application.\n\nDeep links must include at least one of `path` or `searchDeepLinks`. A deep link that does not have a `path`\nrepresents a topological level in the application's hierarchy, but does not have a destination URL that is\nuser-accessible."
-        ],
         "source": {
           "path": "src/core/public/application/types.ts",
-          "lineNumber": 293
+          "lineNumber": 325
         },
-        "signature": [
-          "{ id: string; title: string; } & { path: string; searchDeepLinks?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreApplicationPluginApi",
-            "section": "def-public.AppSearchDeepLink",
-            "text": "AppSearchDeepLink"
-          },
-          "[] | undefined; keywords?: string[] | undefined; } | { id: string; title: string; } & { path?: string | undefined; searchDeepLinks: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreApplicationPluginApi",
-            "section": "def-public.AppSearchDeepLink",
-            "text": "AppSearchDeepLink"
-          },
-          "[]; keywords?: string[] | undefined; }"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "core",
         "id": "def-public.AppUnmount",
         "type": "Type",
+        "tags": [],
         "label": "AppUnmount",
-        "tags": [
-          "public"
-        ],
         "description": [
           "\nA function called when an application should be unmounted from the page. This function should be synchronous."
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 346
-        },
         "signature": [
           "() => void"
         ],
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 333
+        },
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "core",
         "id": "def-public.AppUpdatableFields",
         "type": "Type",
+        "tags": [],
         "label": "AppUpdatableFields",
-        "tags": [
-          "public"
-        ],
         "description": [
           "\nDefines the list of fields that can be updated via an {@link AppUpdater}."
+        ],
+        "signature": [
+          "{ status?: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppStatus",
+            "text": "AppStatus"
+          },
+          " | undefined; deepLinks?: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppDeepLink",
+            "text": "AppDeepLink"
+          },
+          "[] | undefined; navLinkStatus?: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppNavLinkStatus",
+            "text": "AppNavLinkStatus"
+          },
+          " | undefined; defaultPath?: string | undefined; tooltip?: string | undefined; }"
         ],
         "source": {
           "path": "src/core/public/application/types.ts",
           "lineNumber": 64
         },
-        "signature": [
-          "{ status?: AppStatus | undefined; meta?: AppMeta | undefined; navLinkStatus?: AppNavLinkStatus | undefined; defaultPath?: string | undefined; tooltip?: string | undefined; }"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "core",
         "id": "def-public.AppUpdater",
         "type": "Type",
+        "tags": [],
         "label": "AppUpdater",
-        "tags": [
-          "public"
-        ],
         "description": [
           "\nUpdater for applications.\nsee {@link ApplicationSetup}"
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 74
-        },
         "signature": [
           "(app: ",
           {
@@ -1810,65 +2362,107 @@
             "section": "def-public.App",
             "text": "App"
           },
-          "<unknown>, \"status\" | \"meta\" | \"navLinkStatus\" | \"defaultPath\" | \"tooltip\">> | undefined"
+          "<unknown>, \"status\" | \"deepLinks\" | \"navLinkStatus\" | \"defaultPath\" | \"tooltip\">> | undefined"
         ],
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 74
+        },
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "core",
+        "id": "def-public.PublicAppDeepLinkInfo",
+        "type": "Type",
+        "tags": [],
+        "label": "PublicAppDeepLinkInfo",
+        "description": [
+          "\nPublic information about a registered app's {@link AppDeepLink | deepLinks}\n"
+        ],
+        "signature": [
+          "Pick<",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppDeepLink",
+            "text": "AppDeepLink"
+          },
+          ", \"title\" | \"id\" | \"path\"> & { deepLinks: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.PublicAppDeepLinkInfo",
+            "text": "PublicAppDeepLinkInfo"
+          },
+          "[]; keywords: string[]; navLinkStatus: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppNavLinkStatus",
+            "text": "AppNavLinkStatus"
+          },
+          "; }"
+        ],
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 262
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-public.PublicAppInfo",
         "type": "Type",
+        "tags": [],
         "label": "PublicAppInfo",
-        "tags": [
-          "public"
-        ],
         "description": [
           "\nPublic information about a registered {@link App | application}\n"
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 322
-        },
         "signature": [
-          "Pick<App<unknown>, \"status\" | \"title\" | \"id\" | \"order\" | \"category\" | \"navLinkStatus\" | \"defaultPath\" | \"tooltip\" | \"euiIconType\" | \"icon\" | \"capabilities\" | \"chromeless\" | \"appRoute\" | \"exactRoute\"> & { status: AppStatus; navLinkStatus: AppNavLinkStatus; appRoute: string; meta: PublicAppMetaInfo; }"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.PublicAppMetaInfo",
-        "type": "Type",
-        "label": "PublicAppMetaInfo",
-        "tags": [
-          "public"
-        ],
-        "description": [
-          "\nPublic information about a registered app's {@link AppMeta | keywords }\n"
-        ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 267
-        },
-        "signature": [
-          "Pick<AppMeta, never> & { keywords: string[]; searchDeepLinks: PublicAppSearchDeepLinkInfo[]; }"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.PublicAppSearchDeepLinkInfo",
-        "type": "Type",
-        "label": "PublicAppSearchDeepLinkInfo",
-        "tags": [
-          "public"
-        ],
-        "description": [
-          "\nPublic information about a registered app's {@link AppSearchDeepLink | searchDeepLinks}\n"
+          "Pick<",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.App",
+            "text": "App"
+          },
+          "<unknown>, \"status\" | \"title\" | \"id\" | \"order\" | \"category\" | \"navLinkStatus\" | \"defaultPath\" | \"tooltip\" | \"euiIconType\" | \"icon\" | \"capabilities\" | \"chromeless\" | \"appRoute\" | \"exactRoute\"> & { status: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppStatus",
+            "text": "AppStatus"
+          },
+          "; navLinkStatus: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppNavLinkStatus",
+            "text": "AppNavLinkStatus"
+          },
+          "; appRoute: string; keywords: string[]; deepLinks: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.PublicAppDeepLinkInfo",
+            "text": "PublicAppDeepLinkInfo"
+          },
+          "[]; }"
         ],
         "source": {
           "path": "src/core/public/application/types.ts",
-          "lineNumber": 277
+          "lineNumber": 308
         },
-        "signature": [
-          "Pick<AppSearchDeepLink, \"title\" | \"id\" | \"path\"> & { searchDeepLinks: PublicAppSearchDeepLinkInfo[]; keywords: string[]; }"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],

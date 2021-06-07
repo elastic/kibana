@@ -42,7 +42,14 @@ beforeAll(() => {
 it('Test number primitive doc def', () => {
   const node = nodes.find((n) => getNodeName(n) === 'aNum');
   expect(node).toBeDefined();
-  const def = buildApiDeclaration(node!, plugins, log, plugins[0].manifest.id, ApiScope.CLIENT);
+  const def = buildApiDeclaration({
+    node: node!,
+    plugins,
+    log,
+    currentPluginId: plugins[0].manifest.id,
+    scope: ApiScope.CLIENT,
+    captureReferences: false,
+  });
 
   expect(def.type).toBe(TypeKind.NumberKind);
 });
@@ -50,7 +57,14 @@ it('Test number primitive doc def', () => {
 it('Function type is exported as type with signature', () => {
   const node = nodes.find((n) => getNodeName(n) === 'FnWithGeneric');
   expect(node).toBeDefined();
-  const def = buildApiDeclaration(node!, plugins, log, plugins[0].manifest.id, ApiScope.CLIENT);
+  const def = buildApiDeclaration({
+    node: node!,
+    plugins,
+    log,
+    currentPluginId: plugins[0].manifest.id,
+    scope: ApiScope.CLIENT,
+    captureReferences: false,
+  });
   expect(def).toBeDefined();
   expect(def?.type).toBe(TypeKind.TypeKind);
   expect(def?.signature?.length).toBeGreaterThan(0);
@@ -59,7 +73,14 @@ it('Function type is exported as type with signature', () => {
 it('Test Interface Kind doc def', () => {
   const node = nodes.find((n) => getNodeName(n) === 'ExampleInterface');
   expect(node).toBeDefined();
-  const def = buildApiDeclaration(node!, plugins, log, plugins[0].manifest.id, ApiScope.CLIENT);
+  const def = buildApiDeclaration({
+    node: node!,
+    plugins,
+    log,
+    currentPluginId: plugins[0].manifest.id,
+    scope: ApiScope.CLIENT,
+    captureReferences: false,
+  });
 
   expect(def.type).toBe(TypeKind.InterfaceKind);
   expect(def.children).toBeDefined();
@@ -69,17 +90,63 @@ it('Test Interface Kind doc def', () => {
 it('Test union export', () => {
   const node = nodes.find((n) => getNodeName(n) === 'aUnionProperty');
   expect(node).toBeDefined();
-  const def = buildApiDeclaration(node!, plugins, log, plugins[0].manifest.id, ApiScope.CLIENT);
+  const def = buildApiDeclaration({
+    node: node!,
+    plugins,
+    log,
+    currentPluginId: plugins[0].manifest.id,
+    scope: ApiScope.CLIENT,
+    captureReferences: false,
+  });
   expect(def.type).toBe(TypeKind.CompoundTypeKind);
 });
 
 it('Function inside interface has a label', () => {
   const node = nodes.find((n) => getNodeName(n) === 'ExampleInterface');
   expect(node).toBeDefined();
-  const def = buildApiDeclaration(node!, plugins, log, plugins[0].manifest.id, ApiScope.CLIENT);
+  const def = buildApiDeclaration({
+    node: node!,
+    plugins,
+    log,
+    currentPluginId: plugins[0].manifest.id,
+    scope: ApiScope.CLIENT,
+    captureReferences: false,
+  });
 
   const fn = def!.children?.find((c) => c.label === 'aFn');
   expect(fn).toBeDefined();
   expect(fn?.label).toBe('aFn');
   expect(fn?.type).toBe(TypeKind.FunctionKind);
+});
+
+it('Test ReactElement signature', () => {
+  const node = nodes.find((n) => getNodeName(n) === 'AReactElementFn');
+  expect(node).toBeDefined();
+  const def = buildApiDeclaration({
+    node: node!,
+    plugins,
+    log,
+    currentPluginId: plugins[0].manifest.id,
+    scope: ApiScope.CLIENT,
+    captureReferences: false,
+  });
+  expect(def.signature).toBeDefined();
+  expect(def.signature!.length).toBe(3);
+  // There is a terrible hack to achieve this, but without it, ReactElement<Props> expands to include the second default generic type
+  // (ReactElement<Props, string | (any) crazy code here with lots of anys that comes from react types >) and
+  // it looks awful.
+  expect(def.signature![2]).toBe('>');
+  expect(def.signature!).toMatchInlineSnapshot(`
+    Array [
+      "() => React.ReactElement<",
+      Object {
+        "docId": "kibPluginAPluginApi",
+        "pluginId": "pluginA",
+        "scope": "public",
+        "section": "def-public.MyProps",
+        "text": "MyProps",
+      },
+      ">",
+    ]
+  `);
 });

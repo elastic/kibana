@@ -10,32 +10,31 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { ContextErrorMessage } from './context_error_message';
-// @ts-expect-error
-import { FAILURE_REASONS, LOADING_STATUS } from '../../angular/context/query';
+import { FailureReason, LoadingStatus } from '../../angular/context_app_state';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 describe('loading spinner', function () {
   let component: ReactWrapper;
 
   it('ContextErrorMessage does not render on loading', () => {
-    component = mountWithIntl(<ContextErrorMessage status={LOADING_STATUS.LOADING} />);
+    component = mountWithIntl(<ContextErrorMessage status={LoadingStatus.LOADING} />);
     expect(findTestSubject(component, 'contextErrorMessageTitle').length).toBe(0);
   });
 
   it('ContextErrorMessage does not render on success loading', () => {
-    component = mountWithIntl(<ContextErrorMessage status={LOADING_STATUS.LOADED} />);
+    component = mountWithIntl(<ContextErrorMessage status={LoadingStatus.LOADED} />);
     expect(findTestSubject(component, 'contextErrorMessageTitle').length).toBe(0);
   });
 
   it('ContextErrorMessage renders just the title if the reason is not specifically handled', () => {
-    component = mountWithIntl(<ContextErrorMessage status={LOADING_STATUS.FAILED} />);
+    component = mountWithIntl(<ContextErrorMessage status={LoadingStatus.FAILED} />);
     expect(findTestSubject(component, 'contextErrorMessageTitle').length).toBe(1);
     expect(findTestSubject(component, 'contextErrorMessageBody').text()).toBe('');
   });
 
   it('ContextErrorMessage renders the reason for unknown errors', () => {
     component = mountWithIntl(
-      <ContextErrorMessage status={LOADING_STATUS.FAILED} reason={FAILURE_REASONS.UNKNOWN} />
+      <ContextErrorMessage status={LoadingStatus.FAILED} reason={FailureReason.UNKNOWN} />
     );
     expect(findTestSubject(component, 'contextErrorMessageTitle').length).toBe(1);
     expect(findTestSubject(component, 'contextErrorMessageBody').length).toBe(1);

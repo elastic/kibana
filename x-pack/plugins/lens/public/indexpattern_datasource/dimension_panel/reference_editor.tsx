@@ -6,7 +6,6 @@
  */
 
 import './dimension_editor.scss';
-import _ from 'lodash';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -44,14 +43,19 @@ export interface ReferenceEditorProps {
   selectionStyle: 'full' | 'field' | 'hidden';
   validation: RequiredReference;
   columnId: string;
-  updateLayer: (newLayer: IndexPatternLayer) => void;
+  updateLayer: (
+    setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer),
+    shouldClose?: boolean
+  ) => void;
   currentIndexPattern: IndexPattern;
+
   existingFields: IndexPatternPrivateState['existingFields'];
   dateRange: DateRange;
   labelAppend?: EuiFormRowProps['labelAppend'];
   dimensionGroups: VisualizationDimensionGroupConfig[];
   isFullscreen: boolean;
   toggleFullscreen: () => void;
+  setIsCloseable: (isCloseable: boolean) => void;
 
   // Services
   uiSettings: IUiSettingsClient;
@@ -75,6 +79,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
     dimensionGroups,
     isFullscreen,
     toggleFullscreen,
+    setIsCloseable,
     ...services
   } = props;
 
@@ -96,6 +101,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
     const operationByField: Partial<Record<string, Set<OperationType>>> = {};
     const fieldByOperation: Partial<Record<OperationType, Set<string>>> = {};
     Object.values(operationDefinitionMap)
+      .filter(({ hidden }) => !hidden)
       .sort((op1, op2) => {
         return op1.displayName.localeCompare(op2.displayName);
       })
@@ -351,6 +357,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
               operationDefinitionMap={operationDefinitionMap}
               isFullscreen={isFullscreen}
               toggleFullscreen={toggleFullscreen}
+              setIsCloseable={setIsCloseable}
               {...services}
             />
           </>

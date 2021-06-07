@@ -15,7 +15,6 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
   describe('Endpoint plugin', function () {
     const ingestManager = getService('ingestManager');
 
-    this.tags('ciGroupDocker');
     const log = getService('log');
 
     if (!isRegistryEnabled()) {

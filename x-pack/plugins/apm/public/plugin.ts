@@ -6,9 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { of } from 'rxjs';
 import type { ConfigSchema } from '.';
 import {
   AppMountParameters,
+  AppNavLinkStatus,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
@@ -33,43 +35,40 @@ import type {
   FetchDataParams,
   HasDataParams,
   ObservabilityPublicSetup,
+  ObservabilityPublicStart,
 } from '../../observability/public';
-import { FormatterRuleRegistry } from '../../observability/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../triggers_actions_ui/public';
-import { apmRuleRegistrySettings } from '../common/rules/apm_rule_registry_settings';
-import type { APMRuleFieldMap } from '../common/rules/apm_rule_field_map';
 import { registerApmAlerts } from './components/alerting/register_apm_alerts';
 import { featureCatalogueEntry } from './featureCatalogueEntry';
-import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
-export type ApmRuleRegistry = ApmPluginSetup['ruleRegistry'];
 
 export type ApmPluginStart = void;
 
 export interface ApmPluginSetupDeps {
   alerting?: AlertingPluginPublicSetup;
-  ml?: MlPluginSetup;
   data: DataPublicPluginSetup;
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  ml?: MlPluginSetup;
   observability: ObservabilityPublicSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }
 
 export interface ApmPluginStartDeps {
   alerting?: AlertingPluginPublicStart;
-  ml?: MlPluginStart;
   data: DataPublicPluginStart;
+  embeddable: EmbeddableStart;
   home: void;
   licensing: void;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  embeddable: EmbeddableStart;
   maps?: MapsStartApi;
+  ml?: MlPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  observability: ObservabilityPublicStart;
 }
 
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
@@ -87,11 +86,21 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
     }
 
-    const apmRuleRegistry = plugins.observability.ruleRegistry.create({
-      ...apmRuleRegistrySettings,
-      fieldMap: {} as APMRuleFieldMap,
-      ctor: FormatterRuleRegistry,
-    });
+    // register observability nav
+    plugins.observability.navigation.registerSections(
+      of([
+        {
+          label: 'APM',
+          sortKey: 200,
+          entries: [
+            { label: 'Services', app: 'apm', path: '/services' },
+            { label: 'Traces', app: 'apm', path: '/traces' },
+            { label: 'Service Map', app: 'apm', path: '/service-map' },
+          ],
+        },
+      ])
+    );
+
     const getApmDataHelper = async () => {
       const {
         fetchObservabilityOverviewPageData,
@@ -127,6 +136,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       return { fetchUxOverviewDate, hasRumData };
     };
 
+    const { observabilityRuleTypeRegistry } = plugins.observability;
+
     plugins.observability.dashboard.register({
       appName: 'ux',
       hasData: async (params?: HasDataParams) => {
@@ -139,6 +150,26 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       },
     });
 
+    plugins.observability.navigation.registerSections(
+      of([
+        {
+          label: 'User Experience',
+          sortKey: 201,
+          entries: [
+            {
+              label: i18n.translate('xpack.apm.ux.overview.heading', {
+                defaultMessage: 'Overview',
+              }),
+              app: 'ux',
+              path: '/',
+              matchFullPath: true,
+              ignoreTrailingSlash: true,
+            },
+          ],
+        },
+      ])
+    );
+
     core.application.register({
       id: 'apm',
       title: 'APM',
@@ -147,32 +178,30 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       appRoute: '/app/apm',
       icon: 'plugins/apm/public/icon.svg',
       category: DEFAULT_APP_CATEGORIES.observability,
-      meta: {
-        // !! Need to be kept in sync with the routes in x-pack/plugins/apm/public/components/app/Main/route_config/index.tsx
-        searchDeepLinks: [
-          {
-            id: 'services',
-            title: i18n.translate('xpack.apm.breadcrumb.servicesTitle', {
-              defaultMessage: 'Services',
-            }),
-            path: '/services',
-          },
-          {
-            id: 'traces',
-            title: i18n.translate('xpack.apm.breadcrumb.tracesTitle', {
-              defaultMessage: 'Traces',
-            }),
-            path: '/traces',
-          },
-          {
-            id: 'service-map',
-            title: i18n.translate('xpack.apm.breadcrumb.serviceMapTitle', {
-              defaultMessage: 'Service Map',
-            }),
-            path: '/service-map',
-          },
-        ],
-      },
+      // !! Need to be kept in sync with the routes in x-pack/plugins/apm/public/components/app/Main/route_config/index.tsx
+      deepLinks: [
+        {
+          id: 'services',
+          title: i18n.translate('xpack.apm.breadcrumb.servicesTitle', {
+            defaultMessage: 'Services',
+          }),
+          path: '/services',
+        },
+        {
+          id: 'traces',
+          title: i18n.translate('xpack.apm.breadcrumb.tracesTitle', {
+            defaultMessage: 'Traces',
+          }),
+          path: '/traces',
+        },
+        {
+          id: 'service-map',
+          title: i18n.translate('xpack.apm.breadcrumb.serviceMapTitle', {
+            defaultMessage: 'Service Map',
+          }),
+          path: '/service-map',
+        },
+      ],
 
       async mount(appMountParameters: AppMountParameters<unknown>) {
         // Load application bundle and Get start services
@@ -187,12 +216,12 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           appMountParameters,
           config,
           pluginsStart: pluginsStart as ApmPluginStartDeps,
-          apmRuleRegistry,
+          observabilityRuleTypeRegistry,
         });
       },
     });
 
-    registerApmAlerts(apmRuleRegistry);
+    registerApmAlerts(observabilityRuleTypeRegistry);
 
     core.application.register({
       id: 'ux',
@@ -200,28 +229,29 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       order: 8500,
       euiIconType: 'logoObservability',
       category: DEFAULT_APP_CATEGORIES.observability,
-      meta: {
-        keywords: [
-          'RUM',
-          'Real User Monitoring',
-          'DEM',
-          'Digital Experience Monitoring',
-          'EUM',
-          'End User Monitoring',
-          'UX',
-          'Javascript',
-          'APM',
-          'Mobile',
-          'digital',
-          'performance',
-          'web performance',
-          'web perf',
-        ],
-      },
+      navLinkStatus: config.ui.enabled
+        ? AppNavLinkStatus.default
+        : AppNavLinkStatus.hidden,
+      keywords: [
+        'RUM',
+        'Real User Monitoring',
+        'DEM',
+        'Digital Experience Monitoring',
+        'EUM',
+        'End User Monitoring',
+        'UX',
+        'Javascript',
+        'APM',
+        'Mobile',
+        'digital',
+        'performance',
+        'web performance',
+        'web perf',
+      ],
       async mount(appMountParameters: AppMountParameters<unknown>) {
         // Load application bundle and Get start service
         const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([
-          import('./application/csmApp'),
+          import('./application/uxApp'),
           core.getStartServices(),
         ]);
 
@@ -231,16 +261,12 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           appMountParameters,
           config,
           corePlugins: corePlugins as ApmPluginStartDeps,
-          apmRuleRegistry,
+          observabilityRuleTypeRegistry,
         });
       },
     });
 
-    return {
-      ruleRegistry: apmRuleRegistry,
-    };
+    return {};
   }
-  public start(core: CoreStart, plugins: ApmPluginStartDeps) {
-    toggleAppLinkInNav(core, this.initializerContext.config.get());
-  }
+  public start(core: CoreStart, plugins: ApmPluginStartDeps) {}
 }

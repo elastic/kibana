@@ -16,7 +16,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "AWS Config Service Tampering",
-  "note": "The AWS Filebeat module must be enabled to use this rule.",
+  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "query": "event.dataset:aws.cloudtrail and event.provider:config.amazonaws.com and event.action:(DeleteConfigRule or DeleteOrganizationConfigRule or DeleteConfigurationAggregator or DeleteConfigurationRecorder or DeleteConformancePack or DeleteOrganizationConformancePack or DeleteDeliveryChannel or DeleteRemediationConfiguration or DeleteRetentionConfiguration)",
   "references": [
     "https://docs.aws.amazon.com/config/latest/developerguide/how-does-config-work.html",

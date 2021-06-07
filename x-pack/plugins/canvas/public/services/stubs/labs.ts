@@ -14,6 +14,7 @@ export const labsService: CanvasLabsService = {
   getProject: noop,
   getProjects: noop,
   getProjectIDs: () => projectIDs,
+  isProjectEnabled: () => false,
   isLabsEnabled: () => true,
   projectIDs,
   reset: noop,

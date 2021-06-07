@@ -10,7 +10,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "SUNBURST Command and Control Activity",
-  "note": "The SUNBURST malware attempts to hide within the Orion Improvement Program (OIP) network traffic. As this rule detects post-exploitation network traffic, investigations into this should be prioritized.",
+  "note": "## Triage and analysis\n\nThe SUNBURST malware attempts to hide within the Orion Improvement Program (OIP) network traffic. As this rule detects post-exploitation network traffic, investigations into this should be prioritized.",
   "query": "network where event.type == \"protocol\" and network.protocol == \"http\" and\n  process.name : (\"ConfigurationWizard.exe\",\n                  \"NetFlowService.exe\",\n                  \"NetflowDatabaseMaintenance.exe\",\n                  \"SolarWinds.Administration.exe\",\n                  \"SolarWinds.BusinessLayerHost.exe\",\n                  \"SolarWinds.BusinessLayerHostx64.exe\",\n                  \"SolarWinds.Collector.Service.exe\",\n                  \"SolarwindsDiagnostics.exe\") and\n  (http.request.body.content : \"*/swip/Upload.ashx*\" and http.request.body.content : (\"POST*\", \"PUT*\")) or\n  (http.request.body.content : (\"*/swip/SystemDescription*\", \"*/swip/Events*\") and http.request.body.content : (\"GET*\", \"HEAD*\")) and\n  not http.request.body.content : \"*solarwinds.com*\"\n",
   "references": [
     "https://www.fireeye.com/blog/threat-research/2020/12/evasive-attacker-leverages-solarwinds-supply-chain-compromises-with-sunburst-backdoor.html"

@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { validate } from '../../../../../common/validate';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import {
   PrePackagedRulesAndTimelinesStatusSchema,
   prePackagedRulesAndTimelinesStatusSchema,
 } from '../../../../../common/detection_engine/schemas/response/prepackaged_rules_status_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../../common/constants';
-import { transformError, buildSiemResponse } from '../utils';
+import { buildSiemResponse } from '../utils';
+
 import { getRulesToInstall } from '../../rules/get_rules_to_install';
 import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { findRules } from '../../rules/find_rules';

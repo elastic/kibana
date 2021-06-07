@@ -17,9 +17,7 @@ export const Y_AXIS_LABEL_WIDTH = 170;
 export const Y_AXIS_LABEL_PADDING = 8;
 export const Y_AXIS_LABEL_FONT_COLOR = '#6a717d';
 const ANNOTATION_CONTAINER_HEIGHT = 12;
-const ANNOTATION_MARGIN = 2;
-const ANNOTATION_MIN_WIDTH = 5;
-const ANNOTATION_HEIGHT = ANNOTATION_CONTAINER_HEIGHT - 2 * ANNOTATION_MARGIN;
+const ANNOTATION_MIN_WIDTH = 8;
 
 interface SwimlaneAnnotationContainerProps {
   chartWidth: number;
@@ -93,11 +91,9 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
           .append('rect')
           .classed('mlAnnotationRect', true)
           .attr('x', d.timestamp >= domain.min ? xScale(d.timestamp) : startingXPos)
-          .attr('y', ANNOTATION_MARGIN)
-          .attr('height', ANNOTATION_HEIGHT)
+          .attr('y', 0)
+          .attr('height', ANNOTATION_CONTAINER_HEIGHT)
           .attr('width', Math.max(annotationWidth, ANNOTATION_MIN_WIDTH))
-          .attr('rx', ANNOTATION_MARGIN)
-          .attr('ry', ANNOTATION_MARGIN)
           .on('mouseover', function () {
             const startingTime = formatHumanReadableDateTimeSeconds(d.timestamp);
             const endingTime =

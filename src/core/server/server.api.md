@@ -400,6 +400,11 @@ export interface ContextSetup {
 // @internal
 export interface CoreConfigUsageData {
     // (undocumented)
+    deprecatedKeys: {
+        set: string[];
+        unset: string[];
+    };
+    // (undocumented)
     elasticsearch: {
         sniffOnStart: boolean;
         sniffIntervalMs?: number;
@@ -867,8 +872,9 @@ export interface DeprecationsDetails {
                 [key: string]: any;
             };
         };
-        manualSteps?: string[];
+        manualSteps: string[];
     };
+    deprecationType?: 'config' | 'feature';
     // (undocumented)
     documentationUrl?: string;
     level: 'warning' | 'critical' | 'fetch_error';
@@ -975,6 +981,8 @@ export interface ElasticsearchServiceStart {
 export interface ElasticsearchStatusMeta {
     // (undocumented)
     incompatibleNodes: NodesVersionCompatibility['incompatibleNodes'];
+    // (undocumented)
+    nodesInfoRequestError?: NodesVersionCompatibility['nodesInfoRequestError'];
     // (undocumented)
     warningNodes: NodesVersionCompatibility['warningNodes'];
 }
@@ -1206,15 +1214,6 @@ export type ILegacyCustomClusterClient = Pick<LegacyClusterClient, 'callAsIntern
 // @public @deprecated
 export type ILegacyScopedClusterClient = Pick<LegacyScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
 
-// @public (undocumented)
-export interface ImageValidation {
-    // (undocumented)
-    maxSize: {
-        length: number;
-        description: string;
-    };
-}
-
 // @public @deprecated (undocumented)
 export interface IndexSettingsDeprecationInfo {
     // (undocumented)
@@ -1253,9 +1252,9 @@ export type ISavedObjectsExporter = PublicMethodsOf<SavedObjectsExporter>;
 export type ISavedObjectsImporter = PublicMethodsOf<SavedObjectsImporter>;
 
 // @public (undocumented)
-export interface ISavedObjectsPointInTimeFinder {
+export interface ISavedObjectsPointInTimeFinder<T, A> {
     close: () => Promise<void>;
-    find: () => AsyncGenerator<SavedObjectsFindResponse>;
+    find: () => AsyncGenerator<SavedObjectsFindResponse<T, A>>;
 }
 
 // @public
@@ -1727,6 +1726,8 @@ export interface NodesVersionCompatibility {
     // (undocumented)
     message?: string;
     // (undocumented)
+    nodesInfoRequestError?: Error;
+    // (undocumented)
     warningNodes: NodeInfo[];
 }
 
@@ -2140,6 +2141,7 @@ export type SavedObjectAttributeSingle = string | number | boolean | null | unde
 // @public (undocumented)
 export interface SavedObjectExportBaseOptions {
     excludeExportDetails?: boolean;
+    includeNamespaces?: boolean;
     includeReferencesDeep?: boolean;
     namespace?: string;
     request: KibanaRequest;
@@ -2147,9 +2149,9 @@ export interface SavedObjectExportBaseOptions {
 
 // @public
 export interface SavedObjectMigrationContext {
-    convertToMultiNamespaceTypeVersion?: string;
-    log: SavedObjectsMigrationLogger;
-    migrationVersion: string;
+    readonly convertToMultiNamespaceTypeVersion?: string;
+    readonly log: SavedObjectsMigrationLogger;
+    readonly migrationVersion: string;
 }
 
 // @public
@@ -2171,15 +2173,18 @@ export interface SavedObjectReference {
     type: string;
 }
 
-// @public (undocumented)
-export interface SavedObjectsAddToNamespacesOptions extends SavedObjectsBaseOptions {
-    refresh?: MutatingOperationRefreshSetting;
-    version?: string;
-}
-
-// @public (undocumented)
-export interface SavedObjectsAddToNamespacesResponse {
-    namespaces: string[];
+// @public
+export interface SavedObjectReferenceWithContext {
+    id: string;
+    inboundReferences: Array<{
+        type: string;
+        id: string;
+        name: string;
+    }>;
+    isMissing?: boolean;
+    spaces: string[];
+    spacesWithMatchingAliases?: string[];
+    type: string;
 }
 
 // Warning: (ae-forgotten-export) The symbol "SavedObjectDoc" needs to be exported by the entry point index.d.ts
@@ -2273,16 +2278,15 @@ export interface SavedObjectsCheckConflictsResponse {
 export class SavedObjectsClient {
     // @internal
     constructor(repository: ISavedObjectsRepository);
-    addToNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsAddToNamespacesOptions): Promise<SavedObjectsAddToNamespacesResponse>;
     bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkGet<T = unknown>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkUpdate<T = unknown>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
     checkConflicts(objects?: SavedObjectsCheckConflictsObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsCheckConflictsResponse>;
     closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions): Promise<SavedObjectsClosePointInTimeResponse>;
+    collectMultiNamespaceReferences(objects: SavedObjectsCollectMultiNamespaceReferencesObject[], options?: SavedObjectsCollectMultiNamespaceReferencesOptions): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse>;
     create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
-    createPointInTimeFinder(findOptions: SavedObjectsCreatePointInTimeFinderOptions, dependencies?: SavedObjectsCreatePointInTimeFinderDependencies): ISavedObjectsPointInTimeFinder;
+    createPointInTimeFinder<T = unknown, A = unknown>(findOptions: SavedObjectsCreatePointInTimeFinderOptions, dependencies?: SavedObjectsCreatePointInTimeFinderDependencies): ISavedObjectsPointInTimeFinder<T, A>;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
-    deleteFromNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions): Promise<SavedObjectsDeleteFromNamespacesResponse>;
     // (undocumented)
     static errors: typeof SavedObjectsErrorHelpers;
     // (undocumented)
@@ -2293,6 +2297,7 @@ export class SavedObjectsClient {
     removeReferencesTo(type: string, id: string, options?: SavedObjectsRemoveReferencesToOptions): Promise<SavedObjectsRemoveReferencesToResponse>;
     resolve<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObjectsResolveResponse<T>>;
     update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions<T>): Promise<SavedObjectsUpdateResponse<T>>;
+    updateObjectsSpaces(objects: SavedObjectsUpdateObjectsSpacesObject[], spacesToAdd: string[], spacesToRemove: string[], options?: SavedObjectsUpdateObjectsSpacesOptions): Promise<import("./lib").SavedObjectsUpdateObjectsSpacesResponse>;
 }
 
 // @public
@@ -2335,6 +2340,25 @@ export type SavedObjectsClosePointInTimeOptions = SavedObjectsBaseOptions;
 export interface SavedObjectsClosePointInTimeResponse {
     num_freed: number;
     succeeded: boolean;
+}
+
+// @public
+export interface SavedObjectsCollectMultiNamespaceReferencesObject {
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    type: string;
+}
+
+// @public
+export interface SavedObjectsCollectMultiNamespaceReferencesOptions extends SavedObjectsBaseOptions {
+    purpose?: 'collectMultiNamespaceReferences' | 'updateObjectsSpaces';
+}
+
+// @public
+export interface SavedObjectsCollectMultiNamespaceReferencesResponse {
+    // (undocumented)
+    objects: SavedObjectReferenceWithContext[];
 }
 
 // @public
@@ -2395,16 +2419,6 @@ export type SavedObjectsCreatePointInTimeFinderOptions = Omit<SavedObjectsFindOp
 // @public (undocumented)
 export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOptions {
     refresh?: boolean;
-}
-
-// @public (undocumented)
-export interface SavedObjectsDeleteFromNamespacesOptions extends SavedObjectsBaseOptions {
-    refresh?: MutatingOperationRefreshSetting;
-}
-
-// @public (undocumented)
-export interface SavedObjectsDeleteFromNamespacesResponse {
-    namespaces: string[];
 }
 
 // @public (undocumented)
@@ -2880,21 +2894,20 @@ export interface SavedObjectsRemoveReferencesToResponse extends SavedObjectsBase
 
 // @public (undocumented)
 export class SavedObjectsRepository {
-    addToNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsAddToNamespacesOptions): Promise<SavedObjectsAddToNamespacesResponse>;
     bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkGet<T = unknown>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkUpdate<T = unknown>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
     checkConflicts(objects?: SavedObjectsCheckConflictsObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsCheckConflictsResponse>;
     closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions): Promise<SavedObjectsClosePointInTimeResponse>;
+    collectMultiNamespaceReferences(objects: SavedObjectsCollectMultiNamespaceReferencesObject[], options?: SavedObjectsCollectMultiNamespaceReferencesOptions): Promise<import("./collect_multi_namespace_references").SavedObjectsCollectMultiNamespaceReferencesResponse>;
     create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
-    createPointInTimeFinder(findOptions: SavedObjectsCreatePointInTimeFinderOptions, dependencies?: SavedObjectsCreatePointInTimeFinderDependencies): ISavedObjectsPointInTimeFinder;
+    createPointInTimeFinder<T = unknown, A = unknown>(findOptions: SavedObjectsCreatePointInTimeFinderOptions, dependencies?: SavedObjectsCreatePointInTimeFinderDependencies): ISavedObjectsPointInTimeFinder<T, A>;
     // Warning: (ae-forgotten-export) The symbol "IKibanaMigrator" needs to be exported by the entry point index.d.ts
     //
     // @internal
-    static createRepository(migrator: IKibanaMigrator, typeRegistry: SavedObjectTypeRegistry, indexName: string, client: ElasticsearchClient, logger: Logger, includedHiddenTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
+    static createRepository(migrator: IKibanaMigrator, typeRegistry: ISavedObjectTypeRegistry, indexName: string, client: ElasticsearchClient, logger: Logger, includedHiddenTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOptions): Promise<any>;
-    deleteFromNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions): Promise<SavedObjectsDeleteFromNamespacesResponse>;
     // (undocumented)
     find<T = unknown, A = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T, A>>;
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
@@ -2903,6 +2916,7 @@ export class SavedObjectsRepository {
     removeReferencesTo(type: string, id: string, options?: SavedObjectsRemoveReferencesToOptions): Promise<SavedObjectsRemoveReferencesToResponse>;
     resolve<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObjectsResolveResponse<T>>;
     update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions<T>): Promise<SavedObjectsUpdateResponse<T>>;
+    updateObjectsSpaces(objects: SavedObjectsUpdateObjectsSpacesObject[], spacesToAdd: string[], spacesToRemove: string[], options?: SavedObjectsUpdateObjectsSpacesOptions): Promise<import("./update_objects_spaces").SavedObjectsUpdateObjectsSpacesResponse>;
 }
 
 // @public
@@ -2934,7 +2948,7 @@ export class SavedObjectsSerializer {
     generateRawId(namespace: string | undefined, type: string, id: string): string;
     generateRawLegacyUrlAliasId(namespace: string, type: string, id: string): string;
     isRawSavedObject(doc: SavedObjectsRawDoc, options?: SavedObjectsRawDocParseOptions): boolean;
-    rawToSavedObject(doc: SavedObjectsRawDoc, options?: SavedObjectsRawDocParseOptions): SavedObjectSanitizedDoc;
+    rawToSavedObject<T = unknown>(doc: SavedObjectsRawDoc, options?: SavedObjectsRawDocParseOptions): SavedObjectSanitizedDoc<T>;
     savedObjectToRaw(savedObj: SavedObjectSanitizedDoc): SavedObjectsRawDoc;
     }
 
@@ -2998,6 +3012,35 @@ export interface SavedObjectsTypeManagementDefinition {
 export interface SavedObjectsTypeMappingDefinition {
     dynamic?: false | 'strict';
     properties: SavedObjectsMappingProperties;
+}
+
+// @public
+export interface SavedObjectsUpdateObjectsSpacesObject {
+    id: string;
+    // @internal
+    spaces?: string[];
+    type: string;
+    // @internal
+    version?: string;
+}
+
+// @public
+export interface SavedObjectsUpdateObjectsSpacesOptions extends SavedObjectsBaseOptions {
+    refresh?: MutatingOperationRefreshSetting;
+}
+
+// @public
+export interface SavedObjectsUpdateObjectsSpacesResponse {
+    // (undocumented)
+    objects: SavedObjectsUpdateObjectsSpacesResponseObject[];
+}
+
+// @public
+export interface SavedObjectsUpdateObjectsSpacesResponseObject {
+    error?: SavedObjectError;
+    id: string;
+    spaces: string[];
+    type: string;
 }
 
 // @public (undocumented)
@@ -3196,25 +3239,6 @@ export interface StatusServiceSetup {
 }
 
 // @public
-export type StringValidation = StringValidationRegex | StringValidationRegexString;
-
-// @public
-export interface StringValidationRegex {
-    // (undocumented)
-    message: string;
-    // (undocumented)
-    regex: RegExp;
-}
-
-// @public
-export interface StringValidationRegexString {
-    // (undocumented)
-    message: string;
-    // (undocumented)
-    regexString: string;
-}
-
-// @public
 export interface UiSettingsParams<T = unknown> {
     category?: string[];
     deprecation?: DeprecationSettings;
@@ -3234,8 +3258,6 @@ export interface UiSettingsParams<T = unknown> {
     schema: Type<T>;
     sensitive?: boolean;
     type?: UiSettingsType;
-    // (undocumented)
-    validation?: ImageValidation | StringValidation;
     value?: T;
 }
 

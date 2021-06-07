@@ -24,17 +24,13 @@ import {
   COLOR_MAP_TYPE,
 } from '../../../../maps/common/constants';
 import { useMlKibana } from '../contexts/kibana';
+import { isDefined } from '../../../common/types/guards';
 import { MlEmbeddedMapComponent } from '../components/ml_embedded_map';
 import { EMSTermJoinConfig } from '../../../../maps/public';
 import { AnomaliesTableRecord } from '../../../common/types/anomalies';
+import { COMMON_EMS_LAYER_IDS } from '../../../common/constants/embeddable_map';
 
 const MAX_ENTITY_VALUES = 3;
-const COMMON_EMS_LAYER_IDS = [
-  'world_countries',
-  'administrative_regions_lvl2',
-  'usa_zip_codes',
-  'usa_states',
-];
 
 function getAnomalyRows(anomalies: AnomaliesTableRecord[], jobId: string) {
   const anomalyRows: Record<
@@ -65,8 +61,7 @@ function getAnomalyRows(anomalies: AnomaliesTableRecord[], jobId: string) {
 
 export const getChoroplethAnomaliesLayer = (
   anomalies: AnomaliesTableRecord[],
-  { layerId, field, jobId }: MLEMSTermJoinConfig,
-  visible: boolean
+  { layerId, field, jobId }: MLEMSTermJoinConfig
 ): VectorLayerDescriptor => {
   return {
     id: htmlIdGenerator()(),
@@ -132,7 +127,7 @@ export const getChoroplethAnomaliesLayer = (
       },
       isTimeAware: true,
     },
-    visible,
+    visible: false,
     type: 'VECTOR',
   };
 };
@@ -147,9 +142,7 @@ interface MLEMSTermJoinConfig extends EMSTermJoinConfig {
 }
 
 export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
-  const [EMSSuggestions, setEMSSuggestions] = useState<
-    Array<MLEMSTermJoinConfig | null> | undefined
-  >();
+  const [EMSSuggestions, setEMSSuggestions] = useState<MLEMSTermJoinConfig[] | undefined>();
   const {
     services: { maps: mapsPlugin },
   } = useMlKibana();
@@ -195,7 +188,7 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
       })
     );
 
-    setEMSSuggestions(suggestions.filter((s) => s !== null));
+    setEMSSuggestions(suggestions.filter(isDefined));
   }, [...jobIds]);
 
   useEffect(
@@ -207,24 +200,26 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
     [...jobIds]
   );
 
-  const layerList = useMemo(() => {
-    let layers: VectorLayerDescriptor[] = [];
-    // Loop through suggestions list and make a layer for each
-    if (EMSSuggestions?.length) {
-      let count = 0;
-      layers = EMSSuggestions.reduce(function (result, suggestion) {
-        if (suggestion) {
-          const visible = count === 0;
-          result.push(getChoroplethAnomaliesLayer(anomalies, suggestion, visible));
-          count++;
-        }
-        return result;
-      }, [] as VectorLayerDescriptor[]);
-    }
-    return layers;
+  const layerList: VectorLayerDescriptor[] = useMemo(() => {
+    if (!EMSSuggestions?.length) return [];
+
+    return EMSSuggestions.map((suggestion) => {
+      return getChoroplethAnomaliesLayer(anomalies, suggestion);
+    }, [] as VectorLayerDescriptor[]);
   }, [EMSSuggestions, anomalies]);
 
-  if (EMSSuggestions?.length === 0) {
+  const layersWithAnomalies = layerList.filter((layer) => {
+    // @ts-ignore _rows does not exist - can remove when VectorLayerDescriptor is updated
+    const rows = Array.isArray(layer.joins) ? layer.joins[0]?.right?.__rows : [];
+    return rows.length;
+  });
+
+  // set the layer with anomalies to visible
+  if (layersWithAnomalies.length > 0) {
+    layersWithAnomalies[0].visible = true;
+  }
+
+  if (EMSSuggestions?.length === 0 || layersWithAnomalies.length === 0) {
     return null;
   }
 

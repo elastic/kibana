@@ -11,11 +11,21 @@ import ReactDOM from 'react-dom';
 import { I18nStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSpacer, EuiButton, EuiText, EuiWrappingPopover, EuiCode } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiButton,
+  EuiText,
+  EuiWrappingPopover,
+  EuiCode,
+  EuiHorizontalRule,
+  EuiButtonEmpty,
+  EuiTextAlign,
+} from '@elastic/eui';
 import { getServices } from '../../../kibana_services';
 import './open_options_popover.scss';
 import { DOC_TABLE_LEGACY } from '../../../../common';
 
+const container = document.createElement('div');
 let isOpen = false;
 
 interface OptionsPopoverProps {
@@ -32,10 +42,10 @@ export function OptionsPopover(props: OptionsPopoverProps) {
 
   const mode = isLegacy
     ? i18n.translate('discover.openOptionsPopover.legacyTableText', {
-        defaultMessage: 'Legacy table',
+        defaultMessage: 'Classic table',
       })
     : i18n.translate('discover.openOptionsPopover.dataGridText', {
-        defaultMessage: 'Data grid',
+        defaultMessage: 'New table',
       });
 
   return (
@@ -64,7 +74,7 @@ export function OptionsPopover(props: OptionsPopoverProps) {
         <EuiText color="subdued" size="s">
           <FormattedMessage
             id="discover.topNav.openOptionsPopover.description"
-            defaultMessage="The new data grid layout includes enhanced data sorting, drag-and-drop columns, multi-document selection, and a full screen view. Toggle 'Use legacy table' in Advanced Settings to switch modes."
+            defaultMessage="Great news! Discover has better ways to sort data, drag and drop columns, and compare documents. Toggle 'Use classic table' in Advanced Settings to get started."
           />
         </EuiText>
         <EuiSpacer />
@@ -74,12 +84,30 @@ export function OptionsPopover(props: OptionsPopoverProps) {
           href={addBasePath(`/app/management/kibana/settings?query=${DOC_TABLE_LEGACY}`)}
         >
           {i18n.translate('discover.openOptionsPopover.goToAdvancedSettings', {
-            defaultMessage: 'Go to Advanced Settings',
+            defaultMessage: 'Get started',
           })}
         </EuiButton>
+        <EuiHorizontalRule margin="s" />
+        <EuiTextAlign textAlign="center">
+          <EuiButtonEmpty
+            iconType="gear"
+            size="s"
+            href={addBasePath(`/app/management/kibana/settings?query=category:(discover)`)}
+          >
+            {i18n.translate('discover.openOptionsPopover.gotToAllSettings', {
+              defaultMessage: 'All Discover options',
+            })}
+          </EuiButtonEmpty>
+        </EuiTextAlign>
       </div>
     </EuiWrappingPopover>
   );
+}
+
+function onClose() {
+  ReactDOM.unmountComponentAtNode(container);
+  document.body.removeChild(container);
+  isOpen = false;
 }
 
 export function openOptionsPopover({
@@ -90,17 +118,11 @@ export function openOptionsPopover({
   anchorElement: HTMLElement;
 }) {
   if (isOpen) {
+    onClose();
     return;
   }
 
   isOpen = true;
-  const container = document.createElement('div');
-  const onClose = () => {
-    ReactDOM.unmountComponentAtNode(container);
-    document.body.removeChild(container);
-    isOpen = false;
-  };
-
   document.body.appendChild(container);
 
   const element = (

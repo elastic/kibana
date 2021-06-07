@@ -7,7 +7,7 @@
 
 import './layer_panel.scss';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   EuiPanel,
   EuiSpacer,
@@ -42,6 +42,7 @@ export function LayerPanel(
     isOnlyLayer: boolean;
     updateVisualization: StateSetter<unknown>;
     updateDatasource: (datasourceId: string, newState: unknown) => void;
+    updateDatasourceAsync: (datasourceId: string, newState: unknown) => void;
     updateAll: (
       datasourceId: string,
       newDatasourcestate: unknown,
@@ -76,6 +77,7 @@ export function LayerPanel(
     setActiveDimension(initialActiveDimensionState);
   }, [activeVisualization.id]);
 
+  const panelRef = useRef<HTMLDivElement | null>(null);
   const registerLayerRef = useCallback((el) => registerNewLayerRef(layerId, el), [
     layerId,
     registerNewLayerRef,
@@ -409,10 +411,16 @@ export function LayerPanel(
       </section>
 
       <DimensionContainer
+        panelRef={(el) => (panelRef.current = el)}
         isOpen={!!activeId}
         isFullscreen={isFullscreen}
         groupLabel={activeGroup?.groupLabel || ''}
         handleClose={() => {
+          if (layerDatasource.canCloseDimensionEditor) {
+            if (!layerDatasource.canCloseDimensionEditor(layerDatasourceState)) {
+              return false;
+            }
+          }
           if (layerDatasource.updateStateOnCloseDimension) {
             const newState = layerDatasource.updateStateOnCloseDimension({
               state: layerDatasourceState,
@@ -427,6 +435,7 @@ export function LayerPanel(
           if (isFullscreen) {
             toggleFullscreen();
           }
+          return true;
         }}
         panel={
           <div>
@@ -448,9 +457,11 @@ export function LayerPanel(
                     {
                       shouldReplaceDimension,
                       shouldRemoveDimension,
+                      shouldClose,
                     }: {
                       shouldReplaceDimension?: boolean;
                       shouldRemoveDimension?: boolean;
+                      shouldClose?: boolean;
                     } = {}
                   ) => {
                     if (shouldReplaceDimension || shouldRemoveDimension) {
@@ -471,12 +482,14 @@ export function LayerPanel(
                             })
                       );
                     } else {
-                      props.updateDatasource(datasourceId, newState);
+                      props.updateDatasourceAsync(datasourceId, newState);
                     }
-                    setActiveDimension({
-                      ...activeDimension,
-                      isNew: false,
-                    });
+                    if (!shouldClose) {
+                      setActiveDimension({
+                        ...activeDimension,
+                        isNew: false,
+                      });
+                    }
                   },
                 }}
               />
@@ -495,6 +508,7 @@ export function LayerPanel(
                       groupId: activeGroup.groupId,
                       accessor: activeId,
                       setState: props.updateVisualization,
+                      panelRef,
                     }}
                   />
                 </div>

@@ -33,7 +33,6 @@ module.exports = {
   // Include a require alias for legacy UI code and styles
   resolve: {
     alias: {
-      ui: path.resolve(KIBANA_ROOT, 'src/legacy/ui/public'),
       'data/interpreter': path.resolve(
         KIBANA_ROOT,
         'src/plugins/data/public/expressions/interpreter'

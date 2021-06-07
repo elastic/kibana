@@ -30,6 +30,7 @@ export async function getStats(req, apmIndexPattern, clusterUuid) {
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
   const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
+  const cgroup = config.get('monitoring.ui.container.apm.enabled');
 
   const params = {
     index: apmIndexPattern,
@@ -42,7 +43,7 @@ export async function getStats(req, apmIndexPattern, clusterUuid) {
         end,
         clusterUuid,
       }),
-      aggs: apmUuidsAgg(maxBucketSize),
+      aggs: apmUuidsAgg(maxBucketSize, cgroup),
     },
   };
 

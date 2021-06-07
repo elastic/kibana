@@ -13,7 +13,7 @@ import { validateInterval } from './application/lib/validate_interval';
 import { getUISettings, getDataStart, getCoreStart } from './services';
 import { MAX_BUCKETS_SETTING, ROUTES } from '../common/constants';
 import { TimeseriesVisParams } from './types';
-import { TimeseriesVisData } from '../common/types';
+import type { TimeseriesVisData } from '../common/types';
 
 interface MetricsRequestHandlerParams {
   input: KibanaContext | null;

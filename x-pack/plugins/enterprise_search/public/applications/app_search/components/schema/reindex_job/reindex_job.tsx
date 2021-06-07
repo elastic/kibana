@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+
+import { useActions, useValues } from 'kea';
 
 import { EuiPageHeader, EuiPageContentBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -14,6 +16,13 @@ import { i18n } from '@kbn/i18n';
 import { FlashMessages } from '../../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
 import { BreadcrumbTrail } from '../../../../shared/kibana_chrome/generate_breadcrumbs';
+import { Loading } from '../../../../shared/loading';
+import { SchemaErrorsAccordion } from '../../../../shared/schema';
+
+import { ENGINE_DOCUMENT_DETAIL_PATH } from '../../../routes';
+import { EngineLogic, generateEnginePath } from '../../engine';
+
+import { ReindexJobLogic } from './reindex_job_logic';
 
 interface Props {
   schemaBreadcrumb: BreadcrumbTrail;
@@ -21,6 +30,17 @@ interface Props {
 
 export const ReindexJob: React.FC<Props> = ({ schemaBreadcrumb }) => {
   const { reindexJobId } = useParams() as { reindexJobId: string };
+  const { loadReindexJob } = useActions(ReindexJobLogic);
+  const { dataLoading, fieldCoercionErrors } = useValues(ReindexJobLogic);
+  const {
+    engine: { schema },
+  } = useValues(EngineLogic);
+
+  useEffect(() => {
+    loadReindexJob(reindexJobId);
+  }, [reindexJobId]);
+
+  if (dataLoading) return <Loading />;
 
   return (
     <>
@@ -39,7 +59,15 @@ export const ReindexJob: React.FC<Props> = ({ schemaBreadcrumb }) => {
         )}
       />
       <FlashMessages />
-      <EuiPageContentBody>{reindexJobId}</EuiPageContentBody>
+      <EuiPageContentBody>
+        <SchemaErrorsAccordion
+          fieldCoercionErrors={fieldCoercionErrors}
+          schema={schema!}
+          generateViewPath={(documentId: string) =>
+            generateEnginePath(ENGINE_DOCUMENT_DETAIL_PATH, { documentId })
+          }
+        />
+      </EuiPageContentBody>
     </>
   );
 };

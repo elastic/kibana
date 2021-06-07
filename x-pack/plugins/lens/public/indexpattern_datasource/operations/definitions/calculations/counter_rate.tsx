@@ -17,7 +17,7 @@ import {
 } from './utils';
 import { DEFAULT_TIME_SCALE } from '../../time_scale_utils';
 import { OperationDefinition } from '..';
-import { getFormatFromPreviousColumn } from '../helpers';
+import { getFormatFromPreviousColumn, getFilter } from '../helpers';
 
 const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.CounterRateOf', {
@@ -70,7 +70,8 @@ export const counterRateOperation: OperationDefinition<
       ref && 'sourceField' in ref
         ? indexPattern.getFieldByName(ref.sourceField)?.displayName
         : undefined,
-      column.timeScale
+      column.timeScale,
+      column.timeShift
     );
   },
   toExpression: (layer, columnId) => {
@@ -79,20 +80,13 @@ export const counterRateOperation: OperationDefinition<
   buildColumn: ({ referenceIds, previousColumn, layer, indexPattern }, columnParams) => {
     const metric = layer.columns[referenceIds[0]];
     const timeScale = previousColumn?.timeScale || DEFAULT_TIME_SCALE;
-    let filter = previousColumn?.filter;
-    if (columnParams) {
-      if ('kql' in columnParams) {
-        filter = { query: columnParams.kql ?? '', language: 'kuery' };
-      } else if ('lucene' in columnParams) {
-        filter = { query: columnParams.lucene ?? '', language: 'lucene' };
-      }
-    }
     return {
       label: ofName(
         metric && 'sourceField' in metric
           ? indexPattern.getFieldByName(metric.sourceField)?.displayName
           : undefined,
-        timeScale
+        timeScale,
+        previousColumn?.timeShift
       ),
       dataType: 'number',
       operationType: 'counter_rate',
@@ -100,7 +94,8 @@ export const counterRateOperation: OperationDefinition<
       scale: 'ratio',
       references: referenceIds,
       timeScale,
-      filter,
+      timeShift: previousColumn?.timeShift,
+      filter: getFilter(previousColumn, columnParams),
       params: getFormatFromPreviousColumn(previousColumn),
     };
   },
@@ -126,4 +121,23 @@ export const counterRateOperation: OperationDefinition<
   },
   timeScalingMode: 'mandatory',
   filterable: true,
+  documentation: {
+    section: 'calculation',
+    signature: i18n.translate('xpack.lens.indexPattern.counterRate.signature', {
+      defaultMessage: 'metric: number',
+    }),
+    description: i18n.translate('xpack.lens.indexPattern.counterRate.documentation', {
+      defaultMessage: `
+Calculates the rate of an ever increasing counter. This function will only yield helpful results on counter metric fields which contain a measurement of some kind monotonically growing over time.
+If the value does get smaller, it will interpret this as a counter reset. To get most precise results, \`counter_rate\` should be calculated on the \`max\` of a field.
+
+This calculation will be done separately for separate series defined by filters or top values dimensions.
+It uses the current interval when used in Formula.
+
+Example: Visualize the rate of bytes received over time by a memcached server:
+\`counter_rate(max(memcached.stats.read.bytes))\`
+      `,
+    }),
+  },
+  shiftable: true,
 };

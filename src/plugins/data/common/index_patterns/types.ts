@@ -25,8 +25,9 @@ export interface RuntimeField {
 }
 
 /**
+ * @deprecated
  * IIndexPattern allows for an IndexPattern OR an index pattern saved object
- * too ambiguous, should be avoided
+ * Use IndexPattern or IndexPatternSpec instead
  */
 export interface IIndexPattern {
   fields: IFieldType[];

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mockFlashMessageHelpers, mockHttpValues, mockKibanaValues } from '../../../__mocks__';
+import { mockFlashMessageHelpers, mockHttpValues } from '../../../__mocks__';
 import { LogicMounter } from '../../../__mocks__/kea.mock';
 
 import { engines } from '../../__mocks__/engines.mock';
@@ -13,20 +13,25 @@ import { engines } from '../../__mocks__/engines.mock';
 import { nextTick } from '@kbn/test/jest';
 
 import { asRoleMapping } from '../../../shared/role_mapping/__mocks__/roles';
-import { ANY_AUTH_PROVIDER } from '../../../shared/role_mapping/constants';
+import { ANY_AUTH_PROVIDER, ROLE_MAPPING_NOT_FOUND } from '../../../shared/role_mapping/constants';
 
 import { RoleMappingsLogic } from './role_mappings_logic';
 
 describe('RoleMappingsLogic', () => {
   const { http } = mockHttpValues;
-  const { navigateToUrl } = mockKibanaValues;
-  const { clearFlashMessages, flashAPIErrors, setSuccessMessage } = mockFlashMessageHelpers;
+  const {
+    clearFlashMessages,
+    flashAPIErrors,
+    setSuccessMessage,
+    setErrorMessage,
+  } = mockFlashMessageHelpers;
   const { mount } = new LogicMounter(RoleMappingsLogic);
   const DEFAULT_VALUES = {
     attributes: [],
     availableAuthProviders: [],
     elasticsearchRoles: [],
     roleMapping: null,
+    roleMappingFlyoutOpen: false,
     roleMappings: [],
     roleType: 'owner',
     attributeValue: '',
@@ -38,6 +43,7 @@ describe('RoleMappingsLogic', () => {
     selectedEngines: new Set(),
     accessAllEngines: true,
     selectedAuthProviders: [ANY_AUTH_PROVIDER],
+    selectedOptions: [],
   };
 
   const mappingsServerProps = { multipleAuthProvidersConfig: true, roleMappings: [asRoleMapping] };
@@ -87,6 +93,10 @@ describe('RoleMappingsLogic', () => {
           attributeValue: 'superuser',
           elasticsearchRoles: mappingServerProps.elasticsearchRoles,
           selectedEngines: new Set(engines.map((e) => e.name)),
+          selectedOptions: [
+            { label: engines[0].name, value: engines[0].name },
+            { label: engines[1].name, value: engines[1].name },
+          ],
         });
       });
 
@@ -134,21 +144,21 @@ describe('RoleMappingsLogic', () => {
       });
 
       it('handles adding an engine to selected engines', () => {
-        RoleMappingsLogic.actions.handleEngineSelectionChange(otherEngine.name, true);
+        RoleMappingsLogic.actions.handleEngineSelectionChange([engine.name, otherEngine.name]);
 
         expect(RoleMappingsLogic.values.selectedEngines).toEqual(
           new Set([engine.name, otherEngine.name])
         );
       });
       it('handles removing an engine from selected engines', () => {
-        RoleMappingsLogic.actions.handleEngineSelectionChange(otherEngine.name, false);
+        RoleMappingsLogic.actions.handleEngineSelectionChange([engine.name]);
 
         expect(RoleMappingsLogic.values.selectedEngines).toEqual(new Set([engine.name]));
       });
     });
 
     it('handleAccessAllEnginesChange', () => {
-      RoleMappingsLogic.actions.handleAccessAllEnginesChange();
+      RoleMappingsLogic.actions.handleAccessAllEnginesChange(false);
 
       expect(RoleMappingsLogic.values).toEqual({
         ...DEFAULT_VALUES,
@@ -250,6 +260,25 @@ describe('RoleMappingsLogic', () => {
       expect(RoleMappingsLogic.values).toEqual(DEFAULT_VALUES);
       expect(clearFlashMessages).toHaveBeenCalled();
     });
+
+    it('openRoleMappingFlyout', () => {
+      mount(mappingServerProps);
+      RoleMappingsLogic.actions.openRoleMappingFlyout();
+
+      expect(RoleMappingsLogic.values.roleMappingFlyoutOpen).toEqual(true);
+      expect(clearFlashMessages).toHaveBeenCalled();
+    });
+
+    it('closeRoleMappingFlyout', () => {
+      mount({
+        ...mappingServerProps,
+        roleMappingFlyoutOpen: true,
+      });
+      RoleMappingsLogic.actions.closeRoleMappingFlyout();
+
+      expect(RoleMappingsLogic.values.roleMappingFlyoutOpen).toEqual(false);
+      expect(clearFlashMessages).toHaveBeenCalled();
+    });
   });
 
   describe('listeners', () => {
@@ -302,33 +331,12 @@ describe('RoleMappingsLogic', () => {
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
 
-      it('redirects when there is a 404 status', async () => {
+      it('shows error when there is a 404 status', async () => {
         http.get.mockReturnValue(Promise.reject({ status: 404 }));
         RoleMappingsLogic.actions.initializeRoleMapping();
         await nextTick();
 
-        expect(navigateToUrl).toHaveBeenCalled();
-      });
-    });
-
-    describe('handleResetMappings', () => {
-      const callback = jest.fn();
-      it('calls API and executes callback', async () => {
-        http.post.mockReturnValue(Promise.resolve({}));
-        RoleMappingsLogic.actions.handleResetMappings(callback);
-
-        expect(http.post).toHaveBeenCalledWith('/api/app_search/role_mappings/reset');
-        await nextTick();
-        expect(callback).toHaveBeenCalled();
-      });
-
-      it('handles error', async () => {
-        http.post.mockReturnValue(Promise.reject('this is an error'));
-        RoleMappingsLogic.actions.handleResetMappings(callback);
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
-        expect(callback).toHaveBeenCalled();
+        expect(setErrorMessage).toHaveBeenCalledWith(ROLE_MAPPING_NOT_FOUND);
       });
     });
 
@@ -343,8 +351,12 @@ describe('RoleMappingsLogic', () => {
         engines: [],
       };
 
-      it('calls API and navigates when new mapping', async () => {
+      it('calls API and refreshes list when new mapping', async () => {
         mount(mappingsServerProps);
+        const initializeRoleMappingsSpy = jest.spyOn(
+          RoleMappingsLogic.actions,
+          'initializeRoleMappings'
+        );
 
         http.post.mockReturnValue(Promise.resolve(mappingServerProps));
         RoleMappingsLogic.actions.handleSaveMapping();
@@ -354,11 +366,15 @@ describe('RoleMappingsLogic', () => {
         });
         await nextTick();
 
-        expect(navigateToUrl).toHaveBeenCalled();
+        expect(initializeRoleMappingsSpy).toHaveBeenCalled();
       });
 
-      it('calls API and navigates when existing mapping', async () => {
+      it('calls API and refreshes list when existing mapping', async () => {
         mount(mappingServerProps);
+        const initializeRoleMappingsSpy = jest.spyOn(
+          RoleMappingsLogic.actions,
+          'initializeRoleMappings'
+        );
 
         http.put.mockReturnValue(Promise.resolve(mappingServerProps));
         RoleMappingsLogic.actions.handleSaveMapping();
@@ -368,7 +384,7 @@ describe('RoleMappingsLogic', () => {
         });
         await nextTick();
 
-        expect(navigateToUrl).toHaveBeenCalled();
+        expect(initializeRoleMappingsSpy).toHaveBeenCalled();
         expect(setSuccessMessage).toHaveBeenCalled();
       });
 
@@ -404,6 +420,7 @@ describe('RoleMappingsLogic', () => {
 
     describe('handleDeleteMapping', () => {
       let confirmSpy: any;
+      const roleMappingId = 'r1';
 
       beforeEach(() => {
         confirmSpy = jest.spyOn(window, 'confirm');
@@ -414,30 +431,26 @@ describe('RoleMappingsLogic', () => {
         confirmSpy.mockRestore();
       });
 
-      it('returns when no mapping', () => {
-        RoleMappingsLogic.actions.handleDeleteMapping();
-
-        expect(http.delete).not.toHaveBeenCalled();
-      });
-
-      it('calls API and navigates', async () => {
+      it('calls API and refreshes list', async () => {
         mount(mappingServerProps);
-        http.delete.mockReturnValue(Promise.resolve({}));
-        RoleMappingsLogic.actions.handleDeleteMapping();
-
-        expect(http.delete).toHaveBeenCalledWith(
-          `/api/app_search/role_mappings/${asRoleMapping.id}`
+        const initializeRoleMappingsSpy = jest.spyOn(
+          RoleMappingsLogic.actions,
+          'initializeRoleMappings'
         );
+        http.delete.mockReturnValue(Promise.resolve({}));
+        RoleMappingsLogic.actions.handleDeleteMapping(roleMappingId);
+
+        expect(http.delete).toHaveBeenCalledWith(`/api/app_search/role_mappings/${roleMappingId}`);
         await nextTick();
 
-        expect(navigateToUrl).toHaveBeenCalled();
+        expect(initializeRoleMappingsSpy).toHaveBeenCalled();
         expect(setSuccessMessage).toHaveBeenCalled();
       });
 
       it('handles error', async () => {
         mount(mappingServerProps);
         http.delete.mockReturnValue(Promise.reject('this is an error'));
-        RoleMappingsLogic.actions.handleDeleteMapping();
+        RoleMappingsLogic.actions.handleDeleteMapping(roleMappingId);
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
@@ -446,7 +459,7 @@ describe('RoleMappingsLogic', () => {
       it('will do nothing if not confirmed', () => {
         mount(mappingServerProps);
         jest.spyOn(window, 'confirm').mockReturnValueOnce(false);
-        RoleMappingsLogic.actions.handleDeleteMapping();
+        RoleMappingsLogic.actions.handleDeleteMapping(roleMappingId);
 
         expect(http.delete).not.toHaveBeenCalled();
       });

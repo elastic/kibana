@@ -20,6 +20,7 @@ import {
 } from '../../common';
 
 export interface PresentationLabsService {
+  isProjectEnabled: (id: ProjectID) => boolean;
   getProjectIDs: () => typeof projectIDs;
   getProject: (id: ProjectID) => Project;
   getProjects: (solutions?: SolutionName[]) => Record<ProjectID, Project>;

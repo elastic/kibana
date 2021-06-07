@@ -30,6 +30,10 @@ export const createAppContextStartContractMock = (): FleetAppContext => {
     security: securityMock.createStart(),
     logger: loggingSystemMock.create().get(),
     isProductionMode: true,
+    configInitialValue: {
+      agents: { enabled: true, elasticsearch: {} },
+      enabled: true,
+    },
     kibanaVersion: '8.0.0',
     kibanaBranch: 'master',
   };

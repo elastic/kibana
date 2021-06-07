@@ -64,8 +64,8 @@ installDir="$KIBANA_DIR/install/kibana"
 mkdir -p "$installDir"
 tar -xzf "$linuxBuild" -C "$installDir" --strip=1
 
-mkdir -p "$WORKSPACE/kibana-build-xpack"
-cp -pR install/kibana/. $WORKSPACE/kibana-build-xpack/
+mkdir -p "$WORKSPACE/kibana-build"
+cp -pR install/kibana/. $WORKSPACE/kibana-build/
 
 echo " -> Setup env for tests"
 source test/scripts/jenkins_test_setup_xpack.sh

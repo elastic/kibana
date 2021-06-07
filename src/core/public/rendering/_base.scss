@@ -49,6 +49,13 @@
     top: $headerHeight;
     height: calc(100% - #{$headerHeight});
   }
+
+  @include euiBreakpoint('m', 'l', 'xl') {
+    .euiPageSideBar--sticky {
+      max-height: calc(100vh - #{$headerHeight});
+      top: #{$headerHeight};
+    }
+  }
 }
 
 .kbnBody {

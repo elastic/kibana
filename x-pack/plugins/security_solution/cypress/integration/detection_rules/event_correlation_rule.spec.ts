@@ -131,7 +131,7 @@ describe('Detection rules, EQL', () => {
 
     goToRuleDetails();
 
-    cy.get(RULE_NAME_HEADER).should('have.text', `${this.rule.name}`);
+    cy.get(RULE_NAME_HEADER).should('contain', `${this.rule.name}`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', this.rule.description);
     cy.get(ABOUT_DETAILS).within(() => {
       getDetails(SEVERITY_DETAILS).should('have.text', this.rule.severity);

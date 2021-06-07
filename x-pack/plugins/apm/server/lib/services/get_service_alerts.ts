@@ -5,33 +5,30 @@
  * 2.0.
  */
 
+import { ALERT_UUID } from '@kbn/rule-data-utils/target/technical_field_names';
+import { RuleDataClient } from '../../../../rule_registry/server';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import type { PromiseReturnType } from '../../../../observability/typings/common';
-import type { APMRuleRegistry } from '../../plugin';
 import { environmentQuery, rangeQuery } from '../../utils/queries';
 
 export async function getServiceAlerts({
-  apmRuleRegistryClient,
+  ruleDataClient,
   start,
   end,
   serviceName,
   environment,
   transactionType,
 }: {
-  apmRuleRegistryClient: Exclude<
-    PromiseReturnType<APMRuleRegistry['createScopedRuleRegistryClient']>,
-    undefined
-  >;
+  ruleDataClient: RuleDataClient;
   start: number;
   end: number;
   serviceName: string;
   environment?: string;
   transactionType: string;
 }) {
-  const response = await apmRuleRegistryClient.search({
+  const response = await ruleDataClient.getReader().search({
     body: {
       query: {
         bool: {
@@ -68,13 +65,14 @@ export async function getServiceAlerts({
       size: 100,
       fields: ['*'],
       collapse: {
-        field: 'kibana.rac.alert.uuid',
+        field: ALERT_UUID,
       },
       sort: {
         '@timestamp': 'desc',
       },
     },
+    allow_no_indices: true,
   });
 
-  return response.events;
+  return response.hits.hits.map((hit) => hit.fields);
 }

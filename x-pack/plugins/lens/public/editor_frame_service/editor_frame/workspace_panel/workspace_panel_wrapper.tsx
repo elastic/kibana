@@ -10,6 +10,7 @@ import './workspace_panel_wrapper.scss';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPageContent, EuiFlexGroup, EuiFlexItem, EuiScreenReaderOnly } from '@elastic/eui';
+import classNames from 'classnames';
 import { Datasource, FramePublicAPI, Visualization } from '../../../types';
 import { NativeRenderer } from '../../../native_renderer';
 import { Action } from '../state_management';
@@ -62,9 +63,20 @@ export function WorkspacePanelWrapper({
     },
     [dispatch, activeVisualization]
   );
-  const warningMessages =
-    activeVisualization?.getWarningMessages &&
-    activeVisualization.getWarningMessages(visualizationState, framePublicAPI);
+  const warningMessages: React.ReactNode[] = [];
+  if (activeVisualization?.getWarningMessages) {
+    warningMessages.push(
+      ...(activeVisualization.getWarningMessages(visualizationState, framePublicAPI) || [])
+    );
+  }
+  Object.entries(datasourceStates).forEach(([datasourceId, datasourceState]) => {
+    const datasource = datasourceMap[datasourceId];
+    if (!datasourceState.isLoading && datasource.getWarningMessages) {
+      warningMessages.push(
+        ...(datasource.getWarningMessages(datasourceState.state, framePublicAPI) || [])
+      );
+    }
+  });
   return (
     <>
       <div>
@@ -119,21 +131,21 @@ export function WorkspacePanelWrapper({
           </EuiFlexItem>
         </EuiFlexGroup>
       </div>
-      {isFullscreen ? (
-        children
-      ) : (
-        <EuiPageContent className="lnsWorkspacePanelWrapper">
-          <EuiScreenReaderOnly>
-            <h1 id="lns_ChartTitle" data-test-subj="lns_ChartTitle">
-              {title ||
-                i18n.translate('xpack.lens.chartTitle.unsaved', {
-                  defaultMessage: 'Unsaved visualization',
-                })}
-            </h1>
-          </EuiScreenReaderOnly>
-          {children}
-        </EuiPageContent>
-      )}
+      <EuiPageContent
+        className={classNames('lnsWorkspacePanelWrapper', {
+          'lnsWorkspacePanelWrapper--fullscreen': isFullscreen,
+        })}
+      >
+        <EuiScreenReaderOnly>
+          <h1 id="lns_ChartTitle" data-test-subj="lns_ChartTitle">
+            {title ||
+              i18n.translate('xpack.lens.chartTitle.unsaved', {
+                defaultMessage: 'Unsaved visualization',
+              })}
+          </h1>
+        </EuiScreenReaderOnly>
+        {children}
+      </EuiPageContent>
     </>
   );
 }

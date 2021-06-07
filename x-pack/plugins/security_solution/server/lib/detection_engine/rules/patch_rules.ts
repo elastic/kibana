@@ -6,7 +6,7 @@
  */
 
 import { defaults } from 'lodash/fp';
-import { validate } from '../../../../common/validate';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { PartialAlert } from '../../../../../alerting/server';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { PatchRulesOptions } from './types';

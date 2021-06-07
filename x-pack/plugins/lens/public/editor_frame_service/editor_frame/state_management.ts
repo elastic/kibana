@@ -7,7 +7,6 @@
 
 import { EditorFrameProps } from './index';
 import { Document } from '../../persistence/saved_object_store';
-import { TableInspectorAdapter } from '../types';
 
 export interface PreviewState {
   visualization: {
@@ -23,7 +22,6 @@ export interface EditorFrameState extends PreviewState {
   description?: string;
   stagedPreview?: PreviewState;
   activeDatasourceId: string | null;
-  activeData?: TableInspectorAdapter;
   isFullscreenDatasource?: boolean;
 }
 
@@ -35,10 +33,6 @@ export type Action =
   | {
       type: 'UPDATE_TITLE';
       title: string;
-    }
-  | {
-      type: 'UPDATE_ACTIVE_DATA';
-      tables: TableInspectorAdapter;
     }
   | {
       type: 'UPDATE_STATE';
@@ -107,25 +101,27 @@ export function getActiveDatasourceIdFromDoc(doc?: Document) {
     return null;
   }
 
-  const [initialDatasourceId] = Object.keys(doc.state.datasourceStates);
-  return initialDatasourceId || null;
+  const [firstDatasourceFromDoc] = Object.keys(doc.state.datasourceStates);
+  return firstDatasourceFromDoc || null;
 }
 
-function getInitialDatasourceId(props: EditorFrameProps) {
-  return props.initialDatasourceId
-    ? props.initialDatasourceId
-    : getActiveDatasourceIdFromDoc(props.doc);
-}
-
-export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
+export const getInitialState = (
+  params: EditorFrameProps & { doc?: Document }
+): EditorFrameState => {
   const datasourceStates: EditorFrameState['datasourceStates'] = {};
 
-  if (props.doc) {
-    Object.entries(props.doc.state.datasourceStates).forEach(([datasourceId, state]) => {
+  const initialDatasourceId =
+    getActiveDatasourceIdFromDoc(params.doc) || Object.keys(params.datasourceMap)[0] || null;
+
+  const initialVisualizationId =
+    (params.doc && params.doc.visualizationType) || Object.keys(params.visualizationMap)[0] || null;
+
+  if (params.doc) {
+    Object.entries(params.doc.state.datasourceStates).forEach(([datasourceId, state]) => {
       datasourceStates[datasourceId] = { isLoading: true, state };
     });
-  } else if (props.initialDatasourceId) {
-    datasourceStates[props.initialDatasourceId] = {
+  } else if (initialDatasourceId) {
+    datasourceStates[initialDatasourceId] = {
       state: null,
       isLoading: true,
     };
@@ -134,10 +130,10 @@ export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
   return {
     title: '',
     datasourceStates,
-    activeDatasourceId: getInitialDatasourceId(props),
+    activeDatasourceId: initialDatasourceId,
     visualization: {
       state: null,
-      activeId: props.initialVisualizationId,
+      activeId: initialVisualizationId,
     },
   };
 };
@@ -150,11 +146,6 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
       return { ...state, title: action.title };
     case 'UPDATE_STATE':
       return action.updater(state);
-    case 'UPDATE_ACTIVE_DATA':
-      return {
-        ...state,
-        activeData: { ...action.tables },
-      };
     case 'UPDATE_LAYER':
       return {
         ...state,

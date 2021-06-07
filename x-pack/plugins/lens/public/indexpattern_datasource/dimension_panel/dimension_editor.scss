@@ -2,15 +2,19 @@
   height: 100%;
 }
 
-.lnsIndexPatternDimensionEditor-fullscreen {
+.lnsIndexPatternDimensionEditor-isFullscreen {
   position: absolute;
+  left: 0;
+  right: 0;
   top: 0;
   bottom: 0;
-  display: flex;
-  flex-direction: column;
+
+  .lnsIndexPatternDimensionEditor__section {
+    height: 100%;
+  }
 }
 
-.lnsIndexPatternDimensionEditor__section {
+.lnsIndexPatternDimensionEditor__section--padded {
   padding: $euiSizeS;
 }
 

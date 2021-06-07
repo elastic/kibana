@@ -91,6 +91,7 @@ export interface FullAgentPolicy {
   revision?: number;
   agent?: {
     monitoring: {
+      namespace?: string;
       use_output?: string;
       enabled: boolean;
       metrics: boolean;

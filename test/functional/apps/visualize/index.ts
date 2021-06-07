@@ -6,33 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context.d';
-import { UI_SETTINGS } from '../../../../src/plugins/data/common';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const deployment = getService('deployment');
-  let isOss = true;
 
   describe('visualize app', () => {
     before(async () => {
       log.debug('Starting visualize before method');
       await browser.setWindowSize(1280, 800);
+      await esArchiver.load('empty_kibana');
+
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.loadIfNeeded('long_window_logstash');
-      await esArchiver.load('visualize');
-      await kibanaServer.uiSettings.replace({
-        defaultIndex: 'logstash-*',
-        [UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
-      });
-      isOss = await deployment.isOss();
     });
 
     // TODO: Remove when vislib is removed
-    describe('new charts library', function () {
+    describe('new charts library visualize ciGroup7', function () {
       this.tags('ciGroup7');
 
       before(async () => {
@@ -56,9 +49,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_point_series_options'));
       loadTestFile(require.resolve('./_vertical_bar_chart'));
       loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
+      loadTestFile(require.resolve('./_pie_chart'));
     });
 
-    describe('', function () {
+    describe('visualize ciGroup9', function () {
       this.tags('ciGroup9');
 
       loadTestFile(require.resolve('./_embedding_chart'));
@@ -66,14 +60,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_data_table'));
       loadTestFile(require.resolve('./_data_table_nontimeindex'));
       loadTestFile(require.resolve('./_data_table_notimeindex_filters'));
-
-      // this check is not needed when the CI doesn't run anymore for the OSS
-      if (!isOss) {
-        loadTestFile(require.resolve('./_chart_types'));
-      }
+      loadTestFile(require.resolve('./_chart_types'));
     });
 
-    describe('', function () {
+    describe('visualize ciGroup10', function () {
       this.tags('ciGroup10');
 
       loadTestFile(require.resolve('./_inspector'));
@@ -85,7 +75,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_metric_chart'));
     });
 
-    describe('', function () {
+    describe('visualize ciGroup4', function () {
       this.tags('ciGroup4');
 
       loadTestFile(require.resolve('./_line_chart_split_series'));
@@ -98,14 +88,11 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_linked_saved_searches'));
       loadTestFile(require.resolve('./_visualize_listing'));
       loadTestFile(require.resolve('./_add_to_dashboard.ts'));
-
-      if (isOss) {
-        loadTestFile(require.resolve('./_tile_map'));
-        loadTestFile(require.resolve('./_region_map'));
-      }
+      loadTestFile(require.resolve('./_tile_map'));
+      loadTestFile(require.resolve('./_region_map'));
     });
 
-    describe('', function () {
+    describe('visualize ciGroup12', function () {
       this.tags('ciGroup12');
 
       loadTestFile(require.resolve('./_tag_cloud'));

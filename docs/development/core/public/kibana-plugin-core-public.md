@@ -37,7 +37,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AppLeaveDefaultAction](./kibana-plugin-core-public.appleavedefaultaction.md) | Action to return from a [AppLeaveHandler](./kibana-plugin-core-public.appleavehandler.md) to execute the default behaviour when leaving the application.<!-- -->See  |
 |  [ApplicationSetup](./kibana-plugin-core-public.applicationsetup.md) |  |
 |  [ApplicationStart](./kibana-plugin-core-public.applicationstart.md) |  |
-|  [AppMeta](./kibana-plugin-core-public.appmeta.md) | Input type for meta data for an application.<!-- -->Meta fields include <code>keywords</code> and <code>searchDeepLinks</code> Keywords is an array of string with which to associate the app, must include at least one unique string as an array. <code>searchDeepLinks</code> is an array of links that represent secondary in-app locations for the app. |
 |  [AppMountParameters](./kibana-plugin-core-public.appmountparameters.md) |  |
 |  [AsyncPlugin](./kibana-plugin-core-public.asyncplugin.md) | A plugin with asynchronous lifecycle methods. |
 |  [Capabilities](./kibana-plugin-core-public.capabilities.md) | The read-only set of capabilities available for the current UI session. Capabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID, and the boolean is a flag indicating if the capability is enabled or disabled. |
@@ -84,7 +83,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IHttpFetchError](./kibana-plugin-core-public.ihttpfetcherror.md) |  |
 |  [IHttpInterceptController](./kibana-plugin-core-public.ihttpinterceptcontroller.md) | Used to halt a request Promise chain in a [HttpInterceptor](./kibana-plugin-core-public.httpinterceptor.md)<!-- -->. |
 |  [IHttpResponseInterceptorOverrides](./kibana-plugin-core-public.ihttpresponseinterceptoroverrides.md) | Properties that can be returned by HttpInterceptor.request to override the response. |
-|  [ImageValidation](./kibana-plugin-core-public.imagevalidation.md) |  |
 |  [IUiSettingsClient](./kibana-plugin-core-public.iuisettingsclient.md) | Client-side client that provides access to the advanced settings stored in elasticsearch. The settings provide control over the behavior of the Kibana application. For example, a user can specify how to display numeric or date fields. Users can adjust the settings via Management UI. [IUiSettingsClient](./kibana-plugin-core-public.iuisettingsclient.md) |
 |  [NavigateToAppOptions](./kibana-plugin-core-public.navigatetoappoptions.md) | Options for the [navigateToApp API](./kibana-plugin-core-public.applicationstart.navigatetoapp.md) |
 |  [NotificationsSetup](./kibana-plugin-core-public.notificationssetup.md) |  |
@@ -103,12 +101,14 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectAttributes](./kibana-plugin-core-public.savedobjectattributes.md) | The data for a Saved Object is stored as an object in the <code>attributes</code> property. |
 |  [SavedObjectError](./kibana-plugin-core-public.savedobjecterror.md) |  |
 |  [SavedObjectReference](./kibana-plugin-core-public.savedobjectreference.md) | A reference to another saved object. |
+|  [SavedObjectReferenceWithContext](./kibana-plugin-core-public.savedobjectreferencewithcontext.md) | A returned input object or one of its references, with additional context. |
 |  [SavedObjectsBaseOptions](./kibana-plugin-core-public.savedobjectsbaseoptions.md) |  |
 |  [SavedObjectsBatchResponse](./kibana-plugin-core-public.savedobjectsbatchresponse.md) |  |
 |  [SavedObjectsBulkCreateObject](./kibana-plugin-core-public.savedobjectsbulkcreateobject.md) |  |
 |  [SavedObjectsBulkCreateOptions](./kibana-plugin-core-public.savedobjectsbulkcreateoptions.md) |  |
 |  [SavedObjectsBulkUpdateObject](./kibana-plugin-core-public.savedobjectsbulkupdateobject.md) |  |
 |  [SavedObjectsBulkUpdateOptions](./kibana-plugin-core-public.savedobjectsbulkupdateoptions.md) |  |
+|  [SavedObjectsCollectMultiNamespaceReferencesResponse](./kibana-plugin-core-public.savedobjectscollectmultinamespacereferencesresponse.md) | The response when object references are collected. |
 |  [SavedObjectsCreateOptions](./kibana-plugin-core-public.savedobjectscreateoptions.md) |  |
 |  [SavedObjectsFindOptions](./kibana-plugin-core-public.savedobjectsfindoptions.md) |  |
 |  [SavedObjectsFindOptionsReference](./kibana-plugin-core-public.savedobjectsfindoptionsreference.md) |  |
@@ -127,8 +127,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsMigrationVersion](./kibana-plugin-core-public.savedobjectsmigrationversion.md) | Information about the migrations that have been applied to this SavedObject. When Kibana starts up, KibanaMigrator detects outdated documents and migrates them based on this value. For each migration that has been applied, the plugin's name is used as a key and the latest migration version as the value. |
 |  [SavedObjectsStart](./kibana-plugin-core-public.savedobjectsstart.md) |  |
 |  [SavedObjectsUpdateOptions](./kibana-plugin-core-public.savedobjectsupdateoptions.md) |  |
-|  [StringValidationRegex](./kibana-plugin-core-public.stringvalidationregex.md) | StringValidation with regex object |
-|  [StringValidationRegexString](./kibana-plugin-core-public.stringvalidationregexstring.md) | StringValidation as regex string |
 |  [ToastOptions](./kibana-plugin-core-public.toastoptions.md) | Options available for [IToasts](./kibana-plugin-core-public.itoasts.md) APIs. |
 |  [UiSettingsParams](./kibana-plugin-core-public.uisettingsparams.md) | UiSettings parameters defined by the plugins. |
 |  [UiSettingsState](./kibana-plugin-core-public.uisettingsstate.md) |  |
@@ -145,17 +143,16 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Type Alias | Description |
 |  --- | --- |
+|  [AppDeepLink](./kibana-plugin-core-public.appdeeplink.md) | Input type for registering secondary in-app locations for an application.<!-- -->Deep links must include at least one of <code>path</code> or <code>deepLinks</code>. A deep link that does not have a <code>path</code> represents a topological level in the application's hierarchy, but does not have a destination URL that is user-accessible. |
 |  [AppLeaveAction](./kibana-plugin-core-public.appleaveaction.md) | Possible actions to return from a [AppLeaveHandler](./kibana-plugin-core-public.appleavehandler.md)<!-- -->See [AppLeaveConfirmAction](./kibana-plugin-core-public.appleaveconfirmaction.md) and [AppLeaveDefaultAction](./kibana-plugin-core-public.appleavedefaultaction.md) |
 |  [AppLeaveHandler](./kibana-plugin-core-public.appleavehandler.md) | A handler that will be executed before leaving the application, either when going to another application or when closing the browser tab or manually changing the url. Should return <code>confirm</code> to prompt a message to the user before leaving the page, or <code>default</code> to keep the default behavior (doing nothing).<!-- -->See [AppMountParameters](./kibana-plugin-core-public.appmountparameters.md) for detailed usage examples. |
 |  [AppMount](./kibana-plugin-core-public.appmount.md) | A mount function called when the user navigates to this app's route. |
-|  [AppSearchDeepLink](./kibana-plugin-core-public.appsearchdeeplink.md) | Input type for registering secondary in-app locations for an application.<!-- -->Deep links must include at least one of <code>path</code> or <code>searchDeepLinks</code>. A deep link that does not have a <code>path</code> represents a topological level in the application's hierarchy, but does not have a destination URL that is user-accessible. |
 |  [AppUnmount](./kibana-plugin-core-public.appunmount.md) | A function called when an application should be unmounted from the page. This function should be synchronous. |
 |  [AppUpdatableFields](./kibana-plugin-core-public.appupdatablefields.md) | Defines the list of fields that can be updated via an [AppUpdater](./kibana-plugin-core-public.appupdater.md)<!-- -->. |
 |  [AppUpdater](./kibana-plugin-core-public.appupdater.md) | Updater for applications. see [ApplicationSetup](./kibana-plugin-core-public.applicationsetup.md) |
 |  [ChromeBreadcrumb](./kibana-plugin-core-public.chromebreadcrumb.md) |  |
 |  [ChromeHelpExtensionLinkBase](./kibana-plugin-core-public.chromehelpextensionlinkbase.md) |  |
 |  [ChromeHelpExtensionMenuLink](./kibana-plugin-core-public.chromehelpextensionmenulink.md) |  |
-|  [ChromeNavLinkUpdateableFields](./kibana-plugin-core-public.chromenavlinkupdateablefields.md) |  |
 |  [FatalErrorsStart](./kibana-plugin-core-public.fatalerrorsstart.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
 |  [HttpStart](./kibana-plugin-core-public.httpstart.md) | See [HttpSetup](./kibana-plugin-core-public.httpsetup.md) |
 |  [IToasts](./kibana-plugin-core-public.itoasts.md) | Methods for adding and removing global toast messages. See [ToastsApi](./kibana-plugin-core-public.toastsapi.md)<!-- -->. |
@@ -163,9 +160,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [NavType](./kibana-plugin-core-public.navtype.md) |  |
 |  [PluginInitializer](./kibana-plugin-core-public.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>public</code> directory should conform to this interface. |
 |  [PluginOpaqueId](./kibana-plugin-core-public.pluginopaqueid.md) |  |
+|  [PublicAppDeepLinkInfo](./kibana-plugin-core-public.publicappdeeplinkinfo.md) | Public information about a registered app's [deepLinks](./kibana-plugin-core-public.appdeeplink.md) |
 |  [PublicAppInfo](./kibana-plugin-core-public.publicappinfo.md) | Public information about a registered [application](./kibana-plugin-core-public.app.md) |
-|  [PublicAppMetaInfo](./kibana-plugin-core-public.publicappmetainfo.md) | Public information about a registered app's [keywords](./kibana-plugin-core-public.appmeta.md) |
-|  [PublicAppSearchDeepLinkInfo](./kibana-plugin-core-public.publicappsearchdeeplinkinfo.md) | Public information about a registered app's [searchDeepLinks](./kibana-plugin-core-public.appsearchdeeplink.md) |
 |  [PublicUiSettingsParams](./kibana-plugin-core-public.publicuisettingsparams.md) | A sub-set of [UiSettingsParams](./kibana-plugin-core-public.uisettingsparams.md) exposed to the client-side. |
 |  [ResolveDeprecationResponse](./kibana-plugin-core-public.resolvedeprecationresponse.md) |  |
 |  [SavedObjectAttribute](./kibana-plugin-core-public.savedobjectattribute.md) | Type definition for a Saved Object attribute value |
@@ -174,7 +170,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsImportWarning](./kibana-plugin-core-public.savedobjectsimportwarning.md) | Composite type of all the possible types of import warnings.<!-- -->See [SavedObjectsImportSimpleWarning](./kibana-plugin-core-public.savedobjectsimportsimplewarning.md) and [SavedObjectsImportActionRequiredWarning](./kibana-plugin-core-public.savedobjectsimportactionrequiredwarning.md) for more details. |
 |  [SavedObjectsNamespaceType](./kibana-plugin-core-public.savedobjectsnamespacetype.md) | The namespace type dictates how a saved object can be interacted in relation to namespaces. Each type is mutually exclusive: \* single (default): This type of saved object is namespace-isolated, e.g., it exists in only one namespace. \* multiple: This type of saved object is shareable, e.g., it can exist in one or more namespaces. \* multiple-isolated: This type of saved object is namespace-isolated, e.g., it exists in only one namespace, but object IDs must be unique across all namespaces. This is intended to be an intermediate step when objects with a "single" namespace type are being converted to a "multiple" namespace type. In other words, objects with a "multiple-isolated" namespace type will be \*share-capable\*, but will not actually be shareable until the namespace type is changed to "multiple". \* agnostic: This type of saved object is global. |
 |  [StartServicesAccessor](./kibana-plugin-core-public.startservicesaccessor.md) | Allows plugins to get access to APIs available in start inside async handlers, such as [App.mount](./kibana-plugin-core-public.app.mount.md)<!-- -->. Promise will not resolve until Core and plugin dependencies have completed <code>start</code>. |
-|  [StringValidation](./kibana-plugin-core-public.stringvalidation.md) | Allows regex objects or a regex string |
 |  [Toast](./kibana-plugin-core-public.toast.md) |  |
 |  [ToastInput](./kibana-plugin-core-public.toastinput.md) | Inputs for [IToasts](./kibana-plugin-core-public.itoasts.md) APIs. |
 |  [ToastInputFields](./kibana-plugin-core-public.toastinputfields.md) | Allowed fields for [ToastInput](./kibana-plugin-core-public.toastinput.md)<!-- -->. |

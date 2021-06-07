@@ -75,7 +75,13 @@ import { estypes } from '@elastic/elasticsearch';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
 import { IIndexPattern, IndexPattern, IndexPatternField } from '../../index_patterns';
-import { AggConfigs, ES_SEARCH_STRATEGY, ISearchGeneric, ISearchOptions } from '../..';
+import {
+  AggConfigs,
+  ES_SEARCH_STRATEGY,
+  IEsSearchResponse,
+  ISearchGeneric,
+  ISearchOptions,
+} from '../..';
 import type {
   ISearchSource,
   SearchFieldValue,
@@ -414,6 +420,15 @@ export class SearchSource {
     }
   }
 
+  private postFlightTransform(response: IEsSearchResponse<any>) {
+    const aggs = this.getField('aggs');
+    if (aggs instanceof AggConfigs) {
+      return aggs.postFlightTransform(response);
+    } else {
+      return response;
+    }
+  }
+
   private async fetchOthers(response: estypes.SearchResponse<any>, options: ISearchOptions) {
     const aggs = this.getField('aggs');
     if (aggs instanceof AggConfigs) {
@@ -451,24 +466,26 @@ export class SearchSource {
           if (isErrorResponse(response)) {
             obs.error(response);
           } else if (isPartialResponse(response)) {
-            obs.next(response);
+            obs.next(this.postFlightTransform(response));
           } else {
             if (!this.hasPostFlightRequests()) {
-              obs.next(response);
+              obs.next(this.postFlightTransform(response));
               obs.complete();
             } else {
               // Treat the complete response as partial, then run the postFlightRequests.
               obs.next({
-                ...response,
+                ...this.postFlightTransform(response),
                 isPartial: true,
                 isRunning: true,
               });
               const sub = from(this.fetchOthers(response.rawResponse, options)).subscribe({
                 next: (responseWithOther) => {
-                  obs.next({
-                    ...response,
-                    rawResponse: responseWithOther,
-                  });
+                  obs.next(
+                    this.postFlightTransform({
+                      ...response,
+                      rawResponse: responseWithOther!,
+                    })
+                  );
                 },
                 error: (e) => {
                   obs.error(e);
@@ -682,6 +699,7 @@ export class SearchSource {
     searchRequest.body = searchRequest.body || {};
     const { body, index, query, filters, highlightAll } = searchRequest;
     searchRequest.indexType = this.getIndexType(index);
+    const metaFields = getConfig(UI_SETTINGS.META_FIELDS);
 
     // get some special field types from the index pattern
     const { docvalueFields, scriptFields, storedFields, runtimeFields } = index
@@ -712,7 +730,7 @@ export class SearchSource {
         body._source = sourceFilters;
       }
 
-      const filter = fieldWildcardFilter(body._source.excludes, getConfig(UI_SETTINGS.META_FIELDS));
+      const filter = fieldWildcardFilter(body._source.excludes, metaFields);
       // also apply filters to provided fields & default docvalueFields
       body.fields = body.fields.filter((fld: SearchFieldValue) => filter(this.getFieldName(fld)));
       fieldsFromSource = fieldsFromSource.filter((fld: SearchFieldValue) =>
@@ -793,17 +811,21 @@ export class SearchSource {
             const field2Name = this.getFieldName(fld2);
             return field1Name === field2Name;
           }
-        ).map((fld: SearchFieldValue) => {
-          const fieldName = this.getFieldName(fld);
-          if (Object.keys(docvaluesIndex).includes(fieldName)) {
-            // either provide the field object from computed docvalues,
-            // or merge the user-provided field with the one in docvalues
-            return typeof fld === 'string'
-              ? docvaluesIndex[fld]
-              : this.getFieldFromDocValueFieldsOrIndexPattern(docvaluesIndex, fld, index);
-          }
-          return fld;
-        });
+        )
+          .filter((fld: SearchFieldValue) => {
+            return !metaFields.includes(this.getFieldName(fld));
+          })
+          .map((fld: SearchFieldValue) => {
+            const fieldName = this.getFieldName(fld);
+            if (Object.keys(docvaluesIndex).includes(fieldName)) {
+              // either provide the field object from computed docvalues,
+              // or merge the user-provided field with the one in docvalues
+              return typeof fld === 'string'
+                ? docvaluesIndex[fld]
+                : this.getFieldFromDocValueFieldsOrIndexPattern(docvaluesIndex, fld, index);
+            }
+            return fld;
+          });
       }
     } else {
       body.fields = filteredDocvalueFields;

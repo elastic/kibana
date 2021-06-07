@@ -12,7 +12,7 @@ import { makeChecksWithStatus } from './helper/make_checks';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   describe('telemetry collectors heartbeat', () => {
     before('generating data', async () => {

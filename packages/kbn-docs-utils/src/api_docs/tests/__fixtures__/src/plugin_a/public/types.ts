@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { ReactElement } from 'react';
 import { ImACommonType } from '../common';
 import { FooType, ImNotExportedFromIndex } from './foo';
 
@@ -46,3 +46,10 @@ export interface ImAnObject {
 
 /** @internal */
 export type IShouldBeInternal = string | { foo: string };
+
+export interface MyProps {
+  foo: string;
+  bar: FnWithGeneric;
+}
+
+export type AReactElementFn = () => ReactElement<MyProps>;

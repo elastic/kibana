@@ -30,6 +30,7 @@ const defaultProps = {
   operationDefinitionMap: {},
   isFullscreen: false,
   toggleFullscreen: jest.fn(),
+  setIsCloseable: jest.fn(),
 };
 
 // mocking random id generator function

@@ -15,7 +15,7 @@ import {
   TCPAdvancedFieldsContext,
   TLSFieldsContext,
 } from './contexts';
-import { Config, ConfigKeys } from './types';
+import { Config, ConfigKeys, DataStream } from './types';
 import { CustomFields } from './custom_fields';
 import { useUpdatePolicy } from './use_update_policy';
 import { validate } from './validation';
@@ -48,6 +48,11 @@ export const SyntheticsPolicyEditExtension = memo<SyntheticsPolicyEditExtensionP
           ...httpAdvancedFields,
           ...tcpAdvancedFields,
           ...tlsFields,
+          // ensure proxyUrl is not overwritten
+          [ConfigKeys.PROXY_URL]:
+            simpleFields[ConfigKeys.MONITOR_TYPE] === DataStream.HTTP
+              ? httpAdvancedFields[ConfigKeys.PROXY_URL]
+              : tcpAdvancedFields[ConfigKeys.PROXY_URL],
         }));
       },
       250,

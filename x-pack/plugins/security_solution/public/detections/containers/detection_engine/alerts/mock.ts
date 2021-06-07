@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { AlertSearchResponse, AlertsIndex, Privilege } from './types';
+import { HostIsolationResponse } from '../../../../../common/endpoint/types/actions';
+import { AlertSearchResponse, AlertsIndex, Privilege, CasesFromAlertsResponse } from './types';
 
 export const alertsMock: AlertSearchResponse<unknown, unknown> = {
   took: 7,
@@ -1039,3 +1040,12 @@ export const mockUserPrivilege: Privilege = {
   is_authenticated: true,
   has_encryption_key: true,
 };
+
+export const mockHostIsolation: HostIsolationResponse = {
+  action: '713085d6-ab45-4e9e-b41d-96563cafdd97',
+};
+
+export const mockCaseIdsFromAlertId: CasesFromAlertsResponse = [
+  '818601a0-b26b-11eb-8759-6b318e8cf4bc',
+  '8a774850-b26b-11eb-8759-6b318e8cf4bc',
+];

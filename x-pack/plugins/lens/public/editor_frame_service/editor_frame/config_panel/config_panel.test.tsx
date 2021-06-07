@@ -121,6 +121,29 @@ describe('ConfigPanel', () => {
     expect(component.find(LayerPanel).exists()).toBe(false);
   });
 
+  it('allow datasources and visualizations to use setters', async () => {
+    const props = getDefaultProps();
+    const component = mountWithIntl(<LayerPanels {...props} />);
+    const { updateDatasource, updateAll } = component.find(LayerPanel).props();
+
+    const updater = () => 'updated';
+    updateDatasource('ds1', updater);
+    // wait for one tick so async updater has a chance to trigger
+    await new Promise((r) => setTimeout(r, 0));
+    expect(props.dispatch).toHaveBeenCalledTimes(1);
+    expect(props.dispatch.mock.calls[0][0].updater(props.datasourceStates.ds1.state)).toEqual(
+      'updated'
+    );
+
+    updateAll('ds1', updater, props.visualizationState);
+    // wait for one tick so async updater has a chance to trigger
+    await new Promise((r) => setTimeout(r, 0));
+    expect(props.dispatch).toHaveBeenCalledTimes(2);
+    expect(props.dispatch.mock.calls[0][0].updater(props.datasourceStates.ds1.state)).toEqual(
+      'updated'
+    );
+  });
+
   describe('focus behavior when adding or removing layers', () => {
     it('should focus the only layer when resetting the layer', () => {
       const component = mountWithIntl(<LayerPanels {...getDefaultProps()} />, {

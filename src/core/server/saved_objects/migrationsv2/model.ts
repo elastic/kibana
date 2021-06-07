@@ -9,15 +9,21 @@
 import { gt, valid } from 'semver';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
-import { cloneDeep } from 'lodash';
+
 import { AliasAction, FetchIndexResponse, isLeftTypeof, RetryableEsClientError } from './actions';
 import { AllActionStates, InitState, State } from './types';
 import { IndexMapping } from '../mappings';
 import { ResponseType } from './next';
 import { SavedObjectsMigrationVersion } from '../types';
 import { disableUnknownTypeMappingFields } from '../migrations/core/migration_context';
-import { excludeUnusedTypesQuery } from '../migrations/core';
+import { excludeUnusedTypesQuery, TransformErrorObjects } from '../migrations/core';
 import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
+import {
+  createInitialProgress,
+  incrementProcessedProgress,
+  logProgress,
+  setProgressTotal,
+} from './progress';
 
 /**
  * A helper function/type for ensuring that all control state's are handled.
@@ -97,6 +103,28 @@ function getAliases(indices: FetchIndexResponse) {
   }, {} as Record<string, string>);
 }
 
+/**
+ * Constructs migration failure message strings from corrupt document ids and document transformation errors
+ */
+function extractTransformFailuresReason(
+  corruptDocumentIds: string[],
+  transformErrors: TransformErrorObjects[]
+): string {
+  const corruptDocumentIdReason =
+    corruptDocumentIds.length > 0
+      ? ` Corrupt saved object documents: ${corruptDocumentIds.join(',')}`
+      : '';
+  // we have both the saved object Id and the stack trace in each `transformErrors` item.
+  const transformErrorsReason =
+    transformErrors.length > 0
+      ? ' Transformation errors: ' +
+        transformErrors
+          .map((errObj) => `${errObj.rawId}: ${errObj.err.message}\n ${errObj.err.stack ?? ''}`)
+          .join('/n')
+      : '';
+  return `Migrations failed. Reason:${corruptDocumentIdReason}${transformErrorsReason}. To allow migrations to proceed, please delete these documents.`;
+}
+
 const delayRetryState = <S extends State>(
   state: S,
   errorMessage: string,
@@ -156,7 +184,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   // control state using:
   // `const res = resW as ResponseType<typeof stateP.controlState>;`
 
-  let stateP: State = cloneDeep(currentState);
+  let stateP: State = currentState;
 
   // Handle retryable_es_client_errors. Other left values need to be handled
   // by the control state specific code below.
@@ -481,25 +509,51 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
         sourceIndexPitId: res.right.pitId,
         lastHitSortValue: undefined,
+        // placeholders to collect document transform problems
+        corruptDocumentIds: [],
+        transformErrors: [],
+        progress: createInitialProgress(),
       };
     } else {
       throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_READ') {
+    // we carry through any failures we've seen with transforming documents on state
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
+      const progress = setProgressTotal(stateP.progress, res.right.totalHits);
+      const logs = logProgress(stateP.logs, progress);
       if (res.right.outdatedDocuments.length > 0) {
         return {
           ...stateP,
           controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX',
           outdatedDocuments: res.right.outdatedDocuments,
           lastHitSortValue: res.right.lastHitSortValue,
+          progress,
+          logs,
         };
+      } else {
+        // we don't have any more outdated documents and need to either fail or move on to updating the target mappings.
+        if (stateP.corruptDocumentIds.length > 0 || stateP.transformErrors.length > 0) {
+          const transformFailureReason = extractTransformFailuresReason(
+            stateP.corruptDocumentIds,
+            stateP.transformErrors
+          );
+          return {
+            ...stateP,
+            controlState: 'FATAL',
+            reason: transformFailureReason,
+          };
+        } else {
+          // we don't have any more outdated documents and we haven't encountered any document transformation issues.
+          // Close the PIT search and carry on with the happy path.
+          return {
+            ...stateP,
+            controlState: 'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT',
+            logs,
+          };
+        }
       }
-      return {
-        ...stateP,
-        controlState: 'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT',
-      };
     } else {
       throwBadResponse(stateP, res);
     }
@@ -516,34 +570,63 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_INDEX') {
+    // We follow a similar control flow as for
+    // outdated document search -> outdated document transform -> transform documents bulk index
+    // collecting issues along the way rather than failing
+    // REINDEX_SOURCE_TO_TEMP_INDEX handles the document transforms
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+
+    // Increment the processed documents, no matter what the results are.
+    // Otherwise the progress might look off when there are errors.
+    const progress = incrementProcessedProgress(stateP.progress, stateP.outdatedDocuments.length);
+
+    if (Either.isRight(res)) {
+      if (stateP.corruptDocumentIds.length === 0 && stateP.transformErrors.length === 0) {
+        return {
+          ...stateP,
+          controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK', // handles the actual bulk indexing into temp index
+          transformedDocs: [...res.right.processedDocs],
+          progress,
+        };
+      } else {
+        // we don't have any transform issues with the current batch of outdated docs but
+        // we have carried through previous transformation issues.
+        // The migration will ultimately fail but before we do that, continue to
+        // search through remaining docs for more issues and pass the previous failures along on state
+        return {
+          ...stateP,
+          controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
+          progress,
+        };
+      }
+    } else {
+      // we have failures from the current batch of documents and add them to the lists
+      const left = res.left;
+      if (isLeftTypeof(left, 'documents_transform_failed')) {
+        return {
+          ...stateP,
+          controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
+          corruptDocumentIds: [...stateP.corruptDocumentIds, ...left.corruptDocumentIds],
+          transformErrors: [...stateP.transformErrors, ...left.transformErrors],
+          progress,
+        };
+      } else {
+        // should never happen
+        throwBadResponse(stateP, res as never);
+      }
+    }
+  } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       return {
         ...stateP,
         controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
+        // we're still on the happy path with no transformation failures seen.
+        corruptDocumentIds: [],
+        transformErrors: [],
       };
     } else {
-      const left = res.left;
-      if (
-        isLeftTypeof(left, 'target_index_had_write_block') ||
-        (isLeftTypeof(left, 'index_not_found_exception') && left.index === stateP.tempIndex)
-      ) {
-        // index_not_found_exception:
-        //   another instance completed the MARK_VERSION_INDEX_READY and
-        //   removed the temp index.
-        // target_index_had_write_block
-        //   another instance completed the SET_TEMP_WRITE_BLOCK step adding a
-        //   write block to the temp index.
-        //
-        // For simplicity we continue linearly through the next steps even if
-        // we know another instance already completed these.
-        return {
-          ...stateP,
-          controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
-        };
-      }
-      // should never happen
-      throwBadResponse(stateP, res as never);
+      throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'SET_TEMP_WRITE_BLOCK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -610,7 +693,10 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ',
         pitId: res.right.pitId,
         lastHitSortValue: undefined,
+        progress: createInitialProgress(),
         hasTransformedDocs: false,
+        corruptDocumentIds: [],
+        transformErrors: [],
       };
     } else {
       throwBadResponse(stateP, res);
@@ -619,20 +705,107 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       if (res.right.outdatedDocuments.length > 0) {
+        const progress = setProgressTotal(stateP.progress, res.right.totalHits);
+        const logs = logProgress(stateP.logs, progress);
+
         return {
           ...stateP,
           controlState: 'OUTDATED_DOCUMENTS_TRANSFORM',
           outdatedDocuments: res.right.outdatedDocuments,
           lastHitSortValue: res.right.lastHitSortValue,
+          progress,
+          logs,
         };
       } else {
-        return {
-          ...stateP,
-          controlState: 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT',
-        };
+        // we don't have any more outdated documents and need to either fail or move on to updating the target mappings.
+        if (stateP.corruptDocumentIds.length > 0 || stateP.transformErrors.length > 0) {
+          const transformFailureReason = extractTransformFailuresReason(
+            stateP.corruptDocumentIds,
+            stateP.transformErrors
+          );
+          return {
+            ...stateP,
+            controlState: 'FATAL',
+            reason: transformFailureReason,
+          };
+        } else {
+          // If there are no more results we have transformed all outdated
+          // documents and we didn't encounter any corrupt documents or transformation errors
+          // and can proceed to the next step
+          return {
+            ...stateP,
+            controlState: 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT',
+          };
+        }
       }
     } else {
       throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_TRANSFORM') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+
+    // Increment the processed documents, no matter what the results are.
+    // Otherwise the progress might look off when there are errors.
+    const progress = incrementProcessedProgress(stateP.progress, stateP.outdatedDocuments.length);
+
+    if (Either.isRight(res)) {
+      // we haven't seen corrupt documents or any transformation errors thus far in the migration
+      // index the migrated docs
+      if (stateP.corruptDocumentIds.length === 0 && stateP.transformErrors.length === 0) {
+        return {
+          ...stateP,
+          controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX',
+          transformedDocs: [...res.right.processedDocs],
+          hasTransformedDocs: true,
+          progress,
+        };
+      } else {
+        // We have seen corrupt documents and/or transformation errors
+        // skip indexing and go straight to reading and transforming more docs
+        return {
+          ...stateP,
+          controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ',
+          progress,
+        };
+      }
+    } else {
+      if (isLeftTypeof(res.left, 'documents_transform_failed')) {
+        // continue to build up any more transformation errors before failing the migration.
+        return {
+          ...stateP,
+          controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ',
+          corruptDocumentIds: [...stateP.corruptDocumentIds, ...res.left.corruptDocumentIds],
+          transformErrors: [...stateP.transformErrors, ...res.left.transformErrors],
+          hasTransformedDocs: false,
+          progress,
+        };
+      } else {
+        throwBadResponse(stateP, res as never);
+      }
+    }
+  } else if (stateP.controlState === 'TRANSFORMED_DOCUMENTS_BULK_INDEX') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ',
+        corruptDocumentIds: [],
+        transformErrors: [],
+        hasTransformedDocs: true,
+      };
+    } else {
+      throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK',
+        updateTargetMappingsTaskId: res.right.taskId,
+      };
+    } else {
+      throwBadResponse(stateP, res as never);
     }
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_REFRESH') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -657,28 +830,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       return {
         ...state,
         controlState: 'UPDATE_TARGET_MAPPINGS',
-      };
-    } else {
-      throwBadResponse(stateP, res);
-    }
-  } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_TRANSFORM') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ',
-        hasTransformedDocs: true,
-      };
-    } else {
-      throwBadResponse(stateP, res as never);
-    }
-  } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK',
-        updateTargetMappingsTaskId: res.right.taskId,
       };
     } else {
       throwBadResponse(stateP, res);

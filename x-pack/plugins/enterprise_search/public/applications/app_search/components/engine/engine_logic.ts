@@ -8,7 +8,6 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { HttpLogic } from '../../../shared/http';
-import { IIndexingStatus } from '../../../shared/schema/types';
 
 import { EngineDetails, EngineTypes } from './types';
 
@@ -18,6 +17,7 @@ interface EngineValues {
   engineName: string;
   isMetaEngine: boolean;
   isSampleEngine: boolean;
+  hasSchemaErrors: boolean;
   hasSchemaConflicts: boolean;
   hasUnconfirmedSchemaFields: boolean;
   engineNotFound: boolean;
@@ -26,7 +26,6 @@ interface EngineValues {
 interface EngineActions {
   setEngineData(engine: EngineDetails): { engine: EngineDetails };
   setEngineName(engineName: string): { engineName: string };
-  setIndexingStatus(activeReindexJob: IIndexingStatus): { activeReindexJob: IIndexingStatus };
   setEngineNotFound(notFound: boolean): { notFound: boolean };
   clearEngine(): void;
   initializeEngine(): void;
@@ -37,7 +36,6 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
   actions: {
     setEngineData: (engine) => ({ engine }),
     setEngineName: (engineName) => ({ engineName }),
-    setIndexingStatus: (activeReindexJob) => ({ activeReindexJob }),
     setEngineNotFound: (notFound) => ({ notFound }),
     clearEngine: true,
     initializeEngine: true,
@@ -55,10 +53,6 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
       {
         setEngineData: (_, { engine }) => engine,
         clearEngine: () => ({}),
-        setIndexingStatus: (state, { activeReindexJob }) => ({
-          ...state,
-          activeReindexJob,
-        }),
       },
     ],
     engineName: [
@@ -79,6 +73,12 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
   selectors: ({ selectors }) => ({
     isMetaEngine: [() => [selectors.engine], (engine) => engine?.type === EngineTypes.meta],
     isSampleEngine: [() => [selectors.engine], (engine) => !!engine?.sample],
+    // Indexed engines
+    hasSchemaErrors: [
+      () => [selectors.engine],
+      ({ activeReindexJob }) => activeReindexJob?.numDocumentsWithErrors > 0,
+    ],
+    // Meta engines
     hasSchemaConflicts: [
       () => [selectors.engine],
       (engine) => !!(engine?.schemaConflicts && Object.keys(engine.schemaConflicts).length > 0),

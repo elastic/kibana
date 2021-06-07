@@ -163,7 +163,7 @@ export interface ApiDeclaration {
   tags?: string[];
 
   /**
-   * Every plugn that exposes functionality from their setup and start contract
+   * Every plugin that exposes functionality from their setup and start contract
    * should have a single exported type for each. These get pulled to the top because
    * they are accessed differently than other exported functionality and types.
    */
@@ -173,6 +173,26 @@ export interface ApiDeclaration {
    * Used to create links to github to view the code for this API.
    */
   source: SourceLink;
+
+  /**
+   * Other plugins that reference this API item (along with SourceLink info for each reference).
+   */
+  references?: ApiReference[];
+
+  /**
+   * The id of the plugin this API belongs to.
+   */
+  parentPluginId: string;
+
+  /**
+   * Certain deprecated APIs may specify a removeBy date.
+   */
+  removeBy?: string;
+
+  /**
+   * Is this API deprecated or not?
+   */
+  deprecated?: boolean;
 }
 
 export interface SourceLink {
@@ -201,4 +221,13 @@ export enum Lifecycle {
 // Mapping of plugin id to the missing source API id to all the plugin API items that referenced this item.
 export interface MissingApiItemMap {
   [key: string]: { [key: string]: string[] };
+}
+
+export interface ApiReference {
+  plugin: string;
+  link: SourceLink;
+}
+
+export interface ReferencedDeprecations {
+  [key: string]: Array<{ deprecatedApi: ApiDeclaration; ref: ApiReference }>;
 }

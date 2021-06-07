@@ -15,6 +15,7 @@ import {
   ESSearchSourceResponseMeta,
   MapExtent,
   MapQuery,
+  Timeslice,
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
@@ -39,6 +40,7 @@ export interface BoundsFilters {
   query?: MapQuery;
   sourceQuery?: MapQuery;
   timeFilters: TimeRange;
+  timeslice?: Timeslice;
 }
 
 export interface IVectorSource extends ISource {
@@ -60,7 +62,7 @@ export interface IVectorSource extends ISource {
   getSyncMeta(): VectorSourceSyncMeta | null;
   getFieldNames(): string[];
   createField({ fieldName }: { fieldName: string }): IField;
-  canFormatFeatureProperties(): boolean;
+  hasTooltipProperties(): boolean;
   getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]>;
   isBoundsAware(): boolean;
   getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig;
@@ -115,7 +117,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     throw new Error('Should implement VectorSource#getGeoJson');
   }
 
-  canFormatFeatureProperties() {
+  hasTooltipProperties() {
     return false;
   }
 

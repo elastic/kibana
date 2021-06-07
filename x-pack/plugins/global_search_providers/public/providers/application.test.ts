@@ -29,10 +29,8 @@ const createApp = (props: Partial<PublicAppInfo> = {}): PublicAppInfo => ({
   status: AppStatus.accessible,
   navLinkStatus: AppNavLinkStatus.visible,
   chromeless: false,
-  meta: {
-    keywords: props.meta?.keywords || [],
-    searchDeepLinks: [],
-  },
+  keywords: props.keywords || [],
+  deepLinks: [],
   ...props,
 });
 

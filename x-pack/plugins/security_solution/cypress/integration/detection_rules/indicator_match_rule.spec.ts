@@ -16,7 +16,16 @@ import {
   ALERT_RULE_VERSION,
   NUMBER_OF_ALERTS,
 } from '../../screens/alerts';
-import { JSON_LINES } from '../../screens/alerts_details';
+import {
+  JSON_LINES,
+  TABLE_CELL,
+  TABLE_ROWS,
+  THREAT_CONTENT,
+  THREAT_DETAILS_VIEW,
+  THREAT_INTEL_TAB,
+  THREAT_SUMMARY_VIEW,
+  TITLE,
+} from '../../screens/alerts_details';
 import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
@@ -54,14 +63,20 @@ import {
   TIMELINE_FIELD,
   TIMELINE_TEMPLATE_DETAILS,
 } from '../../screens/rule_details';
+import { INDICATOR_MATCH_ROW_RENDER, PROVIDER_BADGE } from '../../screens/timeline';
 
 import {
   expandFirstAlert,
   goToManageAlertsDetectionRules,
+  investigateFirstAlertInTimeline,
   waitForAlertsIndexToBeCreated,
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
-import { openJsonView, scrollJsonViewToBottom } from '../../tasks/alerts_details';
+import {
+  openJsonView,
+  openThreatIndicatorDetails,
+  scrollJsonViewToBottom,
+} from '../../tasks/alerts_details';
 import {
   changeRowsPerPageTo300,
   duplicateFirstRule,
@@ -75,6 +90,7 @@ import {
   checkDuplicatedRule,
 } from '../../tasks/alerts_detection_rules';
 import { createCustomIndicatorRule } from '../../tasks/api_calls/rules';
+import { loadPrepackagedTimelineTemplates } from '../../tasks/api_calls/timelines';
 import { cleanKibana, reload } from '../../tasks/common';
 import {
   createAndActivateRule,
@@ -392,15 +408,15 @@ describe('indicator match', () => {
       beforeEach(() => {
         cleanKibana();
         loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+      });
+
+      it('Creates and activates a new Indicator Match rule', () => {
         waitForAlertsPanelToBeLoaded();
         waitForAlertsIndexToBeCreated();
         goToManageAlertsDetectionRules();
         waitForRulesTableToBeLoaded();
         goToCreateNewRule();
         selectIndicatorMatchType();
-      });
-
-      it('Creates and activates a new Indicator Match rule', () => {
         fillDefineIndicatorMatchRuleAndContinue(newThreatIndicatorRule);
         fillAboutRuleAndContinue(newThreatIndicatorRule);
         fillScheduleRuleAndContinue(newThreatIndicatorRule);
@@ -426,7 +442,7 @@ describe('indicator match', () => {
 
         goToRuleDetails();
 
-        cy.get(RULE_NAME_HEADER).should('have.text', `${newThreatIndicatorRule.name}`);
+        cy.get(RULE_NAME_HEADER).should('contain', `${newThreatIndicatorRule.name}`);
         cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', newThreatIndicatorRule.description);
         cy.get(ABOUT_DETAILS).within(() => {
           getDetails(SEVERITY_DETAILS).should('have.text', newThreatIndicatorRule.severity);
@@ -446,7 +462,7 @@ describe('indicator match', () => {
         cy.get(DEFINITION_DETAILS).within(() => {
           getDetails(INDEX_PATTERNS_DETAILS).should(
             'have.text',
-            newThreatIndicatorRule.index!.join('')
+            newThreatIndicatorRule.index.join('')
           );
           getDetails(CUSTOM_QUERY_DETAILS).should('have.text', '*:*');
           getDetails(RULE_TYPE_DETAILS).should('have.text', 'Indicator Match');
@@ -484,6 +500,35 @@ describe('indicator match', () => {
           .first()
           .should('have.text', newThreatIndicatorRule.severity.toLowerCase());
         cy.get(ALERT_RULE_RISK_SCORE).first().should('have.text', newThreatIndicatorRule.riskScore);
+      });
+
+      it('Investigate alert in timeline', () => {
+        const accessibilityText = `Press enter for options, or press space to begin dragging.`;
+        const threatIndicatorPath =
+          '../../../x-pack/test/security_solution_cypress/es_archives/threat_indicator/data.json';
+
+        loadPrepackagedTimelineTemplates();
+
+        goToManageAlertsDetectionRules();
+        createCustomIndicatorRule(newThreatIndicatorRule);
+
+        reload();
+        goToRuleDetails();
+        waitForAlertsToPopulate();
+        investigateFirstAlertInTimeline();
+
+        cy.get(PROVIDER_BADGE).should('have.length', 3);
+        cy.get(PROVIDER_BADGE).should(
+          'have.text',
+          `threat.indicator.matched.atomic: "${newThreatIndicatorRule.atomic}"threat.indicator.matched.type: "${newThreatIndicatorRule.type}"threat.indicator.matched.field: "${newThreatIndicatorRule.indicatorMappingField}"`
+        );
+
+        cy.readFile(threatIndicatorPath).then((threatIndicator) => {
+          cy.get(INDICATOR_MATCH_ROW_RENDER).should(
+            'have.text',
+            `threat.indicator.matched.field${newThreatIndicatorRule.indicatorMappingField}${accessibilityText}matched${newThreatIndicatorRule.indicatorMappingField}${newThreatIndicatorRule.atomic}${accessibilityText}threat.indicator.matched.type${newThreatIndicatorRule.type}${accessibilityText}fromthreat.indicator.event.dataset${threatIndicator.value.source.event.dataset}${accessibilityText}:threat.indicator.event.reference${threatIndicator.value.source.event.reference}(opens in a new tab or window)${accessibilityText}`
+          );
+        });
       });
     });
 
@@ -550,6 +595,90 @@ describe('indicator match', () => {
             cy.wrap(elements)
               .eq(length - enrichment.line)
               .should('have.text', enrichment.text);
+          });
+        });
+      });
+
+      it('Displays threat summary data on alerts details', () => {
+        const expectedThreatSummary = [
+          { field: 'matched.field', value: 'myhash.mysha256' },
+          { field: 'matched.type', value: 'file' },
+          { field: 'first_seen', value: '2021-03-10T08:02:14.000Z' },
+        ];
+
+        expandFirstAlert();
+
+        cy.get(THREAT_SUMMARY_VIEW).within(() => {
+          cy.get(TABLE_ROWS).should('have.length', expectedThreatSummary.length);
+          expectedThreatSummary.forEach((row, index) => {
+            cy.get(TABLE_ROWS)
+              .eq(index)
+              .within(() => {
+                cy.get(TITLE).should('have.text', row.field);
+                cy.get(THREAT_CONTENT).should('have.text', row.value);
+              });
+          });
+        });
+      });
+
+      it('Displays threat indicator data on the threat intel tab', () => {
+        const expectedThreatIndicatorData = [
+          { field: 'first_seen', value: '2021-03-10T08:02:14.000Z' },
+          { field: 'file.size', value: '80280' },
+          { field: 'file.type', value: 'elf' },
+          {
+            field: 'file.hash.sha256',
+            value: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
+          },
+          {
+            field: 'file.hash.tlsh',
+            value: '6D7312E017B517CC1371A8353BED205E9128223972AE35302E97528DF957703BAB2DBE',
+          },
+          {
+            field: 'file.hash.ssdeep',
+            value:
+              '1536:87vbq1lGAXSEYQjbChaAU2yU23M51DjZgSQAvcYkFtZTjzBht5:8D+CAXFYQChaAUk5ljnQssL',
+          },
+          { field: 'file.hash.md5', value: '9b6c3518a91d23ed77504b5416bfb5b3' },
+          { field: 'type', value: 'file' },
+          {
+            field: 'event.reference',
+            value:
+              'https://urlhaus-api.abuse.ch/v1/download/a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3/(opens in a new tab or window)',
+          },
+          { field: 'event.ingested', value: '2021-03-10T14:51:09.809069Z' },
+          { field: 'event.created', value: '2021-03-10T14:51:07.663Z' },
+          { field: 'event.kind', value: 'enrichment' },
+          { field: 'event.module', value: 'threatintel' },
+          { field: 'event.category', value: 'threat' },
+          { field: 'event.type', value: 'indicator' },
+          { field: 'event.dataset', value: 'threatintel.abusemalware' },
+          {
+            field: 'matched.atomic',
+            value: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
+          },
+          { field: 'matched.field', value: 'myhash.mysha256' },
+          {
+            field: 'matched.id',
+            value: '84cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f',
+          },
+          { field: 'matched.index', value: 'filebeat-7.12.0-2021.03.10-000001' },
+          { field: 'matched.type', value: 'file' },
+        ];
+
+        expandFirstAlert();
+        openThreatIndicatorDetails();
+
+        cy.get(THREAT_INTEL_TAB).should('have.text', 'Threat Intel (1)');
+        cy.get(THREAT_DETAILS_VIEW).within(() => {
+          cy.get(TABLE_ROWS).should('have.length', expectedThreatIndicatorData.length);
+          expectedThreatIndicatorData.forEach((row, index) => {
+            cy.get(TABLE_ROWS)
+              .eq(index)
+              .within(() => {
+                cy.get(TABLE_CELL).eq(0).should('have.text', row.field);
+                cy.get(TABLE_CELL).eq(1).should('have.text', row.value);
+              });
           });
         });
       });

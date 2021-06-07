@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, memo, useState, useContext } from 'react';
+import React, { useMemo, useCallback, memo, useContext } from 'react';
 import {
   EuiHorizontalRule,
   EuiBasicTable,
@@ -17,11 +17,6 @@ import {
   EuiSelectableProps,
   EuiSuperDatePicker,
   EuiSpacer,
-  EuiPopover,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiContextMenuPanelProps,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiCallOut,
@@ -31,8 +26,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { createStructuredSelector } from 'reselect';
 import { useDispatch } from 'react-redux';
-import { EuiContextMenuItemProps } from '@elastic/eui/src/components/context_menu/context_menu_item';
-import { NavigateToAppOptions } from 'kibana/public';
 import { ThemeContext } from 'styled-components';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
@@ -64,8 +57,8 @@ import { OutOfDate } from './components/out_of_date';
 import { AdminSearchBar } from './components/search_bar';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { APP_ID } from '../../../../../common/constants';
 import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
+import { TableRowActions } from './components/table_row_actions';
 
 const MAX_PAGINATED_ITEM = 9999;
 
@@ -104,36 +97,6 @@ const EndpointListNavLink = memo<{
 });
 EndpointListNavLink.displayName = 'EndpointListNavLink';
 
-const TableRowActions = memo<{
-  items: EuiContextMenuPanelProps['items'];
-}>(({ items }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const handleCloseMenu = useCallback(() => setIsOpen(false), [setIsOpen]);
-  const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
-
-  return (
-    <EuiPopover
-      anchorPosition="downRight"
-      panelPaddingSize="none"
-      button={
-        <EuiButtonIcon
-          data-test-subj="endpointTableRowActions"
-          iconType="boxesHorizontal"
-          onClick={handleToggleMenu}
-          aria-label={i18n.translate('xpack.securitySolution.endpoint.list.actionmenu', {
-            defaultMessage: 'Open',
-          })}
-        />
-      }
-      isOpen={isOpen}
-      closePopover={handleCloseMenu}
-    >
-      <EuiContextMenuPanel items={items} />
-    </EuiPopover>
-  );
-});
-TableRowActions.displayName = 'EndpointTableRowActions';
-
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
 export const EndpointList = () => {
   const history = useHistory();
@@ -152,7 +115,6 @@ export const EndpointList = () => {
     policyItemsLoading,
     endpointPackageVersion,
     endpointsExist,
-    agentPolicies,
     autoRefreshInterval,
     isAutoRefreshEnabled,
     patternsError,
@@ -162,7 +124,6 @@ export const EndpointList = () => {
     isTransformEnabled,
   } = useEndpointSelector(selector);
   const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
-
   const dispatch = useDispatch<(a: EndpointAction) => void>();
   // cap ability to page at 10k records. (max_result_window)
   const maxPageCount = totalItemCount > MAX_PAGINATED_ITEM ? MAX_PAGINATED_ITEM : totalItemCount;
@@ -234,7 +195,7 @@ export const EndpointList = () => {
 
   const NOOP = useCallback(() => {}, []);
 
-  const PAD_LEFT: React.CSSProperties = { paddingLeft: '6px' };
+  const PAD_LEFT: React.CSSProperties = useMemo(() => ({ paddingLeft: '6px' }), []);
 
   const handleDeployEndpointsClick = useNavigateToAppEventHandler<AgentPolicyDetailsDeployAgentAction>(
     'fleet',
@@ -321,7 +282,7 @@ export const EndpointList = () => {
         render: (hostStatus: HostInfo['host_status']) => {
           return (
             <EuiBadge
-              color={HOST_STATUS_TO_BADGE_COLOR[hostStatus] || 'warning'}
+              color={hostStatus != null ? HOST_STATUS_TO_BADGE_COLOR[hostStatus] : 'warning'}
               data-test-subj="rowHostStatus"
               className="eui-textTruncate"
             >
@@ -461,79 +422,13 @@ export const EndpointList = () => {
           {
             // eslint-disable-next-line react/display-name
             render: (item: HostInfo) => {
-              return (
-                <TableRowActions
-                  items={[
-                    <EuiContextMenuItemNavByRouter
-                      data-test-subj="hostLink"
-                      icon="logoSecurity"
-                      key="hostDetailsLink"
-                      navigateAppId={APP_ID}
-                      navigateOptions={{ path: `hosts/${item.metadata.host.hostname}` }}
-                      href={`${services?.application?.getUrlForApp('securitySolution')}/hosts/${
-                        item.metadata.host.hostname
-                      }`}
-                    >
-                      <FormattedMessage
-                        id="xpack.securitySolution.endpoint.list.actions.hostDetails"
-                        defaultMessage="View Host Details"
-                      />
-                    </EuiContextMenuItemNavByRouter>,
-                    <EuiContextMenuItemNavByRouter
-                      icon="logoObservability"
-                      key="agentConfigLink"
-                      data-test-subj="agentPolicyLink"
-                      navigateAppId="fleet"
-                      navigateOptions={{
-                        path: `#${pagePathGetters.policy_details({
-                          policyId: agentPolicies[item.metadata.Endpoint.policy.applied.id],
-                        })}`,
-                      }}
-                      href={`${services?.application?.getUrlForApp(
-                        'fleet'
-                      )}#${pagePathGetters.policy_details({
-                        policyId: agentPolicies[item.metadata.Endpoint.policy.applied.id],
-                      })}`}
-                      disabled={
-                        agentPolicies[item.metadata.Endpoint.policy.applied.id] === undefined
-                      }
-                    >
-                      <FormattedMessage
-                        id="xpack.securitySolution.endpoint.list.actions.agentPolicy"
-                        defaultMessage="View Agent Policy"
-                      />
-                    </EuiContextMenuItemNavByRouter>,
-                    <EuiContextMenuItemNavByRouter
-                      icon="logoObservability"
-                      key="agentDetailsLink"
-                      data-test-subj="agentDetailsLink"
-                      navigateAppId="fleet"
-                      navigateOptions={{
-                        path: `#${pagePathGetters.fleet_agent_details({
-                          agentId: item.metadata.elastic.agent.id,
-                        })}`,
-                      }}
-                      href={`${services?.application?.getUrlForApp(
-                        'fleet'
-                      )}#${pagePathGetters.fleet_agent_details({
-                        agentId: item.metadata.elastic.agent.id,
-                      })}`}
-                    >
-                      <FormattedMessage
-                        id="xpack.securitySolution.endpoint.list.actions.agentDetails"
-                        defaultMessage="View Agent Details"
-                      />
-                    </EuiContextMenuItemNavByRouter>,
-                  ]}
-                />
-              );
+              return <TableRowActions endpointMetadata={item.metadata} />;
             },
           },
         ],
       },
     ];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formatUrl, queryParams, search, agentPolicies, services?.application?.getUrlForApp]);
+  }, [queryParams, search, formatUrl, PAD_LEFT]);
 
   const renderTableOrEmptyState = useMemo(() => {
     if (endpointsExist || areEndpointsEnrolling) {
@@ -697,20 +592,3 @@ export const EndpointList = () => {
     </AdministrationListPage>
   );
 };
-
-const EuiContextMenuItemNavByRouter = memo<
-  Omit<EuiContextMenuItemProps, 'onClick'> & {
-    navigateAppId: string;
-    navigateOptions: NavigateToAppOptions;
-    children: React.ReactNode;
-  }
->(({ navigateAppId, navigateOptions, children, ...otherMenuItemProps }) => {
-  const handleOnClick = useNavigateToAppEventHandler(navigateAppId, navigateOptions);
-
-  return (
-    <EuiContextMenuItem {...otherMenuItemProps} onClick={handleOnClick}>
-      {children}
-    </EuiContextMenuItem>
-  );
-});
-EuiContextMenuItemNavByRouter.displayName = 'EuiContextMenuItemNavByRouter';

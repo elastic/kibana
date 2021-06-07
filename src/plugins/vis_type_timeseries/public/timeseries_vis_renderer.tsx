@@ -15,7 +15,8 @@ import { IUiSettingsClient } from 'kibana/public';
 
 import { VisualizationContainer, PersistedState } from '../../visualizations/public';
 
-import { isVisTableData, TimeseriesVisData } from '../common/types';
+import type { TimeseriesVisData } from '../common/types';
+import { isVisTableData } from '../common/vis_data_utils';
 import { getChartsSetup } from './services';
 
 import type { TimeseriesVisParams } from './types';

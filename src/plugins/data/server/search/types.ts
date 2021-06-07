@@ -37,6 +37,7 @@ export interface SearchStrategyDependencies {
   esClient: IScopedClusterClient;
   uiSettingsClient: IUiSettingsClient;
   searchSessionsClient: IScopedSearchSessionsClient;
+  request: KibanaRequest;
 }
 
 export interface ISearchSetup {

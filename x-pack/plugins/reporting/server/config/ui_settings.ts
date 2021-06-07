@@ -11,7 +11,7 @@ import { CoreSetup, UiSettingsParams } from 'kibana/server';
 import { PLUGIN_ID, UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../common/constants';
 
 const kbToBase64Length = (kb: number) => Math.floor((kb * 1024 * 8) / 6);
-const maxLogoSizeInKilobytes = kbToBase64Length(200);
+const maxLogoSizeInBase64 = kbToBase64Length(200);
 
 // inspired by x-pack/plugins/canvas/common/lib/dataurl.ts
 const dataurlRegex = /^data:([a-z]+\/[a-z0-9-+.]+)(;[a-z-]+=[a-z0-9-]+)?(;([a-z0-9]+))?,/;
@@ -33,21 +33,13 @@ const isImageData = (str: any): boolean => {
   return true;
 };
 
-const isLessThanMaxSize = (str: any) => {
-  if (str.length > maxLogoSizeInKilobytes) {
-    return false;
-  }
-
-  return true;
-};
-
 const validatePdfLogoBase64String = (str: any) => {
   if (typeof str !== 'string' || !isImageData(str)) {
     return i18n.translate('xpack.reporting.uiSettings.validate.customLogo.badFile', {
       defaultMessage: `Sorry, that file will not work. Please try a different image file.`,
     });
   }
-  if (!isLessThanMaxSize(str)) {
+  if (str.length > maxLogoSizeInBase64) {
     return i18n.translate('xpack.reporting.uiSettings.validate.customLogo.tooLarge', {
       defaultMessage: `Sorry, that file is too large. The image file must be less than 200 kilobytes.`,
     });
@@ -70,12 +62,6 @@ export function registerUiSettings(core: CoreSetup<object, unknown>) {
       type: 'image',
       schema: PdfLogoSchema,
       category: [PLUGIN_ID],
-      validation: {
-        maxSize: {
-          length: maxLogoSizeInKilobytes,
-          description: '200 kB',
-        },
-      },
     },
   } as Record<string, UiSettingsParams<null>>);
 }

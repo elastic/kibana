@@ -26,6 +26,8 @@ export const CASE = (id: string) => {
 
 export const CLOSE_TIMELINE_BTN = '[data-test-subj="close-timeline"]';
 
+export const COLUMN_HEADERS = '[data-test-subj="column-headers"] [data-test-subj^=header-text]';
+
 export const COMBO_BOX = '.euiComboBoxOption__content';
 
 export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-new"]';
@@ -93,6 +95,8 @@ export const SAVE_FILTER_BTN = '[data-test-subj="saveFilter"]';
 
 export const SEARCH_OR_FILTER_CONTAINER =
   '[data-test-subj="timeline-search-or-filter-search-container"]';
+
+export const INDICATOR_MATCH_ROW_RENDER = '[data-test-subj="threat-match-row"]';
 
 export const QUERY_TAB_EVENTS_TABLE = '[data-test-subj="query-events-table"]';
 

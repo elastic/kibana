@@ -64,6 +64,10 @@ def isPr() {
   return !!(env.ghprbPullId && env.ghprbPullLink && env.ghprbPullLink =~ /\/elastic\/kibana\//)
 }
 
+def isTrackedBranchPr() {
+  return isPr() && (env.ghprbTargetBranch == 'master' || env.ghprbTargetBranch == '6.8' || env.ghprbTargetBranch =~ /[7-8]\.[x0-9]+/)
+}
+
 def getLatestBuildComment() {
   return getComments()
     .reverse()
@@ -234,8 +238,10 @@ def getNextCommentMessage(previousCommentInfo = [:], isFinal = false) {
 
   messages << getTestFailuresMessage()
 
-  if (isFinal) {
-    messages << ciStats.getMetricsReport()
+  catchErrors {
+    if (isFinal && isTrackedBranchPr()) {
+      messages << ciStats.getMetricsReport()
+    }
   }
 
   if (info.builds && info.builds.size() > 0) {

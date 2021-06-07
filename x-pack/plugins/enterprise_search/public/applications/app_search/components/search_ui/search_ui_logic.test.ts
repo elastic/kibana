@@ -78,10 +78,10 @@ describe('SearchUILogic', () => {
       });
     });
 
-    describe('onURLFieldChange', () => {
+    describe('onUrlFieldChange', () => {
       it('sets the urlField value', () => {
         mount({ urlField: '' });
-        SearchUILogic.actions.onURLFieldChange('foo');
+        SearchUILogic.actions.onUrlFieldChange('foo');
         expect(SearchUILogic.values).toEqual({
           ...DEFAULT_VALUES,
           urlField: 'foo',
@@ -128,6 +128,10 @@ describe('SearchUILogic', () => {
       validFields: ['test'],
       validSortFields: ['test'],
       validFacetFields: ['test'],
+      defaultValues: {
+        urlField: 'url',
+        titleField: 'title',
+      },
     };
 
     describe('loadFieldData', () => {
@@ -142,7 +146,13 @@ describe('SearchUILogic', () => {
         expect(http.get).toHaveBeenCalledWith(
           '/api/app_search/engines/engine1/search_ui/field_config'
         );
-        expect(SearchUILogic.actions.onFieldDataLoaded).toHaveBeenCalledWith(MOCK_RESPONSE);
+        expect(SearchUILogic.actions.onFieldDataLoaded).toHaveBeenCalledWith({
+          validFields: ['test'],
+          validSortFields: ['test'],
+          validFacetFields: ['test'],
+          urlField: 'url',
+          titleField: 'title',
+        });
       });
 
       it('handles errors', async () => {

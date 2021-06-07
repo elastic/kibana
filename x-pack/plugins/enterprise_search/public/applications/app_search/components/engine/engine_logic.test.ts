@@ -43,6 +43,7 @@ describe('EngineLogic', () => {
     engineName: '',
     isMetaEngine: false,
     isSampleEngine: false,
+    hasSchemaErrors: false,
     hasSchemaConflicts: false,
     hasUnconfirmedSchemaFields: false,
     engineNotFound: false,
@@ -82,28 +83,6 @@ describe('EngineLogic', () => {
           expect(EngineLogic.values).toEqual({
             ...DEFAULT_VALUES,
             engineName: 'some-new-engine',
-          });
-        });
-      });
-    });
-
-    describe('setIndexingStatus', () => {
-      describe('engine', () => {
-        it('should set the nested obj property to the provided value', () => {
-          mount({ engine: mockEngineData });
-          const mockReindexJob = {
-            percentageComplete: 50,
-            numDocumentsWithErrors: 2,
-            activeReindexJobId: '123',
-          };
-          EngineLogic.actions.setIndexingStatus(mockReindexJob);
-
-          expect(EngineLogic.values).toEqual({
-            ...DEFAULT_VALUES,
-            engine: {
-              ...mockEngineData,
-              activeReindexJob: mockReindexJob,
-            },
           });
         });
       });
@@ -224,6 +203,24 @@ describe('EngineLogic', () => {
           ...DEFAULT_VALUES,
           engine: mockMetaEngine,
           isMetaEngine: true,
+        });
+      });
+    });
+
+    describe('hasSchemaErrors', () => {
+      it('should be set based on engine.activeReindexJob.numDocumentsWithErrors', () => {
+        const mockSchemaEngine = {
+          ...mockEngineData,
+          activeReindexJob: {
+            numDocumentsWithErrors: 10,
+          },
+        };
+        mount({ engine: mockSchemaEngine });
+
+        expect(EngineLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          engine: mockSchemaEngine,
+          hasSchemaErrors: true,
         });
       });
     });

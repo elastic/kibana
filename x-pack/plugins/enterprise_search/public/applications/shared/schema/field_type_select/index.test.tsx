@@ -39,4 +39,10 @@ describe('SchemaFieldTypeSelect', () => {
 
     expect(wrapper.find(EuiSelect).prop('disabled')).toEqual(true);
   });
+
+  it('passes arbitrary props', () => {
+    const wrapper = shallow(<SchemaFieldTypeSelect {...props} disabled aria-label="Test label" />);
+
+    expect(wrapper.find(EuiSelect).prop('aria-label')).toEqual('Test label');
+  });
 });

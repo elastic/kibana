@@ -36,7 +36,7 @@ interface TestClusterFactoryOptions {
    * */
   dataArchive?: string;
   esArgs?: string[];
-  esEnvVars?: Record<string, any>;
+  esJavaOpts?: string;
   clusterName?: string;
   log: ToolingLog;
   ssl?: boolean;
@@ -52,7 +52,7 @@ export function createTestEsCluster(options: TestClusterFactoryOptions) {
     esFrom = esTestConfig.getBuildFrom(),
     dataArchive,
     esArgs: customEsArgs = [],
-    esEnvVars,
+    esJavaOpts,
     clusterName: customClusterName = 'es-test-cluster',
     ssl,
   } = options;
@@ -107,7 +107,7 @@ export function createTestEsCluster(options: TestClusterFactoryOptions) {
       await cluster.start(installPath, {
         password: config.password,
         esArgs,
-        esEnvVars,
+        esJavaOpts,
       });
     }
 

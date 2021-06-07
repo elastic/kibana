@@ -35,7 +35,7 @@ import { OptionsPopover } from './open_options_popover';
 test('should display the correct text if datagrid is selected', () => {
   const element = document.createElement('div');
   const component = mountWithIntl(<OptionsPopover onClose={jest.fn()} anchorElement={element} />);
-  expect(findTestSubject(component, 'docTableMode').text()).toBe('Data grid');
+  expect(findTestSubject(component, 'docTableMode').text()).toBe('New table');
 });
 
 test('should display the correct text if legacy table is selected', () => {
@@ -45,5 +45,5 @@ test('should display the correct text if legacy table is selected', () => {
   uiSettings.set('doc_table:legacy', true);
   const element = document.createElement('div');
   const component = mountWithIntl(<OptionsPopover onClose={jest.fn()} anchorElement={element} />);
-  expect(findTestSubject(component, 'docTableMode').text()).toBe('Legacy table');
+  expect(findTestSubject(component, 'docTableMode').text()).toBe('Classic table');
 });

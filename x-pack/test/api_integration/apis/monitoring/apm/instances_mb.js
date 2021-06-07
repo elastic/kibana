@@ -67,6 +67,7 @@ export default function ({ getService }) {
             time_of_last_event: '2018-08-31T13:59:21.163Z',
           },
         ],
+        cgroup: false,
       };
 
       expect(body).to.eql(expected);

@@ -106,15 +106,17 @@ const DefaultNoItemsFound = memo(() => {
 
 DefaultNoItemsFound.displayName = 'DefaultNoItemsFound';
 
-const ErrorMessage = memo<{ message: string }>(({ message }) => {
-  return (
-    <EuiText textAlign="center">
-      <EuiSpacer size="m" />
-      <EuiIcon type="minusInCircle" color="danger" /> {message}
-      <EuiSpacer size="m" />
-    </EuiText>
-  );
-});
+const ErrorMessage = memo<{ message: string; 'data-test-subj'?: string }>(
+  ({ message, 'data-test-subj': dataTestSubj }) => {
+    return (
+      <EuiText textAlign="center" data-test-subj={dataTestSubj}>
+        <EuiSpacer size="m" />
+        <EuiIcon type="minusInCircle" color="danger" /> {message}
+        <EuiSpacer size="m" />
+      </EuiText>
+    );
+  }
+);
 
 ErrorMessage.displayName = 'ErrorMessage';
 
@@ -166,7 +168,11 @@ export const PaginatedContent = memo(
 
     const generatedBodyItemContent = useMemo(() => {
       if (error) {
-        return 'string' === typeof error ? <ErrorMessage message={error} /> : error;
+        return 'string' === typeof error ? (
+          <ErrorMessage message={error} data-test-subj={getTestId('error')} />
+        ) : (
+          error
+        );
       }
 
       // This casting here is needed in order to avoid the following a TS error (TS2322)
@@ -197,13 +203,29 @@ export const PaginatedContent = memo(
           return <Item {...itemComponentProps(item)} key={key} />;
         });
       }
-
-      return noItemsMessage || <DefaultNoItemsFound />;
-    }, [ItemComponent, error, itemComponentProps, itemId, itemKeys, items, noItemsMessage]);
+      if (!loading) return noItemsMessage || <DefaultNoItemsFound />;
+    }, [
+      ItemComponent,
+      error,
+      getTestId,
+      itemComponentProps,
+      itemId,
+      itemKeys,
+      items,
+      noItemsMessage,
+      loading,
+    ]);
 
     return (
       <RootContainer data-test-subj={dataTestSubj} aria-label={ariaLabel} className={className}>
-        {loading && <EuiProgress size="xs" color="primary" position="absolute" />}
+        {loading && (
+          <EuiProgress
+            size="xs"
+            color="primary"
+            position="absolute"
+            data-test-subj={getTestId('loader')}
+          />
+        )}
 
         <div className="body" data-test-subj={getTestId('body')}>
           <div className={`body-content ${contentClassName}`}>
