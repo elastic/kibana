@@ -118,7 +118,7 @@ export const getFieldEditorOpener = ({
           />
         </KibanaReactContextProvider>
       ),
-      { className: euiFlyoutClassname, maxWidth: 708, size: 'l' }
+      { className: euiFlyoutClassname, maxWidth: 708, size: 'l', ownFocus: true }
     );
 
     return closeEditor;
