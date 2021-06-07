@@ -6,42 +6,39 @@
  * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrService } from '../ftr_provider_context';
 import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
-export function TagCloudPageProvider({ getService, getPageObjects }: FtrProviderContext) {
-  const find = getService('find');
-  const testSubjects = getService('testSubjects');
-  const { header, visChart } = getPageObjects(['header', 'visChart']);
+export class TagCloudPageObject extends FtrService {
+  private readonly find = this.ctx.getService('find');
+  private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly header = this.ctx.getPageObject('header');
+  private readonly visChart = this.ctx.getPageObject('visChart');
 
-  class TagCloudPage {
-    public async selectTagCloudTag(tagDisplayText: string) {
-      await testSubjects.click(tagDisplayText);
-      await header.waitUntilLoadingHasFinished();
-    }
-
-    public async getTextTagByElement(webElement: WebElementWrapper) {
-      await visChart.waitForVisualization();
-      const elements = await webElement.findAllByCssSelector('text');
-      return await Promise.all(elements.map(async (element) => await element.getVisibleText()));
-    }
-
-    public async getTextTag() {
-      await visChart.waitForVisualization();
-      const elements = await find.allByCssSelector('text');
-      return await Promise.all(elements.map(async (element) => await element.getVisibleText()));
-    }
-
-    public async getTextSizes() {
-      const tags = await find.allByCssSelector('text');
-      async function returnTagSize(tag: WebElementWrapper) {
-        const style = await tag.getAttribute('style');
-        const fontSize = style.match(/font-size: ([^;]*);/);
-        return fontSize ? fontSize[1] : '';
-      }
-      return await Promise.all(tags.map(returnTagSize));
-    }
+  public async selectTagCloudTag(tagDisplayText: string) {
+    await this.testSubjects.click(tagDisplayText);
+    await this.header.waitUntilLoadingHasFinished();
   }
 
-  return new TagCloudPage();
+  public async getTextTagByElement(webElement: WebElementWrapper) {
+    await this.visChart.waitForVisualization();
+    const elements = await webElement.findAllByCssSelector('text');
+    return await Promise.all(elements.map(async (element) => await element.getVisibleText()));
+  }
+
+  public async getTextTag() {
+    await this.visChart.waitForVisualization();
+    const elements = await this.find.allByCssSelector('text');
+    return await Promise.all(elements.map(async (element) => await element.getVisibleText()));
+  }
+
+  public async getTextSizes() {
+    const tags = await this.find.allByCssSelector('text');
+    async function returnTagSize(tag: WebElementWrapper) {
+      const style = await tag.getAttribute('style');
+      const fontSize = style.match(/font-size: ([^;]*);/);
+      return fontSize ? fontSize[1] : '';
+    }
+    return await Promise.all(tags.map(returnTagSize));
+  }
 }

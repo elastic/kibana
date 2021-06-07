@@ -15,6 +15,7 @@ import {
   commonAddSupportOfDualIndexSelectionModeInTSVB,
   commonHideTSVBLastValueIndicator,
   commonRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel,
+  commonMigrateVislibPie,
   commonAddEmptyValueColorRule,
   commonMigrateTagCloud,
 } from './visualization_common_migrations';
@@ -991,6 +992,29 @@ const addEmptyValueColorRule: SavedObjectMigrationFn<any, any> = (doc) => {
   return doc;
 };
 
+// [Pie Chart] Migrate vislib pie chart to use the new plugin vis_type_pie
+const migrateVislibPie: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+    const newVisState = commonMigrateVislibPie(visState);
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        visState: JSON.stringify(newVisState),
+      },
+    };
+  }
+  return doc;
+};
+
 // [Tagcloud] Migrate to the new palette service
 const migrateTagCloud: SavedObjectMigrationFn<any, any> = (doc) => {
   const visStateJSON = get(doc, 'attributes.visState');
@@ -1060,5 +1084,5 @@ export const visualizationSavedObjectTypeMigrations = {
     hideTSVBLastValueIndicator,
     removeDefaultIndexPatternAndTimeFieldFromTSVBModel
   ),
-  '7.14.0': flow(addEmptyValueColorRule, migrateTagCloud),
+  '7.14.0': flow(addEmptyValueColorRule, migrateVislibPie, migrateTagCloud),
 };
