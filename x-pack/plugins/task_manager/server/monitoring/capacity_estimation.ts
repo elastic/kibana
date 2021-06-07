@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { isFinite, mapValues } from 'lodash';
+import { mapValues } from 'lodash';
 import stats from 'stats-lite';
 import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { RawMonitoringStats, RawMonitoredStat, HealthStatus } from './monitoring_stats_stream';
 import { AveragedStat } from './task_run_calcultors';
 import { TaskPersistenceTypes } from './task_run_statistics';
+import { asErr, asOk, isOk, map, Result } from '../lib/result_type';
 
 export interface CapacityEstimationStat extends JsonObject {
   observed: {
@@ -63,16 +64,17 @@ export function estimateCapacity(
     max_workers: maxWorkers,
   } = capacityStats.configuration.value;
 
-  const averageDuration = getAverageDuration(durationByPersistence);
-
   /**
    * On average, how many polling cycles does it take to execute a task?
    * If this is higher than the polling cycle, then a whole cycle is wasted as
    * we won't use the worker until the next cycle.
    */
   const averagePollIntervalsPerExecution = Math.ceil(
-    (isFinite(averageDuration) ? Math.max(averageDuration, pollInterval) : pollInterval) /
-      pollInterval
+    map(
+      getAverageDuration(durationByPersistence),
+      (averageDuration) => Math.max(averageDuration, pollInterval),
+      () => pollInterval
+    ) / pollInterval
   );
 
   /**
@@ -234,12 +236,18 @@ function percentageOf(val: number, percentage: number) {
   return Math.round((percentage * val) / 100);
 }
 
-function getAverageDuration(durations: Partial<TaskPersistenceTypes<AveragedStat>>): number {
-  return stats.mean(
+function getAverageDuration(
+  durations: Partial<TaskPersistenceTypes<AveragedStat>>
+): Result<number, number> {
+  const result = stats.mean(
     [
       durations.ephemeral?.p50 ?? 0,
       durations.non_recurring?.p50 ?? 0,
       durations.recurring?.p50 ?? 0,
     ].filter((val) => val > 0)
   );
+  if (isNaN(result)) {
+    return asErr(result);
+  }
+  return asOk(result);
 }
