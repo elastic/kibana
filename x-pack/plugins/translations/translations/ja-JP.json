@@ -5609,7 +5609,6 @@
     "xpack.apm.rum.filterGroup.coreWebVitals": "コアWebバイタル",
     "xpack.apm.rum.filterGroup.seconds": "秒",
     "xpack.apm.rum.filterGroup.selectBreakdown": "内訳を選択",
-    "xpack.apm.rum.filters.searchByUrl": "URLで検索",
     "xpack.apm.rum.filters.searchResults": "{total}件の検索結果",
     "xpack.apm.rum.filters.select": "選択してください",
     "xpack.apm.rum.filters.topPages": "上位のページ",

@@ -5642,7 +5642,6 @@
     "xpack.apm.rum.filterGroup.coreWebVitals": "网站体验核心指标",
     "xpack.apm.rum.filterGroup.seconds": "秒",
     "xpack.apm.rum.filterGroup.selectBreakdown": "选择细分",
-    "xpack.apm.rum.filters.searchByUrl": "按 URL 搜索",
     "xpack.apm.rum.filters.searchResults": "{total} 项搜索结果",
     "xpack.apm.rum.filters.select": "选择",
     "xpack.apm.rum.filters.topPages": "排名靠前页面",
