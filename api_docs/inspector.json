@@ -217,8 +217,7 @@
                 "docId": "kibCorePluginApi",
                 "section": "def-public.OverlayRef",
                 "text": "OverlayRef"
-              },
-              "; }"
+              }
             ],
             "source": {
               "path": "src/plugins/inspector/public/plugin.tsx",
@@ -292,7 +291,8 @@
             "section": "def-common.RequestAdapter",
             "text": "RequestAdapter"
           },
-          " extends EventEmitter"
+          " extends ",
+          "EventEmitter"
         ],
         "source": {
           "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
@@ -919,23 +919,7 @@
             "label": "component",
             "description": [],
             "signature": [
-              "React.ComponentClass<",
-              {
-                "pluginId": "inspector",
-                "scope": "public",
-                "docId": "kibInspectorPluginApi",
-                "section": "def-public.InspectorViewProps",
-                "text": "InspectorViewProps"
-              },
-              "<",
-              {
-                "pluginId": "inspector",
-                "scope": "common",
-                "docId": "kibInspectorPluginApi",
-                "section": "def-common.Adapters",
-                "text": "Adapters"
-              },
-              ">, any> | React.FunctionComponent<",
+              "React.ComponentType<",
               {
                 "pluginId": "inspector",
                 "scope": "public",
@@ -1231,13 +1215,7 @@
         "label": "InspectorSession",
         "description": [],
         "signature": [
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.OverlayRef",
-            "text": "OverlayRef"
-          }
+          "OverlayRef"
         ],
         "source": {
           "path": "src/plugins/inspector/public/types.ts",
@@ -1283,32 +1261,7 @@
             "path": "src/plugins/inspector/public/plugin.tsx",
             "lineNumber": 21
           },
-          "deprecated": false,
-          "returnComment": [],
-          "children": [
-            {
-              "parentPluginId": "inspector",
-              "id": "def-public.view",
-              "type": "Object",
-              "tags": [],
-              "label": "view",
-              "description": [],
-              "signature": [
-                {
-                  "pluginId": "inspector",
-                  "scope": "public",
-                  "docId": "kibInspectorPluginApi",
-                  "section": "def-public.InspectorViewDescription",
-                  "text": "InspectorViewDescription"
-                }
-              ],
-              "source": {
-                "path": "src/plugins/inspector/public/view_registry.ts",
-                "lineNumber": 33
-              },
-              "deprecated": false
-            }
-          ]
+          "deprecated": false
         },
         {
           "parentPluginId": "inspector",
@@ -1369,37 +1322,7 @@
             "path": "src/plugins/inspector/public/plugin.tsx",
             "lineNumber": 37
           },
-          "deprecated": false,
-          "returnComment": [
-            "True, if a call to `open` with the same adapters\nwould have shown the inspector panel, false otherwise."
-          ],
-          "children": [
-            {
-              "parentPluginId": "inspector",
-              "id": "def-public.adapters",
-              "type": "Object",
-              "tags": [],
-              "label": "adapters",
-              "description": [
-                "- An object of adapters. This should be the same\nyou would pass into `open`."
-              ],
-              "signature": [
-                {
-                  "pluginId": "inspector",
-                  "scope": "common",
-                  "docId": "kibInspectorPluginApi",
-                  "section": "def-common.Adapters",
-                  "text": "Adapters"
-                },
-                " | undefined"
-              ],
-              "source": {
-                "path": "src/plugins/inspector/public/plugin.tsx",
-                "lineNumber": 37
-              },
-              "deprecated": false
-            }
-          ]
+          "deprecated": false
         },
         {
           "parentPluginId": "inspector",
@@ -1443,61 +1366,7 @@
             "path": "src/plugins/inspector/public/plugin.tsx",
             "lineNumber": 51
           },
-          "deprecated": false,
-          "returnComment": [
-            "The session instance for the opened inspector."
-          ],
-          "children": [
-            {
-              "parentPluginId": "inspector",
-              "id": "def-public.adapters",
-              "type": "Object",
-              "tags": [],
-              "label": "adapters",
-              "description": [
-                "- An object of adapters for which you want to show\nthe inspector panel."
-              ],
-              "signature": [
-                {
-                  "pluginId": "inspector",
-                  "scope": "common",
-                  "docId": "kibInspectorPluginApi",
-                  "section": "def-common.Adapters",
-                  "text": "Adapters"
-                }
-              ],
-              "source": {
-                "path": "src/plugins/inspector/public/plugin.tsx",
-                "lineNumber": 51
-              },
-              "deprecated": false
-            },
-            {
-              "parentPluginId": "inspector",
-              "id": "def-public.options",
-              "type": "Object",
-              "tags": [],
-              "label": "options",
-              "description": [
-                "- Options that configure the inspector. See InspectorOptions type."
-              ],
-              "signature": [
-                {
-                  "pluginId": "inspector",
-                  "scope": "public",
-                  "docId": "kibInspectorPluginApi",
-                  "section": "def-public.InspectorOptions",
-                  "text": "InspectorOptions"
-                },
-                " | undefined"
-              ],
-              "source": {
-                "path": "src/plugins/inspector/public/plugin.tsx",
-                "lineNumber": 51
-              },
-              "deprecated": false
-            }
-          ]
+          "deprecated": false
         }
       ],
       "lifecycle": "start",
@@ -1533,7 +1402,8 @@
             "section": "def-common.RequestAdapter",
             "text": "RequestAdapter"
           },
-          " extends EventEmitter"
+          " extends ",
+          "EventEmitter"
         ],
         "source": {
           "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",

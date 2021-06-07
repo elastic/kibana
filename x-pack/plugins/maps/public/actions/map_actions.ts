@@ -42,10 +42,8 @@ import {
   SET_MOUSE_COORDINATES,
   SET_OPEN_TOOLTIPS,
   SET_QUERY,
-  SET_REFRESH_CONFIG,
   SET_SCROLL_ZOOM,
   TRACK_MAP_SETTINGS,
-  TRIGGER_REFRESH_TIMER,
   UPDATE_DRAW_STATE,
   UPDATE_EDIT_STATE_SHAPE,
   UPDATE_MAP_SETTING,
@@ -59,7 +57,6 @@ import {
   MapCenter,
   MapCenterAndZoom,
   MapExtent,
-  MapRefreshConfig,
   Timeslice,
 } from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common/constants';
@@ -283,7 +280,7 @@ export function setQuery({
         queryLastTriggeredAt: forceRefresh ? generateQueryTimestamp() : prevTriggeredAt,
       },
       filters: filters ? filters : getFilters(getState()),
-      searchSessionId,
+      searchSessionId: searchSessionId ? searchSessionId : getSearchSessionId(getState()),
       searchSessionMapBuffer,
     };
 
@@ -304,31 +301,6 @@ export function setQuery({
     dispatch({
       type: SET_QUERY,
       ...nextQueryContext,
-    });
-
-    if (getMapSettings(getState()).autoFitToDataBounds) {
-      dispatch(autoFitToBounds());
-    } else {
-      await dispatch(syncDataForAllLayers());
-    }
-  };
-}
-
-export function setRefreshConfig({ isPaused, interval }: MapRefreshConfig) {
-  return {
-    type: SET_REFRESH_CONFIG,
-    isPaused,
-    interval,
-  };
-}
-
-export function triggerRefreshTimer() {
-  return async (
-    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
-    getState: () => MapStoreState
-  ) => {
-    dispatch({
-      type: TRIGGER_REFRESH_TIMER,
     });
 
     if (getMapSettings(getState()).autoFitToDataBounds) {

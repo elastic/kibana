@@ -528,6 +528,10 @@ Array [
         "dashboards",
         "kibana",
       ],
+      "cases": Object {
+        "all": Array [],
+        "read": Array [],
+      },
       "catalogue": Array [
         "dashboard",
       ],
@@ -673,6 +677,10 @@ Array [
         "discover",
         "kibana",
       ],
+      "cases": Object {
+        "all": Array [],
+        "read": Array [],
+      },
       "catalogue": Array [
         "discover",
       ],
@@ -915,6 +923,10 @@ Array [
         "lens",
         "kibana",
       ],
+      "cases": Object {
+        "all": Array [],
+        "read": Array [],
+      },
       "catalogue": Array [
         "visualize",
       ],
@@ -1044,6 +1056,10 @@ Array [
         "dashboards",
         "kibana",
       ],
+      "cases": Object {
+        "all": Array [],
+        "read": Array [],
+      },
       "catalogue": Array [
         "dashboard",
       ],
@@ -1189,6 +1205,10 @@ Array [
         "discover",
         "kibana",
       ],
+      "cases": Object {
+        "all": Array [],
+        "read": Array [],
+      },
       "catalogue": Array [
         "discover",
       ],
@@ -1431,6 +1451,10 @@ Array [
         "lens",
         "kibana",
       ],
+      "cases": Object {
+        "all": Array [],
+        "read": Array [],
+      },
       "catalogue": Array [
         "visualize",
       ],

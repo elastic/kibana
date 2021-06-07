@@ -7,7 +7,7 @@
 
 import React, { Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useUrlStorage } from '../hooks/use_url_storage';
+import { useSeriesStorage } from '../hooks/use_series_storage';
 import { FilterLabel } from '../components/filter_label';
 import { DataSeries, UrlFilter } from '../types';
 import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
@@ -20,7 +20,9 @@ interface Props {
   isNew?: boolean;
 }
 export function SelectedFilters({ seriesId, isNew, series: dataSeries }: Props) {
-  const { series } = useUrlStorage(seriesId);
+  const { getSeries } = useSeriesStorage();
+
+  const series = getSeries(seriesId);
 
   const { reportDefinitions = {} } = series;
 

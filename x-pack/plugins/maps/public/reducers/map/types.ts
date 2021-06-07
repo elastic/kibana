@@ -15,7 +15,6 @@ import {
   MapCenter,
   MapExtent,
   MapQuery,
-  MapRefreshConfig,
   Timeslice,
   TooltipState,
 } from '../../../common/descriptor_types';
@@ -36,7 +35,6 @@ export type MapContext = {
   timeslice?: Timeslice;
   query?: MapQuery;
   filters: Filter[];
-  refreshConfig?: MapRefreshConfig;
   refreshTimerLastTriggeredAt?: string;
   drawState?: DrawState;
   editState?: EditState;

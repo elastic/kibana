@@ -252,23 +252,7 @@
               "path": "src/plugins/url_forwarding/public/plugin.ts",
               "lineNumber": 19
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "urlForwarding",
-                "id": "def-public.legacyPath",
-                "type": "string",
-                "tags": [],
-                "label": "legacyPath",
-                "description": [],
-                "source": {
-                  "path": "src/plugins/url_forwarding/public/plugin.ts",
-                  "lineNumber": 19
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -301,15 +285,7 @@
         "label": "UrlForwardingStart",
         "description": [],
         "signature": [
-          "{ navigateToDefaultApp: ({ overwriteHash }?: { overwriteHash: boolean; }) => void; navigateToLegacyKibanaUrl: (hash: string) => { navigated: boolean; }; getForwards: () => ",
-          {
-            "pluginId": "urlForwarding",
-            "scope": "public",
-            "docId": "kibUrlForwardingPluginApi",
-            "section": "def-public.ForwardDefinition",
-            "text": "ForwardDefinition"
-          },
-          "[]; }"
+          "{ navigateToDefaultApp: ({ overwriteHash }?: { overwriteHash: boolean; }) => void; navigateToLegacyKibanaUrl: (hash: string) => { navigated: boolean; }; getForwards: () => ForwardDefinition[]; }"
         ],
         "source": {
           "path": "src/plugins/url_forwarding/public/plugin.ts",
