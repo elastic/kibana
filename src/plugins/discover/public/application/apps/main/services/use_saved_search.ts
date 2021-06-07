@@ -107,8 +107,8 @@ export const useSavedSearch = ({
    */
   const data$: SavedSearchDataSubject = useSingleton(
     () =>
-      new BehaviorSubject({
-        state: initFetchState as FetchStatus,
+      new BehaviorSubject<SavedSearchDataMessage>({
+        state: initFetchState,
       })
   );
   /**
