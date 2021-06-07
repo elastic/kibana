@@ -252,9 +252,7 @@
               "path": "x-pack/plugins/actions/server/types.ts",
               "lineNumber": 40
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "deprecated": false
           },
           {
             "parentPluginId": "actions",
@@ -278,9 +276,7 @@
               "path": "x-pack/plugins/actions/server/types.ts",
               "lineNumber": 41
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -520,55 +516,14 @@
             "label": "executor",
             "description": [],
             "signature": [
-              "(options: ",
-              {
-                "pluginId": "actions",
-                "scope": "server",
-                "docId": "kibActionsPluginApi",
-                "section": "def-server.ActionTypeExecutorOptions",
-                "text": "ActionTypeExecutorOptions"
-              },
-              "<Config, Secrets, Params>) => Promise<",
-              {
-                "pluginId": "actions",
-                "scope": "common",
-                "docId": "kibActionsPluginApi",
-                "section": "def-common.ActionTypeExecutorResult",
-                "text": "ActionTypeExecutorResult"
-              },
-              "<ExecutorResultData>>"
+              "ExecutorType",
+              "<Config, Secrets, Params, ExecutorResultData>"
             ],
             "source": {
               "path": "x-pack/plugins/actions/server/types.ts",
               "lineNumber": 116
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "actions",
-                "id": "def-server.options",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "actions",
-                    "scope": "server",
-                    "docId": "kibActionsPluginApi",
-                    "section": "def-server.ActionTypeExecutorOptions",
-                    "text": "ActionTypeExecutorOptions"
-                  },
-                  "<Config, Secrets, Params>"
-                ],
-                "source": {
-                  "path": "x-pack/plugins/actions/server/types.ts",
-                  "lineNumber": 84
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -788,7 +743,7 @@
         "label": "ActionParamsType",
         "description": [],
         "signature": [
-          "{ readonly source?: string | undefined; readonly summary?: string | undefined; readonly timestamp?: string | undefined; readonly eventAction?: \"resolve\" | \"trigger\" | \"acknowledge\" | undefined; readonly dedupKey?: string | undefined; readonly severity?: \"warning\" | \"error\" | \"info\" | \"critical\" | undefined; readonly component?: string | undefined; readonly group?: string | undefined; readonly class?: string | undefined; }"
+          "{ readonly source?: string | undefined; readonly summary?: string | undefined; readonly timestamp?: string | undefined; readonly eventAction?: \"resolve\" | \"trigger\" | \"acknowledge\" | undefined; readonly dedupKey?: string | undefined; readonly severity?: \"warning\" | \"info\" | \"error\" | \"critical\" | undefined; readonly component?: string | undefined; readonly group?: string | undefined; readonly class?: string | undefined; }"
         ],
         "source": {
           "path": "x-pack/plugins/actions/server/builtin_action_types/pagerduty.ts",
@@ -805,7 +760,7 @@
         "label": "ActionParamsType",
         "description": [],
         "signature": [
-          "{ readonly message: string; readonly level: \"error\" | \"info\" | \"debug\" | \"trace\" | \"warn\" | \"fatal\"; }"
+          "{ readonly message: string; readonly level: \"info\" | \"error\" | \"debug\" | \"trace\" | \"warn\" | \"fatal\"; }"
         ],
         "source": {
           "path": "x-pack/plugins/actions/server/builtin_action_types/server_log.ts",
@@ -968,38 +923,7 @@
             "docId": "kibActionsPluginApi",
             "section": "def-server.ActionResult",
             "text": "ActionResult"
-          },
-          "<Record<string, unknown>>>; execute: ({ actionId, params, source, }: Pick<",
-          "ExecuteOptions",
-          "<unknown>, \"source\" | \"params\" | \"actionId\">) => Promise<",
-          {
-            "pluginId": "actions",
-            "scope": "common",
-            "docId": "kibActionsPluginApi",
-            "section": "def-common.ActionTypeExecutorResult",
-            "text": "ActionTypeExecutorResult"
-          },
-          "<unknown>>; getAll: () => Promise<",
-          "FindActionResult",
-          "[]>; getBulk: (ids: string[]) => Promise<",
-          {
-            "pluginId": "actions",
-            "scope": "server",
-            "docId": "kibActionsPluginApi",
-            "section": "def-server.ActionResult",
-            "text": "ActionResult"
-          },
-          "<Record<string, unknown>>[]>; enqueueExecution: (options: ",
-          "ExecuteOptions",
-          ") => Promise<void>; listTypes: () => Promise<",
-          {
-            "pluginId": "actions",
-            "scope": "common",
-            "docId": "kibActionsPluginApi",
-            "section": "def-common.ActionType",
-            "text": "ActionType"
-          },
-          "[]>; isActionTypeEnabled: (actionTypeId: string, options?: { notifyUsage: boolean; }) => boolean; }"
+          }
         ],
         "source": {
           "path": "x-pack/plugins/actions/server/index.ts",
@@ -1054,7 +978,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/actions/server/builtin_action_types/pagerduty.ts",
-          "lineNumber": 121
+          "lineNumber": 129
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1795,7 +1719,7 @@
             "label": "config",
             "description": [],
             "signature": [
-              "{ [x: string]: any; }"
+              "Record<string, any>"
             ],
             "source": {
               "path": "x-pack/plugins/actions/common/types.ts",

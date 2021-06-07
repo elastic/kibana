@@ -151,23 +151,7 @@
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
               "lineNumber": 122
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "kibanaReact",
-                "id": "def-public.filter",
-                "type": "string",
-                "tags": [],
-                "label": "filter",
-                "description": [],
-                "source": {
-                  "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-                  "lineNumber": 122
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -547,7 +531,15 @@
             "label": "getDerivedStateFromProps",
             "description": [],
             "signature": [
-              "(nextProps: Props, prevState: State) => { value: [React.ReactText, React.ReactText] | undefined; prevValue: [React.ReactText, React.ReactText] | undefined; isValid: boolean; errorMessage: string; } | null"
+              "typeof ",
+              {
+                "pluginId": "kibanaReact",
+                "scope": "public",
+                "docId": "kibKibanaReactPluginApi",
+                "section": "def-public.ValidatedDualRange",
+                "text": "ValidatedDualRange"
+              },
+              ".getDerivedStateFromProps"
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
@@ -1038,7 +1030,7 @@
         "label": "KibanaContextProvider",
         "description": [],
         "signature": [
-          "React.FunctionComponent<{ services?: {} | undefined; }>"
+          "React.FC<{ services?: {} | undefined; }>"
         ],
         "source": {
           "path": "src/plugins/kibana_react/public/context/context.tsx",
@@ -1581,9 +1573,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "ReactComp",
-            "description": [
-              "A React component."
-            ],
+            "description": [],
             "signature": [
               "React.ComponentType<Props>"
             ],
@@ -1669,9 +1659,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "node",
-            "description": [
-              "to get a mount point for"
-            ],
+            "description": [],
             "signature": [
               "React.ReactNode"
             ],
@@ -2137,9 +2125,7 @@
               "path": "src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button.tsx",
               "lineNumber": 15
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -2177,7 +2163,7 @@
               "\nLabel for the button"
             ],
             "signature": [
-              "string | number | boolean | {} | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactNodeArray | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/field_button/field_button.tsx",
@@ -2195,7 +2181,7 @@
               "\nIcon representing the field type.\nRecommend using FieldIcon"
             ],
             "signature": [
-              "string | number | boolean | {} | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactNodeArray | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/field_button/field_button.tsx",
@@ -2213,7 +2199,7 @@
               "\nAn optional node to place inside and at the end of the <button>"
             ],
             "signature": [
-              "string | number | boolean | {} | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactNodeArray | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/field_button/field_button.tsx",
@@ -2231,7 +2217,7 @@
               "\nAn optional node to place outside of and to the right of the <button>"
             ],
             "signature": [
-              "string | number | boolean | {} | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactNodeArray | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/field_button/field_button.tsx",
@@ -2385,7 +2371,7 @@
           },
           " extends Pick<",
           "EuiTokenProps",
-          ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"title\" | \"id\" | \"size\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"data-test-subj\" | \"fill\" | \"shape\">"
+          ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"title\" | \"id\" | \"size\" | \"placeholder\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"data-test-subj\" | \"fill\" | \"shape\">"
         ],
         "source": {
           "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
@@ -2495,48 +2481,13 @@
             "label": "Provider",
             "description": [],
             "signature": [
-              "React.FunctionComponent<{ services?: T | undefined; }>"
+              "React.FC<{ services?: T | undefined; }>"
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/context/types.ts",
               "lineNumber": 24
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "kibanaReact",
-                "id": "def-public.props",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "props",
-                "description": [],
-                "signature": [
-                  "P & { children?: React.ReactNode; }"
-                ],
-                "source": {
-                  "path": "node_modules/@types/react/index.d.ts",
-                  "lineNumber": 554
-                },
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "kibanaReact",
-                "id": "def-public.context",
-                "type": "Any",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "source": {
-                  "path": "node_modules/@types/react/index.d.ts",
-                  "lineNumber": 554
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -2546,7 +2497,7 @@
             "label": "Consumer",
             "description": [],
             "signature": [
-              "React.ExoticComponent<React.ConsumerProps<",
+              "React.Consumer<",
               {
                 "pluginId": "kibanaReact",
                 "scope": "public",
@@ -2554,32 +2505,13 @@
                 "section": "def-public.KibanaReactContextValue",
                 "text": "KibanaReactContextValue"
               },
-              "<T>>>"
+              "<T>>"
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/context/types.ts",
               "lineNumber": 25
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "kibanaReact",
-                "id": "def-public.props",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "props",
-                "description": [],
-                "signature": [
-                  "P"
-                ],
-                "source": {
-                  "path": "node_modules/@types/react/index.d.ts",
-                  "lineNumber": 359
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -2776,49 +2708,7 @@
               "path": "src/plugins/kibana_react/public/overlays/types.ts",
               "lineNumber": 13
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "kibanaReact",
-                "id": "def-public.node",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "node",
-                "description": [],
-                "signature": [
-                  "string | number | boolean | {} | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactNodeArray | React.ReactPortal | null | undefined"
-                ],
-                "source": {
-                  "path": "src/plugins/kibana_react/public/overlays/types.ts",
-                  "lineNumber": 14
-                },
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "kibanaReact",
-                "id": "def-public.options",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.OverlayFlyoutOpenOptions",
-                    "text": "OverlayFlyoutOpenOptions"
-                  },
-                  " | undefined"
-                ],
-                "source": {
-                  "path": "src/plugins/kibana_react/public/overlays/types.ts",
-                  "lineNumber": 15
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -2849,49 +2739,7 @@
               "path": "src/plugins/kibana_react/public/overlays/types.ts",
               "lineNumber": 17
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "kibanaReact",
-                "id": "def-public.node",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "node",
-                "description": [],
-                "signature": [
-                  "string | number | boolean | {} | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactNodeArray | React.ReactPortal | null | undefined"
-                ],
-                "source": {
-                  "path": "src/plugins/kibana_react/public/overlays/types.ts",
-                  "lineNumber": 18
-                },
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "kibanaReact",
-                "id": "def-public.options",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.OverlayModalOpenOptions",
-                    "text": "OverlayModalOpenOptions"
-                  },
-                  " | undefined"
-                ],
-                "source": {
-                  "path": "src/plugins/kibana_react/public/overlays/types.ts",
-                  "lineNumber": 19
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -3156,153 +3004,15 @@
             "label": "toastNotifications",
             "description": [],
             "signature": [
-              "{ get$: () => ",
-              "Observable",
-              "<",
+              "Pick<",
               {
                 "pluginId": "core",
                 "scope": "public",
                 "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
+                "section": "def-public.ToastsApi",
+                "text": "ToastsApi"
               },
-              "[]>; add: (toastOrTitle: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastInput",
-                "text": "ToastInput"
-              },
-              ") => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              },
-              "; remove: (toastOrId: string | ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              },
-              ") => void; addSuccess: (toastOrTitle: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastInput",
-                "text": "ToastInput"
-              },
-              ", options?: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastOptions",
-                "text": "ToastOptions"
-              },
-              " | undefined) => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              },
-              "; addWarning: (toastOrTitle: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastInput",
-                "text": "ToastInput"
-              },
-              ", options?: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastOptions",
-                "text": "ToastOptions"
-              },
-              " | undefined) => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              },
-              "; addDanger: (toastOrTitle: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastInput",
-                "text": "ToastInput"
-              },
-              ", options?: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastOptions",
-                "text": "ToastOptions"
-              },
-              " | undefined) => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              },
-              "; addError: (error: Error, options: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ErrorToastOptions",
-                "text": "ErrorToastOptions"
-              },
-              ") => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              },
-              "; addInfo: (toastOrTitle: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastInput",
-                "text": "ToastInput"
-              },
-              ", options?: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastOptions",
-                "text": "ToastOptions"
-              },
-              " | undefined) => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              },
-              "; }"
+              ", \"get$\" | \"add\" | \"remove\" | \"addSuccess\" | \"addWarning\" | \"addDanger\" | \"addError\" | \"addInfo\">"
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
@@ -3555,7 +3265,7 @@
             "label": "title",
             "description": [],
             "signature": [
-              "string | number | boolean | {} | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactNodeArray | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/notifications/types.ts",
@@ -3571,7 +3281,7 @@
             "label": "body",
             "description": [],
             "signature": [
-              "string | number | boolean | {} | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactNodeArray | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/notifications/types.ts",
@@ -3587,7 +3297,7 @@
             "label": "color",
             "description": [],
             "signature": [
-              "\"warning\" | \"primary\" | \"success\" | \"danger\" | undefined"
+              "\"warning\" | \"success\" | \"primary\" | \"danger\" | undefined"
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/notifications/types.ts",
@@ -3719,48 +3429,13 @@
             "label": "onChange",
             "description": [],
             "signature": [
-              "(value: string, event: ",
-              "editor",
-              ".IModelContentChangedEvent) => void"
+              "(value: string, event: any) => void"
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
               "lineNumber": 35
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "kibanaReact",
-                "id": "def-public.value",
-                "type": "string",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "source": {
-                  "path": "src/plugins/kibana_react/public/code_editor/code_editor.tsx",
-                  "lineNumber": 37
-                },
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "kibanaReact",
-                "id": "def-public.event",
-                "type": "Object",
-                "tags": [],
-                "label": "event",
-                "description": [],
-                "signature": [
-                  "editor",
-                  ".IModelContentChangedEvent"
-                ],
-                "source": {
-                  "path": "src/plugins/kibana_react/public/code_editor/code_editor.tsx",
-                  "lineNumber": 37
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3770,9 +3445,7 @@
             "label": "onEditor",
             "description": [],
             "signature": [
-              "((editor: ",
-              "editor",
-              ".IStandaloneCodeEditor) => void) | undefined"
+              "((editor: any) => void) | undefined"
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
@@ -3864,13 +3537,12 @@
           {
             "parentPluginId": "kibanaReact",
             "id": "def-public.UrlTemplateEditorVariable.kind",
-            "type": "CompoundType",
+            "type": "Any",
             "tags": [],
             "label": "kind",
             "description": [],
             "signature": [
-              "languages",
-              ".CompletionItemKind | undefined"
+              "any"
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
@@ -3944,63 +3616,16 @@
           "\nA thin wrapper around EuiPageTemplate with a few Kibana specific additions"
         ],
         "signature": [
-          "(Pick<",
+          "Pick<",
           "EuiPageProps",
-          ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"title\" | \"id\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"data-test-subj\" | \"grow\" | \"direction\" | \"restrictWidth\"> & ",
+          ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"title\" | \"id\" | \"placeholder\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"grow\" | \"data-test-subj\" | \"direction\" | \"restrictWidth\"> & ",
           "DisambiguateSet",
           "<{ template?: \"default\" | undefined; bottomBar?: React.ReactNode; bottomBarProps?: (",
           "CommonProps",
           " & React.HTMLAttributes<HTMLElement> & ",
           "DisambiguateSet",
-          "<{ position?: \"fixed\" | undefined; usePortal?: boolean | undefined; affordForDisplacement?: boolean | undefined; }, { position: \"static\" | \"sticky\"; }> & { position: \"static\" | \"sticky\"; } & { paddingSize?: \"m\" | \"s\" | \"none\" | \"l\" | undefined; bodyClassName?: string | undefined; landmarkHeading?: string | undefined; top?: string | number | undefined; right?: string | number | undefined; bottom?: string | number | undefined; left?: string | number | undefined; }) | (",
-          "CommonProps",
-          " & React.HTMLAttributes<HTMLElement> & ",
-          "DisambiguateSet",
-          "<{ position: \"static\" | \"sticky\"; }, { position?: \"fixed\" | undefined; usePortal?: boolean | undefined; affordForDisplacement?: boolean | undefined; }> & { position?: \"fixed\" | undefined; usePortal?: boolean | undefined; affordForDisplacement?: boolean | undefined; } & { paddingSize?: \"m\" | \"s\" | \"none\" | \"l\" | undefined; bodyClassName?: string | undefined; landmarkHeading?: string | undefined; top?: string | number | undefined; right?: string | number | undefined; bottom?: string | number | undefined; left?: string | number | undefined; }) | undefined; }, { template: \"default\" | \"empty\" | \"centeredBody\" | \"centeredContent\"; }> & { template: \"default\" | \"empty\" | \"centeredBody\" | \"centeredContent\"; } & { paddingSize?: \"m\" | \"s\" | \"none\" | \"l\" | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
-          "EuiPageSideBarProps",
-          " | undefined; pageHeader?: ",
-          "EuiPageHeaderProps",
-          " | undefined; pageBodyProps?: ",
-          "EuiPageBodyProps",
-          "<\"main\"> | undefined; pageContentProps?: ",
-          "EuiPageContentProps",
-          " | undefined; pageContentBodyProps?: ",
-          "EuiPageContentBodyProps",
-          " | undefined; } & { isEmptyState?: boolean | undefined; solutionNav?: ",
-          "KibanaPageTemplateSolutionNavProps",
-          " | undefined; }) | (Pick<",
-          "EuiPageProps",
-          ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"title\" | \"id\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"data-test-subj\" | \"grow\" | \"direction\" | \"restrictWidth\"> & ",
-          "DisambiguateSet",
-          "<{ template: \"default\" | \"empty\" | \"centeredBody\" | \"centeredContent\"; }, { template?: \"default\" | undefined; bottomBar?: React.ReactNode; bottomBarProps?: (",
-          "CommonProps",
-          " & React.HTMLAttributes<HTMLElement> & ",
-          "DisambiguateSet",
-          "<{ position?: \"fixed\" | undefined; usePortal?: boolean | undefined; affordForDisplacement?: boolean | undefined; }, { position: \"static\" | \"sticky\"; }> & { position: \"static\" | \"sticky\"; } & { paddingSize?: \"m\" | \"s\" | \"none\" | \"l\" | undefined; bodyClassName?: string | undefined; landmarkHeading?: string | undefined; top?: string | number | undefined; right?: string | number | undefined; bottom?: string | number | undefined; left?: string | number | undefined; }) | (",
-          "CommonProps",
-          " & React.HTMLAttributes<HTMLElement> & ",
-          "DisambiguateSet",
-          "<{ position: \"static\" | \"sticky\"; }, { position?: \"fixed\" | undefined; usePortal?: boolean | undefined; affordForDisplacement?: boolean | undefined; }> & { position?: \"fixed\" | undefined; usePortal?: boolean | undefined; affordForDisplacement?: boolean | undefined; } & { paddingSize?: \"m\" | \"s\" | \"none\" | \"l\" | undefined; bodyClassName?: string | undefined; landmarkHeading?: string | undefined; top?: string | number | undefined; right?: string | number | undefined; bottom?: string | number | undefined; left?: string | number | undefined; }) | undefined; }> & { template?: \"default\" | undefined; bottomBar?: React.ReactNode; bottomBarProps?: (",
-          "CommonProps",
-          " & React.HTMLAttributes<HTMLElement> & ",
-          "DisambiguateSet",
-          "<{ position?: \"fixed\" | undefined; usePortal?: boolean | undefined; affordForDisplacement?: boolean | undefined; }, { position: \"static\" | \"sticky\"; }> & { position: \"static\" | \"sticky\"; } & { paddingSize?: \"m\" | \"s\" | \"none\" | \"l\" | undefined; bodyClassName?: string | undefined; landmarkHeading?: string | undefined; top?: string | number | undefined; right?: string | number | undefined; bottom?: string | number | undefined; left?: string | number | undefined; }) | (",
-          "CommonProps",
-          " & React.HTMLAttributes<HTMLElement> & ",
-          "DisambiguateSet",
-          "<{ position: \"static\" | \"sticky\"; }, { position?: \"fixed\" | undefined; usePortal?: boolean | undefined; affordForDisplacement?: boolean | undefined; }> & { position?: \"fixed\" | undefined; usePortal?: boolean | undefined; affordForDisplacement?: boolean | undefined; } & { paddingSize?: \"m\" | \"s\" | \"none\" | \"l\" | undefined; bodyClassName?: string | undefined; landmarkHeading?: string | undefined; top?: string | number | undefined; right?: string | number | undefined; bottom?: string | number | undefined; left?: string | number | undefined; }) | undefined; } & { paddingSize?: \"m\" | \"s\" | \"none\" | \"l\" | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
-          "EuiPageSideBarProps",
-          " | undefined; pageHeader?: ",
-          "EuiPageHeaderProps",
-          " | undefined; pageBodyProps?: ",
-          "EuiPageBodyProps",
-          "<\"main\"> | undefined; pageContentProps?: ",
-          "EuiPageContentProps",
-          " | undefined; pageContentBodyProps?: ",
-          "EuiPageContentBodyProps",
-          " | undefined; } & { isEmptyState?: boolean | undefined; solutionNav?: ",
-          "KibanaPageTemplateSolutionNavProps",
-          " | undefined; })"
+          "<{ position?: \"fixed\" | undefined; usePortal?: boolean | undefined; affordForDisplacement?: boolean | undefined; }, { position: \"static\" | \"sticky\"; }> & { position: \"static\" | \"sticky\"; } & { paddingSize?: \"none\" | \"m\" | \"s\" | \"l\" | undefined; bodyClassName?: string | undefined; landmarkHeading?: string | undefined; top?: string | number | undefined; right?: string | number | undefined; bottom?: string | number | undefined; left?: string | number | undefined; }) | (",
+          "CommonProps"
         ],
         "source": {
           "path": "src/plugins/kibana_react/public/page_template/page_template.tsx",
@@ -4021,7 +3646,7 @@
           {
             "pluginId": "core",
             "scope": "public",
-            "docId": "kibCoreApplicationPluginApi",
+            "docId": "kibCorePluginApi",
             "section": "def-public.ApplicationStart",
             "text": "ApplicationStart"
           },
@@ -4029,7 +3654,7 @@
           {
             "pluginId": "core",
             "scope": "public",
-            "docId": "kibCoreChromePluginApi",
+            "docId": "kibCorePluginApi",
             "section": "def-public.ChromeStart",
             "text": "ChromeStart"
           },
@@ -4045,7 +3670,7 @@
           {
             "pluginId": "core",
             "scope": "public",
-            "docId": "kibCoreHttpPluginApi",
+            "docId": "kibCorePluginApi",
             "section": "def-public.HttpSetup",
             "text": "HttpSetup"
           },
@@ -4053,59 +3678,10 @@
           {
             "pluginId": "core",
             "scope": "public",
-            "docId": "kibCoreSavedObjectsPluginApi",
+            "docId": "kibCorePluginApi",
             "section": "def-public.SavedObjectsStart",
             "text": "SavedObjectsStart"
-          },
-          " | undefined; i18n?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.I18nStart",
-            "text": "I18nStart"
-          },
-          " | undefined; notifications?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.NotificationsStart",
-            "text": "NotificationsStart"
-          },
-          " | undefined; overlays?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.OverlayStart",
-            "text": "OverlayStart"
-          },
-          " | undefined; uiSettings?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.IUiSettingsClient",
-            "text": "IUiSettingsClient"
-          },
-          " | undefined; fatalErrors?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.FatalErrorsSetup",
-            "text": "FatalErrorsSetup"
-          },
-          " | undefined; deprecations?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.DeprecationsServiceStart",
-            "text": "DeprecationsServiceStart"
-          },
-          " | undefined; injectedMetadata?: { getInjectedVar: (name: string, defaultValue?: any) => unknown; } | undefined; }"
+          }
         ],
         "source": {
           "path": "src/plugins/kibana_react/public/context/types.ts",
@@ -4122,7 +3698,7 @@
         "label": "POSITIONS",
         "description": [],
         "signature": [
-          "(\"left\" | \"right\" | \"none\" | \"center\")[]"
+          "(\"none\" | \"left\" | \"right\" | \"center\")[]"
         ],
         "source": {
           "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
@@ -4173,7 +3749,6 @@
         "label": "ToolbarButtonProps",
         "description": [],
         "signature": [
-          "(",
           "DisambiguateSet",
           "<",
           "PropsForAnchor",
@@ -4182,22 +3757,7 @@
           ", { buttonRef?: ((instance: HTMLAnchorElement | null) => void) | React.RefObject<HTMLAnchorElement> | null | undefined; }>, ",
           "PropsForButton",
           "<",
-          "EuiButtonProps",
-          ", { buttonRef?: ((instance: HTMLButtonElement | null) => void) | React.RefObject<HTMLButtonElement> | null | undefined; }>> & ",
-          "EuiButtonProps",
-          " & { onClick?: ((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void) | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: ((instance: HTMLButtonElement | null) => void) | React.RefObject<HTMLButtonElement> | null | undefined; } & { fontWeight?: \"bold\" | \"normal\" | undefined; size?: \"m\" | \"s\" | undefined; hasArrow?: boolean | undefined; groupPosition?: \"left\" | \"right\" | \"none\" | \"center\" | undefined; dataTestSubj?: string | undefined; }) | (",
-          "DisambiguateSet",
-          "<",
-          "PropsForButton",
-          "<",
-          "EuiButtonProps",
-          ", { buttonRef?: ((instance: HTMLButtonElement | null) => void) | React.RefObject<HTMLButtonElement> | null | undefined; }>, ",
-          "PropsForAnchor",
-          "<",
-          "EuiButtonProps",
-          ", { buttonRef?: ((instance: HTMLAnchorElement | null) => void) | React.RefObject<HTMLAnchorElement> | null | undefined; }>> & ",
-          "EuiButtonProps",
-          " & { href?: string | undefined; onClick?: ((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: ((instance: HTMLAnchorElement | null) => void) | React.RefObject<HTMLAnchorElement> | null | undefined; } & { fontWeight?: \"bold\" | \"normal\" | undefined; size?: \"m\" | \"s\" | undefined; hasArrow?: boolean | undefined; groupPosition?: \"left\" | \"right\" | \"none\" | \"center\" | undefined; dataTestSubj?: string | undefined; })"
+          "EuiButtonProps"
         ],
         "source": {
           "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
@@ -4767,7 +4327,7 @@
         "label": "createGlobalStyle",
         "description": [],
         "signature": [
-          "<P extends object = {}>(first: ",
+          "<P>(first: ",
           "CSSObject",
           " | ",
           "InterpolationFunction",
@@ -4782,28 +4342,7 @@
             "text": "EuiTheme"
           },
           ">> | TemplateStringsArray, ...interpolations: ",
-          "Interpolation",
-          "<",
-          "ThemedStyledProps",
-          "<P, ",
-          {
-            "pluginId": "kibanaReact",
-            "scope": "common",
-            "docId": "kibKibanaReactPluginApi",
-            "section": "def-common.EuiTheme",
-            "text": "EuiTheme"
-          },
-          ">>[]) => ",
-          "GlobalStyleComponent",
-          "<P, ",
-          {
-            "pluginId": "kibanaReact",
-            "scope": "common",
-            "docId": "kibKibanaReactPluginApi",
-            "section": "def-common.EuiTheme",
-            "text": "EuiTheme"
-          },
-          ">"
+          "Interpolation"
         ],
         "source": {
           "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
@@ -4820,7 +4359,7 @@
         "label": "css",
         "description": [],
         "signature": [
-          "BaseThemedCssFunction",
+          "ThemedCssFunction",
           "<",
           {
             "pluginId": "kibanaReact",
@@ -4846,7 +4385,7 @@
         "label": "euiStyled",
         "description": [],
         "signature": [
-          "ThemedBaseStyledInterface",
+          "ThemedStyledInterface",
           "<",
           {
             "pluginId": "kibanaReact",
@@ -4955,7 +4494,8 @@
         "label": "withTheme",
         "description": [],
         "signature": [
-          "<C extends React.ComponentType<any>>(component: React.ComponentProps<C> extends { theme?: ",
+          "BaseWithThemeFnInterface",
+          "<",
           {
             "pluginId": "kibanaReact",
             "scope": "common",
@@ -4963,15 +4503,7 @@
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
-          " | undefined; } ? C : never) => React.ForwardRefExoticComponent<WithOptionalTheme<React.ComponentPropsWithRef<C>, ",
-          {
-            "pluginId": "kibanaReact",
-            "scope": "common",
-            "docId": "kibKibanaReactPluginApi",
-            "section": "def-common.EuiTheme",
-            "text": "EuiTheme"
-          },
-          ">>"
+          ">"
         ],
         "source": {
           "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",

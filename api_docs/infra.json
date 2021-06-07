@@ -109,23 +109,7 @@
               "path": "x-pack/plugins/infra/common/formatters/index.ts",
               "lineNumber": 16
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "infra",
-                "id": "def-public.val",
-                "type": "number",
-                "tags": [],
-                "label": "val",
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/infra/common/formatters/number.ts",
-                  "lineNumber": 8
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           },
           {
             "parentPluginId": "infra",
@@ -143,23 +127,7 @@
               "path": "x-pack/plugins/infra/common/formatters/index.ts",
               "lineNumber": 19
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "infra",
-                "id": "def-public.bytes",
-                "type": "number",
-                "tags": [],
-                "label": "bytes",
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/infra/common/formatters/bytes.ts",
-                  "lineNumber": 42
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           },
           {
             "parentPluginId": "infra",
@@ -177,23 +145,7 @@
               "path": "x-pack/plugins/infra/common/formatters/index.ts",
               "lineNumber": 21
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "infra",
-                "id": "def-public.bytes",
-                "type": "number",
-                "tags": [],
-                "label": "bytes",
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/infra/common/formatters/bytes.ts",
-                  "lineNumber": 42
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           },
           {
             "parentPluginId": "infra",
@@ -211,23 +163,7 @@
               "path": "x-pack/plugins/infra/common/formatters/index.ts",
               "lineNumber": 23
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "infra",
-                "id": "def-public.bytes",
-                "type": "number",
-                "tags": [],
-                "label": "bytes",
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/infra/common/formatters/bytes.ts",
-                  "lineNumber": 42
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           },
           {
             "parentPluginId": "infra",
@@ -243,23 +179,7 @@
               "path": "x-pack/plugins/infra/common/formatters/index.ts",
               "lineNumber": 24
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "infra",
-                "id": "def-public.val",
-                "type": "number",
-                "tags": [],
-                "label": "val",
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/infra/common/formatters/percent.ts",
-                  "lineNumber": 9
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           },
           {
             "parentPluginId": "infra",
@@ -275,23 +195,7 @@
               "path": "x-pack/plugins/infra/common/formatters/index.ts",
               "lineNumber": 25
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "infra",
-                "id": "def-public.val",
-                "type": "number",
-                "tags": [],
-                "label": "val",
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/infra/common/formatters/high_precision.ts",
-                  "lineNumber": 8
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -329,9 +233,7 @@
         "label": "InfraRequestHandlerContext",
         "description": [],
         "signature": [
-          "InfraMlRequestHandlerContext",
-          " & ",
-          "InfraSpacesRequestHandlerContext"
+          "InfraMlRequestHandlerContext & InfraSpacesRequestHandlerContext"
         ],
         "source": {
           "path": "x-pack/plugins/infra/server/types.ts",
@@ -371,39 +273,7 @@
             "path": "x-pack/plugins/infra/server/plugin.ts",
             "lineNumber": 76
           },
-          "deprecated": false,
-          "returnComment": [],
-          "children": [
-            {
-              "parentPluginId": "infra",
-              "id": "def-server.sourceId",
-              "type": "string",
-              "tags": [],
-              "label": "sourceId",
-              "description": [],
-              "source": {
-                "path": "x-pack/plugins/infra/server/plugin.ts",
-                "lineNumber": 77
-              },
-              "deprecated": false
-            },
-            {
-              "parentPluginId": "infra",
-              "id": "def-server.sourceProperties",
-              "type": "Object",
-              "tags": [],
-              "label": "sourceProperties",
-              "description": [],
-              "signature": [
-                "InfraStaticSourceConfiguration"
-              ],
-              "source": {
-                "path": "x-pack/plugins/infra/server/plugin.ts",
-                "lineNumber": 78
-              },
-              "deprecated": false
-            }
-          ]
+          "deprecated": false
         }
       ],
       "lifecycle": "setup",
