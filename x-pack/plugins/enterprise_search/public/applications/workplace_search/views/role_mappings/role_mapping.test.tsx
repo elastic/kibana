@@ -15,7 +15,7 @@ import { shallow } from 'enzyme';
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiRadioGroup } from '@elastic/eui';
 
-import { AttributeSelector, RoleSelector } from '../../../shared/role_mapping';
+import { AttributeSelector, RoleSelector, RoleMappingFlyout } from '../../../shared/role_mapping';
 import { wsRoleMapping } from '../../../shared/role_mapping/__mocks__/roles';
 
 import { RoleMapping } from './role_mapping';
@@ -56,6 +56,7 @@ describe('RoleMapping', () => {
     availableAuthProviders: [],
     multipleAuthProvidersConfig: true,
     selectedAuthProviders: [],
+    roleMappingErrors: [],
   };
 
   beforeEach(() => {
@@ -108,5 +109,17 @@ describe('RoleMapping', () => {
     wrapper.update();
 
     expect(handleGroupSelectionChange).toHaveBeenCalledWith([groups[0].name]);
+  });
+
+  it('enables flyout when attribute value is valid', () => {
+    setMockValues({
+      ...mockValues,
+      attributeValue: 'foo',
+      attributeName: 'role',
+      includeInAllGroups: true,
+    });
+    const wrapper = shallow(<RoleMapping />);
+
+    expect(wrapper.find(RoleMappingFlyout).prop('disabled')).toBe(false);
   });
 });
