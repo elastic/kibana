@@ -5,14 +5,4 @@
  * 2.0.
  */
 
-import { PutLifecycleRequest } from '@elastic/elasticsearch/api/types';
-
-export const reportingIlmPolicy: PutLifecycleRequest['body'] = {
-  policy: {
-    phases: {
-      hot: {
-        actions: {},
-      },
-    },
-  },
-};
+export * from './truncatable_text';
