@@ -32,6 +32,7 @@ import {
   isLoadingResourceState,
 } from '../../../state';
 import { ServerApiError } from '../../../../common/types';
+import { isEndpointHostIsolated } from '../../../../common/utils/validators';
 
 export const listData = (state: Immutable<EndpointState>) => state.hosts;
 
@@ -204,6 +205,14 @@ export const uiQueryParams: (
         'admin_query',
       ];
 
+      const allowedShowValues: Array<EndpointIndexUIQueryParams['show']> = [
+        'policy_response',
+        'details',
+        'isolate',
+        'unisolate',
+        'activity_log',
+      ];
+
       for (const key of keys) {
         const value: string | undefined =
           typeof query[key] === 'string'
@@ -214,13 +223,8 @@ export const uiQueryParams: (
 
         if (value !== undefined) {
           if (key === 'show') {
-            if (
-              value === 'policy_response' ||
-              value === 'details' ||
-              value === 'activity_log' ||
-              value === 'isolate'
-            ) {
-              data[key] = value;
+            if (allowedShowValues.includes(value as EndpointIndexUIQueryParams['show'])) {
+              data[key] = value as EndpointIndexUIQueryParams['show'];
             }
           } else {
             data[key] = value;
@@ -377,4 +381,8 @@ export const getActivityLogError: (
   if (isFailedResourceState(activityLog)) {
     return activityLog.error;
   }
+});
+
+export const getIsEndpointHostIsolated = createSelector(detailsData, (details) => {
+  return (details && isEndpointHostIsolated(details)) || false;
 });
