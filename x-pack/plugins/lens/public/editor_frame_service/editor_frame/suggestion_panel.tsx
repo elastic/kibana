@@ -7,7 +7,7 @@
 
 import './suggestion_panel.scss';
 
-import _, { camelCase } from 'lodash';
+import { camelCase, pick } from 'lodash';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -442,7 +442,7 @@ function getPreviewExpression(
   ) {
     const datasource = datasources[visualizableState.datasourceId];
     const datasourceState = visualizableState.datasourceState;
-    const updatedLayerApis: Record<string, DatasourcePublicAPI> = _.pick(
+    const updatedLayerApis: Record<string, DatasourcePublicAPI> = pick(
       frame.datasourceLayers,
       visualizableState.keptLayerIds
     );

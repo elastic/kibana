@@ -6,7 +6,7 @@
  */
 
 import { ConfigProps, DataSeries } from '../../types';
-import { FieldLabels, RECORDS_FIELD } from '../constants';
+import { FieldLabels, OPERATION_COLUMN, RECORDS_FIELD } from '../constants';
 import { buildPhraseFilter } from '../utils';
 import {
   CLIENT_GEO_COUNTRY_NAME,
@@ -85,20 +85,25 @@ export function getKPITrendsLensConfig({ seriesId, indexPattern }: ConfigProps):
       {
         field: 'business.kpi',
         custom: true,
-        defaultValue: RECORDS_FIELD,
         options: [
-          { field: RECORDS_FIELD, label: PAGE_VIEWS_LABEL },
-          { label: PAGE_LOAD_TIME_LABEL, field: TRANSACTION_DURATION, columnType: 'operation' },
+          { field: RECORDS_FIELD, id: RECORDS_FIELD, label: PAGE_VIEWS_LABEL },
+          {
+            label: PAGE_LOAD_TIME_LABEL,
+            field: TRANSACTION_DURATION,
+            id: TRANSACTION_DURATION,
+            columnType: OPERATION_COLUMN,
+          },
           {
             label: BACKEND_TIME_LABEL,
             field: TRANSACTION_TIME_TO_FIRST_BYTE,
-            columnType: 'operation',
+            id: TRANSACTION_TIME_TO_FIRST_BYTE,
+            columnType: OPERATION_COLUMN,
           },
-          { label: FCP_LABEL, field: FCP_FIELD, columnType: 'operation' },
-          { label: TBT_LABEL, field: TBT_FIELD, columnType: 'operation' },
-          { label: LCP_LABEL, field: LCP_FIELD, columnType: 'operation' },
-          { label: FID_LABEL, field: FID_FIELD, columnType: 'operation' },
-          { label: CLS_LABEL, field: CLS_FIELD, columnType: 'operation' },
+          { label: FCP_LABEL, field: FCP_FIELD, id: FCP_FIELD, columnType: OPERATION_COLUMN },
+          { label: TBT_LABEL, field: TBT_FIELD, id: TBT_FIELD, columnType: OPERATION_COLUMN },
+          { label: LCP_LABEL, field: LCP_FIELD, id: LCP_FIELD, columnType: OPERATION_COLUMN },
+          { label: FID_LABEL, field: FID_FIELD, id: FID_FIELD, columnType: OPERATION_COLUMN },
+          { label: CLS_LABEL, field: CLS_FIELD, id: CLS_FIELD, columnType: OPERATION_COLUMN },
         ],
       },
     ],
