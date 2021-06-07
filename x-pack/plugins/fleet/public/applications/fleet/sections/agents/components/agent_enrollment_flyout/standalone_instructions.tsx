@@ -22,24 +22,22 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import type { AgentPolicy } from '../../../../types';
 import { useStartServices, useLink, sendGetOneAgentPolicyFull } from '../../../../hooks';
 import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../../services';
 
 import { DownloadStep, AgentPolicySelectionStep } from './steps';
+import type { BaseProps } from './types';
 
-interface Props {
-  agentPolicies?: AgentPolicy[];
-}
+type Props = BaseProps;
 
 const RUN_INSTRUCTIONS = './elastic-agent install';
 
-export const StandaloneInstructions = React.memo<Props>(({ agentPolicies }) => {
+export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPolicies }) => {
   const { getHref } = useLink();
   const core = useStartServices();
   const { notifications } = core;
 
-  const [selectedPolicyId, setSelectedPolicyId] = useState<string | undefined>();
+  const [selectedPolicyId, setSelectedPolicyId] = useState<string | undefined>(agentPolicy?.id);
   const [fullAgentPolicy, setFullAgentPolicy] = useState<any | undefined>();
 
   const downloadLink = selectedPolicyId
@@ -74,9 +72,11 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicies }) => {
   }, [selectedPolicyId, notifications.toasts]);
 
   const yaml = useMemo(() => fullAgentPolicyToYaml(fullAgentPolicy), [fullAgentPolicy]);
-  const steps: EuiContainedStepProps[] = [
+  const steps = [
     DownloadStep(),
-    AgentPolicySelectionStep({ agentPolicies, setSelectedPolicyId, excludeFleetServer: true }),
+    !agentPolicy
+      ? AgentPolicySelectionStep({ agentPolicies, setSelectedPolicyId, excludeFleetServer: true })
+      : undefined,
     {
       title: i18n.translate('xpack.fleet.agentEnrollment.stepConfigureAgentTitle', {
         defaultMessage: 'Configure the agent',
@@ -178,7 +178,7 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicies }) => {
         </>
       ),
     },
-  ];
+  ].filter(Boolean) as EuiContainedStepProps[];
 
   return (
     <>

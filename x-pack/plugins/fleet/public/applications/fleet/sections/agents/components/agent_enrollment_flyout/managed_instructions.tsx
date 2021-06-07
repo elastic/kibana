@@ -11,14 +11,12 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import type { AgentPolicy } from '../../../../types';
 import {
   useGetOneEnrollmentAPIKey,
   useGetSettings,
   useLink,
   useFleetStatus,
 } from '../../../../hooks';
-import { NewEnrollmentTokenModal } from '../../enrollment_token_list_page/components/new_enrollment_key_modal';
 
 import { ManualInstructions } from '../../../../components/enrollment_instructions';
 import {
@@ -29,10 +27,9 @@ import {
 } from '../../agent_requirements_page';
 
 import { DownloadStep, AgentPolicySelectionStep } from './steps';
+import type { BaseProps } from './types';
 
-interface Props {
-  agentPolicies?: AgentPolicy[];
-}
+type Props = BaseProps;
 
 const DefaultMissingRequirements = () => {
   const { getHref } = useLink();
@@ -61,7 +58,7 @@ const FleetServerMissingRequirements = () => {
   return <FleetServerRequirementPage />;
 };
 
-export const ManagedInstructions = React.memo<Props>(({ agentPolicies }) => {
+export const ManagedInstructions = React.memo<Props>(({ agentPolicy, agentPolicies }) => {
   const fleetStatus = useFleetStatus();
 
   const [selectedAPIKeyId, setSelectedAPIKeyId] = useState<string | undefined>();
@@ -81,14 +78,16 @@ export const ManagedInstructions = React.memo<Props>(({ agentPolicies }) => {
       setPlatform,
     } = fleetServerInstructions;
     const fleetServerHosts = settings.data?.item?.fleet_server_hosts || [];
-    const baseSteps: EuiContainedStepProps[] = [
+    const baseSteps = [
       DownloadStep(),
-      AgentPolicySelectionStep({
-        agentPolicies,
-        setSelectedAPIKeyId,
-        setIsFleetServerPolicySelected,
-      }),
-    ];
+      !agentPolicy
+        ? AgentPolicySelectionStep({
+            agentPolicies,
+            setSelectedAPIKeyId,
+            setIsFleetServerPolicySelected,
+          })
+        : undefined,
+    ].filter(Boolean) as EuiContainedStepProps[];
     if (isFleetServerPolicySelected) {
       baseSteps.push(
         ...[
@@ -108,6 +107,7 @@ export const ManagedInstructions = React.memo<Props>(({ agentPolicies }) => {
     }
     return baseSteps;
   }, [
+    agentPolicy,
     agentPolicies,
     selectedAPIKeyId,
     apiKey.data,
@@ -115,11 +115,6 @@ export const ManagedInstructions = React.memo<Props>(({ agentPolicies }) => {
     settings.data?.item?.fleet_server_hosts,
     fleetServerInstructions,
   ]);
-
-  const [isModalOpen, setModalOpen] = useState(false);
-  const closeModal = () => {
-    setModalOpen(false);
-  };
 
   return (
     <>
@@ -133,10 +128,6 @@ export const ManagedInstructions = React.memo<Props>(({ agentPolicies }) => {
           </EuiText>
           <EuiSpacer size="l" />
           <EuiSteps steps={steps} />
-
-          {isModalOpen && (
-            <NewEnrollmentTokenModal agentPolicies={agentPolicies} onClose={closeModal} />
-          )}
         </>
       ) : fleetStatus.missingRequirements?.length === 1 &&
         fleetStatus.missingRequirements[0] === 'fleet_server' ? (

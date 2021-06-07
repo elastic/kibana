@@ -16,72 +16,26 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
-  EuiButton,
   EuiFlyoutFooter,
   EuiTab,
   EuiTabs,
-  EuiCallOut,
-  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 
 import { useGetSettings, useUrlModal } from '../../../../hooks';
-import type { AgentPolicy } from '../../../../types';
 
 import { ManagedInstructions } from './managed_instructions';
 import { StandaloneInstructions } from './standalone_instructions';
+import { MissingFleetServerHostCallout } from './missing_fleet_server_host_callout';
+import type { BaseProps } from './types';
 
-interface Props {
+interface Props extends BaseProps {
   onClose: () => void;
-  agentPolicies?: AgentPolicy[];
 }
-
-const MissingFleetServerHostCallout: React.FunctionComponent = () => {
-  const { setModal } = useUrlModal();
-  return (
-    <EuiCallOut
-      title={i18n.translate('xpack.fleet.agentEnrollment.missingFleetHostCalloutTitle', {
-        defaultMessage: 'Missing URL for Fleet Server host',
-      })}
-    >
-      <FormattedMessage
-        id="xpack.fleet.agentEnrollment.missingFleetHostCalloutText"
-        defaultMessage="A URL for your Fleet Server host is required to enroll agents with Fleet. You can add this information in Fleet Settings. For more information, see the {link}."
-        values={{
-          link: (
-            <EuiLink
-              href="https://www.elastic.co/guide/en/fleet/current/index.html"
-              target="_blank"
-              external
-            >
-              <FormattedMessage
-                id="xpack.fleet.agentEnrollment.missingFleetHostGuideLink"
-                defaultMessage="Fleet User Guide"
-              />
-            </EuiLink>
-          ),
-        }}
-      />
-      <EuiSpacer size="m" />
-      <EuiButton
-        fill
-        iconType="gear"
-        onClick={() => {
-          setModal('settings');
-        }}
-      >
-        <FormattedMessage
-          id="xpack.fleet.agentEnrollment.fleetSettingsLink"
-          defaultMessage="Fleet Settings"
-        />
-      </EuiButton>
-    </EuiCallOut>
-  );
-};
 
 export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
   onClose,
+  agentPolicy,
   agentPolicies,
 }) => {
   const [mode, setMode] = useState<'managed' | 'standalone'>('managed');
@@ -142,9 +96,9 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
         }
       >
         {fleetServerHosts.length === 0 && mode === 'managed' ? null : mode === 'managed' ? (
-          <ManagedInstructions agentPolicies={agentPolicies} />
+          <ManagedInstructions agentPolicy={agentPolicy} agentPolicies={agentPolicies} />
         ) : (
-          <StandaloneInstructions agentPolicies={agentPolicies} />
+          <StandaloneInstructions agentPolicy={agentPolicy} agentPolicies={agentPolicies} />
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
