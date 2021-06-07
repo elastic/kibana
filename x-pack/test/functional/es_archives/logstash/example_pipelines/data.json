@@ -1,0 +1,426 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "tweets_and_beats",
+    "index": ".logstash",
+    "source": {
+      "description": "ingest tweets and beats",
+      "last_modified": "2017-08-02T18:59:07.724Z",
+      "pipeline": "input {\n    twitter {\n        consumer_key => \"enter_your_consumer_key_here\"\n        consumer_secret => \"enter_your_secret_here\"\n        keywords => [\"cloud\"]\n        oauth_token => \"enter_your_access_token_here\"\n        oauth_token_secret => \"enter_your_access_token_secret_here\"\n    }\n    beats {\n        port => \"5043\"\n    }\n}\noutput {\n    elasticsearch {\n        hosts => [\"IP Address 1:port1\", \"IP Address 2:port2\", \"IP Address 3\"]\n    }\n}",
+      "pipeline_metadata": {
+        "type": "logstash_pipeline",
+        "version": 1
+      },
+      "username": "elastic"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "empty_pipeline_1",
+    "index": ".logstash",
+    "source": {
+      "description": "an empty pipeline",
+      "last_modified": "2017-08-02T18:57:32.907Z",
+      "pipeline": "input {\n}\nfilter {\n}\noutput {\n}",
+      "pipeline_metadata": {
+        "type": "logstash_pipeline",
+        "version": 1
+      },
+      "username": "elastic"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "empty_pipeline_2",
+    "index": ".logstash",
+    "source": {
+      "description": "an empty pipeline",
+      "last_modified": "2017-08-02T18:57:32.907Z",
+      "pipeline": "input {\n}\nfilter {\n}\noutput {\n}",
+      "pipeline_metadata": {
+        "type": "logstash_pipeline",
+        "version": 1
+      },
+      "username": "elastic"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "empty_pipeline_3",
+    "index": ".logstash",
+    "source": {
+      "description": "an empty pipeline",
+      "last_modified": "2017-08-02T18:57:32.907Z",
+      "pipeline": "input {\n}\nfilter {\n}\noutput {\n}",
+      "pipeline_metadata": {
+        "type": "logstash_pipeline",
+        "version": 1
+      },
+      "username": "elastic"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "empty_pipeline_4",
+    "index": ".logstash",
+    "source": {
+      "description": "an empty pipeline",
+      "last_modified": "2017-08-02T18:57:32.907Z",
+      "pipeline": "input {\n}\nfilter {\n}\noutput {\n}",
+      "pipeline_metadata": {
+        "type": "logstash_pipeline",
+        "version": 1
+      },
+      "username": "elastic"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "empty_pipeline_5",
+    "index": ".logstash",
+    "source": {
+      "description": "an empty pipeline",
+      "last_modified": "2017-08-02T18:57:32.907Z",
+      "pipeline": "input {\n}\nfilter {\n}\noutput {\n}",
+      "pipeline_metadata": {
+        "type": "logstash_pipeline",
+        "version": 1
+      },
+      "username": "elastic"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "empty_pipeline_6",
+    "index": ".logstash",
+    "source": {
+      "description": "an empty pipeline",
+      "last_modified": "2017-08-02T18:57:32.907Z",
+      "pipeline": "input {\n}\nfilter {\n}\noutput {\n}",
+      "pipeline_metadata": {
+        "type": "logstash_pipeline",
+        "version": 1
+      },
+      "username": "elastic"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "empty_pipeline_7",
+    "index": ".logstash",
+    "source": {
+      "description": "an empty pipeline",
+      "last_modified": "2017-08-02T18:57:32.907Z",
+      "pipeline": "input {\n}\nfilter {\n}\noutput {\n}",
+      "pipeline_metadata": {
+        "type": "logstash_pipeline",
+        "version": 1
+      },
+      "username": "elastic"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "empty_pipeline_8",
+    "index": ".logstash",
+    "source": {
+      "description": "an empty pipeline",
+      "last_modified": "2017-08-02T18:57:32.907Z",
+      "pipeline": "input {\n}\nfilter {\n}\noutput {\n}",
+      "pipeline_metadata": {
+        "type": "logstash_pipeline",
+        "version": 1
+      },
+      "username": "elastic"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "empty_pipeline_9",
+    "index": ".logstash",
+    "source": {
+      "description": "an empty pipeline",
+      "last_modified": "2017-08-02T18:57:32.907Z",
+      "pipeline": "input {\n}\nfilter {\n}\noutput {\n}",
+      "pipeline_metadata": {
+        "type": "logstash_pipeline",
+        "version": 1
+      },
+      "username": "elastic"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "empty_pipeline_10",
+    "index": ".logstash",
+    "source": {
+      "description": "an empty pipeline",
+      "last_modified": "2017-08-02T18:57:32.907Z",
+      "pipeline": "input {\n}\nfilter {\n}\noutput {\n}",
+      "pipeline_metadata": {
+        "type": "logstash_pipeline",
+        "version": 1
+      },
+      "username": "elastic"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "empty_pipeline_11",
+    "index": ".logstash",
+    "source": {
+      "description": "an empty pipeline",
+      "last_modified": "2017-08-02T18:57:32.907Z",
+      "pipeline": "input {\n}\nfilter {\n}\noutput {\n}",
+      "pipeline_metadata": {
+        "type": "logstash_pipeline",
+        "version": 1
+      },
+      "username": "elastic"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "empty_pipeline_12",
+    "index": ".logstash",
+    "source": {
+      "description": "an empty pipeline",
+      "last_modified": "2017-08-02T18:57:32.907Z",
+      "pipeline": "input {\n}\nfilter {\n}\noutput {\n}",
+      "pipeline_metadata": {
+        "type": "logstash_pipeline",
+        "version": 1
+      },
+      "username": "elastic"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "empty_pipeline_13",
+    "index": ".logstash",
+    "source": {
+      "description": "an empty pipeline",
+      "last_modified": "2017-08-02T18:57:32.907Z",
+      "pipeline": "input {\n}\nfilter {\n}\noutput {\n}",
+      "pipeline_metadata": {
+        "type": "logstash_pipeline",
+        "version": 1
+      },
+      "username": "elastic"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "empty_pipeline_14",
+    "index": ".logstash",
+    "source": {
+      "description": "an empty pipeline",
+      "last_modified": "2017-08-02T18:57:32.907Z",
+      "pipeline": "input {\n}\nfilter {\n}\noutput {\n}",
+      "pipeline_metadata": {
+        "type": "logstash_pipeline",
+        "version": 1
+      },
+      "username": "elastic"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "empty_pipeline_15",
+    "index": ".logstash",
+    "source": {
+      "description": "an empty pipeline",
+      "last_modified": "2017-08-02T18:57:32.907Z",
+      "pipeline": "input {\n}\nfilter {\n}\noutput {\n}",
+      "pipeline_metadata": {
+        "type": "logstash_pipeline",
+        "version": 1
+      },
+      "username": "elastic"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "empty_pipeline_16",
+    "index": ".logstash",
+    "source": {
+      "description": "an empty pipeline",
+      "last_modified": "2017-08-02T18:57:32.907Z",
+      "pipeline": "input {\n}\nfilter {\n}\noutput {\n}",
+      "pipeline_metadata": {
+        "type": "logstash_pipeline",
+        "version": 1
+      },
+      "username": "elastic"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "empty_pipeline_17",
+    "index": ".logstash",
+    "source": {
+      "description": "an empty pipeline",
+      "last_modified": "2017-08-02T18:57:32.907Z",
+      "pipeline": "input {\n}\nfilter {\n}\noutput {\n}",
+      "pipeline_metadata": {
+        "type": "logstash_pipeline",
+        "version": 1
+      },
+      "username": "elastic"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "empty_pipeline_18",
+    "index": ".logstash",
+    "source": {
+      "description": "an empty pipeline",
+      "last_modified": "2017-08-02T18:57:32.907Z",
+      "pipeline": "input {\n}\nfilter {\n}\noutput {\n}",
+      "pipeline_metadata": {
+        "type": "logstash_pipeline",
+        "version": 1
+      },
+      "username": "elastic"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "empty_pipeline_19",
+    "index": ".logstash",
+    "source": {
+      "description": "an empty pipeline",
+      "last_modified": "2017-08-02T18:57:32.907Z",
+      "pipeline": "input {\n}\nfilter {\n}\noutput {\n}",
+      "pipeline_metadata": {
+        "type": "logstash_pipeline",
+        "version": 1
+      },
+      "username": "elastic"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "empty_pipeline_20",
+    "index": ".logstash",
+    "source": {
+      "description": "an empty pipeline",
+      "last_modified": "2017-08-02T18:57:32.907Z",
+      "pipeline": "input {\n}\nfilter {\n}\noutput {\n}",
+      "pipeline_metadata": {
+        "type": "logstash_pipeline",
+        "version": 1
+      },
+      "username": "elastic"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "empty_pipeline_21",
+    "index": ".logstash",
+    "source": {
+      "description": "an empty pipeline",
+      "last_modified": "2017-08-02T18:57:32.907Z",
+      "pipeline": "input {\n}\nfilter {\n}\noutput {\n}",
+      "pipeline_metadata": {
+        "type": "logstash_pipeline",
+        "version": 1
+      },
+      "username": "elastic"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "config:7.0.0-alpha1",
+    "index": ".kibana_1",
+    "source": {
+      "config": {
+        "buildNum": 8467,
+        "xPackMonitoring:showBanner": false
+      },
+      "type": "config"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "space:default",
+    "index": ".kibana_1",
+    "source": {
+      "space": {
+        "_reserved": true,
+        "description": "This is the default space",
+        "name": "Default"
+      },
+      "type": "space"
+    }
+  }
+}

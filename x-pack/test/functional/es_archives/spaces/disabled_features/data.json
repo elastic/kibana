@@ -1,7 +1,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "type": "doc",
     "id": "space:default",
     "source": {
@@ -22,7 +22,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "type": "doc",
     "id": "index-pattern:logstash-*",
     "source": {
@@ -43,7 +43,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "type": "doc",
     "id": "custom_space:index-pattern:logstash-*",
     "source": {
@@ -65,7 +65,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "type": "doc",
     "id": "custom_space:visualization:75c3e060-1e7c-11e9-8488-65449e65d0ed",
     "source": {
@@ -89,7 +89,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "type": "doc",
     "id": "custom_space:dashboard:i-exist",
     "source": {

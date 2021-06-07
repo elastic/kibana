@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "config:6.0.0-alpha1",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "config": {
         "buildNum": 8467,
@@ -17,7 +17,7 @@
   "type": "doc",
   "value": {
     "id": "space:default",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "space": {
         "description": "This is the default space!",
@@ -32,7 +32,7 @@
   "type": "doc",
   "value": {
     "id": "space:another-space",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "space": {
         "description": "This is another space",
@@ -46,7 +46,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "type": "doc",
     "id": "index-pattern:logstash-*",
     "source": {
@@ -67,7 +67,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "type": "doc",
     "id": "visualization:75c3e060-1e7c-11e9-8488-65449e65d0ed",
     "source": {
@@ -90,7 +90,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "type": "doc",
     "id": "dashboard:my-dashboard",
     "source": {
@@ -115,7 +115,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "type": "doc",
     "id": "another-space:index-pattern:logstash-*",
     "source": {
@@ -137,7 +137,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "type": "doc",
     "id": "another-space:visualization:75c3e060-1e7c-11e9-8488-65449e65d0ed",
     "source": {
@@ -161,7 +161,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "type": "doc",
     "id": "another-space:dashboard:my-dashboard",
     "source": {

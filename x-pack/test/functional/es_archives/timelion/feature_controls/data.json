@@ -1,7 +1,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "type": "doc",
     "id": "config:7.0.0",
     "source": {
@@ -18,7 +18,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "id": "index-pattern:logstash-*",
     "source": {
       "type": "index-pattern",
@@ -34,7 +34,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "id": "timelion-sheet:i-exist",
     "source": {
       "timelion-sheet": {
@@ -58,7 +58,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "id": "custom_space:timelion-sheet:i-exist",
     "source": {
       "namespace": "custom_space",

@@ -1,7 +1,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "id": "action:uuid-actionId",
     "source": {
       "type": "action",
@@ -48,8 +48,7 @@
         "name": "A jira action",
         "secrets": "gUYVHxyvkY6I6rZrST16PzSBjwuPLzWYIm9Ow6qjJXiCimA1wHGgH1BR5nO/xZJjv9QqIGO3eKDSYsn7K9m39UJv83+oi5P4ZgtFktsFq0Jv6XEFQPFkuVY5sWno7w89CxgxlsTQFpYAJb0Hl0qf/6p6bKKaje48YRqNS5roebNAAribh9AWu80uxIJFWNo="
       },
-      "references": [
-      ],
+      "references": [],
       "type": "action",
       "updated_at": "2020-09-24T08:08:23.715Z"
     },
@@ -76,8 +75,7 @@
       "migrationVersion": {
         "action": "7.10.0"
       },
-      "references": [
-      ],
+      "references": [],
       "type": "action",
       "updated_at": "2020-10-26T21:29:47.380Z"
     }
@@ -103,8 +101,7 @@
       "migrationVersion": {
         "action": "7.10.0"
       },
-      "references": [
-      ],
+      "references": [],
       "type": "action",
       "updated_at": "2020-10-26T21:30:35.146Z"
     }

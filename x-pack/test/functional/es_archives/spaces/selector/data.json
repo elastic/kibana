@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "config:6.0.0-alpha1",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "config": {
         "buildNum": 8467,
@@ -17,7 +17,7 @@
   "type": "doc",
   "value": {
     "id": "space:default",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "space": {
         "description": "This is the default space!",
@@ -32,7 +32,7 @@
   "type": "doc",
   "value": {
     "id": "space:another-space",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "space": {
         "description": "This is another space",

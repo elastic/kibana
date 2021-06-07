@@ -1,0 +1,577 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "config:8.0.0",
+    "index": ".kibana_1",
+    "source": {
+      "config": {
+        "buildNum": 9007199254740991,
+        "defaultIndex": "timeless-sales"
+      },
+      "references": [],
+      "type": "config",
+      "updated_at": "2019-03-05T22:52:20.993Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:timeless-sales",
+    "index": ".kibana_1",
+    "source": {
+      "index-pattern": {
+        "fields": "[{\"name\":\"@date\",\"type\":\"date\",\"count\":1,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"_id\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"metric\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"name\",\"type\":\"string\",\"count\":1,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"power\",\"type\":\"number\",\"count\":1,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"success\",\"type\":\"boolean\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true}]",
+        "title": "sales"
+      },
+      "migrationVersion": {
+        "index-pattern": "6.5.0"
+      },
+      "references": [],
+      "type": "index-pattern",
+      "updated_at": "2019-03-05T22:52:35.474Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "search:71e3ee20-3f99-11e9-b8ee-6b9604f2f877",
+    "index": ".kibana_1",
+    "source": {
+      "migrationVersion": {
+        "search": "7.0.0"
+      },
+      "references": [
+        {
+          "id": "timeless-sales",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern"
+        },
+        {
+          "id": "timeless-sales",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+          "type": "index-pattern"
+        }
+      ],
+      "search": {
+        "columns": [
+          "name",
+          "power"
+        ],
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[{\"$state\":{\"store\":\"appState\"},\"meta\":{\"alias\":null,\"disabled\":false,\"key\":\"power\",\"negate\":false,\"params\":{\"gte\":1,\"lt\":null},\"type\":\"range\",\"value\":\"1 to \",\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"range\":{\"power\":{\"gte\":1,\"lt\":null}}}],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        },
+        "sort": [
+          [
+            "power",
+            "asc"
+          ]
+        ],
+        "title": "SALE POWER",
+        "version": 1
+      },
+      "type": "search",
+      "updated_at": "2019-03-05T22:53:08.481Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "UOEOUGkBxhhfVX4mK8ae",
+    "index": "sales",
+    "source": {
+      "@date": "2019-03-05T22:51:31Z",
+      "metric": 3485,
+      "name": "Suzie-May Rishel",
+      "power": -1,
+      "success": false
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "UeEOUGkBxhhfVX4mK8ae",
+    "index": "sales",
+    "source": {
+      "@date": "2019-02-22T13:06:31Z",
+      "metric": 9104,
+      "name": "Florinda Alejandro",
+      "power": 0.9104,
+      "success": true
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "UuEOUGkBxhhfVX4mK8ae",
+    "index": "sales",
+    "source": {
+      "@date": "2019-02-11T03:21:31Z",
+      "metric": 5884,
+      "name": "Jonelle-Jane Marth",
+      "power": 1.1768,
+      "success": true
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "U-EOUGkBxhhfVX4mK8ae",
+    "index": "sales",
+    "source": {
+      "@date": "2019-01-30T17:36:31Z",
+      "metric": 1525,
+      "name": "Rosana Casto",
+      "power": -1,
+      "success": false
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "VOEOUGkBxhhfVX4mK8ae",
+    "index": "sales",
+    "source": {
+      "@date": "2019-01-19T07:51:31Z",
+      "metric": 880,
+      "name": "Rosana Casto",
+      "power": 0.352,
+      "success": true
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "VeEOUGkBxhhfVX4mK8af",
+    "index": "sales",
+    "source": {
+      "@date": "2019-01-07T22:06:31Z",
+      "metric": 4154,
+      "name": "Suzie-May Rishel",
+      "power": 2.077,
+      "success": true
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "VuEOUGkBxhhfVX4mK8af",
+    "index": "sales",
+    "source": {
+      "@date": "2018-12-27T12:21:31Z",
+      "metric": 7083,
+      "name": "Alfredo Weinberger",
+      "power": -1,
+      "success": false
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "V-EOUGkBxhhfVX4mK8af",
+    "index": "sales",
+    "source": {
+      "@date": "2018-12-16T02:36:31Z",
+      "metric": 3347,
+      "name": "Jonelle-Jane Marth",
+      "power": -1,
+      "success": false
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "WOEOUGkBxhhfVX4mK8af",
+    "index": "sales",
+    "source": {
+      "@date": "2018-12-04T16:51:31Z",
+      "metric": 2280,
+      "name": "Suzie-May Rishel",
+      "power": 1.824,
+      "success": true
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "WeEOUGkBxhhfVX4mK8af",
+    "index": "sales",
+    "source": {
+      "@date": "2018-11-23T07:06:31Z",
+      "metric": 7180,
+      "name": "Hae Cross",
+      "power": -1,
+      "success": false
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "WuEOUGkBxhhfVX4mK8af",
+    "index": "sales",
+    "source": {
+      "@date": "2018-11-11T21:21:31Z",
+      "metric": 891,
+      "name": "Florinda Alejandro",
+      "power": -1,
+      "success": false
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "W-EOUGkBxhhfVX4mK8af",
+    "index": "sales",
+    "source": {
+      "@date": "2018-10-31T11:36:31Z",
+      "metric": 5776,
+      "name": "Jonelle-Jane Marth",
+      "power": -1,
+      "success": false
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "XOEOUGkBxhhfVX4mK8af",
+    "index": "sales",
+    "source": {
+      "@date": "2018-10-20T01:51:31Z",
+      "metric": 9890,
+      "name": "Criselda Durand",
+      "power": -1,
+      "success": false
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "XeEOUGkBxhhfVX4mK8af",
+    "index": "sales",
+    "source": {
+      "@date": "2018-10-08T16:06:31Z",
+      "metric": 5003,
+      "name": "Hal Riva",
+      "power": -1,
+      "success": false
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "XuEOUGkBxhhfVX4mK8af",
+    "index": "sales",
+    "source": {
+      "@date": "2018-09-27T06:21:31Z",
+      "metric": 5069,
+      "name": "Jonelle-Jane Marth",
+      "power": 7.0966,
+      "success": true
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "X-EOUGkBxhhfVX4mK8af",
+    "index": "sales",
+    "source": {
+      "@date": "2018-09-15T20:36:31Z",
+      "metric": 5891,
+      "name": "Alfredo Weinberger",
+      "power": -1,
+      "success": false
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "YOEOUGkBxhhfVX4mK8af",
+    "index": "sales",
+    "source": {
+      "@date": "2018-09-04T10:51:31Z",
+      "metric": 6877,
+      "name": "Jonelle-Jane Marth",
+      "power": -1,
+      "success": false
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "YeEOUGkBxhhfVX4mK8af",
+    "index": "sales",
+    "source": {
+      "@date": "2018-08-24T01:06:31Z",
+      "metric": 1845,
+      "name": "Rusty Galentine",
+      "power": -1,
+      "success": false
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "YuEOUGkBxhhfVX4mK8af",
+    "index": "sales",
+    "source": {
+      "@date": "2018-08-12T15:21:31Z",
+      "metric": 5763,
+      "name": "Florinda Alejandro",
+      "power": 10.3734,
+      "success": true
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "Y-EOUGkBxhhfVX4mK8af",
+    "index": "sales",
+    "source": {
+      "@date": "2018-08-01T05:36:31Z",
+      "metric": 2624,
+      "name": "Stephen Cortez",
+      "power": 4.9856,
+      "success": true
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "ZOEOUGkBxhhfVX4mK8af",
+    "index": "sales",
+    "source": {
+      "@date": "2018-07-20T19:51:31Z",
+      "metric": 7632,
+      "name": "Florinda Alejandro",
+      "power": -1,
+      "success": false
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "ZeEOUGkBxhhfVX4mK8af",
+    "index": "sales",
+    "source": {
+      "@date": "2018-07-09T10:06:31Z",
+      "metric": 8088,
+      "name": "Florinda Alejandro",
+      "power": -1,
+      "success": false
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "ZuEOUGkBxhhfVX4mK8af",
+    "index": "sales",
+    "source": {
+      "@date": "2018-06-28T00:21:31Z",
+      "metric": 9509,
+      "name": "Suzie-May Rishel",
+      "power": 20.9198,
+      "success": true
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "Z-EOUGkBxhhfVX4mK8af",
+    "index": "sales",
+    "source": {
+      "@date": "2018-06-16T14:36:31Z",
+      "metric": 6438,
+      "name": "Jonelle-Jane Marth",
+      "power": 14.8074,
+      "success": true
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "aOEOUGkBxhhfVX4mK8af",
+    "index": "sales",
+    "source": {
+      "@date": "2018-06-05T04:51:31Z",
+      "metric": 8836,
+      "name": "Florinda Alejandro",
+      "power": -1,
+      "success": false
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "aeEOUGkBxhhfVX4mK8af",
+    "index": "sales",
+    "source": {
+      "@date": "2018-05-24T19:06:31Z",
+      "metric": 4641,
+      "name": "Suzie-May Rishel",
+      "power": -1,
+      "success": false
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "auEOUGkBxhhfVX4mK8af",
+    "index": "sales",
+    "source": {
+      "@date": "2018-05-13T09:21:31Z",
+      "metric": 8542,
+      "name": "Florinda Alejandro",
+      "power": 22.2092,
+      "success": true
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "a-EOUGkBxhhfVX4mK8af",
+    "index": "sales",
+    "source": {
+      "@date": "2018-05-01T23:36:31Z",
+      "metric": 9376,
+      "name": "Bernardo Binion-Schwartz",
+      "power": -1,
+      "success": false
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "bOEOUGkBxhhfVX4mK8af",
+    "index": "sales",
+    "source": {
+      "@date": "2018-04-20T13:51:31Z",
+      "metric": 1003,
+      "name": "Rosana Casto",
+      "power": 2.8084,
+      "success": true
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "beEOUGkBxhhfVX4mK8af",
+    "index": "sales",
+    "source": {
+      "@date": "2018-04-09T04:06:31Z",
+      "metric": 7443,
+      "name": "Florinda Alejandro",
+      "power": -1,
+      "success": false
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "buEOUGkBxhhfVX4mK8af",
+    "index": "sales",
+    "source": {
+      "@date": "2018-03-28T18:21:31Z",
+      "metric": 2052,
+      "name": "Jonelle-Jane Marth",
+      "power": 6.156,
+      "success": true
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "b-EOUGkBxhhfVX4mK8af",
+    "index": "sales",
+    "source": {
+      "@date": "2018-03-17T08:36:31Z",
+      "metric": 6367,
+      "name": "Suzie-May Rishel",
+      "power": 19.7377,
+      "success": true
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "cOEOUGkBxhhfVX4mK8af",
+    "index": "sales",
+    "source": {
+      "@date": "2018-03-05T22:51:31Z",
+      "metric": 6620,
+      "name": "Jonelle-Jane Marth",
+      "power": -1,
+      "success": false
+    }
+  }
+}

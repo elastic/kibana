@@ -1,7 +1,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "type": "doc",
     "id": "index-pattern:logstash-*",
     "source": {
@@ -22,7 +22,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "type": "doc",
     "id": "visualization:75c3e060-1e7c-11e9-8488-65449e65d0ed",
     "source": {
@@ -45,7 +45,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "type": "doc",
     "id": "dashboard:i-exist",
     "source": {
@@ -70,7 +70,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "type": "doc",
     "id": "config:6.0.0",
     "source": {
@@ -87,19 +87,19 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "type": "doc",
     "id": "map:0b849ed0-70f5-11e9-8625-9580c4904684",
     "source": {
       "map": {
-        "title" : "just a map",
-        "description" : "",
-        "mapStateJSON" : "{\"zoom\":0.8,\"center\":{\"lon\":0,\"lat\":0},\"timeFilters\":{\"from\":\"now-15m\",\"to\":\"now\"},\"refreshConfig\":{\"isPaused\":false,\"interval\":0},\"query\":{\"query\":\"\",\"language\":\"kuery\"}}",
-        "layerListJSON" : "[{\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"id\":\"c7bdee60-5267-459e-83d6-b53acf1b9e67\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"alpha\":1,\"visible\":true,\"applyGlobalQuery\":true,\"style\":{\"type\":\"TILE\",\"properties\":{}},\"type\":\"TILE\"}]",
-        "uiStateJSON" : "{\"isLayerTOCOpen\":true}",
-        "bounds" : {
-          "type" : "polygon",
-          "coordinates" : [
+        "title": "just a map",
+        "description": "",
+        "mapStateJSON": "{\"zoom\":0.8,\"center\":{\"lon\":0,\"lat\":0},\"timeFilters\":{\"from\":\"now-15m\",\"to\":\"now\"},\"refreshConfig\":{\"isPaused\":false,\"interval\":0},\"query\":{\"query\":\"\",\"language\":\"kuery\"}}",
+        "layerListJSON": "[{\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"id\":\"c7bdee60-5267-459e-83d6-b53acf1b9e67\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"alpha\":1,\"visible\":true,\"applyGlobalQuery\":true,\"style\":{\"type\":\"TILE\",\"properties\":{}},\"type\":\"TILE\"}]",
+        "uiStateJSON": "{\"isLayerTOCOpen\":true}",
+        "bounds": {
+          "type": "polygon",
+          "coordinates": [
             [
               [
                 -180,
@@ -126,11 +126,11 @@
         }
       },
       "type": "map",
-      "references" : [ ],
-      "migrationVersion" : {
-        "map" : "7.1.0"
+      "references": [],
+      "migrationVersion": {
+        "map": "7.1.0"
       },
-      "updated_at" : "2019-05-07T18:22:17.405Z"
+      "updated_at": "2019-05-07T18:22:17.405Z"
     }
   }
 }
@@ -138,34 +138,34 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "type": "doc",
     "id": "dashboard:1c1a87f0-70f5-11e9-8625-9580c4904684",
     "source": {
       "dashboard": {
-        "title" : "dashboard with map",
-        "hits" : 0,
-        "description" : "",
-        "panelsJSON" : "[{\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"1\"},\"version\":\"8.0.0\",\"panelIndex\":\"1\",\"embeddableConfig\":{\"mapCenter\":{\"lat\":0,\"lon\":0,\"zoom\":0.8},\"isLayerTOCOpen\":true},\"panelRefName\":\"panel_0\"}]",
-        "optionsJSON" : "{\"useMargins\":true,\"hidePanelTitles\":false}",
-        "version" : 1,
-        "timeRestore" : false,
-        "kibanaSavedObjectMeta" : {
-          "searchSourceJSON" : "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        "title": "dashboard with map",
+        "hits": 0,
+        "description": "",
+        "panelsJSON": "[{\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"1\"},\"version\":\"8.0.0\",\"panelIndex\":\"1\",\"embeddableConfig\":{\"mapCenter\":{\"lat\":0,\"lon\":0,\"zoom\":0.8},\"isLayerTOCOpen\":true},\"panelRefName\":\"panel_0\"}]",
+        "optionsJSON": "{\"useMargins\":true,\"hidePanelTitles\":false}",
+        "version": 1,
+        "timeRestore": false,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
         }
       },
       "type": "dashboard",
-      "references" : [
+      "references": [
         {
-          "name" : "panel_0",
-          "type" : "map",
-          "id" : "0b849ed0-70f5-11e9-8625-9580c4904684"
+          "name": "panel_0",
+          "type": "map",
+          "id": "0b849ed0-70f5-11e9-8625-9580c4904684"
         }
       ],
-      "migrationVersion" : {
-        "dashboard" : "7.0.0"
+      "migrationVersion": {
+        "dashboard": "7.0.0"
       },
-      "updated_at" : "2019-05-07T18:22:45.231Z"
+      "updated_at": "2019-05-07T18:22:45.231Z"
     }
   }
 }
@@ -173,7 +173,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "type": "doc",
     "id": "query:OKJpgs",
     "source": {
@@ -184,7 +184,33 @@
           "query": "response:200",
           "language": "kuery"
         },
-        "filters": [{"meta":{"index":"b15b1d40-a8bb-11e9-98cf-2bb06ef63e0b","alias":null,"negate":false,"type":"phrase","key":"extension.raw","value":"jpg","params":{"query":"jpg"},"disabled":false},"query":{"match":{"extension.raw":{"query":"jpg","type":"phrase"}}},"$state":{"store":"appState"}}]
+        "filters": [
+          {
+            "meta": {
+              "index": "b15b1d40-a8bb-11e9-98cf-2bb06ef63e0b",
+              "alias": null,
+              "negate": false,
+              "type": "phrase",
+              "key": "extension.raw",
+              "value": "jpg",
+              "params": {
+                "query": "jpg"
+              },
+              "disabled": false
+            },
+            "query": {
+              "match": {
+                "extension.raw": {
+                  "query": "jpg",
+                  "type": "phrase"
+                }
+              }
+            },
+            "$state": {
+              "store": "appState"
+            }
+          }
+        ]
       },
       "type": "query",
       "updated_at": "2019-07-17T17:54:26.378Z"

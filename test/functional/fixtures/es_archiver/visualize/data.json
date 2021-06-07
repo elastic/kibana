@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:logstash-*",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "index-pattern": {
         "fieldFormatMap": "{\"bytes\":{\"id\":\"bytes\"}}",
@@ -20,7 +20,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:logstash*",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "index-pattern": {
         "fieldFormatMap": "{\"bytes\":{\"id\":\"bytes\"}}",
@@ -36,7 +36,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:long-window-logstash-*",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "index-pattern": {
         "fieldFormatMap": "{\"bytes\":{\"id\":\"bytes\"}}",
@@ -53,7 +53,7 @@
   "type": "doc",
   "value": {
     "id": "visualization:Shared-Item-Visualization-AreaChart",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "type": "visualization",
       "visualization": {
@@ -74,7 +74,7 @@
   "type": "doc",
   "value": {
     "id": "visualization:Visualization-AreaChart",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "type": "visualization",
       "visualization": {
@@ -95,35 +95,35 @@
   "type": "doc",
   "value": {
     "id": "visualization:68305470-87bc-11e9-a991-3b492a7c3e09",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
-      "visualization" : {
-        "title" : "chained input control",
-        "visState" : "{\"title\":\"chained input control\",\"type\":\"input_control_vis\",\"params\":{\"controls\":[{\"id\":\"1559757816862\",\"fieldName\":\"geo.src\",\"parent\":\"\",\"label\":\"\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"dynamicOptions\":true,\"size\":5,\"order\":\"desc\"},\"indexPatternRefName\":\"control_0_index_pattern\"},{\"id\":\"1559757836347\",\"fieldName\":\"clientip\",\"parent\":\"1559757816862\",\"label\":\"\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"dynamicOptions\":true,\"size\":5,\"order\":\"desc\"},\"indexPatternRefName\":\"control_1_index_pattern\"}],\"updateFiltersOnChange\":false,\"useTimeFilter\":false,\"pinFilters\":false},\"aggs\":[]}",
-        "uiStateJSON" : "{}",
-        "description" : "",
-        "version" : 1,
-        "kibanaSavedObjectMeta" : {
-          "searchSourceJSON" : "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+      "visualization": {
+        "title": "chained input control",
+        "visState": "{\"title\":\"chained input control\",\"type\":\"input_control_vis\",\"params\":{\"controls\":[{\"id\":\"1559757816862\",\"fieldName\":\"geo.src\",\"parent\":\"\",\"label\":\"\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"dynamicOptions\":true,\"size\":5,\"order\":\"desc\"},\"indexPatternRefName\":\"control_0_index_pattern\"},{\"id\":\"1559757836347\",\"fieldName\":\"clientip\",\"parent\":\"1559757816862\",\"label\":\"\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"dynamicOptions\":true,\"size\":5,\"order\":\"desc\"},\"indexPatternRefName\":\"control_1_index_pattern\"}],\"updateFiltersOnChange\":false,\"useTimeFilter\":false,\"pinFilters\":false},\"aggs\":[]}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
         }
       },
-      "type" : "visualization",
-      "references" : [
+      "type": "visualization",
+      "references": [
         {
-          "name" : "control_0_index_pattern",
-          "type" : "index-pattern",
-          "id" : "logstash-*"
+          "name": "control_0_index_pattern",
+          "type": "index-pattern",
+          "id": "logstash-*"
         },
         {
-          "name" : "control_1_index_pattern",
-          "type" : "index-pattern",
-          "id" : "logstash-*"
+          "name": "control_1_index_pattern",
+          "type": "index-pattern",
+          "id": "logstash-*"
         }
       ],
-      "migrationVersion" : {
-        "visualization" : "7.3.0"
+      "migrationVersion": {
+        "visualization": "7.3.0"
       },
-      "updated_at" : "2019-06-05T18:04:48.310Z"
+      "updated_at": "2019-06-05T18:04:48.310Z"
     }
   }
 }
@@ -132,30 +132,30 @@
   "type": "doc",
   "value": {
     "id": "visualization:64983230-87bf-11e9-a991-3b492a7c3e09",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
-      "visualization" : {
-        "title" : "dynamic options input control",
-        "visState" : "{\"title\":\"dynamic options input control\",\"type\":\"input_control_vis\",\"params\":{\"controls\":[{\"id\":\"1559759127876\",\"fieldName\":\"geo.src\",\"parent\":\"\",\"label\":\"\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"dynamicOptions\":true,\"size\":5,\"order\":\"desc\"},\"indexPatternRefName\":\"control_0_index_pattern\"}],\"updateFiltersOnChange\":false,\"useTimeFilter\":false,\"pinFilters\":false},\"aggs\":[]}",
-        "uiStateJSON" : "{}",
-        "description" : "",
-        "version" : 1,
-        "kibanaSavedObjectMeta" : {
-          "searchSourceJSON" : "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+      "visualization": {
+        "title": "dynamic options input control",
+        "visState": "{\"title\":\"dynamic options input control\",\"type\":\"input_control_vis\",\"params\":{\"controls\":[{\"id\":\"1559759127876\",\"fieldName\":\"geo.src\",\"parent\":\"\",\"label\":\"\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"dynamicOptions\":true,\"size\":5,\"order\":\"desc\"},\"indexPatternRefName\":\"control_0_index_pattern\"}],\"updateFiltersOnChange\":false,\"useTimeFilter\":false,\"pinFilters\":false},\"aggs\":[]}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
         }
       },
-      "type" : "visualization",
-      "references" : [
+      "type": "visualization",
+      "references": [
         {
-          "name" : "control_0_index_pattern",
-          "type" : "index-pattern",
-          "id" : "logstash-*"
+          "name": "control_0_index_pattern",
+          "type": "index-pattern",
+          "id": "logstash-*"
         }
       ],
-      "migrationVersion" : {
-        "visualization" : "7.3.0"
+      "migrationVersion": {
+        "visualization": "7.3.0"
       },
-      "updated_at" : "2019-06-05T18:26:10.771Z"
+      "updated_at": "2019-06-05T18:26:10.771Z"
     }
   }
 }
@@ -164,35 +164,35 @@
   "type": "doc",
   "value": {
     "id": "visualization:5d2de430-87c0-11e9-a991-3b492a7c3e09",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
-      "visualization" : {
-        "title" : "chained input control with dynamic options",
-        "visState" : "{\"title\":\"chained input control with dynamic options\",\"type\":\"input_control_vis\",\"params\":{\"controls\":[{\"id\":\"1559759550755\",\"fieldName\":\"machine.os.raw\",\"parent\":\"\",\"label\":\"\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"dynamicOptions\":true,\"size\":5,\"order\":\"desc\"},\"indexPatternRefName\":\"control_0_index_pattern\"},{\"id\":\"1559759557302\",\"fieldName\":\"geo.src\",\"parent\":\"1559759550755\",\"label\":\"\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"dynamicOptions\":true,\"size\":5,\"order\":\"desc\"},\"indexPatternRefName\":\"control_1_index_pattern\"}],\"updateFiltersOnChange\":false,\"useTimeFilter\":false,\"pinFilters\":false},\"aggs\":[]}",
-        "uiStateJSON" : "{}",
-        "description" : "",
-        "version" : 1,
-        "kibanaSavedObjectMeta" : {
-          "searchSourceJSON" : "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+      "visualization": {
+        "title": "chained input control with dynamic options",
+        "visState": "{\"title\":\"chained input control with dynamic options\",\"type\":\"input_control_vis\",\"params\":{\"controls\":[{\"id\":\"1559759550755\",\"fieldName\":\"machine.os.raw\",\"parent\":\"\",\"label\":\"\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"dynamicOptions\":true,\"size\":5,\"order\":\"desc\"},\"indexPatternRefName\":\"control_0_index_pattern\"},{\"id\":\"1559759557302\",\"fieldName\":\"geo.src\",\"parent\":\"1559759550755\",\"label\":\"\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"dynamicOptions\":true,\"size\":5,\"order\":\"desc\"},\"indexPatternRefName\":\"control_1_index_pattern\"}],\"updateFiltersOnChange\":false,\"useTimeFilter\":false,\"pinFilters\":false},\"aggs\":[]}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
         }
       },
-      "type" : "visualization",
-      "references" : [
+      "type": "visualization",
+      "references": [
         {
-          "name" : "control_0_index_pattern",
-          "type" : "index-pattern",
-          "id" : "logstash-*"
+          "name": "control_0_index_pattern",
+          "type": "index-pattern",
+          "id": "logstash-*"
         },
         {
-          "name" : "control_1_index_pattern",
-          "type" : "index-pattern",
-          "id" : "logstash-*"
+          "name": "control_1_index_pattern",
+          "type": "index-pattern",
+          "id": "logstash-*"
         }
       ],
-      "migrationVersion" : {
-        "visualization" : "7.3.0"
+      "migrationVersion": {
+        "visualization": "7.3.0"
       },
-      "updated_at" : "2019-06-05T18:33:07.827Z"
+      "updated_at": "2019-06-05T18:33:07.827Z"
     }
   }
 }
@@ -201,7 +201,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:test_index*",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "index-pattern": {
         "fields": "[{\"name\":\"_id\",\"type\":\"string\",\"esTypes\":[\"_id\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"esTypes\":[\"_index\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"esTypes\":[\"_source\"],\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"esTypes\":[\"_type\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"message\",\"type\":\"string\",\"esTypes\":[\"text\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"message.keyword\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"message\"}}},{\"name\":\"user\",\"type\":\"string\",\"esTypes\":[\"text\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"user.keyword\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"user\"}}}]",
@@ -216,7 +216,7 @@
   "type": "doc",
   "value": {
     "id": "visualization:AreaChart-no-date-field",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "type": "visualization",
       "visualization": {
@@ -228,7 +228,7 @@
         "uiStateJSON": "{}",
         "version": 1,
         "visState": "{\"title\":\"AreaChart [no date field]\",\"type\":\"area\",\"params\":{\"type\":\"area\",\"addTooltip\":true,\"addLegend\":true,\"times\":[],\"addTimeMarker\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}}]}"
-        }
+      }
     }
   }
 }
@@ -237,7 +237,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:log*",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "index-pattern": {
         "fieldFormatMap": "{\"bytes\":{\"id\":\"bytes\"}}",
@@ -253,7 +253,7 @@
   "type": "doc",
   "value": {
     "id": "visualization:AreaChart-no-time-filter",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "type": "visualization",
       "visualization": {
@@ -265,7 +265,7 @@
         "uiStateJSON": "{}",
         "version": 1,
         "visState": "{\"title\":\"AreaChart [no time filter]\",\"type\":\"area\",\"params\":{\"type\":\"area\",\"addTooltip\":true,\"addLegend\":true,\"times\":[],\"addTimeMarker\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}}]}"
-        }
+      }
     }
   }
 }
@@ -274,7 +274,7 @@
   "type": "doc",
   "value": {
     "id": "visualization:VegaMap",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "type": "visualization",
       "visualization": {

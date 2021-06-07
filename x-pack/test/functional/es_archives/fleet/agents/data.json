@@ -68,11 +68,11 @@
     "id": "ed22ca17-e178-4cfe-8b02-54ea29fbd6d0",
     "index": ".fleet-enrollment-api-keys",
     "source": {
-      "created_at" : "2019-10-10T16:31:12.518Z",
+      "created_at": "2019-10-10T16:31:12.518Z",
       "name": "FleetEnrollmentKey:1",
-      "api_key_id" : "key",
-      "policy_id" : "policy1",
-      "active" : true
+      "api_key_id": "key",
+      "policy_id": "policy1",
+      "active": true
     }
   }
 }
@@ -81,7 +81,7 @@
   "type": "doc",
   "value": {
     "id": "fleet-agent-actions:b400439c-bbbf-43d5-83cb-cf8b7e32506f",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "type": "fleet-agent-actions",
       "fleet-agent-actions": {
@@ -98,7 +98,7 @@
   "type": "doc",
   "value": {
     "id": "fleet-agent-actions:48cebde1-c906-4893-b89f-595d943b72a1",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "type": "fleet-agent-actions",
       "fleet-agent-actions": {
@@ -115,7 +115,7 @@
   "type": "doc",
   "value": {
     "id": "fleet-agent-actions:48cebde1-c906-4893-b89f-595d943b72a2",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "type": "fleet-agent-actions",
       "fleet-agent-actions": {
@@ -132,7 +132,7 @@
   "type": "doc",
   "value": {
     "id": "ingest-agent-policies:policy1",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "type": "ingest-agent-policies",
       "ingest-agent-policies": {
@@ -161,7 +161,7 @@
   "type": "doc",
   "value": {
     "id": "ingest-agent-policies:policy2",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "type": "ingest-agent-policies",
       "ingest-agent-policies": {

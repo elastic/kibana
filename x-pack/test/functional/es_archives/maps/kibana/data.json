@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "space:default",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "space": {
         "description": "This is the default space!",
@@ -17,7 +17,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:c698b940-e149-11e8-a35a-370a8516603a",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "index-pattern": {
         "fields" : "[{\"name\":\"hour_of_day\",\"type\":\"number\",\"count\":0,\"scripted\":true,\"script\":\"doc['@timestamp'].value.getHour()\",\"lang\":\"painless\",\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false}]",
@@ -33,7 +33,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:561253e0-f731-11e8-8487-11b9dd924f96",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "index-pattern": {
         "fields" : "[]",
@@ -48,7 +48,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:e20b2a30-f735-11e8-8ce0-9723965e01e3",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "index-pattern": {
         "runtimeFieldMap" : "{\"runtime_shape_name\":{\"type\":\"keyword\",\"script\":{\"source\":\"emit(doc['shape_name'].value)\"}}}",
@@ -64,7 +64,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:1035e930-1811-11e9-b78a-23d706cd2507",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "index-pattern": {
         "fields" : "[]",
@@ -79,7 +79,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:502886a0-18f8-11e9-97c8-5da5e037299c",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "index-pattern": {
         "fields" : "[]",
@@ -94,7 +94,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:f7fc94a0-936b-11e9-a43f-eb6ee3467b2b",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "index-pattern" : {
         "fields" : "[]",
@@ -114,7 +114,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:dedd3180-c8d8-11e9-b36c-81f9f9da524f",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "index-pattern" : {
         "fields" : "[]",
@@ -134,7 +134,7 @@
   "type": "doc",
   "value": {
     "id": "map:d2e73f40-e14a-11e8-a35a-370a8516603a",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "map": {
         "bounds": {
@@ -165,7 +165,7 @@
   "type": "doc",
   "value": {
     "id": "map:8eabdab0-144f-11e9-809f-ad25bb78262c",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "map": {
         "bounds": {
@@ -196,7 +196,7 @@
   "type": "doc",
   "value": {
     "id": "map:7f047b80-b93b-11e9-b146-7d043e1b0586",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "map": {
         "bounds": {
@@ -228,7 +228,7 @@
   "type": "doc",
   "value": {
     "id": "map:68305470-87bc-11e9-a991-3b492a7c3e09",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "map": {
         "title" : "document example top hits",
@@ -283,7 +283,7 @@
   "type": "doc",
   "value": {
     "id": "map:4ea1e4f0-4dba-11ea-b554-4ba0def79f86",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "map": {
         "title" : "document example top hits split with scripted field",
@@ -339,7 +339,7 @@
   "type": "doc",
   "value": {
     "id": "map:c9734720-eb7f-11e9-8f42-fb14e91ef4b8",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "map": {
         "title" : "document example with data driven styles",
@@ -395,7 +395,7 @@
   "type": "doc",
   "value": {
     "id": "map:c9277dd0-eb8f-11e9-ae47-693d6a50fb9e",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "map": {
         "title" : "document example with data driven styles on date field",
@@ -451,7 +451,7 @@
   "type": "doc",
   "value": {
     "id": "map:2de4de10-cc82-11ea-9b0a-eb2886fc84af",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "map": {
         "title" : "document example hidden",
@@ -482,7 +482,7 @@
   "type": "doc",
   "value": {
     "id": "map:1649cc70-f736-11e8-8ce0-9723965e01e3",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "map": {
         "bounds": {
@@ -528,7 +528,7 @@
   "type": "doc",
   "value": {
     "id": "map:60a3c850-03ae-11e9-83d4-5b39b6575325",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "map": {
         "bounds": {
@@ -558,7 +558,7 @@
   "type": "doc",
   "value": {
     "id": "map:88845ec0-03ae-11e9-83d4-5b39b6575325",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "map": {
         "bounds": {
@@ -589,7 +589,7 @@
   "type": "doc",
   "value": {
     "id": "map:0c86d024-a767-11ea-bb37-0242ac130002",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "map": {
         "bounds": {
@@ -620,7 +620,7 @@
   "type": "doc",
   "value": {
     "id": "map:78116c8c-fd2a-11ea-adc1-0242ac120002",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "map": {
         "bounds": {
@@ -651,7 +651,7 @@
   "type": "doc",
   "value": {
     "id": "map:346fbec0-1811-11e9-b78a-23d706cd2507",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "map": {
         "bounds": {
@@ -696,7 +696,7 @@
   "type": "doc",
   "value": {
     "id": "map:6a6ff930-18f8-11e9-97c8-5da5e037299c",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "map": {
         "bounds": {
@@ -741,7 +741,7 @@
   "type": "doc",
   "value": {
     "id": "map:745c98b0-23e1-11e9-a048-6fef5a3e0d1e",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "map": {
         "bounds": {
@@ -786,7 +786,7 @@
   "type": "doc",
   "value": {
     "id": "map:62914770-936c-11e9-a43f-eb6ee3467b2b",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "map": {
         "title" : "vector styling icon demo",
@@ -842,7 +842,7 @@
   "type": "doc",
   "value": {
     "id": "map:4cd3e220-bf64-11e9-bbcc-7db09a1519e9",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "map": {
         "title" : "join and dynamic coloring demo",
@@ -903,7 +903,7 @@
   "type": "doc",
   "value": {
     "id": "map:3c9949f0-c8dc-11e9-9ea1-8b2710d4a86b",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "map" : {
         "title" : "pew pew demo",
@@ -959,7 +959,7 @@
   "type": "doc",
   "value": {
     "id": "map:279e1f20-6883-11ea-952a-b102add99cf8",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "map" : {
         "title" : "blended document example",
@@ -1015,7 +1015,7 @@
   "type": "doc",
   "value": {
     "id": "map:13776f20-db37-11ea-8fbb-3da39bb9bff2",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "map" : {
         "title" : "document example - auto fit to bounds for initial location",
@@ -1044,7 +1044,7 @@
   "type": "doc",
   "value": {
     "id": "map:bff99716-e3dc-11ea-87d0-0242ac130003",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "map" : {
         "description":"shapes with mvt scaling",
@@ -1078,7 +1078,7 @@
   "type": "doc",
   "value": {
     "id": "dashboard:19906970-2e40-11e9-85cb-6965aae20f13",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "dashboard": {
         "description": "",
@@ -1108,7 +1108,7 @@
   "type": "doc",
   "value": {
     "id": "dashboard:03c7cbf0-8eae-11e9-b674-69d1999628e4",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "dashboard": {
         "title" : "dash for tooltip filter action test",
@@ -1153,7 +1153,7 @@
   "type": "doc",
   "value": {
     "id": "dashboard:42f6f040-b34f-11eb-8c95-dd19591c63df",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "dashboard": {
         "title" : "filter by map extent dashboard",
@@ -1203,7 +1203,7 @@
   "type": "doc",
   "value": {
     "id": "dashboard:4beb0d80-c2ef-11eb-b0cb-bd162d969e6b",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "dashboard": {
         "title" : "by value map",
@@ -1230,7 +1230,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "id": "query:OKJpgs",
     "source": {
       "query": {

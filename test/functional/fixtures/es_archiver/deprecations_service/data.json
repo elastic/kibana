@@ -1,7 +1,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "id": "test-deprecations-plugin:ff3733a0-9fty-11e7-ahb3-3dcb94193fab",
     "source": {
       "type": "test-deprecations-plugin",

@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "space:default",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "space": {
         "_reserved": true,
@@ -20,7 +20,7 @@
   "type": "doc",
   "value": {
     "id": "tag:tag-1",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "tag": {
         "name": "tag-1",
@@ -38,7 +38,7 @@
   "type": "doc",
   "value": {
     "id": "tag:tag-2",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "tag": {
         "name": "tag-2",
@@ -56,7 +56,7 @@
   "type": "doc",
   "value": {
     "id": "tag:tag-3",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "tag": {
         "name": "tag-3",
@@ -74,7 +74,7 @@
   "type": "doc",
   "value": {
     "id": "tag:tag-4",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "tag": {
         "name": "tag-4",
@@ -92,7 +92,7 @@
   "type": "doc",
   "value": {
     "id": "tag:unused-tag",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "tag": {
         "name": "unused-tag",
@@ -109,7 +109,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "id": "visualization:ref-to-tag-1",
     "source": {
       "type": "visualization",
@@ -138,7 +138,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "id": "visualization:ref-to-tag-1-and-tag-3",
     "source": {
       "type": "visualization",
@@ -172,7 +172,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "id": "visualization:ref-to-tag-3",
     "source": {
       "type": "visualization",
@@ -202,7 +202,7 @@
   "type": "doc",
   "value": {
     "id": "dashboard:ref-to-tag-1-and-tag-2",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "dashboard": {
         "title": "dashboard 1 (tag-2)",
@@ -243,7 +243,7 @@
   "type": "doc",
   "value": {
     "id": "dashboard:ref-to-tag-2-and-tag-4",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "dashboard": {
         "title": "dashboard 2 (tag-2 and tag-4)",
@@ -284,7 +284,7 @@
   "type": "doc",
   "value": {
     "id": "dashboard:no-tag-reference",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "dashboard": {
         "title": "dashboard 2 (tag-2 and tag-4)",

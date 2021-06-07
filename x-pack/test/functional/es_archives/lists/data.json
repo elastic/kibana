@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "exception-list-agnostic:1",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "type": "exception-list-agnostic",
       "exception-list-agnostic": {
@@ -34,7 +34,7 @@
   "type": "doc",
   "value": {
     "id": "exception-list-agnostic:2",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "type": "exception-list-agnostic",
       "exception-list-agnostic": {

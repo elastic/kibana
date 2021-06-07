@@ -1,7 +1,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "type": "doc",
     "id": "test-export-transform:type_1-obj_1",
     "source": {
@@ -31,7 +31,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "type": "doc",
     "id": "test-export-transform:type_1-obj_2",
     "source": {
@@ -49,7 +49,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "type": "doc",
     "id": "test-export-add:type_2-obj_1",
     "source": {
@@ -66,7 +66,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "type": "doc",
     "id": "test-export-add-dep:type_dep-obj_1",
     "source": {

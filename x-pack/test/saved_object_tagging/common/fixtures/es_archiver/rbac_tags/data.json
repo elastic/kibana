@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "space:default",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "space": {
         "_reserved": true,
@@ -20,7 +20,7 @@
   "type": "doc",
   "value": {
     "id": "space:space_1",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "space": {
         "description": "This is the first test space",
@@ -37,7 +37,7 @@
   "type": "doc",
   "value": {
     "id": "space:space_2",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "space": {
         "description": "This is the second test space",
@@ -54,7 +54,7 @@
   "type": "doc",
   "value": {
     "id": "tag:default-space-tag-1",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "tag": {
         "name": "tag-1",
@@ -72,7 +72,7 @@
   "type": "doc",
   "value": {
     "id": "tag:default-space-tag-2",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "tag": {
         "name": "tag-2",
@@ -90,7 +90,7 @@
   "type": "doc",
   "value": {
     "id": "space_1:tag:space_1-tag-3",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "tag": {
         "name": "tag-3",

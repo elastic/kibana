@@ -7,13 +7,11 @@
       "migrationVersion": {
         "space": "6.6.0"
       },
-      "references": [
-      ],
+      "references": [],
       "space": {
         "_reserved": true,
         "description": "This is the default space!",
-        "disabledFeatures": [
-        ],
+        "disabledFeatures": [],
         "name": "Default"
       },
       "type": "space"
@@ -27,73 +25,73 @@
     "index": "metricbeat-7",
     "id": "asdf",
     "source": {
-      "@timestamp" : "2015-09-20T21:43:43.104Z",
-      "event" : {
-        "dataset" : "system.cpu",
-        "module" : "system",
-        "duration" : 34818
+      "@timestamp": "2015-09-20T21:43:43.104Z",
+      "event": {
+        "dataset": "system.cpu",
+        "module": "system",
+        "duration": 34818
       },
-      "metricset" : {
-        "name" : "cpu"
+      "metricset": {
+        "name": "cpu"
       },
-      "service" : {
-        "type" : "system"
+      "service": {
+        "type": "system"
       },
-      "system" : {
-        "cpu" : {
-          "system" : {
-            "pct" : 0.16
+      "system": {
+        "cpu": {
+          "system": {
+            "pct": 0.16
           },
-          "idle" : {
-            "pct" : 10.5088
+          "idle": {
+            "pct": 10.5088
           },
-          "irq" : {
-            "pct" : 0
+          "irq": {
+            "pct": 0
           },
-          "cores" : 12,
-          "total" : {
-            "pct" : 1.4912
+          "cores": 12,
+          "total": {
+            "pct": 1.4912
           },
-          "iowait" : {
-            "pct" : 0
+          "iowait": {
+            "pct": 0
           },
-          "softirq" : {
-            "pct" : 0
+          "softirq": {
+            "pct": 0
           },
-          "user" : {
-            "pct" : 1.3312
+          "user": {
+            "pct": 1.3312
           },
-          "nice" : {
-            "pct" : 0
+          "nice": {
+            "pct": 0
           },
-          "steal" : {
-            "pct" : 0
+          "steal": {
+            "pct": 0
           }
         }
       },
-      "ecs" : {
-        "version" : "1.0.1"
+      "ecs": {
+        "version": "1.0.1"
       },
-      "host" : {
-        "name" : "my-host-name.local",
-        "os" : {
-          "name" : "Mac OS X",
-          "kernel" : "",
-          "build" : "",
-          "platform" : "darwin",
-          "version" : "",
-          "family" : "darwin"
+      "host": {
+        "name": "my-host-name.local",
+        "os": {
+          "name": "Mac OS X",
+          "kernel": "",
+          "build": "",
+          "platform": "darwin",
+          "version": "",
+          "family": "darwin"
         },
-        "id" : "",
-        "hostname" : "my-host-name.local",
-        "architecture" : "x86_64"
+        "id": "",
+        "hostname": "my-host-name.local",
+        "architecture": "x86_64"
       },
-      "agent" : {
-        "id" : "aaaaa",
-        "version" : "7.6.0",
-        "type" : "metricbeat",
-        "ephemeral_id" : "bbbbb",
-        "hostname" : "my-host-name.local"
+      "agent": {
+        "id": "aaaaa",
+        "version": "7.6.0",
+        "type": "metricbeat",
+        "ephemeral_id": "bbbbb",
+        "hostname": "my-host-name.local"
       }
     }
   }
@@ -114,8 +112,7 @@
       "migrationVersion": {
         "index-pattern": "7.11.0"
       },
-      "references": [
-      ],
+      "references": [],
       "type": "index-pattern",
       "updated_at": "2020-01-22T15:34:59.061Z"
     }
@@ -125,7 +122,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "type": "doc",
     "id": "index-pattern:logstash-*",
     "index": ".kibana_1",
@@ -137,8 +134,7 @@
       "migrationVersion": {
         "index-pattern": "7.11.0"
       },
-      "references": [
-      ],
+      "references": [],
       "type": "index-pattern",
       "updated_at": "2018-12-21T00:43:07.096Z"
     }
@@ -148,7 +144,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_1",
     "type": "doc",
     "id": "index-pattern:logstash-2015.09.22",
     "index": ".kibana_1",
@@ -156,14 +152,13 @@
       "index-pattern": {
         "timeFieldName": "@timestamp",
         "title": "logstash-2015.09.22",
-        "fields":"[{\"name\":\"scripted_date\",\"type\":\"date\",\"count\":0,\"scripted\":true,\"script\":\"1234\",\"lang\":\"painless\",\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"scripted_string\",\"type\":\"string\",\"count\":0,\"scripted\":true,\"script\":\"return 'hello'\",\"lang\":\"painless\",\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false}]",
-        "runtimeFieldMap":"{\"runtime_string_field\":{\"type\":\"keyword\",\"script\":{\"source\":\"emit('hello world!')\"}}}"
+        "fields": "[{\"name\":\"scripted_date\",\"type\":\"date\",\"count\":0,\"scripted\":true,\"script\":\"1234\",\"lang\":\"painless\",\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"scripted_string\",\"type\":\"string\",\"count\":0,\"scripted\":true,\"script\":\"return 'hello'\",\"lang\":\"painless\",\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false}]",
+        "runtimeFieldMap": "{\"runtime_string_field\":{\"type\":\"keyword\",\"script\":{\"source\":\"emit('hello world!')\"}}}"
       },
       "migrationVersion": {
         "index-pattern": "7.11.0"
       },
-      "references": [
-      ],
+      "references": [],
       "type": "index-pattern",
       "updated_at": "2018-12-21T00:43:07.096Z"
     }
@@ -184,8 +179,7 @@
         "index-pattern": "7.11.0"
       },
       "namespace": "custom_space",
-      "references": [
-      ],
+      "references": [],
       "type": "index-pattern",
       "updated_at": "2018-12-21T00:43:07.096Z"
     }
@@ -298,8 +292,7 @@
         },
         "title": "OKJpgs"
       },
-      "references": [
-      ],
+      "references": [],
       "type": "query",
       "updated_at": "2019-07-17T17:54:26.378Z"
     }

@@ -1,0 +1,14 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "config:6.0.0-alpha1",
+    "index": ".kibana_1",
+    "source": {
+      "config": {
+        "buildNum": 8467,
+        "dateFormat:tz": "UTC"
+      },
+      "type": "config"
+    }
+  }
+}

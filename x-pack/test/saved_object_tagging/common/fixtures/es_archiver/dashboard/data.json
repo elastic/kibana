@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "space:default",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "space": {
         "_reserved": true,
@@ -20,7 +20,7 @@
   "type": "doc",
   "value": {
     "id": "tag:tag-1",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "tag": {
         "name": "tag-1",
@@ -38,7 +38,7 @@
   "type": "doc",
   "value": {
     "id": "tag:tag-2",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "tag": {
         "name": "tag-2",
@@ -56,7 +56,7 @@
   "type": "doc",
   "value": {
     "id": "tag:tag-3",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "tag": {
         "name": "tag-3",
@@ -74,7 +74,7 @@
   "type": "doc",
   "value": {
     "id": "config:6.3.0",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "config": {
         "buildNum": 8467,
@@ -92,7 +92,7 @@
   "type": "doc",
   "value": {
     "id": "dashboard:61c58ad0-3dd3-11e8-b2b9-5d5dc1715159",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "dashboard": {
         "title": "dashboard 4 with real data (tag-1)",
@@ -148,7 +148,7 @@
   "type": "doc",
   "value": {
     "id": "dashboard:ref-to-tag-2",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "dashboard": {
         "title": "dashboard 1 (tag-2)",
@@ -184,7 +184,7 @@
   "type": "doc",
   "value": {
     "id": "dashboard:ref-to-tag-3",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "dashboard": {
         "title": "dashboard 2 (tag-3)",
@@ -220,7 +220,7 @@
   "type": "doc",
   "value": {
     "id": "dashboard:ref-to-tag-1-and-tag-3",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "dashboard": {
         "title": "dashboard 3 (tag-1 and tag-3)",
@@ -261,7 +261,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:a0f483a0-3dc9-11e8-8660-4d65aa086b3c",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "index-pattern": {
         "fieldFormatMap": "{\"weightLbs\":{\"id\":\"number\",\"params\":{\"pattern\":\"0,0.0\"}},\"is_dog\":{\"id\":\"boolean\"},\"isDog\":{\"id\":\"boolean\"}}",
@@ -284,7 +284,7 @@
   "type": "doc",
   "value": {
     "id": "visualization:50643b60-3dd3-11e8-b2b9-5d5dc1715159",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "migrationVersion": {
         "visualization": "7.8.0"
@@ -316,7 +316,7 @@
   "type": "doc",
   "value": {
     "id": "search:a16d1990-3dca-11e8-8660-4d65aa086b3c",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "migrationVersion": {
         "search": "7.4.0"
