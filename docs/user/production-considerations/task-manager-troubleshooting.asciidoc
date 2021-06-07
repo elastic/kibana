@@ -850,7 +850,7 @@ For details on scaling Task Manager, see <<task-manager-scaling-guidance>>.
 
 Task Manager is constantly evaluating its runtime operations and workload. This enables Task Manager to make rough estimates about the sufficiency of its capacity.
 
-As the name suggests, these are estimates based on historical data and should not be used as predictions. These estimations should be evaluated along side the detailed <<task-manager-health-monitoring>> stats before making changes to infrastructure. These estimations assumes all {kib} instances are configured identically.
+As the name suggests, these are estimates based on historical data and should not be used as predictions. These estimations should be evaluated alongside the detailed <<task-manager-health-monitoring>> stats before making changes to infrastructure. These estimations assumes all {kib} instances are configured identically.
 
 We recommend using these estimations when following the Task Manager <<task-manager-scaling-guidance>>.
 
