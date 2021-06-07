@@ -630,7 +630,7 @@ Evaluating the preceding health stats, you see the following output under `stats
 <3> 8% of executed tasks are ephemeral tasks
 
 You can infer from these stats that the majority of executions consist of recurring tasks at 88%.
-You can use the `execution.persistence` stats to evaluate the ratio of consumed capacity, but on their own, you should not make assumptions about the sufficency of the availabe capacity.
+You can use the `execution.persistence` stats to evaluate the ratio of consumed capacity, but on their own, you should not make assumptions about the sufficiency of the available capacity.
 
 In order to assess the capacity, you should evaluate these stats against the `load` under `stats.runtime.value`:
 
@@ -681,7 +681,7 @@ Evaluate the `load` under `stats.runtime.value`, we see the following:
 You can infer from these stats that it is quite common for this {kib} instance to run out of capacity.
 Given the high rate of non-recurring and ephemeral tasks, it would be reasonable to assess that there is insufficient capacity in the {kib} cluster to handle the amount of tasks.
 
-It is important to keep in mind that these stats give you a glimpse at a moment in time, and even though there has been insufficient capacity in recent minutes, this might not be true in other times where fewer non-recurring or ephemeral tasks are used. We recommend tracking these stats over time and identifying the source of these tasks before making sweeping changes to your infrastruture.
+It is important to keep in mind that these stats give you a glimpse at a moment in time, and even though there has been insufficient capacity in recent minutes, this might not be true in other times where fewer non-recurring or ephemeral tasks are used. We recommend tracking these stats over time and identifying the source of these tasks before making sweeping changes to your infrastructure.
 
 [[task-manager-health-evaluate-the-workload]]
 ===== Evaluate the Workload
@@ -850,7 +850,7 @@ For details on scaling Task Manager, see <<task-manager-scaling-guidance>>.
 
 Task Manager is constantly evaluating its runtime operations and workload. This enables Task Manager to make rough estimates about the sufficiency of its capacity.
 
-As the name suggests, these are estimates based on historical data and should not be used as predictions. These estimations should be evaluated along side the detailed <<task-manager-health-monitoring>> stats before making changes to infrastructure. These estimations assumes all {kib} instances are configured identically.
+As the name suggests, these are estimates based on historical data and should not be used as predictions. These estimations should be evaluated alongside the detailed <<task-manager-health-monitoring>> stats before making changes to infrastructure. These estimations assumes all {kib} instances are configured identically.
 
 We recommend using these estimations when following the Task Manager <<task-manager-scaling-guidance>>.
 
@@ -930,7 +930,7 @@ Evaluating by these estimates, we can infer some interesting attributes of our s
 
 * These estimates are produced based on the assumption that there are two {kib} instances in the cluster. This number is based on the number of {kib} instances actively executing tasks in recent minutes. At times this number might fluctuate if {kib} instances remain idle, so validating these estimates against what you know about the system is recommended.
 * There appear to be so many overdue tasks that it would take 12 minutes of executions to catch up with that backlog. This does not take into account tasks that might become overdue during those 12 minutes, so while this congestion might be temporary, the system could also remain consistently under provisioned and might never drain the backlog entirely.
-* Evauating the recurring tasks in the workload the system requires a throughput of 354 tasks per minute on average to execute tasks on time, which is lower then the estimated maximum throughput of 400 tasks per minute. Once we take into account historical throughpout though, we estimate that the required throughput at 434 tasks per minute. This suggests that, historically, approximately 20% of tasks have been ad-hoc non-recurring tasks, the scale of which are harder to predict than recurring tasks.
+* Evaluating the recurring tasks in the workload the system requires a throughput of 354 tasks per minute on average to execute tasks on time, which is lower then the estimated maximum throughput of 400 tasks per minute. Once we take into account historical throughput though, we estimate that the required throughput at 434 tasks per minute. This suggests that, historically, approximately 20% of tasks have been ad-hoc non-recurring tasks, the scale of which are harder to predict than recurring tasks.
 
 You can infer from these estimates that the capacity in the current system is insufficient and at least one additional {kib} instance is required in order to keep up with the workload.
 
