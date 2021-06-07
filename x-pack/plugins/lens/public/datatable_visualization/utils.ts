@@ -12,45 +12,16 @@ function isValidNumber(value: unknown): boolean {
   return typeof value === 'number' || value == null;
 }
 
-/**
- * It checks the configuration and content of the current datatable
- * It returns an object with the following content:
- * * isNumeric: whether the field is numeric
- * * hasNumberValues: whether the table rows contain all values of type number (empty values are ignored)
- * * hasNumericValues: whether the table rows contain numeric compatible values (arrays with numbers are considered valid here, empty values are ignored)
- * @param currentData
- * @param accessor
- * @returns An object containing stats metadata retrieved from both configuration and current data
- */
 export function isNumericField(currentData: Datatable | undefined, accessor: string) {
   const isNumeric =
     currentData?.columns.find((col) => col.id === accessor || getOriginalId(col.id) === accessor)
       ?.meta.type === 'number';
 
-  // if the field type is not numeric, do not proceed any further
-  if (!isNumeric) {
-    return {
-      isNumeric,
-      hasNumberValues: false,
-      hasNumericValues: false,
-    };
-  }
-
-  let hasFieldOnlyNumberValues = isNumeric;
-  let hasFieldNumericValues = isNumeric;
-  for (const row of currentData?.rows || []) {
-    const value = row[accessor];
-    if (!hasFieldOnlyNumberValues) {
-      hasFieldOnlyNumberValues = hasFieldOnlyNumberValues && isValidNumber(value);
-      hasFieldNumericValues =
-        hasFieldNumericValues &&
-        (hasFieldOnlyNumberValues || (Array.isArray(value) && value.every(isValidNumber)));
-    }
-  }
-
-  return {
-    isNumeric,
-    hasNumberValues: hasFieldOnlyNumberValues,
-    hasNumericValues: hasFieldNumericValues,
-  };
+  return (
+    isNumeric &&
+    currentData?.rows.every((row) => {
+      const val = row[accessor];
+      return isValidNumber(val) || (Array.isArray(val) && val.every(isValidNumber));
+    })
+  );
 }

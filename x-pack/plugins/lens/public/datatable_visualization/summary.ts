@@ -19,9 +19,9 @@ export function getFinalSummaryConfiguration(
   columnArgs: Pick<ColumnConfigArg, 'summaryRow' | 'summaryLabel'> | undefined,
   table: Datatable | undefined
 ) {
-  const { hasNumericValues } = isNumericField(table, columnId);
+  const isNumeric = isNumericField(table, columnId);
 
-  const summaryRow = hasNumericValues ? columnArgs?.summaryRow || 'none' : 'none';
+  const summaryRow = isNumeric ? columnArgs?.summaryRow || 'none' : 'none';
   const summaryLabel = columnArgs?.summaryLabel ?? getDefaultSummaryLabel(summaryRow);
 
   return {
