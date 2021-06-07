@@ -19,12 +19,9 @@ describe('CrawlerLanding', () => {
   let wrapper: ShallowWrapper;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     setMockValues({ ...mockEngineValues });
     wrapper = shallow(<CrawlerLanding />);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
   });
 
   it('contains an external documentation link', () => {
