@@ -11,13 +11,29 @@ import React, { ReactNode } from 'react';
 import { SettingsTemplate } from './settings_template';
 import { createMemoryHistory } from 'history';
 import { MemoryRouter, RouteComponentProps } from 'react-router-dom';
+import { CoreStart } from 'kibana/public';
+import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
 
 const { location } = createMemoryHistory();
+
+const KibanaReactContext = createKibanaReactContext({
+  usageCollection: { reportUiCounter: () => {} },
+  observability: {
+    navigation: {
+      registerSections: () => jest.fn(),
+      PageTemplate: ({ children }: { children: React.ReactNode }) => (
+        <div>hello worlds {children}</div>
+      ),
+    },
+  },
+} as Partial<CoreStart>);
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
     <MemoryRouter>
-      <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
+      <KibanaReactContext.Provider>
+        <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
+      </KibanaReactContext.Provider>
     </MemoryRouter>
   );
 }
@@ -29,8 +45,8 @@ describe('Settings', () => {
     } as unknown) as RouteComponentProps<{}>;
     expect(() =>
       render(
-        <SettingsTemplate {...routerProps}>
-          <div />
+        <SettingsTemplate selectedTab="agent-configurations" {...routerProps}>
+          <div>hello world</div>
         </SettingsTemplate>,
         { wrapper: Wrapper }
       )

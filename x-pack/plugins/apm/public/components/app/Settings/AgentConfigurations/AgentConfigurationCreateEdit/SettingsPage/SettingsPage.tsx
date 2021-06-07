@@ -20,6 +20,7 @@ import {
   EuiStat,
   EuiText,
   EuiTitle,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
@@ -136,17 +137,7 @@ export function SettingsPage({
           }}
         >
           {/* Selected Service panel */}
-          <EuiPanel paddingSize="m">
-            <EuiTitle size="s">
-              <h3>
-                {i18n.translate('xpack.apm.agentConfig.chooseService.title', {
-                  defaultMessage: 'Choose service',
-                })}
-              </h3>
-            </EuiTitle>
-
-            <EuiSpacer size="m" />
-
+          <EuiPanel hasShadow={false} paddingSize="none">
             <EuiFlexGroup>
               <EuiFlexItem>
                 <EuiStat
@@ -187,10 +178,10 @@ export function SettingsPage({
             </EuiFlexGroup>
           </EuiPanel>
 
-          <EuiSpacer size="m" />
+          <EuiHorizontalRule />
 
           {/* Settings panel */}
-          <EuiPanel paddingSize="m">
+          <EuiPanel hasShadow={false} paddingSize="none">
             <EuiTitle size="s">
               <h3>
                 {i18n.translate('xpack.apm.agentConfig.settings.title', {

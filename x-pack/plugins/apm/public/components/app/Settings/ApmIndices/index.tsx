@@ -176,21 +176,25 @@ export function ApmIndices() {
 
   return (
     <>
-      <EuiTitle>
+      <EuiText color="subdued">
+        {i18n.translate('xpack.apm.settings.apmIndices.description', {
+          defaultMessage: `The APM UI uses index patterns to query your APM indices. If you've customized the index names that APM Server writes events to, you may need to update these patterns for the APM UI to work. Settings here take precedence over those set in kibana.yml.`,
+        })}
+      </EuiText>
+
+      <EuiSpacer size="m" />
+
+      <EuiTitle size="s">
         <h2>
           {i18n.translate('xpack.apm.settings.apmIndices.title', {
             defaultMessage: 'Indices',
           })}
         </h2>
       </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiText color="subdued">
-        {i18n.translate('xpack.apm.settings.apmIndices.description', {
-          defaultMessage: `The APM UI uses index patterns to query your APM indices. If you've customized the index names that APM Server writes events to, you may need to update these patterns for the APM UI to work. Settings here take precedence over those set in kibana.yml.`,
-        })}
-      </EuiText>
-      <EuiSpacer size="l" />
-      <EuiPanel>
+
+      <EuiSpacer size="m" />
+
+      <EuiPanel hasShadow={false} paddingSize="none">
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiForm>

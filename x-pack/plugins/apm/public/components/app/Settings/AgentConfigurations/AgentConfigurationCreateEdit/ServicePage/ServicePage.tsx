@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiTitle,
   EuiSpacer,
   EuiPanel,
   EuiFlexGroup,
@@ -100,17 +99,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
   );
 
   return (
-    <EuiPanel paddingSize="m">
-      <EuiTitle size="xs">
-        <h3>
-          {i18n.translate('xpack.apm.agentConfig.servicePage.title', {
-            defaultMessage: 'Choose service',
-          })}
-        </h3>
-      </EuiTitle>
-
-      <EuiSpacer size="m" />
-
+    <EuiPanel hasShadow={false} paddingSize="none">
       {/* Service name options */}
       <FormRowSelect
         title={i18n.translate(

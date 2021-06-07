@@ -81,18 +81,18 @@ export function AddEnvironments({
 
   const isLoading = status === FETCH_STATUS.LOADING;
   return (
-    <EuiPanel>
-      <EuiTitle>
+    <EuiPanel hasShadow={false} paddingSize="none">
+      <EuiTitle size="s">
         <h2>
           {i18n.translate(
             'xpack.apm.settings.anomalyDetection.addEnvironments.titleText',
-            {
-              defaultMessage: 'Select environments',
-            }
+            { defaultMessage: 'Select environments' }
           )}
         </h2>
       </EuiTitle>
+
       <EuiSpacer size="l" />
+
       <EuiText>
         {i18n.translate(
           'xpack.apm.settings.anomalyDetection.addEnvironments.descriptionText',

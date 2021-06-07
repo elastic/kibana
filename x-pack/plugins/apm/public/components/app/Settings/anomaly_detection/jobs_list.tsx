@@ -66,7 +66,28 @@ export function JobsList({ data, status, onAddEnvironments }: Props) {
   const { jobs, hasLegacyJobs } = data;
 
   return (
-    <EuiPanel>
+    <>
+      <EuiText color="subdued">
+        <FormattedMessage
+          id="xpack.apm.settings.anomalyDetection.jobList.mlDescriptionText"
+          defaultMessage="To add anomaly detection to a new environment, create a machine learning job. Existing machine learning jobs can be managed in {mlJobsLink}."
+          values={{
+            mlJobsLink: (
+              <MLManageJobsLink>
+                {i18n.translate(
+                  'xpack.apm.settings.anomalyDetection.jobList.mlDescriptionText.mlJobsLinkText',
+                  {
+                    defaultMessage: 'Machine Learning',
+                  }
+                )}
+              </MLManageJobsLink>
+            ),
+          }}
+        />
+      </EuiText>
+
+      <EuiSpacer size="m" />
+
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiTitle size="s">
@@ -91,34 +112,20 @@ export function JobsList({ data, status, onAddEnvironments }: Props) {
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiText size="s" color="subdued">
-        <FormattedMessage
-          id="xpack.apm.settings.anomalyDetection.jobList.mlDescriptionText"
-          defaultMessage="To add anomaly detection to a new environment, create a machine learning job. Existing machine learning jobs can be managed in {mlJobsLink}."
-          values={{
-            mlJobsLink: (
-              <MLManageJobsLink>
-                {i18n.translate(
-                  'xpack.apm.settings.anomalyDetection.jobList.mlDescriptionText.mlJobsLinkText',
-                  {
-                    defaultMessage: 'Machine Learning',
-                  }
-                )}
-              </MLManageJobsLink>
-            ),
-          }}
-        />
-      </EuiText>
-      <EuiSpacer size="l" />
-      <ManagedTable
-        noItemsMessage={getNoItemsMessage({ status })}
-        columns={columns}
-        items={jobs}
-      />
-      <EuiSpacer size="l" />
 
-      {hasLegacyJobs && <LegacyJobsCallout />}
-    </EuiPanel>
+      <EuiSpacer size="m" />
+
+      <EuiPanel hasShadow={false} paddingSize="none">
+        <ManagedTable
+          noItemsMessage={getNoItemsMessage({ status })}
+          columns={columns}
+          items={jobs}
+        />
+        <EuiSpacer size="l" />
+
+        {hasLegacyJobs && <LegacyJobsCallout />}
+      </EuiPanel>
+    </>
   );
 }
 
