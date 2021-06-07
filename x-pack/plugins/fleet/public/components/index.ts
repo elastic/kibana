@@ -15,6 +15,8 @@ export { AlphaFlyout } from './alpha_flyout';
 export { HeaderProps, Header } from './header';
 export { NewEnrollmentTokenModal } from './new_enrollment_key_modal';
 export { AgentPolicyPackageBadges } from './agent_policy_package_badges';
+export { DangerEuiContextMenuItem } from './danger_eui_context_menu_item';
+export { PackagePolicyDeleteProvider } from './package_policy_delete_provider';
 export * from './link_and_revision';
 export * from './settings_flyout';
 export * from './agent_enrollment_flyout';

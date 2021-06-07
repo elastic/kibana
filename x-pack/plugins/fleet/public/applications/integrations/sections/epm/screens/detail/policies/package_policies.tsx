@@ -21,7 +21,12 @@ import { FormattedRelative, FormattedMessage } from '@kbn/i18n/react';
 import styled from 'styled-components';
 
 import { InstallStatus } from '../../../../../types';
-import { useLink, useUrlPagination, useGetPackageInstallStatus } from '../../../../../hooks';
+import {
+  useLink,
+  useUrlPagination,
+  useGetPackageInstallStatus,
+  AgentPolicyRefreshContext,
+} from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
 import {
   AgentEnrollmentFlyout,
@@ -32,6 +37,7 @@ import {
 import type { PackagePolicyAndAgentPolicy } from './use_package_policies_with_agent_policy';
 import { usePackagePoliciesWithAgentPolicy } from './use_package_policies_with_agent_policy';
 import { Persona } from './persona';
+import { PackagePoliciesActionMenu } from './actions_menu';
 
 const AddAgentButton = styled(EuiButtonIcon)`
   margin-left: ${(props) => props.theme.eui.euiSizeS};
@@ -54,6 +60,7 @@ const IntegrationDetailsLink = memo<{
     </EuiLink>
   );
 });
+
 interface PackagePoliciesPanelProps {
   name: string;
   version: string;
@@ -64,7 +71,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(name);
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
-  const { data, isLoading } = usePackagePoliciesWithAgentPolicy({
+  const { data, isLoading, resendRequest: refreshPolicies } = usePackagePoliciesWithAgentPolicy({
     page: pagination.currentPage,
     perPage: pagination.pageSize,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: ${name}`,
@@ -114,7 +121,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         }),
         truncateText: true,
         align: 'left',
-        width: '16ch',
+        width: '8ch',
         render({ packagePolicy, agentPolicy }: PackagePolicyAndAgentPolicy) {
           return (
             <>
@@ -162,6 +169,19 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
           );
         },
       },
+      {
+        field: '',
+        name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.actions', {
+          defaultMessage: 'Actions',
+        }),
+        width: '8ch',
+        align: 'right',
+        render({ agentPolicy, packagePolicy }) {
+          return (
+            <PackagePoliciesActionMenu agentPolicy={agentPolicy} packagePolicy={packagePolicy} />
+          );
+        },
+      },
     ],
     []
   );
@@ -193,7 +213,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   }
 
   return (
-    <>
+    <AgentPolicyRefreshContext.Provider value={{ refresh: refreshPolicies }}>
       <EuiFlexGroup alignItems="flexStart">
         <EuiFlexItem grow={1} />
         <EuiFlexItem grow={6}>
@@ -218,6 +238,6 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
           }
         />
       )}
-    </>
+    </AgentPolicyRefreshContext.Provider>
   );
 };

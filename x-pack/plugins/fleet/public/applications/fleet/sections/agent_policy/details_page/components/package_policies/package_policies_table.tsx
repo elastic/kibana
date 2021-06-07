@@ -20,10 +20,13 @@ import {
 } from '@elastic/eui';
 
 import type { AgentPolicy, PackagePolicy } from '../../../../../types';
-import { PackageIcon, ContextMenuActions } from '../../../../../components';
-import { PackagePolicyDeleteProvider, DangerEuiContextMenuItem } from '../../../components';
-import { useCapabilities, useLink } from '../../../../../hooks';
-import { useAgentPolicyRefresh } from '../../hooks';
+import {
+  PackageIcon,
+  ContextMenuActions,
+  DangerEuiContextMenuItem,
+  PackagePolicyDeleteProvider,
+} from '../../../../../components';
+import { useCapabilities, useLink, useAgentPolicyRefresh } from '../../../../../hooks';
 
 interface InMemoryPackagePolicy extends PackagePolicy {
   packageName?: string;
