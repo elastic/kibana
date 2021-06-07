@@ -24,14 +24,14 @@ export const SW_ACTION_TYPE_TITLE = i18n.translate(
 export const SW_REQUIRED_RULE_NAME = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredRuleName',
   {
-    defaultMessage: 'Rule Name is required.',
+    defaultMessage: 'Rule name is required.',
   }
 );
 
 export const SW_REQUIRED_APP_ID_TEXT = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredAppIdText',
   {
-    defaultMessage: 'An App Id is required.',
+    defaultMessage: 'An App ID is required.',
   }
 );
 
@@ -89,7 +89,7 @@ export const SW_API_URL_INVALID = i18n.translate(
 export const SW_APP_ID_TEXT_FIELD_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.appIdTextFieldLabel',
   {
-    defaultMessage: 'Application Id',
+    defaultMessage: 'Application ID',
   }
 );
 
@@ -110,7 +110,7 @@ export const SW_MAPPING_TITLE_TEXT_FIELD_LABEL = i18n.translate(
 export const SW_ALERT_SOURCE_FIELD_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.alertSourceFieldLabel',
   {
-    defaultMessage: 'Alert Source',
+    defaultMessage: 'Alert source',
   }
 );
 
@@ -131,7 +131,7 @@ export const SW_MAPPING_DESCRIPTION_TEXT_FIELD_LABEL = i18n.translate(
 export const SW_RULE_NAME_FIELD_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.ruleNameFieldLabel',
   {
-    defaultMessage: 'Rule Name',
+    defaultMessage: 'Rule name',
   }
 );
 
@@ -152,7 +152,7 @@ export const SW_CASE_ID_FIELD_LABEL = i18n.translate(
 export const SW_CASE_NAME_FIELD_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.caseNameFieldLabel',
   {
-    defaultMessage: 'Case Name',
+    defaultMessage: 'Case name',
   }
 );
 
@@ -226,7 +226,7 @@ export const EMPTY_MAPPING_WARNING_DESC = i18n.translate(
 export const SW_REQUIRED_ALERT_SOURCE = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredAlertSource',
   {
-    defaultMessage: 'Alert Source is required.',
+    defaultMessage: 'Alert source is required.',
   }
 );
 
@@ -240,7 +240,7 @@ export const SW_REQUIRED_SEVERITY = i18n.translate(
 export const SW_REQUIRED_CASE_NAME = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredCaseName',
   {
-    defaultMessage: 'Case Name is required.',
+    defaultMessage: 'Case name is required.',
   }
 );
 

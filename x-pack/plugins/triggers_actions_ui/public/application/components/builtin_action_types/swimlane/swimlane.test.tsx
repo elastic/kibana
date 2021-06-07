@@ -29,7 +29,7 @@ describe('actionTypeRegistry.get() works', () => {
 });
 
 describe('swimlane connector validation', () => {
-  test('connector validation succeeds when connector config is valid', () => {
+  test('connector validation succeeds when connector is valid', () => {
     const actionConnector = {
       secrets: {
         apiToken: 'test',
@@ -40,24 +40,137 @@ describe('swimlane connector validation', () => {
       config: {
         apiUrl: 'http:\\test',
         appId: '1234567asbd32',
+        connectorType: 'all',
         mappings: {
+          alertIdConfig: { id: '1234' },
+          alertSourceConfig: { id: '1234' },
+          severityConfig: { id: '1234' },
+          ruleNameConfig: { id: '1234' },
           caseIdConfig: { id: '1234' },
+          caseNameConfig: { id: '1234' },
+          descriptionConfig: { id: '1234' },
+          commentsConfig: { id: '1234' },
         },
       },
     } as SwimlaneActionConnector;
+
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: { errors: { apiUrl: [], appId: [], mappings: [], connectorType: [] } },
       secrets: { errors: { apiToken: [] } },
     });
+  });
 
-    // @ts-ignore
-    delete actionConnector.config.apiUrl;
-    actionConnector.secrets.apiToken = 'test1';
+  test('it validates correctly when connectorType=all', () => {
+    const actionConnector = {
+      secrets: {
+        apiToken: 'test',
+      },
+      id: 'test',
+      actionTypeId: '.swimlane',
+      name: 'swimlane',
+      config: {
+        apiUrl: 'http:\\test',
+        appId: '1234567asbd32',
+        connectorType: 'all',
+        mappings: {},
+      },
+    } as SwimlaneActionConnector;
+
+    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+      config: { errors: { apiUrl: [], appId: [], mappings: [], connectorType: [] } },
+      secrets: { errors: { apiToken: [] } },
+    });
+  });
+
+  test('it validates correctly when connectorType=cases', () => {
+    const actionConnector = {
+      secrets: {
+        apiToken: 'test',
+      },
+      id: 'test',
+      actionTypeId: '.swimlane',
+      name: 'swimlane',
+      config: {
+        apiUrl: 'http:\\test',
+        appId: '1234567asbd32',
+        connectorType: 'cases',
+        mappings: {},
+      },
+    } as SwimlaneActionConnector;
+
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
-        errors: { apiUrl: ['URL is required.'], appId: [], mappings: [], connectorType: [] },
+        errors: {
+          apiUrl: [],
+          appId: [],
+          mappings: [
+            {
+              caseIdConfig: 'Case ID is required.',
+              caseNameConfig: 'Case name is required.',
+              commentsConfig: 'Comments are required.',
+              descriptionConfig: 'Description is required.',
+            },
+          ],
+          connectorType: [],
+        },
       },
       secrets: { errors: { apiToken: [] } },
+    });
+  });
+
+  test('it validates correctly when connectorType=alerts', () => {
+    const actionConnector = {
+      secrets: {
+        apiToken: 'test',
+      },
+      id: 'test',
+      actionTypeId: '.swimlane',
+      name: 'swimlane',
+      config: {
+        apiUrl: 'http:\\test',
+        appId: '1234567asbd32',
+        connectorType: 'alerts',
+        mappings: {},
+      },
+    } as SwimlaneActionConnector;
+
+    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+      config: {
+        errors: {
+          apiUrl: [],
+          appId: [],
+          mappings: [
+            {
+              alertIdConfig: 'Alert ID is required.',
+              ruleNameConfig: 'Rule name is required.',
+            },
+          ],
+          connectorType: [],
+        },
+      },
+      secrets: { errors: { apiToken: [] } },
+    });
+  });
+
+  test('it validates correctly required config/secrets fields', () => {
+    const actionConnector = {
+      secrets: {},
+      id: 'test',
+      actionTypeId: '.swimlane',
+      name: 'swimlane',
+      config: {},
+    } as SwimlaneActionConnector;
+
+    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+      config: {
+        errors: {
+          apiUrl: ['URL is required.'],
+          appId: ['An App ID is required.'],
+          mappings: [],
+          connectorType: [],
+        },
+      },
+      secrets: { errors: { apiToken: ['An API token is required.'] } },
     });
   });
 });
@@ -67,12 +180,40 @@ describe('swimlane action params validation', () => {
     const actionParams = {
       subActionParams: {
         ruleName: 'Rule Name',
+        alertId: 'alert-id',
       },
     };
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         'subActionParams.incident.ruleName': [],
+        'subActionParams.incident.alertId': [],
+      },
+    });
+  });
+
+  test('it validates correctly required fields', () => {
+    const actionParams = {
+      subActionParams: { incident: {} },
+    };
+
+    expect(actionTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        'subActionParams.incident.ruleName': ['Rule name is required.'],
+        'subActionParams.incident.alertId': ['Alert ID is required.'],
+      },
+    });
+  });
+
+  test('it succeeds when missing incident', () => {
+    const actionParams = {
+      subActionParams: {},
+    };
+
+    expect(actionTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        'subActionParams.incident.ruleName': [],
+        'subActionParams.incident.alertId': [],
       },
     });
   });

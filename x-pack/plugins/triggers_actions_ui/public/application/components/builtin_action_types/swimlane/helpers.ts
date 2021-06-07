@@ -48,15 +48,15 @@ export const isValidFieldForConnector = (
 };
 
 export const validateMappingForConnector = (
-  connector: SwimlaneConnectorType,
+  connectorType: SwimlaneConnectorType,
   mapping: SwimlaneMappingConfig
 ): Record<string, string> => {
-  if (connector === SwimlaneConnectorType.All) {
+  if (connectorType === SwimlaneConnectorType.All || connectorType == null) {
     return {};
   }
 
   const requiredFields =
-    connector === SwimlaneConnectorType.Alerts ? alertsRequiredFields : casesRequiredFields;
+    connectorType === SwimlaneConnectorType.Alerts ? alertsRequiredFields : casesRequiredFields;
 
   return requiredFields.reduce((errors, field) => {
     if (mapping == null || (mapping != null && mapping[field] == null)) {
