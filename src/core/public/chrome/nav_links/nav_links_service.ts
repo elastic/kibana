@@ -92,7 +92,7 @@ export class NavLinksService {
             .reduce((navLinks: Array<[string, NavLinkWrapper]>, [appId, app]) => {
               navLinks.push(
                 [appId, toNavLink(app, http.basePath)],
-                ...toNavDeepLinks(app, app.deepLinks, http)
+                ...toNavDeepLinks(app, app.deepLinks, http.basePath)
               );
               return navLinks;
             }, [])
@@ -173,15 +173,17 @@ function sortNavLinks(navLinks: ReadonlyMap<string, NavLinkWrapper>) {
 function toNavDeepLinks(
   app: PublicAppInfo,
   deepLinks: PublicAppDeepLinkInfo[],
-  http: HttpStart
+  basePath: HttpStart['basePath']
 ): Array<[string, NavLinkWrapper]> {
-  if (!deepLinks) return [];
+  if (!deepLinks) {
+    return [];
+  }
   return deepLinks.reduce((navDeepLinks: Array<[string, NavLinkWrapper]>, deepLink) => {
     const id = `${app.id}:${deepLink.id}`;
     if (deepLink.path) {
-      navDeepLinks.push([id, toNavLink(app, http.basePath, { ...deepLink, id })]);
+      navDeepLinks.push([id, toNavLink(app, basePath, { ...deepLink, id })]);
     }
-    navDeepLinks.push(...toNavDeepLinks(app, deepLink.deepLinks, http));
+    navDeepLinks.push(...toNavDeepLinks(app, deepLink.deepLinks, basePath));
     return navDeepLinks;
   }, []);
 }

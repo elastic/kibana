@@ -242,7 +242,9 @@ export class ApplicationService {
       if (shouldNavigate) {
         if (deepLinkId) {
           const deepLinkPath = getAppDeepLinkPath(availableMounters, appId, deepLinkId);
-          if (deepLinkPath) path = appendAppPath(deepLinkPath, path);
+          if (deepLinkPath) {
+            path = appendAppPath(deepLinkPath, path);
+          }
         }
         if (path === undefined) {
           path = applications$.value.get(appId)?.defaultPath;
@@ -415,7 +417,9 @@ const updateStatus = (app: App, statusUpdaters: AppUpdaterWrapper[]): App => {
 };
 
 const populateDeepLinkDefaults = (deepLinks?: AppDeepLink[]): AppDeepLink[] => {
-  if (!deepLinks) return [];
+  if (!deepLinks) {
+    return [];
+  }
   return deepLinks.map((deepLink) => ({
     ...deepLink,
     navLinkStatus: deepLink.navLinkStatus ?? AppNavLinkStatus.default,
@@ -424,7 +428,9 @@ const populateDeepLinkDefaults = (deepLinks?: AppDeepLink[]): AppDeepLink[] => {
 };
 
 const toDeepLinkPaths = (deepLinks?: AppDeepLink[]): Mounter['deepLinkPaths'] => {
-  if (!deepLinks) return {};
+  if (!deepLinks) {
+    return {};
+  }
   return deepLinks.reduce((deepLinkPaths: Mounter['deepLinkPaths'], deepLink) => {
     if (deepLink.path) deepLinkPaths[deepLink.id] = deepLink.path;
     return { ...deepLinkPaths, ...toDeepLinkPaths(deepLink.deepLinks) };

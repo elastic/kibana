@@ -918,6 +918,27 @@ describe('#start()', () => {
           undefined
         );
       });
+
+      it('ignores the deepLinkId parameter if it is unknown', async () => {
+        const { register } = service.setup(setupDeps);
+
+        register(
+          Symbol(),
+          createApp({
+            id: 'app1',
+            defaultPath: 'default/path',
+            deepLinks: [{ id: 'dl1', title: 'deep link 1', path: '/deep-link' }],
+          })
+        );
+
+        const { navigateToApp } = await service.start(startDeps);
+
+        await navigateToApp('app1', { deepLinkId: 'dl-unknown' });
+        expect(MockHistory.push).toHaveBeenLastCalledWith('/app/app1/default/path', undefined);
+
+        await navigateToApp('app1', { deepLinkId: 'dl-unknown', path: 'some-other-path' });
+        expect(MockHistory.push).toHaveBeenLastCalledWith('/app/app1/some-other-path', undefined);
+      });
     });
   });
 
