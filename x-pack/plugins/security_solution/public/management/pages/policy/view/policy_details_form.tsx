@@ -17,15 +17,19 @@ import { Ransomware } from './policy_forms/protections/ransomware';
 import { LockedPolicyCard } from './policy_forms/locked_card';
 import { useLicense } from '../../../../common/hooks/use_license';
 
-const LOCKED_CARD_RAMSOMWARE_TITLE = {
-  id: 'xpack.securitySolution.endpoint.policy.details.ransomware',
-  defaultMessage: 'Ransomware',
-};
+const LOCKED_CARD_RAMSOMWARE_TITLE = (
+  <FormattedMessage
+    id="xpack.securitySolution.endpoint.policy.details.ransomware"
+    defaultMessage="Ransomware"
+  />
+);
 
-const LOCKED_CARD_MEMORY_TITLE = {
-  id: 'xpack.securitySolution.endpoint.policy.details.memory',
-  defaultMessage: 'Memory',
-};
+const LOCKED_CARD_MEMORY_TITLE = (
+  <FormattedMessage
+    id="xpack.securitySolution.endpoint.policy.details.memory"
+    defaultMessage="Memory"
+  />
+);
 
 export const PolicyDetailsForm = memo(() => {
   const [showAdvancedPolicy, setShowAdvancedPolicy] = useState<boolean>(false);

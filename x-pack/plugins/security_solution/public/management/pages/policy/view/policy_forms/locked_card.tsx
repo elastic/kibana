@@ -30,7 +30,7 @@ const LockedPolicyDiv = styled.div`
   }
 `;
 
-export const LockedPolicyCard = memo(({ title }: { title: FormattedMessage.MessageDescriptor }) => {
+export const LockedPolicyCard = memo(({ title }: { title: FormattedMessage }) => {
   return (
     <LockedPolicyDiv>
       <EuiCard
@@ -42,9 +42,7 @@ export const LockedPolicyCard = memo(({ title }: { title: FormattedMessage.Messa
         icon={<EuiIcon size="xl" type="lock" />}
         title={
           <h3>
-            <strong>
-              <FormattedMessage {...title} />
-            </strong>
+            <strong>{title}</strong>
           </h3>
         }
         description={false}
