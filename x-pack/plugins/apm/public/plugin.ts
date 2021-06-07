@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { of } from 'rxjs';
 import type { ConfigSchema } from '.';
 import {
   AppMountParameters,
@@ -34,6 +35,7 @@ import type {
   FetchDataParams,
   HasDataParams,
   ObservabilityPublicSetup,
+  ObservabilityPublicStart,
 } from '../../observability/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
@@ -48,24 +50,25 @@ export type ApmPluginStart = void;
 
 export interface ApmPluginSetupDeps {
   alerting?: AlertingPluginPublicSetup;
-  ml?: MlPluginSetup;
   data: DataPublicPluginSetup;
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  ml?: MlPluginSetup;
   observability: ObservabilityPublicSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }
 
 export interface ApmPluginStartDeps {
   alerting?: AlertingPluginPublicStart;
-  ml?: MlPluginStart;
   data: DataPublicPluginStart;
+  embeddable: EmbeddableStart;
   home: void;
   licensing: void;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  embeddable: EmbeddableStart;
   maps?: MapsStartApi;
+  ml?: MlPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  observability: ObservabilityPublicStart;
 }
 
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
@@ -82,6 +85,21 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       pluginSetupDeps.home.environment.update({ apmUi: true });
       pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
     }
+
+    // register observability nav
+    plugins.observability.navigation.registerSections(
+      of([
+        {
+          label: 'APM',
+          sortKey: 200,
+          entries: [
+            { label: 'Services', app: 'apm', path: '/services' },
+            { label: 'Traces', app: 'apm', path: '/traces' },
+            { label: 'Service Map', app: 'apm', path: '/service-map' },
+          ],
+        },
+      ])
+    );
 
     const getApmDataHelper = async () => {
       const {
@@ -131,6 +149,26 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         return await dataHelper.fetchUxOverviewDate(params);
       },
     });
+
+    plugins.observability.navigation.registerSections(
+      of([
+        {
+          label: 'User Experience',
+          sortKey: 201,
+          entries: [
+            {
+              label: i18n.translate('xpack.apm.ux.overview.heading', {
+                defaultMessage: 'Overview',
+              }),
+              app: 'ux',
+              path: '/',
+              matchFullPath: true,
+              ignoreTrailingSlash: true,
+            },
+          ],
+        },
+      ])
+    );
 
     core.application.register({
       id: 'apm',
@@ -213,7 +251,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       async mount(appMountParameters: AppMountParameters<unknown>) {
         // Load application bundle and Get start service
         const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([
-          import('./application/csmApp'),
+          import('./application/uxApp'),
           core.getStartServices(),
         ]);
 

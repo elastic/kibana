@@ -54,8 +54,8 @@ export const AgentPolicySelectionStep = ({
   excludeFleetServer,
 }: {
   agentPolicies?: AgentPolicy[];
-  setSelectedAPIKeyId?: (key: string) => void;
-  setSelectedPolicyId?: (policyId: string) => void;
+  setSelectedAPIKeyId?: (key?: string) => void;
+  setSelectedPolicyId?: (policyId?: string) => void;
   setIsFleetServerPolicySelected?: (selected: boolean) => void;
   excludeFleetServer?: boolean;
 }) => {
@@ -67,11 +67,11 @@ export const AgentPolicySelectionStep = ({
     : [];
 
   const onAgentPolicyChange = useCallback(
-    async (policyId: string) => {
+    async (policyId?: string) => {
       if (setSelectedPolicyId) {
         setSelectedPolicyId(policyId);
       }
-      if (setIsFleetServerPolicySelected) {
+      if (policyId && setIsFleetServerPolicySelected) {
         const agentPolicyRequest = await sendGetOneAgentPolicy(policyId);
         if (
           agentPolicyRequest.data?.item &&
