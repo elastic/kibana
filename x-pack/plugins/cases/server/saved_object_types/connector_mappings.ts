@@ -6,12 +6,12 @@
  */
 
 import { SavedObjectsType } from 'src/core/server';
-
-export const CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT = 'cases-connector-mappings';
+import { CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '../../common/constants';
+import { connectorMappingsMigrations } from './migrations';
 
 export const caseConnectorMappingsSavedObjectType: SavedObjectsType = {
   name: CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
-  hidden: false,
+  hidden: true,
   namespaceType: 'single',
   mappings: {
     properties: {
@@ -28,6 +28,10 @@ export const caseConnectorMappingsSavedObjectType: SavedObjectsType = {
           },
         },
       },
+      owner: {
+        type: 'keyword',
+      },
     },
   },
+  migrations: connectorMappingsMigrations,
 };
