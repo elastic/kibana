@@ -3291,7 +3291,9 @@
                 "type": "boolean",
                 "tags": [],
                 "label": "refresh",
-                "description": [],
+                "description": [
+                  "Force refresh of index pattern list"
+                ],
                 "signature": [
                   "boolean"
                 ],
@@ -3329,7 +3331,9 @@
                 "type": "boolean",
                 "tags": [],
                 "label": "refresh",
-                "description": [],
+                "description": [
+                  "Force refresh of index pattern list"
+                ],
                 "signature": [
                   "boolean"
                 ],
@@ -3432,7 +3436,9 @@
                 "type": "boolean",
                 "tags": [],
                 "label": "refresh",
-                "description": [],
+                "description": [
+                  "Force refresh of index pattern list"
+                ],
                 "signature": [
                   "boolean"
                 ],
@@ -3470,7 +3476,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": [],
+                "description": [
+                  "optionally clear a single id"
+                ],
                 "signature": [
                   "string | undefined"
                 ],
@@ -3536,6 +3544,26 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.IndexPatternsService.getDefaultId",
+            "type": "Function",
+            "tags": [],
+            "label": "getDefaultId",
+            "description": [
+              "\nGet default index pattern id"
+            ],
+            "signature": [
+              "() => Promise<string | null>"
+            ],
+            "source": {
+              "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
+              "lineNumber": 206
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.IndexPatternsService.setDefault",
             "type": "Function",
             "tags": [],
@@ -3544,30 +3572,30 @@
               "\nOptionally set default index pattern, unless force = true"
             ],
             "signature": [
-              "(id: string, force?: boolean) => Promise<void>"
+              "(id: string | null, force?: boolean) => Promise<void>"
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 208
+              "lineNumber": 216
             },
             "deprecated": false,
             "children": [
               {
                 "parentPluginId": "data",
                 "id": "def-common.IndexPatternsService.setDefault.$1",
-                "type": "string",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "id",
                 "description": [],
                 "signature": [
-                  "string"
+                  "string | null"
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 208
+                  "lineNumber": 216
                 },
                 "deprecated": false,
-                "isRequired": true
+                "isRequired": false
               },
               {
                 "parentPluginId": "data",
@@ -3581,7 +3609,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 208
+                  "lineNumber": 216
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -3611,7 +3639,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 219
+              "lineNumber": 227
             },
             "deprecated": false,
             "children": [
@@ -3633,7 +3661,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 219
+                  "lineNumber": 227
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -3681,7 +3709,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 235
+              "lineNumber": 243
             },
             "deprecated": false,
             "children": [
@@ -3711,7 +3739,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 236
+                  "lineNumber": 244
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -3735,7 +3763,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 237
+                  "lineNumber": 245
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -3767,7 +3795,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 250
+              "lineNumber": 258
             },
             "deprecated": false,
             "children": [
@@ -3789,7 +3817,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 250
+                  "lineNumber": 258
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -3835,7 +3863,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 327
+              "lineNumber": 335
             },
             "deprecated": false,
             "children": [
@@ -3845,7 +3873,9 @@
                 "type": "Array",
                 "tags": [],
                 "label": "fields",
-                "description": [],
+                "description": [
+                  ": FieldSpec[]"
+                ],
                 "signature": [
                   {
                     "pluginId": "data",
@@ -3858,7 +3888,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 327
+                  "lineNumber": 335
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -3869,7 +3899,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "fieldAttrs",
-                "description": [],
+                "description": [
+                  ": FieldAttrs"
+                ],
                 "signature": [
                   {
                     "pluginId": "data",
@@ -3882,7 +3914,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 327
+                  "lineNumber": 335
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -3923,7 +3955,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 343
+              "lineNumber": 351
             },
             "deprecated": false,
             "children": [
@@ -3948,7 +3980,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 343
+                  "lineNumber": 351
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -3980,7 +4012,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 465
+              "lineNumber": 473
             },
             "deprecated": false,
             "children": [
@@ -3996,7 +4028,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 465
+                  "lineNumber": 473
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4034,7 +4066,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 484
+              "lineNumber": 492
             },
             "deprecated": false,
             "children": [
@@ -4056,7 +4088,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 484
+                  "lineNumber": 492
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4073,7 +4105,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 484
+                  "lineNumber": 492
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4113,7 +4145,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 509
+              "lineNumber": 517
             },
             "deprecated": false,
             "children": [
@@ -4135,7 +4167,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 509
+                  "lineNumber": 517
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4154,7 +4186,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 509
+                  "lineNumber": 517
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4173,7 +4205,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 509
+                  "lineNumber": 517
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4211,7 +4243,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 522
+              "lineNumber": 530
             },
             "deprecated": false,
             "children": [
@@ -4233,7 +4265,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 522
+                  "lineNumber": 530
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4252,7 +4284,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 522
+                  "lineNumber": 530
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4282,7 +4314,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 550
+              "lineNumber": 558
             },
             "deprecated": false,
             "children": [
@@ -4304,7 +4336,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 551
+                  "lineNumber": 559
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4321,7 +4353,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 552
+                  "lineNumber": 560
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4338,7 +4370,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 553
+                  "lineNumber": 561
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4360,7 +4392,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 636
+              "lineNumber": 644
             },
             "deprecated": false,
             "children": [
@@ -4378,7 +4410,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 636
+                  "lineNumber": 644
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -5516,20 +5548,6 @@
           {
             "plugin": "maps",
             "link": {
-              "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts",
-              "lineNumber": 10
-            }
-          },
-          {
-            "plugin": "maps",
-            "link": {
-              "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts",
-              "lineNumber": 360
-            }
-          },
-          {
-            "plugin": "maps",
-            "link": {
               "path": "x-pack/plugins/maps/public/classes/fields/es_doc_field.ts",
               "lineNumber": 12
             }
@@ -5539,6 +5557,20 @@
             "link": {
               "path": "x-pack/plugins/maps/public/classes/fields/es_doc_field.ts",
               "lineNumber": 45
+            }
+          },
+          {
+            "plugin": "maps",
+            "link": {
+              "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts",
+              "lineNumber": 10
+            }
+          },
+          {
+            "plugin": "maps",
+            "link": {
+              "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts",
+              "lineNumber": 367
             }
           },
           {
@@ -8911,14 +8943,7 @@
             "plugin": "securitySolution",
             "link": {
               "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts",
-              "lineNumber": 40
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts",
-              "lineNumber": 55
+              "lineNumber": 44
             }
           },
           {
@@ -8926,6 +8951,13 @@
             "link": {
               "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts",
               "lineNumber": 60
+            }
+          },
+          {
+            "plugin": "securitySolution",
+            "link": {
+              "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts",
+              "lineNumber": 65
             }
           },
           {
@@ -9940,7 +9972,7 @@
             "plugin": "maps",
             "link": {
               "path": "x-pack/plugins/maps/public/embeddable/types.ts",
-              "lineNumber": 44
+              "lineNumber": 45
             }
           },
           {
@@ -12499,7 +12531,7 @@
             "section": "def-common.IndexPattern",
             "text": "IndexPattern"
           },
-          " | null>; setDefault: (id: string, force?: boolean) => Promise<void>; getFieldsForWildcard: (options: ",
+          " | null>; getDefaultId: () => Promise<string | null>; setDefault: (id: string | null, force?: boolean) => Promise<void>; getFieldsForWildcard: (options: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -12625,7 +12657,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-          "lineNumber": 642
+          "lineNumber": 650
         },
         "deprecated": false,
         "initialIsOpen": false

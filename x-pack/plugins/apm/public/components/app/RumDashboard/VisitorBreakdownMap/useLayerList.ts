@@ -22,7 +22,7 @@ import {
   SYMBOLIZE_AS_TYPES,
 } from '../../../../../../maps/common/constants';
 
-import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../../../../src/plugins/apm_oss/public';
+import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../common/index_pattern_constants';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import {
   SERVICE_NAME,

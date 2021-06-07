@@ -19,11 +19,11 @@ const paramsSchema = schema.object({
   name: schema.string(),
 });
 
-export function registerGetAllRoute({ router, license, lib: { isEsError } }: RouteDependencies) {
+export function registerGetAllRoute({ router, lib: { isEsError } }: RouteDependencies) {
   // Get all component templates
   router.get(
     { path: addBasePath('/component_templates'), validate: false },
-    license.guardApiRoute(async (ctx, req, res) => {
+    async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.dataManagement!.client;
 
       try {
@@ -56,7 +56,7 @@ export function registerGetAllRoute({ router, license, lib: { isEsError } }: Rou
 
         throw error;
       }
-    })
+    }
   );
 
   // Get single component template
@@ -67,7 +67,7 @@ export function registerGetAllRoute({ router, license, lib: { isEsError } }: Rou
         params: paramsSchema,
       },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
+    async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.dataManagement!.client;
       const { name } = req.params;
 
@@ -96,6 +96,6 @@ export function registerGetAllRoute({ router, license, lib: { isEsError } }: Rou
 
         throw error;
       }
-    })
+    }
   );
 }

@@ -3,7 +3,7 @@ pageLoadAssetSize:
   alerting: 106936
   apm: 64385
   apmOss: 18996
-  bfetch: 41874
+  bfetch: 51874
   canvas: 1066647
   charts: 195358
   cloud: 21076
@@ -34,7 +34,7 @@ pageLoadAssetSize:
   indexManagement: 140608
   indexPatternManagement: 28222
   infra: 184320
-  fleet: 415829
+  fleet: 450005
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
@@ -110,3 +110,4 @@ pageLoadAssetSize:
   timelines: 28613
   cases: 162385
   screenshotMode: 17856
+  visTypePie: 35583
