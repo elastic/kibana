@@ -99,7 +99,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {
       if (Math.abs(chartWidth - e.width) > 20) {
-        requestAnimationFrame(() => setChartWidth(e.width));
+        setChartWidth(e.width);
       }
     }, RESIZE_THROTTLE_TIME_MS),
     [chartWidth]
