@@ -132,10 +132,9 @@ export function DocTableLegacy(renderProps: DocTableLegacyProps) {
         scope.current = newScope;
       });
     } else if (scope && scope.current) {
-      scope.current.renderProps = { ...renderProps, rows, minimumVisibleRows };
-      if (scope.current.$root.$$phase !== '$apply' && scope.current.$root.$$phase !== '$digest') {
-        scope.current.$apply();
-      }
+      scope.current.$evalAsync((subscope: AngularScope) => {
+        subscope.renderProps = { ...renderProps, rows, minimumVisibleRows };
+      });
     }
   }, [renderProps, minimumVisibleRows, rows]);
 
