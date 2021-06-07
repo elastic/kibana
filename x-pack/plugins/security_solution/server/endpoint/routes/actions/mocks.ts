@@ -18,6 +18,28 @@ import {
   ISOLATION_ACTIONS,
 } from '../../../../common/endpoint/types';
 
+export const mockAuditLog = (results: any = []): ApiResponse<any> => {
+  return {
+    body: {
+      hits: {
+        hits: results.map((a: any) => {
+          const _index = a._index;
+          delete a._index;
+          const _source = a;
+          return {
+            _index,
+            _source,
+          };
+        }),
+      },
+    },
+    statusCode: 200,
+    headers: {},
+    warnings: [],
+    meta: {} as any,
+  };
+};
+
 export const mockSearchResult = (results: any = []): ApiResponse<any> => {
   return {
     body: {
