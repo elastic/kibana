@@ -231,6 +231,32 @@ export default ({ getService }: FtrProviderContext): void => {
             closure_type: 'close-by-pushing',
             version: configuration.version,
           },
+          403,
+          {
+            user: secOnly,
+            space: 'space2',
+          }
+        );
+      });
+
+      it('should NOT update a configuration created in space2 by making a request to space1', async () => {
+        const configuration = await createConfiguration(
+          supertestWithoutAuth,
+          { ...getConfigurationRequest(), owner: 'securitySolutionFixture' },
+          200,
+          {
+            user: superUser,
+            space: 'space2',
+          }
+        );
+
+        await updateConfiguration(
+          supertestWithoutAuth,
+          configuration.id,
+          {
+            closure_type: 'close-by-pushing',
+            version: configuration.version,
+          },
           404,
           {
             user: secOnly,

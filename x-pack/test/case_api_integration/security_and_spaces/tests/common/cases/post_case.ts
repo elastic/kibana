@@ -32,6 +32,7 @@ import {
   obsOnlyRead,
   obsSecRead,
   noKibanaPrivileges,
+  testDisabled,
 } from '../../../../common/lib/authentication/users';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -240,6 +241,22 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('rbac', () => {
+      it('returns a 403 when attempting to create a case with an owner that was from a disabled feature in the space', async () => {
+        const theCase = ((await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'testDisabledFixture' }),
+          403,
+          {
+            user: testDisabled,
+            space: 'space1',
+          }
+        )) as unknown) as { message: string };
+
+        expect(theCase.message).to.eql(
+          'Unauthorized to create case with owners: "testDisabledFixture"'
+        );
+      });
+
       it('User: security solution only - should create a case', async () => {
         const theCase = await createCase(
           supertestWithoutAuth,

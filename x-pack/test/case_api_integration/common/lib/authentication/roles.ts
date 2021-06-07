@@ -46,6 +46,31 @@ export const globalRead: Role = {
   },
 };
 
+export const testDisabledPluginAll: Role = {
+  name: 'test_disabled_plugin_all',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          testDisabledFixtureID: ['all'],
+          securitySolutionFixture: ['all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+  },
+};
+
 export const securitySolutionOnlyAll: Role = {
   name: 'sec_only_all',
   privileges: {
@@ -149,6 +174,7 @@ export const roles = [
   securitySolutionOnlyRead,
   observabilityOnlyAll,
   observabilityOnlyRead,
+  testDisabledPluginAll,
 ];
 
 /**
