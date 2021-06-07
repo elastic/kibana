@@ -18,7 +18,8 @@ import { ALL_LABEL, ANY_AUTH_PROVIDER_OPTION_LABEL } from './constants';
 import { RoleMappingsTable } from './role_mappings_table';
 
 describe('RoleMappingsTable', () => {
-  const getRoleMappingPath = jest.fn();
+  const initializeRoleMapping = jest.fn();
+  const handleDeleteMapping = jest.fn();
   const roleMappings = [
     {
       ...wsRoleMapping,
@@ -36,7 +37,8 @@ describe('RoleMappingsTable', () => {
     roleMappings,
     addMappingButton: <button />,
     shouldShowAuthProvider: true,
-    getRoleMappingPath,
+    initializeRoleMapping,
+    handleDeleteMapping,
   };
 
   it('renders', () => {
@@ -61,6 +63,20 @@ describe('RoleMappingsTable', () => {
     input.simulate('change', { target: { value } });
 
     expect(wrapper.find(EuiTableRow)).toHaveLength(0);
+  });
+
+  it('handles manage click', () => {
+    const wrapper = shallow(<RoleMappingsTable {...props} />);
+    wrapper.find('[data-test-subj="ManageButton"]').simulate('click');
+
+    expect(initializeRoleMapping).toHaveBeenCalled();
+  });
+
+  it('handles delete click', () => {
+    const wrapper = shallow(<RoleMappingsTable {...props} />);
+    wrapper.find('[data-test-subj="DeleteButton"]').simulate('click');
+
+    expect(handleDeleteMapping).toHaveBeenCalled();
   });
 
   it('handles input change with special chars', () => {
