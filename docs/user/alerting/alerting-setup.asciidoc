@@ -5,6 +5,8 @@
 <titleabbrev>Setup</titleabbrev>
 ++++
 
+The Alerting feature is automatically enabled in {kib} but may require some additional configuration.
+
 [float]
 [[alerting-prerequisites]]
 === Prerequisites
@@ -43,6 +45,12 @@ See <<kibana-feature-privileges, feature privileges>> for more information on co
 Also note that a user will need +read+ privileges for the *Actions and Connectors* feature to attach actions to a rule or to edit a rule that has an action attached to it.
 
 [float]
+[[alerting-restricting-actions]]
+==== Restrict actions
+
+For security reasons you may wish to limit the extent to which {kib} can connect to external services. <<action-settings>> allows you to disable certain <<action-types>> and allowlist the hostnames that {kib} can connect with.
+
+[float]
 [[alerting-spaces]]
 === Space isolation
 
@@ -58,9 +66,3 @@ Rules, including all background detection and the actions they generate are auth
 ==============================================
 If a rule requires certain privileges to run, such as index privileges, keep in mind that if a user without those privileges updates the rule, the rule will no longer function.  
 ==============================================
-
-[float]
-[[alerting-restricting-actions]]
-=== Restrict actions
-
-For security reasons you may wish to limit the extent to which {kib} can connect to external services. <<action-settings>> allows you to disable certain <<action-types>> and allowlist the hostnames that {kib} can connect with.
