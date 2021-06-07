@@ -19,7 +19,6 @@ import { licensingMock } from '../../licensing/public/mocks';
 import { ManagementService } from './management';
 import type { PluginStartDependencies } from './plugin';
 import { SecurityPlugin } from './plugin';
-import { SessionTimeout } from './session';
 
 describe('Security Plugin', () => {
   beforeAll(() => {
