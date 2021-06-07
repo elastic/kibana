@@ -70,7 +70,7 @@ export class SecurityPlugin
   public setup(
     core: CoreSetup<PluginStartDependencies>,
     { home, licensing, management, securityOss }: PluginSetupDependencies
-  ) {
+  ): SecurityPluginSetup {
     const { http, notifications } = core;
     const { anonymousPaths } = http;
 
@@ -134,12 +134,14 @@ export class SecurityPlugin
 
     return {
       authc: this.authc,
-      sessionTimeout: this.sessionTimeout,
       license,
     };
   }
 
-  public start(core: CoreStart, { management, securityOss }: PluginStartDependencies) {
+  public start(
+    core: CoreStart,
+    { management, securityOss }: PluginStartDependencies
+  ): SecurityPluginStart {
     this.sessionTimeout.start();
     this.securityCheckupService.start({ securityOssStart: securityOss, docLinks: core.docLinks });
 
@@ -164,7 +166,6 @@ export class SecurityPlugin
 
 export interface SecurityPluginSetup {
   authc: AuthenticationServiceSetup;
-  sessionTimeout: SessionTimeout;
   license: Readonly<SecurityLicense>;
 }
 
