@@ -20,10 +20,9 @@ const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiCounter: () => {} },
   observability: {
     navigation: {
-      registerSections: () => jest.fn(),
-      PageTemplate: ({ children }: { children: React.ReactNode }) => (
-        <div>hello worlds {children}</div>
-      ),
+      PageTemplate: () => {
+        return <>hello world</>;
+      },
     },
   },
 } as Partial<CoreStart>);

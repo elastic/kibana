@@ -71,7 +71,10 @@ describe('renderApp', () => {
     const pluginsStart = ({
       observability: {
         navigation: {
-          PageTemplate: () => {},
+          registerSections: () => jest.fn(),
+          PageTemplate: ({ children }: { children: React.ReactNode }) => (
+            <div>hello worlds {children}</div>
+          ),
         },
       },
       triggersActionsUi: {
