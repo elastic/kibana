@@ -17,8 +17,3 @@ export interface CreateMappingsArgs extends MappingsArgs {
 export interface UpdateMappingsArgs extends MappingsArgs {
   mappingId: string;
 }
-
-export interface ConfigurationGetFields {
-  connectorId: string;
-  connectorType: string;
-}

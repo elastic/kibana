@@ -8,13 +8,13 @@
 import { ConnectorMappingsAttributes, ConnectorTypes } from '../../../common/api';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { createCaseError } from '../../common/error';
-import { CasesClientArgs, CasesClientInternal } from '..';
+import { CasesClientArgs } from '..';
 import { CreateMappingsArgs } from './types';
+import { createDefaultMapping } from './utils';
 
 export const createMappings = async (
   { connectorType, connectorId, owner }: CreateMappingsArgs,
-  clientArgs: CasesClientArgs,
-  casesClientInternal: CasesClientInternal
+  clientArgs: CasesClientArgs
 ): Promise<ConnectorMappingsAttributes[]> => {
   const { unsecuredSavedObjectsClient, connectorMappingsService, logger } = clientArgs;
 
@@ -23,15 +23,12 @@ export const createMappings = async (
       return [];
     }
 
-    const res = await casesClientInternal.configuration.getFields({
-      connectorId,
-      connectorType,
-    });
+    const mappings = createDefaultMapping(connectorType);
 
     const theMapping = await connectorMappingsService.post({
       unsecuredSavedObjectsClient,
       attributes: {
-        mappings: res.defaultMappings,
+        mappings,
         owner,
       },
       references: [
