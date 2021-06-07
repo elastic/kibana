@@ -241,7 +241,7 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
           .subscribe({
             next: (response) => {
               if (isCompleteResponse(response)) {
-                const stringifyIndices = response.indicesExist.sort().join();
+                const stringifyIndices = indicesName.sort().join();
                 dispatch(
                   sourcererActions.setSource({
                     id: sourcererScopeName,
