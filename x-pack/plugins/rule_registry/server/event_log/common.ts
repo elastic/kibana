@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-export interface IndexMappings {
-  dynamic: 'strict' | boolean;
-  properties: Record<string, { type: string } | IndexMappings>;
-  _meta?: Record<string, unknown>;
-}
+export * from '../../common/event_log/assets';
+export * from '../../common/event_log/definition';

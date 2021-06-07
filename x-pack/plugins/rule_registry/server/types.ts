@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RequestHandlerContext } from '../../../../src/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -12,6 +13,8 @@ import {
   AlertTypeState,
 } from '../../alerting/common';
 import { AlertType } from '../../alerting/server';
+import { IEventLog } from './event_log';
+import { CommonFields, EventLogDefinition } from './event_log/common';
 
 type SimpleAlertType<
   TParams extends AlertTypeParams = {},
@@ -38,3 +41,13 @@ export type AlertTypeWithExecutor<
 > & {
   executor: AlertTypeExecutor<TParams, TAlertInstanceContext, TServices>;
 };
+
+export interface RuleRegistryApiRequestHandlerContext {
+  getEventLogClient: <TEvent extends CommonFields>(
+    logDefinition: EventLogDefinition<TEvent>
+  ) => Promise<IEventLog<TEvent>>;
+}
+
+export interface RuleRegistryRequestHandlerContext extends RequestHandlerContext {
+  ruleRegistry: RuleRegistryApiRequestHandlerContext;
+}

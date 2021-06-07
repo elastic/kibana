@@ -7,13 +7,13 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import { DeepPartial } from '../utils/utility_types';
-import { IndexNames } from '../elasticsearch';
+import { CommonFields, IndexNames } from '../common';
 import { IEventLog, IEventLogger, IEventLoggerTemplate, IEventQueryBuilder } from './public_api';
 import { EventLogParams } from './internal_api';
 import { EventLoggerTemplate } from './event_logger_template';
 import { EventQueryBuilder } from './event_query_builder';
 
-export class EventLog<TEvent> implements IEventLog<TEvent> {
+export class EventLog<TEvent extends CommonFields> implements IEventLog<TEvent> {
   private readonly params: EventLogParams;
   private readonly initialTemplate: IEventLoggerTemplate<TEvent>;
 

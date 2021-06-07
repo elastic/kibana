@@ -5,18 +5,19 @@
  * 2.0.
  */
 
+import { CommonFields } from '../common';
 import { IIndexWriter } from '../elasticsearch';
 import { IEventLog } from './public_api';
 import { IEventLogProvider } from './internal_api';
-import { EventLogBootstrapper } from './event_log_bootstrapper';
+import { BootstrapperOfLogResources } from './bootstrapper_of_log_resources';
 
-interface ConstructorParams<TEvent> {
+interface ConstructorParams<TEvent extends CommonFields> {
   log: IEventLog<TEvent>;
-  logBootstrapper: EventLogBootstrapper;
+  logBootstrapper: BootstrapperOfLogResources;
   indexWriter: IIndexWriter;
 }
 
-export class EventLogProvider<TEvent> implements IEventLogProvider<TEvent> {
+export class EventLogProvider<TEvent extends CommonFields> implements IEventLogProvider<TEvent> {
   constructor(private readonly params: ConstructorParams<TEvent>) {}
 
   public getLog(): IEventLog<TEvent> {

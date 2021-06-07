@@ -9,30 +9,8 @@ import { estypes } from '@elastic/elasticsearch';
 import { IClusterClient, KibanaRequest, Logger } from 'kibana/server';
 import { SpacesServiceStart } from '../../../../spaces/server';
 
-import { IlmPolicy, IndexNames, IndexSpecification } from '../elasticsearch';
-import { FieldMap, Event, EventSchema } from '../event_schema';
+import { CommonFields, EventLogDefinition, IndexNames } from '../common';
 import { DeepPartial } from '../utils/utility_types';
-
-export { IlmPolicy, IndexSpecification };
-
-// -------------------------------------------------------------------------------------------------
-// Definition API (defining log hierarchies as simple objects)
-
-export interface EventLogOptions<TMap extends FieldMap> {
-  name: string;
-  schema: EventSchema<TMap>;
-  ilmPolicy?: IlmPolicy;
-}
-
-export interface IEventLogDefinition<TMap extends FieldMap> {
-  eventLogName: string;
-  eventSchema: EventSchema<TMap>;
-  ilmPolicy: IlmPolicy;
-
-  defineChild<TExtMap extends FieldMap>(
-    options: EventLogOptions<TExtMap>
-  ): IEventLogDefinition<TMap & TExtMap>;
-}
 
 // -------------------------------------------------------------------------------------------------
 // Resolving and bootstrapping API (creating runtime objects representing logs, bootstrapping indices)
@@ -54,19 +32,19 @@ export interface IEventLogService {
 }
 
 export interface IEventLogResolver {
-  resolve<TMap extends FieldMap>(
-    definition: IEventLogDefinition<TMap>,
+  resolve<TEvent extends CommonFields>(
+    logDefinition: EventLogDefinition<TEvent>,
     spaceId: string
-  ): Promise<IEventLog<Event<TMap>>>;
+  ): Promise<IEventLog<TEvent>>;
 }
 
 export interface IScopedEventLogResolver {
-  resolve<TMap extends FieldMap>(
-    definition: IEventLogDefinition<TMap>
-  ): Promise<IEventLog<Event<TMap>>>;
+  resolve<TEvent extends CommonFields>(
+    logDefinition: EventLogDefinition<TEvent>
+  ): Promise<IEventLog<TEvent>>;
 }
 
-export interface IEventLog<TEvent> extends IEventLoggerTemplate<TEvent> {
+export interface IEventLog<TEvent extends CommonFields> extends IEventLoggerTemplate<TEvent> {
   getNames(): IndexNames;
 
   getQueryBuilder(): IEventQueryBuilder<TEvent>;
@@ -79,19 +57,19 @@ export interface IEventLog<TEvent> extends IEventLoggerTemplate<TEvent> {
 // -------------------------------------------------------------------------------------------------
 // Write API (logging events)
 
-export interface IEventLoggerTemplate<TEvent> {
+export interface IEventLoggerTemplate<TEvent extends CommonFields> {
   getLoggerTemplate(fields: DeepPartial<TEvent>): IEventLoggerTemplate<TEvent>;
   getLogger(name: string, fields?: DeepPartial<TEvent>): IEventLogger<TEvent>;
 }
 
-export interface IEventLogger<TEvent> extends IEventLoggerTemplate<TEvent> {
+export interface IEventLogger<TEvent extends CommonFields> extends IEventLoggerTemplate<TEvent> {
   logEvent(fields: DeepPartial<TEvent>): void;
 }
 
 // -------------------------------------------------------------------------------------------------
 // Read API (searching, filtering, sorting, pagination, aggregation over events)
 
-export interface IEventQueryBuilder<TEvent> {
+export interface IEventQueryBuilder<TEvent extends CommonFields> {
   filterByLogger(loggerName: string): IEventQueryBuilder<TEvent>;
   filterByFields(fields: DeepPartial<TEvent>): IEventQueryBuilder<TEvent>;
   filterByKql(kql: string): IEventQueryBuilder<TEvent>;

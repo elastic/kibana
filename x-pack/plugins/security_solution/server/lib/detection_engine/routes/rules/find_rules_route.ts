@@ -20,6 +20,7 @@ import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_s
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { transformFindAlerts } from './utils';
 import { getBulkRuleActionsSavedObject } from '../../rule_actions/get_bulk_rule_actions_saved_object';
+// import { commonSchema } from '../../../../../../rule_registry/server/event_log/common';
 
 export const findRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -52,6 +53,57 @@ export const findRulesRoute = (
         if (!alertsClient) {
           return siemResponse.error({ statusCode: 404 });
         }
+
+        // const eventLogClient = await context.ruleRegistry.getEventLogClient({
+        //   logName: 'execution.log',
+        //   schema: commonSchema,
+        //   templates: {
+        //     applicationDefinedComponentTemplate: {
+        //       mappings: {
+        //         dynamic: 'strict',
+        //         properties: {
+        //           kibana: {
+        //             properties: {
+        //               rac: {
+        //                 properties: {
+        //                   event_log: {
+        //                     properties: {
+        //                       log_name: {
+        //                         type: 'keyword',
+        //                       },
+        //                       logger_name: {
+        //                         type: 'keyword',
+        //                       },
+        //                     },
+        //                   },
+        //                 },
+        //               },
+        //             },
+        //           },
+        //         },
+        //       },
+        //     },
+        //   },
+        // });
+
+        // const ruleLogger = eventLogClient.getLogger('ruleExecutionLogger');
+
+        // ruleLogger.logEvent({
+        //   '@timestamp': [`${new Date().getTime()}`],
+        //   tags: ['test'],
+        //   'kibana.rac.alert.id': 'testId',
+        //   'kibana.rac.alert.status': 'warning',
+        // });
+
+        // const searchQuery = eventLogClient
+        //   .getQueryBuilder()
+        //   .filterByLogger('ruleExecutionLogger')
+        //   .sortBy([{ '@timestamp': { order: 'desc' } }])
+        //   .buildQuery();
+
+        // const events = await searchQuery.execute();
+
+        // console.log({ events });
 
         const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
         const rules = await findRules({

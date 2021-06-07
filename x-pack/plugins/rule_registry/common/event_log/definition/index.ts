@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export * from './schema_types';
-export * from './schema';
+export * from './event_log_definition';
+export * from './event_schema';
+export * from './ilm_policy';
+export * from './index_names';
+export * from './index_template';

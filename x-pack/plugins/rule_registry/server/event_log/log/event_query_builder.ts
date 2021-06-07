@@ -11,11 +11,12 @@ import { esKuery } from '../../../../../../src/plugins/data/server';
 
 import { DeepPartial } from '../utils/utility_types';
 import { mergeFields } from '../utils/fields';
-import { EventLogParams } from './internal_api';
+import { CommonFields } from '../common';
 import { IEventQueryBuilder, IEventQuery, SortingParams, PaginationParams } from './public_api';
+import { EventLogParams } from './internal_api';
 import { EventQuery } from './event_query';
 
-export class EventQueryBuilder<TEvent> implements IEventQueryBuilder<TEvent> {
+export class EventQueryBuilder<TEvent extends CommonFields> implements IEventQueryBuilder<TEvent> {
   private readonly params: EventLogParams;
   private loggerName: string;
   private fields: DeepPartial<TEvent> | null;

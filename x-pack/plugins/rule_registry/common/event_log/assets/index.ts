@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export * from './event_log_service';
-export * from './public_api';
+export * from './common_component_templates';
+export * from './common_schema';
+export * from './default_ilm_policy';

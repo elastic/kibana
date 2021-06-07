@@ -7,10 +7,11 @@
 
 import { DeepPartial } from '../utils/utility_types';
 import { mergeFields } from '../utils/fields';
-import { EventLoggerParams } from './internal_api';
+import { CommonFields } from '../common';
 import { IEventLogger, IEventLoggerTemplate } from './public_api';
+import { EventLoggerParams } from './internal_api';
 
-export class EventLogger<TEvent> implements IEventLogger<TEvent> {
+export class EventLogger<TEvent extends CommonFields> implements IEventLogger<TEvent> {
   private readonly params: EventLoggerParams<TEvent>;
   private readonly ownTemplate: IEventLoggerTemplate<TEvent>;
 

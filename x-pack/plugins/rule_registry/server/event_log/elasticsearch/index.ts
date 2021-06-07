@@ -9,6 +9,5 @@ export * from './index_bootstrapper';
 export * from './index_management_gateway';
 export * from './index_reader';
 export * from './index_writer';
-export * from './resources/ilm_policy';
-export * from './resources/index_mappings';
-export * from './resources/index_names';
+export * from './resources/index_spec';
+export * from './resources/index_templates';

@@ -7,19 +7,20 @@
 
 import { KibanaRequest } from 'kibana/server';
 
-import { Event, FieldMap } from '../event_schema';
+import { CommonFields, EventLogDefinition } from '../common';
 import {
   EventLogServiceConfig,
   EventLogServiceDependencies,
   IEventLog,
-  IEventLogDefinition,
   IEventLogResolver,
   IEventLogService,
   IScopedEventLogResolver,
 } from './public_api';
 
+import { EventLogObjectFactory } from './event_log_object_factory';
 import { EventLogRegistry } from './event_log_registry';
 import { EventLogResolver } from './event_log_resolver';
+import { BootstrapperOfCommonResources } from './bootstrapper_of_common_resources';
 
 const BOOTSTRAP_BY_DEFAULT = true;
 
@@ -29,17 +30,19 @@ interface ConstructorParams {
 }
 
 export class EventLogService implements IEventLogService {
+  private readonly factory: EventLogObjectFactory;
   private readonly registry: EventLogRegistry;
+  private readonly bootstrapper: BootstrapperOfCommonResources;
 
   constructor(private readonly params: ConstructorParams) {
+    this.factory = new EventLogObjectFactory(params.config, params.dependencies);
     this.registry = new EventLogRegistry();
+    this.bootstrapper = this.factory.createBootstrapperOfCommonResources();
   }
 
   public getResolver(bootstrapLog = BOOTSTRAP_BY_DEFAULT): IEventLogResolver {
-    const { params, registry } = this;
-    const { config, dependencies } = params;
-
-    return new EventLogResolver(config, dependencies, registry, bootstrapLog);
+    const isMechanismReady = this.bootstrapper.waitUntilFinished();
+    return new EventLogResolver(this.factory, this.registry, isMechanismReady, bootstrapLog);
   }
 
   public getScopedResolver(
@@ -49,19 +52,24 @@ export class EventLogService implements IEventLogService {
     const resolver = this.getResolver(bootstrapLog);
 
     return {
-      resolve: async <TMap extends FieldMap>(
-        definition: IEventLogDefinition<TMap>
-      ): Promise<IEventLog<Event<TMap>>> => {
+      resolve: async <TEvent extends CommonFields>(
+        logDefinition: EventLogDefinition<TEvent>
+      ): Promise<IEventLog<TEvent>> => {
         const spaces = await this.params.dependencies.spacesService;
         const spaceId = spaces.getSpaceId(request);
 
-        const log = await resolver.resolve(definition, spaceId);
+        const log = await resolver.resolve(logDefinition, spaceId);
         return log;
       },
     };
   }
 
+  public start(): void {
+    this.bootstrapper.start();
+  }
+
   public async stop(): Promise<void> {
+    await this.bootstrapper.waitUntilFinished();
     await this.registry.shutdown();
   }
 }

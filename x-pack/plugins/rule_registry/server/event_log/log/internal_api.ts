@@ -7,27 +7,27 @@
 
 import { Logger } from 'kibana/server';
 
-import { IIndexReader, IIndexWriter, IndexNames } from '../elasticsearch';
-import { Event, FieldMap } from '../event_schema';
+import { CommonFields, EventLogDefinition, IndexNames } from '../common';
+import { IIndexReader, IIndexWriter } from '../elasticsearch';
 import { DeepPartial } from '../utils/utility_types';
-import { IEventLogDefinition, IEventLog } from './public_api';
+import { IEventLog } from './public_api';
 
 export interface IEventLogRegistry {
-  get<TMap extends FieldMap>(
-    definition: IEventLogDefinition<TMap>,
+  get<TEvent extends CommonFields>(
+    definition: EventLogDefinition<TEvent>,
     spaceId: string
-  ): IEventLogProvider<Event<TMap>> | null;
+  ): IEventLogProvider<TEvent> | null;
 
-  add<TMap extends FieldMap>(
-    definition: IEventLogDefinition<TMap>,
+  add<TEvent extends CommonFields>(
+    definition: EventLogDefinition<TEvent>,
     spaceId: string,
-    provider: IEventLogProvider<Event<TMap>>
+    provider: IEventLogProvider<TEvent>
   ): void;
 
   shutdown(): Promise<void>;
 }
 
-export interface IEventLogProvider<TEvent> {
+export interface IEventLogProvider<TEvent extends CommonFields> {
   getLog(): IEventLog<TEvent>;
   bootstrapLog(): Promise<void>;
   shutdownLog(): Promise<void>;

@@ -5,12 +5,20 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, Plugin, CoreSetup, Logger } from 'src/core/server';
+import {
+  PluginInitializerContext,
+  Plugin,
+  CoreSetup,
+  Logger,
+  IContextProvider,
+} from 'src/core/server';
 import { SpacesPluginStart } from '../../spaces/server';
-
+import { APP_ID } from '../common/constants';
 import { RuleRegistryPluginConfig } from './config';
 import { RuleDataPluginService } from './rule_data_plugin_service';
 import { EventLogService, IEventLogService } from './event_log';
+import { RuleRegistryApiRequestHandlerContext, RuleRegistryRequestHandlerContext } from './types';
+import { CommonFields, EventLogDefinition } from './event_log/common';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface RuleRegistryPluginSetupDependencies {}
@@ -86,10 +94,41 @@ export class RuleRegistryPlugin
     });
 
     this.eventLogService = eventLogService;
+
+    core.http.registerRouteHandlerContext<RuleRegistryRequestHandlerContext, typeof APP_ID>(
+      APP_ID,
+      this.createRouteHandlerContext()
+    );
+
     return { ruleDataService, eventLogService };
   }
 
-  public start(): RuleRegistryPluginStartContract {}
+  public start(): RuleRegistryPluginStartContract {
+    const { eventLogService } = this;
+
+    if (eventLogService) {
+      eventLogService.start();
+    }
+  }
+
+  private createRouteHandlerContext = (): IContextProvider<
+    RuleRegistryRequestHandlerContext,
+    typeof APP_ID
+  > => {
+    const { eventLogService } = this;
+    return async (context, request): Promise<RuleRegistryApiRequestHandlerContext> => {
+      return {
+        getEventLogClient: async <TEvent extends CommonFields>(
+          logDefinition: EventLogDefinition<TEvent>
+        ) => {
+          const eventLogClient = await eventLogService!
+            .getScopedResolver(request)
+            .resolve(logDefinition);
+          return eventLogClient;
+        },
+      };
+    };
+  };
 
   public stop() {
     const { eventLogService, logger } = this;
