@@ -229,7 +229,7 @@ export const xyChart: ExpressionFunctionDefinition<
   },
 };
 
-export async function calculateMinInterval({ args: { layers }, data }: XYChartProps) {
+export function calculateMinInterval({ args: { layers }, data }: XYChartProps) {
   const filteredLayers = getFilteredLayers(layers, data);
   if (filteredLayers.length === 0) return;
   const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
@@ -287,7 +287,7 @@ export const getXyChartRenderer = (dependencies: {
           chartsThemeService={dependencies.chartsThemeService}
           paletteService={dependencies.paletteService}
           timeZone={dependencies.timeZone}
-          minInterval={await calculateMinInterval(config)}
+          minInterval={calculateMinInterval(config)}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
           renderMode={handlers.getRenderMode()}

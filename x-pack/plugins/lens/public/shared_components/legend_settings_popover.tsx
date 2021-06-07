@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiButtonGroup, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 import { ToolbarPopover } from '../shared_components';
+import { ToolbarButtonProps } from '../../../../../src/plugins/kibana_react/public';
 
 export interface LegendSettingsPopoverProps {
   /**
@@ -56,6 +57,10 @@ export interface LegendSettingsPopoverProps {
    * If true, value in legend switch is rendered
    */
   renderValueInLegendSwitch?: boolean;
+  /**
+   * Button group position
+   */
+  groupPosition?: ToolbarButtonProps['groupPosition'];
 }
 
 const toggleButtonsIcons = [
@@ -101,6 +106,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
   valueInLegend,
   onValueInLegendChange = () => {},
   renderValueInLegendSwitch,
+  groupPosition = 'right',
 }) => {
   return (
     <ToolbarPopover
@@ -108,7 +114,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
         defaultMessage: 'Legend',
       })}
       type="legend"
-      groupPosition="right"
+      groupPosition={groupPosition}
       buttonDataTestSubj="lnsLegendButton"
     >
       <EuiFormRow

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import styled from 'styled-components';
+import { EuiToolTip } from '@elastic/eui';
 
 /**
  * Applies CSS styling to enable text to be truncated with an ellipsis.
@@ -14,7 +16,7 @@ import styled from 'styled-components';
  * Note: Requires a parent container with a defined width or max-width.
  */
 
-export const TruncatableText = styled.span`
+const EllipsisText = styled.span`
   &,
   & * {
     display: inline-block;
@@ -25,4 +27,19 @@ export const TruncatableText = styled.span`
     white-space: nowrap;
   }
 `;
-TruncatableText.displayName = 'TruncatableText';
+EllipsisText.displayName = 'EllipsisText';
+
+interface Props {
+  tooltipContent?: React.ReactNode;
+  children: React.ReactNode;
+}
+
+export function TruncatableText({ tooltipContent, children, ...props }: Props) {
+  if (!tooltipContent) return <EllipsisText {...props}>{children}</EllipsisText>;
+
+  return (
+    <EuiToolTip display="block" content={tooltipContent}>
+      <EllipsisText {...props}>{children}</EllipsisText>
+    </EuiToolTip>
+  );
+}
