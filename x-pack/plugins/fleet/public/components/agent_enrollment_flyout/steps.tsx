@@ -10,9 +10,9 @@ import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import type { AgentPolicy, PackagePolicy } from '../../../../types';
-import { sendGetOneAgentPolicy } from '../../../../hooks';
-import { FLEET_SERVER_PACKAGE } from '../../../../constants';
+import type { AgentPolicy, PackagePolicy } from '../../types';
+import { sendGetOneAgentPolicy } from '../../hooks';
+import { FLEET_SERVER_PACKAGE } from '../../constants';
 
 import { EnrollmentStepAgentPolicy } from './agent_policy_selection';
 

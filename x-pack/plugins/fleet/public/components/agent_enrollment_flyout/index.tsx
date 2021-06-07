@@ -26,8 +26,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { useGetSettings, useUrlModal } from '../../../../hooks';
-import type { AgentPolicy } from '../../../../types';
+import { useGetSettings, useUrlModal } from '../../hooks';
+import type { AgentPolicy } from '../../types';
 
 import { ManagedInstructions } from './managed_instructions';
 import { StandaloneInstructions } from './standalone_instructions';
@@ -36,6 +36,11 @@ interface Props {
   onClose: () => void;
   agentPolicies?: AgentPolicy[];
 }
+
+export * from './agent_policy_selection';
+export * from './managed_instructions';
+export * from './standalone_instructions';
+export * from './steps';
 
 const MissingFleetServerHostCallout: React.FunctionComponent = () => {
   const { setModal } = useUrlModal();

@@ -13,5 +13,8 @@ export { ExtensionWrapper } from './extension_wrapper';
 export { AlphaMessaging } from './alpha_messaging';
 export { AlphaFlyout } from './alpha_flyout';
 export { HeaderProps, Header } from './header';
+export { NewEnrollmentTokenModal } from './new_enrollment_key_modal';
+export { AgentPolicyPackageBadges } from './agent_policy_package_badges';
 export * from './link_and_revision';
 export * from './settings_flyout';
+export * from './agent_enrollment_flyout';

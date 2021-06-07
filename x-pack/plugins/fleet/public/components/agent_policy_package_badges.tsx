@@ -10,11 +10,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiBadge, EuiCallOut } from '@elastic/eui';
 
-import { FLEET_SERVER_PACKAGE } from '../../../../../../common/constants';
+import { FLEET_SERVER_PACKAGE } from '../../common/constants';
 
-import type { PackagePolicy, PackagePolicyPackage } from '../../../types';
-import { useGetOneAgentPolicy } from '../../../hooks';
-import { PackageIcon } from '../../../components';
+import type { PackagePolicy, PackagePolicyPackage } from '../types';
+import { useGetOneAgentPolicy } from '../hooks';
+import { PackageIcon } from '../components';
 
 interface Props {
   agentPolicyId: string;
