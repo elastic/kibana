@@ -18,7 +18,6 @@ import {
   packageToPackagePolicy,
   isPackageLimited,
   doesAgentPolicyAlreadyIncludePackage,
-  doesPackageHaveIntegrations,
 } from '../../common';
 import type {
   DeletePackagePoliciesResponse,
