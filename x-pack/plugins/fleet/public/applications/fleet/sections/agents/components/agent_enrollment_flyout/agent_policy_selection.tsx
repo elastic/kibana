@@ -8,21 +8,25 @@
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSelect, EuiSpacer, EuiText, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButton, EuiCallOut, EuiSelect, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { SO_SEARCH_LIMIT } from '../../../../constants';
 import type { AgentPolicy, GetEnrollmentAPIKeysResponse } from '../../../../types';
-import { sendGetEnrollmentAPIKeys, useStartServices } from '../../../../hooks';
+import {
+  sendGetEnrollmentAPIKeys,
+  useStartServices,
+  sendCreateEnrollmentAPIKey,
+} from '../../../../hooks';
 import { AgentPolicyPackageBadges } from '../agent_policy_package_badges';
 
 type Props = {
   agentPolicies?: AgentPolicy[];
-  onAgentPolicyChange?: (key: string) => void;
+  onAgentPolicyChange?: (key?: string) => void;
   excludeFleetServer?: boolean;
 } & (
   | {
       withKeySelection: true;
-      onKeyChange?: (key: string) => void;
+      onKeyChange?: (key?: string) => void;
     }
   | {
       withKeySelection: false;
@@ -38,6 +42,8 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
   const [enrollmentAPIKeys, setEnrollmentAPIKeys] = useState<GetEnrollmentAPIKeysResponse['list']>(
     []
   );
+  const [isLoadingEnrollmentKey, setIsLoadingEnrollmentKey] = useState(false);
+
   const [selectedState, setSelectedState] = useState<{
     agentPolicyId?: string;
     enrollmentAPIKeyId?: string;
@@ -45,7 +51,7 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
 
   useEffect(
     function triggerOnAgentPolicyChangeEffect() {
-      if (onAgentPolicyChange && selectedState.agentPolicyId) {
+      if (onAgentPolicyChange) {
         onAgentPolicyChange(selectedState.agentPolicyId);
       }
     },
@@ -58,7 +64,7 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
         return;
       }
 
-      if (selectedState.enrollmentAPIKeyId) {
+      if (onKeyChange) {
         onKeyChange(selectedState.enrollmentAPIKeyId);
       }
     },
@@ -94,6 +100,7 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
         return;
       }
       if (!selectedState.agentPolicyId) {
+        setIsAuthenticationSettingsOpen(true);
         setEnrollmentAPIKeys([]);
         return;
       }
@@ -204,28 +211,89 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
           {isAuthenticationSettingsOpen && (
             <>
               <EuiSpacer size="m" />
-              <EuiSelect
-                fullWidth
-                options={enrollmentAPIKeys.map((key) => ({
-                  value: key.id,
-                  text: key.name,
-                }))}
-                value={selectedState.enrollmentAPIKeyId || undefined}
-                prepend={
-                  <EuiText>
+              {enrollmentAPIKeys.length && selectedState.enrollmentAPIKeyId ? (
+                <EuiSelect
+                  fullWidth
+                  options={enrollmentAPIKeys.map((key) => ({
+                    value: key.id,
+                    text: key.name,
+                  }))}
+                  value={selectedState.enrollmentAPIKeyId || undefined}
+                  prepend={
+                    <EuiText>
+                      <FormattedMessage
+                        id="xpack.fleet.enrollmentStepAgentPolicy.enrollmentTokenSelectLabel"
+                        defaultMessage="Enrollment token"
+                      />
+                    </EuiText>
+                  }
+                  onChange={(e) => {
+                    setSelectedState({
+                      ...selectedState,
+                      enrollmentAPIKeyId: e.target.value,
+                    });
+                  }}
+                />
+              ) : (
+                <EuiCallOut
+                  color="warning"
+                  title={i18n.translate(
+                    'xpack.fleet.enrollmentStepAgentPolicy.noEnrollmentTokensForSelectedPolicyCallout',
+                    {
+                      defaultMessage:
+                        'There are no enrollment tokens for the selected agent policy',
+                    }
+                  )}
+                >
+                  <div className="eui-textBreakWord">
                     <FormattedMessage
-                      id="xpack.fleet.enrollmentStepAgentPolicy.enrollmentTokenSelectLabel"
-                      defaultMessage="Enrollment token"
+                      id="xpack.fleet.agentEnrenrollmentStepAgentPolicyollment.noEnrollmentTokensForSelectedPolicyCalloutDescription"
+                      defaultMessage="You must create and enrollment token in order to enroll agents with this policy"
                     />
-                  </EuiText>
-                }
-                onChange={(e) => {
-                  setSelectedState({
-                    ...selectedState,
-                    enrollmentAPIKeyId: e.target.value,
-                  });
-                }}
-              />
+                  </div>
+                  <EuiSpacer size="m" />
+                  <EuiButton
+                    iconType="plusInCircle"
+                    isLoading={isLoadingEnrollmentKey}
+                    fill
+                    onClick={() => {
+                      setIsLoadingEnrollmentKey(true);
+                      if (selectedState.agentPolicyId) {
+                        sendCreateEnrollmentAPIKey({ policy_id: selectedState.agentPolicyId })
+                          .then((res) => {
+                            if (res.error) {
+                              throw res.error;
+                            }
+                            setIsLoadingEnrollmentKey(false);
+                            if (res.data?.item) {
+                              setEnrollmentAPIKeys([res.data.item]);
+                              setSelectedState({
+                                ...selectedState,
+                                enrollmentAPIKeyId: res.data.item.id,
+                              });
+                              notifications.toasts.addSuccess(
+                                i18n.translate('xpack.fleet.newEnrollmentKey.keyCreatedToasts', {
+                                  defaultMessage: 'Enrollment token created',
+                                })
+                              );
+                            }
+                          })
+                          .catch((error) => {
+                            setIsLoadingEnrollmentKey(false);
+                            notifications.toasts.addError(error, {
+                              title: 'Error',
+                            });
+                          });
+                      }
+                    }}
+                  >
+                    <FormattedMessage
+                      id="xpack.fleet.enrollmentStepAgentPolicy.setUpAgentsLink"
+                      defaultMessage="Create enrollment token"
+                    />
+                  </EuiButton>
+                </EuiCallOut>
+              )}
             </>
           )}
         </>

@@ -12,7 +12,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { ApplicationStart } from 'src/core/public';
 import { createNavigateToUrlClickHandler } from './click_handler';
 
-interface RedirectCrossAppLinksProps {
+interface RedirectCrossAppLinksProps extends React.HTMLAttributes<HTMLDivElement> {
   application: ApplicationStart;
   className?: string;
   'data-test-subj'?: string;
