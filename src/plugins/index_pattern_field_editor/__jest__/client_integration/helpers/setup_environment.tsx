@@ -44,12 +44,30 @@ export const setupEnvironment = () => {
   };
 };
 
+export const indexPatternFields = [
+  {
+    name: 'field1',
+    displayName: 'field1',
+  },
+  {
+    name: 'field2',
+    displayName: 'field2',
+  },
+  {
+    name: 'field3',
+    displayName: 'field3',
+  },
+];
+
 export const WithFieldEditorDependencies = <T extends object = { [key: string]: unknown }>(
   Comp: FunctionComponent<T>,
   overridingDependencies?: Partial<Context>
 ) => (props: T) => {
   const dependencies: Context = {
-    indexPattern: { title: 'testIndexPattern' } as any,
+    indexPattern: {
+      title: 'testIndexPattern',
+      fields: { getAll: () => indexPatternFields },
+    } as any,
     uiSettings: {} as any,
     fieldTypeToProcess: 'runtime',
     existingConcreteFields: [],

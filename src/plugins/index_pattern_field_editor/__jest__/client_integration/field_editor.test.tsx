@@ -78,8 +78,8 @@ describe('<FieldEditor />', () => {
     httpRequestsMockHelpers.setFieldPreviewResponse({ message: 'TODO: set by Jest test' });
   });
 
-  test('initial state should have "set custom label", "set value" and "set format" turned off', () => {
-    testBed = setup();
+  test('initial state should have "set custom label", "set value" and "set format" turned off', async () => {
+    testBed = await setup();
 
     ['customLabel', 'value', 'format'].forEach((row) => {
       const testSubj = `${row}Row.toggle`;
@@ -102,7 +102,7 @@ describe('<FieldEditor />', () => {
       script: { source: 'emit("hello")' },
     };
 
-    testBed = setup({ onChange, field });
+    testBed = await setup({ onChange, field });
 
     expect(onChange).toHaveBeenCalled();
 
@@ -123,7 +123,7 @@ describe('<FieldEditor />', () => {
   describe('validation', () => {
     test('should accept an optional list of existing fields and prevent creating duplicates', async () => {
       const existingFields = ['myRuntimeField'];
-      testBed = setup(
+      testBed = await setup(
         {
           onChange,
         },
@@ -164,7 +164,7 @@ describe('<FieldEditor />', () => {
         script: { source: 'emit("hello"' },
       };
 
-      testBed = setup(
+      testBed = await setup(
         {
           field,
           onChange,
@@ -214,15 +214,19 @@ describe('<FieldEditor />', () => {
         );
       };
 
-      const customTestbed = registerTestBed(WithFieldEditorDependencies(TestComponent), {
-        memoryRouter: {
-          wrapComponent: false,
-        },
-      })() as TestBed<string>;
+      let customTestbed: TestBed<string>;
+
+      await act(async () => {
+        customTestbed = await registerTestBed(WithFieldEditorDependencies(TestComponent), {
+          memoryRouter: {
+            wrapComponent: false,
+          },
+        })();
+      });
 
       testBed = {
-        ...customTestbed,
-        actions: getCommonActions(customTestbed),
+        ...customTestbed!,
+        actions: getCommonActions(customTestbed!),
       };
 
       const {
