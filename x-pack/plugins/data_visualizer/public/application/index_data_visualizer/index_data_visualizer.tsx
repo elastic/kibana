@@ -178,15 +178,7 @@ export const DataVisualizerUrlStateContextProvider: FC<DataVisualizerUrlStateCon
 
 export const IndexDataVisualizer: FC = () => {
   const coreStart = getCoreStart();
-  const {
-    data,
-    maps,
-    embeddable,
-    share,
-    security,
-    fileUpload,
-    indexPatternFieldEditor,
-  } = getPluginsStart();
+  const { data, maps, embeddable, share, security, fileUpload } = getPluginsStart();
   const services = {
     data,
     maps,
@@ -194,7 +186,6 @@ export const IndexDataVisualizer: FC = () => {
     share,
     security,
     fileUpload,
-    indexPatternFieldEditor,
     ...coreStart,
   };
 

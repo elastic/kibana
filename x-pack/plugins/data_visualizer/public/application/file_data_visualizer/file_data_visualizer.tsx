@@ -15,15 +15,7 @@ import { FileDataVisualizerView } from './components/file_data_visualizer_view/i
 export type FileDataVisualizerSpec = typeof FileDataVisualizer;
 export const FileDataVisualizer: FC = () => {
   const coreStart = getCoreStart();
-  const {
-    data,
-    maps,
-    embeddable,
-    share,
-    security,
-    fileUpload,
-    indexPatternFieldEditor,
-  } = getPluginsStart();
+  const { data, maps, embeddable, share, security, fileUpload } = getPluginsStart();
   const services = {
     data,
     maps,
@@ -31,7 +23,6 @@ export const FileDataVisualizer: FC = () => {
     share,
     security,
     fileUpload,
-    indexPatternFieldEditor,
     ...coreStart,
   };
 

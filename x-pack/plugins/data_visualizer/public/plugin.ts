@@ -33,7 +33,6 @@ export interface DataVisualizerStartDependencies {
   security?: SecurityPluginSetup;
   share: SharePluginStart;
   lens?: LensPublicStart;
-  indexPatternFieldEditor?: IndexPatternFieldEditorStart;
 }
 
 export type DataVisualizerPluginSetup = ReturnType<DataVisualizerPlugin['setup']>;

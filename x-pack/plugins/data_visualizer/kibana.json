@@ -17,7 +17,6 @@
     "maps",
     "home",
     "lens",
-    "indexPatternFieldEditor"
   ],
   "requiredBundles": [
     "kibanaReact",
