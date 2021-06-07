@@ -681,7 +681,6 @@ function generateNewAndRecoveredInstanceEvents<
   const newIds = without(currentAlertInstanceIds, ...originalAlertInstanceIds);
 
   for (const id of recoveredAlertInstanceIds) {
-    // console.log(`recovered instance: ${JSON.stringify(recoveredAlertInstances[id])}`);
     const { group: actionGroup, subgroup: actionSubgroup } =
       recoveredAlertInstances[id].getLastScheduledActions() ?? {};
     const state = recoveredAlertInstances[id].getState();
@@ -697,7 +696,6 @@ function generateNewAndRecoveredInstanceEvents<
   }
 
   for (const id of newIds) {
-    // console.log(`new instance: ${JSON.stringify(currentAlertInstances[id])}`);
     const { actionGroup, subgroup: actionSubgroup } =
       currentAlertInstances[id].getScheduledActionOptions() ?? {};
     const state = currentAlertInstances[id].getState();
@@ -713,7 +711,6 @@ function generateNewAndRecoveredInstanceEvents<
   }
 
   for (const id of currentAlertInstanceIds) {
-    // console.log(`active instance: ${JSON.stringify(currentAlertInstances[id])}`);
     const { actionGroup, subgroup: actionSubgroup } =
       currentAlertInstances[id].getScheduledActionOptions() ?? {};
     const state = currentAlertInstances[id].getState();
