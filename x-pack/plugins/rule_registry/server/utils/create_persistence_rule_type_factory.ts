@@ -4,8 +4,40 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { ESSearchRequest } from 'typings/elasticsearch';
 import v4 from 'uuid/v4';
-import { CreatePersistenceRuleTypeFactory } from './persistence_types';
+import { Logger } from '@kbn/logging';
+
+import { AlertInstance } from '../../../alerting/server';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertTypeParams,
+} from '../../../alerting/common';
+import { RuleDataClient } from '../rule_data_client';
+import { AlertTypeWithExecutor } from '../types';
+
+type PersistenceAlertService<TAlertInstanceContext extends Record<string, unknown>> = (
+  alerts: Array<Record<string, unknown>>
+) => Array<AlertInstance<AlertInstanceState, TAlertInstanceContext, string>>;
+
+type PersistenceAlertQueryService = (
+  query: ESSearchRequest
+) => Promise<Array<Record<string, unknown>>>;
+
+type CreatePersistenceRuleTypeFactory = (options: {
+  ruleDataClient: RuleDataClient;
+  logger: Logger;
+}) => <
+  TParams extends AlertTypeParams,
+  TAlertInstanceContext extends AlertInstanceContext,
+  TServices extends {
+    alertWithPersistence: PersistenceAlertService<TAlertInstanceContext>;
+    findAlerts: PersistenceAlertQueryService;
+  }
+>(
+  type: AlertTypeWithExecutor<TParams, TAlertInstanceContext, TServices>
+) => AlertTypeWithExecutor<TParams, TAlertInstanceContext, any>;
 
 export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory = ({
   logger,
@@ -40,7 +72,7 @@ export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory 
               ignore_unavailable: true,
             });
             return body.hits.hits
-              .map((event: unknown) => (event as { _source: any })._source!)
+              .map((event: { _source: any }) => event._source!)
               .map((event: { [x: string]: any }) => {
                 const alertUuid = event['kibana.rac.alert.uuid'];
                 const isAlert = alertUuid != null;
