@@ -14,19 +14,19 @@ export function MachineLearningDataVisualizerProvider({ getService }: FtrProvide
 
   return {
     async assertDataVisualizerImportDataCardExists() {
-      await testSubjects.existOrFail('dataVisualizerCardImportData');
+      await testSubjects.existOrFail('mlDataVisualizerCardImportData');
     },
 
     async assertDataVisualizerIndexDataCardExists() {
-      await testSubjects.existOrFail('dataVisualizerCardIndexData');
+      await testSubjects.existOrFail('mlDataVisualizerCardIndexData');
     },
 
     async assertDataVisualizerStartTrialCardExists() {
-      await testSubjects.existOrFail('dataVisualizerCardStartTrial');
+      await testSubjects.existOrFail('mlDataVisualizerCardStartTrial');
     },
 
     async assertSelectIndexButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('dataVisualizerSelectIndexButton');
+      const isEnabled = await testSubjects.isEnabled('mlDataVisualizerSelectIndexButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "select index" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
@@ -36,7 +36,7 @@ export function MachineLearningDataVisualizerProvider({ getService }: FtrProvide
     },
 
     async assertUploadFileButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('dataVisualizerUploadFileButton');
+      const isEnabled = await testSubjects.isEnabled('mlDataVisualizerUploadFileButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "upload file" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
@@ -46,7 +46,7 @@ export function MachineLearningDataVisualizerProvider({ getService }: FtrProvide
     },
 
     async assertStartTrialButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('dataVisualizerStartTrialButton');
+      const isEnabled = await testSubjects.isEnabled('mlDataVisualizerStartTrialButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "start trial" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
@@ -56,12 +56,12 @@ export function MachineLearningDataVisualizerProvider({ getService }: FtrProvide
     },
 
     async navigateToIndexPatternSelection() {
-      await testSubjects.click('dataVisualizerSelectIndexButton');
+      await testSubjects.click('mlDataVisualizerSelectIndexButton');
       await testSubjects.existOrFail('mlPageSourceSelection');
     },
 
     async navigateToFileUpload() {
-      await testSubjects.click('dataVisualizerUploadFileButton');
+      await testSubjects.click('mlDataVisualizerUploadFileButton');
       await testSubjects.existOrFail('dataVisualizerPageFileUpload');
     },
   };

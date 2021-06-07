@@ -113,7 +113,7 @@ export const useDataGrid = (
             <ColumnChart
               chartData={chartData}
               columnType={c}
-              dataTestSubj={`dataVisualizerDataGridChart-${c.id}`}
+              dataTestSubj={`mlDataGridChart-${c.id}`}
             />
           ) : undefined,
       };
