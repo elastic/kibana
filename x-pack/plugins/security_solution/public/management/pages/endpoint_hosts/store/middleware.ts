@@ -41,19 +41,19 @@ import {
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../fleet/common';
 import {
   ENDPOINT_ACTION_LOG_ROUTE,
-  HOST_METADATA_GET_API,
-  HOST_METADATA_LIST_API,
+  HOST_METADATA_GET_ROUTE,
+  HOST_METADATA_LIST_ROUTE,
   metadataCurrentIndexPattern,
 } from '../../../../../common/endpoint/constants';
 import { IIndexPattern, Query } from '../../../../../../../../src/plugins/data/public';
-import { resolvePathVariables } from '../../../common/utils';
 import {
   createFailedResourceState,
   createLoadedResourceState,
   createLoadingResourceState,
 } from '../../../state';
-import { isolateHost } from '../../../../common/lib/host_isolation';
+import { isolateHost, unIsolateHost } from '../../../../common/lib/host_isolation';
 import { AppAction } from '../../../../common/store/actions';
+import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 
 type EndpointPageStore = ImmutableMiddlewareAPI<EndpointState, AppAction>;
 
@@ -104,7 +104,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       try {
         const decodedQuery: Query = searchBarQuery(getState());
 
-        endpointResponse = await coreStart.http.post<HostResultList>(HOST_METADATA_LIST_API, {
+        endpointResponse = await coreStart.http.post<HostResultList>(HOST_METADATA_LIST_ROUTE, {
           body: JSON.stringify({
             paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
             filters: { kql: decodedQuery.query },
@@ -253,7 +253,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       if (listData(getState()).length === 0) {
         const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
         try {
-          const response = await coreStart.http.post(HOST_METADATA_LIST_API, {
+          const response = await coreStart.http.post(HOST_METADATA_LIST_ROUTE, {
             body: JSON.stringify({
               paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
             }),
@@ -303,7 +303,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       const { selected_endpoint: selectedEndpoint } = uiQueryParams(getState());
       try {
         const response = await coreStart.http.get<HostInfo>(
-          resolvePathVariables(HOST_METADATA_GET_API, { id: selectedEndpoint as string })
+          resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: selectedEndpoint as string })
         );
         dispatch({
           type: 'serverReturnedEndpointDetails',
@@ -458,7 +458,7 @@ const getAgentAndPoliciesForEndpointsList = async (
 const endpointsTotal = async (http: HttpStart): Promise<number> => {
   try {
     return (
-      await http.post<HostResultList>(HOST_METADATA_LIST_API, {
+      await http.post<HostResultList>(HOST_METADATA_LIST_ROUTE, {
         body: JSON.stringify({
           paging_properties: [{ page_index: 0 }, { page_size: 1 }],
         }),
@@ -504,7 +504,13 @@ const handleIsolateEndpointHost = async (
 
   try {
     // Cast needed below due to the value of payload being `Immutable<>`
-    const response = await isolateHost(action.payload as HostIsolationRequestBody);
+    let response: HostIsolationResponse;
+
+    if (action.payload.type === 'unisolate') {
+      response = await unIsolateHost(action.payload.data as HostIsolationRequestBody);
+    } else {
+      response = await isolateHost(action.payload.data as HostIsolationRequestBody);
+    }
 
     dispatch({
       type: 'endpointIsolationRequestStateChange',
