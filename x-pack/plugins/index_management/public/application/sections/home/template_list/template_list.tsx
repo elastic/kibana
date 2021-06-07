@@ -253,8 +253,8 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
           {/* Composable index templates table */}
           {renderTemplatesTable()}
 
-          {/* Legacy index templates table */}
-          {renderLegacyTemplatesTable()}
+          {/* Legacy index templates table. We discourage their adoption if the user isn't already using them. */}
+          {filteredTemplates.legacyTemplates.length > 0 && renderLegacyTemplatesTable()}
         </Fragment>
       );
     }
