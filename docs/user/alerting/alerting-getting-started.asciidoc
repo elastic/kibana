@@ -30,7 +30,10 @@ A rule specifies a background task that runs on the {kib} server to check for sp
 * *Schedule*: when/how often should detection checks run?
 * *Actions*: what happens when a condition is detected?
 
-For example, when monitoring a set of servers, a rule might check for average CPU usage > 0.9 on each server for the last two minutes (condition), checked every minute (schedule), sending a warning email message via SMTP with subject `CPU on {{server}} is high` (action).
+For example, when monitoring a set of servers, a rule might: 
+* Check for average CPU usage > 0.9 on each server for the last two minutes (condition).
+* Check every minute (schedule).
+* Send a warning email message via SMTP with subject `CPU on {{server}} is high` (action).
 
 image::images/what-is-a-rule.svg[Three components of a rule]
 
@@ -40,7 +43,7 @@ The following sections describe each part of the rule in more detail.
 [[alerting-concepts-conditions]]
 ==== Conditions
 
-Under the hood, {kib} rules detect conditions by running a javascript function on the {kib} server, which gives it the flexibility to support a wide range of conditions, anything from the results of a simple {es} query to heavy computations involving data from multiple sources or external systems. 
+Under the hood, {kib} rules detect conditions by running a Javascript function on the {kib} server, which gives it the flexibility to support a wide range of conditions, anything from the results of a simple {es} query to heavy computations involving data from multiple sources or external systems. 
 
 These conditions are packaged and exposed as *rule types*. A rule type hides the underlying details of the condition, and exposes a set of parameters
 to control the details of the conditions to detect.
@@ -68,9 +71,9 @@ Actions are invocations of connectors, which allow interaction with {kib} servic
 
 When defining actions in a rule, you specify:
 
-* the *connector type*: the type of service or integration to use
-* the connection for that type by referencing a <<alerting-concepts-connectors, connector>>
-* a mapping of rule values to properties exposed for that type of action
+* The *connector type*: the type of service or integration to use
+* The connection for that type by referencing a <<alerting-concepts-connectors, connector>>
+* A mapping of rule values to properties exposed for that type of action
 
 The result is a template: all the parameters needed to invoke a service are supplied except for specific values that are only known at the time the rule condition is detected. 
 
