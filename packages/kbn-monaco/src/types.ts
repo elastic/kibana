@@ -15,5 +15,8 @@ export interface LangModule {
   getSyntaxErrors?: Function;
 }
 
-
-
+export interface CompleteLangModule extends LangModule {
+  languageConfiguration: monaco.languages.LanguageConfiguration;
+  getSuggestionProvider: Function;
+  getSyntaxErrors: Function;
+}
