@@ -13,10 +13,36 @@ import type { PackageListItem } from '../../../../types';
 
 interface Props {
   updatablePackages: PackageListItem[];
+  updatableIntegrations: Record<string, any[]>;
 }
 
-export const UpgradeCallout = memo(({ updatablePackages }: Props) => {
-  if (!updatablePackages.length) return null;
+export const UpgradeCallout = memo(({ updatablePackages, updatableIntegrations }: Props) => {
+  const integrationsCount = Object.keys(updatableIntegrations).length;
+  if (!updatablePackages.length && !integrationsCount) return null;
+
+  const integrationsMessage = integrationsCount ? (
+    <p>
+      {i18n.translate('xpack.fleet.epm.integrationUpgradesAvailable', {
+        defaultMessage:
+          '{count, plural, one {# integration} other {# integrations}} have been upgraded, click here to upgrade your policies.',
+        values: {
+          count: integrationsCount,
+        },
+      })}
+    </p>
+  ) : null;
+
+  const packagesMessage = updatablePackages.length ? (
+    <p>
+      {i18n.translate('xpack.fleet.epm.packageUpgradesAvailable', {
+        defaultMessage:
+          'Upgrades are available for {count, plural, one {# package} other {# packages}}.',
+        values: {
+          count: updatablePackages.length,
+        },
+      })}
+    </p>
+  ) : null;
 
   return (
     <>
@@ -26,15 +52,8 @@ export const UpgradeCallout = memo(({ updatablePackages }: Props) => {
         })}
         iconType="alert"
       >
-        <p>
-          {i18n.translate('xpack.fleet.epm.packageUpgradesAvailable', {
-            defaultMessage:
-              'Upgrades are available for {count, plural, one {# package} other {# packages}.}',
-            values: {
-              count: updatablePackages.length,
-            },
-          })}
-        </p>
+        {integrationsMessage}
+        {packagesMessage}
       </EuiCallOut>
       <EuiSpacer size="m" />
     </>

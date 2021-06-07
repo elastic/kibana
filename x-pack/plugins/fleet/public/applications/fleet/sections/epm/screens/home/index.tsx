@@ -13,10 +13,21 @@ import { i18n } from '@kbn/i18n';
 
 import { installationStatuses } from '../../../../../../../common/constants';
 import { PAGE_ROUTING_PATHS } from '../../../../constants';
-import { useLink, useGetCategories, useGetPackages, useBreadcrumbs } from '../../../../hooks';
+import {
+  useLink,
+  useGetCategories,
+  useGetPackages,
+  useBreadcrumbs,
+  useGetAgentPolicies,
+} from '../../../../hooks';
 import { doesPackageHaveIntegrations } from '../../../../services';
 import { WithHeaderLayout } from '../../../../layouts';
-import type { CategorySummaryItem, PackageList, PackageListItem } from '../../../../types';
+import type {
+  CategorySummaryItem,
+  PackageList,
+  PackageListItem,
+  PackagePolicy,
+} from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
 
 import { CategoryFacets } from './category_facets';
@@ -29,7 +40,13 @@ export const EPMHomePage: React.FC = memo(() => {
   } = useRouteMatch<{ tabId?: string }>();
   const { getHref } = useLink();
 
-  const { allPackages, allInstalledPackages, updatablePackages, isLoadingPackages } = usePackages();
+  const {
+    allPackages,
+    allInstalledPackages,
+    updatablePackages,
+    updatableIntegrations,
+    isLoadingPackages,
+  } = usePackages();
 
   return (
     <WithHeaderLayout
@@ -56,7 +73,10 @@ export const EPMHomePage: React.FC = memo(() => {
         ] as unknown) as EuiTabProps[]
       }
     >
-      <UpgradeCallout updatablePackages={updatablePackages} />
+      <UpgradeCallout
+        updatablePackages={updatablePackages}
+        updatableIntegrations={updatableIntegrations}
+      />
       <Switch>
         <Route path={PAGE_ROUTING_PATHS.integrations_installed}>
           <InstalledPackages
@@ -107,6 +127,11 @@ const usePackages = () => {
   const { data: allPackages, isLoading: isLoadingPackages } = useGetPackages({
     experimental: true,
   });
+
+  const { data: agentPolicyData } = useGetAgentPolicies({
+    full: true,
+  });
+
   const allInstalledPackages = useMemo(
     () =>
       (allPackages?.response || []).filter((pkg) => pkg.status === installationStatuses.Installed),
@@ -122,7 +147,38 @@ const usePackages = () => {
     [allInstalledPackages]
   );
 
-  return { allPackages, allInstalledPackages, updatablePackages, isLoadingPackages };
+  const updatableIntegrations = useMemo(
+    () =>
+      (agentPolicyData?.items || []).reduce((result, policy) => {
+        policy.package_policies.forEach((pkgPolicy: PackagePolicy | string) => {
+          if (typeof pkgPolicy === 'string' || !pkgPolicy.package) return false;
+          const { name, version } = pkgPolicy.package;
+          const installedPackage = allInstalledPackages.find(
+            (installedPkg) =>
+              'savedObject' in installedPkg && installedPkg.savedObject.attributes.name === name
+          );
+          if (
+            installedPackage &&
+            'savedObject' in installedPackage &&
+            semverLt(version, installedPackage.savedObject.attributes.version)
+          ) {
+            const policiesList = Reflect.get(result, name) || [];
+            policiesList.push(pkgPolicy.id);
+            Reflect.set(result, name, policiesList);
+          }
+        });
+        return result;
+      }, {}),
+    [allInstalledPackages, agentPolicyData]
+  );
+
+  return {
+    allPackages,
+    allInstalledPackages,
+    updatablePackages,
+    updatableIntegrations,
+    isLoadingPackages,
+  };
 };
 
 interface InstalledPackagesProps {
