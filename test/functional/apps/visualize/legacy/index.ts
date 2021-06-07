@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context.d';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
 
 export default function ({ getPageObjects, getService, loadTestFile }: FtrProviderContext) {

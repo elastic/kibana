@@ -14,7 +14,8 @@
   ],
   "optionalPlugins": [
     "security",
-    "maps"
+    "maps",
+    "home"
   ],
   "requiredBundles": [
     "kibanaReact",

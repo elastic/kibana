@@ -14,6 +14,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 
 import { JobStatus, Threshold, ThresholdNormalized } from './schemas/common/schemas';
 
@@ -21,11 +22,6 @@ export const hasLargeValueItem = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
 ) => {
   return exceptionItems.some((exceptionItem) => hasLargeValueList(exceptionItem.entries));
-};
-
-export const hasLargeValueList = (entries: EntriesArray): boolean => {
-  const found = entries.filter(({ type }) => type === 'list');
-  return found.length > 0;
 };
 
 export const hasNestedEntry = (entries: EntriesArray): boolean => {

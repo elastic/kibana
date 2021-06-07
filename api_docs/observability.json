@@ -170,7 +170,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
-          "lineNumber": 34
+          "lineNumber": 36
         },
         "deprecated": false,
         "children": [
@@ -186,7 +186,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
-              "lineNumber": 34
+              "lineNumber": 36
             },
             "deprecated": false,
             "isRequired": true
@@ -283,7 +283,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
-          "lineNumber": 14
+          "lineNumber": 16
         },
         "deprecated": false,
         "children": [
@@ -299,7 +299,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
-              "lineNumber": 14
+              "lineNumber": 16
             },
             "deprecated": false,
             "isRequired": true
@@ -322,7 +322,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
-          "lineNumber": 24
+          "lineNumber": 26
         },
         "deprecated": false,
         "children": [
@@ -338,7 +338,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
-              "lineNumber": 24
+              "lineNumber": 26
             },
             "deprecated": false,
             "isRequired": true
@@ -1050,7 +1050,7 @@
             "label": "unsafe",
             "description": [],
             "signature": [
-              "{ alertingExperience: { enabled: boolean; }; }"
+              "{ alertingExperience: { enabled: boolean; }; cases: { enabled: boolean; }; }"
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/index.ts",
@@ -2040,7 +2040,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/observability/public/plugin.ts",
-          "lineNumber": 40
+          "lineNumber": 42
         },
         "deprecated": false,
         "children": [
@@ -2062,7 +2062,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/plugin.ts",
-              "lineNumber": 41
+              "lineNumber": 43
             },
             "deprecated": false
           },
@@ -2084,7 +2084,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/plugin.ts",
-              "lineNumber": 42
+              "lineNumber": 44
             },
             "deprecated": false
           },
@@ -2107,7 +2107,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/plugin.ts",
-              "lineNumber": 43
+              "lineNumber": 45
             },
             "deprecated": false
           }
@@ -2123,7 +2123,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/observability/public/plugin.ts",
-          "lineNumber": 46
+          "lineNumber": 48
         },
         "deprecated": false,
         "children": [
@@ -2146,7 +2146,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/plugin.ts",
-              "lineNumber": 47
+              "lineNumber": 49
             },
             "deprecated": false
           },
@@ -2168,7 +2168,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/plugin.ts",
-              "lineNumber": 48
+              "lineNumber": 50
             },
             "deprecated": false
           },
@@ -2190,7 +2190,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/plugin.ts",
-              "lineNumber": 49
+              "lineNumber": 51
             },
             "deprecated": false
           },
@@ -2212,7 +2212,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/plugin.ts",
-              "lineNumber": 50
+              "lineNumber": 52
             },
             "deprecated": false
           }
@@ -2838,7 +2838,7 @@
           "METRIC_TYPE"
         ],
         "source": {
-          "path": "node_modules/@kbn/analytics/target/types/metrics/index.d.ts",
+          "path": "node_modules/@kbn/analytics/target_types/metrics/index.d.ts",
           "lineNumber": 10
         },
         "deprecated": false,
@@ -3142,11 +3142,15 @@
           "section": "def-public.AlertTypeModel",
           "text": "AlertTypeModel"
         },
-        "<any> & { format: Formatter; }) => void; getFormatter: (typeId: string) => Formatter | undefined; }; isAlertingExperienceEnabled: () => boolean; }"
+        "<any> & { format: Formatter; }) => void; getFormatter: (typeId: string) => Formatter | undefined; }; isAlertingExperienceEnabled: () => boolean; navigation: { registerSections: (sections$: ",
+        "Observable",
+        "<",
+        "NavigationSection",
+        "[]>) => void; }; }"
       ],
       "source": {
         "path": "x-pack/plugins/observability/public/plugin.ts",
-        "lineNumber": 38
+        "lineNumber": 40
       },
       "deprecated": false,
       "lifecycle": "setup",
@@ -3160,11 +3164,13 @@
       "label": "ObservabilityPublicStart",
       "description": [],
       "signature": [
-        "void"
+        "{ navigation: { PageTemplate: (pageTemplateProps: ",
+        "WrappedPageTemplateProps",
+        ") => JSX.Element; }; }"
       ],
       "source": {
         "path": "x-pack/plugins/observability/public/plugin.ts",
-        "lineNumber": 53
+        "lineNumber": 55
       },
       "deprecated": false,
       "lifecycle": "start",
@@ -3431,7 +3437,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/observability/server/utils/queries.ts",
-          "lineNumber": 25
+          "lineNumber": 35
         },
         "deprecated": false,
         "children": [
@@ -3447,7 +3453,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/server/utils/queries.ts",
-              "lineNumber": 25
+              "lineNumber": 35
             },
             "deprecated": false,
             "isRequired": false
@@ -3470,7 +3476,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/observability/server/utils/queries.ts",
-          "lineNumber": 11
+          "lineNumber": 21
         },
         "deprecated": false,
         "children": [
@@ -3486,7 +3492,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/server/utils/queries.ts",
-              "lineNumber": 11
+              "lineNumber": 21
             },
             "deprecated": false,
             "isRequired": false
@@ -3503,7 +3509,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/server/utils/queries.ts",
-              "lineNumber": 11
+              "lineNumber": 21
             },
             "deprecated": false,
             "isRequired": false
@@ -3520,7 +3526,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/server/utils/queries.ts",
-              "lineNumber": 11
+              "lineNumber": 21
             },
             "deprecated": false,
             "isRequired": true
@@ -3861,7 +3867,15 @@
           "Type",
           "<number, string, unknown>; end: ",
           "Type",
-          "<number, string, unknown>; }>, ",
+          "<number, string, unknown>; status: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"all\">, ",
+          "LiteralC",
+          "<\"open\">, ",
+          "LiteralC",
+          "<\"closed\">]>; }>, ",
           "PartialC",
           "<{ kuery: ",
           "StringC",
@@ -3928,11 +3942,11 @@
         "label": "ObservabilityConfig",
         "description": [],
         "signature": [
-          "{ readonly enabled: boolean; readonly annotations: Readonly<{} & { enabled: boolean; index: string; }>; readonly unsafe: Readonly<{} & { alertingExperience: Readonly<{} & { enabled: boolean; }>; }>; }"
+          "{ readonly enabled: boolean; readonly annotations: Readonly<{} & { enabled: boolean; index: string; }>; readonly unsafe: Readonly<{} & { cases: Readonly<{} & { enabled: boolean; }>; alertingExperience: Readonly<{} & { enabled: boolean; }>; }>; }"
         ],
         "source": {
           "path": "x-pack/plugins/observability/server/index.ts",
-          "lineNumber": 34
+          "lineNumber": 35
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -3974,7 +3988,15 @@
           "Type",
           "<number, string, unknown>; end: ",
           "Type",
-          "<number, string, unknown>; }>, ",
+          "<number, string, unknown>; status: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"all\">, ",
+          "LiteralC",
+          "<\"open\">, ",
+          "LiteralC",
+          "<\"closed\">]>; }>, ",
           "PartialC",
           "<{ kuery: ",
           "StringC",

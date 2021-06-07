@@ -7,7 +7,10 @@
 
 import { inflateSync } from 'zlib';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
-import { ENDPOINT_LIST_ID, ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../../lists/common';
+import {
+  ENDPOINT_LIST_ID,
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
+} from '@kbn/securitysolution-list-constants';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { PackagePolicy } from '../../../../../../fleet/common/types/models';
 import { getEmptyInternalArtifactMock } from '../../../schemas/artifacts/saved_objects.mock';
@@ -62,6 +65,9 @@ describe('ManifestManager', () => {
   const ARTIFACT_NAME_TRUSTED_APPS_MACOS = 'endpoint-trustlist-macos-v1';
   const ARTIFACT_NAME_TRUSTED_APPS_WINDOWS = 'endpoint-trustlist-windows-v1';
   const ARTIFACT_NAME_TRUSTED_APPS_LINUX = 'endpoint-trustlist-linux-v1';
+  const ARTIFACT_NAME_EVENT_FILTERS_MACOS = 'endpoint-eventfilterlist-macos-v1';
+  const ARTIFACT_NAME_EVENT_FILTERS_WINDOWS = 'endpoint-eventfilterlist-windows-v1';
+  const ARTIFACT_NAME_EVENT_FILTERS_LINUX = 'endpoint-eventfilterlist-linux-v1';
 
   let ARTIFACTS: InternalArtifactCompleteSchema[] = [];
   let ARTIFACTS_BY_ID: { [K: string]: InternalArtifactCompleteSchema } = {};
@@ -216,6 +222,9 @@ describe('ManifestManager', () => {
       ARTIFACT_NAME_TRUSTED_APPS_MACOS,
       ARTIFACT_NAME_TRUSTED_APPS_WINDOWS,
       ARTIFACT_NAME_TRUSTED_APPS_LINUX,
+      ARTIFACT_NAME_EVENT_FILTERS_MACOS,
+      ARTIFACT_NAME_EVENT_FILTERS_WINDOWS,
+      ARTIFACT_NAME_EVENT_FILTERS_LINUX,
     ];
 
     const getArtifactIds = (artifacts: InternalArtifactSchema[]) => [
@@ -246,6 +255,11 @@ describe('ManifestManager', () => {
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
       context.packagePolicyService.listIds = mockPolicyListIdsResponse([TEST_POLICY_ID_1]);
 
+      context.savedObjectsClient.create = jest
+        .fn()
+        .mockImplementation((type: string, object: InternalManifestSchema) => ({
+          attributes: object,
+        }));
       const manifest = await manifestManager.buildNewManifest();
 
       expect(manifest?.getSchemaVersion()).toStrictEqual('v1');
@@ -254,7 +268,7 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
-      expect(artifacts.length).toBe(6);
+      expect(artifacts.length).toBe(9);
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
       expect(artifacts.every(isCompressed)).toBe(true);
 
@@ -277,6 +291,11 @@ describe('ManifestManager', () => {
         [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
         [ENDPOINT_TRUSTED_APPS_LIST_ID]: { linux: [trustedAppListItem] },
       });
+      context.savedObjectsClient.create = jest
+        .fn()
+        .mockImplementation((type: string, object: InternalManifestSchema) => ({
+          attributes: object,
+        }));
       context.packagePolicyService.listIds = mockPolicyListIdsResponse([TEST_POLICY_ID_1]);
 
       const manifest = await manifestManager.buildNewManifest();
@@ -287,7 +306,7 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
-      expect(artifacts.length).toBe(6);
+      expect(artifacts.length).toBe(9);
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
       expect(artifacts.every(isCompressed)).toBe(true);
 
@@ -301,6 +320,9 @@ describe('ManifestManager', () => {
       expect(await uncompressArtifact(artifacts[5])).toStrictEqual({
         entries: translateToEndpointExceptions([trustedAppListItem], 'v1'),
       });
+      expect(await uncompressArtifact(artifacts[6])).toStrictEqual({ entries: [] });
+      expect(await uncompressArtifact(artifacts[7])).toStrictEqual({ entries: [] });
+      expect(await uncompressArtifact(artifacts[8])).toStrictEqual({ entries: [] });
 
       for (const artifact of artifacts) {
         expect(manifest.isDefaultArtifact(artifact)).toBe(true);
@@ -320,7 +342,11 @@ describe('ManifestManager', () => {
         [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
       });
       context.packagePolicyService.listIds = mockPolicyListIdsResponse([TEST_POLICY_ID_1]);
-
+      context.savedObjectsClient.create = jest
+        .fn()
+        .mockImplementation((type: string, object: InternalManifestSchema) => ({
+          attributes: object,
+        }));
       const oldManifest = await manifestManager.buildNewManifest();
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
@@ -336,7 +362,7 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
-      expect(artifacts.length).toBe(6);
+      expect(artifacts.length).toBe(9);
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
       expect(artifacts.every(isCompressed)).toBe(true);
 
@@ -348,6 +374,9 @@ describe('ManifestManager', () => {
       expect(await uncompressArtifact(artifacts[5])).toStrictEqual({
         entries: translateToEndpointExceptions([trustedAppListItem], 'v1'),
       });
+      expect(await uncompressArtifact(artifacts[6])).toStrictEqual({ entries: [] });
+      expect(await uncompressArtifact(artifacts[7])).toStrictEqual({ entries: [] });
+      expect(await uncompressArtifact(artifacts[8])).toStrictEqual({ entries: [] });
 
       for (const artifact of artifacts) {
         expect(manifest.isDefaultArtifact(artifact)).toBe(true);
@@ -381,6 +410,12 @@ describe('ManifestManager', () => {
         TEST_POLICY_ID_2,
       ]);
 
+      context.savedObjectsClient.create = jest
+        .fn()
+        .mockImplementation((type: string, object: InternalManifestSchema) => ({
+          attributes: object,
+        }));
+
       const manifest = await manifestManager.buildNewManifest();
 
       expect(manifest?.getSchemaVersion()).toStrictEqual('v1');
@@ -389,7 +424,7 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
-      expect(artifacts.length).toBe(7);
+      expect(artifacts.length).toBe(10);
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
       expect(artifacts.every(isCompressed)).toBe(true);
 
@@ -409,6 +444,9 @@ describe('ManifestManager', () => {
           'v1'
         ),
       });
+      expect(await uncompressArtifact(artifacts[7])).toStrictEqual({ entries: [] });
+      expect(await uncompressArtifact(artifacts[8])).toStrictEqual({ entries: [] });
+      expect(await uncompressArtifact(artifacts[9])).toStrictEqual({ entries: [] });
 
       for (const artifact of artifacts.slice(0, 5)) {
         expect(manifest.isDefaultArtifact(artifact)).toBe(true);

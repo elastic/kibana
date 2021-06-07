@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { pick } from '@kbn/std';
 import { AppCategory } from '../../';
 
 /**
@@ -81,11 +80,6 @@ export interface ChromeNavLink {
   readonly hidden?: boolean;
 }
 
-/** @public */
-export type ChromeNavLinkUpdateableFields = Partial<
-  Pick<ChromeNavLink, 'disabled' | 'hidden' | 'url' | 'href'>
->;
-
 export class NavLinkWrapper {
   public readonly id: string;
   public readonly properties: Readonly<ChromeNavLink>;
@@ -97,11 +91,5 @@ export class NavLinkWrapper {
 
     this.id = properties.id;
     this.properties = Object.freeze(properties);
-  }
-
-  public update(newProps: ChromeNavLinkUpdateableFields) {
-    // Enforce limited properties at runtime for JS code
-    newProps = pick(newProps, ['disabled', 'hidden', 'url', 'href']);
-    return new NavLinkWrapper({ ...this.properties, ...newProps });
   }
 }

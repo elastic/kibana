@@ -9,6 +9,7 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { initSortDefault, TimelineArgs, useTimelineEvents, UseTimelineEventsProps } from '.';
 import { SecurityPageName } from '../../../common/constants';
 import { TimelineId } from '../../../common/types/timeline';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { mockTimelineData } from '../../common/mock';
 import { useRouteSpy } from '../../common/utils/route/use_route_spy';
 
@@ -25,6 +26,9 @@ jest.mock('react-redux', () => {
 const mockEvents = mockTimelineData.filter((i, index) => index <= 11);
 
 const mockSearch = jest.fn();
+
+jest.mock('../../common/hooks/use_experimental_features');
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
 jest.mock('../../common/lib/kibana', () => ({
   useToasts: jest.fn().mockReturnValue({
@@ -93,6 +97,7 @@ mockUseRouteSpy.mockReturnValue([
 ]);
 
 describe('useTimelineEvents', () => {
+  useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
   beforeEach(() => {
     mockSearch.mockReset();
   });

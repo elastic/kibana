@@ -1687,7 +1687,9 @@
                 "type": "Enum",
                 "tags": [],
                 "label": "fieldType",
-                "description": [],
+                "description": [
+                  "- the field type"
+                ],
                 "signature": [
                   {
                     "pluginId": "data",
@@ -1710,7 +1712,9 @@
                 "type": "Array",
                 "tags": [],
                 "label": "esTypes",
-                "description": [],
+                "description": [
+                  "- Array of ES data types"
+                ],
                 "signature": [
                   {
                     "pluginId": "data",
@@ -1759,7 +1763,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "formatId",
-                "description": [],
+                "description": [
+                  "- the format id"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -1878,7 +1884,9 @@
                 "type": "Array",
                 "tags": [],
                 "label": "esTypes",
-                "description": [],
+                "description": [
+                  "- Array of ES data types"
+                ],
                 "signature": [
                   {
                     "pluginId": "data",
@@ -1941,7 +1949,9 @@
                 "type": "Array",
                 "tags": [],
                 "label": "esTypes",
-                "description": [],
+                "description": [
+                  "- Array of ES data types"
+                ],
                 "signature": [
                   {
                     "pluginId": "data",

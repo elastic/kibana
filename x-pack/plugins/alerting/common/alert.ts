@@ -77,6 +77,26 @@ export interface Alert<Params extends AlertTypeParams = never> {
 
 export type SanitizedAlert<Params extends AlertTypeParams = never> = Omit<Alert<Params>, 'apiKey'>;
 
+export type SanitizedRuleConfig = Pick<
+  SanitizedAlert,
+  | 'name'
+  | 'tags'
+  | 'consumer'
+  | 'enabled'
+  | 'schedule'
+  | 'actions'
+  | 'createdBy'
+  | 'updatedBy'
+  | 'createdAt'
+  | 'updatedAt'
+  | 'throttle'
+  | 'notifyWhen'
+> & {
+  producer: string;
+  ruleTypeId: string;
+  ruleTypeName: string;
+};
+
 export enum HealthStatus {
   OK = 'ok',
   Warning = 'warn',

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export * from '../common/shared_imports';
-
 export {
   getUseField,
   getFieldValidityAndErrorMessage,

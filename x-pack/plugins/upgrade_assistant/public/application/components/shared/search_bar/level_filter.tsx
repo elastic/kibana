@@ -13,15 +13,9 @@ import { i18n } from '@kbn/i18n';
 import { LevelFilterOption } from '../../types';
 
 const LocalizedOptions: { [option: string]: string } = {
-  warning: i18n.translate(
-    'xpack.upgradeAssistant.checkupTab.controls.filterBar.warningButtonLabel',
-    {
-      defaultMessage: 'warning',
-    }
-  ),
   critical: i18n.translate(
     'xpack.upgradeAssistant.checkupTab.controls.filterBar.criticalButtonLabel',
-    { defaultMessage: 'critical' }
+    { defaultMessage: 'Critical' }
   ),
 };
 interface DeprecationLevelProps {

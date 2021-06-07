@@ -120,7 +120,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                     >
                       <EuiFlexGroup gutterSize={'none'} alignItems={'center'}>
                         <EuiFlexItem>
-                          {/** !! Need to be kept in sync with the searchDeepLinks in x-pack/plugins/infra/public/plugin.ts */}
+                          {/** !! Need to be kept in sync with the deepLinks in x-pack/plugins/infra/public/plugin.ts */}
                           <RoutedTabs
                             tabs={[
                               {

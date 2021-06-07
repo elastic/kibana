@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import testSubjSelector from '@kbn/test-subj-selector';
 
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -32,6 +33,34 @@ export function InfraHomePageProvider({ getService }: FtrProviderContext) {
         }
       });
       return await testSubjects.find('waffleMap');
+    },
+
+    async getWaffleMapTooltips() {
+      const node = await testSubjects.findAll('nodeContainer');
+      await node[0].moveMouseTo();
+      const tooltip = await testSubjects.find('conditionalTooltipContent-demo-stack-redis-01');
+      const metrics = await tooltip.findAllByTestSubject('conditionalTooltipContent-metric');
+      const values = await tooltip.findAllByTestSubject('conditionalTooltipContent-value');
+      expect(await metrics[0].getVisibleText()).to.be('CPU usage');
+      expect(await values[0].getVisibleText()).to.be('1%');
+      expect(await metrics[1].getVisibleText()).to.be('Memory usage');
+      expect(await values[1].getVisibleText()).to.be('15.9%');
+      expect(await metrics[2].getVisibleText()).to.be('Outbound traffic');
+      expect(await values[2].getVisibleText()).to.be('71.9kbit/s');
+      expect(await metrics[3].getVisibleText()).to.be('Inbound traffic');
+      expect(await values[3].getVisibleText()).to.be('25.6kbit/s');
+      await node[1].moveMouseTo();
+      const tooltip2 = await testSubjects.find('conditionalTooltipContent-demo-stack-nginx-01');
+      const metrics2 = await tooltip2.findAllByTestSubject('conditionalTooltipContent-metric');
+      const values2 = await tooltip2.findAllByTestSubject('conditionalTooltipContent-value');
+      expect(await metrics2[0].getVisibleText()).to.be('CPU usage');
+      expect(await values2[0].getVisibleText()).to.be('1.1%');
+      expect(await metrics2[1].getVisibleText()).to.be('Memory usage');
+      expect(await values2[1].getVisibleText()).to.be('18%');
+      expect(await metrics2[2].getVisibleText()).to.be('Outbound traffic');
+      expect(await values2[2].getVisibleText()).to.be('256.3kbit/s');
+      expect(await metrics2[3].getVisibleText()).to.be('Inbound traffic');
+      expect(await values2[3].getVisibleText()).to.be('255.1kbit/s');
     },
 
     async openInvenotrySwitcher() {

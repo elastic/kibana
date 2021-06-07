@@ -38,9 +38,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
       after(async () => await esArchiver.unload('infra/metrics_and_logs'));
 
-      it('renders the waffle map for dates with data', async () => {
+      it('renders the waffle map and tooltips for dates with data', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraHome.getWaffleMap();
+        await pageObjects.infraHome.getWaffleMapTooltips();
       });
 
       it('renders an empty data prompt for dates with no data', async () => {

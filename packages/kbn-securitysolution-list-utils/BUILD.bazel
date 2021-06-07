@@ -29,6 +29,7 @@ NPM_MODULE_EXTRA_FILES = [
 
 SRC_DEPS = [
   "//packages/kbn-i18n",
+  "//packages/kbn-securitysolution-list-constants",
   "//packages/kbn-securitysolution-io-ts-list-types",
   "//packages/kbn-securitysolution-utils",
   "@npm//lodash",

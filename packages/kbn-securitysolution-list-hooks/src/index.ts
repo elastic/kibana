@@ -21,5 +21,4 @@ export * from './use_persist_exception_item';
 export * from './use_persist_exception_list';
 export * from './use_read_list_index';
 export * from './use_read_list_privileges';
-export * from './utils';
 export * from './with_optional_signal';

@@ -25,6 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('can create a new scripted field', async () => {
       const title = `foo-${Date.now()}-${Math.random()}*`;
       const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
+        override: true,
         index_pattern: {
           title,
         },

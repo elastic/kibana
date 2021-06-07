@@ -18,7 +18,7 @@ describe('pie', () => {
   const fn = functionWrapper(
     pieFunctionFactory({
       get: () => ({
-        getColors: () => ['red', 'black'],
+        getCategoricalColors: () => ['red', 'black'],
       }),
     })
   );
@@ -59,7 +59,7 @@ describe('pie', () => {
         const mockedFn = functionWrapper(
           pieFunctionFactory({
             get: () => ({
-              getColors: mockedColors,
+              getCategoricalColors: mockedColors,
             }),
           })
         );
