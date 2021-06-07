@@ -50,8 +50,10 @@ export const DocumentationPage = (
             navigation for, these rule types.
           </p>
           <p>
-            If you see a message about needing to enable the Transport Layer Security, start Kibana
-            with `yarn start --run-examples --ssl`{' '}
+            If you see a message about needing to enable the Transport Layer Security, start ES with
+            `yarn es snapshot --ssl --license trial` and Kibana with `yarn start --run-examples
+            --ssl`. If you running chrome on a mac, you may need to type in 'thisisunsafe' if you
+            see the Certificate invalid screen with no way to "proceed anyway".
           </p>
         </EuiText>
         <EuiSpacer />
