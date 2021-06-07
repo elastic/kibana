@@ -40,9 +40,9 @@ image::images/rule-flyout-sections.png[The three sections of a rule definition]
 
 All rules share the following four properties.
 
-Name::      The name of the rule. While this name does not have to be unique, the name can be referenced in actions and also appears in the searchable rule listing in the management UI. A distinctive name can help identify and find a rule.
-Tags::      A list of tag names that can be applied to a rule. Tags can help you organize and find rules, because tags appear in the rule listing in the management UI which is searchable by tag.
-Check every::      This value determines how frequently the rule conditions below are checked. Note that the timing of background rule checks are not guaranteed, particularly for intervals of less than 10 seconds. See <<alerting-production-considerations, Alerting production considerations>> for more information.
+Name::      The name of the rule. While this name does not have to be unique, the name can be referenced in actions and also appears in the searchable rule listing in the *Management* UI. A distinctive name can help identify and find a rule.
+Tags::      A list of tag names that can be applied to a rule. Tags can help you organize and find rules, because tags appear in the rule listing in the *Management* UI, which is searchable by tag.
+Check every::      This value determines how frequently the rule conditions below are checked. Note that the timing of background rule checks is not guaranteed, particularly for intervals of less than 10 seconds. See <<alerting-production-considerations, Alerting production considerations>> for more information.
 Notify::      This value limits how often actions are repeated when an alert remains active across rule checks. See <<alerting-concepts-suppressing-duplicate-notifications>> for more information. +
 - **Only on status change**: Actions are not repeated when an alert remains active across checks. Actions run only when the alert status changes.
 - **Every time alert is active**: Actions are repeated when an alert remains active across checks.
@@ -55,12 +55,12 @@ image::images/rule-flyout-general-details.png[alt='All rules have name, tags, ch
 [[defining-rules-type-conditions]]
 ==== Rule type and conditions
 
-Depending upon the {kib} app and context, you may be prompted to choose the type of rule you wish to create. Some apps will pre-select the type of rule for you.
+Depending upon the {kib} app and context, you may be prompted to choose the type of rule to create. Some apps will pre-select the type of rule for you.
 
 [role="screenshot"]
 image::images/rule-flyout-rule-type-selection.png[Choosing the type of rule to create]
 
-Each rule type provides its own way of defining the conditions to detect, but an expression formed by a series of clauses is a common pattern. Each clause has a UI control that allows you to define the clause. For example, in an index threshold rule the `WHEN` clause allows you to select an aggregation operation to apply to a numeric field.
+Each rule type provides its own way of defining the conditions to detect, but an expression formed by a series of clauses is a common pattern. Each clause has a UI control that allows you to define the clause. For example, in an index threshold rule, the `WHEN` clause allows you to select an aggregation operation to apply to a numeric field.
 
 [role="screenshot"]
 image::images/rule-flyout-rule-conditions.png[UI for defining rule conditions on an index threshold rule]
