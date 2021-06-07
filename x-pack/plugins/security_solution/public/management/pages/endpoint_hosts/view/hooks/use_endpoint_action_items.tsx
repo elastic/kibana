@@ -112,13 +112,17 @@ export const useEndpointActionItems = (
           'data-test-subj': 'agentPolicyLink',
           navigateAppId: 'fleet',
           navigateOptions: {
-            path: `#${pagePathGetters.policy_details({
-              policyId: fleetAgentPolicies[endpointPolicyId],
-            })}`,
+            path: `#${
+              pagePathGetters.policy_details({
+                policyId: fleetAgentPolicies[endpointPolicyId],
+              })[1]
+            }`,
           },
-          href: `${getUrlForApp('fleet')}#${pagePathGetters.policy_details({
-            policyId: fleetAgentPolicies[endpointPolicyId],
-          })}`,
+          href: `${getUrlForApp('fleet')}#${
+            pagePathGetters.policy_details({
+              policyId: fleetAgentPolicies[endpointPolicyId],
+            })[1]
+          }`,
           disabled: fleetAgentPolicies[endpointPolicyId] === undefined,
           children: (
             <FormattedMessage
@@ -133,13 +137,17 @@ export const useEndpointActionItems = (
           'data-test-subj': 'agentDetailsLink',
           navigateAppId: 'fleet',
           navigateOptions: {
-            path: `#${pagePathGetters.fleet_agent_details({
-              agentId: fleetAgentId,
-            })}`,
+            path: `#${
+              pagePathGetters.fleet_agent_details({
+                agentId: fleetAgentId,
+              })[1]
+            }`,
           },
-          href: `${getUrlForApp('fleet')}#${pagePathGetters.fleet_agent_details({
-            agentId: fleetAgentId,
-          })}`,
+          href: `${getUrlForApp('fleet')}#${
+            pagePathGetters.fleet_agent_details({
+              agentId: fleetAgentId,
+            })[1]
+          }`,
           children: (
             <FormattedMessage
               id="xpack.securitySolution.endpoint.actions.agentDetails"
