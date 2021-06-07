@@ -10,7 +10,11 @@ import ReactDOM from 'react-dom';
 import 'react-vis/dist/style.css';
 import type { ObservabilityRuleTypeRegistry } from '../../../observability/public';
 import { ConfigSchema } from '../';
-import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
+import {
+  AppMountParameters,
+  CoreStart,
+  APP_WRAPPER_CLASS,
+} from '../../../../../src/core/public';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
@@ -43,6 +47,7 @@ export const renderApp = ({
     config,
     core: coreStart,
     plugins: pluginsSetup,
+    observability: pluginsStart.observability,
     observabilityRuleTypeRegistry,
   };
 
@@ -56,6 +61,9 @@ export const renderApp = ({
     // eslint-disable-next-line no-console
     console.log('Error creating static index pattern', e);
   });
+
+  // add .kbnAppWrappers class to root element
+  element.classList.add(APP_WRAPPER_CLASS);
 
   ReactDOM.render(
     <ApmAppRoot

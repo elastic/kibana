@@ -18,6 +18,8 @@ import {
   useLink,
   useFleetStatus,
 } from '../../../../hooks';
+import { NewEnrollmentTokenModal } from '../../enrollment_token_list_page/components/new_enrollment_key_modal';
+
 import { ManualInstructions } from '../../../../components/enrollment_instructions';
 import {
   FleetServerRequirementPage,
@@ -99,7 +101,7 @@ export const ManagedInstructions = React.memo<Props>(({ agentPolicies }) => {
         title: i18n.translate('xpack.fleet.agentEnrollment.stepEnrollAndRunAgentTitle', {
           defaultMessage: 'Enroll and start the Elastic Agent',
         }),
-        children: apiKey.data && (
+        children: selectedAPIKeyId && apiKey.data && (
           <ManualInstructions apiKey={apiKey.data.item} fleetServerHosts={fleetServerHosts} />
         ),
       });
@@ -107,11 +109,17 @@ export const ManagedInstructions = React.memo<Props>(({ agentPolicies }) => {
     return baseSteps;
   }, [
     agentPolicies,
+    selectedAPIKeyId,
     apiKey.data,
     isFleetServerPolicySelected,
     settings.data?.item?.fleet_server_hosts,
     fleetServerInstructions,
   ]);
+
+  const [isModalOpen, setModalOpen] = useState(false);
+  const closeModal = () => {
+    setModalOpen(false);
+  };
 
   return (
     <>
@@ -125,6 +133,10 @@ export const ManagedInstructions = React.memo<Props>(({ agentPolicies }) => {
           </EuiText>
           <EuiSpacer size="l" />
           <EuiSteps steps={steps} />
+
+          {isModalOpen && (
+            <NewEnrollmentTokenModal agentPolicies={agentPolicies} onClose={closeModal} />
+          )}
         </>
       ) : fleetStatus.missingRequirements?.length === 1 &&
         fleetStatus.missingRequirements[0] === 'fleet_server' ? (
