@@ -305,8 +305,8 @@ Pagination in a data table is unsupported in *Lens*. However, the <<types-of-vis
 *Lens* lets you pick, for each Y dimension, up to two distinct axis: *left* and *right*. Each axis can have a different scale.
 
 [float]
-[[why-my-value-is-not-of-the-right-color-using-dynamic-coloring]]
-===== Why mt value is not of the right color when using dynamic coloring?
+[[why-my-value-is-not-of-the-right-color-using-value-based-coloring]]
+===== Why mt value is not of the right color when using value-based coloring?
 
 There could be various reason for a specific value in the table to have a different color than expected.
 
