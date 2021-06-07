@@ -7,15 +7,15 @@
 
 import { TestBed } from '@kbn/test/jest';
 
-import { Phase } from './types';
-import { createFormToggleAction } from './create_form_toggle_action';
-import { createFormSetValueAction } from './create_form_set_value_action';
+import { Phase } from '../types';
+import { createFormToggleAction } from './form_toggle_action';
+import { createFormSetValueAction } from './form_set_value_action';
 
 export const setReplicas = async (testBed: TestBed, phase: Phase, value: string) => {
   const { exists } = testBed;
 
   if (!exists(`${phase}-selectedReplicaCount`)) {
-    await createFormToggleAction(testBed, `${phase}-setReplicasSwitch`)(true);
+    await createFormToggleAction(testBed, `${phase}-setReplicasSwitch`)();
   }
   await createFormSetValueAction(testBed, `${phase}-selectedReplicaCount`)(value);
 };
