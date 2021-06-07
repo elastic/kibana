@@ -78,11 +78,11 @@ export const TagCloudChart = ({
 }: TagCloudChartProps) => {
   const [warning, setWarning] = useState(false);
   const { bucket, metric, scale, palette, showLabel, orientation } = visParams;
+  const bucketFormatter = bucket ? getFormatService().deserialize(bucket.format) : null;
 
   const tagCloudData = useMemo(() => {
     const tagColumn = bucket ? visData.columns[bucket.accessor].id : -1;
     const metricColumn = visData.columns[metric.accessor]?.id;
-    const bucketFormatter = bucket ? getFormatService().deserialize(bucket.format) : null;
 
     const metrics = visData.rows.map((row) => row[metricColumn]);
     const values = bucket ? visData.rows.map((row) => row[tagColumn]) : [];
@@ -99,6 +99,7 @@ export const TagCloudChart = ({
     });
   }, [
     bucket,
+    bucketFormatter,
     metric.accessor,
     palette.name,
     palettesRegistry,
@@ -127,12 +128,48 @@ export const TagCloudChart = ({
       }, 300),
     []
   );
+
+  const handleWordClick = useCallback(
+    (d) => {
+      if (!bucket) {
+        return;
+      }
+      const termsBucket = visData.columns[bucket.accessor];
+      const clickedValue = d[0][0].text;
+
+      const rowIndex = visData.rows.findIndex((row) => {
+        const formattedValue = bucketFormatter
+          ? bucketFormatter.convert(row[termsBucket.id], 'text')
+          : row[termsBucket.id];
+        return formattedValue === clickedValue;
+      });
+
+      if (rowIndex < 0) {
+        return;
+      }
+
+      fireEvent({
+        name: 'filterBucket',
+        data: {
+          data: [
+            {
+              table: visData,
+              column: bucket.accessor,
+              row: rowIndex,
+            },
+          ],
+        },
+      });
+    },
+    [bucket, bucketFormatter, fireEvent, visData]
+  );
+
   return (
     <EuiResizeObserver onResize={updateChart}>
       {(resizeRef) => (
         <div className="tgcChart__wrapper" ref={resizeRef} data-test-subj="tagCloudVisualization">
           <Chart size="100%">
-            <Settings onElementClick={(d) => {}} onRenderChange={onRenderChange} />
+            <Settings onElementClick={handleWordClick} onRenderChange={onRenderChange} />
             <Wordcloud
               id="tagCloud"
               startAngle={0}
