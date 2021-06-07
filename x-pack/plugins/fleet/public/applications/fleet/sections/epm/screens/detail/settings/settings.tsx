@@ -169,16 +169,6 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                       }}
                     />
                   </p>
-                  <EuiFlexGroup>
-                    <EuiFlexItem grow={false}>
-                      <p>
-                        <InstallationButton
-                          {...packageInfo}
-                          disabled={!packagePoliciesData || packageHasUsages}
-                        />
-                      </p>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
                 </div>
               ) : (
                 <div>
