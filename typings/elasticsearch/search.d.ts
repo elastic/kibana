@@ -35,7 +35,7 @@ type CompositeKeysOf<
   ? KeysOfSources<TSource>
   : unknown;
 
-type Source = estypes.SourceFilter | boolean | estypes.Fields;
+type Source = estypes.SearchSourceFilter | boolean | estypes.Fields;
 
 type ValueTypeOfField<T> = T extends Record<string, string | number>
   ? ValuesType<T>
@@ -50,7 +50,7 @@ type ValueTypeOfField<T> = T extends Record<string, string | number>
 type MaybeArray<T> = T | T[];
 
 type Fields = Exclude<Required<estypes.SearchRequest>['body']['fields'], undefined>;
-type DocValueFields = MaybeArray<string | estypes.DocValueField>;
+type DocValueFields = MaybeArray<string | estypes.SearchDocValueField>;
 
 export type SearchHit<
   TSource extends any = unknown,
@@ -524,7 +524,7 @@ export type AggregateOf<
         relation: 'eq' | 'gte';
       };
       max_score: number | null;
-      hits: TAggregationContainer extends { top_hits: estypes.TopHitsAggregation }
+      hits: TAggregationContainer extends { top_hits: estypes.AggregationsTopHitsAggregation }
         ? HitsOf<TAggregationContainer['top_hits'], TDocument>
         : estypes.SearchHitsMetadata<TDocument>;
     };
