@@ -24,7 +24,12 @@ import {
 
 import { UIM_TEMPLATE_LIST_LOAD } from '../../../../../common/constants';
 import { TemplateListItem } from '../../../../../common';
-import { SectionError, SectionLoading, Error } from '../../../components';
+import {
+  SectionError,
+  SectionLoading,
+  Error,
+  LegacyIndexTemplatesDeprecation,
+} from '../../../components';
 import { useLoadIndexTemplates } from '../../../services/api';
 import { documentationService } from '../../../services/documentation';
 import { useServices } from '../../../app_context';
@@ -34,11 +39,11 @@ import {
   getTemplateCloneLink,
 } from '../../../services/routing';
 import { getIsLegacyFromQueryParams } from '../../../lib/index_templates';
+import { attemptToURIDecode } from '../../../../shared_imports';
+import { FilterListButton, Filters } from '../components';
 import { TemplateTable } from './template_table';
 import { TemplateDetails } from './template_details';
 import { LegacyTemplateTable } from './legacy_templates/template_table';
-import { FilterListButton, Filters } from '../components';
-import { attemptToURIDecode } from '../../../../shared_imports';
 
 type FilterName = 'managed' | 'cloudManaged' | 'system';
 interface MatchParams {
@@ -196,7 +201,13 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
           />
         </h1>
       </EuiTitle>
-      <EuiSpacer />
+
+      <EuiSpacer size="s" />
+
+      <LegacyIndexTemplatesDeprecation />
+
+      <EuiSpacer size="m" />
+
       <LegacyTemplateTable
         templates={filteredTemplates.legacyTemplates}
         reload={reload}

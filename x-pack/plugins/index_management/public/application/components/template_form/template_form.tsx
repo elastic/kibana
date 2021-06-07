@@ -12,14 +12,6 @@ import { EuiSpacer, EuiButton } from '@elastic/eui';
 
 import { TemplateDeserialized } from '../../../../common';
 import { serializers, Forms, GlobalFlyout } from '../../../shared_imports';
-import { SectionError } from '../section_error';
-import {
-  SimulateTemplateFlyoutContent,
-  SimulateTemplateProps,
-  simulateTemplateFlyoutProps,
-  SimulateTemplateFilters,
-} from '../index_templates';
-import { StepLogisticsContainer, StepComponentContainer, StepReviewContainer } from './steps';
 import {
   CommonWizardSteps,
   StepSettingsContainer,
@@ -27,6 +19,15 @@ import {
   StepAliasesContainer,
 } from '../shared';
 import { documentationService } from '../../services/documentation';
+import { SectionError } from '../section_error';
+import {
+  SimulateTemplateFlyoutContent,
+  SimulateTemplateProps,
+  simulateTemplateFlyoutProps,
+  SimulateTemplateFilters,
+  LegacyIndexTemplatesDeprecation,
+} from '../index_templates';
+import { StepLogisticsContainer, StepComponentContainer, StepReviewContainer } from './steps';
 
 const { stripEmptyFields } = serializers;
 const { FormWizard, FormWizardStep } = Forms;
@@ -283,12 +284,18 @@ export const TemplateForm = ({
     );
   };
 
+  const isLegacyIndexTemplate = indexTemplate._kbnMeta.isLegacy === true;
+
   return (
     <>
       {/* Form header */}
       {title}
 
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
+
+      {isLegacyIndexTemplate && <LegacyIndexTemplatesDeprecation />}
+
+      <EuiSpacer size="s" />
 
       <FormWizard<WizardContent, WizardSection>
         defaultValue={wizardDefaultValue}
@@ -311,7 +318,7 @@ export const TemplateForm = ({
           />
         </FormWizardStep>
 
-        {indexTemplate._kbnMeta.isLegacy !== true && (
+        {!isLegacyIndexTemplate && (
           <FormWizardStep id={wizardSections.components.id} label={wizardSections.components.label}>
             <StepComponentContainer />
           </FormWizardStep>
