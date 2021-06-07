@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { SecurityPluginStart } from '../..//security/server';
+export const SAMPLER_TOP_TERMS_THRESHOLD = 100000;
+export const SAMPLER_TOP_TERMS_SHARD_SIZE = 5000;
+export const AGGREGATABLE_EXISTS_REQUEST_BATCH_SIZE = 200;
+export const FIELDS_REQUEST_BATCH_SIZE = 10;
 
-export interface StartDeps {
-  security?: SecurityPluginStart;
-}
+export const MAX_CHART_COLUMNS = 20;

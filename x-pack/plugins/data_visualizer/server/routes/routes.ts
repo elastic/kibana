@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, IScopedClusterClient, Logger } from 'kibana/server';
+import type { CoreSetup, IScopedClusterClient } from 'kibana/server';
 import { estypes } from '@elastic/elasticsearch';
 import {
   dataVisualizerFieldHistogramsSchema,
@@ -13,8 +13,8 @@ import {
   dataVisualizerOverallStatsSchema,
   indexPatternTitleSchema,
 } from './schemas';
-import { DataVisualizer, Field, HistogramField } from '../models/data_visualizer';
-import type { StartDeps } from '../types';
+import type { Field, StartDeps, HistogramField } from '../types';
+import { DataVisualizer } from '../models/data_visualizer';
 import { wrapError } from '../utils/error_wrapper';
 
 function getOverallStats(
@@ -91,7 +91,7 @@ function getHistogramsForFields(
 /**
  * Routes for the index data visualizer.
  */
-export function dataVisualizerRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger) {
+export function dataVisualizerRoutes(coreSetup: CoreSetup<StartDeps, unknown>) {
   const router = coreSetup.http.createRouter();
 
   /**
@@ -134,7 +134,6 @@ export function dataVisualizerRoutes(coreSetup: CoreSetup<StartDeps, unknown>, l
           body: results,
         });
       } catch (e) {
-        logger.warn(e);
         return response.customError(wrapError(e));
       }
     }
@@ -194,7 +193,6 @@ export function dataVisualizerRoutes(coreSetup: CoreSetup<StartDeps, unknown>, l
           body: results,
         });
       } catch (e) {
-        logger.warn(e);
         return response.customError(wrapError(e));
       }
     }
@@ -257,7 +255,6 @@ export function dataVisualizerRoutes(coreSetup: CoreSetup<StartDeps, unknown>, l
           body: results,
         });
       } catch (e) {
-        logger.warn(e);
         return response.customError(wrapError(e));
       }
     }

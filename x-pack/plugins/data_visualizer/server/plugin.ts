@@ -5,26 +5,16 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
-import { Logger } from 'kibana/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
-import { StartDeps } from './types';
+import { CoreSetup, CoreStart, Plugin } from 'src/core/server';
+import { StartDeps, SetupDeps } from './types';
 import { dataVisualizerRoutes } from './routes';
 import { setupCapabilities } from './capabilities';
 
-interface SetupDeps {
-  usageCollection: UsageCollectionSetup;
-}
-
 export class DataVisualizerPlugin implements Plugin {
-  private readonly _logger: Logger;
-
-  constructor(initializerContext: PluginInitializerContext) {
-    this._logger = initializerContext.logger.get();
-  }
+  constructor() {}
 
   async setup(coreSetup: CoreSetup<StartDeps, unknown>, plugins: SetupDeps) {
-    dataVisualizerRoutes(coreSetup, this._logger);
+    dataVisualizerRoutes(coreSetup);
     setupCapabilities(coreSetup);
   }
 

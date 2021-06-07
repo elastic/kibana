@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { SecurityPluginStart } from '../../../security/server';
+import type { SecurityPluginStart } from '../../../security/server';
+import type { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
 
 export interface StartDeps {
   security?: SecurityPluginStart;
+}
+export interface SetupDeps {
+  usageCollection: UsageCollectionSetup;
 }
