@@ -16,9 +16,11 @@ export interface RouteUsageMetric {
 
 export type RouteString = 'live_query';
 
+export const routeStrings: RouteString[] = ['live_query'];
+
 export async function createMetricObjects(soClient: SavedObjectsClientContract) {
   const res = await Promise.allSettled(
-    ['live_query'].map(async (route) => {
+    routeStrings.map(async (route) => {
       try {
         await soClient.get(usageMetricSavedObjectType, route);
       } catch (e) {
@@ -42,16 +44,18 @@ export async function getCount(soClient: SavedObjectsClientContract, route: Rout
   return await soClient.get<LiveQuerySessionUsage>(usageMetricSavedObjectType, route);
 }
 
+export interface CounterValue {
+  count: number;
+  errors: number;
+}
+
 export async function incrementCount(
   soClient: SavedObjectsClientContract,
   route: RouteString,
-  key: 'errors' | 'count' = 'count',
+  key: keyof CounterValue = 'count',
   increment = 1
 ) {
-  const metric = await soClient.get<{ count: number; errors: number }>(
-    usageMetricSavedObjectType,
-    route
-  );
+  const metric = await soClient.get<CounterValue>(usageMetricSavedObjectType, route);
   metric.attributes[key] += increment;
   await soClient.update(usageMetricSavedObjectType, route, metric.attributes);
 }
