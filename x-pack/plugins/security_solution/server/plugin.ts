@@ -95,6 +95,7 @@ import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { securitySolutionTimelineEqlSearchStrategyProvider } from './search_strategy/timeline/eql';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
+import { securityComponentTemplate } from './lib/detection_engine/assets/security_component_template';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -224,14 +225,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
         await ruleDataService.createOrUpdateComponentTemplate({
           name: componentTemplateName,
-          body: {
-            template: {
-              settings: {
-                number_of_shards: 1,
-              },
-              mappings: {}, // TODO: Add mappings here via `mappingFromFieldMap()`
-            },
-          },
+          body: securityComponentTemplate,
         });
 
         await ruleDataService.createOrUpdateIndexTemplate({

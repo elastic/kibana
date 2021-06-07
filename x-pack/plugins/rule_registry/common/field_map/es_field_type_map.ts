@@ -19,5 +19,6 @@ export const esFieldTypeMap = {
   float: t.number,
   scaled_float: t.number,
   unsigned_long: t.number,
+  nested: t.boolean,
   flattened: t.record(t.string, t.array(t.string)),
 };
