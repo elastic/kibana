@@ -78,7 +78,7 @@ export const ManagedInstructions = React.memo<Props>(({ agentPolicy, agentPolici
       setPlatform,
     } = fleetServerInstructions;
     const fleetServerHosts = settings.data?.item?.fleet_server_hosts || [];
-    const baseSteps = [
+    const baseSteps: EuiContainedStepProps[] = [
       DownloadStep(),
       !agentPolicy
         ? AgentPolicySelectionStep({
@@ -87,7 +87,7 @@ export const ManagedInstructions = React.memo<Props>(({ agentPolicy, agentPolici
             setIsFleetServerPolicySelected,
           })
         : AgentEnrollmentKeySelectionStep({ agentPolicy, setSelectedAPIKeyId }),
-    ].filter(Boolean) as EuiContainedStepProps[];
+    ];
     if (isFleetServerPolicySelected) {
       baseSteps.push(
         ...[
