@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiPage, EuiPanel, EuiToolTip } from '@elastic/eui';
+import { EuiPanel, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
@@ -22,7 +22,6 @@ import { useFetcher } from '../../../hooks/use_fetcher';
 import { px, truncate, unit } from '../../../style/variables';
 import { ServiceNodeMetricOverviewLink } from '../../shared/Links/apm/ServiceNodeMetricOverviewLink';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
-import { SearchBar } from '../../shared/search_bar';
 
 const INITIAL_PAGE_SIZE = 25;
 const INITIAL_SORT_FIELD = 'cpu';
@@ -143,28 +142,18 @@ function ServiceNodeOverview({ serviceName }: ServiceNodeOverviewProps) {
   ];
 
   return (
-    <>
-      <SearchBar />
-      <EuiPage>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiPanel>
-            <ManagedTable
-              noItemsMessage={i18n.translate(
-                'xpack.apm.jvmsTable.noJvmsLabel',
-                {
-                  defaultMessage: 'No JVMs were found',
-                }
-              )}
-              items={items}
-              columns={columns}
-              initialPageSize={INITIAL_PAGE_SIZE}
-              initialSortField={INITIAL_SORT_FIELD}
-              initialSortDirection={INITIAL_SORT_DIRECTION}
-            />
-          </EuiPanel>
-        </EuiFlexGroup>
-      </EuiPage>
-    </>
+    <EuiPanel hasShadow={false}>
+      <ManagedTable
+        noItemsMessage={i18n.translate('xpack.apm.jvmsTable.noJvmsLabel', {
+          defaultMessage: 'No JVMs were found',
+        })}
+        items={items}
+        columns={columns}
+        initialPageSize={INITIAL_PAGE_SIZE}
+        initialSortField={INITIAL_SORT_FIELD}
+        initialSortDirection={INITIAL_SORT_DIRECTION}
+      />
+    </EuiPanel>
   );
 }
 

@@ -16,7 +16,7 @@ interface BuildEventsSearchQuery {
   index: string[];
   from: string;
   to: string;
-  filter?: estypes.QueryDslQueryContainer;
+  filter: estypes.QueryDslQueryContainer;
   size: number;
   sortOrder?: SortOrderOrUndefined;
   searchAfterSortIds: estypes.SearchSortResults | undefined;
@@ -93,8 +93,6 @@ export const buildEventsSearchQuery = ({
         ];
 
   const filterWithTime: estypes.QueryDslQueryContainer[] = [
-    // but tests contain undefined, so I suppose it's desired behaviour
-    // @ts-expect-error undefined in not assignable to QueryDslQueryContainer
     filter,
     { bool: { filter: [{ bool: { should: [...rangeFilter], minimum_should_match: 1 } }] } },
   ];
@@ -105,7 +103,6 @@ export const buildEventsSearchQuery = ({
     size,
     ignore_unavailable: true,
     body: {
-      docvalue_fields: docFields,
       query: {
         bool: {
           filter: [
@@ -121,6 +118,7 @@ export const buildEventsSearchQuery = ({
           field: '*',
           include_unmapped: true,
         },
+        ...docFields,
       ],
       ...(aggregations ? { aggregations } : {}),
       sort: [

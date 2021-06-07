@@ -31,7 +31,7 @@ interface SingleSearchAfterParams {
   logger: Logger;
   pageSize: number;
   sortOrder?: SortOrderOrUndefined;
-  filter?: estypes.QueryDslQueryContainer;
+  filter: estypes.QueryDslQueryContainer;
   timestampOverride: TimestampOverrideOrUndefined;
   buildRuleMessage: BuildRuleMessage;
 }
