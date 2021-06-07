@@ -26,9 +26,12 @@ export const getMigrateFunction = (embeddables: CommonEmbeddableStartContract) =
     updatedInput.enhancements = {};
     Object.keys(enhancements).forEach((key) => {
       if (!enhancements[key]) return;
-      (updatedInput.enhancements! as Record<string, any>)[key] = embeddables
-        .getEnhancement(key)
-        .migrations[version](enhancements[key] as SerializableState);
+      const enhancementDefinition = embeddables.getEnhancement(key);
+      if (enhancementDefinition.migrations && enhancementDefinition.migrations[version]) {
+        (updatedInput.enhancements! as Record<string, any>)[key] = enhancementDefinition.migrations[
+          version
+        ](enhancements[key] as SerializableState);
+      }
     });
 
     return updatedInput;
