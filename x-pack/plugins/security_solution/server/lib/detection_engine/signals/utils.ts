@@ -52,7 +52,6 @@ import {
   ThreatRuleParams,
   ThresholdRuleParams,
 } from '../schemas/rule_schemas';
-import { ESClient } from '../../../../../apm/target/types/scripts/shared/get_es_client';
 
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
@@ -678,6 +677,7 @@ export const createSearchAfterReturnType = ({
 }: {
   success?: boolean | undefined;
   warning?: boolean;
+  warningMessages?: string[] | undefined;
   searchAfterTimes?: string[] | undefined;
   bulkCreateTimes?: string[] | undefined;
   lastLookBackDate?: Date | undefined;

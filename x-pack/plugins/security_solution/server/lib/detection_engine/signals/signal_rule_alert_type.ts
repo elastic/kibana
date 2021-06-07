@@ -261,12 +261,11 @@ export const signalRulesAlertType = ({
               listClient,
               exceptionItems,
               services,
-              logger,
-              buildRuleMessage,
-              bulkCreate,
-              wrapHits,
-            });
-          }
+            logger,
+            buildRuleMessage,
+            bulkCreate,
+            wrapHits,
+          });}
         } else if (isThresholdRule(type)) {
           const thresholdRuleSO = asTypeSpecificSO(savedObject, thresholdRuleParams);
           for (const tuple of tuples) {
@@ -275,14 +274,13 @@ export const signalRulesAlertType = ({
               tuple,
               exceptionItems,
               services,
-              version,
-              logger,
-              buildRuleMessage,
-              startedAt,
-              bulkCreate,
-              wrapHits,
-            });
-          }
+            version,
+            logger,
+            buildRuleMessage,
+            startedAt,
+            bulkCreate,
+            wrapHits,
+          });}
         } else if (isThreatMatchRule(type)) {
           const threatRuleSO = asTypeSpecificSO(savedObject, threatRuleParams);
           for (const tuple of tuples) {
@@ -327,11 +325,11 @@ export const signalRulesAlertType = ({
               tuple,
               exceptionItems,
               services,
-              version,
-              searchAfterSize,
-              bulkCreate,
-              logger,
-              wrapHits,
+            version,
+            searchAfterSize,
+            bulkCreate,
+            logger,
+          wrapHits,
               wrapSequences,
             });
           }
