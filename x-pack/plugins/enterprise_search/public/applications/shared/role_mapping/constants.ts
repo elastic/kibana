@@ -73,6 +73,13 @@ export const ATTRIBUTE_VALUE_LABEL = i18n.translate(
   }
 );
 
+export const ATTRIBUTE_VALUE_ERROR = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.attributeValueError',
+  {
+    defaultMessage: 'Attribute value is required',
+  }
+);
+
 export const DELETE_ROLE_MAPPING_TITLE = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.deleteRoleMappingTitle',
   {
@@ -131,4 +138,63 @@ export const ROLE_MAPPINGS_DESCRIPTION = i18n.translate(
     defaultMessage:
       'Define role mappings for elasticsearch-native and elasticsearch-saml authentication.',
   }
+);
+
+export const ROLE_MAPPING_NOT_FOUND = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.notFoundMessage',
+  {
+    defaultMessage: 'No matching Role mapping found.',
+  }
+);
+
+export const ROLE_MAPPING_FLYOUT_CREATE_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.flyoutCreateTitle',
+  {
+    defaultMessage: 'Create a role mapping',
+  }
+);
+
+export const ROLE_MAPPING_FLYOUT_UPDATE_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.flyoutUpdateTitle',
+  {
+    defaultMessage: 'Update role mapping',
+  }
+);
+
+export const ROLE_MAPPING_FLYOUT_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.flyoutDescription',
+  {
+    defaultMessage: 'Assign roles and permissions based on user attributes',
+  }
+);
+
+export const ROLE_MAPPING_ADD_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.roleMappingAddButton',
+  {
+    defaultMessage: 'Add mapping',
+  }
+);
+
+export const ROLE_MAPPING_FLYOUT_CREATE_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.roleMappingFlyoutCreateButton',
+  {
+    defaultMessage: 'Create mapping',
+  }
+);
+
+export const ROLE_MAPPING_FLYOUT_UPDATE_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.roleMappingFlyoutUpdateButton',
+  {
+    defaultMessage: 'Update mapping',
+  }
+);
+
+export const SAVE_ROLE_MAPPING = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.saveRoleMappingButtonLabel',
+  { defaultMessage: 'Save role mapping' }
+);
+
+export const UPDATE_ROLE_MAPPING = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.updateRoleMappingButtonLabel',
+  { defaultMessage: 'Update role mapping' }
 );
