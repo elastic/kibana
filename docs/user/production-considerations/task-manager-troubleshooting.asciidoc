@@ -681,7 +681,7 @@ Evaluate the `load` under `stats.runtime.value`, we see the following:
 You can infer from these stats that it is quite common for this {kib} instance to run out of capacity.
 Given the high rate of non-recurring and ephemeral tasks, it would be reasonable to assess that there is insufficient capacity in the {kib} cluster to handle the amount of tasks.
 
-It is important to keep in mind that these stats give you a glimpse at a moment in time, and even though there has been insufficient capacity in recent minutes, this might not be true in other times where fewer non-recurring or ephemeral tasks are used. We recommend tracking these stats over time and identifying the source of these tasks before making sweeping changes to your infrastruture.
+It is important to keep in mind that these stats give you a glimpse at a moment in time, and even though there has been insufficient capacity in recent minutes, this might not be true in other times where fewer non-recurring or ephemeral tasks are used. We recommend tracking these stats over time and identifying the source of these tasks before making sweeping changes to your infrastructure.
 
 [[task-manager-health-evaluate-the-workload]]
 ===== Evaluate the Workload
