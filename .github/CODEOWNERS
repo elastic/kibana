@@ -24,6 +24,7 @@
 /src/plugins/vis_type_vega/ @elastic/kibana-app
 /src/plugins/vis_type_vislib/ @elastic/kibana-app
 /src/plugins/vis_type_xy/ @elastic/kibana-app
+/src/plugins/vis_type_pie/ @elastic/kibana-app
 /src/plugins/visualize/ @elastic/kibana-app
 /src/plugins/visualizations/ @elastic/kibana-app
 /packages/kbn-tinymath/ @elastic/kibana-app
@@ -54,6 +55,7 @@
 /src/plugins/share/ @elastic/kibana-app-services
 /src/plugins/ui_actions/ @elastic/kibana-app-services
 /src/plugins/index_pattern_field_editor @elastic/kibana-app-services
+/src/plugins/screenshot_mode @elastic/kibana-app-services
 /x-pack/examples/ui_actions_enhanced_examples/ @elastic/kibana-app-services
 /x-pack/plugins/data_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/embeddable_enhanced/ @elastic/kibana-app-services
@@ -87,7 +89,7 @@
 # Client Side Monitoring / Uptime (lives in APM directories but owned by Uptime)
 /x-pack/plugins/apm/e2e/cypress/support/step_definitions/csm @elastic/uptime
 /x-pack/plugins/apm/e2e/cypress/integration/csm_dashboard.feature @elastic/uptime
-/x-pack/plugins/apm/public/application/csmApp.tsx @elastic/uptime
+/x-pack/plugins/apm/public/application/uxApp.tsx @elastic/uptime
 /x-pack/plugins/apm/public/components/app/RumDashboard @elastic/uptime
 /x-pack/plugins/apm/server/lib/rum_client @elastic/uptime
 /x-pack/plugins/apm/server/routes/rum_client.ts @elastic/uptime
@@ -126,7 +128,7 @@
 /x-pack/test/functional_basic/apps/ml/ @elastic/ml-ui
 /x-pack/test/functional_with_es_ssl/apps/ml/ @elastic/ml-ui
 
-# ML team owns and maintains the transform plugin despite it living in the Elasticsearch management section.
+# ML team owns and maintains the transform plugin despite it living in the Data management section.
 /x-pack/plugins/transform/  @elastic/ml-ui
 /x-pack/test/accessibility/apps/transform.ts  @elastic/ml-ui
 /x-pack/test/api_integration/apis/transform/ @elastic/ml-ui
@@ -303,29 +305,29 @@
 /x-pack/plugins/enterprise_search/server/collectors/workplace_search/ @elastic/workplace-search-frontend
 /x-pack/plugins/enterprise_search/server/saved_objects/workplace_search/ @elastic/workplace-search-frontend
 
-# Elasticsearch UI
-/src/plugins/dev_tools/ @elastic/es-ui
-/src/plugins/console/  @elastic/es-ui
-/src/plugins/es_ui_shared/  @elastic/es-ui
-/x-pack/plugins/cross_cluster_replication/  @elastic/es-ui
-/x-pack/plugins/index_lifecycle_management/  @elastic/es-ui
-/x-pack/plugins/console_extensions/  @elastic/es-ui
-/x-pack/plugins/grokdebugger/  @elastic/es-ui
-/x-pack/plugins/index_management/  @elastic/es-ui
-/x-pack/plugins/license_api_guard/  @elastic/es-ui
-/x-pack/plugins/license_management/  @elastic/es-ui
-/x-pack/plugins/painless_lab/  @elastic/es-ui
-/x-pack/plugins/remote_clusters/  @elastic/es-ui
-/x-pack/plugins/rollup/  @elastic/es-ui
-/x-pack/plugins/searchprofiler/  @elastic/es-ui
-/x-pack/plugins/snapshot_restore/  @elastic/es-ui
-/x-pack/plugins/upgrade_assistant/  @elastic/es-ui
-/x-pack/plugins/watcher/  @elastic/es-ui
-/x-pack/plugins/ingest_pipelines/  @elastic/es-ui
-/packages/kbn-ace/ @elastic/es-ui
-/packages/kbn-monaco/ @elastic/es-ui
-#CC# /x-pack/plugins/console_extensions/ @elastic/es-ui
-#CC# /x-pack/plugins/cross_cluster_replication/ @elastic/es-ui
+# Stack Management
+/src/plugins/dev_tools/ @elastic/kibana-stack-management 
+/src/plugins/console/  @elastic/kibana-stack-management 
+/src/plugins/es_ui_shared/  @elastic/kibana-stack-management 
+/x-pack/plugins/cross_cluster_replication/  @elastic/kibana-stack-management 
+/x-pack/plugins/index_lifecycle_management/  @elastic/kibana-stack-management 
+/x-pack/plugins/console_extensions/  @elastic/kibana-stack-management 
+/x-pack/plugins/grokdebugger/  @elastic/kibana-stack-management 
+/x-pack/plugins/index_management/  @elastic/kibana-stack-management 
+/x-pack/plugins/license_api_guard/  @elastic/kibana-stack-management 
+/x-pack/plugins/license_management/  @elastic/kibana-stack-management 
+/x-pack/plugins/painless_lab/  @elastic/kibana-stack-management 
+/x-pack/plugins/remote_clusters/  @elastic/kibana-stack-management 
+/x-pack/plugins/rollup/  @elastic/kibana-stack-management 
+/x-pack/plugins/searchprofiler/  @elastic/kibana-stack-management 
+/x-pack/plugins/snapshot_restore/  @elastic/kibana-stack-management 
+/x-pack/plugins/upgrade_assistant/  @elastic/kibana-stack-management 
+/x-pack/plugins/watcher/  @elastic/kibana-stack-management 
+/x-pack/plugins/ingest_pipelines/  @elastic/kibana-stack-management 
+/packages/kbn-ace/ @elastic/kibana-stack-management 
+/packages/kbn-monaco/ @elastic/kibana-stack-management 
+#CC# /x-pack/plugins/console_extensions/ @elastic/kibana-stack-management 
+#CC# /x-pack/plugins/cross_cluster_replication/ @elastic/kibana-stack-management 
 
 # Security Solution
 /x-pack/test/endpoint_api_integration_no_ingest/ @elastic/security-solution
@@ -340,7 +342,7 @@
 #CC# /x-pack/plugins/security_solution/ @elastic/security-solution
 
 # Security Solution sub teams
-/x-pack/plugins/case @elastic/security-threat-hunting
+/x-pack/plugins/cases @elastic/security-threat-hunting
 /x-pack/plugins/timelines @elastic/security-threat-hunting
 /x-pack/test/case_api_integration @elastic/security-threat-hunting
 /x-pack/plugins/lists @elastic/security-detections-response
