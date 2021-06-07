@@ -36,7 +36,7 @@ const mappings: Mappings = {
   dynamic_templates: [
     {
       // force string to keyword (instead of default of text + keyword)
-      // @ts-expect-error doesn't satisfy MappingDynamicTemplate
+      // @ts-expect-error @elastic/elasticsearch expects here mapping: MappingPropertyBase
       strings: {
         match_mapping_type: 'string',
         mapping: {
