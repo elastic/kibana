@@ -3,3 +3,9 @@
 == Defining rules
 
 This content has been moved to <<create-and-manage-rules>>.
+
+[float]
+[[defining-alerts-general-details]]
+==== General rule details
+
+This content has been moved to <<create-and-manage-rules>>.

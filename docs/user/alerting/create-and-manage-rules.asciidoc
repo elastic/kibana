@@ -28,14 +28,14 @@ After a rule is created, you can re-open the flyout and change a rule's properti
 
 When you create a rule, you must define the rule details, conditions, and actions.
 
-. <<defining-alerts-general-details, General rule details>>
-. <<defining-alerts-type-conditions, Rule type and conditions>>
-. <<defining-alerts-actions-details, Action type and action details>>
+. <<defining-rules-general-details, General rule details>>
+. <<defining-rules-type-conditions, Rule type and conditions>>
+. <<defining-rules-actions-details, Action type and action details>>
 
 image::images/rule-flyout-sections.png[The three sections of a rule definition]
 
 [float]
-[[defining-alerts-general-details]]
+[[defining-rules-general-details]]
 ==== General rule details
 
 All rules share the following four properties.
@@ -52,7 +52,7 @@ Notify::      This value limits how often actions are repeated when an alert rem
 image::images/rule-flyout-general-details.png[alt='All rules have name, tags, check every, and notify properties in common']
 
 [float]
-[[defining-alerts-type-conditions]]
+[[defining-rules-type-conditions]]
 ==== Rule type and conditions
 
 Depending upon the {kib} app and context, you may be prompted to choose the type of rule you wish to create. Some apps will pre-select the type of rule for you.
@@ -66,7 +66,7 @@ Each rule type provides its own way of defining the conditions to detect, but an
 image::images/rule-flyout-rule-conditions.png[UI for defining rule conditions on an index threshold rule]
 
 [float]
-[[defining-alerts-actions-details]]
+[[defining-rules-actions-details]]
 ==== Action type and details
 
 To add an action to a rule, you first select the type of connector:
@@ -87,7 +87,7 @@ Each action type exposes different properties. For example an email action allow
 image::images/rule-flyout-action-details.png[UI for defining an email action]
 
 [float]
-[[defining-alerts-actions-variables]]
+[[defining-rules-actions-variables]]
 ===== Action variables
 Using the https://mustache.github.io/[Mustache] template syntax `{{variable name}}`, you can pass rule values at the time a condition is detected to an action. You can access the list of available variables using the "add variable" button. Although available variables differ by rule type, all rule types pass the following variables:
 
