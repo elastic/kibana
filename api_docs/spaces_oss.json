@@ -416,7 +416,15 @@
               "The space to represent with an avatar."
             ],
             "signature": [
-              "{ id?: string | undefined; name?: string | undefined; description?: string | undefined; color?: string | undefined; initials?: string | undefined; imageUrl?: string | undefined; disabledFeatures?: string[] | undefined; _reserved?: boolean | undefined; }"
+              "Partial<",
+              {
+                "pluginId": "spacesOss",
+                "scope": "common",
+                "docId": "kibSpacesOssPluginApi",
+                "section": "def-common.Space",
+                "text": "Space"
+              },
+              ">"
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
@@ -708,43 +716,7 @@
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 68
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "spacesOss",
-                "id": "def-public.path",
-                "type": "string",
-                "tags": [],
-                "label": "path",
-                "description": [
-                  "The path to use for the new URL, optionally including `search` and/or `hash` URL components."
-                ],
-                "source": {
-                  "path": "src/plugins/spaces_oss/public/api.ts",
-                  "lineNumber": 68
-                },
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "spacesOss",
-                "id": "def-public.objectNoun",
-                "type": "string",
-                "tags": [],
-                "label": "objectNoun",
-                "description": [
-                  "The string that is used to describe the object in the toast, e.g., _The **object** you're looking for has a new\nlocation_. Default value is 'object'."
-                ],
-                "signature": [
-                  "string | undefined"
-                ],
-                "source": {
-                  "path": "src/plugins/spaces_oss/public/api.ts",
-                  "lineNumber": 68
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -774,7 +746,14 @@
               "\nProvides a context that is required to render some Spaces components."
             ],
             "signature": [
-              "(props: ",
+              {
+                "pluginId": "spacesOss",
+                "scope": "public",
+                "docId": "kibSpacesOssPluginApi",
+                "section": "def-public.LazyComponentFn",
+                "text": "LazyComponentFn"
+              },
+              "<",
               {
                 "pluginId": "spacesOss",
                 "scope": "public",
@@ -782,32 +761,13 @@
                 "section": "def-public.SpacesContextProps",
                 "text": "SpacesContextProps"
               },
-              ") => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
+              ">"
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 78
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "spacesOss",
-                "id": "def-public.props",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "props",
-                "description": [],
-                "signature": [
-                  "T"
-                ],
-                "source": {
-                  "path": "src/plugins/spaces_oss/public/api.ts",
-                  "lineNumber": 38
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           },
           {
             "parentPluginId": "spacesOss",
@@ -819,7 +779,14 @@
               "\nDisplays a flyout to edit the spaces that an object is shared to.\n\nNote: must be rendered inside of a SpacesContext."
             ],
             "signature": [
-              "(props: ",
+              {
+                "pluginId": "spacesOss",
+                "scope": "public",
+                "docId": "kibSpacesOssPluginApi",
+                "section": "def-public.LazyComponentFn",
+                "text": "LazyComponentFn"
+              },
+              "<",
               {
                 "pluginId": "spacesOss",
                 "scope": "public",
@@ -827,32 +794,13 @@
                 "section": "def-public.ShareToSpaceFlyoutProps",
                 "text": "ShareToSpaceFlyoutProps"
               },
-              ") => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
+              ">"
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 84
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "spacesOss",
-                "id": "def-public.props",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "props",
-                "description": [],
-                "signature": [
-                  "T"
-                ],
-                "source": {
-                  "path": "src/plugins/spaces_oss/public/api.ts",
-                  "lineNumber": 38
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           },
           {
             "parentPluginId": "spacesOss",
@@ -864,7 +812,14 @@
               "\nDisplays a corresponding list of spaces for a given list of saved object namespaces. It shows up to five spaces (and an indicator for\nany number of spaces that the user is not authorized to see) by default. If more than five named spaces would be displayed, the extras\n(along with the unauthorized spaces indicator, if present) are hidden behind a button. If '*' (aka \"All spaces\") is present, it\nsupersedes all of the above and just displays a single badge without a button.\n\nNote: must be rendered inside of a SpacesContext."
             ],
             "signature": [
-              "(props: ",
+              {
+                "pluginId": "spacesOss",
+                "scope": "public",
+                "docId": "kibSpacesOssPluginApi",
+                "section": "def-public.LazyComponentFn",
+                "text": "LazyComponentFn"
+              },
+              "<",
               {
                 "pluginId": "spacesOss",
                 "scope": "public",
@@ -872,32 +827,13 @@
                 "section": "def-public.SpaceListProps",
                 "text": "SpaceListProps"
               },
-              ") => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
+              ">"
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 93
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "spacesOss",
-                "id": "def-public.props",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "props",
-                "description": [],
-                "signature": [
-                  "T"
-                ],
-                "source": {
-                  "path": "src/plugins/spaces_oss/public/api.ts",
-                  "lineNumber": 38
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           },
           {
             "parentPluginId": "spacesOss",
@@ -909,7 +845,14 @@
               "\nDisplays a callout that needs to be used if a call to `SavedObjectsClient.resolve()` results in an `\"conflict\"` outcome, which\nindicates that the user has loaded the page which is associated directly with one object (A), *and* with a legacy URL that points to a\ndifferent object (B).\n\nIn this case, `SavedObjectsClient.resolve()` has returned object A. This component displays a warning callout to the user explaining\nthat there is a conflict, and it includes a button that will redirect the user to object B when clicked.\n\nConsumers need to determine the local path for the new URL on their own, based on the object ID that was used to call\n`SavedObjectsClient.resolve()` (A) and the `aliasTargetId` value in the response (B). For example...\n\nA is `workpad-123` and B is `workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e`.\n\nFull legacy URL: `https://localhost:5601/app/canvas#/workpad/workpad-123/page/1`\n\nNew URL path: `#/workpad/workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e/page/1`"
             ],
             "signature": [
-              "(props: ",
+              {
+                "pluginId": "spacesOss",
+                "scope": "public",
+                "docId": "kibSpacesOssPluginApi",
+                "section": "def-public.LazyComponentFn",
+                "text": "LazyComponentFn"
+              },
+              "<",
               {
                 "pluginId": "spacesOss",
                 "scope": "public",
@@ -917,32 +860,13 @@
                 "section": "def-public.LegacyUrlConflictProps",
                 "text": "LegacyUrlConflictProps"
               },
-              ") => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
+              ">"
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 111
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "spacesOss",
-                "id": "def-public.props",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "props",
-                "description": [],
-                "signature": [
-                  "T"
-                ],
-                "source": {
-                  "path": "src/plugins/spaces_oss/public/api.ts",
-                  "lineNumber": 38
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           },
           {
             "parentPluginId": "spacesOss",
@@ -954,7 +878,14 @@
               "\nDisplays an avatar for the given space."
             ],
             "signature": [
-              "(props: ",
+              {
+                "pluginId": "spacesOss",
+                "scope": "public",
+                "docId": "kibSpacesOssPluginApi",
+                "section": "def-public.LazyComponentFn",
+                "text": "LazyComponentFn"
+              },
+              "<",
               {
                 "pluginId": "spacesOss",
                 "scope": "public",
@@ -962,32 +893,13 @@
                 "section": "def-public.SpaceAvatarProps",
                 "text": "SpaceAvatarProps"
               },
-              ") => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
+              ">"
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 115
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "spacesOss",
-                "id": "def-public.props",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "props",
-                "description": [],
-                "signature": [
-                  "T"
-                ],
-                "source": {
-                  "path": "src/plugins/spaces_oss/public/api.ts",
-                  "lineNumber": 38
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
