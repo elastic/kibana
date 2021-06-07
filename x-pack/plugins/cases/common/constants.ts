@@ -94,3 +94,4 @@ if (ENABLE_CASE_CONNECTOR) {
 }
 
 export const MAX_DOCS_PER_PAGE = 10_000;
+export const MAX_CONCURRENT_SEARCHES = 10;

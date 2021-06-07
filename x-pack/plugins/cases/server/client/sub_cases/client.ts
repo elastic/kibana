@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import pMap from 'p-map';
 import Boom from '@hapi/boom';
 
+import { SavedObject } from 'kibana/server';
 import {
   caseStatuses,
+  CommentAttributes,
   SubCaseResponse,
   SubCaseResponseRt,
   SubCasesFindRequest,
@@ -19,7 +22,7 @@ import {
 import { CasesClientArgs, CasesClientInternal } from '..';
 import { countAlertsForID, flattenSubCaseSavedObject, transformSubCases } from '../../common';
 import { createCaseError } from '../../common/error';
-import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_SAVED_OBJECT, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import { constructQueryOptions } from '../utils';
 import { defaultPage, defaultPerPage } from '../../routes/api';
@@ -121,13 +124,19 @@ async function deleteSubCase(ids: string[], clientArgs: CasesClientArgs): Promis
       return acc;
     }, new Map<string, string | undefined>());
 
-    await Promise.all(
-      comments.saved_objects.map((comment) =>
-        attachmentService.delete({ unsecuredSavedObjectsClient, attachmentId: comment.id })
-      )
-    );
+    const deleteCommentMapper = async (comment: SavedObject<CommentAttributes>) =>
+      attachmentService.delete({ unsecuredSavedObjectsClient, attachmentId: comment.id });
 
-    await Promise.all(ids.map((id) => caseService.deleteSubCase(unsecuredSavedObjectsClient, id)));
+    const deleteSubCasesMapper = async (id: string) => caseService.deleteSubCase(soClient, id);
+
+    // Ensuring we don't too many concurrent deletions running.
+    await pMap(comments.saved_objects, deleteCommentMapper, {
+      concurrency: MAX_CONCURRENT_SEARCHES,
+    });
+
+    await pMap(ids, deleteSubCasesMapper, {
+      concurrency: MAX_CONCURRENT_SEARCHES,
+    });
 
     const deleteDate = new Date().toISOString();
 
@@ -181,6 +190,7 @@ async function find(
       },
     });
 
+    // casesStatuses are bounded by us. No need to limit concurrent calls.
     const [open, inProgress, closed] = await Promise.all([
       ...caseStatuses.map((status) => {
         const { subCase: statusQueryOptions } = constructQueryOptions({

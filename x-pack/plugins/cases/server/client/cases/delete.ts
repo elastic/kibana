@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import pMap from 'p-map';
 import { Boom } from '@hapi/boom';
-import { SavedObjectsClientContract } from 'kibana/server';
-import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
+import { SavedObject, SavedObjectsClientContract, SavedObjectsFindResponse } from 'kibana/server';
+import { ENABLE_CASE_CONNECTOR, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { CasesClientArgs } from '..';
 import { createCaseError } from '../../common/error';
 import { AttachmentService, CasesService } from '../../services';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import { Operations, OwnerEntity } from '../../authorization';
-import { OWNER_FIELD } from '../../../common/api';
+import { OWNER_FIELD, SubCaseAttributes, CommentAttributes } from '../../../common/api';
 
 async function deleteSubCases({
   attachmentService,
@@ -37,19 +38,24 @@ async function deleteSubCases({
     id: subCaseIDs,
   });
 
-  // This shouldn't actually delete anything because all the comments should be deleted when comments are deleted
-  // per case ID
-  await Promise.all(
-    commentsForSubCases.saved_objects.map((commentSO) =>
-      attachmentService.delete({ unsecuredSavedObjectsClient, attachmentId: commentSO.id })
-    )
-  );
+  const commentMapper = (commentSO: SavedObject<CommentAttributes>) =>
+    attachmentService.delete({ unsecuredSavedObjectsClient, attachmentId: commentSO.id });
 
-  await Promise.all(
-    subCasesForCaseIds.saved_objects.map((subCaseSO) =>
-      caseService.deleteSubCase(unsecuredSavedObjectsClient, subCaseSO.id)
-    )
-  );
+  const subCasesMapper = (commentSO: SavedObject<SubCaseAttributes>) =>
+    attachmentService.delete({ unsecuredSavedObjectsClient, attachmentId: commentSO.id });
+
+  /**
+   * This shouldn't actually delete anything because
+   * all the comments should be deleted when comments are deleted
+   * per case ID. We also ensure that we don't too many concurrent deletions running.
+   */
+  await pMap(commentsForSubCases.saved_objects, commentMapper, {
+    concurrency: MAX_CONCURRENT_SEARCHES,
+  });
+
+  await pMap(subCasesForCaseIds.saved_objects, subCasesMapper, {
+    concurrency: MAX_CONCURRENT_SEARCHES,
+  });
 }
 
 /**
@@ -88,38 +94,46 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
       entities: Array.from(entities.values()),
     });
 
-    await Promise.all(
-      ids.map((id) =>
-        caseService.deleteCase({
-          unsecuredSavedObjectsClient,
-          id,
-        })
-      )
-    );
+    const deleteCasesMapper = async (id: string) =>
+      caseService.deleteCase({
+        unsecuredSavedObjectsClient,
+        id,
+      });
 
-    const comments = await Promise.all(
-      ids.map((id) =>
-        caseService.getAllCaseComments({
-          unsecuredSavedObjectsClient,
-          id,
-        })
-      )
-    );
+    // Ensuring we don't too many concurrent deletions running.
+    await pMap(ids, deleteCasesMapper, {
+      concurrency: MAX_CONCURRENT_SEARCHES,
+    });
 
-    if (comments.some((c) => c.saved_objects.length > 0)) {
-      await Promise.all(
-        comments.map((c) =>
-          Promise.all(
-            c.saved_objects.map(({ id }) =>
-              attachmentService.delete({
-                unsecuredSavedObjectsClient,
-                attachmentId: id,
-              })
-            )
-          )
-        )
+    const getCommentsMapper = async (id: string) =>
+      caseService.getAllCaseComments({
+        unsecuredSavedObjectsClient,
+        id,
+      });
+
+    // Ensuring we don't too many concurrent get running.
+    const comments = await pMap(ids, getCommentsMapper, {
+      concurrency: MAX_CONCURRENT_SEARCHES,
+    });
+
+    /**
+     * This is a nested pMap.Mapper.
+     * Each element of the comments array contains all comments of a particular case.
+     * For that reason we need first to create a map that iterate over all cases
+     * and return a pMap that deletes the comments for that case
+     */
+    const deleteCommentsMapper = async (commentRes: SavedObjectsFindResponse<CommentAttributes>) =>
+      pMap(commentRes.saved_objects, (comment) =>
+        attachmentService.delete({
+          unsecuredSavedObjectsClient,
+          attachmentId: comment.id,
+        })
       );
-    }
+
+    // Ensuring we don't too many concurrent deletions running.
+    await pMap(comments, deleteCommentsMapper, {
+      concurrency: MAX_CONCURRENT_SEARCHES,
+    });
 
     if (ENABLE_CASE_CONNECTOR) {
       await deleteSubCases({

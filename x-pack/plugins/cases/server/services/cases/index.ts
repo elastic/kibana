@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pMap from 'p-map';
 import { cloneDeep } from 'lodash';
 import {
   KibanaRequest,
@@ -43,7 +44,11 @@ import {
   groupTotalAlertsByID,
   SavedObjectFindOptionsKueryNode,
 } from '../../common';
-import { ENABLE_CASE_CONNECTOR, MAX_DOCS_PER_PAGE } from '../../../common/constants';
+import {
+  ENABLE_CASE_CONNECTOR,
+  MAX_CONCURRENT_SEARCHES,
+  MAX_DOCS_PER_PAGE,
+} from '../../../common/constants';
 import { defaultPage, defaultPerPage } from '../../routes/api';
 import {
   CASE_SAVED_OBJECT,
@@ -503,16 +508,18 @@ export class CasesService {
     const refType =
       associationType === AssociationType.case ? CASE_SAVED_OBJECT : SUB_CASE_SAVED_OBJECT;
 
-    const allComments = await Promise.all(
-      ids.map((id) =>
-        this.getCommentsByAssociation({
-          unsecuredSavedObjectsClient,
-          associationType,
-          id,
-          options: { page: 1, perPage: 1 },
-        })
-      )
-    );
+    const getCommentsMapper = async (id: string) =>
+      this.getCommentsByAssociation({
+        unsecuredSavedObjectsClient,
+        associationType,
+        id,
+        options: { page: 1, perPage: 1 },
+      });
+
+    // Ensuring we don't too many concurrent get running.
+    const allComments = await pMap(ids, getCommentsMapper, {
+      concurrency: MAX_CONCURRENT_SEARCHES,
+    });
 
     const alerts = await this.getCommentsByAssociation({
       unsecuredSavedObjectsClient,
