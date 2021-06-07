@@ -220,7 +220,7 @@
               "EUI `IconType` for icon to be displayed to the user. EUI supports any known EUI icon, SVG URL, or ReactElement."
             ],
             "signature": [
-              "IconType"
+              "string | React.ComponentClass<{}, any> | React.FunctionComponent<{}>"
             ],
             "source": {
               "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
@@ -419,7 +419,7 @@
               "EUI `IconType` for icon to be displayed to the user. EUI supports any known EUI icon, SVG URL, or ReactElement."
             ],
             "signature": [
-              "IconType"
+              "string | React.ComponentClass<{}, any> | React.FunctionComponent<{}>"
             ],
             "source": {
               "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
@@ -547,7 +547,7 @@
         "label": "TutorialDirectoryHeaderLinkComponent",
         "description": [],
         "signature": [
-          "(props: { children?: React.ReactNode; }, context: any) => React.ReactElement<any, any> | null"
+          "React.FunctionComponent<{}>"
         ],
         "source": {
           "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
@@ -564,7 +564,7 @@
         "label": "TutorialDirectoryNoticeComponent",
         "description": [],
         "signature": [
-          "(props: { children?: React.ReactNode; }, context: any) => React.ReactElement<any, any> | null"
+          "React.FunctionComponent<{}>"
         ],
         "source": {
           "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
@@ -581,7 +581,7 @@
         "label": "TutorialModuleNoticeComponent",
         "description": [],
         "signature": [
-          "(props: React.PropsWithChildren<{ moduleName: string; }>, context: any) => React.ReactElement<any, any> | null"
+          "React.FunctionComponent<{ moduleName: string; }>"
         ],
         "source": {
           "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
@@ -598,13 +598,7 @@
         "label": "TutorialSetup",
         "description": [],
         "signature": [
-          "{ setVariable: (key: string, value: unknown) => void; registerDirectoryNotice: (id: string, component: ",
-          "FC",
-          "<{}>) => void; registerDirectoryHeaderLink: (id: string, component: ",
-          "FC",
-          "<{}>) => void; registerModuleNotice: (id: string, component: ",
-          "FC",
-          "<{ moduleName: string; }>) => void; }"
+          "{ setVariable: (key: string, value: unknown) => void; registerDirectoryNotice: (id: string, component: React.FC<{}>) => void; registerDirectoryHeaderLink: (id: string, component: React.FC<{}>) => void; registerModuleNotice: (id: string, component: React.FC<{ moduleName: string; }>) => void; }"
         ],
         "source": {
           "path": "src/plugins/home/public/plugin.ts",
@@ -1084,9 +1078,21 @@
         "label": "SampleDataRegistrySetup",
         "description": [],
         "signature": [
-          "{ registerSampleDataset: (specProvider: SampleDatasetProvider) => void; getSampleDatasets: () => ",
+          "{ registerSampleDataset: (specProvider: ",
+          {
+            "pluginId": "home",
+            "scope": "server",
+            "docId": "kibHomePluginApi",
+            "section": "def-server.SampleDatasetProvider",
+            "text": "SampleDatasetProvider"
+          },
+          ") => void; getSampleDatasets: () => ",
           "Writable",
-          "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; statusMsg?: string | undefined; } & { description: string; id: string; name: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; appLinks: Readonly<{} & { label: string; path: string; icon: string; }>[]; defaultIndex: string; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: SavedObject<unknown>[]) => void; addAppLinksToSampleDataset: (id: string, appLinks: Readonly<{} & { label: string; path: string; icon: string; }>[]) => void; replacePanelInSampleDatasetDashboard: ({ sampleDataId, dashboardId, oldEmbeddableId, embeddableId, embeddableType, embeddableConfig, }: SampleDatasetDashboardPanel) => void; }"
+          "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; statusMsg?: string | undefined; } & { description: string; id: string; name: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; appLinks: Readonly<{} & { label: string; path: string; icon: string; }>[]; defaultIndex: string; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: ",
+          "SavedObject",
+          "<unknown>[]) => void; addAppLinksToSampleDataset: (id: string, appLinks: Readonly<{} & { label: string; path: string; icon: string; }>[]) => void; replacePanelInSampleDatasetDashboard: ({ sampleDataId, dashboardId, oldEmbeddableId, embeddableId, embeddableType, embeddableConfig, }: ",
+          "SampleDatasetDashboardPanel",
+          ") => void; }"
         ],
         "source": {
           "path": "src/plugins/home/server/services/sample_data/sample_data_registry.ts",
@@ -1124,7 +1130,7 @@
         "signature": [
           "(context: ",
           "TutorialContext",
-          ") => Readonly<{ savedObjects?: any[] | undefined; euiIconType?: string | undefined; previewImagePath?: string | undefined; moduleName?: string | undefined; isBeta?: boolean | undefined; completionTimeMinutes?: number | undefined; elasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; label: string; id: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; success?: string | undefined; error?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; onPremElasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; label: string; id: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; success?: string | undefined; error?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; artifacts?: Readonly<{ application?: Readonly<{} & { label: string; path: string; }> | undefined; exportedFields?: Readonly<{} & { documentationUrl: string; }> | undefined; } & { dashboards: Readonly<{ linkLabel?: string | undefined; } & { id: string; isOverview: boolean; }>[]; }> | undefined; savedObjectsInstallMsg?: string | undefined; } & { id: string; name: string; category: \"metrics\" | \"security\" | \"logging\" | \"other\"; shortDescription: string; longDescription: string; onPrem: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; label: string; id: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; success?: string | undefined; error?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; } & {}>[]; }>[]; }>[]; }>; }>"
+          ") => Readonly<{ savedObjects?: any[] | undefined; euiIconType?: string | undefined; previewImagePath?: string | undefined; moduleName?: string | undefined; isBeta?: boolean | undefined; completionTimeMinutes?: number | undefined; elasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; label: string; id: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; success?: string | undefined; error?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; onPremElasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; label: string; id: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; success?: string | undefined; error?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; artifacts?: Readonly<{ application?: Readonly<{} & { label: string; path: string; }> | undefined; exportedFields?: Readonly<{} & { documentationUrl: string; }> | undefined; } & { dashboards: Readonly<{ linkLabel?: string | undefined; } & { id: string; isOverview: boolean; }>[]; }> | undefined; savedObjectsInstallMsg?: string | undefined; } & { id: string; name: string; category: \"metrics\" | \"security\" | \"other\" | \"logging\"; shortDescription: string; longDescription: string; onPrem: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; label: string; id: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; success?: string | undefined; error?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; } & {}>[]; }>[]; }>[]; }>; }>"
         ],
         "source": {
           "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",

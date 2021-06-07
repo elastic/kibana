@@ -200,7 +200,9 @@
               "path": "src/plugins/telemetry/public/plugin.ts",
               "lineNumber": 40
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "telemetry",
@@ -233,7 +235,9 @@
               "path": "src/plugins/telemetry/public/plugin.ts",
               "lineNumber": 44
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "telemetry",
@@ -251,7 +255,9 @@
               "path": "src/plugins/telemetry/public/plugin.ts",
               "lineNumber": 46
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "telemetry",
@@ -269,7 +275,9 @@
               "path": "src/plugins/telemetry/public/plugin.ts",
               "lineNumber": 48
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "telemetry",
@@ -287,7 +295,25 @@
               "path": "src/plugins/telemetry/public/plugin.ts",
               "lineNumber": 54
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "telemetry",
+                "id": "def-public.optedIn",
+                "type": "boolean",
+                "tags": [],
+                "label": "optedIn",
+                "description": [
+                  "Whether the user is opting-in (`true`) or out (`false`)."
+                ],
+                "source": {
+                  "path": "src/plugins/telemetry/public/plugin.ts",
+                  "lineNumber": 54
+                },
+                "deprecated": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -674,7 +700,14 @@
           "\nThe Data Telemetry is reported as an array of {@link DataTelemetryDocument}"
         ],
         "signature": [
-          "DataTelemetryDocument[]"
+          {
+            "pluginId": "telemetry",
+            "scope": "server",
+            "docId": "kibTelemetryPluginApi",
+            "section": "def-server.DataTelemetryDocument",
+            "text": "DataTelemetryDocument"
+          },
+          "[]"
         ],
         "source": {
           "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
@@ -693,7 +726,17 @@
           "\nThe payload structure as composed by the OSS telemetry collection mechanism."
         ],
         "signature": [
-          "{ timestamp: string; cluster_uuid: string; cluster_name: string; version: string; cluster_stats: Pick<estypes.ClusterStatsResponse, \"status\" | \"indices\" | \"nodes\" | \"cluster_uuid\" | \"timestamp\">; collection: string; stack_stats: { data: DataTelemetryPayload | undefined; kibana: { count: number; indices: number; os: {}; versions: { version: string; count: number; }[]; plugins: { [plugin: string]: Record<string, unknown>; }; } | undefined; }; }"
+          "{ timestamp: string; cluster_uuid: string; cluster_name: string; version: string; cluster_stats: Pick<",
+          "ClusterStatsResponse",
+          ", \"status\" | \"indices\" | \"nodes\" | \"cluster_uuid\" | \"timestamp\">; collection: string; stack_stats: { data: ",
+          {
+            "pluginId": "telemetry",
+            "scope": "server",
+            "docId": "kibTelemetryPluginApi",
+            "section": "def-server.DataTelemetryPayload",
+            "text": "DataTelemetryPayload"
+          },
+          " | undefined; kibana: { count: number; indices: number; os: {}; versions: { version: string; count: number; }[]; plugins: { [plugin: string]: Record<string, unknown>; }; } | undefined; }; }"
         ],
         "source": {
           "path": "src/plugins/telemetry/server/telemetry_collection/get_local_stats.ts",
@@ -737,7 +780,9 @@
             "path": "src/plugins/telemetry/server/plugin.ts",
             "lineNumber": 56
           },
-          "deprecated": false
+          "deprecated": false,
+          "returnComment": [],
+          "children": []
         }
       ],
       "lifecycle": "setup",
@@ -774,7 +819,9 @@
             "path": "src/plugins/telemetry/server/plugin.ts",
             "lineNumber": 68
           },
-          "deprecated": false
+          "deprecated": false,
+          "returnComment": [],
+          "children": []
         }
       ],
       "lifecycle": "start",
