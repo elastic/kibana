@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { ProductName } from '../types';
+
 export const ANY_AUTH_PROVIDER = '*';
 
 export const ANY_AUTH_PROVIDER_OPTION_LABEL = i18n.translate(
@@ -197,4 +199,26 @@ export const SAVE_ROLE_MAPPING = i18n.translate(
 export const UPDATE_ROLE_MAPPING = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.updateRoleMappingButtonLabel',
   { defaultMessage: 'Update role mapping' }
+);
+
+export const ROLE_MAPPINGS_HEADING_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.roleMappingsHeadingTitle',
+  { defaultMessage: 'Role mappings' }
+);
+
+export const ROLE_MAPPINGS_HEADING_DESCRIPTION = (productName: ProductName) =>
+  i18n.translate('xpack.enterpriseSearch.roleMapping.roleMappingsHeadingDescription', {
+    defaultMessage:
+      'Role mappings provide an interface to associate native or SAML-governed role attributes with {productName} permissions.',
+    values: { productName },
+  });
+
+export const ROLE_MAPPINGS_HEADING_DOCS_LINK = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.roleMappingsHeadingDocsLink',
+  { defaultMessage: 'Learn more about role mappings' }
+);
+
+export const ROLE_MAPPINGS_HEADING_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.roleMappingsHeadingButton',
+  { defaultMessage: 'Create a new role mapping' }
 );
