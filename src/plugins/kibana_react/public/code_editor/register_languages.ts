@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { CssLang, HandlebarsLang, MarkdownLang, registerLanguage } from './languages';
+import { registerLanguage } from '@kbn/monaco';
+import { CssLang, HandlebarsLang, MarkdownLang } from './languages';
 
 registerLanguage(CssLang);
 registerLanguage(HandlebarsLang);

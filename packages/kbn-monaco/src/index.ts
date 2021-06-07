@@ -12,7 +12,10 @@ import './register_globals';
 export { monaco } from './monaco_imports';
 export { XJsonLang } from './xjson';
 export { PainlessLang, PainlessContext, PainlessAutocompleteField } from './painless';
-
 /* eslint-disable-next-line @kbn/eslint/module_migration */
 import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';
-export { BarePluginApi };
+
+import { registerLanguage } from './helpers';
+import { LangModule as LangModuleType } from './types';
+
+export { BarePluginApi, registerLanguage, LangModuleType };

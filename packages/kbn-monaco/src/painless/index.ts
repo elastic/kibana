@@ -9,6 +9,7 @@
 import { ID } from './constants';
 import { lexerRules, languageConfiguration } from './lexer_rules';
 import { getSuggestionProvider, getSyntaxErrors } from './language';
+import { LangModule as LangModuleType } from '../types';
 
 export const PainlessLang = {
   ID,
@@ -16,6 +17,6 @@ export const PainlessLang = {
   lexerRules,
   languageConfiguration,
   getSyntaxErrors,
-};
+} as LangModuleType;
 
 export { PainlessContext, PainlessAutocompleteField } from './types';

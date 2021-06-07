@@ -5,10 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { monaco } from '@kbn/monaco';
+import { monaco } from './monaco_imports';
 
 export interface LangModule {
   ID: string;
-  language: monaco.languages.IMonarchLanguage;
-  conf: monaco.languages.LanguageConfiguration;
+  lexerRules: monaco.languages.IMonarchLanguage;
+  languageConfiguration?: monaco.languages.LanguageConfiguration;
+  getSuggestionProvider?: Function;
+  getSyntaxErrors?: Function;
 }
+
+
+

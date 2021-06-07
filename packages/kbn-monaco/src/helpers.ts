@@ -5,13 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { monaco } from '@kbn/monaco';
-import { LangModuleType } from './';
+import { monaco } from './monaco_imports';
+import { LangModule as LangModuleType } from './types';
 
 function registerLanguage(language: LangModuleType) {
   monaco.languages.register({ id: language.ID });
-  monaco.languages.setMonarchTokensProvider(language.ID, language.language);
-  monaco.languages.setLanguageConfiguration(language.ID, language.conf);
+  monaco.languages.setMonarchTokensProvider(language.ID, language.lexerRules);
+  if (language.languageConfiguration) {
+    monaco.languages.setLanguageConfiguration(language.ID, language.languageConfiguration);
+  }
 }
 
 export { registerLanguage };

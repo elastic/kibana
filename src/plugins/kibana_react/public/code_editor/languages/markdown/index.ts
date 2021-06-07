@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { language, conf } from './language';
+import { LangModuleType } from '@kbn/monaco';
+import { languageConfiguration, lexerRules } from './language';
 import { LANG } from './constants';
-import { LangModule } from '../types';
 
-export const Lang: LangModule = { ID: LANG, language, conf };
+export const Lang: LangModuleType = { ID: LANG, languageConfiguration, lexerRules };

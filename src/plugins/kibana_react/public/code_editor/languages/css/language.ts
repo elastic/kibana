@@ -9,4 +9,4 @@
 /* eslint-disable @kbn/eslint/module_migration */
 import { conf, language } from 'monaco-editor/esm/vs/basic-languages/css/css';
 
-export { conf, language };
+export { conf as languageConfiguration, language as lexerRules };
