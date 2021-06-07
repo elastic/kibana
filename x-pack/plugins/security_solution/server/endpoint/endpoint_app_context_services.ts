@@ -191,4 +191,11 @@ export class EndpointAppContextService {
     }
     return this.license;
   }
+
+  public async getCasesClient(req: KibanaRequest): Promise<CasesClient> {
+    if (!this.cases) {
+      throw new Error(`must call start on ${EndpointAppContextService.name} to call getter`);
+    }
+    return this.cases.getCasesClientWithRequest(req);
+  }
 }
