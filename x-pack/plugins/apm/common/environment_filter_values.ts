@@ -37,6 +37,18 @@ export function getEnvironmentLabel(environment: string) {
   return environmentLabels[environment] || environment;
 }
 
+export function omitEsFieldValue({
+  esFieldValue,
+  value,
+  text,
+}: {
+  esFieldValue?: string;
+  value: string;
+  text: string;
+}) {
+  return { value, text };
+}
+
 export function parseEnvironmentUrlParam(environment: string) {
   if (environment === ENVIRONMENT_ALL_VALUE) {
     return ENVIRONMENT_ALL;
