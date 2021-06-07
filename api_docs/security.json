@@ -442,7 +442,7 @@
             "label": "iconType",
             "description": [],
             "signature": [
-              "string | React.ComponentClass<{}, any> | React.FunctionComponent<{}>"
+              "IconType"
             ],
             "source": {
               "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
@@ -510,11 +510,7 @@
       "label": "SecurityPluginSetup",
       "description": [],
       "signature": [
-        "{ authc: ",
-        "AuthenticationServiceSetup",
-        "; sessionTimeout: ",
-        "SessionTimeout",
-        "; license: Readonly<{ isLicenseAvailable: () => boolean; isEnabled: () => boolean; getType: () => \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; getFeatures: () => ",
+        "{ authc: AuthenticationServiceSetup; sessionTimeout: SessionTimeout; license: Readonly<{ isLicenseAvailable: () => boolean; isEnabled: () => boolean; getType: () => \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; getFeatures: () => ",
         "SecurityLicenseFeatures",
         "; features$: ",
         "Observable",
@@ -540,9 +536,7 @@
       "signature": [
         "{ navControlService: ",
         "SecurityNavControlServiceStart",
-        "; authc: ",
-        "AuthenticationServiceSetup",
-        "; }"
+        "; authc: AuthenticationServiceSetup; }"
       ],
       "source": {
         "path": "x-pack/plugins/security/public/plugin.tsx",
@@ -650,33 +644,7 @@
               "path": "x-pack/plugins/security/server/audit/audit_service.ts",
               "lineNumber": 37
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "security",
-                "id": "def-server.event",
-                "type": "Object",
-                "tags": [],
-                "label": "event",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "security",
-                    "scope": "server",
-                    "docId": "kibSecurityPluginApi",
-                    "section": "def-server.AuditEvent",
-                    "text": "AuditEvent"
-                  },
-                  " | undefined"
-                ],
-                "source": {
-                  "path": "x-pack/plugins/security/server/audit/audit_service.ts",
-                  "lineNumber": 37
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -832,7 +800,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-          "lineNumber": 56
+          "lineNumber": 62
         },
         "deprecated": false,
         "children": [
@@ -847,7 +815,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 60
+              "lineNumber": 66
             },
             "deprecated": false
           },
@@ -862,7 +830,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 64
+              "lineNumber": 70
             },
             "deprecated": false
           },
@@ -880,7 +848,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 68
+              "lineNumber": 74
             },
             "deprecated": false
           },
@@ -895,7 +863,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 72
+              "lineNumber": 78
             },
             "deprecated": false
           }
@@ -911,7 +879,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-          "lineNumber": 75
+          "lineNumber": 81
         },
         "deprecated": false,
         "children": [
@@ -926,7 +894,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 79
+              "lineNumber": 85
             },
             "deprecated": false
           },
@@ -941,7 +909,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 83
+              "lineNumber": 89
             },
             "deprecated": false
           },
@@ -956,7 +924,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 87
+              "lineNumber": 93
             },
             "deprecated": false
           }
@@ -974,7 +942,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-          "lineNumber": 93
+          "lineNumber": 99
         },
         "deprecated": false,
         "children": [
@@ -992,7 +960,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 97
+              "lineNumber": 103
             },
             "deprecated": false
           },
@@ -1010,7 +978,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 101
+              "lineNumber": 107
             },
             "deprecated": false
           },
@@ -1025,7 +993,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 105
+              "lineNumber": 111
             },
             "deprecated": false
           },
@@ -1043,7 +1011,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 109
+              "lineNumber": 115
             },
             "deprecated": false
           }
@@ -1061,7 +1029,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-          "lineNumber": 46
+          "lineNumber": 52
         },
         "deprecated": false,
         "children": [
@@ -1077,7 +1045,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 47
+              "lineNumber": 53
             },
             "deprecated": false
           }
@@ -1185,52 +1153,7 @@
               "path": "x-pack/plugins/security/server/audit/audit_service.ts",
               "lineNumber": 33
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "security",
-                "id": "def-server.eventType",
-                "type": "string",
-                "tags": [],
-                "label": "eventType",
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/security/server/audit/audit_service.ts",
-                  "lineNumber": 33
-                },
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "security",
-                "id": "def-server.message",
-                "type": "string",
-                "tags": [],
-                "label": "message",
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/security/server/audit/audit_service.ts",
-                  "lineNumber": 33
-                },
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "security",
-                "id": "def-server.data",
-                "type": "Object",
-                "tags": [],
-                "label": "data",
-                "description": [],
-                "signature": [
-                  "Record<string, any> | undefined"
-                ],
-                "source": {
-                  "path": "x-pack/plugins/security/server/audit/audit_service.ts",
-                  "lineNumber": 33
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1314,13 +1237,6 @@
                 }
               },
               {
-                "plugin": "cases",
-                "link": {
-                  "path": "x-pack/plugins/cases/server/plugin.ts",
-                  "lineNumber": 89
-                }
-              },
-              {
                 "plugin": "dashboardMode",
                 "link": {
                   "path": "x-pack/plugins/dashboard_mode/server/interceptors/dashboard_mode_request_interceptor.ts",
@@ -1381,15 +1297,15 @@
             "label": "authz",
             "description": [],
             "signature": [
-              "{ mode: ",
-              "AuthorizationMode",
-              "; actions: ",
-              "Actions",
-              "; checkPrivilegesDynamicallyWithRequest: ",
-              "CheckPrivilegesDynamicallyWithRequest",
-              "; checkPrivilegesWithRequest: ",
-              "CheckPrivilegesWithRequest",
-              "; }"
+              "Pick<",
+              {
+                "pluginId": "security",
+                "scope": "server",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-server.AuthorizationServiceSetup",
+                "text": "AuthorizationServiceSetup"
+              },
+              ", \"mode\" | \"actions\" | \"checkPrivilegesDynamicallyWithRequest\" | \"checkPrivilegesWithRequest\">"
             ],
             "source": {
               "path": "x-pack/plugins/security/server/plugin.ts",
@@ -1513,19 +1429,9 @@
             "label": "authc",
             "description": [],
             "signature": [
-              "{ getCurrentUser: (request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
-              "<unknown, unknown, unknown, any>) => ",
-              "AuthenticatedUser",
-              " | null; apiKeys: Pick<",
-              "APIKeys",
-              ", \"create\" | \"areAPIKeysEnabled\" | \"invalidate\" | \"grantAsInternalUser\" | \"invalidateAsInternalUser\">; }"
+              "Pick<",
+              "AuthenticationServiceStart",
+              ", \"getCurrentUser\" | \"apiKeys\">"
             ],
             "source": {
               "path": "x-pack/plugins/security/server/plugin.ts",
@@ -1541,15 +1447,15 @@
             "label": "authz",
             "description": [],
             "signature": [
-              "{ mode: ",
-              "AuthorizationMode",
-              "; actions: ",
-              "Actions",
-              "; checkPrivilegesDynamicallyWithRequest: ",
-              "CheckPrivilegesDynamicallyWithRequest",
-              "; checkPrivilegesWithRequest: ",
-              "CheckPrivilegesWithRequest",
-              "; }"
+              "Pick<",
+              {
+                "pluginId": "security",
+                "scope": "server",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-server.AuthorizationServiceSetup",
+                "text": "AuthorizationServiceSetup"
+              },
+              ", \"mode\" | \"actions\" | \"checkPrivilegesDynamicallyWithRequest\" | \"checkPrivilegesWithRequest\">"
             ],
             "source": {
               "path": "x-pack/plugins/security/server/plugin.ts",

@@ -36,14 +36,11 @@
           ", ",
           "PluginStart",
           ", ",
-          "SetupPlugins",
-          ", ",
-          "StartPlugins",
-          ">"
+          "SetupPlugins"
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-          "lineNumber": 74
+          "lineNumber": 75
         },
         "deprecated": false,
         "children": [
@@ -59,7 +56,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-              "lineNumber": 78
+              "lineNumber": 79
             },
             "deprecated": false,
             "children": [
@@ -82,7 +79,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-                  "lineNumber": 78
+                  "lineNumber": 79
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -123,7 +120,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-              "lineNumber": 102
+              "lineNumber": 103
             },
             "deprecated": false,
             "children": [
@@ -150,7 +147,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-                  "lineNumber": 102
+                  "lineNumber": 103
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -167,7 +164,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-                  "lineNumber": 102
+                  "lineNumber": 103
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -197,7 +194,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-              "lineNumber": 343
+              "lineNumber": 344
             },
             "deprecated": false,
             "children": [
@@ -219,7 +216,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-                  "lineNumber": 343
+                  "lineNumber": 344
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -236,7 +233,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-                  "lineNumber": 343
+                  "lineNumber": 344
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -256,7 +253,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-              "lineNumber": 388
+              "lineNumber": 389
             },
             "deprecated": false,
             "children": [],
@@ -300,9 +297,7 @@
             "path": "x-pack/plugins/security_solution/public/types.ts",
             "lineNumber": 70
           },
-          "deprecated": false,
-          "returnComment": [],
-          "children": []
+          "deprecated": false
         }
       ],
       "lifecycle": "setup",
@@ -438,14 +433,11 @@
             "text": "PluginStart"
           },
           ", ",
-          "SetupPlugins",
-          ", ",
-          "StartPlugins",
-          ">"
+          "SetupPlugins"
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/server/plugin.ts",
-          "lineNumber": 133
+          "lineNumber": 143
         },
         "deprecated": false,
         "children": [
@@ -461,7 +453,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/server/plugin.ts",
-              "lineNumber": 148
+              "lineNumber": 159
             },
             "deprecated": false,
             "children": [
@@ -484,7 +476,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 148
+                  "lineNumber": 159
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -524,7 +516,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/server/plugin.ts",
-              "lineNumber": 160
+              "lineNumber": 171
             },
             "deprecated": false,
             "children": [
@@ -557,7 +549,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 160
+                  "lineNumber": 171
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -574,7 +566,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 160
+                  "lineNumber": 171
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -604,7 +596,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/server/plugin.ts",
-              "lineNumber": 345
+              "lineNumber": 471
             },
             "deprecated": false,
             "children": [
@@ -626,7 +618,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 345
+                  "lineNumber": 471
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -643,7 +635,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 345
+                  "lineNumber": 471
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -663,7 +655,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/server/plugin.ts",
-              "lineNumber": 420
+              "lineNumber": 546
             },
             "deprecated": false,
             "children": [],
@@ -709,9 +701,7 @@
               "path": "x-pack/plugins/security_solution/server/types.ts",
               "lineNumber": 18
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -747,7 +737,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/security_solution/server/plugin.ts",
-        "lineNumber": 109
+        "lineNumber": 127
       },
       "deprecated": false,
       "children": [],
@@ -763,7 +753,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/security_solution/server/plugin.ts",
-        "lineNumber": 112
+        "lineNumber": 130
       },
       "deprecated": false,
       "children": [],

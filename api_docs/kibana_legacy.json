@@ -982,25 +982,6 @@
           "lineNumber": 14
         },
         "deprecated": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "kibanaLegacy",
-            "id": "def-public.options",
-            "type": "Unknown",
-            "tags": [],
-            "label": "options",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/angular/kbn_top_nav.d.ts",
-              "lineNumber": 15
-            },
-            "deprecated": false
-          }
-        ],
         "initialIsOpen": false
       },
       {
@@ -1019,7 +1000,7 @@
             "section": "def-public.AngularHttpError",
             "text": "AngularHttpError"
           },
-          ") => string"
+          ") => any"
         ],
         "source": {
           "path": "src/plugins/kibana_legacy/public/notify/lib/format_angular_http_error.ts",
@@ -1203,8 +1184,6 @@
           "lineNumber": 15
         },
         "deprecated": false,
-        "returnComment": [],
-        "children": [],
         "initialIsOpen": false
       },
       {
@@ -1842,7 +1821,7 @@
         "label": "AngularHttpError",
         "description": [],
         "signature": [
-          "angular.IHttpResponse<{ message: string; }>"
+          "IHttpResponse<{ message: string; }>"
         ],
         "source": {
           "path": "src/plugins/kibana_legacy/public/notify/lib/format_angular_http_error.ts",
@@ -1859,7 +1838,7 @@
         "label": "createTopNavDirective",
         "description": [],
         "signature": [
-          "angular.IDirectiveFactory<angular.IScope, JQLite, angular.IAttributes, angular.IController> | (string | angular.IDirectiveFactory<angular.IScope, JQLite, angular.IAttributes, angular.IController>)[]"
+          "angular.Injectable<angular.IDirectiveFactory<angular.IScope, JQLite, angular.IAttributes, angular.IController>>"
         ],
         "source": {
           "path": "src/plugins/kibana_legacy/public/angular/kbn_top_nav.d.ts",
@@ -1876,7 +1855,7 @@
         "label": "IPrivate",
         "description": [],
         "signature": [
-          "<T>(provider: (...injectable: any[]) => T) => T"
+          "(provider: (...injectable: any[]) => T) => T"
         ],
         "source": {
           "path": "src/plugins/kibana_legacy/public/utils/private.d.ts",
@@ -1893,7 +1872,7 @@
         "label": "KbnAccessibleClickProvider",
         "description": [],
         "signature": [
-          "angular.IDirectiveFactory<angular.IScope, JQLite, angular.IAttributes, angular.IController> | (string | angular.IDirectiveFactory<angular.IScope, JQLite, angular.IAttributes, angular.IController>)[]"
+          "angular.Injectable<angular.IDirectiveFactory<angular.IScope, JQLite, angular.IAttributes, angular.IController>>"
         ],
         "source": {
           "path": "src/plugins/kibana_legacy/public/utils/kbn_accessible_click.d.ts",

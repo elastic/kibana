@@ -16,12 +16,10 @@ import {
   getGroupPath,
   getGroupSourcePrioritizationPath,
   getReindexJobRoute,
-  getRoleMappingPath,
   getSourcesPath,
   GROUPS_PATH,
   SOURCES_PATH,
   PERSONAL_SOURCES_PATH,
-  ROLE_MAPPINGS_PATH,
   SOURCE_DETAILS_PATH,
 } from './routes';
 
@@ -49,12 +47,6 @@ describe('getContentSourcePath', () => {
 describe('getGroupPath', () => {
   it('should format path', () => {
     expect(getGroupPath('123')).toEqual(`${GROUPS_PATH}/123`);
-  });
-});
-
-describe('getRoleMappingPath', () => {
-  it('should format path', () => {
-    expect(getRoleMappingPath('123')).toEqual(`${ROLE_MAPPINGS_PATH}/123`);
   });
 });
 

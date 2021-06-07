@@ -284,24 +284,7 @@
           "<",
           "CommonEuiButtonEmptyProps",
           ", {}>, ",
-          "PropsForButton",
-          "<",
-          "CommonEuiButtonEmptyProps",
-          ", {}>> & ",
-          "CommonEuiButtonEmptyProps",
-          " & { onClick?: ((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void) | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement>) | (",
-          "DisambiguateSet",
-          "<",
-          "PropsForButton",
-          "<",
-          "CommonEuiButtonEmptyProps",
-          ", {}>, ",
-          "PropsForAnchor",
-          "<",
-          "CommonEuiButtonEmptyProps",
-          ", {}>> & ",
-          "CommonEuiButtonEmptyProps",
-          " & { href?: string | undefined; onClick?: ((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>), \"iconType\" | \"data-test-subj\" | \"target\" | \"rel\">"
+          "PropsForButton"
         ],
         "source": {
           "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
@@ -352,7 +335,7 @@
               "\nContent of the button (in lieu of `children`)"
             ],
             "signature": [
-              "string | number | boolean | {} | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactNodeArray | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "source": {
               "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
@@ -385,24 +368,7 @@
           "<",
           "CommonEuiButtonEmptyProps",
           ", {}>, ",
-          "PropsForButton",
-          "<",
-          "CommonEuiButtonEmptyProps",
-          ", {}>> & ",
-          "CommonEuiButtonEmptyProps",
-          " & { onClick?: ((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void) | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement>) | (",
-          "DisambiguateSet",
-          "<",
-          "PropsForButton",
-          "<",
-          "CommonEuiButtonEmptyProps",
-          ", {}>, ",
-          "PropsForAnchor",
-          "<",
-          "CommonEuiButtonEmptyProps",
-          ", {}>> & ",
-          "CommonEuiButtonEmptyProps",
-          " & { href?: string | undefined; onClick?: ((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>), \"iconType\" | \"data-test-subj\" | \"target\" | \"rel\">"
+          "PropsForButton"
         ],
         "source": {
           "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
@@ -468,24 +434,7 @@
           "<",
           "CommonEuiButtonEmptyProps",
           ", {}>, ",
-          "PropsForButton",
-          "<",
-          "CommonEuiButtonEmptyProps",
-          ", {}>> & ",
-          "CommonEuiButtonEmptyProps",
-          " & { onClick?: ((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void) | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement>) | (",
-          "DisambiguateSet",
-          "<",
-          "PropsForButton",
-          "<",
-          "CommonEuiButtonEmptyProps",
-          ", {}>, ",
-          "PropsForAnchor",
-          "<",
-          "CommonEuiButtonEmptyProps",
-          ", {}>> & ",
-          "CommonEuiButtonEmptyProps",
-          " & { href?: string | undefined; onClick?: ((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>), \"iconType\" | \"data-test-subj\" | \"target\" | \"rel\">"
+          "PropsForButton"
         ],
         "source": {
           "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
@@ -551,24 +500,7 @@
           "<",
           "CommonEuiButtonEmptyProps",
           ", {}>, ",
-          "PropsForButton",
-          "<",
-          "CommonEuiButtonEmptyProps",
-          ", {}>> & ",
-          "CommonEuiButtonEmptyProps",
-          " & { onClick?: ((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void) | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement>) | (",
-          "DisambiguateSet",
-          "<",
-          "PropsForButton",
-          "<",
-          "CommonEuiButtonEmptyProps",
-          ", {}>, ",
-          "PropsForAnchor",
-          "<",
-          "CommonEuiButtonEmptyProps",
-          ", {}>> & ",
-          "CommonEuiButtonEmptyProps",
-          " & { href?: string | undefined; onClick?: ((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>), \"iconType\" | \"data-test-subj\" | \"target\" | \"rel\">"
+          "PropsForButton"
         ],
         "source": {
           "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
@@ -670,39 +602,20 @@
             "label": "mount",
             "description": [],
             "signature": [
-              "(element: HTMLElement) => ",
               {
                 "pluginId": "core",
                 "scope": "public",
                 "docId": "kibCorePluginApi",
-                "section": "def-public.UnmountCallback",
-                "text": "UnmountCallback"
-              }
+                "section": "def-public.MountPoint",
+                "text": "MountPoint"
+              },
+              "<HTMLElement>"
             ],
             "source": {
               "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
               "lineNumber": 17
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "core",
-                "id": "def-public.element",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "element",
-                "description": [],
-                "signature": [
-                  "T"
-                ],
-                "source": {
-                  "path": "src/core/public/types.ts",
-                  "lineNumber": 25
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -2459,39 +2372,20 @@
             "label": "content",
             "description": [],
             "signature": [
-              "(element: HTMLDivElement) => ",
               {
                 "pluginId": "core",
                 "scope": "public",
                 "docId": "kibCorePluginApi",
-                "section": "def-public.UnmountCallback",
-                "text": "UnmountCallback"
-              }
+                "section": "def-public.MountPoint",
+                "text": "MountPoint"
+              },
+              "<HTMLDivElement>"
             ],
             "source": {
               "path": "src/core/public/chrome/types.ts",
               "lineNumber": 41
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "core",
-                "id": "def-public.element",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "element",
-                "description": [],
-                "signature": [
-                  "T"
-                ],
-                "source": {
-                  "path": "src/core/public/types.ts",
-                  "lineNumber": 25
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -2508,7 +2402,11 @@
         "description": [],
         "signature": [
           "CommonProps",
-          " & { text: React.ReactNode; href?: string | undefined; onClick?: ((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; truncate?: boolean | undefined; }"
+          " & { text: ",
+          "ReactNode",
+          "; href?: string | undefined; onClick?: ((event: ",
+          "MouseEvent",
+          "<HTMLAnchorElement, MouseEvent>) => void) | undefined; truncate?: boolean | undefined; }"
         ],
         "source": {
           "path": "src/core/public/chrome/types.ts",

@@ -15,11 +15,11 @@
       "label": "FileDataVisualizerPluginStart",
       "description": [],
       "signature": [
-        "{ getFileDataVisualizerComponent: () => Promise<React.FC<{}>>; getMaxBytesFormatted: () => string; }"
+        "{ getFileDataVisualizerComponent: typeof getFileDataVisualizerComponent; getMaxBytesFormatted: typeof getMaxBytesFormatted; }"
       ],
       "source": {
         "path": "x-pack/plugins/file_data_visualizer/public/plugin.ts",
-        "lineNumber": 33
+        "lineNumber": 36
       },
       "deprecated": false,
       "lifecycle": "start",
@@ -230,7 +230,7 @@
         "label": "JobFieldType",
         "description": [],
         "signature": [
-          "\"number\" | \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"geo_point\" | \"geo_shape\" | \"unknown\""
+          "\"number\" | \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"unknown\" | \"ip\" | \"geo_point\" | \"geo_shape\""
         ],
         "source": {
           "path": "x-pack/plugins/file_data_visualizer/common/types.ts",
