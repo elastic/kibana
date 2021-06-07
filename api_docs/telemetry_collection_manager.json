@@ -84,17 +84,13 @@
             "label": "esClient",
             "description": [],
             "signature": [
-              "Pick<",
-              "KibanaClient",
-              ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"helpers\" | \"count\" | \"search\" | \"security\" | \"eql\" | \"on\" | \"off\" | \"transform\" | \"emit\" | \"once\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
-              "TransportRequestParams",
-              ", options?: ",
-              "TransportRequestOptions",
-              " | undefined): ",
-              "TransportRequestPromise",
-              "<",
-              "ApiResponse",
-              "<Record<string, any>, unknown>>; }; }"
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              }
             ],
             "source": {
               "path": "src/plugins/telemetry_collection_manager/server/types.ts",
@@ -110,307 +106,15 @@
             "label": "soClient",
             "description": [],
             "signature": [
-              "{ get: <T = unknown>(type: string, id: string, options?: ",
+              "Pick<",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
+                "section": "def-server.SavedObjectsClient",
+                "text": "SavedObjectsClient"
               },
-              ") => Promise<",
-              "SavedObject",
-              "<T>>; delete: (type: string, id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsDeleteOptions",
-                "text": "SavedObjectsDeleteOptions"
-              },
-              ") => Promise<{}>; create: <T = unknown>(type: string, attributes: T, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCreateOptions",
-                "text": "SavedObjectsCreateOptions"
-              },
-              " | undefined) => Promise<",
-              "SavedObject",
-              "<T>>; bulkCreate: <T = unknown>(objects: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkCreateObject",
-                "text": "SavedObjectsBulkCreateObject"
-              },
-              "<T>[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCreateOptions",
-                "text": "SavedObjectsCreateOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkResponse",
-                "text": "SavedObjectsBulkResponse"
-              },
-              "<T>>; checkConflicts: (objects?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCheckConflictsObject",
-                "text": "SavedObjectsCheckConflictsObject"
-              },
-              "[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCheckConflictsResponse",
-                "text": "SavedObjectsCheckConflictsResponse"
-              },
-              ">; find: <T = unknown, A = unknown>(options: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindOptions",
-                "text": "SavedObjectsFindOptions"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindResponse",
-                "text": "SavedObjectsFindResponse"
-              },
-              "<T, A>>; bulkGet: <T = unknown>(objects?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkGetObject",
-                "text": "SavedObjectsBulkGetObject"
-              },
-              "[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkResponse",
-                "text": "SavedObjectsBulkResponse"
-              },
-              "<T>>; resolve: <T = unknown>(type: string, id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsResolveResponse",
-                "text": "SavedObjectsResolveResponse"
-              },
-              "<T>>; update: <T = unknown>(type: string, id: string, attributes: Partial<T>, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateOptions",
-                "text": "SavedObjectsUpdateOptions"
-              },
-              "<T>) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateResponse",
-                "text": "SavedObjectsUpdateResponse"
-              },
-              "<T>>; collectMultiNamespaceReferences: (objects: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesObject",
-                "text": "SavedObjectsCollectMultiNamespaceReferencesObject"
-              },
-              "[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesOptions",
-                "text": "SavedObjectsCollectMultiNamespaceReferencesOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesResponse",
-                "text": "SavedObjectsCollectMultiNamespaceReferencesResponse"
-              },
-              ">; updateObjectsSpaces: (objects: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateObjectsSpacesObject",
-                "text": "SavedObjectsUpdateObjectsSpacesObject"
-              },
-              "[], spacesToAdd: string[], spacesToRemove: string[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateObjectsSpacesOptions",
-                "text": "SavedObjectsUpdateObjectsSpacesOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateObjectsSpacesResponse",
-                "text": "SavedObjectsUpdateObjectsSpacesResponse"
-              },
-              ">; bulkUpdate: <T = unknown>(objects: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkUpdateObject",
-                "text": "SavedObjectsBulkUpdateObject"
-              },
-              "<T>[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkUpdateOptions",
-                "text": "SavedObjectsBulkUpdateOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkUpdateResponse",
-                "text": "SavedObjectsBulkUpdateResponse"
-              },
-              "<T>>; removeReferencesTo: (type: string, id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsRemoveReferencesToOptions",
-                "text": "SavedObjectsRemoveReferencesToOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsRemoveReferencesToResponse",
-                "text": "SavedObjectsRemoveReferencesToResponse"
-              },
-              ">; openPointInTimeForType: (type: string | string[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsOpenPointInTimeOptions",
-                "text": "SavedObjectsOpenPointInTimeOptions"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsOpenPointInTimeResponse",
-                "text": "SavedObjectsOpenPointInTimeResponse"
-              },
-              ">; closePointInTime: (id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsClosePointInTimeResponse",
-                "text": "SavedObjectsClosePointInTimeResponse"
-              },
-              ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: Pick<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindOptions",
-                "text": "SavedObjectsFindOptions"
-              },
-              ", \"type\" | \"filter\" | \"aggs\" | \"fields\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"search\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\" | \"preference\">, dependencies?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCreatePointInTimeFinderDependencies",
-                "text": "SavedObjectsCreatePointInTimeFinderDependencies"
-              },
-              " | undefined) => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.ISavedObjectsPointInTimeFinder",
-                "text": "ISavedObjectsPointInTimeFinder"
-              },
-              "<T, A>; errors: typeof ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsErrorHelpers",
-                "text": "SavedObjectsErrorHelpers"
-              },
-              "; }"
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
             ],
             "source": {
               "path": "src/plugins/telemetry_collection_manager/server/types.ts",
@@ -667,27 +371,7 @@
             "path": "src/plugins/telemetry_collection_manager/server/types.ts",
             "lineNumber": 19
           },
-          "deprecated": false,
-          "returnComment": [],
-          "children": [
-            {
-              "parentPluginId": "telemetryCollectionManager",
-              "id": "def-server.collectionConfig",
-              "type": "Object",
-              "tags": [],
-              "label": "collectionConfig",
-              "description": [],
-              "signature": [
-                "CollectionStrategyConfig",
-                "<T>"
-              ],
-              "source": {
-                "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-                "lineNumber": 20
-              },
-              "deprecated": false
-            }
-          ]
+          "deprecated": false
         },
         {
           "parentPluginId": "telemetryCollectionManager",
@@ -711,41 +395,7 @@
             "path": "src/plugins/telemetry_collection_manager/server/types.ts",
             "lineNumber": 22
           },
-          "deprecated": false,
-          "returnComment": [],
-          "children": [
-            {
-              "parentPluginId": "telemetryCollectionManager",
-              "id": "def-server.optInStatus",
-              "type": "boolean",
-              "tags": [],
-              "label": "optInStatus",
-              "description": [],
-              "source": {
-                "path": "src/plugins/telemetry_collection_manager/server/plugin.ts",
-                "lineNumber": 165
-              },
-              "deprecated": false
-            },
-            {
-              "parentPluginId": "telemetryCollectionManager",
-              "id": "def-server.config",
-              "type": "CompoundType",
-              "tags": [],
-              "label": "config",
-              "description": [],
-              "signature": [
-                "UnencryptedStatsGetterConfig",
-                " | ",
-                "EncryptedStatsGetterConfig"
-              ],
-              "source": {
-                "path": "src/plugins/telemetry_collection_manager/server/plugin.ts",
-                "lineNumber": 165
-              },
-              "deprecated": false
-            }
-          ]
+          "deprecated": false
         },
         {
           "parentPluginId": "telemetryCollectionManager",
@@ -789,9 +439,7 @@
             "path": "src/plugins/telemetry_collection_manager/server/types.ts",
             "lineNumber": 24
           },
-          "deprecated": false,
-          "returnComment": [],
-          "children": []
+          "deprecated": false
         }
       ],
       "lifecycle": "setup",
@@ -832,41 +480,7 @@
             "path": "src/plugins/telemetry_collection_manager/server/types.ts",
             "lineNumber": 28
           },
-          "deprecated": false,
-          "returnComment": [],
-          "children": [
-            {
-              "parentPluginId": "telemetryCollectionManager",
-              "id": "def-server.optInStatus",
-              "type": "boolean",
-              "tags": [],
-              "label": "optInStatus",
-              "description": [],
-              "source": {
-                "path": "src/plugins/telemetry_collection_manager/server/plugin.ts",
-                "lineNumber": 165
-              },
-              "deprecated": false
-            },
-            {
-              "parentPluginId": "telemetryCollectionManager",
-              "id": "def-server.config",
-              "type": "CompoundType",
-              "tags": [],
-              "label": "config",
-              "description": [],
-              "signature": [
-                "UnencryptedStatsGetterConfig",
-                " | ",
-                "EncryptedStatsGetterConfig"
-              ],
-              "source": {
-                "path": "src/plugins/telemetry_collection_manager/server/plugin.ts",
-                "lineNumber": 165
-              },
-              "deprecated": false
-            }
-          ]
+          "deprecated": false
         },
         {
           "parentPluginId": "telemetryCollectionManager",
@@ -910,9 +524,7 @@
             "path": "src/plugins/telemetry_collection_manager/server/types.ts",
             "lineNumber": 30
           },
-          "deprecated": false,
-          "returnComment": [],
-          "children": []
+          "deprecated": false
         }
       ],
       "lifecycle": "start",

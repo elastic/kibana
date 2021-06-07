@@ -125,52 +125,7 @@
               "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
               "lineNumber": 25
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "fileUpload",
-                "id": "def-public.geojsonFile",
-                "type": "Object",
-                "tags": [],
-                "label": "geojsonFile",
-                "description": [],
-                "signature": [
-                  "GeoJSON.FeatureCollection<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>"
-                ],
-                "source": {
-                  "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
-                  "lineNumber": 25
-                },
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "fileUpload",
-                "id": "def-public.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
-                  "lineNumber": 25
-                },
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "fileUpload",
-                "id": "def-public.previewCoverage",
-                "type": "number",
-                "tags": [],
-                "label": "previewCoverage",
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
-                  "lineNumber": 25
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -186,9 +141,7 @@
               "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
               "lineNumber": 26
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "deprecated": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -204,9 +157,7 @@
               "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
               "lineNumber": 27
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "deprecated": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -222,9 +173,7 @@
               "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
               "lineNumber": 28
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "deprecated": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -248,32 +197,7 @@
               "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
               "lineNumber": 29
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "fileUpload",
-                "id": "def-public.results",
-                "type": "Object",
-                "tags": [],
-                "label": "results",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "fileUpload",
-                    "scope": "public",
-                    "docId": "kibFileUploadPluginApi",
-                    "section": "def-public.FileUploadGeoResults",
-                    "text": "FileUploadGeoResults"
-                  }
-                ],
-                "source": {
-                  "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
-                  "lineNumber": 29
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -289,9 +213,7 @@
               "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
               "lineNumber": 30
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -958,39 +880,7 @@
               "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
               "lineNumber": 17
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "fileUpload",
-                "id": "def-public.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
-                  "lineNumber": 17
-                },
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "fileUpload",
-                "id": "def-public.error",
-                "type": "string",
-                "tags": [],
-                "label": "error",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "source": {
-                  "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
-                  "lineNumber": 17
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -1006,9 +896,7 @@
               "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
               "lineNumber": 18
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "deprecated": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -1024,9 +912,7 @@
               "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
               "lineNumber": 19
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1355,208 +1241,7 @@
                 "docId": "kibDataPluginApi",
                 "section": "def-common.ES_FIELD_TYPES",
                 "text": "ES_FIELD_TYPES"
-              },
-              ".OBJECT | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".DATE | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".DATE_NANOS | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".DATE_RANGE | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".GEO_POINT | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".GEO_SHAPE | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".FLOAT | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".HALF_FLOAT | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".SCALED_FLOAT | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".DOUBLE | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".INTEGER | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".LONG | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".SHORT | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".UNSIGNED_LONG | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".FLOAT_RANGE | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".DOUBLE_RANGE | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".INTEGER_RANGE | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".LONG_RANGE | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".NESTED | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".BYTE | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".IP | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".IP_RANGE | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".ATTACHMENT | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".TOKEN_COUNT | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".MURMUR3 | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".HISTOGRAM; format?: string | undefined; }; }; }"
+              }
             ],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
@@ -1839,13 +1524,12 @@
             "label": "doc",
             "description": [],
             "signature": [
-              "string | object | ",
               {
                 "pluginId": "fileUpload",
                 "scope": "common",
                 "docId": "kibFileUploadPluginApi",
-                "section": "def-common.Doc",
-                "text": "Doc"
+                "section": "def-common.ImportDoc",
+                "text": "ImportDoc"
               }
             ],
             "source": {
@@ -2299,14 +1983,7 @@
         "label": "FormattedOverrides",
         "description": [],
         "signature": [
-          {
-            "pluginId": "fileUpload",
-            "scope": "common",
-            "docId": "kibFileUploadPluginApi",
-            "section": "def-common.InputOverrides",
-            "text": "InputOverrides"
-          },
-          " & { column_names: string[]; has_header_row: boolean; should_trim_fields: boolean; }"
+          "InputOverrides & { column_names: string[]; has_header_row: boolean; should_trim_fields: boolean; }"
         ],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",

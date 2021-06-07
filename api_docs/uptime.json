@@ -111,26 +111,7 @@
               "path": "x-pack/plugins/uptime/server/kibana.index.ts",
               "lineNumber": 25
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "uptime",
-                "id": "def-server.options",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  "KibanaRouteOptions"
-                ],
-                "source": {
-                  "path": "x-pack/plugins/uptime/server/kibana.index.ts",
-                  "lineNumber": 25
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
