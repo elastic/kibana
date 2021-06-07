@@ -15,6 +15,7 @@ import { sendGetOneAgentPolicy } from '../../../../hooks';
 import { FLEET_SERVER_PACKAGE } from '../../../../constants';
 
 import { EnrollmentStepAgentPolicy } from './agent_policy_selection';
+import { AdvancedAgentAuthenticationSettings } from './advanced_agent_authentication_settings';
 
 export const DownloadStep = () => {
   return {
@@ -100,6 +101,38 @@ export const AgentPolicySelectionStep = ({
         onAgentPolicyChange={onAgentPolicyChange}
         excludeFleetServer={excludeFleetServer}
       />
+    ),
+  };
+};
+
+export const AgentEnrollmentKeySelectionStep = ({
+  agentPolicy,
+  setSelectedAPIKeyId,
+}: {
+  agentPolicy: AgentPolicy;
+  setSelectedAPIKeyId: (key?: string) => void;
+}) => {
+  return {
+    title: i18n.translate('xpack.fleet.agentEnrollment.stepConfigurePolicyAuthenticationTitle', {
+      defaultMessage: 'Configure agent authentication',
+    }),
+    children: (
+      <>
+        <EuiText>
+          <FormattedMessage
+            id="xpack.fleet.agentEnrollment.agentAuthenticationSettings"
+            defaultMessage="{agentPolicyName} has been selected. Configure agent authentication based on the available policy options."
+            values={{
+              agentPolicyName: <strong>{agentPolicy.name}</strong>,
+            }}
+          />
+        </EuiText>
+        <EuiSpacer size="l" />
+        <AdvancedAgentAuthenticationSettings
+          agentPolicyId={agentPolicy.id}
+          onKeyChange={setSelectedAPIKeyId}
+        />
+      </>
     ),
   };
 };

@@ -9,12 +9,12 @@ import type { AgentPolicy } from '../../../../types';
 
 export interface BaseProps {
   /**
-   * The user has already selected a policy they would like to use
+   * The user selected policy to be used
    */
   agentPolicy?: AgentPolicy;
 
   /**
-   * The user should have the option select from multiple policies
+   * A selection of policies for the user to choose from, will be ignored if `agentPolicy` has been provided
    */
   agentPolicies?: AgentPolicy[];
 }

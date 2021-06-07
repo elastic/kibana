@@ -26,7 +26,7 @@ import {
   useFleetServerInstructions,
 } from '../../agent_requirements_page';
 
-import { DownloadStep, AgentPolicySelectionStep } from './steps';
+import { DownloadStep, AgentPolicySelectionStep, AgentEnrollmentKeySelectionStep } from './steps';
 import type { BaseProps } from './types';
 
 type Props = BaseProps;
@@ -86,7 +86,7 @@ export const ManagedInstructions = React.memo<Props>(({ agentPolicy, agentPolici
             setSelectedAPIKeyId,
             setIsFleetServerPolicySelected,
           })
-        : undefined,
+        : AgentEnrollmentKeySelectionStep({ agentPolicy, setSelectedAPIKeyId }),
     ].filter(Boolean) as EuiContainedStepProps[];
     if (isFleetServerPolicySelected) {
       baseSteps.push(

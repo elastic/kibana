@@ -102,7 +102,7 @@ export const AgentPolicyActionMenu = memo<{
               ) : null}
               {isEnrollmentFlyoutOpen && (
                 <EuiPortal>
-                  <AgentEnrollmentFlyout agentPolicies={[agentPolicy]} onClose={onClose} />
+                  <AgentEnrollmentFlyout agentPolicy={agentPolicy} onClose={onClose} />
                 </EuiPortal>
               )}
               <ContextMenuActions
