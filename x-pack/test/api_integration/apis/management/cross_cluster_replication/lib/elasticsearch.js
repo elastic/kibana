@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import { getRandomString } from './random';
-
 /**
  * Helpers to create and delete indices on the Elasticsearch instance
  * during our tests.
  * @param {ElasticsearchClient} es The Elasticsearch client instance
  */
 export const registerHelpers = (getService) => {
-  const es = getService('legacyEs');
+  const es = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   let indicesCreated = [];
 
-  const createIndex = (index = getRandomString()) => {
+  const createIndex = (index) => {
     indicesCreated.push(index);
     return es.indices.create({ index }).then(() => index);
   };

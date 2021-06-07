@@ -24,7 +24,7 @@ import { savedObjectsPluginMock } from '../../../../saved_objects/public/mocks';
 import { DashboardListing, DashboardListingProps } from './dashboard_listing';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
 import { visualizationsPluginMock } from '../../../../visualizations/public/mocks';
-import { DashboardAppServices, DashboardCapabilities } from '../types';
+import { DashboardAppServices, DashboardAppCapabilities } from '../types';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { chromeServiceMock, coreMock } from '../../../../../core/public/mocks';
 import { I18nProvider } from '@kbn/i18n/react';
@@ -59,7 +59,7 @@ function makeDefaultServices(): DashboardAppServices {
   return {
     savedObjects: savedObjectsPluginMock.createStartContract(),
     embeddable: embeddablePluginMock.createInstance().doStart(),
-    dashboardCapabilities: {} as DashboardCapabilities,
+    dashboardCapabilities: {} as DashboardAppCapabilities,
     initializerContext: {} as PluginInitializerContext,
     chrome: chromeServiceMock.createStartContract(),
     navigation: {} as NavigationPublicPluginStart,

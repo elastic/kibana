@@ -1383,6 +1383,7 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                     <span
                       aria-hidden="true"
                       className="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="arrowLeft"
                       size="m"
                     />
@@ -1433,6 +1434,7 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                     <span
                       aria-hidden="true"
                       className="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="arrowRight"
                       size="m"
                     />
@@ -1462,6 +1464,7 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                         <span
                           aria-hidden="true"
                           className="euiButtonIcon__icon"
+                          color="inherit"
                           data-euiicon-type="gear"
                           size="m"
                         />
@@ -2862,6 +2865,7 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                     <span
                       aria-hidden="true"
                       className="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="arrowLeft"
                       size="m"
                     />
@@ -2912,6 +2916,7 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                     <span
                       aria-hidden="true"
                       className="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="arrowRight"
                       size="m"
                     />
@@ -2941,6 +2946,7 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                         <span
                           aria-hidden="true"
                           className="euiButtonIcon__icon"
+                          color="inherit"
                           data-euiicon-type="gear"
                           size="m"
                         />
@@ -3157,6 +3163,7 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                     <span
                       aria-hidden="true"
                       className="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="arrowLeft"
                       size="m"
                     />
@@ -3206,6 +3213,7 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                     <span
                       aria-hidden="true"
                       className="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="arrowRight"
                       size="m"
                     />
@@ -3235,6 +3243,7 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                         <span
                           aria-hidden="true"
                           className="euiButtonIcon__icon"
+                          color="inherit"
                           data-euiicon-type="gear"
                           size="m"
                         />
