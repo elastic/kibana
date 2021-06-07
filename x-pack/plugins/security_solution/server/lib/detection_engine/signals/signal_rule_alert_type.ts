@@ -253,7 +253,6 @@ export const signalRulesAlertType = ({
             ml,
             listClient,
             exceptionItems,
-            ruleStatusService,
             services,
             logger,
             buildRuleMessage,
@@ -266,7 +265,6 @@ export const signalRulesAlertType = ({
             rule: thresholdRuleSO,
             tuples,
             exceptionItems,
-            ruleStatusService,
             services,
             version,
             logger,
@@ -312,7 +310,6 @@ export const signalRulesAlertType = ({
           result = await eqlExecutor({
             rule: eqlRuleSO,
             exceptionItems,
-            ruleStatusService,
             services,
             version,
             searchAfterSize,
@@ -322,6 +319,11 @@ export const signalRulesAlertType = ({
         } else {
           throw new Error(`unknown rule type ${type}`);
         }
+        if (result.warningMessages.length) {
+          const warningMessage = buildRuleMessage(result.warningMessages.join());
+          await ruleStatusService.partialFailure(warningMessage);
+        }
+
         if (result.success) {
           if (actions.length) {
             const notificationRuleParams: NotificationRuleTypeParams = {

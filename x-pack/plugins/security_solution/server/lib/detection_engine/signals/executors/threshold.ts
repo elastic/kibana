@@ -17,7 +17,6 @@ import { hasLargeValueItem } from '../../../../../common/detection_engine/utils'
 import { ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { getFilter } from '../get_filter';
 import { getInputIndex } from '../get_input_output_index';
-import { RuleStatusService } from '../rule_status_service';
 import {
   bulkCreateThresholdSignals,
   findThresholdSignals,
@@ -42,7 +41,6 @@ export const thresholdExecutor = async ({
   rule,
   tuples,
   exceptionItems,
-  ruleStatusService,
   services,
   version,
   logger,
@@ -54,7 +52,6 @@ export const thresholdExecutor = async ({
   rule: SavedObject<AlertAttributes<ThresholdRuleParams>>;
   tuples: RuleRangeTuple[];
   exceptionItems: ExceptionListItemSchema[];
-  ruleStatusService: RuleStatusService;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
   logger: Logger;
@@ -66,7 +63,7 @@ export const thresholdExecutor = async ({
   let result = createSearchAfterReturnType();
   const ruleParams = rule.attributes.params;
   if (hasLargeValueItem(exceptionItems)) {
-    await ruleStatusService.partialFailure(
+    result.warningMessages.push(
       'Exceptions that use "is in list" or "is not in list" operators are not applied to Threshold rules'
     );
     result.warning = true;

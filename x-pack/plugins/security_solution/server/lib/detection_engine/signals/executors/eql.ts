@@ -23,7 +23,6 @@ import { MIN_EQL_RULE_INDEX_VERSION } from '../../routes/index/get_signals_templ
 import { EqlRuleParams } from '../../schemas/rule_schemas';
 import { buildSignalFromEvent, buildSignalGroupFromSequence } from '../build_bulk_body';
 import { getInputIndex } from '../get_input_output_index';
-import { RuleStatusService } from '../rule_status_service';
 import { filterDuplicateSignals } from '../single_bulk_create';
 import {
   AlertAttributes,
@@ -37,7 +36,6 @@ import { createSearchAfterReturnType, makeFloatString, wrapSignal } from '../uti
 export const eqlExecutor = async ({
   rule,
   exceptionItems,
-  ruleStatusService,
   services,
   version,
   logger,
@@ -46,7 +44,6 @@ export const eqlExecutor = async ({
 }: {
   rule: SavedObject<AlertAttributes<EqlRuleParams>>;
   exceptionItems: ExceptionListItemSchema[];
-  ruleStatusService: RuleStatusService;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
   logger: Logger;
@@ -56,7 +53,7 @@ export const eqlExecutor = async ({
   const result = createSearchAfterReturnType();
   const ruleParams = rule.attributes.params;
   if (hasLargeValueItem(exceptionItems)) {
-    await ruleStatusService.partialFailure(
+    result.warningMessages.push(
       'Exceptions that use "is in list" or "is not in list" operators are not applied to EQL rules'
     );
     result.warning = true;

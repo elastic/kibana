@@ -293,6 +293,7 @@ export interface SearchAfterAndBulkCreateReturnType {
   createdSignalsCount: number;
   createdSignals: unknown[];
   errors: string[];
+  warningMessages: string[];
   totalToFromTuples?: Array<{
     to: Moment | undefined;
     from: Moment | undefined;

@@ -21,7 +21,6 @@ import { bulkCreateMlSignals } from '../bulk_create_ml_signals';
 import { filterEventsAgainstList } from '../filters/filter_events_against_list';
 import { findMlSignals } from '../find_ml_signals';
 import { BuildRuleMessage } from '../rule_messages';
-import { RuleStatusService } from '../rule_status_service';
 import { AlertAttributes, BulkCreate, WrapHits } from '../types';
 import { createErrorsFromShard, createSearchAfterReturnType, mergeReturns } from '../utils';
 
@@ -30,7 +29,6 @@ export const mlExecutor = async ({
   ml,
   listClient,
   exceptionItems,
-  ruleStatusService,
   services,
   logger,
   buildRuleMessage,
@@ -41,7 +39,6 @@ export const mlExecutor = async ({
   ml: SetupPlugins['ml'];
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];
-  ruleStatusService: RuleStatusService;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   buildRuleMessage: BuildRuleMessage;
@@ -68,7 +65,7 @@ export const mlExecutor = async ({
     jobSummaries.length < 1 ||
     jobSummaries.some((job) => !isJobStarted(job.jobState, job.datafeedState))
   ) {
-    const errorMessage = buildRuleMessage(
+    const warningMessage = buildRuleMessage(
       'Machine learning job(s) are not started:',
       ...jobSummaries.map((job) =>
         [
@@ -78,9 +75,9 @@ export const mlExecutor = async ({
         ].join(', ')
       )
     );
-    logger.warn(errorMessage);
+    result.warningMessages.push(warningMessage);
+    logger.warn(warningMessage);
     result.warning = true;
-    await ruleStatusService.partialFailure(errorMessage);
   }
 
   const anomalyResults = await findMlSignals({

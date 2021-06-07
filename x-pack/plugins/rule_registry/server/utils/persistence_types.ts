@@ -35,10 +35,6 @@ export type CreatePersistenceRuleTypeFactory = (options: {
   TServices extends {
     alertWithPersistence: PersistenceAlertService<TAlertInstanceContext>;
     findAlerts: PersistenceAlertQueryService;
-    securityServices?: {
-      exceptionItems: ExceptionListItemSchema[];
-      listClient: ListClient;
-    };
   }
 >(
   type: AlertTypeWithExecutor<TParams, TAlertInstanceContext, TServices>
