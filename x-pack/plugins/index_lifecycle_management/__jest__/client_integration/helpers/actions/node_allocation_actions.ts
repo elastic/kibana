@@ -8,9 +8,9 @@
 import { act } from 'react-dom/test-utils';
 import { TestBed } from '@kbn/test/jest';
 
-import { Phase } from './types';
-import { DataTierAllocationType } from '../../../public/application/sections/edit_policy/types';
-import { createFormSetValueAction } from './create_form_set_value_action';
+import { DataTierAllocationType } from '../../../../public/application/sections/edit_policy/types';
+import { Phase } from '../types';
+import { createFormSetValueAction } from './form_set_value_action';
 
 export const createNodeAllocationActions = (testBed: TestBed, phase: Phase) => {
   const { component, find, exists } = testBed;
