@@ -54,6 +54,7 @@ import {
   EmbeddableComponentProps,
   getEmbeddableComponent,
 } from './editor_frame_service/embeddable/embeddable_component';
+import { HeatmapVisualization } from './heatmap_visualization';
 import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
 import { SaveModalContainerProps } from './app_plugin/save_modal_container';
 
@@ -130,6 +131,7 @@ export class LensPlugin {
   private xyVisualization: XyVisualization;
   private metricVisualization: MetricVisualization;
   private pieVisualization: PieVisualization;
+  private heatmapVisualization: HeatmapVisualization;
 
   private stopReportManager?: () => void;
 
@@ -140,6 +142,7 @@ export class LensPlugin {
     this.xyVisualization = new XyVisualization();
     this.metricVisualization = new MetricVisualization();
     this.pieVisualization = new PieVisualization();
+    this.heatmapVisualization = new HeatmapVisualization();
   }
 
   setup(
@@ -189,6 +192,7 @@ export class LensPlugin {
     this.datatableVisualization.setup(core, dependencies);
     this.metricVisualization.setup(core, dependencies);
     this.pieVisualization.setup(core, dependencies);
+    this.heatmapVisualization.setup(core, dependencies);
 
     visualizations.registerAlias(getLensAliasConfig());
 

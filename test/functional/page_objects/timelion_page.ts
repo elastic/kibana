@@ -6,79 +6,75 @@
  * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrService } from '../ftr_provider_context';
 
-export function TimelionPageProvider({ getService, getPageObjects }: FtrProviderContext) {
-  const testSubjects = getService('testSubjects');
-  const log = getService('log');
-  const PageObjects = getPageObjects(['common', 'header']);
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
+export class TimelionPageObject extends FtrService {
+  private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly log = this.ctx.getService('log');
+  private readonly common = this.ctx.getPageObject('common');
+  private readonly esArchiver = this.ctx.getService('esArchiver');
+  private readonly kibanaServer = this.ctx.getService('kibanaServer');
 
-  class TimelionPage {
-    public async initTests() {
-      await kibanaServer.uiSettings.replace({
-        defaultIndex: 'logstash-*',
-      });
+  public async initTests() {
+    await this.kibanaServer.uiSettings.replace({
+      defaultIndex: 'logstash-*',
+    });
 
-      log.debug('load kibana index');
-      await esArchiver.load('timelion');
+    this.log.debug('load kibana index');
+    await this.esArchiver.load('timelion');
 
-      await PageObjects.common.navigateToApp('timelion');
-    }
-
-    public async setExpression(expression: string) {
-      const input = await testSubjects.find('timelionExpressionTextArea');
-      await input.clearValue();
-      await input.type(expression);
-    }
-
-    public async updateExpression(updates: string) {
-      const input = await testSubjects.find('timelionExpressionTextArea');
-      await input.type(updates);
-      await PageObjects.common.sleep(1000);
-    }
-
-    public async getExpression() {
-      const input = await testSubjects.find('timelionExpressionTextArea');
-      return input.getVisibleText();
-    }
-
-    public async getSuggestionItemsText() {
-      const elements = await testSubjects.findAll('timelionSuggestionListItem');
-      return await Promise.all(elements.map(async (element) => await element.getVisibleText()));
-    }
-
-    public async clickSuggestion(suggestionIndex = 0, waitTime = 1000) {
-      const elements = await testSubjects.findAll('timelionSuggestionListItem');
-      if (suggestionIndex > elements.length) {
-        throw new Error(
-          `Unable to select suggestion ${suggestionIndex}, only ${elements.length} suggestions available.`
-        );
-      }
-      await elements[suggestionIndex].click();
-      // Wait for timelion expression to be updated after clicking suggestions
-      await PageObjects.common.sleep(waitTime);
-    }
-
-    public async saveTimelionSheet() {
-      await testSubjects.click('timelionSaveButton');
-      await testSubjects.click('timelionSaveAsSheetButton');
-      await testSubjects.click('timelionFinishSaveButton');
-      await testSubjects.existOrFail('timelionSaveSuccessToast');
-      await testSubjects.waitForDeleted('timelionSaveSuccessToast');
-    }
-
-    public async expectWriteControls() {
-      await testSubjects.existOrFail('timelionSaveButton');
-      await testSubjects.existOrFail('timelionDeleteButton');
-    }
-
-    public async expectMissingWriteControls() {
-      await testSubjects.missingOrFail('timelionSaveButton');
-      await testSubjects.missingOrFail('timelionDeleteButton');
-    }
+    await this.common.navigateToApp('timelion');
   }
 
-  return new TimelionPage();
+  public async setExpression(expression: string) {
+    const input = await this.testSubjects.find('timelionExpressionTextArea');
+    await input.clearValue();
+    await input.type(expression);
+  }
+
+  public async updateExpression(updates: string) {
+    const input = await this.testSubjects.find('timelionExpressionTextArea');
+    await input.type(updates);
+    await this.common.sleep(1000);
+  }
+
+  public async getExpression() {
+    const input = await this.testSubjects.find('timelionExpressionTextArea');
+    return input.getVisibleText();
+  }
+
+  public async getSuggestionItemsText() {
+    const elements = await this.testSubjects.findAll('timelionSuggestionListItem');
+    return await Promise.all(elements.map(async (element) => await element.getVisibleText()));
+  }
+
+  public async clickSuggestion(suggestionIndex = 0, waitTime = 1000) {
+    const elements = await this.testSubjects.findAll('timelionSuggestionListItem');
+    if (suggestionIndex > elements.length) {
+      throw new Error(
+        `Unable to select suggestion ${suggestionIndex}, only ${elements.length} suggestions available.`
+      );
+    }
+    await elements[suggestionIndex].click();
+    // Wait for timelion expression to be updated after clicking suggestions
+    await this.common.sleep(waitTime);
+  }
+
+  public async saveTimelionSheet() {
+    await this.testSubjects.click('timelionSaveButton');
+    await this.testSubjects.click('timelionSaveAsSheetButton');
+    await this.testSubjects.click('timelionFinishSaveButton');
+    await this.testSubjects.existOrFail('timelionSaveSuccessToast');
+    await this.testSubjects.waitForDeleted('timelionSaveSuccessToast');
+  }
+
+  public async expectWriteControls() {
+    await this.testSubjects.existOrFail('timelionSaveButton');
+    await this.testSubjects.existOrFail('timelionDeleteButton');
+  }
+
+  public async expectMissingWriteControls() {
+    await this.testSubjects.missingOrFail('timelionSaveButton');
+    await this.testSubjects.missingOrFail('timelionDeleteButton');
+  }
 }

@@ -11,6 +11,7 @@ import {
   HostInfo,
   GetHostPolicyResponse,
   HostIsolationRequestBody,
+  ISOLATION_ACTIONS,
 } from '../../../../../common/endpoint/types';
 import { ServerApiError } from '../../../../common/types';
 import { GetPolicyListResponse } from '../../policy/types';
@@ -137,7 +138,10 @@ export interface ServerFailedToReturnEndpointsTotal {
 }
 
 export type EndpointIsolationRequest = Action<'endpointIsolationRequest'> & {
-  payload: HostIsolationRequestBody;
+  payload: {
+    type: ISOLATION_ACTIONS;
+    data: HostIsolationRequestBody;
+  };
 };
 
 export type EndpointIsolationRequestStateChange = Action<'endpointIsolationRequestStateChange'> & {
