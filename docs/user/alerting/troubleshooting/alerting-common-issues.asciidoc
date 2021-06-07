@@ -1,5 +1,5 @@
 [role="xpack"]
-[[alerting-troubleshooting]]
+[[alerting-common-issues]]
 == Alerting Common Issues
 
 This page describes how to resolve common problems you might encounter with Alerting.

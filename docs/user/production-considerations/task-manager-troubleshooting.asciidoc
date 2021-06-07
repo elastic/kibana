@@ -724,3 +724,73 @@ Tasks are not running, and the server logs contain the following error message:
 
 Inline scripts are a hard requirement for Task Manager to function.
 To enable inline scripting, see the Elasticsearch documentation for {ref}/modules-scripting-security.html#allowed-script-types-setting[configuring allowed script types setting].
+
+[float]
+[[task-runat-is-in-the-past]]
+==== What do I do if the Task’s `runAt` is in the past?
+
+*Problem*:
+
+Tasks tasks property `runAt` is in the past.
+
+*Solution*:
+
+Wait a bit before declaring it as a lost cause, as Task Manager might just be falling behind on its work.
+You should take a look at the Kibana log and see what you can find that relates to Task Manager.
+In a healthy environment you should see a log line that indicates that Task Manager was successfully started when Kibana was:
+[source, txt]
+--------------------------------------------------
+server log [12:41:33.672] [info][plugins][taskManager][taskManager] TaskManager is identified by the Kibana UUID: 5b2de169-2785-441b-ae8c-186a1936b17d
+--------------------------------------------------
+
+If you see that message and no other errors that relate to Task Manager, it’s most likely that Task Manager is running fine and has simply not had the chance to pick the task up yet.
+If, on the other hand, the runAt is severely overdue, then it’s worth looking for other Task Manager or Alerting related errors, as something else may have gone wrong.
+It’s worth looking at the status field, as it might have failed, which would explain why it hasn’t been picked up or it might be running which means the task might simply be a very long running one.
+
+[float]
+[[task-marked-failed]]
+==== What do I do if the Task is marked as failed?
+
+*Problem*:
+
+Tasks marked as failed.
+
+*Solution*:
+
+Broadly speaking the Alerting framework is meant to gracefully handle the cases where a task is failing by rescheduling a fresh run in the future. If this fails to happen, then that means something has gone wrong in the underlying implementation and this isn’t expected.
+Ideally you should try and find any log lines that relate to this rule and its task, and use these to help us investigate further. Don’t forget to include the state of the rule (by using the http endpoints) in any ticket you submit.
+
+[float]
+[[task-manager-kibana-log]]
+==== Task Manager Kibana Log
+Task manager will write log lines to the Kibana Log on certain occasions. Below are some common log lines and what they mean.
+
+Task Manager has run out of Available Workers:
+[source, txt]
+--------------------------------------------------
+server log [12:41:33.672] [info][plugins][taskManager][taskManager] [Task Ownership]: Task Manager has skipped Claiming Ownership of available tasks at it has ran out Available Workers.
+--------------------------------------------------
+
+This log message tells us that Task Manager is not managing to keep up with the sheer amount of work it has been tasked with completing. This might mean that Alerts are not running at the frequency that was expected (instead of running every 5 minutes, it runs every 7-8 minutes, just as an example).
+
+By default Task Manager is limited to 10 tasks and this can be bumped up by setting a higher number in the kibana.yml file using the xpack.task_manager.max_workers configuration. That said, though, it’s important to keep in mind that a higher number of tasks running at any given time means more load on both Kibana and Elasticsearch, so only do so if adding this additional load on the environment makes sense.
+
+Another approach to addressing this might be to tell workers to run at a higher rate, rather than adding more of them, which would be configured using xpack.task_manager.poll_interval. This value dictates how often Task Manager checks to see if there’s more work to be done and uses milliseconds (by default it is 3000, which means an interval of 3 seconds).
+
+Before changing either of these numbers it’s highly recommended to investigate what Task Manager can’t keep up - Are there an unusually high number of alerts in the system? Are alerts failing often, forcing Task Manager to re-run them constantly? Is Kibana under heavy load? There could be a variety of issues, none of which should be solved by simply changing these configurations.
+
+Task TaskType failed in attempt to run:
+[source, txt]
+--------------------------------------------------
+server log [12:41:33.672] [info][plugins][taskManager][taskManager] Task TaskType "alerting:example.always-firing" failed in attempt to run: Unable to load resource ‘/api/something’
+--------------------------------------------------
+
+This log message tells us that when Task Manager was running one of our alerts, it’s task errored and, as a result, failed. In this case we can tell that the alert that failed was of type alerting:example.always-firing and that the reason it failed was Unable to load resource ‘/api/something’ . This is a contrived example, but broadly, if you see a message with this kind of format, then this tells you a lot about where the problem might be.
+
+For example, in this case, we’d expect to see a corresponding log line from the Alerting framework itself, saying that the alert failed. You should look in the Kibana log for a line similar to the log line below (probably shortly before the Task Manager log line):
+
+Executing Alert "27559295-44e4-4983-aa1b-94fe043ab4f9" has resulted in Error: Unable to load resource ‘/api/something’
+
+This would confirm that the error did in fact happen in the Alert itself (rather than the Task Manager) and it would help us pin-point the specific ID of the alert which failed: 27559295-44e4-4983-aa1b-94fe043ab4f9
+
+We can now use the ID to find out more about that alert by using the http endpoint to find that Alert’s configuration and current state to help investigate what might have caused the issue.

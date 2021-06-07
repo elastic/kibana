@@ -10,7 +10,7 @@ Alerting framework provides the different options for diagnosing problems with R
 
 Rules and connectors will log to the Kibana logger with tags of [alerting] and [actions], respectively.  Generally the messages are warnings and errors, and in many cases are false positives, which we are trying to reduce. As an example, when a connector is deleted, there could be a rule being run at the time:
 
-[source,console]
+[source, txt]
 --------------------------------------------------
 server    log   [11:39:40.389] [error][alerting][alerting][plugins][plugins] Executing Alert "5b6237b0-c6f6-11eb-b0ff-a1a0cbcf29b6" has resulted in Error: Saved object [action/fdbc8610-c6f5-11eb-b0ff-a1a0cbcf29b6] not found
 --------------------------------------------------
@@ -23,12 +23,12 @@ Some of the resources like saved objects, api keys, may no longer be available o
 The version can help to determine what debugging tools which can be used at our disposal.
 
 7.10+
-<< ,Test connector>> functionality in the UI.
+<<testing-connectors,Test connector>> functionality in the UI.
 
 7.11+
 Better webhook error messages.
 Better overall debug logging for actions/connectors.
-Task manager << ,diagnostics endpoint>>.
+Task manager <<task-manager-diagnosing-root-cause,diagnostics endpoint>>.
 
 [float]
 [[alerting-managment-detail]]
@@ -57,7 +57,7 @@ In addition, there is a command-line client that uses legacy Rules and Connector
 https://github.com/pmuellr/kbn-action
 executing an action ad-hoc
 One of the http endpoints available for actions is the POST _execute API (reference).  You can use this to “test” an action.  For instance, if you have a server log action created, you can execute it via curling the endpoint:
-[source,console]
+[source, txt]
 --------------------------------------------------
 curl -X POST -k \
  -H 'kbn-xsrf: foo' \
@@ -67,13 +67,13 @@ curl -X POST -k \
 --------------------------------------------------
 
 Another option is CLI tools to list / create / edit / delete alerts and actions are available in https://github.com/pmuellr/kbn-action[kbn-action]. Install via command:
-[source,console]
+[source, txt]
 --------------------------------------------------
     npm install -g pmuellr/kbn-action  
 --------------------------------------------------
 
 and the same REST execute command will be:
-[source,console]
+[source, txt]
 --------------------------------------------------
 kbn-action execute a692dc89-15b9-4a3c-9e47-9fb6872e49ce ‘{"params":{"subject":"hallo","message":"hallo!","to":["me@example.com"]}}’
 --------------------------------------------------
@@ -106,7 +106,7 @@ Task Manager uses the `.kibana_task_manager index`, which is an internal index w
 When a Rule is created a Task is created which is scheduled to run at the interval specified. This means that if, for example, when a rule is created its configured to check every 5 minutes, then the underlying will be expected to run every 5 minutes (in practice, after each time the alert is ran, we’ll schedule the task to run again in 5 minutes, rather than it being scheduled to run itself every 5 minutes indefinitely).
 
 If you use the <<alerting-apis,Alerting REST APIs>> to fetch the underlying rule, you’ll get an object like so:
-[source,console]
+[source, txt]
 --------------------------------------------------
 {
   "id": "0a037d60-6b62-11eb-9e0d-85d233e3ee35",
@@ -147,7 +147,7 @@ GET .kibana_task_manager/_doc/task:31563950-b14b-11eb-9a7c-9df284da9f99
 The task: in the ID of the doc. We have to add that to the UUID.
 ==============================================
 
-[source,console]
+[source, txt]
 --------------------------------------------------
 {
   "_index" : ".kibana_task_manager_8.0.0_001",
@@ -189,12 +189,17 @@ The task: in the ID of the doc. We have to add that to the UUID.
 What you can see above is the Task that backs the rule, and for the rule to work, this task must be in a healthy state. This information is available via <<task-manager-api-health, health API>> or via verbose logs if debug logging is enabled.
 When diagnosing the health state of the task, you will most likely be interested in the following fields:
 
-`status` This is the tasks’s current status - is it running, meaning Task Manager is currently running it; or is it idle, meaning we’re waiting for Task Manager to run it at some point in the future; or is it failed, meaning Task Manager has tried to run it and failed?
-runAt This is when the task is scheduled to run next. If this is in the past and the status is idle, this means Task Manager has fallen behind or isn’t in fact running at all. If it’s in the past but the status is running, then that means Task Manager has picked it up and is working on it as we speak, which is fine and considered healthy.
-retryAt Another time field, like runAt. If this field is populated, it means that Task Manager is currently running the task and if, for whether reason, the task doesn’t complete (and hasn’t been marked as failed) then Task Manager will give it another attempt at the time specified under retryAt.
+`status`:: This is the tasks’s current status - is it running, meaning Task Manager is currently running it; or is it idle, meaning we’re waiting for Task Manager to run it at some point in the future; or is it failed, meaning Task Manager has tried to run it and failed?
+`runAt`:: This is when the task is scheduled to run next. If this is in the past and the status is idle, this means Task Manager has fallen behind or isn’t in fact running at all. If it’s in the past but the status is running, then that means Task Manager has picked it up and is working on it as we speak, which is fine and considered healthy.
+`retryAt`:: Another time field, like runAt. If this field is populated, it means that Task Manager is currently running the task and if, for whether reason, the task doesn’t complete (and hasn’t been marked as failed) then Task Manager will give it another attempt at the time specified under retryAt.
 
-Hopefully investigating the underlying Task can help you gauge whether the problem you’re seeing is rooted in the Alert not running at all, whether it’s running and failing or whether it is running, but exhibiting behaviour that is different than what was expected (at which point you should focus on the Alert itself, rather than the Task).
+Investigating the underlying Task can help you gauge whether the problem you’re seeing is rooted in the Alert not running at all, whether it’s running and failing or whether it is running, but exhibiting behaviour that is different than what was expected (at which point you should focus on the Rule itself, rather than the Task).
 
+In addition to the above methods, broadly used the next approaches and common issues:
+
+* <<alerting-common-issues, Alerting common issues>>
+* <<event-log-index, Quering Event log index>>
+* <<testing-connectors, Testing connectors using Connectors UI and `kbn-action` tool>>
 
 include::troubleshooting/event-log-index.asciidoc[]
 include::troubleshooting/testing-connectors.asciidoc[]

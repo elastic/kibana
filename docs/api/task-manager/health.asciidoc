@@ -1,5 +1,5 @@
 [[task-manager-api-health]]
-=== Get Task Manager health API
+== Task Manager health API
 ++++
 <titleabbrev>Get Task Manager health</titleabbrev>
 ++++
