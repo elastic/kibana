@@ -49,6 +49,10 @@ export const DocumentationPage = (
             registration of example the RuleTypes, while the `public` handles creation of, and
             navigation for, these rule types.
           </p>
+          <p>
+            If you see a message about needing to enable the Transport Layer Security, start Kibana
+            with `yarn start --run-examples --ssl`{' '}
+          </p>
         </EuiText>
         <EuiSpacer />
         <CreateAlert {...deps} />
