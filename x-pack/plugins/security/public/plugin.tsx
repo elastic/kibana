@@ -165,11 +165,20 @@ export class SecurityPlugin
 }
 
 export interface SecurityPluginSetup {
+  /**
+   * Exposes authentication information about the currently logged in user.
+   */
   authc: AuthenticationServiceSetup;
+  /**
+   * Exposes license information, like, what type of license is it, and is it expired.
+   */
   license: Readonly<SecurityLicense>;
 }
 
 export interface SecurityPluginStart {
   navControlService: SecurityNavControlServiceStart;
+  /**
+   * Exposes authentication information about the currently logged in user.
+   */
   authc: AuthenticationServiceStart;
 }
