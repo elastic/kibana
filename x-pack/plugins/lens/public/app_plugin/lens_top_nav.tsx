@@ -192,7 +192,7 @@ export const LensTopNavMenu = ({
 
                   memo[`${lastKnownDoc?.title || unsavedTitle}${postFix}.csv`] = {
                     content: exporters.datatableToCSV(datatable, {
-                      csvSeparator: uiSettings.get('csv:separator, ,'),
+                      csvSeparator: uiSettings.get('csv:separator', ','),
                       quoteValues: uiSettings.get('csv:quoteValues', true),
                       formatFactory: data.fieldFormats.deserialize,
                     }),
