@@ -15,7 +15,6 @@ import {
   EuiForm,
   EuiHealth,
   EuiLoadingSpinner,
-  EuiPanel,
   EuiSpacer,
   EuiStat,
   EuiText,
@@ -137,69 +136,65 @@ export function SettingsPage({
           }}
         >
           {/* Selected Service panel */}
-          <EuiPanel hasShadow={false} paddingSize="none">
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiStat
-                  titleSize="xs"
-                  title={
-                    isLoading ? '-' : getOptionLabel(newConfig.service.name)
-                  }
-                  description={i18n.translate(
-                    'xpack.apm.agentConfig.chooseService.service.name.label',
-                    { defaultMessage: 'Service name' }
-                  )}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiStat
-                  titleSize="xs"
-                  title={
-                    isLoading
-                      ? '-'
-                      : getOptionLabel(newConfig.service.environment)
-                  }
-                  description={i18n.translate(
-                    'xpack.apm.agentConfig.chooseService.service.environment.label',
-                    { defaultMessage: 'Environment' }
-                  )}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                {!isEditMode && (
-                  <EuiButton onClick={onClickEdit} iconType="pencil">
-                    {i18n.translate(
-                      'xpack.apm.agentConfig.chooseService.editButton',
-                      { defaultMessage: 'Edit' }
-                    )}
-                  </EuiButton>
+
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiStat
+                titleSize="xs"
+                title={isLoading ? '-' : getOptionLabel(newConfig.service.name)}
+                description={i18n.translate(
+                  'xpack.apm.agentConfig.chooseService.service.name.label',
+                  { defaultMessage: 'Service name' }
                 )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiStat
+                titleSize="xs"
+                title={
+                  isLoading
+                    ? '-'
+                    : getOptionLabel(newConfig.service.environment)
+                }
+                description={i18n.translate(
+                  'xpack.apm.agentConfig.chooseService.service.environment.label',
+                  { defaultMessage: 'Environment' }
+                )}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {!isEditMode && (
+                <EuiButton onClick={onClickEdit} iconType="pencil">
+                  {i18n.translate(
+                    'xpack.apm.agentConfig.chooseService.editButton',
+                    { defaultMessage: 'Edit' }
+                  )}
+                </EuiButton>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
           <EuiHorizontalRule />
 
           {/* Settings panel */}
-          <EuiPanel hasShadow={false} paddingSize="none">
-            <EuiTitle size="s">
-              <h3>
-                {i18n.translate('xpack.apm.agentConfig.settings.title', {
-                  defaultMessage: 'Configuration options',
-                })}
-              </h3>
-            </EuiTitle>
 
-            <EuiSpacer size="m" />
+          <EuiTitle size="s">
+            <h3>
+              {i18n.translate('xpack.apm.agentConfig.settings.title', {
+                defaultMessage: 'Configuration options',
+              })}
+            </h3>
+          </EuiTitle>
 
-            {isLoading ? (
-              <div style={{ textAlign: 'center' }}>
-                <EuiLoadingSpinner size="m" />
-              </div>
-            ) : (
-              renderSettings({ unsavedChanges, newConfig, setNewConfig })
-            )}
-          </EuiPanel>
+          <EuiSpacer size="m" />
+
+          {isLoading ? (
+            <div style={{ textAlign: 'center' }}>
+              <EuiLoadingSpinner size="m" />
+            </div>
+          ) : (
+            renderSettings({ unsavedChanges, newConfig, setNewConfig })
+          )}
         </form>
       </EuiForm>
       <EuiSpacer size="xxl" />

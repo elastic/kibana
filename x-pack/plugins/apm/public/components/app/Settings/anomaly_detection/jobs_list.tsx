@@ -9,7 +9,6 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -115,16 +114,14 @@ export function JobsList({ data, status, onAddEnvironments }: Props) {
 
       <EuiSpacer size="m" />
 
-      <EuiPanel hasShadow={false} paddingSize="none">
-        <ManagedTable
-          noItemsMessage={getNoItemsMessage({ status })}
-          columns={columns}
-          items={jobs}
-        />
-        <EuiSpacer size="l" />
+      <ManagedTable
+        noItemsMessage={getNoItemsMessage({ status })}
+        columns={columns}
+        items={jobs}
+      />
+      <EuiSpacer size="l" />
 
-        {hasLegacyJobs && <LegacyJobsCallout />}
-      </EuiPanel>
+      {hasLegacyJobs && <LegacyJobsCallout />}
     </>
   );
 }

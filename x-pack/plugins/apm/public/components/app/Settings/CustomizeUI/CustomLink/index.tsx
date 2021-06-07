@@ -8,7 +8,6 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiTitle,
   EuiText,
   EuiSpacer,
@@ -116,20 +115,18 @@ export function CustomLinkOverview() {
 
       <EuiSpacer size="m" />
 
-      <EuiPanel hasShadow={false} paddingSize="none">
-        {hasValidLicense ? (
-          showEmptyPrompt ? (
-            <EmptyPrompt onCreateCustomLinkClick={onCreateCustomLinkClick} />
-          ) : (
-            <CustomLinkTable
-              items={customLinks}
-              onCustomLinkSelected={setCustomLinkSelected}
-            />
-          )
+      {hasValidLicense ? (
+        showEmptyPrompt ? (
+          <EmptyPrompt onCreateCustomLinkClick={onCreateCustomLinkClick} />
         ) : (
-          <LicensePrompt text={INVALID_LICENSE} />
-        )}
-      </EuiPanel>
+          <CustomLinkTable
+            items={customLinks}
+            onCustomLinkSelected={setCustomLinkSelected}
+          />
+        )
+      ) : (
+        <LicensePrompt text={INVALID_LICENSE} />
+      )}
     </>
   );
 }

@@ -13,7 +13,6 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -194,86 +193,83 @@ export function ApmIndices() {
 
       <EuiSpacer size="m" />
 
-      <EuiPanel hasShadow={false} paddingSize="none">
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiForm>
-              {APM_INDEX_LABELS.map(({ configurationName, label }) => {
-                const matchedConfiguration = data.apmIndexSettings.find(
-                  ({ configurationName: configName }) =>
-                    configName === configurationName
-                );
-                const defaultValue = matchedConfiguration
-                  ? matchedConfiguration.defaultValue
-                  : '';
-                const savedUiIndexValue = apmIndices[configurationName] || '';
-                return (
-                  <EuiFormRow
-                    key={configurationName}
-                    label={label}
-                    helpText={i18n.translate(
-                      'xpack.apm.settings.apmIndices.helpText',
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiForm>
+            {APM_INDEX_LABELS.map(({ configurationName, label }) => {
+              const matchedConfiguration = data.apmIndexSettings.find(
+                ({ configurationName: configName }) =>
+                  configName === configurationName
+              );
+              const defaultValue = matchedConfiguration
+                ? matchedConfiguration.defaultValue
+                : '';
+              const savedUiIndexValue = apmIndices[configurationName] || '';
+              return (
+                <EuiFormRow
+                  key={configurationName}
+                  label={label}
+                  helpText={i18n.translate(
+                    'xpack.apm.settings.apmIndices.helpText',
+                    {
+                      defaultMessage:
+                        'Overrides {configurationName}: {defaultValue}',
+                      values: { configurationName, defaultValue },
+                    }
+                  )}
+                  fullWidth
+                >
+                  <EuiFieldText
+                    disabled={!canSave}
+                    fullWidth
+                    name={configurationName}
+                    placeholder={defaultValue}
+                    value={savedUiIndexValue}
+                    onChange={handleChangeIndexConfigurationEvent}
+                  />
+                </EuiFormRow>
+              );
+            })}
+            <EuiSpacer />
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={refetch}>
+                  {i18n.translate(
+                    'xpack.apm.settings.apmIndices.cancelButton',
+                    { defaultMessage: 'Cancel' }
+                  )}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={
+                    !canSave &&
+                    i18n.translate(
+                      'xpack.apm.settings.apmIndices.noPermissionTooltipLabel',
                       {
                         defaultMessage:
-                          'Overrides {configurationName}: {defaultValue}',
-                        values: { configurationName, defaultValue },
+                          "Your user role doesn't have permissions to change APM indices",
                       }
-                    )}
-                    fullWidth
+                    )
+                  }
+                >
+                  <EuiButton
+                    fill
+                    onClick={handleApplyChangesEvent}
+                    isLoading={isSaving}
+                    isDisabled={!canSave}
                   >
-                    <EuiFieldText
-                      disabled={!canSave}
-                      fullWidth
-                      name={configurationName}
-                      placeholder={defaultValue}
-                      value={savedUiIndexValue}
-                      onChange={handleChangeIndexConfigurationEvent}
-                    />
-                  </EuiFormRow>
-                );
-              })}
-              <EuiSpacer />
-              <EuiFlexGroup justifyContent="flexEnd">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={refetch}>
                     {i18n.translate(
-                      'xpack.apm.settings.apmIndices.cancelButton',
-                      { defaultMessage: 'Cancel' }
+                      'xpack.apm.settings.apmIndices.applyButton',
+                      { defaultMessage: 'Apply changes' }
                     )}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    content={
-                      !canSave &&
-                      i18n.translate(
-                        'xpack.apm.settings.apmIndices.noPermissionTooltipLabel',
-                        {
-                          defaultMessage:
-                            "Your user role doesn't have permissions to change APM indices",
-                        }
-                      )
-                    }
-                  >
-                    <EuiButton
-                      fill
-                      onClick={handleApplyChangesEvent}
-                      isLoading={isSaving}
-                      isDisabled={!canSave}
-                    >
-                      {i18n.translate(
-                        'xpack.apm.settings.apmIndices.applyButton',
-                        { defaultMessage: 'Apply changes' }
-                      )}
-                    </EuiButton>
-                  </EuiToolTip>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiForm>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-      </EuiPanel>
+                  </EuiButton>
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiForm>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 }

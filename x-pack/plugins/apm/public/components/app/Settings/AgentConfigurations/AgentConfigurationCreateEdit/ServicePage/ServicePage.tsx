@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiSpacer,
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-} from '@elastic/eui';
+import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { isString } from 'lodash';
@@ -99,7 +93,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
   );
 
   return (
-    <EuiPanel hasShadow={false} paddingSize="none">
+    <>
       {/* Service name options */}
       <FormRowSelect
         title={i18n.translate(
@@ -196,6 +190,6 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPanel>
+    </>
   );
 }

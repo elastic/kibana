@@ -7,7 +7,6 @@
 
 import React, { useState } from 'react';
 import {
-  EuiPanel,
   EuiTitle,
   EuiText,
   EuiSpacer,
@@ -70,18 +69,16 @@ export function AddEnvironments({
 
   if (!canCreateJob) {
     return (
-      <EuiPanel>
-        <EuiEmptyPrompt
-          iconType="alert"
-          body={<>{ML_ERRORS.MISSING_WRITE_PRIVILEGES}</>}
-        />
-      </EuiPanel>
+      <EuiEmptyPrompt
+        iconType="alert"
+        body={<>{ML_ERRORS.MISSING_WRITE_PRIVILEGES}</>}
+      />
     );
   }
 
   const isLoading = status === FETCH_STATUS.LOADING;
   return (
-    <EuiPanel hasShadow={false} paddingSize="none">
+    <>
       <EuiTitle size="s">
         <h2>
           {i18n.translate(
@@ -181,6 +178,6 @@ export function AddEnvironments({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="l" />
-    </EuiPanel>
+    </>
   );
 }
