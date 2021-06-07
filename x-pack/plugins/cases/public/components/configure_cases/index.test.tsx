@@ -563,11 +563,11 @@ describe('user interactions', () => {
     const actionType = actionTypeRegistryMock.createMockActionTypeModel({
       id: '.resilient',
       validateConnector: () => {
-        return {};
+        return Promise.resolve({});
       },
       validateParams: () => {
         const validationResult = { errors: {} };
-        return validationResult;
+        return Promise.resolve(validationResult);
       },
       actionConnectorFields: null,
     });

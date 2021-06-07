@@ -30,8 +30,7 @@ const MappingComponent: React.FC<MappingProps> = ({
   const { triggersActionsUi } = useKibana().services;
   const selectedConnector = useMemo(
     () => triggersActionsUi.actionTypeRegistry.get(connectorActionTypeId),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [connectorActionTypeId]
+    [connectorActionTypeId, triggersActionsUi]
   );
   const fieldMappingDesc: { desc: string; color: TextColor } = useMemo(
     () =>
