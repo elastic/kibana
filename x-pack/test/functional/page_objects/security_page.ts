@@ -200,8 +200,8 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
 
     async initTests() {
       log.debug('SecurityPage:initTests');
-      await esArchiver.load('empty_kibana');
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await browser.setWindowSize(1600, 1000);
     }
 

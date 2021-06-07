@@ -18,14 +18,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('indexpattern without timefield', () => {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'kibana_timefield']);
-      await esArchiver.loadIfNeeded('index_pattern_without_timefield');
+      await esArchiver.loadIfNeeded(
+        'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
+      );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'without-timefield' });
       await PageObjects.common.navigateToApp('discover');
     });
 
     after(async () => {
       await security.testUser.restoreDefaults();
-      await esArchiver.unload('index_pattern_without_timefield');
+      await esArchiver.unload(
+        'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
+      );
     });
 
     it('should not display a timepicker', async () => {
