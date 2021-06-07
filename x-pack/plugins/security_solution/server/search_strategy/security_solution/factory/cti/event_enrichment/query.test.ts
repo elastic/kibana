@@ -12,9 +12,67 @@ describe('buildEventEnrichmentQuery', () => {
   it('converts each event field/value into a named filter', () => {
     const options = buildRequestOptionsMock();
     const query = buildEventEnrichmentQuery(options);
-    expect(query.body?.query?.bool?.filter).toEqual(expect.objectContaining({ foo: 'bar' }));
+    expect(query.body?.query?.bool?.should).toEqual(
+      expect.arrayContaining([
+        {
+          match: {
+            'threatintel.indicator.file.hash.md5': {
+              _name: 'file.hash.md5',
+              query: '1eee2bf3f56d8abed72da2bc523e7431',
+            },
+          },
+        },
+        { match: { 'threatintel.indicator.ip': { _name: 'source.ip', query: '127.0.0.1' } } },
+        { match: { 'threatintel.indicator.url.full': { _name: 'url.full', query: 'elastic.co' } } },
+      ])
+    );
   });
 
-  it.todo('filters on indicator events');
-  it.todo('includes the specified timerange');
+  it('filters on indicator events', () => {
+    const options = buildRequestOptionsMock();
+    const query = buildEventEnrichmentQuery(options);
+    expect(query.body?.query?.bool?.filter).toEqual(
+      expect.arrayContaining([{ term: { 'event.type': 'indicator' } }])
+    );
+  });
+
+  it('includes the specified timerange', () => {
+    const options = buildRequestOptionsMock();
+    const query = buildEventEnrichmentQuery(options);
+    expect(query.body?.query?.bool?.filter).toEqual(
+      expect.arrayContaining([
+        {
+          range: {
+            '@timestamp': {
+              format: 'strict_date_optional_time',
+              gte: '2020-09-13T09:00:43.249Z',
+              lte: '2020-09-14T09:00:43.249Z',
+            },
+          },
+        },
+      ])
+    );
+  });
+
+  it('includes specified docvalue_fields', () => {
+    const docValueFields = [
+      { field: '@timestamp', format: 'date_time' },
+      { field: 'event.created', format: 'date_time' },
+      { field: 'event.end', format: 'date_time' },
+    ];
+    const options = buildRequestOptionsMock({ docValueFields });
+    const query = buildEventEnrichmentQuery(options);
+    expect(query.body?.docvalue_fields).toEqual(expect.arrayContaining(docValueFields));
+  });
+
+  it('includes specified filters', () => {
+    const filterQuery = {
+      query: 'query_field: query_value',
+      language: 'kuery',
+    };
+
+    const options = buildRequestOptionsMock({ filterQuery });
+    const query = buildEventEnrichmentQuery(options);
+    expect(query.body?.query?.bool?.filter).toEqual(expect.arrayContaining([filterQuery]));
+  });
 });
