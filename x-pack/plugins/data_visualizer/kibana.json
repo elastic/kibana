@@ -16,7 +16,7 @@
     "security",
     "maps",
     "home",
-    "lens",
+    "lens"
   ],
   "requiredBundles": [
     "kibanaReact",
