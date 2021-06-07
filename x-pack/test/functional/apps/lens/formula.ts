@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const listingTable = getService('listingTable');
   const browser = getService('browser');
+  const testSubjects = getService('testSubjects');
 
   describe('lens formula', () => {
     it('should transition from count to formula', async () => {
@@ -169,6 +170,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       expect(await PageObjects.lens.getDatatableCellText(1, 1)).to.eql('222420');
       expect(await PageObjects.lens.getDatatableCellText(1, 2)).to.eql('222420');
+    });
+
+    it('should keep the formula if the user does not fully transition to a quick function', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.switchToVisualization('lnsDatatable');
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsDatatable_metrics > lns-empty-dimension',
+        operation: 'formula',
+        formula: `count()`,
+        keepOpen: true,
+      });
+
+      await PageObjects.lens.switchToQuickFunctions();
+      await testSubjects.click(`lns-indexPatternDimension-min incompatible`);
+      await PageObjects.common.sleep(1000);
+      await PageObjects.lens.closeDimensionEditor();
+
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsDatatable_metrics', 0)).to.eql(
+        'count()'
+      );
     });
   });
 }

@@ -115,6 +115,7 @@ export function FormulaEditor({
           operationDefinitionMap
         ).newLayer;
       }, true);
+      setIsCloseable(true);
     }
   });
 
