@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-import { ROLE_MAPPING_PATH } from '../../routes';
-import { generateEncodedPath } from '../../utils/encode_path_params';
-
-export const generateRoleMappingPath = (roleId: string) =>
-  generateEncodedPath(ROLE_MAPPING_PATH, { roleId });
+export * from './truncatable_text';
