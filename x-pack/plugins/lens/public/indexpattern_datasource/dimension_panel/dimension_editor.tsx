@@ -6,7 +6,7 @@
  */
 
 import './dimension_editor.scss';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiListGroup,
@@ -146,11 +146,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const possibleOperations = useMemo(() => {
     return Object.values(operationDefinitionMap)
       .filter(({ hidden }) => !hidden)
+      .filter(({ type }) => fieldByOperation[type]?.size || operationWithoutField.has(type))
       .sort((op1, op2) => {
         return op1.displayName.localeCompare(op2.displayName);
       })
-      .map((def) => def.type)
-      .filter((type) => fieldByOperation[type]?.size || operationWithoutField.has(type));
+      .map((def) => def.type);
   }, [fieldByOperation, operationWithoutField]);
 
   const [filterByOpenInitially, setFilterByOpenInitally] = useState(false);
@@ -615,6 +615,24 @@ export function DimensionEditor(props: DimensionEditorProps) {
     />
   ) : null;
 
+  const onFormatChange = useCallback(
+    (newFormat) => {
+      setState(
+        mergeLayer({
+          state,
+          layerId,
+          newLayer: updateColumnParam({
+            layer: state.layers[layerId],
+            columnId,
+            paramName: 'format',
+            value: newFormat,
+          }),
+        })
+      );
+    },
+    [columnId, layerId, setState, state]
+  );
+
   return (
     <div id={columnId}>
       {!isFullscreen ? (
@@ -713,23 +731,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           {!isFullscreen &&
           selectedColumn &&
           (selectedColumn.dataType === 'number' || selectedColumn.operationType === 'range') ? (
-            <FormatSelector
-              selectedColumn={selectedColumn}
-              onChange={(newFormat) => {
-                setState(
-                  mergeLayer({
-                    state,
-                    layerId,
-                    newLayer: updateColumnParam({
-                      layer: state.layers[layerId],
-                      columnId,
-                      paramName: 'format',
-                      value: newFormat,
-                    }),
-                  })
-                );
-              }}
-            />
+            <FormatSelector selectedColumn={selectedColumn} onChange={onFormatChange} />
           ) : null}
         </div>
       )}
