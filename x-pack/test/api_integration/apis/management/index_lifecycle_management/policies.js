@@ -45,6 +45,9 @@ export default function ({ getService }) {
         const modifiedDate = '2019-04-30T14:30:00.000Z';
         policy.modified_date = modifiedDate;
 
+        // We don't want to match `_meta` field since it can change between Elasticsearch versions
+        delete policy.policy._meta;
+
         expect(policy).to.eql({
           version: 1,
           modified_date: modifiedDate,
