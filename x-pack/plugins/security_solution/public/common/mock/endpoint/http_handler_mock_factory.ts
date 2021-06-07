@@ -13,7 +13,7 @@ import type {
   HttpHandler,
   HttpStart,
 } from 'kibana/public';
-import { extend } from 'lodash';
+import { merge } from 'lodash';
 import { act } from '@testing-library/react';
 
 class ApiRouteNotMocked extends Error {}
@@ -159,6 +159,11 @@ export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}
       }
     };
 
+    // For debugging purposes.
+    // It will provide a stack trace leading back to the location in the test file
+    // where the `core.http` mocks were applied from.
+    const testContextStackTrace = new Error('HTTP MOCK APPLIED FROM:').stack;
+
     const responseProvider: MockedApi<R>['responseProvider'] = mocks.reduce(
       (providers, routeMock) => {
         // FIXME: find a way to remove the ignore below. May need to limit the calling signature of `RouteMock['handler']`
@@ -195,7 +200,7 @@ export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}
 
       http[method].mockImplementation(async (...args) => {
         const path = isHttpFetchOptionsWithPath(args[0]) ? args[0].path : args[0];
-        const routeMock = methodMocks.find((handler) => handler.path === path);
+        const routeMock = methodMocks.find((handler) => pathMatchesPattern(handler.path, path));
 
         if (routeMock) {
           markApiCallAsHandled(responseProvider[routeMock.id].mockDelay);
@@ -211,6 +216,9 @@ export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}
         }
 
         const err = new ApiRouteNotMocked(`API [${method.toUpperCase()} ${path}] is not MOCKED!`);
+        // Append additional stack calling data from when this API mock was applied
+        err.stack += `\n${testContextStackTrace}`;
+
         // eslint-disable-next-line no-console
         console.error(err);
         throw err;
@@ -219,6 +227,29 @@ export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}
 
     return mockedApiInterface;
   };
+};
+
+const pathMatchesPattern = (pathPattern: string, path: string): boolean => {
+  // No path params - pattern is single path
+  if (pathPattern === path) {
+    return true;
+  }
+
+  // If pathPattern has params (`{value}`), then see if `path` matches it
+  if (/{.*?}/.test(pathPattern)) {
+    const pathParts = path.split(/\//);
+    const patternParts = pathPattern.split(/\//);
+
+    if (pathParts.length !== patternParts.length) {
+      return false;
+    }
+
+    return pathParts.every((part, index) => {
+      return part === patternParts[index] || /{.*?}/.test(patternParts[index]);
+    });
+  }
+
+  return false;
 };
 
 const isHttpFetchOptionsWithPath = (
@@ -235,12 +266,14 @@ const isHttpFetchOptionsWithPath = (
  * @example
  * import { composeApiHandlerMocks } from './http_handler_mock_factory';
  * import {
+ *   FleetSetupApiMockInterface,
  *   fleetSetupApiMock,
+ *   AgentsSetupApiMockInterface,
  *   agentsSetupApiMock,
  * } from './setup';
  *
- * // Create the new interface as an intersection of all other Api Handler Mocks
- * type ComposedApiHandlerMocks = ReturnType<typeof agentsSetupApiMock> & ReturnType<typeof fleetSetupApiMock>
+ * // Create the new interface as an intersection of all other Api Handler Mock's interfaces
+ * type ComposedApiHandlerMocks = AgentsSetupApiMockInterface & FleetSetupApiMockInterface
  *
  * const newComposedHandlerMock = composeApiHandlerMocks<
  *  ComposedApiHandlerMocks
@@ -267,7 +300,7 @@ export const composeHttpHandlerMocks = <
 
     handlerMocks.forEach((handlerMock) => {
       const { waitForApi, ...otherInterfaceProps } = handlerMock(http);
-      extend(mockedApiInterfaces, otherInterfaceProps);
+      merge(mockedApiInterfaces, otherInterfaceProps);
     });
 
     return mockedApiInterfaces;
