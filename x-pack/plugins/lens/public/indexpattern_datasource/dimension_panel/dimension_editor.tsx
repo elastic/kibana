@@ -6,7 +6,7 @@
  */
 
 import './dimension_editor.scss';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiListGroup,
@@ -625,6 +625,24 @@ export function DimensionEditor(props: DimensionEditorProps) {
     <></>
   );
 
+  const onFormatChange = useCallback(
+    (newFormat) => {
+      setState(
+        mergeLayer({
+          state,
+          layerId,
+          newLayer: updateColumnParam({
+            layer: state.layers[layerId],
+            columnId,
+            paramName: 'format',
+            value: newFormat,
+          }),
+        })
+      );
+    },
+    [columnId, layerId, setState, state]
+  );
+
   return (
     <div id={columnId}>
       {!isFullscreen ? (
@@ -722,23 +740,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           {!isFullscreen &&
           selectedColumn &&
           (selectedColumn.dataType === 'number' || selectedColumn.operationType === 'range') ? (
-            <FormatSelector
-              selectedColumn={selectedColumn}
-              onChange={(newFormat) => {
-                setState(
-                  mergeLayer({
-                    state,
-                    layerId,
-                    newLayer: updateColumnParam({
-                      layer: state.layers[layerId],
-                      columnId,
-                      paramName: 'format',
-                      value: newFormat,
-                    }),
-                  })
-                );
-              }}
-            />
+            <FormatSelector selectedColumn={selectedColumn} onChange={onFormatChange} />
           ) : null}
         </div>
       )}
