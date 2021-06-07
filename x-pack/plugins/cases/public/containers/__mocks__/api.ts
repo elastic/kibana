@@ -60,6 +60,7 @@ export const getCases = async ({
     reporters: [],
     status: CaseStatuses.open,
     tags: [],
+    owner: [],
   },
   queryParams = {
     page: 1,

@@ -6,16 +6,22 @@
  */
 
 import React from 'react';
+import { Owner } from '../../types';
 import { CaseDetailsHrefSchema, CasesNavigation } from '../links';
+import { OwnerProvider } from '../owner_context';
 import { AllCasesGeneric } from './all_cases_generic';
-export interface AllCasesProps {
+export interface AllCasesProps extends Owner {
   caseDetailsNavigation: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>; // if not passed, case name is not displayed as a link (Formerly dependant on isSelector)
   configureCasesNavigation: CasesNavigation; // if not passed, header with nav is not displayed (Formerly dependant on isSelector)
   createCaseNavigation: CasesNavigation;
   userCanCrud: boolean;
 }
 
-export const AllCases: React.FC<AllCasesProps> = (props) => <AllCasesGeneric {...props} />;
+export const AllCases: React.FC<AllCasesProps> = (props) => (
+  <OwnerProvider owner={props.owner}>
+    <AllCasesGeneric {...props} />
+  </OwnerProvider>
+);
 
 // eslint-disable-next-line import/no-default-export
 export { AllCases as default };
