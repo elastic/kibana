@@ -427,7 +427,7 @@ export function FormulaEditor({
           }
 
           let editOperation: monaco.editor.IIdentifiedSingleEditOperation | null = null;
-          let cursorOffset = 2;
+          const cursorOffset = 2;
           if (char === '=') {
             editOperation = {
               range: {
@@ -449,7 +449,6 @@ export function FormulaEditor({
               },
               text: `\\'`,
             };
-            cursorOffset = 3;
           }
 
           if (editOperation) {
