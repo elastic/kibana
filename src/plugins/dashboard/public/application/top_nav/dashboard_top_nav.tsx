@@ -123,7 +123,7 @@ export function DashboardTopNav({
 
   const trackUiMetric = usageCollection?.reportUiCounter.bind(
     usageCollection,
-    DashboardConstants.DASHBOARDS_ID
+    DashboardConstants.DASHBOARD_ID
   );
 
   useEffect(() => {
@@ -176,7 +176,7 @@ export function DashboardTopNav({
 
       if (visType) {
         if (trackUiMetric) {
-          trackUiMetric(METRIC_TYPE.CLICK, visType.name);
+          trackUiMetric(METRIC_TYPE.CLICK, `${visType.name}:create`);
         }
 
         if ('aliasPath' in visType) {
