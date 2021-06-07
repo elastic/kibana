@@ -695,8 +695,8 @@
           "{ readonly enabled: boolean; readonly index: string; readonly write: Readonly<{} & { enabled: boolean; }>; }"
         ],
         "source": {
-          "path": "x-pack/plugins/rule_registry/server/index.ts",
-          "lineNumber": 28
+          "path": "x-pack/plugins/rule_registry/server/config.ts",
+          "lineNumber": 20
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -706,18 +706,49 @@
     "setup": {
       "parentPluginId": "ruleRegistry",
       "id": "def-server.RuleRegistryPluginSetupContract",
-      "type": "Type",
+      "type": "Interface",
       "tags": [],
       "label": "RuleRegistryPluginSetupContract",
       "description": [],
-      "signature": [
-        "RuleDataPluginService"
-      ],
       "source": {
         "path": "x-pack/plugins/rule_registry/server/plugin.ts",
-        "lineNumber": 12
+        "lineNumber": 22
       },
       "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "ruleRegistry",
+          "id": "def-server.RuleRegistryPluginSetupContract.ruleDataService",
+          "type": "Object",
+          "tags": [],
+          "label": "ruleDataService",
+          "description": [],
+          "signature": [
+            "RuleDataPluginService"
+          ],
+          "source": {
+            "path": "x-pack/plugins/rule_registry/server/plugin.ts",
+            "lineNumber": 23
+          },
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "ruleRegistry",
+          "id": "def-server.RuleRegistryPluginSetupContract.eventLogService",
+          "type": "Object",
+          "tags": [],
+          "label": "eventLogService",
+          "description": [],
+          "signature": [
+            "IEventLogService"
+          ],
+          "source": {
+            "path": "x-pack/plugins/rule_registry/server/plugin.ts",
+            "lineNumber": 24
+          },
+          "deprecated": false
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -733,7 +764,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/rule_registry/server/plugin.ts",
-        "lineNumber": 13
+        "lineNumber": 27
       },
       "deprecated": false,
       "lifecycle": "start",

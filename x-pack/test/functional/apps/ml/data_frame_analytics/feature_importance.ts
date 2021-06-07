@@ -14,8 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/93188
-  describe.skip('total feature importance panel and decision path popover', function () {
+  describe('total feature importance panel and decision path popover', function () {
     const testDataList: Array<{
       suiteTitle: string;
       archive: string;
@@ -189,6 +188,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.navigateToMl();
           await ml.navigation.navigateToDataFrameAnalytics();
           await ml.dataFrameAnalyticsTable.waitForAnalyticsToLoad();
+          await ml.testResources.createIndexPatternIfNeeded(testData.job.dest!.index as string);
           await ml.dataFrameAnalyticsTable.openResultsView(testData.job.id as string);
         });
 

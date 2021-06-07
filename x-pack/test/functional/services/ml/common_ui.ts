@@ -123,6 +123,25 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
       await this.assertRadioGroupValue(testSubject, value);
     },
 
+    async assertSelectSelectedOptionVisibleText(testSubject: string, visibleText: string) {
+      // Need to validate the selected option text, as the option value may be different to the visible text.
+      const selectControl = await testSubjects.find(testSubject);
+      const selectedValue = await selectControl.getAttribute('value');
+      const selectedOption = await selectControl.findByCssSelector(`[value="${selectedValue}"]`);
+      const selectedOptionText = await selectedOption.getVisibleText();
+      expect(selectedOptionText).to.eql(
+        visibleText,
+        `Expected selected option visible text to be '${visibleText}' (got '${selectedOptionText}')`
+      );
+    },
+
+    async selectSelectValueByVisibleText(testSubject: string, visibleText: string) {
+      // Cannot use await testSubjects.selectValue as the option value may be different to the text.
+      const selectControl = await testSubjects.find(testSubject);
+      await selectControl.type(visibleText);
+      await this.assertSelectSelectedOptionVisibleText(testSubject, visibleText);
+    },
+
     async setMultiSelectFilter(testDataSubj: string, fieldTypes: string[]) {
       await testSubjects.clickWhenNotDisabled(`${testDataSubj}-button`);
       await testSubjects.existOrFail(`${testDataSubj}-popover`);

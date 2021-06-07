@@ -7,11 +7,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Map, Style, MapboxOptions } from 'mapbox-gl';
+import type { Map, Style, MapboxOptions } from '@kbn/mapbox-gl';
 
 import { View, parse } from 'vega';
-// @ts-expect-error
-import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
+
+import { mapboxgl } from '@kbn/mapbox-gl';
+
 import { initTmsRasterLayer, initVegaLayer } from './layers';
 import { VegaBaseView } from '../vega_base_view';
 import { getMapServiceSettings } from '../../services';
@@ -26,14 +27,6 @@ import {
 } from './constants';
 import { validateZoomSettings, injectMapPropsIntoSpec } from './utils';
 import './vega_map_view.scss';
-
-// @ts-expect-error
-import mbRtlPlugin from '!!file-loader!@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js';
-// @ts-expect-error
-import mbWorkerUrl from '!!file-loader!mapbox-gl/dist/mapbox-gl-csp-worker';
-
-mapboxgl.workerUrl = mbWorkerUrl;
-mapboxgl.setRTLTextPlugin(mbRtlPlugin);
 
 async function updateVegaView(mapBoxInstance: Map, vegaView: View) {
   const mapCanvas = mapBoxInstance.getCanvas();

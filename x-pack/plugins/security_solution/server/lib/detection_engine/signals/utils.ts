@@ -10,7 +10,7 @@ import moment from 'moment';
 import uuidv5 from 'uuid/v5';
 import dateMath from '@elastic/datemath';
 import type { estypes } from '@elastic/elasticsearch';
-import { isEmpty, partition } from 'lodash';
+import { chunk, isEmpty, partition } from 'lodash';
 import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
 
 import { SortResults } from '@elastic/elasticsearch/api/types';
@@ -38,6 +38,7 @@ import {
   Signal,
   WrappedSignalHit,
   RuleRangeTuple,
+  BaseSignalHit,
 } from './types';
 import { BuildRuleMessage } from './rule_messages';
 import { ShardError } from '../../types';
@@ -577,30 +578,49 @@ export const lastValidDate = ({
   searchResult,
   timestampOverride,
 }: {
-  searchResult: estypes.SearchResponse;
+  searchResult: SignalSearchResponse;
   timestampOverride: TimestampOverrideOrUndefined;
 }): Date | undefined => {
   if (searchResult.hits.hits.length === 0) {
     return undefined;
   } else {
     const lastRecord = searchResult.hits.hits[searchResult.hits.hits.length - 1];
-    const timestamp = timestampOverride ?? '@timestamp';
-    const timestampValue =
-      lastRecord.fields != null && lastRecord.fields[timestamp] != null
-        ? lastRecord.fields[timestamp][0]
-        : // @ts-expect-error @elastic/elasticsearch _source is optional
-          lastRecord._source[timestamp];
-    const lastTimestamp =
-      typeof timestampValue === 'string' || typeof timestampValue === 'number'
-        ? timestampValue
-        : undefined;
-    if (lastTimestamp != null) {
-      const tempMoment = moment(lastTimestamp);
-      if (tempMoment.isValid()) {
-        return tempMoment.toDate();
-      } else {
-        return undefined;
-      }
+    return getValidDateFromDoc({ doc: lastRecord, timestampOverride });
+  }
+};
+
+/**
+ * Given a search hit this will return a valid last date if it can find one, otherwise it
+ * will return undefined. This tries the "fields" first to get a formatted date time if it can, but if
+ * it cannot it will resort to using the "_source" fields second which can be problematic if the date time
+ * is not correctly ISO8601 or epoch milliseconds formatted.
+ * @param searchResult The result to try and parse out the timestamp.
+ * @param timestampOverride The timestamp override to use its values if we have it.
+ */
+export const getValidDateFromDoc = ({
+  doc,
+  timestampOverride,
+}: {
+  doc: BaseSignalHit;
+  timestampOverride: TimestampOverrideOrUndefined;
+}): Date | undefined => {
+  const timestamp = timestampOverride ?? '@timestamp';
+  const timestampValue =
+    doc.fields != null && doc.fields[timestamp] != null
+      ? doc.fields[timestamp][0]
+      : doc._source != null
+      ? doc._source[timestamp]
+      : undefined;
+  const lastTimestamp =
+    typeof timestampValue === 'string' || typeof timestampValue === 'number'
+      ? timestampValue
+      : undefined;
+  if (lastTimestamp != null) {
+    const tempMoment = moment(lastTimestamp);
+    if (tempMoment.isValid()) {
+      return tempMoment.toDate();
+    } else {
+      return undefined;
     }
   }
 };
@@ -609,7 +629,7 @@ export const createSearchAfterReturnTypeFromResponse = ({
   searchResult,
   timestampOverride,
 }: {
-  searchResult: estypes.SearchResponse;
+  searchResult: SignalSearchResponse;
   timestampOverride: TimestampOverrideOrUndefined;
 }): SearchAfterAndBulkCreateReturnType => {
   return createSearchAfterReturnType({
@@ -867,4 +887,17 @@ export const getSafeSortIds = (sortIds: SortResults | undefined) => {
     }
     return sortId;
   });
+};
+
+export const buildChunkedOrFilter = (field: string, values: string[], chunkSize: number = 1024) => {
+  if (values.length === 0) {
+    return undefined;
+  }
+  const chunkedValues = chunk(values, chunkSize);
+  return chunkedValues
+    .map((subArray) => {
+      const joinedValues = subArray.map((value) => `"${value}"`).join(' OR ');
+      return `${field}: (${joinedValues})`;
+    })
+    .join(' OR ');
 };

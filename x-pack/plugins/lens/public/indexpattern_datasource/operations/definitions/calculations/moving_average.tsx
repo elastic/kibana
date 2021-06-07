@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState } from 'react';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
+import { useDebounceWithOptions } from '../../../../shared_components';
 import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPatternLayer } from '../../../types';
 import {
@@ -19,12 +20,7 @@ import {
   hasDateField,
 } from './utils';
 import { updateColumnParam } from '../../layer_helpers';
-import {
-  getFormatFromPreviousColumn,
-  isValidNumber,
-  useDebounceWithOptions,
-  getFilter,
-} from '../helpers';
+import { getFormatFromPreviousColumn, isValidNumber, getFilter } from '../helpers';
 import { adjustTimeScaleOnOtherColumnChange } from '../../time_scale_utils';
 import { HelpPopover, HelpPopoverButton } from '../../../help_popover';
 import type { OperationDefinition, ParamEditorProps } from '..';
@@ -80,7 +76,7 @@ export const movingAverageOperation: OperationDefinition<
     }
   },
   getDefaultLabel: (column, indexPattern, columns) => {
-    return ofName(columns[column.references[0]]?.label, column.timeScale);
+    return ofName(columns[column.references[0]]?.label, column.timeScale, column.timeShift);
   },
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'moving_average', {
@@ -94,7 +90,7 @@ export const movingAverageOperation: OperationDefinition<
     const metric = layer.columns[referenceIds[0]];
     const { window = WINDOW_DEFAULT_VALUE } = columnParams;
     return {
-      label: ofName(metric?.label, previousColumn?.timeScale),
+      label: ofName(metric?.label, previousColumn?.timeScale, previousColumn?.timeShift),
       dataType: 'number',
       operationType: 'moving_average',
       isBucketed: false,
@@ -102,6 +98,7 @@ export const movingAverageOperation: OperationDefinition<
       references: referenceIds,
       timeScale: previousColumn?.timeScale,
       filter: getFilter(previousColumn, columnParams),
+      timeShift: previousColumn?.timeShift,
       params: {
         window,
         ...getFormatFromPreviousColumn(previousColumn),
@@ -133,6 +130,7 @@ export const movingAverageOperation: OperationDefinition<
   },
   timeScalingMode: 'optional',
   filterable: true,
+  shiftable: true,
 };
 
 function MovingAverageParamEditor({

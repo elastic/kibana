@@ -70,7 +70,8 @@ export const counterRateOperation: OperationDefinition<
       ref && 'sourceField' in ref
         ? indexPattern.getFieldByName(ref.sourceField)?.displayName
         : undefined,
-      column.timeScale
+      column.timeScale,
+      column.timeShift
     );
   },
   toExpression: (layer, columnId) => {
@@ -84,7 +85,8 @@ export const counterRateOperation: OperationDefinition<
         metric && 'sourceField' in metric
           ? indexPattern.getFieldByName(metric.sourceField)?.displayName
           : undefined,
-        timeScale
+        timeScale,
+        previousColumn?.timeShift
       ),
       dataType: 'number',
       operationType: 'counter_rate',
@@ -92,6 +94,7 @@ export const counterRateOperation: OperationDefinition<
       scale: 'ratio',
       references: referenceIds,
       timeScale,
+      timeShift: previousColumn?.timeShift,
       filter: getFilter(previousColumn, columnParams),
       params: getFormatFromPreviousColumn(previousColumn),
     };
@@ -118,4 +121,5 @@ export const counterRateOperation: OperationDefinition<
   },
   timeScalingMode: 'mandatory',
   filterable: true,
+  shiftable: true,
 };

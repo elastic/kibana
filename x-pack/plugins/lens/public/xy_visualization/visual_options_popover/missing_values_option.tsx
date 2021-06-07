@@ -7,7 +7,14 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonGroup, EuiFormRow, EuiIconTip, EuiSuperSelect, EuiText } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiFormRow,
+  EuiIconTip,
+  EuiSuperSelect,
+  EuiText,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FittingFunction, fittingFunctionDefinitions } from '../fitting_functions';
 import { ValueLabelConfig } from '../types';
 
@@ -133,6 +140,7 @@ export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
           />
         </EuiFormRow>
       )}
+      <EuiSpacer />
     </>
   );
 };

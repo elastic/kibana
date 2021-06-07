@@ -69,13 +69,16 @@ export interface ManifestManagerMockOptions {
 
 export const buildManifestManagerMockOptions = (
   opts: Partial<ManifestManagerMockOptions>
-): ManifestManagerMockOptions => ({
-  cache: new LRU<string, Buffer>({ max: 10, maxAge: 1000 * 60 * 60 }),
-  exceptionListClient: listMock.getExceptionListClient(),
-  packagePolicyService: createPackagePolicyServiceMock(),
-  savedObjectsClient: savedObjectsClientMock.create(),
-  ...opts,
-});
+): ManifestManagerMockOptions => {
+  const savedObjectMock = savedObjectsClientMock.create();
+  return {
+    cache: new LRU<string, Buffer>({ max: 10, maxAge: 1000 * 60 * 60 }),
+    exceptionListClient: listMock.getExceptionListClient(savedObjectMock),
+    packagePolicyService: createPackagePolicyServiceMock(),
+    savedObjectsClient: savedObjectMock,
+    ...opts,
+  };
+};
 
 export const buildManifestManagerContextMock = (
   opts: Partial<ManifestManagerMockOptions>

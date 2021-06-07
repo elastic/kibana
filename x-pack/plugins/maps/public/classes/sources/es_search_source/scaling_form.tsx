@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { getIndexPatternService } from '../../../kibana_services';
 import { DEFAULT_MAX_RESULT_WINDOW, LAYER_TYPE, SCALING_TYPES } from '../../../../common/constants';
 import { loadIndexSettings } from './load_index_settings';
-import { OnSourceChangeArgs } from '../../../connected_components/layer_panel/view';
+import { OnSourceChangeArgs } from '../source';
 
 interface Props {
   filterByMapBounds: boolean;

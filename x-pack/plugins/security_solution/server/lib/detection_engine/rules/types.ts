@@ -211,12 +211,6 @@ export const isRuleStatusFindType = (
   return get('saved_objects', obj) != null;
 };
 
-export const isRuleStatusFindTypes = (
-  obj: unknown[] | undefined
-): obj is Array<SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes>> => {
-  return obj ? obj.every((ruleStatus) => isRuleStatusFindType(ruleStatus)) : false;
-};
-
 export interface CreateRulesOptions {
   alertsClient: AlertsClient;
   anomalyThreshold: AnomalyThresholdOrUndefined;
