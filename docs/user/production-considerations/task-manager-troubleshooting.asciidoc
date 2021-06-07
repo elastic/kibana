@@ -879,7 +879,7 @@ Evaluating the health stats above you can see the following output under `stats.
 --------------------------------------------------
 <1> These estimates assume that there is one {kib} instance actively executing tasks
 <2> Based on past throughput the overdue tasks in the system could be executed within 1 minute
-<3> Assuming all {kib} instacnes in the cluster are configured the same as this instance, the maximum available throughput is 200 tasks per minute
+<3> Assuming all {kib} instances in the cluster are configured the same as this instance, the maximum available throughput is 200 tasks per minute
 <4> On average the recurring tasks in the system have historically required a throughput of 28 tasks per minute
 <5> On average, regardless of whether they are recurring or otherwise, the tasks in the system have historically required a throughput of 28 tasks per minute
 <6> One {kib} instance should be sufficient to run the current recurring workload
