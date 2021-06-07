@@ -1,0 +1,5 @@
+[role="xpack"]
+[[defining-alerts]]
+== Defining rules
+
+This content has been moved to <<create-and-manage-rules>>.
