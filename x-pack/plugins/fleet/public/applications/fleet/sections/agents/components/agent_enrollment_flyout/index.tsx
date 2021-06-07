@@ -148,7 +148,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexGroup justifyContent="flexStart">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={onClose}>
               <FormattedMessage
