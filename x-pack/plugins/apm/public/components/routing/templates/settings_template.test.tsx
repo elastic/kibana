@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import React, { ReactNode } from 'react';
-import { Settings } from './';
+import { SettingsTemplate } from './settings_template';
 import { createMemoryHistory } from 'history';
 import { MemoryRouter, RouteComponentProps } from 'react-router-dom';
 
@@ -29,9 +29,9 @@ describe('Settings', () => {
     } as unknown) as RouteComponentProps<{}>;
     expect(() =>
       render(
-        <Settings {...routerProps}>
+        <SettingsTemplate {...routerProps}>
           <div />
-        </Settings>,
+        </SettingsTemplate>,
         { wrapper: Wrapper }
       )
     ).not.toThrowError();
