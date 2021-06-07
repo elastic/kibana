@@ -42,7 +42,7 @@ export const getFleetServerUsage = async (
     const res = await packagePolicyService.list(soClient, {
       page: page++,
       perPage: 20,
-      kuery: 'ingest-package-policies.package.name:fleet-server',
+      kuery: 'ingest-package-policies.package.name:fleet_server',
     });
 
     for (const item of res.items) {
