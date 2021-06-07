@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { css } from '@emotion/css';
 import { elasticOutline } from '../../lib/elastic_outline';
 import { isValidUrl } from '../../../common/lib/url';
 import { RendererStrings } from '../../../i18n';
@@ -13,38 +14,74 @@ import { Output as Arguments } from '../../functions/common/revealImage';
 
 const { revealImage: strings } = RendererStrings;
 
+function getClipPath(percent: number, origin = 'bottom') {
+  const directions: Record<string, number> = { bottom: 0, left: 1, top: 2, right: 3 };
+  const values: Array<number | string> = [0, 0, 0, 0];
+  values[directions[origin]] = `${100 - percent * 100}%`;
+  return `inset(${values.join(' ')})`;
+}
+
 export const revealImage: RendererFactory<Arguments> = () => ({
   name: 'revealImage',
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
   reuseDomNode: true,
   render(domNode, config, handlers) {
-    const aligner = document.createElement('div');
-    const img = new Image();
+    const elementWidth = domNode.clientWidth;
+    const elementHeight = domNode.clientHeight;
 
-    // modify the top-level container class
-    domNode.className = 'revealImage';
+    const img = new Image();
+    img.src = isValidUrl(config.image) ? config.image : elasticOutline;
+
+    const aligner = document.createElement('div');
+
+    const clipPath = getClipPath(config.percent, config.origin);
+
+    const imageAspectRatio = img.naturalHeight / img.naturalWidth;
+    const elementAspectRatio = elementHeight / elementWidth;
+
+    const imgStyles = css`
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+
+      -webkit-clip-path: ${clipPath};
+      clip-path: ${clipPath};
+    `;
+
+    const alignerStyles = css`
+      background-size: contain;
+      background-repeat: no-repeat;
+      ${isValidUrl(config.emptyImage) ? `background-image: url(${config.emptyImage});` : ''}
+    `;
+
+    const containerStyles = css`
+      height: 100%;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    `;
+
+    img.classList.add(imgStyles);
+    aligner.classList.add(alignerStyles);
+    domNode.classList.add(containerStyles);
 
     // set up the overlay image
     function onLoad() {
       setSize();
       finish();
     }
+
     img.onload = onLoad;
 
-    img.className = 'revealImage__image';
-    img.style.clipPath = getClipPath(config.percent, config.origin);
-    img.style.setProperty('-webkit-clip-path', getClipPath(config.percent, config.origin));
-    img.src = isValidUrl(config.image) ? config.image : elasticOutline;
     handlers.onResize(onLoad);
 
-    // set up the underlay, "empty" image
-    aligner.className = 'revealImageAligner';
     aligner.appendChild(img);
-    if (isValidUrl(config.emptyImage)) {
-      // only use empty image if one is provided
-      aligner.style.backgroundImage = `url(${config.emptyImage})`;
-    }
 
     function finish() {
       const firstChild = domNode.firstChild;
@@ -54,13 +91,6 @@ export const revealImage: RendererFactory<Arguments> = () => ({
         domNode.appendChild(aligner);
       }
       handlers.done();
-    }
-
-    function getClipPath(percent: number, origin = 'bottom') {
-      const directions: Record<string, number> = { bottom: 0, left: 1, top: 2, right: 3 };
-      const values: Array<number | string> = [0, 0, 0, 0];
-      values[directions[origin]] = `${100 - percent * 100}%`;
-      return `inset(${values.join(' ')})`;
     }
 
     function setSize() {

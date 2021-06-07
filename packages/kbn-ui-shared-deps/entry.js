@@ -19,6 +19,7 @@ export const KbnI18nAngular = require('@kbn/i18n/angular');
 export const KbnI18nReact = require('@kbn/i18n/react');
 export const Angular = require('angular');
 export const EmotionReact = require('@emotion/react');
+export const EmotionCss = require('@emotion/css');
 export const Moment = require('moment');
 export const MomentTimezone = require('moment-timezone/moment-timezone');
 export const KbnMonaco = require('@kbn/monaco');

@@ -23,6 +23,7 @@ exports.externals = {
   '@kbn/i18n/angular': '__kbnSharedDeps__.KbnI18nAngular',
   '@kbn/i18n/react': '__kbnSharedDeps__.KbnI18nReact',
   '@emotion/react': '__kbnSharedDeps__.EmotionReact',
+  '@emotion/css': '__kbnSharedDeps__.EmotionCss',
   jquery: '__kbnSharedDeps__.Jquery',
   moment: '__kbnSharedDeps__.Moment',
   'moment-timezone': '__kbnSharedDeps__.MomentTimezone',
