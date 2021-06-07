@@ -1,7 +1,6 @@
 {
   "id": "visTypeXy",
   "version": "kibana",
-  "server": true,
   "ui": true,
   "requiredPlugins": ["charts", "data", "expressions", "visualizations", "usageCollection"],
   "requiredBundles": ["kibanaUtils", "visDefaultEditor"]

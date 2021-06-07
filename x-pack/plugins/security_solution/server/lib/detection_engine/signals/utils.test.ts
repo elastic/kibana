@@ -40,6 +40,7 @@ import {
   lastValidDate,
   calculateThresholdSignalUuid,
   buildChunkedOrFilter,
+  getValidDateFromDoc,
 } from './utils';
 import { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
@@ -54,6 +55,7 @@ import {
   sampleDocSearchResultsNoSortIdNoHits,
   repeatedSearchResultsWithSortId,
   sampleDocSearchResultsNoSortId,
+  sampleDocNoSortId,
 } from './__mocks__/es_results';
 import { ShardError } from '../../types';
 
@@ -1174,7 +1176,6 @@ describe('utils', () => {
 
     test('It will not set an invalid date time stamp from a non-existent @timestamp when the index is not 100% ECS compliant', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
-      // @ts-expect-error @elastic/elasticsearch _source is optional
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = undefined;
       if (searchResult.hits.hits[0].fields != null) {
         (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = undefined;
@@ -1188,7 +1189,6 @@ describe('utils', () => {
 
     test('It will not set an invalid date time stamp from a null @timestamp when the index is not 100% ECS compliant', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
-      // @ts-expect-error @elastic/elasticsearch _source is optional
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = null;
       if (searchResult.hits.hits[0].fields != null) {
         (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = null;
@@ -1202,7 +1202,6 @@ describe('utils', () => {
 
     test('It will not set an invalid date time stamp from an invalid @timestamp string', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
-      // @ts-expect-error @elastic/elasticsearch _source is optional
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid';
       if (searchResult.hits.hits[0].fields != null) {
         (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = ['invalid'];
@@ -1218,7 +1217,6 @@ describe('utils', () => {
   describe('lastValidDate', () => {
     test('It returns undefined if the search result contains a null timestamp', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
-      // @ts-expect-error @elastic/elasticsearch _source is optional
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = null;
       if (searchResult.hits.hits[0].fields != null) {
         (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = null;
@@ -1229,7 +1227,6 @@ describe('utils', () => {
 
     test('It returns undefined if the search result contains a undefined timestamp', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
-      // @ts-expect-error @elastic/elasticsearch _source is optional
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = undefined;
       if (searchResult.hits.hits[0].fields != null) {
         (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = undefined;
@@ -1240,7 +1237,6 @@ describe('utils', () => {
 
     test('It returns undefined if the search result contains an invalid string value', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
-      // @ts-expect-error @elastic/elasticsearch _source is optional
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid value';
       if (searchResult.hits.hits[0].fields != null) {
         (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = ['invalid value'];
@@ -1292,6 +1288,84 @@ describe('utils', () => {
         },
       };
       const date = lastValidDate({ searchResult, timestampOverride: 'different_timestamp' });
+      expect(date?.toISOString()).toEqual(override);
+    });
+  });
+
+  describe('getValidDateFromDoc', () => {
+    test('It returns undefined if the search result contains a null timestamp', () => {
+      const doc = sampleDocNoSortId();
+      (doc._source['@timestamp'] as unknown) = null;
+      if (doc.fields != null) {
+        (doc.fields['@timestamp'] as unknown) = null;
+      }
+      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      expect(date).toEqual(undefined);
+    });
+
+    test('It returns undefined if the search result contains a undefined timestamp', () => {
+      const doc = sampleDocNoSortId();
+      (doc._source['@timestamp'] as unknown) = undefined;
+      if (doc.fields != null) {
+        (doc.fields['@timestamp'] as unknown) = undefined;
+      }
+      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      expect(date).toEqual(undefined);
+    });
+
+    test('It returns undefined if the search result contains an invalid string value', () => {
+      const doc = sampleDocNoSortId();
+      (doc._source['@timestamp'] as unknown) = 'invalid value';
+      if (doc.fields != null) {
+        (doc.fields['@timestamp'] as unknown) = ['invalid value'];
+      }
+      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      expect(date).toEqual(undefined);
+    });
+
+    test('It returns normal date time if set', () => {
+      const doc = sampleDocNoSortId();
+      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      expect(date?.toISOString()).toEqual('2020-04-20T21:27:45.000Z');
+    });
+
+    test('It returns date time from field if set there', () => {
+      const timestamp = '2020-10-07T19:27:19.136Z';
+      let doc = sampleDocNoSortId();
+      if (doc == null) {
+        throw new TypeError('Test requires one element');
+      }
+      doc = {
+        ...doc,
+        fields: {
+          '@timestamp': [timestamp],
+        },
+      };
+      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      expect(date?.toISOString()).toEqual(timestamp);
+    });
+
+    test('It returns timestampOverride date time if set', () => {
+      const override = '2020-10-07T19:20:28.049Z';
+      const doc = sampleDocNoSortId();
+      doc._source.different_timestamp = new Date(override).toISOString();
+      const date = getValidDateFromDoc({ doc, timestampOverride: 'different_timestamp' });
+      expect(date?.toISOString()).toEqual(override);
+    });
+
+    test('It returns timestampOverride date time from fields if set on it', () => {
+      const override = '2020-10-07T19:36:31.110Z';
+      let doc = sampleDocNoSortId();
+      if (doc == null) {
+        throw new TypeError('Test requires one element');
+      }
+      doc = {
+        ...doc,
+        fields: {
+          different_timestamp: [override],
+        },
+      };
+      const date = getValidDateFromDoc({ doc, timestampOverride: 'different_timestamp' });
       expect(date?.toISOString()).toEqual(override);
     });
   });
