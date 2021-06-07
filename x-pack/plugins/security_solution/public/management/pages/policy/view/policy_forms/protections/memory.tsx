@@ -15,7 +15,6 @@ import { Immutable, OperatingSystem } from '../../../../../../../common/endpoint
 import { MemoryProtectionOSes, OS } from '../../../types';
 import { ConfigForm } from '../../components/config_form';
 import { LinkToApp } from '../../../../../../common/components/endpoint/link_to_app';
-import { useLicense } from '../../../../../../common/hooks/use_license';
 import { RadioButtons } from '../components/radio_buttons';
 import { UserNotification } from '../components/user_notification';
 import { ProtectionSwitch } from '../components/protection_switch';
@@ -26,7 +25,6 @@ import { ProtectionSwitch } from '../components/protection_switch';
 export const MemoryProtection = React.memo(() => {
   const OSes: Immutable<MemoryProtectionOSes[]> = [OS.windows];
   const protection = 'memory';
-  const isPlatinumPlus = useLicense().isPlatinumPlus();
   return (
     <ConfigForm
       type={i18n.translate('xpack.securitySolution.endpoint.policy.details.memory', {
@@ -37,7 +35,7 @@ export const MemoryProtection = React.memo(() => {
       rightCorner={<ProtectionSwitch protection={protection} osList={OSes} />}
     >
       <RadioButtons protection={protection} osList={OSes} />
-      {isPlatinumPlus && <UserNotification protection={protection} osList={OSes} />}
+      <UserNotification protection={protection} osList={OSes} />
       <EuiSpacer size="m" />
       <EuiCallOut iconType="iInCircle">
         <FormattedMessage

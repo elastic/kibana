@@ -835,7 +835,7 @@ export interface PolicyConfig {
       security: boolean;
     };
     malware: ProtectionFields;
-    memory: ProtectionFields;
+    memory: ProtectionFields & SupportedFields;
     ransomware: ProtectionFields & SupportedFields;
     logging: {
       file: string;

@@ -31,6 +31,7 @@ export const policyFactory = (): PolicyConfig => {
       },
       memory: {
         mode: ProtectionModes.prevent,
+        supported: true,
       },
       popup: {
         malware: {
@@ -108,6 +109,10 @@ export const policyFactoryWithoutPaidFeatures = (
         mode: ProtectionModes.off,
         supported: false,
       },
+      memory: {
+        mode: ProtectionModes.off,
+        supported: false,
+      },
       popup: {
         ...policy.windows.popup,
         malware: {
@@ -115,6 +120,10 @@ export const policyFactoryWithoutPaidFeatures = (
           enabled: true,
         },
         ransomware: {
+          message: '',
+          enabled: false,
+        },
+        memory: {
           message: '',
           enabled: false,
         },
@@ -155,6 +164,10 @@ export const policyFactoryWithSupportedFeatures = (
       ...policy.windows,
       ransomware: {
         ...policy.windows.ransomware,
+        supported: true,
+      },
+      memory: {
+        ...policy.windows.memory,
         supported: true,
       },
     },
