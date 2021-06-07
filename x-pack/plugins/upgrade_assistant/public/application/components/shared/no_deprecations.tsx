@@ -7,7 +7,7 @@
 
 import React, { FunctionComponent } from 'react';
 
-import { EuiLink, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiLink, EuiEmptyPrompt, EuiPageContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -46,18 +46,20 @@ export const NoDeprecationsPrompt: FunctionComponent<Props> = ({
   navigateToOverviewPage,
 }) => {
   return (
-    <EuiEmptyPrompt
-      iconType="faceHappy"
-      data-test-subj="noDeprecationsPrompt"
-      title={<h2>{i18nTexts.emptyPromptTitle}</h2>}
-      body={
-        <>
-          <p data-test-subj="upgradeAssistantIssueSummary">
-            {i18nTexts.getEmptyPromptDescription(deprecationType)}
-          </p>
-          <p>{i18nTexts.getEmptyPromptNextStepsDescription(navigateToOverviewPage)}</p>
-        </>
-      }
-    />
+    <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiEmptyPrompt
+        iconType="faceHappy"
+        data-test-subj="noDeprecationsPrompt"
+        title={<h2>{i18nTexts.emptyPromptTitle}</h2>}
+        body={
+          <>
+            <p data-test-subj="upgradeAssistantIssueSummary">
+              {i18nTexts.getEmptyPromptDescription(deprecationType)}
+            </p>
+            <p>{i18nTexts.getEmptyPromptNextStepsDescription(navigateToOverviewPage)}</p>
+          </>
+        }
+      />
+    </EuiPageContent>
   );
 };
