@@ -734,7 +734,6 @@ function generateResults(
         relation: 'eq',
       },
       max_score: 100,
-      // @ts-expect-error not full interface
       hits,
     },
   };

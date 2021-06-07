@@ -84,7 +84,6 @@ export const generateArtifactEsGetSingleHitMock = (): SearchHit<ArtifactElastics
     created,
   };
 
-  // @ts-expect-error not full interface
   return {
     _index: '.fleet-artifacts_1',
     _id: id,
