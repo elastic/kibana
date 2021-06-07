@@ -73,7 +73,9 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                     }}
                     inputValidationResults={
                       validationResults!.inputs![
-                        `${policyTemplate.name}-${packagePolicyInput.type}`
+                        hasIntegrations
+                          ? `${policyTemplate.name}-${packagePolicyInput.type}`
+                          : packagePolicyInput.type
                       ]
                     }
                     forceShowErrors={submitAttempted}
