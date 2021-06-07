@@ -6,8 +6,8 @@
  */
 
 import { TestBed } from '@kbn/test/jest';
+import { Phase } from '../../../../common/types';
 import { createFormSetValueAction } from './form_set_value_action';
-import { Phase } from '../types';
 
 export const createMinAgeActions = (testBed: TestBed, phase: Phase) => {
   const { exists } = testBed;
