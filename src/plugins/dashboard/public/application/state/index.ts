@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { getSampleDashboardInput, getSampleDashboardPanel } from './get_sample_dashboard_input';
-export { getSavedDashboardMock } from './get_saved_dashboard_mock';
-export { makeDefaultServices } from './make_default_services';
+export * from './dashboard_state_slice';
+
+export { dashboardStateStore } from './dashboard_state_store';
+export { useDashboardDispatch, useDashboardSelector } from './dashboard_state_hooks';
