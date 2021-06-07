@@ -8,7 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSelect, EuiSpacer, EuiText, EuiButtonEmpty } from '@elastic/eui';
+import { EuiSelect, EuiSpacer, EuiText } from '@elastic/eui';
 
 import type { AgentPolicy } from '../../../../types';
 import { AgentPolicyPackageBadges } from '../agent_policy_package_badges';
@@ -29,11 +29,30 @@ type Props = {
     }
 );
 
+const resolveAgentId = (
+  agentPolicies?: AgentPolicy[],
+  selectedAgentId?: string
+): undefined | string => {
+  if (agentPolicies && agentPolicies.length && !selectedAgentId) {
+    if (agentPolicies.length === 1) {
+      return agentPolicies[0].id;
+    }
+
+    const defaultAgentPolicy = agentPolicies.find((agentPolicy) => agentPolicy.is_default);
+    if (defaultAgentPolicy) {
+      return defaultAgentPolicy.id;
+    }
+  }
+
+  return selectedAgentId;
+};
+
 export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
   const { withKeySelection, agentPolicies, onAgentPolicyChange, excludeFleetServer } = props;
   const onKeyChange = props.withKeySelection && props.onKeyChange;
-
-  const [selectedAgentId, setSelectedAgentId] = useState<undefined | string>();
+  const [selectedAgentId, setSelectedAgentId] = useState<undefined | string>(
+    () => resolveAgentId(agentPolicies, undefined) // no agent id selected yet
+  );
 
   useEffect(
     function triggerOnAgentPolicyChangeEffect() {
@@ -46,16 +65,9 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
 
   useEffect(
     function useDefaultAgentPolicyEffect() {
-      if (agentPolicies && agentPolicies.length && !selectedAgentId) {
-        if (agentPolicies.length === 1) {
-          setSelectedAgentId(agentPolicies[0].id);
-          return;
-        }
-
-        const defaultAgentPolicy = agentPolicies.find((agentPolicy) => agentPolicy.is_default);
-        if (defaultAgentPolicy) {
-          setSelectedAgentId(defaultAgentPolicy.id);
-        }
+      const resolvedId = resolveAgentId(agentPolicies, selectedAgentId);
+      if (resolvedId !== selectedAgentId) {
+        setSelectedAgentId(resolvedId);
       }
     },
     [agentPolicies, selectedAgentId]
@@ -92,10 +104,13 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
         />
       )}
       {withKeySelection && onKeyChange && (
-        <AdvancedAgentAuthenticationSettings
-          onKeyChange={onKeyChange}
-          agentPolicyId={selectedAgentId}
-        />
+        <>
+          <EuiSpacer />
+          <AdvancedAgentAuthenticationSettings
+            onKeyChange={onKeyChange}
+            agentPolicyId={selectedAgentId}
+          />
+        </>
       )}
     </>
   );

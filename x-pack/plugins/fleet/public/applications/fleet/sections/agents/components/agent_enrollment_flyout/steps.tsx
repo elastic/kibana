@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -60,12 +60,14 @@ export const AgentPolicySelectionStep = ({
   setIsFleetServerPolicySelected?: (selected: boolean) => void;
   excludeFleetServer?: boolean;
 }) => {
-  const regularAgentPolicies = Array.isArray(agentPolicies)
-    ? agentPolicies.filter(
-        (policy) =>
-          policy && !policy.is_managed && (!excludeFleetServer || !policy.is_default_fleet_server)
-      )
-    : [];
+  const regularAgentPolicies = useMemo(() => {
+    return Array.isArray(agentPolicies)
+      ? agentPolicies.filter(
+          (policy) =>
+            policy && !policy.is_managed && (!excludeFleetServer || !policy.is_default_fleet_server)
+        )
+      : [];
+  }, [agentPolicies, excludeFleetServer]);
 
   const onAgentPolicyChange = useCallback(
     async (policyId?: string) => {
