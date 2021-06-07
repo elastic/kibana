@@ -202,9 +202,16 @@ export function LayerPanel(
     setNextFocusedButtonId,
   ]);
 
+  const isDimensionPanelOpen = Boolean(activeId);
+
   return (
     <>
-      <section tabIndex={-1} ref={registerLayerRef} className="lnsLayerPanel">
+      <section
+        tabIndex={-1}
+        ref={registerLayerRef}
+        className="lnsLayerPanel"
+        style={{ visibility: isDimensionPanelOpen ? 'hidden' : 'visible' }}
+      >
         <EuiPanel data-test-subj={`lns-layerPanel-${layerIndex}`} paddingSize="s">
           <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
             <EuiFlexItem grow={false} className="lnsLayerPanel__settingsFlexItem">
@@ -412,7 +419,7 @@ export function LayerPanel(
 
       <DimensionContainer
         panelRef={(el) => (panelRef.current = el)}
-        isOpen={!!activeId}
+        isOpen={isDimensionPanelOpen}
         isFullscreen={isFullscreen}
         groupLabel={activeGroup?.groupLabel || ''}
         handleClose={() => {

@@ -170,44 +170,42 @@ export function FormulaEditor({
           }
         }
 
-        const markers = errors
-          .flatMap((innerError) => {
-            if (innerError.locations.length) {
-              return innerError.locations.map((location) => {
-                const startPosition = offsetToRowColumn(text, location.min);
-                const endPosition = offsetToRowColumn(text, location.max);
-                return {
-                  message: innerError.message,
-                  startColumn: startPosition.column + 1,
-                  startLineNumber: startPosition.lineNumber,
-                  endColumn: endPosition.column + 1,
-                  endLineNumber: endPosition.lineNumber,
-                  severity:
-                    innerError.severity === 'warning'
-                      ? monaco.MarkerSeverity.Warning
-                      : monaco.MarkerSeverity.Error,
-                };
-              });
-            } else {
-              // Parse errors return no location info
-              const startPosition = offsetToRowColumn(text, 0);
-              const endPosition = offsetToRowColumn(text, text.length - 1);
-              return [
-                {
-                  message: innerError.message,
-                  startColumn: startPosition.column + 1,
-                  startLineNumber: startPosition.lineNumber,
-                  endColumn: endPosition.column + 1,
-                  endLineNumber: endPosition.lineNumber,
-                  severity:
-                    innerError.severity === 'warning'
-                      ? monaco.MarkerSeverity.Warning
-                      : monaco.MarkerSeverity.Error,
-                },
-              ];
-            }
-          })
-          .filter((marker) => marker);
+        const markers = errors.flatMap((innerError) => {
+          if (innerError.locations.length) {
+            return innerError.locations.map((location) => {
+              const startPosition = offsetToRowColumn(text, location.min);
+              const endPosition = offsetToRowColumn(text, location.max);
+              return {
+                message: innerError.message,
+                startColumn: startPosition.column + 1,
+                startLineNumber: startPosition.lineNumber,
+                endColumn: endPosition.column + 1,
+                endLineNumber: endPosition.lineNumber,
+                severity:
+                  innerError.severity === 'warning'
+                    ? monaco.MarkerSeverity.Warning
+                    : monaco.MarkerSeverity.Error,
+              };
+            });
+          } else {
+            // Parse errors return no location info
+            const startPosition = offsetToRowColumn(text, 0);
+            const endPosition = offsetToRowColumn(text, text.length - 1);
+            return [
+              {
+                message: innerError.message,
+                startColumn: startPosition.column + 1,
+                startLineNumber: startPosition.lineNumber,
+                endColumn: endPosition.column + 1,
+                endLineNumber: endPosition.lineNumber,
+                severity:
+                  innerError.severity === 'warning'
+                    ? monaco.MarkerSeverity.Warning
+                    : monaco.MarkerSeverity.Error,
+              },
+            ];
+          }
+        });
 
         monaco.editor.setModelMarkers(editorModel.current, 'LENS', markers);
         setWarnings(markers.map(({ severity, message }) => ({ severity, message })));

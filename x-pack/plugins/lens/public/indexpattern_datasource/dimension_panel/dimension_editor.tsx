@@ -157,11 +157,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const possibleOperations = useMemo(() => {
     return Object.values(operationDefinitionMap)
       .filter(({ hidden }) => !hidden)
+      .filter(({ type }) => fieldByOperation[type]?.size || operationWithoutField.has(type))
       .sort((op1, op2) => {
         return op1.displayName.localeCompare(op2.displayName);
       })
-      .map((def) => def.type)
-      .filter((type) => fieldByOperation[type]?.size || operationWithoutField.has(type));
+      .map((def) => def.type);
   }, [fieldByOperation, operationWithoutField]);
 
   const [filterByOpenInitially, setFilterByOpenInitally] = useState(false);
