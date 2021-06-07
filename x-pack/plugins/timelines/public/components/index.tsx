@@ -27,7 +27,6 @@ type TGridComponent = TGridProps & {
 };
 
 export const TGrid = (props: TGridComponent) => {
-  console.log('TGrid');
   const { store, storage, ...tGridProps } = props;
   let tGridStore = store;
   if (!tGridStore && props.type === 'standalone') {

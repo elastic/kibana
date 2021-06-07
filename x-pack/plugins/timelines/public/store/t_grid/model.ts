@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiDataGridColumn } from '@elastic/eui';
-import { Filter, FilterManager } from '../../../../../../src/plugins/data/public';
-import { TimelineNonEcsData } from '../../../common/search_strategy';
-import {
+import type { EuiDataGridColumn } from '@elastic/eui';
+import type { Filter, FilterManager } from '../../../../../../src/plugins/data/public';
+import type { TimelineNonEcsData } from '../../../common/search_strategy';
+import type {
   ColumnHeaderOptions,
-  RowRendererId,
   TimelineExpandedDetail,
   SortColumnTimeline,
   SerializedFilterQuery,
 } from '../../../common/types/timeline';
+import { RowRendererId } from '../../../common/types/timeline';
 
 export interface TGridModel {
   /** The columns displayed in the timeline */

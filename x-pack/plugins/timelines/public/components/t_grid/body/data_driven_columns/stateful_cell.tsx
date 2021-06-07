@@ -6,12 +6,12 @@
  */
 
 import React, { HTMLAttributes, useState } from 'react';
-import { TimelineNonEcsData } from '../../../../../common/search_strategy';
-import {
+import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
+import type {
   CellValueElementProps,
   ColumnHeaderOptions,
-  TimelineTabs,
 } from '../../../../../common/types/timeline';
+import { TimelineTabs } from '../../../../../common/types/timeline';
 
 export interface CommonProps {
   className?: string;

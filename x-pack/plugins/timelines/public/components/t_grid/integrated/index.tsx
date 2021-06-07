@@ -11,18 +11,18 @@ import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { Direction, DocValueFields } from '../../../../common/search_strategy';
-import { CoreStart } from '../../../../../../../src/core/public';
-import { BrowserFields } from '../../../../common/search_strategy/index_fields';
-import {
+import { Direction } from '../../../../common/search_strategy';
+import type { DocValueFields } from '../../../../common/search_strategy';
+import type { CoreStart } from '../../../../../../../src/core/public';
+import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
+import type {
   CellValueElementProps,
   ColumnHeaderOptions,
   ControlColumnProps,
   DataProvider,
   RowRenderer,
-  TimelineId,
-  TimelineTabs,
 } from '../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import {
   esQuery,
   Filter,

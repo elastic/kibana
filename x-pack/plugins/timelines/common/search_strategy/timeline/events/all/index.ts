@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
-import { Ecs } from '../../../../ecs';
-import { CursorType, Inspect, Maybe, PaginationInputPaginated } from '../../../common';
-import { TimelineRequestOptionsPaginated } from '../..';
+import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
+import type { Ecs } from '../../../../ecs';
+import type { CursorType, Inspect, Maybe, PaginationInputPaginated } from '../../../common';
+import type { TimelineRequestOptionsPaginated } from '../..';
 
 export interface TimelineEdges {
   node: TimelineItem;

@@ -29,27 +29,14 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 SRC_DEPS = [
-  "//packages/kbn-i18n",
-  "@npm//tslib",
-  "@npm//d3",
   "@npm//lodash",
-  "@npm//react",
-  "@npm//react-beautiful-dnd",
-  "@npm//@elastic/eui",
-  "@npm//react-intl",
-  "@npm//polished",
-  "@npm//styled-components",
+  "@npm//tslib",
 ]
 
 TYPES_DEPS = [
   "@npm//@types/jest",
   "@npm//@types/lodash",
   "@npm//@types/node",
-  "@npm//@types/d3",
-  "@npm//@types/react",
-  "@npm//@types/react-beautiful-dnd",
-  "@npm//@types/react-intl",
-  "@npm//@types/styled-components",
 ]
 
 DEPS = SRC_DEPS + TYPES_DEPS

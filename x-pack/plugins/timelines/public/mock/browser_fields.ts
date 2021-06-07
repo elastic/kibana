@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DocValueFields } from '../../common/search_strategy';
-import { BrowserFields } from '../../common/search_strategy/index_fields';
+import type { DocValueFields } from '../../common/search_strategy';
+import type { BrowserFields } from '../../common/search_strategy/index_fields';
 
 const DEFAULT_INDEX_PATTERN = [
   'apm-*-transaction*',

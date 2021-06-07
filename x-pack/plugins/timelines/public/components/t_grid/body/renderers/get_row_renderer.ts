@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Ecs } from '../../../../../common/ecs';
-import { RowRenderer } from '../../../../../common/types/timeline';
+import type { Ecs } from '../../../../../common/ecs';
+import type { RowRenderer } from '../../../../../common/types/timeline';
 
 export const getRowRenderer = (ecs: Ecs, rowRenderers: RowRenderer[]): RowRenderer | null =>
   rowRenderers.find((rowRenderer) => rowRenderer.isInstance(ecs)) ?? null;

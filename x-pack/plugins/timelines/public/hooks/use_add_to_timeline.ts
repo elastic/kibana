@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import d3 from 'd3';
+import { range } from 'd3-array';
+import { interpolate } from 'd3-interpolate';
 import { useCallback } from 'react';
-import { DraggableId, FluidDragActions, Position, SensorAPI } from 'react-beautiful-dnd';
+import type { DraggableId, FluidDragActions, Position, SensorAPI } from 'react-beautiful-dnd';
 
 import {
   EMPTY_PROVIDERS_GROUP_CLASS_NAME,
@@ -173,9 +173,9 @@ export const useAddToTimeline = ({
 
       if (draggableCoordinate != null && dropTargetCoordinate != null && preDrag != null) {
         const steps = 10;
-        const points = d3.range(steps + 1).map((i) => ({
-          x: d3.interpolate(draggableCoordinate.x, dropTargetCoordinate.x)(i * 0.1),
-          y: d3.interpolate(draggableCoordinate.y, dropTargetCoordinate.y)(i * 0.1),
+        const points = range(steps + 1).map((i) => ({
+          x: interpolate(draggableCoordinate.x, dropTargetCoordinate.x)(i * 0.1),
+          y: interpolate(draggableCoordinate.y, dropTargetCoordinate.y)(i * 0.1),
         }));
 
         const drag = preDrag.fluidLift(draggableCoordinate);
@@ -188,6 +188,7 @@ export const useAddToTimeline = ({
         document.body.classList.remove(IS_DRAGGING_CLASS_NAME); // it was not possible to perform a drag and drop
       }
     }, 0);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [_sensorApiSingleton, draggableId]);
 

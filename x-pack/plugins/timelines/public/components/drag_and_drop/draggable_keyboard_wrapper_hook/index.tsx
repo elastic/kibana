@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { FluidDragActions } from 'react-beautiful-dnd';
+import type { FluidDragActions } from 'react-beautiful-dnd';
 
 import { useAddToTimeline } from '../../../hooks/use_add_to_timeline';
 

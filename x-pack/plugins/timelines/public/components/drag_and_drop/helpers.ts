@@ -5,17 +5,12 @@
  * 2.0.
  */
 
-import { DropResult, FluidDragActions, Position } from 'react-beautiful-dnd';
+import type { DropResult, FluidDragActions, Position } from 'react-beautiful-dnd';
 import { KEYBOARD_DRAG_OFFSET } from '@kbn/securitysolution-t-grid';
 import { Dispatch } from 'redux';
 import { isString, keyBy } from 'lodash/fp';
-import {
-  BrowserField,
-  BrowserFields,
-  ColumnHeaderOptions,
-  stopPropagationAndPreventDefault,
-  TimelineId,
-} from '../../../common';
+import type { BrowserField, BrowserFields, ColumnHeaderOptions } from '../../../common';
+import { stopPropagationAndPreventDefault, TimelineId } from '../../../common';
 import { tGridActions } from '../../store/t_grid';
 import { getFieldIdFromDraggable } from '../../../common/types/drag_and_drop';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../t_grid/body/constants';

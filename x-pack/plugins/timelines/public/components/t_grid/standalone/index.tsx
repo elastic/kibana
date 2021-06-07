@@ -12,16 +12,16 @@ import { useDispatch } from 'react-redux';
 
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { Direction } from '../../../../common/search_strategy';
-import { CoreStart } from '../../../../../../../src/core/public';
-import {
+import type { CoreStart } from '../../../../../../../src/core/public';
+import type {
   CellValueElementProps,
   ColumnHeaderOptions,
   ControlColumnProps,
   DataProvider,
   RowRenderer,
   SortColumnTimeline,
-  TimelineTabs,
 } from '../../../../common/types/timeline';
+import { TimelineTabs } from '../../../../common/types/timeline';
 import { esQuery, Filter, Query } from '../../../../../../../src/plugins/data/public';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { Refetch } from '../../../store/t_grid/inputs';

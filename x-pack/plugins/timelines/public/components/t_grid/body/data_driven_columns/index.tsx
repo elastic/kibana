@@ -22,17 +22,17 @@ import {
 
 import { StatefulCell } from './stateful_cell';
 import * as i18n from './translations';
-import {
+import type {
   ActionProps,
   CellValueElementProps,
   ColumnHeaderOptions,
   ControlColumnProps,
   RowCellRender,
-  TimelineTabs,
 } from '../../../../../common/types/timeline';
-import { TimelineNonEcsData } from '../../../../../common/search_strategy';
+import { TimelineTabs } from '../../../../../common/types/timeline';
+import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { ARIA_COLUMN_INDEX_OFFSET } from '../../helpers';
-import { Ecs } from '../../../../../common/ecs';
+import type { Ecs } from '../../../../../common/ecs';
 
 interface CellProps {
   _id: string;

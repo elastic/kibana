@@ -7,10 +7,10 @@
 
 import { EuiButtonIcon } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { ColumnHeaderOptions } from '../../../../../../common/types/timeline';
+import type { ColumnHeaderOptions } from '../../../../../../common/types/timeline';
 import { EventsHeadingExtra, EventsLoading } from '../../../styles';
-import { OnColumnRemoved } from '../../../types';
-import { Sort } from '../../sort';
+import type { OnColumnRemoved } from '../../../types';
+import type { Sort } from '../../sort';
 
 import * as i18n from '../translations';
 

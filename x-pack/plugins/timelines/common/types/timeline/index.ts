@@ -7,7 +7,6 @@
 
 import * as runtimeTypes from 'io-ts';
 
-import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 import { stringEnum, unionWithNullType } from '../../utility_types';
 import { NoteResult, NoteSavedObject, NoteSavedObjectToReturnRuntimeType } from './note';
 import {
@@ -27,7 +26,7 @@ export * from './store';
 const errorSchema = runtimeTypes.exact(
   runtimeTypes.type({
     error: runtimeTypes.type({
-      status_code: PositiveInteger,
+      status_code: runtimeTypes.number,
       message: runtimeTypes.string,
     }),
   })
@@ -444,9 +443,9 @@ export type NotesAndPinnedEventsByTimelineId = Record<
 export const importTimelineResultSchema = runtimeTypes.exact(
   runtimeTypes.type({
     success: runtimeTypes.boolean,
-    success_count: PositiveInteger,
-    timelines_installed: PositiveInteger,
-    timelines_updated: PositiveInteger,
+    success_count: runtimeTypes.number,
+    timelines_installed: runtimeTypes.number,
+    timelines_updated: runtimeTypes.number,
     errors: runtimeTypes.array(errorSchema),
   })
 );

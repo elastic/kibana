@@ -10,19 +10,16 @@ import { isEmpty } from 'lodash';
 
 import { EventsTbody } from '../../styles';
 import { StatefulEvent } from './stateful_event';
-import { BrowserFields } from '../../../../../common/search_strategy/index_fields';
-import {
+import type { BrowserFields } from '../../../../../common/search_strategy/index_fields';
+import type {
   CellValueElementProps,
   ColumnHeaderOptions,
   ControlColumnProps,
   OnRowSelected,
   RowRenderer,
-  TimelineTabs,
 } from '../../../../../common/types/timeline';
-import {
-  TimelineItem,
-  TimelineNonEcsData,
-} from '../../../../../common/search_strategy';
+import { TimelineTabs } from '../../../../../common/types/timeline';
+import { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 
 /** This offset begins at two, because the header row counts as "row 1", and aria-rowindex starts at "1" */
 const ARIA_ROW_INDEX_OFFSET = 2;

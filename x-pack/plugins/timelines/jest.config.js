@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-export type {
-  OnColumnSorted,
-  OnColumnsSorted,
-  OnColumnRemoved,
-  OnColumnResized,
-  OnChangePage,
-  OnRowSelected,
-  OnSelectAll,
-  OnUpdateColumns,
-} from '../../../common/types/timeline';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../..',
+  roots: ['<rootDir>/x-pack/plugins/timelines'],
+};

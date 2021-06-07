@@ -9,11 +9,12 @@ import { Store } from 'redux';
 
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { CoreSetup, Plugin, PluginInitializerContext } from '../../../../src/core/public';
-import { TimelinesUIStart, TGridProps } from './types';
+import type { TimelinesUIStart, TGridProps } from './types';
 import { getLastUpdatedLazy, getLoadingPanelLazy, getTGridLazy } from './methods';
-import { useAddToTimeline, useAddToTimelineSensor } from './hooks/use_add_to_timeline';
-import { LastUpdatedAtProps, LoadingPanelProps, useDraggableKeyboardWrapper } from './components';
+import type { LastUpdatedAtProps, LoadingPanelProps } from './components';
 import { tGridReducer } from './store/t_grid/reducer';
+import { useDraggableKeyboardWrapper } from './components/drag_and_drop/draggable_keyboard_wrapper_hook';
+import { useAddToTimeline, useAddToTimelineSensor } from './hooks/use_add_to_timeline';
 
 export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}

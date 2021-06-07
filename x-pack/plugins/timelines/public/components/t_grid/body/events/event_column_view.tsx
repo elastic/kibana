@@ -7,18 +7,18 @@
 
 import React, { useMemo } from 'react';
 
-import { OnRowSelected } from '../../types';
+import type { OnRowSelected } from '../../types';
 import { EventsTrData, EventsTdGroupActions } from '../../styles';
 import { DataDrivenColumns, getMappedNonEcsValue } from '../data_driven_columns';
-import {
+import type {
   CellValueElementProps,
   ColumnHeaderOptions,
   ControlColumnProps,
   RowCellRender,
-  TimelineTabs,
 } from '../../../../../common/types/timeline';
-import { TimelineNonEcsData } from '../../../../../common/search_strategy';
-import { Ecs } from '../../../../../common/ecs';
+import { TimelineTabs } from '../../../../../common/types/timeline';
+import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
+import type { Ecs } from '../../../../../common/ecs';
 
 interface Props {
   id: string;

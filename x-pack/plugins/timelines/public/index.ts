@@ -6,7 +6,7 @@
  */
 
 import { PluginInitializerContext } from '../../../../src/core/public';
-import './index.scss';
+
 import { TimelinesPlugin } from './plugin';
 
 export {

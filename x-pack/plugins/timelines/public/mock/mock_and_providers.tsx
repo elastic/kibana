@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  DataProvider,
-  DataProvidersAnd,
-  IS_OPERATOR,
-} from '../../common/types/timeline';
+import type { DataProvider, DataProvidersAnd } from '../../common/types/timeline';
+import { IS_OPERATOR } from '../../common/types/timeline';
 
 export const providerA: DataProvidersAnd = {
   enabled: true,

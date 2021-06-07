@@ -12,11 +12,11 @@ import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import type { TGridProps } from '../types';
 import { LastUpdatedAtProps, LoadingPanelProps } from '../components';
 
+const TimelineLazy = lazy(() => import('../components'));
 export const getTGridLazy = (
   props: TGridProps,
   { store, storage }: { store?: Store; storage: Storage }
 ) => {
-  const TimelineLazy = lazy(() => import('../components'));
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <TimelineLazy {...props} store={store} storage={storage} />
@@ -24,8 +24,8 @@ export const getTGridLazy = (
   );
 };
 
+const LastUpdatedLazy = lazy(() => import('../components/last_updated'));
 export const getLastUpdatedLazy = (props: LastUpdatedAtProps) => {
-  const LastUpdatedLazy = lazy(() => import('../components/last_updated'));
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <LastUpdatedLazy {...props} />
@@ -33,8 +33,8 @@ export const getLastUpdatedLazy = (props: LastUpdatedAtProps) => {
   );
 };
 
+const LoadingPanelLazy = lazy(() => import('../components/loading'));
 export const getLoadingPanelLazy = (props: LoadingPanelProps) => {
-  const LoadingPanelLazy = lazy(() => import('../components/loading'));
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <LoadingPanelLazy {...props} />

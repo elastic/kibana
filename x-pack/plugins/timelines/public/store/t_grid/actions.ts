@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
 import actionCreatorFactory from 'typescript-fsa';
-import { FilterManager } from '../../../../../../src/plugins/data/public';
-import { TimelineNonEcsData } from '../../../common/search_strategy';
-import {
+import type { FilterManager } from '../../../../../../src/plugins/data/public';
+import type { TimelineNonEcsData } from '../../../common/search_strategy';
+import type {
   ColumnHeaderOptions,
   SortColumnTimeline,
   TimelineExpandedDetailType,
   TGridPersistInput,
-  TimelineTabs,
 } from '../../../common/types/timeline';
+import { TimelineTabs } from '../../../common/types/timeline';
 
 const actionCreator = actionCreatorFactory('x-pack/timelines/t-grid');
 

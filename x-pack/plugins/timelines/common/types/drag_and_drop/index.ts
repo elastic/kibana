@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DropResult } from 'react-beautiful-dnd';
+import type { DropResult } from 'react-beautiful-dnd';
 
 export const draggableIdPrefix = 'draggableId';
 

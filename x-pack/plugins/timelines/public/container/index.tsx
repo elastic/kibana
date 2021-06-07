@@ -18,22 +18,22 @@ import {
   isErrorResponse,
 } from '../../../../../src/plugins/data/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import {
-  Direction,
+
+import { Direction } from '../../common/search_strategy';
+import type {
   DocValueFields,
-  TimelineFactoryQueryTypes,
   Inspect,
   PaginationInputPaginated,
   TimelineStrategyResponseType,
   TimelineEdges,
   TimelineEventsAllRequestOptions,
   TimelineEventsAllStrategyResponse,
-  TimelineEventsQueries,
   TimelineItem,
   TimelineRequestSortField,
 } from '../../common/search_strategy';
-import { ESQuery } from '../../common/typed_json';
-import { KueryFilterQueryKind } from '../../common/types/timeline';
+import { TimelineFactoryQueryTypes, TimelineEventsQueries } from '../../common/search_strategy';
+import type { ESQuery } from '../../common/typed_json';
+import type { KueryFilterQueryKind } from '../../common/types/timeline';
 import { useAppToasts } from '../hooks/use_app_toasts';
 import { TimelineId } from '../store/t_grid/types';
 import * as i18n from './translations';

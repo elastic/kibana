@@ -6,7 +6,7 @@
  */
 
 import { ReactElement } from 'react';
-import { SensorAPI } from 'react-beautiful-dnd';
+import type { SensorAPI } from 'react-beautiful-dnd';
 import { Store } from 'redux';
 import type {
   LastUpdatedAtProps,

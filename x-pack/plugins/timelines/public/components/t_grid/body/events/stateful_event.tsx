@@ -10,23 +10,23 @@ import { useDispatch } from 'react-redux';
 
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
 import { EventsTrGroup, EventsTrSupplement } from '../../styles';
-import { OnRowSelected } from '../../types';
+import type { OnRowSelected } from '../../types';
 import { isEventBuildingBlockType, getEventType, isEvenEqlSequence } from '../helpers';
 import { EventColumnView } from './event_column_view';
 import { getRowRenderer } from '../renderers/get_row_renderer';
 import { StatefulRowRenderer } from './stateful_row_renderer';
 import { getMappedNonEcsValue } from '../data_driven_columns';
 import { StatefulEventContext } from './stateful_event_context';
-import { BrowserFields } from '../../../../../common/search_strategy/index_fields';
-import {
+import type { BrowserFields } from '../../../../../common/search_strategy/index_fields';
+import type {
   CellValueElementProps,
   ColumnHeaderOptions,
   ControlColumnProps,
   RowRenderer,
   TimelineExpandedDetailType,
-  TimelineTabs,
 } from '../../../../../common/types/timeline';
-import { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
+import { TimelineTabs } from '../../../../../common/types/timeline';
+import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { tGridActions, tGridSelectors } from '../../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../../hooks/use_selector';
 

@@ -7,17 +7,17 @@
 
 import { omit, union } from 'lodash/fp';
 
-import { ToggleDetailPanel } from './actions';
+import type { ToggleDetailPanel } from './actions';
 import { TimelineById, TimelineId } from './types';
-import { TGridModel } from './model';
+import type { TGridModel } from './model';
 
-import {
+import type {
   ColumnHeaderOptions,
-  RowRendererId,
   SerializedFilterQuery,
   SortColumnTimeline,
   TimelineExpandedDetail,
 } from '../../../common/types/timeline';
+import type { RowRendererId } from '../../../common/types/timeline';
 import { getTGridManageDefaults, tGridDefaults } from './defaults';
 import { Filter } from '../../../../../../src/plugins/data/public';
 

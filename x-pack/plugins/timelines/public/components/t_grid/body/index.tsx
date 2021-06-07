@@ -18,16 +18,14 @@ import {
   onKeyDownFocusHandler,
 } from '../../../../common';
 import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
-import {
+import type {
   CellValueElementProps,
   ColumnHeaderOptions,
   ControlColumnProps,
   RowRenderer,
-  RowRendererId,
-  TimelineId,
-  TimelineTabs,
 } from '../../../../common/types/timeline';
-import { TimelineItem } from '../../../../common/search_strategy/timeline';
+import { RowRendererId, TimelineId, TimelineTabs } from '../../../../common/types/timeline';
+import type { TimelineItem } from '../../../../common/search_strategy/timeline';
 
 import { getActionsColumnWidth, getColumnHeaders } from './column_headers/helpers';
 import { getEventIdToDataMapping } from './helpers';

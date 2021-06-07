@@ -6,12 +6,12 @@
  */
 
 import { Direction } from '../../../common/search_strategy';
-import { ColumnHeaderOptions, ColumnHeaderType } from '../../../common/types/timeline';
+import type { ColumnHeaderOptions, ColumnHeaderType } from '../../../common/types/timeline';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
 } from '../../components/t_grid/body/constants';
-import { SubsetTGridModel } from './model';
+import type { SubsetTGridModel } from './model';
 import * as i18n from './translations';
 
 export const defaultColumnHeaderType: ColumnHeaderType = 'not-filtered';

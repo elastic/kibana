@@ -13,7 +13,6 @@ import { TGridStandalone } from './t_grid/standalone';
 
 export const TGrid = (props: TGridProps) => {
   const { type, ...componentsProps } = props;
-  console.log('TGridIntegrated ', type);
   if (type === 'standalone') {
     return <TGridStandalone {...componentsProps} />;
   } else if (type === 'embedded') {

@@ -14,19 +14,15 @@ import {
   handleSkipFocus,
   stopPropagationAndPreventDefault,
 } from '../../../common';
-import {
+import type {
   EsQueryConfig,
   Filter,
   IIndexPattern,
   Query,
 } from '../../../../../../src/plugins/data/public';
-import { BrowserFields } from '../../../common/search_strategy/index_fields';
-import {
-  DataProvider,
-  DataProvidersAnd,
-  DataProviderType,
-  EXISTS_OPERATOR,
-} from '../../../common/types/timeline';
+import type { BrowserFields } from '../../../common/search_strategy/index_fields';
+import type { DataProvider, DataProvidersAnd } from '../../../common/types/timeline';
+import { DataProviderType, EXISTS_OPERATOR } from '../../../common/types/timeline';
 import { convertToBuildEsQuery, escapeQueryValue } from '../utils/keury';
 
 import { EVENTS_TABLE_CLASS_NAME } from './styles';

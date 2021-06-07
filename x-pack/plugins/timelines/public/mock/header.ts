@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ColumnHeaderOptions } from '../../common/types/timeline';
+import type { ColumnHeaderOptions } from '../../common/types/timeline';
 import { defaultColumnHeaderType } from '../components/t_grid/body/column_headers/default_headers';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,

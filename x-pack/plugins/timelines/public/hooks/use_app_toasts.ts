@@ -7,12 +7,8 @@
 
 import { useCallback, useRef } from 'react';
 import { isString } from 'lodash/fp';
-import {
-  AppError,
-  isAppError,
-  isKibanaError,
-  isSecurityAppError,
-} from '@kbn/securitysolution-t-grid';
+import type { AppError } from '@kbn/securitysolution-t-grid';
+import { isAppError, isKibanaError, isSecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import {
   ErrorToastOptions,

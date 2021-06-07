@@ -6,13 +6,8 @@
  */
 
 import React, { useCallback, useState, useMemo } from 'react';
-import {
-  focusColumn,
-  isArrowDownOrArrowUp,
-  isArrowUp,
-  isEscape,
-  OnColumnFocused,
-} from '../../../../../../common';
+import { focusColumn, isArrowDownOrArrowUp, isArrowUp, isEscape } from '../../../../../../common';
+import type { OnColumnFocused } from '../../../../../../common';
 
 type FocusOwnership = 'not-owned' | 'owned';
 
