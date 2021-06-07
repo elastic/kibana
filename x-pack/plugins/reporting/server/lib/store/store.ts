@@ -11,7 +11,6 @@ import { ReportingCore } from '../../';
 import { indexTimestamp } from './index_timestamp';
 import { mapping } from './mapping';
 import { Report } from './report';
-import { reportingIlmPolicy } from './report_ilm_policy';
 
 const checkReportIsEditable = (report: Report) => {
   if (!report._id || !report._index) {
@@ -53,22 +52,19 @@ export class ReportingStore {
       return exists;
     }
 
+    const indexSettings = {
+      number_of_shards: 1,
+      auto_expand_replicas: '0-1',
+    };
+    const body = {
+      settings: indexSettings,
+      mappings: {
+        properties: mapping,
+      },
+    };
+
     try {
-      await client.indices.create({
-        index: indexName,
-        body: {
-          settings: {
-            number_of_shards: 1,
-            auto_expand_replicas: '0-1',
-            lifecycle: {
-              name: this.ilmPolicyName,
-            },
-          },
-          mappings: {
-            properties: mapping,
-          },
-        },
-      });
+      await client.indices.create({ index: indexName, body });
 
       return true;
     } catch (error) {
@@ -113,44 +109,6 @@ export class ReportingStore {
     const client = await this.getClient();
 
     return client.indices.refresh({ index });
-  }
-
-  private readonly ilmPolicyName = 'kibana-reporting';
-
-  private async doesIlmPolicyExist(): Promise<boolean> {
-    const client = await this.getClient();
-    try {
-      await client.ilm.getLifecycle({ policy: this.ilmPolicyName });
-      return true;
-    } catch (e) {
-      if (e.statusCode === 404) {
-        return false;
-      }
-      throw e;
-    }
-  }
-
-  /**
-   * Function to be called during plugin start phase. This ensures the environment is correctly
-   * configured for storage of reports.
-   */
-  public async start() {
-    const client = await this.getClient();
-    try {
-      if (await this.doesIlmPolicyExist()) {
-        this.logger.debug(`Found ILM policy ${this.ilmPolicyName}; skipping creation.`);
-        return;
-      }
-      this.logger.info(`Creating ILM policy for managing reporting indices: ${this.ilmPolicyName}`);
-      await client.ilm.putLifecycle({
-        policy: this.ilmPolicyName,
-        body: reportingIlmPolicy,
-      });
-    } catch (e) {
-      this.logger.error('Error in start phase');
-      this.logger.error(e.body.error);
-      throw e;
-    }
   }
 
   public async addReport(report: Report): Promise<Report> {
