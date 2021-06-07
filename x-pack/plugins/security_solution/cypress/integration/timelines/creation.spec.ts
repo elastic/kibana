@@ -37,7 +37,6 @@ import {
   markAsFavorite,
   pinFirstEvent,
   populateTimeline,
-  waitForTimelineChanges,
 } from '../../tasks/timeline';
 
 import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL } from '../../urls/navigation';
@@ -111,8 +110,11 @@ describe('Timelines', (): void => {
     });
 
     it('can be marked as favorite', () => {
+      cy.intercept('PATCH', '/api/timeline/_favorite').as('updateTimeline');
+
       markAsFavorite();
-      waitForTimelineChanges();
+      cy.wait('@updateTimeline', { timeout: 10000 }).its('response.statusCode').should('eq', 200);
+
       cy.get(FAVORITE_TIMELINE).should('have.text', 'Remove from favorites');
       cy.visit(OVERVIEW_URL);
       cy.get(OVERVIEW_REVENT_TIMELINES).should('contain', timeline.title);
