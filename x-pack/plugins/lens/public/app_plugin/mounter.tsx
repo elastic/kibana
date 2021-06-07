@@ -334,6 +334,7 @@ export function loadDocument(
           })
         );
       }
+      redirectCallback();
     },
     () => {
       lensStore.dispatch(

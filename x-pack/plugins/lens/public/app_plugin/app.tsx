@@ -213,35 +213,33 @@ export function App({
   ]);
 
   const runSave = (saveProps: SaveProps, options: { saveToLibrary: boolean }) => {
-    if (lastKnownDoc) {
-      return runSaveLensVisualization(
-        {
-          lastKnownDoc,
-          getIsByValueMode,
-          savedObjectsTagging,
-          initialInput,
-          redirectToDashboard,
-          redirectToOrigin,
-          persistedDoc: appState.persistedDoc,
-          onAppLeave,
-          redirectTo,
-          ...lensAppServices,
-        },
-        saveProps,
-        options
-      ).then(
-        (newState) => {
-          if (newState) {
-            dispatchSetState(newState);
-            setIsSaveModalVisible(false);
-          }
-        },
-        () => {
-          // error is handled inside the modal
-          // so ignoring it here
+    return runSaveLensVisualization(
+      {
+        lastKnownDoc,
+        getIsByValueMode,
+        savedObjectsTagging,
+        initialInput,
+        redirectToDashboard,
+        redirectToOrigin,
+        persistedDoc: appState.persistedDoc,
+        onAppLeave,
+        redirectTo,
+        ...lensAppServices,
+      },
+      saveProps,
+      options
+    ).then(
+      (newState) => {
+        if (newState) {
+          dispatchSetState(newState);
+          setIsSaveModalVisible(false);
         }
-      );
-    }
+      },
+      () => {
+        // error is handled inside the modal
+        // so ignoring it here
+      }
+    );
   };
 
   return (

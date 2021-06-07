@@ -152,7 +152,7 @@ export function SaveModalContainer({
 
 export const runSaveLensVisualization = async (
   props: {
-    lastKnownDoc: Document;
+    lastKnownDoc?: Document;
     getIsByValueMode: () => boolean;
     persistedDoc?: Document;
   } & ExtraProps &
@@ -160,6 +160,10 @@ export const runSaveLensVisualization = async (
   saveProps: SaveProps,
   options: { saveToLibrary: boolean }
 ): Promise<Partial<LensAppState> | undefined> => {
+  if (!props.lastKnownDoc) {
+    return;
+  }
+
   const {
     chrome,
     initialInput,
