@@ -84,19 +84,25 @@ function DefaultEditorControls({
                 </EuiButton>
               </EuiToolTip>
             ) : (
-              <EuiButton
-                data-test-subj="visualizeEditorRenderButton"
-                disabled={!isDirty}
-                fill
-                iconType="play"
-                onClick={applyChanges}
-                size="s"
+              <EuiToolTip
+                content={i18n.translate('visDefaultEditor.sidebar.updateButtonTooltip', {
+                  defaultMessage: 'You can also use Ctrl + Enter.',
+                })}
               >
-                <FormattedMessage
-                  id="visDefaultEditor.sidebar.updateChartButtonLabel"
-                  defaultMessage="Update"
-                />
-              </EuiButton>
+                <EuiButton
+                  data-test-subj="visualizeEditorRenderButton"
+                  disabled={!isDirty}
+                  fill
+                  iconType="play"
+                  onClick={applyChanges}
+                  size="s"
+                >
+                  <FormattedMessage
+                    id="visDefaultEditor.sidebar.updateChartButtonLabel"
+                    defaultMessage="Update"
+                  />
+                </EuiButton>
+              </EuiToolTip>
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
