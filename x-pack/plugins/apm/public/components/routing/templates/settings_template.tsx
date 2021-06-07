@@ -12,7 +12,7 @@ import { useHistory } from 'react-router-dom';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { getAPMHref } from '../../shared/Links/apm/APMLink';
 
-export function Settings({ children }: { children: ReactNode }) {
+export function SettingsTemplate({ children }: { children: ReactNode }) {
   const { core } = useApmPluginContext();
   const history = useHistory();
   const { basePath } = core.http;
@@ -30,7 +30,7 @@ export function Settings({ children }: { children: ReactNode }) {
   }
 
   return (
-    <EuiPage>
+    <EuiPage style={{ backgroundColor: 'white' }}>
       <EuiPageSideBar>
         <EuiSideNav
           toggleOpenOnMobile={() => toggleOpenOnMobile()}
