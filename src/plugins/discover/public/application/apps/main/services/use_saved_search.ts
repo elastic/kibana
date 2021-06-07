@@ -287,7 +287,7 @@ export const useSavedSearch = ({
         filter(() => refs.current.fetchStatus !== FetchStatus.LOADING)
       ),
       data.query.queryString.getUpdates$(),
-      searchSessionManager.newSearchSessionIdFromURL$
+      searchSessionManager.newSearchSessionIdFromURL$.pipe(filter((content) => !!content))
     ).pipe(debounceTime(100));
 
     const subscription = fetch$.subscribe((val) => {
