@@ -26,7 +26,11 @@ import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
 import { versionService } from './lib/version';
 import { createReindexWorker } from './routes/reindex_indices';
 import { registerRoutes } from './routes/register_routes';
-import { telemetrySavedObjectType, reindexOperationSavedObjectType } from './saved_object_types';
+import {
+  telemetrySavedObjectType,
+  reindexOperationSavedObjectType,
+  mlSavedObjectType,
+} from './saved_object_types';
 
 import { RouteDependencies } from './types';
 
@@ -69,6 +73,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
     savedObjects.registerType(reindexOperationSavedObjectType);
     savedObjects.registerType(telemetrySavedObjectType);
+    savedObjects.registerType(mlSavedObjectType);
 
     features.registerElasticsearchFeature({
       id: 'upgrade_assistant',

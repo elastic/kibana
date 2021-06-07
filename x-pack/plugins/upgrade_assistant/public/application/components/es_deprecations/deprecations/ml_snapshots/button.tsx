@@ -5,24 +5,38 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { EuiButton } from '@elastic/eui';
+import { ButtonSize, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { FixSnapshotsProvider } from './fix_snapshots_provider';
+import { FixSnapshotsFlyout } from './fix_snapshots_flyout';
+import { useAppContext } from '../../../../app_context';
+import { useSnapshotStatus } from './use_snapshot_state';
 
 const i18nTexts = {
   fixButtonLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.upgradeButtonLabel',
+    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.fixButtonLabel',
     {
       defaultMessage: 'Fix',
+    }
+  ),
+  upgradingButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.upgradingButtonLabel',
+    {
+      defaultMessage: 'Upgrading…',
     }
   ),
   doneButtonLabel: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.mlSnapshots.doneButtonLabel',
     {
       defaultMessage: 'Done',
+    }
+  ),
+  failedButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.failedButtonLabel',
+    {
+      defaultMessage: 'Failed',
     }
   ),
 };
@@ -38,22 +52,68 @@ export const FixMlSnapshotsButton: React.FunctionComponent<Props> = ({
   jobId,
   description,
 }) => {
+  const { api } = useAppContext();
+  const {
+    snapshotState,
+    upgradeSnapshot,
+    deleteSnapshot,
+    updateSnapshotStatus,
+  } = useSnapshotStatus({
+    jobId,
+    snapshotId,
+    api,
+  });
+
+  const [showFlyout, setShowFlyout] = useState(false);
+
+  useEffect(() => {
+    updateSnapshotStatus();
+  }, [updateSnapshotStatus]);
+
+  const commonButtonProps = {
+    size: 's' as ButtonSize,
+    onClick: () => setShowFlyout(true),
+    'data-test-subj': 'fixMlSnapshotsButton',
+  };
+  let button = <EuiButton {...commonButtonProps}>{i18nTexts.fixButtonLabel}</EuiButton>;
+
+  switch (snapshotState.status) {
+    case 'in_progress':
+      button = (
+        <EuiButton color="secondary" {...commonButtonProps} isLoading>
+          {i18nTexts.upgradingButtonLabel}
+        </EuiButton>
+      );
+      break;
+    case 'complete':
+      button = (
+        <EuiButton color="secondary" iconType="check" {...commonButtonProps} disabled>
+          {i18nTexts.doneButtonLabel}
+        </EuiButton>
+      );
+      break;
+    case 'error':
+      button = (
+        <EuiButton color="danger" iconType="cross" {...commonButtonProps}>
+          {i18nTexts.failedButtonLabel}
+        </EuiButton>
+      );
+      break;
+  }
+
   return (
-    <FixSnapshotsProvider>
-      {(fixSnapshotsPrompt, successfulRequests) => {
-        const isSuccessfulRequest = successfulRequests[snapshotId] === true;
-        return (
-          <EuiButton
-            size="s"
-            data-test-subj="fixMlSnapshotsButton"
-            onClick={() => fixSnapshotsPrompt({ snapshotId, jobId, description })}
-            isDisabled={isSuccessfulRequest}
-            iconType={isSuccessfulRequest ? 'check' : undefined}
-          >
-            {isSuccessfulRequest ? i18nTexts.doneButtonLabel : i18nTexts.fixButtonLabel}
-          </EuiButton>
-        );
-      }}
-    </FixSnapshotsProvider>
+    <>
+      {button}
+
+      {showFlyout && (
+        <FixSnapshotsFlyout
+          snapshotState={snapshotState}
+          upgradeSnapshot={upgradeSnapshot}
+          deleteSnapshot={deleteSnapshot}
+          description={description}
+          closeFlyout={() => setShowFlyout(false)}
+        />
+      )}
+    </>
   );
 };

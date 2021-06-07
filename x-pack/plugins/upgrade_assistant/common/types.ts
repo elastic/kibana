@@ -28,7 +28,6 @@ export enum ReindexStatus {
 }
 
 export const REINDEX_OP_TYPE = 'upgrade-assistant-reindex-operation';
-
 export interface QueueSettings extends SavedObjectAttributes {
   /**
    * A Unix timestamp of when the reindex operation was enqueued.
@@ -237,4 +236,13 @@ export interface ResolveIndexResponseFromES {
     indices: string[];
   }>;
   data_streams: Array<{ name: string; backing_indices: string[]; timestamp_field: string }>;
+}
+
+export const ML_UPGRADE_OP_TYPE = 'upgrade-assistant-ml-upgrade-operation';
+
+export interface MlOperation extends SavedObjectAttributes {
+  nodeId: string;
+  snapshotId: string;
+  jobId: string;
+  status: 'complete' | 'in_progress' | 'error';
 }
