@@ -24,12 +24,13 @@ Warsaw OR Venice OR Clear
 . From the list of *Available fields*, add `_score` and any other fields you want to the document table.
 . To sort the `_score` column in descending order, hover over its header, and then click twice on
 the arrow icon
-image:images/double-arrow.png[Double arrow icon to indicate sorting].
+image:images/double-arrow.png[Double arrow icon to indicate sorting] so it changes to
+image:images/downward-arrow.png[Downward pointing arrow to indicate descending sorting].
 +
-You're currently doing a multi-column search: first by `Time`, and then by `_score`.
+At this point, you're doing a multi-column sort: first by `Time`, and then by `_score`.
 . To turn off sorting for the `Time` field, hover over its header, and then click the down arrow.
 +
-Your table now shows documents with the best matches, from most to least relevant.
+Your table now sort documents from most to least relevant.
 +
 [role="screenshot"]
 image::images/discover-search-for-relevance.png["Example of a search for relevance"]
