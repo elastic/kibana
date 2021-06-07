@@ -110,7 +110,7 @@ export const configSchema = schema.object(
       }),
     }),
     ephemeral_tasks: schema.object({
-      enabled: schema.boolean({ defaultValue: true }),
+      enabled: schema.boolean({ defaultValue: false }),
     }),
   },
   {
