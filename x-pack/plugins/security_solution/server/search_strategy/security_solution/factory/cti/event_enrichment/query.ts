@@ -34,10 +34,12 @@ export const buildEventEnrichmentQuery: SecuritySolutionFactory<CtiQueries.event
 
   return {
     allowNoIndices: true,
-    index: defaultIndex,
     ignoreUnavailable: true,
+    index: defaultIndex,
     body: {
+      _source: false,
       ...(!isEmpty(docValueFields) && { docvalue_fields: docValueFields }),
+      fields: ['*'],
       query: {
         bool: {
           should: buildIndicatorShouldClauses(eventFields),

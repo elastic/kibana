@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildIndicatorShouldClauses } from './helpers';
+import { buildIndicatorEnrichments, buildIndicatorShouldClauses, getTotalCount } from './helpers';
 
 describe('buildIndicatorShouldClauses', () => {
   it('returns an empty array given an empty fieldset', () => {
@@ -48,5 +48,125 @@ describe('buildIndicatorShouldClauses', () => {
         { match: { 'threatintel.indicator.url.full': { _name: 'url.full', query: 'elastic.co' } } },
       ])
     );
+  });
+});
+
+describe('getTotalCount', () => {
+  it('returns 0 when total is null (not tracking)', () => {
+    expect(getTotalCount(null)).toEqual(0);
+  });
+
+  it('returns total when total is a number', () => {
+    expect(getTotalCount(5)).toEqual(5);
+  });
+
+  it('returns total.value when total is an object', () => {
+    expect(getTotalCount({ value: 20, relation: 'eq' })).toEqual(20);
+  });
+});
+
+describe('buildIndicatorEnrichments', () => {
+  it('returns nothing if hits have no matched queries', () => {
+    const hits = [{ _id: '_id', _index: '_index', matched_queries: [] }];
+    expect(buildIndicatorEnrichments(hits)).toEqual([]);
+  });
+
+  it("returns nothing if hits' matched queries are not valid", () => {
+    const hits = [{ _id: '_id', _index: '_index', matched_queries: ['invalid.field'] }];
+    expect(buildIndicatorEnrichments(hits)).toEqual([]);
+  });
+
+  it('builds a single enrichment if the hit has a matched query', () => {
+    const hits = [
+      {
+        _id: '_id',
+        _index: '_index',
+        matched_queries: ['file.hash.md5'],
+        fields: {
+          'threatintel.indicator.file.hash.md5': ['indicator_value'],
+        },
+      },
+    ];
+
+    expect(buildIndicatorEnrichments(hits)).toEqual([
+      expect.objectContaining({
+        'matched.atomic': ['indicator_value'],
+        'matched.field': ['file.hash.md5'],
+        'matched.id': ['_id'],
+        'matched.index': ['_index'],
+        'threatintel.indicator.file.hash.md5': ['indicator_value'],
+      }),
+    ]);
+  });
+
+  it('builds multiple enrichments if the hit has matched queries', () => {
+    const hits = [
+      {
+        _id: '_id',
+        _index: '_index',
+        matched_queries: ['file.hash.md5', 'source.ip'],
+        fields: {
+          'threatintel.indicator.file.hash.md5': ['indicator_value'],
+          'threatintel.indicator.ip': ['127.0.0.1'],
+        },
+      },
+    ];
+
+    expect(buildIndicatorEnrichments(hits)).toEqual([
+      expect.objectContaining({
+        'matched.atomic': ['indicator_value'],
+        'matched.field': ['file.hash.md5'],
+        'matched.id': ['_id'],
+        'matched.index': ['_index'],
+        'threatintel.indicator.file.hash.md5': ['indicator_value'],
+        'threatintel.indicator.ip': ['127.0.0.1'],
+      }),
+      expect.objectContaining({
+        'matched.atomic': ['127.0.0.1'],
+        'matched.field': ['source.ip'],
+        'matched.id': ['_id'],
+        'matched.index': ['_index'],
+        'threatintel.indicator.file.hash.md5': ['indicator_value'],
+        'threatintel.indicator.ip': ['127.0.0.1'],
+      }),
+    ]);
+  });
+
+  it('builds an enrichment for each hit', () => {
+    const hits = [
+      {
+        _id: '_id',
+        _index: '_index',
+        matched_queries: ['file.hash.md5'],
+        fields: {
+          'threatintel.indicator.file.hash.md5': ['indicator_value'],
+        },
+      },
+      {
+        _id: '_id2',
+        _index: '_index2',
+        matched_queries: ['source.ip'],
+        fields: {
+          'threatintel.indicator.ip': ['127.0.0.1'],
+        },
+      },
+    ];
+
+    expect(buildIndicatorEnrichments(hits)).toEqual([
+      expect.objectContaining({
+        'matched.atomic': ['indicator_value'],
+        'matched.field': ['file.hash.md5'],
+        'matched.id': ['_id'],
+        'matched.index': ['_index'],
+        'threatintel.indicator.file.hash.md5': ['indicator_value'],
+      }),
+      expect.objectContaining({
+        'matched.atomic': ['127.0.0.1'],
+        'matched.field': ['source.ip'],
+        'matched.id': ['_id2'],
+        'matched.index': ['_index2'],
+        'threatintel.indicator.ip': ['127.0.0.1'],
+      }),
+    ]);
   });
 });

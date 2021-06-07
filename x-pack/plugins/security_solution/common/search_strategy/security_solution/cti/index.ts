@@ -17,7 +17,10 @@ export interface CtiEventEnrichmentRequestOptions extends RequestBasicOptions {
   eventFields: Record<string, unknown>;
 }
 
+export type CtiEnrichment = Record<string, unknown[]>;
+
 export interface CtiEventEnrichmentStrategyResponse extends IEsSearchResponse {
+  enrichments: CtiEnrichment[];
   inspect?: Inspect;
   totalCount: number;
 }

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { buildRequestOptionsMock } from '../../../../../../common/search_strategy/security_solution/cti/index.mock';
+import { buildEventEnrichmentRequestOptionsMock } from '../../../../../../common/search_strategy/security_solution/cti/index.mock';
 import { buildEventEnrichmentQuery } from './query';
 
 describe('buildEventEnrichmentQuery', () => {
   it('converts each event field/value into a named filter', () => {
-    const options = buildRequestOptionsMock();
+    const options = buildEventEnrichmentRequestOptionsMock();
     const query = buildEventEnrichmentQuery(options);
     expect(query.body?.query?.bool?.should).toEqual(
       expect.arrayContaining([
@@ -29,7 +29,7 @@ describe('buildEventEnrichmentQuery', () => {
   });
 
   it('filters on indicator events', () => {
-    const options = buildRequestOptionsMock();
+    const options = buildEventEnrichmentRequestOptionsMock();
     const query = buildEventEnrichmentQuery(options);
     expect(query.body?.query?.bool?.filter).toEqual(
       expect.arrayContaining([{ term: { 'event.type': 'indicator' } }])
@@ -37,7 +37,7 @@ describe('buildEventEnrichmentQuery', () => {
   });
 
   it('includes the specified timerange', () => {
-    const options = buildRequestOptionsMock();
+    const options = buildEventEnrichmentRequestOptionsMock();
     const query = buildEventEnrichmentQuery(options);
     expect(query.body?.query?.bool?.filter).toEqual(
       expect.arrayContaining([
@@ -60,9 +60,21 @@ describe('buildEventEnrichmentQuery', () => {
       { field: 'event.created', format: 'date_time' },
       { field: 'event.end', format: 'date_time' },
     ];
-    const options = buildRequestOptionsMock({ docValueFields });
+    const options = buildEventEnrichmentRequestOptionsMock({ docValueFields });
     const query = buildEventEnrichmentQuery(options);
     expect(query.body?.docvalue_fields).toEqual(expect.arrayContaining(docValueFields));
+  });
+
+  it('requests all fields', () => {
+    const options = buildEventEnrichmentRequestOptionsMock();
+    const query = buildEventEnrichmentQuery(options);
+    expect(query.body?.fields).toEqual(['*']);
+  });
+
+  it('excludes _source', () => {
+    const options = buildEventEnrichmentRequestOptionsMock();
+    const query = buildEventEnrichmentQuery(options);
+    expect(query.body?._source).toEqual(false);
   });
 
   it('includes specified filters', () => {
@@ -71,7 +83,7 @@ describe('buildEventEnrichmentQuery', () => {
       language: 'kuery',
     };
 
-    const options = buildRequestOptionsMock({ filterQuery });
+    const options = buildEventEnrichmentRequestOptionsMock({ filterQuery });
     const query = buildEventEnrichmentQuery(options);
     expect(query.body?.query?.bool?.filter).toEqual(expect.arrayContaining([filterQuery]));
   });
