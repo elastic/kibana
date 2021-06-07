@@ -7,9 +7,10 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiTitle, EuiFlexItem } from '@elastic/eui';
 import { RumOverview } from '../RumDashboard';
 import { CsmSharedContextProvider } from './CsmSharedContext';
-import { MainFilters } from './Panels/MainFilters';
+import { WebApplicationSelect } from './Panels/WebApplicationSelect';
 import { DatePicker } from '../../shared/DatePicker';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { EnvironmentFilter } from '../../shared/EnvironmentFilter';
@@ -24,27 +25,65 @@ export function RumHome() {
   const { observability } = useApmPluginContext();
   const PageTemplateComponent = observability.navigation.PageTemplate;
 
-  const { isSmall } = useBreakPoints();
+  const { isSmall, isXXL } = useBreakPoints();
 
   const envStyle = isSmall ? {} : { maxWidth: 200 };
 
   return (
     <CsmSharedContextProvider>
       <PageTemplateComponent
-        pageHeader={{
-          pageTitle: UX_LABEL,
-          rightSideItems: [
-            <DatePicker />,
-            <div style={envStyle}>
-              <EnvironmentFilter />
-            </div>,
-            <UserPercentile />,
-            <MainFilters />,
-          ],
-        }}
+        pageHeader={
+          isXXL
+            ? {
+                pageTitle: UX_LABEL,
+                rightSideItems: [
+                  <DatePicker />,
+                  <div style={envStyle}>
+                    <EnvironmentFilter />
+                  </div>,
+                  <UserPercentile />,
+                  <WebApplicationSelect />,
+                ],
+              }
+            : { children: <PageHeader /> }
+        }
       >
         <RumOverview />
       </PageTemplateComponent>
     </CsmSharedContextProvider>
+  );
+}
+
+function PageHeader() {
+  const { isSmall } = useBreakPoints();
+
+  const envStyle = isSmall ? {} : { maxWidth: 200 };
+
+  return (
+    <div style={{ width: '100%' }}>
+      <EuiFlexGroup wrap>
+        <EuiFlexItem>
+          <EuiTitle>
+            <h1>{UX_LABEL}</h1>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <DatePicker />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup wrap>
+        <EuiFlexItem grow={false}>
+          <WebApplicationSelect />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <UserPercentile />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <div style={envStyle}>
+            <EnvironmentFilter />
+          </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
   );
 }

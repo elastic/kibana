@@ -68,7 +68,7 @@ function LocalUIFilters() {
   );
 
   const content = (
-    <EuiFlexGroup>
+    <EuiFlexGroup wrap>
       <EuiFlexItem>
         <URLFilter />
       </EuiFlexItem>
