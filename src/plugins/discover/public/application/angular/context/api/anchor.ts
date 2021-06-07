@@ -16,11 +16,6 @@ import {
 } from '../../../../../../data/public';
 import { EsHitRecord } from './context';
 
-export interface AnchorHitRecord extends EsHitRecord {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  $$_isAnchor: boolean;
-}
-
 export function fetchAnchorProvider(
   indexPatterns: IndexPatternsContract,
   searchSource: ISearchSource,
@@ -30,7 +25,7 @@ export function fetchAnchorProvider(
     indexPatternId: string,
     anchorId: string,
     sort: EsQuerySortValue[]
-  ): Promise<AnchorHitRecord> {
+  ): Promise<EsHitRecord> {
     const indexPattern = await indexPatterns.get(indexPatternId);
     searchSource
       .setParent(undefined)
@@ -66,8 +61,7 @@ export function fetchAnchorProvider(
 
     return {
       ...get(response, ['hits', 'hits', 0]),
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      $$_isAnchor: true,
-    } as AnchorHitRecord;
+      isAnchor: true,
+    } as EsHitRecord;
   };
 }

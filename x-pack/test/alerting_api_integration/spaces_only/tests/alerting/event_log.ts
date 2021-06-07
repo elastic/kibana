@@ -128,7 +128,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           case 'execute':
             validateEvent(event, {
               spaceId: Spaces.space1.id,
-              savedObjects: [{ type: 'alert', id: alertId, rel: 'primary' }],
+              savedObjects: [
+                { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
+              ],
               outcome: 'success',
               message: `alert executed: test.patternFiring:${alertId}: 'abc'`,
               status: executeStatuses[executeCount++],
@@ -138,8 +140,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             validateEvent(event, {
               spaceId: Spaces.space1.id,
               savedObjects: [
-                { type: 'alert', id: alertId, rel: 'primary' },
-                { type: 'action', id: createdAction.id },
+                { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
+                { type: 'action', id: createdAction.id, type_id: 'test.noop' },
               ],
               message: `alert: test.patternFiring:${alertId}: 'abc' instanceId: 'instance' scheduled actionGroup: 'default' action: test.noop:${createdAction.id}`,
               instanceId: 'instance',
@@ -164,7 +166,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
       function validateInstanceEvent(event: IValidatedEvent, subMessage: string) {
         validateEvent(event, {
           spaceId: Spaces.space1.id,
-          savedObjects: [{ type: 'alert', id: alertId, rel: 'primary' }],
+          savedObjects: [
+            { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
+          ],
           message: `test.patternFiring:${alertId}: 'abc' ${subMessage}`,
           instanceId: 'instance',
           actionGroupId: 'default',
@@ -260,7 +264,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           case 'execute':
             validateEvent(event, {
               spaceId: Spaces.space1.id,
-              savedObjects: [{ type: 'alert', id: alertId, rel: 'primary' }],
+              savedObjects: [
+                { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
+              ],
               outcome: 'success',
               message: `alert executed: test.patternFiring:${alertId}: 'abc'`,
               status: executeStatuses[executeCount++],
@@ -273,8 +279,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             validateEvent(event, {
               spaceId: Spaces.space1.id,
               savedObjects: [
-                { type: 'alert', id: alertId, rel: 'primary' },
-                { type: 'action', id: createdAction.id },
+                { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
+                { type: 'action', id: createdAction.id, type_id: 'test.noop' },
               ],
               message: `alert: test.patternFiring:${alertId}: 'abc' instanceId: 'instance' scheduled actionGroup(subgroup): 'default(${event?.kibana?.alerting?.action_subgroup})' action: test.noop:${createdAction.id}`,
               instanceId: 'instance',
@@ -305,7 +311,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
       function validateInstanceEvent(event: IValidatedEvent, subMessage: string) {
         validateEvent(event, {
           spaceId: Spaces.space1.id,
-          savedObjects: [{ type: 'alert', id: alertId, rel: 'primary' }],
+          savedObjects: [
+            { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
+          ],
           message: `test.patternFiring:${alertId}: 'abc' ${subMessage}`,
           instanceId: 'instance',
           actionGroupId: 'default',
@@ -345,7 +353,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
 
       validateEvent(event, {
         spaceId: Spaces.space1.id,
-        savedObjects: [{ type: 'alert', id: alertId, rel: 'primary' }],
+        savedObjects: [{ type: 'alert', id: alertId, rel: 'primary', type_id: 'test.throw' }],
         outcome: 'failure',
         message: `alert execution failure: test.throw:${alertId}: 'abc'`,
         errorMessage: 'this alert is intended to fail',
@@ -360,6 +368,7 @@ interface SavedObject {
   type: string;
   id: string;
   rel?: string;
+  type_id: string;
 }
 
 interface ValidateEventLogParams {

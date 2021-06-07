@@ -15,7 +15,7 @@ export const createConfigurationMock = (): FleetConfigType => {
     agents: {
       enabled: true,
       elasticsearch: {
-        host: '',
+        hosts: [''],
         ca_sha256: '',
       },
     },

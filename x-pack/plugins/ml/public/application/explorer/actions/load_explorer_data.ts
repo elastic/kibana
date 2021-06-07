@@ -83,6 +83,7 @@ export interface LoadExplorerDataConfig {
   viewByFromPage: number;
   viewByPerPage: number;
   swimlaneContainerWidth: number;
+  swimLaneSeverity: number;
 }
 
 export const isLoadExplorerDataConfig = (arg: any): arg is LoadExplorerDataConfig => {
@@ -135,6 +136,7 @@ const loadExplorerDataProvider = (
       swimlaneContainerWidth,
       viewByFromPage,
       viewByPerPage,
+      swimLaneSeverity,
     } = config;
 
     const combinedJobRecords: Record<string, CombinedJob> = selectedJobs.reduce((acc, job) => {
@@ -192,7 +194,13 @@ const loadExplorerDataProvider = (
               influencersFilterQuery
             )
           : Promise.resolve({}),
-      overallState: memoizedLoadOverallData(lastRefresh, selectedJobs, swimlaneContainerWidth),
+      overallState: memoizedLoadOverallData(
+        lastRefresh,
+        selectedJobs,
+        swimlaneContainerWidth,
+        undefined,
+        swimLaneSeverity
+      ),
       tableData: memoizedLoadAnomaliesTableData(
         lastRefresh,
         selectedCells,
@@ -278,7 +286,9 @@ const loadExplorerDataProvider = (
               viewByPerPage,
               viewByFromPage,
               swimlaneContainerWidth,
-              influencersFilterQuery
+              influencersFilterQuery,
+              undefined,
+              swimLaneSeverity
             ),
           }).pipe(
             map(({ viewBySwimlaneState, filteredTopInfluencers }) => {

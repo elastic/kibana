@@ -25,7 +25,6 @@ import {
   getEventFiltersListPath,
   getTrustedAppsListPath,
 } from '../common/routing';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 /** Ensure that all flyouts z-index in Administation area show the flyout header */
 const EuiPanelStyled = styled(EuiPanel)`
@@ -44,7 +43,6 @@ interface AdministrationListPageProps {
 
 export const AdministrationListPage: FC<AdministrationListPageProps & CommonProps> = memo(
   ({ beta, title, subtitle, actions, children, headerBackComponent, ...otherProps }) => {
-    const isEventFilteringEnabled = useIsExperimentalFeatureEnabled('eventFilteringEnabled');
     const badgeOptions = !beta ? undefined : { beta: true, text: BETA_BADGE_LABEL };
 
     return (
@@ -77,18 +75,14 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
               pageId: SecurityPageName.administration,
               disabled: false,
             },
-            ...(isEventFilteringEnabled
-              ? {
-                  [AdministrationSubTab.eventFilters]: {
-                    name: EVENT_FILTERS_TAB,
-                    id: AdministrationSubTab.eventFilters,
-                    href: getEventFiltersListPath(),
-                    urlKey: 'administration',
-                    pageId: SecurityPageName.administration,
-                    disabled: false,
-                  },
-                }
-              : {}),
+            [AdministrationSubTab.eventFilters]: {
+              name: EVENT_FILTERS_TAB,
+              id: AdministrationSubTab.eventFilters,
+              href: getEventFiltersListPath(),
+              urlKey: 'administration',
+              pageId: SecurityPageName.administration,
+              disabled: false,
+            },
           }}
         />
 

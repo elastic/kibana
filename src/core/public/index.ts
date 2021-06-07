@@ -89,13 +89,11 @@ export type {
   AppLeaveAction,
   AppLeaveDefaultAction,
   AppLeaveConfirmAction,
-  AppMeta,
   AppUpdatableFields,
   AppUpdater,
-  AppSearchDeepLink,
+  AppDeepLink,
   PublicAppInfo,
-  PublicAppMetaInfo,
-  PublicAppSearchDeepLinkInfo,
+  PublicAppDeepLinkInfo,
   NavigateToAppOptions,
 } from './application';
 

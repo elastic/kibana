@@ -196,6 +196,12 @@ export const xyChart: ExpressionFunctionDefinition<
         defaultMessage: 'Define how curve type is rendered for a line chart',
       }),
     },
+    fillOpacity: {
+      types: ['number'],
+      help: i18n.translate('xpack.lens.xyChart.fillOpacity.help', {
+        defaultMessage: 'Define the area chart fill opacity',
+      }),
+    },
     hideEndzones: {
       types: ['boolean'],
       default: false,
@@ -216,7 +222,7 @@ export const xyChart: ExpressionFunctionDefinition<
   },
 };
 
-export async function calculateMinInterval({ args: { layers }, data }: XYChartProps) {
+export function calculateMinInterval({ args: { layers }, data }: XYChartProps) {
   const filteredLayers = getFilteredLayers(layers, data);
   if (filteredLayers.length === 0) return;
   const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
@@ -274,7 +280,7 @@ export const getXyChartRenderer = (dependencies: {
           chartsThemeService={dependencies.chartsThemeService}
           paletteService={dependencies.paletteService}
           timeZone={dependencies.timeZone}
-          minInterval={await calculateMinInterval(config)}
+          minInterval={calculateMinInterval(config)}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
           renderMode={handlers.getRenderMode()}
@@ -792,7 +798,7 @@ export function XYChart({
                   ),
                 },
               ];
-              return paletteService.get(palette.name).getColor(
+              return paletteService.get(palette.name).getCategoricalColor(
                 seriesLayers,
                 {
                   maxDepth: 1,
@@ -812,6 +818,7 @@ export function XYChart({
                 visible: !xAccessor,
                 radius: 5,
               },
+              ...(args.fillOpacity && { area: { opacity: args.fillOpacity } }),
             },
             lineSeriesStyle: {
               point: {

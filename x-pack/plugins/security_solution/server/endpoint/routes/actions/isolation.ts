@@ -20,14 +20,7 @@ import {
 } from '../../../types';
 import { getAgentIDsForEndpoints } from '../../services';
 import { EndpointAppContext } from '../../types';
-
-export const userCanIsolate = (roles: readonly string[] | undefined): boolean => {
-  // only superusers can write to the fleet index (or look up endpoint data to convert endp ID to agent ID)
-  if (!roles || roles.length === 0) {
-    return false;
-  }
-  return roles.includes('superuser');
-};
+import { userCanIsolate } from '../../../../common/endpoint/actions';
 
 /**
  * Registers the Host-(un-)isolation routes
@@ -124,7 +117,7 @@ export const isolationRequestHandler = function (
     const actionID = uuid.v4();
     let result;
     try {
-      result = await esClient.index({
+      result = await esClient.index<EndpointAction>({
         index: AGENT_ACTIONS_INDEX,
         body: {
           action_id: actionID,
@@ -133,12 +126,12 @@ export const isolationRequestHandler = function (
           type: 'INPUT_ACTION',
           input_type: 'endpoint',
           agents: agentIDs,
-          user_id: user?.username,
+          user_id: user!.username,
           data: {
             command: isolate ? 'isolate' : 'unisolate',
-            comment: req.body.comment,
+            comment: req.body.comment ?? undefined,
           },
-        } as EndpointAction,
+        },
       });
     } catch (e) {
       return res.customError({
