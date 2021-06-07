@@ -11,7 +11,7 @@ import ReactDOM from 'react-dom';
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import { I18nProvider } from '@kbn/i18n/react';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
-import { TimelinesPluginSetup } from '../../../../../../../plugins/timelines/public';
+import { TimelinesUIStart } from '../../../../../../../plugins/timelines/public';
 
 /**
  * Render the Timeline Test app. Returns a cleanup function.
@@ -19,13 +19,13 @@ import { TimelinesPluginSetup } from '../../../../../../../plugins/timelines/pub
 export function renderApp(
   coreStart: CoreStart,
   parameters: AppMountParameters,
-  timelinesPluginSetup: TimelinesPluginSetup
+  timelinesPluginSetup: TimelinesUIStart
 ) {
   ReactDOM.render(
     <AppRoot
       coreStart={coreStart}
       parameters={parameters}
-      timelinesPluginSetup={timelinesPluginSetup}
+      timelinesPluginSetup={TimelinesUIStart}
     />,
     parameters.element
   );
@@ -43,7 +43,7 @@ const AppRoot = React.memo(
   }: {
     coreStart: CoreStart;
     parameters: AppMountParameters;
-    timelinesPluginSetup: TimelinesPluginSetup;
+    timelinesPluginSetup: TimelinesUIStart;
   }) => {
     return (
       <I18nProvider>
