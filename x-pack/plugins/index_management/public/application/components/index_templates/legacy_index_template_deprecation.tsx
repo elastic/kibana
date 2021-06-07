@@ -13,15 +13,17 @@ import { documentationService } from '../../services/documentation';
 
 export const LegacyIndexTemplatesDeprecation = () => (
   <EuiCallOut
-    title="Legacy index templates will be deprecated in a future release"
+    title={i18n.translate('xpack.idxMgmt.legacyIndexTemplatesDeprecation.title', {
+      defaultMessage: 'Legacy index templates are deprecated in favor of composable templates',
+    })}
     color="warning"
     iconType="alert"
     data-test-subj="legacyIndexTemplateDeprecationWarning"
   >
     <p>
       <FormattedMessage
-        id="xpack.idxMgmt.home.indexTemplatesDescription"
-        defaultMessage="Migrate your legacy index templates to composable index templates. {learnMoreLink}"
+        id="xpack.idxMgmt.legacyIndexTemplatesDeprecation.description"
+        defaultMessage="Use composable index templates instead. {learnMoreLink}"
         values={{
           learnMoreLink: (
             <EuiLink
@@ -29,12 +31,9 @@ export const LegacyIndexTemplatesDeprecation = () => (
               target="_blank"
               external
             >
-              {i18n.translate(
-                'xpack.idxMgmt.home.legacyIndexTemplatesDeprecation.learnMoreLinkText',
-                {
-                  defaultMessage: 'Learn more.',
-                }
-              )}
+              {i18n.translate('xpack.idxMgmt.legacyIndexTemplatesDeprecation.learnMoreLinkText', {
+                defaultMessage: 'Learn more.',
+              })}
             </EuiLink>
           ),
         }}
