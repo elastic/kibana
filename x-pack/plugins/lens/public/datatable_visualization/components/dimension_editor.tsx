@@ -16,8 +16,8 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiButtonEmpty,
-  EuiSuperSelect,
   EuiFieldText,
+  EuiComboBox,
 } from '@elastic/eui';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { VisualizationDimensionEditorProps } from '../../types';
@@ -211,12 +211,24 @@ export function TableDimensionEditor(
             })}
             display="columnCompressed"
           >
-            <EuiSuperSelect<SummaryRowType>
-              data-test-subj="lnsDatatable_summaryrow_function"
-              valueOfSelected={summaryRow}
-              options={getSummaryRowOptions()}
+            <EuiComboBox
+              fullWidth
               compressed
-              onChange={(newValue) => {
+              isClearable={false}
+              data-test-subj="indexPattern-dimension-field"
+              placeholder={i18n.translate('xpack.lens.indexPattern.fieldPlaceholder', {
+                defaultMessage: 'Field',
+              })}
+              options={getSummaryRowOptions()}
+              selectedOptions={[
+                {
+                  label: fallbackSummaryLabel,
+                  value: summaryRow,
+                },
+              ]}
+              singleSelection={{ asPlainText: true }}
+              onChange={(choices) => {
+                const newValue = choices[0].value as SummaryRowType;
                 setState({
                   ...state,
                   columns: updateColumnWith(state, accessor, { summaryRow: newValue }),

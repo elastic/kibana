@@ -31,53 +31,53 @@ export function getFinalSummaryConfiguration(
 }
 
 export function getDefaultSummaryLabel(type: SummaryRowType) {
-  return getSummaryRowOptions().find(({ value }) => type === value)!.inputDisplay!;
+  return getSummaryRowOptions().find(({ value }) => type === value)!.label!;
 }
 
 export function getSummaryRowOptions(): Array<{
   value: SummaryRowType;
-  inputDisplay: string;
+  label: string;
   'data-test-subj': string;
 }> {
   return [
     {
       value: 'none',
-      inputDisplay: i18n.translate('xpack.lens.table.summaryRow.none', {
+      label: i18n.translate('xpack.lens.table.summaryRow.none', {
         defaultMessage: 'None',
       }),
       'data-test-subj': 'lns-datatable-summary-none',
     },
     {
       value: 'count',
-      inputDisplay: i18n.translate('xpack.lens.table.summaryRow.count', {
+      label: i18n.translate('xpack.lens.table.summaryRow.count', {
         defaultMessage: 'Value count',
       }),
       'data-test-subj': 'lns-datatable-summary-count',
     },
     {
       value: 'sum',
-      inputDisplay: i18n.translate('xpack.lens.table.summaryRow.sum', {
+      label: i18n.translate('xpack.lens.table.summaryRow.sum', {
         defaultMessage: 'Sum',
       }),
       'data-test-subj': 'lns-datatable-summary-sum',
     },
     {
       value: 'avg',
-      inputDisplay: i18n.translate('xpack.lens.table.summaryRow.average', {
+      label: i18n.translate('xpack.lens.table.summaryRow.average', {
         defaultMessage: 'Average',
       }),
       'data-test-subj': 'lns-datatable-summary-avg',
     },
     {
       value: 'min',
-      inputDisplay: i18n.translate('xpack.lens.table.summaryRow.minimum', {
+      label: i18n.translate('xpack.lens.table.summaryRow.minimum', {
         defaultMessage: 'Minimum',
       }),
       'data-test-subj': 'lns-datatable-summary-min',
     },
     {
       value: 'max',
-      inputDisplay: i18n.translate('xpack.lens.table.summaryRow.maximum', {
+      label: i18n.translate('xpack.lens.table.summaryRow.maximum', {
         defaultMessage: 'Maximum',
       }),
       'data-test-subj': 'lns-datatable-summary-max',
