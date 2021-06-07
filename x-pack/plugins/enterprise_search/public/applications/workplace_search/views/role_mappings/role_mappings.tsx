@@ -12,12 +12,8 @@ import { useActions, useValues } from 'kea';
 import { FlashMessages } from '../../../shared/flash_messages';
 import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { Loading } from '../../../shared/loading';
-import { RoleMappingsTable } from '../../../shared/role_mapping';
-import {
-  ROLE_MAPPINGS_TITLE,
-  ROLE_MAPPINGS_DESCRIPTION,
-} from '../../../shared/role_mapping/constants';
-import { ViewContentHeader } from '../../components/shared/view_content_header';
+import { RoleMappingsTable, RoleMappingsHeading } from '../../../shared/role_mapping';
+import { ROLE_MAPPINGS_TITLE } from '../../../shared/role_mapping/constants';
 
 import { ROLE_MAPPINGS_TABLE_HEADER } from './constants';
 
@@ -42,27 +38,26 @@ export const RoleMappings: React.FC = () => {
 
   if (dataLoading) return <Loading />;
 
-  const roleMappingsTable = (
-    <RoleMappingsTable
-      roleMappings={roleMappings}
-      accessItemKey="groups"
-      accessHeader={ROLE_MAPPINGS_TABLE_HEADER}
-      shouldShowAuthProvider={multipleAuthProvidersConfig}
-      initializeRoleMapping={initializeRoleMapping}
-      handleDeleteMapping={handleDeleteMapping}
-    />
+  const roleMappingsSection = (
+    <>
+      <RoleMappingsHeading productName="Workplace Search" onClick={() => initializeRoleMapping()} />
+      <RoleMappingsTable
+        roleMappings={roleMappings}
+        accessItemKey="groups"
+        accessHeader={ROLE_MAPPINGS_TABLE_HEADER}
+        shouldShowAuthProvider={multipleAuthProvidersConfig}
+        initializeRoleMapping={initializeRoleMapping}
+        handleDeleteMapping={handleDeleteMapping}
+      />
+    </>
   );
 
   return (
     <>
       <SetPageChrome trail={[ROLE_MAPPINGS_TITLE]} />
-      <ViewContentHeader title={ROLE_MAPPINGS_TITLE} description={ROLE_MAPPINGS_DESCRIPTION} />
-
       {roleMappingFlyoutOpen && <RoleMapping />}
-      <div>
-        <FlashMessages />
-        {roleMappingsTable}
-      </div>
+      <FlashMessages />
+      {roleMappingsSection}
     </>
   );
 };

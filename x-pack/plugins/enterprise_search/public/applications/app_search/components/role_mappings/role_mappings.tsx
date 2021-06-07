@@ -9,16 +9,11 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiPageContent, EuiPageContentBody, EuiPageHeader } from '@elastic/eui';
-
 import { FlashMessages } from '../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { Loading } from '../../../shared/loading';
-import { RoleMappingsTable } from '../../../shared/role_mapping';
-import {
-  ROLE_MAPPINGS_TITLE,
-  ROLE_MAPPINGS_DESCRIPTION,
-} from '../../../shared/role_mapping/constants';
+import { RoleMappingsTable, RoleMappingsHeading } from '../../../shared/role_mapping';
+import { ROLE_MAPPINGS_TITLE } from '../../../shared/role_mapping/constants';
 
 import { ROLE_MAPPINGS_ENGINE_ACCESS_HEADING } from './constants';
 import { RoleMapping } from './role_mapping';
@@ -45,29 +40,26 @@ export const RoleMappings: React.FC = () => {
 
   if (dataLoading) return <Loading />;
 
-  const roleMappingsTable = (
-    <RoleMappingsTable
-      roleMappings={roleMappings}
-      accessItemKey="engines"
-      accessHeader={ROLE_MAPPINGS_ENGINE_ACCESS_HEADING}
-      initializeRoleMapping={initializeRoleMapping}
-      shouldShowAuthProvider={multipleAuthProvidersConfig}
-      handleDeleteMapping={handleDeleteMapping}
-    />
+  const roleMappingsSection = (
+    <>
+      <RoleMappingsHeading productName="App Search" onClick={() => initializeRoleMapping()} />
+      <RoleMappingsTable
+        roleMappings={roleMappings}
+        accessItemKey="engines"
+        accessHeader={ROLE_MAPPINGS_ENGINE_ACCESS_HEADING}
+        initializeRoleMapping={initializeRoleMapping}
+        shouldShowAuthProvider={multipleAuthProvidersConfig}
+        handleDeleteMapping={handleDeleteMapping}
+      />
+    </>
   );
 
   return (
     <>
       <SetPageChrome trail={[ROLE_MAPPINGS_TITLE]} />
-      <EuiPageHeader pageTitle={ROLE_MAPPINGS_TITLE} description={ROLE_MAPPINGS_DESCRIPTION} />
-
       {roleMappingFlyoutOpen && <RoleMapping />}
-      <EuiPageContent hasShadow={false} hasBorder={roleMappings.length > 0}>
-        <EuiPageContentBody>
-          <FlashMessages />
-          {roleMappingsTable}
-        </EuiPageContentBody>
-      </EuiPageContent>
+      <FlashMessages />
+      {roleMappingsSection}
     </>
   );
 };
