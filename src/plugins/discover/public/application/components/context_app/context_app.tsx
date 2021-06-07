@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { EuiText, EuiPageContent, EuiPage, EuiSpacer } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
-import { esFilters } from '../../../../../data/public';
+import { esFilters, SortDirection } from '../../../../../data/public';
 import {
   CONTEXT_DEFAULT_SIZE_SETTING,
   DOC_TABLE_LEGACY,
@@ -164,7 +164,7 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
                 predecessorCount={appState.predecessorCount}
                 successorCount={appState.successorCount}
                 rows={rows}
-                sort={appState.sort}
+                sort={appState.sort as [[string, SortDirection]]}
                 predecessors={fetchedState.predecessors}
                 successors={fetchedState.successors}
                 anchorStatus={fetchedState.anchorStatus.value}

@@ -11,11 +11,12 @@ import './context_app_content.scss';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiHorizontalRule, EuiText } from '@elastic/eui';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../common';
+import { IndexPattern, IndexPatternField } from '../../../../../data/common/index_patterns';
+import { SortDirection } from '../../../../../data/public';
 import {
   DocTableLegacy,
   DocTableLegacyProps,
 } from '../../angular/doc_table/create_doc_table_react';
-import { IndexPattern, IndexPatternField } from '../../../../../data/common/index_patterns';
 import { LoadingStatus } from '../../angular/context_query_state';
 import { ActionBar } from '../../angular/context/components/action_bar/action_bar';
 import { DiscoverGrid, DiscoverGridProps } from '../discover_grid/discover_grid';
@@ -35,7 +36,7 @@ export interface ContextAppContentProps {
   predecessorCount: number;
   successorCount: number;
   rows: EsHitRecordList;
-  sort: SortPairArr[];
+  sort: [[string, SortDirection]];
   predecessors: EsHitRecordList;
   successors: EsHitRecordList;
   anchorStatus: LoadingStatus;
@@ -101,7 +102,7 @@ export function ContextAppContent({
       expandedDoc,
       isLoading: isAnchorLoading,
       sampleSize: 0,
-      sort,
+      sort: sort as [[string, SortDirection]],
       isSortEnabled: false,
       showTimeCol,
       services,

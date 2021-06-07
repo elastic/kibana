@@ -35,7 +35,7 @@ export interface AppState {
   /**
    * Sorting of the records to be fetched, assumed to be a legacy parameter
    */
-  sort: [[string, SortDirection]];
+  sort: string[][];
   /**
    * Number of records to be fetched after the anchor records (older records)
    */

@@ -7,7 +7,6 @@
  */
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-
 import { fromPairs } from 'lodash';
 import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../../common';
 import { DiscoverServices } from '../../../build_services';
@@ -28,6 +27,15 @@ const createError = (statusKey: string, reason: FailureReason, error?: Error) =>
   [statusKey]: { value: LoadingStatus.FAILED, error, reason },
 });
 
+export interface ContextAppFetchProps {
+  anchorId: string;
+  indexPatternId: string;
+  indexPattern: IndexPattern;
+  appState: AppState;
+  useNewFieldsApi: boolean;
+  services: DiscoverServices;
+}
+
 export function useContextAppFetch({
   anchorId,
   indexPatternId,
@@ -35,14 +43,7 @@ export function useContextAppFetch({
   appState,
   useNewFieldsApi,
   services,
-}: {
-  anchorId: string;
-  indexPatternId: string;
-  indexPattern: IndexPattern;
-  appState: AppState;
-  useNewFieldsApi: boolean;
-  services: DiscoverServices;
-}) {
+}: ContextAppFetchProps) {
   const { uiSettings: config, data, indexPatterns, toastNotifications, filterManager } = services;
 
   const searchSource = useMemo(() => {
@@ -99,13 +100,13 @@ export function useContextAppFetch({
       setState({ anchor, anchorStatus: { value: LoadingStatus.LOADED } });
       return anchor;
     } catch (error) {
-      setState(createError('anchorStatus', FailureReason.UNKNOWN, error));
       toastNotifications.addDanger({
         title: i18n.translate('discover.context.unableToLoadAnchorDocumentDescription', {
           defaultMessage: 'Unable to load the anchor document',
         }),
         text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>),
       });
+      setState(createError('anchorStatus', FailureReason.UNKNOWN, error));
     }
   }, [
     appState,
@@ -148,13 +149,13 @@ export function useContextAppFetch({
         );
         setState({ [type]: rows, [statusKey]: { value: LoadingStatus.LOADED } });
       } catch (error) {
-        setState(createError(statusKey, FailureReason.UNKNOWN, error));
         toastNotifications.addDanger({
           title: i18n.translate('discover.context.unableToLoadDocumentDescription', {
             defaultMessage: 'Unable to load documents',
           }),
           text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>),
         });
+        setState(createError(statusKey, FailureReason.UNKNOWN, error));
       }
     },
     [
