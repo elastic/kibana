@@ -630,7 +630,7 @@ Evaluating the preceding health stats, you see the following output under `stats
 <3> 8% of executed tasks are ephemeral tasks
 
 You can infer from these stats that the majority of executions consist of recurring tasks at 88%.
-You can use the `execution.persistence` stats to evaluate the ratio of consumed capacity, but on their own, you should not make assumptions about the sufficency of the availabe capacity.
+You can use the `execution.persistence` stats to evaluate the ratio of consumed capacity, but on their own, you should not make assumptions about the sufficiency of the available capacity.
 
 In order to assess the capacity, you should evaluate these stats against the `load` under `stats.runtime.value`:
 
