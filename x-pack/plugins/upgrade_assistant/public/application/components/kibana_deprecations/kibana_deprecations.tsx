@@ -12,7 +12,6 @@ import { EuiButtonEmpty, EuiPageContent, EuiPageHeader, EuiSpacer } from '@elast
 import { i18n } from '@kbn/i18n';
 
 import type { DomainDeprecationDetails } from 'kibana/public';
-import { APP_WRAPPER_CLASS } from '../../../../../../../src/core/public';
 import { SectionLoading } from '../../../shared_imports';
 import { useAppContext } from '../../app_context';
 import { NoDeprecationsPrompt } from '../shared';
@@ -142,15 +141,13 @@ export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponent
 
   if (isLoading) {
     content = (
-      <div className={APP_WRAPPER_CLASS}>
-        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
-          <SectionLoading>{i18nTexts.isLoading}</SectionLoading>
-        </EuiPageContent>
-      </div>
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+        <SectionLoading>{i18nTexts.isLoading}</SectionLoading>
+      </EuiPageContent>
     );
   } else if (kibanaDeprecations?.length) {
     content = (
-      <>
+      <div data-test-subj="kibanaDeprecationsContent">
         <EuiPageHeader
           bottomBorder
           pageTitle={i18nTexts.pageTitle}
@@ -189,11 +186,11 @@ export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponent
             deprecation={resolveModalContent}
           />
         )}
-      </>
+      </div>
     );
   } else if (error) {
     content = <KibanaDeprecationErrors errorType="requestError" />;
   }
 
-  return <div data-test-subj="kibanaDeprecationsContent">{content}</div>;
+  return <>{content}</>;
 });

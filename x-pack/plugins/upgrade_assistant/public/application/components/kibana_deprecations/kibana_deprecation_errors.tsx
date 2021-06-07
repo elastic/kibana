@@ -9,8 +9,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPageContent, EuiEmptyPrompt } from '@elastic/eui';
 
-import { APP_WRAPPER_CLASS } from '../../../../../../../src/core/public';
-
 interface Props {
   errorType: 'pluginError' | 'requestError';
 }
@@ -43,37 +41,33 @@ const i18nTexts = {
 export const KibanaDeprecationErrors: React.FunctionComponent<Props> = ({ errorType }) => {
   if (errorType === 'pluginError') {
     return (
-      <div className={APP_WRAPPER_CLASS}>
-        <EuiPageContent
-          verticalPosition="center"
-          horizontalPosition="center"
-          color="danger"
-          data-test-subj="kibanaPluginError"
-        >
-          <EuiEmptyPrompt
-            iconType="alert"
-            title={<h2>{i18nTexts.pluginError.title}</h2>}
-            body={<p>{i18nTexts.pluginError.description}</p>}
-          />
-        </EuiPageContent>
-      </div>
-    );
-  }
-
-  return (
-    <div className={APP_WRAPPER_CLASS}>
       <EuiPageContent
         verticalPosition="center"
         horizontalPosition="center"
         color="danger"
-        data-test-subj="kibanaRequestError"
+        data-test-subj="kibanaPluginError"
       >
         <EuiEmptyPrompt
           iconType="alert"
-          title={<h2>{i18nTexts.loadingError.title}</h2>}
-          body={<p>{i18nTexts.loadingError.description}</p>}
+          title={<h2>{i18nTexts.pluginError.title}</h2>}
+          body={<p>{i18nTexts.pluginError.description}</p>}
         />
       </EuiPageContent>
-    </div>
+    );
+  }
+
+  return (
+    <EuiPageContent
+      verticalPosition="center"
+      horizontalPosition="center"
+      color="danger"
+      data-test-subj="kibanaRequestError"
+    >
+      <EuiEmptyPrompt
+        iconType="alert"
+        title={<h2>{i18nTexts.loadingError.title}</h2>}
+        body={<p>{i18nTexts.loadingError.description}</p>}
+      />
+    </EuiPageContent>
   );
 };
