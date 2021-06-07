@@ -81,6 +81,7 @@ describe('bulkUpdateSessions', () => {
           status: SearchSessionStatus.IN_PROGRESS,
           created: moment().subtract(moment.duration(3, 'm')),
           touched: moment().subtract(moment.duration(10, 's')),
+          expires: moment().add(moment.duration(5, 'd')),
           idMapping: {
             'search-hash': {
               id: 'search-id',
@@ -115,6 +116,7 @@ describe('bulkUpdateSessions', () => {
       const so = {
         id: '123',
         attributes: {
+          expires: moment().add(moment.duration(5, 'd')),
           status: SearchSessionStatus.ERROR,
           idMapping: {
             'search-hash': {
@@ -192,6 +194,7 @@ describe('bulkUpdateSessions', () => {
       savedObjectsClient.bulkUpdate = jest.fn();
       const so = {
         attributes: {
+          expires: moment().add(moment.duration(5, 'd')),
           idMapping: {
             'search-hash': {
               id: 'search-id',
@@ -248,6 +251,7 @@ describe('bulkUpdateSessions', () => {
       const so = {
         namespaces: ['awesome'],
         attributes: {
+          expires: moment().add(moment.duration(5, 'd')),
           status: SearchSessionStatus.IN_PROGRESS,
           touched: '123',
           idMapping: {
@@ -282,6 +286,7 @@ describe('bulkUpdateSessions', () => {
       const so = {
         namespaces: ['awesome'],
         attributes: {
+          expires: moment().add(moment.duration(5, 'd')),
           status: SearchSessionStatus.IN_PROGRESS,
           touched: '123',
           idMapping: {
