@@ -20,7 +20,7 @@ import {
 
 import { WithHeaderLayout } from '../../../../layouts';
 import type { AgentPolicy, PackageInfo } from '../../../../types';
-import { PackageIcon } from '../../../../components/package_icon';
+import { PackageIcon } from '../../../../components';
 import type { CreatePackagePolicyFrom } from '../types';
 
 export const CreatePackagePolicyPageLayout: React.FunctionComponent<{

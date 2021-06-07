@@ -6,7 +6,7 @@
  */
 
 import { Cookie, cookie } from 'request';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
