@@ -66,7 +66,6 @@ export const RoleMappings: React.FC = () => {
       roleMappings={roleMappings}
       accessItemKey="groups"
       accessHeader={ROLE_MAPPINGS_TABLE_HEADER}
-      addMappingButton={addMappingButton}
       shouldShowAuthProvider={multipleAuthProvidersConfig}
       initializeRoleMapping={initializeRoleMapping}
       handleDeleteMapping={handleDeleteMapping}
