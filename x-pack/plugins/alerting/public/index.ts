@@ -7,6 +7,7 @@
 
 import { AlertingPublicPlugin } from './plugin';
 export { PluginSetupContract, PluginStartContract } from './plugin';
+export { AlertNavigationHandler } from './alert_navigation_registry';
 
 export function plugin() {
   return new AlertingPublicPlugin();
