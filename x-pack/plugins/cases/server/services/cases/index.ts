@@ -43,7 +43,7 @@ import {
   groupTotalAlertsByID,
   SavedObjectFindOptionsKueryNode,
 } from '../../common';
-import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
+import { ENABLE_CASE_CONNECTOR, MAX_DOCS_PER_PAGE } from '../../../common/constants';
 import { defaultPage, defaultPerPage } from '../../routes/api';
 import {
   CASE_SAVED_OBJECT,
@@ -818,17 +818,9 @@ export class CasesService {
         });
       }
 
-      const stats = await unsecuredSavedObjectsClient.find<SubCaseAttributes>({
-        fields: [],
-        page: 1,
-        perPage: 1,
-        sortField: defaultSortField,
-        ...cloneDeep(options),
-        type: SUB_CASE_SAVED_OBJECT,
-      });
       return unsecuredSavedObjectsClient.find<SubCaseAttributes>({
         page: 1,
-        perPage: stats.total,
+        perPage: MAX_DOCS_PER_PAGE,
         sortField: defaultSortField,
         ...cloneDeep(options),
         type: SUB_CASE_SAVED_OBJECT,
@@ -903,21 +895,11 @@ export class CasesService {
           ...cloneDeep(options),
         });
       }
-      // get the total number of comments that are in ES then we'll grab them all in one go
-      const stats = await unsecuredSavedObjectsClient.find<CommentAttributes>({
-        type: CASE_COMMENT_SAVED_OBJECT,
-        fields: [],
-        page: 1,
-        perPage: 1,
-        sortField: defaultSortField,
-        // spread the options after so the caller can override the default behavior if they want
-        ...cloneDeep(options),
-      });
 
       return unsecuredSavedObjectsClient.find<CommentAttributes>({
         type: CASE_COMMENT_SAVED_OBJECT,
         page: 1,
-        perPage: stats.total,
+        perPage: MAX_DOCS_PER_PAGE,
         sortField: defaultSortField,
         ...cloneDeep(options),
       });
@@ -1020,19 +1002,12 @@ export class CasesService {
   }: GetReportersArgs): Promise<SavedObjectsFindResponse<ESCaseAttributes>> {
     try {
       this.log.debug(`Attempting to GET all reporters`);
-      const firstReporters = await unsecuredSavedObjectsClient.find({
-        type: CASE_SAVED_OBJECT,
-        fields: ['created_by', OWNER_FIELD],
-        page: 1,
-        perPage: 1,
-        filter: cloneDeep(filter),
-      });
 
       return await unsecuredSavedObjectsClient.find<ESCaseAttributes>({
         type: CASE_SAVED_OBJECT,
         fields: ['created_by', OWNER_FIELD],
         page: 1,
-        perPage: firstReporters.total,
+        perPage: MAX_DOCS_PER_PAGE,
         filter: cloneDeep(filter),
       });
     } catch (error) {
@@ -1047,19 +1022,12 @@ export class CasesService {
   }: GetTagsArgs): Promise<SavedObjectsFindResponse<ESCaseAttributes>> {
     try {
       this.log.debug(`Attempting to GET all cases`);
-      const firstTags = await unsecuredSavedObjectsClient.find({
-        type: CASE_SAVED_OBJECT,
-        fields: ['tags', OWNER_FIELD],
-        page: 1,
-        perPage: 1,
-        filter: cloneDeep(filter),
-      });
 
       return await unsecuredSavedObjectsClient.find<ESCaseAttributes>({
         type: CASE_SAVED_OBJECT,
         fields: ['tags', OWNER_FIELD],
         page: 1,
-        perPage: firstTags.total,
+        perPage: MAX_DOCS_PER_PAGE,
         filter: cloneDeep(filter),
       });
     } catch (error) {
