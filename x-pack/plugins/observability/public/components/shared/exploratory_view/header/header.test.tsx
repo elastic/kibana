@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mockUrlStorage, render } from '../rtl_helpers';
+import { render } from '../rtl_helpers';
 import { ExploratoryViewHeader } from './header';
 import { fireEvent } from '@testing-library/dom';
 
@@ -22,22 +22,23 @@ describe('ExploratoryViewHeader', function () {
   });
 
   it('should be able to click open in lens', function () {
-    mockUrlStorage({
+    const initSeries = {
       data: {
         'uptime-pings-histogram': {
-          dataType: 'synthetics',
-          reportType: 'upp',
+          dataType: 'synthetics' as const,
+          reportType: 'upp' as const,
           breakdown: 'monitor.status',
           time: { from: 'now-15m', to: 'now' },
         },
       },
-    });
+    };
 
     const { getByText, core } = render(
       <ExploratoryViewHeader
         seriesId={'dummy-series'}
         lensAttributes={{ title: 'Performance distribution' } as any}
-      />
+      />,
+      { initSeries }
     );
     fireEvent.click(getByText('Open in Lens'));
 

@@ -5,87 +5,111 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
-import { DeeplyMockedKeys } from '@kbn/utility-types/target/jest';
-import { loggingSystemMock, elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
-import {
-  AlertServiceContract,
-  CaseConfigureService,
-  CaseService,
-  CaseUserActionServiceSetup,
-  ConnectorMappingsService,
-} from '../services';
-import { CasesClient } from './types';
-import { authenticationMock } from '../routes/api/__fixtures__';
-import { createExternalCasesClient } from '.';
+import { PublicContract, PublicMethodsOf } from '@kbn/utility-types';
 
-export type CasesClientPluginContractMock = jest.Mocked<CasesClient>;
-export const createExternalCasesClientMock = (): CasesClientPluginContractMock => ({
-  addComment: jest.fn(),
-  create: jest.fn(),
-  get: jest.fn(),
-  push: jest.fn(),
-  getAlerts: jest.fn(),
-  getFields: jest.fn(),
-  getMappings: jest.fn(),
-  getUserActions: jest.fn(),
-  update: jest.fn(),
-  updateAlertsStatus: jest.fn(),
-  getCaseIdsByAlertId: jest.fn(),
-});
+import { CasesClient } from '.';
+import { AttachmentsSubClient } from './attachments/client';
+import { CasesSubClient } from './cases/client';
+import { ConfigureSubClient } from './configure/client';
+import { CasesClientFactory } from './factory';
+import { StatsSubClient } from './stats/client';
+import { SubCasesClient } from './sub_cases/client';
+import { UserActionsSubClient } from './user_actions/client';
 
-export const createCasesClientWithMockSavedObjectsClient = async ({
-  savedObjectsClient,
-  badAuth = false,
-  omitFromContext = [],
-}: {
-  savedObjectsClient: any;
-  badAuth?: boolean;
-  omitFromContext?: string[];
-}): Promise<{
-  client: CasesClient;
-  services: {
-    userActionService: jest.Mocked<CaseUserActionServiceSetup>;
-    alertsService: jest.Mocked<AlertServiceContract>;
-  };
-  esClient: DeeplyMockedKeys<ElasticsearchClient>;
-}> => {
-  const esClient = elasticsearchServiceMock.createElasticsearchClient();
-  const log = loggingSystemMock.create().get('case');
+type CasesSubClientMock = jest.Mocked<CasesSubClient>;
 
-  const auth = badAuth ? authenticationMock.createInvalid() : authenticationMock.create();
-  const caseService = new CaseService(log, auth);
-  const caseConfigureServicePlugin = new CaseConfigureService(log);
-  const connectorMappingsServicePlugin = new ConnectorMappingsService(log);
-
-  const caseConfigureService = await caseConfigureServicePlugin.setup();
-
-  const connectorMappingsService = await connectorMappingsServicePlugin.setup();
-  const userActionService = {
-    getUserActions: jest.fn(),
-    postUserActions: jest.fn(),
-  };
-
-  const alertsService = {
-    initialize: jest.fn(),
-    updateAlertsStatus: jest.fn(),
-    getAlerts: jest.fn(),
-  };
-
-  const casesClient = createExternalCasesClient({
-    savedObjectsClient,
-    user: auth.getCurrentUser(),
-    caseService,
-    caseConfigureService,
-    connectorMappingsService,
-    userActionService,
-    alertsService,
-    scopedClusterClient: esClient,
-    logger: log,
-  });
+const createCasesSubClientMock = (): CasesSubClientMock => {
   return {
-    client: casesClient,
-    services: { userActionService, alertsService },
-    esClient,
+    create: jest.fn(),
+    find: jest.fn(),
+    get: jest.fn(),
+    push: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    getTags: jest.fn(),
+    getReporters: jest.fn(),
+    getCaseIDsByAlertID: jest.fn(),
   };
+};
+
+type AttachmentsSubClientMock = jest.Mocked<AttachmentsSubClient>;
+
+const createAttachmentsSubClientMock = (): AttachmentsSubClientMock => {
+  return {
+    add: jest.fn(),
+    deleteAll: jest.fn(),
+    delete: jest.fn(),
+    find: jest.fn(),
+    getAll: jest.fn(),
+    get: jest.fn(),
+    update: jest.fn(),
+  };
+};
+
+type UserActionsSubClientMock = jest.Mocked<UserActionsSubClient>;
+
+const createUserActionsSubClientMock = (): UserActionsSubClientMock => {
+  return {
+    getAll: jest.fn(),
+  };
+};
+
+type SubCasesClientMock = jest.Mocked<SubCasesClient>;
+
+const createSubCasesClientMock = (): SubCasesClientMock => {
+  return {
+    delete: jest.fn(),
+    find: jest.fn(),
+    get: jest.fn(),
+    update: jest.fn(),
+  };
+};
+
+type ConfigureSubClientMock = jest.Mocked<ConfigureSubClient>;
+
+const createConfigureSubClientMock = (): ConfigureSubClientMock => {
+  return {
+    get: jest.fn(),
+    getConnectors: jest.fn(),
+    update: jest.fn(),
+    create: jest.fn(),
+  };
+};
+
+type StatsSubClientMock = jest.Mocked<StatsSubClient>;
+
+const createStatsSubClientMock = (): StatsSubClientMock => {
+  return {
+    getStatusTotalsByType: jest.fn(),
+  };
+};
+
+export interface CasesClientMock extends CasesClient {
+  cases: CasesSubClientMock;
+  attachments: AttachmentsSubClientMock;
+  userActions: UserActionsSubClientMock;
+  subCases: SubCasesClientMock;
+}
+
+export const createCasesClientMock = (): CasesClientMock => {
+  const client: PublicContract<CasesClient> = {
+    cases: createCasesSubClientMock(),
+    attachments: createAttachmentsSubClientMock(),
+    userActions: createUserActionsSubClientMock(),
+    subCases: createSubCasesClientMock(),
+    configure: createConfigureSubClientMock(),
+    stats: createStatsSubClientMock(),
+  };
+  return (client as unknown) as CasesClientMock;
+};
+
+export type CasesClientFactoryMock = jest.Mocked<CasesClientFactory>;
+
+export const createCasesClientFactory = (): CasesClientFactoryMock => {
+  const factory: PublicMethodsOf<CasesClientFactory> = {
+    initialize: jest.fn(),
+    create: jest.fn(),
+  };
+
+  return (factory as unknown) as CasesClientFactoryMock;
 };
