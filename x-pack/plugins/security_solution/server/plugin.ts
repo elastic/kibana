@@ -29,6 +29,7 @@ import {
   PluginStartContract as AlertPluginStartContract,
 } from '../../alerting/server';
 
+import { PluginStartContract as CasesPluginStartContract } from '../../cases/server';
 import {
   ECS_COMPONENT_TEMPLATE_NAME,
   TECHNICAL_COMPONENT_TEMPLATE_NAME,
@@ -119,6 +120,7 @@ export interface StartPlugins {
   taskManager?: TaskManagerStartContract;
   telemetry?: TelemetryPluginStart;
   security: SecurityPluginStart;
+  cases?: CasesPluginStartContract;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -528,6 +530,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       security: plugins.security,
       alerting: plugins.alerting,
       config: this.config!,
+      cases: plugins.cases,
       logger,
       manifestManager,
       registerIngestCallback,
