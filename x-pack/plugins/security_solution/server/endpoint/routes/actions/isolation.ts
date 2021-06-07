@@ -20,6 +20,7 @@ import {
 import { getAgentIDsForEndpoints } from '../../services';
 import { EndpointAppContext } from '../../types';
 import { APP_ID } from '../../../../common/constants';
+import { CommentType } from '../../../../../cases/common';
 import { userCanIsolate } from '../../../../common/endpoint/actions';
 
 /**
