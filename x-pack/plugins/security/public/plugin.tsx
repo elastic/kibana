@@ -176,6 +176,9 @@ export interface SecurityPluginSetup {
 }
 
 export interface SecurityPluginStart {
+  /**
+   * Exposes the ability to add custom links to the dropdown menu in the top right, where the users Avatar is.
+   */
   navControlService: SecurityNavControlServiceStart;
   /**
    * Exposes authentication information about the currently logged in user.

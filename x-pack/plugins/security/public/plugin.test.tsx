@@ -43,7 +43,6 @@ describe('Security Plugin', () => {
           }
         )
       ).toEqual({
-        __legacyCompat: { logoutUrl: '/some-base-path/logout', tenant: '/some-base-path' },
         authc: { getCurrentUser: expect.any(Function), areAPIKeysEnabled: expect.any(Function) },
         license: {
           isLicenseAvailable: expect.any(Function),
@@ -52,7 +51,6 @@ describe('Security Plugin', () => {
           getFeatures: expect.any(Function),
           features$: expect.any(Observable),
         },
-        sessionTimeout: expect.any(SessionTimeout),
       });
     });
 
