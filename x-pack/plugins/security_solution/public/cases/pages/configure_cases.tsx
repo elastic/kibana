@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { SecurityPageName } from '../../app/types';
@@ -22,8 +21,10 @@ import * as i18n from './translations';
 import { APP_ID } from '../../../common/constants';
 
 const ConfigureCasesPageComponent: React.FC = () => {
-  const { cases } = useKibana().services;
-  const history = useHistory();
+  const {
+    application: { navigateToApp },
+    cases,
+  } = useKibana().services;
   const userPermissions = useGetUserCasesPermissions();
   const search = useGetUrlSearch(navTabs.case);
 
@@ -37,7 +38,7 @@ const ConfigureCasesPageComponent: React.FC = () => {
   );
 
   if (userPermissions != null && !userPermissions.read) {
-    history.push(getCaseUrl(search));
+    navigateToApp(`${APP_ID}:${SecurityPageName.case}`, { path: getCaseUrl(search) });
     return null;
   }
 

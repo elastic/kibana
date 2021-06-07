@@ -7,7 +7,6 @@
 
 import React, { useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import { SearchResponse } from 'elasticsearch';
 import { isEmpty } from 'lodash';
 
@@ -21,7 +20,6 @@ import {
 } from '../../../common/components/link_to';
 import { Ecs } from '../../../../common/ecs';
 import { Case } from '../../../../../cases/common';
-import { TimelineNonEcsData } from '../../../../common/search_strategy';
 import { TimelineId } from '../../../../common/types/timeline';
 import { SecurityPageName } from '../../../app/types';
 import { KibanaServices, useKibana } from '../../../common/lib/kibana';
@@ -70,7 +68,6 @@ const TimelineDetailsPanel = () => {
 };
 
 const InvestigateInTimelineActionComponent = (alertIds: string[]) => {
-  const EMPTY_ARRAY: TimelineNonEcsData[] = [];
   const fetchEcsAlertsData = async (fetchAlertIds?: string[]): Promise<Ecs[]> => {
     if (isEmpty(fetchAlertIds)) {
       return [];
@@ -104,7 +101,7 @@ const InvestigateInTimelineActionComponent = (alertIds: string[]) => {
       key="investigate-in-timeline"
       ecsRowData={null}
       fetchEcsAlertsData={fetchEcsAlertsData}
-      nonEcsRowData={EMPTY_ARRAY}
+      nonEcsRowData={[]}
     />
   );
 };
@@ -127,7 +124,6 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
     cases: casesUi,
     application: { navigateToApp },
   } = useKibana().services;
-  const history = useHistory();
   const dispatch = useDispatch();
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { formatUrl: detectionsFormatUrl, search: detectionsUrlSearch } = useFormatUrl(
@@ -136,42 +132,16 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
 
   const allCasesLink = getCaseUrl(search);
   const formattedAllCasesLink = formatUrl(allCasesLink);
-  const backToAllCasesOnClick = useCallback(
-    (ev) => {
-      ev.preventDefault();
-      history.push(allCasesLink);
-    },
-    [allCasesLink, history]
-  );
+  const configureCasesHref = formatUrl(getConfigureCasesUrl());
+
   const caseDetailsLink = formatUrl(getCaseDetailsUrl({ id: caseId }), { absolute: true });
-  const getCaseDetailHrefWithCommentId = (commentId: string) => {
-    return formatUrl(getCaseDetailsUrlWithCommentId({ id: caseId, commentId, subCaseId }), {
+  const getCaseDetailHrefWithCommentId = (commentId: string) =>
+    formatUrl(getCaseDetailsUrlWithCommentId({ id: caseId, commentId, subCaseId }), {
       absolute: true,
     });
-  };
-
-  const configureCasesHref = formatUrl(getConfigureCasesUrl());
-  const onConfigureCasesNavClick = useCallback(
-    (ev) => {
-      ev.preventDefault();
-      history.push(getConfigureCasesUrl(search));
-    },
-    [history, search]
-  );
-
-  const onDetectionsRuleDetailsClick = useCallback(
-    (ruleId: string | null | undefined) => {
-      navigateToApp(`${APP_ID}:${SecurityPageName.detections}`, {
-        path: getRuleDetailsUrl(ruleId ?? ''),
-      });
-    },
-    [navigateToApp]
-  );
 
   const getDetectionsRuleDetailsHref = useCallback(
-    (ruleId) => {
-      return detectionsFormatUrl(getRuleDetailsUrl(ruleId ?? '', detectionsUrlSearch));
-    },
+    (ruleId) => detectionsFormatUrl(getRuleDetailsUrl(ruleId ?? '', detectionsUrlSearch)),
     [detectionsFormatUrl, detectionsUrlSearch]
   );
 
@@ -207,27 +177,35 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
       {casesUi.getCaseView({
         allCasesNavigation: {
           href: formattedAllCasesLink,
-          onClick: backToAllCasesOnClick,
+          onClick: async () =>
+            navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+              path: allCasesLink,
+            }),
         },
         caseDetailsNavigation: {
           href: caseDetailsLink,
-          onClick: () => {
+          onClick: async () =>
             navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
               path: getCaseDetailsUrl({ id: caseId }),
-            });
-          },
+            }),
         },
         caseId,
         configureCasesNavigation: {
           href: configureCasesHref,
-          onClick: onConfigureCasesNavClick,
+          onClick: async () =>
+            navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+              path: getConfigureCasesUrl(search),
+            }),
         },
         getCaseDetailHrefWithCommentId,
         onCaseDataSuccess,
         onComponentInitialized,
         ruleDetailsNavigation: {
           href: getDetectionsRuleDetailsHref,
-          onClick: onDetectionsRuleDetailsClick,
+          onClick: async (ruleId: string | null | undefined) =>
+            navigateToApp(`${APP_ID}:${SecurityPageName.detections}`, {
+              path: getRuleDetailsUrl(ruleId ?? ''),
+            }),
         },
         showAlertDetails,
         subCaseId,
