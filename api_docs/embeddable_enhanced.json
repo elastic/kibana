@@ -96,6 +96,14 @@
             "description": [],
             "signature": [
               {
+                "pluginId": "embeddableEnhanced",
+                "scope": "public",
+                "docId": "kibEmbeddableEnhancedPluginApi",
+                "section": "def-public.EnhancedEmbeddable",
+                "text": "EnhancedEmbeddable"
+              },
+              "<",
+              {
                 "pluginId": "embeddable",
                 "scope": "public",
                 "docId": "kibEmbeddablePluginApi",
@@ -118,15 +126,7 @@
                 "section": "def-public.EmbeddableOutput",
                 "text": "EmbeddableOutput"
               },
-              "> & { enhancements: { dynamicActions: ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "public",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-public.DynamicActionManager",
-                "text": "DynamicActionManager"
-              },
-              "; }; }"
+              ">>"
             ],
             "source": {
               "path": "x-pack/plugins/embeddable_enhanced/public/types.ts",
@@ -268,7 +268,13 @@
         "label": "drilldownGrouping",
         "description": [],
         "signature": [
-          "PresentableGroup",
+          {
+            "pluginId": "uiActions",
+            "scope": "public",
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.PresentableGrouping",
+            "text": "PresentableGrouping"
+          },
           "<{ embeddable?: ",
           {
             "pluginId": "embeddable",
@@ -293,7 +299,7 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          "> | undefined; }>[]"
+          "> | undefined; }>"
         ],
         "source": {
           "path": "x-pack/plugins/embeddable_enhanced/public/actions/drilldown_grouping.ts",
@@ -310,15 +316,7 @@
         "label": "EnhancedEmbeddable",
         "description": [],
         "signature": [
-          "E & { enhancements: { dynamicActions: ",
-          {
-            "pluginId": "uiActionsEnhanced",
-            "scope": "public",
-            "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-public.DynamicActionManager",
-            "text": "DynamicActionManager"
-          },
-          "; }; }"
+          "E & { enhancements: {    dynamicActions: DynamicActionManager;}; }"
         ],
         "source": {
           "path": "x-pack/plugins/embeddable_enhanced/public/types.ts",

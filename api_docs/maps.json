@@ -48,12 +48,7 @@
             "docId": "kibEmbeddablePluginApi",
             "section": "def-public.ReferenceOrValueEmbeddable",
             "text": "ReferenceOrValueEmbeddable"
-          },
-          "<",
-          "MapByValueInput",
-          ", ",
-          "MapByReferenceInput",
-          ">"
+          }
         ],
         "source": {
           "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
@@ -907,7 +902,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 487
+              "lineNumber": 486
             },
             "deprecated": false,
             "children": [],
@@ -925,7 +920,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 501
+              "lineNumber": 500
             },
             "deprecated": false,
             "children": [],
@@ -943,7 +938,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 517
+              "lineNumber": 516
             },
             "deprecated": false,
             "children": [],
@@ -961,7 +956,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 523
+              "lineNumber": 522
             },
             "deprecated": false,
             "children": [],
@@ -1066,9 +1061,7 @@
               "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
               "lineNumber": 36
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "deprecated": false
           },
           {
             "parentPluginId": "maps",
@@ -1149,23 +1142,7 @@
               "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
               "lineNumber": 40
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.layerId",
-                "type": "string",
-                "tags": [],
-                "label": "layerId",
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-                  "lineNumber": 40
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           },
           {
             "parentPluginId": "maps",
@@ -1196,26 +1173,7 @@
               "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
               "lineNumber": 42
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.__0",
-                "type": "Object",
-                "tags": [],
-                "label": "__0",
-                "description": [],
-                "signature": [
-                  "{ layerId: string; featureId?: string | number | undefined; mbProperties: GeoJSON.GeoJsonProperties; }"
-                ],
-                "source": {
-                  "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-                  "lineNumber": 42
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           },
           {
             "parentPluginId": "maps",
@@ -1231,26 +1189,7 @@
               "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
               "lineNumber": 51
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.__0",
-                "type": "Object",
-                "tags": [],
-                "label": "__0",
-                "description": [],
-                "signature": [
-                  "{ layerId: string; featureId?: string | number | undefined; }"
-                ],
-                "source": {
-                  "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-                  "lineNumber": 51
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           },
           {
             "parentPluginId": "maps",
@@ -1390,22 +1329,7 @@
         "label": "MapEmbeddableOutput",
         "description": [],
         "signature": [
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.EmbeddableOutput",
-            "text": "EmbeddableOutput"
-          },
-          " & { indexPatterns: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataIndexPatternsPluginApi",
-            "section": "def-common.IIndexPattern",
-            "text": "IIndexPattern"
-          },
-          "[]; }"
+          "EmbeddableOutput & { indexPatterns: IIndexPattern[]; }"
         ],
         "source": {
           "path": "x-pack/plugins/maps/public/embeddable/types.ts",
@@ -2325,10 +2249,13 @@
       {
         "parentPluginId": "maps",
         "id": "def-common.APP_NAME",
-        "type": "string",
+        "type": "Any",
         "tags": [],
         "label": "APP_NAME",
         "description": [],
+        "signature": [
+          "any"
+        ],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
           "lineNumber": 33
@@ -2356,10 +2283,13 @@
       {
         "parentPluginId": "maps",
         "id": "def-common.COUNT_PROP_LABEL",
-        "type": "string",
+        "type": "Any",
         "tags": [],
         "label": "COUNT_PROP_LABEL",
         "description": [],
+        "signature": [
+          "any"
+        ],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
           "lineNumber": 195
@@ -3368,7 +3298,7 @@
         "label": "RawValue",
         "description": [],
         "signature": [
-          "string | number | boolean | string[] | null | undefined"
+          "undefined | null | string | number | false | true | string[]"
         ],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
