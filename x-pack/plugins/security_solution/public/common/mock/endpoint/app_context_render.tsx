@@ -23,6 +23,7 @@ import { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { PLUGIN_ID } from '../../../../../fleet/common';
 import { APP_ID } from '../../../../common/constants';
 import { KibanaContextProvider } from '../../lib/kibana';
+import { MANAGEMENT_APP_ID } from '../../../management/common/constants';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
@@ -156,6 +157,8 @@ const createCoreStartMock = (): ReturnType<typeof coreMock.createStart> => {
         return '/app/fleet';
       case APP_ID:
         return '/app/security';
+      case MANAGEMENT_APP_ID:
+        return '/app/security/administration';
       default:
         return `${appId} not mocked!`;
     }

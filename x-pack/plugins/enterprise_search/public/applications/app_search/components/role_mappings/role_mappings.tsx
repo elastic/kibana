@@ -10,6 +10,7 @@ import React, { useEffect } from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
+  EuiButton,
   EuiEmptyPrompt,
   EuiPageContent,
   EuiPageContentBody,
@@ -20,22 +21,31 @@ import {
 import { FlashMessages } from '../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { Loading } from '../../../shared/loading';
-import { AddRoleMappingButton, RoleMappingsTable } from '../../../shared/role_mapping';
+import { RoleMappingsTable } from '../../../shared/role_mapping';
 import {
   EMPTY_ROLE_MAPPINGS_TITLE,
+  ROLE_MAPPING_ADD_BUTTON,
   ROLE_MAPPINGS_TITLE,
   ROLE_MAPPINGS_DESCRIPTION,
 } from '../../../shared/role_mapping/constants';
 
-import { ROLE_MAPPING_NEW_PATH } from '../../routes';
-
 import { ROLE_MAPPINGS_ENGINE_ACCESS_HEADING, EMPTY_ROLE_MAPPINGS_BODY } from './constants';
+import { RoleMapping } from './role_mapping';
 import { RoleMappingsLogic } from './role_mappings_logic';
-import { generateRoleMappingPath } from './utils';
 
 export const RoleMappings: React.FC = () => {
-  const { initializeRoleMappings, resetState } = useActions(RoleMappingsLogic);
-  const { roleMappings, multipleAuthProvidersConfig, dataLoading } = useValues(RoleMappingsLogic);
+  const {
+    initializeRoleMappings,
+    initializeRoleMapping,
+    handleDeleteMapping,
+    resetState,
+  } = useActions(RoleMappingsLogic);
+  const {
+    roleMappings,
+    multipleAuthProvidersConfig,
+    dataLoading,
+    roleMappingFlyoutOpen,
+  } = useValues(RoleMappingsLogic);
 
   useEffect(() => {
     initializeRoleMappings();
@@ -44,7 +54,11 @@ export const RoleMappings: React.FC = () => {
 
   if (dataLoading) return <Loading />;
 
-  const addMappingButton = <AddRoleMappingButton path={ROLE_MAPPING_NEW_PATH} />;
+  const addMappingButton = (
+    <EuiButton fill onClick={() => initializeRoleMapping()}>
+      {ROLE_MAPPING_ADD_BUTTON}
+    </EuiButton>
+  );
 
   const roleMappingEmptyState = (
     <EuiPanel paddingSize="l" color="subdued" hasBorder={false}>
@@ -63,8 +77,9 @@ export const RoleMappings: React.FC = () => {
       accessItemKey="engines"
       accessHeader={ROLE_MAPPINGS_ENGINE_ACCESS_HEADING}
       addMappingButton={addMappingButton}
-      getRoleMappingPath={generateRoleMappingPath}
+      initializeRoleMapping={initializeRoleMapping}
       shouldShowAuthProvider={multipleAuthProvidersConfig}
+      handleDeleteMapping={handleDeleteMapping}
     />
   );
 
@@ -72,6 +87,8 @@ export const RoleMappings: React.FC = () => {
     <>
       <SetPageChrome trail={[ROLE_MAPPINGS_TITLE]} />
       <EuiPageHeader pageTitle={ROLE_MAPPINGS_TITLE} description={ROLE_MAPPINGS_DESCRIPTION} />
+
+      {roleMappingFlyoutOpen && <RoleMapping />}
       <EuiPageContent hasShadow={false} hasBorder={roleMappings.length > 0}>
         <EuiPageContentBody>
           <FlashMessages />

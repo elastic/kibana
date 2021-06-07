@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import uuid from 'uuid';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { IEvent } from '../../../../plugins/event_log/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 

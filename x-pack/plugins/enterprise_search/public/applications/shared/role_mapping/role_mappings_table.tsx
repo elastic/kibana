@@ -8,6 +8,7 @@
 import React, { Fragment, useState } from 'react';
 
 import {
+  EuiButtonIcon,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,8 +26,7 @@ import { i18n } from '@kbn/i18n';
 
 import { ASRoleMapping } from '../../app_search/types';
 import { WSRoleMapping } from '../../workplace_search/types';
-import { MANAGE_BUTTON_LABEL } from '../constants';
-import { EuiLinkTo } from '../react_router_helpers';
+import { MANAGE_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../constants';
 import { RoleRules } from '../types';
 
 import './role_mappings_table.scss';
@@ -57,7 +57,8 @@ interface Props {
   addMappingButton: React.ReactNode;
   accessAllEngines?: boolean;
   shouldShowAuthProvider?: boolean;
-  getRoleMappingPath(roleId: string): string;
+  initializeRoleMapping(roleMappingId: string): void;
+  handleDeleteMapping(roleMappingId: string): void;
 }
 
 const MAX_CELL_WIDTH = 24;
@@ -72,8 +73,9 @@ export const RoleMappingsTable: React.FC<Props> = ({
   accessHeader,
   roleMappings,
   addMappingButton,
-  getRoleMappingPath,
   shouldShowAuthProvider,
+  initializeRoleMapping,
+  handleDeleteMapping,
 }) => {
   const [filterValue, updateValue] = useState('');
 
@@ -95,6 +97,23 @@ export const RoleMappingsTable: React.FC<Props> = ({
   const filteredResults = standardizeRoleMapping.filter(filterResults);
   const getFirstAttributeName = (rules: RoleRules): string => Object.entries(rules)[0][0];
   const getFirstAttributeValue = (rules: RoleRules): string => Object.entries(rules)[0][1];
+
+  const rowActions = (id: string) => (
+    <>
+      <EuiButtonIcon
+        onClick={() => initializeRoleMapping(id)}
+        iconType="pencil"
+        aria-label={MANAGE_BUTTON_LABEL}
+        data-test-subj="ManageButton"
+      />{' '}
+      <EuiButtonIcon
+        onClick={() => handleDeleteMapping(id)}
+        iconType="trash"
+        aria-label={DELETE_BUTTON_LABEL}
+        data-test-subj="DeleteButton"
+      />
+    </>
+  );
 
   return (
     <>
@@ -155,7 +174,7 @@ export const RoleMappingsTable: React.FC<Props> = ({
                     </EuiTableRowCell>
                   )}
                   <EuiTableRowCell align="right">
-                    {id && <EuiLinkTo to={getRoleMappingPath(id)}>{MANAGE_BUTTON_LABEL}</EuiLinkTo>}
+                    {id && rowActions(id)}
                     {toolTip && <EuiIconTip position="left" content={toolTip.content} />}
                   </EuiTableRowCell>
                 </EuiTableRow>
