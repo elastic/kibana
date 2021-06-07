@@ -106,7 +106,7 @@ export const DELETE_ROLE_MAPPING_BUTTON = i18n.translate(
 export const FILTER_ROLE_MAPPINGS_PLACEHOLDER = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.filterRoleMappingsPlaceholder',
   {
-    defaultMessage: 'Filter roles...',
+    defaultMessage: 'Filter role mappings',
   }
 );
 
