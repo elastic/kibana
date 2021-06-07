@@ -18,7 +18,7 @@ describe('CaseActionBar', () => {
   const defaultProps = {
     allCasesNavigation: {
       href: 'all-cases-href',
-      onClick: jest.fn(),
+      onClick: () => {},
     },
     caseData: basicCase,
     isAlerting: true,

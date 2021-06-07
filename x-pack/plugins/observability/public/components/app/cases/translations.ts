@@ -47,24 +47,12 @@ export const NAME = i18n.translate('xpack.observability.cases.caseView.name', {
   defaultMessage: 'Name',
 });
 
-export const OPENED_ON = i18n.translate('xpack.observability.cases.caseView.openedOn', {
-  defaultMessage: 'Opened on',
-});
-
-export const CLOSED_ON = i18n.translate('xpack.observability.cases.caseView.closedOn', {
-  defaultMessage: 'Closed on',
-});
-
 export const REPORTER = i18n.translate('xpack.observability.cases.caseView.reporterLabel', {
   defaultMessage: 'Reporter',
 });
 
 export const PARTICIPANTS = i18n.translate('xpack.observability.cases.caseView.particpantsLabel', {
   defaultMessage: 'Participants',
-});
-
-export const CREATE_BC_TITLE = i18n.translate('xpack.observability.cases.caseView.breadcrumb', {
-  defaultMessage: 'Create',
 });
 
 export const CREATE_TITLE = i18n.translate('xpack.observability.cases.caseView.create', {

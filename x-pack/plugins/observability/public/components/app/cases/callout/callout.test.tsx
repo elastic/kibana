@@ -30,7 +30,7 @@ describe('Callout', () => {
     jest.clearAllMocks();
   });
 
-  it('It renders the callout', () => {
+  it('renders the callout', () => {
     const wrapper = mount(<CallOut {...defaultProps} />);
     expect(wrapper.find(`[data-test-subj="case-callout-md5-hex"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="callout-messages-md5-hex"]`).exists()).toBeTruthy();
@@ -42,7 +42,7 @@ describe('Callout', () => {
     expect(wrapper.find(`[data-test-subj="case-callout-md5-hex"]`).exists()).toBeFalsy();
   });
 
-  it('does not shows any messages when the list is empty', () => {
+  it('does not show any messages when the list is empty', () => {
     const wrapper = mount(<CallOut {...defaultProps} messages={[]} />);
     expect(wrapper.find(`[data-test-subj="callout-messages-md5-hex"]`).exists()).toBeFalsy();
   });

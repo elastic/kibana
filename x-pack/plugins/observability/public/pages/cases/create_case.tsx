@@ -29,9 +29,9 @@ export const CreateCasePage = React.memo(() => {
   } = useKibana().services;
 
   const goTo = useCallback(
-    (ev) => {
+    async (ev) => {
       ev.preventDefault();
-      navigateToApp(`${CASES_APP_ID}`);
+      return navigateToApp(CASES_APP_ID);
     },
     [navigateToApp]
   );
