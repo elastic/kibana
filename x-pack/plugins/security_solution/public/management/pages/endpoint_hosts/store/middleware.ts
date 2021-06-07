@@ -30,6 +30,9 @@ import {
   getIsIsolationRequestPending,
   getCurrentIsolationRequestState,
   getActivityLogData,
+  getActivityLogDataPaging,
+  getPreviousLogData,
+  hasPreviousLogData,
 } from './selectors';
 import { EndpointState, PolicyIds } from '../types';
 import {
@@ -349,9 +352,10 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       });
 
       try {
-        const activityLog = await coreStart.http.get<ActivityLog>(
-          resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, { agent_id: selectedAgent(getState()) })
-        );
+        const route = resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, {
+          agent_id: selectedAgent(getState()),
+        });
+        const activityLog = await coreStart.http.get<ActivityLog>(route);
         dispatch({
           type: 'endpointDetailsActivityLogChanged',
           payload: createLoadedResourceState<ActivityLog>(activityLog),
@@ -376,6 +380,47 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
         dispatch({
           type: 'serverFailedToReturnEndpointPolicyResponse',
           payload: error,
+        });
+      }
+    }
+
+    // page activity log API
+    if (action.type === 'appRequestedActivityLog' && hasSelectedEndpoint(getState())) {
+      dispatch({
+        type: 'endpointDetailsActivityLogChanged',
+        // ts error to be fixed when AsyncResourceState is refactored (#830)
+        // @ts-expect-error
+        payload: createLoadingResourceState<ActivityLog>(getActivityLogData(getState())),
+      });
+
+      try {
+        const { page, pageSize } = getActivityLogDataPaging(getState());
+        const route = resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, {
+          agent_id: selectedAgent(getState()),
+        });
+        const activityLog = await coreStart.http.get<ActivityLog>(route, {
+          query: { page, page_size: pageSize },
+        });
+
+        if (hasPreviousLogData(getState())) {
+          const previousLogData = getPreviousLogData(getState());
+          const updatedLogData = [...new Set([...previousLogData, ...activityLog])] as ActivityLog;
+          dispatch({
+            type: 'endpointDetailsActivityLogChanged',
+            payload: createLoadedResourceState<ActivityLog>(updatedLogData),
+          });
+          // TODO dispatch 'noNewLogData' if !activityLog.length
+          // resets paging to previous state
+        } else {
+          dispatch({
+            type: 'endpointDetailsActivityLogChanged',
+            payload: createLoadedResourceState<ActivityLog>(activityLog),
+          });
+        }
+      } catch (error) {
+        dispatch({
+          type: 'endpointDetailsActivityLogChanged',
+          payload: createFailedResourceState<ActivityLog>(error.body ?? error),
         });
       }
     }

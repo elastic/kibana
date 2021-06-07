@@ -17,6 +17,7 @@ import {
   HostPolicyResponseActionStatus,
   MetadataQueryStrategyVersions,
   HostStatus,
+  ActivityLog,
 } from '../../../../../common/endpoint/types';
 import { EndpointState, EndpointIndexUIQueryParams } from '../types';
 import { extractListPaginationParams } from '../../../common/routing';
@@ -357,6 +358,30 @@ export const getIsolationRequestError: (
   if (isFailedResourceState(isolateHost)) {
     return isolateHost.error;
   }
+});
+
+export const getActivityLogDataPaging = (
+  state: Immutable<EndpointState>
+): Immutable<Omit<EndpointState['endpointDetails']['activityLog'], 'logData'>> => {
+  return {
+    page: state.endpointDetails.activityLog.page,
+    pageSize: state.endpointDetails.activityLog.pageSize,
+  };
+};
+
+export const getPreviousLogData = (state: Immutable<EndpointState>): Immutable<ActivityLog> => {
+  const logData = state.endpointDetails.activityLog.logData;
+  if (
+    logData.type === 'LoadingResourceState' &&
+    logData.previousState.type === 'LoadedResourceState'
+  ) {
+    return logData.previousState.data;
+  }
+  return [];
+};
+
+export const hasPreviousLogData = createSelector(getPreviousLogData, (logData): boolean => {
+  return logData.length > 0;
 });
 
 export const getActivityLogData = (

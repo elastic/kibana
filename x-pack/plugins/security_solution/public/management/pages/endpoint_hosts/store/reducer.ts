@@ -33,7 +33,10 @@ const handleEndpointDetailsActivityLogChanged: CaseReducer<EndpointDetailsActivi
     ...state!,
     endpointDetails: {
       ...state.endpointDetails!,
-      activityLog: action.payload,
+      activityLog: {
+        ...state.endpointDetails.activityLog,
+        logData: action.payload,
+      },
     },
   };
 };
@@ -118,6 +121,21 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
           ...state.endpointDetails.hostDetails,
           detailsError: action.payload,
           detailsLoading: false,
+        },
+      },
+    };
+  } else if (action.type === 'appRequestedActivityLog') {
+    const pageData = {
+      page: action.payload.page,
+      pageSize: action.payload.pageSize,
+    };
+    return {
+      ...state,
+      endpointDetails: {
+        ...state.endpointDetails!,
+        activityLog: {
+          ...state.endpointDetails.activityLog,
+          ...pageData,
         },
       },
     };
@@ -220,6 +238,12 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
       policyResponseError: undefined,
     };
 
+    const activityLog = {
+      logData: createUninitialisedResourceState(),
+      page: 1,
+      pageSize: 10,
+    };
+
     // Reset `isolationRequestState` if needed
     if (
       uiQueryParams(newState).show !== 'isolate' &&
@@ -236,6 +260,7 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
           ...stateUpdates,
           endpointDetails: {
             ...state.endpointDetails,
+            activityLog,
             hostDetails: {
               ...state.endpointDetails.hostDetails,
               detailsError: undefined,
@@ -253,6 +278,7 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
           ...stateUpdates,
           endpointDetails: {
             ...state.endpointDetails,
+            activityLog,
             hostDetails: {
               ...state.endpointDetails.hostDetails,
               detailsLoading: true,
@@ -269,6 +295,7 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
           ...stateUpdates,
           endpointDetails: {
             ...state.endpointDetails,
+            activityLog,
             hostDetails: {
               ...state.endpointDetails.hostDetails,
               detailsLoading: true,
@@ -287,6 +314,7 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
       ...stateUpdates,
       endpointDetails: {
         ...state.endpointDetails,
+        activityLog,
         hostDetails: {
           ...state.endpointDetails.hostDetails,
           detailsError: undefined,
