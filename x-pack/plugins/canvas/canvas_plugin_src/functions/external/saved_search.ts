@@ -43,7 +43,7 @@ export function savedSearch(): ExpressionFunctionDefinition<
     },
     type: EmbeddableExpressionType,
     fn: (input, { id }) => {
-      const filters = input ? input.and : [];
+      const filters = input?.and ?? [];
       return {
         type: EmbeddableExpressionType,
         input: {

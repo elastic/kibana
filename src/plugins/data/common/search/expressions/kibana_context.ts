@@ -24,11 +24,17 @@ export interface KibanaContextStartDependencies {
   savedObjectsClient: SavedObjectsClientCommon;
 }
 
+interface EmbeddableSavedSearch {
+  type: 'embeddable';
+  input: { id: string };
+  embeddableType: 'search';
+}
+
 interface Arguments {
   q?: KibanaQueryOutput | null;
   filters?: KibanaFilter[] | null;
   timeRange?: KibanaTimerangeOutput | null;
-  savedSearchId?: string | null;
+  savedSearchId?: EmbeddableSavedSearch | string | null;
 }
 
 export type ExpressionFunctionKibanaContext = ExpressionFunctionDefinition<
@@ -38,6 +44,10 @@ export type ExpressionFunctionKibanaContext = ExpressionFunctionDefinition<
   Promise<KibanaContext>,
   ExecutionContext<Adapters, ExecutionContextSearch>
 >;
+
+function isEmbeddableSavedSearch(value: any): value is EmbeddableSavedSearch {
+  return value?.type === 'embeddable' && value?.embeddableType === 'search';
+}
 
 const getParsedValue = (data: any, defaultValue: any) =>
   typeof data === 'string' && data.length ? JSON.parse(data) || defaultValue : defaultValue;
@@ -84,7 +94,7 @@ export const getKibanaContextFn = (
         }),
       },
       savedSearchId: {
-        types: ['string', 'null'],
+        types: ['embeddable', 'string', 'null'],
         default: null,
         help: i18n.translate('data.search.functions.kibana_context.savedSearchId.help', {
           defaultMessage: 'Specify saved search ID to be used for queries and filters',
@@ -130,8 +140,12 @@ export const getKibanaContextFn = (
         ...((args?.filters?.map(unboxExpressionValue) || []) as Filter[]),
       ];
 
-      if (args.savedSearchId) {
-        const obj = await savedObjectsClient.get('search', args.savedSearchId);
+      const savedSearchId = isEmbeddableSavedSearch(args.savedSearchId)
+        ? args.savedSearchId.input.id
+        : args.savedSearchId;
+
+      if (typeof savedSearchId === 'string') {
+        const obj = await savedObjectsClient.get('search', savedSearchId);
         const search = (obj.attributes as any).kibanaSavedObjectMeta.searchSourceJSON as string;
         const { query, filter } = getParsedValue(search, {});
 
