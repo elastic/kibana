@@ -37,7 +37,7 @@ import { ErrorState } from './views/error_state';
 import { GroupsRouter } from './views/groups';
 import { GroupSubNav } from './views/groups/components/group_sub_nav';
 import { Overview } from './views/overview';
-import { RoleMappingsRouter } from './views/role_mappings';
+import { RoleMappings } from './views/role_mappings';
 import { Security } from './views/security';
 import { SettingsRouter } from './views/settings';
 import { SettingsSubNav } from './views/settings/components/settings_sub_nav';
@@ -123,7 +123,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
       </Route>
       <Route path={ROLE_MAPPINGS_PATH}>
         <Layout navigation={<WorkplaceSearchNav />} restrictWidth readOnlyMode={readOnlyMode}>
-          <RoleMappingsRouter />
+          <RoleMappings />
         </Layout>
       </Route>
       <Route path={SECURITY_PATH}>
