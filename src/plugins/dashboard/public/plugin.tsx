@@ -65,6 +65,7 @@ import {
   AddToLibraryAction,
   LibraryNotificationAction,
   CopyToDashboardAction,
+  DashboardCapabilities,
 } from './application';
 import {
   createDashboardUrlGenerator,
@@ -351,6 +352,9 @@ export class DashboardPlugin
     const { notifications, overlays, application } = core;
     const { uiActions, data, share, presentationUtil, embeddable } = plugins;
 
+    const dashboardCapabilities: Readonly<DashboardCapabilities> = application.capabilities
+      .dashboard as DashboardCapabilities;
+
     const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, core.uiSettings);
 
     const expandPanelAction = new ExpandPanelAction();
@@ -395,8 +399,8 @@ export class DashboardPlugin
         overlays,
         embeddable.getStateTransfer(),
         {
-          canCreateNew: Boolean(application.capabilities.dashboard.createNew),
-          canEditExisting: !Boolean(application.capabilities.dashboard.hideWriteControls),
+          canCreateNew: Boolean(dashboardCapabilities.createNew),
+          canEditExisting: Boolean(dashboardCapabilities.showWriteControls),
         },
         presentationUtil.ContextProvider
       );
