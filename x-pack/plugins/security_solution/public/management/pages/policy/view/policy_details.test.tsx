@@ -308,18 +308,14 @@ describe('Policy Details', () => {
         expect(tooltip).toHaveLength(1);
       });
 
-      it('memory popup, message customization options and tooltip are shown', () => {
-        // use query for finding stuff, if it doesn't find it, just returns null
+      it('memory card and user notification checkbox are shown', () => {
+        const memory = policyView.find('EuiPanel[data-test-subj="memoryProtectionsForm"]');
         const userNotificationCheckbox = policyView.find(
           'EuiCheckbox[data-test-subj="memoryUserNotificationCheckbox"]'
         );
-        const userNotificationCustomMessageTextArea = policyView.find(
-          'EuiTextArea[data-test-subj="memoryUserNotificationCustomMessage"]'
-        );
-        const tooltip = policyView.find('EuiIconTip[data-test-subj="memoryTooltip"]');
+
+        expect(memory).toHaveLength(1);
         expect(userNotificationCheckbox).toHaveLength(1);
-        expect(userNotificationCustomMessageTextArea).toHaveLength(1);
-        expect(tooltip).toHaveLength(1);
       });
 
       it('ransomware card is shown', () => {
@@ -346,17 +342,13 @@ describe('Policy Details', () => {
         expect(tooltip).toHaveLength(0);
       });
 
-      it('memory popup, message customization options, and tooltip are hidden', () => {
+      it('memory card, and user notification checkbox are hidden', () => {
+        const memory = policyView.find('EuiPanel[data-test-subj="memoryProtectionsForm"]');
+        expect(memory).toHaveLength(0);
         const userNotificationCheckbox = policyView.find(
           'EuiCheckbox[data-test-subj="memoryUserNotificationCheckbox"]'
         );
-        const userNotificationCustomMessageTextArea = policyView.find(
-          'EuiTextArea[data-test-subj="memoryUserNotificationCustomMessage"]'
-        );
-        const tooltip = policyView.find('EuiIconTip[data-test-subj="memoryTooltip"]');
         expect(userNotificationCheckbox).toHaveLength(0);
-        expect(userNotificationCustomMessageTextArea).toHaveLength(0);
-        expect(tooltip).toHaveLength(0);
       });
 
       it('ransomware card is hidden', () => {
