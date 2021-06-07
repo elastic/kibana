@@ -8,7 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiPageBody, EuiPageContent, EuiTitle, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiPageContentBody, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
 
 import { useComponentTemplatesContext } from '../../component_templates_context';
 import {
@@ -109,20 +109,23 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
   }
 
   return (
-    <EuiPageBody>
-      <EuiPageContent>
-        <EuiTitle size="l">
-          <h1 data-test-subj="pageTitle">
+    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+      <EuiPageHeader
+        pageTitle={
+          <span data-test-subj="pageTitle">
             <FormattedMessage
               id="xpack.idxMgmt.componentTemplateEdit.editPageTitle"
               defaultMessage="Edit component template '{name}'"
               values={{ name: decodedName }}
             />
-          </h1>
-        </EuiTitle>
-        <EuiSpacer size="l" />
-        {content}
-      </EuiPageContent>
-    </EuiPageBody>
+          </span>
+        }
+        bottomBorder
+      />
+
+      <EuiSpacer size="l" />
+
+      {content}
+    </EuiPageContentBody>
   );
 };

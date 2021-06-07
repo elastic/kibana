@@ -8,7 +8,7 @@
 import React, { useEffect, useState, Fragment } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiPageBody, EuiPageContent, EuiTitle, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiPageContentBody, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';
 
 import { TemplateDeserialized } from '../../../../common';
@@ -138,15 +138,11 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
           )}
           <TemplateForm
             title={
-              <EuiTitle size="l">
-                <h1 data-test-subj="pageTitle">
-                  <FormattedMessage
-                    id="xpack.idxMgmt.editTemplate.editTemplatePageTitle"
-                    defaultMessage="Edit template '{name}'"
-                    values={{ name: decodedTemplateName }}
-                  />
-                </h1>
-              </EuiTitle>
+              <FormattedMessage
+                id="xpack.idxMgmt.editTemplate.editTemplatePageTitle"
+                defaultMessage="Edit template '{name}'"
+                values={{ name: decodedTemplateName }}
+              />
             }
             defaultValue={template}
             onSave={onSave}
@@ -163,8 +159,8 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
   }
 
   return (
-    <EuiPageBody>
-      <EuiPageContent>{content}</EuiPageContent>
-    </EuiPageBody>
+    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+      {content}
+    </EuiPageContentBody>
   );
 };
