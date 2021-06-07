@@ -184,7 +184,13 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             id: response.body.rule_type_id,
             uuid: alertId,
             author: response.body.updated_by,
-            category: response.body.rule_type_id,
+            category: 'Test: Firing on a Pattern',
+            license: 'basic',
+            name: response.body.name,
+            namespace: Spaces.space1.id,
+            reference: 'https://www.elastic.co/guide/en/kibana/master/stack-rules.html',
+            ruleset: 'alertsFixture',
+            version: '8.0.0-SNAPSHOT',
           },
         });
       }

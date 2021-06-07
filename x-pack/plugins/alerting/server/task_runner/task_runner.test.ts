@@ -299,7 +299,7 @@ describe('Task Runner', () => {
           "reference": "https://www.elastic.co/guide/en/kibana/master/stack-rules.html",
           "ruleset": "alerts",
           "uuid": "1",
-          "version": undefined,
+          "version": "1.0.0",
         },
       }
     `);
@@ -420,7 +420,7 @@ describe('Task Runner', () => {
         reference: 'https://www.elastic.co/guide/en/kibana/master/stack-rules.html',
         ruleset: 'alerts',
         uuid: '1',
-        version: undefined,
+        version: '1.0.0',
       },
     });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
@@ -441,7 +441,7 @@ describe('Task Runner', () => {
         reference: 'https://www.elastic.co/guide/en/kibana/master/stack-rules.html',
         ruleset: 'alerts',
         uuid: '1',
-        version: undefined,
+        version: '1.0.0',
       },
     });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(3, {
@@ -482,7 +482,7 @@ describe('Task Runner', () => {
         reference: 'https://www.elastic.co/guide/en/kibana/master/stack-rules.html',
         ruleset: 'alerts',
         uuid: '1',
-        version: undefined,
+        version: '1.0.0',
       },
     });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(4, {
@@ -503,7 +503,7 @@ describe('Task Runner', () => {
         reference: 'https://www.elastic.co/guide/en/kibana/master/stack-rules.html',
         ruleset: 'alerts',
         uuid: '1',
-        version: undefined,
+        version: '1.0.0',
       },
     });
   });
@@ -593,7 +593,7 @@ describe('Task Runner', () => {
         reference: 'https://www.elastic.co/guide/en/kibana/master/stack-rules.html',
         ruleset: 'alerts',
         uuid: '1',
-        version: undefined,
+        version: '1.0.0',
       },
     });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
@@ -627,7 +627,7 @@ describe('Task Runner', () => {
         reference: 'https://www.elastic.co/guide/en/kibana/master/stack-rules.html',
         ruleset: 'alerts',
         uuid: '1',
-        version: undefined,
+        version: '1.0.0',
       },
     });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(3, {
@@ -662,7 +662,7 @@ describe('Task Runner', () => {
         reference: 'https://www.elastic.co/guide/en/kibana/master/stack-rules.html',
         ruleset: 'alerts',
         uuid: '1',
-        version: undefined,
+        version: '1.0.0',
       },
     });
   });
@@ -810,7 +810,7 @@ describe('Task Runner', () => {
               "reference": "https://www.elastic.co/guide/en/kibana/master/stack-rules.html",
               "ruleset": "alerts",
               "uuid": "1",
-              "version": undefined,
+              "version": "1.0.0",
             },
           },
         ],
@@ -851,7 +851,7 @@ describe('Task Runner', () => {
               "reference": "https://www.elastic.co/guide/en/kibana/master/stack-rules.html",
               "ruleset": "alerts",
               "uuid": "1",
-              "version": undefined,
+              "version": "1.0.0",
             },
           },
         ],
@@ -1075,7 +1075,7 @@ describe('Task Runner', () => {
               "reference": "https://www.elastic.co/guide/en/kibana/master/stack-rules.html",
               "ruleset": "alerts",
               "uuid": "1",
-              "version": undefined,
+              "version": "1.0.0",
             },
           },
         ],
@@ -1115,7 +1115,7 @@ describe('Task Runner', () => {
               "reference": "https://www.elastic.co/guide/en/kibana/master/stack-rules.html",
               "ruleset": "alerts",
               "uuid": "1",
-              "version": undefined,
+              "version": "1.0.0",
             },
           },
         ],
@@ -1161,7 +1161,7 @@ describe('Task Runner', () => {
               "reference": "https://www.elastic.co/guide/en/kibana/master/stack-rules.html",
               "ruleset": "alerts",
               "uuid": "1",
-              "version": undefined,
+              "version": "1.0.0",
             },
           },
         ],
@@ -1202,7 +1202,7 @@ describe('Task Runner', () => {
               "reference": "https://www.elastic.co/guide/en/kibana/master/stack-rules.html",
               "ruleset": "alerts",
               "uuid": "1",
-              "version": undefined,
+              "version": "1.0.0",
             },
           },
         ],
@@ -1602,7 +1602,7 @@ describe('Task Runner', () => {
               "reference": "https://www.elastic.co/guide/en/kibana/master/stack-rules.html",
               "ruleset": "alerts",
               "uuid": "1",
-              "version": undefined,
+              "version": "1.0.0",
             },
           },
         ],
@@ -1642,7 +1642,7 @@ describe('Task Runner', () => {
               "reference": "https://www.elastic.co/guide/en/kibana/master/stack-rules.html",
               "ruleset": "alerts",
               "uuid": "1",
-              "version": undefined,
+              "version": "1.0.0",
             },
           },
         ],
@@ -1683,7 +1683,7 @@ describe('Task Runner', () => {
               "reference": "https://www.elastic.co/guide/en/kibana/master/stack-rules.html",
               "ruleset": "alerts",
               "uuid": "1",
-              "version": undefined,
+              "version": "1.0.0",
             },
           },
         ],

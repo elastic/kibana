@@ -1313,7 +1313,7 @@ instanceStateValue: true
       namespace: spaceId,
       name: alertSearchResultWithoutDates.alertInfo.name,
       author: [alertSearchResultWithoutDates.alertInfo.updatedBy],
-      version: '8.0.0',
+      version: '8.0.0-SNAPSHOT',
     });
 
     expect(event?.message).to.eql(message);
