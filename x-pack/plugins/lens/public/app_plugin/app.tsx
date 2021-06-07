@@ -224,7 +224,7 @@ export function App({
 
     if (usageCollection) {
       usageCollection.reportUiCounter(
-        saveProps.returnToOrigin ? 'dashboard' : 'visualize',
+        incomingState?.originatingApp || 'visualize',
         METRIC_TYPE.CLICK,
         'lens:save'
       );
