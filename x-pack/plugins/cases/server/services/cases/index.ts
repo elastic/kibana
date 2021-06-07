@@ -252,7 +252,7 @@ export class CasesService {
         filter,
       ]);
 
-      let response = await unsecuredSavedObjectsClient.find<
+      const response = await unsecuredSavedObjectsClient.find<
         CommentAttributes,
         GetCaseIdsByAlertIdAggs
       >({
@@ -261,23 +261,9 @@ export class CasesService {
         page: 1,
         perPage: 1,
         sortField: defaultSortField,
-        aggs: this.buildCaseIdsAggs(),
+        aggs: this.buildCaseIdsAggs(MAX_DOCS_PER_PAGE),
         filter: combinedFilter,
       });
-      if (response.total > 100) {
-        response = await unsecuredSavedObjectsClient.find<
-          CommentAttributes,
-          GetCaseIdsByAlertIdAggs
-        >({
-          type: CASE_COMMENT_SAVED_OBJECT,
-          fields: includeFieldsRequiredForAuthentication(),
-          page: 1,
-          perPage: 1,
-          sortField: defaultSortField,
-          aggs: this.buildCaseIdsAggs(response.total),
-          filter: combinedFilter,
-        });
-      }
       return response;
     } catch (error) {
       this.log.error(`Error on GET all cases for alert id ${alertId}: ${error}`);
