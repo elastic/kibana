@@ -47,7 +47,7 @@ interface FormProps {
   dockLinks: DocLinksStart['links'];
   toasts: ToastsStart;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
-  queryText: string;
+  queryText?: string;
 }
 
 interface FormState {
