@@ -6,30 +6,19 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
 import { LocalUIFilters } from './LocalUIFilters';
 import { RumDashboard } from './RumDashboard';
-import { URLFilter } from './URLFilter';
 
 export function RumOverview() {
   useTrackPageview({ app: 'ux', path: 'home' });
   useTrackPageview({ app: 'ux', path: 'home', delay: 15000 });
 
-  const localUIFiltersConfig = useMemo(() => {
-    const config: React.ComponentProps<typeof LocalUIFilters> = {
-      filterNames: ['location', 'device', 'os', 'browser'],
-    };
-
-    return config;
-  }, []);
-
   return (
     <>
-      <LocalUIFilters {...localUIFiltersConfig} showCount={true}>
-        <URLFilter />
-        <EuiSpacer size="s" />
-      </LocalUIFilters>
+      <LocalUIFilters />
+      <EuiSpacer size="xs" />
       <RumDashboard />
     </>
   );

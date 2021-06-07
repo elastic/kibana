@@ -8,7 +8,6 @@
 import useDebounce from 'react-use/lib/useDebounce';
 import React, { useEffect, useState, FormEvent, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import { EuiTitle } from '@elastic/eui';
 import { useUrlParams } from '../../../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../../../hooks/use_fetcher';
 import { I18LABELS } from '../../translations';
@@ -139,22 +138,17 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
   };
 
   return (
-    <>
-      <EuiTitle size="xxxs" textTransform="uppercase">
-        <h4>{I18LABELS.url}</h4>
-      </EuiTitle>
-      <SelectableUrlList
-        initialValue={searchTerm}
-        loading={isLoading}
-        onInputChange={onInputChange}
-        onTermChange={onTermChange}
-        data={{ items, total: data?.total ?? 0 }}
-        onChange={onChange}
-        onClose={onClose}
-        searchValue={searchValue}
-        popoverIsOpen={popoverIsOpen}
-        setPopoverIsOpen={setPopoverIsOpen}
-      />
-    </>
+    <SelectableUrlList
+      initialValue={searchTerm}
+      loading={isLoading}
+      onInputChange={onInputChange}
+      onTermChange={onTermChange}
+      data={{ items, total: data?.total ?? 0 }}
+      onChange={onChange}
+      onClose={onClose}
+      searchValue={searchValue}
+      popoverIsOpen={popoverIsOpen}
+      setPopoverIsOpen={setPopoverIsOpen}
+    />
   );
 }

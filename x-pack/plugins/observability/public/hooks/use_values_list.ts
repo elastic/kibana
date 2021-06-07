@@ -8,14 +8,13 @@
 import { capitalize, union } from 'lodash';
 import { useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { IndexPattern } from '../../../../../src/plugins/data/common';
 import { ESFilter } from '../../../../../typings/elasticsearch';
 import { createEsParams, useEsSearch } from './use_es_search';
 
 export interface Props {
   sourceField: string;
   query?: string;
-  indexPattern: IndexPattern;
+  indexPatternTitle?: string;
   filters?: ESFilter[];
   time?: { from: string; to: string };
   keepHistory?: boolean;
@@ -23,7 +22,7 @@ export interface Props {
 
 export const useValuesList = ({
   sourceField,
-  indexPattern,
+  indexPatternTitle,
   query = '',
   filters,
   time,
@@ -31,7 +30,6 @@ export const useValuesList = ({
 }: Props): { values: string[]; loading?: boolean } => {
   const [debouncedQuery, setDebounceQuery] = useState<string>(query);
   const [values, setValues] = useState<string[]>([]);
-  const [allLoaded, setAllLoaded] = useState(false);
 
   const { from, to } = time ?? {};
 
@@ -57,7 +55,7 @@ export const useValuesList = ({
 
   const { data, loading } = useEsSearch(
     createEsParams({
-      index: indexPattern.title,
+      index: indexPatternTitle!,
       body: {
         query: {
           bool: {
@@ -90,16 +88,12 @@ export const useValuesList = ({
         },
       },
     }),
-    [debouncedQuery, from, to, JSON.stringify(filters)]
+    [debouncedQuery, from, to, JSON.stringify(filters), indexPatternTitle]
   );
 
   useEffect(() => {
     const newValues =
       data?.aggregations?.values.buckets.map(({ key: value }) => String(value)) ?? [];
-
-    if (newValues.length < 100 && !query) {
-      setAllLoaded(true);
-    }
 
     if (keepHistory && query) {
       setValues((prevState) => {

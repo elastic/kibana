@@ -9,44 +9,51 @@ import React from 'react';
 import {
   EuiTitle,
   EuiSpacer,
-  EuiHorizontalRule,
   EuiButtonEmpty,
   EuiAccordion,
   EuiFilterGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
-import { Filter } from './Filter';
 import { useLocalUIFilters } from '../hooks/useLocalUIFilters';
 import { LocalUIFilterName } from '../../../../../common/ui_filter';
 import { useBreakPoints } from '../../../../hooks/use_break_points';
-
-interface Props {
-  filterNames: LocalUIFilterName[];
-  params?: Record<string, string | number | boolean | undefined>;
-  showCount?: boolean;
-  children?: React.ReactNode;
-  shouldFetch?: boolean;
-}
+import { FieldValueSuggestions } from '../../../../../../observability/public';
+import { URLFilter } from '../URLFilter';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { SelectedFilters } from './SelectedFilters';
+import { useDynamicIndexPatternFetcher } from '../../../../hooks/use_dynamic_index_pattern';
+import { TRANSACTION_TYPE } from '../../../../../common/elasticsearch_fieldnames';
+import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
 
 const ButtonWrapper = euiStyled.div`
   display: inline-block;
 `;
+const filterNames: LocalUIFilterName[] = [
+  'location',
+  'device',
+  'os',
+  'browser',
+];
 
-function LocalUIFilters({
-  params,
-  filterNames,
-  children,
-  showCount = true,
-  shouldFetch = true,
-}: Props) {
-  const { filters, setFilterValue, clearValues } = useLocalUIFilters({
+const RUM_DATA_FILTERS = [
+  { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
+];
+
+function LocalUIFilters() {
+  const { filters = [], setFilterValue, clearValues } = useLocalUIFilters({
     filterNames,
-    params,
-    shouldFetch,
   });
 
-  const hasValues = filters.some((filter) => filter.value.length > 0);
+  const { indexPattern } = useDynamicIndexPatternFetcher();
+
+  const {
+    urlParams: { start, end },
+  } = useUrlParams();
+
+  const hasValues = filters.some((filter) => filter.value?.length > 0);
 
   const { isSmall } = useBreakPoints();
 
@@ -61,41 +68,60 @@ function LocalUIFilters({
   );
 
   const content = (
-    <EuiFilterGroup>
-      {children}
-      {filters.map((filter) => {
-        return (
-          <React.Fragment key={filter.name}>
-            <Filter
-              {...filter}
-              onChange={(value) => {
-                setFilterValue(filter.name, value);
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <URLFilter />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFilterGroup fullWidth={true}>
+          {filters.map((filter) => (
+            <FieldValueSuggestions
+              key={filter.name}
+              sourceField={filter.fieldName}
+              indexPatternTitle={indexPattern?.title}
+              label={filter.title}
+              asCombobox={false}
+              selectedValue={filter.value}
+              asFilterButton={true}
+              onChange={(values) => {
+                setFilterValue(filter.name, values || []);
               }}
-              showCount={showCount}
+              filters={RUM_DATA_FILTERS}
+              time={{ from: start!, to: end! }}
             />
-            <EuiHorizontalRule margin="none" />
-          </React.Fragment>
-        );
-      })}
-      {hasValues ? (
-        <>
-          <EuiSpacer size="s" />
-          <ButtonWrapper>
-            <EuiButtonEmpty
-              size="xs"
-              iconType="cross"
-              flush="left"
-              onClick={clearValues}
-              data-cy="clearFilters"
-            >
-              {i18n.translate('xpack.apm.clearFilters', {
-                defaultMessage: 'Clear filters',
-              })}
-            </EuiButtonEmpty>
-          </ButtonWrapper>
-        </>
-      ) : null}
-    </EuiFilterGroup>
+          ))}
+        </EuiFilterGroup>
+        <EuiSpacer size="xs" />
+        {hasValues && (
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow={false}>
+              <SelectedFilters
+                filters={filters}
+                indexPatternTitle={indexPattern?.title}
+                onChange={(name, values) => {
+                  setFilterValue(name, values);
+                }}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <ButtonWrapper>
+                <EuiButtonEmpty
+                  size="xs"
+                  iconType="cross"
+                  flush="left"
+                  onClick={clearValues}
+                  data-cy="clearFilters"
+                >
+                  {i18n.translate('xpack.apm.clearFilters', {
+                    defaultMessage: 'Clear filters',
+                  })}
+                </EuiButtonEmpty>
+              </ButtonWrapper>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 
   return isSmall ? (
@@ -103,11 +129,7 @@ function LocalUIFilters({
       {content}
     </EuiAccordion>
   ) : (
-    <>
-      {title}
-      <EuiSpacer size="s" />
-      {content}
-    </>
+    <>{content}</>
   );
 }
 

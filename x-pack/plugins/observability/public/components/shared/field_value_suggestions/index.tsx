@@ -17,7 +17,7 @@ export function FieldValueSuggestions({
   fullWidth,
   sourceField,
   label,
-  indexPattern,
+  indexPatternTitle,
   selectedValue,
   filters,
   button,
@@ -36,7 +36,7 @@ export function FieldValueSuggestions({
   const [debouncedValue, setDebouncedValue] = useState('');
 
   const { values, loading } = useValuesList({
-    indexPattern,
+    indexPatternTitle,
     query,
     sourceField,
     filters,

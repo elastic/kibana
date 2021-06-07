@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { RumOverview } from '../RumDashboard';
@@ -47,16 +46,5 @@ export function RumHome() {
         <RumOverview />
       </PageTemplateComponent>
     </CsmSharedContextProvider>
-  );
-}
-
-export function UxHomeHeaderItems() {
-  return (
-    <EuiFlexGroup wrap justifyContent={'flexEnd'} responsive={true}>
-      <MainFilters />
-      <EuiFlexItem grow={false}>
-        <DatePicker />
-      </EuiFlexItem>
-    </EuiFlexGroup>
   );
 }

@@ -188,7 +188,7 @@ export function SelectableUrlList({
         onClick: onInputClick,
         onInput: onSearchInput,
         inputRef: setSearchRef,
-        placeholder: I18LABELS.searchByUrl,
+        placeholder: I18LABELS.filterByUrl,
       }}
       listProps={{
         rowHeight: 68,
@@ -207,7 +207,7 @@ export function SelectableUrlList({
             display={'block'}
             button={search}
             closePopover={closePopover}
-            style={{ minWidth: 200 }}
+            style={{ minWidth: 400 }}
           >
             <div style={{ width: 600, maxWidth: '100%' }}>
               <PopOverTitle />

@@ -27,8 +27,6 @@ import { getWebCoreVitals } from '../lib/rum_client/get_web_core_vitals';
 import { hasRumData } from '../lib/rum_client/has_rum_data';
 import { getLocalUIFilters } from '../lib/rum_client/ui_filters/local_ui_filters';
 import { localUIFilterNames } from '../lib/rum_client/ui_filters/local_ui_filters/config';
-import { getRumPageLoadTransactionsProjection } from '../projections/rum_page_load_transactions';
-import { Projection } from '../projections/typings';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 import { rangeRt } from './default_api_types';
@@ -278,99 +276,6 @@ const rumHasDataRoute = createApmServerRoute({
   },
 });
 
-// Everything below here was originally in ui_filters.ts but now is here, since
-// UX is the only part of APM using UI filters now.
-
-const filterNamesRt = t.type({
-  filterNames: jsonRt.pipe(
-    t.array(
-      t.keyof(
-        Object.fromEntries(
-          localUIFilterNames.map((filterName) => [filterName, null])
-        ) as Record<LocalUIFilterName, null>
-      )
-    )
-  ),
-});
-
-const localUiBaseQueryRt = t.intersection([
-  filterNamesRt,
-  uiFiltersRt,
-  rangeRt,
-]);
-
-function createLocalFiltersRoute<
-  TEndpoint extends string,
-  TProjection extends Projection,
-  TQueryRT extends t.HasProps
->({
-  endpoint,
-  getProjection,
-  queryRt,
-}: {
-  endpoint: TEndpoint;
-  getProjection: GetProjection<
-    TProjection,
-    t.IntersectionC<[TQueryRT, BaseQueryType]>
-  >;
-  queryRt: TQueryRT;
-}) {
-  return createApmServerRoute({
-    endpoint,
-    params: t.type({
-      query: t.intersection([localUiBaseQueryRt, queryRt]),
-    }),
-    options: { tags: ['access:apm'] },
-    handler: async (resources) => {
-      const setup = await setupRequest(resources);
-      const { uiFilters } = setup;
-
-      const { query } = resources.params;
-
-      const { filterNames } = query;
-      const projection = await getProjection({
-        query,
-        resources,
-        setup,
-      });
-
-      const localUiFilters = await getLocalUIFilters({
-        projection,
-        setup,
-        uiFilters,
-        localFilterNames: filterNames,
-      });
-
-      return { localUiFilters };
-    },
-  });
-}
-
-const rumOverviewLocalFiltersRoute = createLocalFiltersRoute({
-  endpoint: 'GET /api/apm/rum/local_filters',
-  getProjection: async ({ setup }) => {
-    return getRumPageLoadTransactionsProjection({
-      setup,
-    });
-  },
-  queryRt: t.type({}),
-});
-
-type BaseQueryType = typeof localUiBaseQueryRt;
-
-type GetProjection<
-  TProjection extends Projection,
-  TQueryRT extends t.HasProps
-> = ({
-  query,
-  setup,
-  resources,
-}: {
-  query: t.TypeOf<TQueryRT>;
-  setup: Setup & SetupTimeRange;
-  resources: APMRouteHandlerResources;
-}) => Promise<TProjection> | TProjection;
-
 export const rumRouteRepository = createApmServerRouteRepository()
   .add(rumClientMetricsRoute)
   .add(rumPageLoadDistributionRoute)
@@ -382,5 +287,4 @@ export const rumRouteRepository = createApmServerRouteRepository()
   .add(rumLongTaskMetrics)
   .add(rumUrlSearch)
   .add(rumJSErrors)
-  .add(rumHasDataRoute)
-  .add(rumOverviewLocalFiltersRoute);
+  .add(rumHasDataRoute);

@@ -13,6 +13,7 @@ import { PageLoadAndViews } from './Panels/PageLoadAndViews';
 import { VisitorBreakdownsPanel } from './Panels/VisitorBreakdowns';
 import { useBreakPoints } from '../../../hooks/use_break_points';
 import { ClientMetrics } from './ClientMetrics';
+import { LoadWhenInView } from '../../../../../observability/public';
 
 export function RumDashboard() {
   const { isSmall } = useBreakPoints();
@@ -29,10 +30,14 @@ export function RumDashboard() {
         <PageLoadAndViews />
       </EuiFlexItem>
       <EuiFlexItem>
-        <VisitorBreakdownsPanel />
+        <LoadWhenInView minHeight={470}>
+          <VisitorBreakdownsPanel />
+        </LoadWhenInView>
       </EuiFlexItem>
       <EuiFlexItem>
-        <ImpactfulMetrics />
+        <LoadWhenInView>
+          <ImpactfulMetrics />
+        </LoadWhenInView>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
