@@ -457,11 +457,9 @@ export function LayerPanel(
                     {
                       shouldReplaceDimension,
                       shouldRemoveDimension,
-                      shouldClose,
                     }: {
                       shouldReplaceDimension?: boolean;
                       shouldRemoveDimension?: boolean;
-                      shouldClose?: boolean;
                     } = {}
                   ) => {
                     if (shouldReplaceDimension || shouldRemoveDimension) {
@@ -483,12 +481,6 @@ export function LayerPanel(
                       );
                     } else {
                       props.updateDatasourceAsync(datasourceId, newState);
-                    }
-                    if (!shouldClose) {
-                      setActiveDimension({
-                        ...activeDimension,
-                        isNew: false,
-                      });
                     }
                   },
                 }}

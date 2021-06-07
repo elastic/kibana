@@ -151,8 +151,7 @@ export interface ParamEditorProps<C> {
   currentColumn: C;
   layer: IndexPatternLayer;
   updateLayer: (
-    setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer),
-    shouldClose?: boolean
+    setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
   ) => void;
   toggleFullscreen: () => void;
   setIsCloseable: (isCloseable: boolean) => void;

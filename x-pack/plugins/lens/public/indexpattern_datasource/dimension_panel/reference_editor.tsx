@@ -44,8 +44,7 @@ export interface ReferenceEditorProps {
   validation: RequiredReference;
   columnId: string;
   updateLayer: (
-    setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer),
-    shouldClose?: boolean
+    setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
   ) => void;
   currentIndexPattern: IndexPattern;
 

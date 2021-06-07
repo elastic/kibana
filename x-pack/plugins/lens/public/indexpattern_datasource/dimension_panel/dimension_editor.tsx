@@ -110,8 +110,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     selectedColumn && operationDefinitionMap[selectedColumn.operationType];
 
   const setStateWrapper = (
-    setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer),
-    shouldClose?: boolean
+    setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
   ) => {
     const hypotheticalLayer = typeof setter === 'function' ? setter(state.layers[layerId]) : setter;
     const hasIncompleteColumns = Boolean(hypotheticalLayer.incompleteColumns?.[columnId]);
@@ -128,7 +127,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
         shouldRemoveDimension: Boolean(
           hasIncompleteColumns && prevOperationType === 'fullReference'
         ),
-        shouldClose: Boolean(shouldClose),
       }
     );
   };
@@ -400,8 +398,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   updateLayer={(
                     setter:
                       | IndexPatternLayer
-                      | ((prevLayer: IndexPatternLayer) => IndexPatternLayer),
-                    shouldClose?: boolean
+                      | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
                   ) => {
                     setState(
                       mergeLayer({

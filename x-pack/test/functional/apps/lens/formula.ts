@@ -73,19 +73,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       let input = await find.activeElement();
       await input.type(' ');
       await input.pressKeys(browser.keys.ARROW_LEFT);
-      await input.type(`Men's`);
+      await input.type(`Men's Clothing`);
 
       await PageObjects.common.sleep(100);
 
       let element = await find.byCssSelector('.monaco-editor');
-      expect(await element.getVisibleText()).to.equal(`count(kql='Men\\'s ')`);
+      expect(await element.getVisibleText()).to.equal(`count(kql='Men\\'s Clothing ')`);
 
       await PageObjects.lens.typeFormula('count(kql=');
       input = await find.activeElement();
-      await input.type(`Men\'s `);
+      await input.type(`Men\'s Clothing`);
 
       element = await find.byCssSelector('.monaco-editor');
-      expect(await element.getVisibleText()).to.equal(`count(kql='Men\\'s ')`);
+      expect(await element.getVisibleText()).to.equal(`count(kql='Men\\'s Clothing')`);
     });
 
     it('should persist a broken formula on close', async () => {

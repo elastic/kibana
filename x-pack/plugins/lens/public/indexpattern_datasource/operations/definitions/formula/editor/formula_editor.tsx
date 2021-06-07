@@ -103,6 +103,7 @@ export function FormulaEditor({
   }, []);
 
   useUnmount(() => {
+    setIsCloseable(true);
     // If the text is not synced, update the column.
     if (text !== currentColumn.params.formula) {
       updateLayer((prevLayer) => {
@@ -114,8 +115,7 @@ export function FormulaEditor({
           indexPattern,
           operationDefinitionMap
         ).newLayer;
-      }, true);
-      setIsCloseable(true);
+      });
     }
   });
 
