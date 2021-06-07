@@ -8,14 +8,12 @@
 import { CoreSetup, CoreStart, Plugin } from 'src/core/server';
 import { StartDeps, SetupDeps } from './types';
 import { dataVisualizerRoutes } from './routes';
-import { setupCapabilities } from './capabilities';
 
 export class DataVisualizerPlugin implements Plugin {
   constructor() {}
 
   async setup(coreSetup: CoreSetup<StartDeps, unknown>, plugins: SetupDeps) {
     dataVisualizerRoutes(coreSetup);
-    setupCapabilities(coreSetup);
   }
 
   start(core: CoreStart) {}
