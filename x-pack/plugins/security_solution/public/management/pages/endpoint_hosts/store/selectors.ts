@@ -361,7 +361,8 @@ export const getIsolationRequestError: (
 
 export const getActivityLogData = (
   state: Immutable<EndpointState>
-): Immutable<EndpointState['endpointDetails']['activityLog']> => state.endpointDetails.activityLog;
+): Immutable<EndpointState['endpointDetails']['activityLog']['logData']> =>
+  state.endpointDetails.activityLog.logData;
 
 export const getActivityLogRequestLoading: (
   state: Immutable<EndpointState>

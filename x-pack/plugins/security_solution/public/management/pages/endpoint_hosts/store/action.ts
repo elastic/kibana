@@ -149,7 +149,7 @@ export type EndpointIsolationRequestStateChange = Action<'endpointIsolationReque
 };
 
 export type EndpointDetailsActivityLogChanged = Action<'endpointDetailsActivityLogChanged'> & {
-  payload: EndpointState['endpointDetails']['activityLog'];
+  payload: EndpointState['endpointDetails']['activityLog']['logData'];
 };
 
 export type EndpointAction =

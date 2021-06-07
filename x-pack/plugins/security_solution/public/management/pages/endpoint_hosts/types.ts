@@ -36,7 +36,11 @@ export interface EndpointState {
   /** api error from retrieving host list */
   error?: ServerApiError;
   endpointDetails: {
-    activityLog: AsyncResourceState<ActivityLog>;
+    activityLog: {
+      page: number;
+      pageSize: number;
+      logData: AsyncResourceState<ActivityLog>;
+    };
     hostDetails: {
       /** details data for a specific host */
       details?: Immutable<HostMetadata>;
