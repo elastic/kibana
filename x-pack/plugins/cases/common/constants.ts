@@ -11,6 +11,24 @@ export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz';
 
 export const APP_ID = 'cases';
 
+export const CASE_SAVED_OBJECT = 'cases';
+export const CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT = 'cases-connector-mappings';
+export const SUB_CASE_SAVED_OBJECT = 'cases-sub-case';
+export const CASE_USER_ACTION_SAVED_OBJECT = 'cases-user-actions';
+export const CASE_COMMENT_SAVED_OBJECT = 'cases-comments';
+export const CASE_CONFIGURE_SAVED_OBJECT = 'cases-configure';
+
+/**
+ * If more values are added here please also add them here: x-pack/test/case_api_integration/common/fixtures/plugins
+ */
+export const SAVED_OBJECT_TYPES = [
+  CASE_SAVED_OBJECT,
+  CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_CONFIGURE_SAVED_OBJECT,
+];
+
 /**
  * Case routes
  */
@@ -18,6 +36,7 @@ export const APP_ID = 'cases';
 export const CASES_URL = '/api/cases';
 export const CASE_DETAILS_URL = `${CASES_URL}/{case_id}`;
 export const CASE_CONFIGURE_URL = `${CASES_URL}/configure`;
+export const CASE_CONFIGURE_DETAILS_URL = `${CASES_URL}/configure/{configuration_id}`;
 export const CASE_CONFIGURE_CONNECTORS_URL = `${CASE_CONFIGURE_URL}/connectors`;
 
 export const SUB_CASES_PATCH_DEL_URL = `${CASES_URL}/sub_cases`;
@@ -56,6 +75,18 @@ export const MAX_ALERTS_PER_SUB_CASE = 5000;
 export const MAX_GENERATED_ALERTS_PER_SUB_CASE = 50;
 
 /**
+ * This must be the same value that the security solution plugin uses to define the case kind when it registers the
+ * feature for the 7.13 migration only.
+ *
+ * This variable is being also used by test files and mocks.
+ */
+export const SECURITY_SOLUTION_OWNER = 'securitySolution';
+
+/**
  * This flag governs enabling the case as a connector feature. It is disabled by default as the feature is not complete.
  */
 export const ENABLE_CASE_CONNECTOR = false;
+
+if (ENABLE_CASE_CONNECTOR) {
+  SAVED_OBJECT_TYPES.push(SUB_CASE_SAVED_OBJECT);
+}

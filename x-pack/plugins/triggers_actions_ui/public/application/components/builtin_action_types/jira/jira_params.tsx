@@ -192,6 +192,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
 
   const areLabelsInvalid =
     errors['subActionParams.incident.labels'] != null &&
+    errors['subActionParams.incident.labels'] !== undefined &&
     errors['subActionParams.incident.labels'].length > 0 &&
     incident.labels !== undefined;
 
@@ -283,6 +284,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
             fullWidth
             error={errors['subActionParams.incident.summary']}
             isInvalid={
+              errors['subActionParams.incident.summary'] !== undefined &&
               errors['subActionParams.incident.summary'].length > 0 &&
               incident.summary !== undefined
             }

@@ -38,7 +38,7 @@ import {
   TransformerArgs,
   TransformFieldsArgs,
 } from './types';
-import { getAlertIds } from '../../routes/api/utils';
+import { getAlertIds } from '../utils';
 
 interface CreateIncidentArgs {
   actionsClient: ActionsClient;
@@ -330,11 +330,13 @@ export const isCommentAlertType = (
 export const getCommentContextFromAttributes = (
   attributes: CommentAttributes
 ): CommentRequestUserType | CommentRequestAlertType => {
+  const owner = attributes.owner;
   switch (attributes.type) {
     case CommentType.user:
       return {
         type: CommentType.user,
         comment: attributes.comment,
+        owner,
       };
     case CommentType.generatedAlert:
     case CommentType.alert:
@@ -343,11 +345,13 @@ export const getCommentContextFromAttributes = (
         alertId: attributes.alertId,
         index: attributes.index,
         rule: attributes.rule,
+        owner,
       };
     default:
       return {
         type: CommentType.user,
         comment: '',
+        owner,
       };
   }
 };

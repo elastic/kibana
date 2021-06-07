@@ -7,7 +7,11 @@ exports[`Title it renders 1`] = `
   <h1
     data-test-subj="header-page-title"
   >
-    Test title
+    <TruncatableText
+      tooltipContent="Test title"
+    >
+      Test title
+    </TruncatableText>
      
     <StyledEuiBetaBadge
       label="Beta"

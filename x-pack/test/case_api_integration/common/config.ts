@@ -17,6 +17,7 @@ interface CreateTestConfigOptions {
   license: string;
   disabledPlugins?: string[];
   ssl?: boolean;
+  testFiles?: string[];
 }
 
 // test.not-enabled is specifically not enabled
@@ -29,6 +30,7 @@ const enabledActionTypes = [
   '.resilient',
   '.server-log',
   '.servicenow',
+  '.servicenow-sir',
   '.slack',
   '.webhook',
   '.case',
@@ -40,7 +42,7 @@ const enabledActionTypes = [
 ];
 
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
-  const { license = 'trial', disabledPlugins = [], ssl = false } = options;
+  const { license = 'trial', disabledPlugins = [], ssl = false, testFiles = [] } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackApiIntegrationTestsConfig = await readConfigFile(
@@ -55,7 +57,14 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       },
     };
 
-    const allFiles = fs.readdirSync(
+    // Find all folders in ./fixtures/plugins
+    const allFiles = fs.readdirSync(path.resolve(__dirname, 'fixtures', 'plugins'));
+    const plugins = allFiles.filter((file) =>
+      fs.statSync(path.resolve(__dirname, 'fixtures', 'plugins', file)).isDirectory()
+    );
+
+    // This is needed so that we can correctly use the alerting test frameworks mock implementation for the connectors.
+    const alertingAllFiles = fs.readdirSync(
       path.resolve(
         __dirname,
         '..',
@@ -66,7 +75,8 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         'plugins'
       )
     );
-    const plugins = allFiles.filter((file) =>
+
+    const alertingPlugins = alertingAllFiles.filter((file) =>
       fs
         .statSync(
           path.resolve(
@@ -84,7 +94,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     );
 
     return {
-      testFiles: [require.resolve(`../${name}/tests/`)],
+      testFiles: testFiles ? testFiles : [require.resolve('../tests/common')],
       servers,
       services,
       junit: {
@@ -110,7 +120,8 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           '--xpack.eventLog.logEntries=true',
           ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
-          ...plugins.map(
+          // Actions simulators plugin. Needed for testing push to external services.
+          ...alertingPlugins.map(
             (pluginDir) =>
               `--plugin-path=${path.resolve(
                 __dirname,
@@ -122,6 +133,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
                 'plugins',
                 pluginDir
               )}`
+          ),
+          ...plugins.map(
+            (pluginDir) =>
+              `--plugin-path=${path.resolve(__dirname, 'fixtures', 'plugins', pluginDir)}`
           ),
           `--server.xsrf.whitelist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl
