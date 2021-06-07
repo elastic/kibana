@@ -33,7 +33,6 @@ import {
   detailsLoading,
   getActivityLogData,
   getActivityLogError,
-  getActivityLogRequestLoading,
   showView,
   policyResponseConfigurations,
   policyResponseActions,
@@ -87,7 +86,6 @@ export const EndpointDetailsFlyout = memo(() => {
   } = queryParams;
 
   const activityLog = useEndpointSelector(getActivityLogData);
-  const activityLoading = useEndpointSelector(getActivityLogRequestLoading);
   const activityError = useEndpointSelector(getActivityLogError);
   const hostDetails = useEndpointSelector(detailsData);
   const hostDetailsLoading = useEndpointSelector(detailsLoading);
@@ -122,11 +120,7 @@ export const EndpointDetailsFlyout = memo(() => {
     {
       id: EndpointDetailsTabsTypes.activityLog,
       name: i18.ACTIVITY_LOG,
-      content: activityLoading ? (
-        ContentLoadingMarkup
-      ) : (
-        <EndpointActivityLog activityLog={activityLog} />
-      ),
+      content: <EndpointActivityLog activityLog={activityLog} />,
     },
   ];
 
@@ -175,7 +169,7 @@ export const EndpointDetailsFlyout = memo(() => {
       paddingSize="m"
     >
       <EuiFlyoutHeader hasBorder>
-        {hostDetailsLoading || activityLoading ? (
+        {hostDetailsLoading ? (
           <EuiLoadingContent lines={1} />
         ) : (
           <EuiToolTip content={hostDetails?.host?.hostname} anchorClassName="eui-textTruncate">

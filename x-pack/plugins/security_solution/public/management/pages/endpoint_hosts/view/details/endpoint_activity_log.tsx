@@ -7,21 +7,46 @@
 
 import React, { memo, useCallback } from 'react';
 
-import { EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
+import { useDispatch } from 'react-redux';
 import { LogEntry } from './components/log_entry';
 import * as i18 from '../translations';
 import { SearchBar } from '../../../../components/search_bar';
 import { Immutable, ActivityLog } from '../../../../../../common/endpoint/types';
 import { AsyncResourceState } from '../../../../state';
+import { useEndpointSelector } from '../hooks';
+import { EndpointAction } from '../../store/action';
+import {
+  getActivityLogDataPaging,
+  getActivityLogError,
+  getActivityLogRequestLoading,
+} from '../../store/selectors';
 
 export const EndpointActivityLog = memo(
   ({ activityLog }: { activityLog: AsyncResourceState<Immutable<ActivityLog>> }) => {
+    const activityLoading = useEndpointSelector(getActivityLogRequestLoading);
+    const activityError = useEndpointSelector(getActivityLogError);
+    const dispatch = useDispatch<(a: EndpointAction) => void>();
+    const { page, pageSize } = useEndpointSelector(getActivityLogDataPaging);
+
     // TODO
     const onSearch = useCallback(() => {}, []);
+
+    const getActivityLog = useCallback(() => {
+      dispatch({
+        type: 'appRequestedActivityLog',
+        payload: {
+          page: page + pageSize,
+          pageSize,
+        },
+      });
+    }, [dispatch, page, pageSize]);
+
     return (
       <>
         <EuiSpacer size="l" />
-        {activityLog.type !== 'LoadedResourceState' || !activityLog.data.length ? (
+        {(activityLog.type === 'LoadedResourceState' && !activityLog.data.length) ||
+        activityError ? (
           <EuiEmptyPrompt
             iconType="editorUnorderedList"
             titleSize="s"
@@ -32,12 +57,20 @@ export const EndpointActivityLog = memo(
           <>
             <SearchBar onSearch={onSearch} placeholder={i18.SEARCH_ACTIVITY_LOG} />
             <EuiSpacer size="l" />
-            {
+            {activityLoading ? (
+              <EuiLoadingContent lines={3} />
+            ) : (
               // @ts-ignore
-              activityLog.data.map((logEntry) => (
-                <LogEntry key={logEntry.item.action_id} logEntry={logEntry} />
+              activityLog.data?.map((logEntry) => (
+                <LogEntry
+                  key={`${logEntry.item.action_id}-${logEntry.item['@timestamp']}`}
+                  logEntry={logEntry}
+                />
               ))
-            }
+            )}
+            <EuiButton size="s" fill onClick={getActivityLog}>
+              {'show more'}
+            </EuiButton>
           </>
         )}
       </>
