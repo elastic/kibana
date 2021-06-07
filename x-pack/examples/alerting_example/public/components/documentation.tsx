@@ -17,6 +17,8 @@ import {
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiTitle,
+  EuiIcon,
+  EuiCallOut,
   EuiSpacer,
 } from '@elastic/eui';
 import { CreateAlert } from './create_alert';
@@ -49,12 +51,13 @@ export const DocumentationPage = (
             registration of example the RuleTypes, while the `public` handles creation of, and
             navigation for, these rule types.
           </p>
-          <p>
+          <EuiCallOut title="Transport Layer Security" iconType="alert" color="warning">
             If you see a message about needing to enable the Transport Layer Security, start ES with
-            `yarn es snapshot --ssl --license trial` and Kibana with `yarn start --run-examples
-            --ssl`. If you running chrome on a mac, you may need to type in 'thisisunsafe' if you
-            see the Certificate invalid screen with no way to "proceed anyway".
-          </p>
+            <code>yarn es snapshot --ssl --license trial</code> and Kibana with{' '}
+            <code>yarn start --run-examples --ssl</code>. If you running chrome on a mac, you may
+            need to type in <code>thisisunsafe</code> if you see the Certificate invalid screen with
+            no way to &lsquo;proceed anyway&rsquo;.
+          </EuiCallOut>
         </EuiText>
         <EuiSpacer />
         <CreateAlert {...deps} />
