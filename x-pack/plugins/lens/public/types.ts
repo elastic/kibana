@@ -571,6 +571,10 @@ export interface VisualizationType {
    * Higher number means higher priority. When omitted defaults to 0
    */
   sortPriority?: number;
+  /**
+   * Indicates if visualization is in the beta stage.
+   */
+  showBetaBadge?: boolean;
 }
 
 export interface Visualization<T = unknown> {

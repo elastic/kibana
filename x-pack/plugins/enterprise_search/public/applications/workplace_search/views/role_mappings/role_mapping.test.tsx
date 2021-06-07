@@ -10,16 +10,12 @@ import { setMockActions, setMockValues } from '../../../__mocks__';
 
 import React from 'react';
 
+import { waitFor } from '@testing-library/dom';
 import { shallow } from 'enzyme';
 
-import { EuiCheckbox } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiRadioGroup } from '@elastic/eui';
 
-import { Loading } from '../../../shared/loading';
-import {
-  AttributeSelector,
-  DeleteMappingCallout,
-  RoleSelector,
-} from '../../../shared/role_mapping';
+import { AttributeSelector, RoleSelector } from '../../../shared/role_mapping';
 import { wsRoleMapping } from '../../../shared/role_mapping/__mocks__/roles';
 
 import { RoleMapping } from './role_mapping';
@@ -80,42 +76,37 @@ describe('RoleMapping', () => {
   });
 
   it('renders', () => {
+    setMockValues({ ...mockValues, roleMapping: wsRoleMapping });
     const wrapper = shallow(<RoleMapping />);
 
     expect(wrapper.find(AttributeSelector)).toHaveLength(1);
-    expect(wrapper.find(RoleSelector)).toHaveLength(2);
+    expect(wrapper.find(RoleSelector)).toHaveLength(1);
   });
 
-  it('returns Loading when loading', () => {
-    setMockValues({ ...mockValues, dataLoading: true });
+  it('sets initial selected state when includeInAllGroups is true', () => {
+    setMockValues({ ...mockValues, includeInAllGroups: true });
     const wrapper = shallow(<RoleMapping />);
 
-    expect(wrapper.find(Loading)).toHaveLength(1);
+    expect(wrapper.find(EuiRadioGroup).prop('idSelected')).toBe('all');
   });
 
-  it('hides DeleteMappingCallout for new mapping', () => {
-    const wrapper = shallow(<RoleMapping isNew />);
-
-    expect(wrapper.find(DeleteMappingCallout)).toHaveLength(0);
-  });
-
-  it('handles group checkbox click', () => {
+  it('handles all/specific groups radio change', () => {
     const wrapper = shallow(<RoleMapping />);
-    wrapper
-      .find(EuiCheckbox)
-      .first()
-      .simulate('change', { target: { checked: true } });
+    const radio = wrapper.find(EuiRadioGroup);
+    radio.simulate('change', { target: { checked: false } });
 
-    expect(handleGroupSelectionChange).toHaveBeenCalledWith(groups[0].id, true);
+    expect(handleAllGroupsSelectionChange).toHaveBeenCalledWith(false);
   });
 
-  it('handles all groups checkbox click', () => {
+  it('handles group checkbox click', async () => {
     const wrapper = shallow(<RoleMapping />);
-    wrapper
-      .find(EuiCheckbox)
-      .last()
-      .simulate('change', { target: { checked: true } });
+    await waitFor(() =>
+      ((wrapper.find(EuiComboBox).props() as unknown) as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }).onChange([{ label: groups[0].name, value: groups[0].name }])
+    );
+    wrapper.update();
 
-    expect(handleAllGroupsSelectionChange).toHaveBeenCalledWith(true);
+    expect(handleGroupSelectionChange).toHaveBeenCalledWith([groups[0].name]);
   });
 });
