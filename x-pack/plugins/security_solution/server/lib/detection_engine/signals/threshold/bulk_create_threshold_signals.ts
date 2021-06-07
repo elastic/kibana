@@ -19,7 +19,7 @@ import {
 } from '../../../../../../alerting/server';
 import { BaseHit } from '../../../../../common/detection_engine/types';
 import { TermAggregationBucket } from '../../../types';
-import { GenericBulkCreateResponse } from '../single_bulk_create';
+import { GenericBulkCreateResponse } from '../bulk_create';
 import {
   calculateThresholdSignalUuid,
   getThresholdAggregationParts,

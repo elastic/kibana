@@ -23,7 +23,7 @@ import { MIN_EQL_RULE_INDEX_VERSION } from '../../routes/index/get_signals_templ
 import { EqlRuleParams } from '../../schemas/rule_schemas';
 import { buildSignalFromEvent, buildSignalGroupFromSequence } from '../build_bulk_body';
 import { getInputIndex } from '../get_input_output_index';
-import { filterDuplicateSignals } from '../single_bulk_create';
+import { filterDuplicateSignals } from '../filter_duplicate_signals';
 import {
   AlertAttributes,
   BulkCreate,

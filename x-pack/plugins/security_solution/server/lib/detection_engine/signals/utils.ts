@@ -649,13 +649,13 @@ export const createSearchAfterReturnType = ({
 }: {
   success?: boolean | undefined;
   warning?: boolean;
-  warningMessages?: string[] | undefined;
   searchAfterTimes?: string[] | undefined;
   bulkCreateTimes?: string[] | undefined;
   lastLookBackDate?: Date | undefined;
   createdSignalsCount?: number | undefined;
   createdSignals?: unknown[] | undefined;
   errors?: string[] | undefined;
+  warningMessages?: string[] | undefined;
 } = {}): SearchAfterAndBulkCreateReturnType => {
   return {
     success: success ?? true,

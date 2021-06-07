@@ -56,6 +56,7 @@ export const createThreatSignals = async ({
     createdSignalsCount: 0,
     createdSignals: [],
     errors: [],
+    warningMessages: [],
   };
 
   let threatListCount = await getThreatListCount({

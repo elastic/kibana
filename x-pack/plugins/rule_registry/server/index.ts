@@ -15,8 +15,6 @@ export { IRuleDataClient } from './rule_data_client/types';
 export { getRuleExecutorData, RuleExecutorData } from './utils/get_rule_executor_data';
 export { createLifecycleRuleTypeFactory } from './utils/create_lifecycle_rule_type_factory';
 export { createPersistenceRuleTypeFactory } from './utils/create_persistence_rule_type_factory';
-export * from './utils/persistence_types';
-export { AlertTypeWithExecutor } from './types';
 
 export const plugin = (initContext: PluginInitializerContext) =>
   new RuleRegistryPlugin(initContext);

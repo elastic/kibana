@@ -179,8 +179,9 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
-      refresh: false,
       buildRuleMessage,
+      bulkCreate: jest.fn(),
+      wrapHits: jest.fn(),
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(5);
@@ -282,8 +283,9 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
-      refresh: false,
       buildRuleMessage,
+      bulkCreate: jest.fn(),
+      wrapHits: jest.fn(),
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(4);
@@ -359,8 +361,9 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
-      refresh: false,
       buildRuleMessage,
+      bulkCreate: jest.fn(),
+      wrapHits: jest.fn(),
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
@@ -417,8 +420,9 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
-      refresh: false,
       buildRuleMessage,
+      bulkCreate: jest.fn(),
+      wrapHits: jest.fn(),
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
@@ -495,8 +499,9 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
-      refresh: false,
       buildRuleMessage,
+      bulkCreate: jest.fn(),
+      wrapHits: jest.fn(),
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
@@ -549,8 +554,9 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
-      refresh: false,
       buildRuleMessage,
+      bulkCreate: jest.fn(),
+      wrapHits: jest.fn(),
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
@@ -625,8 +631,9 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
-      refresh: false,
       buildRuleMessage,
+      bulkCreate: jest.fn(),
+      wrapHits: jest.fn(),
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
@@ -703,8 +710,9 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
-      refresh: false,
       buildRuleMessage,
+      bulkCreate: jest.fn(),
+      wrapHits: jest.fn(),
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
@@ -746,8 +754,9 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
-      refresh: false,
       buildRuleMessage,
+      bulkCreate: jest.fn(),
+      wrapHits: jest.fn(),
     });
     expect(mockLogger.error).toHaveBeenCalled();
     expect(success).toEqual(false);
@@ -792,8 +801,9 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
-      refresh: false,
       buildRuleMessage,
+      bulkCreate: jest.fn(),
+      wrapHits: jest.fn(),
     });
     expect(success).toEqual(true);
     expect(createdSignalsCount).toEqual(0);
@@ -852,8 +862,9 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
-      refresh: false,
       buildRuleMessage,
+      bulkCreate: jest.fn(),
+      wrapHits: jest.fn(),
     });
     expect(success).toEqual(false);
     expect(createdSignalsCount).toEqual(0); // should not create signals if search threw error
@@ -977,8 +988,9 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
-      refresh: false,
       buildRuleMessage,
+      bulkCreate: jest.fn(),
+      wrapHits: jest.fn(),
     });
     expect(success).toEqual(false);
     expect(errors).toEqual(['error on creation']);
@@ -1072,8 +1084,9 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
-      refresh: false,
       buildRuleMessage,
+      bulkCreate: jest.fn(),
+      wrapHits: jest.fn(),
     });
 
     expect(mockEnrichment).toHaveBeenCalledWith(

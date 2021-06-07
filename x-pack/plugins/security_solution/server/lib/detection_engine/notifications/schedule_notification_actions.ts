@@ -8,7 +8,6 @@
 import { mapKeys, snakeCase } from 'lodash/fp';
 import { AlertInstance } from '../../../../../alerting/server';
 import { RuleParams } from '../schemas/rule_schemas';
-import { SignalSource } from '../signals/types';
 
 export type NotificationRuleTypeParams = RuleParams & {
   name: string;
