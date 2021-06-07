@@ -32,31 +32,31 @@ export const TimeSeriesExplorerHelpPopover = () => {
       <p>
         <FormattedMessage
           id="xpack.ml.timeSeriesExplorer.popoverBasicExplanation"
-          defaultMessage="Anomaly detection jobs analyze your data and create models to identify anomalous patterns of behavior. If the job has model plot enabled, you can view a chart that represents the actual and expected values over time."
+          defaultMessage="This chart illustrates the actual data values over time for a specific detector. You can examine an event by sliding the time selector and changing its length. For the most accurate view, set the zoom size to auto."
         />
       </p>
       <p>
         <FormattedMessage
-          id="xpack.ml.timeSeriesExplorer.popoverBoundsExplanation"
-          defaultMessage="The blue line in the chart represents the actual data values. The shaded blue area represents the bounds for the expected values. The area between the upper and lower bounds are the most likely values for the model. As the job analyzes more data, it learns to more closely predict the patterns of behavior."
+          id="xpack.ml.timeSeriesExplorer.popoverAnomalyExplanation"
+          defaultMessage="An anomaly score is calculated for each bucket time interval, with a value from 0 to 100. Anomalous events are highlighted in colors that indicate their severity. If an anomaly is depicted with a cross symbol instead of a dot, it has a medium or high multi-bucket impact. This extra analysis can catch anomalies even when they fall within the bounds of expected behavior."
         />
       </p>
       <p>
         <FormattedMessage
-          id="xpack.ml.timeSeriesExplorer.popoverScoreExplanation"
-          defaultMessage="Any data points outside the model bounds are marked as anomalies. An anomaly score is calcuated for each bucket time interval, with a value from 0 to 100. The highly anomalous data points are shown in red and data points with low scores are blue."
-        />
-      </p>
-      <p>
-        <FormattedMessage
-          id="xpack.ml.timeSeriesExplorer.popoverMultiBucketsExplanation"
-          defaultMessage="If an anomaly is depicted with a cross symbol instead of a dot, it is anomalous relative to its neighboring buckets. This multi-bucket analysis evaluates events in each bucket relative to the larger context of recent events and can catch anomalies even when they fall within the bounds of expected behavior."
+          id="xpack.ml.timeSeriesExplorer.popoverForecastExplanation"
+          defaultMessage="If you create a forecast, predicted data values are added to the chart. A shaded area around these values represents the confidence level; as you forecast further into the future, the confidence level generally decreases."
         />
       </p>
       <p>
         <FormattedMessage
           id="xpack.ml.timeSeriesExplorer.popoverAnnotationsExplanation"
-          defaultMessage="You can optionally annotate your job results by drag-selecting a period of time in the chart and adding a description. Some annotations are also generated automatically to indicate noteworthy occurrences."
+          defaultMessage="You can also optionally annotate your job results by drag-selecting a period of time in the chart and adding a description. Some annotations are generated automatically to indicate noteworthy occurrences."
+        />
+      </p>
+      <p>
+        <FormattedMessage
+          id="xpack.ml.timeSeriesExplorer.popoverModelPlotExplanation"
+          defaultMessage="If model plot is enabled, you can optionally show model bounds, which are represented by a shaded area in the chart. As the job analyzes more data, it learns to more closely predict the expected patterns of behavior."
         />
       </p>
     </HelpPopover>
