@@ -41,11 +41,7 @@ export function ApmHeaderActionMenu() {
 
   return (
     <EuiHeaderLinks>
-      <EuiHeaderLink
-        color="primary"
-        href={apmHref('/settings')}
-        iconType="gear"
-      >
+      <EuiHeaderLink size="xs" color="text" href={apmHref('/settings')}>
         {i18n.translate('xpack.apm.settingsLinkLabel', {
           defaultMessage: 'Settings',
         })}

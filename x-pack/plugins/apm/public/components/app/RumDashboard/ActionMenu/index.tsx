@@ -60,20 +60,27 @@ export function UXActionMenu({
       setHeaderActionMenu={appMountParameters.setHeaderActionMenu}
     >
       <EuiFlexGroup
-        alignItems="flexEnd"
+        alignItems="center"
+        gutterSize="s"
         responsive={false}
         style={{ paddingRight: 20 }}
       >
         <EuiFlexItem>
           <EuiToolTip position="top" content={<p>{ANALYZE_MESSAGE}</p>}>
             <EuiButtonEmpty
+              size="xs"
+              color="text"
               href={uxExploratoryViewLink}
-              color="primary"
               iconType="visBarVerticalStacked"
             >
               {ANALYZE_DATA}
             </EuiButtonEmpty>
           </EuiToolTip>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButtonEmpty iconType="indexOpen" iconSide="left">
+            Add data
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
     </HeaderMenuPortal>

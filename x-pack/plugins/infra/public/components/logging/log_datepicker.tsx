@@ -6,7 +6,13 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSuperDatePicker,
+  EuiButtonEmpty,
+  EuiButton,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 interface LogDatepickerProps {
@@ -61,12 +67,12 @@ export const LogDatepicker: React.FC<LogDatepickerProps> = ({
             />
           </EuiButtonEmpty>
         ) : (
-          <EuiButtonEmpty iconType="play" iconSide="left" onClick={onStartStreaming}>
+          <EuiButton color="primary" iconType="play" iconSide="left" onClick={onStartStreaming}>
             <FormattedMessage
               id="xpack.infra.logs.startStreamingButtonLabel"
               defaultMessage="Stream live"
             />
-          </EuiButtonEmpty>
+          </EuiButton>
         )}
       </EuiFlexItem>
     </EuiFlexGroup>
