@@ -123,3 +123,10 @@ export const jobsExistSchema = schema.object({
   jobIds: schema.arrayOf(schema.string()),
   allSpaces: schema.maybe(schema.boolean()),
 });
+
+export const bulkCreateSchema = schema.object({
+  job: schema.any(),
+  datafeed: schema.any(),
+  // job: schema.object(anomalyDetectionJobSchema),
+  // datafeed: datafeedConfigSchema,
+});

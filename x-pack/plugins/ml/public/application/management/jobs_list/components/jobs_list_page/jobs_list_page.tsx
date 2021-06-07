@@ -46,6 +46,7 @@ import { getDefaultAnomalyDetectionJobsListState } from '../../../../jobs/jobs_l
 import { getMlGlobalServices } from '../../../../app';
 import { ListingPageUrlState } from '../../../../../../common/types/common';
 import { getDefaultDFAListState } from '../../../../data_frame_analytics/pages/analytics_management/page';
+import { ExportJobsFlyout, ImportJobsFlyout } from '../../../../components/import_export_jobs';
 
 interface Tab extends EuiTabbedContentTab {
   'data-test-subj': string;
@@ -251,17 +252,27 @@ export const JobsListPage: FC<{
                 </EuiTitle>
                 <EuiSpacer size="l" />
                 <EuiPageContentBody>
-                  {spacesEnabled && (
-                    <>
-                      <EuiButtonEmpty onClick={() => setShowSyncFlyout(true)}>
-                        {i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
-                          defaultMessage: 'Synchronize saved objects',
-                        })}
-                      </EuiButtonEmpty>
-                      {showSyncFlyout && <JobSpacesSyncFlyout onClose={onCloseSyncFlyout} />}
-                      <EuiSpacer size="s" />
-                    </>
-                  )}
+                  <EuiFlexGroup>
+                    <EuiFlexItem grow={false}>
+                      {spacesEnabled && (
+                        <>
+                          <EuiButtonEmpty onClick={() => setShowSyncFlyout(true)}>
+                            {i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
+                              defaultMessage: 'Synchronize saved objects',
+                            })}
+                          </EuiButtonEmpty>
+                          {showSyncFlyout && <JobSpacesSyncFlyout onClose={onCloseSyncFlyout} />}
+                          <EuiSpacer size="s" />
+                        </>
+                      )}
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <ExportJobsFlyout isDisabled={false} />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <ImportJobsFlyout refreshJobs={() => {}} isDisabled={false} />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                   {renderTabs()}
                 </EuiPageContentBody>
               </EuiPageContent>
