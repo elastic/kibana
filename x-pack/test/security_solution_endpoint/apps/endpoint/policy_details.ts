@@ -328,9 +328,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
+                memory: { mode: 'prevent', supported: true },
                 ransomware: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {filename}',
+                  },
+                  memory: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
                   },
@@ -532,9 +537,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
+                memory: { mode: 'prevent', supported: true },
                 ransomware: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {filename}',
+                  },
+                  memory: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
                   },
@@ -733,9 +743,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
+                memory: { mode: 'prevent', supported: true },
                 ransomware: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {filename}',
+                  },
+                  memory: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
                   },
