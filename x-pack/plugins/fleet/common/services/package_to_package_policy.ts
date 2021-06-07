@@ -65,7 +65,10 @@ const varsReducer = (
 /*
  * This service creates a package policy inputs definition from defaults provided in package info
  */
-export const packageToPackagePolicyInputs = (packageInfo: PackageInfo): NewPackagePolicyInput[] => {
+export const packageToPackagePolicyInputs = (
+  packageInfo: PackageInfo,
+  integrationToEnable?: string
+): NewPackagePolicyInput[] => {
   const hasIntegrations = doesPackageHaveIntegrations(packageInfo);
   const inputs: NewPackagePolicyInput[] = [];
   const packageInputsByPolicyTemplateAndType: {
@@ -114,10 +117,27 @@ export const packageToPackagePolicyInputs = (packageInfo: PackageInfo): NewPacka
 
     streamsForInput.push(...streams);
 
+    // Check if we should enable this input by the streams below it
+    // Enable it if at least one of its streams is enabled
+    let enableInput = streamsForInput.length
+      ? !!streamsForInput.find((stream) => stream.enabled)
+      : true;
+
+    // If we are wanting to enabling this input, check if we only want
+    // to enable specific integrations (aka `policy_template`s)
+    if (
+      enableInput &&
+      hasIntegrations &&
+      integrationToEnable &&
+      integrationToEnable !== packageInput.policy_template
+    ) {
+      enableInput = false;
+    }
+
     const input: NewPackagePolicyInput = {
       type: packageInput.type,
       policy_template: packageInput.policy_template,
-      enabled: streamsForInput.length ? !!streamsForInput.find((stream) => stream.enabled) : true,
+      enabled: enableInput,
       streams: streamsForInput,
     };
 
@@ -145,7 +165,8 @@ export const packageToPackagePolicy = (
   outputId: string,
   namespace: string = '',
   packagePolicyName?: string,
-  description?: string
+  description?: string,
+  integrationToEnable?: string
 ): NewPackagePolicy => {
   const packagePolicy: NewPackagePolicy = {
     name: packagePolicyName || `${packageInfo.name}-1`,
@@ -159,7 +180,7 @@ export const packageToPackagePolicy = (
     enabled: true,
     policy_id: agentPolicyId,
     output_id: outputId,
-    inputs: packageToPackagePolicyInputs(packageInfo),
+    inputs: packageToPackagePolicyInputs(packageInfo, integrationToEnable),
     vars: undefined,
   };
 

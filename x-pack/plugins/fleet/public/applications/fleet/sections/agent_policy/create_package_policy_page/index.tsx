@@ -60,19 +60,26 @@ const StepsWithLessPadding = styled(EuiSteps)`
   }
 `;
 
+interface AddToPolicyParams {
+  pkgkey: string;
+  integration?: string;
+}
+
+interface AddFromPolicyParams {
+  policyId: string;
+}
+
 export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const { notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
-  const {
-    params: { policyId, pkgkey },
-  } = useRouteMatch<{ policyId: string; pkgkey: string }>();
+  const { params } = useRouteMatch<AddToPolicyParams | AddFromPolicyParams>();
   const { getHref, getPath } = useLink();
   const history = useHistory();
   const handleNavigateTo = useNavigateToCallback();
   const routeState = useIntraAppState<CreatePackagePolicyRouteState>();
-  const from: CreatePackagePolicyFrom = policyId ? 'policy' : 'package';
+  const from: CreatePackagePolicyFrom = 'policyId' in params ? 'policy' : 'package';
 
   // Agent policy and package info states
   const [agentPolicy, setAgentPolicy] = useState<AgentPolicy>();
@@ -215,9 +222,11 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       return routeState.onCancelUrl;
     }
     return from === 'policy'
-      ? getHref('policy_details', { policyId: agentPolicyId || policyId })
-      : getHref('integration_details_overview', { pkgkey });
-  }, [agentPolicyId, policyId, from, getHref, pkgkey, routeState]);
+      ? getHref('policy_details', {
+          policyId: agentPolicyId || (params as AddFromPolicyParams).policyId,
+        })
+      : getHref('integration_details_overview', { pkgkey: (params as AddToPolicyParams).pkgkey });
+  }, [agentPolicyId, params, from, getHref, routeState]);
 
   const cancelClickHandler: ReactEventHandler = useCallback(
     (ev) => {
@@ -255,7 +264,11 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             : routeState.onSaveNavigateTo
         );
       } else {
-        history.push(getPath('policy_details', { policyId: agentPolicy?.id || policyId }));
+        history.push(
+          getPath('policy_details', {
+            policyId: agentPolicy?.id || (params as AddFromPolicyParams).policyId,
+          })
+        );
       }
 
       notifications.toasts.addSuccess({
@@ -295,14 +308,14 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const stepSelectAgentPolicy = useMemo(
     () => (
       <StepSelectAgentPolicy
-        pkgkey={pkgkey}
+        pkgkey={(params as AddToPolicyParams).pkgkey}
         updatePackageInfo={updatePackageInfo}
         agentPolicy={agentPolicy}
         updateAgentPolicy={updateAgentPolicy}
         setIsLoadingSecondStep={setIsLoadingSecondStep}
       />
     ),
-    [pkgkey, updatePackageInfo, agentPolicy, updateAgentPolicy]
+    [params, updatePackageInfo, agentPolicy, updateAgentPolicy]
   );
 
   const ExtensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-create');
@@ -310,14 +323,14 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const stepSelectPackage = useMemo(
     () => (
       <StepSelectPackage
-        agentPolicyId={policyId}
+        agentPolicyId={(params as AddFromPolicyParams).policyId}
         updateAgentPolicy={updateAgentPolicy}
         packageInfo={packageInfo}
         updatePackageInfo={updatePackageInfo}
         setIsLoadingSecondStep={setIsLoadingSecondStep}
       />
     ),
-    [policyId, updateAgentPolicy, packageInfo, updatePackageInfo]
+    [params, updateAgentPolicy, packageInfo, updatePackageInfo]
   );
 
   const stepConfigurePackagePolicy = useMemo(
@@ -333,6 +346,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             updatePackagePolicy={updatePackagePolicy}
             validationResults={validationResults!}
             submitAttempted={formState === 'INVALID'}
+            integrationToEnable={(params as AddToPolicyParams).integration}
           />
 
           {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
@@ -357,6 +371,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
         <div />
       ),
     [
+      params,
       isLoadingSecondStep,
       agentPolicy,
       packageInfo,
