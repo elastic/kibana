@@ -89,7 +89,9 @@ export const createSpyMiddleware = <
       type ResolvedAction = A extends { type: typeof actionType } ? A : never;
 
       // Error is defined here so that we get a better stack trace that points to the test from where it was used
-      const err = new Error(`action '${actionType}' was not dispatched within the allocated time`);
+      const err = new Error(
+        `Timeout! Action '${actionType}' was not dispatched within the allocated time`
+      );
 
       return new Promise<ResolvedAction>((resolve, reject) => {
         const watch: ActionWatcher = (action) => {
@@ -108,7 +110,10 @@ export const createSpyMiddleware = <
         const timeout = setTimeout(() => {
           watchers.delete(watch);
           reject(err);
+          // TODO: is there a way we can grab the current timeout value from jest?
+          // For now, this is using the default value (5000ms) - 500.
         }, 4500);
+
         watchers.add(watch);
       });
     },
