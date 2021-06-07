@@ -13,15 +13,6 @@ import * as i18n from './translations';
 const LINE_CLAMP = 3;
 const LINE_CLAMP_HEIGHT = 5.5;
 
-const StyledLineClamp = styled.div`
-  display: -webkit-box;
-  -webkit-line-clamp: ${LINE_CLAMP};
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  max-height: ${`${LINE_CLAMP_HEIGHT}em`};
-  height: ${`${LINE_CLAMP_HEIGHT}em`};
-`;
-
 const ReadMore = styled(EuiButtonEmpty)`
   span.euiButtonContent {
     padding: 0;
@@ -35,7 +26,10 @@ const ExpandedContent = styled.div`
   overflow-y: auto;
 `;
 
-const LineClampComponent: React.FC<{ content?: string | null }> = ({ content }) => {
+const LineClampComponent: React.FC<{
+  content?: string | null;
+  lineClampHeight?: number;
+}> = ({ content, lineClampHeight = LINE_CLAMP_HEIGHT }) => {
   const [isOverflow, setIsOverflow] = useState<boolean | null>(null);
   const [isExpanded, setIsExpanded] = useState<boolean | null>(null);
   const descriptionRef = useRef<HTMLDivElement>(null);
@@ -63,6 +57,15 @@ const LineClampComponent: React.FC<{ content?: string | null }> = ({ content }) 
   if (!content) {
     return null;
   }
+
+  const StyledLineClamp = styled.div`
+    display: -webkit-box;
+    -webkit-line-clamp: ${LINE_CLAMP};
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    max-height: ${`${lineClampHeight}em`};
+    height: ${`${lineClampHeight}em`};
+  `;
 
   return (
     <>
