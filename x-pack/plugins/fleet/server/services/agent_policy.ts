@@ -758,6 +758,29 @@ class AgentPolicyService {
       cluster: DEFAULT_PERMISSIONS.cluster,
     };
 
+    // TODO fetch this from the elastic agent package
+    const monitoringOutput = fullAgentPolicy.agent?.monitoring.use_output;
+    if (
+      fullAgentPolicy.agent?.monitoring.enabled &&
+      monitoringOutput &&
+      fullAgentPolicy.outputs[monitoringOutput]?.type === 'elasticsearch'
+    ) {
+      const names: string[] = [];
+      if (fullAgentPolicy.agent.monitoring.logs) {
+        names.push('logs-*');
+      }
+      if (fullAgentPolicy.agent.monitoring.metrics) {
+        names.push('metrics-*');
+      }
+
+      permissions._elastic_agent_checks.indices = [
+        {
+          names,
+          privileges: ['auto_configure', 'create_doc'],
+        },
+      ];
+    }
+
     // Only add permissions if output.type is "elasticsearch"
     fullAgentPolicy.output_permissions = Object.keys(fullAgentPolicy.outputs).reduce<
       NonNullable<FullAgentPolicy['output_permissions']>
