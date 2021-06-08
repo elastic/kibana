@@ -11,11 +11,21 @@ import ReactDOM from 'react-dom';
 import { I18nStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSpacer, EuiButton, EuiText, EuiWrappingPopover, EuiCode } from '@elastic/eui';
-import { getServices } from '../../../../../kibana_services';
+import {
+  EuiSpacer,
+  EuiButton,
+  EuiText,
+  EuiWrappingPopover,
+  EuiCode,
+  EuiHorizontalRule,
+  EuiButtonEmpty,
+  EuiTextAlign,
+} from '@elastic/eui';
+import { getServices } from '../../../kibana_services';
 import './open_options_popover.scss';
 import { DOC_TABLE_LEGACY } from '../../../../../../common';
 
+const container = document.createElement('div');
 let isOpen = false;
 
 interface OptionsPopoverProps {
@@ -77,9 +87,27 @@ export function OptionsPopover(props: OptionsPopoverProps) {
             defaultMessage: 'Get started',
           })}
         </EuiButton>
+        <EuiHorizontalRule margin="s" />
+        <EuiTextAlign textAlign="center">
+          <EuiButtonEmpty
+            iconType="gear"
+            size="s"
+            href={addBasePath(`/app/management/kibana/settings?query=category:(discover)`)}
+          >
+            {i18n.translate('discover.openOptionsPopover.gotToAllSettings', {
+              defaultMessage: 'All Discover options',
+            })}
+          </EuiButtonEmpty>
+        </EuiTextAlign>
       </div>
     </EuiWrappingPopover>
   );
+}
+
+function onClose() {
+  ReactDOM.unmountComponentAtNode(container);
+  document.body.removeChild(container);
+  isOpen = false;
 }
 
 export function openOptionsPopover({
@@ -90,17 +118,11 @@ export function openOptionsPopover({
   anchorElement: HTMLElement;
 }) {
   if (isOpen) {
+    onClose();
     return;
   }
 
   isOpen = true;
-  const container = document.createElement('div');
-  const onClose = () => {
-    ReactDOM.unmountComponentAtNode(container);
-    document.body.removeChild(container);
-    isOpen = false;
-  };
-
   document.body.appendChild(container);
 
   const element = (
