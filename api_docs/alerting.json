@@ -404,7 +404,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 79
+          "lineNumber": 80
         },
         "deprecated": false,
         "children": [
@@ -417,7 +417,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 86
+              "lineNumber": 87
             },
             "deprecated": false
           },
@@ -433,7 +433,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 87
+              "lineNumber": 88
             },
             "deprecated": false
           },
@@ -449,7 +449,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 88
+              "lineNumber": 89
             },
             "deprecated": false
           },
@@ -472,7 +472,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 89
+              "lineNumber": 90
             },
             "deprecated": false
           },
@@ -488,7 +488,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 90
+              "lineNumber": 91
             },
             "deprecated": false
           },
@@ -504,7 +504,31 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 91
+              "lineNumber": 92
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.AlertExecutorOptions.rule",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rule",
+            "description": [],
+            "signature": [
+              "Pick<Pick<",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.Alert",
+                "text": "Alert"
+              },
+              "<never>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">, \"enabled\" | \"name\" | \"actions\" | \"tags\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"throttle\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/alerting/server/types.ts",
+              "lineNumber": 93
             },
             "deprecated": false
           },
@@ -517,7 +541,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 92
+              "lineNumber": 94
             },
             "deprecated": false
           },
@@ -533,7 +557,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 93
+              "lineNumber": 95
             },
             "deprecated": false
           },
@@ -546,7 +570,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 94
+              "lineNumber": 96
             },
             "deprecated": false
           },
@@ -562,7 +586,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 95
+              "lineNumber": 97
             },
             "deprecated": false
           },
@@ -578,7 +602,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 96
+              "lineNumber": 98
             },
             "deprecated": false
           },
@@ -594,7 +618,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 97
+              "lineNumber": 99
             },
             "deprecated": false
           }
@@ -610,7 +634,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 45
+          "lineNumber": 46
         },
         "deprecated": false,
         "children": [
@@ -633,7 +657,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 46
+              "lineNumber": 47
             },
             "deprecated": false,
             "returnComment": [],
@@ -653,7 +677,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 47
+              "lineNumber": 48
             },
             "deprecated": false,
             "returnComment": [],
@@ -679,7 +703,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 48
+              "lineNumber": 49
             },
             "deprecated": false,
             "returnComment": [],
@@ -697,7 +721,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 49
+              "lineNumber": 50
             },
             "deprecated": false,
             "returnComment": [],
@@ -715,7 +739,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 219
+          "lineNumber": 221
         },
         "deprecated": false,
         "children": [
@@ -737,7 +761,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 220
+              "lineNumber": 222
             },
             "deprecated": false
           },
@@ -759,7 +783,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 221
+              "lineNumber": 223
             },
             "deprecated": false
           }
@@ -786,7 +810,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 69
+          "lineNumber": 70
         },
         "deprecated": false,
         "children": [
@@ -804,7 +828,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 74
+              "lineNumber": 75
             },
             "deprecated": false,
             "returnComment": [],
@@ -818,7 +842,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/alerting/server/types.ts",
-                  "lineNumber": 75
+                  "lineNumber": 76
                 },
                 "deprecated": false
               }
@@ -846,7 +870,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 113
+          "lineNumber": 115
         },
         "deprecated": false,
         "children": [
@@ -859,7 +883,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 121
+              "lineNumber": 123
             },
             "deprecated": false
           },
@@ -872,7 +896,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 122
+              "lineNumber": 124
             },
             "deprecated": false
           },
@@ -890,7 +914,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 123
+              "lineNumber": 125
             },
             "deprecated": false
           },
@@ -913,7 +937,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 126
+              "lineNumber": 128
             },
             "deprecated": false
           },
@@ -929,7 +953,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 127
+              "lineNumber": 129
             },
             "deprecated": false
           },
@@ -952,7 +976,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 128
+              "lineNumber": 130
             },
             "deprecated": false
           },
@@ -984,7 +1008,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 129
+              "lineNumber": 131
             },
             "deprecated": false,
             "returnComment": [],
@@ -1008,7 +1032,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/alerting/server/types.ts",
-                  "lineNumber": 107
+                  "lineNumber": 109
                 },
                 "deprecated": false
               }
@@ -1023,7 +1047,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 140
+              "lineNumber": 142
             },
             "deprecated": false
           },
@@ -1063,7 +1087,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 141
+              "lineNumber": 143
             },
             "deprecated": false
           },
@@ -1079,7 +1103,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 146
+              "lineNumber": 148
             },
             "deprecated": false
           }
@@ -1640,7 +1664,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 179
+          "lineNumber": 181
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2047,7 +2071,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerting/common/alert.ts",
-          "lineNumber": 101
+          "lineNumber": 121
         },
         "deprecated": false,
         "children": [
@@ -2060,7 +2084,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 102
+              "lineNumber": 122
             },
             "deprecated": false
           },
@@ -2073,7 +2097,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 103
+              "lineNumber": 123
             },
             "deprecated": false
           },
@@ -2089,7 +2113,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 104
+              "lineNumber": 124
             },
             "deprecated": false
           },
@@ -2105,7 +2129,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 105
+              "lineNumber": 125
             },
             "deprecated": false
           }
@@ -3040,7 +3064,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerting/common/alert.ts",
-          "lineNumber": 86
+          "lineNumber": 106
         },
         "deprecated": false,
         "children": [
@@ -3064,7 +3088,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 87
+              "lineNumber": 107
             },
             "deprecated": false
           },
@@ -3088,7 +3112,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 91
+              "lineNumber": 111
             },
             "deprecated": false
           },
@@ -3112,7 +3136,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 95
+              "lineNumber": 115
             },
             "deprecated": false
           }
@@ -3410,7 +3434,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerting/common/alert.ts",
-          "lineNumber": 80
+          "lineNumber": 100
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -3879,6 +3903,31 @@
         "source": {
           "path": "x-pack/plugins/alerting/common/alert.ts",
           "lineNumber": 78
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.SanitizedRuleConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "SanitizedRuleConfig",
+        "description": [],
+        "signature": [
+          "Pick<Pick<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.Alert",
+            "text": "Alert"
+          },
+          "<never>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">, \"enabled\" | \"name\" | \"actions\" | \"tags\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"throttle\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
+        ],
+        "source": {
+          "path": "x-pack/plugins/alerting/common/alert.ts",
+          "lineNumber": 80
         },
         "deprecated": false,
         "initialIsOpen": false

@@ -98,14 +98,6 @@ describe('Session service', () => {
       expect(nowProvider.reset).toHaveBeenCalled();
     });
 
-    it("Can't clear other apps' session", async () => {
-      sessionService.start();
-      expect(sessionService.getSessionId()).not.toBeUndefined();
-      currentAppId$.next('change');
-      sessionService.clear();
-      expect(sessionService.getSessionId()).not.toBeUndefined();
-    });
-
     it("Can start a new session in case there is other apps' stale session", async () => {
       const s1 = sessionService.start();
       expect(sessionService.getSessionId()).not.toBeUndefined();

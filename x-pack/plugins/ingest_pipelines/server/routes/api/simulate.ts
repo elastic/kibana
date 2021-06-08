@@ -19,7 +19,6 @@ const bodySchema = schema.object({
 
 export const registerSimulateRoute = ({
   router,
-  license,
   lib: { handleEsError },
 }: RouteDependencies): void => {
   router.post(
@@ -29,7 +28,7 @@ export const registerSimulateRoute = ({
         body: bodySchema,
       },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
+    async (ctx, req, res) => {
       const { client: clusterClient } = ctx.core.elasticsearch;
 
       const { pipeline, documents, verbose } = req.body;
@@ -47,6 +46,6 @@ export const registerSimulateRoute = ({
       } catch (error) {
         return handleEsError({ error, response: res });
       }
-    })
+    }
   );
 };

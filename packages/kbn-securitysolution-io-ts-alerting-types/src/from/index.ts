@@ -8,7 +8,7 @@
 
 import { Either } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
-import { parseScheduleDates } from '@kbn/securitysolution-io-ts-types';
+import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 
 const stringValidator = (input: unknown): input is string => typeof input === 'string';
 

@@ -730,6 +730,7 @@ class AgentPolicyService {
         ? {
             agent: {
               monitoring: {
+                namespace: agentPolicy.namespace,
                 use_output: defaultOutput.name,
                 enabled: true,
                 logs: agentPolicy.monitoring_enabled.includes(dataTypes.Logs),

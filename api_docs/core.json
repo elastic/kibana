@@ -1112,7 +1112,7 @@
         ],
         "source": {
           "path": "src/core/public/index.ts",
-          "lineNumber": 206
+          "lineNumber": 203
         },
         "deprecated": false,
         "children": [
@@ -1136,7 +1136,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 208
+              "lineNumber": 205
             },
             "deprecated": false
           },
@@ -1160,7 +1160,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 210
+              "lineNumber": 207
             },
             "deprecated": false
           },
@@ -1184,7 +1184,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 212
+              "lineNumber": 209
             },
             "deprecated": false
           },
@@ -1208,7 +1208,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 214
+              "lineNumber": 211
             },
             "deprecated": false
           },
@@ -1232,7 +1232,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 216
+              "lineNumber": 213
             },
             "deprecated": false
           },
@@ -1252,7 +1252,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 223
+              "lineNumber": 220
             },
             "deprecated": true,
             "references": []
@@ -1279,7 +1279,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 227
+              "lineNumber": 224
             },
             "deprecated": false,
             "returnComment": [],
@@ -1299,7 +1299,7 @@
         ],
         "source": {
           "path": "src/core/public/index.ts",
-          "lineNumber": 251
+          "lineNumber": 248
         },
         "deprecated": false,
         "children": [
@@ -1323,7 +1323,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 253
+              "lineNumber": 250
             },
             "deprecated": false
           },
@@ -1347,7 +1347,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 255
+              "lineNumber": 252
             },
             "deprecated": false
           },
@@ -1371,7 +1371,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 257
+              "lineNumber": 254
             },
             "deprecated": false
           },
@@ -1395,7 +1395,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 259
+              "lineNumber": 256
             },
             "deprecated": false
           },
@@ -1419,7 +1419,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 261
+              "lineNumber": 258
             },
             "deprecated": false
           },
@@ -1443,7 +1443,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 263
+              "lineNumber": 260
             },
             "deprecated": false
           },
@@ -1467,7 +1467,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 265
+              "lineNumber": 262
             },
             "deprecated": false
           },
@@ -1491,7 +1491,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 267
+              "lineNumber": 264
             },
             "deprecated": false
           },
@@ -1515,7 +1515,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 269
+              "lineNumber": 266
             },
             "deprecated": false
           },
@@ -1539,7 +1539,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 271
+              "lineNumber": 268
             },
             "deprecated": false
           },
@@ -1563,7 +1563,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 273
+              "lineNumber": 270
             },
             "deprecated": false
           },
@@ -1583,7 +1583,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 280
+              "lineNumber": 277
             },
             "deprecated": true,
             "references": [
@@ -1770,7 +1770,7 @@
         "description": [],
         "source": {
           "path": "src/core/public/doc_links/doc_links_service.ts",
-          "lineNumber": 408
+          "lineNumber": 409
         },
         "deprecated": false,
         "children": [
@@ -1783,7 +1783,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/doc_links/doc_links_service.ts",
-              "lineNumber": 409
+              "lineNumber": 410
             },
             "deprecated": false
           },
@@ -1796,7 +1796,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/doc_links/doc_links_service.ts",
-              "lineNumber": 410
+              "lineNumber": 411
             },
             "deprecated": false
           },
@@ -1808,11 +1808,11 @@
             "label": "links",
             "description": [],
             "signature": [
-              "{ readonly canvas: { readonly guide: string; }; readonly dashboard: { readonly guide: string; readonly drilldowns: string; readonly drilldownsTriggerPicker: string; readonly urlDrilldownTemplateSyntax: string; readonly urlDrilldownVariables: string; }; readonly discover: Record<string, string>; readonly filebeat: { readonly base: string; readonly installation: string; readonly configuration: string; readonly elasticsearchOutput: string; readonly elasticsearchModule: string; readonly startup: string; readonly exportedFields: string; }; readonly auditbeat: { readonly base: string; }; readonly metricbeat: { readonly base: string; readonly configure: string; readonly httpEndpoint: string; readonly install: string; readonly start: string; }; readonly enterpriseSearch: { readonly base: string; readonly appSearchBase: string; readonly workplaceSearchBase: string; }; readonly heartbeat: { readonly base: string; }; readonly logstash: { readonly base: string; }; readonly functionbeat: { readonly base: string; }; readonly winlogbeat: { readonly base: string; }; readonly aggs: { readonly composite: string; readonly composite_missing_bucket: string; readonly date_histogram: string; readonly date_range: string; readonly date_format_pattern: string; readonly filter: string; readonly filters: string; readonly geohash_grid: string; readonly histogram: string; readonly ip_range: string; readonly range: string; readonly significant_terms: string; readonly terms: string; readonly avg: string; readonly avg_bucket: string; readonly max_bucket: string; readonly min_bucket: string; readonly sum_bucket: string; readonly cardinality: string; readonly count: string; readonly cumulative_sum: string; readonly derivative: string; readonly geo_bounds: string; readonly geo_centroid: string; readonly max: string; readonly median: string; readonly min: string; readonly moving_avg: string; readonly percentile_ranks: string; readonly serial_diff: string; readonly std_dev: string; readonly sum: string; readonly top_hits: string; }; readonly runtimeFields: { readonly overview: string; readonly mapping: string; }; readonly scriptedFields: { readonly scriptFields: string; readonly scriptAggs: string; readonly painless: string; readonly painlessApi: string; readonly painlessLangSpec: string; readonly painlessSyntax: string; readonly painlessWalkthrough: string; readonly luceneExpressions: string; }; readonly search: { readonly sessions: string; }; readonly indexPatterns: { readonly introduction: string; readonly fieldFormattersNumber: string; readonly fieldFormattersString: string; }; readonly addData: string; readonly kibana: string; readonly upgradeAssistant: string; readonly elasticsearch: Record<string, string>; readonly siem: { readonly guide: string; readonly gettingStarted: string; }; readonly query: { readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; }; readonly date: { readonly dateMath: string; readonly dateMathIndexNames: string; }; readonly management: Record<string, string>; readonly ml: Record<string, string>; readonly transforms: Record<string, string>; readonly visualize: Record<string, string>; readonly apis: Readonly<{ bulkIndexAlias: string; byteSizeUnits: string; createAutoFollowPattern: string; createFollower: string; createIndex: string; createSnapshotLifecyclePolicy: string; createRoleMapping: string; createRoleMappingTemplates: string; createRollupJobsRequest: string; createApiKey: string; createPipeline: string; createTransformRequest: string; cronExpressions: string; executeWatchActionModes: string; indexExists: string; openIndex: string; putComponentTemplate: string; painlessExecute: string; painlessExecuteAPIContexts: string; putComponentTemplateMetadata: string; putSnapshotLifecyclePolicy: string; putIndexTemplateV1: string; putWatch: string; simulatePipeline: string; timeUnits: string; updateTransform: string; }>; readonly observability: Record<string, string>; readonly alerting: Record<string, string>; readonly maps: Record<string, string>; readonly monitoring: Record<string, string>; readonly security: Readonly<{ apiKeyServiceSettings: string; clusterPrivileges: string; elasticsearchSettings: string; elasticsearchEnableSecurity: string; indicesPrivileges: string; kibanaTLS: string; kibanaPrivileges: string; mappingRoles: string; mappingRolesFieldRules: string; runAsPrivilege: string; }>; readonly watcher: Record<string, string>; readonly ccs: Record<string, string>; readonly plugins: Record<string, string>; readonly snapshotRestore: Record<string, string>; readonly ingest: Record<string, string>; }"
+              "{ readonly canvas: { readonly guide: string; }; readonly dashboard: { readonly guide: string; readonly drilldowns: string; readonly drilldownsTriggerPicker: string; readonly urlDrilldownTemplateSyntax: string; readonly urlDrilldownVariables: string; }; readonly discover: Record<string, string>; readonly filebeat: { readonly base: string; readonly installation: string; readonly configuration: string; readonly elasticsearchOutput: string; readonly elasticsearchModule: string; readonly startup: string; readonly exportedFields: string; }; readonly auditbeat: { readonly base: string; }; readonly metricbeat: { readonly base: string; readonly configure: string; readonly httpEndpoint: string; readonly install: string; readonly start: string; }; readonly enterpriseSearch: { readonly base: string; readonly appSearchBase: string; readonly workplaceSearchBase: string; }; readonly heartbeat: { readonly base: string; }; readonly logstash: { readonly base: string; }; readonly functionbeat: { readonly base: string; }; readonly winlogbeat: { readonly base: string; }; readonly aggs: { readonly composite: string; readonly composite_missing_bucket: string; readonly date_histogram: string; readonly date_range: string; readonly date_format_pattern: string; readonly filter: string; readonly filters: string; readonly geohash_grid: string; readonly histogram: string; readonly ip_range: string; readonly range: string; readonly significant_terms: string; readonly terms: string; readonly avg: string; readonly avg_bucket: string; readonly max_bucket: string; readonly min_bucket: string; readonly sum_bucket: string; readonly cardinality: string; readonly count: string; readonly cumulative_sum: string; readonly derivative: string; readonly geo_bounds: string; readonly geo_centroid: string; readonly max: string; readonly median: string; readonly min: string; readonly moving_avg: string; readonly percentile_ranks: string; readonly serial_diff: string; readonly std_dev: string; readonly sum: string; readonly top_hits: string; }; readonly runtimeFields: { readonly overview: string; readonly mapping: string; }; readonly scriptedFields: { readonly scriptFields: string; readonly scriptAggs: string; readonly painless: string; readonly painlessApi: string; readonly painlessLangSpec: string; readonly painlessSyntax: string; readonly painlessWalkthrough: string; readonly luceneExpressions: string; }; readonly search: { readonly sessions: string; }; readonly indexPatterns: { readonly introduction: string; readonly fieldFormattersNumber: string; readonly fieldFormattersString: string; readonly runtimeFields: string; }; readonly addData: string; readonly kibana: string; readonly upgradeAssistant: string; readonly elasticsearch: Record<string, string>; readonly siem: { readonly guide: string; readonly gettingStarted: string; }; readonly query: { readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; }; readonly date: { readonly dateMath: string; readonly dateMathIndexNames: string; }; readonly management: Record<string, string>; readonly ml: Record<string, string>; readonly transforms: Record<string, string>; readonly visualize: Record<string, string>; readonly apis: Readonly<{ bulkIndexAlias: string; byteSizeUnits: string; createAutoFollowPattern: string; createFollower: string; createIndex: string; createSnapshotLifecyclePolicy: string; createRoleMapping: string; createRoleMappingTemplates: string; createRollupJobsRequest: string; createApiKey: string; createPipeline: string; createTransformRequest: string; cronExpressions: string; executeWatchActionModes: string; indexExists: string; openIndex: string; putComponentTemplate: string; painlessExecute: string; painlessExecuteAPIContexts: string; putComponentTemplateMetadata: string; putSnapshotLifecyclePolicy: string; putIndexTemplateV1: string; putWatch: string; simulatePipeline: string; timeUnits: string; updateTransform: string; }>; readonly observability: Record<string, string>; readonly alerting: Record<string, string>; readonly maps: Record<string, string>; readonly monitoring: Record<string, string>; readonly security: Readonly<{ apiKeyServiceSettings: string; clusterPrivileges: string; elasticsearchSettings: string; elasticsearchEnableSecurity: string; indicesPrivileges: string; kibanaTLS: string; kibanaPrivileges: string; mappingRoles: string; mappingRolesFieldRules: string; runAsPrivilege: string; }>; readonly watcher: Record<string, string>; readonly ccs: Record<string, string>; readonly plugins: Record<string, string>; readonly snapshotRestore: Record<string, string>; readonly ingest: Record<string, string>; }"
             ],
             "source": {
               "path": "src/core/public/doc_links/doc_links_service.ts",
-              "lineNumber": 411
+              "lineNumber": 412
             },
             "deprecated": false
           }
@@ -7427,7 +7427,7 @@
         ],
         "source": {
           "path": "src/core/public/index.ts",
-          "lineNumber": 237
+          "lineNumber": 234
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -8058,7 +8058,7 @@
         ],
         "source": {
           "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-          "lineNumber": 188
+          "lineNumber": 210
         },
         "deprecated": false,
         "children": [
@@ -8076,7 +8076,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 192
+              "lineNumber": 214
             },
             "deprecated": false
           },
@@ -8091,7 +8091,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 197
+              "lineNumber": 219
             },
             "deprecated": false
           },
@@ -8106,7 +8106,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 202
+              "lineNumber": 224
             },
             "deprecated": false
           },
@@ -8124,7 +8124,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 208
+              "lineNumber": 230
             },
             "deprecated": false
           },
@@ -8142,7 +8142,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 215
+              "lineNumber": 237
             },
             "deprecated": false
           },
@@ -8160,7 +8160,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 220
+              "lineNumber": 242
             },
             "deprecated": false
           },
@@ -8178,7 +8178,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 225
+              "lineNumber": 247
             },
             "deprecated": false
           },
@@ -8196,7 +8196,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 230
+              "lineNumber": 252
             },
             "deprecated": false
           },
@@ -8211,7 +8211,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 236
+              "lineNumber": 258
             },
             "deprecated": false
           },
@@ -8229,7 +8229,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 242
+              "lineNumber": 264
             },
             "deprecated": false
           },
@@ -8244,7 +8244,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 248
+              "lineNumber": 270
             },
             "deprecated": false
           },
@@ -8262,7 +8262,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 254
+              "lineNumber": 276
             },
             "deprecated": false
           },
@@ -8280,7 +8280,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 260
+              "lineNumber": 282
             },
             "deprecated": false
           },
@@ -8298,7 +8298,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 267
+              "lineNumber": 289
             },
             "deprecated": false
           },
@@ -8316,7 +8316,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 277
+              "lineNumber": 299
             },
             "deprecated": false
           },
@@ -8332,7 +8332,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 279
+              "lineNumber": 301
             },
             "deprecated": false,
             "children": [
@@ -8348,7 +8348,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-                  "lineNumber": 279
+                  "lineNumber": 301
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8545,6 +8545,20 @@
                 }
               },
               {
+                "plugin": "monitoring",
+                "link": {
+                  "path": "x-pack/plugins/monitoring/server/kibana_monitoring/collectors/get_usage_collector.ts",
+                  "lineNumber": 107
+                }
+              },
+              {
+                "plugin": "monitoring",
+                "link": {
+                  "path": "x-pack/plugins/monitoring/server/telemetry_collection/register_monitoring_telemetry_collection.ts",
+                  "lineNumber": 148
+                }
+              },
+              {
                 "plugin": "securitySolution",
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
@@ -8563,27 +8577,6 @@
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
                   "lineNumber": 235
-                }
-              },
-              {
-                "plugin": "beatsManagement",
-                "link": {
-                  "path": "x-pack/plugins/beats_management/server/lib/adapters/database/kibana_database_adapter.ts",
-                  "lineNumber": 113
-                }
-              },
-              {
-                "plugin": "monitoring",
-                "link": {
-                  "path": "x-pack/plugins/monitoring/server/kibana_monitoring/collectors/get_usage_collector.ts",
-                  "lineNumber": 107
-                }
-              },
-              {
-                "plugin": "monitoring",
-                "link": {
-                  "path": "x-pack/plugins/monitoring/server/telemetry_collection/register_monitoring_telemetry_collection.ts",
-                  "lineNumber": 148
                 }
               },
               {
@@ -8755,7 +8748,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "endpoint",
-                "description": [],
+                "description": [
+                  "- String descriptor of the endpoint e.g. `cluster.getSettings` or `ping`."
+                ],
                 "signature": [
                   "string"
                 ],
@@ -8772,7 +8767,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "clientParams",
-                "description": [],
+                "description": [
+                  "- A dictionary of parameters that will be passed directly to the Elasticsearch JS client."
+                ],
                 "signature": [
                   "Record<string, any>"
                 ],
@@ -8789,7 +8786,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [],
+                "description": [
+                  "- Options that affect the way we call the API and process the result."
+                ],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -9096,7 +9095,7 @@
             "plugin": "indexManagement",
             "link": {
               "path": "x-pack/plugins/index_management/server/types.ts",
-              "lineNumber": 40
+              "lineNumber": 39
             }
           },
           {
@@ -9110,7 +9109,7 @@
             "plugin": "indexManagement",
             "link": {
               "path": "x-pack/plugins/index_management/target/types/server/types.d.ts",
-              "lineNumber": 25
+              "lineNumber": 24
             }
           }
         ],
@@ -9384,56 +9383,7 @@
                 "plugin": "data",
                 "link": {
                   "path": "src/plugins/data/server/autocomplete/value_suggestions_route.ts",
-                  "lineNumber": 67
-                }
-              },
-              {
-                "plugin": "lists",
-                "link": {
-                  "path": "x-pack/plugins/lists/server/routes/read_privileges_route.ts",
-                  "lineNumber": 31
-                }
-              },
-              {
-                "plugin": "lists",
-                "link": {
-                  "path": "x-pack/plugins/lists/server/routes/read_privileges_route.ts",
-                  "lineNumber": 35
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/framework/kibana_framework_adapter.ts",
-                  "lineNumber": 34
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/query_signals_route.ts",
-                  "lineNumber": 52
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/open_close_signals_route.ts",
-                  "lineNumber": 60
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/privileges/read_privileges_route.ts",
-                  "lineNumber": 41
-                }
-              },
-              {
-                "plugin": "beatsManagement",
-                "link": {
-                  "path": "x-pack/plugins/beats_management/server/lib/adapters/database/kibana_database_adapter.ts",
-                  "lineNumber": 111
+                  "lineNumber": 65
                 }
               },
               {
@@ -9489,7 +9439,7 @@
                 "plugin": "indexManagement",
                 "link": {
                   "path": "x-pack/plugins/index_management/server/routes/api/indices/register_list_route.ts",
-                  "lineNumber": 18
+                  "lineNumber": 16
                 }
               },
               {
@@ -9510,7 +9460,7 @@
                 "plugin": "indexManagement",
                 "link": {
                   "path": "x-pack/plugins/index_management/server/routes/api/indices/register_reload_route.ts",
-                  "lineNumber": 33
+                  "lineNumber": 28
                 }
               },
               {
@@ -9538,14 +9488,14 @@
                 "plugin": "indexManagement",
                 "link": {
                   "path": "x-pack/plugins/index_management/server/routes/api/templates/register_get_routes.ts",
-                  "lineNumber": 24
+                  "lineNumber": 22
                 }
               },
               {
                 "plugin": "indexManagement",
                 "link": {
                   "path": "x-pack/plugins/index_management/server/routes/api/templates/register_get_routes.ts",
-                  "lineNumber": 65
+                  "lineNumber": 62
                 }
               },
               {
@@ -9622,14 +9572,14 @@
                 "plugin": "indexManagement",
                 "link": {
                   "path": "x-pack/plugins/index_management/server/routes/api/component_templates/create.ts",
-                  "lineNumber": 28
+                  "lineNumber": 24
                 }
               },
               {
                 "plugin": "indexManagement",
                 "link": {
                   "path": "x-pack/plugins/index_management/server/routes/api/component_templates/update.ts",
-                  "lineNumber": 32
+                  "lineNumber": 28
                 }
               },
               {
@@ -9647,178 +9597,17 @@
                 }
               },
               {
-                "plugin": "crossClusterReplication",
+                "plugin": "lists",
                 "link": {
-                  "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_create_route.ts",
-                  "lineNumber": 45
+                  "path": "x-pack/plugins/lists/server/routes/read_privileges_route.ts",
+                  "lineNumber": 31
                 }
               },
               {
-                "plugin": "crossClusterReplication",
+                "plugin": "lists",
                 "link": {
-                  "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_create_route.ts",
-                  "lineNumber": 64
-                }
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "link": {
-                  "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_delete_route.ts",
-                  "lineNumber": 50
-                }
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "link": {
-                  "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_fetch_route.ts",
-                  "lineNumber": 27
-                }
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "link": {
-                  "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_get_route.ts",
-                  "lineNumber": 37
-                }
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "link": {
-                  "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_pause_route.ts",
-                  "lineNumber": 49
-                }
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "link": {
-                  "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_resume_route.ts",
-                  "lineNumber": 49
-                }
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "link": {
-                  "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_update_route.ts",
-                  "lineNumber": 47
-                }
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "link": {
-                  "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/follower_index/register_create_route.ts",
-                  "lineNumber": 52
-                }
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "link": {
-                  "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/follower_index/register_fetch_route.ts",
-                  "lineNumber": 29
-                }
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "link": {
-                  "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/follower_index/register_fetch_route.ts",
+                  "path": "x-pack/plugins/lists/server/routes/read_privileges_route.ts",
                   "lineNumber": 35
-                }
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "link": {
-                  "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/follower_index/register_get_route.ts",
-                  "lineNumber": 38
-                }
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "link": {
-                  "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/follower_index/register_get_route.ts",
-                  "lineNumber": 58
-                }
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "link": {
-                  "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/follower_index/register_pause_route.ts",
-                  "lineNumber": 47
-                }
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "link": {
-                  "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/follower_index/register_resume_route.ts",
-                  "lineNumber": 47
-                }
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "link": {
-                  "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/follower_index/register_unfollow_route.ts",
-                  "lineNumber": 50
-                }
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "link": {
-                  "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/follower_index/register_unfollow_route.ts",
-                  "lineNumber": 59
-                }
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "link": {
-                  "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/follower_index/register_unfollow_route.ts",
-                  "lineNumber": 64
-                }
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "link": {
-                  "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/follower_index/register_unfollow_route.ts",
-                  "lineNumber": 72
-                }
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "link": {
-                  "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/follower_index/register_update_route.ts",
-                  "lineNumber": 53
-                }
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "link": {
-                  "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/follower_index/register_update_route.ts",
-                  "lineNumber": 66
-                }
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "link": {
-                  "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/follower_index/register_update_route.ts",
-                  "lineNumber": 80
-                }
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "link": {
-                  "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/cross_cluster_replication/register_permissions_route.ts",
-                  "lineNumber": 40
-                }
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "link": {
-                  "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/cross_cluster_replication/register_stats_route.ts",
-                  "lineNumber": 29
-                }
-              },
-              {
-                "plugin": "infra",
-                "link": {
-                  "path": "x-pack/plugins/infra/server/lib/log_analysis/log_entry_categories_analysis.ts",
-                  "lineNumber": 420
                 }
               },
               {
@@ -9839,7 +9628,35 @@
                 "plugin": "monitoring",
                 "link": {
                   "path": "x-pack/plugins/monitoring/server/plugin.ts",
-                  "lineNumber": 356
+                  "lineNumber": 361
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/lib/framework/kibana_framework_adapter.ts",
+                  "lineNumber": 34
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/query_signals_route.ts",
+                  "lineNumber": 60
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/open_close_signals_route.ts",
+                  "lineNumber": 60
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/privileges/read_privileges_route.ts",
+                  "lineNumber": 41
                 }
               },
               {
@@ -10311,7 +10128,7 @@
             "plugin": "fleet",
             "link": {
               "path": "x-pack/plugins/fleet/server/plugin.ts",
-              "lineNumber": 189
+              "lineNumber": 190
             }
           },
           {
@@ -10817,7 +10634,7 @@
         ],
         "source": {
           "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-          "lineNumber": 87
+          "lineNumber": 96
         },
         "deprecated": false,
         "children": [
@@ -10838,7 +10655,7 @@
             ],
             "source": {
               "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-              "lineNumber": 100
+              "lineNumber": 109
             },
             "deprecated": false,
             "children": [
@@ -10854,7 +10671,7 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 100
+                  "lineNumber": 109
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10871,7 +10688,7 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 100
+                  "lineNumber": 109
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10890,7 +10707,7 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 100
+                  "lineNumber": 109
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -10915,7 +10732,7 @@
             ],
             "source": {
               "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-              "lineNumber": 116
+              "lineNumber": 125
             },
             "deprecated": false,
             "children": [
@@ -10931,7 +10748,7 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 116
+                  "lineNumber": 125
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10948,7 +10765,7 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 116
+                  "lineNumber": 125
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10967,7 +10784,7 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 116
+                  "lineNumber": 125
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -10992,7 +10809,7 @@
             ],
             "source": {
               "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-              "lineNumber": 129
+              "lineNumber": 138
             },
             "deprecated": false,
             "children": [
@@ -11008,7 +10825,7 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 129
+                  "lineNumber": 138
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -11027,7 +10844,7 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 129
+                  "lineNumber": 138
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -11052,7 +10869,7 @@
             ],
             "source": {
               "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-              "lineNumber": 145
+              "lineNumber": 154
             },
             "deprecated": false,
             "children": [
@@ -11068,7 +10885,7 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 145
+                  "lineNumber": 154
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -11087,7 +10904,7 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 145
+                  "lineNumber": 154
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -12179,6 +11996,24 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-server.DeprecationsDetails.deprecationType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "deprecationType",
+            "description": [
+              "\n(optional) Used to identify between different deprecation types.\nExample use case: in Upgrade Assistant, we may want to allow the user to sort by\ndeprecation type or show each type in a separate tab.\n\nFeel free to add new types if necessary.\nPredefined types are necessary to reduce having similar definitions with different keywords\nacross kibana deprecations."
+            ],
+            "signature": [
+              "\"config\" | \"feature\" | undefined"
+            ],
+            "source": {
+              "path": "src/core/server/deprecations/types.ts",
+              "lineNumber": 37
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-server.DeprecationsDetails.documentationUrl",
             "type": "string",
             "tags": [],
@@ -12189,7 +12024,7 @@
             ],
             "source": {
               "path": "src/core/server/deprecations/types.ts",
-              "lineNumber": 29
+              "lineNumber": 39
             },
             "deprecated": false
           },
@@ -12201,11 +12036,11 @@
             "label": "correctiveActions",
             "description": [],
             "signature": [
-              "{ api?: { path: string; method: \"PUT\" | \"POST\"; body?: { [key: string]: any; } | undefined; } | undefined; manualSteps?: string[] | undefined; }"
+              "{ api?: { path: string; method: \"PUT\" | \"POST\"; body?: { [key: string]: any; } | undefined; } | undefined; manualSteps: string[]; }"
             ],
             "source": {
               "path": "src/core/server/deprecations/types.ts",
-              "lineNumber": 31
+              "lineNumber": 41
             },
             "deprecated": false
           }
@@ -12273,7 +12108,7 @@
         ],
         "source": {
           "path": "src/core/server/deprecations/deprecations_service.ts",
-          "lineNumber": 103
+          "lineNumber": 101
         },
         "deprecated": false,
         "children": [
@@ -12297,7 +12132,7 @@
             ],
             "source": {
               "path": "src/core/server/deprecations/deprecations_service.ts",
-              "lineNumber": 104
+              "lineNumber": 102
             },
             "deprecated": false,
             "returnComment": [],
@@ -12320,7 +12155,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/deprecations/deprecations_service.ts",
-                  "lineNumber": 104
+                  "lineNumber": 102
                 },
                 "deprecated": false
               }
@@ -12713,6 +12548,27 @@
                 }
               },
               {
+                "plugin": "indexManagement",
+                "link": {
+                  "path": "x-pack/plugins/index_management/server/plugin.ts",
+                  "lineNumber": 32
+                }
+              },
+              {
+                "plugin": "globalSearch",
+                "link": {
+                  "path": "x-pack/plugins/global_search/server/services/context.ts",
+                  "lineNumber": 29
+                }
+              },
+              {
+                "plugin": "licensing",
+                "link": {
+                  "path": "x-pack/plugins/licensing/server/plugin.test.ts",
+                  "lineNumber": 41
+                }
+              },
+              {
                 "plugin": "securitySolution",
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
@@ -12731,41 +12587,6 @@
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
                   "lineNumber": 235
-                }
-              },
-              {
-                "plugin": "beatsManagement",
-                "link": {
-                  "path": "x-pack/plugins/beats_management/server/lib/adapters/database/kibana_database_adapter.ts",
-                  "lineNumber": 31
-                }
-              },
-              {
-                "plugin": "indexManagement",
-                "link": {
-                  "path": "x-pack/plugins/index_management/server/plugin.ts",
-                  "lineNumber": 34
-                }
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "link": {
-                  "path": "x-pack/plugins/cross_cluster_replication/server/plugin.ts",
-                  "lineNumber": 33
-                }
-              },
-              {
-                "plugin": "globalSearch",
-                "link": {
-                  "path": "x-pack/plugins/global_search/server/services/context.ts",
-                  "lineNumber": 29
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.test.ts",
-                  "lineNumber": 41
                 }
               },
               {
@@ -12964,7 +12785,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/deprecations/types.ts",
-          "lineNumber": 60
+          "lineNumber": 70
         },
         "deprecated": false,
         "children": [
@@ -12986,7 +12807,7 @@
             ],
             "source": {
               "path": "src/core/server/deprecations/types.ts",
-              "lineNumber": 61
+              "lineNumber": 71
             },
             "deprecated": false
           },
@@ -13302,7 +13123,7 @@
             ],
             "source": {
               "path": "src/core/server/deprecations/types.ts",
-              "lineNumber": 62
+              "lineNumber": 72
             },
             "deprecated": false
           }
@@ -15941,48 +15762,6 @@
         "removeBy": "7.16",
         "references": [
           {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/server/schemas/common/get_call_cluster.mock.ts",
-              "lineNumber": 9
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/server/schemas/common/get_call_cluster.mock.ts",
-              "lineNumber": 27
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/server/schemas/common/get_call_cluster.mock.ts",
-              "lineNumber": 31
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
-              "lineNumber": 10
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
-              "lineNumber": 447
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
-              "lineNumber": 466
-            }
-          },
-          {
             "plugin": "canvas",
             "link": {
               "path": "x-pack/plugins/canvas/server/lib/query_es_sql.ts",
@@ -16014,14 +15793,14 @@
             "plugin": "crossClusterReplication",
             "link": {
               "path": "x-pack/plugins/cross_cluster_replication/server/plugin.ts",
-              "lineNumber": 17
+              "lineNumber": 16
             }
           },
           {
             "plugin": "crossClusterReplication",
             "link": {
               "path": "x-pack/plugins/cross_cluster_replication/server/plugin.ts",
-              "lineNumber": 36
+              "lineNumber": 27
             }
           },
           {
@@ -16270,6 +16049,48 @@
             }
           },
           {
+            "plugin": "securitySolution",
+            "link": {
+              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
+              "lineNumber": 10
+            }
+          },
+          {
+            "plugin": "securitySolution",
+            "link": {
+              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
+              "lineNumber": 447
+            }
+          },
+          {
+            "plugin": "securitySolution",
+            "link": {
+              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
+              "lineNumber": 466
+            }
+          },
+          {
+            "plugin": "lists",
+            "link": {
+              "path": "x-pack/plugins/lists/server/schemas/common/get_call_cluster.mock.ts",
+              "lineNumber": 9
+            }
+          },
+          {
+            "plugin": "lists",
+            "link": {
+              "path": "x-pack/plugins/lists/server/schemas/common/get_call_cluster.mock.ts",
+              "lineNumber": 27
+            }
+          },
+          {
+            "plugin": "lists",
+            "link": {
+              "path": "x-pack/plugins/lists/server/schemas/common/get_call_cluster.mock.ts",
+              "lineNumber": 31
+            }
+          },
+          {
             "plugin": "monitoring",
             "link": {
               "path": "x-pack/plugins/monitoring/server/lib/alerts/disable_watcher_cluster_alerts.ts",
@@ -16456,6 +16277,27 @@
             "link": {
               "path": "x-pack/plugins/monitoring/target/types/server/telemetry_collection/get_licenses.d.ts",
               "lineNumber": 20
+            }
+          },
+          {
+            "plugin": "lists",
+            "link": {
+              "path": "x-pack/plugins/lists/target/types/server/schemas/common/get_call_cluster.mock.d.ts",
+              "lineNumber": 2
+            }
+          },
+          {
+            "plugin": "lists",
+            "link": {
+              "path": "x-pack/plugins/lists/target/types/server/schemas/common/get_call_cluster.mock.d.ts",
+              "lineNumber": 4
+            }
+          },
+          {
+            "plugin": "lists",
+            "link": {
+              "path": "x-pack/plugins/lists/target/types/server/schemas/common/get_call_cluster.mock.d.ts",
+              "lineNumber": 5
             }
           },
           {
@@ -20308,13 +20150,13 @@
             "signature": [
               "{ legacy: { globalConfig$: ",
               "Observable",
-              "<Readonly<{ kibana: Readonly<{ readonly index: string; readonly autocompleteTerminateAfter: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly autocompleteTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
+              "<Readonly<{ kibana: Readonly<{ readonly index: string; }>; elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
               "ByteSizeValue",
               ") => boolean; isLessThan: (other: ",
               "ByteSizeValue",
               ") => boolean; isEqualTo: (other: ",
               "ByteSizeValue",
-              ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: \"b\" | \"kb\" | \"mb\" | \"gb\" | undefined) => string; }>; }>; }>>; get: () => Readonly<{ kibana: Readonly<{ readonly index: string; readonly autocompleteTerminateAfter: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly autocompleteTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
+              ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: \"b\" | \"kb\" | \"mb\" | \"gb\" | undefined) => string; }>; }>; }>>; get: () => Readonly<{ kibana: Readonly<{ readonly index: string; }>; elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
               "ByteSizeValue",
               ") => boolean; isLessThan: (other: ",
               "ByteSizeValue",
@@ -20546,7 +20388,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/deprecations/types.ts",
-          "lineNumber": 56
+          "lineNumber": 66
         },
         "deprecated": false,
         "children": [
@@ -20578,7 +20420,7 @@
             ],
             "source": {
               "path": "src/core/server/deprecations/types.ts",
-              "lineNumber": 57
+              "lineNumber": 67
             },
             "deprecated": false,
             "returnComment": [],
@@ -20601,7 +20443,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/deprecations/types.ts",
-                  "lineNumber": 57
+                  "lineNumber": 67
                 },
                 "deprecated": false
               }
@@ -22315,7 +22157,7 @@
         ],
         "source": {
           "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-          "lineNumber": 70
+          "lineNumber": 79
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -23174,20 +23016,6 @@
             }
           },
           {
-            "plugin": "beatsManagement",
-            "link": {
-              "path": "x-pack/plugins/beats_management/server/lib/adapters/database/kibana_database_adapter.ts",
-              "lineNumber": 8
-            }
-          },
-          {
-            "plugin": "beatsManagement",
-            "link": {
-              "path": "x-pack/plugins/beats_management/server/lib/adapters/database/kibana_database_adapter.ts",
-              "lineNumber": 28
-            }
-          },
-          {
             "plugin": "licensing",
             "link": {
               "path": "x-pack/plugins/licensing/server/plugin.test.ts",
@@ -23402,28 +23230,14 @@
             "plugin": "indexManagement",
             "link": {
               "path": "x-pack/plugins/index_management/server/plugin.ts",
-              "lineNumber": 14
+              "lineNumber": 12
             }
           },
           {
             "plugin": "indexManagement",
             "link": {
               "path": "x-pack/plugins/index_management/server/plugin.ts",
-              "lineNumber": 42
-            }
-          },
-          {
-            "plugin": "crossClusterReplication",
-            "link": {
-              "path": "x-pack/plugins/cross_cluster_replication/server/plugin.ts",
-              "lineNumber": 13
-            }
-          },
-          {
-            "plugin": "crossClusterReplication",
-            "link": {
-              "path": "x-pack/plugins/cross_cluster_replication/server/plugin.ts",
-              "lineNumber": 69
+              "lineNumber": 38
             }
           },
           {
@@ -23507,7 +23321,7 @@
             "plugin": "monitoring",
             "link": {
               "path": "x-pack/plugins/monitoring/server/plugin.ts",
-              "lineNumber": 279
+              "lineNumber": 284
             }
           },
           {
@@ -23680,28 +23494,14 @@
             "plugin": "indexManagement",
             "link": {
               "path": "x-pack/plugins/index_management/server/types.ts",
-              "lineNumber": 43
+              "lineNumber": 42
             }
           },
           {
             "plugin": "indexManagement",
             "link": {
               "path": "x-pack/plugins/index_management/server/types.ts",
-              "lineNumber": 50
-            }
-          },
-          {
-            "plugin": "crossClusterReplication",
-            "link": {
-              "path": "x-pack/plugins/cross_cluster_replication/server/types.ts",
-              "lineNumber": 8
-            }
-          },
-          {
-            "plugin": "crossClusterReplication",
-            "link": {
-              "path": "x-pack/plugins/cross_cluster_replication/server/types.ts",
-              "lineNumber": 41
+              "lineNumber": 49
             }
           },
           {
@@ -23716,41 +23516,6 @@
             "link": {
               "path": "x-pack/plugins/global_search/server/types.ts",
               "lineNumber": 73
-            }
-          },
-          {
-            "plugin": "infra",
-            "link": {
-              "path": "x-pack/plugins/infra/server/lib/log_analysis/log_entry_categories_analysis.ts",
-              "lineNumber": 9
-            }
-          },
-          {
-            "plugin": "infra",
-            "link": {
-              "path": "x-pack/plugins/infra/server/lib/log_analysis/log_entry_categories_analysis.ts",
-              "lineNumber": 139
-            }
-          },
-          {
-            "plugin": "infra",
-            "link": {
-              "path": "x-pack/plugins/infra/server/lib/log_analysis/log_entry_categories_analysis.ts",
-              "lineNumber": 405
-            }
-          },
-          {
-            "plugin": "crossClusterReplication",
-            "link": {
-              "path": "x-pack/plugins/cross_cluster_replication/target/types/server/types.d.ts",
-              "lineNumber": 1
-            }
-          },
-          {
-            "plugin": "crossClusterReplication",
-            "link": {
-              "path": "x-pack/plugins/cross_cluster_replication/target/types/server/types.d.ts",
-              "lineNumber": 30
             }
           },
           {
@@ -23778,28 +23543,14 @@
             "plugin": "indexManagement",
             "link": {
               "path": "x-pack/plugins/index_management/target/types/server/types.d.ts",
-              "lineNumber": 27
+              "lineNumber": 26
             }
           },
           {
             "plugin": "indexManagement",
             "link": {
               "path": "x-pack/plugins/index_management/target/types/server/types.d.ts",
-              "lineNumber": 33
-            }
-          },
-          {
-            "plugin": "infra",
-            "link": {
-              "path": "x-pack/plugins/infra/target/types/server/lib/log_analysis/log_entry_categories_analysis.d.ts",
-              "lineNumber": 1
-            }
-          },
-          {
-            "plugin": "infra",
-            "link": {
-              "path": "x-pack/plugins/infra/target/types/server/lib/log_analysis/log_entry_categories_analysis.d.ts",
-              "lineNumber": 58
+              "lineNumber": 32
             }
           }
         ],
@@ -24268,7 +24019,7 @@
         "label": "SharedGlobalConfig",
         "description": [],
         "signature": [
-          "{ readonly kibana: Readonly<{ readonly index: string; readonly autocompleteTerminateAfter: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly autocompleteTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; readonly elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; readonly path: Readonly<{ readonly data: string; }>; readonly savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
+          "{ readonly kibana: Readonly<{ readonly index: string; }>; readonly elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; readonly path: Readonly<{ readonly data: string; }>; readonly savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
           "ByteSizeValue",
           ") => boolean; isLessThan: (other: ",
           "ByteSizeValue",

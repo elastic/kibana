@@ -30,9 +30,13 @@ import {
   listItemIndexExistSchema,
   listSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  LIST_INDEX,
+  LIST_ITEM_URL,
+  LIST_PRIVILEGES_URL,
+  LIST_URL,
+} from '@kbn/securitysolution-list-constants';
 import { toError, toPromise } from '../fp_utils';
-
-import { LIST_INDEX, LIST_ITEM_URL, LIST_PRIVILEGES_URL, LIST_URL } from '../constants';
 
 import {
   ApiParams,

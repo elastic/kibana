@@ -6,6 +6,7 @@
  */
 
 import { CoreSetup } from 'kibana/public';
+import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
 import { EditorFrameSetup, FormatFactory } from '../types';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
@@ -17,6 +18,7 @@ export interface DatatableVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
   formatFactory: Promise<FormatFactory>;
   editorFrame: EditorFrameSetup;
+  charts: ChartsPluginSetup;
 }
 
 export class DatatableVisualization {
@@ -24,15 +26,16 @@ export class DatatableVisualization {
 
   setup(
     core: CoreSetup<DatatableVisualizationPluginStartPlugins, void>,
-    { expressions, formatFactory, editorFrame }: DatatableVisualizationPluginSetupPlugins
+    { expressions, formatFactory, editorFrame, charts }: DatatableVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
       const {
         getDatatable,
         datatableColumn,
         getDatatableRenderer,
-        datatableVisualization,
+        getDatatableVisualization,
       } = await import('../async_services');
+      const palettes = await charts.palettes.getPalettes();
       const resolvedFormatFactory = await formatFactory;
 
       expressions.registerFunction(() => datatableColumn);
@@ -43,9 +46,11 @@ export class DatatableVisualization {
           getType: core
             .getStartServices()
             .then(([_, { data: dataStart }]) => dataStart.search.aggs.types.get),
+          paletteService: palettes,
+          uiSettings: core.uiSettings,
         })
       );
-      return datatableVisualization;
+      return getDatatableVisualization({ paletteService: palettes });
     });
   }
 }

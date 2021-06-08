@@ -969,7 +969,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -977,7 +977,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 >
                   Status
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell euiTableHeaderCell--hideForMobile"
@@ -985,7 +985,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -993,7 +993,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 >
                   Name
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -1002,7 +1002,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               scope="col"
               style="width:30%"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -1010,7 +1010,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 >
                   Url
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -1019,7 +1019,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               scope="col"
               style="width:12%"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -1027,7 +1027,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 >
                   Tags
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -1035,7 +1035,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -1043,7 +1043,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 >
                   TLS Certificate
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell euiTableHeaderCell--hideForMobile"
@@ -1051,7 +1051,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent euiTableCellContent--alignCenter"
               >
                 <span
@@ -1059,7 +1059,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 >
                   Downtime history
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -1068,7 +1068,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               scope="col"
               style="width:100px"
             >
-              <div
+              <span
                 class="euiTableCellContent euiTableCellContent--alignCenter"
               >
                 <span
@@ -1076,7 +1076,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 >
                   Status alert
                 </span>
-              </div>
+              </span>
             </th>
             <td
               class="euiTableHeaderCell"
@@ -1085,13 +1085,13 @@ exports[`MonitorList component renders the monitor list 1`] = `
               scope="col"
               style="width:40px"
             >
-              <div
+              <span
                 class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
                   class="euiTableCellContent__text"
                 />
-              </div>
+              </span>
             </td>
           </tr>
         </thead>
@@ -1342,6 +1342,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -1594,6 +1595,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -1629,6 +1631,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             >
               <span
                 class="euiButtonContent__icon"
+                color="inherit"
                 data-euiicon-type="arrowDown"
               />
               <span
@@ -1660,6 +1663,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             <span
               aria-hidden="true"
               class="euiButtonIcon__icon"
+              color="inherit"
               data-euiicon-type="arrowLeft"
             />
           </button>
@@ -1677,6 +1681,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             <span
               aria-hidden="true"
               class="euiButtonIcon__icon"
+              color="inherit"
               data-euiicon-type="arrowRight"
             />
           </button>

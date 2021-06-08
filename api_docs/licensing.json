@@ -45,7 +45,7 @@
               "\nThe validity status of the license."
             ],
             "signature": [
-              "\"active\" | \"invalid\" | \"expired\" | undefined"
+              "\"invalid\" | \"active\" | \"expired\" | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
@@ -492,7 +492,7 @@
               "\nThe validity status of the license."
             ],
             "signature": [
-              "\"active\" | \"invalid\" | \"expired\""
+              "\"invalid\" | \"active\" | \"expired\""
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
@@ -553,90 +553,6 @@
             },
             "deprecated": true,
             "references": [
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts",
-                  "lineNumber": 22
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts",
-                  "lineNumber": 23
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts",
-                  "lineNumber": 24
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts",
-                  "lineNumber": 159
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts",
-                  "lineNumber": 161
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts",
-                  "lineNumber": 42
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts",
-                  "lineNumber": 43
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts",
-                  "lineNumber": 44
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts",
-                  "lineNumber": 54
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts",
-                  "lineNumber": 55
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts",
-                  "lineNumber": 47
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts",
-                  "lineNumber": 48
-                }
-              },
               {
                 "plugin": "apm",
                 "link": {
@@ -740,6 +656,90 @@
                 "link": {
                   "path": "x-pack/plugins/security/common/licensing/license_service.test.ts",
                   "lineNumber": 219
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts",
+                  "lineNumber": 22
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts",
+                  "lineNumber": 23
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts",
+                  "lineNumber": 24
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts",
+                  "lineNumber": 47
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts",
+                  "lineNumber": 48
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts",
+                  "lineNumber": 42
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts",
+                  "lineNumber": 43
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts",
+                  "lineNumber": 44
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts",
+                  "lineNumber": 54
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts",
+                  "lineNumber": 55
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts",
+                  "lineNumber": 159
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts",
+                  "lineNumber": 161
                 }
               }
             ]
@@ -856,7 +856,7 @@
         "label": "LicenseStatus",
         "description": [],
         "signature": [
-          "\"active\" | \"invalid\" | \"expired\""
+          "\"invalid\" | \"active\" | \"expired\""
         ],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
@@ -942,41 +942,6 @@
           "deprecated": true,
           "references": [
             {
-              "plugin": "security",
-              "link": {
-                "path": "x-pack/plugins/security/public/plugin.tsx",
-                "lineNumber": 82
-              }
-            },
-            {
-              "plugin": "licenseManagement",
-              "link": {
-                "path": "x-pack/plugins/license_management/public/plugin.ts",
-                "lineNumber": 61
-              }
-            },
-            {
-              "plugin": "ml",
-              "link": {
-                "path": "x-pack/plugins/ml/public/application/license/check_license.tsx",
-                "lineNumber": 26
-              }
-            },
-            {
-              "plugin": "ml",
-              "link": {
-                "path": "x-pack/plugins/ml/public/plugin.ts",
-                "lineNumber": 136
-              }
-            },
-            {
-              "plugin": "fleet",
-              "link": {
-                "path": "x-pack/plugins/fleet/public/plugin.ts",
-                "lineNumber": 97
-              }
-            },
-            {
               "plugin": "reporting",
               "link": {
                 "path": "x-pack/plugins/reporting/public/panel_actions/get_csv_panel_action.tsx",
@@ -1012,6 +977,34 @@
               }
             },
             {
+              "plugin": "licenseManagement",
+              "link": {
+                "path": "x-pack/plugins/license_management/public/plugin.ts",
+                "lineNumber": 61
+              }
+            },
+            {
+              "plugin": "security",
+              "link": {
+                "path": "x-pack/plugins/security/public/plugin.tsx",
+                "lineNumber": 82
+              }
+            },
+            {
+              "plugin": "ml",
+              "link": {
+                "path": "x-pack/plugins/ml/public/application/license/check_license.tsx",
+                "lineNumber": 26
+              }
+            },
+            {
+              "plugin": "ml",
+              "link": {
+                "path": "x-pack/plugins/ml/public/plugin.ts",
+                "lineNumber": 141
+              }
+            },
+            {
               "plugin": "apm",
               "link": {
                 "path": "x-pack/plugins/apm/public/context/license/license_context.tsx",
@@ -1019,17 +1012,17 @@
               }
             },
             {
-              "plugin": "beatsManagement",
-              "link": {
-                "path": "x-pack/plugins/beats_management/public/lib/adapters/framework/kibana_framework_adapter.ts",
-                "lineNumber": 65
-              }
-            },
-            {
               "plugin": "crossClusterReplication",
               "link": {
                 "path": "x-pack/plugins/cross_cluster_replication/public/plugin.ts",
                 "lineNumber": 75
+              }
+            },
+            {
+              "plugin": "fleet",
+              "link": {
+                "path": "x-pack/plugins/fleet/public/plugin.ts",
+                "lineNumber": 94
               }
             },
             {
@@ -2085,7 +2078,7 @@
               "\nThe validity status of the license."
             ],
             "signature": [
-              "\"active\" | \"invalid\" | \"expired\" | undefined"
+              "\"invalid\" | \"active\" | \"expired\" | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
@@ -2588,7 +2581,7 @@
               "\nThe validity status of the license."
             ],
             "signature": [
-              "\"active\" | \"invalid\" | \"expired\""
+              "\"invalid\" | \"active\" | \"expired\""
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
@@ -2649,90 +2642,6 @@
             },
             "deprecated": true,
             "references": [
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts",
-                  "lineNumber": 22
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts",
-                  "lineNumber": 23
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts",
-                  "lineNumber": 24
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts",
-                  "lineNumber": 159
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts",
-                  "lineNumber": 161
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts",
-                  "lineNumber": 42
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts",
-                  "lineNumber": 43
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts",
-                  "lineNumber": 44
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts",
-                  "lineNumber": 54
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts",
-                  "lineNumber": 55
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts",
-                  "lineNumber": 47
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts",
-                  "lineNumber": 48
-                }
-              },
               {
                 "plugin": "apm",
                 "link": {
@@ -2836,6 +2745,90 @@
                 "link": {
                   "path": "x-pack/plugins/security/common/licensing/license_service.test.ts",
                   "lineNumber": 219
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts",
+                  "lineNumber": 22
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts",
+                  "lineNumber": 23
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts",
+                  "lineNumber": 24
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts",
+                  "lineNumber": 47
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts",
+                  "lineNumber": 48
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts",
+                  "lineNumber": 42
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts",
+                  "lineNumber": 43
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts",
+                  "lineNumber": 44
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts",
+                  "lineNumber": 54
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts",
+                  "lineNumber": 55
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts",
+                  "lineNumber": 159
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts",
+                  "lineNumber": 161
                 }
               }
             ]
@@ -2971,7 +2964,7 @@
         "label": "LicenseStatus",
         "description": [],
         "signature": [
-          "\"active\" | \"invalid\" | \"expired\""
+          "\"invalid\" | \"active\" | \"expired\""
         ],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
@@ -3060,7 +3053,7 @@
               "plugin": "spaces",
               "link": {
                 "path": "x-pack/plugins/spaces/server/usage_collection/spaces_usage_collector.ts",
-                "lineNumber": 442
+                "lineNumber": 431
               }
             },
             {
@@ -3095,7 +3088,7 @@
               "plugin": "reporting",
               "link": {
                 "path": "x-pack/plugins/reporting/server/core.ts",
-                "lineNumber": 228
+                "lineNumber": 226
               }
             },
             {
@@ -3127,24 +3120,17 @@
               }
             },
             {
-              "plugin": "fleet",
-              "link": {
-                "path": "x-pack/plugins/fleet/server/plugin.ts",
-                "lineNumber": 213
-              }
-            },
-            {
-              "plugin": "indexManagement",
-              "link": {
-                "path": "x-pack/plugins/index_management/server/services/license.ts",
-                "lineNumber": 36
-              }
-            },
-            {
               "plugin": "remoteClusters",
               "link": {
                 "path": "x-pack/plugins/remote_clusters/server/plugin.ts",
                 "lineNumber": 73
+              }
+            },
+            {
+              "plugin": "fleet",
+              "link": {
+                "path": "x-pack/plugins/fleet/server/plugin.ts",
+                "lineNumber": 214
               }
             },
             {
@@ -3162,17 +3148,10 @@
               }
             },
             {
-              "plugin": "ingestPipelines",
-              "link": {
-                "path": "x-pack/plugins/ingest_pipelines/server/services/license.ts",
-                "lineNumber": 40
-              }
-            },
-            {
               "plugin": "maps",
               "link": {
                 "path": "x-pack/plugins/maps/server/plugin.ts",
-                "lineNumber": 164
+                "lineNumber": 167
               }
             },
             {

@@ -832,7 +832,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-          "lineNumber": 56
+          "lineNumber": 62
         },
         "deprecated": false,
         "children": [
@@ -847,7 +847,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 60
+              "lineNumber": 66
             },
             "deprecated": false
           },
@@ -862,7 +862,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 64
+              "lineNumber": 70
             },
             "deprecated": false
           },
@@ -880,7 +880,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 68
+              "lineNumber": 74
             },
             "deprecated": false
           },
@@ -895,7 +895,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 72
+              "lineNumber": 78
             },
             "deprecated": false
           }
@@ -911,7 +911,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-          "lineNumber": 75
+          "lineNumber": 81
         },
         "deprecated": false,
         "children": [
@@ -926,7 +926,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 79
+              "lineNumber": 85
             },
             "deprecated": false
           },
@@ -941,7 +941,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 83
+              "lineNumber": 89
             },
             "deprecated": false
           },
@@ -956,7 +956,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 87
+              "lineNumber": 93
             },
             "deprecated": false
           }
@@ -974,7 +974,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-          "lineNumber": 93
+          "lineNumber": 99
         },
         "deprecated": false,
         "children": [
@@ -992,7 +992,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 97
+              "lineNumber": 103
             },
             "deprecated": false
           },
@@ -1010,7 +1010,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 101
+              "lineNumber": 107
             },
             "deprecated": false
           },
@@ -1025,7 +1025,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 105
+              "lineNumber": 111
             },
             "deprecated": false
           },
@@ -1043,7 +1043,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 109
+              "lineNumber": 115
             },
             "deprecated": false
           }
@@ -1061,7 +1061,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-          "lineNumber": 46
+          "lineNumber": 52
         },
         "deprecated": false,
         "children": [
@@ -1077,7 +1077,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 47
+              "lineNumber": 53
             },
             "deprecated": false
           }
@@ -1307,45 +1307,10 @@
                 }
               },
               {
-                "plugin": "cases",
-                "link": {
-                  "path": "x-pack/plugins/cases/server/plugin.ts",
-                  "lineNumber": 89
-                }
-              },
-              {
                 "plugin": "ml",
                 "link": {
                   "path": "x-pack/plugins/ml/server/routes/annotations.ts",
                   "lineNumber": 105
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/create_signals_migration_route.ts",
-                  "lineNumber": 48
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/delete_signals_migration_route.ts",
-                  "lineNumber": 45
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/finalize_signals_migration_route.ts",
-                  "lineNumber": 45
-                }
-              },
-              {
-                "plugin": "beatsManagement",
-                "link": {
-                  "path": "x-pack/plugins/beats_management/server/lib/adapters/framework/kibana_framework_adapter.ts",
-                  "lineNumber": 44
                 }
               },
               {
@@ -1367,6 +1332,27 @@
                 "link": {
                   "path": "x-pack/plugins/logstash/server/routes/pipeline/save.ts",
                   "lineNumber": 41
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/create_signals_migration_route.ts",
+                  "lineNumber": 48
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/delete_signals_migration_route.ts",
+                  "lineNumber": 45
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/finalize_signals_migration_route.ts",
+                  "lineNumber": 45
                 }
               },
               {

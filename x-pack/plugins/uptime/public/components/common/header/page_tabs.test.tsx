@@ -15,7 +15,6 @@ describe('PageTabs', () => {
     const { getByText } = render(<PageTabs />);
     expect(getByText('Overview')).toBeInTheDocument();
     expect(getByText('Certificates')).toBeInTheDocument();
-    expect(getByText('Settings')).toBeInTheDocument();
   });
 
   it('it keep params while switching', () => {
@@ -31,10 +30,6 @@ describe('PageTabs', () => {
     expect(getByTestId('uptimeCertificatesLink')).toHaveAttribute(
       'href',
       '/certificates?dateRangeStart=now-10m'
-    );
-    expect(getByTestId('settings-page-link')).toHaveAttribute(
-      'href',
-      '/settings?dateRangeStart=now-10m'
     );
   });
 

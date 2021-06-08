@@ -11,7 +11,7 @@ import { KbnClient } from '@kbn/test';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function KibanaServerProvider({ getService }: FtrProviderContext) {
+export function KibanaServerProvider({ getService }: FtrProviderContext): KbnClient {
   const log = getService('log');
   const config = getService('config');
   const lifecycle = getService('lifecycle');

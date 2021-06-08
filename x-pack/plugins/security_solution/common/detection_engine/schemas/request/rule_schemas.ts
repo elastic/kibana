@@ -70,7 +70,7 @@ import {
   last_failure_message,
 } from '../common/schemas';
 
-const createSchema = <
+export const createSchema = <
   Required extends t.Props,
   Optional extends t.Props,
   Defaultable extends t.Props
@@ -118,7 +118,7 @@ const responseSchema = <
   ]);
 };
 
-const buildAPISchemas = <R extends t.Props, O extends t.Props, D extends t.Props>(
+export const buildAPISchemas = <R extends t.Props, O extends t.Props, D extends t.Props>(
   params: APIParams<R, O, D>
 ) => {
   return {
@@ -216,6 +216,7 @@ const {
   patch: eqlPatchParams,
   response: eqlResponseParams,
 } = buildAPISchemas(eqlRuleParams);
+export { eqlCreateParams };
 
 const threatMatchRuleParams = {
   required: {
@@ -244,6 +245,7 @@ const {
   patch: threatMatchPatchParams,
   response: threatMatchResponseParams,
 } = buildAPISchemas(threatMatchRuleParams);
+export { threatMatchCreateParams };
 
 const queryRuleParams = {
   required: {
@@ -264,6 +266,8 @@ const {
   patch: queryPatchParams,
   response: queryResponseParams,
 } = buildAPISchemas(queryRuleParams);
+
+export { queryCreateParams };
 
 const savedQueryRuleParams = {
   required: {
@@ -287,6 +291,8 @@ const {
   response: savedQueryResponseParams,
 } = buildAPISchemas(savedQueryRuleParams);
 
+export { savedQueryCreateParams };
+
 const thresholdRuleParams = {
   required: {
     type: t.literal('threshold'),
@@ -308,6 +314,8 @@ const {
   response: thresholdResponseParams,
 } = buildAPISchemas(thresholdRuleParams);
 
+export { thresholdCreateParams };
+
 const machineLearningRuleParams = {
   required: {
     type: t.literal('machine_learning'),
@@ -322,6 +330,8 @@ const {
   patch: machineLearningPatchParams,
   response: machineLearningResponseParams,
 } = buildAPISchemas(machineLearningRuleParams);
+
+export { machineLearningCreateParams };
 
 const createTypeSpecific = t.union([
   eqlCreateParams,

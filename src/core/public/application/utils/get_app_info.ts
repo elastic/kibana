@@ -10,9 +10,9 @@ import {
   App,
   AppNavLinkStatus,
   AppStatus,
-  AppSearchDeepLink,
+  AppDeepLink,
   PublicAppInfo,
-  PublicAppSearchDeepLinkInfo,
+  PublicAppDeepLinkInfo,
 } from '../types';
 
 export function getAppInfo(app: App): PublicAppInfo {
@@ -28,29 +28,27 @@ export function getAppInfo(app: App): PublicAppInfo {
     status: app.status!,
     navLinkStatus,
     appRoute: app.appRoute!,
-    meta: {
-      keywords: app.meta?.keywords ?? [],
-      searchDeepLinks: getSearchDeepLinkInfos(app, app.meta?.searchDeepLinks),
-    },
+    keywords: app.keywords ?? [],
+    deepLinks: getDeepLinkInfos(app.deepLinks),
   };
 }
 
-function getSearchDeepLinkInfos(
-  app: App,
-  searchDeepLinks?: AppSearchDeepLink[]
-): PublicAppSearchDeepLinkInfo[] {
-  if (!searchDeepLinks) {
-    return [];
-  }
+function getDeepLinkInfos(deepLinks?: AppDeepLink[]): PublicAppDeepLinkInfo[] {
+  if (!deepLinks) return [];
 
-  return searchDeepLinks.map(
-    (rawDeepLink): PublicAppSearchDeepLinkInfo => {
+  return deepLinks.map(
+    (rawDeepLink): PublicAppDeepLinkInfo => {
+      const navLinkStatus =
+        rawDeepLink.navLinkStatus === AppNavLinkStatus.default
+          ? AppNavLinkStatus.hidden
+          : rawDeepLink.navLinkStatus!;
       return {
         id: rawDeepLink.id,
         title: rawDeepLink.title,
         path: rawDeepLink.path,
         keywords: rawDeepLink.keywords ?? [],
-        searchDeepLinks: getSearchDeepLinkInfos(app, rawDeepLink.searchDeepLinks),
+        navLinkStatus,
+        deepLinks: getDeepLinkInfos(rawDeepLink.deepLinks),
       };
     }
   );
