@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-// State and hooks are in stored in separate mock files for when a file needs to
+// State and hooks are stored in separate mock files for when a file needs to
 // import a basic history mock without automatically jest.mock()ing all of React Router
 export * from './state.mock';
 export * from './hooks.mock';
