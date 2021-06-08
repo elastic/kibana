@@ -127,7 +127,8 @@ async function deleteSubCase(ids: string[], clientArgs: CasesClientArgs): Promis
     const deleteCommentMapper = async (comment: SavedObject<CommentAttributes>) =>
       attachmentService.delete({ unsecuredSavedObjectsClient, attachmentId: comment.id });
 
-    const deleteSubCasesMapper = async (id: string) => caseService.deleteSubCase(soClient, id);
+    const deleteSubCasesMapper = async (id: string) =>
+      caseService.deleteSubCase(unsecuredSavedObjectsClient, id);
 
     // Ensuring we don't too many concurrent deletions running.
     await pMap(comments.saved_objects, deleteCommentMapper, {

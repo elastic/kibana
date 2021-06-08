@@ -41,8 +41,8 @@ async function deleteSubCases({
   const commentMapper = (commentSO: SavedObject<CommentAttributes>) =>
     attachmentService.delete({ unsecuredSavedObjectsClient, attachmentId: commentSO.id });
 
-  const subCasesMapper = (commentSO: SavedObject<SubCaseAttributes>) =>
-    attachmentService.delete({ unsecuredSavedObjectsClient, attachmentId: commentSO.id });
+  const subCasesMapper = (subCaseSO: SavedObject<SubCaseAttributes>) =>
+    caseService.deleteSubCase(unsecuredSavedObjectsClient, subCaseSO.id);
 
   /**
    * This shouldn't actually delete anything because

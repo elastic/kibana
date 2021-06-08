@@ -11,7 +11,11 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { SavedObject, SavedObjectsFindResponse, SavedObjectsUtils } from 'kibana/server';
+import {
+  SavedObject,
+  SavedObjectsFindResponse,
+  SavedObjectsUtils,
+} from '../../../../../../src/core/server';
 import { MAX_CONCURRENT_SEARCHES, SUPPORTED_CONNECTORS } from '../../../common/constants';
 import {
   CaseConfigureResponseRt,
