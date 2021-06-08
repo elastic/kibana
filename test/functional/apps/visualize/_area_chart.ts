@@ -34,10 +34,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     );
 
   describe('area charts', function indexPatternCreation() {
-    let isNewChartsLibraryEnabled = false;
     before(async () => {
-      isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled();
-      await PageObjects.visualize.initTests(isNewChartsLibraryEnabled);
+      await PageObjects.visualize.initTests();
     });
     const initAreaChart = async () => {
       log.debug('navigateToApp visualize');

@@ -57,7 +57,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-          "lineNumber": 93
+          "lineNumber": 95
         },
         "deprecated": false,
         "children": [
@@ -70,7 +70,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 96
+              "lineNumber": 98
             },
             "deprecated": false
           },
@@ -86,7 +86,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 115
+              "lineNumber": 118
             },
             "deprecated": false,
             "children": [
@@ -102,7 +102,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 115
+                  "lineNumber": 118
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -125,7 +125,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 115
+                  "lineNumber": 118
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -165,7 +165,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 115
+                  "lineNumber": 118
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -194,7 +194,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 194
+              "lineNumber": 200
             },
             "deprecated": false,
             "children": [
@@ -216,7 +216,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 195
+                  "lineNumber": 201
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -238,7 +238,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 200
+              "lineNumber": 206
             },
             "deprecated": false,
             "children": [],
@@ -258,7 +258,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 208
+              "lineNumber": 214
             },
             "deprecated": false,
             "children": [],
@@ -276,7 +276,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 213
+              "lineNumber": 219
             },
             "deprecated": false,
             "children": [],
@@ -294,7 +294,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 217
+              "lineNumber": 223
             },
             "deprecated": false,
             "children": [],
@@ -314,7 +314,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 221
+              "lineNumber": 227
             },
             "deprecated": false,
             "children": [
@@ -330,7 +330,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 221
+                  "lineNumber": 227
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -352,7 +352,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 225
+              "lineNumber": 231
             },
             "deprecated": false,
             "children": [
@@ -368,7 +368,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 225
+                  "lineNumber": 231
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -395,7 +395,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 229
+              "lineNumber": 235
             },
             "deprecated": false,
             "children": [],
@@ -413,7 +413,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 233
+              "lineNumber": 239
             },
             "deprecated": false,
             "children": [],
@@ -439,7 +439,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 273
+              "lineNumber": 283
             },
             "deprecated": false,
             "children": [],
@@ -457,7 +457,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 281
+              "lineNumber": 291
             },
             "deprecated": false,
             "children": [],
@@ -475,7 +475,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 291
+              "lineNumber": 301
             },
             "deprecated": false,
             "children": [
@@ -488,7 +488,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 291
+                  "lineNumber": 301
                 },
                 "deprecated": false,
                 "children": [
@@ -501,11 +501,61 @@
                     "description": [],
                     "source": {
                       "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                      "lineNumber": 291
+                      "lineNumber": 301
                     },
                     "deprecated": false
                   }
                 ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable._dispatchSetRefreshConfig",
+            "type": "Function",
+            "tags": [],
+            "label": "_dispatchSetRefreshConfig",
+            "description": [],
+            "signature": [
+              "(refreshConfig: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.RefreshInterval",
+                "text": "RefreshInterval"
+              },
+              ") => void"
+            ],
+            "source": {
+              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+              "lineNumber": 321
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.MapEmbeddable._dispatchSetRefreshConfig.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "refreshConfig",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataQueryPluginApi",
+                    "section": "def-common.RefreshInterval",
+                    "text": "RefreshInterval"
+                  }
+                ],
+                "source": {
+                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                  "lineNumber": 321
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -522,7 +572,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 311
+              "lineNumber": 331
             },
             "deprecated": false,
             "children": [
@@ -538,7 +588,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 311
+                  "lineNumber": 331
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -560,7 +610,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 329
+              "lineNumber": 349
             },
             "deprecated": false,
             "children": [
@@ -576,7 +626,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 329
+                  "lineNumber": 349
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -598,7 +648,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 355
+              "lineNumber": 375
             },
             "deprecated": false,
             "children": [
@@ -615,7 +665,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 355
+                  "lineNumber": 375
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -643,7 +693,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 372
+              "lineNumber": 392
             },
             "deprecated": false,
             "children": [
@@ -659,7 +709,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 372
+                  "lineNumber": 392
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -676,7 +726,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 372
+                  "lineNumber": 392
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -699,7 +749,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 372
+                  "lineNumber": 392
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -727,7 +777,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 386
+              "lineNumber": 406
             },
             "deprecated": false,
             "children": [
@@ -750,7 +800,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 386
+                  "lineNumber": 406
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -767,7 +817,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 386
+                  "lineNumber": 406
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -795,7 +845,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 398
+              "lineNumber": 418
             },
             "deprecated": false,
             "children": [],
@@ -821,7 +871,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 419
+              "lineNumber": 439
             },
             "deprecated": false,
             "children": [],
@@ -839,7 +889,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 430
+              "lineNumber": 450
             },
             "deprecated": false,
             "children": [],
@@ -857,7 +907,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 466
+              "lineNumber": 487
             },
             "deprecated": false,
             "children": [],
@@ -875,7 +925,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 480
+              "lineNumber": 501
             },
             "deprecated": false,
             "children": [],
@@ -893,7 +943,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 496
+              "lineNumber": 517
             },
             "deprecated": false,
             "children": [],
@@ -911,7 +961,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 502
+              "lineNumber": 523
             },
             "deprecated": false,
             "children": [],
@@ -1327,7 +1377,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/maps/public/embeddable/types.ts",
-          "lineNumber": 41
+          "lineNumber": 42
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1359,7 +1409,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/maps/public/embeddable/types.ts",
-          "lineNumber": 43
+          "lineNumber": 44
         },
         "deprecated": false,
         "initialIsOpen": false

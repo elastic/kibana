@@ -13,12 +13,7 @@ import { DashboardPanelState, DASHBOARD_GRID_COLUMN_COUNT } from '..';
 
 export type PanelPlacementMethod<PlacementArgs extends IPanelPlacementArgs> = (
   args: PlacementArgs
-) => PanelPlacementMethodReturn;
-
-interface PanelPlacementMethodReturn {
-  newPanelPlacement: Omit<GridData, 'i'>;
-  otherPanels: { [key: string]: DashboardPanelState };
-}
+) => Omit<GridData, 'i'>;
 
 export interface IPanelPlacementArgs {
   width: number;
@@ -35,7 +30,7 @@ export function findTopLeftMostOpenSpace({
   width,
   height,
   currentPanels,
-}: IPanelPlacementArgs): PanelPlacementMethodReturn {
+}: IPanelPlacementArgs): Omit<GridData, 'i'> {
   let maxY = -1;
 
   const currentPanelsArray = Object.values(currentPanels);
@@ -45,7 +40,7 @@ export function findTopLeftMostOpenSpace({
 
   // Handle case of empty grid.
   if (maxY < 0) {
-    return { newPanelPlacement: { x: 0, y: 0, w: width, h: height }, otherPanels: currentPanels };
+    return { x: 0, y: 0, w: width, h: height };
   }
 
   const grid = new Array(maxY);
@@ -85,10 +80,7 @@ export function findTopLeftMostOpenSpace({
 
             if (spaceIsEmpty && fitsPanelWidth && fitsPanelHeight) {
               // Found space
-              return {
-                newPanelPlacement: { x, y, w: width, h: height },
-                otherPanels: currentPanels,
-              };
+              return { x, y, w: width, h: height };
             } else if (grid[h][w] === 1) {
               // x, y spot doesn't work, break.
               break;
@@ -98,7 +90,7 @@ export function findTopLeftMostOpenSpace({
       }
     }
   }
-  return { newPanelPlacement: { x: 0, y: maxY, w: width, h: height }, otherPanels: currentPanels };
+  return { x: 0, y: maxY, w: width, h: height };
 }
 
 interface IplacementDirection {
@@ -131,15 +123,15 @@ export function placePanelBeside({
   height,
   currentPanels,
   placeBesideId,
-}: IPanelPlacementBesideArgs): PanelPlacementMethodReturn {
+}: IPanelPlacementBesideArgs): Omit<GridData, 'i'> {
   const panelToPlaceBeside = currentPanels[placeBesideId];
   if (!panelToPlaceBeside) {
     throw new PanelNotFoundError();
   }
   const beside = panelToPlaceBeside.gridData;
-  const otherPanelGridData: GridData[] = [];
+  const otherPanels: GridData[] = [];
   _.forOwn(currentPanels, (panel: DashboardPanelState, key: string | undefined) => {
-    otherPanelGridData.push(panel.gridData);
+    otherPanels.push(panel.gridData);
   });
 
   const possiblePlacementDirections: IplacementDirection[] = [
@@ -155,7 +147,7 @@ export function placePanelBeside({
       direction.grid.x + direction.grid.w <= DASHBOARD_GRID_COLUMN_COUNT &&
       direction.grid.y >= 0
     ) {
-      const intersection = otherPanelGridData.some((currentPanelGrid: GridData) => {
+      const intersection = otherPanels.some((currentPanelGrid: GridData) => {
         return (
           direction.grid.x + direction.grid.w > currentPanelGrid.x &&
           direction.grid.x < currentPanelGrid.x + currentPanelGrid.w &&
@@ -164,7 +156,7 @@ export function placePanelBeside({
         );
       });
       if (!intersection) {
-        return { newPanelPlacement: direction.grid, otherPanels: currentPanels };
+        return direction.grid;
       }
     } else {
       direction.fits = false;
@@ -176,8 +168,7 @@ export function placePanelBeside({
    * 2. place the cloned panel to the bottom
    * 3. reposition the panels after the cloned panel in the grid
    */
-  const otherPanels = { ...currentPanels };
-  const grid = otherPanelGridData.sort(comparePanels);
+  const grid = otherPanels.sort(comparePanels);
 
   let position = 0;
   for (position; position < grid.length; position++) {
@@ -191,13 +182,13 @@ export function placePanelBeside({
   const diff =
     bottomPlacement.grid.y +
     bottomPlacement.grid.h -
-    otherPanels[originalPositionInTheGrid].gridData.y;
+    currentPanels[originalPositionInTheGrid].gridData.y;
 
   for (let j = position + 1; j < grid.length; j++) {
     originalPositionInTheGrid = grid[j].i;
-    const movedPanel = _.cloneDeep(otherPanels[originalPositionInTheGrid]);
+    const movedPanel = _.cloneDeep(currentPanels[originalPositionInTheGrid]);
     movedPanel.gridData.y = movedPanel.gridData.y + diff;
-    otherPanels[originalPositionInTheGrid] = movedPanel;
+    currentPanels[originalPositionInTheGrid] = movedPanel;
   }
-  return { newPanelPlacement: bottomPlacement.grid, otherPanels };
+  return bottomPlacement.grid;
 }

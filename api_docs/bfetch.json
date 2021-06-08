@@ -78,7 +78,7 @@
       "description": [],
       "source": {
         "path": "src/plugins/bfetch/public/plugin.ts",
-        "lineNumber": 23
+        "lineNumber": 24
       },
       "deprecated": false,
       "children": [
@@ -98,7 +98,7 @@
           ],
           "source": {
             "path": "src/plugins/bfetch/public/plugin.ts",
-            "lineNumber": 24
+            "lineNumber": 25
           },
           "deprecated": false,
           "returnComment": [],
@@ -115,7 +115,7 @@
               ],
               "source": {
                 "path": "src/plugins/bfetch/public/plugin.ts",
-                "lineNumber": 24
+                "lineNumber": 25
               },
               "deprecated": false
             }
@@ -143,7 +143,7 @@
           ],
           "source": {
             "path": "src/plugins/bfetch/public/plugin.ts",
-            "lineNumber": 25
+            "lineNumber": 26
           },
           "deprecated": false,
           "returnComment": [],
@@ -161,7 +161,7 @@
               ],
               "source": {
                 "path": "src/plugins/bfetch/public/plugin.ts",
-                "lineNumber": 26
+                "lineNumber": 27
               },
               "deprecated": false
             }
@@ -195,7 +195,7 @@
         ],
         "source": {
           "path": "src/plugins/bfetch/server/plugin.ts",
-          "lineNumber": 41
+          "lineNumber": 39
         },
         "deprecated": false,
         "children": [
@@ -211,7 +211,7 @@
             ],
             "source": {
               "path": "src/plugins/bfetch/server/plugin.ts",
-              "lineNumber": 42
+              "lineNumber": 40
             },
             "deprecated": false,
             "returnComment": [],
@@ -228,7 +228,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/bfetch/server/plugin.ts",
-                  "lineNumber": 42
+                  "lineNumber": 40
                 },
                 "deprecated": false
               }
@@ -290,7 +290,7 @@
       "description": [],
       "source": {
         "path": "src/plugins/bfetch/server/plugin.ts",
-        "lineNumber": 46
+        "lineNumber": 44
       },
       "deprecated": false,
       "children": [
@@ -322,7 +322,7 @@
           ],
           "source": {
             "path": "src/plugins/bfetch/server/plugin.ts",
-            "lineNumber": 47
+            "lineNumber": 45
           },
           "deprecated": false,
           "returnComment": [],
@@ -336,7 +336,7 @@
               "description": [],
               "source": {
                 "path": "src/plugins/bfetch/server/plugin.ts",
-                "lineNumber": 48
+                "lineNumber": 46
               },
               "deprecated": false
             },
@@ -368,7 +368,7 @@
               ],
               "source": {
                 "path": "src/plugins/bfetch/server/plugin.ts",
-                "lineNumber": 49
+                "lineNumber": 47
               },
               "deprecated": false
             }
@@ -402,7 +402,7 @@
           ],
           "source": {
             "path": "src/plugins/bfetch/server/plugin.ts",
-            "lineNumber": 51
+            "lineNumber": 49
           },
           "deprecated": false,
           "returnComment": [],
@@ -416,7 +416,7 @@
               "description": [],
               "source": {
                 "path": "src/plugins/bfetch/server/plugin.ts",
-                "lineNumber": 52
+                "lineNumber": 50
               },
               "deprecated": false
             },
@@ -448,7 +448,7 @@
               ],
               "source": {
                 "path": "src/plugins/bfetch/server/plugin.ts",
-                "lineNumber": 53
+                "lineNumber": 51
               },
               "deprecated": false
             }
@@ -682,7 +682,7 @@
           ],
           "source": {
             "path": "src/plugins/bfetch/server/plugin.ts",
-            "lineNumber": 83
+            "lineNumber": 81
           },
           "deprecated": false,
           "returnComment": [],
@@ -719,7 +719,7 @@
               ],
               "source": {
                 "path": "src/plugins/bfetch/server/plugin.ts",
-                "lineNumber": 91
+                "lineNumber": 89
               },
               "deprecated": false
             }
@@ -738,7 +738,7 @@
       "description": [],
       "source": {
         "path": "src/plugins/bfetch/server/plugin.ts",
-        "lineNumber": 96
+        "lineNumber": 94
       },
       "deprecated": false,
       "children": [],
@@ -1345,48 +1345,6 @@
       },
       {
         "parentPluginId": "bfetch",
-        "id": "def-common.BatchItemWrapper",
-        "type": "Interface",
-        "tags": [],
-        "label": "BatchItemWrapper",
-        "description": [],
-        "source": {
-          "path": "src/plugins/bfetch/common/batch.ts",
-          "lineNumber": 23
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "bfetch",
-            "id": "def-common.BatchItemWrapper.compressed",
-            "type": "boolean",
-            "tags": [],
-            "label": "compressed",
-            "description": [],
-            "source": {
-              "path": "src/plugins/bfetch/common/batch.ts",
-              "lineNumber": 24
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "bfetch",
-            "id": "def-common.BatchItemWrapper.payload",
-            "type": "string",
-            "tags": [],
-            "label": "payload",
-            "description": [],
-            "source": {
-              "path": "src/plugins/bfetch/common/batch.ts",
-              "lineNumber": 25
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "bfetch",
         "id": "def-common.BatchRequestData",
         "type": "Interface",
         "tags": [],
@@ -1726,25 +1684,7 @@
       }
     ],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "bfetch",
-        "id": "def-common.DISABLE_BFETCH_COMPRESSION",
-        "type": "string",
-        "tags": [],
-        "label": "DISABLE_BFETCH_COMPRESSION",
-        "description": [],
-        "signature": [
-          "\"bfetch:disableCompression\""
-        ],
-        "source": {
-          "path": "src/plugins/bfetch/common/constants.ts",
-          "lineNumber": 9
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": []
   }
 }

@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { DashboardContainerInput } from '../..';
-import { IEmbeddable } from '../../services/embeddable';
 import { dashboardExpandPanelAction } from '../../dashboard_strings';
+import { IEmbeddable } from '../../services/embeddable';
 import { Action, IncompatibleActionError } from '../../services/ui_actions';
-import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
+import {
+  DASHBOARD_CONTAINER_TYPE,
+  DashboardContainer,
+  DashboardContainerInput,
+} from '../embeddable';
 
 export const ACTION_EXPAND_PANEL = 'togglePanel';
 

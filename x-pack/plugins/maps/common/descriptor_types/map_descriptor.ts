@@ -24,6 +24,11 @@ export type MapQuery = Query & {
   queryLastTriggeredAt?: string;
 };
 
+export type MapRefreshConfig = {
+  isPaused: boolean;
+  interval: number;
+};
+
 export type MapCenter = {
   lat: number;
   lon: number;

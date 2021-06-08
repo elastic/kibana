@@ -215,22 +215,6 @@ export const dashboardReadonlyBadge = {
     }),
 };
 
-export const dashboardSaveToastStrings = {
-  getSuccessString: (dashTitle: string) =>
-    i18n.translate('dashboard.dashboardWasSavedSuccessMessage', {
-      defaultMessage: `Dashboard '{dashTitle}' was saved`,
-      values: { dashTitle },
-    }),
-  getFailureString: (dashTitle: string, errorMessage: string) =>
-    i18n.translate('dashboard.dashboardWasNotSavedDangerMessage', {
-      defaultMessage: `Dashboard '{dashTitle}' was not saved. Error: {errorMessage}`,
-      values: {
-        dashTitle,
-        errorMessage,
-      },
-    }),
-};
-
 /*
   Modals
 */
@@ -375,9 +359,17 @@ export const emptyScreenStrings = {
     i18n.translate('dashboard.fillDashboardTitle', {
       defaultMessage: 'This dashboard is empty. Let\u2019s fill it up!',
     }),
-  getHowToStartWorkingOnNewDashboardDescription: () =>
-    i18n.translate('dashboard.howToStartWorkingOnNewDashboardDescription', {
-      defaultMessage: 'Click edit in the menu bar above to start adding panels.',
+  getHowToStartWorkingOnNewDashboardDescription1: () =>
+    i18n.translate('dashboard.howToStartWorkingOnNewDashboardDescription1', {
+      defaultMessage: 'Click',
+    }),
+  getHowToStartWorkingOnNewDashboardDescription2: () =>
+    i18n.translate('dashboard.howToStartWorkingOnNewDashboardDescription2', {
+      defaultMessage: 'in the menu bar above to start adding panels.',
+    }),
+  getHowToStartWorkingOnNewDashboardEditLinkText: () =>
+    i18n.translate('dashboard.howToStartWorkingOnNewDashboardEditLinkText', {
+      defaultMessage: 'Edit',
     }),
   getHowToStartWorkingOnNewDashboardEditLinkAriaLabel: () =>
     i18n.translate('dashboard.howToStartWorkingOnNewDashboardEditLinkAriaLabel', {
@@ -450,8 +442,3 @@ export const dashboardUnsavedListingStrings = {
       defaultMessage: 'Discard changes',
     }),
 };
-
-export const getCreateVisualizationButtonTitle = () =>
-  i18n.translate('dashboard.solutionToolbar.addPanelButtonLabel', {
-    defaultMessage: 'Create visualization',
-  });

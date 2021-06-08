@@ -501,7 +501,7 @@
         ],
         "source": {
           "path": "src/plugins/home/public/plugin.ts",
-          "lineNumber": 166
+          "lineNumber": 161
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -534,7 +534,7 @@
         ],
         "source": {
           "path": "src/plugins/home/public/plugin.ts",
-          "lineNumber": 163
+          "lineNumber": 158
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -602,7 +602,7 @@
         ],
         "source": {
           "path": "src/plugins/home/public/plugin.ts",
-          "lineNumber": 169
+          "lineNumber": 164
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -873,7 +873,7 @@
       "description": [],
       "source": {
         "path": "src/plugins/home/public/plugin.ts",
-        "lineNumber": 175
+        "lineNumber": 167
       },
       "deprecated": false,
       "children": [
@@ -889,25 +889,7 @@
           ],
           "source": {
             "path": "src/plugins/home/public/plugin.ts",
-            "lineNumber": 176
-          },
-          "deprecated": false
-        },
-        {
-          "parentPluginId": "home",
-          "id": "def-public.HomePublicPluginSetup.addData",
-          "type": "Object",
-          "tags": [],
-          "label": "addData",
-          "description": [],
-          "signature": [
-            "{ registerAddDataTab: (tab: ",
-            "AddDataTab",
-            ") => void; }"
-          ],
-          "source": {
-            "path": "src/plugins/home/public/plugin.ts",
-            "lineNumber": 177
+            "lineNumber": 168
           },
           "deprecated": false
         },
@@ -939,7 +921,7 @@
           ],
           "source": {
             "path": "src/plugins/home/public/plugin.ts",
-            "lineNumber": 178
+            "lineNumber": 169
           },
           "deprecated": false
         },
@@ -967,7 +949,7 @@
           ],
           "source": {
             "path": "src/plugins/home/public/plugin.ts",
-            "lineNumber": 185
+            "lineNumber": 176
           },
           "deprecated": true,
           "references": [
@@ -982,7 +964,7 @@
               "plugin": "apm",
               "link": {
                 "path": "x-pack/plugins/apm/public/plugin.ts",
-                "lineNumber": 85
+                "lineNumber": 82
               }
             },
             {
@@ -1007,7 +989,7 @@
       "description": [],
       "source": {
         "path": "src/plugins/home/public/plugin.ts",
-        "lineNumber": 187
+        "lineNumber": 178
       },
       "deprecated": false,
       "children": [
@@ -1023,7 +1005,7 @@
           ],
           "source": {
             "path": "src/plugins/home/public/plugin.ts",
-            "lineNumber": 188
+            "lineNumber": 179
           },
           "deprecated": false
         }

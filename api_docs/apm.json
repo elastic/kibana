@@ -78,7 +78,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/apm/public/plugin.ts",
-        "lineNumber": 47
+        "lineNumber": 45
       },
       "deprecated": false,
       "lifecycle": "setup",
@@ -96,7 +96,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/apm/public/plugin.ts",
-        "lineNumber": 49
+        "lineNumber": 47
       },
       "deprecated": false,
       "lifecycle": "start",
@@ -144,7 +144,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/apm/server/plugin.ts",
-          "lineNumber": 54
+          "lineNumber": 55
         },
         "deprecated": false,
         "children": [
@@ -160,7 +160,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 64
+              "lineNumber": 65
             },
             "deprecated": false,
             "children": [
@@ -183,7 +183,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 64
+                  "lineNumber": 65
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -237,7 +237,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 68
+              "lineNumber": 69
             },
             "deprecated": false,
             "children": [
@@ -262,7 +262,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 69
+                  "lineNumber": 70
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -281,7 +281,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 70
+                  "lineNumber": 71
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -309,7 +309,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 260
+              "lineNumber": 269
             },
             "deprecated": false,
             "children": [
@@ -331,7 +331,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 260
+                  "lineNumber": 269
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -351,7 +351,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 279
+              "lineNumber": 288
             },
             "deprecated": false,
             "children": [],

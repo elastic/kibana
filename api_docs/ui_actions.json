@@ -775,7 +775,7 @@
                 "plugin": "discover",
                 "link": {
                   "path": "src/plugins/discover/public/application/embeddable/search_embeddable.ts",
-                  "lineNumber": 115
+                  "lineNumber": 114
                 }
               },
               {

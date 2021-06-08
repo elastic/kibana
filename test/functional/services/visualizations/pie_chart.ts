@@ -42,7 +42,7 @@ export class PieChartService extends FtrService {
         const pieWidth = pieSize.width;
         await pie.clickMouseButton({
           xOffset: pieSlice.coords[0] - Math.floor(pieWidth / 2),
-          yOffset: pieSlice.coords[1] - Math.floor(pieHeight / 2),
+          yOffset: Math.floor(pieHeight / 2) - pieSlice.coords[1],
         });
       }
     } else {
@@ -94,7 +94,7 @@ export class PieChartService extends FtrService {
       const selectedSlice = slices.filter((slice) => {
         return slice.name.toString() === name.replace(',', '');
       });
-      return selectedSlice[0]?.color;
+      return selectedSlice[0].color;
     }
     const pieSlice = await this.getPieSlice(name);
     return await pieSlice.getAttribute('style');

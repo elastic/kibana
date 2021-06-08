@@ -45,7 +45,7 @@
               "\nThe validity status of the license."
             ],
             "signature": [
-              "\"invalid\" | \"active\" | \"expired\" | undefined"
+              "\"active\" | \"invalid\" | \"expired\" | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
@@ -492,7 +492,7 @@
               "\nThe validity status of the license."
             ],
             "signature": [
-              "\"invalid\" | \"active\" | \"expired\""
+              "\"active\" | \"invalid\" | \"expired\""
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
@@ -856,7 +856,7 @@
         "label": "LicenseStatus",
         "description": [],
         "signature": [
-          "\"invalid\" | \"active\" | \"expired\""
+          "\"active\" | \"invalid\" | \"expired\""
         ],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
@@ -1001,7 +1001,7 @@
               "plugin": "ml",
               "link": {
                 "path": "x-pack/plugins/ml/public/plugin.ts",
-                "lineNumber": 141
+                "lineNumber": 136
               }
             },
             {
@@ -1022,7 +1022,7 @@
               "plugin": "fleet",
               "link": {
                 "path": "x-pack/plugins/fleet/public/plugin.ts",
-                "lineNumber": 94
+                "lineNumber": 97
               }
             },
             {
@@ -2078,7 +2078,7 @@
               "\nThe validity status of the license."
             ],
             "signature": [
-              "\"invalid\" | \"active\" | \"expired\" | undefined"
+              "\"active\" | \"invalid\" | \"expired\" | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
@@ -2581,7 +2581,7 @@
               "\nThe validity status of the license."
             ],
             "signature": [
-              "\"invalid\" | \"active\" | \"expired\""
+              "\"active\" | \"invalid\" | \"expired\""
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
@@ -2964,7 +2964,7 @@
         "label": "LicenseStatus",
         "description": [],
         "signature": [
-          "\"invalid\" | \"active\" | \"expired\""
+          "\"active\" | \"invalid\" | \"expired\""
         ],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
@@ -3120,6 +3120,13 @@
               }
             },
             {
+              "plugin": "indexManagement",
+              "link": {
+                "path": "x-pack/plugins/index_management/server/services/license.ts",
+                "lineNumber": 36
+              }
+            },
+            {
               "plugin": "remoteClusters",
               "link": {
                 "path": "x-pack/plugins/remote_clusters/server/plugin.ts",
@@ -3130,7 +3137,7 @@
               "plugin": "fleet",
               "link": {
                 "path": "x-pack/plugins/fleet/server/plugin.ts",
-                "lineNumber": 214
+                "lineNumber": 213
               }
             },
             {
@@ -3148,10 +3155,17 @@
               }
             },
             {
+              "plugin": "ingestPipelines",
+              "link": {
+                "path": "x-pack/plugins/ingest_pipelines/server/services/license.ts",
+                "lineNumber": 40
+              }
+            },
+            {
               "plugin": "maps",
               "link": {
                 "path": "x-pack/plugins/maps/server/plugin.ts",
-                "lineNumber": 167
+                "lineNumber": 164
               }
             },
             {

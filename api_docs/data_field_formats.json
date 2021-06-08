@@ -513,7 +513,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-          "lineNumber": 211
+          "lineNumber": 157
         },
         "deprecated": false,
         "children": [
@@ -535,7 +535,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-              "lineNumber": 212
+              "lineNumber": 158
             },
             "deprecated": false
           },
@@ -548,7 +548,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-              "lineNumber": 213
+              "lineNumber": 159
             },
             "deprecated": false
           },
@@ -570,7 +570,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-              "lineNumber": 216
+              "lineNumber": 162
             },
             "deprecated": false
           },
@@ -586,7 +586,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-              "lineNumber": 217
+              "lineNumber": 163
             },
             "deprecated": false
           },
@@ -598,11 +598,11 @@
             "label": "outputFormats",
             "description": [],
             "signature": [
-              "({ text: string; method: string; shortText?: undefined; } | { text: string; shortText: string; method: string; })[]"
+              "{ text: string; method: string; }[]"
             ],
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-              "lineNumber": 218
+              "lineNumber": 164
             },
             "deprecated": false
           },
@@ -615,7 +615,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-              "lineNumber": 219
+              "lineNumber": 165
             },
             "deprecated": false
           },
@@ -631,25 +631,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-              "lineNumber": 221
-            },
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.DurationFormat.isHumanPrecise",
-            "type": "Function",
-            "tags": [],
-            "label": "isHumanPrecise",
-            "description": [],
-            "signature": [
-              "() => boolean"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-              "lineNumber": 225
+              "lineNumber": 167
             },
             "deprecated": false,
             "children": [],
@@ -663,11 +645,11 @@
             "label": "getParamDefaults",
             "description": [],
             "signature": [
-              "() => { inputFormat: string; outputFormat: string; outputPrecision: number; includeSpaceWithSuffix: boolean; }"
+              "() => { inputFormat: string; outputFormat: string; outputPrecision: number; }"
             ],
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-              "lineNumber": 229
+              "lineNumber": 170
             },
             "deprecated": false,
             "children": [],
@@ -681,11 +663,11 @@
             "label": "textConvert",
             "description": [],
             "signature": [
-              "(val: any) => any"
+              "(val: any) => string"
             ],
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-              "lineNumber": 238
+              "lineNumber": 178
             },
             "deprecated": false,
             "children": [
@@ -701,7 +683,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-                  "lineNumber": 238
+                  "lineNumber": 178
                 },
                 "deprecated": false,
                 "isRequired": true

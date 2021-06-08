@@ -11,7 +11,7 @@ import {
   EmbeddableOutput,
   SavedObjectEmbeddableInput,
 } from '../../../../../src/plugins/embeddable/public';
-import { Query, Filter, TimeRange } from '../../../../../src/plugins/data/common';
+import { RefreshInterval, Query, Filter, TimeRange } from '../../../../../src/plugins/data/common';
 import { MapCenterAndZoom, MapExtent } from '../../common/descriptor_types';
 import { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 import { MapSettings } from '../reducers/map';
@@ -21,6 +21,7 @@ export interface MapEmbeddableConfig {
 }
 
 interface MapEmbeddableState {
+  refreshConfig?: RefreshInterval;
   isLayerTOCOpen?: boolean;
   openTOCDetails?: string[];
   mapCenter?: MapCenterAndZoom;

@@ -6,4 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { useDashboardAppState } from './use_dashboard_app_state';
+export { useSavedDashboard } from './use_saved_dashboard';
+export { useDashboardContainer } from './use_dashboard_container';
+export { useDashboardBreadcrumbs } from './use_dashboard_breadcrumbs';
+export { useDashboardStateManager } from './use_dashboard_state_manager';

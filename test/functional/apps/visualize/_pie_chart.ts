@@ -15,6 +15,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const pieChart = getService('pieChart');
   const inspector = getService('inspector');
+  const browser = getService('browser');
+  const kibanaServer = getService('kibanaServer');
 
   const PageObjects = getPageObjects([
     'common',
@@ -31,8 +33,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const vizName1 = 'Visualization PieChart';
     before(async function () {
       isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled();
-      await PageObjects.visualize.initTests(isNewChartsLibraryEnabled);
-
+      await PageObjects.visualize.initTests();
+      if (isNewChartsLibraryEnabled) {
+        await kibanaServer.uiSettings.update({
+          'visualization:visualize:legacyChartsLibrary': false,
+        });
+        await browser.refresh();
+      }
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       log.debug('clickPieChart');

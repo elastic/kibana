@@ -76,6 +76,10 @@ export function EmbeddedMapComponent({
         attributes: { title: '' },
         filters: [],
         hidePanelTitles: true,
+        refreshConfig: {
+          value: 0,
+          pause: false,
+        },
         viewMode: ViewMode.VIEW,
         isLayerTOCOpen: false,
         hideFilterActions: true,

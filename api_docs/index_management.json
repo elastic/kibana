@@ -722,7 +722,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/index_management/server/plugin.ts",
-        "lineNumber": 23
+        "lineNumber": 25
       },
       "deprecated": false,
       "children": [
@@ -740,7 +740,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/index_management/server/plugin.ts",
-            "lineNumber": 24
+            "lineNumber": 26
           },
           "deprecated": false
         }

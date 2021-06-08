@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { attemptLoadDashboardByTitle } from '../lib';
-import { DashboardAppServices, DashboardRedirect } from '../../types';
+import { DashboardAppServices, DashboardRedirect } from '../types';
 import { getDashboardBreadcrumb, dashboardListingTable } from '../../dashboard_strings';
 import { ApplicationStart, SavedObjectsFindOptionsReference } from '../../../../../core/public';
 import { syncQueryStateWithUrl } from '../../services/data';
@@ -43,13 +43,13 @@ export const DashboardListing = ({
       savedObjectsClient,
       savedObjectsTagging,
       dashboardCapabilities,
-      dashboardSessionStorage,
+      dashboardPanelStorage,
       chrome: { setBreadcrumbs },
     },
   } = useKibana<DashboardAppServices>();
 
   const [unsavedDashboardIds, setUnsavedDashboardIds] = useState<string[]>(
-    dashboardSessionStorage.getDashboardIdsWithUnsavedChanges()
+    dashboardPanelStorage.getDashboardIdsWithUnsavedChanges()
   );
 
   // Set breadcrumbs useEffect
@@ -104,19 +104,19 @@ export const DashboardListing = ({
   );
 
   const createItem = useCallback(() => {
-    if (!dashboardSessionStorage.dashboardHasUnsavedEdits()) {
+    if (!dashboardPanelStorage.dashboardHasUnsavedEdits()) {
       redirectTo({ destination: 'dashboard' });
     } else {
       confirmCreateWithUnsaved(
         core.overlays,
         () => {
-          dashboardSessionStorage.clearState();
+          dashboardPanelStorage.clearPanels();
           redirectTo({ destination: 'dashboard' });
         },
         () => redirectTo({ destination: 'dashboard' })
       );
     }
-  }, [dashboardSessionStorage, redirectTo, core.overlays]);
+  }, [dashboardPanelStorage, redirectTo, core.overlays]);
 
   const emptyPrompt = useMemo(
     () => getNoItemsMessage(hideWriteControls, core.application, createItem),
@@ -145,11 +145,11 @@ export const DashboardListing = ({
 
   const deleteItems = useCallback(
     (dashboards: Array<{ id: string }>) => {
-      dashboards.map((d) => dashboardSessionStorage.clearState(d.id));
-      setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges());
+      dashboards.map((d) => dashboardPanelStorage.clearPanels(d.id));
+      setUnsavedDashboardIds(dashboardPanelStorage.getDashboardIdsWithUnsavedChanges());
       return savedDashboards.delete(dashboards.map((d) => d.id));
     },
-    [savedDashboards, dashboardSessionStorage]
+    [savedDashboards, dashboardPanelStorage]
   );
 
   const editItem = useCallback(
@@ -196,7 +196,7 @@ export const DashboardListing = ({
         redirectTo={redirectTo}
         unsavedDashboardIds={unsavedDashboardIds}
         refreshUnsavedDashboards={() =>
-          setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges())
+          setUnsavedDashboardIds(dashboardPanelStorage.getDashboardIdsWithUnsavedChanges())
         }
       />
     </TableListView>

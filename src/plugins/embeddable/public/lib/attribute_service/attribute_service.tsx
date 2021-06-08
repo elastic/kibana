@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { get, omit } from 'lodash';
+import { get } from 'lodash';
 import { I18nStart, NotificationsStart } from 'src/core/public';
 import { SavedObjectSaveModal, OnSaveProps, SaveResult } from '../../../../saved_objects/public';
 import {
@@ -150,10 +150,12 @@ export class AttributeService<
           const wrappedInput = (await this.wrapAttributes(newAttributes, true)) as RefType;
 
           // Remove unneeded attributes from the original input.
-          const newInput = omit(input, ATTRIBUTE_SERVICE_KEY);
+          delete (input as { [ATTRIBUTE_SERVICE_KEY]?: SavedObjectAttributes })[
+            ATTRIBUTE_SERVICE_KEY
+          ];
 
           // Combine input and wrapped input to preserve any passed in explicit Input.
-          resolve({ ...newInput, ...wrappedInput });
+          resolve({ ...input, ...wrappedInput });
           return { id: wrappedInput.savedObjectId };
         } catch (error) {
           reject(error);

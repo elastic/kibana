@@ -16,6 +16,7 @@ import {
   getMapZoom,
   getMapCenter,
   getLayerListRaw,
+  getRefreshConfig,
   getQuery,
   getFilters,
   getMapSettings,
@@ -38,7 +39,6 @@ import {
   getToasts,
   getIsAllowByValueEmbeddables,
   getSavedObjectsTagging,
-  getTimeFilter,
 } from '../../../kibana_services';
 import { goToSpecifiedPath } from '../../../render_app';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
@@ -394,10 +394,7 @@ export class SavedMap {
       zoom: getMapZoom(state),
       center: getMapCenter(state),
       timeFilters: getTimeFilters(state),
-      refreshConfig: {
-        isPaused: getTimeFilter().getRefreshInterval().pause,
-        interval: getTimeFilter().getRefreshInterval().value,
-      },
+      refreshConfig: getRefreshConfig(state),
       query: _.omit(getQuery(state), 'queryLastTriggeredAt'),
       filters: getFilters(state),
       settings: getMapSettings(state),

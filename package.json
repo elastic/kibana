@@ -748,7 +748,6 @@
     "jest-cli": "^26.6.3",
     "jest-diff": "^26.6.2",
     "jest-environment-jsdom": "^26.6.2",
-    "jest-environment-jsdom-thirteen": "^1.0.1",
     "jest-raw-loader": "^1.0.1",
     "jest-silent-reporter": "^0.5.0",
     "jest-snapshot": "^26.6.2",

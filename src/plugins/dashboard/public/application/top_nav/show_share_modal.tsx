@@ -14,20 +14,18 @@ import { DashboardSavedObject } from '../..';
 import { setStateToKbnUrl, unhashUrl } from '../../services/kibana_utils';
 import { SharePluginStart } from '../../services/share';
 import { dashboardUrlParams } from '../dashboard_router';
+import { DashboardStateManager } from '../dashboard_state_manager';
 import { shareModalStrings } from '../../dashboard_strings';
-import { DashboardAppCapabilities, DashboardState } from '../../types';
-import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
+import { DashboardAppCapabilities } from '../types';
 
 const showFilterBarId = 'showFilterBar';
 
 interface ShowShareModalProps {
-  isDirty: boolean;
-  kibanaVersion: string;
   share: SharePluginStart;
   anchorElement: HTMLElement;
   savedDashboard: DashboardSavedObject;
-  currentDashboardState: DashboardState;
   dashboardCapabilities: DashboardAppCapabilities;
+  dashboardStateManager: DashboardStateManager;
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
@@ -40,12 +38,10 @@ export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => 
 
 export function ShowShareModal({
   share,
-  isDirty,
-  kibanaVersion,
   anchorElement,
   savedDashboard,
   dashboardCapabilities,
-  currentDashboardState,
+  dashboardStateManager,
 }: ShowShareModalProps) {
   const EmbedUrlParamExtension = ({
     setParamValue,
@@ -105,13 +101,12 @@ export function ShowShareModal({
   };
 
   share.toggleShareContextMenu({
-    isDirty,
     anchorElement,
     allowEmbed: true,
     allowShortUrl: dashboardCapabilities.createShortUrl,
     shareableUrl: setStateToKbnUrl(
       '_a',
-      stateToRawDashboardState({ state: currentDashboardState, version: kibanaVersion }),
+      dashboardStateManager.getAppState(),
       { useHash: false, storeInHashQuery: true },
       unhashUrl(window.location.href)
     ),
@@ -120,6 +115,7 @@ export function ShowShareModal({
     sharingData: {
       title: savedDashboard.title,
     },
+    isDirty: dashboardStateManager.getIsDirty(),
     embedUrlParamExtensions: [
       {
         paramName: 'embed',

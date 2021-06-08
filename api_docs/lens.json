@@ -87,7 +87,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/cardinality.tsx",
-          "lineNumber": 52
+          "lineNumber": 45
         },
         "deprecated": false,
         "children": [
@@ -103,7 +103,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/cardinality.tsx",
-              "lineNumber": 55
+              "lineNumber": 48
             },
             "deprecated": false
           }
@@ -119,7 +119,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
-          "lineNumber": 48
+          "lineNumber": 42
         },
         "deprecated": false,
         "children": [
@@ -136,7 +136,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
-              "lineNumber": 49
+              "lineNumber": 43
             },
             "deprecated": false
           },
@@ -149,7 +149,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
-              "lineNumber": 50
+              "lineNumber": 44
             },
             "deprecated": false
           },
@@ -166,7 +166,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
-              "lineNumber": 51
+              "lineNumber": 45
             },
             "deprecated": false
           }
@@ -199,7 +199,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/date_histogram.tsx",
-          "lineNumber": 44
+          "lineNumber": 43
         },
         "deprecated": false,
         "children": [
@@ -215,7 +215,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/date_histogram.tsx",
-              "lineNumber": 45
+              "lineNumber": 44
             },
             "deprecated": false
           },
@@ -231,7 +231,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/date_histogram.tsx",
-              "lineNumber": 46
+              "lineNumber": 45
             },
             "deprecated": false
           }
@@ -308,7 +308,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/column_types.ts",
-          "lineNumber": 46
+          "lineNumber": 45
         },
         "deprecated": false,
         "children": [
@@ -324,7 +324,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/column_types.ts",
-              "lineNumber": 47
+              "lineNumber": 46
             },
             "deprecated": false
           },
@@ -340,7 +340,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/column_types.ts",
-              "lineNumber": 48
+              "lineNumber": 47
             },
             "deprecated": false
           }
@@ -407,7 +407,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/last_value.tsx",
-          "lineNumber": 87
+          "lineNumber": 80
         },
         "deprecated": false,
         "children": [
@@ -423,7 +423,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/last_value.tsx",
-              "lineNumber": 88
+              "lineNumber": 81
             },
             "deprecated": false
           },
@@ -439,7 +439,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/last_value.tsx",
-              "lineNumber": 89
+              "lineNumber": 82
             },
             "deprecated": false
           }
@@ -522,7 +522,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/plugin.ts",
-          "lineNumber": 84
+          "lineNumber": 83
         },
         "deprecated": false,
         "children": [
@@ -558,7 +558,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/plugin.ts",
-              "lineNumber": 93
+              "lineNumber": 92
             },
             "deprecated": false
           },
@@ -580,7 +580,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/plugin.ts",
-              "lineNumber": 102
+              "lineNumber": 101
             },
             "deprecated": false,
             "returnComment": [],
@@ -599,7 +599,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/lens/public/plugin.ts",
-                  "lineNumber": 102
+                  "lineNumber": 101
                 },
                 "deprecated": false
               },
@@ -615,7 +615,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/lens/public/plugin.ts",
-                  "lineNumber": 102
+                  "lineNumber": 101
                 },
                 "deprecated": false
               }
@@ -635,7 +635,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/plugin.ts",
-              "lineNumber": 106
+              "lineNumber": 105
             },
             "deprecated": false,
             "returnComment": [],
@@ -657,7 +657,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/plugin.ts",
-              "lineNumber": 111
+              "lineNumber": 110
             },
             "deprecated": false,
             "returnComment": [],
@@ -720,7 +720,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/types.ts",
-          "lineNumber": 362
+          "lineNumber": 363
         },
         "deprecated": false,
         "children": [
@@ -736,7 +736,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/types.ts",
-              "lineNumber": 364
+              "lineNumber": 365
             },
             "deprecated": false
           },
@@ -749,7 +749,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/types.ts",
-              "lineNumber": 367
+              "lineNumber": 368
             },
             "deprecated": false
           },
@@ -767,7 +767,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/types.ts",
-              "lineNumber": 373
+              "lineNumber": 374
             },
             "deprecated": false
           }
@@ -800,7 +800,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/percentile.tsx",
-          "lineNumber": 25
+          "lineNumber": 24
         },
         "deprecated": false,
         "children": [
@@ -816,7 +816,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/percentile.tsx",
-              "lineNumber": 26
+              "lineNumber": 25
             },
             "deprecated": false
           },
@@ -832,7 +832,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/percentile.tsx",
-              "lineNumber": 27
+              "lineNumber": 26
             },
             "deprecated": false
           }
@@ -1039,7 +1039,7 @@
             "label": "numberDisplay",
             "description": [],
             "signature": [
-              "\"percent\" | \"hidden\" | \"value\""
+              "\"hidden\" | \"value\" | \"percent\""
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/pie_visualization/types.ts",
@@ -1156,7 +1156,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/terms/index.tsx",
-          "lineNumber": 161
+          "lineNumber": 56
         },
         "deprecated": false,
         "children": [
@@ -1172,7 +1172,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/terms/index.tsx",
-              "lineNumber": 162
+              "lineNumber": 57
             },
             "deprecated": false
           },
@@ -1188,7 +1188,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/terms/index.tsx",
-              "lineNumber": 163
+              "lineNumber": 58
             },
             "deprecated": false
           }
@@ -1277,13 +1277,7 @@
             "label": "yConfig",
             "description": [],
             "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.YConfig",
-                "text": "YConfig"
-              },
+              "YConfig",
               "[] | undefined"
             ],
             "source": {
@@ -1359,7 +1353,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-          "lineNumber": 475
+          "lineNumber": 474
         },
         "deprecated": false,
         "children": [
@@ -1375,7 +1369,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 476
+              "lineNumber": 475
             },
             "deprecated": false
           },
@@ -1397,7 +1391,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 477
+              "lineNumber": 476
             },
             "deprecated": false
           },
@@ -1413,7 +1407,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 478
+              "lineNumber": 477
             },
             "deprecated": false
           },
@@ -1429,7 +1423,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 479
+              "lineNumber": 478
             },
             "deprecated": false
           },
@@ -1446,7 +1440,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 480
+              "lineNumber": 479
             },
             "deprecated": false
           },
@@ -1463,7 +1457,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 481
+              "lineNumber": 480
             },
             "deprecated": false
           },
@@ -1486,7 +1480,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 482
+              "lineNumber": 481
             },
             "deprecated": false
           },
@@ -1502,7 +1496,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 483
+              "lineNumber": 482
             },
             "deprecated": false
           },
@@ -1518,7 +1512,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 484
+              "lineNumber": 483
             },
             "deprecated": false
           },
@@ -1534,7 +1528,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 485
+              "lineNumber": 484
             },
             "deprecated": false
           },
@@ -1557,7 +1551,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 486
+              "lineNumber": 485
             },
             "deprecated": false
           },
@@ -1580,7 +1574,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 487
+              "lineNumber": 486
             },
             "deprecated": false
           },
@@ -1603,7 +1597,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 488
+              "lineNumber": 487
             },
             "deprecated": false
           },
@@ -1619,7 +1613,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 489
+              "lineNumber": 488
             },
             "deprecated": false
           },
@@ -1635,7 +1629,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 490
+              "lineNumber": 489
             },
             "deprecated": false
           },
@@ -1651,84 +1645,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 491
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.XYState.valuesInLegend",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "valuesInLegend",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "source": {
-              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 492
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
-        "id": "def-public.YConfig",
-        "type": "Interface",
-        "tags": [],
-        "label": "YConfig",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-          "lineNumber": 418
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.YConfig.forAccessor",
-            "type": "string",
-            "tags": [],
-            "label": "forAccessor",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 419
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.YConfig.axisMode",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "axisMode",
-            "description": [],
-            "signature": [
-              "\"left\" | \"right\" | \"auto\" | undefined"
-            ],
-            "source": {
-              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 420
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.YConfig.color",
-            "type": "string",
-            "tags": [],
-            "label": "color",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "source": {
-              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 421
+              "lineNumber": 490
             },
             "deprecated": false
           }
@@ -1759,7 +1676,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
-          "lineNumber": 139
+          "lineNumber": 132
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1825,7 +1742,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/cumulative_sum.tsx",
-          "lineNumber": 34
+          "lineNumber": 33
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1842,7 +1759,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/types.ts",
-          "lineNumber": 351
+          "lineNumber": 352
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1958,7 +1875,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/index.ts",
-          "lineNumber": 80
+          "lineNumber": 79
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2075,7 +1992,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/index.ts",
-          "lineNumber": 59
+          "lineNumber": 58
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2101,7 +2018,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
-          "lineNumber": 141
+          "lineNumber": 134
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2127,7 +2044,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
-          "lineNumber": 142
+          "lineNumber": 135
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2153,7 +2070,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
-          "lineNumber": 140
+          "lineNumber": 133
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2173,7 +2090,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/moving_average.tsx",
-          "lineNumber": 43
+          "lineNumber": 47
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2192,7 +2109,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/index.ts",
-          "lineNumber": 533
+          "lineNumber": 498
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2292,7 +2209,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
-          "lineNumber": 138
+          "lineNumber": 131
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2379,7 +2296,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-          "lineNumber": 472
+          "lineNumber": 471
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2433,7 +2350,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/server/plugin.tsx",
-          "lineNumber": 34
+          "lineNumber": 31
         },
         "deprecated": false,
         "children": [
@@ -2449,7 +2366,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/server/plugin.tsx",
-              "lineNumber": 38
+              "lineNumber": 35
             },
             "deprecated": false,
             "children": [
@@ -2472,7 +2389,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/lens/server/plugin.tsx",
-                  "lineNumber": 38
+                  "lineNumber": 35
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2516,7 +2433,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/server/plugin.tsx",
-              "lineNumber": 42
+              "lineNumber": 39
             },
             "deprecated": false,
             "children": [
@@ -2547,7 +2464,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/lens/server/plugin.tsx",
-                  "lineNumber": 42
+                  "lineNumber": 39
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2570,7 +2487,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/lens/server/plugin.tsx",
-                  "lineNumber": 42
+                  "lineNumber": 39
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2606,7 +2523,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/server/plugin.tsx",
-              "lineNumber": 63
+              "lineNumber": 59
             },
             "deprecated": false,
             "children": [
@@ -2628,7 +2545,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/lens/server/plugin.tsx",
-                  "lineNumber": 63
+                  "lineNumber": 59
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2651,7 +2568,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/lens/server/plugin.tsx",
-                  "lineNumber": 63
+                  "lineNumber": 59
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2671,7 +2588,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/server/plugin.tsx",
-              "lineNumber": 70
+              "lineNumber": 66
             },
             "deprecated": false,
             "children": [],
@@ -2692,7 +2609,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/server/plugin.tsx",
-          "lineNumber": 23
+          "lineNumber": 21
         },
         "deprecated": false,
         "children": [
@@ -2715,7 +2632,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/server/plugin.tsx",
-              "lineNumber": 24
+              "lineNumber": 22
             },
             "deprecated": false
           },
@@ -2738,29 +2655,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/server/plugin.tsx",
-              "lineNumber": 25
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-server.PluginSetupContract.embeddable",
-            "type": "Object",
-            "tags": [],
-            "label": "embeddable",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "embeddable",
-                "scope": "server",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-server.EmbeddableSetup",
-                "text": "EmbeddableSetup"
-              }
-            ],
-            "source": {
-              "path": "x-pack/plugins/lens/server/plugin.tsx",
-              "lineNumber": 26
+              "lineNumber": 23
             },
             "deprecated": false
           }
@@ -2776,7 +2671,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/server/plugin.tsx",
-          "lineNumber": 29
+          "lineNumber": 26
         },
         "deprecated": false,
         "children": [
@@ -2799,7 +2694,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/server/plugin.tsx",
-              "lineNumber": 30
+              "lineNumber": 27
             },
             "deprecated": false
           },
@@ -2821,7 +2716,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/server/plugin.tsx",
-              "lineNumber": 31
+              "lineNumber": 28
             },
             "deprecated": false
           }

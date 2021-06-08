@@ -19,8 +19,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { DashboardSavedObject } from '../..';
 import { dashboardUnsavedListingStrings, getNewDashboardTitle } from '../../dashboard_strings';
 import { useKibana } from '../../services/kibana_react';
-import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
-import { DashboardAppServices, DashboardRedirect } from '../../types';
+import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_panel_storage';
+import { DashboardAppServices, DashboardRedirect } from '../types';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
 
 const DashboardUnsavedItem = ({
@@ -115,7 +115,7 @@ export const DashboardUnsavedListing = ({
 }: DashboardUnsavedListingProps) => {
   const {
     services: {
-      dashboardSessionStorage,
+      dashboardPanelStorage,
       savedDashboards,
       core: { overlays },
     },
@@ -133,11 +133,11 @@ export const DashboardUnsavedListing = ({
   const onDiscard = useCallback(
     (id?: string) => {
       confirmDiscardUnsavedChanges(overlays, () => {
-        dashboardSessionStorage.clearState(id);
+        dashboardPanelStorage.clearPanels(id);
         refreshUnsavedDashboards();
       });
     },
-    [overlays, refreshUnsavedDashboards, dashboardSessionStorage]
+    [overlays, refreshUnsavedDashboards, dashboardPanelStorage]
   );
 
   useEffect(() => {
@@ -161,7 +161,7 @@ export const DashboardUnsavedListing = ({
       const newItems = dashboards.reduce((map, dashboard) => {
         if (typeof dashboard === 'string') {
           hasError = true;
-          dashboardSessionStorage.clearState(dashboard);
+          dashboardPanelStorage.clearPanels(dashboard);
           return map;
         }
         return {
@@ -178,7 +178,7 @@ export const DashboardUnsavedListing = ({
     return () => {
       canceled = true;
     };
-  }, [savedDashboards, dashboardSessionStorage, refreshUnsavedDashboards, unsavedDashboardIds]);
+  }, [savedDashboards, dashboardPanelStorage, refreshUnsavedDashboards, unsavedDashboardIds]);
 
   return unsavedDashboardIds.length === 0 ? null : (
     <>

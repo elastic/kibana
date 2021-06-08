@@ -11,6 +11,7 @@ import { DashboardPlugin } from './plugin';
 
 export {
   DashboardContainer,
+  DashboardContainerInput,
   DashboardContainerFactoryDefinition,
   DASHBOARD_CONTAINER_TYPE,
 } from './application';
@@ -28,7 +29,7 @@ export {
   DashboardUrlGeneratorState,
 } from './url_generator';
 export { DashboardSavedObject } from './saved_dashboards';
-export { SavedDashboardPanel, DashboardContainerInput } from './types';
+export { SavedDashboardPanel } from './types';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardPlugin(initializerContext);

@@ -79,7 +79,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/discover/public/url_generator.ts",
-          "lineNumber": 16
+          "lineNumber": 22
         },
         "deprecated": false,
         "children": [
@@ -97,7 +97,7 @@
             ],
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 20
+              "lineNumber": 26
             },
             "deprecated": false
           },
@@ -115,7 +115,7 @@
             ],
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 25
+              "lineNumber": 31
             },
             "deprecated": false
           },
@@ -140,7 +140,7 @@
             ],
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 30
+              "lineNumber": 36
             },
             "deprecated": false
           },
@@ -165,7 +165,7 @@
             ],
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 35
+              "lineNumber": 41
             },
             "deprecated": false
           },
@@ -190,7 +190,7 @@
             ],
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 40
+              "lineNumber": 46
             },
             "deprecated": false
           },
@@ -215,7 +215,7 @@
             ],
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 46
+              "lineNumber": 52
             },
             "deprecated": false
           },
@@ -233,7 +233,7 @@
             ],
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 52
+              "lineNumber": 58
             },
             "deprecated": false
           },
@@ -251,7 +251,7 @@
             ],
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 57
+              "lineNumber": 63
             },
             "deprecated": false
           },
@@ -269,7 +269,7 @@
             ],
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 62
+              "lineNumber": 68
             },
             "deprecated": false
           },
@@ -287,7 +287,7 @@
             ],
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 67
+              "lineNumber": 73
             },
             "deprecated": false
           },
@@ -305,7 +305,7 @@
             ],
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 72
+              "lineNumber": 77
             },
             "deprecated": false
           },
@@ -323,7 +323,7 @@
             ],
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 77
+              "lineNumber": 81
             },
             "deprecated": false
           }
@@ -890,7 +890,7 @@
         ],
         "source": {
           "path": "src/plugins/discover/public/url_generator.ts",
-          "lineNumber": 14
+          "lineNumber": 20
         },
         "deprecated": false,
         "initialIsOpen": false

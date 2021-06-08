@@ -2272,7 +2272,7 @@
         "label": "getShardTimeout",
         "description": [],
         "signature": [
-          "(config: Readonly<{ kibana: Readonly<{ readonly index: string; }>; elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
+          "(config: Readonly<{ kibana: Readonly<{ readonly index: string; readonly autocompleteTerminateAfter: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly autocompleteTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
           "ByteSizeValue",
           ") => boolean; isLessThan: (other: ",
           "ByteSizeValue",
@@ -2298,7 +2298,7 @@
             "label": "config",
             "description": [],
             "signature": [
-              "Readonly<{ kibana: Readonly<{ readonly index: string; }>; elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
+              "Readonly<{ kibana: Readonly<{ readonly index: string; readonly autocompleteTerminateAfter: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly autocompleteTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
               "ByteSizeValue",
               ") => boolean; isLessThan: (other: ",
               "ByteSizeValue",
@@ -4164,7 +4164,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-          "lineNumber": 57
+          "lineNumber": 55
         },
         "deprecated": false,
         "children": [
@@ -4184,7 +4184,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 65
+              "lineNumber": 63
             },
             "deprecated": false,
             "children": [
@@ -4202,7 +4202,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-                  "lineNumber": 65
+                  "lineNumber": 63
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4236,7 +4236,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 85
+              "lineNumber": 83
             },
             "deprecated": false,
             "children": [
@@ -4259,7 +4259,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-                  "lineNumber": 85
+                  "lineNumber": 83
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4287,7 +4287,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 94
+              "lineNumber": 92
             },
             "deprecated": false
           },
@@ -4300,7 +4300,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 95
+              "lineNumber": 93
             },
             "deprecated": false
           },
@@ -4313,7 +4313,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 96
+              "lineNumber": 94
             },
             "deprecated": false
           },
@@ -4329,7 +4329,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 97
+              "lineNumber": 95
             },
             "deprecated": false
           },
@@ -4352,7 +4352,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 98
+              "lineNumber": 96
             },
             "deprecated": false
           },
@@ -4368,7 +4368,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 99
+              "lineNumber": 97
             },
             "deprecated": false
           },
@@ -4384,7 +4384,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 100
+              "lineNumber": 98
             },
             "deprecated": false
           },
@@ -4400,7 +4400,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 106
+              "lineNumber": 104
             },
             "deprecated": false,
             "children": [
@@ -4422,7 +4422,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-                  "lineNumber": 106
+                  "lineNumber": 104
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4457,7 +4457,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-                  "lineNumber": 106
+                  "lineNumber": 104
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4481,7 +4481,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 136
+              "lineNumber": 134
             },
             "deprecated": false,
             "children": [
@@ -4499,7 +4499,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-                  "lineNumber": 136
+                  "lineNumber": 134
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4519,7 +4519,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 173
+              "lineNumber": 171
             },
             "deprecated": false,
             "children": [
@@ -4535,48 +4535,12 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-                  "lineNumber": 173
+                  "lineNumber": 171
                 },
                 "deprecated": false,
                 "isRequired": true
               }
             ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggConfig.hasTimeShift",
-            "type": "Function",
-            "tags": [],
-            "label": "hasTimeShift",
-            "description": [],
-            "signature": [
-              "() => boolean"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 177
-            },
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggConfig.getTimeShift",
-            "type": "Function",
-            "tags": [],
-            "label": "getTimeShift",
-            "description": [],
-            "signature": [
-              "() => moment.Duration | undefined"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 181
-            },
-            "deprecated": false,
-            "children": [],
             "returnComment": []
           },
           {
@@ -4599,7 +4563,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 202
+              "lineNumber": 175
             },
             "deprecated": false,
             "children": [
@@ -4622,7 +4586,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-                  "lineNumber": 202
+                  "lineNumber": 175
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -4642,7 +4606,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 206
+              "lineNumber": 179
             },
             "deprecated": false,
             "children": [],
@@ -4660,7 +4624,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 210
+              "lineNumber": 183
             },
             "deprecated": false,
             "children": [
@@ -4676,7 +4640,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-                  "lineNumber": 210
+                  "lineNumber": 183
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4693,7 +4657,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-                  "lineNumber": 210
+                  "lineNumber": 183
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4733,7 +4697,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 236
+              "lineNumber": 209
             },
             "deprecated": false,
             "children": [
@@ -4757,7 +4721,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-                  "lineNumber": 236
+                  "lineNumber": 209
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4781,7 +4745,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-                  "lineNumber": 236
+                  "lineNumber": 209
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -4813,7 +4777,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 257
+              "lineNumber": 230
             },
             "deprecated": false,
             "children": [
@@ -4838,7 +4802,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-                  "lineNumber": 257
+                  "lineNumber": 230
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -4862,7 +4826,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 292
+              "lineNumber": 265
             },
             "deprecated": false,
             "children": [],
@@ -4886,7 +4850,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 323
+              "lineNumber": 296
             },
             "deprecated": true,
             "references": [
@@ -4915,7 +4879,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 334
+              "lineNumber": 307
             },
             "deprecated": false,
             "children": [],
@@ -4941,7 +4905,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 343
+              "lineNumber": 316
             },
             "deprecated": false,
             "children": [],
@@ -4977,7 +4941,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 398
+              "lineNumber": 371
             },
             "deprecated": false,
             "children": [],
@@ -5003,7 +4967,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 402
+              "lineNumber": 375
             },
             "deprecated": false,
             "children": [],
@@ -5029,7 +4993,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 406
+              "lineNumber": 379
             },
             "deprecated": false,
             "children": [],
@@ -5047,7 +5011,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 410
+              "lineNumber": 383
             },
             "deprecated": false,
             "children": [
@@ -5063,7 +5027,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-                  "lineNumber": 410
+                  "lineNumber": 383
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -5083,7 +5047,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 414
+              "lineNumber": 387
             },
             "deprecated": false,
             "children": [
@@ -5099,7 +5063,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-                  "lineNumber": 414
+                  "lineNumber": 387
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -5116,7 +5080,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-                  "lineNumber": 414
+                  "lineNumber": 387
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -5136,7 +5100,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 422
+              "lineNumber": 395
             },
             "deprecated": false,
             "children": [],
@@ -5154,7 +5118,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 428
+              "lineNumber": 401
             },
             "deprecated": false,
             "children": [],
@@ -5174,7 +5138,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 437
+              "lineNumber": 410
             },
             "deprecated": false,
             "children": [],
@@ -5192,7 +5156,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 441
+              "lineNumber": 414
             },
             "deprecated": false,
             "children": [
@@ -5208,7 +5172,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-                  "lineNumber": 441
+                  "lineNumber": 414
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -5235,7 +5199,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 455
+              "lineNumber": 428
             },
             "deprecated": false,
             "children": [],
@@ -5261,7 +5225,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 459
+              "lineNumber": 432
             },
             "deprecated": false,
             "children": [],
@@ -5279,7 +5243,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 463
+              "lineNumber": 436
             },
             "deprecated": false,
             "children": [],
@@ -5297,7 +5261,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 468
+              "lineNumber": 441
             },
             "deprecated": false,
             "children": [],
@@ -5346,7 +5310,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 479
+              "lineNumber": 452
             },
             "deprecated": false
           },
@@ -5393,7 +5357,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 483
+              "lineNumber": 456
             },
             "deprecated": false
           },
@@ -5417,7 +5381,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 513
+              "lineNumber": 486
             },
             "deprecated": false,
             "children": [
@@ -5439,7 +5403,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-                  "lineNumber": 513
+                  "lineNumber": 486
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -5459,7 +5423,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-          "lineNumber": 76
+          "lineNumber": 65
         },
         "deprecated": false,
         "children": [
@@ -5481,7 +5445,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 77
+              "lineNumber": 66
             },
             "deprecated": false
           },
@@ -5504,7 +5468,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 78
+              "lineNumber": 67
             },
             "deprecated": false
           },
@@ -5520,23 +5484,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 79
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggConfigs.forceNow",
-            "type": "Object",
-            "tags": [],
-            "label": "forceNow",
-            "description": [],
-            "signature": [
-              "Date | undefined"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 80
+              "lineNumber": 68
             },
             "deprecated": false
           },
@@ -5552,7 +5500,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 81
+              "lineNumber": 69
             },
             "deprecated": false
           },
@@ -5575,7 +5523,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 85
+              "lineNumber": 73
             },
             "deprecated": false
           },
@@ -5591,7 +5539,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 87
+              "lineNumber": 75
             },
             "deprecated": false,
             "children": [
@@ -5613,7 +5561,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 88
+                  "lineNumber": 76
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -5648,7 +5596,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 89
+                  "lineNumber": 77
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -5671,7 +5619,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 90
+                  "lineNumber": 78
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -5691,7 +5639,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 103
+              "lineNumber": 91
             },
             "deprecated": false,
             "children": [
@@ -5707,43 +5655,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 103
-                },
-                "deprecated": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggConfigs.setForceNow",
-            "type": "Function",
-            "tags": [],
-            "label": "setForceNow",
-            "description": [],
-            "signature": [
-              "(now: Date | undefined) => void"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 107
-            },
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-common.AggConfigs.setForceNow.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "now",
-                "description": [],
-                "signature": [
-                  "Date | undefined"
-                ],
-                "source": {
-                  "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 107
+                  "lineNumber": 91
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -5771,7 +5683,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 111
+              "lineNumber": 95
             },
             "deprecated": false,
             "children": [
@@ -5793,7 +5705,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 111
+                  "lineNumber": 95
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -5820,7 +5732,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 129
+              "lineNumber": 113
             },
             "deprecated": false,
             "children": [
@@ -5836,7 +5748,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 129
+                  "lineNumber": 113
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -5890,7 +5802,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 142
+              "lineNumber": 126
             },
             "deprecated": false,
             "children": [
@@ -5924,7 +5836,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 143
+                  "lineNumber": 127
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -5941,7 +5853,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 144
+                  "lineNumber": 128
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -5971,7 +5883,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 185
+              "lineNumber": 169
             },
             "deprecated": false,
             "children": [
@@ -5996,7 +5908,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 185
+                  "lineNumber": 169
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -6016,7 +5928,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 197
+              "lineNumber": 181
             },
             "deprecated": false,
             "children": [],
@@ -6042,7 +5954,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 287
+              "lineNumber": 250
             },
             "deprecated": false,
             "children": [],
@@ -6067,7 +5979,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 291
+              "lineNumber": 254
             },
             "deprecated": false,
             "children": [
@@ -6083,7 +5995,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 291
+                  "lineNumber": 254
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -6111,7 +6023,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 295
+              "lineNumber": 258
             },
             "deprecated": false,
             "children": [
@@ -6127,7 +6039,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 295
+                  "lineNumber": 258
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -6155,7 +6067,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 299
+              "lineNumber": 262
             },
             "deprecated": false,
             "children": [
@@ -6171,7 +6083,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 299
+                  "lineNumber": 262
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -6199,7 +6111,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 303
+              "lineNumber": 266
             },
             "deprecated": false,
             "children": [
@@ -6215,7 +6127,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 303
+                  "lineNumber": 266
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -6243,7 +6155,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 307
+              "lineNumber": 270
             },
             "deprecated": false,
             "children": [
@@ -6259,7 +6171,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 307
+                  "lineNumber": 270
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -6287,7 +6199,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 311
+              "lineNumber": 274
             },
             "deprecated": false,
             "children": [
@@ -6303,7 +6215,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 311
+                  "lineNumber": 274
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -6331,167 +6243,10 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 315
+              "lineNumber": 278
             },
             "deprecated": false,
             "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggConfigs.getTimeShifts",
-            "type": "Function",
-            "tags": [],
-            "label": "getTimeShifts",
-            "description": [],
-            "signature": [
-              "() => Record<string, moment.Duration>"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 329
-            },
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggConfigs.getTimeShiftInterval",
-            "type": "Function",
-            "tags": [],
-            "label": "getTimeShiftInterval",
-            "description": [],
-            "signature": [
-              "() => moment.Duration | undefined"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 344
-            },
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggConfigs.hasTimeShifts",
-            "type": "Function",
-            "tags": [],
-            "label": "hasTimeShifts",
-            "description": [],
-            "signature": [
-              "() => boolean"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 351
-            },
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggConfigs.getSearchSourceTimeFilter",
-            "type": "Function",
-            "tags": [],
-            "label": "getSearchSourceTimeFilter",
-            "description": [],
-            "signature": [
-              "(forceNow?: Date | undefined) => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.RangeFilter",
-                "text": "RangeFilter"
-              },
-              "[] | { meta: { index: string | undefined; params: {}; alias: string; disabled: boolean; negate: boolean; }; query: { bool: { should: { bool: { filter: { range: { [x: string]: { gte: string; lte: string; }; }; }[]; }; }[]; minimum_should_match: number; }; }; }[]"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 355
-            },
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-common.AggConfigs.getSearchSourceTimeFilter.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "forceNow",
-                "description": [],
-                "signature": [
-                  "Date | undefined"
-                ],
-                "source": {
-                  "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 355
-                },
-                "deprecated": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggConfigs.postFlightTransform",
-            "type": "Function",
-            "tags": [],
-            "label": "postFlightTransform",
-            "description": [],
-            "signature": [
-              "(response: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IEsSearchResponse",
-                "text": "IEsSearchResponse"
-              },
-              "<any>) => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IEsSearchResponse",
-                "text": "IEsSearchResponse"
-              },
-              "<any>"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 408
-            },
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-common.AggConfigs.postFlightTransform.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "response",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.IEsSearchResponse",
-                    "text": "IEsSearchResponse"
-                  },
-                  "<any>"
-                ],
-                "source": {
-                  "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 408
-                },
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
             "returnComment": []
           },
           {
@@ -6514,7 +6269,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 427
+              "lineNumber": 292
             },
             "deprecated": false,
             "children": [
@@ -6530,7 +6285,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 427
+                  "lineNumber": 292
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -6562,7 +6317,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 442
+              "lineNumber": 307
             },
             "deprecated": false,
             "children": [],
@@ -6592,7 +6347,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 456
+              "lineNumber": 321
             },
             "deprecated": false,
             "children": [
@@ -6610,7 +6365,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 456
+                  "lineNumber": 321
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -6646,7 +6401,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 465
+              "lineNumber": 330
             },
             "deprecated": false,
             "children": [
@@ -6670,7 +6425,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 465
+                  "lineNumber": 330
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -6694,7 +6449,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 465
+                  "lineNumber": 330
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -7876,73 +7631,6 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.AggType.splitForTimeShift",
-            "type": "Function",
-            "tags": [],
-            "label": "splitForTimeShift",
-            "description": [],
-            "signature": [
-              "(agg: TAggConfig, aggs: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.AggConfigs",
-                "text": "AggConfigs"
-              },
-              ") => boolean"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 218
-            },
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-common.AggType.splitForTimeShift.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "agg",
-                "description": [],
-                "signature": [
-                  "TAggConfig"
-                ],
-                "source": {
-                  "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-                  "lineNumber": 218
-                },
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "data",
-                "id": "def-common.AggType.splitForTimeShift.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "aggs",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.AggConfigs",
-                    "text": "AggConfigs"
-                  }
-                ],
-                "source": {
-                  "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-                  "lineNumber": 218
-                },
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
             "id": "def-common.AggType.Unnamed",
             "type": "Function",
             "tags": [
@@ -7958,7 +7646,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 231
+              "lineNumber": 227
             },
             "deprecated": false,
             "children": [
@@ -7991,7 +7679,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-                  "lineNumber": 231
+                  "lineNumber": 227
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8608,7 +8296,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/aggs/buckets/bucket_agg_type.ts",
-          "lineNumber": 40
+          "lineNumber": 31
         },
         "deprecated": false,
         "children": [
@@ -8624,7 +8312,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/buckets/bucket_agg_type.ts",
-              "lineNumber": 44
+              "lineNumber": 35
             },
             "deprecated": false,
             "returnComment": [],
@@ -8641,7 +8329,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/buckets/bucket_agg_type.ts",
-                  "lineNumber": 44
+                  "lineNumber": 35
                 },
                 "deprecated": false
               },
@@ -8657,7 +8345,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/buckets/bucket_agg_type.ts",
-                  "lineNumber": 44
+                  "lineNumber": 35
                 },
                 "deprecated": false
               },
@@ -8673,7 +8361,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/buckets/bucket_agg_type.ts",
-                  "lineNumber": 44
+                  "lineNumber": 35
                 },
                 "deprecated": false
               }
@@ -8688,213 +8376,9 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/buckets/bucket_agg_type.ts",
-              "lineNumber": 45
+              "lineNumber": 36
             },
             "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.BucketAggType.getShiftedKey",
-            "type": "Function",
-            "tags": [],
-            "label": "getShiftedKey",
-            "description": [],
-            "signature": [
-              "(agg: TBucketAggConfig, key: React.ReactText, timeShift: moment.Duration) => React.ReactText"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/aggs/buckets/bucket_agg_type.ts",
-              "lineNumber": 47
-            },
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-common.BucketAggType.getShiftedKey.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "agg",
-                "description": [],
-                "signature": [
-                  "TBucketAggConfig"
-                ],
-                "source": {
-                  "path": "src/plugins/data/common/search/aggs/buckets/bucket_agg_type.ts",
-                  "lineNumber": 48
-                },
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "data",
-                "id": "def-common.BucketAggType.getShiftedKey.$2",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "key",
-                "description": [],
-                "signature": [
-                  "React.ReactText"
-                ],
-                "source": {
-                  "path": "src/plugins/data/common/search/aggs/buckets/bucket_agg_type.ts",
-                  "lineNumber": 49
-                },
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "data",
-                "id": "def-common.BucketAggType.getShiftedKey.$3",
-                "type": "Object",
-                "tags": [],
-                "label": "timeShift",
-                "description": [],
-                "signature": [
-                  "moment.Duration"
-                ],
-                "source": {
-                  "path": "src/plugins/data/common/search/aggs/buckets/bucket_agg_type.ts",
-                  "lineNumber": 50
-                },
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.BucketAggType.getTimeShiftInterval",
-            "type": "Function",
-            "tags": [],
-            "label": "getTimeShiftInterval",
-            "description": [],
-            "signature": [
-              "(agg: TBucketAggConfig) => moment.Duration | undefined"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/aggs/buckets/bucket_agg_type.ts",
-              "lineNumber": 55
-            },
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-common.BucketAggType.getTimeShiftInterval.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "agg",
-                "description": [],
-                "signature": [
-                  "TBucketAggConfig"
-                ],
-                "source": {
-                  "path": "src/plugins/data/common/search/aggs/buckets/bucket_agg_type.ts",
-                  "lineNumber": 55
-                },
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.BucketAggType.orderBuckets",
-            "type": "Function",
-            "tags": [],
-            "label": "orderBuckets",
-            "description": [],
-            "signature": [
-              "(agg: TBucketAggConfig, a: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.GenericBucket",
-                "text": "GenericBucket"
-              },
-              ", b: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.GenericBucket",
-                "text": "GenericBucket"
-              },
-              ") => number"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/aggs/buckets/bucket_agg_type.ts",
-              "lineNumber": 59
-            },
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-common.BucketAggType.orderBuckets.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "agg",
-                "description": [],
-                "signature": [
-                  "TBucketAggConfig"
-                ],
-                "source": {
-                  "path": "src/plugins/data/common/search/aggs/buckets/bucket_agg_type.ts",
-                  "lineNumber": 59
-                },
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "data",
-                "id": "def-common.BucketAggType.orderBuckets.$2",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "a",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.GenericBucket",
-                    "text": "GenericBucket"
-                  }
-                ],
-                "source": {
-                  "path": "src/plugins/data/common/search/aggs/buckets/bucket_agg_type.ts",
-                  "lineNumber": 59
-                },
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "data",
-                "id": "def-common.BucketAggType.orderBuckets.$3",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "b",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.GenericBucket",
-                    "text": "GenericBucket"
-                  }
-                ],
-                "source": {
-                  "path": "src/plugins/data/common/search/aggs/buckets/bucket_agg_type.ts",
-                  "lineNumber": 59
-                },
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -8908,7 +8392,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/buckets/bucket_agg_type.ts",
-              "lineNumber": 63
+              "lineNumber": 38
             },
             "deprecated": false,
             "children": [
@@ -8924,7 +8408,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/buckets/bucket_agg_type.ts",
-                  "lineNumber": 63
+                  "lineNumber": 38
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -9607,7 +9091,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/aggs/metrics/metric_agg_type.ts",
-          "lineNumber": 38
+          "lineNumber": 37
         },
         "deprecated": false,
         "children": [
@@ -9620,7 +9104,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/metrics/metric_agg_type.ts",
-              "lineNumber": 42
+              "lineNumber": 41
             },
             "deprecated": false
           },
@@ -9636,7 +9120,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/metrics/metric_agg_type.ts",
-              "lineNumber": 43
+              "lineNumber": 42
             },
             "deprecated": false,
             "returnComment": [],
@@ -9651,7 +9135,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/metrics/metric_agg_type.ts",
-              "lineNumber": 44
+              "lineNumber": 43
             },
             "deprecated": false
           },
@@ -9667,7 +9151,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/metrics/metric_agg_type.ts",
-              "lineNumber": 46
+              "lineNumber": 45
             },
             "deprecated": false,
             "children": [],
@@ -9685,7 +9169,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/metrics/metric_agg_type.ts",
-              "lineNumber": 48
+              "lineNumber": 47
             },
             "deprecated": false,
             "children": [
@@ -9701,7 +9185,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/metrics/metric_agg_type.ts",
-                  "lineNumber": 48
+                  "lineNumber": 47
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -9947,7 +9431,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/search_source/search_source.ts",
-          "lineNumber": 127
+          "lineNumber": 121
         },
         "deprecated": false,
         "children": [
@@ -9963,7 +9447,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 135
+              "lineNumber": 129
             },
             "deprecated": false
           },
@@ -9979,7 +9463,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 139
+              "lineNumber": 133
             },
             "deprecated": false,
             "children": [
@@ -10001,7 +9485,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 139
+                  "lineNumber": 133
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10024,7 +9508,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 139
+                  "lineNumber": 133
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10046,7 +9530,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 157
+              "lineNumber": 151
             },
             "deprecated": false,
             "children": [
@@ -10062,7 +9546,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 157
+                  "lineNumber": 151
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10092,7 +9576,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 166
+              "lineNumber": 160
             },
             "deprecated": false,
             "children": [
@@ -10110,7 +9594,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 166
+                  "lineNumber": 160
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10136,7 +9620,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 166
+                  "lineNumber": 160
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10158,7 +9642,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 178
+              "lineNumber": 172
             },
             "deprecated": false,
             "children": [
@@ -10176,7 +9660,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 178
+                  "lineNumber": 172
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10208,7 +9692,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 189
+              "lineNumber": 183
             },
             "deprecated": false,
             "children": [
@@ -10232,7 +9716,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 189
+                  "lineNumber": 183
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10254,7 +9738,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 197
+              "lineNumber": 191
             },
             "deprecated": false,
             "children": [],
@@ -10281,7 +9765,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 204
+              "lineNumber": 198
             },
             "deprecated": false,
             "children": [],
@@ -10309,7 +9793,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 211
+              "lineNumber": 205
             },
             "deprecated": false,
             "children": [
@@ -10325,7 +9809,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 211
+                  "lineNumber": 205
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10342,7 +9826,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 211
+                  "lineNumber": 205
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10372,7 +9856,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 222
+              "lineNumber": 216
             },
             "deprecated": false,
             "children": [
@@ -10388,7 +9872,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 222
+                  "lineNumber": 216
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10417,7 +9901,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 229
+              "lineNumber": 223
             },
             "deprecated": true,
             "references": [
@@ -10425,14 +9909,14 @@
                 "plugin": "discover",
                 "link": {
                   "path": "src/plugins/discover/public/application/embeddable/search_embeddable.ts",
-                  "lineNumber": 207
+                  "lineNumber": 206
                 }
               },
               {
                 "plugin": "discover",
                 "link": {
                   "path": "src/plugins/discover/public/application/embeddable/search_embeddable.ts",
-                  "lineNumber": 213
+                  "lineNumber": 212
                 }
               }
             ],
@@ -10460,7 +9944,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 236
+              "lineNumber": 230
             },
             "deprecated": false,
             "children": [],
@@ -10487,7 +9971,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 250
+              "lineNumber": 244
             },
             "deprecated": false,
             "children": [
@@ -10503,7 +9987,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 250
+                  "lineNumber": 244
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10543,7 +10027,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 262
+              "lineNumber": 256
             },
             "deprecated": false,
             "children": [
@@ -10569,7 +10053,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 262
+                  "lineNumber": 256
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -10594,7 +10078,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 262
+                  "lineNumber": 256
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10628,7 +10112,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 272
+              "lineNumber": 266
             },
             "deprecated": false,
             "children": [],
@@ -10668,7 +10152,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 280
+              "lineNumber": 274
             },
             "deprecated": false,
             "children": [
@@ -10690,7 +10174,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 281
+                  "lineNumber": 275
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10724,7 +10208,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 318
+              "lineNumber": 312
             },
             "deprecated": true,
             "references": [
@@ -10733,6 +10217,13 @@
                 "link": {
                   "path": "src/plugins/discover/public/application/angular/context/api/utils/fetch_hits_in_interval.ts",
                   "lineNumber": 77
+                }
+              },
+              {
+                "plugin": "discover",
+                "link": {
+                  "path": "src/plugins/discover/public/application/angular/context/api/anchor.ts",
+                  "lineNumber": 57
                 }
               },
               {
@@ -10776,7 +10267,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 318
+                  "lineNumber": 312
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10816,7 +10307,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 331
+              "lineNumber": 325
             },
             "deprecated": false,
             "children": [
@@ -10848,7 +10339,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 332
+                  "lineNumber": 326
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10870,7 +10361,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 340
+              "lineNumber": 334
             },
             "deprecated": false,
             "children": [],
@@ -10892,7 +10383,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 348
+              "lineNumber": 342
             },
             "deprecated": false,
             "children": [],
@@ -10919,7 +10410,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 848
+              "lineNumber": 831
             },
             "deprecated": false,
             "children": [
@@ -10935,7 +10426,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 848
+                  "lineNumber": 831
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10959,7 +10450,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 877
+              "lineNumber": 860
             },
             "deprecated": false,
             "children": [],
@@ -14435,7 +13926,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
-          "lineNumber": 64
+          "lineNumber": 63
         },
         "deprecated": false,
         "children": [],
@@ -14491,7 +13982,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
-          "lineNumber": 35
+          "lineNumber": 43
         },
         "deprecated": false,
         "children": [
@@ -14507,7 +13998,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
-              "lineNumber": 35
+              "lineNumber": 43
             },
             "deprecated": false,
             "isRequired": true
@@ -14760,7 +14251,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/aggs/buckets/bucket_agg_type.ts",
-          "lineNumber": 90
+          "lineNumber": 49
         },
         "deprecated": false,
         "children": [
@@ -14776,7 +14267,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/buckets/bucket_agg_type.ts",
-              "lineNumber": 90
+              "lineNumber": 49
             },
             "deprecated": false,
             "isRequired": true
@@ -14942,7 +14433,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/aggs/metrics/metric_agg_type.ts",
-          "lineNumber": 92
+          "lineNumber": 75
         },
         "deprecated": false,
         "children": [
@@ -14958,7 +14449,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/metrics/metric_agg_type.ts",
-              "lineNumber": 92
+              "lineNumber": 75
             },
             "deprecated": false,
             "isRequired": true
@@ -15427,45 +14918,6 @@
             "source": {
               "path": "src/plugins/data/common/search/search_source/parse_json.ts",
               "lineNumber": 12
-            },
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.parseTimeShift",
-        "type": "Function",
-        "tags": [],
-        "label": "parseTimeShift",
-        "description": [
-          "\nThis method parses a string into a time shift duration.\nIf parsing fails, 'invalid' is returned.\nAllowed values are the string 'previous' and an integer followed by the units s,m,h,d,w,M,y"
-        ],
-        "signature": [
-          "(val: string) => moment.Duration | \"previous\" | \"invalid\""
-        ],
-        "source": {
-          "path": "src/plugins/data/common/search/aggs/utils/parse_time_shift.ts",
-          "lineNumber": 18
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.parseTimeShift.$1",
-            "type": "string",
-            "tags": [],
-            "label": "val",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/aggs/utils/parse_time_shift.ts",
-              "lineNumber": 18
             },
             "deprecated": false,
             "isRequired": true
@@ -16109,7 +15561,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-          "lineNumber": 53
+          "lineNumber": 44
         },
         "deprecated": false,
         "children": [
@@ -16125,7 +15577,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 54
+              "lineNumber": 45
             },
             "deprecated": false
           },
@@ -16141,7 +15593,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 55
+              "lineNumber": 46
             },
             "deprecated": false
           }
@@ -16159,7 +15611,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/aggs/types.ts",
-          "lineNumber": 196
+          "lineNumber": 195
         },
         "deprecated": false,
         "children": [
@@ -16188,7 +15640,7 @@
                 "section": "def-common.BUCKET_TYPES",
                 "text": "BUCKET_TYPES"
               },
-              ".FILTER>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\"> & Pick<{ geo_bounding_box?: string | undefined; filter?: string | undefined; }, \"geo_bounding_box\"> & Pick<{ geo_bounding_box?: string | undefined; filter?: string | undefined; }, \"filter\">, \"enabled\" | \"id\" | \"filter\" | \"customLabel\" | \"schema\" | \"geo_bounding_box\" | \"json\" | \"timeShift\">, ",
+              ".FILTER>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\"> & Pick<{ geo_bounding_box?: string | undefined; filter?: string | undefined; }, \"geo_bounding_box\"> & Pick<{ geo_bounding_box?: string | undefined; filter?: string | undefined; }, \"filter\">, \"enabled\" | \"id\" | \"filter\" | \"customLabel\" | \"schema\" | \"geo_bounding_box\" | \"json\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -16212,7 +15664,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 197
+              "lineNumber": 196
             },
             "deprecated": false
           },
@@ -16241,7 +15693,7 @@
                 "section": "def-common.BUCKET_TYPES",
                 "text": "BUCKET_TYPES"
               },
-              ".FILTERS>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"timeShift\"> & Pick<{ filters?: string | undefined; }, \"filters\"> & Pick<{ filters?: string | undefined; }, never>, \"enabled\" | \"filters\" | \"id\" | \"schema\" | \"json\" | \"timeShift\">, ",
+              ".FILTERS>, \"enabled\" | \"id\" | \"schema\" | \"json\"> & Pick<{ filters?: string | undefined; }, \"filters\"> & Pick<{ filters?: string | undefined; }, never>, \"enabled\" | \"filters\" | \"id\" | \"schema\" | \"json\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -16265,7 +15717,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 198
+              "lineNumber": 197
             },
             "deprecated": false
           },
@@ -16318,7 +15770,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 199
+              "lineNumber": 198
             },
             "deprecated": false
           },
@@ -16347,7 +15799,60 @@
                 "section": "def-common.BUCKET_TYPES",
                 "text": "BUCKET_TYPES"
               },
-              ".IP_RANGE>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"field\"> & Pick<{ ranges?: string | undefined; ipRangeType?: string | undefined; }, \"ipRangeType\" | \"ranges\"> & Pick<{ ranges?: string | undefined; ipRangeType?: string | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"field\" | \"ipRangeType\" | \"ranges\">, ",
+              ".IP_RANGE>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"field\"> & Pick<{ ranges?: string | undefined; ipRangeType?: string | undefined; }, \"ipRangeType\" | \"ranges\"> & Pick<{ ranges?: string | undefined; ipRangeType?: string | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"field\" | \"ipRangeType\" | \"ranges\">, ",
+              "AggExpressionType",
+              ", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExecutionContext",
+                "text": "ExecutionContext"
+              },
+              "<",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              ", ",
+              "SerializableState",
+              ">>"
+            ],
+            "source": {
+              "path": "src/plugins/data/common/search/aggs/types.ts",
+              "lineNumber": 199
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggFunctionsMapping.aggDateRange",
+            "type": "Object",
+            "tags": [],
+            "label": "aggDateRange",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunctionDefinition",
+                "text": "ExpressionFunctionDefinition"
+              },
+              "<\"aggDateRange\", any, Pick<Pick<",
+              "AggExpressionFunctionArgs",
+              "<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.BUCKET_TYPES",
+                "text": "BUCKET_TYPES"
+              },
+              ".DATE_RANGE>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"field\" | \"time_zone\"> & Pick<{ ranges?: string | undefined; }, \"ranges\"> & Pick<{ ranges?: string | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"field\" | \"ranges\" | \"time_zone\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -16377,10 +15882,10 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.AggFunctionsMapping.aggDateRange",
+            "id": "def-common.AggFunctionsMapping.aggRange",
             "type": "Object",
             "tags": [],
-            "label": "aggDateRange",
+            "label": "aggRange",
             "description": [],
             "signature": [
               {
@@ -16390,7 +15895,7 @@
                 "section": "def-common.ExpressionFunctionDefinition",
                 "text": "ExpressionFunctionDefinition"
               },
-              "<\"aggDateRange\", any, Pick<Pick<",
+              "<\"aggRange\", any, Pick<Pick<",
               "AggExpressionFunctionArgs",
               "<",
               {
@@ -16400,7 +15905,7 @@
                 "section": "def-common.BUCKET_TYPES",
                 "text": "BUCKET_TYPES"
               },
-              ".DATE_RANGE>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"field\" | \"time_zone\"> & Pick<{ ranges?: string | undefined; }, \"ranges\"> & Pick<{ ranges?: string | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"field\" | \"ranges\" | \"time_zone\">, ",
+              ".RANGE>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"field\"> & Pick<{ ranges?: string | undefined; }, \"ranges\"> & Pick<{ ranges?: string | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"field\" | \"ranges\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -16425,59 +15930,6 @@
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
               "lineNumber": 201
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggFunctionsMapping.aggRange",
-            "type": "Object",
-            "tags": [],
-            "label": "aggRange",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionFunctionDefinition",
-                "text": "ExpressionFunctionDefinition"
-              },
-              "<\"aggRange\", any, Pick<Pick<",
-              "AggExpressionFunctionArgs",
-              "<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.BUCKET_TYPES",
-                "text": "BUCKET_TYPES"
-              },
-              ".RANGE>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"field\"> & Pick<{ ranges?: string | undefined; }, \"ranges\"> & Pick<{ ranges?: string | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"field\" | \"ranges\">, ",
-              "AggExpressionType",
-              ", ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExecutionContext",
-                "text": "ExecutionContext"
-              },
-              "<",
-              {
-                "pluginId": "inspector",
-                "scope": "common",
-                "docId": "kibInspectorPluginApi",
-                "section": "def-common.Adapters",
-                "text": "Adapters"
-              },
-              ", ",
-              "SerializableState",
-              ">>"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 202
             },
             "deprecated": false
           },
@@ -16530,7 +15982,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 203
+              "lineNumber": 202
             },
             "deprecated": false
           },
@@ -16559,7 +16011,60 @@
                 "section": "def-common.BUCKET_TYPES",
                 "text": "BUCKET_TYPES"
               },
-              ".GEOHASH_GRID>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"field\" | \"autoPrecision\" | \"precision\" | \"useGeocentroid\" | \"isFilteredByCollar\"> & Pick<{ boundingBox?: string | undefined; }, \"boundingBox\"> & Pick<{ boundingBox?: string | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"field\" | \"autoPrecision\" | \"precision\" | \"useGeocentroid\" | \"isFilteredByCollar\" | \"boundingBox\">, ",
+              ".GEOHASH_GRID>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"field\" | \"autoPrecision\" | \"precision\" | \"useGeocentroid\" | \"isFilteredByCollar\"> & Pick<{ boundingBox?: string | undefined; }, \"boundingBox\"> & Pick<{ boundingBox?: string | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"field\" | \"autoPrecision\" | \"precision\" | \"useGeocentroid\" | \"isFilteredByCollar\" | \"boundingBox\">, ",
+              "AggExpressionType",
+              ", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExecutionContext",
+                "text": "ExecutionContext"
+              },
+              "<",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              ", ",
+              "SerializableState",
+              ">>"
+            ],
+            "source": {
+              "path": "src/plugins/data/common/search/aggs/types.ts",
+              "lineNumber": 203
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggFunctionsMapping.aggHistogram",
+            "type": "Object",
+            "tags": [],
+            "label": "aggHistogram",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunctionDefinition",
+                "text": "ExpressionFunctionDefinition"
+              },
+              "<\"aggHistogram\", any, Pick<Pick<",
+              "AggExpressionFunctionArgs",
+              "<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.BUCKET_TYPES",
+                "text": "BUCKET_TYPES"
+              },
+              ".HISTOGRAM>, \"enabled\" | \"interval\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"field\" | \"used_interval\" | \"maxBars\" | \"intervalBase\" | \"min_doc_count\" | \"has_extended_bounds\"> & Pick<{ extended_bounds?: string | undefined; }, \"extended_bounds\"> & Pick<{ extended_bounds?: string | undefined; }, never>, \"enabled\" | \"interval\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"field\" | \"used_interval\" | \"maxBars\" | \"intervalBase\" | \"min_doc_count\" | \"has_extended_bounds\" | \"extended_bounds\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -16589,10 +16094,10 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.AggFunctionsMapping.aggHistogram",
+            "id": "def-common.AggFunctionsMapping.aggDateHistogram",
             "type": "Object",
             "tags": [],
-            "label": "aggHistogram",
+            "label": "aggDateHistogram",
             "description": [],
             "signature": [
               {
@@ -16602,7 +16107,7 @@
                 "section": "def-common.ExpressionFunctionDefinition",
                 "text": "ExpressionFunctionDefinition"
               },
-              "<\"aggHistogram\", any, Pick<Pick<",
+              "<\"aggDateHistogram\", any, Pick<Pick<",
               "AggExpressionFunctionArgs",
               "<",
               {
@@ -16612,7 +16117,7 @@
                 "section": "def-common.BUCKET_TYPES",
                 "text": "BUCKET_TYPES"
               },
-              ".HISTOGRAM>, \"enabled\" | \"interval\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"field\" | \"used_interval\" | \"maxBars\" | \"intervalBase\" | \"min_doc_count\" | \"has_extended_bounds\"> & Pick<{ extended_bounds?: string | undefined; }, \"extended_bounds\"> & Pick<{ extended_bounds?: string | undefined; }, never>, \"enabled\" | \"interval\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"field\" | \"used_interval\" | \"maxBars\" | \"intervalBase\" | \"min_doc_count\" | \"has_extended_bounds\" | \"extended_bounds\">, ",
+              ".DATE_HISTOGRAM>, \"enabled\" | \"interval\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"field\" | \"time_zone\" | \"used_interval\" | \"min_doc_count\" | \"useNormalizedEsInterval\" | \"scaleMetricValues\" | \"used_time_zone\" | \"drop_partials\" | \"format\"> & Pick<{ timeRange?: string | undefined; extended_bounds?: string | undefined; }, \"timeRange\" | \"extended_bounds\"> & Pick<{ timeRange?: string | undefined; extended_bounds?: string | undefined; }, never>, \"enabled\" | \"interval\" | \"timeRange\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"field\" | \"time_zone\" | \"used_interval\" | \"min_doc_count\" | \"extended_bounds\" | \"useNormalizedEsInterval\" | \"scaleMetricValues\" | \"used_time_zone\" | \"drop_partials\" | \"format\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -16642,10 +16147,10 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.AggFunctionsMapping.aggDateHistogram",
+            "id": "def-common.AggFunctionsMapping.aggTerms",
             "type": "Object",
             "tags": [],
-            "label": "aggDateHistogram",
+            "label": "aggTerms",
             "description": [],
             "signature": [
               {
@@ -16655,7 +16160,7 @@
                 "section": "def-common.ExpressionFunctionDefinition",
                 "text": "ExpressionFunctionDefinition"
               },
-              "<\"aggDateHistogram\", any, Pick<Pick<",
+              "<\"aggTerms\", any, Pick<Pick<",
               "AggExpressionFunctionArgs",
               "<",
               {
@@ -16665,7 +16170,11 @@
                 "section": "def-common.BUCKET_TYPES",
                 "text": "BUCKET_TYPES"
               },
-              ".DATE_HISTOGRAM>, \"enabled\" | \"interval\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"field\" | \"time_zone\" | \"used_interval\" | \"min_doc_count\" | \"useNormalizedEsInterval\" | \"scaleMetricValues\" | \"used_time_zone\" | \"drop_partials\" | \"format\"> & Pick<{ timeRange?: string | undefined; extended_bounds?: string | undefined; }, \"timeRange\" | \"extended_bounds\"> & Pick<{ timeRange?: string | undefined; extended_bounds?: string | undefined; }, never>, \"enabled\" | \"interval\" | \"timeRange\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"field\" | \"time_zone\" | \"used_interval\" | \"min_doc_count\" | \"extended_bounds\" | \"useNormalizedEsInterval\" | \"scaleMetricValues\" | \"used_time_zone\" | \"drop_partials\" | \"format\">, ",
+              ".TERMS>, \"enabled\" | \"id\" | \"size\" | \"customLabel\" | \"schema\" | \"json\" | \"field\" | \"orderBy\" | \"order\" | \"missingBucket\" | \"missingBucketLabel\" | \"otherBucket\" | \"otherBucketLabel\" | \"exclude\" | \"include\"> & Pick<{ orderAgg?: ",
+              "AggExpressionType",
+              " | undefined; }, \"orderAgg\"> & Pick<{ orderAgg?: ",
+              "AggExpressionType",
+              " | undefined; }, never>, \"enabled\" | \"id\" | \"size\" | \"customLabel\" | \"schema\" | \"json\" | \"field\" | \"orderBy\" | \"orderAgg\" | \"order\" | \"missingBucket\" | \"missingBucketLabel\" | \"otherBucket\" | \"otherBucketLabel\" | \"exclude\" | \"include\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -16690,63 +16199,6 @@
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
               "lineNumber": 206
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggFunctionsMapping.aggTerms",
-            "type": "Object",
-            "tags": [],
-            "label": "aggTerms",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionFunctionDefinition",
-                "text": "ExpressionFunctionDefinition"
-              },
-              "<\"aggTerms\", any, Pick<Pick<",
-              "AggExpressionFunctionArgs",
-              "<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.BUCKET_TYPES",
-                "text": "BUCKET_TYPES"
-              },
-              ".TERMS>, \"enabled\" | \"id\" | \"size\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"field\" | \"orderBy\" | \"order\" | \"missingBucket\" | \"missingBucketLabel\" | \"otherBucket\" | \"otherBucketLabel\" | \"exclude\" | \"include\"> & Pick<{ orderAgg?: ",
-              "AggExpressionType",
-              " | undefined; }, \"orderAgg\"> & Pick<{ orderAgg?: ",
-              "AggExpressionType",
-              " | undefined; }, never>, \"enabled\" | \"id\" | \"size\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"field\" | \"orderBy\" | \"orderAgg\" | \"order\" | \"missingBucket\" | \"missingBucketLabel\" | \"otherBucket\" | \"otherBucketLabel\" | \"exclude\" | \"include\">, ",
-              "AggExpressionType",
-              ", ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExecutionContext",
-                "text": "ExecutionContext"
-              },
-              "<",
-              {
-                "pluginId": "inspector",
-                "scope": "common",
-                "docId": "kibInspectorPluginApi",
-                "section": "def-common.Adapters",
-                "text": "Adapters"
-              },
-              ", ",
-              "SerializableState",
-              ">>"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 207
             },
             "deprecated": false
           },
@@ -16799,7 +16251,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 208
+              "lineNumber": 207
             },
             "deprecated": false
           },
@@ -16828,7 +16280,7 @@
                 "section": "def-common.METRIC_TYPES",
                 "text": "METRIC_TYPES"
               },
-              ".AVG_BUCKET>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\"> & Pick<{ customBucket?: ",
+              ".AVG_BUCKET>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\"> & Pick<{ customBucket?: ",
               "AggExpressionType",
               " | undefined; customMetric?: ",
               "AggExpressionType",
@@ -16836,7 +16288,68 @@
               "AggExpressionType",
               " | undefined; customMetric?: ",
               "AggExpressionType",
-              " | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"customMetric\" | \"customBucket\">, ",
+              " | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"customMetric\" | \"customBucket\">, ",
+              "AggExpressionType",
+              ", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExecutionContext",
+                "text": "ExecutionContext"
+              },
+              "<",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              ", ",
+              "SerializableState",
+              ">>"
+            ],
+            "source": {
+              "path": "src/plugins/data/common/search/aggs/types.ts",
+              "lineNumber": 208
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggFunctionsMapping.aggBucketMax",
+            "type": "Object",
+            "tags": [],
+            "label": "aggBucketMax",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunctionDefinition",
+                "text": "ExpressionFunctionDefinition"
+              },
+              "<\"aggBucketMax\", any, Pick<Pick<",
+              "AggExpressionFunctionArgs",
+              "<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.METRIC_TYPES",
+                "text": "METRIC_TYPES"
+              },
+              ".MAX_BUCKET>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\"> & Pick<{ customBucket?: ",
+              "AggExpressionType",
+              " | undefined; customMetric?: ",
+              "AggExpressionType",
+              " | undefined; }, \"customMetric\" | \"customBucket\"> & Pick<{ customBucket?: ",
+              "AggExpressionType",
+              " | undefined; customMetric?: ",
+              "AggExpressionType",
+              " | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"customMetric\" | \"customBucket\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -16866,10 +16379,10 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.AggFunctionsMapping.aggBucketMax",
+            "id": "def-common.AggFunctionsMapping.aggBucketMin",
             "type": "Object",
             "tags": [],
-            "label": "aggBucketMax",
+            "label": "aggBucketMin",
             "description": [],
             "signature": [
               {
@@ -16879,7 +16392,7 @@
                 "section": "def-common.ExpressionFunctionDefinition",
                 "text": "ExpressionFunctionDefinition"
               },
-              "<\"aggBucketMax\", any, Pick<Pick<",
+              "<\"aggBucketMin\", any, Pick<Pick<",
               "AggExpressionFunctionArgs",
               "<",
               {
@@ -16889,7 +16402,7 @@
                 "section": "def-common.METRIC_TYPES",
                 "text": "METRIC_TYPES"
               },
-              ".MAX_BUCKET>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\"> & Pick<{ customBucket?: ",
+              ".MIN_BUCKET>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\"> & Pick<{ customBucket?: ",
               "AggExpressionType",
               " | undefined; customMetric?: ",
               "AggExpressionType",
@@ -16897,7 +16410,7 @@
               "AggExpressionType",
               " | undefined; customMetric?: ",
               "AggExpressionType",
-              " | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"customMetric\" | \"customBucket\">, ",
+              " | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"customMetric\" | \"customBucket\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -16927,10 +16440,10 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.AggFunctionsMapping.aggBucketMin",
+            "id": "def-common.AggFunctionsMapping.aggBucketSum",
             "type": "Object",
             "tags": [],
-            "label": "aggBucketMin",
+            "label": "aggBucketSum",
             "description": [],
             "signature": [
               {
@@ -16940,7 +16453,7 @@
                 "section": "def-common.ExpressionFunctionDefinition",
                 "text": "ExpressionFunctionDefinition"
               },
-              "<\"aggBucketMin\", any, Pick<Pick<",
+              "<\"aggBucketSum\", any, Pick<Pick<",
               "AggExpressionFunctionArgs",
               "<",
               {
@@ -16950,7 +16463,7 @@
                 "section": "def-common.METRIC_TYPES",
                 "text": "METRIC_TYPES"
               },
-              ".MIN_BUCKET>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\"> & Pick<{ customBucket?: ",
+              ".SUM_BUCKET>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\"> & Pick<{ customBucket?: ",
               "AggExpressionType",
               " | undefined; customMetric?: ",
               "AggExpressionType",
@@ -16958,7 +16471,7 @@
               "AggExpressionType",
               " | undefined; customMetric?: ",
               "AggExpressionType",
-              " | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"customMetric\" | \"customBucket\">, ",
+              " | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"customMetric\" | \"customBucket\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -16988,10 +16501,10 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.AggFunctionsMapping.aggBucketSum",
+            "id": "def-common.AggFunctionsMapping.aggFilteredMetric",
             "type": "Object",
             "tags": [],
-            "label": "aggBucketSum",
+            "label": "aggFilteredMetric",
             "description": [],
             "signature": [
               {
@@ -17001,7 +16514,7 @@
                 "section": "def-common.ExpressionFunctionDefinition",
                 "text": "ExpressionFunctionDefinition"
               },
-              "<\"aggBucketSum\", any, Pick<Pick<",
+              "<\"aggFilteredMetric\", any, Pick<Pick<",
               "AggExpressionFunctionArgs",
               "<",
               {
@@ -17011,7 +16524,7 @@
                 "section": "def-common.METRIC_TYPES",
                 "text": "METRIC_TYPES"
               },
-              ".SUM_BUCKET>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\"> & Pick<{ customBucket?: ",
+              ".FILTERED_METRIC>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\"> & Pick<{ customBucket?: ",
               "AggExpressionType",
               " | undefined; customMetric?: ",
               "AggExpressionType",
@@ -17019,7 +16532,7 @@
               "AggExpressionType",
               " | undefined; customMetric?: ",
               "AggExpressionType",
-              " | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"customMetric\" | \"customBucket\">, ",
+              " | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"customMetric\" | \"customBucket\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -17044,67 +16557,6 @@
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
               "lineNumber": 212
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggFunctionsMapping.aggFilteredMetric",
-            "type": "Object",
-            "tags": [],
-            "label": "aggFilteredMetric",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionFunctionDefinition",
-                "text": "ExpressionFunctionDefinition"
-              },
-              "<\"aggFilteredMetric\", any, Pick<Pick<",
-              "AggExpressionFunctionArgs",
-              "<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.METRIC_TYPES",
-                "text": "METRIC_TYPES"
-              },
-              ".FILTERED_METRIC>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\"> & Pick<{ customBucket?: ",
-              "AggExpressionType",
-              " | undefined; customMetric?: ",
-              "AggExpressionType",
-              " | undefined; }, \"customMetric\" | \"customBucket\"> & Pick<{ customBucket?: ",
-              "AggExpressionType",
-              " | undefined; customMetric?: ",
-              "AggExpressionType",
-              " | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"customMetric\" | \"customBucket\">, ",
-              "AggExpressionType",
-              ", ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExecutionContext",
-                "text": "ExecutionContext"
-              },
-              "<",
-              {
-                "pluginId": "inspector",
-                "scope": "common",
-                "docId": "kibInspectorPluginApi",
-                "section": "def-common.Adapters",
-                "text": "Adapters"
-              },
-              ", ",
-              "SerializableState",
-              ">>"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 213
             },
             "deprecated": false
           },
@@ -17157,7 +16609,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 214
+              "lineNumber": 213
             },
             "deprecated": false
           },
@@ -17210,7 +16662,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 215
+              "lineNumber": 214
             },
             "deprecated": false
           },
@@ -17239,11 +16691,11 @@
                 "section": "def-common.METRIC_TYPES",
                 "text": "METRIC_TYPES"
               },
-              ".CUMULATIVE_SUM>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"buckets_path\" | \"metricAgg\"> & Pick<{ customMetric?: ",
+              ".CUMULATIVE_SUM>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"buckets_path\" | \"metricAgg\"> & Pick<{ customMetric?: ",
               "AggExpressionType",
               " | undefined; }, \"customMetric\"> & Pick<{ customMetric?: ",
               "AggExpressionType",
-              " | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"customMetric\" | \"buckets_path\" | \"metricAgg\">, ",
+              " | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"customMetric\" | \"buckets_path\" | \"metricAgg\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -17267,7 +16719,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 216
+              "lineNumber": 215
             },
             "deprecated": false
           },
@@ -17296,11 +16748,11 @@
                 "section": "def-common.METRIC_TYPES",
                 "text": "METRIC_TYPES"
               },
-              ".DERIVATIVE>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"buckets_path\" | \"metricAgg\"> & Pick<{ customMetric?: ",
+              ".DERIVATIVE>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"buckets_path\" | \"metricAgg\"> & Pick<{ customMetric?: ",
               "AggExpressionType",
               " | undefined; }, \"customMetric\"> & Pick<{ customMetric?: ",
               "AggExpressionType",
-              " | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"customMetric\" | \"buckets_path\" | \"metricAgg\">, ",
+              " | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"customMetric\" | \"buckets_path\" | \"metricAgg\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -17324,7 +16776,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 217
+              "lineNumber": 216
             },
             "deprecated": false
           },
@@ -17377,7 +16829,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 218
+              "lineNumber": 217
             },
             "deprecated": false
           },
@@ -17430,7 +16882,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 219
+              "lineNumber": 218
             },
             "deprecated": false
           },
@@ -17483,7 +16935,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 220
+              "lineNumber": 219
             },
             "deprecated": false
           },
@@ -17536,7 +16988,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 221
+              "lineNumber": 220
             },
             "deprecated": false
           },
@@ -17589,7 +17041,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 222
+              "lineNumber": 221
             },
             "deprecated": false
           },
@@ -17642,7 +17094,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 223
+              "lineNumber": 222
             },
             "deprecated": false
           },
@@ -17671,11 +17123,11 @@
                 "section": "def-common.METRIC_TYPES",
                 "text": "METRIC_TYPES"
               },
-              ".MOVING_FN>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"buckets_path\" | \"metricAgg\" | \"window\" | \"script\"> & Pick<{ customMetric?: ",
+              ".MOVING_FN>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"buckets_path\" | \"metricAgg\" | \"window\" | \"script\"> & Pick<{ customMetric?: ",
               "AggExpressionType",
               " | undefined; }, \"customMetric\"> & Pick<{ customMetric?: ",
               "AggExpressionType",
-              " | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"customMetric\" | \"buckets_path\" | \"metricAgg\" | \"window\" | \"script\">, ",
+              " | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"customMetric\" | \"buckets_path\" | \"metricAgg\" | \"window\" | \"script\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -17699,7 +17151,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 224
+              "lineNumber": 223
             },
             "deprecated": false
           },
@@ -17752,7 +17204,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 225
+              "lineNumber": 224
             },
             "deprecated": false
           },
@@ -17805,7 +17257,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 226
+              "lineNumber": 225
             },
             "deprecated": false
           },
@@ -17834,11 +17286,11 @@
                 "section": "def-common.METRIC_TYPES",
                 "text": "METRIC_TYPES"
               },
-              ".SERIAL_DIFF>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"buckets_path\" | \"metricAgg\"> & Pick<{ customMetric?: ",
+              ".SERIAL_DIFF>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"buckets_path\" | \"metricAgg\"> & Pick<{ customMetric?: ",
               "AggExpressionType",
               " | undefined; }, \"customMetric\"> & Pick<{ customMetric?: ",
               "AggExpressionType",
-              " | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"customMetric\" | \"buckets_path\" | \"metricAgg\">, ",
+              " | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"customMetric\" | \"buckets_path\" | \"metricAgg\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -17862,7 +17314,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 227
+              "lineNumber": 226
             },
             "deprecated": false
           },
@@ -17915,7 +17367,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 228
+              "lineNumber": 227
             },
             "deprecated": false
           },
@@ -17968,7 +17420,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 229
+              "lineNumber": 228
             },
             "deprecated": false
           },
@@ -18021,7 +17473,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 230
+              "lineNumber": 229
             },
             "deprecated": false
           }
@@ -19046,7 +18498,7 @@
           },
           " extends Pick<",
           "BaseAggParams",
-          ", \"json\" | \"timeShift\">"
+          ", \"json\">"
         ],
         "source": {
           "path": "src/plugins/data/common/search/aggs/buckets/filters.ts",
@@ -20316,7 +19768,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
-          "lineNumber": 49
+          "lineNumber": 48
         },
         "deprecated": false,
         "children": [
@@ -20329,7 +19781,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
-              "lineNumber": 50
+              "lineNumber": 49
             },
             "deprecated": false
           },
@@ -20342,7 +19794,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
-              "lineNumber": 51
+              "lineNumber": 50
             },
             "deprecated": false
           },
@@ -20360,7 +19812,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
-              "lineNumber": 52
+              "lineNumber": 51
             },
             "deprecated": false
           },
@@ -20376,7 +19828,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
-              "lineNumber": 53
+              "lineNumber": 52
             },
             "deprecated": false
           },
@@ -20392,7 +19844,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
-              "lineNumber": 54
+              "lineNumber": 53
             },
             "deprecated": false
           },
@@ -20408,7 +19860,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
-              "lineNumber": 55
+              "lineNumber": 54
             },
             "deprecated": false
           },
@@ -20424,7 +19876,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
-              "lineNumber": 56
+              "lineNumber": 55
             },
             "deprecated": false
           },
@@ -20440,7 +19892,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
-              "lineNumber": 57
+              "lineNumber": 56
             },
             "deprecated": false
           },
@@ -20456,7 +19908,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
-              "lineNumber": 58
+              "lineNumber": 57
             },
             "deprecated": false
           },
@@ -20472,7 +19924,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
-              "lineNumber": 60
+              "lineNumber": 59
             },
             "deprecated": false
           },
@@ -20488,7 +19940,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
-              "lineNumber": 61
+              "lineNumber": 60
             },
             "deprecated": false
           }
@@ -21045,7 +20497,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/aggs/buckets/bucket_agg_type.ts",
-          "lineNumber": 19
+          "lineNumber": 18
         },
         "deprecated": false,
         "children": [
@@ -21061,7 +20513,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/buckets/bucket_agg_type.ts",
-              "lineNumber": 21
+              "lineNumber": 20
             },
             "deprecated": false
           },
@@ -21092,7 +20544,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/buckets/bucket_agg_type.ts",
-              "lineNumber": 22
+              "lineNumber": 21
             },
             "deprecated": false
           }
@@ -21831,7 +21283,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/aggs/buckets/bucket_agg_type.ts",
-          "lineNumber": 15
+          "lineNumber": 14
         },
         "deprecated": false,
         "children": [
@@ -21862,7 +21314,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/buckets/bucket_agg_type.ts",
-              "lineNumber": 16
+              "lineNumber": 15
             },
             "deprecated": false
           }
@@ -22387,7 +21839,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/aggs/metrics/metric_agg_type.ts",
-          "lineNumber": 17
+          "lineNumber": 16
         },
         "deprecated": false,
         "children": [
@@ -22418,7 +21870,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/metrics/metric_agg_type.ts",
-              "lineNumber": 18
+              "lineNumber": 17
             },
             "deprecated": false
           }
@@ -23084,7 +22536,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/aggs/metrics/metric_agg_type.ts",
-          "lineNumber": 21
+          "lineNumber": 20
         },
         "deprecated": false,
         "children": [
@@ -23115,7 +22567,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/metrics/metric_agg_type.ts",
-              "lineNumber": 23
+              "lineNumber": 22
             },
             "deprecated": false
           },
@@ -23131,7 +22583,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/metrics/metric_agg_type.ts",
-              "lineNumber": 24
+              "lineNumber": 23
             },
             "deprecated": false
           }
@@ -24198,7 +23650,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/search_source/search_source.ts",
-          "lineNumber": 122
+          "lineNumber": 116
         },
         "deprecated": false,
         "children": [
@@ -24256,7 +23708,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 123
+              "lineNumber": 117
             },
             "deprecated": false,
             "returnComment": [],
@@ -25334,7 +24786,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-          "lineNumber": 45
+          "lineNumber": 43
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -25551,7 +25003,7 @@
         "label": "AggGroupName",
         "description": [],
         "signature": [
-          "\"none\" | \"buckets\" | \"metrics\""
+          "\"buckets\" | \"metrics\" | \"none\""
         ],
         "source": {
           "path": "src/plugins/data/common/search/aggs/agg_groups.ts",
@@ -26060,7 +25512,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-          "lineNumber": 58
+          "lineNumber": 49
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -27099,87 +26551,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-common.GenericBucket",
-        "type": "Type",
-        "tags": [],
-        "label": "GenericBucket",
-        "description": [],
-        "signature": [
-          "(",
-          "CompositeBucketKeys",
-          " & { [property: string]: ",
-          "Aggregate",
-          "; }) | ({ [property: string]: ",
-          "Aggregate",
-          "; } & { [property: string]: ",
-          "Aggregate",
-          "; }) | (",
-          "DateHistogramBucketKeys",
-          " & { [property: string]: ",
-          "Aggregate",
-          "; }) | ({ [property: string]: ",
-          "Aggregate",
-          "; } & { [property: string]: ",
-          "Aggregate",
-          "; }) | (",
-          "FiltersBucketItemKeys",
-          " & { [property: string]: ",
-          "Aggregate",
-          "; }) | ({ [property: string]: ",
-          "Aggregate",
-          "; } & { [property: string]: ",
-          "Aggregate",
-          "; }) | (",
-          "IpRangeBucketKeys",
-          " & { [property: string]: ",
-          "Aggregate",
-          "; }) | ({ [property: string]: ",
-          "Aggregate",
-          "; } & { [property: string]: ",
-          "Aggregate",
-          "; }) | (",
-          "RangeBucketKeys",
-          " & { [property: string]: ",
-          "Aggregate",
-          "; }) | ({ [property: string]: ",
-          "Aggregate",
-          "; } & { [property: string]: ",
-          "Aggregate",
-          "; }) | ({ [property: string]: ",
-          "Aggregate",
-          "; } & { [property: string]: ",
-          "Aggregate",
-          "; }) | (",
-          "RareTermsBucketKeys",
-          "<any> & { [property: string]: ",
-          "Aggregate",
-          "; }) | ({ [property: string]: ",
-          "Aggregate",
-          "; } & { [property: string]: ",
-          "Aggregate",
-          "; }) | (",
-          "SignificantTermsBucketKeys",
-          "<any> & { [property: string]: ",
-          "Aggregate",
-          "; }) | ({ [property: string]: ",
-          "Aggregate",
-          "; } & { [property: string]: ",
-          "Aggregate",
-          "; }) | (",
-          "KeyedBucketKeys",
-          "<any> & { [property: string]: ",
-          "Aggregate",
-          "; })"
-        ],
-        "source": {
-          "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-          "lineNumber": 60
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-common.IAggConfig",
         "type": "Type",
         "tags": [
@@ -27199,7 +26570,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-          "lineNumber": 55
+          "lineNumber": 53
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -27328,7 +26699,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/aggs/metrics/metric_agg_type.ts",
-          "lineNumber": 36
+          "lineNumber": 35
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -28028,7 +27399,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
-          "lineNumber": 31
+          "lineNumber": 30
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -31242,7 +30613,7 @@
                     "label": "types",
                     "description": [],
                     "signature": [
-                      "(\"number\" | \"string\")[]"
+                      "(\"string\" | \"number\")[]"
                     ],
                     "source": {
                       "path": "src/plugins/data/common/search/expressions/range.ts",
@@ -31286,7 +30657,7 @@
                     "label": "types",
                     "description": [],
                     "signature": [
-                      "(\"number\" | \"string\")[]"
+                      "(\"string\" | \"number\")[]"
                     ],
                     "source": {
                       "path": "src/plugins/data/common/search/expressions/range.ts",
@@ -31330,7 +30701,7 @@
                     "label": "types",
                     "description": [],
                     "signature": [
-                      "(\"number\" | \"string\")[]"
+                      "(\"string\" | \"number\")[]"
                     ],
                     "source": {
                       "path": "src/plugins/data/common/search/expressions/range.ts",
@@ -31374,7 +30745,7 @@
                     "label": "types",
                     "description": [],
                     "signature": [
-                      "(\"number\" | \"string\")[]"
+                      "(\"string\" | \"number\")[]"
                     ],
                     "source": {
                       "path": "src/plugins/data/common/search/expressions/range.ts",

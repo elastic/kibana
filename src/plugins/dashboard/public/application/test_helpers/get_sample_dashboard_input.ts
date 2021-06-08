@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { DashboardContainerInput } from '../..';
-import { DashboardPanelState } from '../embeddable';
 import { ViewMode, EmbeddableInput } from '../../services/embeddable';
+import { DashboardContainerInput, DashboardPanelState } from '../embeddable';
 
 export function getSampleDashboardInput(
   overrides?: Partial<DashboardContainerInput>

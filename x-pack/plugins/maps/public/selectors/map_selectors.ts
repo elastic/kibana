@@ -45,6 +45,7 @@ import {
   MapCenter,
   MapExtent,
   MapQuery,
+  MapRefreshConfig,
   TooltipState,
   VectorLayerDescriptor,
 } from '../../common/descriptor_types';
@@ -198,6 +199,18 @@ export const getDrawState = ({ map }: MapStoreState): DrawState | undefined =>
 
 export const isDrawingFilter = ({ map }: MapStoreState): boolean => {
   return !!map.mapState.drawState;
+};
+
+export const getRefreshConfig = ({ map }: MapStoreState): MapRefreshConfig => {
+  if (map.mapState.refreshConfig) {
+    return map.mapState.refreshConfig;
+  }
+
+  const refreshInterval = getTimeFilter().getRefreshInterval();
+  return {
+    isPaused: refreshInterval.pause,
+    interval: refreshInterval.value,
+  };
 };
 
 export const getRefreshTimerLastTriggeredAt = ({ map }: MapStoreState): string | undefined =>

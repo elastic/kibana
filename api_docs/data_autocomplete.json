@@ -370,7 +370,7 @@
         ],
         "source": {
           "path": "src/plugins/data/public/autocomplete/autocomplete_service.ts",
-          "lineNumber": 103
+          "lineNumber": 96
         },
         "deprecated": false,
         "initialIsOpen": false

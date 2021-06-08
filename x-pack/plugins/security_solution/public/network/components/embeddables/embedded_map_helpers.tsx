@@ -70,6 +70,7 @@ export const createEmbeddable = async (
     filters,
     hidePanelTitles: true,
     query,
+    refreshConfig: { value: 0, pause: true },
     timeRange: {
       from: new Date(startDate).toISOString(),
       to: new Date(endDate).toISOString(),

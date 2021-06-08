@@ -6,16 +6,80 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { mount } from 'enzyme';
-import { I18nProvider } from '@kbn/i18n/react';
+import {
+  IUiSettingsClient,
+  PluginInitializerContext,
+  ScopedHistory,
+  SimpleSavedObject,
+} from '../../../../../core/public';
 
-import { DashboardAppServices } from '../../types';
-import { SimpleSavedObject } from '../../../../../core/public';
+import { SavedObjectLoader, SavedObjectLoaderFindOptions } from '../../services/saved_objects';
+import { IndexPatternsContract, SavedQueryService } from '../../services/data';
+import { NavigationPublicPluginStart } from '../../services/navigation';
 import { KibanaContextProvider } from '../../services/kibana_react';
 import { createKbnUrlStateStorage } from '../../services/kibana_utils';
+
+import { savedObjectsPluginMock } from '../../../../saved_objects/public/mocks';
 import { DashboardListing, DashboardListingProps } from './dashboard_listing';
-import { makeDefaultServices } from '../test_helpers';
+import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
+import { visualizationsPluginMock } from '../../../../visualizations/public/mocks';
+import { DashboardAppServices, DashboardAppCapabilities } from '../types';
+import { dataPluginMock } from '../../../../data/public/mocks';
+import { chromeServiceMock, coreMock } from '../../../../../core/public/mocks';
+import { I18nProvider } from '@kbn/i18n/react';
+import React from 'react';
+import { UrlForwardingStart } from '../../../../url_forwarding/public';
+import { DashboardPanelStorage } from '../lib';
+
+function makeDefaultServices(): DashboardAppServices {
+  const core = coreMock.createStart();
+  const savedDashboards = {} as SavedObjectLoader;
+  savedDashboards.find = (search: string, sizeOrOptions: number | SavedObjectLoaderFindOptions) => {
+    const size = typeof sizeOrOptions === 'number' ? sizeOrOptions : sizeOrOptions.size ?? 10;
+    const hits = [];
+    for (let i = 0; i < size; i++) {
+      hits.push({
+        id: `dashboard${i}`,
+        title: `dashboard${i} - ${search} - title`,
+        description: `dashboard${i} desc`,
+      });
+    }
+    return Promise.resolve({
+      total: size,
+      hits,
+    });
+  };
+  const dashboardPanelStorage = ({
+    getDashboardIdsWithUnsavedChanges: jest
+      .fn()
+      .mockResolvedValue(['dashboardUnsavedOne', 'dashboardUnsavedTwo']),
+  } as unknown) as DashboardPanelStorage;
+
+  return {
+    savedObjects: savedObjectsPluginMock.createStartContract(),
+    embeddable: embeddablePluginMock.createInstance().doStart(),
+    dashboardCapabilities: {} as DashboardAppCapabilities,
+    initializerContext: {} as PluginInitializerContext,
+    chrome: chromeServiceMock.createStartContract(),
+    navigation: {} as NavigationPublicPluginStart,
+    savedObjectsClient: core.savedObjects.client,
+    data: dataPluginMock.createStartContract(),
+    indexPatterns: {} as IndexPatternsContract,
+    scopedHistory: () => ({} as ScopedHistory),
+    savedQueryService: {} as SavedQueryService,
+    setHeaderActionMenu: (mountPoint) => {},
+    urlForwarding: {} as UrlForwardingStart,
+    uiSettings: {} as IUiSettingsClient,
+    restorePreviousUrl: () => {},
+    onAppLeave: (handler) => {},
+    allowByValueEmbeddables: true,
+    dashboardPanelStorage,
+    savedDashboards,
+    core,
+    visualizations: visualizationsPluginMock.createStartContract(),
+  };
+}
 
 function makeDefaultProps(): DashboardListingProps {
   return {

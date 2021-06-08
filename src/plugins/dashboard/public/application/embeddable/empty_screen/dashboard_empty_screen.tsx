@@ -10,6 +10,7 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
   EuiIcon,
+  EuiLink,
   EuiSpacer,
   EuiPageContent,
   EuiPageBody,
@@ -23,6 +24,7 @@ import { emptyScreenStrings } from '../../../dashboard_strings';
 
 export interface DashboardEmptyScreenProps {
   isEditMode?: boolean;
+  onLinkClick: () => void;
   uiSettings: IUiSettingsClient;
   http: HttpStart;
   isReadonlyMode?: boolean;
@@ -30,6 +32,7 @@ export interface DashboardEmptyScreenProps {
 
 export function DashboardEmptyScreen({
   isEditMode,
+  onLinkClick,
   uiSettings,
   http,
   isReadonlyMode,
@@ -38,7 +41,33 @@ export function DashboardEmptyScreen({
   const emptyStateGraphicURL = IS_DARK_THEME
     ? '/plugins/home/assets/welcome_graphic_dark_2x.png'
     : '/plugins/home/assets/welcome_graphic_light_2x.png';
-
+  const paragraph = (
+    description1: string | null,
+    description2: string,
+    linkText: string,
+    ariaLabel: string,
+    dataTestSubj?: string
+  ) => {
+    return (
+      <EuiText size="m" color="subdued">
+        <p>
+          {description1}
+          {description1 && <span>&nbsp;</span>}
+          <EuiLink onClick={onLinkClick} aria-label={ariaLabel} data-test-subj={dataTestSubj || ''}>
+            {linkText}
+          </EuiLink>
+          <span>&nbsp;</span>
+          {description2}
+        </p>
+      </EuiText>
+    );
+  };
+  const enterEditModeParagraph = paragraph(
+    emptyScreenStrings.getHowToStartWorkingOnNewDashboardDescription1(),
+    emptyScreenStrings.getHowToStartWorkingOnNewDashboardDescription2(),
+    emptyScreenStrings.getHowToStartWorkingOnNewDashboardEditLinkText(),
+    emptyScreenStrings.getHowToStartWorkingOnNewDashboardEditLinkAriaLabel()
+  );
   const page = (mainText: string, showAdditionalParagraph?: boolean, additionalText?: string) => {
     return (
       <EuiPage
@@ -65,11 +94,7 @@ export function DashboardEmptyScreen({
             {showAdditionalParagraph ? (
               <React.Fragment>
                 <EuiSpacer size="m" />
-                <div className="dshStartScreen__panelDesc">
-                  <EuiText size="m" color="subdued">
-                    <p>{emptyScreenStrings.getHowToStartWorkingOnNewDashboardDescription()}</p>
-                  </EuiText>
-                </div>
+                <div className="dshStartScreen__panelDesc">{enterEditModeParagraph}</div>
               </React.Fragment>
             ) : null}
           </EuiPageContent>

@@ -1245,7 +1245,7 @@
                 "plugin": "securitySolution",
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 206
+                  "lineNumber": 194
                 }
               },
               {
@@ -2086,7 +2086,7 @@
               "plugin": "securitySolution",
               "link": {
                 "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 206
+                "lineNumber": 194
               }
             }
           ]

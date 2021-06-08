@@ -99,7 +99,7 @@ export default function ({ getPageObjects, getService }) {
       describe('save as', () => {
         it('should return to dashboard and add new panel', async () => {
           await PageObjects.maps.saveMap('Clone of map embeddable example');
-          await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.dashboard.waitForRenderComplete();
           const panelCount = await PageObjects.dashboard.getPanelCount();
           expect(panelCount).to.equal(3);
         });

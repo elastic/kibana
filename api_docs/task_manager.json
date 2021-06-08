@@ -364,7 +364,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/task_manager/server/task.ts",
-          "lineNumber": 302
+          "lineNumber": 297
         },
         "deprecated": false,
         "children": [
@@ -379,7 +379,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 307
+              "lineNumber": 302
             },
             "deprecated": false
           },
@@ -397,7 +397,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 312
+              "lineNumber": 307
             },
             "deprecated": false
           },
@@ -415,7 +415,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 318
+              "lineNumber": 313
             },
             "deprecated": false
           },
@@ -430,7 +430,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 324
+              "lineNumber": 319
             },
             "deprecated": false
           },
@@ -454,7 +454,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 329
+              "lineNumber": 324
             },
             "deprecated": false
           },
@@ -472,7 +472,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 335
+              "lineNumber": 330
             },
             "deprecated": false
           },
@@ -490,7 +490,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 342
+              "lineNumber": 337
             },
             "deprecated": false
           },
@@ -508,7 +508,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 348
+              "lineNumber": 343
             },
             "deprecated": false
           },
@@ -526,7 +526,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 358
+              "lineNumber": 353
             },
             "deprecated": false
           },
@@ -544,7 +544,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 363
+              "lineNumber": 358
             },
             "deprecated": false
           }
@@ -768,24 +768,6 @@
           },
           {
             "parentPluginId": "taskManager",
-            "id": "def-server.TaskInstance.traceparent",
-            "type": "string",
-            "tags": [],
-            "label": "traceparent",
-            "description": [
-              "\nThe serialized traceparent string of the current APM transaction or span."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 263
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "taskManager",
             "id": "def-server.TaskInstance.user",
             "type": "string",
             "tags": [],
@@ -798,7 +780,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 268
+              "lineNumber": 263
             },
             "deprecated": false
           },
@@ -816,7 +798,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 274
+              "lineNumber": 269
             },
             "deprecated": false
           },
@@ -834,7 +816,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 279
+              "lineNumber": 274
             },
             "deprecated": false
           }

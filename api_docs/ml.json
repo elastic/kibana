@@ -868,7 +868,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/common/types/capabilities.ts",
-          "lineNumber": 161
+          "lineNumber": 153
         },
         "deprecated": false,
         "children": [
@@ -884,7 +884,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/capabilities.ts",
-              "lineNumber": 162
+              "lineNumber": 154
             },
             "deprecated": false
           },
@@ -897,7 +897,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/capabilities.ts",
-              "lineNumber": 163
+              "lineNumber": 155
             },
             "deprecated": false
           },
@@ -910,7 +910,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/capabilities.ts",
-              "lineNumber": 164
+              "lineNumber": 156
             },
             "deprecated": false
           },
@@ -923,7 +923,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/capabilities.ts",
-              "lineNumber": 165
+              "lineNumber": 157
             },
             "deprecated": false
           }
@@ -1563,7 +1563,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/ml/public/plugin.ts",
-        "lineNumber": 212
+        "lineNumber": 213
       },
       "deprecated": false,
       "lifecycle": "start",

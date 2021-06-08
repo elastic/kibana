@@ -18,7 +18,7 @@ import { BaseVisType, VisGroups, VisTypeAlias } from '../../../../visualizations
 import { SolutionToolbarPopover } from '../../../../presentation_util/public';
 import { EmbeddableFactoryDefinition, EmbeddableInput } from '../../services/embeddable';
 import { useKibana } from '../../services/kibana_react';
-import { DashboardAppServices } from '../../types';
+import { DashboardAppServices } from '../types';
 import { DashboardContainer } from '..';
 import { DashboardConstants } from '../../dashboard_constants';
 import { dashboardReplacePanelAction } from '../../dashboard_strings';

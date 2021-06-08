@@ -110,12 +110,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Exit out of edit mode', async () => {
-      await PageObjects.dashboard.clickCancelOutOfEditMode(false);
+      await PageObjects.dashboard.clickDiscardChanges(false);
       await a11y.testAppSnapshot();
     });
 
     it('Discard changes', async () => {
-      await PageObjects.common.clickConfirmOnModal();
+      await testSubjects.exists('dashboardDiscardConfirmDiscard');
+      await testSubjects.click('dashboardDiscardConfirmDiscard');
       await PageObjects.dashboard.getIsInViewMode();
       await a11y.testAppSnapshot();
     });

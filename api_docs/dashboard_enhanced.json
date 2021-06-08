@@ -684,8 +684,6 @@
               },
               ") => void; } & { urlGenerators: ",
               "UrlGeneratorsSetup",
-              "; url: ",
-              "UrlService",
               "; }"
             ],
             "source": {
@@ -794,8 +792,6 @@
               },
               ") => void; } & { urlGenerators: ",
               "UrlGeneratorsStart",
-              "; url: ",
-              "UrlService",
               "; }"
             ],
             "source": {

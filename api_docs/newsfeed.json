@@ -228,7 +228,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/newsfeed/public/lib/api.ts",
-          "lineNumber": 16
+          "lineNumber": 25
         },
         "deprecated": false,
         "initialIsOpen": false

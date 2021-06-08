@@ -12,6 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
+  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
@@ -47,6 +48,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Add a retry to fix https://github.com/elastic/kibana/issues/14574.  Perhaps the recent changes to this
       // being a CSS update is causing the UI to change slower than grabbing the panels?
+      await retry.try(async () => {
+        const panelCountAfterMaxThenMinimize = await PageObjects.dashboard.getPanelCount();
+        expect(panelCountAfterMaxThenMinimize).to.be(panelCount);
+      });
+    });
+
+    it('minimizes using the browser back button', async () => {
+      const panelCount = await PageObjects.dashboard.getPanelCount();
+
+      await dashboardPanelActions.openContextMenu();
+      await dashboardPanelActions.clickExpandPanelToggle();
+
+      await browser.goBack();
       await retry.try(async () => {
         const panelCountAfterMaxThenMinimize = await PageObjects.dashboard.getPanelCount();
         expect(panelCountAfterMaxThenMinimize).to.be(panelCount);
