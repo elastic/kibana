@@ -28,11 +28,12 @@ import {
 } from '../../../../data/common';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
-import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
+import { SavedSearchEmbeddableComponentMemoized } from './saved_search_embeddable_component';
 import { UiActionsStart } from '../../../../ui_actions/public';
 import { getServices } from '../../kibana_services';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
+  DOC_TABLE_LEGACY,
   SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
@@ -284,7 +285,7 @@ export class SavedSearchEmbeddable
       useNewFieldsApi: !this.services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false),
       showTimeCol: !this.services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
       ariaLabelledBy: 'documentsAriaLabel',
-      useLegacyTable: this.services.uiSettings.get('doc_table:legacy'),
+      useLegacyTable: this.services.uiSettings.get(DOC_TABLE_LEGACY),
     };
 
     const timeRangeSearchSource = searchSource.create();
@@ -354,7 +355,7 @@ export class SavedSearchEmbeddable
       }
     } else if (this.searchProps && this.node) {
       this.searchProps = searchProps;
-      ReactDOM.render(<SavedSearchEmbeddableComponent {...this.searchProps} />, this.node);
+      ReactDOM.render(<SavedSearchEmbeddableComponentMemoized {...this.searchProps} />, this.node);
     }
   }
 
@@ -378,7 +379,7 @@ export class SavedSearchEmbeddable
     }
     this.searchProps.refs = domNode;
     await this.pushContainerStateParamsToProps(this.searchProps);
-    ReactDOM.render(<SavedSearchEmbeddableComponent {...this.searchProps} />, domNode);
+    ReactDOM.render(<SavedSearchEmbeddableComponentMemoized {...this.searchProps} />, domNode);
   }
 
   public reload() {

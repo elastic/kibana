@@ -25,3 +25,5 @@ export function SavedSearchEmbeddableComponent(props: SearchProps) {
   const discoverGridProps = props as DiscoverGridProps;
   return <DiscoverGridEmbeddable {...discoverGridProps} className="dscDiscoverGrid" />;
 }
+
+export const SavedSearchEmbeddableComponentMemoized = React.memo(SavedSearchEmbeddableComponent);
