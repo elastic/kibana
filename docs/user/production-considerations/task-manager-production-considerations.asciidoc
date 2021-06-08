@@ -129,7 +129,7 @@ As demonstrated in <<task-manager-health-evaluate-the-capacity-estimation, Evalu
 
 These estimates are based on historical data and should not be used as predictions, but can be used as a rough guide when scaling the system.
 
-We recommend provisioning enough {kib} instances to ensure a buffer between the observed maximum throughput (as estimated under `observed.max_throughput_per_minute`) and the average required throughput (as estimated under `observed.avg_required_throughput_per_minute`), otherwise there might be insufficient capacity to handle spikes of ad-hoc tasks. How much of a buffer is needed largely depends on your use case, but keep in mind that estimated throughput takes into account recent spikes and, as long as they are representative of your system's behaviour, shouldn't require much of a buffer.
+We recommend provisioning enough {kib} instances to ensure a buffer between the observed maximum throughput (as estimated under `observed.max_throughput_per_minute`) and the average required throughput (as estimated under `observed.avg_required_throughput_per_minute`). Otherwise there might be insufficient capacity to handle spikes of ad-hoc tasks. How much of a buffer is needed largely depends on your use case, but keep in mind that estimated throughput takes into account recent spikes and, as long as they are representative of your system's behaviour, shouldn't require much of a buffer.
 
 We recommend provisioning at least as many {kib} instances as proposed by `proposed.proposed_kibana`, but keep in mind that this number is based on the estimated required throughput, which is based on average historical performance, and cannot accurately predict future requirements.
 
