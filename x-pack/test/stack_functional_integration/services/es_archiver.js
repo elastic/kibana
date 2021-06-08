@@ -22,10 +22,6 @@ export function EsArchiverProvider({ getService }) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
 
-  if (!config.get('esArchiver')) {
-    throw new Error(`esArchiver can't be used unless you specify it's config in your config file`);
-  }
-
   const esArchiver = new EsArchiver({
     baseDir: INTEGRATION_TEST_ROOT,
     client,
