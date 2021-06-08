@@ -32,12 +32,12 @@ import {
   AgentEnrollmentFlyout,
   AgentPolicySummaryLine,
   LinkedAgentCount,
+  PackagePolicyActionsMenu,
 } from '../../../../../components';
 
 import type { PackagePolicyAndAgentPolicy } from './use_package_policies_with_agent_policy';
 import { usePackagePoliciesWithAgentPolicy } from './use_package_policies_with_agent_policy';
 import { Persona } from './persona';
-import { PackagePoliciesActionMenu } from './actions_menu';
 
 const AddAgentButton = styled(EuiButtonIcon)`
   margin-left: ${(props) => props.theme.eui.euiSizeS};
@@ -186,7 +186,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         align: 'right',
         render({ agentPolicy, packagePolicy }) {
           return (
-            <PackagePoliciesActionMenu agentPolicy={agentPolicy} packagePolicy={packagePolicy} />
+            <PackagePolicyActionsMenu agentPolicy={agentPolicy} packagePolicy={packagePolicy} />
           );
         },
       },
