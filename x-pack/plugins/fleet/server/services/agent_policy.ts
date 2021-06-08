@@ -760,17 +760,19 @@ class AgentPolicyService {
 
     // TODO fetch this from the elastic agent package
     const monitoringOutput = fullAgentPolicy.agent?.monitoring.use_output;
+    const monitoringNamespace = fullAgentPolicy.agent?.monitoring.namespace;
     if (
       fullAgentPolicy.agent?.monitoring.enabled &&
+      monitoringNamespace &&
       monitoringOutput &&
       fullAgentPolicy.outputs[monitoringOutput]?.type === 'elasticsearch'
     ) {
       const names: string[] = [];
       if (fullAgentPolicy.agent.monitoring.logs) {
-        names.push('logs-*');
+        names.push(`logs-elastic_agent.*-${monitoringNamespace}`);
       }
       if (fullAgentPolicy.agent.monitoring.metrics) {
-        names.push('metrics-*');
+        names.push(`metrics-elastic_agent.*-${monitoringNamespace}`);
       }
 
       permissions._elastic_agent_checks.indices = [
