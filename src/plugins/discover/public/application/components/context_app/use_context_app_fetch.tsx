@@ -72,14 +72,14 @@ export function useContextAppFetch({
   const fetchAnchorRow = useCallback(async () => {
     const { sort } = appState;
     const [[, sortDir]] = sort;
-    const anchorError = i18n.translate('discover.context.unableToLoadAnchorDocumentDescription', {
+    const errorTitle = i18n.translate('discover.context.unableToLoadAnchorDocumentDescription', {
       defaultMessage: 'Unable to load the anchor document',
     });
 
     if (!tieBreakerField) {
       setState(createError('anchorStatus', FailureReason.INVALID_TIEBREAKER));
       toastNotifications.addDanger({
-        title: anchorError,
+        title: errorTitle,
         text: toMountPoint(
           <MarkdownSimple>
             {i18n.translate('discover.context.invalidTieBreakerFiledSetting', {
@@ -100,11 +100,11 @@ export function useContextAppFetch({
       setState({ anchor, anchorStatus: { value: LoadingStatus.LOADED } });
       return anchor;
     } catch (error) {
+      setState(createError('anchorStatus', FailureReason.UNKNOWN, error));
       toastNotifications.addDanger({
-        title: anchorError,
+        title: errorTitle,
         text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>),
       });
-      setState(createError('anchorStatus', FailureReason.UNKNOWN, error));
     }
   }, [
     appState,
@@ -125,6 +125,24 @@ export function useContextAppFetch({
       const count = type === 'predecessors' ? appState.predecessorCount : appState.successorCount;
       const anchor = fetchedAnchor || fetchedState.anchor;
       const statusKey = `${type}Status`;
+      const errorTitle = i18n.translate('discover.context.unableToLoadDocumentDescription', {
+        defaultMessage: 'Unable to load documents',
+      });
+
+      if (!tieBreakerField) {
+        setState(createError(statusKey, FailureReason.INVALID_TIEBREAKER));
+        toastNotifications.addDanger({
+          title: errorTitle,
+          text: toMountPoint(
+            <MarkdownSimple>
+              {i18n.translate('discover.context.invalidTieBreakerFiledSetting', {
+                defaultMessage: 'Invalid tie breaker field setting',
+              })}
+            </MarkdownSimple>
+          ),
+        });
+        return;
+      }
 
       try {
         setState({ [statusKey]: { value: LoadingStatus.LOADING } });
@@ -140,13 +158,11 @@ export function useContextAppFetch({
         );
         setState({ [type]: rows, [statusKey]: { value: LoadingStatus.LOADED } });
       } catch (error) {
+        setState(createError(statusKey, FailureReason.UNKNOWN, error));
         toastNotifications.addDanger({
-          title: i18n.translate('discover.context.unableToLoadDocumentDescription', {
-            defaultMessage: 'Unable to load documents',
-          }),
+          title: errorTitle,
           text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>),
         });
-        setState(createError(statusKey, FailureReason.UNKNOWN, error));
       }
     },
     [
