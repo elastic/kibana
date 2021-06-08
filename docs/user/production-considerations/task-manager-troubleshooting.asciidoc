@@ -827,9 +827,9 @@ Suppose the output of `stats.workload.value` looked something like this:
 <1> There are 2,191 tasks in the system.
 <2> The scheduled tasks are distributed across a variety of cadences.
 <3> The schedule density shows that you expect to exceed the default 10 concurrent tasks.
-<4> There are 329 task executions that recur  within the space of every minute
-<5> There are 4,273 task executions that recur within the space of every hour
-<6> There are 61 task executions that recur within the space of every day
+<4> There are 329 task executions that recur  within the space of every minute.
+<5> There are 4,273 task executions that recur within the space of every hour.
+<6> There are 61 task executions that recur within the space of every day.
 
 You can infer several important attributes of your workload from this output:
 
@@ -877,13 +877,13 @@ Evaluating the health stats above you can see the following output under `stats.
   }
 }
 --------------------------------------------------
-<1> These estimates assume that there is one {kib} instance actively executing tasks
-<2> Based on past throughput the overdue tasks in the system could be executed within 1 minute
-<3> Assuming all {kib} instances in the cluster are configured the same as this instance, the maximum available throughput is 200 tasks per minute
-<4> On average the recurring tasks in the system have historically required a throughput of 28 tasks per minute
-<5> On average, regardless of whether they are recurring or otherwise, the tasks in the system have historically required a throughput of 28 tasks per minute
-<6> One {kib} instance should be sufficient to run the current recurring workload
-<7> We propose waiting for the workload to change before additional {kib} instances are provisioned
+<1> These estimates assume that there is one {kib} instance actively executing tasks.
+<2> Based on past throughput the overdue tasks in the system could be executed within 1 minute.
+<3> Assuming all {kib} instances in the cluster are configured the same as this instance, the maximum available throughput is 200 tasks per minute.
+<4> On average the recurring tasks in the system have historically required a throughput of 28 tasks per minute.
+<5> On average, regardless of whether they are recurring or otherwise, the tasks in the system have historically required a throughput of 28 tasks per minute.
+<6> One {kib} instance should be sufficient to run the current recurring workload.
+<7> We propose waiting for the workload to change before additional {kib} instances are provisioned.
 
 The `capacity_estimation` section is made up of two subsections:
 
@@ -915,16 +915,16 @@ Suppose an alternate scenario, where you see the following output under `stats.c
   }
 }
 --------------------------------------------------
-<1> These estimates assume that there are two {kib} instance actively executing tasks
-<2> The maximum available throughput in the system currently is 400 tasks per minute
-<3> Based on past throughput the overdue tasks in the system should be executed within 12 minute
-<4> On average the recurring tasks in the system have historically required a throughput of 354 tasks per minute
-<5> On average each {kib} instance utilizes 177 tasks per minute of its capacity to execute recurring tasks
-<6> On average the tasks in the system have historically required a throughput of 434 tasks per minute
-<7> The system estimates that at least two {kib} instances are required to run the current recurring workload
-<8> The system recommends provisioning three {kib} instances to handle the workload
-<9> Once a third {kib} instance is provisioned, the capacity utilized by each instance to execute recurring tasks should drop from 177 to 118 tasks per minute
-<10> Taking into account historical ad-hoc task execution, we estimate the throughput required of each {kib} instance will drop from 217 task per minute to 145, once a third {kib} instance is provisioned
+<1> These estimates assume that there are two {kib} instance actively executing tasks.
+<2> The maximum available throughput in the system currently is 400 tasks per minute.
+<3> Based on past throughput the overdue tasks in the system should be executed within 12 minute.
+<4> On average the recurring tasks in the system have historically required a throughput of 354 tasks per minute.
+<5> On average each {kib} instance utilizes 177 tasks per minute of its capacity to execute recurring tasks.
+<6> On average the tasks in the system have historically required a throughput of 434 tasks per minute.
+<7> The system estimates that at least two {kib} instances are required to run the current recurring workload.
+<8> The system recommends provisioning three {kib} instances to handle the workload.
+<9> Once a third {kib} instance is provisioned, the capacity utilized by each instance to execute recurring tasks should drop from 177 to 118 tasks per minute.
+<10> Taking into account historical ad-hoc task execution, we estimate the throughput required of each {kib} instance will drop from 217 task per minute to 145, once a third {kib} instance is provisioned.
 
 Evaluating by these estimates, we can infer some interesting attributes of our system:
 
