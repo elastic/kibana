@@ -153,19 +153,17 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           />
         )}
       </StyledEuiFlyoutBody>
-      {isIsolationAllowed &&
-        isEndpointAlert &&
-        isHostIsolationPanelOpen === false && (
-          <EuiFlyoutFooter>
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <TakeActionDropdown onChange={showHostIsolationPanel} agentId={agentId} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="l" />
-            <EuiSpacer size="l" />
-          </EuiFlyoutFooter>
-        )}
+      {isIsolationAllowed && isEndpointAlert && isHostIsolationPanelOpen === false && (
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <TakeActionDropdown onChange={showHostIsolationPanel} agentId={agentId} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="l" />
+          <EuiSpacer size="l" />
+        </EuiFlyoutFooter>
+      )}
     </>
   ) : (
     <>
