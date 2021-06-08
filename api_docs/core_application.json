@@ -1609,6 +1609,13 @@
               {
                 "plugin": "fleet",
                 "link": {
+                  "path": "x-pack/plugins/fleet/public/applications/integrations/index.tsx",
+                  "lineNumber": 67
+                }
+              },
+              {
+                "plugin": "fleet",
+                "link": {
                   "path": "x-pack/plugins/fleet/public/applications/fleet/index.tsx",
                   "lineNumber": 67
                 }
@@ -1661,6 +1668,13 @@
                   "path": "x-pack/plugins/fleet/target/types/public/applications/fleet/index.d.ts",
                   "lineNumber": 11
                 }
+              },
+              {
+                "plugin": "fleet",
+                "link": {
+                  "path": "x-pack/plugins/fleet/target/types/public/applications/integrations/index.d.ts",
+                  "lineNumber": 11
+                }
               }
             ]
           },
@@ -1695,22 +1709,22 @@
               {
                 "plugin": "dashboard",
                 "link": {
-                  "path": "src/plugins/dashboard/public/application/types.ts",
-                  "lineNumber": 82
+                  "path": "src/plugins/dashboard/public/types.ts",
+                  "lineNumber": 194
                 }
               },
               {
                 "plugin": "dashboard",
                 "link": {
                   "path": "src/plugins/dashboard/public/application/dashboard_router.tsx",
-                  "lineNumber": 56
+                  "lineNumber": 57
                 }
               },
               {
                 "plugin": "dashboard",
                 "link": {
                   "path": "src/plugins/dashboard/public/plugin.tsx",
-                  "lineNumber": 298
+                  "lineNumber": 299
                 }
               },
               {
@@ -1724,7 +1738,7 @@
                 "plugin": "maps",
                 "link": {
                   "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx",
-                  "lineNumber": 59
+                  "lineNumber": 67
                 }
               },
               {
@@ -1738,14 +1752,21 @@
                 "plugin": "lens",
                 "link": {
                   "path": "x-pack/plugins/lens/public/app_plugin/types.ts",
-                  "lineNumber": 71
+                  "lineNumber": 44
+                }
+              },
+              {
+                "plugin": "lens",
+                "link": {
+                  "path": "x-pack/plugins/lens/public/app_plugin/types.ts",
+                  "lineNumber": 72
                 }
               },
               {
                 "plugin": "lens",
                 "link": {
                   "path": "x-pack/plugins/lens/public/app_plugin/mounter.tsx",
-                  "lineNumber": 171
+                  "lineNumber": 219
                 }
               },
               {
@@ -1822,7 +1843,7 @@
                 "plugin": "maps",
                 "link": {
                   "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts",
-                  "lineNumber": 13
+                  "lineNumber": 17
                 }
               }
             ],
