@@ -1708,8 +1708,6 @@
     "discover.howToChangeTheTimeTooltip": "要更改时间，请使用全局时间筛选。",
     "discover.howToSeeOtherMatchingDocumentsDescription": "下面是与您的搜索匹配的前 {sampleSize} 个文档，请优化您的搜索以查看其他文档。",
     "discover.howToSeeOtherMatchingDocumentsDescriptionGrid": "下面是与您的搜索匹配的前 {sampleSize} 个文档，请优化您的搜索以查看其他文档。",
-    "discover.inspectorRequestDataTitle": "数据",
-    "discover.inspectorRequestDescription": "此请求将查询 Elasticsearch 以获取搜索的数据。",
     "discover.json.codeEditorAriaLabel": "Elasticsearch 文档的只读 JSON 视图",
     "discover.json.copyToClipboardLabel": "复制到剪贴板",
     "discover.localMenu.inspectTitle": "检查",

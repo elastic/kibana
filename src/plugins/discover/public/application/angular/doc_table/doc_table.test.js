@@ -18,7 +18,7 @@ import { coreMock } from '../../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../../data/public/mocks';
 import { navigationPluginMock } from '../../../../../navigation/public/mocks';
 import { setScopedHistory, setServices } from '../../../kibana_services';
-import { getInnerAngularModule } from '../../../get_inner_angular';
+import { getInnerAngularModule } from '../get_inner_angular';
 
 let $parentScope;
 
