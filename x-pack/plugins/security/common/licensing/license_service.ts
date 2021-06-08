@@ -16,7 +16,7 @@ export interface SecurityLicense {
   isEnabled(): boolean;
   getType(): LicenseType | undefined;
   getFeatures(): SecurityLicenseFeatures;
-  readonly features$: Observable<SecurityLicenseFeatures>;
+  features$: Observable<SecurityLicenseFeatures>;
 }
 
 interface SetupDeps {
