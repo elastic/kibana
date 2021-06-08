@@ -23,9 +23,8 @@ import { usageCollectionPluginMock } from '../../usage_collection/public/mocks';
 
 import { registerTestBed } from './test_utils';
 
-import { FieldEditorFlyoutContentContainer } from './components/field_editor_flyout_content_container';
-import { IndexPatternFieldEditorPlugin } from './plugin';
-import { DeleteFieldModal } from './components/delete_field_modal';
+import { IndexPatternFlyoutContentContainer } from './components/index_pattern_flyout_content_container';
+import { IndexPatternEditorPlugin } from './plugin';
 import { IndexPattern } from './shared_imports';
 
 const noop = () => {};
@@ -37,10 +36,10 @@ describe('IndexPatternFieldEditorPlugin', () => {
     usageCollection: usageCollectionPluginMock.createSetupContract(),
   };
 
-  let plugin: IndexPatternFieldEditorPlugin;
+  let plugin: IndexPatternEditorPlugin;
 
   beforeEach(() => {
-    plugin = new IndexPatternFieldEditorPlugin();
+    plugin = new IndexPatternEditorPlugin();
   });
 
   test('should expose a handler to open the indexpattern field editor', async () => {

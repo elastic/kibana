@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { FieldEditor } from './field_editor';
+export { AdvancedParametersSection } from './advanced_parameters_section';
+export { FormRow } from './form_row';

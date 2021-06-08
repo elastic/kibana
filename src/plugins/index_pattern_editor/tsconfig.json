@@ -16,6 +16,5 @@
     { "path": "../kibana_react/tsconfig.json" },
     { "path": "../kibana_utils/tsconfig.json" },
     { "path": "../es_ui_shared/tsconfig.json" },
-    { "path": "../index_pattern_management/tsconfig.json" },
   ]
 }

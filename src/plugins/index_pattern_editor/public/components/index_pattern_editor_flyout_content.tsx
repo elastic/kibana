@@ -20,7 +20,6 @@ import {
 } from '@elastic/eui';
 
 import { DocLinksStart, CoreStart } from 'src/core/public';
-import { getIndexPatterns } from './utils';
 
 import { ensureMinimumTime, getIndices, extractTimeFields, getMatchedIndices } from '../lib';
 import { AdvancedParametersSection } from './field_editor/advanced_parameters_section';
@@ -82,8 +81,6 @@ export interface TimestampOption {
 export interface FormInternal extends Omit<IndexPatternConfig, 'timestampField'> {
   timestampField?: TimestampOption;
 }
-
-const count = 0;
 
 const geti18nTexts = () => {
   return {

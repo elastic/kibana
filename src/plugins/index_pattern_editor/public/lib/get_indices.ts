@@ -10,7 +10,7 @@ import { sortBy } from 'lodash';
 import { HttpStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 // todo move into this plugin, consider removing all ipm references
-import { IndexPatternCreationConfig } from '../../../index_pattern_management/public';
+// import { IndexPatternCreationConfig } from '../../../index_pattern_management/public';
 import { MatchedItem, ResolveIndexResponse, ResolveIndexResponseItemIndexAttrs } from '../types';
 
 const aliasLabel = i18n.translate('indexPatternManagement.aliasLabel', { defaultMessage: 'Alias' });
@@ -28,7 +28,8 @@ const frozenLabel = i18n.translate('indexPatternManagement.frozenLabel', {
 
 export async function getIndices(
   http: HttpStart,
-  getIndexTags: IndexPatternCreationConfig['getIndexTags'],
+  // todo
+  getIndexTags: () => [], // IndexPatternCreationConfig['getIndexTags'],
   rawPattern: string,
   showAllIndices: boolean
 ): Promise<MatchedItem[]> {
@@ -71,7 +72,8 @@ export async function getIndices(
 
 export const responseToItemArray = (
   response: ResolveIndexResponse,
-  getIndexTags: IndexPatternCreationConfig['getIndexTags']
+  // todo
+  getIndexTags: (a: string) => [] // IndexPatternCreationConfig['getIndexTags']
 ): MatchedItem[] => {
   const source: MatchedItem[] = [];
 

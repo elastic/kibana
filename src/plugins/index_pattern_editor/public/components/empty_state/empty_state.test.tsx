@@ -12,8 +12,7 @@ import { shallow } from 'enzyme';
 import sinon from 'sinon';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test/jest';
-import { docLinksServiceMock } from '../../../../../../core/public/mocks';
-import { MlCardState } from '../../../types';
+import { docLinksServiceMock } from '../../../../../core/public/mocks';
 
 const docLinks = docLinksServiceMock.createStartContract();
 
@@ -30,8 +29,9 @@ describe('EmptyState', () => {
         docLinks={docLinks}
         onRefresh={() => {}}
         navigateToApp={async () => {}}
-        getMlCardState={() => MlCardState.ENABLED}
         canSave={true}
+        createAnyway={() => {}}
+        closeFlyout={() => {}}
       />
     );
 
@@ -48,8 +48,9 @@ describe('EmptyState', () => {
             docLinks={docLinks}
             onRefresh={onRefreshHandler}
             navigateToApp={async () => {}}
-            getMlCardState={() => MlCardState.ENABLED}
             canSave={true}
+            createAnyway={() => {}}
+            closeFlyout={() => {}}
           />
         );
 

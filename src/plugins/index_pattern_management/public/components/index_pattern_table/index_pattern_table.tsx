@@ -25,11 +25,9 @@ import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate, useKibana } from '../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../types';
-import { IndexPatternTableItem, IndexPatternCreationOption } from '../types';
+import { IndexPatternTableItem } from '../types';
 import { getIndexPatterns } from '../utils';
 import { getListBreadcrumbs } from '../breadcrumbs';
-import { MatchedItem, ResolveIndexResponseItemAlias } from '../create_index_pattern_wizard/types';
-import { getIndices } from '../create_index_pattern_wizard/lib';
 
 const pagination = {
   initialPageSize: 10,
@@ -64,64 +62,30 @@ interface Props extends RouteComponentProps {
   canSave: boolean;
 }
 
-export const IndexPatternTable = ({ canSave, history }: Props) => {
+export const IndexPatternTable = ({ history }: Props) => {
   const {
     setBreadcrumbs,
     uiSettings,
     indexPatternManagementStart,
     chrome,
-    docLinks,
-    application,
-    http,
     data,
-    getMlCardState,
     indexPatternEditor,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
-  const [creationOptions, setCreationOptions] = useState<IndexPatternCreationOption[]>([]);
-  const [sources, setSources] = useState<MatchedItem[]>([]);
-  const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
-  const [isLoadingSources, setIsLoadingSources] = useState<boolean>(true);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
 
   setBreadcrumbs(getListBreadcrumbs());
   useEffect(() => {
     (async function () {
-      const options = await indexPatternManagementStart.creation.getIndexPatternCreationOptions(
-        history.push
-      );
       const gettedIndexPatterns: IndexPatternTableItem[] = await getIndexPatterns(
         uiSettings.get('defaultIndex'),
         indexPatternManagementStart,
         data.indexPatterns
       );
       setIsLoadingIndexPatterns(false);
-      setCreationOptions(options);
       setIndexPatterns(gettedIndexPatterns);
     })();
   }, [history.push, indexPatterns.length, indexPatternManagementStart, uiSettings, data]);
-
-  const removeAliases = (item: MatchedItem) =>
-    !((item as unknown) as ResolveIndexResponseItemAlias).indices;
-
-  const loadSources = () => {
-    getIndices(http, () => [], '*', false).then((dataSources) =>
-      setSources(dataSources.filter(removeAliases))
-    );
-    getIndices(http, () => [], '*:*', false).then((dataSources) =>
-      setRemoteClustersExist(!!dataSources.filter(removeAliases).length)
-    );
-  };
-
-  useEffect(() => {
-    getIndices(http, () => [], '*', false).then((dataSources) => {
-      setSources(dataSources.filter(removeAliases));
-      setIsLoadingSources(false);
-    });
-    getIndices(http, () => [], '*:*', false).then((dataSources) =>
-      setRemoteClustersExist(!!dataSources.filter(removeAliases).length)
-    );
-  }, [http, creationOptions]);
 
   chrome.docTitle.change(title);
 
@@ -196,7 +160,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     </EuiButton>
   );
 
-  if (isLoadingSources || isLoadingIndexPatterns) {
+  if (isLoadingIndexPatterns) {
     return <></>;
   }
 
