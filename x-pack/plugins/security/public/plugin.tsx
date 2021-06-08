@@ -172,7 +172,7 @@ export interface SecurityPluginSetup {
   /**
    * Exposes license information, like the type of license and whether it is expired.
    */
-  license: Readonly<SecurityLicense>;
+  license: SecurityLicense;
 }
 
 export interface SecurityPluginStart {
