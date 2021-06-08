@@ -7769,6 +7769,81 @@
         }
       }
     },
+    "event_loop_delays": {
+      "properties": {
+        "daily": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "processId": {
+                "type": "long",
+                "_meta": {
+                  "description": "The process id of the monitored kibana instance."
+                }
+              },
+              "min": {
+                "type": "long",
+                "_meta": {
+                  "description": "The minimum recorded event loop delay."
+                }
+              },
+              "max": {
+                "type": "long",
+                "_meta": {
+                  "description": "The maximum recorded event loop delay."
+                }
+              },
+              "mean": {
+                "type": "long",
+                "_meta": {
+                  "description": "The mean of the recorded event loop delays."
+                }
+              },
+              "exceeds": {
+                "type": "long",
+                "_meta": {
+                  "description": "The number of times the event loop delay exceeded the maximum 1 hour eventloop delay threshold."
+                }
+              },
+              "stddev": {
+                "type": "long",
+                "_meta": {
+                  "description": "The standard deviation of the recorded event loop delays."
+                }
+              },
+              "percentiles": {
+                "properties": {
+                  "50": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "The 50th accumulated percentile distribution"
+                    }
+                  },
+                  "75": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "The 75th accumulated percentile distribution"
+                    }
+                  },
+                  "95": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "The 95th accumulated percentile distribution"
+                    }
+                  },
+                  "99": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "The 99th accumulated percentile distribution"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "localization": {
       "properties": {
         "locale": {
