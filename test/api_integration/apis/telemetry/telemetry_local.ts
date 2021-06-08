@@ -189,8 +189,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('UI Counters telemetry', () => {
-      before('Add UI Counters saved objects', () => esArchiver.load('saved_objects/ui_counters'));
-      after('cleanup saved objects changes', () => esArchiver.unload('saved_objects/ui_counters'));
+      before('Add UI Counters saved objects', () =>
+        esArchiver.load('test/api_integration/fixtures/es_archiver/saved_objects/ui_counters')
+      );
+      after('cleanup saved objects changes', () =>
+        esArchiver.unload('test/api_integration/fixtures/es_archiver/saved_objects/ui_counters')
+      );
       it('returns ui counters aggregated by day', async () => {
         const stats = await retrieveTelemetry(supertest);
         expect(stats.stack_stats.kibana.plugins.ui_counters).to.eql(basicUiCounters);
@@ -199,10 +203,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('Usage Counters telemetry', () => {
       before('Add UI Counters saved objects', () =>
-        esArchiver.load('saved_objects/usage_counters')
+        esArchiver.load('test/api_integration/fixtures/es_archiver/saved_objects/usage_counters')
       );
       after('cleanup saved objects changes', () =>
-        esArchiver.unload('saved_objects/usage_counters')
+        esArchiver.unload('test/api_integration/fixtures/es_archiver/saved_objects/usage_counters')
       );
 
       it('returns usage counters aggregated by day', async () => {

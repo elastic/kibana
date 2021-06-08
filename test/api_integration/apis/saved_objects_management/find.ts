@@ -90,8 +90,12 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       describe('`hasReference` and `hasReferenceOperator` parameters', () => {
-        before(() => esArchiver.load('saved_objects/references'));
-        after(() => esArchiver.unload('saved_objects/references'));
+        before(() =>
+          esArchiver.load('test/api_integration/fixtures/es_archiver/saved_objects/references')
+        );
+        after(() =>
+          esArchiver.unload('test/api_integration/fixtures/es_archiver/saved_objects/references')
+        );
 
         it('search for a reference', async () => {
           await supertest

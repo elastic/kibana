@@ -244,8 +244,12 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       describe('`has_reference` and `has_reference_operator` parameters', () => {
-        before(() => esArchiver.load('saved_objects/references'));
-        after(() => esArchiver.unload('saved_objects/references'));
+        before(() =>
+          esArchiver.load('test/api_integration/fixtures/es_archiver/saved_objects/references')
+        );
+        after(() =>
+          esArchiver.unload('test/api_integration/fixtures/es_archiver/saved_objects/references')
+        );
 
         it('search for a reference', async () => {
           await supertest
@@ -307,8 +311,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('searching for special characters', () => {
-      before(() => esArchiver.load('saved_objects/find_edgecases'));
-      after(() => esArchiver.unload('saved_objects/find_edgecases'));
+      before(() =>
+        esArchiver.load('test/api_integration/fixtures/es_archiver/saved_objects/find_edgecases')
+      );
+      after(() =>
+        esArchiver.unload('test/api_integration/fixtures/es_archiver/saved_objects/find_edgecases')
+      );
 
       it('can search for objects with dashes', async () =>
         await supertest
