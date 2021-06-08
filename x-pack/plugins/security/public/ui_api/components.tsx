@@ -8,24 +8,23 @@
 import type { FC, PropsWithChildren, PropsWithRef } from 'react';
 import React from 'react';
 
-import type { StartServicesAccessor } from 'src/core/public';
+import type { CoreStart } from 'src/core/public';
 
 import { getChangePasswordComponent } from '../account_management/change_password/change_password_async';
 import { getPersonalInfoComponent } from '../account_management/personal_info/personal_info_async';
-import type { PluginStartDependencies } from '../plugin';
 import { LazyWrapper } from './lazy_wrapper';
 
 export interface GetComponentsOptions {
-  getStartServices: StartServicesAccessor<PluginStartDependencies>;
+  core: CoreStart;
 }
 
-export const getComponents = ({ getStartServices }: GetComponentsOptions) => {
+export const getComponents = ({ core }: GetComponentsOptions) => {
   /**
    * Returns a function that creates a lazy-loading version of a component.
    */
   function wrapLazy<T>(fn: () => Promise<FC<T>>) {
     return (props: JSX.IntrinsicAttributes & PropsWithRef<PropsWithChildren<T>>) => (
-      <LazyWrapper fn={fn} getStartServices={getStartServices} props={props} />
+      <LazyWrapper fn={fn} core={core} props={props} />
     );
   }
 

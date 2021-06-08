@@ -7,16 +7,15 @@
 
 import type { ReactElement } from 'react';
 
-import type { StartServicesAccessor } from 'src/core/public';
+import type { CoreStart } from 'src/core/public';
 
 import type { ChangePasswordProps } from '../account_management/change_password';
 import type { PersonalInfoProps } from '../account_management/personal_info';
 import { UserAPIClient } from '../management';
-import type { PluginStartDependencies } from '../plugin';
 import { getComponents } from './components';
 
 interface GetUiApiOptions {
-  getStartServices: StartServicesAccessor<PluginStartDependencies>;
+  core: CoreStart;
 }
 
 type LazyComponentFn<T> = (props: T) => ReactElement;
@@ -29,8 +28,8 @@ export interface UiApi {
   UserAPIClient: typeof UserAPIClient;
 }
 
-export const getUiApi = ({ getStartServices }: GetUiApiOptions): UiApi => {
-  const components = getComponents({ getStartServices });
+export const getUiApi = ({ core }: GetUiApiOptions): UiApi => {
+  const components = getComponents({ core });
 
   return {
     components,

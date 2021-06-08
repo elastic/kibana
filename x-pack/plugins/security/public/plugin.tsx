@@ -29,7 +29,6 @@ import { SecurityNavControlService } from './nav_control';
 import { SecurityCheckupService } from './security_checkup';
 import { SessionExpired, SessionTimeout, UnauthorizedResponseHttpInterceptor } from './session';
 import { getUiApi } from './ui_api';
-import type { UiApi } from './ui_api';
 
 export interface PluginSetupDependencies {
   licensing: LicensingPluginSetup;
@@ -62,7 +61,6 @@ export class SecurityPlugin
   private readonly securityCheckupService = new SecurityCheckupService();
   private authc!: AuthenticationServiceSetup;
   private readonly config: ConfigType;
-  private uiApi!: UiApi;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<ConfigType>();
@@ -98,10 +96,6 @@ export class SecurityPlugin
       securityLicense: license,
       authc: this.authc,
       logoutUrl,
-    });
-
-    this.uiApi = getUiApi({
-      getStartServices: core.getStartServices,
     });
 
     accountManagementApp.create({
@@ -154,7 +148,7 @@ export class SecurityPlugin
     }
 
     return {
-      uiApi: this.uiApi,
+      uiApi: getUiApi({ core }),
       navControlService: this.navControlService.start({ core }),
       authc: this.authc as AuthenticationServiceStart,
     };
