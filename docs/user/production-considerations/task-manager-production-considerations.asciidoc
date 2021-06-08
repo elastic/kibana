@@ -162,4 +162,4 @@ As a default, a {kib} instance provides a throughput of `200/tpm`. A good starti
 
 Although this is a _rough_ estimate, the  _tasks per minute_ provides the lower bound needed to execute tasks on time.
 
-Once you calculate the rough _tasks per minute_ estimate, add a buffer for non-recurring tasks. How much of a buffer is required largely depends on your use case. Ensure enough of a buffer is provisioned by <<task-manager-health-evaluate-the-workload,evaluating your workload>> as it grows and tracking the ratio of recurring to non-recurring tasks by <<task-manager-health-evaluate-the-runtime,evaluating your runtime>>.
+Once you estimate  _tasks per minute_ , add a buffer for non-recurring tasks. How much of a buffer is required largely depends on your use case. Ensure enough of a buffer is provisioned by <<task-manager-health-evaluate-the-workload,evaluating your workload>> as it grows and tracking the ratio of recurring to non-recurring tasks by <<task-manager-health-evaluate-the-runtime,evaluating your runtime>>.
