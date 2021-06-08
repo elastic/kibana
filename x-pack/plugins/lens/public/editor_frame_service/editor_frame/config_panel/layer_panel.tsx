@@ -423,10 +423,11 @@ export function LayerPanel(
         isFullscreen={isFullscreen}
         groupLabel={activeGroup?.groupLabel || ''}
         handleClose={() => {
-          if (layerDatasource.canCloseDimensionEditor) {
-            if (!layerDatasource.canCloseDimensionEditor(layerDatasourceState)) {
-              return false;
-            }
+          if (
+            layerDatasource.canCloseDimensionEditor &&
+            !layerDatasource.canCloseDimensionEditor(layerDatasourceState)
+          ) {
+            return false;
           }
           if (layerDatasource.updateStateOnCloseDimension) {
             const newState = layerDatasource.updateStateOnCloseDimension({
@@ -461,36 +462,37 @@ export function LayerPanel(
                   isFullscreen,
                   setState: (
                     newState: unknown,
-                    {
-                      shouldReplaceDimension,
-                      shouldRemoveDimension,
-                    }: {
-                      shouldReplaceDimension?: boolean;
-                      shouldRemoveDimension?: boolean;
-                    } = {}
+                    { isDimensionComplete = true }: { isDimensionComplete?: boolean } = {}
                   ) => {
-                    if (shouldReplaceDimension || shouldRemoveDimension) {
+                    if (allAccessors.includes(activeId)) {
+                      if (isDimensionComplete) {
+                        props.updateDatasourceAsync(datasourceId, newState);
+                      } else {
+                        // The datasource can indicate that the previously-valid column is no longer
+                        // complete, which clears the visualization. This keeps the flyout open and reuses
+                        // the previous columnId
+                        props.updateAll(
+                          datasourceId,
+                          newState,
+                          activeVisualization.removeDimension({
+                            layerId,
+                            columnId: activeId,
+                            prevState: props.visualizationState,
+                          })
+                        );
+                      }
+                    } else if (isDimensionComplete) {
                       props.updateAll(
                         datasourceId,
                         newState,
-                        shouldRemoveDimension
-                          ? activeVisualization.removeDimension({
-                              layerId,
-                              columnId: activeId,
-                              prevState: props.visualizationState,
-                            })
-                          : activeVisualization.setDimension({
-                              layerId,
-                              groupId: activeGroup.groupId,
-                              columnId: activeId,
-                              prevState: props.visualizationState,
-                            })
+                        activeVisualization.setDimension({
+                          layerId,
+                          groupId: activeGroup.groupId,
+                          columnId: activeId,
+                          prevState: props.visualizationState,
+                        })
                       );
-                      if (shouldRemoveDimension) {
-                        setActiveDimension(initialActiveDimensionState);
-                      } else {
-                        setActiveDimension({ ...activeDimension, isNew: false });
-                      }
+                      setActiveDimension({ ...activeDimension, isNew: false });
                     } else {
                       props.updateDatasourceAsync(datasourceId, newState);
                     }
