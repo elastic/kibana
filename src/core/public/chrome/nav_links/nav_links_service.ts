@@ -11,7 +11,7 @@ import { BehaviorSubject, combineLatest, Observable, ReplaySubject } from 'rxjs'
 import { map, takeUntil } from 'rxjs/operators';
 
 import { InternalApplicationStart, PublicAppDeepLinkInfo, PublicAppInfo } from '../../application';
-import { HttpStart } from '../../http';
+import { HttpStart, IBasePath } from '../../http';
 import { ChromeNavLink, NavLinkWrapper } from './nav_link';
 import { toNavLink } from './to_nav_link';
 
@@ -173,7 +173,7 @@ function sortNavLinks(navLinks: ReadonlyMap<string, NavLinkWrapper>) {
 function toNavDeepLinks(
   app: PublicAppInfo,
   deepLinks: PublicAppDeepLinkInfo[],
-  basePath: HttpStart['basePath']
+  basePath: IBasePath
 ): Array<[string, NavLinkWrapper]> {
   if (!deepLinks) {
     return [];
