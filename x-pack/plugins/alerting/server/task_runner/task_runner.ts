@@ -331,6 +331,7 @@ export class TaskRunner<
       alertId,
       alertLabel,
       namespace,
+      ruleTypeId: alert.alertTypeId,
     });
 
     if (!muteAll) {
@@ -493,6 +494,7 @@ export class TaskRunner<
             rel: SAVED_OBJECT_REL_PRIMARY,
             type: 'alert',
             id: alertId,
+            type_id: this.alertType.id,
             namespace,
           },
         ],
@@ -598,6 +600,7 @@ interface GenerateNewAndRecoveredInstanceEventsParams<
   alertId: string;
   alertLabel: string;
   namespace: string | undefined;
+  ruleTypeId: string;
 }
 
 function generateNewAndRecoveredInstanceEvents<
@@ -611,6 +614,7 @@ function generateNewAndRecoveredInstanceEvents<
     currentAlertInstances,
     originalAlertInstances,
     recoveredAlertInstances,
+    ruleTypeId,
   } = params;
   const originalAlertInstanceIds = Object.keys(originalAlertInstances);
   const currentAlertInstanceIds = Object.keys(currentAlertInstances);
@@ -664,6 +668,7 @@ function generateNewAndRecoveredInstanceEvents<
             rel: SAVED_OBJECT_REL_PRIMARY,
             type: 'alert',
             id: alertId,
+            type_id: ruleTypeId,
             namespace,
           },
         ],
