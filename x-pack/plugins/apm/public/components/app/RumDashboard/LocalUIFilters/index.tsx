@@ -9,14 +9,12 @@ import React from 'react';
 import {
   EuiTitle,
   EuiSpacer,
-  EuiButtonEmpty,
   EuiAccordion,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { useLocalUIFilters } from '../hooks/useLocalUIFilters';
 import { LocalUIFilterName } from '../../../../../common/ui_filter';
 import { useBreakPoints } from '../../../../hooks/use_break_points';
@@ -28,9 +26,6 @@ import { useDynamicIndexPatternFetcher } from '../../../../hooks/use_dynamic_ind
 import { TRANSACTION_TYPE } from '../../../../../common/elasticsearch_fieldnames';
 import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
 
-const ButtonWrapper = euiStyled.div`
-  display: inline-block;
-`;
 const filterNames: LocalUIFilterName[] = [
   'location',
   'device',
@@ -52,8 +47,6 @@ function LocalUIFilters() {
   const {
     urlParams: { start, end },
   } = useUrlParams();
-
-  const hasValues = filters.some((filter) => filter.value?.length > 0);
 
   const { isSmall } = useBreakPoints();
 
@@ -92,34 +85,14 @@ function LocalUIFilters() {
           ))}
         </EuiFilterGroup>
         <EuiSpacer size="xs" />
-        {hasValues && (
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={false}>
-              <SelectedFilters
-                filters={filters}
-                indexPatternTitle={indexPattern?.title}
-                onChange={(name, values) => {
-                  setFilterValue(name, values);
-                }}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <ButtonWrapper>
-                <EuiButtonEmpty
-                  size="xs"
-                  iconType="cross"
-                  flush="left"
-                  onClick={clearValues}
-                  data-cy="clearFilters"
-                >
-                  {i18n.translate('xpack.apm.clearFilters', {
-                    defaultMessage: 'Clear filters',
-                  })}
-                </EuiButtonEmpty>
-              </ButtonWrapper>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
+        <SelectedFilters
+          filters={filters}
+          onChange={(name, values) => {
+            setFilterValue(name, values);
+          }}
+          clearValues={clearValues}
+          indexPatternTitle={indexPattern?.title}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -6,7 +6,8 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FilterValueLabel } from '../../../../../../observability/public';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
@@ -18,16 +19,20 @@ import {
 import { FiltersUIHook } from '../hooks/useLocalUIFilters';
 import { LocalUIFilterName } from '../../../../../common/ui_filter';
 import { DataPublicPluginStart } from '../../../../../../../../src/plugins/data/public';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 
 interface Props {
   indexPatternTitle?: string;
   filters: FiltersUIHook['filters'];
   onChange: (name: LocalUIFilterName, values: string[]) => void;
+  clearValues: () => void;
 }
+
 export function SelectedFilters({
   indexPatternTitle,
   onChange,
   filters,
+  clearValues,
 }: Props) {
   const { uiFilters } = useUrlParams();
 
@@ -47,32 +52,57 @@ export function SelectedFilters({
     }
   }, [indexPatternTitle, indexPatterns]);
 
-  return indexPattern ? (
-    <EuiFlexGroup gutterSize="xs">
-      {(filters ?? []).map(({ name, title, fieldName }) => (
-        <Fragment key={name}>
-          {((uiFilters?.[name] ?? []) as string[]).map((value) => (
-            <EuiFlexItem key={name + value} grow={false}>
-              <FilterValueLabel
-                indexPattern={indexPattern}
-                removeFilter={() => {
-                  onChange(
-                    name,
-                    (uiFilters?.[name] as string[]).filter(
-                      (valT) => valT !== value
-                    )
-                  );
-                }}
-                invertFilter={(val) => {}}
-                field={fieldName}
-                value={value}
-                negate={false}
-                label={title}
-              />
-            </EuiFlexItem>
+  const hasValues = filters.some((filter) => filter.value?.length > 0);
+
+  return indexPattern && hasValues ? (
+    <EuiFlexGroup alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="xs">
+          {(filters ?? []).map(({ name, title, fieldName }) => (
+            <Fragment key={name}>
+              {((uiFilters?.[name] ?? []) as string[]).map((value) => (
+                <EuiFlexItem key={name + value} grow={false}>
+                  <FilterValueLabel
+                    indexPattern={indexPattern}
+                    removeFilter={() => {
+                      onChange(
+                        name,
+                        (uiFilters?.[name] as string[]).filter(
+                          (valT) => valT !== value
+                        )
+                      );
+                    }}
+                    invertFilter={(val) => {}}
+                    field={fieldName}
+                    value={value}
+                    negate={false}
+                    label={title}
+                  />
+                </EuiFlexItem>
+              ))}
+            </Fragment>
           ))}
-        </Fragment>
-      ))}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <ButtonWrapper>
+          <EuiButtonEmpty
+            size="xs"
+            iconType="cross"
+            flush="left"
+            onClick={clearValues}
+            data-cy="clearFilters"
+          >
+            {i18n.translate('xpack.apm.clearFilters', {
+              defaultMessage: 'Clear filters',
+            })}
+          </EuiButtonEmpty>
+        </ButtonWrapper>
+      </EuiFlexItem>
     </EuiFlexGroup>
   ) : null;
 }
+
+const ButtonWrapper = euiStyled.div`
+  display: inline-block;
+`;
