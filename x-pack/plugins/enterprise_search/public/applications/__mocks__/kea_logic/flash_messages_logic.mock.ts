@@ -15,6 +15,7 @@ export const mockFlashMessagesActions = {
   clearFlashMessages: jest.fn(),
   setQueuedMessages: jest.fn(),
   clearQueuedMessages: jest.fn(),
+  dismissToastMessage: jest.fn(),
 };
 
 export const mockFlashMessageHelpers = {

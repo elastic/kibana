@@ -32,6 +32,7 @@ import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { ExpressionValueBoxed } from 'src/plugins/expressions/common';
 import { FormatFactory as FormatFactory_2 } from 'src/plugins/data/common/field_formats/utils';
 import { IAggConfigs as IAggConfigs_2 } from 'src/plugins/data/public';
+import { IEsSearchResponse as IEsSearchResponse_2 } from 'src/plugins/data/public';
 import { IScopedClusterClient } from 'src/core/server';
 import { ISearchOptions as ISearchOptions_2 } from 'src/plugins/data/public';
 import { ISearchSource } from 'src/plugins/data/public';
@@ -52,6 +53,7 @@ import { Plugin as Plugin_2 } from 'src/core/server';
 import { Plugin as Plugin_3 } from 'kibana/server';
 import { PluginInitializerContext as PluginInitializerContext_2 } from 'src/core/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
+import { RangeFilter } from 'src/plugins/data/public';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { RequestAdapter } from 'src/plugins/inspector/common';
 import { RequestHandlerContext } from 'src/core/server';
@@ -709,7 +711,7 @@ export interface IFieldType {
     // (undocumented)
     format?: any;
     // (undocumented)
-    lang?: string;
+    lang?: estypes.ScriptLanguage;
     // (undocumented)
     name: string;
     // (undocumented)
@@ -780,19 +782,7 @@ export class IndexPattern implements IIndexPattern {
         delay?: string | undefined;
         time_zone?: string | undefined;
     }>> | undefined;
-    getAsSavedObjectBody(): {
-        fieldAttrs: string | undefined;
-        title: string;
-        timeFieldName: string | undefined;
-        intervalName: string | undefined;
-        sourceFilters: string | undefined;
-        fields: string | undefined;
-        fieldFormatMap: string | undefined;
-        type: string | undefined;
-        typeMeta: string | undefined;
-        allowNoIndex: true | undefined;
-        runtimeFieldMap: string | undefined;
-    };
+    getAsSavedObjectBody(): IndexPatternAttributes;
     // (undocumented)
     getComputedFields(): {
         storedFields: string[];
@@ -1428,22 +1418,22 @@ export const shimAbortSignal: <T>(promise: TransportRequestPromise<T>, signal?: 
 export function shimHitsTotal(response: estypes.SearchResponse<unknown>, { legacyHitsTotal }?: ISearchOptions): {
     hits: {
         total: any;
-        hits: estypes.Hit<unknown>[];
+        hits: estypes.SearchHit<unknown>[];
         max_score?: number | undefined;
     };
     took: number;
     timed_out: boolean;
     _shards: estypes.ShardStatistics;
-    aggregations?: Record<string, estypes.Aggregate> | undefined;
+    aggregations?: Record<string, estypes.AggregationsAggregate> | undefined;
     _clusters?: estypes.ClusterStatistics | undefined;
     documents?: unknown[] | undefined;
     fields?: Record<string, any> | undefined;
     max_score?: number | undefined;
     num_reduce_phases?: number | undefined;
-    profile?: estypes.Profile | undefined;
+    profile?: estypes.SearchProfile | undefined;
     pit_id?: string | undefined;
     _scroll_id?: string | undefined;
-    suggest?: Record<string, estypes.Suggest<unknown>[]> | undefined;
+    suggest?: Record<string, estypes.SearchSuggest<unknown>[]> | undefined;
     terminated_early?: boolean | undefined;
 };
 

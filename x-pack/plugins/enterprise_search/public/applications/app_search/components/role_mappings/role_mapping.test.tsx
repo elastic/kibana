@@ -13,17 +13,15 @@ import { engines } from '../../__mocks__/engines.mock';
 
 import React from 'react';
 
+import { waitFor } from '@testing-library/dom';
 import { shallow } from 'enzyme';
 
-import { EuiCheckbox } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiRadioGroup } from '@elastic/eui';
 
-import { Loading } from '../../../shared/loading';
-import {
-  AttributeSelector,
-  DeleteMappingCallout,
-  RoleSelector,
-} from '../../../shared/role_mapping';
+import { AttributeSelector, RoleSelector, RoleMappingFlyout } from '../../../shared/role_mapping';
 import { asRoleMapping } from '../../../shared/role_mapping/__mocks__/roles';
+
+import { STANDARD_ROLE_TYPES } from './constants';
 
 import { RoleMapping } from './role_mapping';
 
@@ -61,6 +59,7 @@ describe('RoleMapping', () => {
     myRole: {
       availableRoleTypes: mockRole.ability.availableRoleTypes,
     },
+    roleMappingErrors: [],
   };
 
   beforeEach(() => {
@@ -69,39 +68,56 @@ describe('RoleMapping', () => {
   });
 
   it('renders', () => {
-    const wrapper = shallow(<RoleMapping />);
-
-    expect(wrapper.find(AttributeSelector)).toHaveLength(1);
-    expect(wrapper.find(RoleSelector)).toHaveLength(5);
-  });
-
-  it('returns Loading when loading', () => {
-    setMockValues({ ...mockValues, dataLoading: true });
-    const wrapper = shallow(<RoleMapping />);
-
-    expect(wrapper.find(Loading)).toHaveLength(1);
-  });
-
-  it('renders DeleteMappingCallout for existing mapping', () => {
     setMockValues({ ...mockValues, roleMapping: asRoleMapping });
     const wrapper = shallow(<RoleMapping />);
 
-    expect(wrapper.find(DeleteMappingCallout)).toHaveLength(1);
+    expect(wrapper.find(AttributeSelector)).toHaveLength(1);
+    expect(wrapper.find(RoleSelector)).toHaveLength(1);
   });
 
-  it('hides DeleteMappingCallout for new mapping', () => {
-    const wrapper = shallow(<RoleMapping isNew />);
-
-    expect(wrapper.find(DeleteMappingCallout)).toHaveLength(0);
-  });
-
-  it('handles engine checkbox click', () => {
+  it('only passes standard role options for non-advanced roles', () => {
+    setMockValues({ ...mockValues, hasAdvancedRoles: false });
     const wrapper = shallow(<RoleMapping />);
-    wrapper
-      .find(EuiCheckbox)
-      .first()
-      .simulate('change', { target: { checked: true } });
 
-    expect(actions.handleEngineSelectionChange).toHaveBeenCalledWith(engines[0].name, true);
+    expect(wrapper.find(RoleSelector).prop('roleOptions')).toHaveLength(STANDARD_ROLE_TYPES.length);
+  });
+
+  it('sets initial selected state when accessAllEngines is true', () => {
+    setMockValues({ ...mockValues, accessAllEngines: true });
+    const wrapper = shallow(<RoleMapping />);
+
+    expect(wrapper.find(EuiRadioGroup).prop('idSelected')).toBe('all');
+  });
+
+  it('handles all/specific engines radio change', () => {
+    const wrapper = shallow(<RoleMapping />);
+    const radio = wrapper.find(EuiRadioGroup);
+    radio.simulate('change', { target: { checked: false } });
+
+    expect(actions.handleAccessAllEnginesChange).toHaveBeenCalledWith(false);
+  });
+
+  it('handles engine checkbox click', async () => {
+    const wrapper = shallow(<RoleMapping />);
+    await waitFor(() =>
+      ((wrapper.find(EuiComboBox).props() as unknown) as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }).onChange([{ label: engines[0].name, value: engines[0].name }])
+    );
+    wrapper.update();
+
+    expect(actions.handleEngineSelectionChange).toHaveBeenCalledWith([engines[0].name]);
+  });
+
+  it('enables flyout when attribute value is valid', () => {
+    setMockValues({
+      ...mockValues,
+      attributeValue: 'foo',
+      attributeName: 'role',
+      accessAllEngines: true,
+    });
+    const wrapper = shallow(<RoleMapping />);
+
+    expect(wrapper.find(RoleMappingFlyout).prop('disabled')).toBe(false);
   });
 });

@@ -22,6 +22,7 @@ import { shallow } from 'enzyme';
 import { Loading } from '../../../shared/loading';
 import { AnalyticsRouter } from '../analytics';
 import { ApiLogs } from '../api_logs';
+import { CrawlerRouter } from '../crawler';
 import { CurationsRouter } from '../curations';
 import { Documents, DocumentDetail } from '../documents';
 import { EngineOverview } from '../engine_overview';
@@ -171,5 +172,12 @@ describe('EngineRouter', () => {
     const wrapper = shallow(<EngineRouter />);
 
     expect(wrapper.find(SourceEngines)).toHaveLength(1);
+  });
+
+  it('renders a crawler view', () => {
+    setMockValues({ ...values, myRole: { canViewEngineCrawler: true } });
+    const wrapper = shallow(<EngineRouter />);
+
+    expect(wrapper.find(CrawlerRouter)).toHaveLength(1);
   });
 });

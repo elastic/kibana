@@ -9,8 +9,8 @@ import React, { memo, useMemo } from 'react';
 import { EuiCard, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { connectorsConfiguration } from '.';
 import { ConnectorTypes } from '../../../common';
+import { useKibana } from '../../common/lib/kibana';
 
 interface ConnectorCardProps {
   connectorType: ConnectorTypes;
@@ -31,6 +31,8 @@ const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
   listItems,
   isLoading,
 }) => {
+  const { triggersActionsUi } = useKibana().services;
+
   const description = useMemo(
     () => (
       <StyledText>
@@ -46,7 +48,13 @@ const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
     [listItems]
   );
   const icon = useMemo(
-    () => <EuiIcon size="xl" type={connectorsConfiguration[`${connectorType}`]?.logo ?? ''} />,
+    () => (
+      <EuiIcon
+        size="xl"
+        type={triggersActionsUi.actionTypeRegistry.get(`${connectorType}`)?.iconClass ?? ''}
+      />
+    ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [connectorType]
   );
   return (
