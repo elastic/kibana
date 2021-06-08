@@ -52,7 +52,10 @@ export const buildQueryEntities = ({
           terms: {
             size: querySize,
             field: 'user.name',
-            order: [{ successes: 'desc' }, { failures: 'desc' }] as estypes.TermsAggregationOrder,
+            order: [
+              { successes: 'desc' },
+              { failures: 'desc' },
+            ] as estypes.AggregationsTermsAggregationOrder,
           },
           aggs: {
             failures: {

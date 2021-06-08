@@ -1,0 +1,7 @@
+{
+  "id": "corePluginDeepLinks",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["core_plugin_deep_links"],
+  "ui": true
+}
