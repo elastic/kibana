@@ -28,9 +28,7 @@ export interface Props {
 }
 
 interface State {
-  isPrintLayoutSupported: boolean;
   usePrintLayout: boolean;
-  isCanvasLayoutSupported: boolean;
   useCanvasLayout: boolean;
 }
 
@@ -38,13 +36,8 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    const isPrintLayoutSupported = props.layoutOption === 'print';
-    const isCanvasLayoutSupported = props.layoutOption === 'canvas';
-
     this.state = {
-      isPrintLayoutSupported,
       usePrintLayout: false,
-      isCanvasLayoutSupported,
       useCanvasLayout: false,
     };
   }
@@ -67,7 +60,7 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
   }
 
   private renderOptions = () => {
-    if (this.state.isPrintLayoutSupported) {
+    if (this.props.layoutOption === 'print') {
       return (
         <EuiFormRow
           helpText={
@@ -92,7 +85,7 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
       );
     }
 
-    if (this.state.isCanvasLayoutSupported) {
+    if (this.props.layoutOption === 'canvas') {
       return (
         <EuiFormRow
           helpText={
