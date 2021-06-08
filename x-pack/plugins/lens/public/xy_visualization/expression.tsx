@@ -209,6 +209,13 @@ export const xyChart: ExpressionFunctionDefinition<
         defaultMessage: 'Hide endzone markers for partial data',
       }),
     },
+    valuesInLegend: {
+      types: ['boolean'],
+      default: false,
+      help: i18n.translate('xpack.lens.xyChart.valuesInLegend.help', {
+        defaultMessage: 'Show values in legend',
+      }),
+    },
   },
   fn(data: LensMultiTable, args: XYArgs) {
     return {
@@ -365,6 +372,7 @@ export function XYChart({
     hideEndzones,
     yLeftExtent,
     yRightExtent,
+    valuesInLegend,
   } = args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
@@ -602,7 +610,6 @@ export function XYChart({
             : legend.isVisible
         }
         legendPosition={legend.position}
-        showLegendExtra={false}
         theme={{
           ...chartTheme,
           barSeriesStyle: {
@@ -622,6 +629,7 @@ export function XYChart({
         xDomain={xDomain}
         onBrushEnd={renderMode !== 'noInteractivity' ? brushHandler : undefined}
         onElementClick={renderMode !== 'noInteractivity' ? clickHandler : undefined}
+        showLegendExtra={isHistogramViz && valuesInLegend}
       />
 
       <Axis
