@@ -1203,7 +1203,7 @@
                 "plugin": "security",
                 "link": {
                   "path": "x-pack/plugins/security/server/plugin.ts",
-                  "lineNumber": 261
+                  "lineNumber": 267
                 }
               },
               {
@@ -2009,21 +2009,21 @@
               "plugin": "security",
               "link": {
                 "path": "x-pack/plugins/security/server/plugin.ts",
-                "lineNumber": 261
+                "lineNumber": 267
               }
             },
             {
               "plugin": "security",
               "link": {
                 "path": "x-pack/plugins/security/server/plugin.ts",
-                "lineNumber": 279
+                "lineNumber": 285
               }
             },
             {
               "plugin": "security",
               "link": {
                 "path": "x-pack/plugins/security/server/plugin.ts",
-                "lineNumber": 295
+                "lineNumber": 301
               }
             },
             {
