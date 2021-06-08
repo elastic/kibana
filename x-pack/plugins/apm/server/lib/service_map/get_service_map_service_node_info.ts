@@ -224,7 +224,9 @@ function getMemoryStats({
       script,
     }: {
       additionalFilters: ESFilter[];
-      script: typeof percentCgroupMemoryUsedScript;
+      script:
+        | typeof percentCgroupMemoryUsedScript
+        | typeof percentSystemMemoryUsedScript;
     }) => {
       return withApmSpan('get_avg_memory_for_service_map_node', async () => {
         const response = await apmEventClient.search({
