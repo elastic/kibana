@@ -11,7 +11,7 @@ import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { RawMonitoringStats, RawMonitoredStat, HealthStatus } from './monitoring_stats_stream';
 import { AveragedStat } from './task_run_calcultors';
 import { TaskPersistenceTypes } from './task_run_statistics';
-import { asErr, asOk, isOk, map, Result } from '../lib/result_type';
+import { asErr, asOk, map, Result } from '../lib/result_type';
 
 export interface CapacityEstimationStat extends JsonObject {
   observed: {
