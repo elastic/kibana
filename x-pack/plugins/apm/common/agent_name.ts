@@ -35,10 +35,10 @@ export const AGENT_NAMES: AgentName[] = [
   'java',
   'js-base',
   'nodejs',
+  'php',
   'python',
   'ruby',
   'rum-js',
-  'php',
   ...OPEN_TELEMETRY_AGENT_NAMES,
 ];
 
