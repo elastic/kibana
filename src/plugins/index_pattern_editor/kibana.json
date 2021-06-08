@@ -1,0 +1,8 @@
+{
+  "id": "indexPatternEditor",
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["data"],
+  "requiredBundles": ["kibanaReact", "esUiShared"]
+}

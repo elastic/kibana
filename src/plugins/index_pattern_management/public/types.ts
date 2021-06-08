@@ -20,6 +20,7 @@ import { ManagementAppMountParams } from '../../management/public';
 import { IndexPatternManagementStart } from './index';
 import { KibanaReactContextValue } from '../../kibana_react/public';
 import { IndexPatternFieldEditorStart } from '../../index_pattern_field_editor/public';
+import { IndexPatternEditorStart } from '../../index_pattern_editor/public';
 
 export interface IndexPatternManagmentContext {
   chrome: ChromeStart;
@@ -35,6 +36,7 @@ export interface IndexPatternManagmentContext {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
   getMlCardState: () => MlCardState;
   fieldFormatEditors: IndexPatternFieldEditorStart['fieldFormatEditors'];
+  indexPatternEditor: IndexPatternEditorStart;
 }
 
 export type IndexPatternManagmentContextValue = KibanaReactContextValue<IndexPatternManagmentContext>;

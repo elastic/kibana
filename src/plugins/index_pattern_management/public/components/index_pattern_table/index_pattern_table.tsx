@@ -8,6 +8,7 @@
 
 import {
   EuiBadge,
+  EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,13 +25,10 @@ import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate, useKibana } from '../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../types';
-import { CreateButton } from '../create_button';
 import { IndexPatternTableItem, IndexPatternCreationOption } from '../types';
 import { getIndexPatterns } from '../utils';
 import { getListBreadcrumbs } from '../breadcrumbs';
-import { EmptyState } from './empty_state';
 import { MatchedItem, ResolveIndexResponseItemAlias } from '../create_index_pattern_wizard/types';
-import { EmptyIndexPatternPrompt } from './empty_index_pattern_prompt';
 import { getIndices } from '../create_index_pattern_wizard/lib';
 
 const pagination = {
@@ -77,6 +75,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     http,
     data,
     getMlCardState,
+    indexPatternEditor,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
   const [creationOptions, setCreationOptions] = useState<IndexPatternCreationOption[]>([]);
@@ -158,6 +157,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     },
   ];
 
+  /*
   const createButton = canSave ? (
     <CreateButton options={creationOptions}>
       <FormattedMessage
@@ -168,34 +168,36 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
   ) : (
     <></>
   );
+  */
+
+  const createButton = (
+    <EuiButton
+      fill={true}
+      iconType="plusInCircle"
+      onClick={() =>
+        indexPatternEditor.openEditor({
+          onSave: async () => {
+            // todo dedup from useEffect code
+            const gettedIndexPatterns: IndexPatternTableItem[] = await getIndexPatterns(
+              uiSettings.get('defaultIndex'),
+              indexPatternManagementStart,
+              data.indexPatterns
+            );
+            setIsLoadingIndexPatterns(false);
+            setIndexPatterns(gettedIndexPatterns);
+          },
+        })
+      }
+    >
+      <FormattedMessage
+        id="indexPatternManagement.indexPatternTable.createBtn"
+        defaultMessage="Create index pattern"
+      />
+    </EuiButton>
+  );
 
   if (isLoadingSources || isLoadingIndexPatterns) {
     return <></>;
-  }
-
-  const hasDataIndices = sources.some(({ name }: MatchedItem) => !name.startsWith('.'));
-
-  if (!indexPatterns.length) {
-    if (!hasDataIndices && !remoteClustersExist) {
-      return (
-        <EmptyState
-          onRefresh={loadSources}
-          docLinks={docLinks}
-          navigateToApp={application.navigateToApp}
-          getMlCardState={getMlCardState}
-          canSave={canSave}
-        />
-      );
-    } else {
-      return (
-        <EmptyIndexPatternPrompt
-          canSave={canSave}
-          creationOptions={creationOptions}
-          docLinksIndexPatternIntro={docLinks.links.indexPatterns.introduction}
-          setBreadcrumbs={setBreadcrumbs}
-        />
-      );
-    }
   }
 
   return (

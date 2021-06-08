@@ -26,27 +26,29 @@ import {
   EuiLink,
   EuiText,
 } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
-import { reactRouterNavigate } from '../../../../../kibana_react/public';
-// import { MlCardState } from '../../../types';
 
 export const EmptyState = ({
   onRefresh,
   navigateToApp,
   docLinks,
-  // getMlCardState,
   canSave,
+  closeFlyout,
+  createAnyway,
 }: {
   onRefresh: () => void;
   navigateToApp: ApplicationStart['navigateToApp'];
+  closeFlyout: () => void;
   docLinks: DocLinksStart;
-  // getMlCardState: () => MlCardState;
   canSave: boolean;
+  createAnyway: () => void;
 }) => {
   const mlCard = (
     <EuiFlexItem>
       <EuiCard
-        onClick={() => navigateToApp('ml', { path: '#/filedatavisualizer' })}
+        onClick={() => {
+          navigateToApp('ml', { path: '#/filedatavisualizer' });
+          closeFlyout();
+        }}
         className="inpEmptyState__card"
         betaBadgeLabel={
           // getMlCardState() === MlCardState.ENABLED
@@ -79,14 +81,14 @@ export const EmptyState = ({
     </EuiFlexItem>
   );
 
-  const createAnyway = (
+  const createAnywayLink = (
     <EuiText color="subdued" textAlign="center" size="xs">
       <FormattedMessage
         id="indexPatternManagement.createIndexPattern.emptyState.createAnyway"
         defaultMessage="Some indices may be hidden. Try to {link} anyway."
         values={{
           link: (
-            <EuiLink {...reactRouterNavigate(useHistory(), 'create')} data-test-subj="createAnyway">
+            <EuiLink onClick={() => createAnyway()} data-test-subj="createAnyway">
               <FormattedMessage
                 id="indexPatternManagement.createIndexPattern.emptyState.createAnywayLink"
                 defaultMessage="create an index pattern"
@@ -124,7 +126,10 @@ export const EmptyState = ({
             <EuiFlexItem>
               <EuiCard
                 className="inpEmptyState__card"
-                onClick={() => navigateToApp('home', { path: '#/tutorial_directory' })}
+                onClick={() => {
+                  navigateToApp('home', { path: '#/tutorial_directory' });
+                  closeFlyout();
+                }}
                 icon={<EuiIcon size="xl" type="database" color="subdued" />}
                 title={
                   <FormattedMessage
@@ -145,7 +150,10 @@ export const EmptyState = ({
             <EuiFlexItem>
               <EuiCard
                 className="inpEmptyState__card"
-                onClick={() => navigateToApp('home', { path: '#/tutorial_directory/sampleData' })}
+                onClick={() => {
+                  navigateToApp('home', { path: '#/tutorial_directory/sampleData' });
+                  closeFlyout();
+                }}
                 icon={<EuiIcon size="xl" type="heatmap" color="subdued" />}
                 title={
                   <FormattedMessage
@@ -215,7 +223,7 @@ export const EmptyState = ({
         </EuiPageContentBody>
       </EuiPageContent>
       <EuiSpacer />
-      {canSave && createAnyway}
+      {canSave && createAnywayLink}
     </>
   );
 };
