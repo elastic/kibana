@@ -31,7 +31,6 @@ import {
   UNISOLATE_HOST,
 } from '../../../../detections/components/host_isolation/translations';
 import { ALERT_DETAILS } from './translations';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useIsolationPrivileges } from '../../../../common/hooks/endpoint/use_isolate_privileges';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
@@ -73,8 +72,6 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     eventId: expandedEvent.eventId ?? '',
     skip: !expandedEvent.eventId,
   });
-
-  const isHostIsolationEnabled = useIsExperimentalFeatureEnabled('hostIsolationEnabled');
 
   const [isHostIsolationPanelOpen, setIsHostIsolationPanel] = useState(false);
 
@@ -157,7 +154,6 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         )}
       </StyledEuiFlyoutBody>
       {isIsolationAllowed &&
-        isHostIsolationEnabled &&
         isEndpointAlert &&
         isHostIsolationPanelOpen === false && (
           <EuiFlyoutFooter>
