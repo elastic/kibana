@@ -20,7 +20,7 @@ import {
   RULE_ID,
   RULE_NAME,
 } from '@kbn/rule-data-utils/target/technical_field_names';
-import React from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import { EuiTheme } from 'src/plugins/kibana_react/common';
 import { ValuesType } from 'utility-types';
 import type { ObservabilityRuleTypeRegistry } from '../../../../../../observability/public';
@@ -83,11 +83,15 @@ export function getAlertAnnotations({
   alerts,
   chartStartTime,
   getFormatter,
+  selectedAlertId,
+  setSelectedAlertId,
   theme,
 }: {
   alerts?: Alert[];
   chartStartTime: number;
   getFormatter: ObservabilityRuleTypeRegistry['getFormatter'];
+  selectedAlertId?: string;
+  setSelectedAlertId: Dispatch<SetStateAction<string | undefined>>;
   theme: EuiTheme;
 }) {
   return alerts?.flatMap((alert) => {
@@ -111,6 +115,7 @@ export function getAlertAnnotations({
         formatters: { asDuration, asPercent },
       }) ?? {}),
     };
+    const isSelected = uuid === selectedAlertId;
 
     return [
       <LineAnnotation
@@ -124,9 +129,23 @@ export function getAlertAnnotations({
         domainType={AnnotationDomainType.XDomain}
         id={`alert_${uuid}_line`}
         key={`alert_${uuid}_line`}
-        marker={<EuiIcon type="alert" />}
+        marker={
+          <EuiIcon
+            onClick={() => {
+              if (selectedAlertId === uuid) {
+                setSelectedAlertId(undefined);
+              } else {
+                setSelectedAlertId(uuid);
+              }
+            }}
+            size={isSelected ? 'xl' : 'm'}
+            type="alert"
+          />
+        }
         markerPosition={Position.Top}
-        style={{ line: { opacity: 1, strokeWidth: 2, stroke: color } }}
+        style={{
+          line: { opacity: 1, strokeWidth: isSelected ? 6 : 2, stroke: color },
+        }}
       />,
       <RectAnnotation
         key={`alert_${uuid}_area`}
@@ -139,7 +158,7 @@ export function getAlertAnnotations({
             },
           },
         ]}
-        style={{ fill: color }}
+        style={{ fill: color, opacity: isSelected ? 0.6 : 0.25 }}
       />,
     ];
   });

@@ -18,7 +18,7 @@ import {
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
 import d3 from 'd3';
-import React from 'react';
+import React, { useState } from 'react';
 import { RULE_ID } from '@kbn/rule-data-utils/target/technical_field_names';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
@@ -68,6 +68,9 @@ export function ErrorDistribution({ distribution, title }: Props) {
   const { observabilityRuleTypeRegistry } = useApmPluginContext();
   const { alerts } = useApmServiceContext();
   const { getFormatter } = observabilityRuleTypeRegistry;
+  const [selectedAlertId, setSelectedAlertId] = useState<string | undefined>(
+    undefined
+  );
 
   const tooltipProps: SettingsSpec['tooltip'] = {
     headerFormatter: (tooltip: TooltipValue) => {
@@ -122,6 +125,8 @@ export function ErrorDistribution({ distribution, title }: Props) {
             ),
             chartStartTime: buckets[0].x0,
             getFormatter,
+            selectedAlertId,
+            setSelectedAlertId,
             theme,
           })}
         </Chart>
