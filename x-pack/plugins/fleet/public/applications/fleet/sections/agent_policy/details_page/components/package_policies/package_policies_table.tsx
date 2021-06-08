@@ -19,10 +19,12 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../../common';
+import { pagePathGetters } from '../../../../../../../constants';
 import type { AgentPolicy, PackagePolicy } from '../../../../../types';
 import { PackageIcon, ContextMenuActions } from '../../../../../components';
 import { PackagePolicyDeleteProvider, DangerEuiContextMenuItem } from '../../../components';
-import { useCapabilities, useLink } from '../../../../../hooks';
+import { useCapabilities, useLink, useStartServices } from '../../../../../hooks';
 import { useAgentPolicyRefresh } from '../../hooks';
 
 interface InMemoryPackagePolicy extends PackagePolicy {
@@ -53,6 +55,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   ...rest
 }) => {
   const { getHref } = useLink();
+  const { application } = useStartServices();
   const hasWriteCapabilities = useCapabilities().write;
   const refreshAgentPolicy = useAgentPolicyRefresh();
 
@@ -255,7 +258,12 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                 key="addPackagePolicyButton"
                 isDisabled={!hasWriteCapabilities}
                 iconType="plusInCircle"
-                href={getHref('add_integration_from_policy', { policyId: agentPolicy.id })}
+                onClick={() => {
+                  application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
+                    path: `#${pagePathGetters.integrations_all()[1]}`,
+                    state: { forAgentPolicyId: agentPolicy.id },
+                  });
+                }}
               >
                 <FormattedMessage
                   id="xpack.fleet.policyDetails.addPackagePolicyButtonText"
