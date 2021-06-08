@@ -104,7 +104,6 @@ describe('Security Plugin', () => {
         })
       ).toEqual({
         uiApi: {
-          UserAPIClient: expect.any(Function),
           components: {
             getChangePassword: expect.any(Function),
             getPersonalInfo: expect.any(Function),

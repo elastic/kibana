@@ -11,7 +11,6 @@ import type { CoreStart } from 'src/core/public';
 
 import type { ChangePasswordProps } from '../account_management/change_password';
 import type { PersonalInfoProps } from '../account_management/personal_info';
-import { UserAPIClient } from '../management';
 import { getComponents } from './components';
 
 interface GetUiApiOptions {
@@ -25,7 +24,6 @@ export interface UiApi {
     getPersonalInfo: LazyComponentFn<PersonalInfoProps>;
     getChangePassword: LazyComponentFn<Pick<ChangePasswordProps, 'user'>>;
   };
-  UserAPIClient: typeof UserAPIClient;
 }
 
 export const getUiApi = ({ core }: GetUiApiOptions): UiApi => {
@@ -33,6 +31,5 @@ export const getUiApi = ({ core }: GetUiApiOptions): UiApi => {
 
   return {
     components,
-    UserAPIClient,
   };
 };

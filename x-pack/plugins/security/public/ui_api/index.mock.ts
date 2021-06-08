@@ -13,6 +13,5 @@ export const getUiApiMock = {
       getPersonalInfo: jest.fn(),
       getChangePassword: jest.fn(),
     },
-    UserAPIClient: jest.fn(),
   }),
 };
