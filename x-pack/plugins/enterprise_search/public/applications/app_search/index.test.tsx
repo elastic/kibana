@@ -28,7 +28,7 @@ import { EnginesOverview } from './components/engines';
 import { ErrorConnecting } from './components/error_connecting';
 import { Library } from './components/library';
 import { MetaEngineCreation } from './components/meta_engine_creation';
-import { RoleMappingsRouter } from './components/role_mappings';
+import { RoleMappings } from './components/role_mappings';
 import { SetupGuide } from './components/setup_guide';
 
 import { AppSearch, AppSearchUnconfigured, AppSearchConfigured, AppSearchNav } from './';
@@ -106,13 +106,13 @@ describe('AppSearchConfigured', () => {
       it('renders RoleMappings when canViewRoleMappings is true', () => {
         setMockValues({ myRole: { canViewRoleMappings: true } });
         rerender(wrapper);
-        expect(wrapper.find(RoleMappingsRouter)).toHaveLength(1);
+        expect(wrapper.find(RoleMappings)).toHaveLength(1);
       });
 
       it('does not render RoleMappings when user canViewRoleMappings is false', () => {
         setMockValues({ myRole: { canManageEngines: false } });
         rerender(wrapper);
-        expect(wrapper.find(RoleMappingsRouter)).toHaveLength(0);
+        expect(wrapper.find(RoleMappings)).toHaveLength(0);
       });
     });
 

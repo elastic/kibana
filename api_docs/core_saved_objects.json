@@ -4759,7 +4759,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-          "lineNumber": 36
+          "lineNumber": 35
         },
         "deprecated": false,
         "children": [
@@ -5075,7 +5075,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-              "lineNumber": 37
+              "lineNumber": 36
             },
             "deprecated": false
           },
@@ -5099,7 +5099,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-              "lineNumber": 38
+              "lineNumber": 37
             },
             "deprecated": false
           },
@@ -5112,7 +5112,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-              "lineNumber": 39
+              "lineNumber": 38
             },
             "deprecated": false
           },
@@ -5128,7 +5128,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-              "lineNumber": 40
+              "lineNumber": 39
             },
             "deprecated": false
           },
@@ -5144,7 +5144,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-              "lineNumber": 42
+              "lineNumber": 41
             },
             "deprecated": false,
             "children": [
@@ -5157,7 +5157,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-                  "lineNumber": 47
+                  "lineNumber": 46
                 },
                 "deprecated": false,
                 "children": [
@@ -5473,7 +5473,7 @@
                     ],
                     "source": {
                       "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-                      "lineNumber": 48
+                      "lineNumber": 47
                     },
                     "deprecated": false
                   },
@@ -5521,7 +5521,7 @@
                     ],
                     "source": {
                       "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-                      "lineNumber": 49
+                      "lineNumber": 48
                     },
                     "deprecated": false
                   },
@@ -5534,7 +5534,7 @@
                     "description": [],
                     "source": {
                       "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-                      "lineNumber": 50
+                      "lineNumber": 49
                     },
                     "deprecated": false
                   },
@@ -5550,7 +5550,7 @@
                     ],
                     "source": {
                       "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-                      "lineNumber": 51
+                      "lineNumber": 50
                     },
                     "deprecated": false
                   }
@@ -5585,7 +5585,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-              "lineNumber": 74
+              "lineNumber": 73
             },
             "deprecated": false,
             "children": [
@@ -5607,7 +5607,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-                  "lineNumber": 74
+                  "lineNumber": 73
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -5641,7 +5641,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-              "lineNumber": 93
+              "lineNumber": 92
             },
             "deprecated": false,
             "children": [
@@ -5663,7 +5663,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-                  "lineNumber": 93
+                  "lineNumber": 92
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -14507,15 +14507,15 @@
               {
                 "plugin": "lens",
                 "link": {
-                  "path": "x-pack/plugins/lens/server/migrations.ts",
-                  "lineNumber": 245
+                  "path": "x-pack/plugins/lens/server/migrations/saved_object_migrations.ts",
+                  "lineNumber": 167
                 }
               },
               {
                 "plugin": "lens",
                 "link": {
-                  "path": "x-pack/plugins/lens/server/migrations.ts",
-                  "lineNumber": 312
+                  "path": "x-pack/plugins/lens/server/migrations/saved_object_migrations.ts",
+                  "lineNumber": 234
                 }
               }
             ],
@@ -17426,7 +17426,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-          "lineNumber": 31
+          "lineNumber": 30
         },
         "deprecated": false,
         "initialIsOpen": false
