@@ -11,11 +11,11 @@
         "label": "ColorPicker",
         "description": [],
         "signature": [
-          "({ onChange, color: selectedColor, label, useLegacyColors, colorIsOverwritten, onKeyDown, }: ColorPickerProps) => JSX.Element"
+          "({ onChange, color: selectedColor, label, useLegacyColors, colorIsOverwritten, onKeyDown, maxDepth, layerIndex, }: ColorPickerProps) => JSX.Element"
         ],
         "source": {
           "path": "src/plugins/charts/public/static/components/color_picker.tsx",
-          "lineNumber": 111
+          "lineNumber": 119
         },
         "deprecated": false,
         "children": [
@@ -24,14 +24,14 @@
             "id": "def-public.ColorPicker.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  onChange,\n  color: selectedColor,\n  label,\n  useLegacyColors = true,\n  colorIsOverwritten = true,\n  onKeyDown,\n}",
+            "label": "{\n  onChange,\n  color: selectedColor,\n  label,\n  useLegacyColors = true,\n  colorIsOverwritten = true,\n  onKeyDown,\n  maxDepth,\n  layerIndex,\n}",
             "description": [],
             "signature": [
               "ColorPickerProps"
             ],
             "source": {
               "path": "src/plugins/charts/public/static/components/color_picker.tsx",
-              "lineNumber": 111
+              "lineNumber": 119
             },
             "deprecated": false,
             "isRequired": true
@@ -628,6 +628,77 @@
             "deprecated": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "charts",
+        "id": "def-public.lightenColor",
+        "type": "Function",
+        "tags": [],
+        "label": "lightenColor",
+        "description": [],
+        "signature": [
+          "(baseColor: string, step: number, totalSteps: number) => string"
+        ],
+        "source": {
+          "path": "src/plugins/charts/public/services/palettes/lighten_color.ts",
+          "lineNumber": 14
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.lightenColor.$1",
+            "type": "string",
+            "tags": [],
+            "label": "baseColor",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/lighten_color.ts",
+              "lineNumber": 14
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.lightenColor.$2",
+            "type": "number",
+            "tags": [],
+            "label": "step",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/lighten_color.ts",
+              "lineNumber": 14
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.lightenColor.$3",
+            "type": "number",
+            "tags": [],
+            "label": "totalSteps",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/lighten_color.ts",
+              "lineNumber": 14
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {

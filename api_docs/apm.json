@@ -78,7 +78,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/apm/public/plugin.ts",
-        "lineNumber": 45
+        "lineNumber": 47
       },
       "deprecated": false,
       "lifecycle": "setup",
@@ -96,7 +96,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/apm/public/plugin.ts",
-        "lineNumber": 47
+        "lineNumber": 49
       },
       "deprecated": false,
       "lifecycle": "start",

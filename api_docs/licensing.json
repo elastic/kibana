@@ -45,7 +45,7 @@
               "\nThe validity status of the license."
             ],
             "signature": [
-              "\"active\" | \"invalid\" | \"expired\" | undefined"
+              "\"invalid\" | \"active\" | \"expired\" | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
@@ -381,7 +381,7 @@
               "\nThe state of checking the results of a license type meeting the license minimum."
             ],
             "signature": [
-              "\"valid\" | \"invalid\" | \"expired\" | \"unavailable\""
+              "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
@@ -492,7 +492,7 @@
               "\nThe validity status of the license."
             ],
             "signature": [
-              "\"active\" | \"invalid\" | \"expired\""
+              "\"invalid\" | \"active\" | \"expired\""
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
@@ -839,7 +839,7 @@
         "label": "LicenseCheckState",
         "description": [],
         "signature": [
-          "\"valid\" | \"invalid\" | \"expired\" | \"unavailable\""
+          "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
         ],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
@@ -856,7 +856,7 @@
         "label": "LicenseStatus",
         "description": [],
         "signature": [
-          "\"active\" | \"invalid\" | \"expired\""
+          "\"invalid\" | \"active\" | \"expired\""
         ],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
@@ -952,7 +952,7 @@
               "plugin": "security",
               "link": {
                 "path": "x-pack/plugins/security/public/plugin.tsx",
-                "lineNumber": 82
+                "lineNumber": 84
               }
             },
             {
@@ -1022,7 +1022,7 @@
               "plugin": "fleet",
               "link": {
                 "path": "x-pack/plugins/fleet/public/plugin.ts",
-                "lineNumber": 97
+                "lineNumber": 94
               }
             },
             {
@@ -2078,7 +2078,7 @@
               "\nThe validity status of the license."
             ],
             "signature": [
-              "\"active\" | \"invalid\" | \"expired\" | undefined"
+              "\"invalid\" | \"active\" | \"expired\" | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
@@ -2414,7 +2414,7 @@
               "\nThe state of checking the results of a license type meeting the license minimum."
             ],
             "signature": [
-              "\"valid\" | \"invalid\" | \"expired\" | \"unavailable\""
+              "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
@@ -2581,7 +2581,7 @@
               "\nThe validity status of the license."
             ],
             "signature": [
-              "\"active\" | \"invalid\" | \"expired\""
+              "\"invalid\" | \"active\" | \"expired\""
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
@@ -2947,7 +2947,7 @@
         "label": "LicenseCheckState",
         "description": [],
         "signature": [
-          "\"valid\" | \"invalid\" | \"expired\" | \"unavailable\""
+          "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
         ],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
@@ -2964,7 +2964,7 @@
         "label": "LicenseStatus",
         "description": [],
         "signature": [
-          "\"active\" | \"invalid\" | \"expired\""
+          "\"invalid\" | \"active\" | \"expired\""
         ],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
@@ -3130,7 +3130,7 @@
               "plugin": "fleet",
               "link": {
                 "path": "x-pack/plugins/fleet/server/plugin.ts",
-                "lineNumber": 213
+                "lineNumber": 214
               }
             },
             {
@@ -3151,7 +3151,7 @@
               "plugin": "maps",
               "link": {
                 "path": "x-pack/plugins/maps/server/plugin.ts",
-                "lineNumber": 164
+                "lineNumber": 167
               }
             },
             {
