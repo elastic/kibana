@@ -12,16 +12,9 @@ import { IndexPattern, getServices } from '../../../kibana_services';
 import { DocProps } from './doc';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
+import { ElasticRequestState } from './elastic_request_state';
 
 type RequestBody = Pick<estypes.SearchRequest, 'body'>;
-
-export enum ElasticRequestState {
-  Loading,
-  NotFound,
-  Found,
-  Error,
-  NotFoundIndexPattern,
-}
 
 /**
  * helper function to build a query body for Elasticsearch

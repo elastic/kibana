@@ -7,11 +7,13 @@
  */
 import React, { useEffect, useState } from 'react';
 import { monaco } from '@kbn/monaco';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { ElasticRequestState, useEsDocSearch } from '../doc/use_es_doc_search';
+import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useEsDocSearch } from '../doc/use_es_doc_search';
 import { DocProps } from '../doc/doc';
 import { JsonCodeEditorCommon } from '../json_code_editor/json_code_editor_common';
-
+import { ElasticRequestState } from '../doc/elastic_request_state';
+import { useUiSetting } from '../../lib/kibana';
 interface SourceViewerProps {
   docProps: DocProps;
   hasLineNumbers: boolean;
@@ -48,14 +50,45 @@ export const SourceViewer = ({ docProps, width, hasLineNumbers }: SourceViewerPr
     editor.layout();
   }, [editor, jsonValue]);
 
-  return reqState === ElasticRequestState.Loading ? (
-    <EuiLoadingSpinner size="m" />
-  ) : (
+  const loadingState = <EuiLoadingSpinner size="m" />;
+
+  const errorMessageTitle = (
+    <h2>
+      {i18n.translate('discover.sourceViewer.errorMessageTitle', {
+        defaultMessage: 'An Error Occurred',
+      })}
+    </h2>
+  );
+  const errorMessage = (
+    <p>
+      {i18n.translate('discover.sourceViewer.errorMessage', {
+        defaultMessage: 'Could not fetch source at this time. Refresh the tab to try again.',
+      })}
+    </p>
+  );
+  const errorState = (
+    <EuiEmptyPrompt iconType="alert" title={errorMessageTitle} body={errorMessage} />
+  );
+
+  if (reqState === ElasticRequestState.Loading) {
+    return loadingState;
+  }
+
+  if (
+    reqState === ElasticRequestState.Error ||
+    reqState === ElasticRequestState.NotFound ||
+    reqState === ElasticRequestState.NotFoundIndexPattern
+  ) {
+    return errorState;
+  }
+
+  return (
     <JsonCodeEditorCommon
       jsonValue={jsonValue}
       width={width}
       hasLineNumbers={hasLineNumbers}
       onEditorDidMount={(editorNode: monaco.editor.IStandaloneCodeEditor) => setEditor(editorNode)}
+      data-test-subj="source-viewer-json-editor"
     />
   );
 };

@@ -7,11 +7,12 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { buildSearchBody, useEsDocSearch, ElasticRequestState } from './use_es_doc_search';
+import { buildSearchBody, useEsDocSearch } from './use_es_doc_search';
 import { DocProps } from './doc';
 import { Observable } from 'rxjs';
 import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '../../../../common';
 import { IndexPattern } from 'src/plugins/data/common';
+import { ElasticRequestState } from './elastic_request_state';
 
 const mockSearchResult = new Observable();
 

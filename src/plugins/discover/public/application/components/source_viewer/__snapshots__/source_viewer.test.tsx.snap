@@ -1,0 +1,631 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Source Viewer component renders error state 1`] = `
+<SourceViewer
+  docProps={
+    Object {
+      "id": "1",
+      "index": "index1",
+      "indexPatternId": "xyz",
+      "indexPatternService": Object {
+        "get": [MockFunction],
+      },
+    }
+  }
+  hasLineNumbers={true}
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  width={123}
+>
+  <EuiEmptyPrompt
+    body={
+      <p>
+        Could not fetch source at this time. Refresh the tab to try again.
+      </p>
+    }
+    iconType="alert"
+    title={
+      <h2>
+        An Error Occurred
+      </h2>
+    }
+  >
+    <div
+      className="euiEmptyPrompt"
+    >
+      <EuiIcon
+        color="subdued"
+        size="xxl"
+        type="alert"
+      >
+        <span
+          color="subdued"
+          data-euiicon-type="alert"
+          size="xxl"
+        />
+      </EuiIcon>
+      <EuiSpacer
+        size="s"
+      >
+        <div
+          className="euiSpacer euiSpacer--s"
+        />
+      </EuiSpacer>
+      <EuiTextColor
+        color="subdued"
+      >
+        <span
+          className="euiTextColor euiTextColor--subdued"
+        >
+          <EuiTitle
+            size="m"
+          >
+            <h2
+              className="euiTitle euiTitle--medium"
+            >
+              An Error Occurred
+            </h2>
+          </EuiTitle>
+          <EuiSpacer
+            size="m"
+          >
+            <div
+              className="euiSpacer euiSpacer--m"
+            />
+          </EuiSpacer>
+          <EuiText>
+            <div
+              className="euiText euiText--medium"
+            >
+              <p>
+                Could not fetch source at this time. Refresh the tab to try again.
+              </p>
+            </div>
+          </EuiText>
+        </span>
+      </EuiTextColor>
+    </div>
+  </EuiEmptyPrompt>
+</SourceViewer>
+`;
+
+exports[`Source Viewer component renders json code editor 1`] = `
+<SourceViewer
+  docProps={
+    Object {
+      "id": "1",
+      "index": "index1",
+      "indexPatternId": "xyz",
+      "indexPatternService": Object {
+        "get": [MockFunction],
+      },
+    }
+  }
+  hasLineNumbers={true}
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  width={123}
+>
+  <JsonCodeEditorCommon
+    data-test-subj="source-viewer-json-editor"
+    hasLineNumbers={true}
+    jsonValue="{
+  \\"message\\": \\"Lorem ipsum dolor sit amet\\",
+  \\"extension\\": \\"html\\",
+  \\"not_mapped\\": \\"yes\\",
+  \\"bytes\\": 100,
+  \\"objectArray\\": [
+    {
+      \\"foo\\": true
+    }
+  ],
+  \\"relatedContent\\": {
+    \\"test\\": 1
+  },
+  \\"scripted\\": 123,
+  \\"_underscore\\": 123
+}"
+    onEditorDidMount={[Function]}
+    width={123}
+  >
+    <EuiFlexGroup
+      className="dscJsonCodeEditor"
+      direction="column"
+      gutterSize="s"
+    >
+      <div
+        className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionColumn euiFlexGroup--responsive dscJsonCodeEditor"
+      >
+        <EuiFlexItem>
+          <div
+            className="euiFlexItem"
+          >
+            <EuiSpacer
+              size="s"
+            >
+              <div
+                className="euiSpacer euiSpacer--s"
+              />
+            </EuiSpacer>
+            <div
+              className="eui-textRight"
+            >
+              <EuiCopy
+                afterMessage="Copied"
+                textToCopy="{
+  \\"message\\": \\"Lorem ipsum dolor sit amet\\",
+  \\"extension\\": \\"html\\",
+  \\"not_mapped\\": \\"yes\\",
+  \\"bytes\\": 100,
+  \\"objectArray\\": [
+    {
+      \\"foo\\": true
+    }
+  ],
+  \\"relatedContent\\": {
+    \\"test\\": 1
+  },
+  \\"scripted\\": 123,
+  \\"_underscore\\": 123
+}"
+              >
+                <EuiToolTip
+                  delay="regular"
+                  onMouseOut={[Function]}
+                  position="top"
+                >
+                  <span
+                    className="euiToolTipAnchor"
+                    onKeyUp={[Function]}
+                    onMouseOut={[Function]}
+                    onMouseOver={[Function]}
+                  >
+                    <EuiButtonEmpty
+                      flush="right"
+                      iconType="copyClipboard"
+                      onBlur={[Function]}
+                      onClick={[Function]}
+                      onFocus={[Function]}
+                      size="xs"
+                    >
+                      <button
+                        className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushRight"
+                        disabled={false}
+                        onBlur={[Function]}
+                        onClick={[Function]}
+                        onFocus={[Function]}
+                        type="button"
+                      >
+                        <EuiButtonContent
+                          className="euiButtonEmpty__content"
+                          iconSide="left"
+                          iconSize="s"
+                          iconType="copyClipboard"
+                          textProps={
+                            Object {
+                              "className": "euiButtonEmpty__text",
+                            }
+                          }
+                        >
+                          <span
+                            className="euiButtonContent euiButtonEmpty__content"
+                          >
+                            <EuiIcon
+                              className="euiButtonContent__icon"
+                              color="inherit"
+                              size="s"
+                              type="copyClipboard"
+                            >
+                              <span
+                                className="euiButtonContent__icon"
+                                color="inherit"
+                                data-euiicon-type="copyClipboard"
+                                size="s"
+                              />
+                            </EuiIcon>
+                            <span
+                              className="euiButtonEmpty__text"
+                            >
+                              Copy to clipboard
+                            </span>
+                          </span>
+                        </EuiButtonContent>
+                      </button>
+                    </EuiButtonEmpty>
+                  </span>
+                </EuiToolTip>
+              </EuiCopy>
+            </div>
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <div
+            className="euiFlexItem"
+          >
+            <CodeEditor
+              aria-label="Read only JSON view of an elasticsearch document"
+              editorDidMount={[Function]}
+              languageId="xjson"
+              onChange={[Function]}
+              options={
+                Object {
+                  "automaticLayout": true,
+                  "fontSize": 12,
+                  "lineNumbers": "on",
+                  "minimap": Object {
+                    "enabled": false,
+                  },
+                  "overviewRulerBorder": false,
+                  "readOnly": true,
+                  "scrollBeyondLastLine": false,
+                  "scrollbar": Object {
+                    "alwaysConsumeMouseWheel": false,
+                  },
+                  "wordWrap": "on",
+                  "wrappingIndent": "indent",
+                }
+              }
+              value="{
+  \\"message\\": \\"Lorem ipsum dolor sit amet\\",
+  \\"extension\\": \\"html\\",
+  \\"not_mapped\\": \\"yes\\",
+  \\"bytes\\": 100,
+  \\"objectArray\\": [
+    {
+      \\"foo\\": true
+    }
+  ],
+  \\"relatedContent\\": {
+    \\"test\\": 1
+  },
+  \\"scripted\\": 123,
+  \\"_underscore\\": 123
+}"
+              width={123}
+            >
+              <EuiErrorBoundary>
+                <Suspense
+                  fallback={<Fallback />}
+                >
+                  <Fallback>
+                    <EuiDelayRender
+                      delay={500}
+                    />
+                  </Fallback>
+                </Suspense>
+              </EuiErrorBoundary>
+            </CodeEditor>
+          </div>
+        </EuiFlexItem>
+      </div>
+    </EuiFlexGroup>
+  </JsonCodeEditorCommon>
+</SourceViewer>
+`;
+
+exports[`Source Viewer component renders loading state 1`] = `
+<SourceViewer
+  docProps={
+    Object {
+      "id": "1",
+      "index": "index1",
+      "indexPatternId": "xyz",
+      "indexPatternService": Object {
+        "get": [MockFunction],
+      },
+    }
+  }
+  hasLineNumbers={true}
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  width={123}
+>
+  <EuiLoadingSpinner
+    size="m"
+  >
+    <span
+      className="euiLoadingSpinner euiLoadingSpinner--medium"
+    />
+  </EuiLoadingSpinner>
+</SourceViewer>
+`;
