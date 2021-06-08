@@ -47,6 +47,10 @@ import { APMConfig } from '.';
 import { getApmIndices } from './lib/settings/apm_indices/get_apm_indices';
 import { createApmEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
 import { ApmPluginRequestHandlerContext } from './routes/typings';
+import {
+  FleetSetupContract as FleetPluginSetup,
+  FleetStartContract as FleetPluginStart,
+} from '../../fleet/server';
 
 export interface APMPluginSetup {
   config$: Observable<APMConfig>;
@@ -123,6 +127,10 @@ interface DependencyMap {
     setup: RuleRegistryPluginSetupContract;
     start: RuleRegistryPluginStartContract;
   };
+  fleet: {
+    setup: FleetPluginSetup;
+    start: FleetPluginStart;
+  };
 }
 
 const requiredDependencies = [
@@ -148,6 +156,7 @@ const optionalDependencies = [
   'ml',
   'home',
   'maps',
+  'fleet',
 ] as const;
 
 type RequiredDependencies = Pick<
