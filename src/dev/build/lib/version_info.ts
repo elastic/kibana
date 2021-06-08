@@ -7,6 +7,8 @@
  */
 
 import execa from 'execa';
+import fs from 'fs';
+import { join } from 'path';
 import { getBuildNumber } from './get_build_number';
 
 interface Options {
@@ -27,11 +29,12 @@ export async function getVersionInfo({ isRelease, versionQualifier, pkg }: Optio
     isRelease ? '' : '-SNAPSHOT'
   );
 
+  const buildSha = fs.existsSync('./.git')
+    ? await execa('git', ['rev-parse', 'HEAD']).stdout
+    : process.env.GIT_COMMIT || process.env.BUILDKITE_COMMIT;
+
   return {
-    buildSha:
-      process.env.GIT_COMMIT ||
-      process.env.BUILDKITE_COMMIT ||
-      (await execa('git', ['rev-parse', 'HEAD'])).stdout,
+    buildSha,
     buildVersion,
     buildNumber: await getBuildNumber(),
   };
