@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React, { useEffect } from 'react';
 import deepEqual from 'fast-deep-equal';
 
@@ -95,8 +93,9 @@ export const NavigationManagerComponent: React.FC<
     );
   }
 );
+NavigationManagerComponent.displayName = 'NavigationManagerComponent';
 
-const NavigationManagerContainer: React.FC<SecuritySolutionNavigationManagerProps> = React.memo(
+export const SecuritySolutionNavigationManager: React.FC<SecuritySolutionNavigationManagerProps> = React.memo(
   (props) => {
     const [routeProps] = useRouteSpy();
     const urlStateProps = useUrlState();
@@ -109,10 +108,7 @@ const NavigationManagerContainer: React.FC<SecuritySolutionNavigationManagerProp
     };
 
     return <NavigationManagerComponent {...navigationManagerProps} />;
-  }
-);
-
-export const SecuritySolutionNavigationManager = React.memo(
-  NavigationManagerContainer,
+  },
   (prevProps, nextProps) => deepEqual(prevProps.navTabs, nextProps.navTabs)
 );
+SecuritySolutionNavigationManager.displayName = 'SecuritySolutionNavigationManager';

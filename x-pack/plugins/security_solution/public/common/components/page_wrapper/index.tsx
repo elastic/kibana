@@ -15,7 +15,6 @@ import { gutterTimeline } from '../../lib/helpers';
 import { AppGlobalStyle } from '../page/index';
 
 const Wrapper = styled.div`
-  padding: ${(props) => `${props.theme.eui.paddingSizes.l}`};
   &.securitySolutionWrapper--fullHeight {
     height: 100%;
     display: flex;

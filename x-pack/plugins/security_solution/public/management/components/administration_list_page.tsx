@@ -88,7 +88,7 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
 
         <EuiSpacer />
 
-        <EuiPanelStyled>{children}</EuiPanelStyled>
+        <EuiPanelStyled hasBorder>{children}</EuiPanelStyled>
 
         <SpyRoute pageName={SecurityPageName.administration} />
       </SecuritySolutionPageWrapper>

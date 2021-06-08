@@ -37,7 +37,7 @@ export const FiltersGlobal = React.memo<FiltersGlobalProps>(({ children, show = 
   return (
     <InPortal node={globalKQLHeaderPortalNode}>
       <FiltersGlobalContainer data-test-subj="filters-global-container" show={show}>
-        <Wrapper className="siemFiltersGlobal">{children}</Wrapper>
+        {children}
       </FiltersGlobalContainer>
     </InPortal>
   );
