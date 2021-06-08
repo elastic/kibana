@@ -53,7 +53,7 @@ export interface GetStateParams {
   /**
    * Number of records to be fetched when 'Load' link/button is clicked
    */
-  defaultStepSize: number;
+  defaultSize: number;
   /**
    * The timefield used for sorting
    */
@@ -123,7 +123,7 @@ const APP_STATE_URL_KEY = '_a';
  * provides helper functions to start/stop syncing with URL
  */
 export function getState({
-  defaultStepSize,
+  defaultSize,
   timeFieldName,
   storeInSessionStorage = false,
   history,
@@ -141,7 +141,7 @@ export function getState({
 
   const appStateFromUrl = stateStorage.get(APP_STATE_URL_KEY) as AppState;
   const appStateInitial = createInitialAppState(
-    defaultStepSize,
+    defaultSize,
     timeFieldName,
     appStateFromUrl,
     uiSettings

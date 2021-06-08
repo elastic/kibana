@@ -49,11 +49,7 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
   /**
    * Context app state
    */
-  const { appState, setAppState } = useContextAppState({
-    indexPattern,
-    defaultStepSize,
-    services,
-  });
+  const { appState, setAppState } = useContextAppState({ indexPattern, services });
   const prevState = useRef<AppState>();
 
   /**

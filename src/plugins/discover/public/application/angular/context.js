@@ -23,7 +23,7 @@ const k7Breadcrumbs = () => {
 };
 
 getAngularModule().config(($routeProvider) => {
-  $routeProvider.when('/context/:indexPatternId/:id', {
+  $routeProvider.when('/context/:indexPatternId/:id*', {
     controller: function ($routeParams, $scope, $route) {
       this.indexPattern = $route.current.locals.indexPattern.ip;
       this.anchorId = $routeParams.id;

@@ -8,31 +8,30 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { cloneDeep } from 'lodash';
+import { CONTEXT_DEFAULT_SIZE_SETTING } from '../../../../common';
 import { IndexPattern } from '../../../../../data/public';
 import { DiscoverServices } from '../../../build_services';
 import { AppState, getState } from '../../angular/context_state';
 
 export function useContextAppState({
   indexPattern,
-  defaultStepSize,
   services,
 }: {
   indexPattern: IndexPattern;
-  defaultStepSize: number;
   services: DiscoverServices;
 }) {
   const { uiSettings: config, history, core, filterManager } = services;
 
   const stateContainer = useMemo(() => {
     return getState({
-      defaultStepSize,
+      defaultSize: config.get(CONTEXT_DEFAULT_SIZE_SETTING),
       timeFieldName: indexPattern.timeFieldName as string,
       storeInSessionStorage: config.get('state:storeInSessionStorage'),
       history: history(),
       toasts: core.notifications.toasts,
       uiSettings: config,
     });
-  }, [defaultStepSize, config, history, indexPattern, core.notifications.toasts]);
+  }, [config, history, indexPattern, core.notifications.toasts]);
 
   const [appState, setState] = useState<AppState>(stateContainer.appState.getState());
 
