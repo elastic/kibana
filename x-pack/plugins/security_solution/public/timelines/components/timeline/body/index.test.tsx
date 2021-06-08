@@ -255,7 +255,7 @@ describe('Body', () => {
           tabType: 'query',
           timelineId: 'timeline-test',
         },
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
+        type: 'x-pack/timelines/t-grid/TOGGLE_DETAIL_PANEL',
       });
     });
 
@@ -279,7 +279,7 @@ describe('Body', () => {
           tabType: 'pinned',
           timelineId: 'timeline-test',
         },
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
+        type: 'x-pack/timelines/t-grid/TOGGLE_DETAIL_PANEL',
       });
     });
 
@@ -303,7 +303,7 @@ describe('Body', () => {
           tabType: 'notes',
           timelineId: 'timeline-test',
         },
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
+        type: 'x-pack/timelines/t-grid/TOGGLE_DETAIL_PANEL',
       });
     });
   });

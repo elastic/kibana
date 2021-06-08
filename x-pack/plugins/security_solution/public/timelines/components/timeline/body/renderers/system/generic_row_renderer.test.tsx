@@ -83,6 +83,8 @@ import {
 import * as i18n from './translations';
 import { RowRenderer } from '../../../../../../../common';
 
+jest.mock('../../../../../../common/lib/kibana');
+
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {

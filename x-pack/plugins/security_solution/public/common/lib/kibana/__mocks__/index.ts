@@ -6,6 +6,12 @@
  */
 
 import { notificationServiceMock } from '../../../../../../../../src/core/public/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { useDraggableKeyboardWrapper } from '../../../../../../timelines/public/components';
+import {
+  useAddToTimeline,
+  useAddToTimelineSensor,
+} from '../../../../../../timelines/public/hooks/use_add_to_timeline';
 import {
   createKibanaContextProviderMock,
   createUseUiSettingMock,
@@ -30,6 +36,12 @@ export const useKibana = jest.fn().mockReturnValue({
           })),
         })),
       },
+    },
+    timelines: {
+      // getTGrid
+      getUseAddToTimeline: () => useAddToTimeline,
+      getUseAddToTimelineSensor: () => useAddToTimelineSensor,
+      getUseDraggableKeyboardWrapper: () => useDraggableKeyboardWrapper,
     },
   },
 });
