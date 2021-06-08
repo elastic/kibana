@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButtonGroup, EuiComboBox, EuiFieldText, EuiSuperSelect } from '@elastic/eui';
+import { EuiButtonGroup, EuiComboBox, EuiFieldText } from '@elastic/eui';
 import { FramePublicAPI, VisualizationDimensionEditorProps } from '../../types';
 import { DatatableVisualizationState } from '../visualization';
 import { createMockDatasource, createMockFramePublicAPI } from '../../editor_frame_service/mocks';
