@@ -9,6 +9,7 @@ import React, { useState, useCallback, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiButton } from '@elastic/eui';
+import { ScopedHistory } from 'kibana/public';
 
 import { TemplateDeserialized } from '../../../../common';
 import { serializers, Forms, GlobalFlyout } from '../../../shared_imports';
@@ -39,6 +40,7 @@ interface Props {
   clearSaveError: () => void;
   isSaving: boolean;
   saveError: any;
+  history?: ScopedHistory;
   isLegacy?: boolean;
   defaultValue?: TemplateDeserialized;
   isEditing?: boolean;
@@ -99,6 +101,7 @@ export const TemplateForm = ({
   saveError,
   clearSaveError,
   onSave,
+  history,
 }: Props) => {
   const [wizardContent, setWizardContent] = useState<Forms.Content<WizardContent> | null>(null);
   const { addContent: addContentToGlobalFlyout, closeFlyout } = useGlobalFlyout();
@@ -293,7 +296,9 @@ export const TemplateForm = ({
 
       <EuiSpacer size="m" />
 
-      {isLegacyIndexTemplate && <LegacyIndexTemplatesDeprecation />}
+      {isLegacyIndexTemplate && (
+        <LegacyIndexTemplatesDeprecation history={history} showCta={true} />
+      )}
 
       <EuiSpacer size="s" />
 

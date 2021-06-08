@@ -8,10 +8,19 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EuiLink, EuiCallOut } from '@elastic/eui';
-import { documentationService } from '../../services/documentation';
+import { EuiCallOut, EuiButton } from '@elastic/eui';
+import { ScopedHistory } from 'kibana/public';
+import { reactRouterNavigate } from '../../../shared_imports';
 
-export const LegacyIndexTemplatesDeprecation = () => (
+interface Props {
+  history?: ScopedHistory;
+  showCta?: boolean;
+}
+
+export const LegacyIndexTemplatesDeprecation: React.FunctionComponent<Props> = ({
+  history,
+  showCta,
+}) => (
   <EuiCallOut
     title={i18n.translate('xpack.idxMgmt.legacyIndexTemplatesDeprecation.title', {
       defaultMessage: 'Legacy index templates are deprecated in favor of composable templates',
@@ -20,24 +29,20 @@ export const LegacyIndexTemplatesDeprecation = () => (
     iconType="alert"
     data-test-subj="legacyIndexTemplateDeprecationWarning"
   >
-    <p>
-      <FormattedMessage
-        id="xpack.idxMgmt.legacyIndexTemplatesDeprecation.description"
-        defaultMessage="Use composable index templates instead. {learnMoreLink}"
-        values={{
-          learnMoreLink: (
-            <EuiLink
-              href={documentationService.getTemplatesDocumentationLink()}
-              target="_blank"
-              external
-            >
-              {i18n.translate('xpack.idxMgmt.legacyIndexTemplatesDeprecation.learnMoreLinkText', {
-                defaultMessage: 'Learn more.',
-              })}
-            </EuiLink>
-          ),
-        }}
-      />
-    </p>
+    {showCta && history && (
+      <EuiButton
+        iconType="plusInCircle"
+        data-test-subj="createTemplateButton"
+        key="createTemplateButton"
+        color="warning"
+        fill
+        {...reactRouterNavigate(history, '/create_template')}
+      >
+        <FormattedMessage
+          id="xpack.idxMgmt.legacyIndexTemplatesDeprecation.createTemplatesButtonLabel"
+          defaultMessage="Create composable template"
+        />
+      </EuiButton>
+    )}
   </EuiCallOut>
 );

@@ -24,6 +24,7 @@ import {
 
 import { UIM_TEMPLATE_LIST_LOAD } from '../../../../../common/constants';
 import { TemplateListItem } from '../../../../../common';
+import { attemptToURIDecode } from '../../../../shared_imports';
 import {
   SectionError,
   SectionLoading,
@@ -39,7 +40,6 @@ import {
   getTemplateCloneLink,
 } from '../../../services/routing';
 import { getIsLegacyFromQueryParams } from '../../../lib/index_templates';
-import { attemptToURIDecode } from '../../../../shared_imports';
 import { FilterListButton, Filters } from '../components';
 import { TemplateTable } from './template_table';
 import { TemplateDetails } from './template_details';
@@ -135,7 +135,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
         <EuiText color="subdued">
           <FormattedMessage
             id="xpack.idxMgmt.home.indexTemplatesDescription"
-            defaultMessage="Use index templates to automatically apply settings, mappings, and aliases to indices. {learnMoreLink}"
+            defaultMessage="Use composable index templates to automatically apply settings, mappings, and aliases to indices. {learnMoreLink}"
             values={{
               learnMoreLink: (
                 <EuiLink
