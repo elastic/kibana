@@ -221,7 +221,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows management navlink', async () => {
-        const spaceId = 'nondefaultspace';
         await PageObjects.spaceSelector.expectHomePage('nondefaultspace');
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.contain('Stack Management');
