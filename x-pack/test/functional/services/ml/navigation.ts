@@ -138,6 +138,15 @@ export function MachineLearningNavigationProvider({
       });
     },
 
+    async navigateToStackManagementInsuficientLicensePage() {
+      // clicks the jobsListLink and loads the jobs list page
+      await testSubjects.click('jobsListLink');
+      await retry.tryForTime(60 * 1000, async () => {
+        // verify that the overall page is present
+        await testSubjects.existOrFail('mlPageInsufficientLicense');
+      });
+    },
+
     async navigateToStackManagementJobsListPageAnalyticsTab() {
       // clicks the `Analytics` tab and loads the analytics list page
       await testSubjects.click('mlStackManagementJobsListAnalyticsTab');
