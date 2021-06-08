@@ -123,24 +123,32 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         align: 'left',
         width: '8ch',
         render({ packagePolicy, agentPolicy }: PackagePolicyAndAgentPolicy) {
+          const count = agentPolicy?.agents ?? 0;
+
           return (
             <>
               <LinkedAgentCount
-                count={agentPolicy?.agents ?? 0}
+                count={count}
                 agentPolicyId={packagePolicy.policy_id}
                 className="eui-textTruncate"
                 data-test-subj="rowAgentCount"
               />
-              <EuiToolTip
-                content={i18n.translate('xpack.fleet.epm.packageDetails.integrationList.addAgent', {
-                  defaultMessage: 'Add Agent',
-                })}
-              >
-                <AddAgentButton
-                  iconType="plusInCircle"
-                  onClick={() => setFlyoutOpenForPolicyId(agentPolicy.id)}
-                />
-              </EuiToolTip>
+              {count === 0 && (
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.fleet.epm.packageDetails.integrationList.addAgent',
+                    {
+                      defaultMessage: 'Add Agent',
+                    }
+                  )}
+                >
+                  <AddAgentButton
+                    iconType="plusInCircle"
+                    onClick={() => setFlyoutOpenForPolicyId(agentPolicy.id)}
+                    data-test-subj="addAgentButton"
+                  />
+                </EuiToolTip>
+              )}
             </>
           );
         },

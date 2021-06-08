@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useState, useMemo } from 'react';
-import { EuiPortal, EuiContextMenuItem, EuiLink } from '@elastic/eui';
+import { EuiPortal, EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import type { AgentPolicy, PackagePolicy } from '../../../../../types';
@@ -51,18 +51,16 @@ export const PackagePoliciesActionMenu: React.FunctionComponent<{
               defaultMessage="Add Agent"
             />
           </EuiContextMenuItem>,
-          <EuiContextMenuItem icon="pencil" onClick={() => null} key="editIntegration">
-            <EuiLink
-              color="text"
-              href={getHref('integration_policy_edit', {
-                packagePolicyId: packagePolicy.id,
-              })}
-            >
-              <FormattedMessage
-                id="xpack.fleet.epm.packageDetails.integrationList.editIntegration"
-                defaultMessage="Edit integration"
-              />
-            </EuiLink>
+          <EuiContextMenuItem
+            icon="pencil"
+            href={getHref('integration_policy_edit', {
+              packagePolicyId: packagePolicy.id,
+            })}
+          >
+            <FormattedMessage
+              id="xpack.fleet.epm.packageDetails.integrationList.editIntegration"
+              defaultMessage="Edit integration"
+            />
           </EuiContextMenuItem>,
           <PackagePolicyDeleteProvider agentPolicy={agentPolicy} key="deleteIntegration">
             {(deletePackagePoliciesPrompt) => (
