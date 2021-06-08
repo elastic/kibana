@@ -114,6 +114,14 @@ export const actionTypesMock: ActionTypeConnector[] = [
     enabledInConfig: true,
     enabledInLicense: true,
   },
+  {
+    id: '.servicenow-sir',
+    name: 'ServiceNow SIR',
+    minimumLicenseRequired: 'platinum',
+    enabled: false,
+    enabledInConfig: true,
+    enabledInLicense: true,
+  },
 ];
 
 export const caseConfigurationResposeMock: CasesConfigureResponse = {

@@ -121,7 +121,7 @@ async function indexHostDocs({
   const kibanaVersion = await fetchKibanaVersion(kbnClient);
   let hostMetadata: HostMetadata;
   let wasAgentEnrolled = false;
-  let enrolledAgent: undefined | estypes.Hit<FleetServerAgent>;
+  let enrolledAgent: undefined | estypes.SearchHit<FleetServerAgent>;
 
   for (let j = 0; j < numDocs; j++) {
     generator.updateHostData();
@@ -373,7 +373,7 @@ const indexFleetAgentForHost = async (
   endpointHost: HostMetadata,
   agentPolicyId: string,
   kibanaVersion: string = '8.0.0'
-): Promise<estypes.Hit<FleetServerAgent>> => {
+): Promise<estypes.SearchHit<FleetServerAgent>> => {
   const agentDoc = fleetAgentGenerator.generateEsHit({
     _source: {
       local_metadata: {

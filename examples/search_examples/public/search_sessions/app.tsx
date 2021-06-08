@@ -702,7 +702,7 @@ function doSearch(
   const startTs = performance.now();
 
   // Submit the search request using the `data.search` service.
-  // @ts-expect-error request.params is incompatible. Filter is not assignable to QueryContainer
+  // @ts-expect-error request.params is incompatible. Filter is not assignable to QueryDslQueryContainer
   return data.search
     .search(req, { sessionId })
     .pipe(
