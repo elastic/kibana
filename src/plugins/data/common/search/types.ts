@@ -65,6 +65,8 @@ export interface IKibanaSearchResponse<RawResponse = any> {
    */
   isPartial?: boolean;
 
+  isRestored?: boolean;
+
   /**
    * The raw response returned by the internal search method (usually the raw ES response)
    */

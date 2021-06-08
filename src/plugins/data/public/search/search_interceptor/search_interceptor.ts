@@ -345,6 +345,11 @@ export class SearchInterceptor {
               this.handleSearchError(e, searchOptions, searchAbortController.isTimeout())
             );
           }),
+          tap((response) => {
+            if (this.deps.session.isRestore() && response.isRestored === false) {
+              this.showRestoreWarning(this.deps.session.getSessionId());
+            }
+          }),
           finalize(() => {
             this.pendingCount$.next(this.pendingCount$.getValue() - 1);
             if (untrackSearch && this.deps.session.isCurrentSession(sessionId)) {
@@ -366,6 +371,25 @@ export class SearchInterceptor {
 
   private showTimeoutErrorMemoized = memoize(
     this.showTimeoutErrorToast,
+    (_: SearchTimeoutError, sessionId: string) => {
+      return sessionId;
+    }
+  );
+
+  private showRestoreWarningToast = (sessionId?: string) => {
+    this.deps.toasts.addWarning(
+      {
+        title: 'Oopsy',
+        text: toMountPoint('Additional searches were added.'),
+      },
+      {
+        toastLifeTimeMs: 30000,
+      }
+    );
+  };
+
+  private showRestoreWarning = memoize(
+    this.showRestoreWarningToast,
     (_: SearchTimeoutError, sessionId: string) => {
       return sessionId;
     }
