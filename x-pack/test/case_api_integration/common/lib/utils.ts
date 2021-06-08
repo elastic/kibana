@@ -532,7 +532,6 @@ export const deleteConfiguration = async (es: KibanaClient): Promise<void> => {
 export const deleteMappings = async (es: KibanaClient): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
-    // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
     q: 'type:cases-connector-mappings',
     wait_for_completion: true,
     refresh: true,
