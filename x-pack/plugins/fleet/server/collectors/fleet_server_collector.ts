@@ -70,7 +70,9 @@ export const getFleetServerUsage = async (
     soClient,
     esClient,
     undefined,
-    [...policyIds].map((policyId) => `(policy_id:"${policyId}")`).join(' or ')
+    Array.from(policyIds)
+      .map((policyId) => `(policy_id:"${policyId}")`)
+      .join(' or ')
   );
 
   return {
