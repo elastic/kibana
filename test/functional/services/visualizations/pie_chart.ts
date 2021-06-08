@@ -42,7 +42,7 @@ export class PieChartService extends FtrService {
         const pieWidth = pieSize.width;
         await pie.clickMouseButton({
           xOffset: pieSlice.coords[0] - Math.floor(pieWidth / 2),
-          yOffset: Math.floor(pieHeight / 2) - pieSlice.coords[1],
+          yOffset: pieSlice.coords[1] - Math.floor(pieHeight / 2),
         });
       }
     } else {
