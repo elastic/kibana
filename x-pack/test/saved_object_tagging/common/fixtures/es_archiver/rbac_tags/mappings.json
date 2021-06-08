@@ -1,8 +1,10 @@
 {
   "type": "index",
   "value": {
-    "aliases": {},
-    "index": ".kibana",
+    "aliases": {
+      ".kibana": {}
+    },
+    "index": ".kibana_1",
     "mappings": {
       "doc": {
         "dynamic": "strict",
