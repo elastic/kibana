@@ -54,7 +54,12 @@ export const EnableAlertsModal: React.FC<{}> = () => {
     <EuiModal onClose={closeModal}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          <h1>Create alerts</h1>
+          <h1>
+            <FormattedMessage
+              id="xpack.monitoring.alerts.modal.title"
+              defaultMessage="Create rules"
+            />
+          </h1>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
