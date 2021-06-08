@@ -7,18 +7,14 @@
 
 import { useRef, useState } from 'react';
 import type { Subscription } from 'rxjs';
-
 import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../../../src/plugins/data/public';
-
 import type { SearchServiceValue } from '../../../../common/search_strategies/correlations/types';
-
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import type { ApmPluginStartDeps } from '../../../plugin';
 
 interface CorrelationsOptions {
   index: string;
@@ -38,8 +34,7 @@ interface RawResponse {
 }
 
 export const useCorrelations = (params: CorrelationsOptions) => {
-  const { pluginsStart } = useApmPluginContext();
-  const data = (pluginsStart.data as unknown) as ApmPluginStartDeps['data'];
+  const { data } = useApmPluginContext();
 
   const [error, setError] = useState<Error>();
   const [isComplete, setIsComplete] = useState(false);

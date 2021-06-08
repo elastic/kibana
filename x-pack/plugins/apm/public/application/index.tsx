@@ -47,6 +47,7 @@ export const renderApp = ({
     config,
     core: coreStart,
     plugins: pluginsSetup,
+    data: pluginsStart.data,
     observability: pluginsStart.observability,
     observabilityRuleTypeRegistry,
   };
