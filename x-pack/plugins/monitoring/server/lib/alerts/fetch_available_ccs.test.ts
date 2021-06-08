@@ -26,7 +26,7 @@ describe('fetchAvailableCcs', () => {
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         [connectedRemote]: {
           connected: true,
-        } as estypes.RemoteInfo,
+        } as estypes.ClusterRemoteInfoClusterRemoteInfo,
       })
     );
 
@@ -41,7 +41,7 @@ describe('fetchAvailableCcs', () => {
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         [disconnectedRemote]: {
           connected: false,
-        } as estypes.RemoteInfo,
+        } as estypes.ClusterRemoteInfoClusterRemoteInfo,
       })
     );
 

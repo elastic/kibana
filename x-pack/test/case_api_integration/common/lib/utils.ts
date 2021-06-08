@@ -72,7 +72,7 @@ export const getSignalsWithES = async ({
   es: KibanaClient;
   indices: string | string[];
   ids: string | string[];
-}): Promise<Map<string, Map<string, estypes.Hit<SignalHit>>>> => {
+}): Promise<Map<string, Map<string, estypes.SearchHit<SignalHit>>>> => {
   const signals: ApiResponse<estypes.SearchResponse<SignalHit>> = await es.search({
     index: indices,
     body: {
@@ -94,13 +94,13 @@ export const getSignalsWithES = async ({
   return signals.body.hits.hits.reduce((acc, hit) => {
     let indexMap = acc.get(hit._index);
     if (indexMap === undefined) {
-      indexMap = new Map<string, estypes.Hit<SignalHit>>([[hit._id, hit]]);
+      indexMap = new Map<string, estypes.SearchHit<SignalHit>>([[hit._id, hit]]);
     } else {
       indexMap.set(hit._id, hit);
     }
     acc.set(hit._index, indexMap);
     return acc;
-  }, new Map<string, Map<string, estypes.Hit<SignalHit>>>());
+  }, new Map<string, Map<string, estypes.SearchHit<SignalHit>>>());
 };
 
 interface SetStatusCasesParams {
@@ -473,7 +473,6 @@ export const deleteAllCaseItems = async (es: KibanaClient) => {
 export const deleteCasesUserActions = async (es: KibanaClient): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
-    // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
     q: 'type:cases-user-actions',
     wait_for_completion: true,
     refresh: true,
@@ -485,7 +484,6 @@ export const deleteCasesUserActions = async (es: KibanaClient): Promise<void> =>
 export const deleteCasesByESQuery = async (es: KibanaClient): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
-    // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
     q: 'type:cases',
     wait_for_completion: true,
     refresh: true,
@@ -501,7 +499,6 @@ export const deleteCasesByESQuery = async (es: KibanaClient): Promise<void> => {
 export const deleteSubCases = async (es: KibanaClient): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
-    // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
     q: 'type:cases-sub-case',
     wait_for_completion: true,
     refresh: true,
@@ -513,7 +510,6 @@ export const deleteSubCases = async (es: KibanaClient): Promise<void> => {
 export const deleteComments = async (es: KibanaClient): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
-    // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
     q: 'type:cases-comments',
     wait_for_completion: true,
     refresh: true,
@@ -525,7 +521,6 @@ export const deleteComments = async (es: KibanaClient): Promise<void> => {
 export const deleteConfiguration = async (es: KibanaClient): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
-    // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
     q: 'type:cases-configure',
     wait_for_completion: true,
     refresh: true,
@@ -537,7 +532,6 @@ export const deleteConfiguration = async (es: KibanaClient): Promise<void> => {
 export const deleteMappings = async (es: KibanaClient): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
-    // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
     q: 'type:cases-connector-mappings',
     wait_for_completion: true,
     refresh: true,

@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { isEmpty } from 'lodash';
-import { TypeMapping } from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { IndexPatternsFetcher } from '../../../../../src/plugins/data/server';
 import {
@@ -137,7 +138,7 @@ export class RuleDataClient implements IRuleDataClient {
       path: `/_index_template/_simulate_index/${concreteIndexName}`,
     });
 
-    const mappings: TypeMapping = simulateResponse.template.mappings;
+    const mappings: estypes.MappingTypeMapping = simulateResponse.template.mappings;
 
     if (isEmpty(mappings)) {
       throw new Error(

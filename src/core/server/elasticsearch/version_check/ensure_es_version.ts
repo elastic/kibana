@@ -31,7 +31,7 @@ export interface PollEsNodesVersionOptions {
 interface NodeInfo {
   version: string;
   ip: string;
-  http: {
+  http?: {
     publish_address: string;
   };
   name: string;
