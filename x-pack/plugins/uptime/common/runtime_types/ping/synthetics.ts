@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isRight } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
 
 export const JourneyStepType = t.type({
@@ -100,3 +101,7 @@ export const ScreenshotRefImageDataType = t.type({
 });
 
 export type ScreenshotRefImageData = t.TypeOf<typeof ScreenshotRefImageDataType>;
+
+export function isScreenshotRef(data: unknown): data is ScreenshotRefImageData {
+  return isRight(ScreenshotRefImageDataType.decode(data));
+}
