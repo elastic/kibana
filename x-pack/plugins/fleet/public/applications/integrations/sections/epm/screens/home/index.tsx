@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState, useMemo } from 'react';
+import React, { memo, useState, useMemo, useEffect } from 'react';
 import { Switch, Route, useLocation, useHistory } from 'react-router-dom';
 import semverLt from 'semver/functions/lt';
 import { i18n } from '@kbn/i18n';
