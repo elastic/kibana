@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButtonGroup, EuiFieldText, EuiSuperSelect } from '@elastic/eui';
+import { EuiButtonGroup, EuiComboBox, EuiFieldText, EuiSuperSelect } from '@elastic/eui';
 import { FramePublicAPI, VisualizationDimensionEditorProps } from '../../types';
 import { DatatableVisualizationState } from '../visualization';
 import { createMockDatasource, createMockFramePublicAPI } from '../../editor_frame_service/mocks';
@@ -227,9 +227,9 @@ describe('data table dimension editor', () => {
     expect(
       instance
         .find('[data-test-subj="lnsDatatable_summaryrow_function"]')
-        .find(EuiSuperSelect)
-        .prop('valueOfSelected')
-    ).toEqual('none');
+        .find(EuiComboBox)
+        .prop('selectedOptions')
+    ).toEqual([{ value: 'none', label: 'None' }]);
 
     expect(instance.find('[data-test-subj="lnsDatatable_summaryrow_label"]').exists()).toBe(false);
   });
@@ -241,9 +241,9 @@ describe('data table dimension editor', () => {
     expect(
       instance
         .find('[data-test-subj="lnsDatatable_summaryrow_function"]')
-        .find(EuiSuperSelect)
-        .prop('valueOfSelected')
-    ).toEqual('sum');
+        .find(EuiComboBox)
+        .prop('selectedOptions')
+    ).toEqual([{ value: 'sum', label: 'Sum' }]);
 
     expect(
       instance

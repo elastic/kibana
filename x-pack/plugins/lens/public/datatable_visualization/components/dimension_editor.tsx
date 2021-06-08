@@ -215,7 +215,7 @@ export function TableDimensionEditor(
               fullWidth
               compressed
               isClearable={false}
-              data-test-subj="indexPattern-dimension-field"
+              data-test-subj="lnsDatatable_summaryrow_function"
               placeholder={i18n.translate('xpack.lens.indexPattern.fieldPlaceholder', {
                 defaultMessage: 'Field',
               })}
