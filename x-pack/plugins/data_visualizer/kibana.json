@@ -16,7 +16,8 @@
     "security",
     "maps",
     "home",
-    "lens"
+    "lens",
+    "indexPatternFieldEditor"
   ],
   "requiredBundles": [
     "kibanaReact",
