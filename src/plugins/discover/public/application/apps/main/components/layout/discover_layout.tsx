@@ -34,6 +34,7 @@ import { DiscoverSidebarResponsive } from '../sidebar';
 import { DiscoverLayoutProps } from './types';
 import { SortPairArr } from '../../../../angular/doc_table/lib/get_sort';
 import {
+  DOC_HIDE_TIME_COLUMN_SETTING,
   DOC_TABLE_LEGACY,
   MODIFY_COLUMNS_ON_SWITCH,
   SAMPLE_SIZE_SETTING,
@@ -242,7 +243,7 @@ export function DiscoverLayout({
 
   const contentCentered = resultState === 'uninitialized';
   const showTimeCol = useMemo(
-    () => !config.get('doc_table:hideTimeColumn', false) && !!indexPattern.timeFieldName,
+    () => !config.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!indexPattern.timeFieldName,
     [config, indexPattern.timeFieldName]
   );
 
@@ -250,7 +251,13 @@ export function DiscoverLayout({
     async (id: string) => {
       const nextIndexPattern = await indexPatterns.get(id);
       if (nextIndexPattern && indexPattern) {
-        savedSearchData$.next({ rows: [], state: FetchStatus.LOADING });
+        /**
+         *  Without resetting the fetch state, e.g. a time column would be displayed when switching
+         *  from a index pattern without to a index pattern with time filter for a brief moment
+         *  That's because appState is updated before savedSearchData$
+         *  The following line of code catches this, but should be improved
+         */
+        savedSearchData$.next({ rows: [], state: FetchStatus.LOADING, fieldCounts: {} });
 
         const nextAppState = getSwitchIndexPatternAppState(
           indexPattern,

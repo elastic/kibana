@@ -137,7 +137,7 @@ export const useSavedSearch = ({
      * needed to right auto refresh behavior, a new auto refresh shouldnt be triggered when
      * loading is still ongoing
      */
-    fetchStatus: string;
+    fetchStatus: FetchStatus;
     /**
      * needed for merging new with old field counts, high likely legacy, but kept this behavior
      * because not 100% sure in this case
@@ -287,7 +287,7 @@ export const useSavedSearch = ({
         filter(() => refs.current.fetchStatus !== FetchStatus.LOADING)
       ),
       data.query.queryString.getUpdates$(),
-      searchSessionManager.newSearchSessionIdFromURL$.pipe(filter((content) => !!content))
+      searchSessionManager.newSearchSessionIdFromURL$.pipe(filter((sessionId) => !!sessionId))
     ).pipe(debounceTime(100));
 
     const subscription = fetch$.subscribe((val) => {
