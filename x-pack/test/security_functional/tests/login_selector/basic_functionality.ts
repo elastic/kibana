@@ -34,13 +34,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         full_name: 'Admin',
       });
 
-      await esArchiver.load('../../functional/es_archives/empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await PageObjects.security.forceLogout();
     });
 
     after(async () => {
       await security.user.delete(testCredentials.username);
-      await esArchiver.unload('../../functional/es_archives/empty_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     beforeEach(async () => {
