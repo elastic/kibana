@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable react/display-name */
+
 import React, { useEffect } from 'react';
 import deepEqual from 'fast-deep-equal';
 
@@ -24,87 +26,92 @@ import { RouteSpyState } from '../../utils/route/types';
  */
 export const NavigationManagerComponent: React.FC<
   RouteSpyState & SecuritySolutionNavigationManagerProps & NavigationManagerComponentProps
-> = ({
-  detailName,
-  display,
-  flowTarget,
-  isPrimary,
-  navTabs,
-  pageName,
-  pathName,
-  search,
-  state,
-  tabName,
-  urlState,
-}) => {
-  const {
-    chrome,
-    application: { getUrlForApp },
-  } = useKibana().services;
+> = React.memo(
+  ({
+    detailName,
+    display,
+    flowTarget,
+    isPrimary,
+    navTabs,
+    pageName,
+    pathName,
+    search,
+    state,
+    tabName,
+    urlState,
+  }) => {
+    const {
+      chrome,
+      application: { getUrlForApp },
+    } = useKibana().services;
 
-  useEffect(() => {
-    if (pathName || pageName) {
-      setBreadcrumbs(
-        {
-          detailName,
-          filters: urlState.filters,
-          flowTarget,
-          navTabs,
-          pageName,
-          pathName,
-          query: urlState.query,
-          savedQuery: urlState.savedQuery,
-          search,
-          sourcerer: urlState.sourcerer,
-          state,
-          tabName,
-          timeline: urlState.timeline,
-          timerange: urlState.timerange,
-        },
-        chrome,
-        getUrlForApp
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chrome, pageName, pathName, search, navTabs, urlState, state]);
+    useEffect(() => {
+      if (pathName || pageName) {
+        setBreadcrumbs(
+          {
+            detailName,
+            filters: urlState.filters,
+            flowTarget,
+            navTabs,
+            pageName,
+            pathName,
+            query: urlState.query,
+            savedQuery: urlState.savedQuery,
+            search,
+            sourcerer: urlState.sourcerer,
+            state,
+            tabName,
+            timeline: urlState.timeline,
+            timerange: urlState.timerange,
+          },
+          chrome,
+          getUrlForApp
+        );
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [chrome, pageName, pathName, search, navTabs, urlState, state]);
 
-  return isPrimary ? (
-    <SecuritySolutionNavigation
-      navTabs={navTabs}
-      pageName={pageName}
-      tabName={tabName}
-      urlState={urlState}
-    />
-  ) : (
-    <TabNavigation
-      query={urlState.query}
-      display={display}
-      filters={urlState.filters}
-      navTabs={navTabs}
-      pageName={pageName}
-      pathName={pathName}
-      sourcerer={urlState.sourcerer}
-      savedQuery={urlState.savedQuery}
-      tabName={tabName}
-      timeline={urlState.timeline}
-      timerange={urlState.timerange}
-    />
-  );
-};
+    return isPrimary ? (
+      <SecuritySolutionNavigation
+        navTabs={navTabs}
+        pageName={pageName}
+        tabName={tabName}
+        urlState={urlState}
+      />
+    ) : (
+      <TabNavigation
+        query={urlState.query}
+        display={display}
+        filters={urlState.filters}
+        navTabs={navTabs}
+        pageName={pageName}
+        pathName={pathName}
+        sourcerer={urlState.sourcerer}
+        savedQuery={urlState.savedQuery}
+        tabName={tabName}
+        timeline={urlState.timeline}
+        timerange={urlState.timerange}
+      />
+    );
+  }
+);
 
-const NavigationManagerContainer: React.FC<SecuritySolutionNavigationManagerProps> = (props) => {
-  const [routeProps] = useRouteSpy();
-  const urlStateProps = useUrlState();
-  const navigationManagerProps: RouteSpyState &
-    NavigationManagerComponentProps &
-    SecuritySolutionNavigationManagerProps = {
-    ...routeProps,
-    ...urlStateProps,
-    ...props,
-  };
+const NavigationManagerContainer: React.FC<SecuritySolutionNavigationManagerProps> = React.memo(
+  (props) => {
+    const [routeProps] = useRouteSpy();
+    const urlStateProps = useUrlState();
+    const navigationManagerProps: RouteSpyState &
+      NavigationManagerComponentProps &
+      SecuritySolutionNavigationManagerProps = {
+      ...routeProps,
+      ...urlStateProps,
+      ...props,
+    };
 
-  return <NavigationManagerComponent {...navigationManagerProps} />;
-};
+    return <NavigationManagerComponent {...navigationManagerProps} />;
+  }
+);
+
 export const SecuritySolutionNavigationManager = React.memo(
   NavigationManagerContainer,
   (prevProps, nextProps) => deepEqual(prevProps.navTabs, nextProps.navTabs)
