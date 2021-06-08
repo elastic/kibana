@@ -10,9 +10,10 @@ import React from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPageContent, EuiPage } from '@elastic/eui';
 import { IndexPatternsContract } from 'src/plugins/data/public';
-import { ElasticRequestState, useEsDocSearch } from './use_es_doc_search';
+import { useEsDocSearch } from './use_es_doc_search';
 import { getServices } from '../../../kibana_services';
 import { DocViewer } from '../doc_viewer/doc_viewer';
+import { ElasticRequestState } from './elastic_request_state';
 
 export interface DocProps {
   /**

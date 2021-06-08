@@ -289,6 +289,14 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.exists('kbnDocViewer');
   }
 
+  public async clickDocViewerTab(index: number) {
+    return await this.find.clickByCssSelector(`#kbn_doc_viewer_tab_${index}`);
+  }
+
+  public async expectSourceViewerToExist() {
+    return await this.find.byClassName('monaco-editor');
+  }
+
   public async getMarks() {
     const table = await this.docTable.getTable();
     const marks = await table.findAllByTagName('mark');

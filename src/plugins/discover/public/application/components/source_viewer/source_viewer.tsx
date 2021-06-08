@@ -13,7 +13,7 @@ import { useEsDocSearch } from '../doc/use_es_doc_search';
 import { DocProps } from '../doc/doc';
 import { JsonCodeEditorCommon } from '../json_code_editor/json_code_editor_common';
 import { ElasticRequestState } from '../doc/elastic_request_state';
-import { useUiSetting } from '../../lib/kibana';
+
 interface SourceViewerProps {
   docProps: DocProps;
   hasLineNumbers: boolean;
@@ -88,7 +88,6 @@ export const SourceViewer = ({ docProps, width, hasLineNumbers }: SourceViewerPr
       width={width}
       hasLineNumbers={hasLineNumbers}
       onEditorDidMount={(editorNode: monaco.editor.IStandaloneCodeEditor) => setEditor(editorNode)}
-      data-test-subj="source-viewer-json-editor"
     />
   );
 };

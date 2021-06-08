@@ -288,7 +288,7 @@ export class DiscoverPlugin
                   indexPatternId: indexPattern?.id || '',
                   indexPatternService: dataStart.indexPatterns,
                 }}
-                hasLineNumbers
+                hasLineNumberss
               />
             ),
           });
