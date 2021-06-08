@@ -31,7 +31,7 @@ interface StartDeps {
 
 export interface SecurityNavControlServiceStart {
   /**
-   * Returns an Observable of the array of user menu links (the links that show up under the users Avatar in the UI) registered by other plugins
+   * Returns an Observable of the array of user menu links (the links that show up under the user's Avatar in the UI) registered by other plugins
    */
   getUserMenuLinks$: () => Observable<UserMenuLink[]>;
 
