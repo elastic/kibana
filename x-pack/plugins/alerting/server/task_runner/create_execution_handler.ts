@@ -182,8 +182,14 @@ export function createExecutionHandler<
             action_subgroup: actionSubgroup,
           },
           saved_objects: [
-            { rel: SAVED_OBJECT_REL_PRIMARY, type: 'alert', id: alertId, ...namespace },
-            { type: 'action', id: action.id, ...namespace },
+            {
+              rel: SAVED_OBJECT_REL_PRIMARY,
+              type: 'alert',
+              id: alertId,
+              type_id: alertType.id,
+              ...namespace,
+            },
+            { type: 'action', id: action.id, type_id: action.actionTypeId, ...namespace },
           ],
         },
       };

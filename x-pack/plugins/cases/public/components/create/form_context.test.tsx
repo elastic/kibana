@@ -10,7 +10,7 @@ import { mount, ReactWrapper } from 'enzyme';
 import { act, waitFor } from '@testing-library/react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { ConnectorTypes } from '../../../common';
+import { ConnectorTypes, SECURITY_SOLUTION_OWNER } from '../../../common';
 import { TestProviders } from '../../common/mock';
 import { usePostCase } from '../../containers/use_post_case';
 import { usePostComment } from '../../containers/use_post_comment';
@@ -77,6 +77,7 @@ const defaultPostCase = {
 const defaultCreateCaseForm = {
   isLoadingConnectors: false,
   connectors: [],
+  owner: SECURITY_SOLUTION_OWNER,
 };
 
 const defaultPostPushToService = {
