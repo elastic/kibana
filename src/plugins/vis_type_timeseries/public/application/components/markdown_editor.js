@@ -21,6 +21,8 @@ import 'brace/theme/github';
 import { EuiText, EuiCodeBlock, EuiSpacer, EuiTitle, EuiCodeEditor } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
+import { getDataStart } from '../../services';
+import { fetchIndexPattern } from '../../../common/index_patterns_utils';
 
 export class MarkdownEditor extends Component {
   handleChange = (value) => {
@@ -37,6 +39,15 @@ export class MarkdownEditor extends Component {
     };
   }
 
+  async componentDidMount() {
+    const { indexPatterns } = getDataStart();
+    const { indexPattern } = await fetchIndexPattern(
+      this.props.model.index_pattern || '',
+      indexPatterns
+    );
+    this.fieldFormatMap = indexPattern?.fieldFormatMap;
+  }
+
   render() {
     const { visData, model, getConfig } = this.props;
 
@@ -45,7 +56,13 @@ export class MarkdownEditor extends Component {
     }
     const dateFormat = getConfig('dateFormat');
     const series = _.get(visData, `${model.id}.series`, []);
-    const variables = convertSeriesToVars(series, model, dateFormat, this.props.getConfig);
+    const variables = convertSeriesToVars(
+      series,
+      model,
+      dateFormat,
+      this.props.getConfig,
+      this.fieldFormatMap
+    );
     const rows = [];
     const rawFormatter = createTickFormatter('0.[0000]', null, this.props.getConfig);
 

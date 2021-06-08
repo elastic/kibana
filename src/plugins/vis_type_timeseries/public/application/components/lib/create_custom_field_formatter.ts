@@ -9,7 +9,7 @@
 import { getFieldFormats } from '../../../services';
 import type { FieldFormatMap } from '../../../../../data/common';
 
-export const createCustomFieldFormatter = (fieldName: string, fieldFormatMap: FieldFormatMap) => {
+export const createCustomFieldFormatter = (fieldName?: string, fieldFormatMap?: FieldFormatMap) => {
   return (value: number) =>
     fieldName && fieldFormatMap
       ? getFieldFormats().deserialize(fieldFormatMap[fieldName]).convert(value)

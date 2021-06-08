@@ -52,6 +52,16 @@ class TimeseriesVisualization extends Component {
   };
 
   applyDocTo = (template) => (doc) => {
+    const { fieldFormatMap } = this.props;
+
+    // formatting each doc value with custom field formatter if fieldFormatMap contains that doc field name
+    Object.keys(doc).forEach((fieldName) => {
+      if (fieldFormatMap[fieldName]) {
+        const customFieldFormatter = createCustomFieldFormatter(fieldName, fieldFormatMap);
+        doc[fieldName] = customFieldFormatter(doc[fieldName]);
+      }
+    });
+
     const vars = replaceVars(template, null, doc);
 
     if (vars instanceof Error) {

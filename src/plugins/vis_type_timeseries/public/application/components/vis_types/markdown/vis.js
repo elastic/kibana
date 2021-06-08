@@ -21,9 +21,15 @@ import { isBackgroundInverted } from '../../../lib/set_is_reversed';
 const getMarkdownId = (id) => `markdown-${id}`;
 
 function MarkdownVisualization(props) {
-  const { backgroundColor, model, visData, getConfig } = props;
+  const { backgroundColor, model, visData, getConfig, fieldFormatMap } = props;
   const series = get(visData, `${model.id}.series`, []);
-  const variables = convertSeriesToVars(series, model, getConfig('dateFormat'), props.getConfig);
+  const variables = convertSeriesToVars(
+    series,
+    model,
+    getConfig('dateFormat'),
+    getConfig,
+    fieldFormatMap
+  );
   const markdownElementId = getMarkdownId(uuid.v1());
 
   const panelBackgroundColor = model.background_color || backgroundColor;

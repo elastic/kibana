@@ -7,27 +7,33 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import _ from 'lodash';
+import { startsWith, snakeCase, last } from 'lodash';
 import { getLastValue } from '../../../../common/last_value_utils';
 import { emptyLabel } from '../../../../common/empty_label';
 import { createTickFormatter } from './tick_formatter';
+import { createCustomFieldFormatter } from './create_custom_field_formatter';
 import { labelDateFormatter } from './label_date_formatter';
 import moment from 'moment';
 
-export const convertSeriesToVars = (series, model, dateFormat = 'lll', getConfig = null) => {
+export const convertSeriesToVars = (
+  series,
+  model,
+  dateFormat = 'lll',
+  getConfig = null,
+  fieldFormatMap
+) => {
   const variables = {};
   model.series.forEach((seriesModel) => {
     series
-      .filter((row) => _.startsWith(row.id, seriesModel.id))
+      .filter((row) => startsWith(row.id, seriesModel.id))
       .forEach((row) => {
-        const label = row.label ? _.snakeCase(row.label) : emptyLabel;
-        const varName = [label, _.snakeCase(seriesModel.var_name)].filter((v) => v).join('.');
+        const label = row.label ? snakeCase(row.label) : emptyLabel;
+        const varName = [label, snakeCase(seriesModel.var_name)].filter((v) => v).join('.');
 
-        const formatter = createTickFormatter(
-          seriesModel.formatter,
-          seriesModel.value_template,
-          getConfig
-        );
+        const formatter = seriesModel.ignore_field_formatting
+          ? createTickFormatter(seriesModel.formatter, seriesModel.value_template, getConfig)
+          : createCustomFieldFormatter(last(seriesModel.metrics)?.field, fieldFormatMap);
+
         const lastValue = getLastValue(row.data);
 
         const data = {
