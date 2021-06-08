@@ -22,6 +22,7 @@ import type {
   CoreUsageDataStart,
 } from 'src/core/server';
 import { SavedObjectsClient } from '../../../core/server';
+import { startTrackingEventLoopDelaysUsage } from './collectors/event_loop_delays';
 import {
   registerApplicationUsageCollector,
   registerKibanaUsageCollector,
@@ -39,6 +40,7 @@ import {
   registerUsageCountersRollups,
   registerUsageCountersUsageCollector,
   registerSavedObjectsCountUsageCollector,
+  registerEventLoopDelaysCollector,
 } from './collectors';
 
 interface KibanaUsageCollectionPluginsDepsSetup {
@@ -55,17 +57,18 @@ export class KibanaUsageCollectionPlugin implements Plugin {
   private metric$: Subject<OpsMetrics>;
   private coreUsageData?: CoreUsageDataStart;
   private stopUsingUiCounterIndicies$: Subject<void>;
+  private stopMonitoringEventLoop$: Subject<void>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.legacyConfig$ = initializerContext.config.legacy.globalConfig$;
     this.metric$ = new Subject<OpsMetrics>();
     this.stopUsingUiCounterIndicies$ = new Subject();
+    this.stopMonitoringEventLoop$ = new Subject();
   }
 
   public setup(coreSetup: CoreSetup, { usageCollection }: KibanaUsageCollectionPluginsDepsSetup) {
     usageCollection.createUsageCounter('uiCounters');
-
     this.registerUsageCollectors(
       usageCollection,
       coreSetup,
@@ -82,11 +85,13 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     this.uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
     core.metrics.getOpsMetrics$().subscribe(this.metric$);
     this.coreUsageData = core.coreUsageData;
+    startTrackingEventLoopDelaysUsage(this.savedObjectsClient, this.stopMonitoringEventLoop$);
   }
 
   public stop() {
     this.metric$.complete();
     this.stopUsingUiCounterIndicies$.complete();
+    this.stopMonitoringEventLoop$.complete();
   }
 
   private registerUsageCollectors(
@@ -127,5 +132,11 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     registerCoreUsageCollector(usageCollection, getCoreUsageDataService);
     registerConfigUsageCollector(usageCollection, getCoreUsageDataService);
     registerLocalizationUsageCollector(usageCollection, coreSetup.i18n);
+    registerEventLoopDelaysCollector(
+      this.logger.get('event-loop-delays'),
+      usageCollection,
+      registerType,
+      getSavedObjectsClient
+    );
   }
 }
