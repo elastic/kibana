@@ -5,7 +5,12 @@
  * 2.0.
  */
 
+import fs from 'fs';
 import expect from '@kbn/expect';
+import { Client as EsClient } from '@elastic/elasticsearch';
+import { KbnClient } from '@kbn/test';
+import { EsArchiver } from '@kbn/es-archiver';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
 
 export default ({ getService, getPageObjects }) => {
   describe('Cross cluster search test in discover', async () => {
@@ -201,6 +206,154 @@ export default ({ getService, getPageObjects }) => {
         log.debug('### hit count = ' + hitCount);
         expect(hitCount).to.be.greaterThan(15000);
         expect(hitCount).to.be.lessThan(originalHitCount);
+      });
+    });
+
+    describe('Detection engine', async function () {
+      const supertest = getService('supertest');
+      const esSupertest = getService('esSupertest');
+      const config = getService('config');
+
+      const esClient = new EsClient({
+        ssl: {
+          ca: fs.readFileSync(CA_CERT_PATH, 'utf-8'),
+        },
+        nodes: [process.env.TEST_ES_URLDATA],
+        requestTimeout: config.get('timeouts.esRequestTimeout'),
+      });
+
+      const kbnClient = new KbnClient({
+        log,
+        url: process.env.TEST_KIBANA_URLDATA,
+        certificateAuthorities: config.get('servers.kibana.certificateAuthorities'),
+        uiSettingDefaults: kibanaServer.uiSettings,
+        importExportDir: config.get('kbnArchiver.directory'),
+      });
+
+      const esArchiver = new EsArchiver({
+        log,
+        client: esClient,
+        kbnClient,
+        dataDir: config.get('esArchiver.directory'),
+      });
+
+      let signalsId;
+      let dataId;
+      let ruleId;
+
+      before('Prepare .siem-signal-*', async function () {
+        log.info('Create index');
+        // visit app/security so to create .siem-signals-* as side effect
+        await PageObjects.common.navigateToApp('security', { insertTimestamp: false });
+
+        log.info('Create index pattern');
+        signalsId = await supertest
+          .post('/api/index_patterns/index_pattern')
+          .set('kbn-xsrf', 'true')
+          .send({
+            index_pattern: {
+              title: '.siem-signals-*',
+            },
+            override: true,
+          })
+          .expect(200)
+          .then((res) => JSON.parse(res.text).index_pattern.id);
+        log.debug('id: ' + signalsId);
+      });
+
+      before('Prepare data:metricbeat-*', async function () {
+        log.info('Create index');
+        await esArchiver.load('metricbeat');
+
+        log.info('Create index pattern');
+        dataId = await supertest
+          .post('/api/index_patterns/index_pattern')
+          .set('kbn-xsrf', 'true')
+          .send({
+            index_pattern: {
+              title: 'data:metricbeat-*',
+            },
+            override: true,
+          })
+          .expect(200)
+          .then((res) => JSON.parse(res.text).index_pattern.id);
+        log.debug('id: ' + dataId);
+      });
+
+      before('Add detection rule', async function () {
+        ruleId = await supertest
+          .post('/api/detection_engine/rules')
+          .set('kbn-xsrf', 'true')
+          .send({
+            description: 'This is the description of the rule',
+            risk_score: 17,
+            severity: 'low',
+            interval: '10s',
+            name: 'CCS_Detection_test',
+            type: 'query',
+            from: 'now-1y',
+            index: ['data:metricbeat-*'],
+            query: '*:*',
+            language: 'kuery',
+            enabled: true,
+          })
+          .expect(200)
+          .then((res) => JSON.parse(res.text).id);
+        log.debug('id: ' + ruleId);
+      });
+
+      after('Clean up detection rule', async function () {
+        if (ruleId !== undefined) {
+          log.debug('id: ' + ruleId);
+          await supertest
+            .delete('/api/detection_engine/rules?id=' + ruleId)
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+        }
+      });
+
+      after('Clean up data:metricbeat-*', async function () {
+        if (dataId !== undefined) {
+          log.info('Delete index pattern');
+          log.debug('id: ' + dataId);
+          await supertest
+            .delete('/api/index_patterns/index_pattern/' + dataId)
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+        }
+
+        log.info('Delete index');
+        await esArchiver.unload('metricbeat');
+      });
+
+      after('Clean up .siem-signal-*', async function () {
+        if (signalsId !== undefined) {
+          log.info('Delete index pattern: .siem-signals-*');
+          log.debug('id: ' + signalsId);
+          await supertest
+            .delete('/api/index_patterns/index_pattern/' + signalsId)
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+        }
+
+        log.info('Delete index alias: .siem-signals-default');
+        await esSupertest
+          .delete('/.siem-signals-default-000001/_alias/.siem-signals-default')
+          .expect(200);
+
+        log.info('Delete index: .siem-signals-default-000001');
+        await esSupertest.delete('/.siem-signals-default-000001').expect(200);
+      });
+
+      it('Should generate alerts based on remote events', async function () {
+        log.info('Check if any alert got to .siem-signals-*');
+        await PageObjects.common.navigateToApp('discover', { insertTimestamp: false });
+        await PageObjects.discover.selectIndexPattern('.siem-signals-*');
+        await retry.tryForTime(30000, async () => {
+          const hitCount = await PageObjects.discover.getHitCount();
+          log.debug('### hit count = ' + hitCount);
+          expect(hitCount).to.be('100');
+        });
       });
     });
   });
