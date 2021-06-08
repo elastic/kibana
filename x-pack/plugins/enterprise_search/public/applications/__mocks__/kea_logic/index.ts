@@ -16,4 +16,4 @@ export {
 } from './flash_messages_logic.mock';
 export { mockAllValues, mockAllActions, setMockValues, setMockActions } from './hooks.mock';
 
-export { LogicMounter } from './logic_mounter';
+export { LogicMounter } from './logic_mounter.test_helper';

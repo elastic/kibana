@@ -25,7 +25,7 @@
  */
 import { resetContext, LogicWrapper } from 'kea';
 
-type LogicFile = LogicWrapper<unknown>;
+type LogicFile = LogicWrapper<any>;
 
 export class LogicMounter {
   private logicFile: LogicFile;
