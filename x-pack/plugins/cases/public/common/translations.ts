@@ -7,18 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SAVED_OBJECT_NO_PERMISSIONS_TITLE = i18n.translate(
-  'xpack.cases.caseSavedObjectNoPermissionsTitle',
+export const CASES_FEATURE_NO_PERMISSIONS_TITLE = i18n.translate(
+  'xpack.cases.caseFeatureNoPermissionsTitle',
   {
     defaultMessage: 'Kibana feature privileges required',
   }
 );
 
-export const SAVED_OBJECT_NO_PERMISSIONS_MSG = i18n.translate(
-  'xpack.cases.caseSavedObjectNoPermissionsMessage',
+export const CASES_FEATURE_NO_PERMISSIONS_MSG = i18n.translate(
+  'xpack.cases.caseFeatureNoPermissionsMessage',
   {
     defaultMessage:
-      'To view cases, you must have privileges for the Saved Object Management feature in the Kibana space. For more information, contact your Kibana administrator.',
+      'To view cases, you must have privileges for the Cases feature in the Kibana space. For more information, contact your Kibana administrator.',
   }
 );
 
