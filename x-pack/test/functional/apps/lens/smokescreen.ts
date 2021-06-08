@@ -172,10 +172,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.existOrFail('indexPattern-dimension-formatDecimals');
 
+      await PageObjects.lens.closeDimensionEditor();
+
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
         'Test of label'
       );
-      await PageObjects.lens.closeDimensionEditor();
     });
 
     it('should be able to add very long labels and still be able to remove a dimension', async () => {
