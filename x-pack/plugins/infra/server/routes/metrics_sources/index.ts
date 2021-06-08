@@ -88,11 +88,13 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
           ? sources.updateSourceConfiguration(
               requestContext.core.savedObjects.client,
               sourceId,
+              // @ts-expect-error doesn't expect fields.container to be optional
               patchedSourceConfigurationProperties
             )
           : sources.createSourceConfiguration(
               requestContext.core.savedObjects.client,
               sourceId,
+              // @ts-expect-error doesn't expect fields.container to be optional
               patchedSourceConfigurationProperties
             ));
 

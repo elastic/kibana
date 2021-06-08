@@ -41,7 +41,6 @@ export default ({ getService }: FtrProviderContext) => {
     beforeEach(async () => {
       await es.deleteByQuery({
         index: '.kibana',
-        // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
         q: 'type:lens-ui-telemetry',
         wait_for_completion: true,
         refresh: true,
@@ -52,7 +51,6 @@ export default ({ getService }: FtrProviderContext) => {
     afterEach(async () => {
       await es.deleteByQuery({
         index: '.kibana',
-        // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
         q: 'type:lens-ui-telemetry',
         wait_for_completion: true,
         refresh: true,

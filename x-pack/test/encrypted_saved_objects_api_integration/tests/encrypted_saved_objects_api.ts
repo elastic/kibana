@@ -443,7 +443,6 @@ export default function ({ getService }: FtrProviderContext) {
       afterEach(async () => {
         await es.deleteByQuery({
           index: '.kibana',
-          // @ts-expect-error @elastic/elasticsearch `DeleteByQueryRequest` type doesn't define `q`.
           q: `type:${SAVED_OBJECT_WITH_SECRET_TYPE} OR type:${HIDDEN_SAVED_OBJECT_WITH_SECRET_TYPE} OR type:${SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE} OR type:${SAVED_OBJECT_WITHOUT_SECRET_TYPE}`,
           refresh: true,
           body: {},
@@ -493,7 +492,6 @@ export default function ({ getService }: FtrProviderContext) {
       afterEach(async () => {
         await es.deleteByQuery({
           index: '.kibana',
-          // @ts-expect-error @elastic/elasticsearch `DeleteByQueryRequest` type doesn't define `q`.
           q: `type:${SAVED_OBJECT_WITH_SECRET_TYPE} OR type:${HIDDEN_SAVED_OBJECT_WITH_SECRET_TYPE} OR type:${SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE} OR type:${SAVED_OBJECT_WITHOUT_SECRET_TYPE}`,
           refresh: true,
           body: {},

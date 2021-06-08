@@ -79,14 +79,13 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
           },
         };
 
-        const search = async (aggs: Record<string, estypes.AggregationContainer>) => {
+        const search = async (aggs: Record<string, estypes.AggregationsAggregationContainer>) => {
           const { body: result } = await requestClient.search({
             index: indexPattern.title,
             track_total_hits: true,
             body: {
               query,
               aggs,
-              // @ts-expect-error @elastic/elasticsearch StoredScript.language is required
               runtime_mappings: field.runtimeField ? { [fieldName]: field.runtimeField } : {},
             },
             size: 0,
@@ -136,7 +135,9 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
 }
 
 export async function getNumberHistogram(
-  aggSearchWithBody: (aggs: Record<string, estypes.AggregationContainer>) => Promise<unknown>,
+  aggSearchWithBody: (
+    aggs: Record<string, estypes.AggregationsAggregationContainer>
+  ) => Promise<unknown>,
   field: IFieldType,
   useTopHits = true
 ): Promise<FieldStatsResponse> {
@@ -245,7 +246,7 @@ export async function getNumberHistogram(
 }
 
 export async function getStringSamples(
-  aggSearchWithBody: (aggs: Record<string, estypes.AggregationContainer>) => unknown,
+  aggSearchWithBody: (aggs: Record<string, estypes.AggregationsAggregationContainer>) => unknown,
   field: IFieldType,
   size = 10
 ): Promise<FieldStatsResponse> {
@@ -285,7 +286,7 @@ export async function getStringSamples(
 
 // This one is not sampled so that it returns the full date range
 export async function getDateHistogram(
-  aggSearchWithBody: (aggs: Record<string, estypes.AggregationContainer>) => unknown,
+  aggSearchWithBody: (aggs: Record<string, estypes.AggregationsAggregationContainer>) => unknown,
   field: IFieldType,
   range: { fromDate: string; toDate: string }
 ): Promise<FieldStatsResponse> {
@@ -332,7 +333,7 @@ function getFieldRef(field: IFieldType) {
   return field.scripted
     ? {
         script: {
-          lang: field.lang as string,
+          lang: field.lang!,
           source: field.script as string,
         },
       }

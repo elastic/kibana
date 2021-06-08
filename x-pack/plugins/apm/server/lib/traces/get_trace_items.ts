@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { ProcessorEvent } from '../../../common/processor_event';
 import {
   TRACE_ID,
@@ -76,7 +76,7 @@ export async function getTraceItems(
               filter: [
                 { term: { [TRACE_ID]: traceId } },
                 ...rangeQuery(start, end),
-              ] as QueryContainer[],
+              ] as QueryDslQueryContainer[],
               should: {
                 exists: { field: PARENT_ID },
               },
