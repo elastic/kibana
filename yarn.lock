@@ -1871,10 +1871,10 @@
     "@hapi/hoek" "9.x.x"
     fast-safe-stringify "2.x.x"
 
-"@hapi/h2o2@^9.0.2":
-  version "9.0.2"
-  resolved "https://registry.yarnpkg.com/@hapi/h2o2/-/h2o2-9.0.2.tgz#e9f1dfe789257c80d6ee37ec9fe358f8c69f855a"
-  integrity sha512-V7RsmVyl7uyWeuEko4uaSZbFpBHKcSFSui6PXNRaRLJHFX+iPbqWmeH6m1pW/WJ8DuaCVJFKhluDCDI9l4+1cw==
+"@hapi/h2o2@^9.1.0":
+  version "9.1.0"
+  resolved "https://registry.yarnpkg.com/@hapi/h2o2/-/h2o2-9.1.0.tgz#b223f4978b6f2b0d7d9db10a84a567606c4c3551"
+  integrity sha512-B7E58bMhxmpiDI22clxTexoAaVShNBk1Ez6S8SQjQZu5FxxD6Tqa44sXeZQBtWrdJF7ZRbsY60/C8AHLRxagNA==
   dependencies:
     "@hapi/boom" "9.x.x"
     "@hapi/hoek" "9.x.x"
