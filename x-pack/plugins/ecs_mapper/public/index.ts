@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import './index.scss';
 import { EcsMapperUIPlugin } from './plugin';
 
 export function plugin() {

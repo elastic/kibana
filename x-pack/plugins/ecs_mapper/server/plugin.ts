@@ -12,6 +12,13 @@ import { PLUGIN } from '../common/constants';
 import { License } from './services';
 import { Dependencies } from './types';
 import { registerExecuteRoute } from './routes/api';
+import { schema } from '@kbn/config-schema';
+
+export const config = {
+  schema: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
+};
 
 export class EcsMapperServerPlugin implements Plugin {
   private readonly license: License;
