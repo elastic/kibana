@@ -22698,7 +22698,6 @@
     "xpack.spaces.management.manageSpacePage.errorLoadingSpaceTitle": "加载空间时出错：{message}",
     "xpack.spaces.management.manageSpacePage.errorSavingSpaceTitle": "保存空间时出错：{message}",
     "xpack.spaces.management.manageSpacePage.loadErrorTitle": "加载可用功能时出错",
-    "xpack.spaces.management.manageSpacePage.manageDescription": "将已保存对象组织到有意义的类别中。",
     "xpack.spaces.management.manageSpacePage.nameFormRowLabel": "名称",
     "xpack.spaces.management.manageSpacePage.spaceDescriptionFormRowLabel": "描述 (可选) ",
     "xpack.spaces.management.manageSpacePage.spaceDescriptionHelpText": "描述显示在”工作区选择“屏幕上。",

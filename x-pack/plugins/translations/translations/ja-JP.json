@@ -22342,7 +22342,6 @@
     "xpack.spaces.management.manageSpacePage.errorLoadingSpaceTitle": "スペースの読み込み中にエラーが発生：{message}",
     "xpack.spaces.management.manageSpacePage.errorSavingSpaceTitle": "スペースの保存中にエラーが発生：{message}",
     "xpack.spaces.management.manageSpacePage.loadErrorTitle": "利用可能な機能の読み込みエラー",
-    "xpack.spaces.management.manageSpacePage.manageDescription": "保存済みオブジェクトをわかりやすいカテゴリー別に整理します。",
     "xpack.spaces.management.manageSpacePage.nameFormRowLabel": "名前",
     "xpack.spaces.management.manageSpacePage.spaceDescriptionFormRowLabel": "説明 (オプション) ",
     "xpack.spaces.management.manageSpacePage.spaceDescriptionHelpText": "説明はスペース選択画面に表示されます。",
