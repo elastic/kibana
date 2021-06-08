@@ -61,19 +61,19 @@ image::images/rule-flyout-rule-conditions.png[UI for defining rule conditions on
 [[defining-rules-actions-details]]
 ==== Action type and details
 
-To add an action to a rule, you first select the type of connector:
+To receive notifications when a rule meets the defined conditions, you must add one or more actions. Start by selecting a type of connector for your action:
 
 [role="screenshot"]
 image::images/rule-flyout-connector-type-selection.png[UI for selecting an action type]
 
-When an alert matches a condition, the rule is marked as _Active_ and assigned an action group. The actions in that group are triggered.
-When the condition is no longer detected, the rule is assigned to the _Recovered_ action group, which triggers any actions assigned to that group.
+Each action must specify a <<alerting-concepts-connectors, connector>> instance. If no connectors exist for the selected type, click **Add connector** to create one.
 
-**Run When** allows you to assign an action to an action group. This will trigger the action in accordance with your **Notify** setting.
+[role="screenshot"]
+image::images/rule-flyout-action-no-connector.png[UI for adding connector]
 
-Each action must specify a <<alerting-concepts-connectors, connector>> instance. If no connectors exist for that action type, click *Add connector* to create one.
+Once you have selected a connector, use the **Run When** dropdown to choose the action group to associate with this action. When a rule meets the defined condition, it is marked as **Active** and alerts are created and assigned to an action group. In addition to the action groups defined by the selected rule type, each rule also has a **Recovered** action group that is assigned when a rule's conditions are no longer detected.
 
-Each action type exposes different properties. For example an email action allows you to set the recipients, the subject, and a message body in markdown format. See <<action-types>> for details on the types of actions provided by {kib} and their properties.
+Each action type exposes different properties. For example, an email action allows you to set the recipients, the subject, and a message body in markdown format. See <<action-types>> for details on the types of actions provided by {kib} and their properties.
 
 [role="screenshot"]
 image::images/rule-flyout-action-details.png[UI for defining an email action]
@@ -121,12 +121,12 @@ Actions are not required on rules. You can run a rule without actions to underst
 
 [float]
 [[controlling-rules]]
-=== Manage rules
+=== Mute and disable rules
 
 The rule listing allows you to quickly mute/unmute, disable/enable, and delete individual rules by clicking the action button. 
 
 [role="screenshot"]
-image:images/individual-mute-disable.png[The actions button allows an individual rule to be muted, disabled, or deleted,width=75%]
+image:images/individual-mute-disable.png[The actions button allows an individual rule to be muted, disabled, or deleted]
 
 You can perform these operations in bulk by multi-selecting rules, and then clicking the *Manage rules* button:
 
@@ -137,7 +137,7 @@ image:images/bulk-mute-disable.png[The Manage rules button lets you mute/unmute,
 [[rule-details]]
 === Drilldown to rule details
 
-The *Rule details* page tells you about the state of the rule and provides granular control over the actions it is taking. 
+Select a rule name from the rule listing to access the *Rule details* page, which tells you about the state of the rule and provides granular control over the actions it is taking. 
 
 [role="screenshot"]
 image::images/rule-details-alerts-active.png[Rule details page with three alerts]
