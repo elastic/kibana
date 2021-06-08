@@ -125,7 +125,7 @@ function getDataRequestContext(
       dispatch(endDataLoad(layerId, dataId, requestToken, data, meta)),
     onLoadError: (dataId: string, requestToken: symbol, errorMessage: string) =>
       dispatch(onDataLoadError(layerId, dataId, requestToken, errorMessage)),
-    updateSourceData: (newData: unknown) => {
+    updateSourceData: (newData: object) => {
       dispatch(updateSourceDataRequest(layerId, newData));
     },
     isRequestStillActive: (dataId: string, requestToken: symbol) => {
@@ -324,7 +324,7 @@ function onDataLoadError(
   };
 }
 
-export function updateSourceDataRequest(layerId: string, newData: unknown) {
+export function updateSourceDataRequest(layerId: string, newData: object) {
   return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
     dispatch({
       type: UPDATE_SOURCE_DATA_REQUEST,
