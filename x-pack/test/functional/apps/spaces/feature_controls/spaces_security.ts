@@ -11,16 +11,23 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'settings', 'security']);
+  const PageObjects = getPageObjects(['common', 'settings', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
+  const spaces = getService('spaces');
   const testSubjects = getService('testSubjects');
 
   describe('security feature controls', () => {
     before(async () => {
       await esArchiver.load('empty_kibana');
+      await spaces.create({
+        id: 'nondefaultspace',
+        name: 'Non-default Space',
+        disabledFeatures: [],
+      });
     });
 
     after(async () => {
+      await spaces.delete('nondefaultspace');
       await esArchiver.unload('empty_kibana');
     });
 
@@ -44,8 +51,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.security.forceLogout();
 
         await PageObjects.security.login('global_all_user', 'global_all_user-password', {
-          expectSpaceSelector: false,
+          expectSpaceSelector: true,
         });
+        await testSubjects.click('space-card-default');
       });
 
       after(async () => {
@@ -172,6 +180,58 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         await testSubjects.existOrFail('managementHome');
+      });
+    });
+
+    // these tests are testing role specific privilege with non default space
+    describe('Non default space and role specific privilege', () => {
+      before(async () => {
+        await security.role.create('nondefault_space_specific_role', {
+          kibana: [
+            {
+              base: ['all'],
+              spaces: ['nondefaultspace'],
+            },
+          ],
+        });
+
+        await security.user.create('nondefault_space_specific_user', {
+          password: 'nondefault_space_specific_role-password',
+          roles: ['nondefault_space_specific_role'],
+          full_name: 'nondefaultspace_specific_user',
+        });
+
+        await PageObjects.security.forceLogout();
+
+        await PageObjects.security.login(
+          'nondefault_space_specific_user',
+          'nondefault_space_specific_role-password',
+          {
+            expectSpaceSelector: false,
+          }
+        );
+      });
+
+      after(async () => {
+        await Promise.all([
+          security.role.delete('nondefault_space_specific_role'),
+          security.user.delete('nondefault_space_specific_user'),
+          PageObjects.security.forceLogout(),
+        ]);
+      });
+
+      it('shows management navlink', async () => {
+        const spaceId = 'nondefaultspace';
+        await PageObjects.spaceSelector.expectHomePage('nondefaultspace');
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.contain('Stack Management');
+      });
+
+      it(`doesn't display spaces in the management section`, async () => {
+        await PageObjects.common.navigateToApp('management', {
+          basePath: '/s/nondefaultspace',
+        });
+        await testSubjects.missingOrFail('spaces');
       });
     });
   });
