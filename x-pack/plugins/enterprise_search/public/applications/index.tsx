@@ -48,7 +48,6 @@ export const renderApp = (
     cloud: plugins.cloud || {},
     history: params.history,
     navigateToUrl: core.application.navigateToUrl,
-    notifications: core.notifications,
     security: plugins.security || {},
     setBreadcrumbs: core.chrome.setBreadcrumbs,
     setChromeIsVisible: core.chrome.setIsVisible,
