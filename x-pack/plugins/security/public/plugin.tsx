@@ -170,7 +170,7 @@ export interface SecurityPluginSetup {
    */
   authc: AuthenticationServiceSetup;
   /**
-   * Exposes license information, like the type of license and whether it is expired.
+   * Exposes information about the available security features under the current license.
    */
   license: SecurityLicense;
 }
