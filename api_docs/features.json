@@ -132,7 +132,7 @@
             "label": "category",
             "description": [],
             "signature": [
-              "Readonly<{ id: string; label: string; ariaLabel?: string | undefined; order?: number | undefined; euiIconType?: string | undefined; }>"
+              "{ readonly id: string; readonly label: string; readonly ariaLabel?: string | undefined; readonly order?: number | undefined; readonly euiIconType?: string | undefined; }"
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -1312,7 +1312,7 @@
             "label": "category",
             "description": [],
             "signature": [
-              "Readonly<{ id: string; label: string; ariaLabel?: string | undefined; order?: number | undefined; euiIconType?: string | undefined; }>"
+              "{ readonly id: string; readonly label: string; readonly ariaLabel?: string | undefined; readonly order?: number | undefined; readonly euiIconType?: string | undefined; }"
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -2401,13 +2401,72 @@
               "\nUtility for iterating through all privileges belonging to a specific feature.\n{@see FeaturePrivilegeIterator }"
             ],
             "signature": [
-              "FeaturePrivilegeIterator"
+              "(feature: ",
+              {
+                "pluginId": "features",
+                "scope": "common",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-common.KibanaFeature",
+                "text": "KibanaFeature"
+              },
+              ", options: ",
+              "FeaturePrivilegeIteratorOptions",
+              ") => IterableIterator<{ privilegeId: string; privilege: ",
+              {
+                "pluginId": "features",
+                "scope": "common",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-common.FeatureKibanaPrivileges",
+                "text": "FeatureKibanaPrivileges"
+              },
+              "; }>"
             ],
             "source": {
               "path": "x-pack/plugins/features/server/plugin.ts",
               "lineNumber": 70
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "features",
+                "id": "def-server.feature",
+                "type": "Object",
+                "tags": [],
+                "label": "feature",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "features",
+                    "scope": "common",
+                    "docId": "kibFeaturesPluginApi",
+                    "section": "def-common.KibanaFeature",
+                    "text": "KibanaFeature"
+                  }
+                ],
+                "source": {
+                  "path": "x-pack/plugins/features/server/feature_privilege_iterator/feature_privilege_iterator.ts",
+                  "lineNumber": 44
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "features",
+                "id": "def-server.options",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "FeaturePrivilegeIteratorOptions"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/features/server/feature_privilege_iterator/feature_privilege_iterator.ts",
+                  "lineNumber": 45
+                },
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "features",
@@ -2419,13 +2478,70 @@
               "\nUtility for iterating through all sub-feature privileges belonging to a specific feature.\n{@see SubFeaturePrivilegeIterator }"
             ],
             "signature": [
-              "SubFeaturePrivilegeIterator"
+              "(feature: ",
+              {
+                "pluginId": "features",
+                "scope": "common",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-common.KibanaFeature",
+                "text": "KibanaFeature"
+              },
+              ", licenseType: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => IterableIterator<",
+              {
+                "pluginId": "features",
+                "scope": "common",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-common.SubFeaturePrivilegeConfig",
+                "text": "SubFeaturePrivilegeConfig"
+              },
+              ">"
             ],
             "source": {
               "path": "x-pack/plugins/features/server/plugin.ts",
               "lineNumber": 76
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "features",
+                "id": "def-server.feature",
+                "type": "Object",
+                "tags": [],
+                "label": "feature",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "features",
+                    "scope": "common",
+                    "docId": "kibFeaturesPluginApi",
+                    "section": "def-common.KibanaFeature",
+                    "text": "KibanaFeature"
+                  }
+                ],
+                "source": {
+                  "path": "x-pack/plugins/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
+                  "lineNumber": 18
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "features",
+                "id": "def-server.licenseType",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "licenseType",
+                "description": [],
+                "signature": [
+                  "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
+                ],
+                "source": {
+                  "path": "x-pack/plugins/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
+                  "lineNumber": 19
+                },
+                "deprecated": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -2817,7 +2933,7 @@
             "label": "category",
             "description": [],
             "signature": [
-              "Readonly<{ id: string; label: string; ariaLabel?: string | undefined; order?: number | undefined; euiIconType?: string | undefined; }>"
+              "{ readonly id: string; readonly label: string; readonly ariaLabel?: string | undefined; readonly order?: number | undefined; readonly euiIconType?: string | undefined; }"
             ],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -4001,13 +4117,7 @@
               "\nThe type of privilege group.\n- `mutually_exclusive`::\n    Users will be able to select at most one privilege within this group.\n    Privileges must be specified in descending order of permissiveness (e.g. `All`, `Read`, not `Read`, `All)\n- `independent`::\n    Users will be able to select any combination of privileges within this group."
             ],
             "signature": [
-              {
-                "pluginId": "features",
-                "scope": "common",
-                "docId": "kibFeaturesPluginApi",
-                "section": "def-common.SubFeaturePrivilegeGroupType",
-                "text": "SubFeaturePrivilegeGroupType"
-              }
+              "\"mutually_exclusive\" | \"independent\""
             ],
             "source": {
               "path": "x-pack/plugins/features/common/sub_feature.ts",

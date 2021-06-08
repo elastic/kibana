@@ -412,7 +412,6 @@ export const downgradeImmutableRule = async (es: KibanaClient, ruleId: string): 
 export const deleteAllTimelines = async (es: KibanaClient): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
-    // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
     q: 'type:siem-ui-timeline',
     wait_for_completion: true,
     refresh: true,
@@ -429,7 +428,6 @@ export const deleteAllRulesStatuses = async (es: KibanaClient): Promise<void> =>
   return countDownES(async () => {
     return es.deleteByQuery({
       index: '.kibana',
-      // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
       q: 'type:siem-detection-engine-rule-status',
       wait_for_completion: true,
       refresh: true,
