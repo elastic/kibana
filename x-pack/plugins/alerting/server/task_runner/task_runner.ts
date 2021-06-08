@@ -164,8 +164,7 @@ export class TaskRunner<
     apiKey: RawAlert['apiKey'],
     kibanaBaseUrl: string | undefined,
     actions: Alert<Params>['actions'],
-    alertParams: Params,
-    alertUpdatedBy?: string
+    alertParams: Params
   ) {
     return createExecutionHandler<
       Params,
@@ -188,7 +187,6 @@ export class TaskRunner<
       eventLogger: this.context.eventLogger,
       request: this.getFakeKibanaRequest(spaceId, apiKey),
       alertParams,
-      alertUpdatedBy,
     });
   }
 
@@ -308,8 +306,6 @@ export class TaskRunner<
     event.rule = {
       ...event.rule,
       name: alert.name,
-      author: alert.updatedBy ? [alert.updatedBy] : undefined,
-      version: undefined,
     };
 
     // Cleanup alert instances that are no longer scheduling actions to avoid over populating the alertInstances object
@@ -429,8 +425,7 @@ export class TaskRunner<
       apiKey,
       this.context.kibanaBaseUrl,
       alert.actions,
-      alert.params,
-      alert.updatedBy ?? undefined
+      alert.params
     );
     return this.executeAlertInstances(
       services,
@@ -514,11 +509,10 @@ export class TaskRunner<
         ],
       },
       rule: {
-        id: this.alertType.id,
+        id: alertId,
         license: this.alertType.minimumLicenseRequired,
-        category: this.alertType.name,
+        category: this.alertType.id,
         ruleset: this.alertType.producer,
-        uuid: alertId,
         namespace,
       },
     };
@@ -712,15 +706,12 @@ function generateNewAndRecoveredInstanceEvents<
       },
       message,
       rule: {
-        id: ruleType.id,
+        id: rule.id,
         license: ruleType.minimumLicenseRequired,
-        category: ruleType.name,
+        category: ruleType.id,
         ruleset: ruleType.producer,
-        uuid: alertId,
         namespace,
         name: rule.name,
-        author: rule.updatedBy ? [rule.updatedBy] : undefined,
-        version: undefined,
       },
     };
     eventLogger.logEvent(event);

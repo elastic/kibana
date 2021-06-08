@@ -1300,15 +1300,12 @@ instanceStateValue: true
     ]);
 
     expect(event?.rule).to.eql({
-      id: ruleObject.alertInfo.ruleTypeId,
+      id: alertId,
       license: 'basic',
-      category: ruleObject.alertInfo.ruleTypeName,
+      category: ruleObject.alertInfo.ruleTypeId,
       ruleset: ruleObject.alertInfo.producer,
-      uuid: alertId,
       namespace: spaceId,
       name: ruleObject.alertInfo.name,
-      author: [ruleObject.alertInfo.updatedBy],
-      version: undefined,
     });
 
     expect(event?.message).to.eql(message);

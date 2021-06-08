@@ -95,7 +95,6 @@ const createExecutionHandlerParams: jest.Mocked<
     contextVal: 'My other {{context.value}} goes here',
     stateVal: 'My other {{state.value}} goes here',
   },
-  alertUpdatedBy: 'testUser',
 };
 
 beforeEach(() => {
@@ -184,17 +183,12 @@ test('enqueues execution per selected action', async () => {
           },
           "message": "alert: test:1: 'name-of-alert' instanceId: '2' scheduled actionGroup: 'default' action: test:1",
           "rule": Object {
-            "author": Array [
-              "testUser",
-            ],
-            "category": "Test",
-            "id": "test",
+            "category": "test",
+            "id": "1",
             "license": "basic",
             "name": "name-of-alert",
             "namespace": "test1",
             "ruleset": "alerts",
-            "uuid": "1",
-            "version": undefined,
           },
         },
       ],

@@ -52,7 +52,6 @@ export interface CreateExecutionHandlerOptions<
   eventLogger: IEventLogger;
   request: KibanaRequest;
   alertParams: AlertTypeParams;
-  alertUpdatedBy?: string;
 }
 
 interface ExecutionHandlerOptions<ActionGroupIds extends string> {
@@ -88,7 +87,6 @@ export function createExecutionHandler<
   eventLogger,
   request,
   alertParams,
-  alertUpdatedBy,
 }: CreateExecutionHandlerOptions<
   Params,
   State,
@@ -199,15 +197,12 @@ export function createExecutionHandler<
           ],
         },
         rule: {
-          id: alertType.id,
+          id: alertId,
           license: alertType.minimumLicenseRequired,
-          category: alertType.name,
+          category: alertType.id,
           ruleset: alertType.producer,
-          uuid: alertId,
           ...namespace,
           name: alertName,
-          author: alertUpdatedBy ? [alertUpdatedBy] : undefined,
-          version: undefined,
         },
       };
 

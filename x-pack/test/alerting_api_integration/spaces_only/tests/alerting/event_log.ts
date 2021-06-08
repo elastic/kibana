@@ -135,10 +135,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               message: `alert executed: test.patternFiring:${alertId}: 'abc'`,
               status: executeStatuses[executeCount++],
               rule: {
-                id: response.body.rule_type_id,
-                uuid: alertId,
-                author: response.body.updated_by,
+                id: alertId,
                 category: response.body.rule_type_id,
+                license: 'basic',
+                ruleset: 'alertsFixture',
+                namespace: Spaces.space1.id,
+                name: response.body.name,
               },
             });
             break;
@@ -153,10 +155,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               instanceId: 'instance',
               actionGroupId: 'default',
               rule: {
-                id: response.body.rule_type_id,
-                uuid: alertId,
-                author: response.body.updated_by,
+                id: alertId,
                 category: response.body.rule_type_id,
+                license: 'basic',
+                ruleset: 'alertsFixture',
+                namespace: Spaces.space1.id,
+                name: response.body.name,
               },
             });
             break;
@@ -185,16 +189,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           instanceId: 'instance',
           actionGroupId: 'default',
           rule: {
-            id: response.body.rule_type_id,
-            uuid: alertId,
-            author: response.body.updated_by,
-            category: 'Test: Firing on a Pattern',
+            id: alertId,
+            category: response.body.rule_type_id,
             license: 'basic',
-            name: response.body.name,
-            namespace: Spaces.space1.id,
-            reference: 'https://www.elastic.co/guide/en/kibana/master/stack-rules.html',
             ruleset: 'alertsFixture',
-            version: '8.0.0-SNAPSHOT',
+            namespace: Spaces.space1.id,
+            name: response.body.name,
           },
         });
       }
@@ -295,10 +295,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               message: `alert executed: test.patternFiring:${alertId}: 'abc'`,
               status: executeStatuses[executeCount++],
               rule: {
-                id: response.body.rule_type_id,
-                uuid: alertId,
-                author: response.body.updated_by,
+                id: alertId,
                 category: response.body.rule_type_id,
+                license: 'basic',
+                ruleset: 'alertsFixture',
+                namespace: Spaces.space1.id,
+                name: response.body.name,
               },
             });
             break;
@@ -316,10 +318,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               instanceId: 'instance',
               actionGroupId: 'default',
               rule: {
-                id: response.body.rule_type_id,
-                uuid: alertId,
-                author: response.body.updated_by,
+                id: alertId,
                 category: response.body.rule_type_id,
+                license: 'basic',
+                ruleset: 'alertsFixture',
+                namespace: Spaces.space1.id,
+                name: response.body.name,
               },
             });
             break;
@@ -354,8 +358,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           instanceId: 'instance',
           actionGroupId: 'default',
           rule: {
-            id: response.body.rule_type_id,
-            uuid: alertId,
+            id: alertId,
+            category: response.body.rule_type_id,
+            license: 'basic',
+            ruleset: 'alertsFixture',
+            namespace: Spaces.space1.id,
+            name: response.body.name,
           },
         });
       }
@@ -400,10 +408,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
         status: 'error',
         reason: 'execute',
         rule: {
-          id: response.body.rule_type_id,
-          uuid: alertId,
-          author: response.body.updated_by,
+          id: alertId,
           category: response.body.rule_type_id,
+          license: 'basic',
+          ruleset: 'alertsFixture',
+          namespace: Spaces.space1.id,
+          name: response.body.name,
         },
       });
     });
@@ -429,7 +439,6 @@ interface ValidateEventLogParams {
   reason?: string;
   rule: {
     id: string;
-    uuid: string;
     name?: string;
     version?: string;
     category?: string;

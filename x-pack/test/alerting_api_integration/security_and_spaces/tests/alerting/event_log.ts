@@ -82,15 +82,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
         status: 'error',
         reason: 'decrypt',
         rule: {
-          id: response.body.rule_type_id,
-          uuid: alertId,
+          id: alertId,
           category: response.body.rule_type_id,
           license: 'basic',
-          // ruleset: ruleObject.alertInfo.producer,
+          ruleset: 'alertsFixture',
           namespace: spaceId,
           name: response.body.name,
-          author: response.body.updatedBy ? [response.body.updatedBy] : undefined,
-          version: undefined,
         },
       });
     });
