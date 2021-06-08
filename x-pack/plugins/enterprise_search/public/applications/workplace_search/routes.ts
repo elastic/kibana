@@ -50,8 +50,6 @@ export const ENT_SEARCH_LICENSE_MANAGEMENT = `${docLinks.enterpriseSearchBase}/l
 export const PERSONAL_PATH = '/p';
 
 export const ROLE_MAPPINGS_PATH = '/role_mappings';
-export const ROLE_MAPPING_PATH = `${ROLE_MAPPINGS_PATH}/:roleId`;
-export const ROLE_MAPPING_NEW_PATH = `${ROLE_MAPPINGS_PATH}/new`;
 
 export const USERS_PATH = '/users';
 export const SECURITY_PATH = '/security';
@@ -135,4 +133,3 @@ export const getReindexJobRoute = (
   isOrganization: boolean
 ) =>
   getSourcesPath(generatePath(REINDEX_JOB_PATH, { sourceId, activeReindexJobId }), isOrganization);
-export const getRoleMappingPath = (roleId: string) => generatePath(ROLE_MAPPING_PATH, { roleId });

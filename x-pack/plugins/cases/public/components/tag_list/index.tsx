@@ -32,6 +32,7 @@ interface TagListProps {
   isLoading: boolean;
   onSubmit: (a: string[]) => void;
   tags: string[];
+  owner: string[];
 }
 
 const MyFlexGroup = styled(EuiFlexGroup)`
@@ -44,7 +45,7 @@ const MyFlexGroup = styled(EuiFlexGroup)`
 `;
 
 export const TagList = React.memo(
-  ({ disabled = false, isLoading, onSubmit, tags }: TagListProps) => {
+  ({ disabled = false, isLoading, onSubmit, tags, owner }: TagListProps) => {
     const initialState = { tags };
     const { form } = useForm({
       defaultValue: initialState,

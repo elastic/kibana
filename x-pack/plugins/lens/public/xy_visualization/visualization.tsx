@@ -9,7 +9,7 @@ import React from 'react';
 import { uniq } from 'lodash';
 import { render } from 'react-dom';
 import { Position } from '@elastic/charts';
-import { I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
@@ -439,10 +439,15 @@ export const getXyVisualization = ({
       }
     }
     return accessorsWithArrayValues.map((label) => (
-      <>
-        <strong>{label}</strong> contains array values. Your visualization may not render as
-        expected.
-      </>
+      <FormattedMessage
+        key={label}
+        id="xpack.lens.xyVisualization.arrayValues"
+        defaultMessage="{label} contains array values. Your visualization may not render as
+        expected."
+        values={{
+          label: <strong>{label}</strong>,
+        }}
+      />
     ));
   },
 });
