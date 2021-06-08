@@ -5,18 +5,24 @@
  * 2.0.
  */
 
+import * as t from 'io-ts';
+import { isRight } from 'fp-ts/lib/Either';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
-import { SearchHit } from 'typings/elasticsearch/search';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
-import { Ping } from '../../../common/runtime_types';
-
+import { JourneyStepType, JourneyStep } from '../../../common/runtime_types';
 export interface GetJourneyStepsParams {
   checkGroup: string;
   syntheticEventTypes?: string | string[];
 }
 
-const defaultEventTypes = ['step/end', 'cmd/status', 'step/screenshot', 'journey/browserconsole'];
+const defaultEventTypes = [
+  'step/end',
+  'cmd/status',
+  'step/screenshot',
+  'journey/browserconsole',
+  'step/screenshot_ref',
+];
 
 export const formatSyntheticEvents = (eventTypes?: string | string[]) => {
   if (!eventTypes) {
@@ -26,11 +32,25 @@ export const formatSyntheticEvents = (eventTypes?: string | string[]) => {
   }
 };
 
-export const getJourneySteps: UMElasticsearchQueryFn<GetJourneyStepsParams, Ping> = async ({
-  uptimeEsClient,
-  checkGroup,
-  syntheticEventTypes,
-}) => {
+const ResultHit = t.type({
+  _id: t.string,
+  _source: t.intersection([JourneyStepType, t.type({ '@timestamp': t.string })]),
+});
+
+const parseResult = (hits: unknown) => {
+  const decoded = t.array(ResultHit).decode(result.hits.hits);
+  if (!isRight(decoded)) {
+    throw Error(
+      `Error processing synthetic journey steps for check group ${checkGroup}. Malformed data.`
+    );
+  }
+  return decoded.right;
+};
+
+export const getJourneySteps: UMElasticsearchQueryFn<
+  GetJourneyStepsParams,
+  JourneyStep[]
+> = async ({ uptimeEsClient, checkGroup, syntheticEventTypes }) => {
   const params = {
     query: {
       bool: {
@@ -53,28 +73,43 @@ export const getJourneySteps: UMElasticsearchQueryFn<GetJourneyStepsParams, Ping
       { '@timestamp': { order: 'asc' } },
     ] as const),
     _source: {
-      excludes: ['synthetics.blob'],
+      excludes: ['synthetics.blob', 'screenshot_ref'],
     },
     size: 500,
   };
   const { body: result } = await uptimeEsClient.search({ body: params });
 
-  const screenshotIndexes: number[] = (result.hits.hits as Array<SearchHit<Ping>>)
-    .filter((h) => h._source?.synthetics?.type === 'step/screenshot')
-    .map((h) => h._source?.synthetics?.step?.index as number);
+  const steps = parseResult(result.hits.hits);
 
-  return ((result.hits.hits as Array<SearchHit<Ping>>)
-    .filter((h) => h._source?.synthetics?.type !== 'step/screenshot')
-    .map((h) => {
-      const source = h._source as Ping & { '@timestamp': string };
-      return {
-        ...source,
-        timestamp: source['@timestamp'],
-        docId: h._id,
-        synthetics: {
-          ...source.synthetics,
-          screenshotExists: screenshotIndexes.some((i) => i === source.synthetics?.step?.index),
-        },
-      };
-    }) as unknown) as Ping;
+  const screenshotIndexList: number[] = [];
+  const refIndexList: number[] = [];
+  const stepsWithoutImages: Array<t.TypeOf<typeof ResultHit>> = [];
+
+  /**
+   * Store screenshot indexes for later tagging.
+   * Store steps that are not screenshots, we return these to the client.
+   */
+  for (const step of steps) {
+    const {
+      _source: { synthetics },
+    } = step;
+    if (synthetics.type === 'step/screenshot') {
+      screenshotIndexList.push(synthetics.step.index);
+    } else if (synthetics.type === 'step/screenshot_ref') {
+      refIndexList.push(synthetics.step.index);
+    } else {
+      stepsWithoutImages.push(step);
+    }
+  }
+
+  return stepsWithoutImages.map(({ _id, _source }) => ({
+    ..._source,
+    timestamp: _source['@timestamp'],
+    docId: _id,
+    synthetics: {
+      ..._source.synthetics,
+      screenshotExists: screenshotIndexList.some((i) => i === _source.synthetics.step.index),
+      isScreenshotRef: refIndexList.some((i) => i === _source.synthetics.step.index),
+    },
+  }));
 };

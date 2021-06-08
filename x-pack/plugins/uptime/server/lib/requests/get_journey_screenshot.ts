@@ -68,16 +68,16 @@ export const getJourneyScreenshot: UMElasticsearchQueryFn<
   };
   const { body: result } = await uptimeEsClient.search({ body: params });
 
-  if (result?.hits?.total.value < 1) {
+  if (result.hits?.total.value < 1) {
     return null;
   }
 
-  const stepHit = result?.aggregations?.step.image.hits.hits[0]?._source as Ping;
+  const stepHit = result.aggregations?.step.image.hits.hits[0]?._source as Ping;
 
   return {
     blob: stepHit?.synthetics?.blob ?? null,
     mimeType: stepHit?.synthetics?.blob_mime ?? null,
     stepName: stepHit?.synthetics?.step?.name ?? '',
-    totalSteps: result?.hits?.total.value,
+    totalSteps: result.hits.total.value,
   };
 };
