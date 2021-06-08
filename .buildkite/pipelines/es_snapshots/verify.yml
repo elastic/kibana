@@ -61,12 +61,8 @@ steps:
     artifact_paths: target/junit/**/*.xml
     key: api-integration
 
-  - trigger: 'kibana-elasticsearch-snapshot-promote'
-    async: true
-    build:
-      env:
-        ES_SNAPSHOT_MANIFEST: '$ES_SNAPSHOT_MANIFEST'
-      branch: '$BUILDKITE_BRANCH'
+  - command: .buildkite/scripts/steps/es_snapshots/trigger_promote.sh
+    label: Trigger promotion
     depends_on:
       - default-cigroup
       - default-cigroup-docker
