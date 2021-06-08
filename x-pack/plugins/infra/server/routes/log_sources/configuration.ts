@@ -85,13 +85,11 @@ export const initLogSourceConfigurationRoutes = ({ framework, sources }: InfraBa
           ? sources.updateSourceConfiguration(
               requestContext.core.savedObjects.client,
               sourceId,
-              // @ts-expect-error doesn't expect fields.container to be optional
               patchedSourceConfigurationProperties
             )
           : sources.createSourceConfiguration(
               requestContext.core.savedObjects.client,
               sourceId,
-              // @ts-expect-error doesn't expect fields.container to be optional
               patchedSourceConfigurationProperties
             ));
 

@@ -10,7 +10,6 @@ import { InfraWaffleMapOptions, InfraFormatterType } from '../../../../lib/lib';
 import { SnapshotMetricType } from '../../../../../common/inventory_models/types';
 
 const options: InfraWaffleMapOptions = {
-  // @ts-expect-error not full interface
   fields: {
     container: 'container.id',
     pod: 'kubernetes.pod.uid',

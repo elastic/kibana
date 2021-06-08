@@ -55,7 +55,6 @@ describe('ExpressionChart', () => {
         inventoryDefaultView: 'host',
         metricsExplorerDefaultView: 'host',
 
-        // @ts-expect-error not full interface
         fields: {
           timestamp: '@timestamp',
           container: 'container.id',
