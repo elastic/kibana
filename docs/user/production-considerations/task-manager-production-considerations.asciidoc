@@ -127,9 +127,9 @@ A default {kib} instance can support up to `200/tpm`.
 
 As demonstrated in <<task-manager-health-evaluate-the-capacity-estimation, Evaluate your capacity estimation>>, the Task Manager <<task-manager-health-monitoring, health monitoring>> performs these estimations automatically.
 
-These are estimates based on historical data and should not be used as predictions, but can be used as a rough guide when scaling the system.
+These estimates are based on historical data and should not be used as predictions, but can be used as a rough guide when scaling the system.
 
-We recommend provisioning enough {kib} instances to ensure a buffer between the observed maximum throughput (as estimated under `observed.max_throughput_per_minute`) and the average required throughput (as estimated under `observed.avg_required_throughput_per_minute`), otherwise there might be insufficient capacity to handle spikes of ad-hoc tasks. How much of a buffer is needed largely depends on your use case, but keep in mind that estimated throughput takes into account recent spikes and, as long as they are representative of your system's behaviour, shouldn't require much of a buffer.
+We recommend provisioning enough {kib} instances to ensure a buffer between the observed maximum throughput (as estimated under `observed.max_throughput_per_minute`) and the average required throughput (as estimated under `observed.avg_required_throughput_per_minute`). Otherwise there might be insufficient capacity to handle spikes of ad-hoc tasks. How much of a buffer is needed largely depends on your use case, but keep in mind that estimated throughput takes into account recent spikes and, as long as they are representative of your system's behaviour, shouldn't require much of a buffer.
 
 We recommend provisioning at least as many {kib} instances as proposed by `proposed.proposed_kibana`, but keep in mind that this number is based on the estimated required throughput, which is based on average historical performance, and cannot accurately predict future requirements.
 
@@ -162,4 +162,4 @@ As a default, a {kib} instance provides a throughput of `200/tpm`. A good starti
 
 Although this is a _rough_ estimate, the  _tasks per minute_ provides the lower bound needed to execute tasks on time.
 
-Once you calculate the rough _tasks per minute_ estimate, add a buffer for non-recurring tasks. How much of a buffer is required largely depends on your use case. Ensure enough of a buffer is provisioned by <<task-manager-health-evaluate-the-workload,evaluating your workload>> as it grows and tracking the ratio of recurring to non-recurring tasks by <<task-manager-health-evaluate-the-runtime,evaluating your runtime>>.
+Once you estimate  _tasks per minute_ , add a buffer for non-recurring tasks. How much of a buffer is required largely depends on your use case. Ensure enough of a buffer is provisioned by <<task-manager-health-evaluate-the-workload,evaluating your workload>> as it grows and tracking the ratio of recurring to non-recurring tasks by <<task-manager-health-evaluate-the-runtime,evaluating your runtime>>.
