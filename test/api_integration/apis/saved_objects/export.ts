@@ -27,8 +27,12 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('with kibana index', () => {
       describe('basic amount of saved objects', () => {
-        before(() => esArchiver.load('saved_objects/basic'));
-        after(() => esArchiver.unload('saved_objects/basic'));
+        before(() =>
+          esArchiver.load('test/api_integration/fixtures/es_archiver/saved_objects/basic')
+        );
+        after(() =>
+          esArchiver.unload('test/api_integration/fixtures/es_archiver/saved_objects/basic')
+        );
 
         it('should return objects in dependency order', async () => {
           await supertest
