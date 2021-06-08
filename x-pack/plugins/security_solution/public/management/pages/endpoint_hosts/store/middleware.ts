@@ -352,10 +352,13 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       });
 
       try {
+        const { page, pageSize } = getActivityLogDataPaging(getState());
         const route = resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, {
           agent_id: selectedAgent(getState()),
         });
-        const activityLog = await coreStart.http.get<ActivityLog>(route);
+        const activityLog = await coreStart.http.get<ActivityLog>(route, {
+          query: { page, page_size: pageSize },
+        });
         dispatch({
           type: 'endpointDetailsActivityLogChanged',
           payload: createLoadedResourceState<ActivityLog>(activityLog),

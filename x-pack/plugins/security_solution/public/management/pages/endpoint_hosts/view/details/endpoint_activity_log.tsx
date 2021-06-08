@@ -36,7 +36,7 @@ export const EndpointActivityLog = memo(
       dispatch({
         type: 'appRequestedActivityLog',
         payload: {
-          page: page + pageSize,
+          page: page + 1,
           pageSize,
         },
       });

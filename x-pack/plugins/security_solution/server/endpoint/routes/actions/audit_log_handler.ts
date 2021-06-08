@@ -30,6 +30,10 @@ export const actionsLogRequestHandler = (
       params: { agent_id: elasticAgentId },
       query: { page, page_size: pageSize },
     } = req;
+
+    const size = pageSize;
+    const from = page <= 1 ? 0 : page * pageSize - pageSize + 1;
+
     const options = {
       headers: {
         'X-elastic-product-origin': 'fleet',
@@ -42,8 +46,8 @@ export const actionsLogRequestHandler = (
       result = await esClient.search(
         {
           index: [AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX],
-          size: pageSize,
-          from: page,
+          size,
+          from,
           body: {
             query: {
               bool: {
