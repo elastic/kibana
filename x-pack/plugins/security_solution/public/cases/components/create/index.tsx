@@ -13,6 +13,7 @@ import { getCaseDetailsUrl } from '../../../common/components/link_to';
 import { useKibana } from '../../../common/lib/kibana';
 import * as timelineMarkdownPlugin from '../../../common/components/markdown_editor/plugins/timeline';
 import { useInsertTimeline } from '../use_insert_timeline';
+import { APP_ID } from '../../../../common/constants';
 
 export const Create = React.memo(() => {
   const { cases } = useKibana().services;
@@ -43,6 +44,7 @@ export const Create = React.memo(() => {
             useInsertTimeline,
           },
         },
+        owner: [APP_ID],
       })}
     </EuiPanel>
   );

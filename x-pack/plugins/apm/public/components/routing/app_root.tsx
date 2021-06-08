@@ -11,7 +11,7 @@ import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import { Route, Router, Switch } from 'react-router-dom';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
-import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
+import { APP_WRAPPER_CLASS } from '../../../../../../src/core/public';
 import {
   KibanaContextProvider,
   RedirectAppLinks,
@@ -32,10 +32,6 @@ import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_con
 import { AnomalyDetectionJobsContextProvider } from '../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import { apmRouteConfig } from './apm_route_config';
 
-const MainContainer = euiStyled.div`
-  height: 100%;
-`;
-
 export function ApmAppRoot({
   apmPluginContextValue,
   pluginsStart,
@@ -48,7 +44,12 @@ export function ApmAppRoot({
   const i18nCore = core.i18n;
 
   return (
-    <RedirectAppLinks application={core.application}>
+    <RedirectAppLinks
+      application={core.application}
+      className={APP_WRAPPER_CLASS}
+      data-test-subj="apmMainContainer"
+      role="main"
+    >
       <ApmPluginContext.Provider value={apmPluginContextValue}>
         <KibanaContextProvider services={{ ...core, ...pluginsStart }}>
           <i18nCore.Context>
@@ -57,19 +58,14 @@ export function ApmAppRoot({
                 <LicenseProvider>
                   <AnomalyDetectionJobsContextProvider>
                     <ApmThemeProvider>
-                      <MainContainer
-                        data-test-subj="apmMainContainer"
-                        role="main"
-                      >
-                        <MountApmHeaderActionMenu />
+                      <MountApmHeaderActionMenu />
 
-                        <Route component={ScrollToTopOnPathChange} />
-                        <Switch>
-                          {apmRouteConfig.map((route, i) => (
-                            <ApmRoute key={i} {...route} />
-                          ))}
-                        </Switch>
-                      </MainContainer>
+                      <Route component={ScrollToTopOnPathChange} />
+                      <Switch>
+                        {apmRouteConfig.map((route, i) => (
+                          <ApmRoute key={i} {...route} />
+                        ))}
+                      </Switch>
                     </ApmThemeProvider>
                   </AnomalyDetectionJobsContextProvider>
                 </LicenseProvider>
