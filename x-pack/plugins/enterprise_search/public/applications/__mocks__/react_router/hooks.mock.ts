@@ -10,7 +10,7 @@ import { mockHistory, mockLocation } from './state.mock';
 export const mockUseHistory = jest.fn(() => mockHistory);
 export const mockUseLocation = jest.fn(() => mockLocation);
 export const mockUseParams = jest.fn(() => ({}));
-export const mockUseRouteMatch = jest.fn(() => null);
+export const mockUseRouteMatch = jest.fn(() => true);
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');

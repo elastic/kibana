@@ -15,7 +15,7 @@ import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 import { mockEngineValues } from '../../__mocks__';
 
 import React from 'react';
-import { Switch, Redirect, useParams } from 'react-router-dom';
+import { Switch, Redirect } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 

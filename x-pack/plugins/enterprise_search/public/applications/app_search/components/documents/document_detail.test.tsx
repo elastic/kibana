@@ -11,7 +11,6 @@ import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 import '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 

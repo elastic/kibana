@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kea, resetContext } from 'kea';
+import { resetContext } from 'kea';
 import { BehaviorSubject } from 'rxjs';
 
 import { licensingMock } from '../../../../../licensing/public/mocks';
