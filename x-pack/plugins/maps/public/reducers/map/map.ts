@@ -87,7 +87,7 @@ export const DEFAULT_MAP_STATE: MapState = {
   __rollbackSettings: null,
 };
 
-export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
+export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, any>) {
   switch (action.type) {
     case UPDATE_DRAW_STATE:
       return {
@@ -186,7 +186,7 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
         ],
       };
     case UPDATE_SOURCE_DATA_REQUEST:
-      return updateSourceDataRequest(state, action);
+      return updateSourceDataRequest(state, action.layerId, action.newData);
     case LAYER_DATA_LOAD_STARTED:
       return startDataRequest(
         state,
