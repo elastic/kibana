@@ -682,7 +682,7 @@ describe('Integration', () => {
       {
         name: 'Any of - mixed - both',
         cursor: { row: 13, column: 2 },
-        autoCompleteSet: [tt('{'), tt(3)],
+        autoCompleteSet: [tt(3), tt('{')],
       },
     ]
   );
