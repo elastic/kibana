@@ -36,6 +36,7 @@ import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../../../networ
 import { SummaryView } from './summary_view';
 import { AlertSummaryRow, getSummaryColumns, SummaryRow } from './helpers';
 import { useRuleAsync } from '../../../detections/containers/detection_engine/rules/use_rule_async';
+import { MarkdownRenderer } from '../markdown_editor';
 import { LineClamp } from '../line_clamp';
 
 const StyledEuiDescriptionList = styled(EuiDescriptionList)`
@@ -216,7 +217,9 @@ const AlertSummaryViewComponent: React.FC<{
         <StyledEuiDescriptionList data-test-subj={`summary-view-guide`} compressed>
           <EuiDescriptionListTitle>{i18n.INVESTIGATION_GUIDE}</EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
-            <LineClamp content={maybeRule?.note} />
+            <LineClamp>
+              <MarkdownRenderer>{maybeRule.note}</MarkdownRenderer>
+            </LineClamp>
           </EuiDescriptionListDescription>
         </StyledEuiDescriptionList>
       )}
