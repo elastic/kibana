@@ -34,7 +34,7 @@ All rules share the following four properties.
 
 Name::      The name of the rule. While this name does not have to be unique, the name can be referenced in actions and also appears in the searchable rule listing in the *Management* UI. A distinctive name can help identify and find a rule.
 Tags::      A list of tag names that can be applied to a rule. Tags can help you organize and find rules, because tags appear in the rule listing in the *Management* UI, which is searchable by tag.
-Check every::      This value determines how frequently the rule conditions below are checked. Note that the timing of background rule checks is not guaranteed, particularly for intervals of less than 10 seconds. See <<alerting-production-considerations, Alerting production considerations>> for more information.
+Check every::      This value determines how frequently the rule conditions are checked. Note that the timing of background rule checks is not guaranteed, particularly for intervals of less than 10 seconds. See <<alerting-production-considerations, Alerting production considerations>> for more information.
 Notify::      This value limits how often actions are repeated when an alert remains active across rule checks. See <<alerting-concepts-suppressing-duplicate-notifications>> for more information. +
 - **Only on status change**: Actions are not repeated when an alert remains active across checks. Actions run only when the alert status changes.
 - **Every time alert is active**: Actions are repeated when an alert remains active across checks.
@@ -47,7 +47,7 @@ image::images/rule-flyout-general-details.png[alt='All rules have name, tags, ch
 [[defining-rules-type-conditions]]
 ==== Rule type and conditions
 
-Depending upon the {kib} app and context, you may be prompted to choose the type of rule to create. Some apps will pre-select the type of rule for you.
+Depending upon the {kib} app and context, you might be prompted to choose the type of rule to create. Some apps will pre-select the type of rule for you.
 
 [role="screenshot"]
 image::images/rule-flyout-rule-type-selection.png[Choosing the type of rule to create]
@@ -128,7 +128,7 @@ The rule listing allows you to quickly mute/unmute, disable/enable, and delete i
 [role="screenshot"]
 image:images/individual-mute-disable.png[The actions button allows an individual rule to be muted, disabled, or deleted,width=75%]
 
-These operations can also be performed in bulk by multi-selecting rules and clicking the *Manage rules* button:
+You can perform these operations in bulk by multi-selecting rules, and then clicking the *Manage rules* button:
 
 [role="screenshot"]
 image:images/bulk-mute-disable.png[The Manage rules button lets you mute/unmute, enable/disable, and delete in bulk,width=75%]
