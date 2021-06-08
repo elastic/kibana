@@ -60,7 +60,7 @@ export const EndpointActivityLog = memo(
             {activityLoading ? (
               <EuiLoadingContent lines={3} />
             ) : (
-              // @ts-ignore
+              activityLog.type === 'LoadedResourceState' &&
               activityLog.data?.map((logEntry) => (
                 <LogEntry
                   key={`${logEntry.item.action_id}-${logEntry.item['@timestamp']}`}
