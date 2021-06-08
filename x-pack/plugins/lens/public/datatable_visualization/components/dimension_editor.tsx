@@ -80,7 +80,7 @@ export function TableDimensionEditor(
     ? currentData?.columns.filter(({ id }) => getOriginalId(id) === accessor).map(({ id }) => id) ||
       []
     : [accessor];
-  const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData);
+  const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData, column?.colorArray);
   const currentMinMax = minMaxByColumnId[accessor];
 
   const activePalette = column?.palette || {
@@ -243,64 +243,117 @@ export function TableDimensionEditor(
             />
           </EuiFormRow>
           {hasDynamicColoring && (
-            <EuiFormRow
-              className="lnsDynamicColoringRow"
-              display="columnCompressed"
-              fullWidth
-              label={i18n.translate('xpack.lens.paletteTableGradient.label', {
-                defaultMessage: 'Color',
-              })}
-            >
-              <EuiFlexGroup
-                alignItems="center"
-                gutterSize="s"
-                responsive={false}
-                className="lnsDynamicColoringClickable"
+            <>
+              <EuiFormRow
+                className="lnsDynamicColoringRow"
+                display="columnCompressed"
+                fullWidth
+                label={i18n.translate('xpack.lens.paletteTableGradient.label', {
+                  defaultMessage: 'Color',
+                })}
               >
-                <EuiFlexItem>
-                  <EuiColorPaletteDisplay
-                    data-test-subj="lnsDatatable_dynamicColoring_palette"
-                    palette={getStopsForFixedMode(displayStops, activePalette.params?.colorStops)}
-                    type={FIXED_PROGRESSION}
-                    onClick={() => {
-                      setIsPaletteOpen(!isPaletteOpen);
-                    }}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    data-test-subj="lnsDatatable_dynamicColoring_trigger"
-                    iconType="controlsHorizontal"
-                    onClick={() => {
-                      setIsPaletteOpen(!isPaletteOpen);
-                    }}
-                    size="xs"
-                    flush="both"
-                  >
-                    {i18n.translate('xpack.lens.paletteTableGradient.customize', {
-                      defaultMessage: 'Edit',
-                    })}
-                  </EuiButtonEmpty>
-                  <PalettePanelContainer
-                    siblingRef={props.panelRef}
-                    isOpen={isPaletteOpen}
-                    handleClose={() => setIsPaletteOpen(!isPaletteOpen)}
-                  >
-                    <CustomizablePalette
-                      palettes={props.paletteService}
-                      activePalette={activePalette}
-                      dataBounds={currentMinMax}
-                      setPalette={(newPalette) => {
-                        setState({
-                          ...state,
-                          columns: updateColumnWith(state, accessor, { palette: newPalette }),
-                        });
+                <EuiFlexGroup
+                  alignItems="center"
+                  gutterSize="s"
+                  responsive={false}
+                  className="lnsDynamicColoringClickable"
+                >
+                  <EuiFlexItem>
+                    <EuiColorPaletteDisplay
+                      data-test-subj="lnsDatatable_dynamicColoring_palette"
+                      palette={getStopsForFixedMode(displayStops, activePalette.params?.colorStops)}
+                      type={FIXED_PROGRESSION}
+                      onClick={() => {
+                        setIsPaletteOpen(!isPaletteOpen);
                       }}
                     />
-                  </PalettePanelContainer>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFormRow>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      data-test-subj="lnsDatatable_dynamicColoring_trigger"
+                      iconType="controlsHorizontal"
+                      onClick={() => {
+                        setIsPaletteOpen(!isPaletteOpen);
+                      }}
+                      size="xs"
+                      flush="both"
+                    >
+                      {i18n.translate('xpack.lens.paletteTableGradient.customize', {
+                        defaultMessage: 'Edit',
+                      })}
+                    </EuiButtonEmpty>
+                    <PalettePanelContainer
+                      siblingRef={props.panelRef}
+                      isOpen={isPaletteOpen}
+                      handleClose={() => setIsPaletteOpen(!isPaletteOpen)}
+                    >
+                      <CustomizablePalette
+                        palettes={props.paletteService}
+                        activePalette={activePalette}
+                        dataBounds={currentMinMax}
+                        setPalette={(newPalette) => {
+                          setState({
+                            ...state,
+                            columns: updateColumnWith(state, accessor, { palette: newPalette }),
+                          });
+                        }}
+                      />
+                    </PalettePanelContainer>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFormRow>
+              <EuiFormRow
+                display="columnCompressed"
+                fullWidth
+                label={i18n.translate('xpack.lens.table.dynamicColoring.whenArray', {
+                  defaultMessage: 'Color when array',
+                })}
+              >
+                <EuiButtonGroup
+                  isFullWidth
+                  legend={i18n.translate('xpack.lens.table.dynamicColoring.whenArray', {
+                    defaultMessage: 'Color when array',
+                  })}
+                  data-test-subj="lnsDatatable_dynamicColoring_groups"
+                  name="dynamicColoring"
+                  buttonSize="compressed"
+                  options={[
+                    {
+                      id: `${idPrefix}skip`,
+                      label: i18n.translate('xpack.lens.table.dynamicColoring.arraySkip', {
+                        defaultMessage: 'Skip',
+                      }),
+                      'data-test-subj': 'lnsDatatable_dynamicColoring_groups_skip',
+                    },
+                    {
+                      id: `${idPrefix}first`,
+                      label: i18n.translate('xpack.lens.table.dynamicColoring.arrayFirst', {
+                        defaultMessage: 'First value',
+                      }),
+                      'data-test-subj': 'lnsDatatable_dynamicColoring_groups_first',
+                    },
+                    {
+                      id: `${idPrefix}last`,
+                      label: i18n.translate('xpack.lens.table.dynamicColoring.arrayLast', {
+                        defaultMessage: 'Last value',
+                      }),
+                      'data-test-subj': 'lnsDatatable_dynamicColoring_groups_last',
+                    },
+                  ]}
+                  idSelected={`${idPrefix}${column?.colorArray || 'skip'}`}
+                  onChange={(id) => {
+                    const newMode = id.replace(idPrefix, '') as ColumnType['colorArray'];
+                    const params: Partial<ColumnType> = {
+                      colorArray: newMode,
+                    };
+                    setState({
+                      ...state,
+                      columns: updateColumnWith(state, accessor, params),
+                    });
+                  }}
+                />
+              </EuiFormRow>
+            </>
           )}
         </>
       )}

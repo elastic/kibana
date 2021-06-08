@@ -169,6 +169,7 @@ export const datatableColumn: ExpressionFunctionDefinition<
     isTransposed: { types: ['boolean'], help: '' },
     transposable: { types: ['boolean'], help: '' },
     colorMode: { types: ['string'], help: '' },
+    colorArray: { types: ['string'], help: '' },
     palette: {
       types: ['palette'],
       help: '',

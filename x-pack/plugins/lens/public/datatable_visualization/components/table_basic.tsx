@@ -228,11 +228,11 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   }, [columnConfig, isNumericMap]);
 
   const minMaxByColumnId: Record<string, { min: number; max: number }> = useMemo(() => {
+    const columnsToCheck = columnConfig.columns.filter(({ columnId }) => isNumericMap[columnId]);
     return findMinMaxByColumnId(
-      columnConfig.columns
-        .filter(({ columnId }) => isNumericMap[columnId])
-        .map(({ columnId }) => columnId),
-      firstTable
+      columnsToCheck.map(({ columnId }) => columnId),
+      firstTable,
+      columnsToCheck[0].colorArray
     );
   }, [firstTable, isNumericMap, columnConfig]);
 

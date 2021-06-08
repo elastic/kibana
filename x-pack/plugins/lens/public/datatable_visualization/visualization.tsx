@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { Ast } from '@kbn/interpreter/common';
-import { I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { DatatableColumn } from 'src/plugins/expressions/public';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
@@ -23,6 +23,7 @@ import { TableDimensionEditor } from './components/dimension_editor';
 import { CUSTOM_PALETTE } from '../shared_components/coloring/constants';
 import { CustomPaletteParams } from '../shared_components/coloring/types';
 import { getStopsForFixedMode } from '../shared_components';
+import { getOriginalId } from './transpose_helpers';
 
 export interface ColumnState {
   columnId: string;
@@ -38,6 +39,7 @@ export interface ColumnState {
   alignment?: 'left' | 'right' | 'center';
   palette?: PaletteOutput<CustomPaletteParams>;
   colorMode?: 'none' | 'cell' | 'text';
+  colorArray?: 'skip' | 'last' | 'first';
 }
 
 export interface SortingState {
@@ -375,6 +377,7 @@ export const getDatatableVisualization = ({
                       ],
                       alignment: typeof column.alignment === 'undefined' ? [] : [column.alignment],
                       colorMode: [column.colorMode ?? 'none'],
+                      colorArray: [column.colorArray ?? 'skip'],
                       palette: [paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams)],
                     },
                   },
@@ -435,6 +438,61 @@ export const getDatatableVisualization = ({
       default:
         return state;
     }
+  },
+  getWarningMessages(state, frame) {
+    if (!state || !frame.activeData) {
+      return;
+    }
+
+    const columnWithDynamicColoring = state.columns?.filter(
+      ({ colorMode = 'none', hidden }) => !hidden && colorMode !== 'none'
+    );
+    if (!columnWithDynamicColoring.length) {
+      return;
+    }
+    const currentData = frame.activeData?.[state.layerId];
+
+    const messages = [];
+    for (const column of columnWithDynamicColoring) {
+      const columnId = getOriginalId(column.columnId);
+      const containsArrayWithNumbers = currentData?.rows.some((row) => {
+        return (
+          Array.isArray(row[columnId]) && row[columnId].every((v: unknown) => typeof v === 'number')
+        );
+      });
+      if (containsArrayWithNumbers) {
+        const columnToLabel = frame.datasourceLayers[state.layerId].getOperationForColumnId(
+          columnId
+        )?.label;
+        const strategy = (column.colorArray || 'skip') === 'skip' ? null : column.colorArray;
+        if (strategy) {
+          messages.push(
+            <FormattedMessage
+              key={columnToLabel}
+              id="xpack.lens.xyVisualization.arrayValues"
+              defaultMessage="{label} contains array values. Color is based on {strategy} value of the array"
+              values={{
+                label: <strong>{columnToLabel}</strong>,
+                strategy,
+              }}
+            />
+          );
+        } else {
+          messages.push(
+            <FormattedMessage
+              key={columnToLabel}
+              id="xpack.lens.xyVisualization.arrayValues"
+              defaultMessage="{label} contains array values. Array values won't be colored"
+              values={{
+                label: <strong>{columnToLabel}</strong>,
+              }}
+            />
+          );
+        }
+      }
+    }
+
+    return messages.length ? messages : undefined;
   },
 });
 

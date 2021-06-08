@@ -8,7 +8,31 @@
 import { Datatable } from 'src/plugins/expressions';
 import { getOriginalId } from '../transpose_helpers';
 
-export const findMinMaxByColumnId = (columnIds: string[], table: Datatable | undefined) => {
+export function getNumericValue(
+  rowValue: number | number[] | undefined,
+  arrayStrategy: 'skip' | 'first' | 'last' = 'skip'
+) {
+  if (rowValue == null) {
+    return;
+  }
+  if (!Array.isArray(rowValue)) {
+    return rowValue;
+  }
+  if (arrayStrategy === 'skip') {
+    return;
+  }
+  if (arrayStrategy === 'first') {
+    return rowValue[0];
+  }
+  // last
+  return rowValue[rowValue.length - 1];
+}
+
+export const findMinMaxByColumnId = (
+  columnIds: string[],
+  table: Datatable | undefined,
+  arrayStrategy: 'skip' | 'first' | 'last' = 'skip'
+) => {
   const minMax: Record<string, { min: number; max: number; fallback?: boolean }> = {};
 
   if (table != null) {
@@ -17,12 +41,13 @@ export const findMinMaxByColumnId = (columnIds: string[], table: Datatable | und
       minMax[originalId] = minMax[originalId] || { max: -Infinity, min: Infinity };
       table.rows.forEach((row) => {
         const rowValue = row[columnId];
-        if (rowValue != null) {
-          if (minMax[originalId].min > rowValue) {
-            minMax[originalId].min = rowValue;
+        const numericValue = getNumericValue(rowValue, arrayStrategy);
+        if (numericValue != null) {
+          if (minMax[originalId].min > numericValue) {
+            minMax[originalId].min = numericValue;
           }
-          if (minMax[originalId].max < rowValue) {
-            minMax[originalId].max = rowValue;
+          if (minMax[originalId].max < numericValue) {
+            minMax[originalId].max = numericValue;
           }
         }
       });
