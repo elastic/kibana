@@ -176,7 +176,7 @@ describe('<TemplateCreate />', () => {
       });
 
       it(`doesn't render the deprecated legacy index template warning`, () => {
-        const { exists, find } = testBed;
+        const { exists } = testBed;
         expect(exists('legacyIndexTemplateDeprecationWarning')).toBe(false);
       });
 
