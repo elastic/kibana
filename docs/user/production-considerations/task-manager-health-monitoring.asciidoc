@@ -92,7 +92,7 @@ a| Runtime
 
 a| Capacity Estimation
 
-| This section provides a rough estimate about the sufficiency of its capacity. As the name suggests, these are estimates based on historical data and should not be used as predictions. Use these estimations when following the Task Manager <<task-manager-scaling-guidance>>.
+| experimental[] This section provides a rough estimate about the sufficiency of its capacity. As the name suggests, these are estimates based on historical data and should not be used as predictions. Use these estimations when following the Task Manager <<task-manager-scaling-guidance>>.
 
 [NOTE]
 ============================================================================

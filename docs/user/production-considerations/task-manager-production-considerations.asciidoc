@@ -125,7 +125,7 @@ A default {kib} instance can support up to `200/tpm`.
 [float]
 ===== Automatic estimation
 
-As demonstrated in <<task-manager-health-evaluate-the-capacity-estimation, Evaluate your capacity estimation>>, the Task Manager <<task-manager-health-monitoring, health monitoring>> performs these estimations automatically.
+experimental[] As demonstrated in <<task-manager-health-evaluate-the-capacity-estimation, Evaluate your capacity estimation>>, the Task Manager <<task-manager-health-monitoring, health monitoring>> performs these estimations automatically.
 
 These estimates are based on historical data and should not be used as predictions, but can be used as a rough guide when scaling the system.
 
