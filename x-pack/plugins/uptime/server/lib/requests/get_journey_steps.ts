@@ -37,8 +37,8 @@ const ResultHit = t.type({
   _source: t.intersection([JourneyStepType, t.type({ '@timestamp': t.string })]),
 });
 
-const parseResult = (hits: unknown) => {
-  const decoded = t.array(ResultHit).decode(result.hits.hits);
+const parseResult = (hits: unknown, checkGroup: string) => {
+  const decoded = t.array(ResultHit).decode(hits);
   if (!isRight(decoded)) {
     throw Error(
       `Error processing synthetic journey steps for check group ${checkGroup}. Malformed data.`
@@ -79,7 +79,7 @@ export const getJourneySteps: UMElasticsearchQueryFn<
   };
   const { body: result } = await uptimeEsClient.search({ body: params });
 
-  const steps = parseResult(result.hits.hits);
+  const steps = parseResult(result.hits.hits, checkGroup);
 
   const screenshotIndexList: number[] = [];
   const refIndexList: number[] = [];
