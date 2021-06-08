@@ -38,6 +38,34 @@ export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
   const [isLoadingEnrollmentKey, setIsLoadingEnrollmentKey] = useState(false);
   const [isAuthenticationSettingsOpen, setIsAuthenticationSettingsOpen] = useState<boolean>(false);
 
+  const onCreateEnrollmentTokenClick = async () => {
+    setIsLoadingEnrollmentKey(true);
+    if (agentPolicyId) {
+      try {
+        const res = await sendCreateEnrollmentAPIKey({ policy_id: agentPolicyId });
+        if (res.error) {
+          throw res.error;
+        }
+        setIsLoadingEnrollmentKey(false);
+        if (!res.data?.item) {
+          return;
+        }
+        setEnrollmentAPIKeys([res.data.item]);
+        setSelectedEnrollmentApiKey(res.data.item.id);
+        notifications.toasts.addSuccess(
+          i18n.translate('xpack.fleet.newEnrollmentKey.keyCreatedToasts', {
+            defaultMessage: 'Enrollment token created',
+          })
+        );
+      } catch (error) {
+        setIsLoadingEnrollmentKey(false);
+        notifications.toasts.addError(error, {
+          title: 'Error',
+        });
+      }
+    }
+  };
+
   useEffect(
     function triggerOnKeyChangeEffect() {
       if (onKeyChange) {
@@ -152,33 +180,7 @@ export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
                 iconType="plusInCircle"
                 isLoading={isLoadingEnrollmentKey}
                 fill
-                onClick={() => {
-                  setIsLoadingEnrollmentKey(true);
-                  if (agentPolicyId) {
-                    sendCreateEnrollmentAPIKey({ policy_id: agentPolicyId })
-                      .then((res) => {
-                        if (res.error) {
-                          throw res.error;
-                        }
-                        setIsLoadingEnrollmentKey(false);
-                        if (res.data?.item) {
-                          setEnrollmentAPIKeys([res.data.item]);
-                          setSelectedEnrollmentApiKey(res.data.item.id);
-                          notifications.toasts.addSuccess(
-                            i18n.translate('xpack.fleet.newEnrollmentKey.keyCreatedToasts', {
-                              defaultMessage: 'Enrollment token created',
-                            })
-                          );
-                        }
-                      })
-                      .catch((error) => {
-                        setIsLoadingEnrollmentKey(false);
-                        notifications.toasts.addError(error, {
-                          title: 'Error',
-                        });
-                      });
-                  }
-                }}
+                onClick={onCreateEnrollmentTokenClick}
               >
                 <FormattedMessage
                   id="xpack.fleet.enrollmentStepAgentPolicy.setUpAgentsLink"
