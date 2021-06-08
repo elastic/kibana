@@ -72,9 +72,22 @@ export function useContextAppFetch({
   const fetchAnchorRow = useCallback(async () => {
     const { sort } = appState;
     const [[, sortDir]] = sort;
+    const anchorError = i18n.translate('discover.context.unableToLoadAnchorDocumentDescription', {
+      defaultMessage: 'Unable to load the anchor document',
+    });
 
     if (!tieBreakerField) {
       setState(createError('anchorStatus', FailureReason.INVALID_TIEBREAKER));
+      toastNotifications.addDanger({
+        title: anchorError,
+        text: toMountPoint(
+          <MarkdownSimple>
+            {i18n.translate('discover.context.invalidTieBreakerFiledSetting', {
+              defaultMessage: 'Invalid tie breaker field setting',
+            })}
+          </MarkdownSimple>
+        ),
+      });
       return;
     }
 
@@ -88,9 +101,7 @@ export function useContextAppFetch({
       return anchor;
     } catch (error) {
       toastNotifications.addDanger({
-        title: i18n.translate('discover.context.unableToLoadAnchorDocumentDescription', {
-          defaultMessage: 'Unable to load the anchor document',
-        }),
+        title: anchorError,
         text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>),
       });
       setState(createError('anchorStatus', FailureReason.UNKNOWN, error));
@@ -99,10 +110,10 @@ export function useContextAppFetch({
     appState,
     tieBreakerField,
     setState,
+    toastNotifications,
     fetchAnchor,
     indexPatternId,
     anchorId,
-    toastNotifications,
   ]);
 
   const fetchSurroundingRows = useCallback(
@@ -114,20 +125,6 @@ export function useContextAppFetch({
       const count = type === 'predecessors' ? appState.predecessorCount : appState.successorCount;
       const anchor = fetchedAnchor || fetchedState.anchor;
       const statusKey = `${type}Status`;
-
-      if (!tieBreakerField) {
-        setState(createError(statusKey, FailureReason.INVALID_TIEBREAKER));
-        const message = i18n.translate('discover.context.invalidTieBreakerFiledSetting', {
-          defaultMessage: 'Invalid tie breaker field setting',
-        });
-        toastNotifications.addDanger({
-          title: i18n.translate('discover.context.unableToLoadDocumentDescription', {
-            defaultMessage: 'Unable to load documents',
-          }),
-          text: toMountPoint(<MarkdownSimple>{message}</MarkdownSimple>),
-        });
-        return;
-      }
 
       try {
         setState({ [statusKey]: { value: LoadingStatus.LOADING } });

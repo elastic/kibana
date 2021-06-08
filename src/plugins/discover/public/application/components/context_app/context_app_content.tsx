@@ -7,7 +7,6 @@
  */
 
 import React, { useState, Fragment, useMemo, useCallback } from 'react';
-import './context_app_content.scss';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiHorizontalRule, EuiText } from '@elastic/eui';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../common';

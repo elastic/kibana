@@ -7,6 +7,7 @@
  */
 
 import React, { Fragment, memo, useEffect, useRef, useMemo, useCallback } from 'react';
+import './context_app.scss';
 import classNames from 'classnames';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { EuiText, EuiPageContent, EuiPage, EuiSpacer } from '@elastic/eui';
