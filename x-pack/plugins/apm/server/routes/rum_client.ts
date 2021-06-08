@@ -6,14 +6,8 @@
  */
 
 import * as t from 'io-ts';
-import { jsonRt } from '@kbn/io-ts-utils';
 import { isoToEpochRt } from '@kbn/io-ts-utils';
-import { LocalUIFilterName } from '../../common/ui_filter';
-import {
-  Setup,
-  setupRequest,
-  SetupTimeRange,
-} from '../lib/helpers/setup_request';
+import { setupRequest } from '../lib/helpers/setup_request';
 import { getClientMetrics } from '../lib/rum_client/get_client_metrics';
 import { getJSErrors } from '../lib/rum_client/get_js_errors';
 import { getLongTaskMetrics } from '../lib/rum_client/get_long_task_metrics';
@@ -25,12 +19,9 @@ import { getUrlSearch } from '../lib/rum_client/get_url_search';
 import { getVisitorBreakdown } from '../lib/rum_client/get_visitor_breakdown';
 import { getWebCoreVitals } from '../lib/rum_client/get_web_core_vitals';
 import { hasRumData } from '../lib/rum_client/has_rum_data';
-import { getLocalUIFilters } from '../lib/rum_client/ui_filters/local_ui_filters';
-import { localUIFilterNames } from '../lib/rum_client/ui_filters/local_ui_filters/config';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 import { rangeRt } from './default_api_types';
-import { APMRouteHandlerResources } from './typings';
 
 export const percentileRangeRt = t.partial({
   minPercentile: t.string,

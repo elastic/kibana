@@ -96,7 +96,7 @@ export function FilterValueButton({
     <FieldValueSuggestions
       button={button}
       label={'Version'}
-      indexPatternTitle={indexPattern.title}
+      indexPatternTitle={indexPattern?.title}
       sourceField={nestedField}
       onChange={onNestedChange}
       filters={filters}
