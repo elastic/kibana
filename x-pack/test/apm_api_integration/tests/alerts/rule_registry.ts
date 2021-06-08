@@ -400,6 +400,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               query: {
                 start: new Date(now - 30 * 60 * 1000).toISOString(),
                 end: new Date(now).toISOString(),
+                status: 'all',
               },
             })
           )
@@ -572,6 +573,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               query: {
                 start: new Date(now - 30 * 60 * 1000).toISOString(),
                 end: new Date().toISOString(),
+                status: 'all',
               },
             })
           )
@@ -601,7 +603,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       expect(errorOrUndefined).not.to.be(undefined);
 
-      expect(errorOrUndefined).to.be(`ResponseError: index_not_found_exception`);
+      expect(errorOrUndefined).to.contain('index_not_found_exception');
     });
   });
 }

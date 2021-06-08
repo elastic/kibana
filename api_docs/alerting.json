@@ -516,13 +516,15 @@
             "label": "rule",
             "description": [],
             "signature": [
+              "Pick<Pick<",
               {
                 "pluginId": "alerting",
                 "scope": "common",
                 "docId": "kibAlertingPluginApi",
-                "section": "def-common.SanitizedRuleConfig",
-                "text": "SanitizedRuleConfig"
-              }
+                "section": "def-common.Alert",
+                "text": "Alert"
+              },
+              "<never>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">, \"enabled\" | \"name\" | \"actions\" | \"tags\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"throttle\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
@@ -840,7 +842,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/alerting/server/types.ts",
-                  "lineNumber": 75
+                  "lineNumber": 76
                 },
                 "deprecated": false
               }
@@ -1030,7 +1032,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/alerting/server/types.ts",
-                  "lineNumber": 107
+                  "lineNumber": 109
                 },
                 "deprecated": false
               }
@@ -3913,7 +3915,15 @@
         "label": "SanitizedRuleConfig",
         "description": [],
         "signature": [
-          "Pick<Pick<Alert<never>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"muteAll\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\">, \"enabled\" | \"name\" | \"actions\" | \"tags\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"throttle\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
+          "Pick<Pick<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.Alert",
+            "text": "Alert"
+          },
+          "<never>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">, \"enabled\" | \"name\" | \"actions\" | \"tags\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"throttle\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
         ],
         "source": {
           "path": "x-pack/plugins/alerting/common/alert.ts",

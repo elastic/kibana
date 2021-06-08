@@ -40,6 +40,7 @@ import { CasesTableFilters } from './table_filters';
 import { EuiBasicTableOnChange } from './types';
 
 import { CasesTable } from './table';
+
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>
     $isShow
@@ -81,6 +82,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
     userCanCrud,
   }) => {
     const { actionLicense } = useGetActionLicense();
+
     const firstAvailableStatus = head(difference(caseStatuses, hiddenStatuses));
     const initialFilterOptions =
       !isEmpty(hiddenStatuses) && firstAvailableStatus ? { status: firstAvailableStatus } : {};
@@ -96,7 +98,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
       setFilters,
       setQueryParams,
       setSelectedCases,
-    } = useGetCases({}, initialFilterOptions);
+    } = useGetCases({ initialFilterOptions });
 
     // Post Comment to Case
     const { postComment, isLoading: isCommentUpdating } = usePostComment();

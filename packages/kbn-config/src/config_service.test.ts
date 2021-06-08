@@ -9,7 +9,7 @@
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first, take } from 'rxjs/operators';
 
-import { mockApplyDeprecations } from './config_service.test.mocks';
+import { mockApplyDeprecations, mockedChangedPaths } from './config_service.test.mocks';
 import { rawConfigServiceMock } from './raw/raw_config_service.mock';
 
 import { schema } from '@kbn/config-schema';
@@ -418,9 +418,15 @@ test('logs deprecation warning during validation', async () => {
   const configService = new ConfigService(rawConfig, defaultEnv, logger);
   mockApplyDeprecations.mockImplementationOnce((config, deprecations, createAddDeprecation) => {
     const addDeprecation = createAddDeprecation!('');
-    addDeprecation({ message: 'some deprecation message' });
-    addDeprecation({ message: 'another deprecation message' });
-    return config;
+    addDeprecation({
+      message: 'some deprecation message',
+      correctiveActions: { manualSteps: ['do X'] },
+    });
+    addDeprecation({
+      message: 'another deprecation message',
+      correctiveActions: { manualSteps: ['do Y'] },
+    });
+    return { config, changedPaths: mockedChangedPaths };
   });
 
   loggerMock.clear(logger);
@@ -444,14 +450,25 @@ test('does not log warnings for silent deprecations during validation', async ()
   mockApplyDeprecations
     .mockImplementationOnce((config, deprecations, createAddDeprecation) => {
       const addDeprecation = createAddDeprecation!('');
-      addDeprecation({ message: 'some deprecation message', silent: true });
-      addDeprecation({ message: 'another deprecation message' });
-      return config;
+      addDeprecation({
+        message: 'some deprecation message',
+        correctiveActions: { manualSteps: ['do X'] },
+        silent: true,
+      });
+      addDeprecation({
+        message: 'another deprecation message',
+        correctiveActions: { manualSteps: ['do Y'] },
+      });
+      return { config, changedPaths: mockedChangedPaths };
     })
     .mockImplementationOnce((config, deprecations, createAddDeprecation) => {
       const addDeprecation = createAddDeprecation!('');
-      addDeprecation({ message: 'I am silent', silent: true });
-      return config;
+      addDeprecation({
+        message: 'I am silent',
+        silent: true,
+        correctiveActions: { manualSteps: ['do Z'] },
+      });
+      return { config, changedPaths: mockedChangedPaths };
     });
 
   loggerMock.clear(logger);
@@ -519,9 +536,13 @@ describe('getHandledDeprecatedConfigs', () => {
     mockApplyDeprecations.mockImplementationOnce((config, deprecations, createAddDeprecation) => {
       deprecations.forEach((deprecation) => {
         const addDeprecation = createAddDeprecation!(deprecation.path);
-        addDeprecation({ message: `some deprecation message`, documentationUrl: 'some-url' });
+        addDeprecation({
+          message: `some deprecation message`,
+          documentationUrl: 'some-url',
+          correctiveActions: { manualSteps: ['do X'] },
+        });
       });
-      return config;
+      return { config, changedPaths: mockedChangedPaths };
     });
 
     await configService.validate();
@@ -532,6 +553,11 @@ describe('getHandledDeprecatedConfigs', () => {
           "base",
           Array [
             Object {
+              "correctiveActions": Object {
+                "manualSteps": Array [
+                  "do X",
+                ],
+              },
               "documentationUrl": "some-url",
               "message": "some deprecation message",
             },
@@ -539,5 +565,20 @@ describe('getHandledDeprecatedConfigs', () => {
         ],
       ]
     `);
+  });
+});
+
+describe('getDeprecatedConfigPath$', () => {
+  it('returns all config paths changes during deprecation', async () => {
+    const rawConfig$ = new BehaviorSubject<Record<string, any>>({ key: 'value' });
+    const rawConfigProvider = rawConfigServiceMock.create({ rawConfig$ });
+
+    const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
+    await configService.setSchema('key', schema.string());
+    await configService.validate();
+
+    const deprecatedConfigPath$ = configService.getDeprecatedConfigPath$();
+    const deprecatedConfigPath = await deprecatedConfigPath$.pipe(first()).toPromise();
+    expect(deprecatedConfigPath).toEqual(mockedChangedPaths);
   });
 });

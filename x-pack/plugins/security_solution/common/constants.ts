@@ -25,6 +25,7 @@ export const DEFAULT_TIME_RANGE = 'timepicker:timeDefaults';
 export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults';
 export const DEFAULT_APP_TIME_RANGE = 'securitySolution:timeDefaults';
 export const DEFAULT_APP_REFRESH_INTERVAL = 'securitySolution:refreshIntervalDefaults';
+export const DEFAULT_ALERTS_INDEX = '.alerts-security-solution';
 export const DEFAULT_SIGNALS_INDEX = '.siem-signals';
 export const DEFAULT_LISTS_INDEX = '.lists';
 export const DEFAULT_ITEMS_INDEX = '.items';
@@ -147,6 +148,18 @@ export const DEFAULT_TRANSFORMS_SETTING = JSON.stringify(defaultTransformsSettin
  * Id for the signals alerting type
  */
 export const SIGNALS_ID = `siem.signals`;
+
+/**
+ * Id's for reference rule types
+ */
+export const REFERENCE_RULE_ALERT_TYPE_ID = `siem.referenceRule`;
+export const REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID = `siem.referenceRulePersistence`;
+
+export const CUSTOM_ALERT_TYPE_ID = `siem.customRule`;
+export const EQL_ALERT_TYPE_ID = `siem.eqlRule`;
+export const INDICATOR_ALERT_TYPE_ID = `siem.indicatorRule`;
+export const ML_ALERT_TYPE_ID = `siem.mlRule`;
+export const THRESHOLD_ALERT_TYPE_ID = `siem.thresholdRule`;
 
 /**
  * Id for the notifications alerting type

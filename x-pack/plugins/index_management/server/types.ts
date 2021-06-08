@@ -14,7 +14,7 @@ import type {
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { SecurityPluginSetup } from '../../security/server';
-import { License, IndexDataEnricher } from './services';
+import { IndexDataEnricher } from './services';
 import { isEsError, parseEsError, handleEsError } from './shared_imports';
 
 export interface Dependencies {
@@ -25,7 +25,6 @@ export interface Dependencies {
 
 export interface RouteDependencies {
   router: IndexManagementRouter;
-  license: License;
   config: {
     isSecurityEnabled: () => boolean;
   };

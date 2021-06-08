@@ -166,10 +166,12 @@ test('enqueues execution per selected action', async () => {
                 "id": "1",
                 "rel": "primary",
                 "type": "alert",
+                "type_id": "test",
               },
               Object {
                 "id": "1",
                 "type": "action",
+                "type_id": "test",
               },
             ],
           },
@@ -180,7 +182,8 @@ test('enqueues execution per selected action', async () => {
   `);
 
   expect(jest.requireMock('./inject_action_params').injectActionParams).toHaveBeenCalledWith({
-    alertId: '1',
+    ruleId: '1',
+    spaceId: 'default',
     actionTypeId: 'test',
     actionParams: {
       alertVal: 'My 1 name-of-alert default tag-A,tag-B 2 goes here',

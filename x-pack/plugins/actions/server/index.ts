@@ -8,7 +8,7 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { PluginInitializerContext, PluginConfigDescriptor } from '../../../../src/core/server';
 import { ActionsPlugin } from './plugin';
-import { configSchema, ActionsConfig } from './config';
+import { configSchema, ActionsConfig, CustomHostSettings } from './config';
 import { ActionsClient as ActionsClientClass } from './actions_client';
 import { ActionsAuthorization as ActionsAuthorizationClass } from './authorization/actions_authorization';
 
@@ -57,7 +57,68 @@ export const plugin = (initContext: PluginInitializerContext) => new ActionsPlug
 
 export const config: PluginConfigDescriptor<ActionsConfig> = {
   schema: configSchema,
-  deprecations: ({ renameFromRoot }) => [
+  deprecations: ({ renameFromRoot, unused }) => [
     renameFromRoot('xpack.actions.whitelistedHosts', 'xpack.actions.allowedHosts'),
+    (settings, fromPath, addDeprecation) => {
+      const customHostSettings = settings?.xpack?.actions?.customHostSettings ?? [];
+      if (
+        customHostSettings.find(
+          (customHostSchema: CustomHostSettings) =>
+            !!customHostSchema.tls && !!customHostSchema.tls.rejectUnauthorized
+        )
+      ) {
+        addDeprecation({
+          message:
+            `"xpack.actions.customHostSettings[<index>].tls.rejectUnauthorized" is deprecated.` +
+            `Use "xpack.actions.customHostSettings[<index>].tls.verificationMode" instead, ` +
+            `with the setting "verificationMode:full" eql to "rejectUnauthorized:true", ` +
+            `and "verificationMode:none" eql to "rejectUnauthorized:false".`,
+          correctiveActions: {
+            manualSteps: [
+              `Remove "xpack.actions.customHostSettings[<index>].tls.rejectUnauthorized" from your kibana configs.`,
+              `Use "xpack.actions.customHostSettings[<index>].tls.verificationMode" ` +
+                `with the setting "verificationMode:full" eql to "rejectUnauthorized:true", ` +
+                `and "verificationMode:none" eql to "rejectUnauthorized:false".`,
+            ],
+          },
+        });
+      }
+    },
+    (settings, fromPath, addDeprecation) => {
+      if (!!settings?.xpack?.actions?.rejectUnauthorized) {
+        addDeprecation({
+          message:
+            `"xpack.actions.rejectUnauthorized" is deprecated. Use "xpack.actions.verificationMode" instead, ` +
+            `with the setting "verificationMode:full" eql to "rejectUnauthorized:true", ` +
+            `and "verificationMode:none" eql to "rejectUnauthorized:false".`,
+          correctiveActions: {
+            manualSteps: [
+              `Remove "xpack.actions.rejectUnauthorized" from your kibana configs.`,
+              `Use "xpack.actions.verificationMode" ` +
+                `with the setting "verificationMode:full" eql to "rejectUnauthorized:true", ` +
+                `and "verificationMode:none" eql to "rejectUnauthorized:false".`,
+            ],
+          },
+        });
+      }
+    },
+    (settings, fromPath, addDeprecation) => {
+      if (!!settings?.xpack?.actions?.proxyRejectUnauthorizedCertificates) {
+        addDeprecation({
+          message:
+            `"xpack.actions.proxyRejectUnauthorizedCertificates" is deprecated. Use "xpack.actions.proxyVerificationMode" instead, ` +
+            `with the setting "proxyVerificationMode:full" eql to "rejectUnauthorized:true",` +
+            `and "proxyVerificationMode:none" eql to "rejectUnauthorized:false".`,
+          correctiveActions: {
+            manualSteps: [
+              `Remove "xpack.actions.proxyRejectUnauthorizedCertificates" from your kibana configs.`,
+              `Use "xpack.actions.proxyVerificationMode" ` +
+                `with the setting "proxyVerificationMode:full" eql to "rejectUnauthorized:true",` +
+                `and "proxyVerificationMode:none" eql to "rejectUnauthorized:false".`,
+            ],
+          },
+        });
+      }
+    },
   ],
 };

@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { safeLoad } from 'js-yaml';
+import { keyBy } from 'lodash';
 
 import { getFlattenedObject, isValidNamespace } from '../../../../services';
 import type {
@@ -32,12 +33,12 @@ export type PackagePolicyInputValidationResults = PackagePolicyConfigValidationR
   streams?: Record<PackagePolicyInputStream['id'], PackagePolicyConfigValidationResults>;
 };
 
-export interface PackagePolicyValidationResults {
+export type PackagePolicyValidationResults = {
   name: Errors;
   description: Errors;
   namespace: Errors;
   inputs: Record<PackagePolicyInput['type'], PackagePolicyInputValidationResults> | null;
-}
+} & PackagePolicyConfigValidationResults;
 
 /*
  * Returns validation information for a given package policy and package info
@@ -65,6 +66,16 @@ export const validatePackagePolicy = (
 
   if (!namespaceValidation.valid && namespaceValidation.error) {
     validationResults.namespace = [namespaceValidation.error];
+  }
+
+  // Validate package-level vars
+  const packageVarsByName = keyBy(packageInfo.vars || [], 'name');
+  const packageVars = Object.entries(packagePolicy.vars || {});
+  if (packageVars.length) {
+    validationResults.vars = packageVars.reduce((results, [name, varEntry]) => {
+      results[name] = validatePackagePolicyConfig(varEntry, packageVarsByName[name]);
+      return results;
+    }, {} as ValidationEntry);
   }
 
   if (

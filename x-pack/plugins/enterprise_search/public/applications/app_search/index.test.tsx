@@ -7,6 +7,7 @@
 
 import { DEFAULT_INITIAL_APP_DATA } from '../../../common/__mocks__';
 import { setMockValues, rerender } from '../__mocks__';
+import '../__mocks__/shallow_useeffect.mock';
 import '../__mocks__/enterprise_search_url.mock';
 import '../__mocks__/react_router_history.mock';
 
@@ -25,8 +26,9 @@ import { EngineRouter, EngineNav } from './components/engine';
 import { EngineCreation } from './components/engine_creation';
 import { EnginesOverview } from './components/engines';
 import { ErrorConnecting } from './components/error_connecting';
+import { Library } from './components/library';
 import { MetaEngineCreation } from './components/meta_engine_creation';
-import { RoleMappingsRouter } from './components/role_mappings';
+import { RoleMappings } from './components/role_mappings';
 import { SetupGuide } from './components/setup_guide';
 
 import { AppSearch, AppSearchUnconfigured, AppSearchConfigured, AppSearchNav } from './';
@@ -70,9 +72,10 @@ describe('AppSearchUnconfigured', () => {
 
 describe('AppSearchConfigured', () => {
   let wrapper: ShallowWrapper;
+  const renderHeaderActions = jest.fn();
 
   beforeAll(() => {
-    setMockValues({ myRole: {} });
+    setMockValues({ myRole: {}, renderHeaderActions });
     wrapper = shallow(<AppSearchConfigured {...DEFAULT_INITIAL_APP_DATA} />);
   });
 
@@ -81,6 +84,10 @@ describe('AppSearchConfigured', () => {
     expect(wrapper.find(Layout).prop('readOnlyMode')).toBeFalsy();
     expect(wrapper.find(EnginesOverview)).toHaveLength(1);
     expect(wrapper.find(EngineRouter)).toHaveLength(1);
+  });
+
+  it('renders header actions', () => {
+    expect(renderHeaderActions).toHaveBeenCalled();
   });
 
   it('mounts AppLogic with passed initial data props', () => {
@@ -99,13 +106,13 @@ describe('AppSearchConfigured', () => {
       it('renders RoleMappings when canViewRoleMappings is true', () => {
         setMockValues({ myRole: { canViewRoleMappings: true } });
         rerender(wrapper);
-        expect(wrapper.find(RoleMappingsRouter)).toHaveLength(1);
+        expect(wrapper.find(RoleMappings)).toHaveLength(1);
       });
 
       it('does not render RoleMappings when user canViewRoleMappings is false', () => {
         setMockValues({ myRole: { canManageEngines: false } });
         rerender(wrapper);
-        expect(wrapper.find(RoleMappingsRouter)).toHaveLength(0);
+        expect(wrapper.find(RoleMappings)).toHaveLength(0);
       });
     });
 
@@ -139,6 +146,28 @@ describe('AppSearchConfigured', () => {
 
         expect(wrapper.find(MetaEngineCreation)).toHaveLength(0);
       });
+    });
+  });
+
+  describe('library', () => {
+    it('renders a library page in development', () => {
+      const OLD_ENV = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'development';
+
+      rerender(wrapper);
+
+      expect(wrapper.find(Library)).toHaveLength(1);
+      process.env.NODE_ENV = OLD_ENV;
+    });
+
+    it("doesn't in production", () => {
+      const OLD_ENV = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'production';
+
+      rerender(wrapper);
+
+      expect(wrapper.find(Library)).toHaveLength(0);
+      process.env.NODE_ENV = OLD_ENV;
     });
   });
 });
