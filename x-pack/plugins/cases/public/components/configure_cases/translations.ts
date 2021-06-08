@@ -50,7 +50,7 @@ export const CASE_CLOSURE_OPTIONS_DESC = i18n.translate(
   }
 );
 
-export const CASE_COLSURE_OPTIONS_SUB_CASES = i18n.translate(
+export const CASE_CLOSURE_OPTIONS_SUB_CASES = i18n.translate(
   'xpack.cases.configureCases.caseClosureOptionsSubCases',
   {
     defaultMessage: 'Automated closures of sub-cases is not currently supported.',

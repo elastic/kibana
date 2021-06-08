@@ -31,7 +31,7 @@ export const getBreadcrumbs = (
       }),
     },
   ];
-  if (params.detailName === 'create') {
+  if (params.pathName === '/create') {
     breadcrumb = [
       ...breadcrumb,
       {

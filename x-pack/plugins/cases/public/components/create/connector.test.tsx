@@ -19,16 +19,14 @@ import { useGetChoices } from '../connectors/servicenow/use_get_choices';
 import { incidentTypes, severity, choices } from '../connectors/mock';
 import { schema, FormProps } from './schema';
 
-jest.mock('../../common/lib/kibana', () => {
-  return {
-    useKibana: () => ({
-      services: {
-        notifications: {},
-        http: {},
-      },
-    }),
-  };
-});
+jest.mock('../../common/lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      notifications: {},
+      http: {},
+    },
+  }),
+}));
 
 jest.mock('../connectors/resilient/use_get_incident_types');
 jest.mock('../connectors/resilient/use_get_severity');

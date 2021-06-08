@@ -132,9 +132,9 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
 
   const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.case);
   const goToCreateCase = useCallback(
-    (ev) => {
+    async (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+      return navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
         path: getCreateCaseUrl(urlSearch),
       });
     },

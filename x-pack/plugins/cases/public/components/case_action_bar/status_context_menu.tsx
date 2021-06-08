@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { memoize } from 'lodash/fp';
 import { EuiPopover, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import { caseStatuses, CaseStatuses } from '../../../common';
 import { Status } from '../status';
@@ -19,8 +18,8 @@ interface Props {
 
 const StatusContextMenuComponent: React.FC<Props> = ({
   currentStatus,
-  onStatusChanged,
   disabled = false,
+  onStatusChanged,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
@@ -30,35 +29,38 @@ const StatusContextMenuComponent: React.FC<Props> = ({
     [disabled, currentStatus, openPopover]
   );
 
-  const onContextMenuItemClick = useMemo(
-    () =>
-      memoize<(status: CaseStatuses) => () => void>((status) => () => {
-        closePopover();
-        onStatusChanged(status);
-      }),
+  const onContextMenuItemClick = useCallback(
+    (status: CaseStatuses) => {
+      closePopover();
+      onStatusChanged(status);
+    },
     [closePopover, onStatusChanged]
   );
 
-  const panelItems = caseStatuses.map((status: CaseStatuses) => (
-    <EuiContextMenuItem
-      key={status}
-      icon={status === currentStatus ? 'check' : 'empty'}
-      onClick={onContextMenuItemClick(status)}
-      data-test-subj={`case-view-status-dropdown-${status}`}
-    >
-      <Status type={status} />
-    </EuiContextMenuItem>
-  ));
+  const panelItems = useMemo(
+    () =>
+      caseStatuses.map((status: CaseStatuses) => (
+        <EuiContextMenuItem
+          data-test-subj={`case-view-status-dropdown-${status}`}
+          icon={status === currentStatus ? 'check' : 'empty'}
+          key={status}
+          onClick={() => onContextMenuItemClick(status)}
+        >
+          <Status type={status} />
+        </EuiContextMenuItem>
+      )),
+    [currentStatus, onContextMenuItemClick]
+  );
 
   return (
     <>
       <EuiPopover
-        id="caseStatusPopover"
-        button={popOverButton}
-        isOpen={isPopoverOpen}
-        closePopover={closePopover}
         anchorPosition="downLeft"
+        button={popOverButton}
+        closePopover={closePopover}
         data-test-subj="case-view-status-dropdown"
+        id="caseStatusPopover"
+        isOpen={isPopoverOpen}
       >
         <EuiContextMenuPanel items={panelItems} />
       </EuiPopover>
