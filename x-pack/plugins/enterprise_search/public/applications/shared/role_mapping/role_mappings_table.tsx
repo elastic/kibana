@@ -10,8 +10,6 @@ import React, { Fragment, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiFieldSearch,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiIconTip,
   EuiSpacer,
   EuiTable,
@@ -54,7 +52,6 @@ interface Props {
   accessItemKey: 'groups' | 'engines';
   accessHeader: string;
   roleMappings: Array<ASRoleMapping | WSRoleMapping>;
-  addMappingButton: React.ReactNode;
   accessAllEngines?: boolean;
   shouldShowAuthProvider?: boolean;
   initializeRoleMapping(roleMappingId: string): void;
@@ -72,7 +69,6 @@ export const RoleMappingsTable: React.FC<Props> = ({
   accessItemKey,
   accessHeader,
   roleMappings,
-  addMappingButton,
   shouldShowAuthProvider,
   initializeRoleMapping,
   handleDeleteMapping,
@@ -117,16 +113,11 @@ export const RoleMappingsTable: React.FC<Props> = ({
 
   return (
     <>
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem>
-          <EuiFieldSearch
-            value={filterValue}
-            placeholder={FILTER_ROLE_MAPPINGS_PLACEHOLDER}
-            onChange={(e) => updateValue(e.target.value)}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{addMappingButton}</EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiFieldSearch
+        value={filterValue}
+        placeholder={FILTER_ROLE_MAPPINGS_PLACEHOLDER}
+        onChange={(e) => updateValue(e.target.value)}
+      />
       <EuiSpacer />
       {filteredResults.length > 0 ? (
         <EuiTable className="roleMappingsTable">
