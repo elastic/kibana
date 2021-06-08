@@ -32,7 +32,7 @@ export const createGetLogEntryQuery = (
       },
     },
     fields: ['*'],
-    // @ts-expect-error @elastic/elasticsearch expects "runtime" property
+    // @ts-expect-error @elastic/elasticsearch doesn't declare "runtime_mappings" property
     runtime_mappings: runtimeMappings,
     sort: [{ [timestampField]: 'desc' }, { [tiebreakerField]: 'desc' }],
     _source: false,

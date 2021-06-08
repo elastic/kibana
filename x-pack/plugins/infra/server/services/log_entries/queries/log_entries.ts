@@ -53,7 +53,7 @@ export const createGetLogEntriesQuery = (
         },
       },
       fields,
-      // @ts-expect-error @elastic/elasticsearch expects "runtime" property
+      // @ts-expect-error @elastic/elasticsearch doesn't declare "runtime_mappings" property
       runtime_mappings: runtimeMappings,
       _source: false,
       ...createSortClause(sortDirection, timestampField, tiebreakerField),
