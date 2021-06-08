@@ -413,7 +413,6 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           license: 'basic',
           ruleset: 'alertsFixture',
           namespace: Spaces.space1.id,
-          name: response.body.name,
         },
       });
     });

@@ -87,7 +87,6 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           license: 'basic',
           ruleset: 'alertsFixture',
           namespace: spaceId,
-          name: response.body.name,
         },
       });
     });
