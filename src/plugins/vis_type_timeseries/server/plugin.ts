@@ -144,4 +144,6 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
       },
     };
   }
+
+  public start(core: CoreStart) {}
 }
