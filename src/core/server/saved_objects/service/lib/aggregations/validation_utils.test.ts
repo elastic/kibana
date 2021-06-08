@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { IndexMapping } from '../../../mappings';
 import {
   isRootLevelAttribute,
   rewriteRootLevelAttribute,
@@ -14,7 +13,7 @@ import {
   rewriteObjectTypeAttribute,
 } from './validation_utils';
 
-const mockMappings: IndexMapping = {
+const mockMappings = {
   properties: {
     updated_at: {
       type: 'date',
