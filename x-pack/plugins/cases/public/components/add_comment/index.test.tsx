@@ -13,7 +13,7 @@ import { noop } from 'lodash/fp';
 import { TestProviders } from '../../common/mock';
 import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
 
-import { CommentRequest, CommentType } from '../../../common';
+import { CommentRequest, CommentType, SECURITY_SOLUTION_OWNER } from '../../../common';
 import { usePostComment } from '../../containers/use_post_comment';
 import { AddComment, AddCommentRefObject } from '.';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
@@ -44,6 +44,7 @@ const defaultPostComment = {
 const sampleData: CommentRequest = {
   comment: 'what a cool comment',
   type: CommentType.user,
+  owner: SECURITY_SOLUTION_OWNER,
 };
 
 describe('AddComment ', () => {

@@ -15,7 +15,7 @@ import { APP_ID } from '../../../../../common/constants';
 import { timelineSelectors } from '../../../../timelines/store/timeline';
 import { setInsertTimeline, showTimeline } from '../../../store/timeline/actions';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { useGetUserSavedObjectPermissions, useKibana } from '../../../../common/lib/kibana';
+import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import { TimelineStatus, TimelineId, TimelineType } from '../../../../../common/types/timeline';
 import {
   getCreateCaseUrl,
@@ -71,7 +71,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
   );
 
   const { formatUrl } = useFormatUrl(SecurityPageName.case);
-  const userPermissions = useGetUserSavedObjectPermissions();
+  const userPermissions = useGetUserCasesPermissions();
   const goToCreateCase = useCallback(
     (ev) => {
       ev.preventDefault();
@@ -177,6 +177,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
           },
           onRowClick,
           userCanCrud: userPermissions?.crud ?? false,
+          owner: [APP_ID],
         })}
     </>
   );
