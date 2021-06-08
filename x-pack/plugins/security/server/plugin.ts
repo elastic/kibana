@@ -10,7 +10,6 @@ import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { RecursiveReadonly } from '@kbn/utility-types';
 import type {
   CoreSetup,
   CoreStart,
@@ -113,12 +112,7 @@ export interface PluginStartDependencies {
  * Represents Security Plugin instance that will be managed by the Kibana plugin system.
  */
 export class SecurityPlugin
-  implements
-    Plugin<
-      RecursiveReadonly<SecurityPluginSetup>,
-      RecursiveReadonly<SecurityPluginStart>,
-      PluginSetupDependencies
-    > {
+  implements Plugin<SecurityPluginSetup, SecurityPluginStart, PluginSetupDependencies> {
   private readonly logger: Logger;
   private authorizationSetup?: AuthorizationServiceSetup;
   private auditSetup?: AuditServiceSetup;
