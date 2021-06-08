@@ -59,6 +59,7 @@ export const registerGetRuntimeFieldRoute = (
       return res.ok({
         body: {
           field: field.toSpec(),
+          runtimeField: indexPattern.getRuntimeField(name),
         },
       });
     })
