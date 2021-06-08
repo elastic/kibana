@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @kbn/eslint/no-restricted-paths */
-
 import React from 'react';
 
 import { RecursivePartial } from '@elastic/eui/src/components/common';
@@ -14,7 +12,7 @@ import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 import { StartServices } from '../../../types';
 import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
-import { securityMock } from '../../../../../security/server/mocks';
+import { securityMock } from '../../../../../security/public/mocks';
 import { triggersActionsUiMock } from '../../../../../triggers_actions_ui/public/mocks';
 
 export const createStartServicesMock = (): StartServices =>
