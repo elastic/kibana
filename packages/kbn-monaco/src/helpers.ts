@@ -9,10 +9,12 @@ import { monaco } from './monaco_imports';
 import { LangModule as LangModuleType } from './types';
 
 function registerLanguage(language: LangModuleType) {
-  monaco.languages.register({ id: language.ID });
-  monaco.languages.setMonarchTokensProvider(language.ID, language.lexerRules);
-  if (language.languageConfiguration) {
-    monaco.languages.setLanguageConfiguration(language.ID, language.languageConfiguration);
+  const { ID, lexerRules, languageConfiguration } = language;
+
+  monaco.languages.register({ id: ID });
+  monaco.languages.setMonarchTokensProvider(ID, lexerRules);
+  if (languageConfiguration) {
+    monaco.languages.setLanguageConfiguration(ID, languageConfiguration);
   }
 }
 

@@ -16,6 +16,9 @@ export { PainlessLang, PainlessContext, PainlessAutocompleteField } from './pain
 import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';
 
 import { registerLanguage } from './helpers';
-import { LangModule as LangModuleType } from './types';
+import {
+  LangModule as LangModuleType,
+  CompleteLangModule as CompleteLangModuleType,
+} from './types';
 
-export { BarePluginApi, registerLanguage, LangModuleType };
+export { BarePluginApi, registerLanguage, LangModuleType, CompleteLangModuleType };
