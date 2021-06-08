@@ -14,7 +14,7 @@
           "<T extends { name: string; version: string; }>(packageInfo: T) => string"
         ],
         "source": {
-          "path": "x-pack/plugins/fleet/public/applications/fleet/services/pkg_key_from_package_info.ts",
+          "path": "x-pack/plugins/fleet/public/services/pkg_key_from_package_info.ts",
           "lineNumber": 8
         },
         "deprecated": false,
@@ -30,7 +30,7 @@
               "T"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/services/pkg_key_from_package_info.ts",
+              "path": "x-pack/plugins/fleet/public/services/pkg_key_from_package_info.ts",
               "lineNumber": 9
             },
             "deprecated": false,
@@ -52,7 +52,7 @@
           "\nSupported routing state for the agent policy details page routes with deploy agents action"
         ],
         "source": {
-          "path": "x-pack/plugins/fleet/public/applications/fleet/types/intra_app_route_state.ts",
+          "path": "x-pack/plugins/fleet/public/types/intra_app_route_state.ts",
           "lineNumber": 37
         },
         "deprecated": false,
@@ -78,7 +78,7 @@
               " | undefined] | undefined"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/types/intra_app_route_state.ts",
+              "path": "x-pack/plugins/fleet/public/types/intra_app_route_state.ts",
               "lineNumber": 39
             },
             "deprecated": false
@@ -96,7 +96,7 @@
           "\nSupported routing state for the agent policy details page routes with deploy agents action"
         ],
         "source": {
-          "path": "x-pack/plugins/fleet/public/applications/fleet/types/intra_app_route_state.ts",
+          "path": "x-pack/plugins/fleet/public/types/intra_app_route_state.ts",
           "lineNumber": 29
         },
         "deprecated": false,
@@ -122,7 +122,7 @@
               " | undefined] | undefined"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/types/intra_app_route_state.ts",
+              "path": "x-pack/plugins/fleet/public/types/intra_app_route_state.ts",
               "lineNumber": 31
             },
             "deprecated": false
@@ -140,7 +140,7 @@
           "\nSupported routing state for the create package policy page routes"
         ],
         "source": {
-          "path": "x-pack/plugins/fleet/public/applications/fleet/types/intra_app_route_state.ts",
+          "path": "x-pack/plugins/fleet/public/types/intra_app_route_state.ts",
           "lineNumber": 15
         },
         "deprecated": false,
@@ -182,7 +182,7 @@
               " | undefined]) | undefined"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/types/intra_app_route_state.ts",
+              "path": "x-pack/plugins/fleet/public/types/intra_app_route_state.ts",
               "lineNumber": 17
             },
             "deprecated": false
@@ -208,7 +208,7 @@
               " | undefined] | undefined"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/types/intra_app_route_state.ts",
+              "path": "x-pack/plugins/fleet/public/types/intra_app_route_state.ts",
               "lineNumber": 21
             },
             "deprecated": false
@@ -226,7 +226,7 @@
               "string | undefined"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/types/intra_app_route_state.ts",
+              "path": "x-pack/plugins/fleet/public/types/intra_app_route_state.ts",
               "lineNumber": 23
             },
             "deprecated": false
@@ -411,7 +411,7 @@
           "Extension point registration contract for Integration details Custom view"
         ],
         "source": {
-          "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+          "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
           "lineNumber": 94
         },
         "deprecated": false,
@@ -424,7 +424,7 @@
             "label": "package",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+              "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
               "lineNumber": 95
             },
             "deprecated": false
@@ -440,7 +440,7 @@
               "\"package-detail-custom\""
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+              "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
               "lineNumber": 96
             },
             "deprecated": false
@@ -488,7 +488,7 @@
               ">; }"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+              "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
               "lineNumber": 97
             },
             "deprecated": false,
@@ -523,7 +523,7 @@
         "label": "PackageCustomExtensionComponentProps",
         "description": [],
         "source": {
-          "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+          "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
           "lineNumber": 87
         },
         "deprecated": false,
@@ -538,7 +538,7 @@
               "The package key value that should be used used for URLs"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+              "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
               "lineNumber": 89
             },
             "deprecated": false
@@ -649,7 +649,7 @@
               ">>"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+              "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
               "lineNumber": 90
             },
             "deprecated": false
@@ -667,7 +667,7 @@
           "Extension point registration contract for Integration Policy Create views"
         ],
         "source": {
-          "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+          "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
           "lineNumber": 76
         },
         "deprecated": false,
@@ -680,7 +680,7 @@
             "label": "package",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+              "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
               "lineNumber": 77
             },
             "deprecated": false
@@ -696,7 +696,7 @@
               "\"package-policy-create\""
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+              "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
               "lineNumber": 78
             },
             "deprecated": false
@@ -744,7 +744,7 @@
               ">; }"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+              "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
               "lineNumber": 79
             },
             "deprecated": false,
@@ -779,7 +779,7 @@
         "label": "PackagePolicyCreateExtensionComponentProps",
         "description": [],
         "source": {
-          "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+          "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
           "lineNumber": 60
         },
         "deprecated": false,
@@ -803,7 +803,7 @@
               }
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+              "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
               "lineNumber": 62
             },
             "deprecated": false
@@ -829,7 +829,7 @@
               "; }) => void"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+              "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
               "lineNumber": 67
             },
             "deprecated": false,
@@ -854,7 +854,7 @@
                   "; }"
                 ],
                 "source": {
-                  "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+                  "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
                   "lineNumber": 67
                 },
                 "deprecated": false
@@ -874,7 +874,7 @@
           "Extension point registration contract for Integration Policy Edit views"
         ],
         "source": {
-          "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+          "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
           "lineNumber": 48
         },
         "deprecated": false,
@@ -887,7 +887,7 @@
             "label": "package",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+              "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
               "lineNumber": 49
             },
             "deprecated": false
@@ -903,7 +903,7 @@
               "\"package-policy-edit\""
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+              "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
               "lineNumber": 50
             },
             "deprecated": false
@@ -951,7 +951,7 @@
               ">; }"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+              "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
               "lineNumber": 51
             },
             "deprecated": false,
@@ -986,7 +986,7 @@
         "label": "PackagePolicyEditExtensionComponentProps",
         "description": [],
         "source": {
-          "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+          "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
           "lineNumber": 26
         },
         "deprecated": false,
@@ -1010,7 +1010,7 @@
               }
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+              "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
               "lineNumber": 28
             },
             "deprecated": false
@@ -1034,7 +1034,7 @@
               }
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+              "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
               "lineNumber": 30
             },
             "deprecated": false
@@ -1060,7 +1060,7 @@
               ">; }) => void"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+              "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
               "lineNumber": 39
             },
             "deprecated": false,
@@ -1085,7 +1085,7 @@
                   ">; }"
                 ],
                 "source": {
-                  "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+                  "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
                   "lineNumber": 39
                 },
                 "deprecated": false
@@ -1105,7 +1105,7 @@
           "Internal storage for registered UI Extension Points"
         ],
         "source": {
-          "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+          "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
           "lineNumber": 16
         },
         "deprecated": false,
@@ -1121,7 +1121,7 @@
               "any"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+              "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
               "lineNumber": 17
             },
             "deprecated": false
@@ -1167,7 +1167,7 @@
           }
         ],
         "source": {
-          "path": "x-pack/plugins/fleet/public/applications/fleet/types/intra_app_route_state.ts",
+          "path": "x-pack/plugins/fleet/public/types/intra_app_route_state.ts",
           "lineNumber": 45
         },
         "deprecated": false,
@@ -1202,7 +1202,7 @@
           ">"
         ],
         "source": {
-          "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+          "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
           "lineNumber": 85
         },
         "deprecated": false,
@@ -1237,7 +1237,7 @@
           ">"
         ],
         "source": {
-          "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+          "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
           "lineNumber": 58
         },
         "deprecated": false,
@@ -1272,7 +1272,7 @@
           ">"
         ],
         "source": {
-          "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+          "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
           "lineNumber": 24
         },
         "deprecated": false,
@@ -1313,7 +1313,7 @@
           }
         ],
         "source": {
-          "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+          "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
           "lineNumber": 101
         },
         "deprecated": false,
@@ -1340,7 +1340,7 @@
           ") => void"
         ],
         "source": {
-          "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+          "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
           "lineNumber": 13
         },
         "deprecated": false,
@@ -1356,8 +1356,8 @@
         "label": "pagePathGetters",
         "description": [],
         "source": {
-          "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-          "lineNumber": 69
+          "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+          "lineNumber": 73
         },
         "deprecated": false,
         "children": [
@@ -1369,11 +1369,11 @@
             "label": "base",
             "description": [],
             "signature": [
-              "() => string"
+              "() => [string, string]"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-              "lineNumber": 75
+              "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+              "lineNumber": 79
             },
             "deprecated": false,
             "children": [],
@@ -1387,11 +1387,11 @@
             "label": "overview",
             "description": [],
             "signature": [
-              "() => string"
+              "() => [string, string]"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-              "lineNumber": 76
+              "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+              "lineNumber": 80
             },
             "deprecated": false,
             "children": [],
@@ -1405,11 +1405,11 @@
             "label": "integrations",
             "description": [],
             "signature": [
-              "() => string"
+              "() => [string, string]"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-              "lineNumber": 77
+              "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+              "lineNumber": 81
             },
             "deprecated": false,
             "children": [],
@@ -1423,11 +1423,11 @@
             "label": "integrations_all",
             "description": [],
             "signature": [
-              "() => string"
+              "() => [string, string]"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-              "lineNumber": 78
+              "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+              "lineNumber": 82
             },
             "deprecated": false,
             "children": [],
@@ -1441,11 +1441,11 @@
             "label": "integrations_installed",
             "description": [],
             "signature": [
-              "() => string"
+              "() => [string, string]"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-              "lineNumber": 79
+              "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+              "lineNumber": 83
             },
             "deprecated": false,
             "children": [],
@@ -1461,11 +1461,11 @@
             "signature": [
               "({ pkgkey, integration }: ",
               "DynamicPagePathValues",
-              ") => string"
+              ") => [string, string]"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-              "lineNumber": 80
+              "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+              "lineNumber": 84
             },
             "deprecated": false,
             "children": [
@@ -1480,8 +1480,8 @@
                   "DynamicPagePathValues"
                 ],
                 "source": {
-                  "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-                  "lineNumber": 80
+                  "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+                  "lineNumber": 84
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1499,11 +1499,11 @@
             "signature": [
               "({ pkgkey, integration }: ",
               "DynamicPagePathValues",
-              ") => string"
+              ") => [string, string]"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-              "lineNumber": 82
+              "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+              "lineNumber": 88
             },
             "deprecated": false,
             "children": [
@@ -1518,8 +1518,8 @@
                   "DynamicPagePathValues"
                 ],
                 "source": {
-                  "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-                  "lineNumber": 82
+                  "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+                  "lineNumber": 88
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1537,11 +1537,11 @@
             "signature": [
               "({ pkgkey, integration }: ",
               "DynamicPagePathValues",
-              ") => string"
+              ") => [string, string]"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-              "lineNumber": 84
+              "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+              "lineNumber": 92
             },
             "deprecated": false,
             "children": [
@@ -1556,8 +1556,8 @@
                   "DynamicPagePathValues"
                 ],
                 "source": {
-                  "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-                  "lineNumber": 84
+                  "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+                  "lineNumber": 92
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1575,11 +1575,11 @@
             "signature": [
               "({ pkgkey, integration }: ",
               "DynamicPagePathValues",
-              ") => string"
+              ") => [string, string]"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-              "lineNumber": 86
+              "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+              "lineNumber": 96
             },
             "deprecated": false,
             "children": [
@@ -1594,8 +1594,8 @@
                   "DynamicPagePathValues"
                 ],
                 "source": {
-                  "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-                  "lineNumber": 86
+                  "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+                  "lineNumber": 96
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1613,11 +1613,11 @@
             "signature": [
               "({ packagePolicyId }: ",
               "DynamicPagePathValues",
-              ") => string"
+              ") => [string, string]"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-              "lineNumber": 88
+              "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+              "lineNumber": 100
             },
             "deprecated": false,
             "children": [
@@ -1632,8 +1632,8 @@
                   "DynamicPagePathValues"
                 ],
                 "source": {
-                  "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-                  "lineNumber": 88
+                  "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+                  "lineNumber": 100
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1649,11 +1649,11 @@
             "label": "policies",
             "description": [],
             "signature": [
-              "() => string"
+              "() => [string, string]"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-              "lineNumber": 90
+              "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+              "lineNumber": 104
             },
             "deprecated": false,
             "children": [],
@@ -1667,11 +1667,11 @@
             "label": "policies_list",
             "description": [],
             "signature": [
-              "() => string"
+              "() => [string, string]"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-              "lineNumber": 91
+              "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+              "lineNumber": 105
             },
             "deprecated": false,
             "children": [],
@@ -1687,11 +1687,11 @@
             "signature": [
               "({ policyId, tabId }: ",
               "DynamicPagePathValues",
-              ") => string"
+              ") => [string, string]"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-              "lineNumber": 92
+              "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+              "lineNumber": 106
             },
             "deprecated": false,
             "children": [
@@ -1706,8 +1706,8 @@
                   "DynamicPagePathValues"
                 ],
                 "source": {
-                  "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-                  "lineNumber": 92
+                  "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+                  "lineNumber": 106
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1725,11 +1725,11 @@
             "signature": [
               "({ policyId }: ",
               "DynamicPagePathValues",
-              ") => string"
+              ") => [string, string]"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-              "lineNumber": 93
+              "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+              "lineNumber": 110
             },
             "deprecated": false,
             "children": [
@@ -1744,8 +1744,8 @@
                   "DynamicPagePathValues"
                 ],
                 "source": {
-                  "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-                  "lineNumber": 93
+                  "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+                  "lineNumber": 110
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1763,11 +1763,11 @@
             "signature": [
               "({ pkgkey, integration }: ",
               "DynamicPagePathValues",
-              ") => string"
+              ") => [string, string]"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-              "lineNumber": 94
+              "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+              "lineNumber": 114
             },
             "deprecated": false,
             "children": [
@@ -1782,8 +1782,8 @@
                   "DynamicPagePathValues"
                 ],
                 "source": {
-                  "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-                  "lineNumber": 94
+                  "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+                  "lineNumber": 114
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1801,11 +1801,11 @@
             "signature": [
               "({ policyId, packagePolicyId }: ",
               "DynamicPagePathValues",
-              ") => string"
+              ") => [string, string]"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-              "lineNumber": 96
+              "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+              "lineNumber": 118
             },
             "deprecated": false,
             "children": [
@@ -1820,8 +1820,8 @@
                   "DynamicPagePathValues"
                 ],
                 "source": {
-                  "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-                  "lineNumber": 96
+                  "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+                  "lineNumber": 118
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1837,11 +1837,11 @@
             "label": "fleet",
             "description": [],
             "signature": [
-              "() => string"
+              "() => [string, string]"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-              "lineNumber": 98
+              "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+              "lineNumber": 122
             },
             "deprecated": false,
             "children": [],
@@ -1857,11 +1857,11 @@
             "signature": [
               "({ kuery }: ",
               "DynamicPagePathValues",
-              ") => string"
+              ") => [string, string]"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-              "lineNumber": 99
+              "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+              "lineNumber": 123
             },
             "deprecated": false,
             "children": [
@@ -1876,8 +1876,8 @@
                   "DynamicPagePathValues"
                 ],
                 "source": {
-                  "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-                  "lineNumber": 99
+                  "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+                  "lineNumber": 123
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1895,11 +1895,11 @@
             "signature": [
               "({ agentId, tabId, logQuery }: ",
               "DynamicPagePathValues",
-              ") => string"
+              ") => [string, string]"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-              "lineNumber": 100
+              "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+              "lineNumber": 127
             },
             "deprecated": false,
             "children": [
@@ -1914,8 +1914,8 @@
                   "DynamicPagePathValues"
                 ],
                 "source": {
-                  "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-                  "lineNumber": 100
+                  "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+                  "lineNumber": 127
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1931,11 +1931,11 @@
             "label": "fleet_enrollment_tokens",
             "description": [],
             "signature": [
-              "() => string"
+              "() => [string, string]"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-              "lineNumber": 102
+              "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+              "lineNumber": 131
             },
             "deprecated": false,
             "children": [],
@@ -1949,11 +1949,11 @@
             "label": "data_streams",
             "description": [],
             "signature": [
-              "() => string"
+              "() => [string, string]"
             ],
             "source": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/constants/page_paths.ts",
-              "lineNumber": 103
+              "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+              "lineNumber": 132
             },
             "deprecated": false,
             "children": [],
@@ -1972,7 +1972,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/fleet/public/plugin.ts",
-        "lineNumber": 51
+        "lineNumber": 48
       },
       "deprecated": false,
       "children": [],
@@ -1990,7 +1990,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/fleet/public/plugin.ts",
-        "lineNumber": 56
+        "lineNumber": 53
       },
       "deprecated": false,
       "children": [
@@ -2014,7 +2014,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/fleet/public/plugin.ts",
-            "lineNumber": 57
+            "lineNumber": 54
           },
           "deprecated": false,
           "returnComment": [],
@@ -2052,7 +2052,7 @@
                 }
               ],
               "source": {
-                "path": "x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts",
+                "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
                 "lineNumber": 13
               },
               "deprecated": false
@@ -2071,7 +2071,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/fleet/public/plugin.ts",
-            "lineNumber": 58
+            "lineNumber": 55
           },
           "deprecated": false,
           "returnComment": [],
@@ -4448,7 +4448,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/server/plugin.ts",
-          "lineNumber": 90
+          "lineNumber": 91
         },
         "deprecated": false,
         "children": [
@@ -4470,7 +4470,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/server/plugin.ts",
-              "lineNumber": 91
+              "lineNumber": 92
             },
             "deprecated": false
           },
@@ -4493,7 +4493,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/server/plugin.ts",
-              "lineNumber": 92
+              "lineNumber": 93
             },
             "deprecated": false
           },
@@ -4516,7 +4516,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/server/plugin.ts",
-              "lineNumber": 93
+              "lineNumber": 94
             },
             "deprecated": false
           },
@@ -4538,7 +4538,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/server/plugin.ts",
-              "lineNumber": 94
+              "lineNumber": 95
             },
             "deprecated": false
           },
@@ -4561,7 +4561,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/server/plugin.ts",
-              "lineNumber": 95
+              "lineNumber": 96
             },
             "deprecated": false
           },
@@ -4584,7 +4584,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/server/plugin.ts",
-              "lineNumber": 96
+              "lineNumber": 97
             },
             "deprecated": false
           }
@@ -4767,7 +4767,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/server/plugin.ts",
-          "lineNumber": 137
+          "lineNumber": 138
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -4784,7 +4784,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/server/index.ts",
-          "lineNumber": 66
+          "lineNumber": 83
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -4838,7 +4838,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/fleet/server/plugin.ts",
-        "lineNumber": 122
+        "lineNumber": 123
       },
       "deprecated": false,
       "lifecycle": "setup",
@@ -4855,7 +4855,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/fleet/server/plugin.ts",
-        "lineNumber": 160
+        "lineNumber": 161
       },
       "deprecated": false,
       "children": [
@@ -4873,7 +4873,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/fleet/server/plugin.ts",
-            "lineNumber": 166
+            "lineNumber": 167
           },
           "deprecated": false,
           "returnComment": [],
@@ -4897,7 +4897,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/fleet/server/plugin.ts",
-            "lineNumber": 167
+            "lineNumber": 168
           },
           "deprecated": false
         },
@@ -4919,7 +4919,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/fleet/server/plugin.ts",
-            "lineNumber": 168
+            "lineNumber": 169
           },
           "deprecated": false
         },
@@ -4941,7 +4941,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/fleet/server/plugin.ts",
-            "lineNumber": 169
+            "lineNumber": 170
           },
           "deprecated": false
         },
@@ -4959,7 +4959,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/fleet/server/plugin.ts",
-            "lineNumber": 173
+            "lineNumber": 174
           },
           "deprecated": false
         },
@@ -4981,7 +4981,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/fleet/server/plugin.ts",
-            "lineNumber": 174
+            "lineNumber": 175
           },
           "deprecated": false
         },
@@ -5007,7 +5007,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/fleet/server/plugin.ts",
-            "lineNumber": 179
+            "lineNumber": 180
           },
           "deprecated": false,
           "returnComment": [],
@@ -5088,7 +5088,7 @@
               ],
               "source": {
                 "path": "x-pack/plugins/fleet/server/plugin.ts",
-                "lineNumber": 179
+                "lineNumber": 180
               },
               "deprecated": false
             }
@@ -5109,7 +5109,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/fleet/server/plugin.ts",
-            "lineNumber": 185
+            "lineNumber": 186
           },
           "deprecated": false,
           "returnComment": [],
@@ -5123,7 +5123,7 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/fleet/server/plugin.ts",
-                "lineNumber": 185
+                "lineNumber": 186
               },
               "deprecated": false
             }
@@ -8203,7 +8203,7 @@
             "label": "agents",
             "description": [],
             "signature": [
-              "{ enabled: boolean; elasticsearch: { host?: string | undefined; ca_sha256?: string | undefined; }; fleet_server?: { hosts?: string[] | undefined; } | undefined; }"
+              "{ enabled: boolean; elasticsearch: { hosts?: string[] | undefined; ca_sha256?: string | undefined; }; fleet_server?: { hosts?: string[] | undefined; } | undefined; }"
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/index.ts",
@@ -17300,6 +17300,23 @@
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
           "lineNumber": 43
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.INTEGRATIONS_PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "INTEGRATIONS_PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"integrations\""
+        ],
+        "source": {
+          "path": "x-pack/plugins/fleet/common/constants/plugin.ts",
+          "lineNumber": 9
         },
         "deprecated": false,
         "initialIsOpen": false

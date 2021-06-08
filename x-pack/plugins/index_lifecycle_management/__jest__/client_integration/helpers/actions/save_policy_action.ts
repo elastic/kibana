@@ -8,7 +8,7 @@
 import { act } from 'react-dom/test-utils';
 import { TestBed } from '@kbn/test/jest';
 
-export const savePolicy = async (testBed: TestBed) => {
+export const createSavePolicyAction = (testBed: TestBed) => async () => {
   const { find, component } = testBed;
 
   await act(async () => {
