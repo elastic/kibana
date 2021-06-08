@@ -34,7 +34,11 @@ import {
 import { PalettePanelContainer } from './palette_panel_container';
 import { findMinMaxByColumnId } from './shared_utils';
 import './dimension_editor.scss';
-import { getFinalSummaryConfiguration, getSummaryRowOptions } from '../summary';
+import {
+  getDefaultSummaryLabel,
+  getFinalSummaryConfiguration,
+  getSummaryRowOptions,
+} from '../summary';
 import { isNumericField } from '../utils';
 
 const idPrefix = htmlIdGenerator()();
@@ -222,7 +226,7 @@ export function TableDimensionEditor(
               options={getSummaryRowOptions()}
               selectedOptions={[
                 {
-                  label: fallbackSummaryLabel,
+                  label: getDefaultSummaryLabel(summaryRow),
                   value: summaryRow,
                 },
               ]}

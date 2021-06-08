@@ -289,6 +289,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   const renderSummaryRow = useMemo(() => {
     const columnsWithSummary = columnConfig.columns
+      .filter((col) => !!col.columnId && !col.hidden)
       .map((config) => ({
         columnId: config.columnId,
         summaryRowValue: config.summaryRowValue,

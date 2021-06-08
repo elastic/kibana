@@ -120,7 +120,12 @@ export const getDatatable = ({
 
     const columnsWithSummary = args.columns.filter((c) => c.summaryRow);
     for (const column of columnsWithSummary) {
-      column.summaryRowValue = computeSummaryRowForColumn(column, firstTable, formatters);
+      column.summaryRowValue = computeSummaryRowForColumn(
+        column,
+        firstTable,
+        formatters,
+        formatFactory({ id: 'number' })
+      );
     }
 
     if (sortBy && columnsReverseLookup[sortBy] && sortDirection !== 'none') {

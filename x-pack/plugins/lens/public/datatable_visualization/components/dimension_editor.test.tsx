@@ -252,4 +252,24 @@ describe('data table dimension editor', () => {
         .prop('value')
     ).toBe('Sum');
   });
+
+  it("should show the correct summary row name when user's changes summary label", () => {
+    frame.activeData!.first.columns[0].meta.type = 'number';
+    state.columns[0].summaryRow = 'sum';
+    state.columns[0].summaryLabel = 'MySum';
+    const instance = mountWithIntl(<TableDimensionEditor {...props} />);
+    expect(
+      instance
+        .find('[data-test-subj="lnsDatatable_summaryrow_function"]')
+        .find(EuiComboBox)
+        .prop('selectedOptions')
+    ).toEqual([{ value: 'sum', label: 'Sum' }]);
+
+    expect(
+      instance
+        .find('[data-test-subj="lnsDatatable_summaryrow_label"]')
+        .find(EuiFieldText)
+        .prop('value')
+    ).toBe('MySum');
+  });
 });

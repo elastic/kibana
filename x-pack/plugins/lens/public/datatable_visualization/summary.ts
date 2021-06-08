@@ -88,12 +88,13 @@ export function getSummaryRowOptions(): Array<{
 export function computeSummaryRowForColumn(
   columnArgs: ColumnConfigArg,
   table: Datatable,
-  formatters: Record<string, FieldFormat>
+  formatters: Record<string, FieldFormat>,
+  defaultFormatter: FieldFormat
 ) {
   const summaryValue = computeFinalValue(columnArgs.summaryRow, columnArgs.columnId, table.rows);
   // ignore the coluymn formatter for the count case
   if (columnArgs.summaryRow === 'count') {
-    return summaryValue;
+    return defaultFormatter.convert(summaryValue);
   }
   return formatters[getOriginalId(columnArgs.columnId)].convert(summaryValue);
 }

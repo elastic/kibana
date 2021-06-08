@@ -28,6 +28,9 @@ describe('Summary row helpers', () => {
     rows: [{ myColumn: 'myString' }],
   };
 
+  const defaultFormatter = { convert: (x) => x } as IFieldFormat;
+  const customNumericFormatter = { convert: (x: number) => x.toFixed(2) } as IFieldFormat;
+
   describe('getFinalSummaryConfiguration', () => {
     it('should return the base configuration for an unconfigured column', () => {
       expect(getFinalSummaryConfiguration('myColumn', {}, mockNumericTable)).toEqual({
@@ -72,8 +75,9 @@ describe('Summary row helpers', () => {
             { summaryRow: op, columnId: 'myColumn', type: 'lens_datatable_column' },
             mockNumericTable,
             {
-              myColumn: { convert: (x: number) => x.toFixed(2) } as IFieldFormat,
-            }
+              myColumn: customNumericFormatter,
+            },
+            defaultFormatter
           )
         ).toBe('45.00');
       });
@@ -85,8 +89,9 @@ describe('Summary row helpers', () => {
           { summaryRow: 'count', columnId: 'myColumn', type: 'lens_datatable_column' },
           mockNumericTable,
           {
-            myColumn: { convert: (x: number) => x.toFixed(2) } as IFieldFormat,
-          }
+            myColumn: customNumericFormatter,
+          },
+          defaultFormatter
         )
       ).toBe(1);
     });
@@ -97,8 +102,9 @@ describe('Summary row helpers', () => {
           { summaryRow: 'count', columnId: 'myColumn', type: 'lens_datatable_column' },
           { ...mockNumericTable, rows: [...mockNumericTable.rows, { myColumn: null }] },
           {
-            myColumn: { convert: (x: number) => x.toFixed(2) } as IFieldFormat,
-          }
+            myColumn: customNumericFormatter,
+          },
+          defaultFormatter
         )
       ).toBe(1);
     });
@@ -109,8 +115,9 @@ describe('Summary row helpers', () => {
           { summaryRow: 'count', columnId: 'myColumn', type: 'lens_datatable_column' },
           mockNumericTableWithArray,
           {
-            myColumn: { convert: (x) => x } as IFieldFormat,
-          }
+            myColumn: defaultFormatter,
+          },
+          defaultFormatter
         )
       ).toBe(2);
     });
