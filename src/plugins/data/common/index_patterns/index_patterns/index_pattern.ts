@@ -484,6 +484,4 @@ export class IndexPattern implements IIndexPattern {
   public readonly deleteFieldFormat = (fieldName: string) => {
     delete this.fieldFormatMap[fieldName];
   };
-
-
 }
