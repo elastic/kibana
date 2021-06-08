@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { Ping, SyntheticsJourneyApiResponse } from '../../../../../common/runtime_types/ping';
+import { FailedStepsApiResponse } from '../../../../../common/runtime_types';
 
 interface Props {
   ping: Ping;
-  failedSteps?: SyntheticsJourneyApiResponse;
+  failedSteps?: FailedStepsApiResponse;
 }
 
 export const FailedStep = ({ ping, failedSteps }: Props) => {
