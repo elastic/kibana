@@ -380,6 +380,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
           {!ExtensionView && (
             <StepConfigurePackagePolicy
               packageInfo={packageInfo}
+              showOnlyIntegration={integrationInfo?.name}
               packagePolicy={packagePolicy}
               updatePackagePolicy={updatePackagePolicy}
               validationResults={validationResults!}

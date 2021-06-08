@@ -24,21 +24,38 @@ import { PackagePolicyInputPanel } from './components';
 
 export const StepConfigurePackagePolicy: React.FunctionComponent<{
   packageInfo: PackageInfo;
+  showOnlyIntegration?: string;
   packagePolicy: NewPackagePolicy;
   updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
   validationResults: PackagePolicyValidationResults;
   submitAttempted: boolean;
-}> = ({ packageInfo, packagePolicy, updatePackagePolicy, validationResults, submitAttempted }) => {
+}> = ({
+  packageInfo,
+  showOnlyIntegration,
+  packagePolicy,
+  updatePackagePolicy,
+  validationResults,
+  submitAttempted,
+}) => {
   const hasIntegrations = useMemo(() => doesPackageHaveIntegrations(packageInfo), [packageInfo]);
+  const packagePolicyTemplates = useMemo(
+    () =>
+      showOnlyIntegration
+        ? (packageInfo.policy_templates || []).filter(
+            (policyTemplate) => policyTemplate.name === showOnlyIntegration
+          ) || []
+        : packageInfo.policy_templates || [],
+    [packageInfo.policy_templates, showOnlyIntegration]
+  );
 
   // Configure inputs (and their streams)
   // Assume packages only export one config template for now
   const renderConfigureInputs = () =>
-    packageInfo.policy_templates && packageInfo.policy_templates.length ? (
+    packagePolicyTemplates.length ? (
       <>
         <EuiHorizontalRule margin="m" />
         <EuiFlexGroup direction="column" gutterSize="none">
-          {packageInfo.policy_templates.map((policyTemplate) => {
+          {packagePolicyTemplates.map((policyTemplate) => {
             return (policyTemplate.inputs || []).map((packageInput) => {
               const packagePolicyInput = packagePolicy.inputs.find(
                 (input) =>
