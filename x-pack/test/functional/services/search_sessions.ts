@@ -54,6 +54,7 @@ export class SearchSessionsService extends FtrService {
       const currentState = await (
         await this.testSubjects.find(SEARCH_SESSION_INDICATOR_TEST_SUBJ)
       ).getAttribute('data-state');
+      this.log.info(`searchSessions state current: ${currentState} expected: ${state}`);
       return currentState === state;
     });
   }
