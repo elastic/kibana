@@ -78,7 +78,13 @@ export interface SecurityPluginSetup {
    * @deprecated Use `authz` methods from the `SecurityServiceStart` contract instead.
    */
   authz: AuthorizationServiceSetup;
+  /**
+   * Exposes information about the available security features under the current license.
+   */
   license: SecurityLicense;
+  /**
+   * Exposes services for audit logging.
+   */
   audit: AuditServiceSetup;
 }
 
