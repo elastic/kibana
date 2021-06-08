@@ -30,6 +30,6 @@ export const getComponents = ({ core }: GetComponentsOptions) => {
 
   return {
     getPersonalInfo: wrapLazy(getPersonalInfoComponent),
-    getChangePassword: wrapLazy(getChangePasswordComponent),
+    getChangePassword: wrapLazy(() => getChangePasswordComponent(core)),
   };
 };

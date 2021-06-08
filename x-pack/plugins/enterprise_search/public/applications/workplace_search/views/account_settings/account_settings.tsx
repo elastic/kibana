@@ -10,12 +10,10 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useValues } from 'kea';
 
 import type { AuthenticatedUser } from '../../../../../../security/public';
-import { HttpLogic } from '../../../shared/http/http_logic';
 import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 
 export const AccountSettings: React.FC = () => {
-  const { security, notifications } = useValues(KibanaLogic);
-  const { http } = useValues(HttpLogic);
+  const { security } = useValues(KibanaLogic);
 
   const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
 
@@ -23,7 +21,6 @@ export const AccountSettings: React.FC = () => {
     security!.authc!.getCurrentUser().then(setCurrentUser);
   }, [security.authc]);
 
-  const UserAPIClient = security!.uiApi!.UserAPIClient;
   const PersonalInfo = useMemo(() => security!.uiApi!.components.getPersonalInfo, [security.uiApi]);
   const ChangePassword = useMemo(() => security!.uiApi!.components.getChangePassword, [
     security.uiApi,
@@ -36,11 +33,7 @@ export const AccountSettings: React.FC = () => {
   return (
     <>
       <PersonalInfo user={currentUser} />
-      <ChangePassword
-        user={currentUser}
-        userAPIClient={new UserAPIClient(http)}
-        notifications={notifications}
-      />
+      <ChangePassword user={currentUser} />
     </>
   );
 };

@@ -23,7 +23,7 @@ type LazyComponentFn<T> = (props: T) => ReactElement;
 export interface UiApi {
   components: {
     getPersonalInfo: LazyComponentFn<PersonalInfoProps>;
-    getChangePassword: LazyComponentFn<ChangePasswordProps>;
+    getChangePassword: LazyComponentFn<Pick<ChangePasswordProps, 'user'>>;
   };
   UserAPIClient: typeof UserAPIClient;
 }

@@ -7,11 +7,23 @@
 
 import React from 'react';
 
+import type { CoreStart } from 'src/core/public';
+
+import { UserAPIClient } from '../../management/users';
 import type { ChangePasswordProps } from './change_password';
 
-export const getChangePasswordComponent = async (): Promise<React.FC<ChangePasswordProps>> => {
+export const getChangePasswordComponent = async (
+  core: CoreStart
+): Promise<React.FC<Pick<ChangePasswordProps, 'user'>>> => {
   const { ChangePassword } = await import('./change_password');
-  return (props: ChangePasswordProps) => {
-    return <ChangePassword {...props} />;
+
+  return (props: Pick<ChangePasswordProps, 'user'>) => {
+    return (
+      <ChangePassword
+        notifications={core.notifications}
+        userAPIClient={new UserAPIClient(core.http)}
+        {...props}
+      />
+    );
   };
 };
