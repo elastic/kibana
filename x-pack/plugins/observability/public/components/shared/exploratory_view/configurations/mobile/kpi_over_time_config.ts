@@ -54,7 +54,7 @@ export function getMobileKPIConfig({ seriesId, indexPattern }: ConfigProps): Dat
       [TRANSACTION_DURATION]: 'Response latency',
       [SERVICE_NAME]: 'Mobile app',
       [METRIC_SYSTEM_MEMORY_USAGE]: 'Memory usage',
-      [METRIC_SYSTEM_MEMORY_USAGE]: 'CPU usage',
+      [METRIC_SYSTEM_CPU_USAGE]: 'CPU usage',
     },
     reportDefinitions: [
       {
