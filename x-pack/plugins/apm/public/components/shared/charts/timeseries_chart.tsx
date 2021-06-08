@@ -43,6 +43,7 @@ import { onBrushEnd, isTimeseriesEmpty } from './helper/helper';
 import { getLatencyChartSelector } from '../../../selectors/latency_chart_selectors';
 import { APMServiceAlert } from '../../../context/apm_service/apm_service_context';
 import { getAlertAnnotations } from './helper/get_alert_annotations';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 interface Props {
   id: string;
@@ -81,6 +82,8 @@ export function TimeseriesChart({
   alerts,
 }: Props) {
   const history = useHistory();
+  const { observabilityRuleTypeRegistry } = useApmPluginContext();
+  const { getFormatter } = observabilityRuleTypeRegistry;
   const { annotations } = useAnnotationsContext();
   const { setPointerEvent, chartRef } = useChartPointerEventContext();
   const theme = useTheme();
@@ -203,6 +206,8 @@ export function TimeseriesChart({
         )}
         {getAlertAnnotations({
           alerts,
+          chartStartTime: xValues[0],
+          getFormatter,
           theme,
         })}
       </Chart>

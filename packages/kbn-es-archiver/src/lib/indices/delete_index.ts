@@ -126,7 +126,7 @@ export async function waitForSnapshotCompletion(
   const { body: repositoryMap } = await client.snapshot.getRepository({} as any);
   for (const repository of Object.keys(repositoryMap)) {
     const allInProgress = await getInProgressSnapshots(repository);
-    const found = allInProgress.find((s: any) => s.indices.includes(index));
+    const found = allInProgress?.find((s: any) => s.indices.includes(index));
 
     if (!found) {
       continue;

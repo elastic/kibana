@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const STATS_ROW_VALUE_INDEX = 1;
   function getHitCount(requestStats: string[][]): string | undefined {
     const hitsCountStatsRow = requestStats.find((statsRow) => {
-      return statsRow[STATS_ROW_NAME_INDEX] === 'Hits (total)';
+      return statsRow[STATS_ROW_NAME_INDEX] === 'Hits';
     });
 
     if (!hitsCountStatsRow) {
@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await inspector.open();
       const requestStats = await inspector.getTableData();
 
-      expect(getHitCount(requestStats)).to.be('14004');
+      expect(getHitCount(requestStats)).to.be('500');
     });
   });
 }

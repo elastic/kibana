@@ -6,13 +6,12 @@
  */
 
 import { SavedObjectsType } from 'src/core/server';
+import { CASE_SAVED_OBJECT } from '../../common/constants';
 import { caseMigrations } from './migrations';
-
-export const CASE_SAVED_OBJECT = 'cases';
 
 export const caseSavedObjectType: SavedObjectsType = {
   name: CASE_SAVED_OBJECT,
-  hidden: false,
+  hidden: true,
   namespaceType: 'single',
   mappings: {
     properties: {
@@ -108,6 +107,9 @@ export const caseSavedObjectType: SavedObjectsType = {
             type: 'text',
           },
         },
+      },
+      owner: {
+        type: 'keyword',
       },
       title: {
         type: 'keyword',

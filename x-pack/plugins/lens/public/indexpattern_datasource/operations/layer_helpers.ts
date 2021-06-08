@@ -838,12 +838,14 @@ function applyReferenceTransition({
   );
 }
 
-function copyCustomLabel(
-  newColumn: IndexPatternColumn,
-  previousOptions: { customLabel?: boolean; label: string }
-) {
+function copyCustomLabel(newColumn: IndexPatternColumn, previousOptions: IndexPatternColumn) {
   const adjustedColumn = { ...newColumn };
-  if (previousOptions.customLabel) {
+  const operationChanged = newColumn.operationType !== previousOptions.operationType;
+  const fieldChanged =
+    ('sourceField' in newColumn && newColumn.sourceField) !==
+    ('sourceField' in previousOptions && previousOptions.sourceField);
+  // only copy custom label if either used operation or used field stayed the same
+  if (previousOptions.customLabel && (!operationChanged || !fieldChanged)) {
     adjustedColumn.customLabel = true;
     adjustedColumn.label = previousOptions.label;
   }

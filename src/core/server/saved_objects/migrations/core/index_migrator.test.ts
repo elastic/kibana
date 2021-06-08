@@ -450,7 +450,7 @@ function withIndex(
   client.tasks.get.mockReturnValue(
     elasticsearchClientMock.createSuccessTransportRequestPromise({
       completed: true,
-    } as estypes.GetTaskResponse)
+    } as estypes.TaskGetResponse)
   );
   client.search.mockReturnValue(
     elasticsearchClientMock.createSuccessTransportRequestPromise(searchResult(0) as any)
