@@ -26,7 +26,7 @@ import { LogEntryCategoriesSetupContent } from './page_setup_content';
 import { LogsPageTemplate } from '../page_template';
 import type { LazyObservabilityPageTemplateProps } from '../../../../../observability/public';
 
-const logCategoriesTabTitle = i18n.translate('xpack.infra.logs.logCategoriesTitle', {
+const logCategoriesTitle = i18n.translate('xpack.infra.logs.logCategoriesTitle', {
   defaultMessage: 'Categories',
 });
 
@@ -81,7 +81,7 @@ export const LogEntryCategoriesPageContent = () => {
       <>
         <LogEntryCategoriesResultsContent
           onOpenSetup={showCategoriesModuleSetup}
-          pageTitle={logCategoriesTabTitle}
+          pageTitle={logCategoriesTitle}
         />
         <LogAnalysisSetupFlyout allowedModules={allowedSetupModules} />
       </>
@@ -112,7 +112,7 @@ const CategoriesPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = ({
     <LogsPageTemplate
       data-test-subj="logsLogEntryCategoriesPage"
       pageHeader={{
-        pageTitle: logCategoriesTabTitle,
+        pageTitle: logCategoriesTitle,
       }}
       {...rest}
     >
