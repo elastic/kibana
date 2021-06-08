@@ -13,16 +13,21 @@ import { Status } from '../status';
 
 interface Props {
   currentStatus: CaseStatuses;
+  disabled?: boolean;
   onStatusChanged: (status: CaseStatuses) => void;
 }
 
-const StatusContextMenuComponent: React.FC<Props> = ({ currentStatus, onStatusChanged }) => {
+const StatusContextMenuComponent: React.FC<Props> = ({
+  currentStatus,
+  onStatusChanged,
+  disabled = false,
+}) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const openPopover = useCallback(() => setIsPopoverOpen(true), []);
   const popOverButton = useMemo(
-    () => <Status type={currentStatus} withArrow onClick={openPopover} />,
-    [currentStatus, openPopover]
+    () => <Status disabled={disabled} type={currentStatus} withArrow onClick={openPopover} />,
+    [disabled, currentStatus, openPopover]
   );
 
   const onContextMenuItemClick = useMemo(
