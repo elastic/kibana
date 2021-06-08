@@ -5,31 +5,29 @@
  * 2.0.
  */
 
-import { Filter, Query } from '../../../../../../../src/plugins/data/public';
-import { HostsTableType } from '../../../hosts/store/model';
-import { UrlInputsModel } from '../../store/inputs/model';
-import { TimelineUrl } from '../../../timelines/store/timeline/model';
-import { CONSTANTS, UrlStateType } from '../url_state/constants';
+import { UrlStateType } from '../url_state/constants';
 import { SecurityPageName } from '../../../app/types';
-import { SourcererScopePatterns } from '../../store/sourcerer/model';
+import { UrlState } from '../url_state/types';
+import { SiemRouteType } from '../../utils/route/types';
 
-export interface SiemNavigationProps {
+export interface SecuritySolutionNavigationManagerProps {
   display?: 'default' | 'condensed';
+  isPrimary?: boolean;
   navTabs: Record<string, NavTab>;
 }
 
-export interface SiemNavigationComponentProps {
-  pathName: string;
+interface CommonNavigationProps {
   pageName: string;
-  tabName: HostsTableType | undefined;
-  urlState: {
-    [CONSTANTS.appQuery]?: Query;
-    [CONSTANTS.filters]?: Filter[];
-    [CONSTANTS.savedQuery]?: string;
-    [CONSTANTS.sourcerer]: SourcererScopePatterns;
-    [CONSTANTS.timerange]: UrlInputsModel;
-    [CONSTANTS.timeline]: TimelineUrl;
-  };
+  tabName: SiemRouteType | undefined;
+  urlState: UrlState;
+}
+
+export interface SecuritySolutionNavigationProps extends CommonNavigationProps {
+  navTabs: Record<string, NavTab>;
+}
+
+export interface NavigationManagerComponentProps extends CommonNavigationProps {
+  pathName: string;
 }
 
 export type SearchNavTab = NavTab | { urlKey: UrlStateType; isDetailPage: boolean };

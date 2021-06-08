@@ -7,17 +7,17 @@
 
 import { UrlInputsModel } from '../../../store/inputs/model';
 import { CONSTANTS } from '../../url_state/constants';
-import { HostsTableType } from '../../../../hosts/store/model';
 import { SourcererScopePatterns } from '../../../store/sourcerer/model';
 import { TimelineUrl } from '../../../../timelines/store/timeline/model';
 import { Filter, Query } from '../../../../../../../../src/plugins/data/public';
 
-import { SiemNavigationProps } from '../types';
+import { SecuritySolutionNavigationManagerProps } from '../types';
+import { SiemRouteType } from '../../../utils/route/types';
 
-export interface TabNavigationProps extends SiemNavigationProps {
+export interface TabNavigationProps extends SecuritySolutionNavigationManagerProps {
   pathName: string;
   pageName: string;
-  tabName: HostsTableType | undefined;
+  tabName: SiemRouteType | undefined;
   [CONSTANTS.appQuery]?: Query;
   [CONSTANTS.filters]?: Filter[];
   [CONSTANTS.savedQuery]?: string;

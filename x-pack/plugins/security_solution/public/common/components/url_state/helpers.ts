@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useSelector } from 'react-redux';
 import { isEmpty } from 'lodash/fp';
 import { parse, stringify } from 'query-string';
 import { decode, encode } from 'rison-node';
@@ -22,7 +23,7 @@ import { timelineSelectors } from '../../../timelines/store/timeline';
 import { formatDate } from '../super_date_picker';
 import { NavTab } from '../navigation/types';
 import { CONSTANTS, UrlStateType } from './constants';
-import { ReplaceStateInLocation, UpdateUrlStateString } from './types';
+import { ReplaceStateInLocation, UpdateUrlStateString, UrlState } from './types';
 import { sourcererSelectors } from '../../store/sourcerer';
 import { SourcererScopeName, SourcererScopePatterns } from '../../store/sourcerer/model';
 
@@ -113,69 +114,66 @@ export const getTitle = (
   return navTabs[pageName] != null ? navTabs[pageName].name : '';
 };
 
-export const makeMapStateToProps = () => {
+export const useUrlState = (): { urlState: UrlState } => {
   const getInputsSelector = inputsSelectors.inputsSelector();
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const getGlobalSavedQuerySelector = inputsSelectors.globalSavedQuerySelector();
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const getSourcererScopes = sourcererSelectors.scopesSelector();
-  const mapStateToProps = (state: State) => {
-    const inputState = getInputsSelector(state);
-    const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
-    const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
 
-    const flyoutTimeline = getTimeline(state, TimelineId.active);
-    const timeline =
-      flyoutTimeline != null
-        ? {
-            id: flyoutTimeline.savedObjectId != null ? flyoutTimeline.savedObjectId : '',
-            isOpen: flyoutTimeline.show,
-            activeTab: flyoutTimeline.activeTab,
-            graphEventId: flyoutTimeline.graphEventId ?? '',
-          }
-        : { id: '', isOpen: false, activeTab: TimelineTabs.query, graphEventId: '' };
-
-    let searchAttr: {
-      [CONSTANTS.appQuery]?: Query;
-      [CONSTANTS.filters]?: Filter[];
-      [CONSTANTS.savedQuery]?: string;
-    } = {
-      [CONSTANTS.appQuery]: getGlobalQuerySelector(state),
-      [CONSTANTS.filters]: getGlobalFiltersQuerySelector(state),
-    };
-    const savedQuery = getGlobalSavedQuerySelector(state);
-    if (savedQuery != null && savedQuery.id !== '') {
-      searchAttr = {
-        [CONSTANTS.savedQuery]: savedQuery.id,
-      };
-    }
-    const sourcerer = getSourcererScopes(state);
-    const activeScopes: SourcererScopeName[] = Object.keys(sourcerer) as SourcererScopeName[];
-    const selectedPatterns: SourcererScopePatterns = activeScopes
-      .filter((scope) => scope === SourcererScopeName.default)
-      .reduce((acc, scope) => ({ ...acc, [scope]: sourcerer[scope]?.selectedPatterns }), {});
-
-    return {
-      urlState: {
-        ...searchAttr,
-        [CONSTANTS.sourcerer]: selectedPatterns,
-        [CONSTANTS.timerange]: {
-          global: {
-            [CONSTANTS.timerange]: globalTimerange,
-            linkTo: globalLinkTo,
-          },
-          timeline: {
-            [CONSTANTS.timerange]: timelineTimerange,
-            linkTo: timelineLinkTo,
-          },
-        },
-        [CONSTANTS.timeline]: timeline,
-      },
-    };
+  const inputState = useSelector(getInputsSelector);
+  const flyoutTimeline = useSelector((state: State) => getTimeline(state, TimelineId.active));
+  const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
+  const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
+  const timeline =
+    flyoutTimeline != null
+      ? {
+          id: flyoutTimeline.savedObjectId != null ? flyoutTimeline.savedObjectId : '',
+          isOpen: flyoutTimeline.show,
+          activeTab: flyoutTimeline.activeTab,
+          graphEventId: flyoutTimeline.graphEventId ?? '',
+        }
+      : { id: '', isOpen: false, activeTab: TimelineTabs.query, graphEventId: '' };
+  let searchAttr: {
+    [CONSTANTS.appQuery]?: Query;
+    [CONSTANTS.filters]?: Filter[];
+    [CONSTANTS.savedQuery]?: string;
+  } = {
+    [CONSTANTS.appQuery]: useSelector(getGlobalQuerySelector),
+    [CONSTANTS.filters]: useSelector(getGlobalFiltersQuerySelector),
   };
 
-  return mapStateToProps;
+  const savedQuery = useSelector(getGlobalSavedQuerySelector);
+  if (savedQuery != null && savedQuery.id !== '') {
+    searchAttr = {
+      [CONSTANTS.savedQuery]: savedQuery.id,
+    };
+  }
+
+  const sourcerer = useSelector(getSourcererScopes);
+  const activeScopes: SourcererScopeName[] = Object.keys(sourcerer) as SourcererScopeName[];
+  const selectedPatterns: SourcererScopePatterns = activeScopes
+    .filter((scope) => scope === SourcererScopeName.default)
+    .reduce((acc, scope) => ({ ...acc, [scope]: sourcerer[scope]?.selectedPatterns }), {});
+
+  return {
+    urlState: {
+      ...searchAttr,
+      [CONSTANTS.sourcerer]: selectedPatterns,
+      [CONSTANTS.timerange]: {
+        global: {
+          [CONSTANTS.timerange]: globalTimerange,
+          linkTo: globalLinkTo,
+        },
+        timeline: {
+          [CONSTANTS.timerange]: timelineTimerange,
+          linkTo: timelineLinkTo,
+        },
+      },
+      [CONSTANTS.timeline]: timeline,
+    },
+  };
 };
 
 export const updateTimerangeUrl = (
