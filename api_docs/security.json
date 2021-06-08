@@ -505,50 +505,112 @@
     "setup": {
       "parentPluginId": "security",
       "id": "def-public.SecurityPluginSetup",
-      "type": "Type",
+      "type": "Interface",
       "tags": [],
       "label": "SecurityPluginSetup",
       "description": [],
-      "signature": [
-        "{ authc: ",
-        "AuthenticationServiceSetup",
-        "; sessionTimeout: ",
-        "SessionTimeout",
-        "; license: Readonly<{ isLicenseAvailable: () => boolean; isEnabled: () => boolean; getType: () => \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; getFeatures: () => ",
-        "SecurityLicenseFeatures",
-        "; features$: ",
-        "Observable",
-        "<",
-        "SecurityLicenseFeatures",
-        ">; }>; __legacyCompat: { logoutUrl: string; tenant: string; }; }"
-      ],
       "source": {
         "path": "x-pack/plugins/security/public/plugin.tsx",
-        "lineNumber": 164
+        "lineNumber": 167
       },
       "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "security",
+          "id": "def-public.SecurityPluginSetup.authc",
+          "type": "Object",
+          "tags": [],
+          "label": "authc",
+          "description": [
+            "\nExposes authentication information about the currently logged in user."
+          ],
+          "signature": [
+            "AuthenticationServiceSetup"
+          ],
+          "source": {
+            "path": "x-pack/plugins/security/public/plugin.tsx",
+            "lineNumber": 171
+          },
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "security",
+          "id": "def-public.SecurityPluginSetup.license",
+          "type": "Object",
+          "tags": [],
+          "label": "license",
+          "description": [
+            "\nExposes license information, like the type of license and whether it is expired."
+          ],
+          "signature": [
+            "{ readonly isLicenseAvailable: () => boolean; readonly isEnabled: () => boolean; readonly getType: () => \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; readonly getFeatures: () => ",
+            "SecurityLicenseFeatures",
+            "; readonly features$: ",
+            "Observable",
+            "<",
+            "SecurityLicenseFeatures",
+            ">; }"
+          ],
+          "source": {
+            "path": "x-pack/plugins/security/public/plugin.tsx",
+            "lineNumber": 175
+          },
+          "deprecated": false
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
     "start": {
       "parentPluginId": "security",
       "id": "def-public.SecurityPluginStart",
-      "type": "Type",
+      "type": "Interface",
       "tags": [],
       "label": "SecurityPluginStart",
       "description": [],
-      "signature": [
-        "{ navControlService: ",
-        "SecurityNavControlServiceStart",
-        "; authc: ",
-        "AuthenticationServiceSetup",
-        "; }"
-      ],
       "source": {
         "path": "x-pack/plugins/security/public/plugin.tsx",
-        "lineNumber": 165
+        "lineNumber": 178
       },
       "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "security",
+          "id": "def-public.SecurityPluginStart.navControlService",
+          "type": "Object",
+          "tags": [],
+          "label": "navControlService",
+          "description": [
+            "\nExposes the ability to add custom links to the dropdown menu in the top right, where the users Avatar is."
+          ],
+          "signature": [
+            "SecurityNavControlServiceStart"
+          ],
+          "source": {
+            "path": "x-pack/plugins/security/public/plugin.tsx",
+            "lineNumber": 182
+          },
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "security",
+          "id": "def-public.SecurityPluginStart.authc",
+          "type": "Object",
+          "tags": [],
+          "label": "authc",
+          "description": [
+            "\nExposes authentication information about the currently logged in user."
+          ],
+          "signature": [
+            "AuthenticationServiceSetup"
+          ],
+          "source": {
+            "path": "x-pack/plugins/security/public/plugin.tsx",
+            "lineNumber": 186
+          },
+          "deprecated": false
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }
