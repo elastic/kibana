@@ -108,9 +108,10 @@ class PackagePolicyService {
       else {
         const [, packageInfo] = await Promise.all([
           ensureInstalledPackage({
+            esClient,
             savedObjectsClient: soClient,
             pkgName: packagePolicy.package.name,
-            esClient,
+            pkgVersion: packagePolicy.package.version,
           }),
           pkgInfoPromise,
         ]);

@@ -46,7 +46,7 @@ const chartBase: ChartBase = {
 export const percentSystemMemoryUsedScript = {
   lang: 'expression',
   source: `1 - doc['${METRIC_SYSTEM_FREE_MEMORY}'] / doc['${METRIC_SYSTEM_TOTAL_MEMORY}']`,
-};
+} as const;
 
 export const percentCgroupMemoryUsedScript = {
   lang: 'painless',
@@ -68,7 +68,7 @@ export const percentCgroupMemoryUsedScript = {
 
     return used / total;
     `,
-};
+} as const;
 
 export async function getMemoryChartData({
   environment,

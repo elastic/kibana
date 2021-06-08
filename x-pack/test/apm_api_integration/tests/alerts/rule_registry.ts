@@ -603,7 +603,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       expect(errorOrUndefined).not.to.be(undefined);
 
-      expect(errorOrUndefined).to.be(`ResponseError: index_not_found_exception`);
+      expect(errorOrUndefined).to.contain('index_not_found_exception');
     });
   });
 }
