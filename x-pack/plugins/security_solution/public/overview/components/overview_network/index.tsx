@@ -120,7 +120,7 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
   return (
     <EuiFlexItem>
       <InspectButtonContainer>
-        <EuiPanel data-test-subj="overview-network-query">
+        <EuiPanel hasBorder data-test-subj="overview-network-query">
           <>
             <HeaderSection id={OverviewNetworkQueryId} subtitle={subtitle} title={title}>
               {networkPageButton}

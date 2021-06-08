@@ -115,7 +115,7 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
   return (
     <EuiFlexItem>
       <InspectButtonContainer>
-        <EuiPanel>
+        <EuiPanel hasBorder>
           <HeaderSection id={OverviewHostQueryId} subtitle={subtitle} title={title}>
             <>{hostPageButton}</>
           </HeaderSection>
