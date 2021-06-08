@@ -33,17 +33,20 @@ export function getResponseDurationLensConfig({ seriesId, indexPattern }: Config
       'labels.net_connection_type',
       'host.os.platform',
       'host.os.full',
+      'service.version',
     ],
     breakdowns: [
       'labels.net_connection_carrier_name',
       'labels.device_model',
       'labels.net_connection_type',
       'host.os.platform',
+      'host.os.full',
+      'service.version',
       'labels.net_connection_carrier_isoCountryCode',
     ],
     filters: [
       ...buildPhraseFilter('transaction.type', 'request', indexPattern),
-      ...buildPhraseFilter('agent.name', 'opentelemetry/swift', indexPattern),
+      ...buildPhraseFilter('agent.name', 'iOS/swift', indexPattern),
     ],
     labels: {
       ...FieldLabels,
