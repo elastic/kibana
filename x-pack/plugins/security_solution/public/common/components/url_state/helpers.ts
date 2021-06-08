@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { isEmpty } from 'lodash/fp';
 import { parse, stringify } from 'query-string';
@@ -115,34 +116,35 @@ export const getTitle = (
 };
 
 export const useUrlState = (): { urlState: UrlState } => {
-  const getInputsSelector = inputsSelectors.inputsSelector();
-  const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
-  const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
-  const getGlobalSavedQuerySelector = inputsSelectors.globalSavedQuerySelector();
-  const getTimeline = timelineSelectors.getTimelineByIdSelector();
-  const getSourcererScopes = sourcererSelectors.scopesSelector();
+  // Memoize each selector to make sure all instances get their own selector: https://react-redux.js.org/api/hooks
+  const getInputsSelector = useMemo(() => inputsSelectors.inputsSelector(), []);
+  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
+  const getGlobalFiltersQuerySelector = useMemo(
+    () => inputsSelectors.globalFiltersQuerySelector(),
+    []
+  );
+  const getGlobalSavedQuerySelector = useMemo(() => inputsSelectors.globalSavedQuerySelector(), []);
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const getSourcererScopes = useMemo(() => sourcererSelectors.scopesSelector(), []);
 
   const inputState = useSelector(getInputsSelector);
   const flyoutTimeline = useSelector((state: State) => getTimeline(state, TimelineId.active));
   const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
   const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
-  const timeline =
-    flyoutTimeline != null
-      ? {
-          id: flyoutTimeline.savedObjectId != null ? flyoutTimeline.savedObjectId : '',
-          isOpen: flyoutTimeline.show,
-          activeTab: flyoutTimeline.activeTab,
-          graphEventId: flyoutTimeline.graphEventId ?? '',
-        }
-      : { id: '', isOpen: false, activeTab: TimelineTabs.query, graphEventId: '' };
+  const globalQuerySelector = useSelector(getGlobalQuerySelector);
+  const globalFiltersQuerySelector = useSelector(getGlobalFiltersQuerySelector);
+
   let searchAttr: {
     [CONSTANTS.appQuery]?: Query;
     [CONSTANTS.filters]?: Filter[];
     [CONSTANTS.savedQuery]?: string;
-  } = {
-    [CONSTANTS.appQuery]: useSelector(getGlobalQuerySelector),
-    [CONSTANTS.filters]: useSelector(getGlobalFiltersQuerySelector),
-  };
+  } = useMemo(
+    () => ({
+      [CONSTANTS.appQuery]: globalQuerySelector,
+      [CONSTANTS.filters]: globalFiltersQuerySelector,
+    }),
+    [globalFiltersQuerySelector, globalQuerySelector]
+  );
 
   const savedQuery = useSelector(getGlobalSavedQuerySelector);
   if (savedQuery != null && savedQuery.id !== '') {
@@ -157,23 +159,45 @@ export const useUrlState = (): { urlState: UrlState } => {
     .filter((scope) => scope === SourcererScopeName.default)
     .reduce((acc, scope) => ({ ...acc, [scope]: sourcerer[scope]?.selectedPatterns }), {});
 
-  return {
-    urlState: {
-      ...searchAttr,
-      [CONSTANTS.sourcerer]: selectedPatterns,
-      [CONSTANTS.timerange]: {
-        global: {
-          [CONSTANTS.timerange]: globalTimerange,
-          linkTo: globalLinkTo,
+  const urlState = useMemo(() => {
+    const timeline =
+      flyoutTimeline != null
+        ? {
+            id: flyoutTimeline.savedObjectId != null ? flyoutTimeline.savedObjectId : '',
+            isOpen: flyoutTimeline.show,
+            activeTab: flyoutTimeline.activeTab,
+            graphEventId: flyoutTimeline.graphEventId ?? '',
+          }
+        : { id: '', isOpen: false, activeTab: TimelineTabs.query, graphEventId: '' };
+
+    return {
+      urlState: {
+        ...searchAttr,
+        [CONSTANTS.sourcerer]: selectedPatterns,
+        [CONSTANTS.timerange]: {
+          global: {
+            [CONSTANTS.timerange]: globalTimerange,
+            linkTo: globalLinkTo,
+          },
+          timeline: {
+            [CONSTANTS.timerange]: timelineTimerange,
+            linkTo: timelineLinkTo,
+          },
         },
-        timeline: {
-          [CONSTANTS.timerange]: timelineTimerange,
-          linkTo: timelineLinkTo,
-        },
+        [CONSTANTS.timeline]: timeline,
       },
-      [CONSTANTS.timeline]: timeline,
-    },
-  };
+    };
+  }, [
+    flyoutTimeline,
+    globalLinkTo,
+    globalTimerange,
+    searchAttr,
+    selectedPatterns,
+    timelineLinkTo,
+    timelineTimerange,
+  ]);
+
+  return urlState;
 };
 
 export const updateTimerangeUrl = (
