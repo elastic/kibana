@@ -372,16 +372,6 @@ function mockHealthStats(overrides = {}) {
           },
         },
       },
-      // capacity_estimation: {
-      //   timestamp: new Date().toISOString(),
-      //   value: {
-      //     min_required_kibana: 1,
-      //     minutes_to_drain_overdue: 0,
-      //     max_throughput_per_minute: 200,
-      //     avg_required_throughput_per_minute: 150,
-      //     avg_recurring_required_throughput_per_minute: 150,
-      //   },
-      // },
     },
   };
   return (merge(stub, overrides) as unknown) as MonitoringStats;
