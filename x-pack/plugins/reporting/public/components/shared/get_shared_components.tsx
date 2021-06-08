@@ -18,6 +18,11 @@ interface IncludeOnCloseFn {
 
 type PropsPDF = Pick<PanelPropsScreenCapture, 'getJobParams' | 'layoutOption'> & IncludeOnCloseFn;
 
+/*
+ * As of 7.14, the only shared component is a PDF report that is suited for Canvas integration.
+ * This is not planned to expand, as work is to be done on moving the export-type implementations out of Reporting
+ * Related Discuss issue: https://github.com/elastic/kibana/issues/101422
+ */
 export function getSharedComponents(core: CoreSetup) {
   return {
     ReportingPanelPDF(props: PropsPDF) {
