@@ -18,7 +18,7 @@ import { getNetworkActivityLensConfig } from './metrics/network_activity_config'
 import { getLogsFrequencyLensConfig } from './logs/logs_frequency_config';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
 import { getCoreWebVitalsConfig } from './rum/core_web_vitals_config';
-import { getResponseDurationLensConfig } from './mobile/response_duration_config';
+import { getMobileKPIConfig } from './mobile/kpi_over_time_config';
 
 interface Props {
   reportType: keyof typeof ReportViewTypes;
@@ -38,8 +38,8 @@ export const getDefaultConfigs = ({ reportType, seriesId, indexPattern }: Props)
       return getMonitorDurationConfig({ seriesId, indexPattern });
     case 'uptime-pings':
       return getMonitorPingsConfig({ seriesId, indexPattern });
-    case 'response-duration':
-      return getResponseDurationLensConfig({ seriesId, indexPattern });
+    case 'mobile-kpi':
+      return getMobileKPIConfig({ seriesId, indexPattern });
     case 'service-latency':
       return getServiceLatencyLensConfig({ seriesId, indexPattern });
     case 'service-throughput':

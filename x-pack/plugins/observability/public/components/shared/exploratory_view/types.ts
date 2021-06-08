@@ -31,7 +31,7 @@ export const ReportViewTypes = {
   cpu: 'cpu-usage',
   mem: 'memory-usage',
   nwk: 'network-activity',
-  mrp: 'response-duration',
+  mkpi: 'mobile-kpi',
 } as const;
 
 type ValueOf<T> = T[keyof T];
@@ -107,13 +107,13 @@ export interface ConfigProps {
 
 export type AppDataType = 'synthetics' | 'ux' | 'infra_logs' | 'infra_metrics' | 'apm' | 'mobile';
 
-type FormatType = 'duration' | 'number';
+type FormatType = 'duration' | 'number' | 'bytes' | 'percent';
 type InputFormat = 'microseconds' | 'milliseconds' | 'seconds';
 type OutputFormat = 'asSeconds' | 'asMilliseconds' | 'humanize';
 
 export interface FieldFormatParams {
-  inputFormat: InputFormat;
-  outputFormat: OutputFormat;
+  inputFormat?: InputFormat;
+  outputFormat?: OutputFormat;
   outputPrecision?: number;
   showSuffix?: boolean;
 }

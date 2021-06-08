@@ -31,8 +31,8 @@ export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; labe
   ],
   mobile: [
     {
-      id: 'mrp',
-      label: 'Response duration',
+      id: 'mkpi',
+      label: 'KPI over time',
     },
   ],
   apm: [
