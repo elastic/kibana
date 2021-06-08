@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { isEmpty } from 'lodash';
 import { TypeMapping } from '@elastic/elasticsearch/api/types';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { IndexPatternsFetcher } from '../../../../../src/plugins/data/server';
@@ -44,15 +45,26 @@ export class RuleDataClient implements IRuleDataClient {
         const clusterClient = await this.getClusterClient();
         const indexPatternsFetcher = new IndexPatternsFetcher(clusterClient);
 
-        const fields = await indexPatternsFetcher.getFieldsForWildcard({
-          pattern: index,
-        });
+        try {
+          const fields = await indexPatternsFetcher.getFieldsForWildcard({
+            pattern: index,
+          });
 
-        return {
-          fields,
-          timeFieldName: '@timestamp',
-          title: index,
-        };
+          return {
+            fields,
+            timeFieldName: '@timestamp',
+            title: index,
+          };
+        } catch (err) {
+          if (err.output?.payload?.code === 'no_matching_indices') {
+            return {
+              fields: [],
+              timeFieldName: '@timestamp',
+              title: index,
+            };
+          }
+          throw err;
+        }
       },
     };
   }
@@ -126,6 +138,12 @@ export class RuleDataClient implements IRuleDataClient {
     });
 
     const mappings: TypeMapping = simulateResponse.template.mappings;
+
+    if (isEmpty(mappings)) {
+      throw new Error(
+        'No mappings would be generated for this index, possibly due to failed/misconfigured bootstrapping'
+      );
+    }
 
     await clusterClient.indices.putMapping({ index: `${alias}*`, body: mappings });
   }
