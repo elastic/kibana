@@ -930,7 +930,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .simulate('click');
 
       // Now check that the dimension gets cleaned up on state update
-      expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
+      expect(setState.mock.calls[0]).toEqual([
+        expect.any(Function),
+        { isDimensionComplete: false },
+      ]);
       expect(setState.mock.calls[0][0](state)).toEqual({
         ...state,
         layers: {

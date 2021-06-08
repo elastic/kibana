@@ -125,7 +125,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       {
         isDimensionComplete:
           prevOperationType === 'fullReference'
-            ? hasIncompleteColumns
+            ? !hasIncompleteColumns
             : Boolean(hypotheticalLayer.columns[columnId]),
       }
     );
