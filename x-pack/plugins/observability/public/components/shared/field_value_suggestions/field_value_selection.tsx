@@ -30,9 +30,7 @@ const formatOptions = (values?: string[], selectedValue?: string[]): EuiSelectab
 export function FieldValueSelection({
   fullWidth,
   label,
-  selectedValue,
   loading,
-  values,
   setQuery,
   button,
   width,
@@ -41,6 +39,8 @@ export function FieldValueSelection({
   anchorPosition,
   singleSelection,
   asFilterButton,
+  values = [],
+  selectedValue = [],
   compressed = true,
   onChange: onSelectionChange,
 }: FieldValueSelectionProps) {

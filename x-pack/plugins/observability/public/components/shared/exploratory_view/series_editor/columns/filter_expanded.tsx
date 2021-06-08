@@ -39,7 +39,7 @@ export function FilterExpanded({ seriesId, field, label, goBack, nestedField, is
 
   const { values, loading } = useValuesList({
     query: value,
-    indexPattern,
+    indexPatternTitle: indexPattern?.title,
     sourceField: field,
     time: series.time,
     keepHistory: true,
