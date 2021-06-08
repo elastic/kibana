@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { CommonProps, EuiPanel } from '@elastic/eui';
-import { useKibana } from '../../../common/lib/kibana';
 import { KibanaPageTemplate } from '../../../../../../../src/plugins/kibana_react/public';
 import { TimelineId } from '../../../../common/types/timeline';
 import { IS_DRAGGING_CLASS_NAME } from '../../../common/components/drag_and_drop/drag_classnames';
 import { getTimelineShowStatusByIdSelector } from '../../../timelines/components/flyout/selectors';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { useThrottledResizeObserver } from '../../../common/components/utils';
 import { GlobalKQLHeader } from './global_kql_header';
 import {
   BOTTOM_BAR_CLASSNAME,
@@ -50,12 +48,6 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
   }
 `;
 
-const StyledEuiPanel = styled(EuiPanel)<{
-  $paddingTop: number;
-}>`
-  padding-top: ${({ $paddingTop }) => $paddingTop}px;
-`;
-
 interface SecuritySolutionPageWrapperProps {
   children: React.ReactNode;
   noPadding?: boolean;
@@ -71,18 +63,6 @@ export const SecuritySolutionTemplateWrapper: React.FC<
     getTimelineShowStatus(state, TimelineId.active)
   );
 
-  const { overlays } = useKibana().services;
-  const { ref, height = 0 } = useThrottledResizeObserver(300);
-  const banners$ = overlays.banners.get$();
-  const [headerFixed, setHeaderFixed] = useState<boolean>(true);
-  const mainPaddingTop = headerFixed ? height : 0;
-
-  // If there are any banners, the kql header should not be fixed
-  useEffect(() => {
-    const subscription = banners$?.subscribe((banners) => setHeaderFixed(!banners.length));
-    return () => subscription?.unsubscribe();
-  }, [banners$]); // Only un/re-subscribe if the Observable changes
-
   return (
     <StyledKibanaPageTemplate
       $isShowingTimelineOverlay={isShowingTimelineOverlay}
@@ -93,16 +73,16 @@ export const SecuritySolutionTemplateWrapper: React.FC<
       restrictWidth={false}
       template="default"
     >
-      <EuiPanel color="subdued" paddingSize="none">
-        <GlobalKQLHeader ref={ref} isFixed={headerFixed} />
-      </EuiPanel>
-      <StyledEuiPanel
-        $paddingTop={mainPaddingTop}
-        className="securityPageWrapper"
-        data-test-subj="pageContainer"
+      <EuiPanel
+        color="subdued"
+        paddingSize="s"
+        style={{ position: 'sticky', top: '96px', zIndex: 100 }}
       >
+        <GlobalKQLHeader />
+      </EuiPanel>
+      <EuiPanel className="securityPageWrapper" data-test-subj="pageContainer">
         {children}
-      </StyledEuiPanel>
+      </EuiPanel>
     </StyledKibanaPageTemplate>
   );
 });

@@ -167,7 +167,6 @@ const HostsComponent = () => {
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
             <Display show={!globalFullScreen}>
               <HeaderPage
-                border
                 subtitle={
                   <LastEventTime
                     docValueFields={docValueFields}
