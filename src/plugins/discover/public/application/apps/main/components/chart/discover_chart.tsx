@@ -36,9 +36,9 @@ export function DiscoverChart({
 }: {
   config: IUiSettingsClient;
   data: DataPublicPluginStart;
-  bucketInterval: TimechartBucketInterval;
+  bucketInterval?: TimechartBucketInterval;
   chartData?: IChart;
-  hits: number;
+  hits?: number;
   indexPattern: IndexPattern;
   isLegacy: boolean;
   resetQuery: () => void;

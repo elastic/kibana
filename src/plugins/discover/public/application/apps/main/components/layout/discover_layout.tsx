@@ -373,10 +373,10 @@ export function DiscoverLayout({
                     <EuiFlexItem grow={false}>
                       <DiscoverChartMemoized
                         config={config}
-                        chartData={fetchState.chartData!}
-                        bucketInterval={fetchState.bucketInterval!}
+                        chartData={fetchState.chartData}
+                        bucketInterval={fetchState.bucketInterval}
                         data={data}
-                        hits={fetchState.hits!}
+                        hits={fetchState.hits}
                         indexPattern={indexPattern}
                         isLegacy={isLegacy}
                         state={state}

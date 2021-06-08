@@ -18,7 +18,7 @@ export interface HitsCounterProps {
   /**
    * the number of query hits
    */
-  hits: number;
+  hits?: number;
   /**
    * displays the reset button
    */
@@ -30,6 +30,9 @@ export interface HitsCounterProps {
 }
 
 export function HitsCounter({ hits, showResetButton, onResetQuery }: HitsCounterProps) {
+  if (typeof hits === 'undefined') {
+    return null;
+  }
   return (
     <I18nProvider>
       <EuiFlexGroup

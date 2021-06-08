@@ -21,9 +21,9 @@ import {
   EuiButtonEmpty,
   EuiTextAlign,
 } from '@elastic/eui';
-import { getServices } from '../../../kibana_services';
 import './open_options_popover.scss';
 import { DOC_TABLE_LEGACY } from '../../../../../../common';
+import { getServices } from '../../../../../kibana_services';
 
 const container = document.createElement('div');
 let isOpen = false;
