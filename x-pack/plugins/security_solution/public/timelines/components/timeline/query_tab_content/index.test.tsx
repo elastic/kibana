@@ -26,6 +26,7 @@ import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
 import { Direction } from '../../../../../common/search_strategy';
 
+jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../containers/index', () => ({
   useTimelineEvents: jest.fn(),
 }));
