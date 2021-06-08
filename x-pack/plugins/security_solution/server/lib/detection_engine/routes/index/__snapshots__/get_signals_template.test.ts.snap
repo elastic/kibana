@@ -7,7 +7,7 @@ Object {
   ],
   "mappings": Object {
     "_meta": Object {
-      "version": 35,
+      "version": 45,
     },
     "dynamic": false,
     "properties": Object {
@@ -4528,6 +4528,6 @@ Object {
       },
     },
   },
-  "version": 35,
+  "version": 45,
 }
 `;
