@@ -13,7 +13,7 @@ export type PhaseWithAllocation = 'warm' | 'cold';
 
 export type PhaseWithTiming = keyof Omit<Phases, 'hot'>;
 
-export type PhasesExceptDelete = keyof Omit<Phases, 'delete'>;
+export type PhaseExceptDelete = keyof Omit<Phases, 'delete'>;
 
 export interface SerializedPolicy {
   name: string;
