@@ -127,7 +127,7 @@ A default {kib} instance can support up to `200/tpm`.
 
 As demonstrated in <<task-manager-health-evaluate-the-capacity-estimation, Evaluate your capacity estimation>>, the Task Manager <<task-manager-health-monitoring, health monitoring>> performs these estimations automatically.
 
-These are estimates based on historical data and should not be used as predictions, but can be used as a rough guide when scaling the system.
+These estimates are based on historical data and should not be used as predictions, but can be used as a rough guide when scaling the system.
 
 We recommend provisioning enough {kib} instances to ensure a buffer between the observed maximum throughput (as estimated under `observed.max_throughput_per_minute`) and the average required throughput (as estimated under `observed.avg_required_throughput_per_minute`), otherwise there might be insufficient capacity to handle spikes of ad-hoc tasks. How much of a buffer is needed largely depends on your use case, but keep in mind that estimated throughput takes into account recent spikes and, as long as they are representative of your system's behaviour, shouldn't require much of a buffer.
 
