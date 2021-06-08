@@ -7,9 +7,8 @@
 
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
-import { render } from '../../../../../utils/test_helper';
 import { getDefaultConfigs } from '../../configurations/default_configs';
-import { mockIndexPattern, mockUrlStorage } from '../../rtl_helpers';
+import { mockIndexPattern, render } from '../../rtl_helpers';
 import { ReportBreakdowns } from './report_breakdowns';
 import { USER_AGENT_OS } from '../../configurations/constants/elasticsearch_fieldnames';
 
@@ -22,8 +21,6 @@ describe('Series Builder ReportBreakdowns', function () {
   });
 
   it('should render properly', function () {
-    mockUrlStorage({});
-
     render(<ReportBreakdowns dataViewSeries={dataViewSeries} seriesId={seriesId} />);
 
     screen.getByText('Select an option: , is selected');
@@ -31,9 +28,9 @@ describe('Series Builder ReportBreakdowns', function () {
   });
 
   it('should set new series breakdown on change', function () {
-    const { setSeries } = mockUrlStorage({});
-
-    render(<ReportBreakdowns dataViewSeries={dataViewSeries} seriesId={seriesId} />);
+    const { setSeries } = render(
+      <ReportBreakdowns dataViewSeries={dataViewSeries} seriesId={seriesId} />
+    );
 
     const btn = screen.getByRole('button', {
       name: /select an option: Browser family , is selected/i,
@@ -53,9 +50,9 @@ describe('Series Builder ReportBreakdowns', function () {
     });
   });
   it('should set undefined on new series on no select breakdown', function () {
-    const { setSeries } = mockUrlStorage({});
-
-    render(<ReportBreakdowns dataViewSeries={dataViewSeries} seriesId={seriesId} />);
+    const { setSeries } = render(
+      <ReportBreakdowns dataViewSeries={dataViewSeries} seriesId={seriesId} />
+    );
 
     const btn = screen.getByRole('button', {
       name: /select an option: Browser family , is selected/i,

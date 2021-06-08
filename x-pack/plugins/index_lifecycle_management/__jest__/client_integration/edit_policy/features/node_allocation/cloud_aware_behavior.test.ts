@@ -67,7 +67,7 @@ describe('<EditPolicy /> node allocation cloud-aware behavior', () => {
       const { actions, component, exists } = testBed;
 
       component.update();
-      await actions.warm.enable(true);
+      await actions.togglePhase('warm');
       expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
 
       // Assert that default, custom and 'none' options exist
@@ -91,7 +91,7 @@ describe('<EditPolicy /> node allocation cloud-aware behavior', () => {
         const { actions, component, exists, find } = testBed;
 
         component.update();
-        await actions.warm.enable(true);
+        await actions.togglePhase('warm');
         expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
 
         // Assert that custom and 'none' options exist
@@ -115,7 +115,7 @@ describe('<EditPolicy /> node allocation cloud-aware behavior', () => {
         testBed.component.update();
 
         const { actions, component, exists, find } = testBed;
-        await actions.warm.enable(true);
+        await actions.togglePhase('warm');
         expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
 
         await actions.warm.openNodeAttributesSection();
@@ -137,8 +137,8 @@ describe('<EditPolicy /> node allocation cloud-aware behavior', () => {
         testBed.component.update();
 
         const { actions, component, exists } = testBed;
-        await actions.warm.enable(true);
-        await actions.cold.enable(true);
+        await actions.togglePhase('warm');
+        await actions.togglePhase('cold');
         expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
 
         expect(exists('cloudDataTierCallout')).toBeFalsy();
