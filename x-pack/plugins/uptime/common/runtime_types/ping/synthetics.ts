@@ -7,6 +7,28 @@
 
 import * as t from 'io-ts';
 
+export const JourneyFailedStepType = t.type({
+  '@timestamp': t.string,
+  monitor: t.type({
+    check_group: t.string,
+  }),
+  synthetics: t.type({
+    step: t.type({
+      index: t.number,
+      name: t.string,
+    }),
+  }),
+});
+
+export type JourneyFailedStep = t.TypeOf<typeof JourneyFailedStepType>;
+
+export const FailedStepsApiResponseType = t.type({
+  checkGroups: t.array(t.string),
+  steps: t.array(JourneyFailedStepType),
+});
+
+export type FailedStepsApiResponse = t.TypeOf<typeof FailedStepsApiResponseType>;
+
 export const ScreenshotBlockType = t.type({
   hash: t.string,
   top: t.number,
@@ -37,6 +59,10 @@ export const RefResultType = t.type({
   }),
 });
 
+export const RawRefResultType = t.type({
+  _source: RefResultType,
+});
+
 export type RefResult = t.TypeOf<typeof RefResultType>;
 
 export const ScreenshotRefType = t.type({
@@ -53,14 +79,14 @@ export type ScreenshotRef = Omit<t.TypeOf<typeof RefResultType>, '@timestamp'> &
   timestamp: string;
 };
 
+const BlockType = t.type({
+  blob: t.string,
+  blob_mime: t.string,
+});
+
 const ScreenshotBlockBlob = t.type({
-  synthetics: t.type({
-    blob: t.string,
-    blob_mime: t.string,
-    index: t.number,
-    package_version: t.string,
-    type: t.string,
-  }),
+  id: t.string,
+  synthetics: BlockType,
 });
 
 export const ScreenshotRefImageDataType = t.type({
