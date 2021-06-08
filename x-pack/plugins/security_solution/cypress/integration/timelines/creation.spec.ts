@@ -111,7 +111,6 @@ describe('Timelines', (): void => {
 
     it('can be marked as favorite', () => {
       cy.intercept('PATCH', '/api/timeline/_favorite').as('markAsFavourite');
-      cy.get(TIMELINE_PANEL).should('be.visible');
       markAsFavorite();
       cy.wait('@markAsFavourite', { timeout: 10000 }).its('response.statusCode').should('eq', 200);
 
