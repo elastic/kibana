@@ -24,7 +24,10 @@ const Label = euiStyled.div`
 `;
 
 interface Props {
-  step: Ping;
+  // TODO: improve this typing situation
+  step: Ping & {
+    synthetics: { screenshotExists: boolean; isScreenshotRef: boolean; step: { index: number } };
+  };
 }
 
 export const StepScreenshots = ({ step }: Props) => {
@@ -59,6 +62,7 @@ export const StepScreenshots = ({ step }: Props) => {
         </Label>
         <StepScreenshotDisplay
           checkGroup={step.monitor.check_group}
+          isScreenshotRef={step.synthetics?.isScreenshotRef}
           screenshotExists={step.synthetics?.screenshotExists}
           stepIndex={step.synthetics?.step?.index}
           stepName={step.synthetics?.step?.name}
@@ -72,7 +76,8 @@ export const StepScreenshots = ({ step }: Props) => {
           <ScreenshotLink lastSuccessfulStep={lastSuccessfulStep} />
           <StepScreenshotDisplay
             checkGroup={lastSuccessfulStep.monitor.check_group}
-            screenshotExists={true}
+            isScreenshotRef={step.synthetics?.isScreenshotRef}
+            screenshotExists={step.synthetics?.screenshotExists}
             stepIndex={lastSuccessfulStep.synthetics?.step?.index}
             stepName={lastSuccessfulStep.synthetics?.step?.name}
             lazyLoad={false}
