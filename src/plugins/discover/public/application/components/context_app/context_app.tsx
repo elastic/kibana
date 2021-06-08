@@ -13,11 +13,7 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { EuiText, EuiPageContent, EuiPage, EuiSpacer } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { esFilters, SortDirection } from '../../../../../data/public';
-import {
-  CONTEXT_DEFAULT_SIZE_SETTING,
-  DOC_TABLE_LEGACY,
-  SEARCH_FIELDS_FROM_SOURCE,
-} from '../../../../common';
+import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
 import { ContextErrorMessage } from '../context_error_message';
 import { IndexPattern, IndexPatternField } from '../../../../../data/common/index_patterns';
 import { LoadingStatus } from '../../angular/context_query_state';
@@ -43,9 +39,6 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
 
   const isLegacy = useMemo(() => config.get(DOC_TABLE_LEGACY), [config]);
   const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
-  const defaultStepSize = useMemo(() => parseInt(config.get(CONTEXT_DEFAULT_SIZE_SETTING), 10), [
-    config,
-  ]);
 
   /**
    * Context app state
@@ -167,7 +160,6 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
                 anchorStatus={fetchedState.anchorStatus.value}
                 predecessorsStatus={fetchedState.predecessorsStatus.value}
                 successorsStatus={fetchedState.successorsStatus.value}
-                defaultStepSize={defaultStepSize}
                 useNewFieldsApi={useNewFieldsApi}
                 isLegacy={isLegacy}
                 setAppState={setAppState}

@@ -9,7 +9,7 @@
 import React, { useState, Fragment, useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiHorizontalRule, EuiText } from '@elastic/eui';
-import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../common';
+import { CONTEXT_STEP_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../common';
 import { IndexPattern, IndexPatternField } from '../../../../../data/common/index_patterns';
 import { SortDirection } from '../../../../../data/public';
 import {
@@ -42,7 +42,6 @@ export interface ContextAppContentProps {
   predecessorsStatus: LoadingStatus;
   successorsStatus: LoadingStatus;
   useNewFieldsApi: boolean;
-  defaultStepSize: number;
   isLegacy: boolean;
   setAppState: (newState: Partial<AppState>) => void;
   addFilter: (
@@ -70,7 +69,6 @@ export function ContextAppContent({
   anchorStatus,
   predecessorsStatus,
   successorsStatus,
-  defaultStepSize,
   useNewFieldsApi,
   isLegacy,
   setAppState,
@@ -91,6 +89,7 @@ export function ContextAppContent({
     () => !config.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!indexPattern.timeFieldName,
     [config, indexPattern]
   );
+  const defaultStepSize = useMemo(() => parseInt(config.get(CONTEXT_STEP_SETTING), 10), [config]);
 
   const docTableProps = () => {
     return {
