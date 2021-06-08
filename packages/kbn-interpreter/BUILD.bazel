@@ -39,13 +39,13 @@ DEPS = SRC_DEPS + TYPES_DEPS
 peggy(
   name = "grammar",
   data = [
-    ":src/common/lib/grammar.peggy"
+    ":grammar/grammar.peggy"
   ],
   output_dir = True,
   args = [
     "-o",
-    "$(@D)/grammar.js",
-    "./%s/src/common/lib/grammar.peggy" % package_name()
+    "$(@D)/index.js",
+    "./%s/grammar/grammar.peggy" % package_name()
   ],
 )
 
@@ -74,7 +74,7 @@ ts_project(
 
 js_library(
   name = PKG_BASE_NAME,
-  srcs = NPM_MODULE_EXTRA_FILES,
+  srcs = NPM_MODULE_EXTRA_FILES + [":grammar"],
   deps = DEPS + [":tsc"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],

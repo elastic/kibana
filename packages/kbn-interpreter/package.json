@@ -1,11 +1,6 @@
-
-
-  {
+{
   "name": "@kbn/interpreter",
   "private": "true",
   "version": "1.0.0",
-  "license": "SSPL-1.0 OR Elastic License 2.0",
-  "scripts": {
-    "interpreter:peg": "../../node_modules/.bin/pegjs src/common/lib/grammar.peg"
-  }
+  "license": "SSPL-1.0 OR Elastic License 2.0"
 }

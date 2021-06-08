@@ -11,7 +11,7 @@ export { Fn } from './lib/fn';
 export { getType } from './lib/get_type';
 export { castProvider } from './lib/cast';
 // eslint-disable-next-line import/no-unresolved
-export { parse } from './lib/grammar';
+export { parse } from '../../grammar';
 export { getByAlias } from './lib/get_by_alias';
 export { Registry } from './lib/registry';
 export { addRegistries, register, registryFactory } from './registries';

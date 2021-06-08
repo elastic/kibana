@@ -7,7 +7,8 @@
  */
 
 import { getType } from './get_type';
-import { parse } from './grammar';
+// eslint-disable-next-line import/no-unresolved
+import { parse } from '../../../grammar';
 
 function getArgumentString(arg, argKey, level = 0) {
   const type = getType(arg);
