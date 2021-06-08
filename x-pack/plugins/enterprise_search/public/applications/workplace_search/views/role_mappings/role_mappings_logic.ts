@@ -66,6 +66,7 @@ interface RoleMappingsActions {
   setRoleMappingsData(data: RoleMappingsServerDetails): RoleMappingsServerDetails;
   openRoleMappingFlyout(): void;
   closeRoleMappingFlyout(): void;
+  setRoleMappingErrors(errors: string[]): { errors: string[] };
 }
 
 interface RoleMappingsValues {
@@ -85,6 +86,7 @@ interface RoleMappingsValues {
   selectedGroups: Set<string>;
   roleMappingFlyoutOpen: boolean;
   selectedOptions: EuiComboBoxOptionOption[];
+  roleMappingErrors: string[];
 }
 
 export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappingsActions>>({
@@ -92,6 +94,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
   actions: {
     setRoleMappingsData: (data: RoleMappingsServerDetails) => data,
     setRoleMappingData: (data: RoleMappingServerDetails) => data,
+    setRoleMappingErrors: (errors: string[]) => ({ errors }),
     handleAuthProviderChange: (value: string[]) => ({ value }),
     handleRoleChange: (roleType: Role) => ({ roleType }),
     handleGroupSelectionChange: (groupIds: string[]) => ({ groupIds }),
@@ -247,6 +250,14 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         initializeRoleMapping: () => true,
       },
     ],
+    roleMappingErrors: [
+      [],
+      {
+        setRoleMappingErrors: (_, { errors }) => errors,
+        handleSaveMapping: () => [],
+        closeRoleMappingFlyout: () => [],
+      },
+    ],
   },
   selectors: ({ selectors }) => ({
     selectedOptions: [
@@ -337,7 +348,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         actions.initializeRoleMappings();
         setSuccessMessage(SUCCESS_MESSAGE);
       } catch (e) {
-        flashAPIErrors(e);
+        actions.setRoleMappingErrors(e?.body?.attributes?.errors);
       }
     },
     resetState: () => {

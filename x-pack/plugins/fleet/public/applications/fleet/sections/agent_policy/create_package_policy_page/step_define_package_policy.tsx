@@ -27,9 +27,8 @@ import type {
   NewPackagePolicy,
   RegistryVarsEntry,
 } from '../../../types';
-import { packageToPackagePolicy } from '../../../services';
+import { packageToPackagePolicy, pkgKeyFromPackageInfo } from '../../../services';
 import { Loading } from '../../../components';
-import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
 
 import { isAdvancedVar } from './services';
 import type { PackagePolicyValidationResults } from './services';
