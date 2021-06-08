@@ -19,11 +19,14 @@
 
 jest.useFakeTimers();
 
+import { promisify } from 'util';
 import React from 'react';
 import { render, mount } from 'enzyme';
 import { VisualizationChart } from './visualization_chart';
 
 let renderPromise;
+
+const nextTick = promisify(process.nextTick);
 
 class VisualizationStub {
   constructor(el, vis) {
@@ -70,6 +73,7 @@ describe('<VisualizationChart/>', () => {
 
     jest.runAllTimers();
     await renderPromise;
+    await nextTick();
     expect(renderStart).toHaveBeenCalledTimes(1);
     expect(renderComplete).toHaveBeenCalledTimes(1);
 
@@ -89,12 +93,14 @@ describe('<VisualizationChart/>', () => {
     domNode.addEventListener('renderComplete', renderComplete);
     jest.runAllTimers();
     await renderPromise;
+    await nextTick();
     expect(renderComplete).toHaveBeenCalledTimes(1);
 
     vis.params.markdown = 'new text';
     wrapper.setProps({ vis });
     jest.runAllTimers();
     await renderPromise;
+    await nextTick();
 
     expect(wrapper.find('.visChart').text()).toBe('new text');
     expect(renderComplete).toHaveBeenCalledTimes(2);
