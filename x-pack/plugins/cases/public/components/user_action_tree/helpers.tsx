@@ -26,11 +26,13 @@ import { Status, statuses } from '../status';
 import { UserActionShowAlert } from './user_action_show_alert';
 import * as i18n from './translations';
 import { AlertCommentEvent } from './user_action_alert_comment_event';
+import { CasesNavigation } from '../links';
 
 interface LabelTitle {
   action: CaseUserActions;
   field: string;
 }
+export type RuleDetailsNavigation = CasesNavigation<string | null | undefined, 'configurable'>;
 
 const getStatusTitle = (id: string, status: CaseStatuses) => (
   <EuiFlexGroup
@@ -202,21 +204,21 @@ export const getAlertAttachment = ({
   alertId,
   getCaseDetailHrefWithCommentId,
   getRuleDetailsHref,
-  onRuleDetailsClick,
   index,
   loadingAlertData,
+  onRuleDetailsClick,
+  onShowAlertDetails,
   ruleId,
   ruleName,
-  onShowAlertDetails,
 }: {
   action: CaseUserActions;
-  getCaseDetailHrefWithCommentId: (commentId: string) => string;
-  getRuleDetailsHref: (ruleId: string | null | undefined) => string;
-  onRuleDetailsClick?: (ruleId: string | null | undefined) => void;
-  onShowAlertDetails: (alertId: string, index: string) => void;
   alertId: string;
+  getCaseDetailHrefWithCommentId: (commentId: string) => string;
+  getRuleDetailsHref: RuleDetailsNavigation['href'];
   index: string;
   loadingAlertData: boolean;
+  onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
+  onShowAlertDetails: (alertId: string, index: string) => void;
   ruleId?: string | null;
   ruleName?: string | null;
 }): EuiCommentProps => ({
@@ -310,8 +312,8 @@ export const getGeneratedAlertsAttachment = ({
   action: CaseUserActions;
   alertIds: string[];
   getCaseDetailHrefWithCommentId: (commentId: string) => string;
-  getRuleDetailsHref: (ruleId: string | null | undefined) => string;
-  onRuleDetailsClick?: (ruleId: string | null | undefined) => void;
+  getRuleDetailsHref: RuleDetailsNavigation['href'];
+  onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
   renderInvestigateInTimelineActionComponent?: (alertIds: string[]) => JSX.Element;
   ruleId: string;
   ruleName: string;

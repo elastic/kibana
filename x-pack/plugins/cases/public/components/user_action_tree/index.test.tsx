@@ -9,13 +9,13 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
-import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
 import { getFormMock, useFormMock, useFormDataMock } from '../__mock__/form';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { basicCase, basicPush, getUserAction } from '../../containers/mock';
 import { UserActionTree } from '.';
 import { TestProviders } from '../../common/mock';
 import { Ecs } from '../../../common';
+import { routeData } from '../__mock__/router';
 
 const fetchUserActions = jest.fn();
 const onUpdateField = jest.fn();
@@ -63,7 +63,7 @@ describe(`UserActionTree`, () => {
     const formHookMock = getFormMock(sampleData);
     useFormMock.mockImplementation(() => ({ form: formHookMock }));
     useFormDataMock.mockImplementation(() => [{ content: sampleData.content, comment: '' }]);
-    jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
+    // jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
     jest
       .spyOn(routeData, 'useParams')
       .mockReturnValue({ detailName: 'case-id', subCaseId: 'sub-case-id' });
@@ -72,9 +72,7 @@ describe(`UserActionTree`, () => {
   it('Loading spinner when user actions loading and displays fullName/username', () => {
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <UserActionTree {...{ ...defaultProps, isLoadingUserActions: true }} />
-        </Router>
+        <UserActionTree {...{ ...defaultProps, isLoadingUserActions: true }} />
       </TestProviders>
     );
     expect(wrapper.find(`[data-test-subj="user-actions-loading"]`).exists()).toEqual(true);
@@ -109,9 +107,7 @@ describe(`UserActionTree`, () => {
     };
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <UserActionTree {...props} />
-        </Router>
+        <UserActionTree {...props} />
       </TestProviders>
     );
     expect(wrapper.find(`[data-test-subj="top-footer"]`).exists()).toEqual(true);
@@ -136,9 +132,7 @@ describe(`UserActionTree`, () => {
 
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <UserActionTree {...props} />
-        </Router>
+        <UserActionTree {...props} />
       </TestProviders>
     );
     expect(wrapper.find(`[data-test-subj="top-footer"]`).exists()).toEqual(true);
@@ -153,9 +147,7 @@ describe(`UserActionTree`, () => {
 
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <UserActionTree {...props} />
-        </Router>
+        <UserActionTree {...props} />
       </TestProviders>
     );
     expect(
@@ -190,9 +182,7 @@ describe(`UserActionTree`, () => {
 
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <UserActionTree {...props} />
-        </Router>
+        <UserActionTree {...props} />
       </TestProviders>
     );
 
@@ -236,9 +226,7 @@ describe(`UserActionTree`, () => {
 
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <UserActionTree {...props} />
-        </Router>
+        <UserActionTree {...props} />
       </TestProviders>
     );
 
@@ -287,9 +275,7 @@ describe(`UserActionTree`, () => {
   it('calls update description when description markdown is saved', async () => {
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <UserActionTree {...defaultProps} />
-        </Router>
+        <UserActionTree {...defaultProps} />
       </TestProviders>
     );
 
@@ -333,9 +319,7 @@ describe(`UserActionTree`, () => {
     const props = defaultProps;
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <UserActionTree {...props} />
-        </Router>
+        <UserActionTree {...props} />
       </TestProviders>
     );
 
@@ -365,9 +349,7 @@ describe(`UserActionTree`, () => {
 
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <UserActionTree {...props} />
-        </Router>
+        <UserActionTree {...props} />
       </TestProviders>
     );
 

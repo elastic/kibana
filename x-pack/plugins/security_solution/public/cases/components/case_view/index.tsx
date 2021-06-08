@@ -177,35 +177,43 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
       {casesUi.getCaseView({
         allCasesNavigation: {
           href: formattedAllCasesLink,
-          onClick: async () =>
-            navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+          onClick: async (e) => {
+            e.preventDefault();
+            return navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
               path: allCasesLink,
-            }),
+            });
+          },
         },
         caseDetailsNavigation: {
           href: caseDetailsLink,
-          onClick: async () =>
-            navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+          onClick: async (e) => {
+            e.preventDefault();
+            return navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
               path: getCaseDetailsUrl({ id: caseId }),
-            }),
+            });
+          },
         },
         caseId,
         configureCasesNavigation: {
           href: configureCasesHref,
-          onClick: async () =>
-            navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+          onClick: async (e) => {
+            e.preventDefault();
+            return navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
               path: getConfigureCasesUrl(search),
-            }),
+            });
+          },
         },
         getCaseDetailHrefWithCommentId,
         onCaseDataSuccess,
         onComponentInitialized,
         ruleDetailsNavigation: {
           href: getDetectionsRuleDetailsHref,
-          onClick: async (ruleId: string | null | undefined) =>
-            navigateToApp(`${APP_ID}:${SecurityPageName.detections}`, {
+          onClick: async (ruleId: string | null | undefined, e) => {
+            e.preventDefault();
+            return navigateToApp(`${APP_ID}:${SecurityPageName.detections}`, {
               path: getRuleDetailsUrl(ruleId ?? ''),
-            }),
+            });
+          },
         },
         showAlertDetails,
         subCaseId,

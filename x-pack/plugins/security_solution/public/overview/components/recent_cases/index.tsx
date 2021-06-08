@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 
 import {
   getCaseDetailsUrl,
@@ -26,33 +26,30 @@ const RecentCasesComponent = () => {
     application: { navigateToApp },
   } = useKibana().services;
 
-  const goToCases = useCallback(
-    (ev) => {
-      ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.case}`);
-    },
-    [navigateToApp]
-  );
-
   return casesUi.getRecentCases({
     allCasesNavigation: {
       href: formatUrl(getCaseUrl()),
-      onClick: goToCases,
+      onClick: async (ev) => {
+        ev.preventDefault();
+        return navigateToApp(`${APP_ID}:${SecurityPageName.case}`);
+      },
     },
     caseDetailsNavigation: {
       href: ({ detailName, subCaseId }: AllCasesNavProps) => {
         return formatUrl(getCaseDetailsUrl({ id: detailName, subCaseId }));
       },
-      onClick: ({ detailName, subCaseId, search }: AllCasesNavProps) => {
-        navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+      onClick: async ({ detailName, subCaseId, search }, e) => {
+        e.preventDefault();
+        return navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
           path: getCaseDetailsUrl({ id: detailName, search, subCaseId }),
         });
       },
     },
     createCaseNavigation: {
       href: formatUrl(getCreateCaseUrl()),
-      onClick: () => {
-        navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+      onClick: async (e) => {
+        e.preventDefault();
+        return navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
           path: getCreateCaseUrl(),
         });
       },

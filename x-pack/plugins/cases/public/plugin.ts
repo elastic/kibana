@@ -43,37 +43,37 @@ export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, S
        * @param props AllCasesProps
        * @return {ReactElement<AllCasesProps>}
        */
-      getAllCases: (props) => getAllCasesLazy(props),
+      getAllCases: getAllCasesLazy,
       /**
        * Get the case view component
        * @param props CaseViewProps
        * @return {ReactElement<CaseViewProps>}
        */
-      getCaseView: (props) => getCaseViewLazy(props),
+      getCaseView: getCaseViewLazy,
       /**
        * Get the configure case component
        * @param props ConfigureCasesProps
        * @return {ReactElement<ConfigureCasesProps>}
        */
-      getConfigureCases: (props) => getConfigureCasesLazy(props),
+      getConfigureCases: getConfigureCasesLazy,
       /**
        * Get the create case form
        * @param props CreateCaseProps
        * @return {ReactElement<CreateCaseProps>}
        */
-      getCreateCase: (props) => getCreateCaseLazy(props),
+      getCreateCase: getCreateCaseLazy,
       /**
        * Get the recent cases component
        * @param props RecentCasesProps
        * @return {ReactElement<RecentCasesProps>}
        */
-      getRecentCases: (props) => getRecentCasesLazy(props),
+      getRecentCases: getRecentCasesLazy,
       /**
        * use Modal hook for all cases selector
        * @param props UseAllCasesSelectorModalProps
        * @return UseAllCasesSelectorModalReturnedValues
        */
-      getAllCasesSelectorModal: (props) => getAllCasesSelectorModalLazy(props),
+      getAllCasesSelectorModal: getAllCasesSelectorModalLazy,
     };
   }
 

@@ -42,6 +42,7 @@ import {
   getUpdateAction,
   getAlertAttachment,
   getGeneratedAlertsAttachment,
+  RuleDetailsNavigation,
 } from './helpers';
 import { UserActionAvatar } from './user_action_avatar';
 import { UserActionMarkdown } from './user_action_markdown';
@@ -50,23 +51,24 @@ import { UserActionUsername } from './user_action_username';
 import { UserActionContentToolbar } from './user_action_content_toolbar';
 import { getManualAlertIdsWithNoRuleId } from '../case_view/helpers';
 import { Ecs } from '../../../common';
+
 export interface UserActionTreeProps {
-  getCaseDetailHrefWithCommentId: (commentId: string) => string;
   caseServices: CaseServices;
   caseUserActions: CaseUserActions[];
   connectors: ActionConnector[];
   data: Case;
-  getRuleDetailsHref: (ruleId: string | null | undefined) => string;
   fetchUserActions: () => void;
+  getCaseDetailHrefWithCommentId: (commentId: string) => string;
+  getRuleDetailsHref: RuleDetailsNavigation['href'];
   isLoadingDescription: boolean;
   isLoadingUserActions: boolean;
-  onRuleDetailsClick?: (ruleId: string | null | undefined) => void;
+  onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
+  onShowAlertDetails: (alertId: string, index: string) => void;
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
   renderInvestigateInTimelineActionComponent?: (alertIds: string[]) => JSX.Element;
   updateCase: (newCase: Case) => void;
   useFetchAlertData: (alertIds: string[]) => [boolean, Record<string, Ecs>];
   userCanCrud: boolean;
-  onShowAlertDetails: (alertId: string, index: string) => void;
 }
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
@@ -114,22 +116,22 @@ const NEW_ID = 'newComment';
 
 export const UserActionTree = React.memo(
   ({
-    data: caseData,
-    getCaseDetailHrefWithCommentId,
     caseServices,
     caseUserActions,
     connectors,
-    getRuleDetailsHref,
+    data: caseData,
     fetchUserActions,
+    getCaseDetailHrefWithCommentId,
+    getRuleDetailsHref,
     isLoadingDescription,
     isLoadingUserActions,
     onRuleDetailsClick,
+    onShowAlertDetails,
     onUpdateField,
     renderInvestigateInTimelineActionComponent,
     updateCase,
     useFetchAlertData,
     userCanCrud,
-    onShowAlertDetails,
   }: UserActionTreeProps) => {
     const { detailName: caseId, commentId, subCaseId } = useParams<{
       detailName: string;
