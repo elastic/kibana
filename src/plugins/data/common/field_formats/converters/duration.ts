@@ -258,7 +258,7 @@ export class DurationFormat extends FieldFormat {
     const duration = parseInputAsDuration(val, inputFormat) as Record<keyof Duration, Function>;
     const formatted = humanPrecise
       ? formatInputHumanPrecise(val, inputFormat, outputPrecision, useShortSuffix, includeSpace)
-      : duration.locale(i18n.getLocale())[outputFormat]();
+      : duration[outputFormat]();
 
     const precise = human || humanPrecise ? formatted : formatted.toFixed(outputPrecision);
     const type = outputFormats.find(({ method }) => method === outputFormat);
