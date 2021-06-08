@@ -6,7 +6,7 @@
  */
 import type { SavedObjectsClientContract } from 'kibana/server';
 
-import type { FullAgentPolicyOutputPermissions } from '../../common';
+import type { FullAgentPolicyOutputPermissions, RegistryDataStreamPermissions } from '../../common';
 import { getPackageInfo } from '../../server/services/epm/packages';
 
 import type { PackagePolicy } from '../types';
@@ -129,7 +129,7 @@ interface DataStreamMeta {
   dataset: string;
   dataset_is_prefix?: boolean;
   hidden?: boolean;
-  permissions?: any; // FIX
+  permissions?: RegistryDataStreamPermissions;
 }
 
 export function getDataStreamPermissions(dataStream: DataStreamMeta, namespace: string = '*') {
