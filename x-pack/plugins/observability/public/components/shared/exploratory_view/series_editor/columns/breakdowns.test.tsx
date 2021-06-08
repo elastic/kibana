@@ -15,7 +15,7 @@ import { USER_AGENT_OS } from '../../configurations/constants/elasticsearch_fiel
 
 describe('Breakdowns', function () {
   const dataViewSeries = getDefaultConfigs({
-    reportType: 'pld',
+    reportType: 'dist',
     indexPattern: mockIndexPattern,
     seriesId: NEW_SERIES_KEY,
   });

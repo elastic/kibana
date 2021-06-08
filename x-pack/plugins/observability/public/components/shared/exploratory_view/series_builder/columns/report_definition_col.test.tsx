@@ -23,7 +23,7 @@ describe('Series Builder ReportDefinitionCol', function () {
 
   const dataViewSeries = getDefaultConfigs({
     seriesId,
-    reportType: 'pld',
+    reportType: 'dist',
     indexPattern: mockIndexPattern,
   });
 

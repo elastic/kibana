@@ -91,7 +91,7 @@ export function ExploratoryView({
                 timeRange={series?.time}
                 attributes={lensAttributes}
                 onBrushEnd={({ range }) => {
-                  if (series?.reportType !== 'pld') {
+                  if (series?.reportType !== 'dist') {
                     setSeries(seriesId, {
                       ...series,
                       time: {

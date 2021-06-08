@@ -15,7 +15,7 @@ describe('Lens Attribute', () => {
   mockAppIndexPattern();
 
   const reportViewConfig = getDefaultConfigs({
-    reportType: 'pld',
+    reportType: 'dist',
     indexPattern: mockIndexPattern,
     seriesId: 'series-id',
   });

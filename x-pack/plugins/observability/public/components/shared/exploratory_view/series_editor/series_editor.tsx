@@ -97,7 +97,7 @@ export function SeriesEditor() {
         getDefaultConfigs({
           indexPattern,
           reportType: series.reportType,
-          seriesId: seriesKey,
+          dataType: series.dataType,
         })
       );
     }

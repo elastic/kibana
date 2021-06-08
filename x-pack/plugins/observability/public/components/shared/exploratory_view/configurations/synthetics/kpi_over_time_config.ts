@@ -6,29 +6,24 @@
  */
 
 import { ConfigProps, DataSeries } from '../../types';
-import { FieldLabels } from '../constants';
+import { FieldLabels, OPERATION_COLUMN } from '../constants';
 import { buildExistsFilter } from '../utils';
 import { DOWN_LABEL, UP_LABEL } from '../constants/labels';
+const SUMMARY_UP = 'summary.up';
+const SUMMARY_DOWN = 'summary.down';
 
-export function getMonitorPingsConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
+export function getSyntheticsKPIConfig({ indexPattern }: ConfigProps): DataSeries {
   return {
-    id: seriesId,
-    reportType: 'uptime-pings',
+    reportType: 'kpi-over-time',
     defaultSeriesType: 'bar_stacked',
-    seriesTypes: ['bar_stacked', 'bar'],
+    seriesTypes: [],
     xAxisColumn: {
       sourceField: '@timestamp',
     },
     yAxisColumns: [
       {
-        operationType: 'sum',
-        sourceField: 'summary.up',
-        label: UP_LABEL,
-      },
-      {
-        operationType: 'sum',
-        sourceField: 'summary.down',
-        label: DOWN_LABEL,
+        sourceField: 'business.kpi',
+        operationType: 'median',
       },
     ],
     yTitle: 'Pings',
@@ -43,6 +38,24 @@ export function getMonitorPingsConfig({ seriesId, indexPattern }: ConfigProps): 
       },
       {
         field: 'url.full',
+      },
+      {
+        field: 'business.kpi',
+        custom: true,
+        options: [
+          {
+            columnType: OPERATION_COLUMN,
+            field: SUMMARY_UP,
+            id: SUMMARY_UP,
+            label: UP_LABEL,
+          },
+          {
+            columnType: OPERATION_COLUMN,
+            field: SUMMARY_DOWN,
+            id: SUMMARY_DOWN,
+            label: DOWN_LABEL,
+          },
+        ],
       },
     ],
     labels: { ...FieldLabels },

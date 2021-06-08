@@ -243,10 +243,10 @@ export const WEB_APPLICATION_LABEL = i18n.translate(
   }
 );
 
-export const UP_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.up', {
-  defaultMessage: 'Up',
+export const UP_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.upPings', {
+  defaultMessage: 'Up Pings',
 });
 
-export const DOWN_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.down', {
-  defaultMessage: 'Down',
+export const DOWN_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.downPings', {
+  defaultMessage: 'Down Pings',
 });

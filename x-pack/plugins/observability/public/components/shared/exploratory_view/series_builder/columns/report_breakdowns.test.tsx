@@ -16,7 +16,7 @@ describe('Series Builder ReportBreakdowns', function () {
   const seriesId = 'test-series-id';
   const dataViewSeries = getDefaultConfigs({
     seriesId,
-    reportType: 'pld',
+    reportType: 'dist',
     indexPattern: mockIndexPattern,
   });
 

@@ -17,7 +17,7 @@ describe('SelectedFilters', function () {
   mockAppIndexPattern();
 
   const dataViewSeries = getDefaultConfigs({
-    reportType: 'pld',
+    reportType: 'dist',
     indexPattern: mockIndexPattern,
     seriesId: NEW_SERIES_KEY,
   });

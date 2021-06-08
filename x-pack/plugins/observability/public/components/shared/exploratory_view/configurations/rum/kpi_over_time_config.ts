@@ -6,7 +6,7 @@
  */
 
 import { ConfigProps, DataSeries } from '../../types';
-import { FieldLabels, RECORDS_FIELD } from '../constants';
+import { FieldLabels, OPERATION_COLUMN, RECORDS_FIELD } from '../constants';
 import { buildPhraseFilter } from '../utils';
 import {
   CLIENT_GEO_COUNTRY_NAME,
@@ -19,13 +19,13 @@ import {
   SERVICE_NAME,
   TBT_FIELD,
   TRANSACTION_DURATION,
-  TRANSACTION_TIME_TO_FIRST_BYTE,
   TRANSACTION_TYPE,
-  TRANSACTION_URL,
   USER_AGENT_DEVICE,
   USER_AGENT_NAME,
   USER_AGENT_OS,
   USER_AGENT_VERSION,
+  TRANSACTION_TIME_TO_FIRST_BYTE,
+  TRANSACTION_URL,
 } from '../constants/elasticsearch_fieldnames';
 import {
   BACKEND_TIME_LABEL,
@@ -34,24 +34,24 @@ import {
   FID_LABEL,
   LCP_LABEL,
   PAGE_LOAD_TIME_LABEL,
-  PAGES_LOADED_LABEL,
+  PAGE_VIEWS_LABEL,
   TBT_LABEL,
   WEB_APPLICATION_LABEL,
 } from '../constants/labels';
 
-export function getPerformanceDistLensConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
+export function getKPITrendsLensConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
   return {
-    id: seriesId ?? 'unique-key',
-    reportType: 'page-load-dist',
-    defaultSeriesType: 'line',
-    seriesTypes: ['line', 'bar'],
+    id: seriesId,
+    defaultSeriesType: 'bar_stacked',
+    reportType: 'kpi-over-time',
+    seriesTypes: ['bar', 'bar_stacked'],
     xAxisColumn: {
-      sourceField: 'performance.metric',
+      sourceField: '@timestamp',
     },
     yAxisColumns: [
       {
-        sourceField: RECORDS_FIELD,
-        label: PAGES_LOADED_LABEL,
+        sourceField: 'business.kpi',
+        operationType: 'median',
       },
     ],
     hasOperationType: false,
@@ -69,6 +69,11 @@ export function getPerformanceDistLensConfig({ seriesId, indexPattern }: ConfigP
       },
     ],
     breakdowns: [USER_AGENT_NAME, USER_AGENT_OS, CLIENT_GEO_COUNTRY_NAME, USER_AGENT_DEVICE],
+    filters: [
+      ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
+      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
+    ],
+    labels: { ...FieldLabels, [SERVICE_NAME]: WEB_APPLICATION_LABEL },
     reportDefinitions: [
       {
         field: SERVICE_NAME,
@@ -78,31 +83,29 @@ export function getPerformanceDistLensConfig({ seriesId, indexPattern }: ConfigP
         field: SERVICE_ENVIRONMENT,
       },
       {
-        field: 'performance.metric',
+        field: 'business.kpi',
         custom: true,
         options: [
-          { label: PAGE_LOAD_TIME_LABEL, id: TRANSACTION_DURATION, field: TRANSACTION_DURATION },
+          { field: RECORDS_FIELD, id: RECORDS_FIELD, label: PAGE_VIEWS_LABEL },
+          {
+            label: PAGE_LOAD_TIME_LABEL,
+            field: TRANSACTION_DURATION,
+            id: TRANSACTION_DURATION,
+            columnType: OPERATION_COLUMN,
+          },
           {
             label: BACKEND_TIME_LABEL,
-            id: TRANSACTION_TIME_TO_FIRST_BYTE,
             field: TRANSACTION_TIME_TO_FIRST_BYTE,
+            id: TRANSACTION_TIME_TO_FIRST_BYTE,
+            columnType: OPERATION_COLUMN,
           },
-          { label: FCP_LABEL, id: FCP_FIELD, field: FCP_FIELD },
-          { label: TBT_LABEL, id: TBT_FIELD, field: TBT_FIELD },
-          { label: LCP_LABEL, id: LCP_FIELD, field: LCP_FIELD },
-          { label: FID_LABEL, id: FID_FIELD, field: FID_FIELD },
-          { label: CLS_LABEL, id: CLS_FIELD, field: CLS_FIELD },
+          { label: FCP_LABEL, field: FCP_FIELD, id: FCP_FIELD, columnType: OPERATION_COLUMN },
+          { label: TBT_LABEL, field: TBT_FIELD, id: TBT_FIELD, columnType: OPERATION_COLUMN },
+          { label: LCP_LABEL, field: LCP_FIELD, id: LCP_FIELD, columnType: OPERATION_COLUMN },
+          { label: FID_LABEL, field: FID_FIELD, id: FID_FIELD, columnType: OPERATION_COLUMN },
+          { label: CLS_LABEL, field: CLS_FIELD, id: CLS_FIELD, columnType: OPERATION_COLUMN },
         ],
       },
     ],
-    filters: [
-      ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
-      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
-    ],
-    labels: {
-      ...FieldLabels,
-      [SERVICE_NAME]: WEB_APPLICATION_LABEL,
-      [TRANSACTION_DURATION]: PAGE_LOAD_TIME_LABEL,
-    },
   };
 }

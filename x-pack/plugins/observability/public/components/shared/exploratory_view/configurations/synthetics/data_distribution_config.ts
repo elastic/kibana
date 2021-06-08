@@ -10,12 +10,11 @@ import { FieldLabels } from '../constants';
 import { buildExistsFilter } from '../utils';
 import { MONITORS_DURATION_LABEL } from '../constants/labels';
 
-export function getMonitorDurationConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
+export function getSyntheticsDistributionConfig({ indexPattern }: ConfigProps): DataSeries {
   return {
-    id: seriesId,
-    reportType: 'uptime-duration',
+    reportType: 'data-distribution',
     defaultSeriesType: 'line',
-    seriesTypes: ['line', 'bar_stacked'],
+    seriesTypes: [],
     xAxisColumn: {
       sourceField: '@timestamp',
     },
