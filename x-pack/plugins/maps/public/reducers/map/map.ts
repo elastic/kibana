@@ -98,14 +98,12 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
         },
       };
     case UPDATE_EDIT_STATE_LAYER:
+      const editState = action.layerId ? { layerId: action.layerId } : undefined;
       return {
         ...state,
         mapState: {
           ...state.mapState,
-          editState: {
-            ...state.mapState.editState,
-            layerId: action.layerId,
-          },
+          editState,
         },
       };
     case UPDATE_EDIT_STATE_SHAPE:

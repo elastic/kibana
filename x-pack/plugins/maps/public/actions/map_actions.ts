@@ -12,7 +12,7 @@ import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
 import { Filter, Query, TimeRange } from 'src/plugins/data/public';
 import { Geometry, Position } from 'geojson';
-import { DRAW_SHAPE } from '../../common/constants';
+import { DRAW_MODE, DRAW_SHAPE } from '../../common/constants';
 import { MapStoreState } from '../reducers/store';
 import {
   getDataFilters,
@@ -63,6 +63,7 @@ import { INITIAL_LOCATION } from '../../common/constants';
 import { scaleBounds } from '../../common/elasticsearch_util';
 import { cleanTooltipStateForLayer } from './tooltip_actions';
 import { VectorLayer } from '../classes/layers/vector_layer';
+import { SET_DRAW_MODE } from './ui_actions';
 
 export interface MapExtentState {
   zoom: number;
@@ -337,6 +338,10 @@ export function updateEditLayer(layerId: string | null) {
     if (layerId !== null) {
       dispatch({ type: SET_OPEN_TOOLTIPS, openTooltips: [] });
     }
+    dispatch({
+      type: SET_DRAW_MODE,
+      drawMode: DRAW_MODE.NONE,
+    });
     dispatch({
       type: UPDATE_EDIT_STATE_LAYER,
       layerId,

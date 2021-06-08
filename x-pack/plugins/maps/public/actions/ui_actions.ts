@@ -13,6 +13,7 @@ import { FLYOUT_STATE } from '../reducers/ui';
 import { setQuery, trackMapSettings } from './map_actions';
 import { setSelectedLayer } from './layer_actions';
 import { DRAW_MODE } from '../../common';
+import { UPDATE_EDIT_STATE_LAYER } from './map_action_constants';
 
 export const UPDATE_FLYOUT = 'UPDATE_FLYOUT';
 export const SET_IS_LAYER_TOC_OPEN = 'SET_IS_LAYER_TOC_OPEN';
@@ -92,9 +93,17 @@ export function hideTOCDetails(layerId: string) {
 }
 
 export function setDrawMode(drawMode: DRAW_MODE) {
-  return {
-    type: SET_DRAW_MODE,
-    drawMode,
+  return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
+    if (drawMode === DRAW_MODE.NONE) {
+      dispatch({
+        type: UPDATE_EDIT_STATE_LAYER,
+        layerId: null,
+      });
+    }
+    dispatch({
+      type: SET_DRAW_MODE,
+      drawMode,
+    });
   };
 }
 
