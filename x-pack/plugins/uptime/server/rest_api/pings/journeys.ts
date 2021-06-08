@@ -58,16 +58,19 @@ export const createJourneyFailedStepsRoute: UMRestApiRouteFactory = (libs: UMSer
       _inspect: schema.maybe(schema.boolean()),
     }),
   },
-  handler: async ({ uptimeEsClient, request }): Promise<any> => {
+  handler: async ({ uptimeEsClient, request, response }): Promise<any> => {
     const { checkGroups } = request.query;
-    const result = await libs.requests.getJourneyFailedSteps({
-      uptimeEsClient,
-      checkGroups,
-    });
-
-    return {
-      checkGroups,
-      steps: result,
-    };
+    try {
+      const result = await libs.requests.getJourneyFailedSteps({
+        uptimeEsClient,
+        checkGroups,
+      });
+      return {
+        checkGroups,
+        steps: result,
+      };
+    } catch (e) {
+      return response.customError({ statusCode: 500, body: e });
+    }
   },
 });

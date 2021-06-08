@@ -6,19 +6,19 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
-import { SearchHit } from '../../../../../../typings/elasticsearch';
+import { isRight } from 'fp-ts/lib/Either';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
-import { Ping } from '../../../common/runtime_types';
+import { JourneyFailedStepType, JourneyFailedStep } from '../../../common/runtime_types';
 
 export interface GetJourneyStepsParams {
   checkGroups: string[];
 }
 
-export const getJourneyFailedSteps: UMElasticsearchQueryFn<GetJourneyStepsParams, Ping> = async ({
-  uptimeEsClient,
-  checkGroups,
-}) => {
+export const getJourneyFailedSteps: UMElasticsearchQueryFn<
+  GetJourneyStepsParams,
+  JourneyFailedStep[]
+> = async ({ uptimeEsClient, checkGroups }) => {
   const params = {
     query: {
       bool: {
@@ -53,11 +53,17 @@ export const getJourneyFailedSteps: UMElasticsearchQueryFn<GetJourneyStepsParams
 
   const { body: result } = await uptimeEsClient.search({ body: params });
 
-  return ((result.hits.hits as Array<SearchHit<Ping>>).map((h) => {
-    const source = h._source as Ping & { '@timestamp': string };
+  return result.hits.hits.map((h) => {
+    const decoded = JourneyFailedStepType.decode(h._source);
+    if (!isRight(decoded)) {
+      throw Error(
+        'Unable to parse data for failed journey steps. Invalid format or missing fields.'
+      );
+    }
+    const { right: step } = decoded;
     return {
-      ...source,
-      timestamp: source['@timestamp'],
+      timestamp: step['@timestamp'],
+      ...step,
     };
-  }) as unknown) as Ping;
+  });
 };
