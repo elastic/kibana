@@ -149,13 +149,17 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             });
             break;
           case 'new-instance':
-            validateInstanceEvent(event, `created new instance: 'instance'`);
+            validateInstanceEvent(event, `created new instance: 'instance'`, false);
             break;
           case 'recovered-instance':
-            validateInstanceEvent(event, `instance 'instance' has recovered`);
+            validateInstanceEvent(event, `instance 'instance' has recovered`, true);
             break;
           case 'active-instance':
-            validateInstanceEvent(event, `active instance: 'instance' in actionGroup: 'default'`);
+            validateInstanceEvent(
+              event,
+              `active instance: 'instance' in actionGroup: 'default'`,
+              false
+            );
             break;
           // this will get triggered as we add new event actions
           default:
@@ -163,7 +167,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
         }
       }
 
-      function validateInstanceEvent(event: IValidatedEvent, subMessage: string) {
+      function validateInstanceEvent(
+        event: IValidatedEvent,
+        subMessage: string,
+        shouldHaveEventEnd: boolean
+      ) {
         validateEvent(event, {
           spaceId: Spaces.space1.id,
           savedObjects: [
@@ -172,7 +180,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           message: `test.patternFiring:${alertId}: 'abc' ${subMessage}`,
           instanceId: 'instance',
           actionGroupId: 'default',
-          shouldHaveEventEnd: false,
+          shouldHaveEventEnd,
         });
       }
     });
@@ -289,10 +297,10 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             });
             break;
           case 'new-instance':
-            validateInstanceEvent(event, `created new instance: 'instance'`);
+            validateInstanceEvent(event, `created new instance: 'instance'`, false);
             break;
           case 'recovered-instance':
-            validateInstanceEvent(event, `instance 'instance' has recovered`);
+            validateInstanceEvent(event, `instance 'instance' has recovered`, true);
             break;
           case 'active-instance':
             expect(
@@ -300,7 +308,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             ).to.be(true);
             validateInstanceEvent(
               event,
-              `active instance: 'instance' in actionGroup(subgroup): 'default(${event?.kibana?.alerting?.action_subgroup})'`
+              `active instance: 'instance' in actionGroup(subgroup): 'default(${event?.kibana?.alerting?.action_subgroup})'`,
+              false
             );
             break;
           // this will get triggered as we add new event actions
@@ -309,7 +318,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
         }
       }
 
-      function validateInstanceEvent(event: IValidatedEvent, subMessage: string) {
+      function validateInstanceEvent(
+        event: IValidatedEvent,
+        subMessage: string,
+        shouldHaveEventEnd: boolean
+      ) {
         validateEvent(event, {
           spaceId: Spaces.space1.id,
           savedObjects: [
@@ -318,7 +331,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           message: `test.patternFiring:${alertId}: 'abc' ${subMessage}`,
           instanceId: 'instance',
           actionGroupId: 'default',
-          shouldHaveEventEnd: false,
+          shouldHaveEventEnd,
         });
       }
     });
@@ -426,6 +439,10 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
       expect(durationDiff < 1).to.equal(true);
       expect(eventStart <= eventEnd).to.equal(true);
       expect(eventEnd <= dateNow).to.equal(true);
+    }
+
+    if (shouldHaveEventEnd === false) {
+      expect(eventEnd).not.to.be.ok();
     }
   }
 
