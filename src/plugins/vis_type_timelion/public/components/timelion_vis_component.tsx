@@ -60,21 +60,25 @@ function TimelionVisComponent({
 
   const updateYAxes = function (yaxes: IAxis[]) {
     yaxes.forEach((yaxis: IAxis) => {
-      if (yaxis.units) {
-        const formatters = tickFormatters(yaxis);
-        yaxis.tickFormatter = formatters[yaxis.units.type as keyof typeof formatters];
-      } else if (yaxis.tickDecimals) {
-        yaxis.tickFormatter = (val: number) => val.toFixed(yaxis.tickDecimals);
-      }
+      if (yaxis) {
+        if (yaxis.units) {
+          const formatters = tickFormatters(yaxis);
+          yaxis.tickFormatter = formatters[yaxis.units.type as keyof typeof formatters];
+        } else if (yaxis.tickDecimals) {
+          yaxis.tickFormatter = (val: number) => val.toFixed(yaxis.tickDecimals);
+        }
 
-      yaxis.domain = {};
+        yaxis.domain = {
+          fit: true,
+        };
 
-      if (yaxis.max) {
-        yaxis.domain.max = yaxis.max;
-      }
+        if (yaxis.max) {
+          yaxis.domain.max = yaxis.max;
+        }
 
-      if (yaxis.min) {
-        yaxis.domain.min = yaxis.min;
+        if (yaxis.min) {
+          yaxis.domain.min = yaxis.min;
+        }
       }
     });
   };
@@ -126,7 +130,7 @@ function TimelionVisComponent({
       floating: true,
       floatingColumns: chartLegendGlobal?.noColumns ?? 1,
       vAlign: Position.Top,
-      hAlign: Position.Right,
+      hAlign: Position.Left,
       direction: LayoutDirection.Vertical,
     };
 
@@ -134,15 +138,19 @@ function TimelionVisComponent({
       case 'ne':
         legendPositionConf.vAlign = Position.Top;
         legendPositionConf.hAlign = Position.Right;
+        break;
       case 'nw':
         legendPositionConf.vAlign = Position.Top;
         legendPositionConf.hAlign = Position.Left;
+        break;
       case 'se':
         legendPositionConf.vAlign = Position.Bottom;
         legendPositionConf.hAlign = Position.Right;
+        break;
       case 'sw':
         legendPositionConf.vAlign = Position.Bottom;
         legendPositionConf.hAlign = Position.Left;
+        break;
     }
 
     return legendPositionConf;
@@ -192,6 +200,18 @@ function TimelionVisComponent({
     [interval, kibana.services.timefilter, kibana.services.uiSettings]
   );
 
+  const yaxes = useMemo(() => {
+    const collectedYAxes = [];
+    chart.forEach((chartInst) => {
+      chartInst._global?.yaxes.forEach((yaxis) => {
+        if (yaxis) {
+          collectedYAxes.push(yaxis);
+        }
+      });
+    });
+    return collectedYAxes;
+  }, [chart]);
+
   return (
     <div className="timelionChart">
       <div className="timelionChart__topTitle">{title}</div>
@@ -211,8 +231,8 @@ function TimelionVisComponent({
           externalPointerEvents={{ tooltip: { visible: false } }}
         />
         <Axis id="bottom" position={Position.Bottom} showOverlappingTicks tickFormat={tickFormat} />
-        {chart[0]._global?.yaxes ? (
-          chart[0]._global.yaxes.map((axis: IAxis, index: number) => {
+        {yaxes.length ? (
+          yaxes.map((axis: IAxis, index: number) => {
             return (
               <Axis
                 key={index}
@@ -220,31 +240,20 @@ function TimelionVisComponent({
                 title={axis.axisLabel}
                 position={axis.position}
                 tickFormat={axis.tickFormatter}
-                gridLine={{
-                  stroke: GRID_LINE_STROKE,
-                  visible: true,
-                }}
                 domain={axis.domain as YDomainRange}
               />
             );
           })
         ) : (
-          <Axis
-            id="left"
-            position={Position.Left}
-            gridLine={{
-              stroke: GRID_LINE_STROKE,
-              visible: true,
-            }}
-          />
+          <Axis id="left" position={Position.Left} />
         )}
         {chart.map((data, index) => {
           const key = `${index}-${data.label}`;
           if (data.bars) {
             return <BarSeriesComponent key={key} data={data} index={index} />;
-          } else {
-            return <AreaSeriesComponent key={key} data={data} index={index} />;
           }
+
+          return <AreaSeriesComponent key={key} data={data} index={index} />;
         })}
       </Chart>
     </div>

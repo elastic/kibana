@@ -11,11 +11,21 @@ import { BarSeries, ScaleType } from '@elastic/charts';
 
 export function BarSeriesComponent({ data, index }: { data: any; index: number }) {
   const bars = data.bars || {};
+  let opacity = bars.fill;
+
+  if (!bars.fill) {
+    opacity = 1;
+  } else if (bars.fill < 0) {
+    opacity = 0;
+  } else if (bars.fill > 1) {
+    opacity = 1;
+  }
+
   const styles = {
     barSeriesStyle: {
       rect: {
         fill: data.color,
-        opacity: !bars.fill || bars.fill < 0 ? 1 : bars.fill,
+        opacity,
         widthPixel: bars.lineWidth,
       },
     },

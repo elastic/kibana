@@ -16,7 +16,7 @@ export function AreaSeriesComponent({ data, index }: { data: any; index: number 
     areaSeriesStyle: {
       line: {
         stroke: data.color,
-        strokeWidth: Number(lines.lineWidth) || 3,
+        strokeWidth: Number(lines.lineWidth) ?? 3,
         visible: lines.show ?? !points.show,
       },
       area: {
@@ -27,11 +27,11 @@ export function AreaSeriesComponent({ data, index }: { data: any; index: number 
       point: {
         fill: points.fillColor,
         opacity: points.fill * 10 ?? 10,
-        radius: points.radius || 3,
+        radius: points.radius ?? 3,
         stroke: data.color,
-        strokeWidth: points.lineWidth || 2,
+        strokeWidth: points.lineWidth ?? 2,
         visible: points.show ?? false,
-        shape: points.symbol,
+        shape: points.symbol === 'cross' ? 'x' : points.symbol,
       },
     },
     curve: lines.steps ? CurveType.CURVE_STEP : CurveType.LINEAR,
