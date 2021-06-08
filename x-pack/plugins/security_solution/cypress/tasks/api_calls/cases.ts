@@ -24,6 +24,7 @@ export const createCase = (newCase: TestCase) =>
       settings: {
         syncAlerts: true,
       },
+      owner: newCase.owner,
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
   });
