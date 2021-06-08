@@ -127,10 +127,8 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({
         datafeedConfig
       );
 
-      if (chartData.success) {
-        setSourceData(chartData.datafeedResults);
-        setBucketData(chartData.bucketResults);
-      }
+      setSourceData(chartData.datafeedResults);
+      setBucketData(chartData.bucketResults);
     } catch (error) {
       const title = i18n.translate('xpack.ml.jobsList.datafeedModal.errorToastTitle', {
         defaultMessage: 'Error fetching data',
