@@ -8,30 +8,22 @@
 
 ```typescript
 getAggregationRestrictions(): Record<string, Record<string, {
-        agg?: string | undefined; /**
-         * Get last saved saved object fields
-         */
+        agg?: string | undefined;
         interval?: number | undefined;
         fixed_interval?: string | undefined;
         calendar_interval?: string | undefined;
         delay?: string | undefined;
-        time_zone?: string | undefined; /**
-         * Reset last saved saved object fields. used after saving
-         */
+        time_zone?: string | undefined;
     }>> | undefined;
 ```
 <b>Returns:</b>
 
 `Record<string, Record<string, {
-        agg?: string | undefined; /**
-         * Get last saved saved object fields
-         */
+        agg?: string | undefined;
         interval?: number | undefined;
         fixed_interval?: string | undefined;
         calendar_interval?: string | undefined;
         delay?: string | undefined;
-        time_zone?: string | undefined; /**
-         * Reset last saved saved object fields. used after saving
-         */
+        time_zone?: string | undefined;
     }>> | undefined`
 

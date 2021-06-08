@@ -73,7 +73,7 @@ export function registerSnapshotsRoutes({
             ignore_unavailable: true, // Allow request to succeed even if some snapshots are unavailable.
           });
 
-          const { snapshots: fetchedSnapshots } = response.body;
+          const { snapshots: fetchedSnapshots = [] } = response.body;
 
           // Decorate each snapshot with the repository with which it's associated.
 
