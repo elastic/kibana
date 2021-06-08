@@ -39,7 +39,6 @@ export const overallMinOperation: OperationDefinition<
     defaultMessage: 'Overall min',
   }),
   input: 'fullReference',
-  hidden: true,
   selectionStyle: 'hidden',
   requiredReferences: [
     {
@@ -95,5 +94,23 @@ export const overallMinOperation: OperationDefinition<
   isTransferable: () => {
     return true;
   },
-  filterable: true,
+  filterable: false,
+  shiftable: false,
+  documentation: {
+    section: 'calculation',
+    signature: i18n.translate('xpack.lens.indexPattern.overall_min', {
+      defaultMessage: 'metric: number',
+    }),
+    description: i18n.translate('xpack.lens.indexPattern.overall_min.documentation', {
+      defaultMessage: `
+Calculates the minimum of a metric for all data points of a series in the current chart. A series is defined by a dimension using a date histogram or interval function.
+Other dimensions breaking down the data like top values or filter are treated as separate series.
+
+If no date histograms or interval functions are used in the current chart, \`overall_min\` is calculating the minimum over all dimensions no matter the used function
+
+Example: Percentage of range
+\`(sum(bytes) - overall_min(sum(bytes)) / (overall_max(bytes) - overall_min(bytes))\`
+      `,
+    }),
+  },
 };

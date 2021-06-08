@@ -39,7 +39,6 @@ export const overallSumOperation: OperationDefinition<
     defaultMessage: 'Overall sum',
   }),
   input: 'fullReference',
-  hidden: true,
   selectionStyle: 'hidden',
   requiredReferences: [
     {
@@ -95,5 +94,23 @@ export const overallSumOperation: OperationDefinition<
   isTransferable: () => {
     return true;
   },
-  filterable: true,
+  filterable: false,
+  shiftable: false,
+  documentation: {
+    section: 'calculation',
+    signature: i18n.translate('xpack.lens.indexPattern.overall_sum', {
+      defaultMessage: 'metric: number',
+    }),
+    description: i18n.translate('xpack.lens.indexPattern.overall_sum.documentation', {
+      defaultMessage: `
+Calculates the sum of a metric of all data points of a series in the current chart. A series is defined by a dimension using a date histogram or interval function.
+Other dimensions breaking down the data like top values or filter are treated as separate series.
+
+If no date histograms or interval functions are used in the current chart, \`overall_sum\` is calculating the sum over all dimensions no matter the used function.
+
+Example: Percentage of total
+\`sum(bytes) / overall_sum(sum(bytes))\`
+      `,
+    }),
+  },
 };
