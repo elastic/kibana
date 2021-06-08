@@ -185,7 +185,7 @@ export const PingList = () => {
             name: i18n.translate('xpack.uptime.pingList.columns.failedStep', {
               defaultMessage: 'Failed step',
             }),
-            render: (timestamp: string, item: Ping) => (
+            render: (_timestamp: string, item: Ping) => (
               <FailedStep ping={item} failedSteps={failedSteps} />
             ),
           },
