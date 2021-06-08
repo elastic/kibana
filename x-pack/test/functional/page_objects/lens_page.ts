@@ -42,6 +42,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return await testSubjects.findAll('lnsFieldListPanelField');
     },
 
+    async isLensPageOrFail() {
+      return await testSubjects.existOrFail('lnsApp');
+    },
+
     /**
      * Move the date filter to the specified time range, defaults to
      * a range that has data in our dataset.
@@ -88,7 +92,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param title - the title of the list item to be clicked
      */
     clickVisualizeListItemTitle(title: string) {
-      return testSubjects.click(`visListingTitleLink-${title}`);
+      return retry.try(async () => {
+        await testSubjects.click(`visListingTitleLink-${title}`);
+        await this.isLensPageOrFail();
+      });
     },
 
     /**
