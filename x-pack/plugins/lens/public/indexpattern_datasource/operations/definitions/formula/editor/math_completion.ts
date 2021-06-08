@@ -238,6 +238,11 @@ function getArgumentSuggestions(
         list.push('lucene');
       }
     }
+    if (operation.shiftable) {
+      if (!namedArguments.find((arg) => arg.name === 'shift')) {
+        list.push('shift');
+      }
+    }
     if ('operationParams' in operation) {
       // Exclude any previously used named args
       list.push(

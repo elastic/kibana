@@ -488,6 +488,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
         {shouldDisplayExtraOptions && ParamEditor && (
           <ParamEditor
             layer={state.layers[layerId]}
+            layerId={layerId}
+            activeData={props.activeData}
             updateLayer={setStateWrapper}
             columnId={columnId}
             currentColumn={state.layers[layerId].columns[columnId]}
@@ -602,6 +604,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const formulaTab = ParamEditor ? (
     <ParamEditor
       layer={state.layers[layerId]}
+      layerId={layerId}
+      activeData={props.activeData}
       updateLayer={setStateWrapper}
       columnId={columnId}
       currentColumn={state.layers[layerId].columns[columnId]}

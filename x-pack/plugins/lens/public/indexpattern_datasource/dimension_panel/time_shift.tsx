@@ -23,6 +23,7 @@ import {
 import { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from '../types';
 import { IndexPatternDimensionEditorProps } from './dimension_panel';
 import { FramePublicAPI } from '../../types';
+import { Datatable } from '../../../../../../src/plugins/expressions';
 
 // to do: get the language from uiSettings
 export const defaultFilter: Query = {
@@ -157,38 +158,15 @@ export function TimeShift({
     return null;
   }
 
-  let dateHistogramInterval: null | moment.Duration = null;
-  const dateHistogramColumn = layer.columnOrder.find(
-    (colId) => layer.columns[colId].operationType === 'date_histogram'
+  const { isValueTooSmall, isValueNotMultiple, canShift } = getLayerTimeShiftChecks(
+    layer,
+    indexPattern,
+    activeData,
+    layerId
   );
-  if (!dateHistogramColumn && !indexPattern.timeFieldName) {
+
+  if (!canShift) {
     return null;
-  }
-  if (dateHistogramColumn && activeData && activeData[layerId] && activeData[layerId]) {
-    const column = activeData[layerId].columns.find((col) => col.id === dateHistogramColumn);
-    if (column) {
-      dateHistogramInterval = search.aggs.parseInterval(
-        search.aggs.getDateHistogramMetaDataByDatatableColumn(column)?.interval || ''
-      );
-    }
-  }
-
-  function isValueTooSmall(parsedValue: ReturnType<typeof parseTimeShift>) {
-    return (
-      dateHistogramInterval &&
-      parsedValue &&
-      typeof parsedValue === 'object' &&
-      parsedValue.asMilliseconds() < dateHistogramInterval.asMilliseconds()
-    );
-  }
-
-  function isValueNotMultiple(parsedValue: ReturnType<typeof parseTimeShift>) {
-    return (
-      dateHistogramInterval &&
-      parsedValue &&
-      typeof parsedValue === 'object' &&
-      !Number.isInteger(parsedValue.asMilliseconds() / dateHistogramInterval.asMilliseconds())
-    );
   }
 
   const parsedLocalValue = localValue && parseTimeShift(localValue);
@@ -306,31 +284,85 @@ export function TimeShift({
   );
 }
 
-export function getTimeShiftWarningMessages(
+function getDateHistogramInterval(
+  layer: IndexPatternLayer,
+  indexPattern: IndexPattern,
+  activeData: Record<string, Datatable> | undefined,
+  layerId: string
+) {
+  const dateHistogramColumn = layer.columnOrder.find(
+    (colId) => layer.columns[colId].operationType === 'date_histogram'
+  );
+  if (!dateHistogramColumn && !indexPattern.timeFieldName) {
+    return { canShift: false };
+  }
+  if (dateHistogramColumn && activeData && activeData[layerId] && activeData[layerId]) {
+    const column = activeData[layerId].columns.find((col) => col.id === dateHistogramColumn);
+    if (column) {
+      const expression =
+        search.aggs.getDateHistogramMetaDataByDatatableColumn(column)?.interval || '';
+      return {
+        interval: search.aggs.parseInterval(expression),
+        expression,
+        canShift: true,
+      };
+    }
+  }
+  return { canShift: true };
+}
+
+export function getLayerTimeShiftChecks(
+  layer: IndexPatternLayer,
+  indexPattern: IndexPattern,
+  activeData: Record<string, Datatable> | undefined,
+  layerId: string
+) {
+  const { interval: dateHistogramInterval, canShift } = getDateHistogramInterval(
+    layer,
+    indexPattern,
+    activeData,
+    layerId
+  );
+
+  return {
+    canShift,
+    isValueTooSmall: (parsedValue: ReturnType<typeof parseTimeShift>) => {
+      return (
+        dateHistogramInterval &&
+        parsedValue &&
+        typeof parsedValue === 'object' &&
+        parsedValue.asMilliseconds() < dateHistogramInterval.asMilliseconds()
+      );
+    },
+    isValueNotMultiple: (parsedValue: ReturnType<typeof parseTimeShift>) => {
+      return (
+        dateHistogramInterval &&
+        parsedValue &&
+        typeof parsedValue === 'object' &&
+        !Number.isInteger(parsedValue.asMilliseconds() / dateHistogramInterval.asMilliseconds())
+      );
+    },
+  };
+}
+
+export function getStateTimeShiftWarningMessages(
   state: IndexPatternPrivateState,
   { activeData }: FramePublicAPI
 ) {
   if (!state) return;
   const warningMessages: React.ReactNode[] = [];
   Object.entries(state.layers).forEach(([layerId, layer]) => {
-    let dateHistogramInterval: null | string = null;
-    const dateHistogramColumn = layer.columnOrder.find(
-      (colId) => layer.columns[colId].operationType === 'date_histogram'
+    const dateHistogramInterval = getDateHistogramInterval(
+      layer,
+      state.indexPatterns[layer.indexPatternId],
+      activeData,
+      layerId
     );
-    if (!dateHistogramColumn) {
+    if (!dateHistogramInterval.interval) {
       return;
     }
-    if (dateHistogramColumn && activeData && activeData[layerId]) {
-      const column = activeData[layerId].columns.find((col) => col.id === dateHistogramColumn);
-      if (column) {
-        dateHistogramInterval =
-          search.aggs.getDateHistogramMetaDataByDatatableColumn(column)?.interval || null;
-      }
-    }
-    if (dateHistogramInterval === null) {
-      return;
-    }
-    const shiftInterval = search.aggs.parseInterval(dateHistogramInterval)!.asMilliseconds();
+    const dateHistogramIntervalExpression = dateHistogramInterval.expression;
+    const shiftInterval = dateHistogramInterval.interval.asMilliseconds();
     let timeShifts: number[] = [];
     const timeShiftMap: Record<number, string[]> = {};
     Object.entries(layer.columns).forEach(([columnId, column]) => {
@@ -366,7 +398,7 @@ export function getTimeShiftWarningMessages(
               defaultMessage="{label} uses a time shift of {columnTimeShift} which is smaller than the date histogram interval of {interval}. To prevent mismatched data, use a multiple of {interval} as time shift."
               values={{
                 label: <strong>{layer.columns[columnId].label}</strong>,
-                interval: <strong>{dateHistogramInterval}</strong>,
+                interval: <strong>{dateHistogramIntervalExpression}</strong>,
                 columnTimeShift: <strong>{layer.columns[columnId].timeShift}</strong>,
               }}
             />
@@ -381,7 +413,7 @@ export function getTimeShiftWarningMessages(
               defaultMessage="{label} uses a time shift of {columnTimeShift} which is not a multiple of the date histogram interval of {interval}. To prevent mismatched data, use a multiple of {interval} as time shift."
               values={{
                 label: <strong>{layer.columns[columnId].label}</strong>,
-                interval: dateHistogramInterval,
+                interval: dateHistogramIntervalExpression,
                 columnTimeShift: layer.columns[columnId].timeShift!,
               }}
             />
@@ -391,4 +423,42 @@ export function getTimeShiftWarningMessages(
     });
   });
   return warningMessages;
+}
+
+export function getColumnTimeShiftWarnings(
+  layer: IndexPatternLayer,
+  indexPattern: IndexPattern,
+  activeData: Record<string, Datatable> | undefined,
+  layerId: string,
+  column: IndexPatternColumn
+) {
+  const { isValueTooSmall, isValueNotMultiple } = getLayerTimeShiftChecks(
+    layer,
+    indexPattern,
+    activeData,
+    layerId
+  );
+
+  const warnings: string[] = [];
+
+  const parsedLocalValue = column.timeShift && parseTimeShift(column.timeShift);
+  const localValueTooSmall = parsedLocalValue && isValueTooSmall(parsedLocalValue);
+  if (localValueTooSmall) {
+    warnings.push(
+      i18n.translate('xpack.lens.indexPattern.timeShift.tooSmallHelp', {
+        defaultMessage:
+          'Time shift should to be larger than the date histogram interval. Either increase time shift or specify smaller interval in date histogram',
+      })
+    );
+  }
+  const localValueNotMultiple = parsedLocalValue && isValueNotMultiple(parsedLocalValue);
+  if (localValueNotMultiple) {
+    warnings.push(
+      i18n.translate('xpack.lens.indexPattern.timeShift.noMultipleHelp', {
+        defaultMessage:
+          'Time shift should be a multiple of the date histogram interval. Either adjust time shift or date histogram interval',
+      })
+    );
+  }
+  return warnings;
 }

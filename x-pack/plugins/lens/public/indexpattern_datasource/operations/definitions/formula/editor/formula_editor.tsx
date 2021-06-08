@@ -47,6 +47,7 @@ import './formula.scss';
 import { FormulaIndexPatternColumn } from '../formula';
 import { regenerateLayerFromAst } from '../parse';
 import { filterByVisibleOperation } from '../util';
+import { getColumnTimeShiftWarnings } from '../../../../dimension_panel/time_shift';
 
 export const MemoizedFormulaEditor = React.memo(FormulaEditor);
 
@@ -61,6 +62,8 @@ export function FormulaEditor({
   toggleFullscreen,
   isFullscreen,
   setIsCloseable,
+  activeData,
+  layerId,
 }: ParamEditorProps<FormulaIndexPatternColumn>) {
   const [text, setText] = useState(currentColumn.params.formula);
   const [warnings, setWarnings] = useState<
@@ -227,6 +230,7 @@ export function FormulaEditor({
         const managedColumns = getManagedColumnsFrom(columnId, newLayer.columns);
         const markers: monaco.editor.IMarkerData[] = managedColumns
           .flatMap(([id, column]) => {
+            const newWarnings: monaco.editor.IMarkerData[] = [];
             if (locations[id]) {
               const def = visibleOperationsMap[column.operationType];
               if (def.getErrorMessage) {
@@ -239,20 +243,38 @@ export function FormulaEditor({
                 if (messages) {
                   const startPosition = offsetToRowColumn(text, locations[id].min);
                   const endPosition = offsetToRowColumn(text, locations[id].max);
-                  return [
-                    {
-                      message: messages.join(', '),
-                      startColumn: startPosition.column + 1,
-                      startLineNumber: startPosition.lineNumber,
-                      endColumn: endPosition.column + 1,
-                      endLineNumber: endPosition.lineNumber,
-                      severity: monaco.MarkerSeverity.Warning,
-                    },
-                  ];
+                  newWarnings.push({
+                    message: messages.join(', '),
+                    startColumn: startPosition.column + 1,
+                    startLineNumber: startPosition.lineNumber,
+                    endColumn: endPosition.column + 1,
+                    endLineNumber: endPosition.lineNumber,
+                    severity: monaco.MarkerSeverity.Warning,
+                  });
                 }
               }
+              if (def.shiftable && column.timeShift) {
+                const startPosition = offsetToRowColumn(text, locations[id].min);
+                const endPosition = offsetToRowColumn(text, locations[id].max);
+                newWarnings.push(
+                  ...getColumnTimeShiftWarnings(
+                    layer,
+                    indexPattern,
+                    activeData,
+                    layerId,
+                    column
+                  ).map((message) => ({
+                    message,
+                    startColumn: startPosition.column + 1,
+                    startLineNumber: startPosition.lineNumber,
+                    endColumn: endPosition.column + 1,
+                    endLineNumber: endPosition.lineNumber,
+                    severity: monaco.MarkerSeverity.Warning,
+                  }))
+                );
+              }
             }
-            return [];
+            return newWarnings;
           })
           .filter((marker) => marker);
         setWarnings(markers.map(({ severity, message }) => ({ severity, message })));
@@ -417,7 +439,9 @@ export function FormulaEditor({
             !tokenInfo ||
             typeof tokenInfo.ast === 'number' ||
             tokenInfo.ast.type !== 'namedArgument' ||
-            (tokenInfo.ast.name !== 'kql' && tokenInfo.ast.name !== 'lucene') ||
+            (tokenInfo.ast.name !== 'kql' &&
+              tokenInfo.ast.name !== 'lucene' &&
+              tokenInfo.ast.name !== 'shift') ||
             (tokenInfo.ast.value !== 'LENS_MATH_MARKER' &&
               !isSingleQuoteCase.test(tokenInfo.ast.value))
           ) {
@@ -437,7 +461,7 @@ export function FormulaEditor({
               text: `''`,
             };
           }
-          if (char === "'") {
+          if (char === "'" && tokenInfo.ast.name !== 'shift') {
             editOperation = {
               range: {
                 ...currentPosition,

@@ -23,6 +23,7 @@ import {
 import type { OperationDefinition, IndexPatternColumn, GenericOperationDefinition } from '../index';
 import type { IndexPattern, IndexPatternLayer } from '../../../types';
 import type { TinymathNodeTypes } from './types';
+import { parseTimeShift } from '../../../../../../../../src/plugins/data/common';
 
 interface ValidationErrors {
   missingField: { message: string; type: { variablesLength: number; variablesList: string } };
@@ -63,6 +64,7 @@ interface ValidationErrors {
     type: {};
   };
 }
+
 type ErrorTypes = keyof ValidationErrors;
 type ErrorValues<K extends ErrorTypes> = ValidationErrors[K]['type'];
 
@@ -83,6 +85,7 @@ function findFunctionNodes(root: TinymathAST | string): TinymathFunction[] {
     }
     return [node, ...node.args.flatMap(flattenFunctionNodes)].filter(Boolean);
   }
+
   return flattenFunctionNodes(root);
 }
 
@@ -406,6 +409,19 @@ function getQueryValidationErrors(
       if (message) {
         errors.push({
           message,
+          locations: [arg.location],
+        });
+      }
+    }
+
+    if (arg.name === 'shift') {
+      const parsedShift = parseTimeShift(arg.value);
+      if (parsedShift === 'invalid') {
+        errors.push({
+          message: i18n.translate('xpack.lens.indexPattern.invalidTimeShift', {
+            defaultMessage:
+              'Invalid time shift. Enter positive integer amount and one of the units s, m, h, d, w, M, y',
+          }),
           locations: [arg.location],
         });
       }
