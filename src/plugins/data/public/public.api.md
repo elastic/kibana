@@ -46,6 +46,7 @@ import { Href } from 'history';
 import { HttpSetup } from 'kibana/public';
 import { IAggConfigs as IAggConfigs_2 } from 'src/plugins/data/public';
 import { IconType } from '@elastic/eui';
+import { IEsSearchResponse as IEsSearchResponse_2 } from 'src/plugins/data/public';
 import { IncomingHttpHeaders } from 'http';
 import { InjectedIntl } from '@kbn/i18n/react';
 import { ISearchOptions as ISearchOptions_2 } from 'src/plugins/data/public';
@@ -74,6 +75,7 @@ import * as PropTypes from 'prop-types';
 import { PublicContract } from '@kbn/utility-types';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { PublicUiSettingsParams } from 'src/core/server/types';
+import { RangeFilter as RangeFilter_2 } from 'src/plugins/data/public';
 import React from 'react';
 import * as React_3 from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
@@ -152,8 +154,12 @@ export class AggConfig {
     // (undocumented)
     getTimeRange(): import("../../../public").TimeRange | undefined;
     // (undocumented)
+    getTimeShift(): undefined | moment.Duration;
+    // (undocumented)
     getValue(bucket: any): any;
     getValueBucketPath(): string;
+    // (undocumented)
+    hasTimeShift(): boolean;
     // (undocumented)
     id: string;
     // (undocumented)
@@ -245,6 +251,8 @@ export class AggConfigs {
         addToAggConfigs?: boolean | undefined;
     }) => T;
     // (undocumented)
+    forceNow?: Date;
+    // (undocumented)
     getAll(): AggConfig[];
     // (undocumented)
     getRequestAggById(id: string): AggConfig | undefined;
@@ -253,12 +261,49 @@ export class AggConfigs {
     getResponseAggById(id: string): AggConfig | undefined;
     getResponseAggs(): AggConfig[];
     // (undocumented)
+    getSearchSourceTimeFilter(forceNow?: Date): RangeFilter_2[] | {
+        meta: {
+            index: string | undefined;
+            params: {};
+            alias: string;
+            disabled: boolean;
+            negate: boolean;
+        };
+        query: {
+            bool: {
+                should: {
+                    bool: {
+                        filter: {
+                            range: {
+                                [x: string]: {
+                                    gte: string;
+                                    lte: string;
+                                };
+                            };
+                        }[];
+                    };
+                }[];
+                minimum_should_match: number;
+            };
+        };
+    }[];
+    // (undocumented)
+    getTimeShiftInterval(): moment.Duration | undefined;
+    // (undocumented)
+    getTimeShifts(): Record<string, moment.Duration>;
+    // (undocumented)
+    hasTimeShifts(): boolean;
+    // (undocumented)
     hierarchical?: boolean;
     // (undocumented)
     indexPattern: IndexPattern;
     jsonDataEquals(aggConfigs: AggConfig[]): boolean;
     // (undocumented)
     onSearchRequestStart(searchSource: ISearchSource_2, options?: ISearchOptions_2): Promise<[unknown, unknown, unknown, unknown, unknown, unknown, unknown, unknown, unknown, unknown]>;
+    // (undocumented)
+    postFlightTransform(response: IEsSearchResponse_2<any>): IEsSearchResponse_2<any>;
+    // (undocumented)
+    setForceNow(now: Date | undefined): void;
     // (undocumented)
     setTimeFields(timeFields: string[] | undefined): void;
     // (undocumented)
@@ -492,6 +537,8 @@ export const APPLY_FILTER_TRIGGER = "FILTER_TRIGGER";
 //
 // @public (undocumented)
 export interface ApplyGlobalFilterActionContext {
+    // (undocumented)
+    controlledBy?: string;
     // (undocumented)
     embeddable?: unknown;
     // (undocumented)
@@ -763,6 +810,7 @@ export const esFilters: {
             disabled: boolean;
             controlledBy?: string | undefined;
             index?: string | undefined;
+            isMultiIndex?: boolean | undefined;
             type?: string | undefined;
             key?: string | undefined;
             params?: any;
@@ -1195,7 +1243,7 @@ export interface IFieldType {
     // (undocumented)
     format?: any;
     // (undocumented)
-    lang?: string;
+    lang?: estypes.ScriptLanguage;
     // (undocumented)
     name: string;
     // (undocumented)
@@ -1304,6 +1352,7 @@ export class IndexPattern implements IIndexPattern {
     // Warning: (ae-forgotten-export) The symbol "IndexPatternDeps" needs to be exported by the entry point index.d.ts
     constructor({ spec, fieldFormats, shortDotsEnable, metaFields, }: IndexPatternDeps);
     addRuntimeField(name: string, runtimeField: RuntimeField): void;
+    // @deprecated
     addScriptedField(name: string, script: string, fieldType?: string): Promise<void>;
     readonly allowNoIndex: boolean;
     // (undocumented)
@@ -1332,19 +1381,7 @@ export class IndexPattern implements IIndexPattern {
         delay?: string | undefined;
         time_zone?: string | undefined;
     }>> | undefined;
-    getAsSavedObjectBody(): {
-        fieldAttrs: string | undefined;
-        title: string;
-        timeFieldName: string | undefined;
-        intervalName: string | undefined;
-        sourceFilters: string | undefined;
-        fields: string | undefined;
-        fieldFormatMap: string | undefined;
-        type: string | undefined;
-        typeMeta: string | undefined;
-        allowNoIndex: true | undefined;
-        runtimeFieldMap: string | undefined;
-    };
+    getAsSavedObjectBody(): IndexPatternAttributes;
     // (undocumented)
     getComputedFields(): {
         storedFields: string[];
@@ -1363,7 +1400,7 @@ export class IndexPattern implements IIndexPattern {
     getFieldByName(name: string): IndexPatternField | undefined;
     getFormatterForField(field: IndexPatternField | IndexPatternField['spec'] | IFieldType): FieldFormat;
     getFormatterForFieldNoDefault(fieldname: string): FieldFormat | undefined;
-    // (undocumented)
+    // @deprecated (undocumented)
     getNonScriptedFields(): IndexPatternField[];
     getOriginalSavedObjectBody: () => {
         fieldAttrs?: string | undefined;
@@ -1376,7 +1413,7 @@ export class IndexPattern implements IIndexPattern {
         typeMeta?: string | undefined;
         type?: string | undefined;
     };
-    // (undocumented)
+    // @deprecated (undocumented)
     getScriptedFields(): IndexPatternField[];
     getSourceFiltering(): {
         excludes: any[];
@@ -1394,6 +1431,7 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     metaFields: string[];
     removeRuntimeField(name: string): void;
+    // @deprecated
     removeScriptedField(fieldName: string): void;
     resetOriginalSavedObjectBody: () => void;
     // (undocumented)
@@ -1480,8 +1518,8 @@ export class IndexPatternField implements IFieldType {
     // (undocumented)
     get filterable(): boolean;
     get isMapped(): boolean | undefined;
-    get lang(): string | undefined;
-    set lang(lang: string | undefined);
+    get lang(): "painless" | "expression" | "mustache" | "java" | undefined;
+    set lang(lang: "painless" | "expression" | "mustache" | "java" | undefined);
     // (undocumented)
     get name(): string;
     // (undocumented)
@@ -1505,7 +1543,7 @@ export class IndexPatternField implements IFieldType {
     toJSON(): {
         count: number;
         script: string | undefined;
-        lang: string | undefined;
+        lang: "painless" | "expression" | "mustache" | "java" | undefined;
         conflictDescriptions: Record<string, string[]> | undefined;
         name: string;
         type: string;
@@ -1621,6 +1659,7 @@ export class IndexPatternsService {
     // (undocumented)
     getCache: () => Promise<SavedObject<IndexPatternSavedObjectAttrs>[] | null | undefined>;
     getDefault: () => Promise<IndexPattern | null>;
+    getDefaultId: () => Promise<string | null>;
     getFieldsForIndexPattern: (indexPattern: IndexPattern | IndexPatternSpec, options?: GetFieldsOptions | undefined) => Promise<any>;
     // Warning: (ae-forgotten-export) The symbol "GetFieldsOptions" needs to be exported by the entry point index.d.ts
     getFieldsForWildcard: (options: GetFieldsOptions) => Promise<any>;
@@ -1632,7 +1671,7 @@ export class IndexPatternsService {
     getTitles: (refresh?: boolean) => Promise<string[]>;
     refreshFields: (indexPattern: IndexPattern) => Promise<void>;
     savedObjectToSpec: (savedObject: SavedObject<IndexPatternAttributes>) => IndexPatternSpec;
-    setDefault: (id: string, force?: boolean) => Promise<void>;
+    setDefault: (id: string | null, force?: boolean) => Promise<void>;
     updateSavedObject(indexPattern: IndexPattern, saveAttempts?: number, ignoreErrors?: boolean): Promise<void | Error>;
 }
 
@@ -1949,7 +1988,7 @@ export type PhraseFilter = Filter & {
     script?: {
         script: {
             source?: any;
-            lang?: string;
+            lang?: estypes.ScriptLanguage;
             params: any;
         };
     };
@@ -2167,7 +2206,7 @@ export type RangeFilter = Filter & EsRangeFilter & {
     script?: {
         script: {
             params: any;
-            lang: string;
+            lang: estypes.ScriptLanguage;
             source: any;
         };
     };
@@ -2213,7 +2252,7 @@ export interface Reason {
         reason: string;
     };
     // (undocumented)
-    lang?: string;
+    lang?: estypes.ScriptLanguage;
     // (undocumented)
     position?: {
         offset: number;
@@ -2689,8 +2728,8 @@ export interface WaitUntilNextSessionCompletesOptions {
 // src/plugins/data/common/es_query/filters/exists_filter.ts:19:3 - (ae-forgotten-export) The symbol "ExistsFilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/es_query/filters/exists_filter.ts:20:3 - (ae-forgotten-export) The symbol "FilterExistsProperty" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/es_query/filters/match_all_filter.ts:17:3 - (ae-forgotten-export) The symbol "MatchAllFilterMeta" needs to be exported by the entry point index.d.ts
-// src/plugins/data/common/es_query/filters/meta_filter.ts:42:3 - (ae-forgotten-export) The symbol "FilterState" needs to be exported by the entry point index.d.ts
-// src/plugins/data/common/es_query/filters/meta_filter.ts:43:3 - (ae-forgotten-export) The symbol "FilterMeta" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/es_query/filters/meta_filter.ts:43:3 - (ae-forgotten-export) The symbol "FilterState" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/es_query/filters/meta_filter.ts:44:3 - (ae-forgotten-export) The symbol "FilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/es_query/filters/phrase_filter.ts:22:3 - (ae-forgotten-export) The symbol "PhraseFilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/es_query/filters/phrases_filter.ts:20:3 - (ae-forgotten-export) The symbol "PhrasesFilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:65:5 - (ae-forgotten-export) The symbol "FormatFieldFn" needs to be exported by the entry point index.d.ts

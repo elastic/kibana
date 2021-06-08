@@ -23,14 +23,24 @@ core.application.register({
   title: 'Translated title',
   keywords: ['translated keyword1', 'translated keyword2'],
   deepLinks: [
-  { id: 'sub1', title: 'Sub1', path: '/sub1', keywords: ['subpath1'] },
-  {
-    id: 'sub2',
-    title: 'Sub2',
-    deepLinks: [
-      { id: 'subsub', title: 'SubSub', path: '/sub2/sub', keywords: ['subpath2'] }
-    ]
-  }
+    {
+      id: 'sub1',
+      title: 'Sub1',
+      path: '/sub1',
+      keywords: ['subpath1'],
+    },
+    {
+      id: 'sub2',
+      title: 'Sub2',
+      deepLinks: [
+        {
+          id: 'subsub',
+          title: 'SubSub',
+          path: '/sub2/sub',
+          keywords: ['subpath2'],
+        },
+      ],
+    },
   ],
   mount: () => { ... }
 })

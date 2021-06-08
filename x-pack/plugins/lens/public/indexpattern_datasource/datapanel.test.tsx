@@ -237,7 +237,7 @@ const initialState: IndexPatternPrivateState = {
   isFirstExistenceFetch: false,
 };
 
-const dslQuery = { bool: { must: [{ match_all: {} }], filter: [], should: [], must_not: [] } };
+const dslQuery = { bool: { must: [], filter: [], should: [], must_not: [] } };
 
 describe('IndexPattern Data Panel', () => {
   let defaultProps: Parameters<typeof InnerIndexPatternDataPanel>[0] & {

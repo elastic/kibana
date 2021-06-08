@@ -17,10 +17,13 @@ import {
   scheduleLensTelemetry,
 } from './usage';
 import { setupSavedObjects } from './saved_objects';
+import { EmbeddableSetup } from '../../../../src/plugins/embeddable/server';
+import { lensEmbeddableFactory } from './embeddable/lens_embeddable_factory';
 
 export interface PluginSetupContract {
   usageCollection?: UsageCollectionSetup;
   taskManager?: TaskManagerSetupContract;
+  embeddable: EmbeddableSetup;
 }
 
 export interface PluginStartContract {
@@ -53,6 +56,7 @@ export class LensServerPlugin implements Plugin<{}, {}, {}, {}> {
         plugins.taskManager
       );
     }
+    plugins.embeddable.registerEmbeddableFactory(lensEmbeddableFactory());
     return {};
   }
 
