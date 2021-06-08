@@ -13,5 +13,10 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export { CasesUiPlugin };
-export * from './plugin';
-export * from './types';
+export { CasesUiStart } from './types';
+export { AllCasesProps } from './components/all_cases';
+export { AllCasesSelectorModalProps } from './components/all_cases/selector_modal';
+export { CaseViewProps } from './components/case_view';
+export { ConfigureCasesProps } from './components/configure_cases';
+export { CreateCaseProps } from './components/create';
+export { RecentCasesProps } from './components/recent_cases';

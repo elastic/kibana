@@ -44,12 +44,42 @@ export interface Owner {
 }
 
 export interface CasesUiStart {
+  /**
+   * Get the all cases table
+   * @param props AllCasesProps
+   * @return {ReactElement<AllCasesProps>}
+   */
   getAllCases: (props: AllCasesProps) => ReactElement<AllCasesProps>;
+  /**
+   * use Modal hook for all cases selector
+   * @param props UseAllCasesSelectorModalProps
+   * @return UseAllCasesSelectorModalReturnedValues
+   */
   getAllCasesSelectorModal: (
     props: AllCasesSelectorModalProps
   ) => ReactElement<AllCasesSelectorModalProps>;
+  /**
+   * Get the case view component
+   * @param props CaseViewProps
+   * @return {ReactElement<CaseViewProps>}
+   */
   getCaseView: (props: CaseViewProps) => ReactElement<CaseViewProps>;
+  /**
+   * Get the configure case component
+   * @param props ConfigureCasesProps
+   * @return {ReactElement<ConfigureCasesProps>}
+   */
   getConfigureCases: (props: ConfigureCasesProps) => ReactElement<ConfigureCasesProps>;
+  /**
+   * Get the create case form
+   * @param props CreateCaseProps
+   * @return {ReactElement<CreateCaseProps>}
+   */
   getCreateCase: (props: CreateCaseProps) => ReactElement<CreateCaseProps>;
+  /**
+   * Get the recent cases component
+   * @param props RecentCasesProps
+   * @return {ReactElement<RecentCasesProps>}
+   */
   getRecentCases: (props: RecentCasesProps) => ReactElement<RecentCasesProps>;
 }

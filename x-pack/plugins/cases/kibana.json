@@ -3,12 +3,21 @@
   "id": "cases",
   "kibanaVersion": "kibana",
   "extraPublicDirs": ["common"],
-  "requiredPlugins": ["actions", "esUiShared", "features", "kibanaReact", "kibanaUtils", "triggersActionsUi"],
-  "optionalPlugins": [
-    "spaces",
-    "security"
+  "requiredPlugins": [
+    "actions",
+    "esUiShared",
+    "features",
+    "kibanaReact",
+    "kibanaUtils",
+    "triggersActionsUi"
   ],
+  "optionalPlugins": ["spaces", "security"],
   "server": true,
   "ui": true,
-  "version": "8.0.0"
+  "version": "8.0.0",
+  "description": "Provides services and functionality related to 'Cases', which are report-like entities that users can leverage to track a situation, collaborate, and add associations to other entities. For example, a user may create a 'Case' because of a security breach. Various users associated with the case can add comments and links to supported visualizations and dashboards. There is a dedicated Cases UI, but this plugin also provides entities for direct integration into other plugins.",
+  "owner": {
+    "name": "SIEM",
+    "githubTeam": "SIEM"
+  }
 }
