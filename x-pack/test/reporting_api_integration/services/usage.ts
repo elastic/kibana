@@ -32,7 +32,7 @@ export interface ReportingUsageStats {
   [jobType: string]: any;
 }
 
-interface UsageStats {
+export interface UsageStats {
   reporting: ReportingUsageStats;
 }
 

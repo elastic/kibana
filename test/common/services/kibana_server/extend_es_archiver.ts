@@ -6,10 +6,23 @@
  * Side Public License, v 1.
  */
 
-const ES_ARCHIVER_LOAD_METHODS = ['load', 'loadIfNeeded', 'unload', 'emptyKibanaIndex'];
+import type { ProvidedType } from '@kbn/test';
+
+import type { EsArchiverProvider } from '../es_archiver';
+import type { RetryService } from '../retry';
+import type { KibanaServerProvider } from './kibana_server';
+
+const ES_ARCHIVER_LOAD_METHODS = ['load', 'loadIfNeeded', 'unload', 'emptyKibanaIndex'] as const;
 const KIBANA_INDEX = '.kibana';
 
-export function extendEsArchiver({ esArchiver, kibanaServer, retry, defaults }) {
+interface Options {
+  esArchiver: ProvidedType<typeof EsArchiverProvider>;
+  kibanaServer: ProvidedType<typeof KibanaServerProvider>;
+  retry: RetryService;
+  defaults: Record<string, any>;
+}
+
+export function extendEsArchiver({ esArchiver, kibanaServer, retry, defaults }: Options) {
   // only extend the esArchiver if there are default uiSettings to restore
   if (!defaults) {
     return;
@@ -18,9 +31,9 @@ export function extendEsArchiver({ esArchiver, kibanaServer, retry, defaults }) 
   ES_ARCHIVER_LOAD_METHODS.forEach((method) => {
     const originalMethod = esArchiver[method];
 
-    esArchiver[method] = async (...args) => {
+    esArchiver[method] = async (...args: unknown[]) => {
       // esArchiver methods return a stats object, with information about the indexes created
-      const stats = await originalMethod.apply(esArchiver, args);
+      const stats = await originalMethod.apply(esArchiver, args as any);
 
       const statsKeys = Object.keys(stats);
       const kibanaKeys = statsKeys.filter(
