@@ -11,10 +11,18 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const queryBar = getService('queryBar');
+  const log = getService('log');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const inspector = getService('inspector');
-  const PageObjects = getPageObjects(['discover', 'common', 'timePicker', 'header', 'context']);
+  const PageObjects = getPageObjects([
+    'discover',
+    'common',
+    'timePicker',
+    'header',
+    'context',
+    'searchSessionsManagement',
+  ]);
   const searchSessions = getService('searchSessions');
   const retry = getService('retry');
 
@@ -43,6 +51,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await searchSessions.expectState('restored');
       await testSubjects.existOrFail('discoverNoResultsError'); // expect error because of fake searchSessionId
+      await PageObjects.common.clearAllToasts();
       const searchSessionId1 = await getSearchSessionId();
       expect(searchSessionId1).to.be(fakeSearchSessionId);
       await queryBar.clickQuerySubmitButton();
@@ -60,6 +69,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       url = await browser.getCurrentUrl();
       expect(url).to.contain('searchSessionId');
       await PageObjects.header.waitUntilLoadingHasFinished();
+      // Note this currently fails, for some reason the fakeSearchSessionId is not restored
       await searchSessions.expectState('restored');
       expect(await getSearchSessionId()).to.be(fakeSearchSessionId);
     });
@@ -81,6 +91,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await PageObjects.context.waitUntilContextLoadingHasFinished();
       await searchSessions.missingOrFail();
+    });
+
+    it('relative timerange works', async () => {
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await searchSessions.save();
+      await searchSessions.expectState('backgroundCompleted');
+      const searchSessionId = await getSearchSessionId();
+      expect(await PageObjects.discover.hasNoResults()).to.be(true);
+      log.info('searchSessionId', searchSessionId);
+
+      // load URL to restore a saved session
+      await PageObjects.searchSessionsManagement.goTo();
+      const searchSessionList = await PageObjects.searchSessionsManagement.getList();
+      // navigate to Discover
+      await searchSessionList[0].view();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await searchSessions.expectState('restored');
+      expect(await PageObjects.discover.hasNoResults()).to.be(true);
     });
   });
 

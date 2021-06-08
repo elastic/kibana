@@ -177,7 +177,6 @@ export default function (providerContext: FtrProviderContext) {
           id: apiResponse.item.api_key_id,
         });
 
-        // @ts-expect-error Metadata not yet in the client type
         expect(apiKeyRes.api_keys[0].metadata).eql({
           policy_id: 'policy1',
           managed_by: 'fleet',
