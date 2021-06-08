@@ -12,7 +12,7 @@ import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
 
 describe('<EditPolicy /> hot phase validation', () => {
   let testBed: EditPolicyTestBed;
-  let runTimers: () => void;
+  let actions: EditPolicyTestBed['actions'];
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
@@ -30,190 +30,159 @@ describe('<EditPolicy /> hot phase validation', () => {
       testBed = await setup();
     });
 
-    const { component, actions } = testBed;
+    const { component } = testBed;
     component.update();
+    ({ actions } = testBed);
     await actions.setPolicyName('mypolicy');
-
-    ({ runTimers } = testBed);
   });
 
   describe('rollover', () => {
     test(`doesn't allow no max primary shard size, no max index size, no max age, no max docs`, async () => {
-      const { actions } = testBed;
+      await actions.rollover.toggleDefault();
+      expect(actions.rollover.hasSettingRequiredCallout()).toBeFalsy();
 
-      await actions.hot.toggleDefaultRollover(false);
-      expect(actions.hot.hasRolloverSettingRequiredCallout()).toBeFalsy();
+      await actions.rollover.setMaxPrimaryShardSize('');
+      await actions.rollover.setMaxAge('');
+      await actions.rollover.setMaxDocs('');
+      await actions.rollover.setMaxSize('');
 
-      await actions.hot.setMaxPrimaryShardSize('');
-      await actions.hot.setMaxAge('');
-      await actions.hot.setMaxDocs('');
-      await actions.hot.setMaxSize('');
+      actions.errors.waitForValidation();
 
-      runTimers();
-
-      expect(actions.hot.hasRolloverSettingRequiredCallout()).toBeTruthy();
+      expect(actions.rollover.hasSettingRequiredCallout()).toBeTruthy();
     });
 
     test(`doesn't allow -1 for max primary shard size`, async () => {
-      const { actions } = testBed;
+      await actions.rollover.toggleDefault();
+      await actions.rollover.setMaxPrimaryShardSize('-1');
 
-      await actions.hot.toggleDefaultRollover(false);
-      await actions.hot.setMaxPrimaryShardSize('-1');
+      actions.errors.waitForValidation();
 
-      runTimers();
-
-      actions.expectErrorMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+      actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
     });
 
     test(`doesn't allow 0 for max primary shard size`, async () => {
-      const { actions } = testBed;
+      await actions.rollover.toggleDefault();
+      await actions.rollover.setMaxPrimaryShardSize('0');
 
-      await actions.hot.toggleDefaultRollover(false);
-      await actions.hot.setMaxPrimaryShardSize('0');
+      actions.errors.waitForValidation();
 
-      runTimers();
-
-      actions.expectErrorMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+      actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
     });
 
     test(`doesn't allow -1 for max size`, async () => {
-      const { actions } = testBed;
+      await actions.rollover.toggleDefault();
+      await actions.rollover.setMaxSize('-1');
 
-      await actions.hot.toggleDefaultRollover(false);
-      await actions.hot.setMaxSize('-1');
+      actions.errors.waitForValidation();
 
-      runTimers();
-
-      actions.expectErrorMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+      actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
     });
 
     test(`doesn't allow 0 for max size`, async () => {
-      const { actions } = testBed;
+      await actions.rollover.toggleDefault();
+      await actions.rollover.setMaxSize('0');
 
-      await actions.hot.toggleDefaultRollover(false);
-      await actions.hot.setMaxSize('0');
+      actions.errors.waitForValidation();
 
-      runTimers();
-
-      actions.expectErrorMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+      actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
     });
 
     test(`doesn't allow -1 for max age`, async () => {
-      const { actions } = testBed;
+      await actions.rollover.toggleDefault();
+      await actions.rollover.setMaxAge('-1');
 
-      await actions.hot.toggleDefaultRollover(false);
-      await actions.hot.setMaxAge('-1');
+      actions.errors.waitForValidation();
 
-      runTimers();
-
-      actions.expectErrorMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+      actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
     });
 
     test(`doesn't allow 0 for max age`, async () => {
-      const { actions } = testBed;
+      await actions.rollover.toggleDefault();
+      await actions.rollover.setMaxAge('0');
 
-      await actions.hot.toggleDefaultRollover(false);
-      await actions.hot.setMaxAge('0');
+      actions.errors.waitForValidation();
 
-      runTimers();
-
-      actions.expectErrorMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+      actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
     });
 
     test(`doesn't allow decimals for max age`, async () => {
-      const { actions } = testBed;
+      await actions.rollover.toggleDefault();
+      await actions.rollover.setMaxAge('5.5');
 
-      await actions.hot.toggleDefaultRollover(false);
-      await actions.hot.setMaxAge('5.5');
+      actions.errors.waitForValidation();
 
-      runTimers();
-
-      actions.expectErrorMessages([i18nTexts.editPolicy.errors.integerRequired]);
+      actions.errors.expectMessages([i18nTexts.editPolicy.errors.integerRequired]);
     });
 
     test(`doesn't allow -1 for max docs`, async () => {
-      const { actions } = testBed;
+      await actions.rollover.toggleDefault();
+      await actions.rollover.setMaxDocs('-1');
 
-      await actions.hot.toggleDefaultRollover(false);
-      await actions.hot.setMaxDocs('-1');
+      actions.errors.waitForValidation();
 
-      runTimers();
-
-      actions.expectErrorMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+      actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
     });
 
     test(`doesn't allow 0 for max docs`, async () => {
-      const { actions } = testBed;
+      await actions.rollover.toggleDefault();
+      await actions.rollover.setMaxDocs('0');
 
-      await actions.hot.toggleDefaultRollover(false);
-      await actions.hot.setMaxDocs('0');
+      actions.errors.waitForValidation();
 
-      runTimers();
-
-      actions.expectErrorMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+      actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
     });
 
     test(`doesn't allow decimals for max docs`, async () => {
-      const { actions } = testBed;
+      await actions.rollover.toggleDefault();
+      await actions.rollover.setMaxDocs('5.5');
 
-      await actions.hot.toggleDefaultRollover(false);
-      await actions.hot.setMaxDocs('5.5');
+      actions.errors.waitForValidation();
 
-      runTimers();
-
-      actions.expectErrorMessages([i18nTexts.editPolicy.errors.integerRequired]);
+      actions.errors.expectMessages([i18nTexts.editPolicy.errors.integerRequired]);
     });
   });
 
   describe('forcemerge', () => {
     test(`doesn't allow 0 for forcemerge`, async () => {
-      const { actions } = testBed;
-      await actions.hot.toggleForceMerge(true);
+      await actions.hot.toggleForceMerge();
       await actions.hot.setForcemergeSegmentsCount('0');
-      runTimers();
-      actions.expectErrorMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+      actions.errors.waitForValidation();
+      actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
     });
     test(`doesn't allow -1 for forcemerge`, async () => {
-      const { actions } = testBed;
-      await actions.hot.toggleForceMerge(true);
+      await actions.hot.toggleForceMerge();
       await actions.hot.setForcemergeSegmentsCount('-1');
-      runTimers();
-      actions.expectErrorMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+      actions.errors.waitForValidation();
+      actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
     });
   });
 
   describe('shrink', () => {
     test(`doesn't allow 0 for shrink`, async () => {
-      const { actions } = testBed;
-      await actions.hot.toggleShrink(true);
+      await actions.hot.toggleShrink();
       await actions.hot.setShrink('0');
-      runTimers();
-      actions.expectErrorMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+      actions.errors.waitForValidation();
+      actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
     });
     test(`doesn't allow -1 for shrink`, async () => {
-      const { actions } = testBed;
-      await actions.hot.toggleShrink(true);
+      await actions.hot.toggleShrink();
       await actions.hot.setShrink('-1');
-      runTimers();
-      actions.expectErrorMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+      actions.errors.waitForValidation();
+      actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
     });
   });
 
   describe('index priority', () => {
     test(`doesn't allow -1 for index priority`, async () => {
-      const { actions } = testBed;
-
       await actions.hot.setIndexPriority('-1');
-      runTimers();
-      actions.expectErrorMessages([i18nTexts.editPolicy.errors.nonNegativeNumberRequired]);
+      actions.errors.waitForValidation();
+      actions.errors.expectMessages([i18nTexts.editPolicy.errors.nonNegativeNumberRequired]);
     });
 
     test(`allows 0 for index priority`, async () => {
-      const { actions } = testBed;
-
       await actions.hot.setIndexPriority('0');
-      runTimers();
-      actions.expectErrorMessages([]);
+      actions.errors.waitForValidation();
+      actions.errors.expectMessages([]);
     });
   });
 });

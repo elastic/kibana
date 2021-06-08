@@ -10,9 +10,8 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPageHeaderProps,
   EuiTitle,
-  EuiTabs,
-  EuiTab,
   EuiBetaBadge,
 } from '@elastic/eui';
 import { ApmMainTemplate } from './apm_main_template';
@@ -33,12 +32,10 @@ import { useUrlParams } from '../../../context/url_params_context/use_url_params
 import { Correlations } from '../../app/correlations';
 import { SearchBar } from '../../shared/search_bar';
 
-interface Tab {
-  key: TabKey;
-  href: string;
-  text: React.ReactNode;
+type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
+  key: string;
   hidden?: boolean;
-}
+};
 
 type TabKey =
   | 'errors'
@@ -49,60 +46,63 @@ type TabKey =
   | 'profiling'
   | 'transactions';
 
-export function ApmServiceTemplate({
+interface Props {
+  children: React.ReactNode;
+  serviceName: string;
+  selectedTab: TabKey;
+  searchBarOptions?: React.ComponentProps<typeof SearchBar>;
+}
+
+export function ApmServiceTemplate(props: Props) {
+  return (
+    <ApmServiceContextProvider>
+      <Template {...props} />
+    </ApmServiceContextProvider>
+  );
+}
+
+function Template({
   children,
   serviceName,
   selectedTab,
   searchBarOptions,
-}: {
-  children: React.ReactNode;
-  serviceName: string;
-  selectedTab: TabKey;
-  searchBarOptions?: {
-    hidden?: boolean;
-    showTransactionTypeSelector?: boolean;
-    showTimeComparison?: boolean;
-  };
-}) {
+}: Props) {
+  const tabs = useTabs({ serviceName, selectedTab });
+
   return (
     <ApmMainTemplate
-      pageTitle={
-        <>
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="l">
-                <h1>{serviceName}</h1>
-              </EuiTitle>
+      pageHeader={{
+        tabs,
+        pageTitle: (
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem>
+              <EuiFlexGroup alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="l">
+                    <h1>{serviceName}</h1>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <ServiceIcons serviceName={serviceName} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
+
             <EuiFlexItem grow={false}>
-              <ServiceIcons serviceName={serviceName} />
+              <Correlations />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </>
-      }
+        ),
+      }}
     >
-      <ApmServiceContextProvider>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem>
-            <TabNavigation
-              serviceName={serviceName}
-              selectedTab={selectedTab}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <Correlations />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+      <SearchBar {...searchBarOptions} />
 
-        <SearchBar {...searchBarOptions} />
-
-        {children}
-      </ApmServiceContextProvider>
+      {children}
     </ApmMainTemplate>
   );
 }
 
-function TabNavigation({
+function useTabs({
   serviceName,
   selectedTab,
 }: {
@@ -117,7 +117,7 @@ function TabNavigation({
     {
       key: 'overview',
       href: useServiceOverviewHref({ serviceName, transactionType }),
-      text: i18n.translate('xpack.apm.serviceDetails.overviewTabLabel', {
+      label: i18n.translate('xpack.apm.serviceDetails.overviewTabLabel', {
         defaultMessage: 'Overview',
       }),
       hidden: !core.uiSettings.get(enableServiceOverview),
@@ -129,21 +129,21 @@ function TabNavigation({
         latencyAggregationType: urlParams.latencyAggregationType,
         transactionType,
       }),
-      text: i18n.translate('xpack.apm.serviceDetails.transactionsTabLabel', {
+      label: i18n.translate('xpack.apm.serviceDetails.transactionsTabLabel', {
         defaultMessage: 'Transactions',
       }),
     },
     {
       key: 'errors',
       href: useErrorOverviewHref(serviceName),
-      text: i18n.translate('xpack.apm.serviceDetails.errorsTabLabel', {
+      label: i18n.translate('xpack.apm.serviceDetails.errorsTabLabel', {
         defaultMessage: 'Errors',
       }),
     },
     {
       key: 'nodes',
       href: useServiceNodeOverviewHref(serviceName),
-      text: i18n.translate('xpack.apm.serviceDetails.nodesTabLabel', {
+      label: i18n.translate('xpack.apm.serviceDetails.nodesTabLabel', {
         defaultMessage: 'JVMs',
       }),
       hidden: !isJavaAgentName(agentName),
@@ -151,7 +151,7 @@ function TabNavigation({
     {
       key: 'metrics',
       href: useMetricOverviewHref(serviceName),
-      text: i18n.translate('xpack.apm.serviceDetails.metricsTabLabel', {
+      label: i18n.translate('xpack.apm.serviceDetails.metricsTabLabel', {
         defaultMessage: 'Metrics',
       }),
       hidden:
@@ -160,7 +160,7 @@ function TabNavigation({
     {
       key: 'service-map',
       href: useServiceMapHref(serviceName),
-      text: i18n.translate('xpack.apm.home.serviceMapTabLabel', {
+      label: i18n.translate('xpack.apm.home.serviceMapTabLabel', {
         defaultMessage: 'Service Map',
       }),
     },
@@ -168,7 +168,7 @@ function TabNavigation({
       key: 'profiling',
       href: useServiceProfilingHref({ serviceName }),
       hidden: !config.profilingEnabled,
-      text: (
+      label: (
         <EuiFlexGroup direction="row" gutterSize="s">
           <EuiFlexItem>
             {i18n.translate('xpack.apm.serviceDetails.profilingTabLabel', {
@@ -197,20 +197,11 @@ function TabNavigation({
     },
   ];
 
-  return (
-    <EuiTabs display="condensed">
-      {tabs
-        .filter((t) => !t.hidden)
-        .map(({ href, key, text }) => (
-          <EuiTab
-            data-test-subj={`tab_${key}`}
-            href={href}
-            isSelected={key === selectedTab}
-            key={key}
-          >
-            {text}
-          </EuiTab>
-        ))}
-    </EuiTabs>
-  );
+  return tabs
+    .filter((t) => !t.hidden)
+    .map(({ href, key, label }) => ({
+      href,
+      label,
+      isSelected: key === selectedTab,
+    }));
 }
