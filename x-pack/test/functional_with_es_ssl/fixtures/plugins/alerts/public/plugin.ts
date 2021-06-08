@@ -24,7 +24,7 @@ export class AlertingFixturePlugin implements Plugin<Setup, Start, AlertingExamp
     alerting.registerNavigation(
       'alerting_fixture',
       'test.noop',
-      (alert: SanitizedAlert, alertType: AlertType) => `/rule/${alert.id}`
+      (alert: SanitizedAlert) => `/rule/${alert.id}`
     );
 
     triggersActionsUi.alertTypeRegistry.register({
