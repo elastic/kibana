@@ -486,6 +486,11 @@ export function LayerPanel(
                               prevState: props.visualizationState,
                             })
                       );
+                      if (shouldRemoveDimension) {
+                        setActiveDimension(initialActiveDimensionState);
+                      } else {
+                        setActiveDimension({ ...activeDimension, isNew: false });
+                      }
                     } else {
                       props.updateDatasourceAsync(datasourceId, newState);
                     }
