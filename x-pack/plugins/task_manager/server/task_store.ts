@@ -46,14 +46,14 @@ export interface StoreOpts {
 export interface SearchOpts {
   search_after?: Array<number | string>;
   size?: number;
-  sort?: estypes.Sort;
-  query?: estypes.QueryContainer;
+  sort?: estypes.SearchSort;
+  query?: estypes.QueryDslQueryContainer;
   seq_no_primary_term?: boolean;
 }
 
 export interface AggregationOpts {
-  aggs: Record<string, estypes.AggregationContainer>;
-  query?: estypes.QueryContainer;
+  aggs: Record<string, estypes.AggregationsAggregationContainer>;
+  query?: estypes.QueryDslQueryContainer;
   size?: number;
 }
 

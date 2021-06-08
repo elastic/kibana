@@ -5,18 +5,6 @@
  * 2.0.
  */
 
-import { JobId } from './job';
-import { ModelSizeStats } from './job_stats';
+import { estypes } from '@elastic/elasticsearch';
 
-export interface ModelSnapshot {
-  job_id: JobId;
-  min_version: string;
-  timestamp: number;
-  description: string;
-  snapshot_id: string;
-  snapshot_doc_count: number;
-  model_size_stats: ModelSizeStats;
-  latest_record_time_stamp: number;
-  latest_result_time_stamp: number;
-  retain: boolean;
-}
+export type ModelSnapshot = estypes.MlModelSnapshot;
