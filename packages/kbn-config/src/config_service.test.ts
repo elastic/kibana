@@ -418,8 +418,14 @@ test('logs deprecation warning during validation', async () => {
   const configService = new ConfigService(rawConfig, defaultEnv, logger);
   mockApplyDeprecations.mockImplementationOnce((config, deprecations, createAddDeprecation) => {
     const addDeprecation = createAddDeprecation!('');
-    addDeprecation({ message: 'some deprecation message' });
-    addDeprecation({ message: 'another deprecation message' });
+    addDeprecation({
+      message: 'some deprecation message',
+      correctiveActions: { manualSteps: ['do X'] },
+    });
+    addDeprecation({
+      message: 'another deprecation message',
+      correctiveActions: { manualSteps: ['do Y'] },
+    });
     return { config, changedPaths: mockedChangedPaths };
   });
 
@@ -444,13 +450,24 @@ test('does not log warnings for silent deprecations during validation', async ()
   mockApplyDeprecations
     .mockImplementationOnce((config, deprecations, createAddDeprecation) => {
       const addDeprecation = createAddDeprecation!('');
-      addDeprecation({ message: 'some deprecation message', silent: true });
-      addDeprecation({ message: 'another deprecation message' });
+      addDeprecation({
+        message: 'some deprecation message',
+        correctiveActions: { manualSteps: ['do X'] },
+        silent: true,
+      });
+      addDeprecation({
+        message: 'another deprecation message',
+        correctiveActions: { manualSteps: ['do Y'] },
+      });
       return { config, changedPaths: mockedChangedPaths };
     })
     .mockImplementationOnce((config, deprecations, createAddDeprecation) => {
       const addDeprecation = createAddDeprecation!('');
-      addDeprecation({ message: 'I am silent', silent: true });
+      addDeprecation({
+        message: 'I am silent',
+        silent: true,
+        correctiveActions: { manualSteps: ['do Z'] },
+      });
       return { config, changedPaths: mockedChangedPaths };
     });
 
@@ -519,7 +536,11 @@ describe('getHandledDeprecatedConfigs', () => {
     mockApplyDeprecations.mockImplementationOnce((config, deprecations, createAddDeprecation) => {
       deprecations.forEach((deprecation) => {
         const addDeprecation = createAddDeprecation!(deprecation.path);
-        addDeprecation({ message: `some deprecation message`, documentationUrl: 'some-url' });
+        addDeprecation({
+          message: `some deprecation message`,
+          documentationUrl: 'some-url',
+          correctiveActions: { manualSteps: ['do X'] },
+        });
       });
       return { config, changedPaths: mockedChangedPaths };
     });
@@ -532,6 +553,11 @@ describe('getHandledDeprecatedConfigs', () => {
           "base",
           Array [
             Object {
+              "correctiveActions": Object {
+                "manualSteps": Array [
+                  "do X",
+                ],
+              },
               "documentationUrl": "some-url",
               "message": "some deprecation message",
             },

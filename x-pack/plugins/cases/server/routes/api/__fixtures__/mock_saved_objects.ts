@@ -21,7 +21,8 @@ import {
 import {
   CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
-} from '../../../saved_object_types';
+  SECURITY_SOLUTION_OWNER,
+} from '../../../../common/constants';
 import { mappings } from '../../../client/configure/mock';
 
 export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
@@ -58,6 +59,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
       settings: {
         syncAlerts: true,
       },
+      owner: SECURITY_SOLUTION_OWNER,
     },
     references: [],
     updated_at: '2019-11-25T21:54:48.952Z',
@@ -96,6 +98,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
       settings: {
         syncAlerts: true,
       },
+      owner: SECURITY_SOLUTION_OWNER,
     },
     references: [],
     updated_at: '2019-11-25T22:32:00.900Z',
@@ -138,6 +141,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
       settings: {
         syncAlerts: true,
       },
+      owner: SECURITY_SOLUTION_OWNER,
     },
     references: [],
     updated_at: '2019-11-25T22:32:17.947Z',
@@ -184,6 +188,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
       settings: {
         syncAlerts: true,
       },
+      owner: SECURITY_SOLUTION_OWNER,
     },
     references: [],
     updated_at: '2019-11-25T22:32:17.947Z',
@@ -246,6 +251,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
         email: 'testemail@elastic.co',
         username: 'elastic',
       },
+      owner: SECURITY_SOLUTION_OWNER,
       pushed_at: null,
       pushed_by: null,
       updated_at: '2019-11-25T21:55:00.177Z',
@@ -278,6 +284,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
         email: 'testemail@elastic.co',
         username: 'elastic',
       },
+      owner: SECURITY_SOLUTION_OWNER,
       pushed_at: null,
       pushed_by: null,
       updated_at: '2019-11-25T21:55:14.633Z',
@@ -311,6 +318,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
         email: 'testemail@elastic.co',
         username: 'elastic',
       },
+      owner: SECURITY_SOLUTION_OWNER,
       pushed_at: null,
       pushed_by: null,
       updated_at: '2019-11-25T22:32:30.608Z',
@@ -344,6 +352,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
         email: 'testemail@elastic.co',
         username: 'elastic',
       },
+      owner: SECURITY_SOLUTION_OWNER,
       pushed_at: null,
       pushed_by: null,
       rule: {
@@ -381,6 +390,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
         email: 'testemail@elastic.co',
         username: 'elastic',
       },
+      owner: SECURITY_SOLUTION_OWNER,
       pushed_at: null,
       pushed_by: null,
       rule: {
@@ -418,6 +428,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
         email: 'testemail@elastic.co',
         username: 'elastic',
       },
+      owner: SECURITY_SOLUTION_OWNER,
       pushed_at: null,
       pushed_by: null,
       rule: {
@@ -467,6 +478,7 @@ export const mockCaseConfigure: Array<SavedObject<ESCasesConfigureAttributes>> =
         email: 'testemail@elastic.co',
         username: 'elastic',
       },
+      owner: SECURITY_SOLUTION_OWNER,
     },
     references: [],
     updated_at: '2020-04-09T09:43:51.778Z',
@@ -480,6 +492,7 @@ export const mockCaseMappings: Array<SavedObject<ConnectorMappings>> = [
     id: 'mock-mappings-1',
     attributes: {
       mappings: mappings[ConnectorTypes.jira],
+      owner: SECURITY_SOLUTION_OWNER,
     },
     references: [],
   },
@@ -491,6 +504,7 @@ export const mockCaseMappingsResilient: Array<SavedObject<ConnectorMappings>> = 
     id: 'mock-mappings-1',
     attributes: {
       mappings: mappings[ConnectorTypes.resilient],
+      owner: SECURITY_SOLUTION_OWNER,
     },
     references: [],
   },
@@ -521,6 +535,7 @@ export const mockUserActions: Array<SavedObject<CaseUserActionAttributes>> = [
       new_value:
         '{"title":"A case","tags":["case"],"description":"Yeah!","connector":{"id":"connector-od","name":"My Connector","type":".servicenow-sir","fields":{"category":"Denial of Service","destIp":true,"malwareHash":true,"malwareUrl":true,"priority":"2","sourceIp":true,"subcategory":"45"}},"settings":{"syncAlerts":true}}',
       old_value: null,
+      owner: SECURITY_SOLUTION_OWNER,
     },
     version: 'WzYsMV0=',
     references: [],
@@ -540,6 +555,7 @@ export const mockUserActions: Array<SavedObject<CaseUserActionAttributes>> = [
       new_value:
         '{"type":"alert","alertId":"cec3da90fb37a44407145adf1593f3b0d5ad94c4654201f773d63b5d4706128e","index":".siem-signals-default-000008"}',
       old_value: null,
+      owner: SECURITY_SOLUTION_OWNER,
     },
     version: 'WzYsMV0=',
     references: [],

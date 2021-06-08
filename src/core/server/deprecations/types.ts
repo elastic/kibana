@@ -55,11 +55,11 @@ export interface DeprecationsDetails {
       };
     };
     /**
-     * (optional) If this deprecation cannot be automtically fixed
-     * via an API corrective action. Specify a list of manual steps
-     * users need to follow to fix the deprecation before upgrade.
+     * Specify a list of manual steps users need to follow to
+     * fix the deprecation before upgrade. Required even if an API
+     * corrective action is set in case the API fails.
      */
-    manualSteps?: string[];
+    manualSteps: string[];
   };
 }
 
