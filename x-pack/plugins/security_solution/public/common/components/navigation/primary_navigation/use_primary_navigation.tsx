@@ -10,12 +10,12 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiIcon, EuiSideNavProps } from '@elastic/eui';
-import { APP_ID, APP_NAME } from '../../../../../common/constants';
+import { APP_ID } from '../../../../../common/constants';
 import { PrimaryNavigationProps } from './types';
 import { usePrimaryNavigationItems } from './use_navigation_items';
 
 const translatedNavTitle = i18n.translate('xpack.securitySolution.navigation.mainLabel', {
-  defaultMessage: APP_NAME,
+  defaultMessage: 'Security',
 });
 
 export const usePrimaryNavigation = ({
