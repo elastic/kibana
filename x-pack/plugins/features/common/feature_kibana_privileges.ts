@@ -127,6 +127,34 @@ export interface FeatureKibanaPrivileges {
       read?: readonly string[];
     };
   };
+
+  /**
+   * If your feature requires access to specific owners of cases (aka plugins that have created cases), then specify your access needs here. The values here should
+   * be unique identifiers for the owners of cases you want access to.
+   */
+  cases?: {
+    /**
+     * List of case owners which users should have full read/write access to when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    all: ['securitySolution']
+     *  }
+     * ```
+     */
+    all?: readonly string[];
+    /**
+     * List of case owners which users should have read-only access to when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    read: ['securitySolution']
+     *  }
+     * ```
+     */
+    read?: readonly string[];
+  };
+
   /**
    * If your feature requires access to specific saved objects, then specify your access needs here.
    */

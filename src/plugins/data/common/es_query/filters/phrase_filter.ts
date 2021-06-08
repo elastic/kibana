@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import { get, isPlainObject } from 'lodash';
 import { Filter, FilterMeta } from './meta_filter';
 import { IIndexPattern, IFieldType } from '../../index_patterns';
@@ -23,7 +23,7 @@ export type PhraseFilter = Filter & {
   script?: {
     script: {
       source?: any;
-      lang?: string;
+      lang?: estypes.ScriptLanguage;
       params: any;
     };
   };

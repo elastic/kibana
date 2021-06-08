@@ -15,7 +15,7 @@
         ],
         "source": {
           "path": "src/plugins/telemetry/public/plugin.ts",
-          "lineNumber": 82
+          "lineNumber": 90
         },
         "deprecated": false,
         "children": [
@@ -30,7 +30,7 @@
             ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 84
+              "lineNumber": 92
             },
             "deprecated": false
           },
@@ -45,7 +45,7 @@
             ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 86
+              "lineNumber": 94
             },
             "deprecated": false
           },
@@ -60,7 +60,7 @@
             ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 88
+              "lineNumber": 96
             },
             "deprecated": false
           },
@@ -75,7 +75,7 @@
             ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 90
+              "lineNumber": 98
             },
             "deprecated": false
           },
@@ -93,7 +93,7 @@
             ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 92
+              "lineNumber": 100
             },
             "deprecated": false
           },
@@ -108,7 +108,7 @@
             ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 94
+              "lineNumber": 102
             },
             "deprecated": false
           },
@@ -126,7 +126,7 @@
             ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 96
+              "lineNumber": 104
             },
             "deprecated": false
           },
@@ -144,7 +144,7 @@
             ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 98
+              "lineNumber": 106
             },
             "deprecated": false
           },
@@ -162,7 +162,7 @@
             ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 100
+              "lineNumber": 108
             },
             "deprecated": false
           }
@@ -180,7 +180,7 @@
         ],
         "source": {
           "path": "src/plugins/telemetry/public/plugin.ts",
-          "lineNumber": 36
+          "lineNumber": 38
         },
         "deprecated": false,
         "children": [
@@ -198,7 +198,7 @@
             ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 38
+              "lineNumber": 40
             },
             "deprecated": false,
             "returnComment": [],
@@ -215,9 +215,29 @@
             ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 40
+              "lineNumber": 42
             },
             "deprecated": false
+          },
+          {
+            "parentPluginId": "telemetry",
+            "id": "def-public.TelemetryServicePublicApis.canSendTelemetry",
+            "type": "Function",
+            "tags": [],
+            "label": "canSendTelemetry",
+            "description": [
+              "Can phone-home telemetry calls be made? This depends on whether we have opted-in or if we are rendering a report"
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "source": {
+              "path": "src/plugins/telemetry/public/plugin.ts",
+              "lineNumber": 44
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "telemetry",
@@ -233,7 +253,7 @@
             ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 42
+              "lineNumber": 46
             },
             "deprecated": false,
             "returnComment": [],
@@ -253,7 +273,7 @@
             ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 44
+              "lineNumber": 48
             },
             "deprecated": false,
             "returnComment": [],
@@ -273,7 +293,7 @@
             ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 50
+              "lineNumber": 54
             },
             "deprecated": false,
             "returnComment": [],
@@ -289,7 +309,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/telemetry/public/plugin.ts",
-                  "lineNumber": 50
+                  "lineNumber": 54
                 },
                 "deprecated": false
               }
@@ -313,7 +333,7 @@
       ],
       "source": {
         "path": "src/plugins/telemetry/public/plugin.ts",
-        "lineNumber": 64
+        "lineNumber": 68
       },
       "deprecated": false,
       "children": [
@@ -337,7 +357,7 @@
           ],
           "source": {
             "path": "src/plugins/telemetry/public/plugin.ts",
-            "lineNumber": 66
+            "lineNumber": 70
           },
           "deprecated": false
         },
@@ -355,7 +375,7 @@
           ],
           "source": {
             "path": "src/plugins/telemetry/public/plugin.ts",
-            "lineNumber": 68
+            "lineNumber": 72
           },
           "deprecated": false
         },
@@ -373,7 +393,7 @@
           ],
           "source": {
             "path": "src/plugins/telemetry/public/plugin.ts",
-            "lineNumber": 73
+            "lineNumber": 77
           },
           "deprecated": false
         }
@@ -392,7 +412,7 @@
       ],
       "source": {
         "path": "src/plugins/telemetry/public/plugin.ts",
-        "lineNumber": 56
+        "lineNumber": 60
       },
       "deprecated": false,
       "children": [
@@ -416,7 +436,7 @@
           ],
           "source": {
             "path": "src/plugins/telemetry/public/plugin.ts",
-            "lineNumber": 58
+            "lineNumber": 62
           },
           "deprecated": false
         }

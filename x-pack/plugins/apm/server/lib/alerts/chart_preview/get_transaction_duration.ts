@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
@@ -45,7 +45,7 @@ export function getTransactionDurationChartPreview({
             : []),
           ...rangeQuery(start, end),
           ...environmentQuery(environment),
-        ] as QueryContainer[],
+        ] as QueryDslQueryContainer[],
       },
     };
 
