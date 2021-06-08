@@ -7,11 +7,10 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   // FLAKY: https://github.com/elastic/kibana/issues/88177
-  describe('uptime alerts', () => {
+  describe.skip('uptime alerts', () => {
     const pageObjects = getPageObjects(['common', 'uptime']);
     const supertest = getService('supertest');
     const retry = getService('retry');
@@ -92,13 +91,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // put the fetch code in a retry block with a timeout.
         let alert: any;
         await retry.tryForTime(60 * 1000, async () => {
-          // add a delay before next call to not overload the server
-          await delay(1500);
           const apiResponse = await supertest.get('/api/alerts/_find?search=uptime-test');
           const alertsFromThisTest = apiResponse.body.data.filter(
             ({ name }: { name: string }) => name === 'uptime-test'
           );
-          expect(alertsFromThisTest.length >= 1).to.be(true);
+          expect(alertsFromThisTest).to.have.length(1);
           alert = alertsFromThisTest[0];
         });
 
@@ -127,7 +124,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(timerangeUnit).to.be('h');
           expect(timerangeCount).to.be(1);
           expect(JSON.stringify(filters)).to.eql(
-            `{"tags":[],"url.port":["5678"],"observer.geo.name":["mpls"],"monitor.type":["http"]}`
+            `{"url.port":["5678"],"observer.geo.name":["mpls"],"monitor.type":["http"],"tags":[]}`
           );
         } finally {
           await supertest.delete(`/api/alerts/alert/${id}`).set('kbn-xsrf', 'true').expect(204);
