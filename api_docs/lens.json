@@ -368,9 +368,9 @@
             "label": "layers",
             "description": [],
             "signature": [
-              "Record<string, Pick<",
+              "{ [x: string]: Pick<",
               "IndexPatternLayer",
-              ", \"columns\" | \"columnOrder\" | \"incompleteColumns\">>"
+              ", \"columns\" | \"columnOrder\" | \"incompleteColumns\">; }"
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/indexpattern_datasource/types.ts",
@@ -484,8 +484,7 @@
               "\nPosition of the legend relative to the chart"
             ],
             "signature": [
-              "node_modules/utility-types/dist/utility-types",
-              "$Values<Readonly<{ Top: \"top\"; Bottom: \"bottom\"; Left: \"left\"; Right: \"right\"; }>>"
+              "\"top\" | \"bottom\" | \"left\" | \"right\""
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
@@ -539,7 +538,15 @@
               "\nReact component which can be used to embed a Lens visualization into another application.\nSee `x-pack/examples/embedded_lens_example` for exemplary usage.\n\nThis API might undergo breaking changes even in minor versions.\n"
             ],
             "signature": [
-              "React.ComponentType<",
+              "React.ComponentClass<",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.EmbeddableComponentProps",
+                "text": "EmbeddableComponentProps"
+              },
+              ", any> | React.FunctionComponent<",
               {
                 "pluginId": "lens",
                 "scope": "public",
@@ -575,7 +582,44 @@
               "path": "x-pack/plugins/lens/public/plugin.ts",
               "lineNumber": 102
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.input",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  "LensByValueInput",
+                  " | ",
+                  "LensByReferenceInput"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/lens/public/plugin.ts",
+                  "lineNumber": 102
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.openInNewTab",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "openInNewTab",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/lens/public/plugin.ts",
+                  "lineNumber": 102
+                },
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "lens",
@@ -593,7 +637,9 @@
               "path": "x-pack/plugins/lens/public/plugin.ts",
               "lineNumber": 106
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "lens",
@@ -613,7 +659,9 @@
               "path": "x-pack/plugins/lens/public/plugin.ts",
               "lineNumber": 111
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           }
         ],
         "initialIsOpen": false
@@ -684,13 +732,7 @@
             "label": "dataType",
             "description": [],
             "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.DataType",
-                "text": "DataType"
-              }
+              "\"string\" | \"number\" | \"boolean\" | \"date\" | \"ip\" | \"geo_point\" | \"geo_shape\" | \"histogram\" | \"document\""
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/types.ts",
@@ -1258,13 +1300,7 @@
             "label": "seriesType",
             "description": [],
             "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.SeriesType",
-                "text": "SeriesType"
-              }
+              "\"area\" | \"line\" | \"bar\" | \"bar_horizontal\" | \"bar_stacked\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"bar_horizontal_percentage_stacked\" | \"area_stacked\" | \"area_percentage_stacked\""
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
@@ -1335,13 +1371,7 @@
             "label": "preferredSeriesType",
             "description": [],
             "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.SeriesType",
-                "text": "SeriesType"
-              }
+              "\"area\" | \"line\" | \"bar\" | \"bar_horizontal\" | \"bar_stacked\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"bar_horizontal_percentage_stacked\" | \"area_stacked\" | \"area_percentage_stacked\""
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
@@ -1716,7 +1746,16 @@
         "label": "AvgIndexPatternColumn",
         "description": [],
         "signature": [
-          "BaseIndexPatternColumn & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & FieldBasedIndexPatternColumn & { operationType: \"average\"; }"
+          "BaseIndexPatternColumn",
+          " & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FieldBasedIndexPatternColumn",
+            "text": "FieldBasedIndexPatternColumn"
+          },
+          " & { operationType: \"average\"; }"
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
@@ -1734,7 +1773,9 @@
         "description": [],
         "signature": [
           "BaseIndexPatternColumn",
-          " & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & ReferenceBasedIndexPatternColumn & { operationType: 'counter_rate'; }"
+          " & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & ",
+          "ReferenceBasedIndexPatternColumn",
+          " & { operationType: \"counter_rate\"; }"
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/counter_rate.tsx",
@@ -1752,7 +1793,15 @@
         "description": [],
         "signature": [
           "BaseIndexPatternColumn",
-          " & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & FieldBasedIndexPatternColumn & { operationType: 'count'; }"
+          " & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FieldBasedIndexPatternColumn",
+            "text": "FieldBasedIndexPatternColumn"
+          },
+          " & { operationType: \"count\"; }"
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/count.tsx",
@@ -1770,7 +1819,9 @@
         "description": [],
         "signature": [
           "BaseIndexPatternColumn",
-          " & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & ReferenceBasedIndexPatternColumn & { operationType: 'cumulative_sum'; }"
+          " & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & ",
+          "ReferenceBasedIndexPatternColumn",
+          " & { operationType: \"cumulative_sum\"; }"
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/cumulative_sum.tsx",
@@ -1805,7 +1856,9 @@
         "description": [],
         "signature": [
           "BaseIndexPatternColumn",
-          " & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & ReferenceBasedIndexPatternColumn & { operationType: typeof OPERATION_NAME; }"
+          " & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & ",
+          "ReferenceBasedIndexPatternColumn",
+          " & { operationType: \"differences\"; }"
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/differences.tsx",
@@ -1885,6 +1938,22 @@
             "docId": "kibLensPluginApi",
             "section": "def-public.PercentileIndexPatternColumn",
             "text": "PercentileIndexPatternColumn"
+          },
+          " | ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.CountIndexPatternColumn",
+            "text": "CountIndexPatternColumn"
+          },
+          " | ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.LastValueIndexPatternColumn",
+            "text": "LastValueIndexPatternColumn"
           }
         ],
         "source": {
@@ -1942,7 +2011,67 @@
             "docId": "kibLensPluginApi",
             "section": "def-public.CardinalityIndexPatternColumn",
             "text": "CardinalityIndexPatternColumn"
-          }
+          },
+          " | MetricColumn<\"sum\"> | MetricColumn<\"median\"> | ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.PercentileIndexPatternColumn",
+            "text": "PercentileIndexPatternColumn"
+          },
+          " | ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.CountIndexPatternColumn",
+            "text": "CountIndexPatternColumn"
+          },
+          " | ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.LastValueIndexPatternColumn",
+            "text": "LastValueIndexPatternColumn"
+          },
+          " | ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.CumulativeSumIndexPatternColumn",
+            "text": "CumulativeSumIndexPatternColumn"
+          },
+          " | ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.CounterRateIndexPatternColumn",
+            "text": "CounterRateIndexPatternColumn"
+          },
+          " | ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.DerivativeIndexPatternColumn",
+            "text": "DerivativeIndexPatternColumn"
+          },
+          " | ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.MovingAverageIndexPatternColumn",
+            "text": "MovingAverageIndexPatternColumn"
+          },
+          " | ",
+          "MathIndexPatternColumn",
+          " | ",
+          "FormulaIndexPatternColumn"
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/index.ts",
@@ -1959,7 +2088,16 @@
         "label": "MaxIndexPatternColumn",
         "description": [],
         "signature": [
-          "BaseIndexPatternColumn & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & FieldBasedIndexPatternColumn & { operationType: \"max\"; }"
+          "BaseIndexPatternColumn",
+          " & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FieldBasedIndexPatternColumn",
+            "text": "FieldBasedIndexPatternColumn"
+          },
+          " & { operationType: \"max\"; }"
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
@@ -1976,7 +2114,16 @@
         "label": "MedianIndexPatternColumn",
         "description": [],
         "signature": [
-          "BaseIndexPatternColumn & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & FieldBasedIndexPatternColumn & { operationType: \"median\"; }"
+          "BaseIndexPatternColumn",
+          " & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FieldBasedIndexPatternColumn",
+            "text": "FieldBasedIndexPatternColumn"
+          },
+          " & { operationType: \"median\"; }"
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
@@ -1993,7 +2140,16 @@
         "label": "MinIndexPatternColumn",
         "description": [],
         "signature": [
-          "BaseIndexPatternColumn & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & FieldBasedIndexPatternColumn & { operationType: \"min\"; }"
+          "BaseIndexPatternColumn",
+          " & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FieldBasedIndexPatternColumn",
+            "text": "FieldBasedIndexPatternColumn"
+          },
+          " & { operationType: \"min\"; }"
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
@@ -2011,7 +2167,9 @@
         "description": [],
         "signature": [
           "BaseIndexPatternColumn",
-          " & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & ReferenceBasedIndexPatternColumn & { operationType: 'moving_average'; params: {    window: number;}; }"
+          " & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & ",
+          "ReferenceBasedIndexPatternColumn",
+          " & { operationType: \"moving_average\"; params: { window: number; }; }"
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/moving_average.tsx",
@@ -2047,7 +2205,23 @@
         "label": "PersistedIndexPatternLayer",
         "description": [],
         "signature": [
-          "{ columns: Record<string, IndexPatternColumn>; columnOrder: string[]; incompleteColumns?: Record<string, IncompleteColumn> | undefined; }"
+          "{ columns: Record<string, ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.IndexPatternColumn",
+            "text": "IndexPatternColumn"
+          },
+          ">; columnOrder: string[]; incompleteColumns?: Record<string, ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.IncompleteColumn",
+            "text": "IncompleteColumn"
+          },
+          "> | undefined; }"
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/types.ts",
@@ -2064,7 +2238,14 @@
         "label": "PieLayerState",
         "description": [],
         "signature": [
-          "SharedPieLayerState & { layerId: string; }"
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.SharedPieLayerState",
+            "text": "SharedPieLayerState"
+          },
+          " & { layerId: string; }"
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/pie_visualization/types.ts",
@@ -2098,7 +2279,16 @@
         "label": "SumIndexPatternColumn",
         "description": [],
         "signature": [
-          "BaseIndexPatternColumn & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & FieldBasedIndexPatternColumn & { operationType: \"sum\"; }"
+          "BaseIndexPatternColumn",
+          " & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FieldBasedIndexPatternColumn",
+            "text": "FieldBasedIndexPatternColumn"
+          },
+          " & { operationType: \"sum\"; }"
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
@@ -2117,7 +2307,41 @@
           "\nType-safe variant of by value embeddable input for Lens.\nThis can be used to hardcode certain Lens chart configurations within another app."
         ],
         "signature": [
-          "Pick<LensByValueInput, \"palette\" | \"timeRange\" | \"syncColors\" | \"viewMode\" | \"filters\" | \"title\" | \"query\" | \"hidePanelTitles\" | \"id\" | \"lastReloadRequestTime\" | \"enhancements\" | \"disabledActions\" | \"disableTriggers\" | \"searchSessionId\" | \"className\" | \"style\" | \"onLoad\" | \"renderMode\" | \"onBrushEnd\" | \"onFilter\" | \"onTableRowClick\"> & { attributes: LensAttributes<'lnsXY', XYState> | LensAttributes<'lnsPie', PieVisualizationState> | LensAttributes<'lnsDatatable', DatatableVisualizationState> | LensAttributes<'lnsMetric', MetricState>; }"
+          "Pick<",
+          "LensByValueInput",
+          ", \"palette\" | \"timeRange\" | \"syncColors\" | \"viewMode\" | \"filters\" | \"title\" | \"query\" | \"hidePanelTitles\" | \"id\" | \"lastReloadRequestTime\" | \"enhancements\" | \"disabledActions\" | \"disableTriggers\" | \"searchSessionId\" | \"className\" | \"style\" | \"onLoad\" | \"renderMode\" | \"onBrushEnd\" | \"onFilter\" | \"onTableRowClick\"> & { attributes: LensAttributes<\"lnsXY\", ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.XYState",
+            "text": "XYState"
+          },
+          "> | LensAttributes<\"lnsPie\", ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.PieVisualizationState",
+            "text": "PieVisualizationState"
+          },
+          "> | LensAttributes<\"lnsDatatable\", ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.DatatableVisualizationState",
+            "text": "DatatableVisualizationState"
+          },
+          "> | LensAttributes<\"lnsMetric\", ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.MetricState",
+            "text": "MetricState"
+          },
+          ">; }"
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/editor_frame_service/embeddable/embeddable_component.tsx",
