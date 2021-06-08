@@ -46,7 +46,9 @@ export default function ({ getService }: FtrProviderContext) {
         before(async () => {
           await ml.api.cleanMlIndices();
 
-          await esArchiver.loadIfNeeded('ml/module_sample_ecommerce');
+          await esArchiver.loadIfNeeded(
+            'x-pack/test/functional/es_archives/ml/module_sample_ecommerce'
+          );
           await ml.testResources.createIndexPatternIfNeeded(ecIndexPattern, 'order_date');
 
           await ml.securityUI.loginAs(testUser.user);
