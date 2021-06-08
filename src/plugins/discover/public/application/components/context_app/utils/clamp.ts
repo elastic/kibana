@@ -6,21 +6,8 @@
  * Side Public License, v 1.
  */
 
-export function createInitialQueryParametersState(
-  indexPatternId: string,
-  anchorId: string,
-  defaultStepSize: number = 5,
-  tieBreakerField: string = '_doc'
-) {
-  return {
-    anchorId,
-    columns: [],
-    defaultStepSize,
-    filters: [],
-    indexPatternId,
-    predecessorCount: 5,
-    successorCount: 5,
-    sort: [],
-    tieBreakerField,
-  };
+import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './constants';
+
+export function clamp(value: number) {
+  return Math.max(Math.min(MAX_CONTEXT_SIZE, value), MIN_CONTEXT_SIZE);
 }

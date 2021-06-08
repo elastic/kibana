@@ -13,7 +13,7 @@ import { DiscoverServices } from '../../../build_services';
 import { fetchAnchorProvider } from '../../angular/context/api/anchor';
 import { EsHitRecord, fetchContextProvider, SurrDocType } from '../../angular/context/api/context';
 import { MarkdownSimple, toMountPoint } from '../../../../../kibana_react/public';
-import { IndexPattern } from '../../../../../data/public';
+import { IndexPattern, SortDirection } from '../../../../../data/public';
 import {
   ContextFetchState,
   FailureReason,
@@ -143,7 +143,7 @@ export function useContextAppFetch({
           anchor as EsHitRecord,
           sortField,
           tieBreakerField,
-          sortDir,
+          sortDir as SortDirection,
           count,
           filters
         );

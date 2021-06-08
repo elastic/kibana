@@ -54,13 +54,6 @@ export interface LoadingStatusEntry {
   reason?: FailureReason;
 }
 
-export enum FetchType {
-  ALL,
-  CONTEXT,
-  PREDECESSORS,
-  SUCCESSORS,
-}
-
 export const getInitialContextQueryState = (): ContextFetchState => ({
   anchor: {} as EsHitRecord,
   predecessors: [],

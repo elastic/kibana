@@ -24,7 +24,7 @@ import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { AppState } from '../../angular/context_state';
 import { EsHitRecord, EsHitRecordList } from '../../angular/context/api/context';
 import { DiscoverServices } from '../../../build_services';
-import { SortPairArr } from '../../angular/doc_table/lib/get_sort';
+import { clamp } from './utils/clamp';
 
 export interface ContextAppContentProps {
   columns: string[];
@@ -149,7 +149,7 @@ export function ContextAppContent({
   const onChangeCount = useCallback(
     (type, count) => {
       const countKey = type === 'successors' ? 'successorCount' : 'predecessorCount';
-      setAppState({ [countKey]: count });
+      setAppState({ [countKey]: clamp(count) });
     },
     [setAppState]
   );
