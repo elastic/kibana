@@ -41,6 +41,7 @@ describe('Kuery field suggestions', () => {
       querySuggestionsArgs,
       mockKueryNode({ prefix, suffix })
     );
+    // @ts-expect-error indexPatternResponse is not properly typed json
     const filterableFields = indexPatternResponse.fields.filter(indexPatternsUtils.isFilterable);
 
     expect(suggestions.length).toBe(filterableFields.length);

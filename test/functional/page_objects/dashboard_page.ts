@@ -242,7 +242,10 @@ export class DashboardPageObject extends FtrService {
 
   public async switchToEditMode() {
     this.log.debug('Switching to edit mode');
-    await this.testSubjects.click('dashboardEditMode');
+    if (await this.testSubjects.exists('dashboardEditMode')) {
+      // if the dashboard is not already in edit mode
+      await this.testSubjects.click('dashboardEditMode');
+    }
     // wait until the count of dashboard panels equals the count of toggle menu icons
     await this.retry.waitFor('in edit mode', async () => {
       const panels = await this.testSubjects.findAll('embeddablePanel', 2500);
@@ -258,22 +261,17 @@ export class DashboardPageObject extends FtrService {
 
   public async clickCancelOutOfEditMode(accept = true) {
     this.log.debug('clickCancelOutOfEditMode');
+    if (await this.getIsInViewMode()) return;
+    await this.retry.waitFor('leave edit mode button enabled', async () => {
+      const leaveEditModeButton = await this.testSubjects.find('dashboardViewOnlyMode');
+      const isDisabled = await leaveEditModeButton.getAttribute('disabled');
+      return !isDisabled;
+    });
     await this.testSubjects.click('dashboardViewOnlyMode');
     if (accept) {
-      const confirmation = await this.testSubjects.exists('dashboardDiscardConfirmKeep');
+      const confirmation = await this.testSubjects.exists('confirmModalTitleText');
       if (confirmation) {
-        await this.testSubjects.click('dashboardDiscardConfirmKeep');
-      }
-    }
-  }
-
-  public async clickDiscardChanges(accept = true) {
-    this.log.debug('clickDiscardChanges');
-    await this.testSubjects.click('dashboardViewOnlyMode');
-    if (accept) {
-      const confirmation = await this.testSubjects.exists('dashboardDiscardConfirmDiscard');
-      if (confirmation) {
-        await this.testSubjects.click('dashboardDiscardConfirmDiscard');
+        await this.common.clickConfirmOnModal();
       }
     }
   }
