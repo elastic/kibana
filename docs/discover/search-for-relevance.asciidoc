@@ -30,7 +30,7 @@ image:images/downward-arrow.png[Downward pointing arrow to indicate descending s
 At this point, you're doing a multi-column sort: first by `Time`, and then by `_score`.
 . To turn off sorting for the `Time` field, hover over its header, and then click the down arrow.
 +
-Your table now sort documents from most to least relevant.
+Your table now sorts documents from most to least relevant.
 +
 [role="screenshot"]
 image::images/discover-search-for-relevance.png["Example of a search for relevance"]
