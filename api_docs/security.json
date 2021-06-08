@@ -486,7 +486,7 @@
             "tags": [],
             "label": "getUserMenuLinks$",
             "description": [
-              "\nReturns an Observable of the array of user menu links (the links that show up under the users Avatar in the UI) registered by other plugins"
+              "\nReturns an Observable of the array of user menu links (the links that show up under the user's Avatar in the UI) registered by other plugins"
             ],
             "signature": [
               "() => ",
@@ -516,7 +516,7 @@
             "tags": [],
             "label": "addUserMenuLinks",
             "description": [
-              "\nRegisters the provided user menu links to be displayed in the user menu (the links that show up under the users Avatar in the UI)."
+              "\nRegisters the provided user menu links to be displayed in the user menu (the links that show up under the user's Avatar in the UI)."
             ],
             "signature": [
               "(newUserMenuLink: ",
@@ -728,7 +728,7 @@
           "tags": [],
           "label": "license",
           "description": [
-            "\nExposes license information, like the type of license and whether it is expired."
+            "\nExposes information about the available security features under the current license."
           ],
           "signature": [
             {
@@ -769,7 +769,7 @@
           "tags": [],
           "label": "navControlService",
           "description": [
-            "\nExposes the ability to add custom links to the dropdown menu in the top right, where the users Avatar is."
+            "\nExposes the ability to add custom links to the dropdown menu in the top right, where the user's Avatar is."
           ],
           "signature": [
             {
