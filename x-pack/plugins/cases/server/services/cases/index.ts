@@ -381,16 +381,6 @@ export class CasesService {
     ensureSavedObjectsAreAuthorized: EnsureSOAuthCallback;
     subCaseOptions?: SavedObjectFindOptionsKueryNode;
   }): Promise<number> {
-    const casesStats = await this.findCases({
-      unsecuredSavedObjectsClient,
-      options: {
-        ...caseOptions,
-        fields: [],
-        page: 1,
-        perPage: 1,
-      },
-    });
-
     /**
      * This could be made more performant. What we're doing here is retrieving all cases
      * that match the API request's filters instead of just counts. This is because we need to grab
@@ -417,7 +407,7 @@ export class CasesService {
         ...caseOptions,
         fields: includeFieldsRequiredForAuthentication([caseTypeField]),
         page: 1,
-        perPage: casesStats.total,
+        perPage: MAX_DOCS_PER_PAGE,
       },
     });
 
