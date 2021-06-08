@@ -94,15 +94,25 @@ export const ReportingExampleApp = ({
       title: 'PDF Reports',
       items: [
         { name: 'No Layout Option', icon: 'document', panel: 2 },
-        { name: 'Print Layout Option', icon: 'document', panel: 3 },
-        { name: 'Canvas Layout Option', icon: 'canvasApp', panel: 4 },
+        { name: 'Canvas Layout Option', icon: 'canvasApp', panel: 3 },
       ],
     },
     {
       id: 2,
-      title: 'PDF Reports',
+      title: 'No Layout Option',
       content: (
         <reporting.components.ReportingPanelPDF
+          getJobParams={getPDFJobParamsDefault}
+          onClose={closePopover}
+        />
+      ),
+    },
+    {
+      id: 3,
+      title: 'Canvas Layout Option',
+      content: (
+        <reporting.components.ReportingPanelPDF
+          layoutOption="canvas"
           getJobParams={getPDFJobParamsDefault}
           onClose={closePopover}
         />
