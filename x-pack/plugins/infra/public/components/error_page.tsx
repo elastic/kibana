@@ -8,7 +8,7 @@
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { useKibanaContextForPlugin } from '../hooks/use_kibana';
+import { PageTemplate } from './page_template';
 
 interface Props {
   detailedMessage?: React.ReactNode;
@@ -18,14 +18,6 @@ interface Props {
 
 // Represents a fully constructed page, including page template.
 export const ErrorPage: React.FC<Props> = ({ detailedMessage, retry, shortMessage }) => {
-  const {
-    services: {
-      observability: {
-        navigation: { PageTemplate },
-      },
-    },
-  } = useKibanaContextForPlugin();
-
   return (
     <PageTemplate isEmptyState={true}>
       <EuiCallOut

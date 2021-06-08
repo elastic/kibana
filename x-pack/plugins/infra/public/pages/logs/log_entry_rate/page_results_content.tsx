@@ -30,7 +30,7 @@ import { useLogEntryAnomaliesResults } from './use_log_entry_anomalies_results';
 import { useDatasetFiltering } from './use_dataset_filtering';
 import { useLogAnalysisResultsUrlState } from './use_log_entry_rate_results_url_state';
 import { isJobStatusWithResults } from '../../../../common/log_analysis';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { LogsPageTemplate } from '../page_template';
 import { ManageJobsButton } from '../../../components/logging/log_analysis_setup/manage_jobs_button';
 
 export const SORT_DEFAULTS = {
@@ -47,14 +47,6 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
 }> = ({ pageTitle }) => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results' });
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results', delay: 15000 });
-
-  const {
-    services: {
-      observability: {
-        navigation: { PageTemplate },
-      },
-    },
-  } = useKibanaContextForPlugin();
 
   const navigateToApp = useKibana().services.application?.navigateToApp;
 
@@ -202,7 +194,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
   );
 
   return (
-    <PageTemplate
+    <LogsPageTemplate
       pageHeader={{
         pageTitle,
         rightSideItems: [<ManageJobsButton onClick={showModuleList} size="s" />],
@@ -282,6 +274,6 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
           />
         ) : null}
       </>
-    </PageTemplate>
+    </LogsPageTemplate>
   );
 };

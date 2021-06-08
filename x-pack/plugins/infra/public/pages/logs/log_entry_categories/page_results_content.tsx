@@ -27,6 +27,7 @@ import {
 } from './use_log_entry_categories_results_url_state';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis/log_analysis_capabilities';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { LogsPageTemplate } from '../page_template';
 import { RecreateJobButton } from '../../../components/logging/log_analysis_setup/create_job_button';
 import { AnalyzeInMlButton } from '../../../components/logging/log_analysis_results';
 import { useMlHref, ML_PAGES } from '../../../../../ml/public';
@@ -47,13 +48,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_results', delay: 15000 });
 
   const {
-    services: {
-      ml,
-      http,
-      observability: {
-        navigation: { PageTemplate },
-      },
-    },
+    services: { ml, http },
   } = useKibanaContextForPlugin();
 
   const { hasLogAnalysisSetupCapabilities } = useLogAnalysisCapabilitiesContext();
@@ -213,7 +208,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
       startTimestamp={categoryQueryTimeRange.timeRange.startTime}
       endTimestamp={categoryQueryTimeRange.timeRange.endTime}
     >
-      <PageTemplate
+      <LogsPageTemplate
         pageHeader={{
           pageTitle,
           rightSideItems: [
@@ -274,7 +269,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </PageTemplate>
+      </LogsPageTemplate>
       <PageViewLogInContext />
     </ViewLogInContext.Provider>
   );

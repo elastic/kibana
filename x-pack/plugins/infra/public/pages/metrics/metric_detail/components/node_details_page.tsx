@@ -18,7 +18,7 @@ import { MetricsTimeInput } from '../hooks/use_metrics_time';
 import { InfraMetadata } from '../../../../../common/http_api/metadata_api';
 import { PageError } from './page_error';
 import { MetadataContext } from '../containers/metadata_context';
-import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
+import { MetricsPageTemplate } from '../../page_template';
 
 interface Props {
   name: string;
@@ -41,14 +41,6 @@ interface Props {
   setTimeRange(timeRange: MetricsTimeInput): void;
 }
 export const NodeDetailsPage = (props: Props) => {
-  const {
-    services: {
-      observability: {
-        navigation: { PageTemplate },
-      },
-    },
-  } = useKibanaContextForPlugin();
-
   const { parsedTimeRange } = props;
   const { metrics, loading, makeRequest, error } = useNodeDetails(
     props.requiredMetrics,
@@ -72,7 +64,7 @@ export const NodeDetailsPage = (props: Props) => {
   }
 
   return (
-    <PageTemplate
+    <MetricsPageTemplate
       pageHeader={{
         pageTitle: props.name,
         rightSideItems: [
@@ -113,6 +105,6 @@ export const NodeDetailsPage = (props: Props) => {
           </SideNavContext.Provider>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </PageTemplate>
+    </MetricsPageTemplate>
   );
 };

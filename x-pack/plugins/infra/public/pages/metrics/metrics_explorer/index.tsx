@@ -17,7 +17,7 @@ import { MetricsExplorerCharts } from './components/charts';
 import { MetricsExplorerToolbar } from './components/toolbar';
 import { useMetricsExplorerState } from './hooks/use_metric_explorer_state';
 import { useSavedViewContext } from '../../../containers/saved_view/saved_view';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { MetricsPageTemplate } from '../page_template';
 
 interface MetricsExplorerPageProps {
   source: MetricsSourceConfigurationProperties;
@@ -29,14 +29,6 @@ const metricsExplorerTitle = i18n.translate('xpack.infra.metrics.metricsExplorer
 });
 
 export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExplorerPageProps) => {
-  const {
-    services: {
-      observability: {
-        navigation: { PageTemplate },
-      },
-    },
-  } = useKibanaContextForPlugin();
-
   const {
     loading,
     error,
@@ -86,7 +78,7 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
           })
         }
       />
-      <PageTemplate
+      <MetricsPageTemplate
         pageHeader={{
           pageTitle: metricsExplorerTitle,
         }}
@@ -128,7 +120,7 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
             onTimeChange={handleTimeChange}
           />
         )}
-      </PageTemplate>
+      </MetricsPageTemplate>
     </EuiErrorBoundary>
   );
 };

@@ -25,7 +25,7 @@ import { useLinkProps } from '../../../hooks/use_link_props';
 import { SavedViewProvider } from '../../../containers/saved_view/saved_view';
 import { DEFAULT_WAFFLE_VIEW_STATE } from './hooks/use_waffle_view_state';
 import { useWaffleOptionsContext } from './hooks/use_waffle_options';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { MetricsPageTemplate } from '../page_template';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { APP_WRAPPER_CLASS } from '../../../../../../../src/core/public';
 
@@ -34,14 +34,6 @@ const inventoryTitle = i18n.translate('xpack.infra.metrics.inventoryPageTitle', 
 });
 
 export const SnapshotPage = () => {
-  const {
-    services: {
-      observability: {
-        navigation: { PageTemplate },
-      },
-    },
-  } = useKibanaContextForPlugin();
-
   const uiCapabilities = useKibana().services.application?.capabilities;
   const {
     hasFailedLoadingSource,
@@ -77,7 +69,7 @@ export const SnapshotPage = () => {
       ) : metricIndicesExist ? (
         <>
           <InventoryPageWrapper className={APP_WRAPPER_CLASS}>
-            <PageTemplate
+            <MetricsPageTemplate
               pageHeader={{
                 pageTitle: inventoryTitle,
               }}
@@ -93,7 +85,7 @@ export const SnapshotPage = () => {
               >
                 <LayoutView />
               </SavedViewProvider>
-            </PageTemplate>
+            </MetricsPageTemplate>
           </InventoryPageWrapper>
         </>
       ) : hasFailedLoadingSource ? (

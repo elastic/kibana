@@ -23,7 +23,7 @@ import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { LogEntryCategoriesResultsContent } from './page_results_content';
 import { LogEntryCategoriesSetupContent } from './page_setup_content';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { LogsPageTemplate } from '../page_template';
 import type { LazyObservabilityPageTemplateProps } from '../../../../../observability/public';
 
 const logCategoriesTabTitle = i18n.translate('xpack.infra.logs.logCategoriesTitle', {
@@ -31,14 +31,6 @@ const logCategoriesTabTitle = i18n.translate('xpack.infra.logs.logCategoriesTitl
 });
 
 export const LogEntryCategoriesPageContent = () => {
-  const {
-    services: {
-      observability: {
-        navigation: { PageTemplate },
-      },
-    },
-  } = useKibanaContextForPlugin();
-
   const {
     hasLogAnalysisCapabilites,
     hasLogAnalysisReadCapabilities,
@@ -60,13 +52,13 @@ export const LogEntryCategoriesPageContent = () => {
 
   if (!hasLogAnalysisCapabilites) {
     return (
-      <CategoriesPageTemplate PageTemplate={PageTemplate} isEmptyState={true}>
+      <CategoriesPageTemplate isEmptyState={true}>
         <SubscriptionSplashContent />
       </CategoriesPageTemplate>
     );
   } else if (!hasLogAnalysisReadCapabilities) {
     return (
-      <CategoriesPageTemplate PageTemplate={PageTemplate} isEmptyState={true}>
+      <CategoriesPageTemplate isEmptyState={true}>
         <MissingResultsPrivilegesPrompt />
       </CategoriesPageTemplate>
     );
@@ -80,7 +72,7 @@ export const LogEntryCategoriesPageContent = () => {
     );
   } else if (setupStatus.type === 'unknown') {
     return (
-      <CategoriesPageTemplate PageTemplate={PageTemplate} isEmptyState={true}>
+      <CategoriesPageTemplate isEmptyState={true}>
         <LogAnalysisSetupStatusUnknownPrompt retry={fetchJobStatus} />
       </CategoriesPageTemplate>
     );
@@ -96,13 +88,13 @@ export const LogEntryCategoriesPageContent = () => {
     );
   } else if (!hasLogAnalysisSetupCapabilities) {
     return (
-      <CategoriesPageTemplate PageTemplate={PageTemplate} isEmptyState={true}>
+      <CategoriesPageTemplate isEmptyState={true}>
         <MissingSetupPrivilegesPrompt />
       </CategoriesPageTemplate>
     );
   } else {
     return (
-      <CategoriesPageTemplate PageTemplate={PageTemplate} isEmptyState={true}>
+      <CategoriesPageTemplate isEmptyState={true}>
         <LogEntryCategoriesSetupContent onOpenSetup={showCategoriesModuleSetup} />
         <LogAnalysisSetupFlyout allowedModules={allowedSetupModules} />
       </CategoriesPageTemplate>
@@ -112,19 +104,19 @@ export const LogEntryCategoriesPageContent = () => {
 
 const allowedSetupModules = ['logs_ui_categories' as const];
 
-const CategoriesPageTemplate: React.FC<{
-  PageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
-  isEmptyState?: boolean;
-}> = ({ PageTemplate, isEmptyState = false, children }) => {
+const CategoriesPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = ({
+  children,
+  ...rest
+}) => {
   return (
-    <PageTemplate
+    <LogsPageTemplate
       data-test-subj="logsLogEntryCategoriesPage"
-      isEmptyState={isEmptyState}
       pageHeader={{
         pageTitle: logCategoriesTabTitle,
       }}
+      {...rest}
     >
       {children}
-    </PageTemplate>
+    </LogsPageTemplate>
   );
 };

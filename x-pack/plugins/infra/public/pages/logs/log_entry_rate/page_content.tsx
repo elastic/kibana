@@ -25,7 +25,7 @@ import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log
 import { useLogEntryRateModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_rate';
 import { LogEntryRateResultsContent } from './page_results_content';
 import { LogEntryRateSetupContent } from './page_setup_content';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { LogsPageTemplate } from '../page_template';
 import type { LazyObservabilityPageTemplateProps } from '../../../../../observability/public';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
@@ -35,14 +35,6 @@ const anomaliesTitle = i18n.translate('xpack.infra.logs.anomaliesPageTitle', {
 });
 
 export const LogEntryRatePageContent = memo(() => {
-  const {
-    services: {
-      observability: {
-        navigation: { PageTemplate },
-      },
-    },
-  } = useKibanaContextForPlugin();
-
   const {
     hasLogAnalysisCapabilites,
     hasLogAnalysisReadCapabilities,
@@ -98,13 +90,13 @@ export const LogEntryRatePageContent = memo(() => {
 
   if (!hasLogAnalysisCapabilites) {
     return (
-      <AnomaliesPageTemplate PageTemplate={PageTemplate} isEmptyState={true}>
+      <AnomaliesPageTemplate isEmptyState={true}>
         <SubscriptionSplashContent />
       </AnomaliesPageTemplate>
     );
   } else if (!hasLogAnalysisReadCapabilities) {
     return (
-      <AnomaliesPageTemplate PageTemplate={PageTemplate} isEmptyState={true}>
+      <AnomaliesPageTemplate isEmptyState={true}>
         <MissingResultsPrivilegesPrompt />
       </AnomaliesPageTemplate>
     );
@@ -124,7 +116,7 @@ export const LogEntryRatePageContent = memo(() => {
     logEntryRateSetupStatus.type === 'unknown'
   ) {
     return (
-      <AnomaliesPageTemplate PageTemplate={PageTemplate} isEmptyState={true}>
+      <AnomaliesPageTemplate isEmptyState={true}>
         <LogAnalysisSetupStatusUnknownPrompt retry={fetchAllJobStatuses} />
       </AnomaliesPageTemplate>
     );
@@ -140,14 +132,14 @@ export const LogEntryRatePageContent = memo(() => {
     );
   } else if (!hasLogAnalysisSetupCapabilities) {
     return (
-      <AnomaliesPageTemplate PageTemplate={PageTemplate} isEmptyState={true}>
+      <AnomaliesPageTemplate isEmptyState={true}>
         <MissingSetupPrivilegesPrompt />;
       </AnomaliesPageTemplate>
     );
   } else {
     return (
       <>
-        <AnomaliesPageTemplate PageTemplate={PageTemplate} isEmptyState={true}>
+        <AnomaliesPageTemplate isEmptyState={true}>
           <LogEntryRateSetupContent onOpenSetup={showModuleList} />
           <LogAnalysisSetupFlyout />
         </AnomaliesPageTemplate>
@@ -156,19 +148,19 @@ export const LogEntryRatePageContent = memo(() => {
   }
 });
 
-const AnomaliesPageTemplate: React.FC<{
-  PageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
-  isEmptyState?: boolean;
-}> = ({ PageTemplate, isEmptyState = false, children }) => {
+const AnomaliesPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = ({
+  children,
+  ...rest
+}) => {
   return (
-    <PageTemplate
+    <LogsPageTemplate
       data-test-subj="logsLogEntryRatePage"
-      isEmptyState={isEmptyState}
       pageHeader={{
         pageTitle: anomaliesTitle,
       }}
+      {...rest}
     >
       {children}
-    </PageTemplate>
+    </LogsPageTemplate>
   );
 };

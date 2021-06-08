@@ -26,7 +26,7 @@ import { LogColumnsConfigurationPanel } from './log_columns_configuration_panel'
 import { NameConfigurationPanel } from './name_configuration_panel';
 import { LogSourceConfigurationFormErrors } from './source_configuration_form_errors';
 import { useLogSourceConfigurationFormState } from './source_configuration_form_state';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { LogsPageTemplate } from '../page_template';
 
 const settingsTitle = i18n.translate('xpack.infra.logs.settingsTitle', {
   defaultMessage: 'Settings',
@@ -35,14 +35,6 @@ const settingsTitle = i18n.translate('xpack.infra.logs.settingsTitle', {
 export const LogsSettingsPage = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
   const shouldAllowEdit = uiCapabilities?.logs?.configureSource === true;
-
-  const {
-    services: {
-      observability: {
-        navigation: { PageTemplate },
-      },
-    },
-  } = useKibanaContextForPlugin();
 
   useTrackPageview({ app: 'infra_logs', path: 'log_source_configuration' });
   useTrackPageview({
@@ -94,7 +86,7 @@ export const LogsSettingsPage = () => {
 
   return (
     <EuiErrorBoundary>
-      <PageTemplate
+      <LogsPageTemplate
         pageHeader={{
           pageTitle: settingsTitle,
         }}
@@ -191,7 +183,7 @@ export const LogsSettingsPage = () => {
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
-      </PageTemplate>
+      </LogsPageTemplate>
     </EuiErrorBoundary>
   );
 };

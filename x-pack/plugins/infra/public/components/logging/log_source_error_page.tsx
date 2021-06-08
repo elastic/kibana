@@ -15,21 +15,13 @@ import {
   ResolveLogSourceConfigurationError,
 } from '../../../common/log_sources';
 import { useLinkProps } from '../../hooks/use_link_props';
-import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
+import { PageTemplate } from '../../pages/logs/page_template';
 
 export const LogSourceErrorPage: React.FC<{
   errors: Error[];
   onRetry: () => void;
 }> = ({ errors, onRetry }) => {
   const settingsLinkProps = useLinkProps({ app: 'logs', pathname: '/settings' });
-
-  const {
-    services: {
-      observability: {
-        navigation: { PageTemplate },
-      },
-    },
-  } = useKibanaContextForPlugin();
 
   return (
     <PageTemplate isEmptyState={true}>

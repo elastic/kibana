@@ -7,7 +7,7 @@
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
-import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
+import { PageTemplate } from '../page_template';
 
 interface NoIndicesProps {
   message: string;
@@ -18,14 +18,6 @@ interface NoIndicesProps {
 
 // Represents a fully constructed page, including page template.
 export const NoIndices: React.FC<NoIndicesProps> = ({ actions, message, title, ...rest }) => {
-  const {
-    services: {
-      observability: {
-        navigation: { PageTemplate },
-      },
-    },
-  } = useKibanaContextForPlugin();
-
   return (
     <PageTemplate isEmptyState={true}>
       <EuiEmptyPrompt

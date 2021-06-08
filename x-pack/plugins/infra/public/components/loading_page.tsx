@@ -7,7 +7,7 @@
 
 import { EuiEmptyPrompt, EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { ReactNode } from 'react';
-import { useKibanaContextForPlugin } from '../hooks/use_kibana';
+import { PageTemplate } from './page_template';
 
 interface LoadingPageProps {
   message?: ReactNode;
@@ -19,14 +19,6 @@ export const LoadingPage = ({
   message,
   'data-test-subj': dataTestSubj = 'loadingPage',
 }: LoadingPageProps) => {
-  const {
-    services: {
-      observability: {
-        navigation: { PageTemplate },
-      },
-    },
-  } = useKibanaContextForPlugin();
-
   return (
     <PageTemplate isEmptyState={true} data-test-subj={dataTestSubj}>
       <EuiEmptyPrompt

@@ -21,7 +21,7 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 import { InventoryItemType } from '../../../../common/inventory_models/types';
 import { useMetricsTimeContext } from './hooks/use_metrics_time';
 import { useLinkProps } from '../../../hooks/use_link_props';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { MetricsPageTemplate } from '../page_template';
 
 interface Props {
   theme: EuiTheme | undefined;
@@ -40,14 +40,6 @@ export const MetricDetail = withMetricPageProviders(
     const nodeType = match.params.type as InventoryItemType;
     const inventoryModel = findInventoryModel(nodeType);
     const { sourceId } = useContext(Source.Context);
-
-    const {
-      services: {
-        observability: {
-          navigation: { PageTemplate },
-        },
-      },
-    } = useKibanaContextForPlugin();
 
     const {
       timeRange,
@@ -95,7 +87,7 @@ export const MetricDetail = withMetricPageProviders(
 
     if (metadataLoading && !filteredRequiredMetrics.length) {
       return (
-        <PageTemplate>
+        <MetricsPageTemplate>
           <InfraLoadingPanel
             height="100vh"
             width="100%"
@@ -103,7 +95,7 @@ export const MetricDetail = withMetricPageProviders(
               defaultMessage: 'Loading data',
             })}
           />
-        </PageTemplate>
+        </MetricsPageTemplate>
       );
     }
 

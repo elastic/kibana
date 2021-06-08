@@ -25,7 +25,7 @@ import { IndicesConfigurationPanel } from './indices_configuration_panel';
 import { MLConfigurationPanel } from './ml_configuration_panel';
 import { NameConfigurationPanel } from './name_configuration_panel';
 import { useSourceConfigurationFormState } from './source_configuration_form_state';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { MetricsPageTemplate } from '../page_template';
 interface SourceConfigurationSettingsProps {
   shouldAllowEdit: boolean;
 }
@@ -37,14 +37,6 @@ const settingsTitle = i18n.translate('xpack.infra.metrics.settingsTitle', {
 export const SourceConfigurationSettings = ({
   shouldAllowEdit,
 }: SourceConfigurationSettingsProps) => {
-  const {
-    services: {
-      observability: {
-        navigation: { PageTemplate },
-      },
-    },
-  } = useKibanaContextForPlugin();
-
   const {
     createSourceConfiguration,
     source,
@@ -94,7 +86,7 @@ export const SourceConfigurationSettings = ({
   }
 
   return (
-    <PageTemplate
+    <MetricsPageTemplate
       pageHeader={{
         pageTitle: settingsTitle,
       }}
@@ -212,6 +204,6 @@ export const SourceConfigurationSettings = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-    </PageTemplate>
+    </MetricsPageTemplate>
   );
 };
