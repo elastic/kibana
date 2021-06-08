@@ -6,9 +6,7 @@
     "emitDeclarationOnly": true,
     "declaration": true,
     "declarationMap": true,
-    "types": ["node"],
-    // overhead is too significant
-    "incremental": false,
+    "types": ["node"]
   },
   "include": [
     "**/*",
