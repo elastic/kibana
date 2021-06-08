@@ -27,7 +27,6 @@ import { InnerJoin } from '../classes/joins/inner_join';
 import { getSourceByType } from '../classes/sources/source_registry';
 import { GeoJsonFileSource } from '../classes/sources/geojson_file_source';
 import {
-  DRAW_SHAPE,
   SOURCE_DATA_REQUEST_ID,
   SPATIAL_FILTERS_LAYER_ID,
   STYLE_TYPE,
@@ -40,6 +39,7 @@ import {
   AbstractSourceDescriptor,
   DataRequestDescriptor,
   DrawState,
+  EditState,
   Goto,
   HeatmapLayerDescriptor,
   LayerDescriptor,
@@ -197,11 +197,8 @@ export const isUsingSearch = (state: MapStoreState): boolean => {
 export const getDrawState = ({ map }: MapStoreState): DrawState | undefined =>
   map.mapState.drawState;
 
-export const getShapeToDraw = ({ map }: MapStoreState): DRAW_SHAPE | undefined =>
-  map.mapState.editState ? map.mapState.editState.drawShape : undefined;
-
-export const getEditingLayer = ({ map }: MapStoreState): string | undefined =>
-  map.mapState.editState ? map.mapState.editState.layerId : undefined;
+export const getEditState = ({ map }: MapStoreState): EditState | undefined =>
+  map.mapState.editState;
 
 export const getRefreshTimerLastTriggeredAt = ({ map }: MapStoreState): string | undefined =>
   map.mapState.refreshTimerLastTriggeredAt;

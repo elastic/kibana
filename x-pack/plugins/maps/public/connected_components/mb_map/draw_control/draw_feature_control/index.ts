@@ -17,12 +17,13 @@ import {
 } from './draw_feature_control';
 import { addNewFeatureToIndex, updateEditShape } from '../../../../actions';
 import { MapStoreState } from '../../../../reducers/store';
-import { getShapeToDraw } from '../../../../selectors/map_selectors';
+import { getEditState } from '../../../../selectors/map_selectors';
 import { getDrawMode } from '../../../../selectors/ui_selectors';
 
 function mapStateToProps(state: MapStoreState): ReduxStateProps {
+  const editState = getEditState(state);
   return {
-    drawShape: getShapeToDraw(state),
+    drawShape: editState ? editState.drawShape : undefined,
     drawMode: getDrawMode(state),
   };
 }

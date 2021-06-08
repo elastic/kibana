@@ -28,12 +28,6 @@ export function closeOnClickTooltip(tooltipId: string) {
 
 export function openOnClickTooltip(tooltipState: TooltipState) {
   return (dispatch: Dispatch, getState: () => MapStoreState) => {
-    if (
-      getDrawMode(getState()) === DRAW_MODE.DRAW_SHAPES ||
-      getDrawMode(getState()) === DRAW_MODE.DRAW_POINTS
-    ) {
-      return;
-    }
     const openTooltips = getOpenTooltips(getState()).filter(({ features, location, isLocked }) => {
       return (
         isLocked &&
@@ -63,13 +57,7 @@ export function closeOnHoverTooltip() {
 }
 
 export function openOnHoverTooltip(tooltipState: TooltipState) {
-  return (dispatch: Dispatch, getState: () => MapStoreState) => {
-    if (
-      getDrawMode(getState()) === DRAW_MODE.DRAW_SHAPES ||
-      getDrawMode(getState()) === DRAW_MODE.DRAW_POINTS
-    ) {
-      return;
-    }
+  return (dispatch: Dispatch) => {
     dispatch({
       type: SET_OPEN_TOOLTIPS,
       openTooltips: [tooltipState],

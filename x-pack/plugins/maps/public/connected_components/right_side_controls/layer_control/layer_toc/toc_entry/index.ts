@@ -15,7 +15,7 @@ import {
   getMapZoom,
   hasDirtyState,
   getSelectedLayer,
-  getEditingLayer,
+  getEditState,
 } from '../../../../../selectors/map_selectors';
 import {
   getIsReadOnly,
@@ -46,7 +46,8 @@ function mapStateToProps(state: MapStoreState, ownProps: OwnProps): ReduxStatePr
     editModeActiveForLayer:
       (getDrawMode(state) === DRAW_MODE.DRAW_SHAPES ||
         getDrawMode(state) === DRAW_MODE.DRAW_POINTS) &&
-      getEditingLayer(state) === ownProps.layer.getId(),
+      !!getEditState(state) &&
+      getEditState(state)!.layerId === ownProps.layer.getId(),
   };
 }
 

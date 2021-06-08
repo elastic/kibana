@@ -12,12 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { IFieldType, IndexPattern } from 'src/plugins/data/public';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import { AbstractESSource } from '../es_source';
-import {
-  getFileUpload,
-  getHttp,
-  getMapAppConfig,
-  getSearchService,
-} from '../../../kibana_services';
+import { getHttp, getMapAppConfig, getSearchService } from '../../../kibana_services';
 import {
   addFieldToDSL,
   getField,
@@ -401,20 +396,12 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       return this._isEditable;
     }
     if (this._isEditable === undefined) {
-      if (!this.indexPattern) {
-        await this.getIndexPattern();
-      }
+      await this.getIndexPattern();
 
       const { matchingIndexes } = await getMatchingIndexes(this.indexPattern!.title);
       this._isEditable =
         // For now we only support 1:1 index-pattern:index matches
-        matchingIndexes.length === 1 &&
-        // Permissions required for index modification are identical to file upload
-        (await getFileUpload().hasImportPermission({
-          checkCreateIndexPattern: true,
-          checkHasManagePipeline: false,
-          indexName: this.indexPattern!.title,
-        }));
+        matchingIndexes.length === 1;
     }
     return this._isEditable;
   }

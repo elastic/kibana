@@ -71,6 +71,7 @@ export interface Props {
   geoFieldNames: string[];
   hasLockedTooltips: boolean;
   filterModeActive: boolean;
+  drawModeActive: boolean;
   layerList: ILayer[];
   mbMap: MbMap;
   openOnClickTooltip: (tooltipState: TooltipState) => void;
@@ -244,7 +245,7 @@ export class TooltipControl extends Component<Props, {}> {
   }
 
   _lockTooltip = (e: MapMouseEvent) => {
-    if (this.props.filterModeActive) {
+    if (this.props.filterModeActive || this.props.drawModeActive) {
       // ignore click events when in draw mode
       return;
     }
@@ -275,7 +276,7 @@ export class TooltipControl extends Component<Props, {}> {
   };
 
   _updateHoverTooltipState = _.debounce((e: MapMouseEvent) => {
-    if (this.props.filterModeActive || this.props.hasLockedTooltips) {
+    if (this.props.filterModeActive || this.props.hasLockedTooltips || this.props.drawModeActive) {
       // ignore hover events when in draw mode or when there are locked tooltips
       return;
     }

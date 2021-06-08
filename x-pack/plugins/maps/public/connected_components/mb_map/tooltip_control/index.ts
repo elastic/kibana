@@ -31,6 +31,8 @@ function mapStateToProps(state: MapStoreState) {
     layerList: getLayerList(state),
     hasLockedTooltips: getHasLockedTooltips(state),
     filterModeActive: getDrawMode(state) === DRAW_MODE.DRAW_FILTERS,
+    drawModeActive:
+      getDrawMode(state) === DRAW_MODE.DRAW_SHAPES || getDrawMode(state) === DRAW_MODE.DRAW_POINTS,
     openTooltips: getOpenTooltips(state),
     geoFieldNames: getGeoFieldNames(state),
   };

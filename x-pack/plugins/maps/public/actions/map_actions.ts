@@ -26,7 +26,7 @@ import {
   getSearchSessionId,
   getSearchSessionMapBuffer,
   getLayerById,
-  getEditingLayer,
+  getEditState,
 } from '../selectors/map_selectors';
 import {
   CLEAR_GOTO,
@@ -349,7 +349,8 @@ export function addNewFeatureToIndex(geometry: Geometry | Position[]) {
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
-    const layerId = getEditingLayer(getState());
+    const editState = getEditState(getState());
+    const layerId = editState ? editState.layerId : undefined;
     if (!layerId) {
       return;
     }

@@ -70,7 +70,7 @@ export async function syncVectorSource({
   const dataRequestId = SOURCE_DATA_REQUEST_ID;
   const requestToken = Symbol(`${layerId}-${dataRequestId}`);
   const doRefresh = syncContext.forceRefresh
-    ? syncContext.forceRefresh
+    ? true
     : !(await canSkipSourceUpdate({
         source,
         prevDataRequest,

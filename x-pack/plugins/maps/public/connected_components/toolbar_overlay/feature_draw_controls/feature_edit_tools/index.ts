@@ -17,11 +17,12 @@ import {
 import { setDrawMode, updateEditShape } from '../../../../actions';
 import { MapStoreState } from '../../../../reducers/store';
 import { DRAW_MODE, DRAW_SHAPE } from '../../../../../common';
-import { getShapeToDraw } from '../../../../selectors/map_selectors';
+import { getEditState } from '../../../../selectors/map_selectors';
 
 function mapStateToProps(state: MapStoreState): ReduxStateProps {
+  const editState = getEditState(state);
   return {
-    drawShape: getShapeToDraw(state),
+    drawShape: editState ? editState.drawShape : undefined,
   };
 }
 
