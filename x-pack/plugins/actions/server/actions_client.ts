@@ -531,7 +531,7 @@ async function injectExtraFindData(
   scopedClusterClient: IScopedClusterClient,
   actionResults: ActionResult[]
 ): Promise<FindActionResult[]> {
-  const aggs: Record<string, estypes.AggregationContainer> = {};
+  const aggs: Record<string, estypes.AggregationsAggregationContainer> = {};
   for (const actionResult of actionResults) {
     aggs[actionResult.id] = {
       filter: {

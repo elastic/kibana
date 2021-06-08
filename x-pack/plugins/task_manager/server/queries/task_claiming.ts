@@ -382,34 +382,41 @@ export class TaskClaiming {
       sort.unshift('_score');
     }
 
-    const apmTrans = apm.startTransaction(`taskManager markAvailableTasksAsClaimed`, 'taskManager');
-    const result = await this.taskStore.updateByQuery(
-      {
-        query: matchesClauses(
-          claimTasksById && claimTasksById.length
-            ? mustBeAllOf(asPinnedQuery(claimTasksById, queryForScheduledTasks))
-            : queryForScheduledTasks,
-          filterDownBy(InactiveTasks)
-        ),
-        script: updateFieldsAndMarkAsFailed(
-          {
-            ownerId: this.taskStore.taskManagerId,
-            retryAt: claimOwnershipUntil,
-          },
-          claimTasksById || [],
-          taskTypesToClaim,
-          taskTypesToSkip,
-          pick(this.taskMaxAttempts, taskTypesToClaim)
-        ),
-        sort,
-      },
-      {
-        max_docs: size,
-      }
+    const apmTrans = apm.startTransaction(
+      'markAvailableTasksAsClaimed',
+      `taskManager markAvailableTasksAsClaimed`
     );
-
-    if (apmTrans) apmTrans.end();
-    return result;
+    try {
+      const result = await this.taskStore.updateByQuery(
+        {
+          query: matchesClauses(
+            claimTasksById && claimTasksById.length
+              ? mustBeAllOf(asPinnedQuery(claimTasksById, queryForScheduledTasks))
+              : queryForScheduledTasks,
+            filterDownBy(InactiveTasks)
+          ),
+          script: updateFieldsAndMarkAsFailed(
+            {
+              ownerId: this.taskStore.taskManagerId,
+              retryAt: claimOwnershipUntil,
+            },
+            claimTasksById || [],
+            taskTypesToClaim,
+            taskTypesToSkip,
+            pick(this.taskMaxAttempts, taskTypesToClaim)
+          ),
+          sort,
+        },
+        {
+          max_docs: size,
+        }
+      );
+      apmTrans?.end('success');
+      return result;
+    } catch (err) {
+      apmTrans?.end('failure');
+      throw err;
+    }
   }
 
   /**

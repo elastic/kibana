@@ -258,6 +258,11 @@ export interface TaskInstance {
   state: Record<string, any>;
 
   /**
+   * The serialized traceparent string of the current APM transaction or span.
+   */
+  traceparent?: string;
+
+  /**
    * The id of the user who scheduled this task.
    */
   user?: string;
@@ -371,6 +376,7 @@ export type SerializedConcreteTaskInstance = Omit<
 > & {
   state: string;
   params: string;
+  traceparent: string;
   scheduledAt: string;
   startedAt: string | null;
   retryAt: string | null;

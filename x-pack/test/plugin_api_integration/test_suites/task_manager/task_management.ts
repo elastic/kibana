@@ -7,6 +7,7 @@
 
 import { random, intersection, range, times } from 'lodash';
 import expect from '@kbn/expect';
+import type { estypes } from '@elastic/elasticsearch';
 import url from 'url';
 import supertestAsPromised from 'supertest-as-promised';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -87,7 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
                 params: taskManagerIndexMapping.params,
                 state: taskManagerIndexMapping.state,
                 runAt: taskManagerIndexMapping.runAt,
-              },
+              } as Record<string, estypes.MappingProperty>,
             },
           },
         });

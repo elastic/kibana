@@ -13,6 +13,7 @@ import { Option, map as mapOptional, getOrElse, isSome } from 'fp-ts/lib/Option'
 import uuid from 'uuid';
 import { pick } from 'lodash';
 import { merge, Subject } from 'rxjs';
+import agent from 'elastic-apm-node';
 import { Logger } from '../../../../src/core/server';
 import { asOk, either, map, mapErr, promiseResult, isErr } from './lib/result_type';
 import {
@@ -98,7 +99,10 @@ export class TaskScheduling {
       ...options,
       taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
     });
-    return await this.store.schedule(modifiedTask);
+    return await this.store.schedule({
+      ...modifiedTask,
+      traceparent: agent.currentTraceparent ?? '',
+    });
   }
 
   /**
