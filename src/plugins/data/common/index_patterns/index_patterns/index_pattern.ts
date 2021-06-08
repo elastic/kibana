@@ -405,7 +405,7 @@ export class IndexPattern implements IIndexPattern {
   replaceAllRuntimeFields(newFields: Record<string, RuntimeField>) {
     const oldRuntimeFieldNames = Object.keys(this.runtimeFieldMap);
     oldRuntimeFieldNames.forEach((name) => {
-      this.removeRuntimeField(name, { removeCustomLabel: false, removeFieldFormat: false });
+      this.removeRuntimeField(name);
     });
 
     Object.entries(newFields).forEach(([name, field]) => {
@@ -415,32 +415,16 @@ export class IndexPattern implements IIndexPattern {
 
   /**
    * Remove a runtime field - removed from mapped field or removed unmapped
-   * field as appropriate
-   * @param name Field name
-   * @param opts specify additional removal options
+   * field as appropriate. Doesn't clear associated field attributes.
+   * @param name - Field name to remove
    */
-  removeRuntimeField(
-    name: string,
-    opts: { removeFieldFormat: boolean; removeCustomLabel: boolean } = {
-      removeCustomLabel: true,
-      removeFieldFormat: true,
-    }
-  ) {
+  removeRuntimeField(name: string) {
     const existingField = this.getFieldByName(name);
     if (existingField) {
       if (existingField.isMapped) {
         // mapped field, remove runtimeField def
         existingField.runtimeField = undefined;
       } else {
-        // runtimeField only
-        if (opts.removeCustomLabel) {
-          this.setFieldCustomLabel(name, null);
-        }
-
-        if (opts.removeFieldFormat) {
-          this.deleteFieldFormat(name);
-        }
-
         this.fields.remove(existingField);
       }
     }
@@ -500,4 +484,6 @@ export class IndexPattern implements IIndexPattern {
   public readonly deleteFieldFormat = (fieldName: string) => {
     delete this.fieldFormatMap[fieldName];
   };
+
+
 }

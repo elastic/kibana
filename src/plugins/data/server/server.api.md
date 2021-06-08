@@ -837,10 +837,7 @@ export class IndexPattern implements IIndexPattern {
     isTimeNanosBased(): boolean;
     // (undocumented)
     metaFields: string[];
-    removeRuntimeField(name: string, opts?: {
-        removeFieldFormat: boolean;
-        removeCustomLabel: boolean;
-    }): void;
+    removeRuntimeField(name: string): void;
     // @deprecated
     removeScriptedField(fieldName: string): void;
     replaceAllRuntimeFields(newFields: Record<string, RuntimeField>): void;

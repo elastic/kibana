@@ -61,7 +61,7 @@ export declare class IndexPattern implements IIndexPattern
 |  [hasRuntimeField(name)](./kibana-plugin-plugins-data-server.indexpattern.hasruntimefield.md) |  | Checks if runtime field exists |
 |  [isTimeBased()](./kibana-plugin-plugins-data-server.indexpattern.istimebased.md) |  |  |
 |  [isTimeNanosBased()](./kibana-plugin-plugins-data-server.indexpattern.istimenanosbased.md) |  |  |
-|  [removeRuntimeField(name, opts)](./kibana-plugin-plugins-data-server.indexpattern.removeruntimefield.md) |  | Remove a runtime field - removed from mapped field or removed unmapped field as appropriate |
+|  [removeRuntimeField(name)](./kibana-plugin-plugins-data-server.indexpattern.removeruntimefield.md) |  | Remove a runtime field - removed from mapped field or removed unmapped field as appropriate. Doesn't clear associated field attributes. |
 |  [removeScriptedField(fieldName)](./kibana-plugin-plugins-data-server.indexpattern.removescriptedfield.md) |  | Remove scripted field from field list |
 |  [replaceAllRuntimeFields(newFields)](./kibana-plugin-plugins-data-server.indexpattern.replaceallruntimefields.md) |  | Replaces all existing runtime fields with new fields |
 |  [setFieldAttrs(fieldName, attrName, value)](./kibana-plugin-plugins-data-server.indexpattern.setfieldattrs.md) |  |  |

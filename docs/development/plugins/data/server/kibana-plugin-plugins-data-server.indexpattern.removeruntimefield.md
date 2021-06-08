@@ -4,23 +4,19 @@
 
 ## IndexPattern.removeRuntimeField() method
 
-Remove a runtime field - removed from mapped field or removed unmapped field as appropriate
+Remove a runtime field - removed from mapped field or removed unmapped field as appropriate. Doesn't clear associated field attributes.
 
 <b>Signature:</b>
 
 ```typescript
-removeRuntimeField(name: string, opts?: {
-        removeFieldFormat: boolean;
-        removeCustomLabel: boolean;
-    }): void;
+removeRuntimeField(name: string): void;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  name | <code>string</code> |  |
-|  opts | <code>{</code><br/><code>        removeFieldFormat: boolean;</code><br/><code>        removeCustomLabel: boolean;</code><br/><code>    }</code> |  |
+|  name | <code>string</code> | Field name to remove |
 
 <b>Returns:</b>
 

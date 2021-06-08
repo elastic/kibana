@@ -62,7 +62,7 @@ export const registerUpdateRuntimeFieldRoute = (
         throw new ErrorIndexPatternFieldNotFound(id, name);
       }
 
-      indexPattern.removeRuntimeField(name, { removeCustomLabel: false, removeFieldFormat: false });
+      indexPattern.removeRuntimeField(name);
       indexPattern.addRuntimeField(name, {
         ...existingRuntimeField,
         ...runtimeField,

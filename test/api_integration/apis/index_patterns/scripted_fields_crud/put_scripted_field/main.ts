@@ -25,6 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('can overwrite an existing field', async () => {
       const title = `basic_index`;
       const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
+        override: true,
         index_pattern: {
           title,
           fields: {

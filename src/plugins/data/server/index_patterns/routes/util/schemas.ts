@@ -53,7 +53,12 @@ export const fieldSpecSchemaFields = {
   shortDotsEnable: schema.maybe(schema.boolean()),
 };
 
-export const fieldSpecSchema = schema.object(fieldSpecSchemaFields);
+export const fieldSpecSchema = schema.object(fieldSpecSchemaFields, {
+  // Allow and ignore unknowns to make fields transient.
+  // Because `fields` have a bunch of calculated fields
+  // this allows to retrieve an index pattern and then to re-create by using the retrieved payload
+  unknowns: 'ignore',
+});
 
 export const runtimeFieldSpecTypeSchema = schema.oneOf(
   RUNTIME_FIELD_TYPES.map((runtimeFieldType) => schema.literal(runtimeFieldType)) as [

@@ -32,7 +32,6 @@ export const registerPutRuntimeFieldRoute = (
             maxLength: 1_000,
           }),
           runtimeField: runtimeFieldSpecSchema,
-          // TODO: extend this API to support `custom label`, `count` and `format`?
         }),
       },
     },
@@ -56,10 +55,7 @@ export const registerPutRuntimeFieldRoute = (
       }
 
       if (oldFieldObject) {
-        indexPattern.removeRuntimeField(name, {
-          removeCustomLabel: false,
-          removeFieldFormat: false,
-        });
+        indexPattern.removeRuntimeField(name);
       }
 
       indexPattern.addRuntimeField(name, runtimeField);

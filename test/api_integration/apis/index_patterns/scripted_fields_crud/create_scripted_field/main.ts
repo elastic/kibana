@@ -52,6 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('newly created scripted field is materialized in the index_pattern object', async () => {
       const title = `basic_index`;
       const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
+        override: true,
         index_pattern: {
           title,
         },

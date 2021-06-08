@@ -32,7 +32,6 @@ export const registerCreateRuntimeFieldRoute = (
             maxLength: 1_000,
           }),
           runtimeField: runtimeFieldSpecSchema,
-          // TODO: extend this API to support `custom label`, `count` and `format`?
         }),
       },
     },
@@ -50,7 +49,6 @@ export const registerCreateRuntimeFieldRoute = (
 
       const indexPattern = await indexPatternsService.get(id);
 
-      // TODO: can I make a regular field into a runtime field?
       if (indexPattern.fields.getByName(name)) {
         throw new Error(`Field [name = ${name}] already exists.`);
       }
