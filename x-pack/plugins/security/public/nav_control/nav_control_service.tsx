@@ -36,7 +36,7 @@ export interface SecurityNavControlServiceStart {
   getUserMenuLinks$: () => Observable<UserMenuLink[]>;
 
   /**
-   * Registers the provided user menu links to be displayed in the user menu (the links that show up under the users Avatar in the UI).
+   * Registers the provided user menu links to be displayed in the user menu (the links that show up under the user's Avatar in the UI).
    */
   addUserMenuLinks: (newUserMenuLink: UserMenuLink[]) => void;
 }
