@@ -212,13 +212,47 @@
           "label": "isScreenshotMode",
           "description": [],
           "signature": [
-            "IsScreenshotMode"
+            "(request: ",
+            {
+              "pluginId": "core",
+              "scope": "server",
+              "docId": "kibCoreHttpPluginApi",
+              "section": "def-server.KibanaRequest",
+              "text": "KibanaRequest"
+            },
+            "<unknown, unknown, unknown, any>) => boolean"
           ],
           "source": {
             "path": "src/plugins/screenshot_mode/server/types.ts",
             "lineNumber": 19
           },
-          "deprecated": false
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "screenshotMode",
+              "id": "def-server.request",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreHttpPluginApi",
+                  "section": "def-server.KibanaRequest",
+                  "text": "KibanaRequest"
+                },
+                "<unknown, unknown, unknown, any>"
+              ],
+              "source": {
+                "path": "src/plugins/screenshot_mode/server/types.ts",
+                "lineNumber": 16
+              },
+              "deprecated": false
+            }
+          ]
         },
         {
           "parentPluginId": "screenshotMode",
@@ -236,7 +270,9 @@
             "path": "src/plugins/screenshot_mode/server/types.ts",
             "lineNumber": 24
           },
-          "deprecated": false
+          "deprecated": false,
+          "returnComment": [],
+          "children": []
         }
       ],
       "lifecycle": "setup",
@@ -263,13 +299,47 @@
           "label": "isScreenshotMode",
           "description": [],
           "signature": [
-            "IsScreenshotMode"
+            "(request: ",
+            {
+              "pluginId": "core",
+              "scope": "server",
+              "docId": "kibCoreHttpPluginApi",
+              "section": "def-server.KibanaRequest",
+              "text": "KibanaRequest"
+            },
+            "<unknown, unknown, unknown, any>) => boolean"
           ],
           "source": {
             "path": "src/plugins/screenshot_mode/server/types.ts",
             "lineNumber": 28
           },
-          "deprecated": false
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "screenshotMode",
+              "id": "def-server.request",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreHttpPluginApi",
+                  "section": "def-server.KibanaRequest",
+                  "text": "KibanaRequest"
+                },
+                "<unknown, unknown, unknown, any>"
+              ],
+              "source": {
+                "path": "src/plugins/screenshot_mode/server/types.ts",
+                "lineNumber": 16
+              },
+              "deprecated": false
+            }
+          ]
         }
       ],
       "lifecycle": "start",

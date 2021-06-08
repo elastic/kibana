@@ -16,7 +16,7 @@ import {
   SavedObjectsFindResult,
 } from 'kibana/server';
 
-import { AggregationContainer } from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { nodeBuilder, KueryNode } from '../../../../../../src/plugins/data/common';
 
 import { SecurityPluginSetup } from '../../../../security/server';
@@ -218,7 +218,9 @@ export class CasesService {
     private readonly authentication?: SecurityPluginSetup['authc']
   ) {}
 
-  private buildCaseIdsAggs = (size: number = 100): Record<string, AggregationContainer> => ({
+  private buildCaseIdsAggs = (
+    size: number = 100
+  ): Record<string, estypes.AggregationsAggregationContainer> => ({
     references: {
       nested: {
         path: `${CASE_COMMENT_SAVED_OBJECT}.references`,

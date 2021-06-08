@@ -23,7 +23,10 @@ type BucketKey = string | Record<string, string>;
 
 function mergeRequestWithAggs<
   TRequestBase extends TransactionGroupRequestBase,
-  TAggregationMap extends Record<string, estypes.AggregationContainer>
+  TAggregationMap extends Record<
+    string,
+    estypes.AggregationsAggregationContainer
+  >
 >(request: TRequestBase, aggs: TAggregationMap) {
   return merge({}, request, {
     body: {

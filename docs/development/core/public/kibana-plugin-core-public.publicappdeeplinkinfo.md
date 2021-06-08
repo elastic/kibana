@@ -9,9 +9,10 @@ Public information about a registered app's [deepLinks](./kibana-plugin-core-pub
 <b>Signature:</b>
 
 ```typescript
-export declare type PublicAppDeepLinkInfo = Omit<AppDeepLink, 'deepLinks' | 'keywords' | 'navLinkStatus'> & {
+export declare type PublicAppDeepLinkInfo = Omit<AppDeepLink, 'deepLinks' | 'keywords' | 'navLinkStatus' | 'searchable'> & {
     deepLinks: PublicAppDeepLinkInfo[];
     keywords: string[];
     navLinkStatus: AppNavLinkStatus;
+    searchable: boolean;
 };
 ```

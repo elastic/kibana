@@ -157,7 +157,10 @@ describe('migration v2', () => {
       const response = body[migratedIndex];
 
       expect(response).toBeDefined();
-      expect(Object.keys(response.aliases).sort()).toEqual(['.kibana', `.kibana_${kibanaVersion}`]);
+      expect(Object.keys(response.aliases!).sort()).toEqual([
+        '.kibana',
+        `.kibana_${kibanaVersion}`,
+      ]);
     });
 
     it('copies all the document of the previous index to the new one', async () => {
@@ -216,7 +219,10 @@ describe('migration v2', () => {
       const response = body[migratedIndex];
 
       expect(response).toBeDefined();
-      expect(Object.keys(response.aliases).sort()).toEqual(['.kibana', `.kibana_${kibanaVersion}`]);
+      expect(Object.keys(response.aliases!).sort()).toEqual([
+        '.kibana',
+        `.kibana_${kibanaVersion}`,
+      ]);
     });
 
     it('copies all the document of the previous index to the new one', async () => {
