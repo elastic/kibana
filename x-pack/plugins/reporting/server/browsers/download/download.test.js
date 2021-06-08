@@ -22,7 +22,7 @@ jest.mock('request', () => {
     return new Readable({
       read() {
         if (resp instanceof Error) {
-          this.emit('error', resp);
+          this.destroy(resp);
           return;
         }
 

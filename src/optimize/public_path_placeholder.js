@@ -35,7 +35,7 @@ export function replacePlaceholder(read, replacement) {
     takeUntil(Rx.fromEvent(read, 'end'))
   )
     .forEach(error => {
-      replace.emit('error', error);
+      replace.destroy(error);
       replace.end();
     });
 

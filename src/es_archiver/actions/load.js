@@ -42,7 +42,7 @@ import {
 const pipeline = (...streams) => streams
   .reduce((source, dest) => (
     source
-      .once('error', (error) => dest.emit('error', error))
+      .once('error', (error) => dest.destroy(error))
       .pipe(dest)
   ));
 
