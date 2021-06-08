@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { deleteMetadataStream } from './data_stream_helper';
 import { METADATA_REQUEST_V1_ROUTE } from '../../../plugins/security_solution/server/endpoint/routes/metadata';
@@ -40,7 +40,11 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe(`POST ${METADATA_REQUEST_V1_ROUTE} when index is not empty`, () => {
       before(
-        async () => await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true })
+        async () =>
+          await esArchiver.load(
+            'x-pack/test/functional/es_archives/endpoint/metadata/api_feature',
+            { useCreate: true }
+          )
       );
       // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
       // to do it manually

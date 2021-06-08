@@ -15,7 +15,6 @@ import { WaterfallContainer } from './index';
 import { getWaterfall } from './Waterfall/waterfall_helpers/waterfall_helpers';
 import {
   inferredSpans,
-  location,
   simpleTrace,
   traceChildStartBeforeParent,
   traceWithErrors,
@@ -45,7 +44,6 @@ export function Example() {
   );
   return (
     <WaterfallContainer
-      location={location}
       urlParams={urlParams}
       waterfall={waterfall}
       exceedsMax={false}
@@ -60,7 +58,6 @@ export function WithErrors() {
   );
   return (
     <WaterfallContainer
-      location={location}
       urlParams={urlParams}
       waterfall={waterfall}
       exceedsMax={false}
@@ -75,7 +72,6 @@ export function ChildStartsBeforeParent() {
   );
   return (
     <WaterfallContainer
-      location={location}
       urlParams={urlParams}
       waterfall={waterfall}
       exceedsMax={false}
@@ -90,7 +86,6 @@ export function InferredSpans() {
   );
   return (
     <WaterfallContainer
-      location={location}
       urlParams={urlParams}
       waterfall={waterfall}
       exceedsMax={false}

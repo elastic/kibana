@@ -45,7 +45,6 @@ import {
   ExperimentalFeatures,
   parseExperimentalConfigValue,
 } from '../../common/experimental_features';
-import { SecuritySolutionRequestHandlerContext } from '../types';
 
 export interface MetadataService {
   queryStrategy(
@@ -200,13 +199,10 @@ export class EndpointAppContextService {
     return this.license;
   }
 
-  public async getCasesClient(
-    req: KibanaRequest,
-    context: SecuritySolutionRequestHandlerContext
-  ): Promise<CasesClient> {
+  public async getCasesClient(req: KibanaRequest): Promise<CasesClient> {
     if (!this.cases) {
       throw new Error(`must call start on ${EndpointAppContextService.name} to call getter`);
     }
-    return this.cases.getCasesClientWithRequestAndContext(context, req);
+    return this.cases.getCasesClientWithRequest(req);
   }
 }

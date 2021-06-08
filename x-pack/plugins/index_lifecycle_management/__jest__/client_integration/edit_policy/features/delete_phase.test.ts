@@ -50,8 +50,10 @@ describe('<EditPolicy /> delete phase', () => {
     component.update();
 
     expect(actions.delete.isShown()).toBeFalsy();
-    await actions.delete.enable(true);
+    await actions.togglePhase('delete');
     expect(actions.delete.isShown()).toBeTruthy();
+    await actions.togglePhase('delete');
+    expect(actions.delete.isShown()).toBeFalsy();
   });
 
   test('shows timing after it was enabled', async () => {
@@ -65,7 +67,7 @@ describe('<EditPolicy /> delete phase', () => {
     component.update();
 
     expect(actions.delete.hasMinAgeInput()).toBeFalsy();
-    await actions.delete.enable(true);
+    await actions.togglePhase('delete');
     expect(actions.delete.hasMinAgeInput()).toBeTruthy();
   });
 
@@ -81,7 +83,7 @@ describe('<EditPolicy /> delete phase', () => {
     test('updates snapshot policy name', async () => {
       const { actions } = testBed;
 
-      await actions.setWaitForSnapshotPolicy(NEW_SNAPSHOT_POLICY_NAME);
+      await actions.delete.setWaitForSnapshotPolicy(NEW_SNAPSHOT_POLICY_NAME);
       await actions.savePolicy();
 
       const expected = {
@@ -109,7 +111,7 @@ describe('<EditPolicy /> delete phase', () => {
     test('shows a callout when the input is not an existing policy', async () => {
       const { actions } = testBed;
 
-      await actions.setWaitForSnapshotPolicy('my_custom_policy');
+      await actions.delete.setWaitForSnapshotPolicy('my_custom_policy');
       expect(testBed.find('noPoliciesCallout').exists()).toBeFalsy();
       expect(testBed.find('policiesErrorCallout').exists()).toBeFalsy();
       expect(testBed.find('customPolicyCallout').exists()).toBeTruthy();
@@ -118,7 +120,7 @@ describe('<EditPolicy /> delete phase', () => {
     test('removes the action if field is empty', async () => {
       const { actions } = testBed;
 
-      await actions.setWaitForSnapshotPolicy('');
+      await actions.delete.setWaitForSnapshotPolicy('');
       await actions.savePolicy();
 
       const expected = {

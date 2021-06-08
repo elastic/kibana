@@ -209,13 +209,6 @@ export const schema = Joi.object()
     // definition of apps that work with `common.navigateToApp()`
     apps: Joi.object().pattern(ID_PATTERN, appUrlPartsSchema()).default(),
 
-    // settings for the esArchiver module
-    esArchiver: Joi.object()
-      .keys({
-        directory: Joi.string().default(defaultRelativeToConfigPath('fixtures/es_archiver')),
-      })
-      .default(),
-
     // settings for the saved objects svc
     kbnArchiver: Joi.object()
       .keys({

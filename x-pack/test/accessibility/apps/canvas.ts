@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Canvas', () => {
     before(async () => {
-      await esArchiver.load('canvas/default');
+      await esArchiver.load('x-pack/test/functional/es_archives/canvas/default');
       await common.navigateToApp('canvas');
     });
 
