@@ -207,7 +207,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
       <WithLogTextviewUrlState />
       <WithFlyoutOptionsUrlState />
       <LogsToolbar />
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
       <PageViewLogInContext />
       {isFlyoutOpen ? (
         <LogEntryFlyout
