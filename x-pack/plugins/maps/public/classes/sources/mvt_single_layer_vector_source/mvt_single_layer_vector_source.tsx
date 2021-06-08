@@ -228,7 +228,7 @@ export class MVTSingleLayerVectorSource
     return tooltips;
   }
 
-  async isEditable(): Promise<boolean> {
+  async loadIsEditable(): Promise<boolean> {
     return false;
   }
 }

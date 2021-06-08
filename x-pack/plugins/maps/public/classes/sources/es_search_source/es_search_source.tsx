@@ -66,7 +66,6 @@ export const sourceTitle = i18n.translate('xpack.maps.source.esSearchTitle', {
 export class ESSearchSource extends AbstractESSource implements ITiledSingleLayerVectorSource {
   readonly _descriptor: ESSearchSourceDescriptor;
   protected readonly _tooltipFields: ESDocField[];
-  protected _isEditable: boolean | undefined;
 
   static createDescriptor(descriptor: Partial<ESSearchSourceDescriptor>): ESSearchSourceDescriptor {
     const normalizedDescriptor = AbstractESSource.createDescriptor(descriptor);
@@ -390,20 +389,14 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return !!(scalingType === SCALING_TYPES.TOP_HITS && topHitsSplitField);
   }
 
-  async isEditable(): Promise<boolean> {
+  async loadIsEditable(): Promise<boolean> {
     if (!getMapAppConfig().enableDrawingFeature) {
-      this._isEditable = false;
-      return this._isEditable;
+      return false;
     }
-    if (this._isEditable === undefined) {
-      await this.getIndexPattern();
-
-      const { matchingIndexes } = await getMatchingIndexes(this.indexPattern!.title);
-      this._isEditable =
-        // For now we only support 1:1 index-pattern:index matches
-        matchingIndexes.length === 1;
-    }
-    return this._isEditable;
+    await this.getIndexPattern();
+    const { matchingIndexes } = await getMatchingIndexes(this.indexPattern!.title);
+    // For now we only support 1:1 index-pattern:index matches
+    return matchingIndexes.length === 1;
   }
 
   _hasSort(): boolean {
