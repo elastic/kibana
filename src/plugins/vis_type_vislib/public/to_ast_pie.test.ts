@@ -10,7 +10,7 @@ import { Vis } from '../../visualizations/public';
 import { buildExpression } from '../../expressions/public';
 
 import { PieVisParams } from './pie';
-import { samplePieVis } from '../../vis_type_xy/public/sample_vis.test.mocks';
+import { samplePieVis } from '../../vis_type_pie/public/sample_vis.test.mocks';
 import { toExpressionAst } from './to_ast_pie';
 
 jest.mock('../../expressions/public', () => ({

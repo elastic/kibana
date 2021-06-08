@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
-import { useUrlStorage } from '../hooks/use_url_storage';
+import { useSeriesStorage } from '../hooks/use_series_storage';
 import { ReportDefinition } from '../types';
 
 interface Props {
@@ -18,7 +18,9 @@ interface Props {
 }
 
 export function CustomReportField({ field, seriesId, options: opts }: Props) {
-  const { series, setSeries } = useUrlStorage(seriesId);
+  const { getSeries, setSeries } = useSeriesStorage();
+
+  const series = getSeries(seriesId);
 
   const { reportDefinitions: rtd = {} } = series;
 
