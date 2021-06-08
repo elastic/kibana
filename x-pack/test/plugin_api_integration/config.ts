@@ -45,6 +45,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.eventLog.logEntries=true',
         '--xpack.eventLog.indexEntries=true',
         '--xpack.task_manager.monitored_aggregated_stats_refresh_rate=5000',
+        '--xpack.task_manager.ephemeral_tasks.enabled=true',
         ...plugins.map(
           (pluginDir) => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
         ),
