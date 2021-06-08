@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { EuiImage, EuiPopover } from '@elastic/eui';
+import { EuiImage, EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
+import { composeScreenshotRef } from '../../../../../lib/helper/compose_screenshot_images';
+import { ScreenshotRefImageData } from '../../../../../../common/runtime_types';
 import { fullSizeImageAlt } from './translations';
 
 const POPOVER_IMG_HEIGHT = 360;
@@ -24,40 +26,106 @@ const StepImage = styled(EuiImage)`
     }
   }
 `;
+
+interface ScreenshotImageProps {
+  captionContent: string;
+  imageCaption: JSX.Element;
+}
+
+const DefaultImage: React.FC<ScreenshotImageProps & { url?: string }> = ({
+  captionContent,
+  imageCaption,
+  url,
+}) =>
+  url ? (
+    <StepImage
+      allowFullScreen={true}
+      alt={captionContent}
+      caption={imageCaption}
+      data-test-subj="pingTimestampImage"
+      hasShadow
+      url={url}
+      size="s"
+      className="syntheticsStepImage"
+    />
+  ) : (
+    <EuiLoadingSpinner />
+  );
+
+const RecomposedScreenshotImage: React.FC<
+  ScreenshotImageProps & {
+    imgRef: ScreenshotRefImageData;
+    setUrl: React.Dispatch<string | undefined>;
+    url?: string;
+  }
+> = (props) => {
+  const { imgRef, setUrl } = props;
+  React.useEffect(() => {
+    const canvas = document.createElement('canvas');
+    composeScreenshotRef(imgRef, canvas).then(() => {
+      const imgData = canvas.toDataURL('image/jpg', 1.0);
+      setUrl(imgData);
+    });
+  }, [imgRef, setUrl]);
+  return <DefaultImage {...props} url={props.url} />;
+};
+
 export interface StepImagePopoverProps {
   captionContent: string;
   imageCaption: JSX.Element;
-  imgSrc: string;
+  imgSrc?: string;
+  imgRef?: ScreenshotRefImageData;
   isImagePopoverOpen: boolean;
 }
+
+const StepImageComponent: React.FC<
+  Omit<StepImagePopoverProps, 'isImagePopoverOpen'> & {
+    setUrl: React.Dispatch<string | undefined>;
+    url: string | undefined;
+  }
+> = (props) => {
+  if (props.imgSrc) {
+    props.setUrl(props.imgSrc);
+    return <DefaultImage {...props} url={props.url} />;
+  } else if (props.imgRef) {
+    return <RecomposedScreenshotImage {...props} imgRef={props.imgRef} />;
+  }
+  return null;
+};
 
 export const StepImagePopover: React.FC<StepImagePopoverProps> = ({
   captionContent,
   imageCaption,
+  imgRef,
   imgSrc,
   isImagePopoverOpen,
-}) => (
-  <EuiPopover
-    anchorPosition="leftDown"
-    button={
-      <StepImage
-        allowFullScreen={true}
-        alt={captionContent}
-        caption={imageCaption}
-        data-test-subj="pingTimestampImage"
-        hasShadow
-        url={imgSrc}
-        size="s"
-        className="syntheticsStepImage"
-      />
-    }
-    isOpen={isImagePopoverOpen}
-    closePopover={() => {}}
-  >
-    <EuiImage
-      alt={fullSizeImageAlt}
-      url={imgSrc}
-      style={{ height: POPOVER_IMG_HEIGHT, width: POPOVER_IMG_WIDTH, objectFit: 'contain' }}
-    />
-  </EuiPopover>
-);
+}) => {
+  const [url, setUrl] = React.useState<string | undefined>(undefined);
+  return (
+    <EuiPopover
+      anchorPosition="leftDown"
+      button={
+        <StepImageComponent
+          captionContent={captionContent}
+          imageCaption={imageCaption}
+          imgRef={imgRef}
+          imgSrc={imgSrc}
+          setUrl={setUrl}
+          url={url}
+        />
+      }
+      isOpen={isImagePopoverOpen}
+      closePopover={() => {}}
+    >
+      {url ? (
+        <EuiImage
+          alt={fullSizeImageAlt}
+          url={url}
+          style={{ height: POPOVER_IMG_HEIGHT, width: POPOVER_IMG_WIDTH, objectFit: 'contain' }}
+        />
+      ) : (
+        <EuiLoadingSpinner />
+      )}
+    </EuiPopover>
+  );
+};
