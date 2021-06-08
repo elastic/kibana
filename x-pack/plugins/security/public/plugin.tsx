@@ -170,14 +170,14 @@ export interface SecurityPluginSetup {
    */
   authc: AuthenticationServiceSetup;
   /**
-   * Exposes license information, like the type of license and whether it is expired.
+   * Exposes information about the available security features under the current license.
    */
   license: SecurityLicense;
 }
 
 export interface SecurityPluginStart {
   /**
-   * Exposes the ability to add custom links to the dropdown menu in the top right, where the users Avatar is.
+   * Exposes the ability to add custom links to the dropdown menu in the top right, where the user's Avatar is.
    */
   navControlService: SecurityNavControlServiceStart;
   /**
