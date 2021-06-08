@@ -105,6 +105,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
                   'influencer_field_name',
                   'influencer_field_value',
                   'influencer_score',
+                  'initial_influencer_score',
                   'is_interim',
                   'job_id',
                   'bucket_span',
@@ -138,6 +139,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
                   'result_type',
                   'timestamp',
                   'record_score',
+                  'initial_record_score',
                   'is_interim',
                   'function',
                   'field_name',
@@ -183,6 +185,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
                         'result_type',
                         'timestamp',
                         'anomaly_score',
+                        'initial_anomaly_score',
                         'is_interim',
                         'bucket_span',
                       ],
@@ -260,7 +263,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
           return {
             ...h._source,
             score: Math.floor(
-              topAnomaly._source[getScoreFields(ANOMALY_RESULT_TYPE.RECORD, useInitialScore)]
+              h._source[getScoreFields(ANOMALY_RESULT_TYPE.RECORD, useInitialScore)]
             ),
             unique_key: getRecordKey(h._source),
           };
@@ -269,7 +272,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
           return {
             ...h._source,
             score: Math.floor(
-              topAnomaly._source[getScoreFields(ANOMALY_RESULT_TYPE.INFLUENCER, useInitialScore)]
+              h._source[getScoreFields(ANOMALY_RESULT_TYPE.INFLUENCER, useInitialScore)]
             ),
             unique_key: `${h._source.timestamp}_${h._source.influencer_field_name}_${h._source.influencer_field_value}`,
           };
