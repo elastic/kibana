@@ -227,6 +227,10 @@ export class MVTSingleLayerVectorSource
     }
     return tooltips;
   }
+
+  async isEditable(): Promise<boolean> {
+    return false;
+  }
 }
 
 registerSource({

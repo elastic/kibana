@@ -6,7 +6,6 @@
  */
 
 import React, { Component } from 'react';
-
 import { EuiPopover, EuiContextMenu, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ILayer } from '../../../../../../classes/layers/layer';
@@ -19,6 +18,7 @@ import {
   EDIT_FEATURES_LABEL,
 } from '../action_labels';
 import { ESSearchSource } from '../../../../../../classes/sources/es_search_source';
+import { VectorLayer } from '../../../../../../classes/layers/vector_layer';
 
 export interface Props {
   cloneLayer: (layerId: string) => void;
@@ -59,6 +59,9 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
   }
 
   async _checkLayerEditable() {
+    if (!(this.props.layer instanceof VectorLayer)) {
+      return;
+    }
     const isLayerEditable = await this.props.layer.isEditable();
     const editModeEnabled = await this.props.layer.getEditModeEnabled();
     if (

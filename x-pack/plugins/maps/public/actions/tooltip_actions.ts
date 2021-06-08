@@ -10,10 +10,9 @@ import { Dispatch } from 'redux';
 import { Feature } from 'geojson';
 import { getOpenTooltips } from '../selectors/map_selectors';
 import { SET_OPEN_TOOLTIPS } from './map_action_constants';
-import { DRAW_MODE, FEATURE_ID_PROPERTY_NAME } from '../../common/constants';
+import { FEATURE_ID_PROPERTY_NAME } from '../../common/constants';
 import { TooltipState } from '../../common/descriptor_types';
 import { MapStoreState } from '../reducers/store';
-import { getDrawMode } from '../selectors/ui_selectors';
 
 export function closeOnClickTooltip(tooltipId: string) {
   return (dispatch: Dispatch, getState: () => MapStoreState) => {

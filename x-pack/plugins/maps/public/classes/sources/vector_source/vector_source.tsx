@@ -159,4 +159,8 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   async addFeature(geometry: Geometry | Position[]) {
     throw new Error('Should implement VectorSource#addFeature');
   }
+
+  async isEditable(): Promise<boolean> {
+    return false;
+  }
 }

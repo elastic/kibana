@@ -39,7 +39,6 @@ export interface ISource {
   getDisplayName(): Promise<string>;
   getInspectorAdapters(): Adapters | undefined;
   isFieldAware(): boolean;
-  isEditable(): Promise<boolean>;
   isFilterByMapBounds(): boolean;
   isGeoGridPrecisionAware(): boolean;
   isQueryAware(): boolean;
@@ -107,10 +106,6 @@ export class AbstractSource implements ISource {
   }
 
   isFieldAware(): boolean {
-    return false;
-  }
-
-  async isEditable(): Promise<boolean> {
     return false;
   }
 

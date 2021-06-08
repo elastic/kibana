@@ -81,6 +81,7 @@ const defaultProps = {
   openTooltips: [],
   hasLockedTooltips: false,
   filterModeActive: false,
+  drawModeActive: false,
 };
 
 const hoverTooltipState = {
