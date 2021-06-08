@@ -26,6 +26,7 @@ import {
 } from '../../../common/types/results';
 import { MlJobsResponse } from '../../../common/types/job_service';
 import type { MlClient } from '../../lib/ml_client';
+import { datafeedsProvider } from '../job_service/datafeeds';
 
 // Service for carrying out Elasticsearch queries to obtain data for the
 // ML Results dashboards.
@@ -613,17 +614,27 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
 
   async function getDatafeedResultsChartData({
     jobId,
-    timefield,
-    bucketSpan,
     start,
     end,
-    desc = true,
-    datafeedConfig,
   }: DatafeedResultsChartDataParams): Promise<GetDatafeedResultsChartDataResult> {
     const finalResults: GetDatafeedResultsChartDataResult = {
       bucketResults: [],
       datafeedResults: [],
     };
+
+    const { getDatafeedByJobId } = datafeedsProvider(client!, mlClient);
+    const datafeedConfig = await getDatafeedByJobId(jobId);
+
+    const {
+      body: { jobs },
+    } = await mlClient.getJobs({ job_id: jobId });
+    const jobConfig = jobs[0];
+    const timefield = jobConfig.data_description.time_field;
+    const bucketSpan = jobConfig.analysis_config.bucket_span;
+
+    if (datafeedConfig === undefined) {
+      return finalResults;
+    }
 
     const rangeFilter = {
       range: {
@@ -686,7 +697,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
 
     const bucketResp = await mlClient.getBuckets({
       job_id: jobId,
-      body: { desc, start: String(start), end: String(end), page: { from: 0, size: 1000 } },
+      body: { desc: true, start: String(start), end: String(end), page: { from: 0, size: 1000 } },
     });
 
     const bucketResults = get(bucketResp, ['body', 'buckets'], []);

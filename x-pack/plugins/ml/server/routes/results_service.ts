@@ -356,7 +356,7 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
   );
 
   /**
-   * @apiGroup JobService
+   * @apiGroup ResultsService
    *
    * @api {post} /api/ml/results/datafeed_results_chart Get datafeed results chart data
    * @apiName GetDatafeedResultsChartData

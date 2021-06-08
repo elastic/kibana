@@ -142,23 +142,11 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  getDatafeedResultChartData(
-    jobId: string,
-    timefield: string,
-    bucketSpan: string,
-    start: number,
-    end: number,
-    datafeedConfig: any,
-    desc: boolean = true
-  ) {
+  getDatafeedResultChartData(jobId: string, start: number, end: number) {
     const body = JSON.stringify({
       jobId,
-      timefield,
-      bucketSpan,
       start,
       end,
-      datafeedConfig,
-      desc,
     });
     return httpService.http<any>({
       path: `${basePath()}/results/datafeed_results_chart`,

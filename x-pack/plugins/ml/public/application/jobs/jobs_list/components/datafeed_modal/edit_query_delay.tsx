@@ -8,7 +8,6 @@
 import React, { FC, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { cloneDeep } from 'lodash';
 import {
   EuiButtonEmpty,
   EuiFieldText,
@@ -17,11 +16,9 @@ import {
   EuiFormRow,
   EuiToolTip,
 } from '@elastic/eui';
-import { estypes } from '@elastic/elasticsearch';
 
 import { ml } from '../../../../services/ml_api_service';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
-import { DATAFEED_STATE } from '../../../../../../common/constants/states';
 import { Datafeed } from '../../../../../../common/types/anomaly_detection_jobs';
 
 const tooltipContent = i18n.translate(
@@ -31,28 +28,20 @@ const tooltipContent = i18n.translate(
   }
 );
 
-interface DatafeedWithStats extends Datafeed {
-  state?: estypes.DatafeedState;
-  timing_stats?: estypes.DatafeedTimingStats;
-}
-
 export const EditQueryDelay: FC<{
-  datafeedConfig: DatafeedWithStats;
-}> = ({ datafeedConfig }) => {
+  datafeedId: Datafeed['datafeed_id'];
+  queryDelay: Datafeed['query_delay'];
+  isEnabled: boolean;
+}> = ({ datafeedId, queryDelay, isEnabled }) => {
   const [newQueryDelay, setNewQueryDelay] = useState<string | undefined>();
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const { query_delay: queryDelay, datafeed_id: datafeedId, state } = datafeedConfig;
   const { displaySuccessToast, displayErrorToast } = useToastNotificationService();
 
   const updateQueryDelay = useCallback(async () => {
-    const datafeedConfigClone = cloneDeep(datafeedConfig);
-    delete datafeedConfigClone.state;
-    delete datafeedConfigClone.timing_stats;
-
     try {
       await ml.updateDatafeed({
         datafeedId,
-        datafeedConfig: { ...datafeedConfigClone, query_delay: newQueryDelay },
+        datafeedConfig: { query_delay: newQueryDelay },
       });
       displaySuccessToast(
         i18n.translate(
@@ -80,13 +69,13 @@ export const EditQueryDelay: FC<{
       );
     }
     setIsEditing(false);
-  }, [datafeedConfig.datafeed_id]);
+  }, [datafeedId, newQueryDelay]);
 
   const editButton = (
     <EuiButtonEmpty
       color="primary"
       size="xs"
-      isDisabled={state !== DATAFEED_STATE.STOPPED}
+      isDisabled={isEnabled === false}
       onClick={() => {
         setIsEditing(true);
       }}
@@ -104,11 +93,7 @@ export const EditQueryDelay: FC<{
 
   return (
     <>
-      {isEditing === false
-        ? state !== DATAFEED_STATE.STOPPED
-          ? editButtonWithTooltip
-          : editButton
-        : null}
+      {isEditing === false ? (isEnabled === false ? editButtonWithTooltip : editButton) : null}
       {isEditing === true ? (
         <EuiFormRow
           label={

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
@@ -34,7 +34,8 @@ import {
   timeFormatter,
 } from '@elastic/charts';
 
-import { Datafeed } from '../../../../../../common/types/anomaly_detection_jobs';
+import { DATAFEED_STATE } from '../../../../../../common/constants/states';
+import { CombinedJobWithStats } from '../../../../../../common/types/anomaly_detection_jobs';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 import { ml } from '../../../../services/ml_api_service';
 import { useCurrentEuiTheme } from '../../../../components/color_range_legend';
@@ -49,26 +50,24 @@ import {
   TAB_IDS,
   TabIdsType,
 } from './constants';
+import { loadFullJob } from '../utils';
 
 const dateFormatter = timeFormatter('MM-DD HH:mm');
 
 interface DatafeedModalProps {
-  datafeedConfig: Datafeed;
-  bucketSpan: string;
+  jobId: string;
   end: number;
   onClose: (deletionApproved?: boolean) => void;
-  timefield: string;
 }
 
-export const DatafeedModal: FC<DatafeedModalProps> = ({
-  datafeedConfig,
-  bucketSpan,
-  end,
-  onClose,
-  timefield,
-}) => {
+export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) => {
+  const [data, setData] = useState<{
+    datafeedConfig: CombinedJobWithStats['datafeed_config'] | undefined;
+    bucketSpan: string | undefined;
+    isInitialized: boolean;
+  }>({ datafeedConfig: undefined, bucketSpan: undefined, isInitialized: false });
   const [endDate, setEndDate] = useState<any>(moment(end));
-  const [interval, setInterval] = useState<string>(getIntervalOptions(bucketSpan)[0].value);
+  const [interval, setInterval] = useState<string | undefined>();
   const [selectedTabId, setSelectedTabId] = useState<TabIdsType>(TAB_IDS.CHART);
   const [isLoadingChartData, setIsLoadingChartData] = useState<boolean>(false);
   const [bucketData, setBucketData] = useState<number[][]>([]);
@@ -76,7 +75,6 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({
 
   const { displayErrorToast } = useToastNotificationService();
   const { euiTheme } = useCurrentEuiTheme();
-  const { job_id: jobId } = datafeedConfig;
 
   const onSelectedTabChanged = (id: TabIdsType) => {
     setSelectedTabId(id);
@@ -100,6 +98,8 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({
   const handleChange = (date: moment.Moment) => setEndDate(date);
 
   const handleEndDateChange = (direction: ChartDirectionType) => {
+    if (interval === undefined) return;
+
     const newEndDate = endDate.clone();
     const [count, type] = interval.split(' ');
 
@@ -112,6 +112,8 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({
   };
 
   const getChartData = useCallback(async () => {
+    if (interval === undefined) return;
+
     const endTimestamp = moment(endDate).valueOf();
     const [count, type] = interval.split(' ');
     const startMoment = endDate.clone().subtract(Number(count), type);
@@ -120,11 +122,8 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({
     try {
       const chartData = await ml.results.getDatafeedResultChartData(
         jobId,
-        timefield,
-        bucketSpan,
         startTimestamp,
-        endTimestamp,
-        datafeedConfig
+        endTimestamp
       );
 
       setSourceData(chartData.datafeedResults);
@@ -138,13 +137,40 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({
     setIsLoadingChartData(false);
   }, [endDate, interval]);
 
+  const getJobData = async () => {
+    try {
+      const job: CombinedJobWithStats = await loadFullJob(jobId);
+      setData({
+        datafeedConfig: job.datafeed_config,
+        bucketSpan: job.analysis_config.bucket_span,
+        isInitialized: true,
+      });
+      setInterval(getIntervalOptions(job.analysis_config.bucket_span)[0].value);
+    } catch (error) {
+      displayErrorToast(error);
+    }
+  };
+
+  useEffect(function loadJobWithDatafeed() {
+    getJobData();
+  }, []);
+
   useEffect(
     function loadChartData() {
-      setIsLoadingChartData(true);
-      getChartData();
+      if (interval !== undefined) {
+        setIsLoadingChartData(true);
+        getChartData();
+      }
     },
     [endDate, interval]
   );
+
+  const { datafeedConfig, bucketSpan, isInitialized } = data;
+
+  const intervalOptions = useMemo(() => {
+    if (bucketSpan === undefined) return [];
+    return getIntervalOptions(bucketSpan);
+  }, [bucketSpan]);
 
   return (
     <EuiModal
@@ -177,104 +203,112 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({
       <EuiModalBody>
         <EuiTabs size="s">{renderTabs()}</EuiTabs>
         <EuiSpacer size="m" />
-        {isLoadingChartData && <EuiLoadingChart size="l" />}
-        {!isLoadingChartData && selectedTabId === TAB_IDS.CHART && (
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem grow={false}>
-                  <EuiSelect
-                    options={getIntervalOptions(bucketSpan)}
-                    value={interval}
-                    onChange={(e) => setInterval(e.target.value)}
-                    aria-label={i18n.translate(
-                      'xpack.ml.jobsList.datafeedModal.intervalSelection',
-                      {
-                        defaultMessage: 'Datafeed modal chart interval selection',
-                      }
-                    )}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EditQueryDelay datafeedConfig={datafeedConfig} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFlexGroup gutterSize="none" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    color="primary"
-                    size="l"
-                    onClick={() => {
-                      handleEndDateChange(CHART_DIRECTION.BACK);
-                    }}
-                    iconType="arrowLeft"
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <Chart size={CHART_SIZE}>
-                    <Settings showLegend showLegendExtra legendPosition={Position.Bottom} />
-                    <Axis
-                      id="bottom"
-                      position={Position.Bottom}
-                      showOverlappingTicks
-                      tickFormat={dateFormatter}
-                      title={i18n.translate('xpack.ml.jobsList.datafeedModal.xAxisTitle', {
-                        defaultMessage: 'Bucket span ({bucketSpan})',
-                        values: { bucketSpan },
-                      })}
+        {isLoadingChartData || isInitialized === false ? <EuiLoadingChart size="l" /> : null}
+        {!isLoadingChartData &&
+          isInitialized &&
+          selectedTabId === TAB_IDS.CHART &&
+          datafeedConfig !== undefined &&
+          bucketSpan && (
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup justifyContent="spaceBetween">
+                  <EuiFlexItem grow={false}>
+                    <EuiSelect
+                      options={intervalOptions}
+                      value={interval}
+                      onChange={(e) => setInterval(e.target.value)}
+                      aria-label={i18n.translate(
+                        'xpack.ml.jobsList.datafeedModal.intervalSelection',
+                        {
+                          defaultMessage: 'Datafeed modal chart interval selection',
+                        }
+                      )}
                     />
-                    <Axis
-                      id="left"
-                      title={i18n.translate('xpack.ml.jobsList.datafeedModal.yAxisTitle', {
-                        defaultMessage: 'Record count',
-                      })}
-                      position={Position.Left}
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EditQueryDelay
+                      datafeedId={datafeedConfig.datafeed_id}
+                      queryDelay={datafeedConfig.query_delay}
+                      isEnabled={datafeedConfig.state === DATAFEED_STATE.STOPPED}
                     />
-                    <LineSeries
-                      color={euiTheme.euiColorPrimary}
-                      id={i18n.translate('xpack.ml.jobsList.datafeedModal.sourceSeriesId', {
-                        defaultMessage: 'Source indices',
-                      })}
-                      xScaleType={ScaleType.Time}
-                      yScaleType={ScaleType.Linear}
-                      xAccessor={0}
-                      yAccessors={[1]}
-                      data={sourceData}
-                      curve={CurveType.LINEAR}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup gutterSize="none" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      color="primary"
+                      size="l"
+                      onClick={() => {
+                        handleEndDateChange(CHART_DIRECTION.BACK);
+                      }}
+                      iconType="arrowLeft"
                     />
-                    <LineSeries
-                      color={euiTheme.euiColorAccentText}
-                      id={i18n.translate('xpack.ml.jobsList.datafeedModal.bucketSeriesId', {
-                        defaultMessage: 'Job results',
-                      })}
-                      xScaleType={ScaleType.Time}
-                      yScaleType={ScaleType.Linear}
-                      xAccessor={0}
-                      yAccessors={[1]}
-                      data={bucketData}
-                      curve={CurveType.LINEAR}
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <Chart size={CHART_SIZE}>
+                      <Settings showLegend showLegendExtra legendPosition={Position.Bottom} />
+                      <Axis
+                        id="bottom"
+                        position={Position.Bottom}
+                        showOverlappingTicks
+                        tickFormat={dateFormatter}
+                        title={i18n.translate('xpack.ml.jobsList.datafeedModal.xAxisTitle', {
+                          defaultMessage: 'Bucket span ({bucketSpan})',
+                          values: { bucketSpan },
+                        })}
+                      />
+                      <Axis
+                        id="left"
+                        title={i18n.translate('xpack.ml.jobsList.datafeedModal.yAxisTitle', {
+                          defaultMessage: 'Record count',
+                        })}
+                        position={Position.Left}
+                      />
+                      <LineSeries
+                        color={euiTheme.euiColorPrimary}
+                        id={i18n.translate('xpack.ml.jobsList.datafeedModal.sourceSeriesId', {
+                          defaultMessage: 'Source indices',
+                        })}
+                        xScaleType={ScaleType.Time}
+                        yScaleType={ScaleType.Linear}
+                        xAccessor={0}
+                        yAccessors={[1]}
+                        data={sourceData}
+                        curve={CurveType.LINEAR}
+                      />
+                      <LineSeries
+                        color={euiTheme.euiColorAccentText}
+                        id={i18n.translate('xpack.ml.jobsList.datafeedModal.bucketSeriesId', {
+                          defaultMessage: 'Job results',
+                        })}
+                        xScaleType={ScaleType.Time}
+                        yScaleType={ScaleType.Linear}
+                        xAccessor={0}
+                        yAccessors={[1]}
+                        data={bucketData}
+                        curve={CurveType.LINEAR}
+                      />
+                    </Chart>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      color="primary"
+                      size="l"
+                      onClick={() => {
+                        handleEndDateChange(CHART_DIRECTION.FORWARD);
+                      }}
+                      iconType="arrowRight"
                     />
-                  </Chart>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    color="primary"
-                    size="l"
-                    onClick={() => {
-                      handleEndDateChange(CHART_DIRECTION.FORWARD);
-                    }}
-                    iconType="arrowRight"
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-        {!isLoadingChartData && selectedTabId === TAB_IDS.MESSAGES && (
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
+        {!isLoadingChartData && selectedTabId === TAB_IDS.MESSAGES ? (
           <JobMessagesPane jobId={jobId} />
-        )}
+        ) : null}
       </EuiModalBody>
     </EuiModal>
   );

@@ -238,7 +238,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
       datafeedConfig,
     }: {
       datafeedId: string;
-      datafeedConfig: Datafeed;
+      datafeedConfig: Partial<Datafeed>;
     }) {
       const body = JSON.stringify(datafeedConfig);
       return httpService.http<any>({

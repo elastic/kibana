@@ -6,7 +6,6 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { Datafeed } from './anomaly_detection_jobs';
 
 export interface GetStoppedPartitionResult {
   jobs: string[] | Record<string, string[]>;
@@ -18,12 +17,8 @@ export interface GetDatafeedResultsChartDataResult {
 
 export interface DatafeedResultsChartDataParams {
   jobId: string;
-  timefield: string;
-  bucketSpan: string;
   start: number;
   end: number;
-  desc: boolean;
-  datafeedConfig: Datafeed;
 }
 
 type MLSearchResp = Omit<estypes.SearchResponse, 'aggregations'>;
