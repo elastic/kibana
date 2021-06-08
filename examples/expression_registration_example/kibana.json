@@ -1,0 +1,11 @@
+{
+  "id": "vistypeDemo",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["expressions", "developerExamples"],
+  "optionalPlugins": [],
+  "extraPublicDirs": [],
+  "requiredBundles": []
+}
