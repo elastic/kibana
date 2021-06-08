@@ -144,8 +144,4 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
       },
     };
   }
-
-  public start(core: CoreStart, { data }: VisTypeTimeseriesPluginStartDependencies) {
-    setFieldFormats(data.fieldFormats);
-  }
 }
