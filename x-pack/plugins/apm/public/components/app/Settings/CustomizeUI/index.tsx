@@ -13,12 +13,12 @@ import { CustomLinkOverview } from './CustomLink';
 export function CustomizeUI() {
   return (
     <>
-      <EuiTitle size="l">
-        <h1>
+      <EuiTitle>
+        <h2>
           {i18n.translate('xpack.apm.settings.customizeApp.title', {
             defaultMessage: 'Customize app',
           })}
-        </h1>
+        </h2>
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiText color="subdued">
