@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 export const PermissionDenied = () => (
   <EuiFlexGroup gutterSize="none">
-    <EuiPageContent horizontalPosition="center">
+    <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
       <EuiEmptyPrompt
         iconType="securityApp"
         title={

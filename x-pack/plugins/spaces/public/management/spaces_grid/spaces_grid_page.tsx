@@ -8,17 +8,15 @@
 import {
   EuiButton,
   EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
   EuiLoadingSpinner,
   EuiPageContent,
+  EuiPageHeader,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
-import React, { Component, Fragment, lazy, Suspense } from 'react';
+import React, { Component, lazy, Suspense } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -83,7 +81,19 @@ export class SpacesGridPage extends Component<Props, State> {
   public render() {
     return (
       <div className="spcGridPage" data-test-subj="spaces-grid-page">
-        <EuiPageContent horizontalPosition="center">{this.getPageContent()}</EuiPageContent>
+        <EuiPageHeader
+          bottomBorder
+          pageTitle={
+            <FormattedMessage
+              id="xpack.spaces.management.spacesGridPage.spacesTitle"
+              defaultMessage="Spaces"
+            />
+          }
+          description={getSpacesFeatureDescription()}
+          rightSideItems={[this.getPrimaryActionButton()]}
+        />
+        <EuiSpacer size="l" />
+        {this.getPageContent()}
         {this.getConfirmDeleteModal()}
       </div>
     );
@@ -91,61 +101,45 @@ export class SpacesGridPage extends Component<Props, State> {
 
   public getPageContent() {
     if (!this.props.capabilities.spaces.manage) {
-      return <UnauthorizedPrompt />;
+      return (
+        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+          <UnauthorizedPrompt />
+        </EuiPageContent>
+      );
     }
 
     return (
-      <Fragment>
-        <EuiFlexGroup justifyContent={'spaceBetween'}>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="m">
-              <h1>
-                <FormattedMessage
-                  id="xpack.spaces.management.spacesGridPage.spacesTitle"
-                  defaultMessage="Spaces"
-                />
-              </h1>
-            </EuiTitle>
-            <EuiText color="subdued" size="s">
-              <p>{getSpacesFeatureDescription()}</p>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>{this.getPrimaryActionButton()}</EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="l" />
-
-        <EuiInMemoryTable
-          itemId={'id'}
-          items={this.state.spaces}
-          tableCaption={i18n.translate('xpack.spaces.management.spacesGridPage.tableCaption', {
-            defaultMessage: 'Kibana spaces',
-          })}
-          rowHeader="name"
-          columns={this.getColumnConfig()}
-          hasActions
-          pagination={true}
-          sorting={true}
-          search={{
-            box: {
-              placeholder: i18n.translate(
-                'xpack.spaces.management.spacesGridPage.searchPlaceholder',
-                {
-                  defaultMessage: 'Search',
-                }
-              ),
-            },
-          }}
-          loading={this.state.loading}
-          message={
-            this.state.loading ? (
-              <FormattedMessage
-                id="xpack.spaces.management.spacesGridPage.loadingTitle"
-                defaultMessage="loading…"
-              />
-            ) : undefined
-          }
-        />
-      </Fragment>
+      <EuiInMemoryTable
+        itemId={'id'}
+        items={this.state.spaces}
+        tableCaption={i18n.translate('xpack.spaces.management.spacesGridPage.tableCaption', {
+          defaultMessage: 'Kibana spaces',
+        })}
+        rowHeader="name"
+        columns={this.getColumnConfig()}
+        hasActions
+        pagination={true}
+        sorting={true}
+        search={{
+          box: {
+            placeholder: i18n.translate(
+              'xpack.spaces.management.spacesGridPage.searchPlaceholder',
+              {
+                defaultMessage: 'Search',
+              }
+            ),
+          },
+        }}
+        loading={this.state.loading}
+        message={
+          this.state.loading ? (
+            <FormattedMessage
+              id="xpack.spaces.management.spacesGridPage.loadingTitle"
+              defaultMessage="loading…"
+            />
+          ) : undefined
+        }
+      />
     );
   }
 
@@ -153,6 +147,7 @@ export class SpacesGridPage extends Component<Props, State> {
     return (
       <EuiButton
         fill
+        iconType="plusInCircle"
         {...reactRouterNavigate(this.props.history, '/create')}
         data-test-subj="createSpace"
       >

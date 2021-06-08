@@ -15,10 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
+  EuiPageHeader,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -82,9 +79,10 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
   const displayName = getUserDisplayName(user);
 
   return (
-    <EuiPageContent>
-      <EuiPageContentHeader>
-        <EuiPageContentHeaderSection>
+    <>
+      <EuiPageHeader
+        bottomBorder
+        pageTitle={
           <EuiFlexGroup alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiAvatar name={displayName!} size="xl" />
@@ -96,227 +94,227 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
               <EuiText>{user.email}</EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiPageContentHeaderSection>
-      </EuiPageContentHeader>
-      <EuiPageContentBody>
-        <EuiHorizontalRule />
-        {isDeprecatedUser ? (
-          <>
-            <EuiCallOut
-              title={
-                <FormattedMessage
-                  id="xpack.security.management.users.editUserPage.deprecatedUserWarning"
-                  defaultMessage="This user is deprecated."
-                />
-              }
-              iconType="alert"
-              color="warning"
-            >
-              {user.metadata?._deprecated_reason?.replace(/\[(.+)\]/, "'$1'")}
-            </EuiCallOut>
-            <EuiSpacer />
-          </>
-        ) : isReservedUser ? (
-          <>
-            <EuiCallOut
-              title={
-                <FormattedMessage
-                  id="xpack.security.management.users.editUserPage.reservedUserWarning"
-                  defaultMessage="This user is built in and can't be updated or deleted."
-                />
-              }
-              iconType="lock"
-            />
-            <EuiSpacer />
-          </>
-        ) : user.enabled === false ? (
-          <>
-            <EuiCallOut
-              title={
-                <FormattedMessage
-                  id="xpack.security.management.users.editUserPage.disabledUserWarning"
-                  defaultMessage="This user has been deactivated and can't access Elastic."
-                />
-              }
-            >
-              <EuiButton onClick={() => setAction('enableUser')} size="s">
-                <FormattedMessage
-                  id="xpack.security.management.users.editUserPage.enableUserButton"
-                  defaultMessage="Activate user"
-                />
-              </EuiButton>
-            </EuiCallOut>
-            <EuiSpacer />
-          </>
-        ) : undefined}
+        }
+      />
 
-        <UserForm
-          isReservedUser={isReservedUser}
-          defaultValues={user}
-          onCancel={backToUsers}
+      <EuiSpacer size="l" />
+
+      {isDeprecatedUser ? (
+        <>
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.security.management.users.editUserPage.deprecatedUserWarning"
+                defaultMessage="This user is deprecated."
+              />
+            }
+            iconType="alert"
+            color="warning"
+          >
+            {user.metadata?._deprecated_reason?.replace(/\[(.+)\]/, "'$1'")}
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      ) : isReservedUser ? (
+        <>
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.security.management.users.editUserPage.reservedUserWarning"
+                defaultMessage="This user is built in and can't be updated or deleted."
+              />
+            }
+            iconType="lock"
+          />
+          <EuiSpacer />
+        </>
+      ) : user.enabled === false ? (
+        <>
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.security.management.users.editUserPage.disabledUserWarning"
+                defaultMessage="This user has been deactivated and can't access Elastic."
+              />
+            }
+          >
+            <EuiButton onClick={() => setAction('enableUser')} size="s">
+              <FormattedMessage
+                id="xpack.security.management.users.editUserPage.enableUserButton"
+                defaultMessage="Activate user"
+              />
+            </EuiButton>
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      ) : undefined}
+
+      <UserForm
+        isReservedUser={isReservedUser}
+        defaultValues={user}
+        onCancel={backToUsers}
+        onSuccess={backToUsers}
+      />
+
+      {action === 'changePassword' ? (
+        <ChangePasswordFlyout
+          username={username!}
+          onCancel={() => setAction('none')}
+          onSuccess={() => setAction('none')}
+        />
+      ) : action === 'disableUser' ? (
+        <ConfirmDisableUsers
+          usernames={[username!]}
+          onCancel={() => setAction('none')}
+          onSuccess={() => {
+            setAction('none');
+            getUser();
+          }}
+        />
+      ) : action === 'enableUser' ? (
+        <ConfirmEnableUsers
+          usernames={[username!]}
+          onCancel={() => setAction('none')}
+          onSuccess={() => {
+            setAction('none');
+            getUser();
+          }}
+        />
+      ) : action === 'deleteUser' ? (
+        <ConfirmDeleteUsers
+          usernames={[username!]}
+          onCancel={() => setAction('none')}
           onSuccess={backToUsers}
         />
+      ) : undefined}
 
-        {action === 'changePassword' ? (
-          <ChangePasswordFlyout
-            username={username!}
-            onCancel={() => setAction('none')}
-            onSuccess={() => setAction('none')}
-          />
-        ) : action === 'disableUser' ? (
-          <ConfirmDisableUsers
-            usernames={[username!]}
-            onCancel={() => setAction('none')}
-            onSuccess={() => {
-              setAction('none');
-              getUser();
-            }}
-          />
-        ) : action === 'enableUser' ? (
-          <ConfirmEnableUsers
-            usernames={[username!]}
-            onCancel={() => setAction('none')}
-            onSuccess={() => {
-              setAction('none');
-              getUser();
-            }}
-          />
-        ) : action === 'deleteUser' ? (
-          <ConfirmDeleteUsers
-            usernames={[username!]}
-            onCancel={() => setAction('none')}
-            onSuccess={backToUsers}
-          />
-        ) : undefined}
+      <EuiSpacer />
+      <EuiHorizontalRule />
 
-        <EuiSpacer />
-        <EuiHorizontalRule />
+      <EuiPanel color="subdued" hasShadow={false}>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem>
+            <EuiDescriptionList>
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.security.management.users.editUserPage.changePasswordTitle"
+                  defaultMessage="Change password"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                <FormattedMessage
+                  id="xpack.security.management.users.editUserPage.changePasswordDescription"
+                  defaultMessage="The user will not be able to log in using their previous
+                    password."
+                />
+              </EuiDescriptionListDescription>
+            </EuiDescriptionList>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton onClick={() => setAction('changePassword')} size="s">
+              <FormattedMessage
+                id="xpack.security.management.users.editUserPage.changePasswordButton"
+                defaultMessage="Change password"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
 
+      <EuiSpacer />
+      {user.enabled === false ? (
         <EuiPanel color="subdued" hasShadow={false}>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem>
               <EuiDescriptionList>
                 <EuiDescriptionListTitle>
                   <FormattedMessage
-                    id="xpack.security.management.users.editUserPage.changePasswordTitle"
-                    defaultMessage="Change password"
+                    id="xpack.security.management.users.editUserPage.enableUserTitle"
+                    defaultMessage="Activate user"
                   />
                 </EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
                   <FormattedMessage
-                    id="xpack.security.management.users.editUserPage.changePasswordDescription"
-                    defaultMessage="The user will not be able to log in using their previous
-                    password."
+                    id="xpack.security.management.users.editUserPage.enableUserDescription"
+                    defaultMessage="Allow the user to access Elastic."
                   />
                 </EuiDescriptionListDescription>
               </EuiDescriptionList>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={() => setAction('changePassword')} size="s">
+              <EuiButton onClick={() => setAction('enableUser')} size="s">
                 <FormattedMessage
-                  id="xpack.security.management.users.editUserPage.changePasswordButton"
-                  defaultMessage="Change password"
+                  id="xpack.security.management.users.editUserPage.enableUserButton"
+                  defaultMessage="Activate user"
                 />
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
-
-        <EuiSpacer />
-        {user.enabled === false ? (
-          <EuiPanel color="subdued" hasShadow={false}>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-              <EuiFlexItem>
-                <EuiDescriptionList>
-                  <EuiDescriptionListTitle>
-                    <FormattedMessage
-                      id="xpack.security.management.users.editUserPage.enableUserTitle"
-                      defaultMessage="Activate user"
-                    />
-                  </EuiDescriptionListTitle>
-                  <EuiDescriptionListDescription>
-                    <FormattedMessage
-                      id="xpack.security.management.users.editUserPage.enableUserDescription"
-                      defaultMessage="Allow the user to access Elastic."
-                    />
-                  </EuiDescriptionListDescription>
-                </EuiDescriptionList>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton onClick={() => setAction('enableUser')} size="s">
+      ) : (
+        <EuiPanel color="subdued" hasShadow={false}>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem>
+              <EuiDescriptionList>
+                <EuiDescriptionListTitle>
                   <FormattedMessage
-                    id="xpack.security.management.users.editUserPage.enableUserButton"
-                    defaultMessage="Activate user"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        ) : (
-          <EuiPanel color="subdued" hasShadow={false}>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-              <EuiFlexItem>
-                <EuiDescriptionList>
-                  <EuiDescriptionListTitle>
-                    <FormattedMessage
-                      id="xpack.security.management.users.editUserPage.disableUserTitle"
-                      defaultMessage="Deactivate user"
-                    />
-                  </EuiDescriptionListTitle>
-                  <EuiDescriptionListDescription>
-                    <FormattedMessage
-                      id="xpack.security.management.users.editUserPage.disableUserDescription"
-                      defaultMessage="Prevent the user from accessing Elastic."
-                    />
-                  </EuiDescriptionListDescription>
-                </EuiDescriptionList>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton onClick={() => setAction('disableUser')} size="s">
-                  <FormattedMessage
-                    id="xpack.security.management.users.editUserPage.disableUserButton"
+                    id="xpack.security.management.users.editUserPage.disableUserTitle"
                     defaultMessage="Deactivate user"
                   />
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>
+                  <FormattedMessage
+                    id="xpack.security.management.users.editUserPage.disableUserDescription"
+                    defaultMessage="Prevent the user from accessing Elastic."
+                  />
+                </EuiDescriptionListDescription>
+              </EuiDescriptionList>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={() => setAction('disableUser')} size="s">
+                <FormattedMessage
+                  id="xpack.security.management.users.editUserPage.disableUserButton"
+                  defaultMessage="Deactivate user"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      )}
+
+      {!isReservedUser && (
+        <>
+          <EuiSpacer />
+          <EuiPanel color="subdued" hasShadow={false}>
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexItem>
+                <EuiDescriptionList>
+                  <EuiDescriptionListTitle>
+                    <FormattedMessage
+                      id="xpack.security.management.users.editUserPage.deleteUserTitle"
+                      defaultMessage="Delete user"
+                    />
+                  </EuiDescriptionListTitle>
+                  <EuiDescriptionListDescription>
+                    <FormattedMessage
+                      id="xpack.security.management.users.editUserPage.deleteUserDescription"
+                      defaultMessage="Permanently delete the user and remove access to Elastic."
+                    />
+                  </EuiDescriptionListDescription>
+                </EuiDescriptionList>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton onClick={() => setAction('deleteUser')} size="s" color="danger">
+                  <FormattedMessage
+                    id="xpack.security.management.users.editUserPage.deleteUserButton"
+                    defaultMessage="Delete user"
+                  />
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
-        )}
-
-        {!isReservedUser && (
-          <>
-            <EuiSpacer />
-            <EuiPanel color="subdued" hasShadow={false}>
-              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                <EuiFlexItem>
-                  <EuiDescriptionList>
-                    <EuiDescriptionListTitle>
-                      <FormattedMessage
-                        id="xpack.security.management.users.editUserPage.deleteUserTitle"
-                        defaultMessage="Delete user"
-                      />
-                    </EuiDescriptionListTitle>
-                    <EuiDescriptionListDescription>
-                      <FormattedMessage
-                        id="xpack.security.management.users.editUserPage.deleteUserDescription"
-                        defaultMessage="Permanently delete the user and remove access to Elastic."
-                      />
-                    </EuiDescriptionListDescription>
-                  </EuiDescriptionList>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton onClick={() => setAction('deleteUser')} size="s" color="danger">
-                    <FormattedMessage
-                      id="xpack.security.management.users.editUserPage.deleteUserButton"
-                      defaultMessage="Delete user"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          </>
-        )}
-      </EuiPageContentBody>
-    </EuiPageContent>
+        </>
+      )}
+    </>
   );
 };

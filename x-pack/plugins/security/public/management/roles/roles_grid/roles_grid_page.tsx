@@ -13,13 +13,10 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
+  EuiPageHeader,
+  EuiSpacer,
   EuiSwitch,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { Component } from 'react';
@@ -90,100 +87,98 @@ export class RolesGridPage extends Component<Props, State> {
   private getPageContent = () => {
     const { roles } = this.state;
     return (
-      <EuiPageContent>
-        <EuiPageContentHeader>
-          <EuiPageContentHeaderSection>
-            <EuiTitle>
-              <h1>
-                <FormattedMessage
-                  id="xpack.security.management.roles.roleTitle"
-                  defaultMessage="Roles"
-                />
-              </h1>
-            </EuiTitle>
-            <EuiText color="subdued" size="s">
-              <p>
-                <FormattedMessage
-                  id="xpack.security.management.roles.subtitle"
-                  defaultMessage="Apply roles to groups of users and manage permissions across the stack."
-                />
-              </p>
-            </EuiText>
-          </EuiPageContentHeaderSection>
-          <EuiPageContentHeaderSection>
+      <>
+        <EuiPageHeader
+          bottomBorder
+          pageTitle={
+            <FormattedMessage
+              id="xpack.security.management.roles.roleTitle"
+              defaultMessage="Roles"
+            />
+          }
+          description={
+            <FormattedMessage
+              id="xpack.security.management.roles.subtitle"
+              defaultMessage="Apply roles to groups of users and manage permissions across the stack."
+            />
+          }
+          rightSideItems={[
             <EuiButton
               data-test-subj="createRoleButton"
               {...reactRouterNavigate(this.props.history, getRoleManagementHref('edit'))}
+              fill
+              iconType="plusInCircleFilled"
             >
               <FormattedMessage
                 id="xpack.security.management.roles.createRoleButtonLabel"
                 defaultMessage="Create role"
               />
-            </EuiButton>
-          </EuiPageContentHeaderSection>
-        </EuiPageContentHeader>
-        <EuiPageContentBody>
-          {this.state.showDeleteConfirmation ? (
-            <ConfirmDelete
-              onCancel={this.onCancelDelete}
-              rolesToDelete={this.state.selection.map((role) => role.name)}
-              callback={this.handleDelete}
-              notifications={this.props.notifications}
-              rolesAPIClient={this.props.rolesAPIClient}
-            />
-          ) : null}
+            </EuiButton>,
+          ]}
+        />
 
-          {
-            <EuiInMemoryTable
-              itemId="name"
-              responsive={false}
-              columns={this.getColumnConfig()}
-              hasActions={true}
-              selection={{
-                selectable: (role: Role) => !role.metadata || !role.metadata._reserved,
-                selectableMessage: (selectable: boolean) => (!selectable ? 'Role is reserved' : ''),
-                onSelectionChange: (selection: Role[]) => this.setState({ selection }),
-              }}
-              pagination={{
-                initialPageSize: 20,
-                pageSizeOptions: [10, 20, 30, 50, 100],
-              }}
-              items={this.state.visibleRoles}
-              loading={roles.length === 0}
-              search={{
-                toolsLeft: this.renderToolsLeft(),
-                toolsRight: this.renderToolsRight(),
-                box: {
-                  incremental: true,
-                  'data-test-subj': 'searchRoles',
-                },
-                onChange: (query: Record<string, any>) => {
-                  this.setState({
-                    filter: query.queryText,
-                    visibleRoles: this.getVisibleRoles(
-                      this.state.roles,
-                      query.queryText,
-                      this.state.includeReservedRoles
-                    ),
-                  });
-                },
-              }}
-              sorting={{
-                sort: {
-                  field: 'name',
-                  direction: 'asc',
-                },
-              }}
-              rowProps={() => {
-                return {
-                  'data-test-subj': 'roleRow',
-                };
-              }}
-              isSelectable
-            />
-          }
-        </EuiPageContentBody>
-      </EuiPageContent>
+        <EuiSpacer size="l" />
+
+        {this.state.showDeleteConfirmation ? (
+          <ConfirmDelete
+            onCancel={this.onCancelDelete}
+            rolesToDelete={this.state.selection.map((role) => role.name)}
+            callback={this.handleDelete}
+            notifications={this.props.notifications}
+            rolesAPIClient={this.props.rolesAPIClient}
+          />
+        ) : null}
+
+        {
+          <EuiInMemoryTable
+            itemId="name"
+            responsive={false}
+            columns={this.getColumnConfig()}
+            hasActions={true}
+            selection={{
+              selectable: (role: Role) => !role.metadata || !role.metadata._reserved,
+              selectableMessage: (selectable: boolean) => (!selectable ? 'Role is reserved' : ''),
+              onSelectionChange: (selection: Role[]) => this.setState({ selection }),
+            }}
+            pagination={{
+              initialPageSize: 20,
+              pageSizeOptions: [10, 20, 30, 50, 100],
+            }}
+            items={this.state.visibleRoles}
+            loading={roles.length === 0}
+            search={{
+              toolsLeft: this.renderToolsLeft(),
+              toolsRight: this.renderToolsRight(),
+              box: {
+                incremental: true,
+                'data-test-subj': 'searchRoles',
+              },
+              onChange: (query: Record<string, any>) => {
+                this.setState({
+                  filter: query.queryText,
+                  visibleRoles: this.getVisibleRoles(
+                    this.state.roles,
+                    query.queryText,
+                    this.state.includeReservedRoles
+                  ),
+                });
+              },
+            }}
+            sorting={{
+              sort: {
+                field: 'name',
+                direction: 'asc',
+              },
+            }}
+            rowProps={() => {
+              return {
+                'data-test-subj': 'roleRow',
+              };
+            }}
+            isSelectable
+          />
+        }
+      </>
     );
   };
 

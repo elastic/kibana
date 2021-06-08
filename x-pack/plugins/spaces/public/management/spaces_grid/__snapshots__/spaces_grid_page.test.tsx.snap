@@ -5,41 +5,22 @@ exports[`SpacesGridPage renders as expected 1`] = `
   className="spcGridPage"
   data-test-subj="spaces-grid-page"
 >
-  <EuiPageContent
-    horizontalPosition="center"
-  >
-    <EuiFlexGroup
-      justifyContent="spaceBetween"
-    >
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiTitle
-          size="m"
-        >
-          <h1>
-            <FormattedMessage
-              defaultMessage="Spaces"
-              id="xpack.spaces.management.spacesGridPage.spacesTitle"
-              values={Object {}}
-            />
-          </h1>
-        </EuiTitle>
-        <EuiText
-          color="subdued"
-          size="s"
-        >
-          <p>
-            Organize your dashboards and other saved objects into meaningful categories.
-          </p>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-      >
+  <EuiPageHeader
+    bottomBorder={true}
+    description="Organize your dashboards and other saved objects into meaningful categories."
+    pageTitle={
+      <FormattedMessage
+        defaultMessage="Spaces"
+        id="xpack.spaces.management.spacesGridPage.spacesTitle"
+        values={Object {}}
+      />
+    }
+    rightSideItems={
+      Array [
         <EuiButton
           data-test-subj="createSpace"
           fill={true}
+          iconType="plusInCircle"
           onClick={[Function]}
         >
           <FormattedMessage
@@ -47,84 +28,84 @@ exports[`SpacesGridPage renders as expected 1`] = `
             id="xpack.spaces.management.spacesGridPage.createSpaceButtonLabel"
             values={Object {}}
           />
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiSpacer
-      size="l"
-    />
-    <EuiInMemoryTable
-      columns={
-        Array [
-          Object {
-            "field": "initials",
-            "name": "",
-            "render": [Function],
-            "width": "50px",
-          },
-          Object {
-            "field": "name",
-            "name": "Space",
-            "render": [Function],
-            "sortable": true,
-          },
-          Object {
-            "field": "description",
-            "name": "Description",
-            "sortable": true,
-          },
-          Object {
-            "field": "disabledFeatures",
-            "name": "Features",
-            "render": [Function],
-            "sortable": [Function],
-          },
-          Object {
-            "field": "id",
-            "name": "Identifier",
-            "render": [Function],
-            "sortable": true,
-          },
-          Object {
-            "actions": Array [
-              Object {
-                "render": [Function],
-              },
-              Object {
-                "available": [Function],
-                "render": [Function],
-              },
-            ],
-            "name": "Actions",
-          },
-        ]
-      }
-      hasActions={true}
-      itemId="id"
-      items={Array []}
-      loading={true}
-      message={
-        <FormattedMessage
-          defaultMessage="loading…"
-          id="xpack.spaces.management.spacesGridPage.loadingTitle"
-          values={Object {}}
-        />
-      }
-      pagination={true}
-      responsive={true}
-      rowHeader="name"
-      search={
+        </EuiButton>,
+      ]
+    }
+  />
+  <EuiSpacer
+    size="l"
+  />
+  <EuiInMemoryTable
+    columns={
+      Array [
         Object {
-          "box": Object {
-            "placeholder": "Search",
-          },
-        }
+          "field": "initials",
+          "name": "",
+          "render": [Function],
+          "width": "50px",
+        },
+        Object {
+          "field": "name",
+          "name": "Space",
+          "render": [Function],
+          "sortable": true,
+        },
+        Object {
+          "field": "description",
+          "name": "Description",
+          "sortable": true,
+        },
+        Object {
+          "field": "disabledFeatures",
+          "name": "Features",
+          "render": [Function],
+          "sortable": [Function],
+        },
+        Object {
+          "field": "id",
+          "name": "Identifier",
+          "render": [Function],
+          "sortable": true,
+        },
+        Object {
+          "actions": Array [
+            Object {
+              "render": [Function],
+            },
+            Object {
+              "available": [Function],
+              "render": [Function],
+            },
+          ],
+          "name": "Actions",
+        },
+      ]
+    }
+    hasActions={true}
+    itemId="id"
+    items={Array []}
+    loading={true}
+    message={
+      <FormattedMessage
+        defaultMessage="loading…"
+        id="xpack.spaces.management.spacesGridPage.loadingTitle"
+        values={Object {}}
+      />
+    }
+    pagination={true}
+    responsive={true}
+    rowHeader="name"
+    search={
+      Object {
+        "box": Object {
+          "placeholder": "Search",
+        },
       }
-      sorting={true}
-      tableCaption="Kibana spaces"
-      tableLayout="fixed"
-    />
-  </EuiPageContent>
+    }
+    sorting={true}
+    tableCaption="Kibana spaces"
+    tableLayout="fixed"
+  />
 </div>
 `;
 

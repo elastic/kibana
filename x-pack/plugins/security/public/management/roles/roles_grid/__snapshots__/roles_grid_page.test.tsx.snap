@@ -9,15 +9,18 @@ exports[`<RolesGridPage /> renders permission denied if required 1`] = `
       className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
       <EuiPageContent
+        color="danger"
         horizontalPosition="center"
+        verticalPosition="center"
       >
         <EuiPanel
-          className="euiPageContent euiPageContent--horizontalCenter"
+          className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+          color="danger"
           paddingSize="l"
           role="main"
         >
           <div
-            className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--horizontalCenter"
+            className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--danger euiPanel--noShadow euiPanel--noBorder euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
             role="main"
           >
             <EuiEmptyPrompt

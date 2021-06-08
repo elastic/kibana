@@ -17,11 +17,9 @@ import {
   EuiInMemoryTable,
   EuiPageContent,
   EuiPageContentBody,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
+  EuiPageHeader,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 import type { History } from 'history';
@@ -123,10 +121,10 @@ export class APIKeysGridPage extends Component<Props, State> {
       apiKeys,
     } = this.state;
 
-    if (!apiKeys) {
+    if (apiKeys) {
       if (isLoadingApp) {
         return (
-          <EuiPageContent>
+          <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
             <SectionLoading>
               <FormattedMessage
                 id="xpack.security.management.apiKeys.table.loadingApiKeysDescription"
@@ -143,7 +141,7 @@ export class APIKeysGridPage extends Component<Props, State> {
 
       if (error) {
         return (
-          <EuiPageContent>
+          <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
             <ApiKeysEmptyPrompt error={error}>
               <EuiButton iconType="refresh" onClick={this.reloadApiKeys}>
                 <FormattedMessage
@@ -167,7 +165,7 @@ export class APIKeysGridPage extends Component<Props, State> {
 
     if (!isLoadingTable && apiKeys && apiKeys.length === 0) {
       return (
-        <EuiPageContent>
+        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
           <ApiKeysEmptyPrompt>
             <EuiButton {...reactRouterNavigate(this.props.history, '/create')} fill>
               <FormattedMessage
@@ -183,42 +181,45 @@ export class APIKeysGridPage extends Component<Props, State> {
     const concatenated = `${this.state.createdApiKey?.id}:${this.state.createdApiKey?.api_key}`;
 
     return (
-      <EuiPageContent>
-        <EuiPageContentHeader>
-          <EuiPageContentHeaderSection>
-            <EuiTitle>
-              <h1>
+      <>
+        <EuiPageHeader
+          bottomBorder
+          pageTitle={
+            <FormattedMessage
+              id="xpack.security.management.apiKeys.table.apiKeysTitle"
+              defaultMessage="API Keys"
+            />
+          }
+          description={
+            <>
+              {isAdmin ? (
                 <FormattedMessage
-                  id="xpack.security.management.apiKeys.table.apiKeysTitle"
-                  defaultMessage="API Keys"
+                  id="xpack.security.management.apiKeys.table.apiKeysAllDescription"
+                  defaultMessage="View and delete API keys. An API key sends requests on behalf of a user."
                 />
-              </h1>
-            </EuiTitle>
-            <EuiText color="subdued" size="s" data-test-subj="apiKeysDescriptionText">
-              <p>
-                {isAdmin ? (
-                  <FormattedMessage
-                    id="xpack.security.management.apiKeys.table.apiKeysAllDescription"
-                    defaultMessage="View and delete API keys. An API key sends requests on behalf of a user."
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.security.management.apiKeys.table.apiKeysOwnDescription"
-                    defaultMessage="View and delete your API keys. An API key sends requests on your behalf."
-                  />
-                )}
-              </p>
-            </EuiText>
-          </EuiPageContentHeaderSection>
-          <EuiPageContentHeaderSection>
-            <EuiButton {...reactRouterNavigate(this.props.history, '/create')}>
+              ) : (
+                <FormattedMessage
+                  id="xpack.security.management.apiKeys.table.apiKeysOwnDescription"
+                  defaultMessage="View and delete your API keys. An API key sends requests on your behalf."
+                />
+              )}
+            </>
+          }
+          rightSideItems={[
+            <EuiButton
+              {...reactRouterNavigate(this.props.history, '/create')}
+              fill
+              iconType="plusInCircleFilled"
+            >
               <FormattedMessage
                 id="xpack.security.management.apiKeys.table.createButton"
                 defaultMessage="Create API key"
               />
-            </EuiButton>
-          </EuiPageContentHeaderSection>
-        </EuiPageContentHeader>
+            </EuiButton>,
+          ]}
+        />
+
+        <EuiSpacer size="l" />
 
         {this.state.createdApiKey && !this.state.isLoadingTable && (
           <>
@@ -302,7 +303,7 @@ export class APIKeysGridPage extends Component<Props, State> {
         )}
 
         <EuiPageContentBody>{this.renderTable()}</EuiPageContentBody>
-      </EuiPageContent>
+      </>
     );
   }
 
