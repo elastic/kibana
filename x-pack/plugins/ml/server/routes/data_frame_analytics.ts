@@ -620,7 +620,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
       try {
         const { analyticsIds, allSpaces } = request.body;
-        const results: { [id: string]: boolean } = {};
+        const results: { [id: string]: { exists: boolean } } = {};
         for (const id of analyticsIds) {
           try {
             const { body } = allSpaces
@@ -630,17 +630,17 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
               : await mlClient.getDataFrameAnalytics({
                   id,
                 });
-            results[id] = body.data_frame_analytics.length > 0;
+            results[id] = { exists: body.data_frame_analytics.length > 0 };
           } catch (error) {
             if (error.statusCode !== 404) {
               throw error;
             }
-            results[id] = false;
+            results[id] = { exists: false };
           }
         }
 
         return response.ok({
-          body: { results },
+          body: results,
         });
       } catch (e) {
         return response.customError(wrapError(e));

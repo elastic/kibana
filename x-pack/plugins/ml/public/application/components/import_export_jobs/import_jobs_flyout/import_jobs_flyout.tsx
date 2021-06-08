@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useState, useEffect } from 'react';
+import React, { FC, useState, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+
 import {
   EuiFlyout,
   EuiFlyoutFooter,
@@ -19,7 +20,6 @@ import {
   EuiFlyoutBody,
   EuiTitle,
   EuiFilePicker,
-  EuiFieldText,
   EuiSpacer,
 } from '@elastic/eui';
 
@@ -27,6 +27,7 @@ import type { Job, Datafeed } from '../../../../../common/types/anomaly_detectio
 import { DataFrameAnalyticsConfig } from '../../../data_frame_analytics/common';
 import { useMlApiContext } from '../../../contexts/kibana';
 import { JobType } from '../../../../../common/types/saved_objects';
+import { JobIdInput } from './job_id_input';
 
 interface ImportedAdJob {
   job: Job;
@@ -56,6 +57,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
   const [jobIds, setJobIds] = useState<string[]>([]);
   const [importing, setImporting] = useState(false);
   const [jobType, setJobType] = useState<JobType | null>('anomaly-detector');
+  const [jobIdsValid, setJobIdsValid] = useState<boolean[]>([]);
 
   useEffect(() => {
     setAdJobs([]);
@@ -68,7 +70,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
     setShowFlyout(!showFlyout);
   }
 
-  async function onFilePickerChange(files: any) {
+  const onFilePickerChange = useCallback(async (files: any) => {
     if (files.length) {
       try {
         const gg = await readJobConfigs(files[0]);
@@ -79,7 +81,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
         }
         setJobType(gg.jobType);
         setJobIds(gg.jobIds);
-        // setJobIds(jobs.map((j) => j.job.job_id));
+        setJobIdsValid(gg.jobIds.map((j) => false));
       } catch (error) {
         // show error
       }
@@ -88,9 +90,9 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
       setDfaJobs([]);
       setJobIds([]);
     }
-  }
+  }, []);
 
-  async function onImport() {
+  const onImport = useCallback(async () => {
     setImporting(true);
     if (jobType === 'anomaly-detector') {
       const renamedJobs = renameAdJobs(jobIds, adJobs);
@@ -103,9 +105,9 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
     setImporting(false);
     setShowFlyout(false);
     refreshJobs();
-  }
+  }, [jobType, jobIds, adJobs, dfaJobs]);
 
-  async function bulkCreateDfaJobs(jobs: DataFrameAnalyticsConfig[]) {
+  const bulkCreateDfaJobs = useCallback(async (jobs: DataFrameAnalyticsConfig[]) => {
     Promise.all(
       jobs.map(async ({ id, ...config }) => {
         try {
@@ -115,16 +117,25 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
         }
       })
     );
-  }
+  }, []);
 
-  function renameJob(index: number, e: any) {
-    const js = [...jobIds];
-    js[index] = e.target.value;
-    setJobIds(js);
-  }
+  const renameJob = useCallback(
+    (index: number, id: string) => {
+      const js = [...jobIds];
+      js[index] = id;
+      setJobIds(js);
+    },
+    [jobIds]
+  );
+
+  const setJobIdValid = useCallback((index: number, valid: boolean) => {
+    const validIds = [...jobIdsValid];
+    validIds[index] = valid;
+    setJobIdsValid(validIds);
+  }, []);
 
   return (
-    <Fragment>
+    <>
       <FlyoutButton onClick={toggleFlyout} isDisabled={isDisabled} />
 
       {showFlyout === true && isDisabled === false && (
@@ -133,7 +144,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
             <EuiTitle size="m">
               <h2>
                 <FormattedMessage
-                  id="xpack.infra.ml.aomalyFlyout.jobSetup.flyoutHeader"
+                  id="xpack.infra.ml.anomalyFlyout.jobSetup.flyoutHeader"
                   defaultMessage="Import jobs"
                 />
               </h2>
@@ -161,20 +172,21 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
                 <>
                   <EuiSpacer size="l" />
                   <FormattedMessage
-                    id="xpack.infra.ml.aomalyFlyout.jobSetup.flyoutHeader"
-                    defaultMessage="{num} anomaly detection jobs read from file"
+                    id="xpack.infra.ml.anomalyFlyout.jobSetup.flyoutHeader"
+                    defaultMessage="{num} anomaly detection {num, plural, one {job} other {jobs}} read from file"
                     values={{ num: adJobs.length }}
                   />
                   <EuiSpacer size="l" />
 
                   {jobIds.map((j, i) => (
                     <div key={i}>
-                      <EuiFieldText
+                      <JobIdInput
+                        jobType={jobType}
+                        index={i}
+                        id={j}
+                        renameJob={renameJob}
                         disabled={importing}
-                        compressed={true}
-                        value={j}
-                        onChange={(e) => renameJob(i, e)}
-                        aria-label="Use aria labels when no actual label is in use"
+                        setIsValid={setJobIdValid}
                       />
                       <EuiSpacer size="s" />
                     </div>
@@ -185,20 +197,21 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
                 <>
                   <EuiSpacer size="l" />
                   <FormattedMessage
-                    id="xpack.infra.ml.aomalyFlyout.jobSetup.flyoutHeader"
-                    defaultMessage="{num} data frame analytics jobs read from file"
+                    id="xpack.infra.ml.anomalyFlyout.jobSetup.flyoutHeader"
+                    defaultMessage="{num} data frame analytics {num, plural, one {job} other {jobs}} read from file"
                     values={{ num: dfaJobs.length }}
                   />
                   <EuiSpacer size="l" />
 
                   {jobIds.map((j, i) => (
                     <div key={i}>
-                      <EuiFieldText
+                      <JobIdInput
+                        jobType={jobType}
+                        index={i}
+                        id={j}
+                        renameJob={renameJob}
                         disabled={importing}
-                        compressed={true}
-                        value={j}
-                        onChange={(e) => renameJob(i, e)}
-                        aria-label="Use aria labels when no actual label is in use"
+                        setIsValid={setJobIdValid}
                       />
                       <EuiSpacer size="s" />
                     </div>
@@ -219,7 +232,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  disabled={/* adJobs.length === 0 ||*/ importing === true}
+                  disabled={jobIdsValid.some((j) => j === false) || importing === true}
                   onClick={onImport}
                   fill
                 >
@@ -233,7 +246,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
           </EuiFlyoutFooter>
         </EuiFlyout>
       )}
-    </Fragment>
+    </>
   );
 };
 
