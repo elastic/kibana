@@ -73,6 +73,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
       onClick: goToCreateCase,
     },
     userCanCrud,
+    owner: [APP_ID],
   });
 });
 

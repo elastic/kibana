@@ -29,6 +29,7 @@ import {
   PluginStartContract as AlertPluginStartContract,
 } from '../../alerting/server';
 
+import { PluginStartContract as CasesPluginStartContract } from '../../cases/server';
 import {
   ECS_COMPONENT_TEMPLATE_NAME,
   TECHNICAL_COMPONENT_TEMPLATE_NAME,
@@ -119,6 +120,7 @@ export interface StartPlugins {
   taskManager?: TaskManagerStartContract;
   telemetry?: TelemetryPluginStart;
   security: SecurityPluginStart;
+  cases?: CasesPluginStartContract;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -136,14 +138,6 @@ const securitySubPlugins = [
   `${APP_ID}:${SecurityPageName.timelines}`,
   `${APP_ID}:${SecurityPageName.case}`,
   `${APP_ID}:${SecurityPageName.administration}`,
-];
-
-const caseSavedObjects = [
-  'cases',
-  'cases-comments',
-  'cases-sub-case',
-  'cases-configure',
-  'cases-user-actions',
 ];
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
@@ -313,20 +307,57 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         insightsAndAlerting: ['triggersActions'],
       },
       alerting: ruleTypes,
+      cases: [APP_ID],
+      subFeatures: [
+        {
+          name: 'Cases',
+          privilegeGroups: [
+            {
+              groupType: 'mutually_exclusive',
+              privileges: [
+                {
+                  id: 'cases_all',
+                  includeIn: 'all',
+                  name: 'All',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  // using variables with underscores here otherwise when we retrieve them from the kibana
+                  // capabilities in a hook I get type errors regarding boolean | ReadOnly<{[x: string]: boolean}>
+                  ui: ['crud_cases', 'read_cases'], // uiCapabilities.siem.crud_cases
+                  cases: {
+                    all: [APP_ID],
+                  },
+                },
+                {
+                  id: 'cases_read',
+                  includeIn: 'read',
+                  name: 'Read',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  // using variables with underscores here otherwise when we retrieve them from the kibana
+                  // capabilities in a hook I get type errors regarding boolean | ReadOnly<{[x: string]: boolean}>
+                  ui: ['read_cases'], // uiCapabilities.siem.read_cases
+                  cases: {
+                    read: [APP_ID],
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
       privileges: {
         all: {
           app: [...securitySubPlugins, 'kibana'],
           catalogue: ['securitySolution'],
           api: ['securitySolution', 'lists-all', 'lists-read'],
           savedObject: {
-            all: [
-              'alert',
-              ...caseSavedObjects,
-              'exception-list',
-              'exception-list-agnostic',
-              ...savedObjectTypes,
-            ],
-            read: ['config'],
+            all: ['alert', 'exception-list', 'exception-list-agnostic', ...savedObjectTypes],
+            read: [],
           },
           alerting: {
             rule: {
@@ -347,13 +378,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           api: ['securitySolution', 'lists-read'],
           savedObject: {
             all: [],
-            read: [
-              'config',
-              ...caseSavedObjects,
-              'exception-list',
-              'exception-list-agnostic',
-              ...savedObjectTypes,
-            ],
+            read: ['exception-list', 'exception-list-agnostic', ...savedObjectTypes],
           },
           alerting: {
             rule: {
@@ -505,6 +530,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       security: plugins.security,
       alerting: plugins.alerting,
       config: this.config!,
+      cases: plugins.cases,
       logger,
       manifestManager,
       registerIngestCallback,
