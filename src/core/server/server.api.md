@@ -2361,38 +2361,6 @@ export interface SavedObjectsCollectMultiNamespaceReferencesResponse {
     objects: SavedObjectReferenceWithContext[];
 }
 
-// @public
-export interface SavedObjectsComplexFieldMapping {
-    // (undocumented)
-    doc_values?: boolean;
-    dynamic?: false | 'strict';
-    // (undocumented)
-    enabled?: boolean;
-    // (undocumented)
-    properties: SavedObjectsMappingProperties;
-    // (undocumented)
-    type?: string;
-}
-
-// @public
-export interface SavedObjectsCoreFieldMapping {
-    // (undocumented)
-    doc_values?: boolean;
-    // (undocumented)
-    fields?: {
-        [subfield: string]: {
-            type: string;
-            ignore_above?: number;
-        };
-    };
-    // (undocumented)
-    index?: boolean;
-    // (undocumented)
-    null_value?: number | boolean | string;
-    // (undocumented)
-    type: string;
-}
-
 // @public (undocumented)
 export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
     coreMigrationVersion?: string;
@@ -2554,12 +2522,14 @@ export interface SavedObjectsExportTransformContext {
 }
 
 // @public
-export type SavedObjectsFieldMapping = SavedObjectsCoreFieldMapping | SavedObjectsComplexFieldMapping;
+export type SavedObjectsFieldMapping = estypes.MappingProperty & {
+    dynamic?: false | 'strict';
+};
 
 // @public (undocumented)
 export interface SavedObjectsFindOptions {
     // @alpha
-    aggs?: Record<string, estypes.AggregationContainer>;
+    aggs?: Record<string, estypes.AggregationsAggregationContainer>;
     defaultSearchOperator?: 'AND' | 'OR';
     fields?: string[];
     // Warning: (ae-forgotten-export) The symbol "KueryNode" needs to be exported by the entry point index.d.ts
@@ -2583,7 +2553,7 @@ export interface SavedObjectsFindOptions {
     // (undocumented)
     sortField?: string;
     // (undocumented)
-    sortOrder?: estypes.SortOrder;
+    sortOrder?: estypes.SearchSortOrder;
     // (undocumented)
     type: string | string[];
     typeToNamespacesMap?: Map<string, string[] | undefined>;

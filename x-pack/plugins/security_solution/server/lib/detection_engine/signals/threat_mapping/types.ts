@@ -167,7 +167,7 @@ export interface ThreatListDoc {
  * This is an ECS document being returned, but the user could return or use non-ecs based
  * documents potentially.
  */
-export type ThreatListItem = estypes.Hit<ThreatListDoc>;
+export type ThreatListItem = estypes.SearchHit<ThreatListDoc>;
 
 export interface ThreatIndicator {
   [key: string]: unknown;
