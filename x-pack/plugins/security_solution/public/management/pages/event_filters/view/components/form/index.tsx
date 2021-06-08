@@ -90,11 +90,12 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
     const handleOnChangeName = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!exception) return;
+        const name = e.target.value.toString().trim();
         dispatch({
           type: 'eventFiltersChangeForm',
           payload: {
-            entry: { ...exception, name: e.target.value.toString() },
-            hasNameError: !e.target.value,
+            entry: { ...exception, name },
+            hasNameError: !name,
           },
         });
       },
