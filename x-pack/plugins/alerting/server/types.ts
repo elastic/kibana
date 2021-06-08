@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandlerContext } from 'src/core/server';
+import type { IRouter, RequestHandlerContext, SavedObjectReference } from 'src/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { PublicAlertInstance } from './alert_instance';
 import { AlertTypeRegistry as OrigAlertTypeRegistry } from './alert_type_registry';
@@ -99,6 +99,20 @@ export interface AlertExecutorOptions<
   updatedBy: string | null;
 }
 
+export interface ExtractedReferencesAndParams<Params extends AlertTypeParams> {
+  references: SavedObjectReference[];
+  params: Params;
+}
+
+export type ExtractReferencesType<Params extends AlertTypeParams> = (
+  params: Params
+) => ExtractedReferencesAndParams<Params>;
+
+export type InjectReferencesType<Params extends AlertTypeParams> = (
+  params: Params,
+  references: SavedObjectReference[]
+) => Params;
+
 export type ExecutorType<
   Params extends AlertTypeParams = never,
   State extends AlertTypeState = never,
@@ -124,6 +138,10 @@ export interface AlertType<
   name: string;
   validate?: {
     params?: AlertTypeParamsValidator<Params>;
+  };
+  references?: {
+    extractReferences: ExtractReferencesType<Params>;
+    injectReferences: InjectReferencesType<Params>;
   };
   actionGroups: Array<ActionGroup<ActionGroupIds>>;
   defaultActionGroupId: ActionGroup<ActionGroupIds>['id'];

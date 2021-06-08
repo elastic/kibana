@@ -282,11 +282,20 @@ export class AlertsClient {
       throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
     }
 
+    // Validate actions and create a saved object reference for each action
     await this.validateActions(alertType, data.actions);
+    const { references: actionReferences, actions } = await this.denormalizeActions(data.actions);
+
+    // Extracts any references using configured reference extractor if available
+    const extractedRefsAndParams = alertType?.references?.extractReferences
+      ? alertType.references.extractReferences(validatedAlertTypeParams)
+      : null;
+    const extractedReferences = extractedRefsAndParams?.references ?? [];
+    const ruleParams = extractedRefsAndParams?.params ?? validatedAlertTypeParams;
+
+    const references = [...actionReferences, ...extractedReferences];
 
     const createTime = Date.now();
-    const { references, actions } = await this.denormalizeActions(data.actions);
-
     const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
 
     const rawAlert: RawAlert = {
@@ -297,7 +306,7 @@ export class AlertsClient {
       updatedBy: username,
       createdAt: new Date(createTime).toISOString(),
       updatedAt: new Date(createTime).toISOString(),
-      params: validatedAlertTypeParams as RawAlert['params'],
+      params: ruleParams as RawAlert['params'],
       muteAll: false,
       mutedInstanceIds: [],
       notifyWhen,
