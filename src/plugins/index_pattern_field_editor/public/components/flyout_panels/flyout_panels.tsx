@@ -23,7 +23,7 @@ interface Panel {
 }
 
 interface Context {
-  addPanel: (panel: Panel) => () => void;
+  addPanel: (panel: Panel) => { removePanel: () => void; isFixedWidth: boolean };
 }
 
 let idx = 0;
@@ -32,7 +32,10 @@ const panelId = () => idx++;
 
 const flyoutPanelsContext = createContext<Context>({
   addPanel() {
-    return () => {};
+    return {
+      removePanel: () => {},
+      isFixedWidth: false,
+    };
   },
 });
 
@@ -46,9 +49,16 @@ export interface Props {
   flyoutClassName: string;
   /** The size between the panels. Corresponds to EuiFlexGroup gutterSize */
   gutterSize?: EuiFlexGroupProps['gutterSize'];
+  /** Flag to indicate if the panels width are declared as fixed pixel width instead of percent */
+  fixedPanelWidths?: boolean;
 }
 
-export const Panels: React.FC<Props> = ({ maxWidth, flyoutClassName, ...props }) => {
+export const Panels: React.FC<Props> = ({
+  maxWidth,
+  flyoutClassName,
+  fixedPanelWidths = false,
+  ...props
+}) => {
   const flyoutDOMelement = useMemo(() => {
     const el = document.getElementsByClassName(flyoutClassName);
 
@@ -75,9 +85,13 @@ export const Panels: React.FC<Props> = ({ maxWidth, flyoutClassName, ...props })
       setPanels((prev) => {
         return { ...prev, [nextId]: panel };
       });
-      return removePanel.bind(null, nextId);
+
+      return {
+        removePanel: removePanel.bind(null, nextId),
+        isFixedWidth: fixedPanelWidths,
+      };
     },
-    [removePanel]
+    [removePanel, fixedPanelWidths]
   );
 
   const ctx: Context = useMemo(
@@ -92,14 +106,23 @@ export const Panels: React.FC<Props> = ({ maxWidth, flyoutClassName, ...props })
       return;
     }
 
-    const totalPercentWidth = Math.min(
-      100,
-      Object.values(panels).reduce((acc, { width = 0 }) => acc + width, 0)
-    );
-    const currentWidth = (maxWidth * totalPercentWidth) / 100;
+    let currentWidth: number;
 
-    flyoutDOMelement.style.maxWidth = `${currentWidth}px`;
-  }, [panels, maxWidth, flyoutClassName, flyoutDOMelement]);
+    if (fixedPanelWidths) {
+      const totalWidth = Object.values(panels).reduce((acc, { width = 0 }) => acc + width, 0);
+      currentWidth = Math.min(maxWidth, totalWidth);
+      flyoutDOMelement.style.width = `${currentWidth}px`;
+      flyoutDOMelement.style.minWidth = `${currentWidth}px`;
+      flyoutDOMelement.style.maxWidth = `${currentWidth}px`;
+    } else {
+      const totalPercentWidth = Math.min(
+        100,
+        Object.values(panels).reduce((acc, { width = 0 }) => acc + width, 0)
+      );
+      currentWidth = (maxWidth * totalPercentWidth) / 100;
+      flyoutDOMelement.style.maxWidth = `${currentWidth}px`;
+    }
+  }, [panels, maxWidth, fixedPanelWidths, flyoutClassName, flyoutDOMelement]);
 
   return (
     <flyoutPanelsContext.Provider value={ctx}>

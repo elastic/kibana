@@ -31,7 +31,7 @@ const flyoutPanelContext = createContext<Context>({
 });
 
 export interface Props {
-  /** Width of the panel (in percent %) */
+  /** Width of the panel (in percent % or in px if the "fixedPanelWidths" prop is set to true on the panels group) */
   width?: number;
   /** EUI sass background */
   backgroundColor?: 'euiPageBackground' | 'euiEmptyShade';
@@ -51,6 +51,8 @@ export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
     hasContent: false,
     hasFooter: false,
   });
+
+  const [styles, setStyles] = useState<CSSProperties>({});
 
   /* eslint-disable @typescript-eslint/naming-convention */
   const classes = classnames('fieldEditor__flyoutPanel', className, {
@@ -93,16 +95,25 @@ export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
   ]);
 
   useLayoutEffect(() => {
-    const removePanel = addPanel({ width });
+    const { removePanel, isFixedWidth } = addPanel({ width });
+
+    if (width) {
+      setStyles((prev) => {
+        if (isFixedWidth) {
+          return {
+            ...prev,
+            width: `${width}px`,
+          };
+        }
+        return {
+          ...prev,
+          minWidth: `${width}%`,
+        };
+      });
+    }
 
     return removePanel;
   }, [width, addPanel]);
-
-  const styles: CSSProperties = {};
-
-  if (width) {
-    styles.minWidth = `${width}%`;
-  }
 
   return (
     <EuiFlexItem className="fieldEditor__flyoutPanels__column" style={styles} grow={false}>

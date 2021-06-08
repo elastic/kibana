@@ -203,16 +203,9 @@ const FieldEditorFlyoutContentComponent = ({
 
   return (
     <>
-      <FlyoutPanels.Group flyoutClassName={euiFlyoutClassname} maxWidth={1180}>
-        {/* Preview panel */}
-        {isPanelVisible && (
-          <FlyoutPanels.Item width={40} backgroundColor="euiPageBackground" border="right">
-            <FieldPreview />
-          </FlyoutPanels.Item>
-        )}
-
+      <FlyoutPanels.Group flyoutClassName={euiFlyoutClassname} maxWidth={1180} fixedPanelWidths>
         {/* Editor panel */}
-        <FlyoutPanels.Item width={60}>
+        <FlyoutPanels.Item width={558}>
           <FlyoutPanels.Content>
             <FlyoutPanels.Header>
               <EuiTitle data-test-subj="flyoutTitle">
@@ -290,6 +283,13 @@ const FieldEditorFlyoutContentComponent = ({
             </>
           </FlyoutPanels.Footer>
         </FlyoutPanels.Item>
+
+        {/* Preview panel */}
+        {isPanelVisible && (
+          <FlyoutPanels.Item width={440} backgroundColor="euiPageBackground" border="right">
+            <FieldPreview />
+          </FlyoutPanels.Item>
+        )}
       </FlyoutPanels.Group>
 
       {modal}
