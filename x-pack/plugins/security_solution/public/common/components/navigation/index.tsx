@@ -6,31 +6,36 @@
  */
 
 import React, { useEffect } from 'react';
-import { connect } from 'react-redux';
-import { compose } from 'redux';
 import deepEqual from 'fast-deep-equal';
 
 import { useKibana } from '../../lib/kibana';
-import { RouteSpyState } from '../../utils/route/types';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
-import { makeMapStateToProps } from '../url_state/helpers';
+import { useUrlState } from '../url_state/helpers';
 import { setBreadcrumbs } from './breadcrumbs';
 import { TabNavigation } from './tab_navigation';
-import { SiemNavigationProps, SiemNavigationComponentProps } from './types';
+import { NavigationManagerComponentProps, SecuritySolutionNavigationManagerProps } from './types';
+import { SecuritySolutionNavigation } from './primary_navigation';
+import { RouteSpyState } from '../../utils/route/types';
 
-export const SiemNavigationComponent: React.FC<
-  SiemNavigationComponentProps & SiemNavigationProps & RouteSpyState
+/**
+ * @description - This component handels all of the navigation seen within the Security Solution application.
+ * For the primary sideNav the SecuritySolutionNavigation is rendered when `isPrimary` is true, while all tabs within pages are rendered
+ * using the TabNavigation component. This allows us to manage breadcrumbs, telemetry, and general url syncing in a single place.
+ */
+export const NavigationManagerComponent: React.FC<
+  RouteSpyState & SecuritySolutionNavigationManagerProps & NavigationManagerComponentProps
 > = ({
   detailName,
   display,
+  flowTarget,
+  isPrimary,
   navTabs,
   pageName,
   pathName,
   search,
+  state,
   tabName,
   urlState,
-  flowTarget,
-  state,
 }) => {
   const {
     chrome,
@@ -63,7 +68,14 @@ export const SiemNavigationComponent: React.FC<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chrome, pageName, pathName, search, navTabs, urlState, state]);
 
-  return (
+  return isPrimary ? (
+    <SecuritySolutionNavigation
+      navTabs={navTabs}
+      pageName={pageName}
+      tabName={tabName}
+      urlState={urlState}
+    />
+  ) : (
     <TabNavigation
       query={urlState.query}
       display={display}
@@ -80,30 +92,20 @@ export const SiemNavigationComponent: React.FC<
   );
 };
 
-export const SiemNavigationRedux = compose<
-  React.ComponentClass<SiemNavigationProps & RouteSpyState>
->(connect(makeMapStateToProps))(
-  React.memo(
-    SiemNavigationComponent,
-    (prevProps, nextProps) =>
-      prevProps.pathName === nextProps.pathName &&
-      prevProps.search === nextProps.search &&
-      deepEqual(prevProps.navTabs, nextProps.navTabs) &&
-      deepEqual(prevProps.urlState, nextProps.urlState) &&
-      deepEqual(prevProps.state, nextProps.state)
-  )
-);
-
-const SiemNavigationContainer: React.FC<SiemNavigationProps> = (props) => {
+const NavigationManagerContainer: React.FC<SecuritySolutionNavigationManagerProps> = (props) => {
   const [routeProps] = useRouteSpy();
-  const stateNavReduxProps: RouteSpyState & SiemNavigationProps = {
+  const urlStateProps = useUrlState();
+  const navigationManagerProps: RouteSpyState &
+    NavigationManagerComponentProps &
+    SecuritySolutionNavigationManagerProps = {
     ...routeProps,
+    ...urlStateProps,
     ...props,
   };
 
-  return <SiemNavigationRedux {...stateNavReduxProps} />;
+  return <NavigationManagerComponent {...navigationManagerProps} />;
 };
-
-export const SiemNavigation = React.memo(SiemNavigationContainer, (prevProps, nextProps) =>
-  deepEqual(prevProps.navTabs, nextProps.navTabs)
+export const SecuritySolutionNavigationManager = React.memo(
+  NavigationManagerContainer,
+  (prevProps, nextProps) => deepEqual(prevProps.navTabs, nextProps.navTabs)
 );
