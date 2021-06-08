@@ -93,7 +93,7 @@ export const fetchTransactionDurationRanges = async (
   }
 
   return (resp.body.aggregations
-    .logspace_ranges as estypes.MultiBucketAggregate<{
+    .logspace_ranges as estypes.AggregationsMultiBucketAggregate<{
     from: number;
     doc_count: number;
   }>).buckets

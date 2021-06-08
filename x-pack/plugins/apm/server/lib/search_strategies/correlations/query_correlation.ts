@@ -100,9 +100,17 @@ export const getTransactionDurationCorrelationRequest = (
             ranges,
           },
         },
+        // Pearson correlation value
         transaction_duration_correlation: {
           bucket_correlation: bucketCorrelation,
-        } as estypes.AggregationContainer,
+        } as estypes.AggregationsAggregationContainer,
+        // KS test value
+        ks_test: {
+          bucket_count_ks_test: {
+            buckets_path: 'latency_ranges>_count',
+            alternative: ['less', 'greater', 'two_sided'],
+          },
+        } as estypes.AggregationsAggregationContainer,
       },
     },
   };
@@ -115,7 +123,11 @@ export const fetchTransactionDurationCorrelation = async (
   totalHits: number,
   fieldName?: string,
   fieldValue?: string
-): Promise<{ ranges: unknown[]; correlation: number }> => {
+): Promise<{
+  ranges: unknown[];
+  correlation: number | null;
+  ksTest: number | null;
+}> => {
   const resp = await esClient.search<ResponseHit>(
     getTransactionDurationCorrelationRequest(
       params,
@@ -131,11 +143,13 @@ export const fetchTransactionDurationCorrelation = async (
       'fetchTransactionDurationCorrelation failed, did not return aggregations.'
     );
   }
-
   return {
     ranges: (resp.body.aggregations
-      .latency_ranges as estypes.MultiBucketAggregate).buckets,
+      .latency_ranges as estypes.AggregationsMultiBucketAggregate).buckets,
     correlation: (resp.body.aggregations
-      .transaction_duration_correlation as estypes.ValueAggregate).value,
+      .transaction_duration_correlation as estypes.AggregationsValueAggregate)
+      .value,
+    // @ts-ignore
+    ksTest: resp.body.aggregations.ks_test.less,
   };
 };

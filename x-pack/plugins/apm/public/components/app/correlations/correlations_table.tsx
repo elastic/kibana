@@ -27,7 +27,7 @@ type CorrelationsApiResponse =
   | APIReturnType<'GET /api/apm/correlations/errors/failed_transactions'>
   | APIReturnType<'GET /api/apm/correlations/latency/slow_transactions'>;
 
-type SignificantTerm = CorrelationsApiResponse['significantTerms'][0];
+export type SignificantTerm = CorrelationsApiResponse['significantTerms'][0];
 
 export type SelectedSignificantTerm = Pick<
   SignificantTerm,
@@ -40,6 +40,7 @@ interface Props<T> {
   percentageColumnName: string;
   setSelectedSignificantTerm: (term: SelectedSignificantTerm | null) => void;
   onFilter: () => void;
+  columns: Array<EuiBasicTableColumn<T>>;
 }
 
 export function CorrelationsTable<T extends SignificantTerm>({
@@ -48,6 +49,7 @@ export function CorrelationsTable<T extends SignificantTerm>({
   percentageColumnName,
   setSelectedSignificantTerm,
   onFilter,
+  columns,
 }: Props<T>) {
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const trackSelectSignificantTerm = useCallback(
@@ -59,7 +61,7 @@ export function CorrelationsTable<T extends SignificantTerm>({
     [trackApmEvent]
   );
   const history = useHistory();
-  const columns: Array<EuiBasicTableColumn<T>> = [
+  const tableColumns: Array<EuiBasicTableColumn<T>> = columns ?? [
     {
       width: '116px',
       field: 'impact',
@@ -195,7 +197,7 @@ export function CorrelationsTable<T extends SignificantTerm>({
         status === FETCH_STATUS.LOADING ? loadingText : noDataText
       }
       loading={status === FETCH_STATUS.LOADING}
-      columns={columns}
+      columns={tableColumns}
       rowProps={(term) => {
         return {
           onMouseEnter: () => {

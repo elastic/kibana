@@ -29,7 +29,7 @@ import { fetchTransactionDurationRanges } from './query_ranges';
 
 const PERCENTILES = 20;
 const CORRELATION_THRESHOLD = 0.03;
-// const KS_TEST_THRESHOLD = 0.1;
+const KS_TEST_THRESHOLD = 0.1;
 
 export const asyncSearchServiceProvider = (
   esClient: ElasticsearchClient,
@@ -131,7 +131,10 @@ export const asyncSearchServiceProvider = (
             return;
           }
 
-          const { correlation } = await fetchTransactionDurationCorrelation(
+          const {
+            correlation,
+            ksTest,
+          } = await fetchTransactionDurationCorrelation(
             esClient,
             params,
             percentiles,
@@ -145,7 +148,12 @@ export const asyncSearchServiceProvider = (
             return;
           }
 
-          if (correlation > CORRELATION_THRESHOLD) {
+          if (
+            correlation !== null &&
+            correlation > CORRELATION_THRESHOLD &&
+            ksTest !== null &&
+            ksTest < KS_TEST_THRESHOLD
+          ) {
             const logHistogram = await fetchTransactionDurationRanges(
               esClient,
               params,
@@ -170,6 +178,7 @@ export const asyncSearchServiceProvider = (
             yield {
               ...item,
               correlation,
+              ksTest,
               histogram: fullHistogram,
             };
           } else {
@@ -182,9 +191,6 @@ export const asyncSearchServiceProvider = (
       for await (const item of fetchTransactionDurationHistograms()) {
         if (item !== undefined) {
           values.push(item);
-          // values = values
-          //   .sort((a, b) => b.correlation - a.correlation)
-          //   .slice(0, 1000);
         }
         loadedHistograms++;
         progress.loadedHistograms = loadedHistograms / fieldValuePairs.length;

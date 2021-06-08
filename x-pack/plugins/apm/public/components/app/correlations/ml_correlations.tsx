@@ -7,11 +7,14 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { useParams } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 
 import { sum } from 'd3-array';
 
 import {
+  EuiIcon,
+  EuiLink,
+  EuiBasicTableColumn,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
@@ -30,8 +33,28 @@ import { CorrelationsChart } from './correlations_chart';
 import {
   CorrelationsTable,
   SelectedSignificantTerm,
+  SignificantTerm,
 } from './correlations_table';
 import { useCorrelations } from './use_correlations';
+import { ImpactBar } from '../../shared/ImpactBar';
+import { createHref, push } from '../../shared/Links/url_helpers';
+
+export function roundToDecimalPlace(
+  num?: number,
+  dp: number = 2
+): number | string {
+  if (num === undefined) return '';
+  if (num % 1 === 0) {
+    // no decimal place
+    return num;
+  }
+
+  if (Math.abs(num) < Math.pow(10, -dp)) {
+    return Number.parseFloat(String(num)).toExponential(2);
+  }
+  const m = Math.pow(10, dp);
+  return Math.round(num * m) / m;
+}
 
 const isErrorMessage = (arg: unknown): arg is Error => {
   return arg instanceof Error;
@@ -39,6 +62,11 @@ const isErrorMessage = (arg: unknown): arg is Error => {
 
 interface Props {
   onClose: () => void;
+}
+
+interface MlCorrelationsTerms extends SignificantTerm {
+  correlation: number;
+  ksTest: number;
 }
 
 export function MlCorrelations({ onClose }: Props) {
@@ -118,6 +146,138 @@ export function MlCorrelations({ onClose }: Props) {
         h.value === selectedSignificantTerm.fieldValue
     );
   }
+  const history = useHistory();
+
+  const mlCorrelationcolumns: Array<
+    EuiBasicTableColumn<MlCorrelationsTerms>
+  > = [
+    {
+      width: '116px',
+      field: 'correlation',
+      name: i18n.translate(
+        'xpack.apm.correlations.correlationsTable.mlCorrelationLabel',
+        { defaultMessage: 'Correlation' }
+      ),
+      render: (_: any, term: MlCorrelationsTerms) => {
+        return (
+          <div>
+            <ImpactBar size="m" value={term.correlation * 100} />
+            {`${Math.trunc(term.correlation * 100)}%`}
+          </div>
+        );
+      },
+    },
+    {
+      field: 'ksTest',
+      name: i18n.translate(
+        'xpack.apm.correlations.correlationsTable.mlKsTestLabel',
+        { defaultMessage: 'KS Test' }
+      ),
+      render: (_: any, term: MlCorrelationsTerms) => {
+        return <div>{term.ksTest.toExponential(2)}</div>;
+      },
+    },
+    {
+      field: 'fieldName',
+      name: i18n.translate(
+        'xpack.apm.correlations.correlationsTable.fieldNameLabel',
+        { defaultMessage: 'Field name' }
+      ),
+    },
+    {
+      field: 'fieldValue',
+      name: i18n.translate(
+        'xpack.apm.correlations.correlationsTable.fieldValueLabel',
+        { defaultMessage: 'Field value' }
+      ),
+      render: (_: any, term: MlCorrelationsTerms) =>
+        String(term.fieldValue).slice(0, 50),
+    },
+    {
+      width: '100px',
+      actions: [
+        {
+          name: i18n.translate(
+            'xpack.apm.correlations.correlationsTable.filterLabel',
+            { defaultMessage: 'Filter' }
+          ),
+          description: i18n.translate(
+            'xpack.apm.correlations.correlationsTable.filterDescription',
+            { defaultMessage: 'Filter by value' }
+          ),
+          icon: 'plusInCircle',
+          type: 'icon',
+          onClick: (term: MlCorrelationsTerms) => {
+            push(history, {
+              query: {
+                kuery: `${term.fieldName}:"${encodeURIComponent(
+                  term.fieldValue
+                )}"`,
+              },
+            });
+            // onFilter();
+            // trackApmEvent({ metric: 'correlations_term_include_filter' });
+          },
+        },
+        {
+          name: i18n.translate(
+            'xpack.apm.correlations.correlationsTable.excludeLabel',
+            { defaultMessage: 'Exclude' }
+          ),
+          description: i18n.translate(
+            'xpack.apm.correlations.correlationsTable.excludeDescription',
+            { defaultMessage: 'Filter out value' }
+          ),
+          icon: 'minusInCircle',
+          type: 'icon',
+          onClick: (term: MlCorrelationsTerms) => {
+            push(history, {
+              query: {
+                kuery: `not ${term.fieldName}:"${encodeURIComponent(
+                  term.fieldValue
+                )}"`,
+              },
+            });
+            // onFilter();
+            // trackApmEvent({ metric: 'correlations_term_exclude_filter' });
+          },
+        },
+      ],
+      name: i18n.translate(
+        'xpack.apm.correlations.correlationsTable.actionsLabel',
+        { defaultMessage: 'Filter' }
+      ),
+      render: (_: any, term: MlCorrelationsTerms) => {
+        return (
+          <>
+            <EuiLink
+              href={createHref(history, {
+                query: {
+                  kuery: `${term.fieldName}:"${encodeURIComponent(
+                    term.fieldValue
+                  )}"`,
+                },
+              })}
+            >
+              <EuiIcon type="magnifyWithPlus" />
+            </EuiLink>
+            &nbsp;/&nbsp;
+            <EuiLink
+              href={createHref(history, {
+                query: {
+                  kuery: `not ${term.fieldName}:"${encodeURIComponent(
+                    term.fieldValue
+                  )}"`,
+                },
+              })}
+            >
+              <EuiIcon type="magnifyWithMinus" />
+            </EuiLink>
+          </>
+        );
+      },
+    },
+  ];
 
   return (
     <>
@@ -184,9 +344,10 @@ export function MlCorrelations({ onClose }: Props) {
           <EuiSpacer size="s" />
 
           <CorrelationsTable
+            columns={mlCorrelationcolumns}
             percentageColumnName={i18n.translate(
               'xpack.apm.correlations.latency.percentageColumnName',
-              { defaultMessage: '% of slow transactions' }
+              { defaultMessage: 'KS test p value' }
             )}
             significantTerms={histograms.map((d) => {
               // all docs for this field/value pair
@@ -204,6 +365,8 @@ export function MlCorrelations({ onClose }: Props) {
                 fieldValue: d.value,
                 score: d.correlation,
                 impact: d.correlation,
+                ksTest: d.ksTest,
+                correlation: d.correlation,
                 fieldCount,
                 valueCount,
               };

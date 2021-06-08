@@ -65,7 +65,7 @@ export const fetchTransactionDurationFieldValuePairs = async (
     }
 
     const buckets = (resp.body.aggregations
-      .attribute_terms as estypes.MultiBucketAggregate<{
+      .attribute_terms as estypes.AggregationsMultiBucketAggregate<{
       key: string;
     }>).buckets;
 

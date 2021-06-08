@@ -37,6 +37,7 @@ export interface SearchServiceValue {
   value: string;
   field: string;
   correlation: number;
+  ksTest: number;
 }
 
 export interface AsyncSearchProviderProgress {
