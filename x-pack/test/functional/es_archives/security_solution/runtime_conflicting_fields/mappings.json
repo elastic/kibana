@@ -77,6 +77,12 @@
             "source": "emit('I am the [host.name] field value which shadows the original host.name value')"
           }
         },
+        "host.field_1": {
+          "type": "keyword",
+          "script": {
+            "source": "emit('I am the [host.name.field_1] field value which now confuses which array element I should be in and am ambiguous')"
+          }
+        },
         "host.name.subobject": {
           "type": "keyword",
           "script": {
