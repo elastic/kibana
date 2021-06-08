@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 
-export const JourneyFailedStepType = t.type({
+export const JourneyStepType = t.type({
   '@timestamp': t.string,
   monitor: t.type({
     check_group: t.string,
@@ -17,14 +17,15 @@ export const JourneyFailedStepType = t.type({
       index: t.number,
       name: t.string,
     }),
+    type: t.string,
   }),
 });
 
-export type JourneyFailedStep = t.TypeOf<typeof JourneyFailedStepType>;
+export type JourneyStep = t.TypeOf<typeof JourneyStepType>;
 
 export const FailedStepsApiResponseType = t.type({
   checkGroups: t.array(t.string),
-  steps: t.array(JourneyFailedStepType),
+  steps: t.array(JourneyStepType),
 });
 
 export type FailedStepsApiResponse = t.TypeOf<typeof FailedStepsApiResponseType>;
