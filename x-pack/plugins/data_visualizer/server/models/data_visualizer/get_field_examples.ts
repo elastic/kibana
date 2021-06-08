@@ -21,7 +21,7 @@ export const getFieldExamples = async (
   earliestMs: number | undefined,
   latestMs: number | undefined,
   maxExamples: number,
-  runtimeMappings?: estypes.RuntimeFields
+  runtimeMappings?: estypes.MappingRuntimeFields
 ): Promise<FieldExamples> => {
   const { asCurrentUser } = client;
 

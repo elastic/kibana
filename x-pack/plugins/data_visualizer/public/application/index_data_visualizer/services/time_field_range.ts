@@ -19,7 +19,7 @@ export async function getTimeFieldRange({
   index: string;
   timeFieldName?: string;
   query?: Query;
-  runtimeMappings?: estypes.RuntimeFields;
+  runtimeMappings?: estypes.MappingRuntimeFields;
 }) {
   const body = JSON.stringify({ index, timeFieldName, query, runtimeMappings });
   const fileUploadModules = await lazyLoadModules();

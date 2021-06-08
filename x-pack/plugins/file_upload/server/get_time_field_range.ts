@@ -13,7 +13,7 @@ export async function getTimeFieldRange(
   index: string[] | string,
   timeFieldName: string,
   query: any,
-  runtimeMappings?: estypes.RuntimeFields
+  runtimeMappings?: estypes.MappingRuntimeFields
 ): Promise<{
   success: boolean;
   start: { epoch: number; string: string };

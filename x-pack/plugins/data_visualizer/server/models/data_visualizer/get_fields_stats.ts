@@ -36,7 +36,7 @@ export const getDocumentCountStats = async (
   earliestMs: number | undefined,
   latestMs: number | undefined,
   intervalMs: number,
-  runtimeMappings: estypes.RuntimeFields
+  runtimeMappings: estypes.MappingRuntimeFields
 ): Promise<DocumentCountStats> => {
   const { asCurrentUser } = client;
 
@@ -101,7 +101,7 @@ export const getNumericFieldsStats = async (
   timeFieldName: string | undefined,
   earliestMs: number | undefined,
   latestMs: number | undefined,
-  runtimeMappings?: estypes.RuntimeFields
+  runtimeMappings?: estypes.MappingRuntimeFields
 ) => {
   const { asCurrentUser } = client;
   const index = indexPatternTitle;
@@ -248,7 +248,7 @@ export const getStringFieldsStats = async (
   timeFieldName: string | undefined,
   earliestMs: number | undefined,
   latestMs: number | undefined,
-  runtimeMappings?: estypes.RuntimeFields
+  runtimeMappings?: estypes.MappingRuntimeFields
 ) => {
   const { asCurrentUser } = client;
 
@@ -342,7 +342,7 @@ export const getDateFieldsStats = async (
   timeFieldName: string | undefined,
   earliestMs: number | undefined,
   latestMs: number | undefined,
-  runtimeMappings?: estypes.RuntimeFields
+  runtimeMappings?: estypes.MappingRuntimeFields
 ) => {
   const { asCurrentUser } = client;
 
@@ -413,7 +413,7 @@ export const getBooleanFieldsStats = async (
   timeFieldName: string | undefined,
   earliestMs: number | undefined,
   latestMs: number | undefined,
-  runtimeMappings?: estypes.RuntimeFields
+  runtimeMappings?: estypes.MappingRuntimeFields
 ) => {
   const { asCurrentUser } = client;
 

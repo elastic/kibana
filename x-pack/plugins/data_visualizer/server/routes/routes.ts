@@ -27,7 +27,7 @@ function getOverallStats(
   timeFieldName: string | undefined,
   earliestMs: number | undefined,
   latestMs: number | undefined,
-  runtimeMappings: estypes.RuntimeFields
+  runtimeMappings: estypes.MappingRuntimeFields
 ) {
   const dv = new DataVisualizer(client);
   return dv.getOverallStats(
@@ -54,7 +54,7 @@ function getStatsForFields(
   latestMs: number | undefined,
   interval: number | undefined,
   maxExamples: number,
-  runtimeMappings: estypes.RuntimeFields
+  runtimeMappings: estypes.MappingRuntimeFields
 ) {
   const dv = new DataVisualizer(client);
   return dv.getStatsForFields(
@@ -77,7 +77,7 @@ function getHistogramsForFields(
   query: any,
   fields: HistogramField[],
   samplerShardSize: number,
-  runtimeMappings: estypes.RuntimeFields
+  runtimeMappings: estypes.MappingRuntimeFields
 ) {
   const dv = new DataVisualizer(client);
   return dv.getHistogramsForFields(

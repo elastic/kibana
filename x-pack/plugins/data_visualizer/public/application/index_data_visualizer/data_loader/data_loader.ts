@@ -22,7 +22,7 @@ const MAX_EXAMPLES_DEFAULT: number = 10;
 
 export class DataLoader {
   private _indexPattern: IndexPattern;
-  private _runtimeMappings: estypes.RuntimeFields;
+  private _runtimeMappings: estypes.MappingRuntimeFields;
   private _indexPatternTitle: IndexPatternTitle = '';
   private _maxExamples: number = MAX_EXAMPLES_DEFAULT;
   private _toastNotifications: CoreSetup['notifications']['toasts'];
@@ -33,7 +33,7 @@ export class DataLoader {
   ) {
     this._indexPattern = indexPattern;
     this._runtimeMappings = this._indexPattern.getComputedFields()
-      .runtimeFields as estypes.RuntimeFields;
+      .runtimeFields as estypes.MappingRuntimeFields;
     this._indexPatternTitle = indexPattern.title;
     this._toastNotifications = toastNotifications;
   }

@@ -23,7 +23,7 @@ export const isPopulatedObject = <U extends string = string>(
   );
 };
 
-export function isRuntimeField(arg: unknown): arg is estypes.RuntimeField {
+export function isRuntimeField(arg: unknown): arg is estypes.MappingRuntimeField {
   return (
     ((isPopulatedObject(arg, ['type']) && Object.keys(arg).length === 1) ||
       (isPopulatedObject(arg, ['type', 'script']) &&
@@ -36,6 +36,6 @@ export function isRuntimeField(arg: unknown): arg is estypes.RuntimeField {
   );
 }
 
-export function isRuntimeMappings(arg: unknown): arg is estypes.RuntimeFields {
+export function isRuntimeMappings(arg: unknown): arg is estypes.MappingRuntimeFields {
   return isPopulatedObject(arg) && Object.values(arg).every((d) => isRuntimeField(d));
 }

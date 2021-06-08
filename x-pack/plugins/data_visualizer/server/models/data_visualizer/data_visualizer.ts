@@ -52,7 +52,7 @@ export class DataVisualizer {
     timeFieldName: string | undefined,
     earliestMs: number | undefined,
     latestMs: number | undefined,
-    runtimeMappings?: estypes.RuntimeFields
+    runtimeMappings?: estypes.MappingRuntimeFields
   ) {
     const stats = {
       totalCount: 0,
@@ -134,7 +134,7 @@ export class DataVisualizer {
     query: any,
     fields: HistogramField[],
     samplerShardSize: number,
-    runtimeMappings?: estypes.RuntimeFields
+    runtimeMappings?: estypes.MappingRuntimeFields
   ): Promise<any> {
     return await getHistogramsForFields(
       this._client,
@@ -159,7 +159,7 @@ export class DataVisualizer {
     latestMs: number | undefined,
     intervalMs: number | undefined,
     maxExamples: number,
-    runtimeMappings: estypes.RuntimeFields
+    runtimeMappings: estypes.MappingRuntimeFields
   ): Promise<BatchStats[]> {
     // Batch up fields by type, getting stats for multiple fields at a time.
     const batches: Field[][] = [];
@@ -299,8 +299,8 @@ export class DataVisualizer {
     timeFieldName: string | undefined,
     earliestMs?: number,
     latestMs?: number,
-    datafeedConfig?: estypes.Datafeed,
-    runtimeMappings?: estypes.RuntimeFields
+    datafeedConfig?: estypes.MlDatafeed,
+    runtimeMappings?: estypes.MappingRuntimeFields
   ) {
     return await checkAggregatableFieldsExist(
       this._client,
@@ -323,7 +323,7 @@ export class DataVisualizer {
     timeFieldName: string | undefined,
     earliestMs: number | undefined,
     latestMs: number | undefined,
-    runtimeMappings?: estypes.RuntimeFields
+    runtimeMappings?: estypes.MappingRuntimeFields
   ) {
     return await checkNonAggregatableFieldExists(
       this._client,
@@ -344,7 +344,7 @@ export class DataVisualizer {
     earliestMs: number | undefined,
     latestMs: number | undefined,
     intervalMs: number,
-    runtimeMappings: estypes.RuntimeFields
+    runtimeMappings: estypes.MappingRuntimeFields
   ): Promise<DocumentCountStats> {
     return await getDocumentCountStats(
       this._client,
@@ -366,7 +366,7 @@ export class DataVisualizer {
     timeFieldName: string | undefined,
     earliestMs: number | undefined,
     latestMs: number | undefined,
-    runtimeMappings?: estypes.RuntimeFields
+    runtimeMappings?: estypes.MappingRuntimeFields
   ) {
     return await getNumericFieldsStats(
       this._client,
@@ -389,7 +389,7 @@ export class DataVisualizer {
     timeFieldName: string | undefined,
     earliestMs: number | undefined,
     latestMs: number | undefined,
-    runtimeMappings?: estypes.RuntimeFields
+    runtimeMappings?: estypes.MappingRuntimeFields
   ) {
     return await getStringFieldsStats(
       this._client,
@@ -412,7 +412,7 @@ export class DataVisualizer {
     timeFieldName: string | undefined,
     earliestMs: number | undefined,
     latestMs: number | undefined,
-    runtimeMappings?: estypes.RuntimeFields
+    runtimeMappings?: estypes.MappingRuntimeFields
   ) {
     return await getDateFieldsStats(
       this._client,
@@ -435,7 +435,7 @@ export class DataVisualizer {
     timeFieldName: string | undefined,
     earliestMs: number | undefined,
     latestMs: number | undefined,
-    runtimeMappings?: estypes.RuntimeFields
+    runtimeMappings?: estypes.MappingRuntimeFields
   ) {
     return await getBooleanFieldsStats(
       this._client,
@@ -458,7 +458,7 @@ export class DataVisualizer {
     earliestMs: number | undefined,
     latestMs: number | undefined,
     maxExamples: number,
-    runtimeMappings?: estypes.RuntimeFields
+    runtimeMappings?: estypes.MappingRuntimeFields
   ): Promise<FieldExamples> {
     return await getFieldExamples(
       this._client,

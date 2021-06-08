@@ -7,8 +7,8 @@
 
 import { estypes } from '@elastic/elasticsearch';
 
-export type Datafeed = estypes.Datafeed;
-export type Aggregation = Record<string, estypes.AggregationContainer>;
+export type Datafeed = estypes.MlDatafeed;
+export type Aggregation = Record<string, estypes.AggregationsAggregationContainer>;
 
 export function getAggregations<T>(obj: any): T | undefined {
   if (obj?.aggregations !== undefined) return obj.aggregations;

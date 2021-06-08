@@ -27,8 +27,8 @@ export const checkAggregatableFieldsExist = async (
   timeFieldName: string | undefined,
   earliestMs?: number,
   latestMs?: number,
-  datafeedConfig?: estypes.Datafeed,
-  runtimeMappings?: estypes.RuntimeFields
+  datafeedConfig?: estypes.MlDatafeed,
+  runtimeMappings?: estypes.MappingRuntimeFields
 ) => {
   const { asCurrentUser } = client;
 
@@ -42,7 +42,7 @@ export const checkAggregatableFieldsExist = async (
   const aggs: Aggs = datafeedAggregations !== undefined ? { ...datafeedAggregations } : {};
 
   // Combine runtime fields from the index pattern as well as the datafeed
-  const combinedRuntimeMappings: estypes.RuntimeFields = {
+  const combinedRuntimeMappings: estypes.MappingRuntimeFields = {
     ...(isPopulatedObject(runtimeMappings) ? runtimeMappings : {}),
     ...(isPopulatedObject(datafeedConfig) && isPopulatedObject(datafeedConfig.runtime_mappings)
       ? datafeedConfig.runtime_mappings
@@ -156,7 +156,7 @@ export const checkNonAggregatableFieldExists = async (
   timeFieldName: string | undefined,
   earliestMs: number | undefined,
   latestMs: number | undefined,
-  runtimeMappings?: estypes.RuntimeFields
+  runtimeMappings?: estypes.MappingRuntimeFields
 ) => {
   const { asCurrentUser } = client;
   const index = indexPatternTitle;

@@ -24,7 +24,7 @@ export const getAggIntervals = async (
   query: any,
   fields: HistogramField[],
   samplerShardSize: number,
-  runtimeMappings?: estypes.RuntimeFields
+  runtimeMappings?: estypes.MappingRuntimeFields
 ): Promise<NumericColumnStatsMap> => {
   const numericColumns = fields.filter((field) => {
     return field.type === KBN_FIELD_TYPES.NUMBER || field.type === KBN_FIELD_TYPES.DATE;
@@ -82,7 +82,7 @@ export const getHistogramsForFields = async (
   query: any,
   fields: HistogramField[],
   samplerShardSize: number,
-  runtimeMappings?: estypes.RuntimeFields
+  runtimeMappings?: estypes.MappingRuntimeFields
 ) => {
   const { asCurrentUser } = client;
   const aggIntervals = await getAggIntervals(

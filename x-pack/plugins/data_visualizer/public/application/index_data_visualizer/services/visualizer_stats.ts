@@ -33,7 +33,7 @@ export async function getVisualizerOverallStats({
   samplerShardSize?: number;
   aggregatableFields: string[];
   nonAggregatableFields: string[];
-  runtimeMappings?: estypes.RuntimeFields;
+  runtimeMappings?: estypes.MappingRuntimeFields;
 }) {
   const body = JSON.stringify({
     query,
@@ -75,7 +75,7 @@ export async function getVisualizerFieldStats({
   interval?: number;
   fields?: FieldRequestConfig[];
   maxExamples?: number;
-  runtimeMappings?: estypes.RuntimeFields;
+  runtimeMappings?: estypes.MappingRuntimeFields;
 }) {
   const body = JSON.stringify({
     query,
