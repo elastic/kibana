@@ -13,16 +13,16 @@ import {
   Plugin,
   Logger,
   KibanaRequest,
+  IUiSettingsClient,
 } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { Server } from '@hapi/hapi';
 import { first, map } from 'rxjs/operators';
-import { setFieldFormats } from './services';
 import { VisTypeTimeseriesConfig } from './config';
 import { getVisData } from './lib/get_vis_data';
 import { UsageCollectionSetup } from '../../usage_collection/server';
 import { PluginStart } from '../../data/server';
-import { IndexPatternsService } from '../../data/common';
+import { FieldFormatsRegistry, IndexPatternsService } from '../../data/common';
 import { visDataRoutes } from './routes/vis';
 import { fieldsRoutes } from './routes/fields';
 import { getUiSettings } from './ui_settings';
@@ -71,6 +71,7 @@ export interface Framework {
   getIndexPatternsService: (
     requestContext: VisTypeTimeseriesRequestHandlerContext
   ) => Promise<IndexPatternsService>;
+  getFieldFormatsService: (uiSettings: IUiSettingsClient) => Promise<FieldFormatsRegistry>;
   getEsShardTimeout: () => Promise<number>;
 }
 
@@ -111,6 +112,11 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
           requestContext.core.savedObjects.client,
           requestContext.core.elasticsearch.client.asCurrentUser
         );
+      },
+      getFieldFormatsService: async (uiSettings) => {
+        const [, { data }] = await core.getStartServices();
+
+        return await data.fieldFormats.fieldFormatServiceFactory(uiSettings);
       },
     };
 

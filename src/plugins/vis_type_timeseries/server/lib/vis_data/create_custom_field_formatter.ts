@@ -6,9 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { createGetterSetter } from '../../kibana_utils/common';
-import { PluginStart as DataPluginStart } from '../../data/server';
+import type { FieldFormatMap, FieldFormatsRegistry } from '../../../../data/common';
 
-export const [getFieldFormats, setFieldFormats] = createGetterSetter<
-  DataPluginStart['fieldFormats']
->('FieldFormats');
+export const createCustomFieldFormatter = (
+  fieldFormatsService: FieldFormatsRegistry,
+  fieldFormatMap?: FieldFormatMap
+) => {
+  if (fieldFormatMap) {
+    return (fieldName: string) => fieldFormatsService.deserialize(fieldFormatMap[fieldName]);
+  }
+};

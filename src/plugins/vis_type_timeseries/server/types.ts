@@ -14,6 +14,7 @@ import type {
   EsQueryConfig,
   IndexPatternsService,
 } from '../../data/server';
+import type { FieldFormatsRegistry } from '../../data/common';
 import type { VisPayload } from '../common/types';
 import type { SearchStrategyRegistry } from './lib/search_strategies';
 import type { CachedIndexPatternFetcher } from './lib/search_strategies/lib/cached_index_pattern_fetcher';
@@ -35,4 +36,5 @@ export interface VisTypeTimeseriesRequestServices {
   indexPatternsService: IndexPatternsService;
   searchStrategyRegistry: SearchStrategyRegistry;
   cachedIndexPatternFetcher: CachedIndexPatternFetcher;
+  fieldFormatService: FieldFormatsRegistry;
 }

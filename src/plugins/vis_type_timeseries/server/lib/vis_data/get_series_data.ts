@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 // not typed yet
 // @ts-expect-error
 import { handleErrorResponse } from './handle_error_response';
-import { getCustomFieldFormatter } from './get_custom_field_formatter';
 import { getAnnotations } from './get_annotations';
 import { handleResponseBody } from './series/handle_response_body';
 import { getSeriesRequestParams } from './series/get_request_params';
@@ -34,7 +33,7 @@ export async function getSeriesData(
     cachedIndexPatternFetcher,
     searchStrategyRegistry,
     indexPatternsService,
-    uiSettings,
+    fieldFormatService,
   } = services;
 
   const panelIndex = await cachedIndexPatternFetcher(panel.index_pattern);
@@ -60,10 +59,6 @@ export async function getSeriesData(
       getSeriesRequestParams(req, panel, panelIndex, series, capabilities, services)
     );
 
-    const customFieldFormatter = await getCustomFieldFormatter(
-      uiSettings,
-      panelIndex.indexPattern?.fieldFormatMap
-    );
     const fieldFetchServices = {
       indexPatternsService,
       cachedIndexPatternFetcher,
@@ -75,7 +70,7 @@ export async function getSeriesData(
       panel,
       req,
       fieldFetchServices,
-      customFieldFormatter
+      fieldFormatService
     );
 
     const searches = await Promise.all(bodiesPromises);

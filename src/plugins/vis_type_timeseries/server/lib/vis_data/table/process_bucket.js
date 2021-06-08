@@ -64,10 +64,9 @@ export function processBucket(
       })
     );
 
-    const key =
-      customFieldFormatter && panel.pivot_id && panel.pivot_type === 'string'
-        ? customFieldFormatter(panel.pivot_id).convert(bucket.key)
-        : bucket.key;
+    const key = customFieldFormatter
+      ? customFieldFormatter(panel.pivot_id).convert(bucket.key)
+      : bucket.key;
 
     return { key, series };
   };

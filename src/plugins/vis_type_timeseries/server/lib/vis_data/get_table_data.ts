@@ -18,6 +18,7 @@ import { handleErrorResponse } from './handle_error_response';
 import { processBucket } from './table/process_bucket';
 
 import { createFieldsFetcher } from '../search_strategies/lib/fields_fetcher';
+import { createCustomFieldFormatter } from './create_custom_field_formatter';
 import { extractFieldLabel } from '../../../common/fields_utils';
 import type {
   VisTypeTimeseriesRequestHandlerContext,
@@ -25,7 +26,6 @@ import type {
   VisTypeTimeseriesVisDataRequest,
 } from '../../types';
 import type { Panel } from '../../../common/types';
-import { getCustomFieldFormatter } from './get_custom_field_formatter';
 
 export async function getTableData(
   requestContext: VisTypeTimeseriesRequestHandlerContext,
@@ -39,6 +39,7 @@ export async function getTableData(
     indexPatternsService,
     esQueryConfig,
     uiSettings,
+    fieldFormatService,
   } = services;
 
   const panelIndex = await cachedIndexPatternFetcher(panel.index_pattern);
@@ -102,8 +103,8 @@ export async function getTableData(
       []
     );
 
-    const customFieldFormatter = await getCustomFieldFormatter(
-      uiSettings,
+    const customFieldFormatter = createCustomFieldFormatter(
+      fieldFormatService,
       panelIndex.indexPattern?.fieldFormatMap
     );
 

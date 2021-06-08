@@ -18,7 +18,6 @@ import { PaletteRegistry } from 'src/plugins/charts/public';
 
 // @ts-expect-error
 import { ErrorComponent } from './error';
-import { getFieldFormats } from '../../services';
 import { TimeseriesVisTypes } from './vis_types';
 import type { PanelData, TimeseriesVisData } from '../../../common/types';
 import { isVisSeriesData, isVisTableData } from '../../../common/vis_data_utils';

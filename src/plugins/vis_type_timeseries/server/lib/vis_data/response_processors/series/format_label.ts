@@ -7,20 +7,29 @@
  */
 
 import { BUCKET_TYPES } from '../../../../../common/enums';
+import { createCustomFieldFormatter } from '../../../../lib/vis_data/create_custom_field_formatter';
 import type { Panel, Series, PanelData } from '../../../../../common/types';
-import type { CustomFieldFormatter } from '../../get_custom_field_formatter';
+import type { FieldFormatsRegistry } from '../../../../../../data/common';
 import type { createFieldsFetcher } from '../../../search_strategies/lib/fields_fetcher';
+import type { CachedIndexPatternFetcher } from '../../../search_strategies/lib/cached_index_pattern_fetcher';
 
 export function formatLabel(
   resp: unknown,
   panel: Panel,
   series: Series,
-  meta: unknown,
+  meta: any,
   extractFields: ReturnType<typeof createFieldsFetcher>,
-  customFieldFormatter?: CustomFieldFormatter
+  fieldFormatService: FieldFormatsRegistry,
+  cachedIndexPatternFetcher: CachedIndexPatternFetcher
 ) {
   return (next: (results: PanelData[]) => unknown) => async (results: PanelData[]) => {
     const termsField = series.terms_field;
+
+    const { indexPattern } = await cachedIndexPatternFetcher({ id: meta.index });
+    const customFieldFormatter = createCustomFieldFormatter(
+      fieldFormatService,
+      indexPattern?.fieldFormatMap
+    );
 
     if (termsField && customFieldFormatter) {
       results
