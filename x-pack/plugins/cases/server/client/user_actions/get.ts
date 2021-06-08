@@ -5,49 +5,63 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
 import {
+  SUB_CASE_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
-  SUB_CASE_SAVED_OBJECT,
-} from '../../saved_object_types';
-import { CaseUserActionsResponseRt, CaseUserActionsResponse } from '../../../common';
-import { CaseUserActionServiceSetup } from '../../services';
+} from '../../../common/constants';
+import { CaseUserActionsResponseRt, CaseUserActionsResponse } from '../../../common/api';
+import { createCaseError } from '../../common/error';
+import { checkEnabledCaseConnectorOrThrow } from '../../common';
+import { CasesClientArgs } from '..';
+import { Operations } from '../../authorization';
+import { UserActionGet } from './client';
 
-interface GetParams {
-  savedObjectsClient: SavedObjectsClientContract;
-  userActionService: CaseUserActionServiceSetup;
-  caseId: string;
-  subCaseId?: string;
-}
+export const get = async (
+  { caseId, subCaseId }: UserActionGet,
+  clientArgs: CasesClientArgs
+): Promise<CaseUserActionsResponse> => {
+  const { unsecuredSavedObjectsClient, userActionService, logger, authorization } = clientArgs;
 
-export const get = async ({
-  savedObjectsClient,
-  userActionService,
-  caseId,
-  subCaseId,
-}: GetParams): Promise<CaseUserActionsResponse> => {
-  const userActions = await userActionService.getUserActions({
-    client: savedObjectsClient,
-    caseId,
-    subCaseId,
-  });
+  try {
+    checkEnabledCaseConnectorOrThrow(subCaseId);
 
-  return CaseUserActionsResponseRt.encode(
-    userActions.saved_objects.reduce<CaseUserActionsResponse>((acc, ua) => {
-      if (subCaseId == null && ua.references.some((uar) => uar.type === SUB_CASE_SAVED_OBJECT)) {
-        return acc;
-      }
-      return [
-        ...acc,
-        {
-          ...ua.attributes,
-          action_id: ua.id,
-          case_id: ua.references.find((r) => r.type === CASE_SAVED_OBJECT)?.id ?? '',
-          comment_id: ua.references.find((r) => r.type === CASE_COMMENT_SAVED_OBJECT)?.id ?? null,
-          sub_case_id: ua.references.find((r) => r.type === SUB_CASE_SAVED_OBJECT)?.id ?? '',
-        },
-      ];
-    }, [])
-  );
+    const userActions = await userActionService.getAll({
+      unsecuredSavedObjectsClient,
+      caseId,
+      subCaseId,
+    });
+
+    await authorization.ensureAuthorized({
+      entities: userActions.saved_objects.map((userAction) => ({
+        owner: userAction.attributes.owner,
+        id: userAction.id,
+      })),
+      operation: Operations.getUserActions,
+    });
+
+    return CaseUserActionsResponseRt.encode(
+      userActions.saved_objects.reduce<CaseUserActionsResponse>((acc, ua) => {
+        if (subCaseId == null && ua.references.some((uar) => uar.type === SUB_CASE_SAVED_OBJECT)) {
+          return acc;
+        }
+        return [
+          ...acc,
+          {
+            ...ua.attributes,
+            action_id: ua.id,
+            case_id: ua.references.find((r) => r.type === CASE_SAVED_OBJECT)?.id ?? '',
+            comment_id: ua.references.find((r) => r.type === CASE_COMMENT_SAVED_OBJECT)?.id ?? null,
+            sub_case_id: ua.references.find((r) => r.type === SUB_CASE_SAVED_OBJECT)?.id ?? '',
+          },
+        ];
+      }, [])
+    );
+  } catch (error) {
+    throw createCaseError({
+      message: `Failed to retrieve user actions case id: ${caseId} sub case id: ${subCaseId}: ${error}`,
+      error,
+      logger,
+    });
+  }
 };

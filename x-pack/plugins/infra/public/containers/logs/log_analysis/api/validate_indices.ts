@@ -20,7 +20,7 @@ import { decodeOrThrow } from '../../../../../common/runtime_types';
 interface RequestArgs {
   indices: string[];
   fields: ValidationIndicesFieldSpecification[];
-  runtimeMappings: estypes.RuntimeFields;
+  runtimeMappings: estypes.MappingRuntimeFields;
 }
 
 export const callValidateIndicesAPI = async (requestArgs: RequestArgs, fetch: HttpHandler) => {

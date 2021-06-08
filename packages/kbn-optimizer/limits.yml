@@ -34,7 +34,7 @@ pageLoadAssetSize:
   indexManagement: 140608
   indexPatternManagement: 28222
   infra: 184320
-  fleet: 415829
+  fleet: 450005
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
@@ -110,3 +110,4 @@ pageLoadAssetSize:
   timelines: 28613
   cases: 162385
   screenshotMode: 17856
+  visTypePie: 35583

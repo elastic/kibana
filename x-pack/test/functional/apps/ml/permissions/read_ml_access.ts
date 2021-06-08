@@ -129,7 +129,6 @@ export default function ({ getService }: FtrProviderContext) {
           description: 'Test calendar',
         });
         await ml.api.createCalendarEvents(calendarId, [
-          // @ts-expect-error not full interface
           {
             description: eventDescription,
             start_time: '1513641600000',
