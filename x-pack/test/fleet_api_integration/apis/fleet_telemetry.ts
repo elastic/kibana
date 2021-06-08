@@ -109,12 +109,17 @@ export default function (providerContext: FtrProviderContext) {
         healthy: 3,
         unhealthy: 2,
         offline: 1,
+        updating: 0,
         total_all_statuses: 6,
       });
 
       expect(apiResponse.stack_stats.kibana.plugins.fleet.fleet_server).eql({
         total_all_statuses: 3,
+        total_enrolled: 3,
         healthy: 2,
+        unhealthy: 1,
+        offline: 0,
+        updating: 0,
         num_host_urls: 2,
       });
     });

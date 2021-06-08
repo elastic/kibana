@@ -12,12 +12,20 @@ import { isFleetServerSetup } from '../services/fleet_server';
 
 const DEFAULT_USAGE = {
   total_all_statuses: 0,
+  total_enrolled: 0,
   healthy: 0,
+  unhealthy: 0,
+  offline: 0,
+  updating: 0,
   num_host_urls: 0,
 };
 
 export interface FleetServerUsage {
+  total_enrolled: number;
   healthy: number;
+  unhealthy: number;
+  offline: number;
+  updating: number;
   total_all_statuses: number;
   num_host_urls: number;
 }
@@ -58,7 +66,7 @@ export const getFleetServerUsage = async (
     return DEFAULT_USAGE;
   }
 
-  const { total, inactive, online } = await getAgentStatusForAgentPolicy(
+  const { total, inactive, online, error, updating, offline } = await getAgentStatusForAgentPolicy(
     soClient,
     esClient,
     undefined,
@@ -66,8 +74,12 @@ export const getFleetServerUsage = async (
   );
 
   return {
-    total_all_statuses: total + inactive,
+    total_enrolled: total,
     healthy: online,
+    unhealthy: error,
+    offline,
+    updating,
+    total_all_statuses: total + inactive,
     num_host_urls: numHostsUrls,
   };
 };

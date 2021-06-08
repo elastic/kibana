@@ -17,6 +17,7 @@ export interface AgentUsage {
   unhealthy: number;
   offline: number;
   total_all_statuses: number;
+  updating: number;
 }
 
 export const getAgentUsage = async (
@@ -32,6 +33,7 @@ export const getAgentUsage = async (
       unhealthy: 0,
       offline: 0,
       total_all_statuses: 0,
+      updating: 0,
     };
   }
 
@@ -41,6 +43,7 @@ export const getAgentUsage = async (
     online,
     error,
     offline,
+    updating,
   } = await AgentService.getAgentStatusForAgentPolicy(soClient, esClient);
   return {
     total_enrolled: total,
@@ -48,5 +51,6 @@ export const getAgentUsage = async (
     unhealthy: error,
     offline,
     total_all_statuses: total + inactive,
+    updating,
   };
 };

@@ -71,6 +71,12 @@ export function registerFleetUsageCollector(
             description: 'The total number of enrolled agents in an unhealthy state',
           },
         },
+        updating: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of enrolled agents in an updating state',
+          },
+        },
         offline: {
           type: 'long',
           _meta: {
@@ -85,6 +91,12 @@ export function registerFleetUsageCollector(
         },
       },
       fleet_server: {
+        total_enrolled: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of enrolled Fleet Server agents, in any state',
+          },
+        },
         total_all_statuses: {
           type: 'long',
           _meta: {
@@ -96,6 +108,24 @@ export function registerFleetUsageCollector(
           type: 'long',
           _meta: {
             description: 'The total number of enrolled Fleet Server agents in a healthy state.',
+          },
+        },
+        unhealthy: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of enrolled Fleet Server agents in an unhealthy state',
+          },
+        },
+        updating: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of enrolled Fleet Server agents in an updating state',
+          },
+        },
+        offline: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of enrolled Fleet Server agents currently offline',
           },
         },
         num_host_urls: {
