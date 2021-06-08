@@ -29,7 +29,7 @@ export async function getVersionInfo({ isRelease, versionQualifier, pkg }: Optio
   );
 
   const buildSha = fs.existsSync('.git')
-    ? await execa('git', ['rev-parse', 'HEAD']).stdout
+    ? (await execa('git', ['rev-parse', 'HEAD'])).stdout
     : process.env.GIT_COMMIT || process.env.BUILDKITE_COMMIT;
 
   return {
