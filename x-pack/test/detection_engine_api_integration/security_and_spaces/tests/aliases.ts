@@ -30,13 +30,13 @@ export default ({ getService }: FtrProviderContext) => {
   describe('Tests involving aliases of source indexes and the signals index', () => {
     beforeEach(async () => {
       await createSignalsIndex(supertest);
-      await esArchiver.load('security_solution/alias');
+      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alias');
     });
 
     afterEach(async () => {
       await deleteSignalsIndex(supertest);
       await deleteAllAlerts(supertest);
-      await esArchiver.unload('security_solution/alias');
+      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alias');
     });
 
     it('Should keep the original alias value such as "host_alias" from a source index when the value is indexed', async () => {
