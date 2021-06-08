@@ -9,7 +9,6 @@ import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/publi
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { kibanaLegacyPluginMock } from '../../../../../src/plugins/kibana_legacy/public/mocks';
 import { embeddablePluginMock } from '../../../../../src/plugins/embeddable/public/mocks';
-import { lensPluginMock } from '../../../lens/public/mocks';
 import { triggersActionsUiMock } from '../../../triggers_actions_ui/public/mocks';
 
 export const createMlStartDepsMock = () => ({
@@ -22,7 +21,6 @@ export const createMlStartDepsMock = () => ({
   spaces: jest.fn(),
   embeddable: embeddablePluginMock.createStartContract(),
   maps: jest.fn(),
-  lens: lensPluginMock.createStartContract(),
   triggersActionsUi: triggersActionsUiMock.createStart(),
   dataVisualizer: jest.fn(),
 });

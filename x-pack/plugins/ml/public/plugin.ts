@@ -46,7 +46,6 @@ import { registerFeature } from './register_feature';
 // Not importing from `ml_url_generator/index` here to avoid importing unnecessary code
 import { registerUrlGenerator } from './ml_url_generator/ml_url_generator';
 import type { MapsStartApi } from '../../maps/public';
-import { LensPublicStart } from '../../lens/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
@@ -63,7 +62,6 @@ export interface MlStartDependencies {
   spaces?: SpacesPluginStart;
   embeddable: EmbeddableStart;
   maps?: MapsStartApi;
-  lens?: LensPublicStart;
   triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
   dataVisualizer: DataVisualizerPluginStart;
 }
@@ -120,7 +118,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             embeddable: { ...pluginsSetup.embeddable, ...pluginsStart.embeddable },
             maps: pluginsStart.maps,
             uiActions: pluginsStart.uiActions,
-            lens: pluginsStart.lens,
             kibanaVersion,
             triggersActionsUi: pluginsStart.triggersActionsUi,
             dataVisualizer: pluginsStart.dataVisualizer,

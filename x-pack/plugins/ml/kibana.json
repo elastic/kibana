@@ -28,7 +28,6 @@
     "management",
     "licenseManagement",
     "maps",
-    "lens",
     "usageCollection"
   ],
   "server": true,
