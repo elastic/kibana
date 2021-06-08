@@ -77,6 +77,7 @@ export function SelectedFilters({
                     value={value}
                     negate={false}
                     label={title}
+                    allowExclusion={false}
                   />
                 </EuiFlexItem>
               ))}

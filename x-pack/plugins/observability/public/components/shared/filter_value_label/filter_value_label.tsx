@@ -45,6 +45,7 @@ interface Props {
   removeFilter: (field: string, value: string, notVal: boolean) => void;
   invertFilter: (val: { field: string; value: string; negate: boolean }) => void;
   indexPattern: IndexPattern;
+  allowExclusion?: boolean;
 }
 export function FilterValueLabel({
   label,
@@ -54,6 +55,7 @@ export function FilterValueLabel({
   indexPattern,
   invertFilter,
   removeFilter,
+  allowExclusion = true,
 }: Props) {
   const FilterItem = injectI18n(esFilters.FilterItem);
 
@@ -77,7 +79,12 @@ export function FilterValueLabel({
         }
       }}
       uiSettings={uiSettings!}
-      hiddenPanelOptions={['pinFilter', 'editFilter', 'disableFilter']}
+      hiddenPanelOptions={[
+        ...(allowExclusion ? [] : ['negateFilter' as const]),
+        'pinFilter',
+        'editFilter',
+        'disableFilter',
+      ]}
     />
   ) : null;
 }
