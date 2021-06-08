@@ -9,29 +9,20 @@ import { ConnectorTypes } from '../../common/api';
 import { getCaseConnector as getJiraCaseConnector } from './jira';
 import { getCaseConnector as getResilientCaseConnector } from './resilient';
 import { getServiceNowITSMCaseConnector, getServiceNowSIRCaseConnector } from './servicenow';
-import {
-  CasesConnectorsMap,
-  CasesConnectorTypes,
-  ICasesConnector,
-  ICasesConnectorFactory,
-} from './types';
+import { ICasesConnector, CasesConnectorsMap } from './types';
 
-export class CasesConnectorsFactory implements ICasesConnectorFactory {
-  private readonly casesConnectorsMap: Map<CasesConnectorTypes, ICasesConnector<{}>>;
+const mapping: Record<ConnectorTypes, ICasesConnector | null> = {
+  [ConnectorTypes.jira]: getJiraCaseConnector(),
+  [ConnectorTypes.serviceNowITSM]: getServiceNowITSMCaseConnector(),
+  [ConnectorTypes.serviceNowSIR]: getServiceNowSIRCaseConnector(),
+  [ConnectorTypes.resilient]: getResilientCaseConnector(),
+  [ConnectorTypes.none]: null,
+};
 
-  constructor() {
-    this.casesConnectorsMap = new Map<CasesConnectorTypes, ICasesConnector>();
-    this.initMapping();
-  }
+const isConnectorTypeSupported = (type: string): type is ConnectorTypes =>
+  Object.values(ConnectorTypes).includes(type as ConnectorTypes);
 
-  private initMapping() {
-    this.casesConnectorsMap.set(ConnectorTypes.jira, getJiraCaseConnector());
-    this.casesConnectorsMap.set(ConnectorTypes.serviceNowITSM, getServiceNowITSMCaseConnector());
-    this.casesConnectorsMap.set(ConnectorTypes.serviceNowSIR, getServiceNowSIRCaseConnector());
-    this.casesConnectorsMap.set(ConnectorTypes.resilient, getResilientCaseConnector());
-  }
-
-  public getCasesConnectors = (): CasesConnectorsMap => {
-    return this.casesConnectorsMap;
-  };
-}
+export const casesConnectors: CasesConnectorsMap = {
+  get: (type: string): ICasesConnector | undefined | null =>
+    isConnectorTypeSupported(type) ? mapping[type] : undefined,
+};

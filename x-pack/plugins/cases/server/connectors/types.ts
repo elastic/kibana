@@ -6,7 +6,7 @@
  */
 
 import { Logger } from 'kibana/server';
-import { CaseResponse, ConnectorMappingsAttributes, ConnectorTypes } from '../../common/api';
+import { CaseResponse, ConnectorMappingsAttributes } from '../../common/api';
 import { CasesClientGetAlertsResponse } from '../client/alerts/types';
 import { CasesClientFactory } from '../client/factory';
 import { RegisterActionType } from '../types';
@@ -31,9 +31,6 @@ export interface ICasesConnector<TExternalServiceParams = {}> {
   getMapping: () => ConnectorMappingsAttributes[];
 }
 
-export type CasesConnectorTypes = Omit<ConnectorTypes, ConnectorTypes.none>;
-export type CasesConnectorsMap = Map<CasesConnectorTypes, ICasesConnector>;
-
-export interface ICasesConnectorFactory {
-  getCasesConnectors: () => CasesConnectorsMap;
+export interface CasesConnectorsMap {
+  get: (type: string) => ICasesConnector | undefined | null;
 }

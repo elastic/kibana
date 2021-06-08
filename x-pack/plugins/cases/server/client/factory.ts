@@ -27,7 +27,6 @@ import { PluginStartContract as FeaturesPluginStart } from '../../../features/se
 import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
 import { AuthorizationAuditLogger } from '../authorization';
 import { CasesClient, createCasesClient } from '.';
-import { CasesConnectorsFactory } from '../connectors';
 
 interface CasesClientFactoryArgs {
   securityPluginSetup?: SecurityPluginSetup;
@@ -91,7 +90,6 @@ export class CasesClientFactory {
 
     const caseService = new CasesService(this.logger, this.options?.securityPluginStart?.authc);
     const userInfo = caseService.getUser({ request });
-    const casesConnectorsFactory = new CasesConnectorsFactory();
 
     return createCasesClient({
       alertsService: new AlertService(),
@@ -112,7 +110,6 @@ export class CasesClientFactory {
       logger: this.logger,
       authorization: auth,
       actionsClient: await this.options.actionsPluginStart.getActionsClientWithRequest(request),
-      casesConnectors: casesConnectorsFactory.getCasesConnectors(),
     });
   }
 }

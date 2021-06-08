@@ -25,6 +25,7 @@ import { createCaseError, flattenCaseSavedObject, getAlertInfoFromComments } fro
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { CasesClient, CasesClientArgs, CasesClientInternal } from '..';
 import { Operations } from '../../authorization';
+import { casesConnectors } from '../../connectors';
 
 /**
  * Returns true if the case should be closed based on the configuration settings and whether the case
@@ -77,7 +78,6 @@ export const push = async (
     user,
     logger,
     authorization,
-    casesConnectors,
   } = clientArgs;
 
   try {

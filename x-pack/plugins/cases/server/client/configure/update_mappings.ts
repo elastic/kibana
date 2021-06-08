@@ -10,17 +10,13 @@ import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { createCaseError } from '../../common/error';
 import { CasesClientArgs } from '..';
 import { UpdateMappingsArgs } from './types';
+import { casesConnectors } from '../../connectors';
 
 export const updateMappings = async (
   { connector, mappingId }: UpdateMappingsArgs,
   clientArgs: CasesClientArgs
 ): Promise<ConnectorMappingsAttributes[]> => {
-  const {
-    unsecuredSavedObjectsClient,
-    connectorMappingsService,
-    logger,
-    casesConnectors,
-  } = clientArgs;
+  const { unsecuredSavedObjectsClient, connectorMappingsService, logger } = clientArgs;
 
   try {
     const mappings = casesConnectors.get(connector.type)?.getMapping() ?? [];
