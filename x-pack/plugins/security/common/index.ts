@@ -6,3 +6,4 @@
  */
 
 export { SecurityLicense } from './licensing';
+export { AuthenticatedUser } from './model';
