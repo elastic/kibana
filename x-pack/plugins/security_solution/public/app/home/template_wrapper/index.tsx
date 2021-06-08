@@ -21,7 +21,8 @@ import {
   SecuritySolutionBottomBar,
   SecuritySolutionBottomBarProps,
 } from './bottom_bar';
-import { useSecurityPageTemplateNav } from './navigation';
+import { SecuritySolutionNavigationManager } from '../../../common/components/navigation';
+import { navTabs } from '../home_navigations';
 
 /* eslint-disable react/display-name */
 
@@ -65,7 +66,6 @@ interface SecuritySolutionPageWrapperProps {
 export const SecuritySolutionTemplateWrapper: React.FC<
   SecuritySolutionPageWrapperProps & CommonProps
 > = React.memo(({ children }) => {
-  const securityPageTemplateNav = useSecurityPageTemplateNav();
   const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
   const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
     getTimelineShowStatus(state, TimelineId.active)
@@ -89,8 +89,8 @@ export const SecuritySolutionTemplateWrapper: React.FC<
       bottomBarProps={SecuritySolutionBottomBarProps}
       bottomBar={<SecuritySolutionBottomBar />}
       paddingSize="none"
+      pageSideBar={<SecuritySolutionNavigationManager navTabs={navTabs} isPrimary />}
       restrictWidth={false}
-      solutionNav={securityPageTemplateNav}
       template="default"
     >
       <EuiPanel color="subdued" paddingSize="none">

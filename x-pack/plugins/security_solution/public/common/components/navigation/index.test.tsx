@@ -9,12 +9,12 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import { CONSTANTS } from '../url_state/constants';
-import { SiemNavigationComponent } from './';
+import { NavigationManagerComponent } from './';
 import { setBreadcrumbs } from './breadcrumbs';
 import { navTabs } from '../../../app/home/home_navigations';
 import { HostsTableType } from '../../../hosts/store/model';
 import { RouteSpyState } from '../../utils/route/types';
-import { SiemNavigationProps, SiemNavigationComponentProps } from './types';
+import { NavigationManagerComponentProps, SecuritySolutionNavigationManagerProps } from './types';
 import { TimelineTabs } from '../../../../common/types/timeline';
 
 jest.mock('react-router-dom', () => {
@@ -48,7 +48,9 @@ jest.mock('../../lib/kibana', () => {
 jest.mock('../link_to');
 
 describe('SIEM Navigation', () => {
-  const mockProps: SiemNavigationComponentProps & SiemNavigationProps & RouteSpyState = {
+  const mockProps: NavigationManagerComponentProps &
+    SecuritySolutionNavigationManagerProps &
+    RouteSpyState = {
     pageName: 'hosts',
     pathName: '/',
     detailName: undefined,
@@ -89,7 +91,7 @@ describe('SIEM Navigation', () => {
       },
     },
   };
-  const wrapper = mount(<SiemNavigationComponent {...mockProps} />);
+  const wrapper = mount(<NavigationManagerComponent {...mockProps} />);
   test('it calls setBreadcrumbs with correct path on mount', () => {
     expect(setBreadcrumbs).toHaveBeenNthCalledWith(
       1,

@@ -21,7 +21,7 @@ import { hostToCriteria } from '../../../common/components/ml/criteria/host_to_c
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';
-import { SiemNavigation } from '../../../common/components/navigation';
+import { SecuritySolutionNavigationManager } from '../../../common/components/navigation';
 import { HostsDetailsKpiComponent } from '../../components/kpi_hosts';
 import { HostOverview } from '../../../overview/components/host_overview';
 import { SiemSearchBar } from '../../../common/components/search_bar';
@@ -184,7 +184,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
 
               <EuiSpacer />
 
-              <SiemNavigation
+              <SecuritySolutionNavigationManager
                 navTabs={navTabsHostDetails(detailName, hasMlUserPermissions(capabilities))}
               />
 

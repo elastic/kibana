@@ -14,6 +14,8 @@ import { navTabs } from '../../../../app/home/home_navigations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { APP_ID } from '../../../../../common/constants';
 
+// TODO: This is a light version of what the navigation should be. Remove this file if/when we decide to stick with the SecuritySolutionNavigationManager
+
 const translatedNavTitle = i18n.translate('xpack.securitySolution.navigation.mainLabel', {
   defaultMessage: 'Security',
 });
