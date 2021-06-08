@@ -111,7 +111,7 @@ describe('test useContextAppFetch', () => {
   });
 
   it('should set anchorStatus to failed when tieBreakingField array is empty', async () => {
-    const { props, dangerNotification } = initDefaults([]);
+    const { props } = initDefaults([]);
 
     const { result } = renderHook(() => {
       return useContextAppFetch(props);
@@ -123,7 +123,6 @@ describe('test useContextAppFetch', () => {
       await result.current.fetchAllRows();
     });
 
-    expect(dangerNotification.mock.calls.length).toBe(1);
     expect(result.current.fetchedState.anchorStatus.value).toBe(LoadingStatus.FAILED);
     expect(result.current.fetchedState.anchorStatus.reason).toBe(FailureReason.INVALID_TIEBREAKER);
     expect(result.current.fetchedState.anchor).toEqual({});

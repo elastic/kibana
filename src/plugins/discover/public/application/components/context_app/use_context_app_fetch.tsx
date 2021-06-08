@@ -69,25 +69,12 @@ export function useContextAppFetch({
     setFetchedState((prevState) => ({ ...prevState, ...values }));
   }, []);
 
-  const sendInvalidTieBreakerFeedback = useCallback(() => {
-    const message = i18n.translate('discover.context.invalidTieBreakerFiledSetting', {
-      defaultMessage: 'Invalid tie breaker field setting',
-    });
-    toastNotifications.addDanger({
-      title: i18n.translate('discover.context.unableToLoadAnchorDocumentDescription', {
-        defaultMessage: 'Unable to load documents',
-      }),
-      text: toMountPoint(<MarkdownSimple>{message}</MarkdownSimple>),
-    });
-  }, [toastNotifications]);
-
   const fetchAnchorRow = useCallback(async () => {
     const { sort } = appState;
     const [[, sortDir]] = sort;
 
     if (!tieBreakerField) {
       setState(createError('anchorStatus', FailureReason.INVALID_TIEBREAKER));
-      sendInvalidTieBreakerFeedback();
       return;
     }
 
@@ -112,7 +99,6 @@ export function useContextAppFetch({
     appState,
     tieBreakerField,
     setState,
-    sendInvalidTieBreakerFeedback,
     fetchAnchor,
     indexPatternId,
     anchorId,
@@ -131,7 +117,15 @@ export function useContextAppFetch({
 
       if (!tieBreakerField) {
         setState(createError(statusKey, FailureReason.INVALID_TIEBREAKER));
-        sendInvalidTieBreakerFeedback();
+        const message = i18n.translate('discover.context.invalidTieBreakerFiledSetting', {
+          defaultMessage: 'Invalid tie breaker field setting',
+        });
+        toastNotifications.addDanger({
+          title: i18n.translate('discover.context.unableToLoadDocumentDescription', {
+            defaultMessage: 'Unable to load documents',
+          }),
+          text: toMountPoint(<MarkdownSimple>{message}</MarkdownSimple>),
+        });
         return;
       }
 
@@ -164,7 +158,6 @@ export function useContextAppFetch({
       fetchedState.anchor,
       tieBreakerField,
       setState,
-      sendInvalidTieBreakerFeedback,
       fetchSurroundingDocs,
       indexPatternId,
       toastNotifications,
