@@ -6,9 +6,15 @@
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 
 export function getSpaceIdFromPath(
-  requestBasePath: string = '/',
-  serverBasePath: string = '/'
+  requestBasePath?: string | null,
+  serverBasePath?: string | null
 ): string {
+  if (requestBasePath == null) {
+    requestBasePath = '/';
+  }
+  if (serverBasePath == null) {
+    serverBasePath = '/';
+  }
   let pathToCheck: string = requestBasePath;
 
   if (serverBasePath && serverBasePath !== '/' && requestBasePath.startsWith(serverBasePath)) {
