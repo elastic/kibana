@@ -262,7 +262,17 @@
       "label": "NewsfeedPublicPluginStart",
       "description": [],
       "signature": [
-        "{ createNewsFeed$: (endpoint: NewsfeedApiEndpoint) => Rx.Observable<void | ",
+        "{ createNewsFeed$: (endpoint: ",
+        {
+          "pluginId": "newsfeed",
+          "scope": "public",
+          "docId": "kibNewsfeedPluginApi",
+          "section": "def-public.NewsfeedApiEndpoint",
+          "text": "NewsfeedApiEndpoint"
+        },
+        ") => ",
+        "Observable",
+        "<void | ",
         {
           "pluginId": "newsfeed",
           "scope": "public",
