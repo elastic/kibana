@@ -145,7 +145,11 @@
             "section": "def-public.AlertTypeModel",
             "text": "AlertTypeModel"
           },
-          "<any> & { format: Formatter; }) => void; getFormatter: (typeId: string) => Formatter | undefined; } & { registerFormatter: () => void; }"
+          "<any> & { format: ",
+          "Formatter",
+          "; }) => void; getFormatter: (typeId: string) => ",
+          "Formatter",
+          " | undefined; } & { registerFormatter: () => void; }"
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/rules/observability_rule_type_registry_mock.ts",
@@ -575,6 +579,46 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.useBreadcrumbs",
+        "type": "Function",
+        "tags": [],
+        "label": "useBreadcrumbs",
+        "description": [],
+        "signature": [
+          "(extraCrumbs: ",
+          "EuiBreadcrumb",
+          "[]) => void"
+        ],
+        "source": {
+          "path": "x-pack/plugins/observability/public/hooks/use_breadcrumbs.ts",
+          "lineNumber": 43
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.useBreadcrumbs.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "extraCrumbs",
+            "description": [],
+            "signature": [
+              "EuiBreadcrumb",
+              "[]"
+            ],
+            "source": {
+              "path": "x-pack/plugins/observability/public/hooks/use_breadcrumbs.ts",
+              "lineNumber": 43
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.useChartTheme",
         "type": "Function",
         "tags": [],
@@ -887,7 +931,7 @@
         "label": "useUiTracker",
         "description": [],
         "signature": [
-          "({\n  app: defaultApp,\n}: { app?: \"apm\" | \"fleet\" | \"infra_metrics\" | \"infra_logs\" | \"uptime\" | \"synthetics\" | \"observability-overview\" | \"stack_monitoring\" | \"ux\" | undefined; }) => ({ app, metric, metricType }: ",
+          "({\n  app: defaultApp,\n}: { app?: \"fleet\" | \"apm\" | \"infra_metrics\" | \"infra_logs\" | \"uptime\" | \"synthetics\" | \"observability-overview\" | \"stack_monitoring\" | \"ux\" | undefined; }) => ({ app, metric, metricType }: ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -924,7 +968,7 @@
                 "label": "app",
                 "description": [],
                 "signature": [
-                  "\"apm\" | \"fleet\" | \"infra_metrics\" | \"infra_logs\" | \"uptime\" | \"synthetics\" | \"observability-overview\" | \"stack_monitoring\" | \"ux\" | undefined"
+                  "\"fleet\" | \"apm\" | \"infra_metrics\" | \"infra_logs\" | \"uptime\" | \"synthetics\" | \"observability-overview\" | \"stack_monitoring\" | \"ux\" | undefined"
                 ],
                 "source": {
                   "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
@@ -2267,7 +2311,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-          "lineNumber": 73
+          "lineNumber": 82
         },
         "deprecated": false,
         "children": [
@@ -2283,7 +2327,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-              "lineNumber": 74
+              "lineNumber": 83
             },
             "deprecated": false
           },
@@ -2299,7 +2343,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-              "lineNumber": 78
+              "lineNumber": 87
             },
             "deprecated": false
           },
@@ -2316,7 +2360,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-              "lineNumber": 79
+              "lineNumber": 88
             },
             "deprecated": false
           },
@@ -2332,7 +2376,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-              "lineNumber": 80
+              "lineNumber": 89
             },
             "deprecated": false
           },
@@ -2344,11 +2388,11 @@
             "label": "reportType",
             "description": [],
             "signature": [
-              "\"logs\" | \"cpu\" | \"pld\" | \"kpi\" | \"upd\" | \"upp\" | \"svl\" | \"tpt\" | \"mem\" | \"nwk\""
+              "\"logs\" | \"cpu\" | \"pld\" | \"kpi\" | \"cwv\" | \"upd\" | \"upp\" | \"svl\" | \"tpt\" | \"mem\" | \"nwk\""
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-              "lineNumber": 81
+              "lineNumber": 90
             },
             "deprecated": false
           },
@@ -2364,7 +2408,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-              "lineNumber": 82
+              "lineNumber": 91
             },
             "deprecated": false
           },
@@ -2380,7 +2424,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-              "lineNumber": 83
+              "lineNumber": 92
             },
             "deprecated": false
           },
@@ -2396,7 +2440,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-              "lineNumber": 84
+              "lineNumber": 93
             },
             "deprecated": false
           }
@@ -3006,7 +3050,11 @@
             "section": "def-public.AlertTypeModel",
             "text": "AlertTypeModel"
           },
-          "<any> & { format: Formatter; }) => void; getFormatter: (typeId: string) => Formatter | undefined; }"
+          "<any> & { format: ",
+          "Formatter",
+          "; }) => void; getFormatter: (typeId: string) => ",
+          "Formatter",
+          " | undefined; }"
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
@@ -3144,7 +3192,11 @@
           "section": "def-public.AlertTypeModel",
           "text": "AlertTypeModel"
         },
-        "<any> & { format: Formatter; }) => void; getFormatter: (typeId: string) => Formatter | undefined; }; isAlertingExperienceEnabled: () => boolean; navigation: { registerSections: (sections$: ",
+        "<any> & { format: ",
+        "Formatter",
+        "; }) => void; getFormatter: (typeId: string) => ",
+        "Formatter",
+        " | undefined; }; isAlertingExperienceEnabled: () => boolean; navigation: { registerSections: (sections$: ",
         "Observable",
         "<",
         "NavigationSection",
@@ -3330,46 +3382,50 @@
                 "description": [],
                 "signature": [
                   "(",
-                  "TypeMapping",
+                  "MappingTypeMapping",
                   " & { all_field?: ",
-                  "AllField",
-                  " | undefined; date_detection?: boolean | undefined; dynamic?: boolean | \"strict\" | undefined; dynamic_date_formats?: string[] | undefined; dynamic_templates?: Record<string, ",
-                  "DynamicTemplate",
+                  "MappingAllField",
+                  " | undefined; date_detection?: boolean | undefined; dynamic?: boolean | \"true\" | \"false\" | \"runtime\" | \"strict\" | undefined; dynamic_date_formats?: string[] | undefined; dynamic_templates?: Record<string, ",
+                  "MappingDynamicTemplate",
                   "> | Record<string, ",
-                  "DynamicTemplate",
+                  "MappingDynamicTemplate",
                   ">[] | undefined; field_names_field?: ",
-                  "FieldNamesField",
+                  "MappingFieldNamesField",
                   " | undefined; index_field?: ",
-                  "IndexField",
+                  "MappingIndexField",
                   " | undefined; meta?: Record<string, any> | undefined; numeric_detection?: boolean | undefined; properties?: Record<string, ",
-                  "PropertyBase",
+                  "MappingProperty",
                   "> | undefined; routing_field?: ",
-                  "RoutingField",
+                  "MappingRoutingField",
                   " | undefined; size_field?: ",
-                  "SizeField",
+                  "MappingSizeField",
                   " | undefined; source_field?: ",
-                  "SourceField",
-                  " | undefined; }) | (Record<string, ",
-                  "TypeMapping",
+                  "MappingSourceField",
+                  " | undefined; runtime?: Record<string, ",
+                  "MappingRuntimeField",
+                  "> | undefined; }) | (Record<string, ",
+                  "MappingTypeMapping",
                   "> & { all_field?: ",
-                  "AllField",
-                  " | undefined; date_detection?: boolean | undefined; dynamic?: boolean | \"strict\" | undefined; dynamic_date_formats?: string[] | undefined; dynamic_templates?: Record<string, ",
-                  "DynamicTemplate",
+                  "MappingAllField",
+                  " | undefined; date_detection?: boolean | undefined; dynamic?: boolean | \"true\" | \"false\" | \"runtime\" | \"strict\" | undefined; dynamic_date_formats?: string[] | undefined; dynamic_templates?: Record<string, ",
+                  "MappingDynamicTemplate",
                   "> | Record<string, ",
-                  "DynamicTemplate",
+                  "MappingDynamicTemplate",
                   ">[] | undefined; field_names_field?: ",
-                  "FieldNamesField",
+                  "MappingFieldNamesField",
                   " | undefined; index_field?: ",
-                  "IndexField",
+                  "MappingIndexField",
                   " | undefined; meta?: Record<string, any> | undefined; numeric_detection?: boolean | undefined; properties?: Record<string, ",
-                  "PropertyBase",
+                  "MappingProperty",
                   "> | undefined; routing_field?: ",
-                  "RoutingField",
+                  "MappingRoutingField",
                   " | undefined; size_field?: ",
-                  "SizeField",
+                  "MappingSizeField",
                   " | undefined; source_field?: ",
-                  "SourceField",
-                  " | undefined; })"
+                  "MappingSourceField",
+                  " | undefined; runtime?: Record<string, ",
+                  "MappingRuntimeField",
+                  "> | undefined; })"
                 ],
                 "source": {
                   "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
@@ -3387,7 +3443,7 @@
                 "signature": [
                   "Pick<",
                   "KibanaClient",
-                  ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"helpers\" | \"count\" | \"search\" | \"security\" | \"eql\" | \"on\" | \"off\" | \"transform\" | \"emit\" | \"once\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
+                  ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"helpers\" | \"count\" | \"search\" | \"security\" | \"eql\" | \"on\" | \"off\" | \"transform\" | \"emit\" | \"once\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
                   "TransportRequestParams",
                   ", options?: ",
                   "TransportRequestOptions",
@@ -3434,12 +3490,12 @@
         "description": [],
         "signature": [
           "(kql: string | undefined) => ",
-          "QueryContainer",
+          "QueryDslQueryContainer",
           "[]"
         ],
         "source": {
           "path": "x-pack/plugins/observability/server/utils/queries.ts",
-          "lineNumber": 35
+          "lineNumber": 39
         },
         "deprecated": false,
         "children": [
@@ -3455,7 +3511,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/server/utils/queries.ts",
-              "lineNumber": 35
+              "lineNumber": 39
             },
             "deprecated": false,
             "isRequired": false
@@ -3473,7 +3529,7 @@
         "description": [],
         "signature": [
           "(start: number | undefined, end: number | undefined, field: string) => ",
-          "QueryContainer",
+          "QueryDslQueryContainer",
           "[]"
         ],
         "source": {
@@ -3494,7 +3550,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/server/utils/queries.ts",
-              "lineNumber": 21
+              "lineNumber": 22
             },
             "deprecated": false,
             "isRequired": false
@@ -3511,7 +3567,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/server/utils/queries.ts",
-              "lineNumber": 21
+              "lineNumber": 23
             },
             "deprecated": false,
             "isRequired": false
@@ -3528,7 +3584,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/server/utils/queries.ts",
-              "lineNumber": 21
+              "lineNumber": 24
             },
             "deprecated": false,
             "isRequired": true
@@ -3801,46 +3857,50 @@
         "description": [],
         "signature": [
           "(",
-          "TypeMapping",
+          "MappingTypeMapping",
           " & { all_field?: ",
-          "AllField",
-          " | undefined; date_detection?: boolean | undefined; dynamic?: boolean | \"strict\" | undefined; dynamic_date_formats?: string[] | undefined; dynamic_templates?: Record<string, ",
-          "DynamicTemplate",
+          "MappingAllField",
+          " | undefined; date_detection?: boolean | undefined; dynamic?: boolean | \"true\" | \"false\" | \"runtime\" | \"strict\" | undefined; dynamic_date_formats?: string[] | undefined; dynamic_templates?: Record<string, ",
+          "MappingDynamicTemplate",
           "> | Record<string, ",
-          "DynamicTemplate",
+          "MappingDynamicTemplate",
           ">[] | undefined; field_names_field?: ",
-          "FieldNamesField",
+          "MappingFieldNamesField",
           " | undefined; index_field?: ",
-          "IndexField",
+          "MappingIndexField",
           " | undefined; meta?: Record<string, any> | undefined; numeric_detection?: boolean | undefined; properties?: Record<string, ",
-          "PropertyBase",
+          "MappingProperty",
           "> | undefined; routing_field?: ",
-          "RoutingField",
+          "MappingRoutingField",
           " | undefined; size_field?: ",
-          "SizeField",
+          "MappingSizeField",
           " | undefined; source_field?: ",
-          "SourceField",
-          " | undefined; }) | (Record<string, ",
-          "TypeMapping",
+          "MappingSourceField",
+          " | undefined; runtime?: Record<string, ",
+          "MappingRuntimeField",
+          "> | undefined; }) | (Record<string, ",
+          "MappingTypeMapping",
           "> & { all_field?: ",
-          "AllField",
-          " | undefined; date_detection?: boolean | undefined; dynamic?: boolean | \"strict\" | undefined; dynamic_date_formats?: string[] | undefined; dynamic_templates?: Record<string, ",
-          "DynamicTemplate",
+          "MappingAllField",
+          " | undefined; date_detection?: boolean | undefined; dynamic?: boolean | \"true\" | \"false\" | \"runtime\" | \"strict\" | undefined; dynamic_date_formats?: string[] | undefined; dynamic_templates?: Record<string, ",
+          "MappingDynamicTemplate",
           "> | Record<string, ",
-          "DynamicTemplate",
+          "MappingDynamicTemplate",
           ">[] | undefined; field_names_field?: ",
-          "FieldNamesField",
+          "MappingFieldNamesField",
           " | undefined; index_field?: ",
-          "IndexField",
+          "MappingIndexField",
           " | undefined; meta?: Record<string, any> | undefined; numeric_detection?: boolean | undefined; properties?: Record<string, ",
-          "PropertyBase",
+          "MappingProperty",
           "> | undefined; routing_field?: ",
-          "RoutingField",
+          "MappingRoutingField",
           " | undefined; size_field?: ",
-          "SizeField",
+          "MappingSizeField",
           " | undefined; source_field?: ",
-          "SourceField",
-          " | undefined; })"
+          "MappingSourceField",
+          " | undefined; runtime?: Record<string, ",
+          "MappingRuntimeField",
+          "> | undefined; })"
         ],
         "source": {
           "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
