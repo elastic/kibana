@@ -67,7 +67,7 @@ const createExecutionHandlerParams: jest.Mocked<
   >
 > = {
   actionsPlugin: mockActionsPlugin,
-  spaceId: 'default',
+  spaceId: 'test1',
   alertId: '1',
   alertName: 'name-of-alert',
   tags: ['tag-A', 'tag-B'],
@@ -96,7 +96,6 @@ const createExecutionHandlerParams: jest.Mocked<
     stateVal: 'My other {{state.value}} goes here',
   },
   alertUpdatedBy: 'testUser',
-  kibanaVersion: '1.1',
 };
 
 beforeEach(() => {
@@ -132,7 +131,7 @@ test('enqueues execution per selected action', async () => {
         "apiKey": "MTIzOmFiYw==",
         "id": "1",
         "params": Object {
-          "alertVal": "My 1 name-of-alert default tag-A,tag-B 2 goes here",
+          "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 2 goes here",
           "contextVal": "My  goes here",
           "foo": true,
           "stateVal": "My  goes here",
@@ -144,7 +143,7 @@ test('enqueues execution per selected action', async () => {
           },
           "type": "SAVED_OBJECT",
         },
-        "spaceId": "default",
+        "spaceId": "test1",
       },
     ]
   `);
@@ -170,12 +169,14 @@ test('enqueues execution per selected action', async () => {
             "saved_objects": Array [
               Object {
                 "id": "1",
+                "namespace": "test1",
                 "rel": "primary",
                 "type": "alert",
                 "type_id": "test",
               },
               Object {
                 "id": "1",
+                "namespace": "test1",
                 "type": "action",
                 "type_id": "test",
               },
@@ -190,11 +191,10 @@ test('enqueues execution per selected action', async () => {
             "id": "test",
             "license": "basic",
             "name": "name-of-alert",
-            "namespace": undefined,
-            "reference": "https://www.elastic.co/guide/en/kibana/master/stack-rules.html",
+            "namespace": "test1",
             "ruleset": "alerts",
             "uuid": "1",
-            "version": "1.1",
+            "version": undefined,
           },
         },
       ],
@@ -203,10 +203,10 @@ test('enqueues execution per selected action', async () => {
 
   expect(jest.requireMock('./inject_action_params').injectActionParams).toHaveBeenCalledWith({
     ruleId: '1',
-    spaceId: 'default',
+    spaceId: 'test1',
     actionTypeId: 'test',
     actionParams: {
-      alertVal: 'My 1 name-of-alert default tag-A,tag-B 2 goes here',
+      alertVal: 'My 1 name-of-alert test1 tag-A,tag-B 2 goes here',
       contextVal: 'My  goes here',
       foo: true,
       stateVal: 'My  goes here',
@@ -253,7 +253,7 @@ test(`doesn't call actionsPlugin.execute for disabled actionTypes`, async () => 
       id: '1',
       type: 'alert',
     }),
-    spaceId: 'default',
+    spaceId: 'test1',
     apiKey: createExecutionHandlerParams.apiKey,
   });
 });
@@ -328,7 +328,7 @@ test('context attribute gets parameterized', async () => {
         "apiKey": "MTIzOmFiYw==",
         "id": "1",
         "params": Object {
-          "alertVal": "My 1 name-of-alert default tag-A,tag-B 2 goes here",
+          "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 2 goes here",
           "contextVal": "My context-val goes here",
           "foo": true,
           "stateVal": "My  goes here",
@@ -340,7 +340,7 @@ test('context attribute gets parameterized', async () => {
           },
           "type": "SAVED_OBJECT",
         },
-        "spaceId": "default",
+        "spaceId": "test1",
       },
     ]
   `);
@@ -361,7 +361,7 @@ test('state attribute gets parameterized', async () => {
         "apiKey": "MTIzOmFiYw==",
         "id": "1",
         "params": Object {
-          "alertVal": "My 1 name-of-alert default tag-A,tag-B 2 goes here",
+          "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 2 goes here",
           "contextVal": "My  goes here",
           "foo": true,
           "stateVal": "My state-val goes here",
@@ -373,7 +373,7 @@ test('state attribute gets parameterized', async () => {
           },
           "type": "SAVED_OBJECT",
         },
-        "spaceId": "default",
+        "spaceId": "test1",
       },
     ]
   `);

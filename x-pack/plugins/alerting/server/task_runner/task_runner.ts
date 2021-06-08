@@ -51,7 +51,6 @@ import {
 } from '../../common';
 import { NormalizedAlertType } from '../alert_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
-import { getDocsForRuleTypeByProducer } from '../lib/get_docs_for_rule_type_by_producer';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
@@ -190,7 +189,6 @@ export class TaskRunner<
       request: this.getFakeKibanaRequest(spaceId, apiKey),
       alertParams,
       alertUpdatedBy,
-      kibanaVersion: this.context.kibanaVersion,
     });
   }
 
@@ -311,7 +309,7 @@ export class TaskRunner<
       ...event.rule,
       name: alert.name,
       author: alert.updatedBy ? [alert.updatedBy] : undefined,
-      version: this.context.kibanaVersion,
+      version: undefined,
     };
 
     // Cleanup alert instances that are no longer scheduling actions to avoid over populating the alertInstances object
@@ -343,7 +341,6 @@ export class TaskRunner<
       namespace,
       ruleType: alertType,
       rule: alert,
-      kibanaVersion: this.context.kibanaVersion,
     });
 
     if (!muteAll) {
@@ -522,7 +519,6 @@ export class TaskRunner<
         category: this.alertType.name,
         ruleset: this.alertType.producer,
         uuid: alertId,
-        reference: getDocsForRuleTypeByProducer(this.alertType.id, this.alertType.producer),
         namespace,
       },
     };
@@ -639,7 +635,6 @@ interface GenerateNewAndRecoveredInstanceEventsParams<
     string
   >;
   rule: SanitizedAlert<AlertTypeParams>;
-  kibanaVersion: string;
 }
 
 function generateNewAndRecoveredInstanceEvents<
@@ -655,7 +650,6 @@ function generateNewAndRecoveredInstanceEvents<
     recoveredAlertInstances,
     rule,
     ruleType,
-    kibanaVersion,
   } = params;
   const originalAlertInstanceIds = Object.keys(originalAlertInstances);
   const currentAlertInstanceIds = Object.keys(currentAlertInstances);
@@ -723,11 +717,10 @@ function generateNewAndRecoveredInstanceEvents<
         category: ruleType.name,
         ruleset: ruleType.producer,
         uuid: alertId,
-        reference: getDocsForRuleTypeByProducer(ruleType.producer, ruleType.id),
         namespace,
         name: rule.name,
         author: rule.updatedBy ? [rule.updatedBy] : undefined,
-        version: kibanaVersion,
+        version: undefined,
       },
     };
     eventLogger.logEvent(event);

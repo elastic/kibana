@@ -83,9 +83,14 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
         reason: 'decrypt',
         rule: {
           id: response.body.rule_type_id,
-          author: response.body.updated_by,
           uuid: alertId,
           category: response.body.rule_type_id,
+          license: 'basic',
+          // ruleset: ruleObject.alertInfo.producer,
+          namespace: spaceId,
+          name: response.body.name,
+          author: response.body.updatedBy ? [response.body.updatedBy] : undefined,
+          version: undefined,
         },
       });
     });
