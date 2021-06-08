@@ -635,7 +635,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   return (
     <div id={columnId}>
-      {!isFullscreen ? (
+      {!isFullscreen && operationSupportMatrix.operationWithoutField.has('formula') ? (
         <EuiTabs size="s">
           <EuiTab
             isSelected={temporaryQuickFunction || selectedColumn?.operationType !== 'formula'}
@@ -650,33 +650,31 @@ export function DimensionEditor(props: DimensionEditorProps) {
               defaultMessage: 'Quick functions',
             })}
           </EuiTab>
-          {operationSupportMatrix.operationWithoutField.has('formula') ? (
-            <EuiTab
-              isSelected={!temporaryQuickFunction && selectedColumn?.operationType === 'formula'}
-              data-test-subj="lens-dimensionTabs-formula"
-              onClick={() => {
-                if (selectedColumn?.operationType !== 'formula') {
-                  setQuickFunction(false);
-                  const newLayer = insertOrReplaceColumn({
-                    layer: props.state.layers[props.layerId],
-                    indexPattern: currentIndexPattern,
-                    columnId,
-                    op: 'formula',
-                    visualizationGroups: dimensionGroups,
-                  });
-                  setStateWrapper(newLayer);
-                  trackUiEvent(`indexpattern_dimension_operation_formula`);
-                  return;
-                } else {
-                  setQuickFunction(false);
-                }
-              }}
-            >
-              {i18n.translate('xpack.lens.indexPattern.formulaLabel', {
-                defaultMessage: 'Formula',
-              })}
-            </EuiTab>
-          ) : null}
+          <EuiTab
+            isSelected={!temporaryQuickFunction && selectedColumn?.operationType === 'formula'}
+            data-test-subj="lens-dimensionTabs-formula"
+            onClick={() => {
+              if (selectedColumn?.operationType !== 'formula') {
+                setQuickFunction(false);
+                const newLayer = insertOrReplaceColumn({
+                  layer: props.state.layers[props.layerId],
+                  indexPattern: currentIndexPattern,
+                  columnId,
+                  op: 'formula',
+                  visualizationGroups: dimensionGroups,
+                });
+                setStateWrapper(newLayer);
+                trackUiEvent(`indexpattern_dimension_operation_formula`);
+                return;
+              } else {
+                setQuickFunction(false);
+              }
+            }}
+          >
+            {i18n.translate('xpack.lens.indexPattern.formulaLabel', {
+              defaultMessage: 'Formula',
+            })}
+          </EuiTab>
         </EuiTabs>
       ) : null}
 
@@ -738,6 +736,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     </div>
   );
 }
+
 function getErrorMessage(
   selectedColumn: IndexPatternColumn | undefined,
   incompleteOperation: boolean,
