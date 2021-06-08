@@ -34,8 +34,6 @@ export interface ICasesConnector<TExternalServiceParams = {}> {
 export type CasesConnectorTypes = Omit<ConnectorTypes, ConnectorTypes.none>;
 export type CasesConnectorsMap = Map<CasesConnectorTypes, ICasesConnector>;
 
-export interface CasesConnectorFactory {
+export interface ICasesConnectorFactory {
   getCasesConnectors: () => CasesConnectorsMap;
 }
-
-export type CreateCasesConnectorFactory = () => CasesConnectorFactory;

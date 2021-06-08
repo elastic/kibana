@@ -30,7 +30,7 @@ import {
 } from './utils';
 import { flattenCaseSavedObject } from '../../common';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
-import { createCaseConnectorFactory } from '../../connectors';
+import { CasesConnectorsFactory } from '../../connectors';
 
 const formatComment = {
   commentId: commentObj.id,
@@ -436,7 +436,7 @@ describe('utils', () => {
       isPreconfigured: false,
     };
 
-    const casesConnectors = createCaseConnectorFactory().getCasesConnectors();
+    const casesConnectors = new CasesConnectorsFactory().getCasesConnectors();
 
     it('creates an external incident', async () => {
       const res = await createIncident({

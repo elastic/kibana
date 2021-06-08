@@ -16,7 +16,7 @@ import { CommentRequest, CommentType } from '../../common/api';
 
 export * from './types';
 export { transformConnectorComment } from './case';
-export { createCaseConnectorFactory } from './factory';
+export { CasesConnectorsFactory } from './factory';
 
 /**
  * Separator used for creating a json parsable array from the mustache syntax that the alerting framework

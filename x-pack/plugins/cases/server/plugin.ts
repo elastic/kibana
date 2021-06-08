@@ -32,7 +32,6 @@ import type { CasesRequestHandlerContext } from './types';
 import { CasesClientFactory } from './client/factory';
 import { SpacesPluginStart } from '../../spaces/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
-import { createCaseConnectorFactory } from './connectors/factory';
 
 function createConfig(context: PluginInitializerContext) {
   return context.config.get<ConfigType>();
@@ -128,7 +127,6 @@ export class CasePlugin {
       },
       featuresPluginStart: plugins.features,
       actionsPluginStart: plugins.actions,
-      casesConnectorsFactory: createCaseConnectorFactory(),
     });
 
     const client = core.elasticsearch.client;

@@ -13,19 +13,25 @@ import {
   CasesConnectorsMap,
   CasesConnectorTypes,
   ICasesConnector,
-  CreateCasesConnectorFactory,
+  ICasesConnectorFactory,
 } from './types';
 
-const getCasesConnectors = (): CasesConnectorsMap => {
-  const casesConnectorsMap = new Map<CasesConnectorTypes, ICasesConnector>();
-  casesConnectorsMap.set(ConnectorTypes.jira, getJiraCaseConnector());
-  casesConnectorsMap.set(ConnectorTypes.serviceNowITSM, getServiceNowITSMCaseConnector());
-  casesConnectorsMap.set(ConnectorTypes.serviceNowSIR, getServiceNowSIRCaseConnector());
-  casesConnectorsMap.set(ConnectorTypes.resilient, getResilientCaseConnector());
+export class CasesConnectorsFactory implements ICasesConnectorFactory {
+  private readonly casesConnectorsMap: Map<CasesConnectorTypes, ICasesConnector<{}>>;
 
-  return casesConnectorsMap;
-};
+  constructor() {
+    this.casesConnectorsMap = new Map<CasesConnectorTypes, ICasesConnector>();
+    this.initMapping();
+  }
 
-export const createCaseConnectorFactory: CreateCasesConnectorFactory = () => ({
-  getCasesConnectors,
-});
+  private initMapping() {
+    this.casesConnectorsMap.set(ConnectorTypes.jira, getJiraCaseConnector());
+    this.casesConnectorsMap.set(ConnectorTypes.serviceNowITSM, getServiceNowITSMCaseConnector());
+    this.casesConnectorsMap.set(ConnectorTypes.serviceNowSIR, getServiceNowSIRCaseConnector());
+    this.casesConnectorsMap.set(ConnectorTypes.resilient, getResilientCaseConnector());
+  }
+
+  public getCasesConnectors = (): CasesConnectorsMap => {
+    return this.casesConnectorsMap;
+  };
+}
