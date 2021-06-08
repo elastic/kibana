@@ -504,7 +504,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     expect(setState.mock.calls[0]).toEqual([
       expect.any(Function),
-      { shouldRemoveDimension: false, shouldReplaceDimension: true, shouldClose: false },
+      { shouldRemoveDimension: false, shouldReplaceDimension: true },
     ]);
     expect(setState.mock.calls[0][0](defaultProps.state)).toEqual({
       ...initialState,
@@ -539,7 +539,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     expect(setState.mock.calls[0]).toEqual([
       expect.any(Function),
-      { shouldRemoveDimension: false, shouldReplaceDimension: true, shouldClose: false },
+      { shouldRemoveDimension: false, shouldReplaceDimension: true },
     ]);
     expect(setState.mock.calls[0][0](defaultProps.state)).toEqual({
       ...state,
@@ -573,7 +573,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     expect(setState.mock.calls[0]).toEqual([
       expect.any(Function),
-      { shouldRemoveDimension: false, shouldReplaceDimension: true, shouldClose: false },
+      { shouldRemoveDimension: false, shouldReplaceDimension: true },
     ]);
     expect(setState.mock.calls[0][0](state)).toEqual({
       ...state,
@@ -647,7 +647,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     expect(setState.mock.calls[0]).toEqual([
       expect.any(Function),
-      { shouldRemoveDimension: false, shouldReplaceDimension: true, shouldClose: false },
+      { shouldRemoveDimension: false, shouldReplaceDimension: true },
     ]);
     expect(setState.mock.calls[0][0](state)).toEqual({
       ...state,
@@ -685,7 +685,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     expect(setState.mock.calls[0]).toEqual([
       expect.any(Function),
-      { shouldRemoveDimension: false, shouldReplaceDimension: true, shouldClose: false },
+      { shouldRemoveDimension: false, shouldReplaceDimension: true },
     ]);
     expect(setState.mock.calls[0][0](state)).toEqual({
       ...state,
@@ -754,7 +754,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
       expect(setState.mock.calls[0]).toEqual([
         expect.any(Function),
-        { shouldRemoveDimension: false, shouldReplaceDimension: true, shouldClose: false },
+        { shouldRemoveDimension: false, shouldReplaceDimension: true },
       ]);
       expect(setState.mock.calls[0][0](state)).toEqual({
         ...state,
@@ -881,7 +881,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
       expect(setState.mock.calls[0]).toEqual([
         expect.any(Function),
-        { shouldRemoveDimension: false, shouldReplaceDimension: false, shouldClose: false },
+        { shouldRemoveDimension: false, shouldReplaceDimension: false },
       ]);
       expect(setState.mock.calls[0][0](state)).toEqual({
         ...state,
@@ -950,7 +950,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       // Now check that the dimension gets cleaned up on state update
       expect(setState.mock.calls[0]).toEqual([
         expect.any(Function),
-        { shouldRemoveDimension: false, shouldReplaceDimension: false, shouldClose: false },
+        { shouldRemoveDimension: false, shouldReplaceDimension: false },
       ]);
       expect(setState.mock.calls[0][0](state)).toEqual({
         ...state,
@@ -1046,7 +1046,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       expect(setState.mock.calls.length).toEqual(2);
       expect(setState.mock.calls[1]).toEqual([
         expect.any(Function),
-        { shouldRemoveDimension: false, shouldReplaceDimension: true, shouldClose: false },
+        { shouldRemoveDimension: false, shouldReplaceDimension: true },
       ]);
       expect(setState.mock.calls[1][0](state)).toEqual({
         ...state,
@@ -1147,7 +1147,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .simulate('click');
       expect(setState.mock.calls[0]).toEqual([
         expect.any(Function),
-        { shouldRemoveDimension: false, shouldReplaceDimension: true, shouldClose: false },
+        { shouldRemoveDimension: false, shouldReplaceDimension: true },
       ]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
@@ -1179,7 +1179,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .simulate('click');
       expect(setState.mock.calls[0]).toEqual([
         expect.any(Function),
-        { shouldRemoveDimension: false, shouldReplaceDimension: true, shouldClose: false },
+        { shouldRemoveDimension: false, shouldReplaceDimension: true },
       ]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
@@ -1209,7 +1209,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       wrapper.find('button[data-test-subj="lns-indexPatternDimension-average"]').simulate('click');
       expect(setState.mock.calls[0]).toEqual([
         expect.any(Function),
-        { shouldRemoveDimension: false, shouldReplaceDimension: true, shouldClose: false },
+        { shouldRemoveDimension: false, shouldReplaceDimension: true },
       ]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
@@ -1243,7 +1243,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       } as unknown) as ChangeEvent<HTMLSelectElement>);
       expect(setState.mock.calls[0]).toEqual([
         expect.any(Function),
-        { shouldRemoveDimension: false, shouldReplaceDimension: true, shouldClose: false },
+        { shouldRemoveDimension: false, shouldReplaceDimension: true },
       ]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
@@ -1273,7 +1273,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       } as unknown) as ChangeEvent<HTMLSelectElement>);
       expect(setState.mock.calls[0]).toEqual([
         expect.any(Function),
-        { shouldRemoveDimension: false, shouldReplaceDimension: true, shouldClose: false },
+        { shouldRemoveDimension: false, shouldReplaceDimension: true },
       ]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
@@ -1304,7 +1304,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       );
       expect(setState.mock.calls[0]).toEqual([
         expect.any(Function),
-        { shouldRemoveDimension: false, shouldReplaceDimension: true, shouldClose: false },
+        { shouldRemoveDimension: false, shouldReplaceDimension: true },
       ]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
@@ -1597,7 +1597,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .simulate('click');
       expect(setState.mock.calls[0]).toEqual([
         expect.any(Function),
-        { shouldRemoveDimension: false, shouldReplaceDimension: true, shouldClose: false },
+        { shouldRemoveDimension: false, shouldReplaceDimension: true },
       ]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
@@ -1631,7 +1631,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .simulate('click');
       expect(setState.mock.calls[0]).toEqual([
         expect.any(Function),
-        { shouldRemoveDimension: false, shouldReplaceDimension: true, shouldClose: false },
+        { shouldRemoveDimension: false, shouldReplaceDimension: true },
       ]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
@@ -1660,7 +1660,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       });
       expect(setState.mock.calls[0]).toEqual([
         expect.any(Function),
-        { shouldRemoveDimension: false, shouldReplaceDimension: true, shouldClose: false },
+        { shouldRemoveDimension: false, shouldReplaceDimension: true },
       ]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
@@ -1692,7 +1692,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       );
       expect(setState.mock.calls[0]).toEqual([
         expect.any(Function),
-        { shouldRemoveDimension: false, shouldReplaceDimension: true, shouldClose: false },
+        { shouldRemoveDimension: false, shouldReplaceDimension: true },
       ]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
@@ -1747,7 +1747,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     expect(setState.mock.calls[0]).toEqual([
       expect.any(Function),
-      { shouldRemoveDimension: false, shouldReplaceDimension: false, shouldClose: false },
+      { shouldRemoveDimension: false, shouldReplaceDimension: false },
     ]);
     expect(setState.mock.calls[0][0](defaultProps.state)).toEqual({
       ...state,
@@ -1814,7 +1814,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     expect(setState.mock.calls[0]).toEqual([
       expect.any(Function),
-      { shouldRemoveDimension: false, shouldReplaceDimension: true, shouldClose: false },
+      { shouldRemoveDimension: false, shouldReplaceDimension: true },
     ]);
     expect(setState.mock.calls[0][0](initialState)).toEqual({
       ...initialState,
@@ -1842,7 +1842,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     expect(setState.mock.calls[0]).toEqual([
       expect.any(Function),
-      { shouldRemoveDimension: false, shouldReplaceDimension: true, shouldClose: false },
+      { shouldRemoveDimension: false, shouldReplaceDimension: true },
     ]);
     expect(setState.mock.calls[0][0](state)).toEqual({
       ...state,
@@ -1979,7 +1979,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     expect(setState.mock.calls[0]).toEqual([
       expect.any(Function),
-      { shouldRemoveDimension: false, shouldReplaceDimension: true, shouldClose: false },
+      { shouldRemoveDimension: false, shouldReplaceDimension: true },
     ]);
     expect(setState.mock.calls[0][0](defaultProps.state)).toEqual({
       ...state,

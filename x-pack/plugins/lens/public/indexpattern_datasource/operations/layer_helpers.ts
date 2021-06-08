@@ -362,9 +362,9 @@ export function replaceColumn({
     tempLayer = resetIncomplete(tempLayer, columnId);
 
     if (previousDefinition.input === 'managedReference') {
-      // Every transition away from a managedReference resets it, we don't have a way to keep the state
+      // If the transition is incomplete, leave the managed state until it's finished.
       tempLayer = deleteColumn({ layer: tempLayer, columnId, indexPattern });
-      return insertNewColumn({
+      const hypotheticalLayer = insertNewColumn({
         layer: tempLayer,
         columnId,
         indexPattern,
@@ -372,6 +372,14 @@ export function replaceColumn({
         field,
         visualizationGroups,
       });
+      if (hypotheticalLayer.incompleteColumns && hypotheticalLayer.incompleteColumns[columnId]) {
+        return {
+          ...layer,
+          incompleteColumns: hypotheticalLayer.incompleteColumns,
+        };
+      } else {
+        return hypotheticalLayer;
+      }
     }
 
     if (operationDefinition.input === 'fullReference') {

@@ -1002,6 +1002,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
+    async switchToQuickFunctions() {
+      await testSubjects.click('lens-dimensionTabs-quickFunctions');
+    },
+
     async switchToFormula() {
       await testSubjects.click('lens-dimensionTabs-formula');
     },
@@ -1011,13 +1015,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async typeFormula(formula: string) {
+      // Formula takes time to open
+      await PageObjects.common.sleep(500);
       await find.byCssSelector('.monaco-editor');
       await find.clickByCssSelectorWhenNotDisabled('.monaco-editor');
       const input = await find.activeElement();
       await input.clearValueWithKeyboard();
       await input.type(formula);
-      // Formula is applied on a 250ms timer, won't be applied if we leave too early
-      await PageObjects.common.sleep(500);
     },
   });
 }

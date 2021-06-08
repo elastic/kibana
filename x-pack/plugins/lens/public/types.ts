@@ -308,7 +308,6 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
     publishToVisualization?: {
       shouldReplaceDimension?: boolean;
       shouldRemoveDimension?: boolean;
-      shouldClose?: boolean;
     }
   ) => void;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
