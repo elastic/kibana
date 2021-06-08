@@ -1698,8 +1698,6 @@
     "discover.howToChangeTheTimeTooltip": "時刻を変更するには、グローバル時刻フィルターを使用します。",
     "discover.howToSeeOtherMatchingDocumentsDescription": "これらは検索条件に一致した初めの {sampleSize} 件のドキュメントです。他の結果を表示するには検索条件を絞ってください。",
     "discover.howToSeeOtherMatchingDocumentsDescriptionGrid": "これらは検索条件に一致した初めの {sampleSize} 件のドキュメントです。他の結果を表示するには検索条件を絞ってください。",
-    "discover.inspectorRequestDataTitle": "データ",
-    "discover.inspectorRequestDescription": "このリクエストはElasticsearchにクエリをかけ、検索データを取得します。",
     "discover.json.codeEditorAriaLabel": "Elasticsearch ドキュメントの JSON ビューのみを読み込む",
     "discover.json.copyToClipboardLabel": "クリップボードにコピー",
     "discover.localMenu.inspectTitle": "検査",
