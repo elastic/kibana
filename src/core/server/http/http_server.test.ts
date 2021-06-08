@@ -543,7 +543,7 @@ describe('with defined `redirectHttpFromPort`', () => {
       ...config,
       ssl: {
         certificate: '/certificate',
-        cipherSuites: ['cipherSuite'],
+        cipherSuites: ['TLS_AES_256_GCM_SHA384'],
         enabled: true,
         getSecureOptions: () => 0,
         key: '/key',

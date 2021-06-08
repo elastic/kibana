@@ -21,4 +21,4 @@ if [ ! -x "$NODE" ]; then
   exit 1
 fi
 
-NODE_ENV=production exec "${NODE}" --no-warnings --max-http-header-size=65536 $NODE_OPTIONS "${DIR}/src/cli" ${@}
+NODE_ENV=production exec "${NODE}" --no-warnings --max-http-header-size=65536 --tls-min-v1.0 $NODE_OPTIONS "${DIR}/src/cli" ${@}

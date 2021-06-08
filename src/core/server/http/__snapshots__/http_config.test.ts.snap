@@ -21,6 +21,9 @@ Object {
   "rewriteBasePath": false,
   "ssl": Object {
     "cipherSuites": Array [
+      "TLS_AES_256_GCM_SHA384",
+      "TLS_CHACHA20_POLY1305_SHA256",
+      "TLS_AES_128_GCM_SHA256",
       "ECDHE-RSA-AES128-GCM-SHA256",
       "ECDHE-ECDSA-AES128-GCM-SHA256",
       "ECDHE-RSA-AES256-GCM-SHA384",
@@ -60,14 +63,16 @@ exports[`with TLS should accept known protocols\` 1`] = `
 "[ssl.supportedProtocols.0]: types that failed validation:
 - [ssl.supportedProtocols.0.0]: expected value to equal [TLSv1] but got [SOMEv100500]
 - [ssl.supportedProtocols.0.1]: expected value to equal [TLSv1.1] but got [SOMEv100500]
-- [ssl.supportedProtocols.0.2]: expected value to equal [TLSv1.2] but got [SOMEv100500]"
+- [ssl.supportedProtocols.0.2]: expected value to equal [TLSv1.2] but got [SOMEv100500]
+- [ssl.supportedProtocols.0.3]: expected value to equal [TLSv1.3] but got [SOMEv100500]"
 `;
 
 exports[`with TLS should accept known protocols\` 2`] = `
 "[ssl.supportedProtocols.3]: types that failed validation:
 - [ssl.supportedProtocols.3.0]: expected value to equal [TLSv1] but got [SOMEv100500]
 - [ssl.supportedProtocols.3.1]: expected value to equal [TLSv1.1] but got [SOMEv100500]
-- [ssl.supportedProtocols.3.2]: expected value to equal [TLSv1.2] but got [SOMEv100500]"
+- [ssl.supportedProtocols.3.2]: expected value to equal [TLSv1.2] but got [SOMEv100500]
+- [ssl.supportedProtocols.3.3]: expected value to equal [TLSv1.3] but got [SOMEv100500]"
 `;
 
 exports[`with TLS throws if TLS is enabled but \`certificate\` is not specified 1`] = `"[ssl]: must specify [certificate] and [key] when ssl is enabled"`;

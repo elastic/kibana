@@ -225,13 +225,13 @@ deprecated:[5.3.0,Replaced by `server.ssl.certificate`]
 
 `server.ssl.certificateAuthorities:`:: List of paths to PEM encoded certificate files that should be trusted.
 
-`server.ssl.cipherSuites:`:: *Default: ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES256-GCM-SHA384, ECDHE-ECDSA-AES256-GCM-SHA384, DHE-RSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-SHA256, DHE-RSA-AES128-SHA256, ECDHE-RSA-AES256-SHA384, DHE-RSA-AES256-SHA384, ECDHE-RSA-AES256-SHA256, DHE-RSA-AES256-SHA256, HIGH,!aNULL, !eNULL, !EXPORT, !DES, !RC4, !MD5, !PSK, !SRP, !CAMELLIA*. Details on the format, and the valid options, are available via the [OpenSSL cipher list format documentation](https://www.openssl.org/docs/man1.0.2/apps/ciphers.html#CIPHER-LIST-FORMAT)
+`server.ssl.cipherSuites:`:: *Default: TLS_AES_256_GCM_SHA384, TLS_CHACHA20_POLY1305_SHA256, TLS_AES_128_GCM_SHA256, ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES256-GCM-SHA384, ECDHE-ECDSA-AES256-GCM-SHA384, DHE-RSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-SHA256, DHE-RSA-AES128-SHA256, ECDHE-RSA-AES256-SHA384, DHE-RSA-AES256-SHA384, ECDHE-RSA-AES256-SHA256, DHE-RSA-AES256-SHA256, HIGH,!aNULL, !eNULL, !EXPORT, !DES, !RC4, !MD5, !PSK, !SRP, !CAMELLIA*. Details on the format, and the valid options, are available via the [OpenSSL cipher list format documentation](https://www.openssl.org/docs/man1.1.1/man1/ciphers.html#CIPHER-LIST-FORMAT)
 
 `server.ssl.keyPassphrase:`:: The passphrase that will be used to decrypt the private key. This value is optional as the key may not be encrypted.
 
 `server.ssl.redirectHttpFromPort:`:: Kibana will bind to this port and redirect all http requests to https over the port configured as `server.port`.
 
-`server.ssl.supportedProtocols:`:: *Default: TLSv1, TLSv1.1, TLSv1.2*  An array of supported protocols with versions. Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`
+`server.ssl.supportedProtocols:`:: *Default: TLSv1, TLSv1.1, TLSv1.2, TLSv1.3*  An array of supported protocols with versions. Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`, `TLSv1.3`.
 
 `status.allowAnonymous:`:: *Default: false* If authentication is enabled, setting this to `true` allows
 unauthenticated users to access the Kibana server status API and status page.
