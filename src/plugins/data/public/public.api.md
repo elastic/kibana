@@ -46,6 +46,7 @@ import { Href } from 'history';
 import { HttpSetup } from 'kibana/public';
 import { IAggConfigs as IAggConfigs_2 } from 'src/plugins/data/public';
 import { IconType } from '@elastic/eui';
+import { IEsSearchResponse as IEsSearchResponse_2 } from 'src/plugins/data/public';
 import { IncomingHttpHeaders } from 'http';
 import { InjectedIntl } from '@kbn/i18n/react';
 import { ISearchOptions as ISearchOptions_2 } from 'src/plugins/data/public';
@@ -74,6 +75,7 @@ import * as PropTypes from 'prop-types';
 import { PublicContract } from '@kbn/utility-types';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { PublicUiSettingsParams } from 'src/core/server/types';
+import { RangeFilter as RangeFilter_2 } from 'src/plugins/data/public';
 import React from 'react';
 import * as React_3 from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
@@ -152,8 +154,12 @@ export class AggConfig {
     // (undocumented)
     getTimeRange(): import("../../../public").TimeRange | undefined;
     // (undocumented)
+    getTimeShift(): undefined | moment.Duration;
+    // (undocumented)
     getValue(bucket: any): any;
     getValueBucketPath(): string;
+    // (undocumented)
+    hasTimeShift(): boolean;
     // (undocumented)
     id: string;
     // (undocumented)
@@ -245,6 +251,8 @@ export class AggConfigs {
         addToAggConfigs?: boolean | undefined;
     }) => T;
     // (undocumented)
+    forceNow?: Date;
+    // (undocumented)
     getAll(): AggConfig[];
     // (undocumented)
     getRequestAggById(id: string): AggConfig | undefined;
@@ -253,12 +261,49 @@ export class AggConfigs {
     getResponseAggById(id: string): AggConfig | undefined;
     getResponseAggs(): AggConfig[];
     // (undocumented)
+    getSearchSourceTimeFilter(forceNow?: Date): RangeFilter_2[] | {
+        meta: {
+            index: string | undefined;
+            params: {};
+            alias: string;
+            disabled: boolean;
+            negate: boolean;
+        };
+        query: {
+            bool: {
+                should: {
+                    bool: {
+                        filter: {
+                            range: {
+                                [x: string]: {
+                                    gte: string;
+                                    lte: string;
+                                };
+                            };
+                        }[];
+                    };
+                }[];
+                minimum_should_match: number;
+            };
+        };
+    }[];
+    // (undocumented)
+    getTimeShiftInterval(): moment.Duration | undefined;
+    // (undocumented)
+    getTimeShifts(): Record<string, moment.Duration>;
+    // (undocumented)
+    hasTimeShifts(): boolean;
+    // (undocumented)
     hierarchical?: boolean;
     // (undocumented)
     indexPattern: IndexPattern;
     jsonDataEquals(aggConfigs: AggConfig[]): boolean;
     // (undocumented)
     onSearchRequestStart(searchSource: ISearchSource_2, options?: ISearchOptions_2): Promise<[unknown, unknown, unknown, unknown, unknown, unknown, unknown, unknown, unknown, unknown]>;
+    // (undocumented)
+    postFlightTransform(response: IEsSearchResponse_2<any>): IEsSearchResponse_2<any>;
+    // (undocumented)
+    setForceNow(now: Date | undefined): void;
     // (undocumented)
     setTimeFields(timeFields: string[] | undefined): void;
     // (undocumented)
@@ -1198,7 +1243,7 @@ export interface IFieldType {
     // (undocumented)
     format?: any;
     // (undocumented)
-    lang?: string;
+    lang?: estypes.ScriptLanguage;
     // (undocumented)
     name: string;
     // (undocumented)
@@ -1336,19 +1381,7 @@ export class IndexPattern implements IIndexPattern {
         delay?: string | undefined;
         time_zone?: string | undefined;
     }>> | undefined;
-    getAsSavedObjectBody(): {
-        fieldAttrs: string | undefined;
-        title: string;
-        timeFieldName: string | undefined;
-        intervalName: string | undefined;
-        sourceFilters: string | undefined;
-        fields: string | undefined;
-        fieldFormatMap: string | undefined;
-        type: string | undefined;
-        typeMeta: string | undefined;
-        allowNoIndex: true | undefined;
-        runtimeFieldMap: string | undefined;
-    };
+    getAsSavedObjectBody(): IndexPatternAttributes;
     // (undocumented)
     getComputedFields(): {
         storedFields: string[];
@@ -1485,8 +1518,8 @@ export class IndexPatternField implements IFieldType {
     // (undocumented)
     get filterable(): boolean;
     get isMapped(): boolean | undefined;
-    get lang(): string | undefined;
-    set lang(lang: string | undefined);
+    get lang(): "painless" | "expression" | "mustache" | "java" | undefined;
+    set lang(lang: "painless" | "expression" | "mustache" | "java" | undefined);
     // (undocumented)
     get name(): string;
     // (undocumented)
@@ -1510,7 +1543,7 @@ export class IndexPatternField implements IFieldType {
     toJSON(): {
         count: number;
         script: string | undefined;
-        lang: string | undefined;
+        lang: "painless" | "expression" | "mustache" | "java" | undefined;
         conflictDescriptions: Record<string, string[]> | undefined;
         name: string;
         type: string;
@@ -1955,7 +1988,7 @@ export type PhraseFilter = Filter & {
     script?: {
         script: {
             source?: any;
-            lang?: string;
+            lang?: estypes.ScriptLanguage;
             params: any;
         };
     };
@@ -2173,7 +2206,7 @@ export type RangeFilter = Filter & EsRangeFilter & {
     script?: {
         script: {
             params: any;
-            lang: string;
+            lang: estypes.ScriptLanguage;
             source: any;
         };
     };
@@ -2219,7 +2252,7 @@ export interface Reason {
         reason: string;
     };
     // (undocumented)
-    lang?: string;
+    lang?: estypes.ScriptLanguage;
     // (undocumented)
     position?: {
         offset: number;
