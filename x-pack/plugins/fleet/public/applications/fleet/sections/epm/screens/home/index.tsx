@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState, useMemo } from 'react';
+import React, { memo, useState, useMemo, useEffect } from 'react';
 import { useRouteMatch, Switch, Route, useLocation, useHistory } from 'react-router-dom';
 import semverLt from 'semver/functions/lt';
 import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
@@ -48,6 +48,8 @@ export const EPMHomePage: React.FC = memo(() => {
     isLoadingPackages,
   } = usePackages();
 
+  const [showUpdatesCategory, setShowUpdatesCategory] = useState(false);
+
   return (
     <WithHeaderLayout
       leftColumn={<HeroCopy />}
@@ -76,6 +78,10 @@ export const EPMHomePage: React.FC = memo(() => {
       <UpgradeCallout
         updatablePackages={updatablePackages}
         updatableIntegrations={updatableIntegrations}
+        linkToPackages={() => {
+          setShowUpdatesCategory(true);
+          window.location.href = getHref('integrations_installed');
+        }}
       />
       <Switch>
         <Route path={PAGE_ROUTING_PATHS.integrations_installed}>
@@ -83,6 +89,8 @@ export const EPMHomePage: React.FC = memo(() => {
             allInstalledPackages={allInstalledPackages}
             updatablePackages={updatablePackages}
             isLoadingPackages={isLoadingPackages}
+            showUpdatesCategory={showUpdatesCategory}
+            onLoadUpdatesCategory={() => setShowUpdatesCategory(false)}
           />
         </Route>
         <Route path={PAGE_ROUTING_PATHS.integrations_all}>
@@ -185,11 +193,23 @@ interface InstalledPackagesProps {
   allInstalledPackages: PackageListItem[];
   updatablePackages: PackageListItem[];
   isLoadingPackages: boolean;
+  showUpdatesCategory: boolean;
+  onLoadUpdatesCategory: () => void;
 }
 const InstalledPackages: React.FC<InstalledPackagesProps> = memo(
-  ({ allInstalledPackages, updatablePackages, isLoadingPackages }) => {
+  ({
+    allInstalledPackages,
+    updatablePackages,
+    isLoadingPackages,
+    showUpdatesCategory,
+    onLoadUpdatesCategory,
+  }) => {
     useBreadcrumbs('integrations_installed');
     const [selectedCategory, setSelectedCategory] = useState('');
+    useEffect(() => {
+      if (showUpdatesCategory) setSelectedCategory('updates_available');
+      onLoadUpdatesCategory();
+    }, [showUpdatesCategory, onLoadUpdatesCategory]);
 
     const title = useMemo(
       () =>
