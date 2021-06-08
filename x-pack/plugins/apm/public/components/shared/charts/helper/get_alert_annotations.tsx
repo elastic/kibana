@@ -68,6 +68,17 @@ function getAlertHeader({
   }
 }
 
+/**
+ * Get the components needed to render alert annotations.
+ *
+ * You might be thinking, "Hey, this is a function that returns DOM.
+ * This should not be a function but a component."
+ *
+ * You would be correct, except for https://github.com/elastic/elastic-charts/issues/914,
+ * which makes it so if you construct a chart with its elements broken into
+ * different components it makes the whole chart disappear, which is not what
+ * we want.
+ */
 export function getAlertAnnotations({
   alerts,
   chartStartTime,
