@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './host_pending_actions';
+export * from './endpoint_pending_actions';
