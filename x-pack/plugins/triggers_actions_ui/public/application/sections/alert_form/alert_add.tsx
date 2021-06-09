@@ -11,14 +11,14 @@ import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import {
-  ActionTypeRegistryContract,
   Alert,
-  AlertTypeRegistryContract,
   AlertTypeParams,
   AlertUpdates,
   AlertFlyoutCloseReason,
+  IErrorObject,
+  AlertAddProps,
 } from '../../../types';
-import { AlertForm, getAlertErrors, isValidAlert } from './alert_form';
+import { AlertForm, getAlertActionErrors, getAlertErrors, isValidAlert } from './alert_form';
 import { alertReducer, InitialAlert, InitialAlertReducer } from './alert_reducer';
 import { createAlert } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
@@ -30,20 +30,6 @@ import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
 import { hasAlertChanged, haveAlertParamsChanged } from './has_alert_changed';
 import { getAlertWithInvalidatedFields } from '../../lib/value_validators';
-
-export interface AlertAddProps<MetaData = Record<string, any>> {
-  consumer: string;
-  alertTypeRegistry: AlertTypeRegistryContract;
-  actionTypeRegistry: ActionTypeRegistryContract;
-  onClose: (reason: AlertFlyoutCloseReason) => void;
-  alertTypeId?: string;
-  canChangeTrigger?: boolean;
-  initialValues?: Partial<Alert>;
-  /** @deprecated use `onSave` as a callback after an alert is saved*/
-  reloadAlerts?: () => Promise<void>;
-  onSave?: () => Promise<void>;
-  metadata?: MetaData;
-}
 
 const AlertAdd = ({
   consumer,
@@ -117,6 +103,18 @@ const AlertAdd = ({
     }
   }, [alert.params, initialAlertParams, setInitialAlertParams]);
 
+  const [alertActionsErrors, setAlertActionsErrors] = useState<IErrorObject[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    (async () => {
+      setIsLoading(true);
+      const res = await getAlertActionErrors(alert as Alert, actionTypeRegistry);
+      setIsLoading(false);
+      setAlertActionsErrors([...res]);
+    })();
+  }, [alert, actionTypeRegistry]);
+
   const checkForChangesAndCloseFlyout = () => {
     if (
       hasAlertChanged(alert, initialAlert, false) ||
@@ -140,9 +138,8 @@ const AlertAdd = ({
   };
 
   const alertType = alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null;
-  const { alertActionsErrors, alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
+  const { alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
     alert as Alert,
-    actionTypeRegistry,
     alertType
   );
 
@@ -210,9 +207,10 @@ const AlertAdd = ({
             </EuiFlyoutBody>
             <AlertAddFooter
               isSaving={isSaving}
+              isFormLoading={isLoading}
               onSave={async () => {
                 setIsSaving(true);
-                if (!isValidAlert(alert, alertErrors, alertActionsErrors)) {
+                if (isLoading || !isValidAlert(alert, alertErrors, alertActionsErrors)) {
                   setAlert(
                     getAlertWithInvalidatedFields(
                       alert as Alert,

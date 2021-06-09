@@ -46,6 +46,7 @@ export type LayerDescriptor = {
   visible?: boolean;
   style?: StyleDescriptor | null;
   query?: Query;
+  includeInFitToBounds?: boolean;
 };
 
 export type VectorLayerDescriptor = LayerDescriptor & {

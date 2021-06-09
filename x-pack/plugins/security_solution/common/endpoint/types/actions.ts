@@ -5,7 +5,15 @@
  * 2.0.
  */
 
+import { TypeOf } from '@kbn/config-schema';
+import { HostIsolationRequestSchema } from '../schema/actions';
+
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
+
+export interface EndpointActionData {
+  command: ISOLATION_ACTIONS;
+  comment?: string;
+}
 
 export interface EndpointAction {
   action_id: string;
@@ -15,13 +23,31 @@ export interface EndpointAction {
   input_type: 'endpoint';
   agents: string[];
   user_id: string;
-  data: {
-    command: ISOLATION_ACTIONS;
-    comment?: string;
-  };
+  data: EndpointActionData;
 }
 
+export interface EndpointActionResponse {
+  '@timestamp': string;
+  /** The id of the action for which this response is associated with */
+  action_id: string;
+  /** The agent id that sent this action response */
+  agent_id: string;
+  started_at: string;
+  completed_at: string;
+  error?: string;
+  action_data: EndpointActionData;
+}
+
+export type HostIsolationRequestBody = TypeOf<typeof HostIsolationRequestSchema.body>;
+
 export interface HostIsolationResponse {
-  action?: string;
-  message?: string;
+  action: string;
+}
+
+export interface PendingActionsResponse {
+  agent_id: string;
+  pending_actions: {
+    /** Number of actions pending for each type. The `key` could be one of the `ISOLATION_ACTIONS` values. */
+    [key: string]: number;
+  };
 }

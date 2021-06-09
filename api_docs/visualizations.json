@@ -85,7 +85,15 @@
             "label": "getSupportedTriggers",
             "description": [],
             "signature": [
-              "(() => string[]) | undefined"
+              "((params?: ",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.VisParams",
+                "text": "VisParams"
+              },
+              " | undefined) => string[]) | undefined"
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
@@ -377,20 +385,93 @@
             "label": "toExpressionAst",
             "description": [],
             "signature": [
+              "(vis: ",
               {
                 "pluginId": "visualizations",
                 "scope": "public",
                 "docId": "kibVisualizationsPluginApi",
-                "section": "def-public.VisToExpressionAst",
-                "text": "VisToExpressionAst"
+                "section": "def-public.Vis",
+                "text": "Vis"
               },
-              "<TVisParams>"
+              "<TVisParams>, params: ",
+              {
+                "pluginId": "visualizations",
+                "scope": "public",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-public.VisToExpressionAstParams",
+                "text": "VisToExpressionAstParams"
+              },
+              ") => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              },
+              " | Promise<",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              },
+              ">"
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
               "lineNumber": 44
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "visualizations",
+                "id": "def-public.vis",
+                "type": "Object",
+                "tags": [],
+                "label": "vis",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "visualizations",
+                    "scope": "public",
+                    "docId": "kibVisualizationsPluginApi",
+                    "section": "def-public.Vis",
+                    "text": "Vis"
+                  },
+                  "<TVisParams>"
+                ],
+                "source": {
+                  "path": "src/plugins/visualizations/public/types.ts",
+                  "lineNumber": 50
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "visualizations",
+                "id": "def-public.params",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "visualizations",
+                    "scope": "public",
+                    "docId": "kibVisualizationsPluginApi",
+                    "section": "def-public.VisToExpressionAstParams",
+                    "text": "VisToExpressionAstParams"
+                  }
+                ],
+                "source": {
+                  "path": "src/plugins/visualizations/public/types.ts",
+                  "lineNumber": 51
+                },
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "visualizations",
@@ -501,8 +582,7 @@
             "section": "def-public.PersistedState",
             "text": "PersistedState"
           },
-          " extends ",
-          "EventEmitter"
+          " extends EventEmitter"
         ],
         "source": {
           "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
@@ -1808,8 +1888,7 @@
             "label": "group",
             "description": [],
             "signature": [
-              "node_modules/utility-types/dist/utility-types",
-              "$Values<Readonly<{ Buckets: \"buckets\"; Metrics: \"metrics\"; None: \"none\"; }>>"
+              "\"none\" | \"buckets\" | \"metrics\""
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
@@ -1980,7 +2059,7 @@
             "label": "tooltip",
             "description": [],
             "signature": [
-              "React.ReactNode"
+              "string | number | boolean | {} | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactNodeArray | React.ReactPortal | null | undefined"
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
@@ -2806,9 +2885,137 @@
             "label": "timefilter",
             "description": [],
             "signature": [
-              "Pick<",
-              "Timefilter",
-              ", \"isTimeRangeSelectorEnabled\" | \"isAutoRefreshSelectorEnabled\" | \"isTimeTouched\" | \"getEnabledUpdated$\" | \"getTimeUpdate$\" | \"getRefreshIntervalUpdate$\" | \"getAutoRefreshFetch$\" | \"getFetch$\" | \"getTime\" | \"getAbsoluteTime\" | \"setTime\" | \"getRefreshInterval\" | \"setRefreshInterval\" | \"createFilter\" | \"getBounds\" | \"calculateBounds\" | \"getActiveBounds\" | \"enableTimeRangeSelector\" | \"disableTimeRangeSelector\" | \"enableAutoRefreshSelector\" | \"disableAutoRefreshSelector\" | \"getTimeDefaults\" | \"getRefreshIntervalDefaults\">"
+              "{ isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; getEnabledUpdated$: () => ",
+              "Observable",
+              "<boolean>; getTimeUpdate$: () => ",
+              "Observable",
+              "<unknown>; getRefreshIntervalUpdate$: () => ",
+              "Observable",
+              "<unknown>; getAutoRefreshFetch$: () => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-public.AutoRefreshDoneFn",
+                "text": "AutoRefreshDoneFn"
+              },
+              ">; getFetch$: () => ",
+              "Observable",
+              "<unknown>; getTime: () => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              "; getAbsoluteTime: () => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              "; setTime: (time: ",
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-public.InputTimeRange",
+                "text": "InputTimeRange"
+              },
+              ") => void; getRefreshInterval: () => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.RefreshInterval",
+                "text": "RefreshInterval"
+              },
+              "; setRefreshInterval: (refreshInterval: Partial<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.RefreshInterval",
+                "text": "RefreshInterval"
+              },
+              ">) => void; createFilter: (indexPattern: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataIndexPatternsPluginApi",
+                "section": "def-common.IIndexPattern",
+                "text": "IIndexPattern"
+              },
+              ", timeRange?: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              " | undefined) => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataPluginApi",
+                "section": "def-common.RangeFilter",
+                "text": "RangeFilter"
+              },
+              " | undefined; getBounds: () => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRangeBounds",
+                "text": "TimeRangeBounds"
+              },
+              "; calculateBounds: (timeRange: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              ") => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRangeBounds",
+                "text": "TimeRangeBounds"
+              },
+              "; getActiveBounds: () => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRangeBounds",
+                "text": "TimeRangeBounds"
+              },
+              " | undefined; enableTimeRangeSelector: () => void; disableTimeRangeSelector: () => void; enableAutoRefreshSelector: () => void; disableAutoRefreshSelector: () => void; getTimeDefaults: () => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              "; getRefreshIntervalDefaults: () => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.RefreshInterval",
+                "text": "RefreshInterval"
+              },
+              "; }"
             ],
             "source": {
               "path": "src/plugins/visualizations/public/types.ts",
@@ -3128,7 +3335,15 @@
               "\nIf given, it will return the supported triggers for this vis."
             ],
             "signature": [
-              "(() => string[]) | undefined"
+              "((params?: ",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.VisParams",
+                "text": "VisParams"
+              },
+              " | undefined) => string[]) | undefined"
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
@@ -3404,20 +3619,93 @@
               "\nShould be provided to expand base visualization expression with\ncustom exprsesion chain, including render expression.\nExplicit renderer should be registered in expressions plugin to render your visualization."
             ],
             "signature": [
+              "(vis: ",
               {
                 "pluginId": "visualizations",
                 "scope": "public",
                 "docId": "kibVisualizationsPluginApi",
-                "section": "def-public.VisToExpressionAst",
-                "text": "VisToExpressionAst"
+                "section": "def-public.Vis",
+                "text": "Vis"
               },
-              "<TVisParams>"
+              "<TVisParams>, params: ",
+              {
+                "pluginId": "visualizations",
+                "scope": "public",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-public.VisToExpressionAstParams",
+                "text": "VisToExpressionAstParams"
+              },
+              ") => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              },
+              " | Promise<",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              },
+              ">"
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
               "lineNumber": 148
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "visualizations",
+                "id": "def-public.vis",
+                "type": "Object",
+                "tags": [],
+                "label": "vis",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "visualizations",
+                    "scope": "public",
+                    "docId": "kibVisualizationsPluginApi",
+                    "section": "def-public.Vis",
+                    "text": "Vis"
+                  },
+                  "<TVisParams>"
+                ],
+                "source": {
+                  "path": "src/plugins/visualizations/public/types.ts",
+                  "lineNumber": 50
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "visualizations",
+                "id": "def-public.params",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "visualizations",
+                    "scope": "public",
+                    "docId": "kibVisualizationsPluginApi",
+                    "section": "def-public.VisToExpressionAstParams",
+                    "text": "VisToExpressionAstParams"
+                  }
+                ],
+                "source": {
+                  "path": "src/plugins/visualizations/public/types.ts",
+                  "lineNumber": 51
+                },
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "visualizations",
@@ -3513,7 +3801,7 @@
               "\nHave the \"defaults\" prop with default params for a visualization.\nTODO: ideally should have next type: { defaults: TVisParams } , but currently\nhave incosistencies in legacy visLib visualizations"
             ],
             "signature": [
-              "Record<string, any>"
+              "{ [x: string]: any; }"
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
@@ -3905,7 +4193,15 @@
         "label": "ExpressionValueVisDimension",
         "description": [],
         "signature": [
-          "{ type: \"vis_dimension\"; } & { accessor: number | DatatableColumn; format: {    id?: string;    params: Record<string, any>;}; }"
+          "{ type: \"vis_dimension\"; } & { accessor: number | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "; format: { id?: string | undefined; params: Record<string, any>; }; }"
         ],
         "source": {
           "path": "src/plugins/visualizations/public/expression_functions/vis_dimension.ts",
@@ -4061,7 +4357,146 @@
             "docId": "kibCorePluginApi",
             "section": "def-public.OverlayRef",
             "text": "OverlayRef"
-          }
+          },
+          " | undefined; transferCustomizationsToUiState: () => void; hasInspector: () => boolean; onContainerLoading: () => void; onContainerRender: () => void; onContainerError: (error: ",
+          {
+            "pluginId": "expressions",
+            "scope": "public",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-public.ExpressionRenderError",
+            "text": "ExpressionRenderError"
+          },
+          ") => void; reload: () => Promise<void>; supportedTriggers: () => string[]; inputIsRefType: (input: ",
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.VisualizeInput",
+            "text": "VisualizeInput"
+          },
+          ") => input is ",
+          "VisualizeByReferenceInput",
+          "; getInputAsValueType: () => Promise<",
+          "VisualizeByValueInput",
+          ">; getInputAsRefType: () => Promise<",
+          "VisualizeByReferenceInput",
+          ">; readonly runtimeId: number; readonly isContainer: boolean; fatalError?: Error | undefined; getIsContainer: () => this is ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.IContainer",
+            "text": "IContainer"
+          },
+          "<{}, ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.ContainerInput",
+            "text": "ContainerInput"
+          },
+          "<{}>, ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.ContainerOutput",
+            "text": "ContainerOutput"
+          },
+          ">; getUpdated$: () => Readonly<",
+          "Observable",
+          "<",
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.VisualizeInput",
+            "text": "VisualizeInput"
+          },
+          " | ",
+          "VisualizeOutput",
+          ">>; getInput$: () => Readonly<",
+          "Observable",
+          "<",
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.VisualizeInput",
+            "text": "VisualizeInput"
+          },
+          ">>; getOutput$: () => Readonly<",
+          "Observable",
+          "<",
+          "VisualizeOutput",
+          ">>; getOutput: () => Readonly<",
+          "VisualizeOutput",
+          ">; getInput: () => Readonly<",
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.VisualizeInput",
+            "text": "VisualizeInput"
+          },
+          ">; getTitle: () => string; getRoot: () => ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.IEmbeddable",
+            "text": "IEmbeddable"
+          },
+          "<",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableInput",
+            "text": "EmbeddableInput"
+          },
+          ", ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableOutput",
+            "text": "EmbeddableOutput"
+          },
+          "> | ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.IContainer",
+            "text": "IContainer"
+          },
+          "<{}, ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.ContainerInput",
+            "text": "ContainerInput"
+          },
+          "<{}>, ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.ContainerOutput",
+            "text": "ContainerOutput"
+          },
+          ">; updateInput: (changes: Partial<",
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.VisualizeInput",
+            "text": "VisualizeInput"
+          },
+          ">) => void; }"
         ],
         "source": {
           "path": "src/plugins/visualizations/public/index.ts",
@@ -4117,7 +4552,124 @@
             "docId": "kibEmbeddablePluginApi",
             "section": "def-public.ContainerInput",
             "text": "ContainerInput"
-          }
+          },
+          "<{}>, ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.ContainerOutput",
+            "text": "ContainerOutput"
+          },
+          "> | undefined) => Promise<",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.ErrorEmbeddable",
+            "text": "ErrorEmbeddable"
+          },
+          " | ",
+          "VisualizeEmbeddable",
+          " | ",
+          "DisabledLabEmbeddable",
+          " | undefined>; isEditable: () => Promise<boolean>; getDisplayName: () => string; createFromSavedObject: (savedObjectId: string, input: Partial<",
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.VisualizeInput",
+            "text": "VisualizeInput"
+          },
+          "> & { id: string; }, parent?: ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.IContainer",
+            "text": "IContainer"
+          },
+          "<{}, ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.ContainerInput",
+            "text": "ContainerInput"
+          },
+          "<{}>, ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.ContainerOutput",
+            "text": "ContainerOutput"
+          },
+          "> | undefined) => Promise<",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.ErrorEmbeddable",
+            "text": "ErrorEmbeddable"
+          },
+          " | ",
+          "VisualizeEmbeddable",
+          " | ",
+          "DisabledLabEmbeddable",
+          ">; readonly savedObjectMetaData: ",
+          {
+            "pluginId": "savedObjects",
+            "scope": "public",
+            "docId": "kibSavedObjectsPluginApi",
+            "section": "def-public.SavedObjectMetaData",
+            "text": "SavedObjectMetaData"
+          },
+          "<VisualizationAttributes>; extract: (_state: ",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableStateWithType",
+            "text": "EmbeddableStateWithType"
+          },
+          ") => { state: ",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableStateWithType",
+            "text": "EmbeddableStateWithType"
+          },
+          "; references: ",
+          "SavedObjectReference",
+          "[]; }; inject: (_state: ",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableStateWithType",
+            "text": "EmbeddableStateWithType"
+          },
+          ", references: ",
+          "SavedObjectReference",
+          "[]) => ",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableStateWithType",
+            "text": "EmbeddableStateWithType"
+          },
+          "; getCurrentAppId: () => Promise<string | undefined>; checkTitle: (props: ",
+          {
+            "pluginId": "savedObjects",
+            "scope": "public",
+            "docId": "kibSavedObjectsPluginApi",
+            "section": "def-public.OnSaveProps",
+            "text": "OnSaveProps"
+          },
+          ") => Promise<true>; }"
         ],
         "source": {
           "path": "src/plugins/visualizations/public/index.ts",
@@ -4291,7 +4843,24 @@
           "docId": "kibVisualizationsPluginApi",
           "section": "def-public.VisTypeAlias",
           "text": "VisTypeAlias"
-        }
+        },
+        "[]; unRegisterAlias: (visTypeAliasName: string) => void; getByGroup: (group: ",
+        {
+          "pluginId": "visualizations",
+          "scope": "public",
+          "docId": "kibVisualizationsPluginApi",
+          "section": "def-public.VisGroups",
+          "text": "VisGroups"
+        },
+        ") => ",
+        {
+          "pluginId": "visualizations",
+          "scope": "public",
+          "docId": "kibVisualizationsPluginApi",
+          "section": "def-public.BaseVisType",
+          "text": "BaseVisType"
+        },
+        "<any>[]; }"
       ],
       "source": {
         "path": "src/plugins/visualizations/public/plugin.ts",
@@ -4370,7 +4939,54 @@
             "path": "src/plugins/visualizations/public/plugin.ts",
             "lineNumber": 80
           },
-          "deprecated": false
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "visualizations",
+              "id": "def-public.visType",
+              "type": "string",
+              "tags": [],
+              "label": "visType",
+              "description": [],
+              "source": {
+                "path": "src/plugins/visualizations/public/plugin.ts",
+                "lineNumber": 80
+              },
+              "deprecated": false
+            },
+            {
+              "parentPluginId": "visualizations",
+              "id": "def-public.visState",
+              "type": "Object",
+              "tags": [],
+              "label": "visState",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "visualizations",
+                  "scope": "public",
+                  "docId": "kibVisualizationsPluginApi",
+                  "section": "def-public.SerializedVis",
+                  "text": "SerializedVis"
+                },
+                "<",
+                {
+                  "pluginId": "visualizations",
+                  "scope": "common",
+                  "docId": "kibVisualizationsPluginApi",
+                  "section": "def-common.VisParams",
+                  "text": "VisParams"
+                },
+                ">"
+              ],
+              "source": {
+                "path": "src/plugins/visualizations/public/plugin.ts",
+                "lineNumber": 80
+              },
+              "deprecated": false
+            }
+          ]
         },
         {
           "parentPluginId": "visualizations",
@@ -4410,7 +5026,32 @@
             "path": "src/plugins/visualizations/public/plugin.ts",
             "lineNumber": 81
           },
-          "deprecated": false
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "visualizations",
+              "id": "def-public.savedVis",
+              "type": "Object",
+              "tags": [],
+              "label": "savedVis",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "visualizations",
+                  "scope": "public",
+                  "docId": "kibVisualizationsPluginApi",
+                  "section": "def-public.ISavedVis",
+                  "text": "ISavedVis"
+                }
+              ],
+              "source": {
+                "path": "src/plugins/visualizations/public/saved_visualizations/_saved_vis.ts",
+                "lineNumber": 31
+              },
+              "deprecated": false
+            }
+          ]
         },
         {
           "parentPluginId": "visualizations",
@@ -4449,7 +5090,41 @@
             "path": "src/plugins/visualizations/public/plugin.ts",
             "lineNumber": 82
           },
-          "deprecated": false
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "visualizations",
+              "id": "def-public.vis",
+              "type": "Object",
+              "tags": [],
+              "label": "vis",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "visualizations",
+                  "scope": "public",
+                  "docId": "kibVisualizationsPluginApi",
+                  "section": "def-public.SerializedVis",
+                  "text": "SerializedVis"
+                },
+                "<",
+                {
+                  "pluginId": "visualizations",
+                  "scope": "common",
+                  "docId": "kibVisualizationsPluginApi",
+                  "section": "def-common.VisParams",
+                  "text": "VisParams"
+                },
+                ">"
+              ],
+              "source": {
+                "path": "src/plugins/visualizations/public/saved_visualizations/_saved_vis.ts",
+                "lineNumber": 51
+              },
+              "deprecated": false
+            }
+          ]
         },
         {
           "parentPluginId": "visualizations",
@@ -4459,14 +5134,34 @@
           "label": "showNewVisModal",
           "description": [],
           "signature": [
-            "typeof ",
-            "showNewVisModal"
+            "({ editorParams, onClose, originatingApp, outsideVisualizeApp, showAggsSelection, selectedVisType, }?: ",
+            "ShowNewVisModalParams",
+            ") => () => void"
           ],
           "source": {
             "path": "src/plugins/visualizations/public/plugin.ts",
             "lineNumber": 83
           },
-          "deprecated": false
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "visualizations",
+              "id": "def-public.__0",
+              "type": "Object",
+              "tags": [],
+              "label": "__0",
+              "description": [],
+              "signature": [
+                "ShowNewVisModalParams"
+              ],
+              "source": {
+                "path": "src/plugins/visualizations/public/wizard/show_new_vis.tsx",
+                "lineNumber": 42
+              },
+              "deprecated": false
+            }
+          ]
         },
         {
           "parentPluginId": "visualizations",
@@ -4509,7 +5204,58 @@
               "text": "SavedObjectLoader"
             },
             " & { findListItems: (search: string, sizeOrOptions?: number | ",
-            "FindListItemsOptions"
+            "FindListItemsOptions",
+            " | undefined) => any; }) | undefined, attributeService?: ",
+            {
+              "pluginId": "embeddable",
+              "scope": "public",
+              "docId": "kibEmbeddablePluginApi",
+              "section": "def-public.AttributeService",
+              "text": "AttributeService"
+            },
+            "<",
+            "VisualizeSavedObjectAttributes",
+            ", ",
+            "VisualizeByValueInput",
+            ", ",
+            "VisualizeByReferenceInput",
+            "> | undefined, parent?: ",
+            {
+              "pluginId": "embeddable",
+              "scope": "public",
+              "docId": "kibEmbeddablePluginApi",
+              "section": "def-public.IContainer",
+              "text": "IContainer"
+            },
+            "<{}, ",
+            {
+              "pluginId": "embeddable",
+              "scope": "public",
+              "docId": "kibEmbeddablePluginApi",
+              "section": "def-public.ContainerInput",
+              "text": "ContainerInput"
+            },
+            "<{}>, ",
+            {
+              "pluginId": "embeddable",
+              "scope": "public",
+              "docId": "kibEmbeddablePluginApi",
+              "section": "def-public.ContainerOutput",
+              "text": "ContainerOutput"
+            },
+            "> | undefined) => Promise<",
+            {
+              "pluginId": "embeddable",
+              "scope": "public",
+              "docId": "kibEmbeddablePluginApi",
+              "section": "def-public.ErrorEmbeddable",
+              "text": "ErrorEmbeddable"
+            },
+            " | ",
+            "VisualizeEmbeddable",
+            " | ",
+            "DisabledLabEmbeddable",
+            ">; }"
           ],
           "source": {
             "path": "src/plugins/visualizations/public/plugin.ts",

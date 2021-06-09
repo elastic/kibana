@@ -73,6 +73,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
         "id": "Custom link",
         "isActive": true,
         "title": "Custom link",
+        "url": "/",
       },
       "closed": false,
       "hasError": false,
@@ -140,6 +141,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "id": "discover",
           "isActive": true,
           "title": "discover",
+          "url": "/",
         },
         Object {
           "baseUrl": "/",
@@ -154,6 +156,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "id": "siem",
           "isActive": true,
           "title": "siem",
+          "url": "/",
         },
         Object {
           "baseUrl": "/",
@@ -168,6 +171,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "id": "metrics",
           "isActive": true,
           "title": "metrics",
+          "url": "/",
         },
         Object {
           "baseUrl": "/",
@@ -182,6 +186,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "id": "monitoring",
           "isActive": true,
           "title": "monitoring",
+          "url": "/",
         },
         Object {
           "baseUrl": "/",
@@ -196,6 +201,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "id": "visualize",
           "isActive": true,
           "title": "visualize",
+          "url": "/",
         },
         Object {
           "baseUrl": "/",
@@ -210,6 +216,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "id": "dashboard",
           "isActive": true,
           "title": "dashboard",
+          "url": "/",
         },
         Object {
           "baseUrl": "/",
@@ -219,6 +226,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "id": "canvas",
           "isActive": true,
           "title": "canvas",
+          "url": "/",
         },
         Object {
           "baseUrl": "/",
@@ -233,6 +241,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "id": "logs",
           "isActive": true,
           "title": "logs",
+          "url": "/",
         },
       ],
       "closed": false,
@@ -351,6 +360,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
       "values": Array [],
     }
   }
+  url="/"
 >
   <EuiCollapsibleNav
     aria-label="Primary"
@@ -587,10 +597,12 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                             >
                               <EuiIcon
                                 className="euiListGroupItem__icon"
+                                color="inherit"
                                 type="home"
                               >
                                 <span
                                   className="euiListGroupItem__icon"
+                                  color="inherit"
                                   data-euiicon-type="home"
                                 />
                               </EuiIcon>
@@ -1921,6 +1933,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                 >
                                   <span
                                     class="euiListGroupItem__icon"
+                                    color="inherit"
                                     data-euiicon-type="lockOpen"
                                   />
                                   <span
@@ -1952,10 +1965,12 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                               >
                                 <EuiIcon
                                   className="euiListGroupItem__icon"
+                                  color="inherit"
                                   type="lockOpen"
                                 >
                                   <span
                                     className="euiListGroupItem__icon"
+                                    color="inherit"
                                     data-euiicon-type="lockOpen"
                                   />
                                 </EuiIcon>
@@ -1999,6 +2014,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                 <EuiButtonContent
                   className="euiButtonEmpty__content"
                   iconSide="left"
+                  iconSize="s"
                   iconType="cross"
                   textProps={
                     Object {
@@ -2011,13 +2027,15 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                   >
                     <EuiIcon
                       className="euiButtonContent__icon"
-                      size="m"
+                      color="inherit"
+                      size="s"
                       type="cross"
                     >
                       <span
                         className="euiButtonContent__icon"
+                        color="inherit"
                         data-euiicon-type="cross"
-                        size="m"
+                        size="s"
                       />
                     </EuiIcon>
                     <span
@@ -2266,6 +2284,7 @@ exports[`CollapsibleNav renders the default nav 1`] = `
       "values": Array [],
     }
   }
+  url="/"
 >
   <EuiCollapsibleNav
     aria-label="Primary"
@@ -2503,6 +2522,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
       "values": Array [],
     }
   }
+  url="/"
 >
   <EuiCollapsibleNav
     aria-label="Primary"
@@ -2740,6 +2760,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
       "values": Array [],
     }
   }
+  url="/"
 >
   <EuiCollapsibleNav
     aria-label="Primary"
@@ -2854,10 +2875,12 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                             >
                               <EuiIcon
                                 className="euiListGroupItem__icon"
+                                color="inherit"
                                 type="home"
                               >
                                 <span
                                   className="euiListGroupItem__icon"
+                                  color="inherit"
                                   data-euiicon-type="home"
                                 />
                               </EuiIcon>
@@ -3084,6 +3107,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                                 >
                                   <span
                                     class="euiListGroupItem__icon"
+                                    color="inherit"
                                     data-euiicon-type="lock"
                                   />
                                   <span
@@ -3115,10 +3139,12 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                               >
                                 <EuiIcon
                                   className="euiListGroupItem__icon"
+                                  color="inherit"
                                   type="lock"
                                 >
                                   <span
                                     className="euiListGroupItem__icon"
+                                    color="inherit"
                                     data-euiicon-type="lock"
                                   />
                                 </EuiIcon>
@@ -3162,6 +3188,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                 <EuiButtonContent
                   className="euiButtonEmpty__content"
                   iconSide="left"
+                  iconSize="s"
                   iconType="cross"
                   textProps={
                     Object {
@@ -3174,13 +3201,15 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                   >
                     <EuiIcon
                       className="euiButtonContent__icon"
-                      size="m"
+                      color="inherit"
+                      size="s"
                       type="cross"
                     >
                       <span
                         className="euiButtonContent__icon"
+                        color="inherit"
                         data-euiicon-type="cross"
-                        size="m"
+                        size="s"
                       />
                     </EuiIcon>
                     <span

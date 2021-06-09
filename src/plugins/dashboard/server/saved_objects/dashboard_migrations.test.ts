@@ -16,6 +16,7 @@ import {
   createInject,
 } from '../../common/embeddable/dashboard_container_persistable_state';
 import { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
+import { SerializableState } from '../../../kibana_utils/common';
 
 const embeddableSetupMock = createEmbeddableSetupMock();
 const extract = createExtract(embeddableSetupMock);
@@ -38,6 +39,7 @@ const injectImplementation = (
 };
 embeddableSetupMock.extract.mockImplementation(extractImplementation);
 embeddableSetupMock.inject.mockImplementation(injectImplementation);
+embeddableSetupMock.getMigrationVersions.mockImplementation(() => []);
 
 const migrations = createDashboardSavedObjectTypeMigrations({
   embeddable: embeddableSetupMock,
@@ -552,6 +554,68 @@ describe('dashboard', () => {
       expect(JSON.parse(newDoc.attributes.panelsJSON)[0].embeddableConfig.__extracted).toBe(true);
 
       embeddableSetupMock.extract.mockImplementation(extractImplementation);
+    });
+  });
+
+  describe('embeddable migrations for by value panels', () => {
+    const originalDoc: DashboardDoc730ToLatest = {
+      attributes: {
+        description: '',
+        kibanaSavedObjectMeta: {
+          searchSourceJSON:
+            '{"query":{"language":"kuery","query":""},"filter":[{"query":{"match_phrase":{"machine.os.keyword":"osx"}},"$state":{"store":"appState"},"meta":{"type":"phrase","key":"machine.os.keyword","params":{"query":"osx"},"disabled":false,"negate":false,"alias":null,"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"}}]}',
+        },
+        optionsJSON: '{"useMargins":true,"hidePanelTitles":false}',
+        panelsJSON: `[
+          {"version":"7.9.3","gridData":{"x":0,"y":0,"w":24,"h":15,"i":"0"},"panelIndex":"0","embeddableConfig":{}},
+          {"version":"7.9.3","gridData":{"x":24,"y":0,"w":24,"h":15,"i":"1"},"panelIndex":"1","embeddableConfig":{ "attributes": { "byValueThing": "ThisIsByValue"} }}
+        ]`,
+        timeRestore: false,
+        title: 'Run by value migrations on this dashboard!',
+        version: 1,
+      },
+      id: '376e6260-1f5e-11eb-91aa-7b6d5f8a61d6',
+      references: [
+        {
+          id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+          name: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+          type: 'index-pattern',
+        },
+        { id: '14e2e710-4258-11e8-b3aa-73fdaf54bfc9', name: 'panel_0', type: 'visualization' },
+      ],
+      type: 'dashboard',
+    };
+
+    it('should add all embeddable migrations for versions above 7.12.0 to dashboard saved object migrations', () => {
+      const newEmbeddableSetupMock = createEmbeddableSetupMock();
+      newEmbeddableSetupMock.getMigrationVersions.mockImplementation(() => [
+        '7.10.100',
+        '7.13.0',
+        '8.0.0',
+      ]);
+      const migrationsList = createDashboardSavedObjectTypeMigrations({
+        embeddable: newEmbeddableSetupMock,
+      });
+      expect(Object.keys(migrationsList).indexOf('8.0.0')).not.toBe(-1);
+      expect(Object.keys(migrationsList).indexOf('7.13.0')).not.toBe(-1);
+      expect(Object.keys(migrationsList).indexOf('7.10.100')).toBe(-1);
+    });
+
+    it('runs migrations on by value panels only', () => {
+      const newEmbeddableSetupMock = createEmbeddableSetupMock();
+      newEmbeddableSetupMock.getMigrationVersions.mockImplementation(() => ['7.13.0']);
+      newEmbeddableSetupMock.migrate.mockImplementation((state: SerializableState) => {
+        state.superCoolKey = 'ONLY 4 BY VALUE EMBEDDABLES THANK YOU VERY MUCH';
+        return state;
+      });
+      const migrationsList = createDashboardSavedObjectTypeMigrations({
+        embeddable: newEmbeddableSetupMock,
+      });
+      expect(migrationsList['7.13.0']).toBeDefined();
+      const migratedDoc = migrationsList['7.13.0'](originalDoc, contextMock);
+      expect(migratedDoc.attributes.panelsJSON).toMatchInlineSnapshot(
+        `"[{\\"version\\":\\"7.9.3\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":24,\\"h\\":15,\\"i\\":\\"0\\"},\\"panelIndex\\":\\"0\\",\\"embeddableConfig\\":{}},{\\"version\\":\\"7.13.0\\",\\"gridData\\":{\\"x\\":24,\\"y\\":0,\\"w\\":24,\\"h\\":15,\\"i\\":\\"1\\"},\\"panelIndex\\":\\"1\\",\\"embeddableConfig\\":{\\"attributes\\":{\\"byValueThing\\":\\"ThisIsByValue\\"},\\"superCoolKey\\":\\"ONLY 4 BY VALUE EMBEDDABLES THANK YOU VERY MUCH\\"}}]"`
+      );
     });
   });
 });

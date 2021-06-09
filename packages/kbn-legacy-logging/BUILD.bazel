@@ -25,6 +25,7 @@ NPM_MODULE_EXTRA_FILES = [
 
 SRC_DEPS = [
   "//packages/kbn-config-schema",
+  "//packages/kbn-utils",
   "@npm//@elastic/numeral",
   "@npm//@hapi/hapi",
   "@npm//chokidar",
@@ -71,7 +72,7 @@ ts_project(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = [":tsc"] + DEPS,
+  deps = DEPS + [":tsc"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )

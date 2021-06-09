@@ -5,31 +5,33 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import { Client, estypes } from '@elastic/elasticsearch';
 import seedrandom from 'seedrandom';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { KbnClient } from '@kbn/test';
 import { AxiosResponse } from 'axios';
-import { EndpointDocGenerator, TreeOptions, Event } from './generate_data';
+import { EndpointDocGenerator, Event, TreeOptions } from './generate_data';
 import { firstNonNullValue } from './models/ecs_safety_helpers';
 import {
+  AGENT_POLICY_API_ROUTES,
   CreateAgentPolicyRequest,
   CreateAgentPolicyResponse,
   CreatePackagePolicyRequest,
   CreatePackagePolicyResponse,
-  GetPackagesResponse,
-  AGENT_API_ROUTES,
-  AGENT_POLICY_API_ROUTES,
   EPM_API_ROUTES,
+  FLEET_SERVER_SERVERS_INDEX,
+  FleetServerAgent,
+  GetPackagesResponse,
   PACKAGE_POLICY_API_ROUTES,
-  ENROLLMENT_API_KEY_ROUTES,
-  GetEnrollmentAPIKeysResponse,
-  GetOneEnrollmentAPIKeyResponse,
-  Agent,
 } from '../../../fleet/common';
 import { policyFactory as policyConfigFactory } from './models/policy_config';
 import { HostMetadata } from './types';
 import { KbnClientWithApiKeySupport } from '../../scripts/endpoint/kbn_client_with_api_key_support';
+import { FleetAgentGenerator } from './data_generators/fleet_agent_generator';
+import { FleetActionGenerator } from './data_generators/fleet_action_generator';
+
+const fleetAgentGenerator = new FleetAgentGenerator();
+const fleetActionGenerator = new FleetActionGenerator();
 
 export async function indexHostsAndAlerts(
   client: Client,
@@ -47,8 +49,15 @@ export async function indexHostsAndAlerts(
 ) {
   const random = seedrandom(seed);
   const epmEndpointPackage = await getEndpointPackageInfo(kbnClient);
+
+  // If `fleet` integration is true, then ensure a (fake) fleet-server is connected
+  if (fleet) {
+    await enableFleetServerIfNecessary(client);
+  }
+
   // Keep a map of host applied policy ids (fake) to real ingest package configs (policy record)
   const realPolicies: Record<string, CreatePackagePolicyResponse['item']> = {};
+
   for (let i = 0; i < numHosts; i++) {
     const generator = new EndpointDocGenerator(random);
     await indexHostDocs({
@@ -71,9 +80,11 @@ export async function indexHostsAndAlerts(
       options,
     });
   }
+
   await client.indices.refresh({
     index: eventIndex,
   });
+
   // TODO: Unclear why the documents are not showing up after the call to refresh.
   // Waiting 5 seconds allows the indices to refresh automatically and
   // the documents become available in API/integration tests.
@@ -107,9 +118,10 @@ async function indexHostDocs({
 }) {
   const timeBetweenDocs = 6 * 3600 * 1000; // 6 hours between metadata documents
   const timestamp = new Date().getTime();
+  const kibanaVersion = await fetchKibanaVersion(kbnClient);
   let hostMetadata: HostMetadata;
   let wasAgentEnrolled = false;
-  let enrolledAgent: undefined | Agent;
+  let enrolledAgent: undefined | estypes.SearchHit<FleetServerAgent>;
 
   for (let j = 0; j < numDocs; j++) {
     generator.updateHostData();
@@ -136,10 +148,12 @@ async function indexHostDocs({
       // If we did not yet enroll an agent for this Host, do it now that we have good policy id
       if (!wasAgentEnrolled) {
         wasAgentEnrolled = true;
-        enrolledAgent = await fleetEnrollAgentForHost(
-          kbnClient,
+
+        enrolledAgent = await indexFleetAgentForHost(
+          client,
           hostMetadata!,
-          realPolicies[appliedPolicyId].policy_id
+          realPolicies[appliedPolicyId].policy_id,
+          kibanaVersion
         );
       }
       // Update the Host metadata record with the ID of the "real" policy along with the enrolled agent id
@@ -149,7 +163,7 @@ async function indexHostDocs({
           ...hostMetadata.elastic,
           agent: {
             ...hostMetadata.elastic.agent,
-            id: enrolledAgent?.id ?? hostMetadata.elastic.agent.id,
+            id: enrolledAgent?._id ?? hostMetadata.elastic.agent.id,
           },
         },
         Endpoint: {
@@ -163,6 +177,9 @@ async function indexHostDocs({
           },
         },
       };
+
+      // Create some actions for this Host
+      await indexFleetActionsForHost(client, hostMetadata);
     }
 
     await client.index({
@@ -295,208 +312,133 @@ const getEndpointPackageInfo = async (
   return endpointPackage;
 };
 
-const fleetEnrollAgentForHost = async (
-  kbnClient: KbnClientWithApiKeySupport,
-  endpointHost: HostMetadata,
-  agentPolicyId: string
-): Promise<undefined | Agent> => {
-  // Get Enrollement key for host's applied policy
-  const enrollmentApiKey = await kbnClient
-    .request<GetEnrollmentAPIKeysResponse>({
-      path: ENROLLMENT_API_KEY_ROUTES.LIST_PATTERN,
-      method: 'GET',
-      query: {
-        kuery: `policy_id:"${agentPolicyId}"`,
-      },
-    })
-    .then((apiKeysResponse) => {
-      const apiKey = apiKeysResponse.data.list[0];
+const fetchKibanaVersion = async (kbnClient: KbnClientWithApiKeySupport) => {
+  const version = ((await kbnClient.request({
+    path: '/api/status',
+    method: 'GET',
+  })) as AxiosResponse).data.version.number;
 
-      if (!apiKey) {
-        return Promise.reject(
-          new Error(`no API enrollment key found for agent policy id ${agentPolicyId}`)
-        );
-      }
+  if (!version) {
+    // eslint-disable-next-line no-console
+    console.log('failed to retrieve kibana version');
+    return '8.0.0';
+  }
 
-      return kbnClient
-        .request<GetOneEnrollmentAPIKeyResponse>({
-          path: ENROLLMENT_API_KEY_ROUTES.INFO_PATTERN.replace('{keyId}', apiKey.id),
-          method: 'GET',
-        })
-        .catch((error) => {
-          // eslint-disable-next-line no-console
-          console.log('unable to retrieve enrollment api key for policy');
-          return Promise.reject(error);
-        });
-    })
-    .then((apiKeyDetailsResponse) => {
-      return apiKeyDetailsResponse.data.item.api_key;
-    })
-    .catch((error) => {
-      // eslint-disable-next-line no-console
-      console.error(error);
-      return '';
-    });
+  return version;
+};
 
-  if (enrollmentApiKey.length === 0) {
+/**
+ * Will ensure that at least one fleet server is present in the `.fleet-servers` index. This will
+ * enable the `Agent` section of kibana Fleet to be displayed
+ *
+ * @param esClient
+ * @param version
+ */
+const enableFleetServerIfNecessary = async (esClient: Client, version: string = '8.0.0') => {
+  const res = await esClient.search<{}, {}>({
+    index: FLEET_SERVER_SERVERS_INDEX,
+    ignore_unavailable: true,
+  });
+
+  // @ts-expect-error value is number | TotalHits
+  if (res.body.hits.total.value > 0) {
     return;
   }
 
-  const fetchKibanaVersion = async () => {
-    const version = ((await kbnClient.request({
-      path: '/api/status',
-      method: 'GET',
-    })) as AxiosResponse).data.version.number;
-    if (!version) {
-      // eslint-disable-next-line no-console
-      console.log('failed to retrieve kibana version');
-    }
-    return version;
-  };
+  // Create a Fake fleet-server in this kibana instance
+  await esClient.index({
+    index: FLEET_SERVER_SERVERS_INDEX,
+    body: {
+      agent: {
+        id: '12988155-475c-430d-ac89-84dc84b67cd1',
+        version: '',
+      },
+      host: {
+        architecture: 'linux',
+        id: 'c3e5f4f690b4a3ff23e54900701a9513',
+        ip: ['127.0.0.1', '::1', '10.201.0.213', 'fe80::4001:aff:fec9:d5'],
+        name: 'endpoint-data-generator',
+      },
+      server: {
+        id: '12988155-475c-430d-ac89-84dc84b67cd1',
+        version: '8.0.0-SNAPSHOT',
+      },
+      '@timestamp': '2021-05-12T18:42:52.009482058Z',
+    },
+  });
+};
 
-  // Enroll an agent for the Host
-  const body = {
-    type: 'PERMANENT',
-    metadata: {
-      local: {
+const indexFleetAgentForHost = async (
+  esClient: Client,
+  endpointHost: HostMetadata,
+  agentPolicyId: string,
+  kibanaVersion: string = '8.0.0'
+): Promise<estypes.SearchHit<FleetServerAgent>> => {
+  const agentDoc = fleetAgentGenerator.generateEsHit({
+    _source: {
+      local_metadata: {
         elastic: {
           agent: {
-            version: await fetchKibanaVersion(),
+            version: kibanaVersion,
           },
         },
         host: {
           ...endpointHost.host,
         },
         os: {
-          family: 'windows',
-          kernel: '10.0.19041.388 (WinBuild.160101.0800)',
-          platform: 'windows',
-          version: '10.0',
-          name: 'Windows 10 Pro',
-          full: 'Windows 10 Pro(10.0)',
+          ...endpointHost.host.os,
         },
       },
-      user_provided: {
-        dev_agent_version: '0.0.1',
-        region: 'us-east',
-      },
+      policy_id: agentPolicyId,
     },
-  };
+  });
 
-  try {
-    // First enroll the agent
-    const res = await kbnClient.requestWithApiKey(AGENT_API_ROUTES.ENROLL_PATTERN, {
-      method: 'POST',
-      body: JSON.stringify(body),
-      headers: {
-        'kbn-xsrf': 'xxx',
-        Authorization: `ApiKey ${enrollmentApiKey}`,
-        'Content-Type': 'application/json',
-      },
+  await esClient.index<FleetServerAgent>({
+    index: agentDoc._index,
+    id: agentDoc._id,
+    body: agentDoc._source!,
+    op_type: 'create',
+  });
+
+  return agentDoc;
+};
+
+const indexFleetActionsForHost = async (
+  esClient: Client,
+  endpointHost: HostMetadata
+): Promise<void> => {
+  const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
+  const agentId = endpointHost.elastic.agent.id;
+
+  for (let i = 0; i < 5; i++) {
+    // create an action
+    const isolateAction = fleetActionGenerator.generate({
+      data: { comment: 'data generator: this host is bad' },
     });
 
-    if (res) {
-      const enrollObj = await res.json();
-      if (!res.ok) {
-        // eslint-disable-next-line no-console
-        console.error('unable to enroll agent', enrollObj);
-        return;
-      }
-      // ------------------------------------------------
-      // now check the agent in so that it can complete enrollment
-      const checkinBody = {
-        events: [
-          {
-            type: 'STATE',
-            subtype: 'RUNNING',
-            message: 'state changed from STOPPED to RUNNING',
-            timestamp: new Date().toISOString(),
-            payload: {
-              random: 'data',
-              state: 'RUNNING',
-              previous_state: 'STOPPED',
-            },
-            agent_id: enrollObj.item.id,
-          },
-        ],
-      };
-      const checkinRes = await kbnClient
-        .requestWithApiKey(
-          AGENT_API_ROUTES.CHECKIN_PATTERN.replace('{agentId}', enrollObj.item.id),
-          {
-            method: 'POST',
-            body: JSON.stringify(checkinBody),
-            headers: {
-              'kbn-xsrf': 'xxx',
-              Authorization: `ApiKey ${enrollObj.item.access_api_key}`,
-              'Content-Type': 'application/json',
-            },
-          }
-        )
-        .catch((error) => {
-          return Promise.reject(error);
-        });
+    isolateAction.agents = [agentId];
 
-      // Agent unenrolling?
-      if (checkinRes.status === 403) {
-        return;
-      }
+    await esClient.index(
+      {
+        index: '.fleet-actions',
+        body: isolateAction,
+      },
+      ES_INDEX_OPTIONS
+    );
 
-      const checkinObj = await checkinRes.json();
-      if (!checkinRes.ok) {
-        // eslint-disable-next-line no-console
-        console.error(
-          `failed to checkin agent [${enrollObj.item.id}] for endpoint [${endpointHost.host.id}]`
-        );
-        return enrollObj.item;
-      }
+    // Create an action response for the above
+    const unIsolateAction = fleetActionGenerator.generateResponse({
+      action_id: isolateAction.action_id,
+      agent_id: agentId,
+      action_data: isolateAction.data,
+    });
 
-      // ------------------------------------------------
-      // If we have an action to ack(), then do it now
-      if (checkinObj.actions.length) {
-        const ackActionBody = {
-          // @ts-ignore
-          events: checkinObj.actions.map((action) => {
-            return {
-              action_id: action.id,
-              type: 'ACTION_RESULT',
-              subtype: 'CONFIG',
-              timestamp: new Date().toISOString(),
-              agent_id: action.agent_id,
-              policy_id: agentPolicyId,
-              message: `endpoint generator: Endpoint Started`,
-            };
-          }),
-        };
-        const ackActionResp = await kbnClient.requestWithApiKey(
-          AGENT_API_ROUTES.ACKS_PATTERN.replace('{agentId}', enrollObj.item.id),
-          {
-            method: 'POST',
-            body: JSON.stringify(ackActionBody),
-            headers: {
-              'kbn-xsrf': 'xxx',
-              Authorization: `ApiKey ${enrollObj.item.access_api_key}`,
-              'Content-Type': 'application/json',
-            },
-          }
-        );
-
-        const ackActionObj = await ackActionResp.json();
-        if (!ackActionResp.ok) {
-          // eslint-disable-next-line no-console
-          console.error(
-            `failed to ACK Actions provided to agent [${enrollObj.item.id}] for endpoint [${endpointHost.host.id}]`
-          );
-          // eslint-disable-next-line no-console
-          console.error(JSON.stringify(ackActionObj, null, 2));
-          return enrollObj.item;
-        }
-      }
-
-      return enrollObj.item;
-    }
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(error);
+    await esClient.index(
+      {
+        index: '.fleet-actions-results',
+        body: unIsolateAction,
+      },
+      ES_INDEX_OPTIONS
+    );
   }
 };

@@ -16,7 +16,16 @@ import {
   ALERT_RULE_VERSION,
   NUMBER_OF_ALERTS,
 } from '../../screens/alerts';
-import { JSON_LINES } from '../../screens/alerts_details';
+import {
+  JSON_LINES,
+  TABLE_CELL,
+  TABLE_ROWS,
+  THREAT_CONTENT,
+  THREAT_DETAILS_VIEW,
+  THREAT_INTEL_TAB,
+  THREAT_SUMMARY_VIEW,
+  TITLE,
+} from '../../screens/alerts_details';
 import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
@@ -63,9 +72,13 @@ import {
   waitForAlertsIndexToBeCreated,
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
-import { openJsonView, scrollJsonViewToBottom } from '../../tasks/alerts_details';
 import {
-  changeRowsPerPageTo300,
+  openJsonView,
+  openThreatIndicatorDetails,
+  scrollJsonViewToBottom,
+} from '../../tasks/alerts_details';
+import {
+  changeRowsPerPageTo100,
   duplicateFirstRule,
   duplicateSelectedRules,
   duplicateRuleFromMenu,
@@ -411,7 +424,7 @@ describe('indicator match', () => {
 
         cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-        changeRowsPerPageTo300();
+        changeRowsPerPageTo100();
 
         cy.get(RULES_TABLE).then(($table) => {
           cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
@@ -582,6 +595,90 @@ describe('indicator match', () => {
             cy.wrap(elements)
               .eq(length - enrichment.line)
               .should('have.text', enrichment.text);
+          });
+        });
+      });
+
+      it('Displays threat summary data on alerts details', () => {
+        const expectedThreatSummary = [
+          { field: 'matched.field', value: 'myhash.mysha256' },
+          { field: 'matched.type', value: 'file' },
+          { field: 'first_seen', value: '2021-03-10T08:02:14.000Z' },
+        ];
+
+        expandFirstAlert();
+
+        cy.get(THREAT_SUMMARY_VIEW).within(() => {
+          cy.get(TABLE_ROWS).should('have.length', expectedThreatSummary.length);
+          expectedThreatSummary.forEach((row, index) => {
+            cy.get(TABLE_ROWS)
+              .eq(index)
+              .within(() => {
+                cy.get(TITLE).should('have.text', row.field);
+                cy.get(THREAT_CONTENT).should('have.text', row.value);
+              });
+          });
+        });
+      });
+
+      it('Displays threat indicator data on the threat intel tab', () => {
+        const expectedThreatIndicatorData = [
+          { field: 'first_seen', value: '2021-03-10T08:02:14.000Z' },
+          { field: 'file.size', value: '80280' },
+          { field: 'file.type', value: 'elf' },
+          {
+            field: 'file.hash.sha256',
+            value: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
+          },
+          {
+            field: 'file.hash.tlsh',
+            value: '6D7312E017B517CC1371A8353BED205E9128223972AE35302E97528DF957703BAB2DBE',
+          },
+          {
+            field: 'file.hash.ssdeep',
+            value:
+              '1536:87vbq1lGAXSEYQjbChaAU2yU23M51DjZgSQAvcYkFtZTjzBht5:8D+CAXFYQChaAUk5ljnQssL',
+          },
+          { field: 'file.hash.md5', value: '9b6c3518a91d23ed77504b5416bfb5b3' },
+          { field: 'type', value: 'file' },
+          {
+            field: 'event.reference',
+            value:
+              'https://urlhaus-api.abuse.ch/v1/download/a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3/(opens in a new tab or window)',
+          },
+          { field: 'event.ingested', value: '2021-03-10T14:51:09.809069Z' },
+          { field: 'event.created', value: '2021-03-10T14:51:07.663Z' },
+          { field: 'event.kind', value: 'enrichment' },
+          { field: 'event.module', value: 'threatintel' },
+          { field: 'event.category', value: 'threat' },
+          { field: 'event.type', value: 'indicator' },
+          { field: 'event.dataset', value: 'threatintel.abusemalware' },
+          {
+            field: 'matched.atomic',
+            value: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
+          },
+          { field: 'matched.field', value: 'myhash.mysha256' },
+          {
+            field: 'matched.id',
+            value: '84cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f',
+          },
+          { field: 'matched.index', value: 'filebeat-7.12.0-2021.03.10-000001' },
+          { field: 'matched.type', value: 'file' },
+        ];
+
+        expandFirstAlert();
+        openThreatIndicatorDetails();
+
+        cy.get(THREAT_INTEL_TAB).should('have.text', 'Threat Intel (1)');
+        cy.get(THREAT_DETAILS_VIEW).within(() => {
+          cy.get(TABLE_ROWS).should('have.length', expectedThreatIndicatorData.length);
+          expectedThreatIndicatorData.forEach((row, index) => {
+            cy.get(TABLE_ROWS)
+              .eq(index)
+              .within(() => {
+                cy.get(TABLE_CELL).eq(0).should('have.text', row.field);
+                cy.get(TABLE_CELL).eq(1).should('have.text', row.value);
+              });
           });
         });
       });

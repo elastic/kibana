@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect } from 'react';
+import React, { memo, useCallback, useMemo, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiHorizontalRule, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { AppAction } from '../../../../common/store/actions';
 import { getEventFiltersListPath } from '../../../common/routing';
 import { AdministrationListPage as _AdministrationListPage } from '../../../components/administration_list_page';
@@ -30,14 +31,18 @@ import {
   getListPageDoesDataExist,
   getActionError,
   getFormEntry,
+  showDeleteModal,
 } from '../store/selector';
 import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
-import { ExceptionListItemSchema } from '../../../../../../lists/common';
-import { Immutable } from '../../../../../common/endpoint/types';
+import { Immutable, ListPageRouteState } from '../../../../../common/endpoint/types';
 import {
   ExceptionItem,
   ExceptionItemProps,
 } from '../../../../common/components/exceptions/viewer/exception_item';
+import { EventFilterDeleteModal } from './components/event_filter_delete_modal';
+
+import { SearchBar } from '../../../components/search_bar';
+import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
 
 type EventListPaginatedContent = PaginatedContentProps<
   Immutable<ExceptionListItemSchema>,
@@ -55,6 +60,7 @@ const AdministrationListPage = styled(_AdministrationListPage)`
 `;
 
 export const EventFiltersListPage = memo(() => {
+  const { state: routeState } = useLocation<ListPageRouteState | undefined>();
   const history = useHistory();
   const dispatch = useDispatch<Dispatch<AppAction>>();
   const isActionError = useEventFiltersSelector(getActionError);
@@ -65,6 +71,7 @@ export const EventFiltersListPage = memo(() => {
   const fetchError = useEventFiltersSelector(getListFetchError);
   const location = useEventFiltersSelector(getCurrentLocation);
   const doesDataExist = useEventFiltersSelector(getListPageDoesDataExist);
+  const showDelete = useEventFiltersSelector(showDeleteModal);
 
   const navigateCallback = useEventFiltersNavigateCallback();
   const showFlyout = !!location.show;
@@ -98,6 +105,13 @@ export const EventFiltersListPage = memo(() => {
     }
   }, [dispatch, formEntry, history, isActionError, location, navigateCallback]);
 
+  const backButton = useMemo(() => {
+    if (routeState && routeState.onBackButtonNavigateTo) {
+      return <BackToExternalAppButton {...routeState} />;
+    }
+    return null;
+  }, [routeState]);
+
   const handleAddButtonClick = useCallback(
     () =>
       navigateCallback({
@@ -126,9 +140,16 @@ export const EventFiltersListPage = memo(() => {
     [navigateCallback]
   );
 
-  const handleItemDelete: ExceptionItemProps['onDeleteException'] = useCallback((args) => {
-    // TODO: implement delete item
-  }, []);
+  const handleItemDelete: ExceptionItemProps['onDeleteException'] = useCallback(
+    ({ id }) => {
+      dispatch({
+        type: 'eventFilterForDeletion',
+        // Casting below needed due to error around the comments array needing to be mutable
+        payload: listItems.find((item) => item.id === id)! as ExceptionListItemSchema,
+      });
+    },
+    [dispatch, listItems]
+  );
 
   const handleItemComponentProps: EventListPaginatedContent['itemComponentProps'] = useCallback(
     (exceptionItem) => ({
@@ -154,9 +175,14 @@ export const EventFiltersListPage = memo(() => {
     [navigateCallback]
   );
 
+  const handleOnSearch = useCallback((query: string) => navigateCallback({ filter: query }), [
+    navigateCallback,
+  ]);
+
   return (
     <AdministrationListPage
       beta={false}
+      headerBackComponent={backButton}
       title={
         <FormattedMessage
           id="xpack.securitySolution.eventFilters.list.pageTitle"
@@ -191,6 +217,29 @@ export const EventFiltersListPage = memo(() => {
           id={location.id}
           type={location.show}
         />
+      )}
+
+      {showDelete && <EventFilterDeleteModal />}
+
+      {doesDataExist && (
+        <>
+          <SearchBar
+            defaultValue={location.filter}
+            onSearch={handleOnSearch}
+            placeholder={i18n.translate('xpack.securitySolution.eventFilter.search.placeholder', {
+              defaultMessage: 'Search on the fields below: name, comments, value',
+            })}
+          />
+          <EuiSpacer size="m" />
+          <EuiText color="subdued" size="xs" data-test-subj="eventFiltersCountLabel">
+            <FormattedMessage
+              id="xpack.securitySolution.eventFilters.list.totalCount"
+              defaultMessage="{total, plural, one {# event filter} other {# event filters}}"
+              values={{ total: listItems.length }}
+            />
+          </EuiText>
+          <EuiHorizontalRule margin="m" />
+        </>
       )}
 
       <PaginatedContent<Immutable<ExceptionListItemSchema>, typeof ExceptionItem>

@@ -43,12 +43,15 @@ const querystringStringify = <ExpectedType, ArgType>(
 type EndpointDetailsUrlProps = Omit<EndpointIndexUIQueryParams, 'selected_endpoint'> &
   Required<Pick<EndpointIndexUIQueryParams, 'selected_endpoint'>>;
 
+/** URL search params that are only applicable to the list page */
+type EndpointListUrlProps = Omit<EndpointIndexUIQueryParams, 'selected_endpoint' | 'show'>;
+
 export const getEndpointListPath = (
-  props: { name: 'default' | 'endpointList' } & EndpointIndexUIQueryParams,
+  props: { name: 'default' | 'endpointList' } & EndpointListUrlProps,
   search?: string
 ) => {
   const { name, ...queryParams } = props;
-  const urlQueryParams = querystringStringify<EndpointIndexUIQueryParams, typeof queryParams>(
+  const urlQueryParams = querystringStringify<EndpointListUrlProps, typeof queryParams>(
     queryParams
   );
   const urlSearch = `${urlQueryParams && !isEmpty(search) ? '&' : ''}${search ?? ''}`;
@@ -62,14 +65,28 @@ export const getEndpointListPath = (
 };
 
 export const getEndpointDetailsPath = (
-  props: { name: 'endpointDetails' | 'endpointPolicyResponse' } & EndpointIndexUIQueryParams &
+  props: {
+    name: 'endpointDetails' | 'endpointPolicyResponse' | 'endpointIsolate' | 'endpointUnIsolate';
+  } & EndpointIndexUIQueryParams &
     EndpointDetailsUrlProps,
   search?: string
 ) => {
-  const { name, ...queryParams } = props;
-  queryParams.show = (props.name === 'endpointPolicyResponse'
-    ? 'policy_response'
-    : '') as EndpointIndexUIQueryParams['show'];
+  const { name, show, ...rest } = props;
+
+  const queryParams: EndpointDetailsUrlProps = { ...rest };
+
+  switch (props.name) {
+    case 'endpointIsolate':
+      queryParams.show = 'isolate';
+      break;
+    case 'endpointUnIsolate':
+      queryParams.show = 'unisolate';
+      break;
+    case 'endpointPolicyResponse':
+      queryParams.show = 'policy_response';
+      break;
+  }
+
   const urlQueryParams = querystringStringify<EndpointDetailsUrlProps, typeof queryParams>(
     queryParams
   );

@@ -42,7 +42,6 @@ export const ModelBounds: FC<Props> = ({ modelData }) => {
       y0Accessors={['modelLower']}
       data={model}
       stackAccessors={['time']}
-      yScaleToDataExtent={false}
       curve={CurveType.CURVE_MONOTONE_X}
       areaSeriesStyle={areaSeriesStyle}
       color={MODEL_COLOR}

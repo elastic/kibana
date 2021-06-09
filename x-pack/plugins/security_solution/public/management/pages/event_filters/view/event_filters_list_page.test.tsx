@@ -41,7 +41,6 @@ describe('When on the Event Filters List Page', () => {
     waitForAction = mockedContext.middlewareSpy.waitForAction;
 
     act(() => {
-      mockedContext.setExperimentalFlag({ eventFilteringEnabled: true });
       history.push('/event_filters');
     });
   });
@@ -139,6 +138,67 @@ describe('When on the Event Filters List Page', () => {
       });
 
       expect(renderResult.getByTestId('eventFiltersContent-error').textContent).toEqual(' oh no');
+    });
+
+    it('should show modal when delete is clicked on a card', async () => {
+      render();
+      await dataReceived();
+      act(() => {
+        fireEvent.click(renderResult.getByTestId('exceptionsViewerDeleteBtn'));
+      });
+
+      expect(
+        renderResult.baseElement.querySelector('[data-test-subj="eventFilterDeleteModalHeader"]')
+      ).not.toBeNull();
+    });
+  });
+
+  describe('And search is dispatched', () => {
+    beforeEach(async () => {
+      act(() => {
+        history.push('/event_filters?filter=test');
+      });
+      renderResult = render();
+      await act(async () => {
+        await waitForAction('eventFiltersListPageDataChanged');
+      });
+    });
+
+    it('search bar is filled with query params', () => {
+      expect(renderResult.getByDisplayValue('test')).not.toBeNull();
+    });
+
+    it('search action is dispatched', async () => {
+      await act(async () => {
+        fireEvent.click(renderResult.getByTestId('searchButton'));
+        expect(await waitForAction('userChangedUrl')).not.toBeNull();
+      });
+    });
+  });
+
+  describe('and the back button is present', () => {
+    beforeEach(async () => {
+      renderResult = render();
+      act(() => {
+        history.push('/event_filters', {
+          onBackButtonNavigateTo: [{ appId: 'appId' }],
+          backButtonLabel: 'back to fleet',
+          backButtonUrl: '/fleet',
+        });
+      });
+    });
+
+    it('back button is present', () => {
+      const button = renderResult.queryByTestId('backToOrigin');
+      expect(button).not.toBeNull();
+      expect(button).toHaveAttribute('href', '/fleet');
+    });
+
+    it('back button is not present', () => {
+      act(() => {
+        history.push('/event_filters');
+      });
+      expect(renderResult.queryByTestId('backToOrigin')).toBeNull();
     });
   });
 });

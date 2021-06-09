@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPageTemplate } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 import { RouteParams } from '../../routes';
+import { usePluginContext } from '../../hooks/use_plugin_context';
 
 interface CasesProps {
   routeParams: RouteParams<'/cases'>;
 }
 
 export function CasesPage(props: CasesProps) {
+  const { ObservabilityPageTemplate } = usePluginContext();
   return (
-    <EuiPageTemplate
+    <ObservabilityPageTemplate
       pageHeader={{
         pageTitle: (
           <>
@@ -44,6 +46,6 @@ export function CasesPage(props: CasesProps) {
           </EuiCallOut>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPageTemplate>
+    </ObservabilityPageTemplate>
   );
 }

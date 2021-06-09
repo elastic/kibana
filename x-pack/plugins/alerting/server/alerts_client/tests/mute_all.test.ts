@@ -9,10 +9,10 @@ import { AlertsClient, ConstructorOptions } from '../alerts_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
-import { alertsAuthorizationMock } from '../../authorization/alerts_authorization.mock';
+import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
 import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
-import { AlertsAuthorization } from '../../authorization/alerts_authorization';
+import { AlertingAuthorization } from '../../authorization/alerting_authorization';
 import { ActionsAuthorization } from '../../../../actions/server';
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { auditServiceMock } from '../../../../security/server/audit/index.mock';
@@ -22,7 +22,7 @@ const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
-const authorization = alertsAuthorizationMock.create();
+const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
 
@@ -31,7 +31,7 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   alertTypeRegistry,
   unsecuredSavedObjectsClient,
-  authorization: (authorization as unknown) as AlertsAuthorization,
+  authorization: (authorization as unknown) as AlertingAuthorization,
   actionsAuthorization: (actionsAuthorization as unknown) as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
@@ -126,7 +126,12 @@ describe('muteAll()', () => {
       const alertsClient = new AlertsClient(alertsClientParams);
       await alertsClient.muteAll({ id: '1' });
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'muteAll');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        entity: 'rule',
+        consumer: 'myApp',
+        operation: 'muteAll',
+        ruleTypeId: 'myType',
+      });
       expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith('execute');
     });
 
@@ -140,7 +145,12 @@ describe('muteAll()', () => {
         `[Error: Unauthorized to muteAll a "myType" alert for "myApp"]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'muteAll');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        entity: 'rule',
+        consumer: 'myApp',
+        operation: 'muteAll',
+        ruleTypeId: 'myType',
+      });
     });
   });
 

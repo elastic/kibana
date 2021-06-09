@@ -19,6 +19,3 @@ export const EventFiltersContainer = () => {
     </Switch>
   );
 };
-export { EventFiltersService } from './types';
-export { EventFiltersListPageState } from './types';
-export { EventFiltersListPageData } from './types';

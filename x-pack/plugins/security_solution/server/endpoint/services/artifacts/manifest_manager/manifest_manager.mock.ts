@@ -12,7 +12,7 @@ import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
 import { createPackagePolicyServiceMock } from '../../../../../../fleet/server/mocks';
 import { ExceptionListClient } from '../../../../../../lists/server';
 import { listMock } from '../../../../../../lists/server/mocks';
-import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas/response';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   createPackagePolicyWithManifestMock,
   createPackagePolicyWithInitialManifestMock,
@@ -69,13 +69,16 @@ export interface ManifestManagerMockOptions {
 
 export const buildManifestManagerMockOptions = (
   opts: Partial<ManifestManagerMockOptions>
-): ManifestManagerMockOptions => ({
-  cache: new LRU<string, Buffer>({ max: 10, maxAge: 1000 * 60 * 60 }),
-  exceptionListClient: listMock.getExceptionListClient(),
-  packagePolicyService: createPackagePolicyServiceMock(),
-  savedObjectsClient: savedObjectsClientMock.create(),
-  ...opts,
-});
+): ManifestManagerMockOptions => {
+  const savedObjectMock = savedObjectsClientMock.create();
+  return {
+    cache: new LRU<string, Buffer>({ max: 10, maxAge: 1000 * 60 * 60 }),
+    exceptionListClient: listMock.getExceptionListClient(savedObjectMock),
+    packagePolicyService: createPackagePolicyServiceMock(),
+    savedObjectsClient: savedObjectMock,
+    ...opts,
+  };
+};
 
 export const buildManifestManagerContextMock = (
   opts: Partial<ManifestManagerMockOptions>

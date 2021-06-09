@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, Fragment, useEffect, useReducer } from 'react';
+import React, { useState, useEffect, useReducer } from 'react';
 import { keyBy } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import {
@@ -136,7 +136,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
               <EuiFlexGroup responsive={false} gutterSize="xs">
                 {hasEditButton ? (
                   <EuiFlexItem grow={false}>
-                    <Fragment>
+                    <>
                       {' '}
                       <EuiButtonEmpty
                         data-test-subj="openEditAlertFlyoutButton"
@@ -162,7 +162,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                           onSave={setAlert}
                         />
                       )}
-                    </Fragment>
+                    </>
                   </EuiFlexItem>
                 ) : null}
                 <EuiFlexItem grow={false}>
@@ -201,7 +201,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
               </EuiFlexItem>
               <EuiFlexItem grow={1}>
                 {uniqueActions && uniqueActions.length ? (
-                  <Fragment>
+                  <>
                     <EuiText size="s">
                       <p>
                         <FormattedMessage
@@ -220,7 +220,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                         </EuiFlexItem>
                       ))}
                     </EuiFlexGroup>
-                  </Fragment>
+                  </>
                 ) : null}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -236,6 +236,8 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                         if (isEnabled) {
                           setIsEnabled(false);
                           await disableAlert(alert);
+                          // Reset dismiss if previously clicked
+                          setDissmissAlertErrors(false);
                         } else {
                           setIsEnabled(true);
                           await enableAlert(alert);
@@ -277,7 +279,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
-            {!dissmissAlertErrors && alert.executionStatus.status === 'error' ? (
+            {alert.enabled && !dissmissAlertErrors && alert.executionStatus.status === 'error' ? (
               <EuiFlexGroup>
                 <EuiFlexItem>
                   <EuiCallOut
@@ -293,7 +295,11 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                     <EuiSpacer size="s" />
                     <EuiFlexGroup gutterSize="s" wrap={true}>
                       <EuiFlexItem grow={false}>
-                        <EuiButton color="danger" onClick={() => setDissmissAlertErrors(true)}>
+                        <EuiButton
+                          data-test-subj="dismiss-execution-error"
+                          color="danger"
+                          onClick={() => setDissmissAlertErrors(true)}
+                        >
                           <FormattedMessage
                             id="xpack.triggersActionsUI.sections.alertDetails.dismissButtonTitle"
                             defaultMessage="Dismiss"
@@ -330,7 +336,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                     readOnly={!canSaveAlert}
                   />
                 ) : (
-                  <Fragment>
+                  <>
                     <EuiSpacer />
                     <EuiCallOut
                       title={i18n.translate(
@@ -349,7 +355,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                         />
                       </p>
                     </EuiCallOut>
-                  </Fragment>
+                  </>
                 )}
               </EuiFlexItem>
             </EuiFlexGroup>

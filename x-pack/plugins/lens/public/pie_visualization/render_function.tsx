@@ -150,7 +150,7 @@ export function PieComponent(
             }
           }
 
-          const outputColor = paletteService.get(palette.name).getColor(
+          const outputColor = paletteService.get(palette.name).getCategoricalColor(
             seriesLayers,
             {
               behindText: categoryDisplay !== 'hide',
@@ -222,11 +222,15 @@ export function PieComponent(
     const value = row[metricColumn.id];
     return typeof value === 'number' && value < 0;
   });
+
+  const isMetricEmpty = firstTable.rows.every((row) => {
+    return !row[metricColumn.id];
+  });
+
   const isEmpty =
     firstTable.rows.length === 0 ||
-    firstTable.rows.every((row) =>
-      groups.every((colId) => !row[colId] || typeof row[colId] === 'undefined')
-    );
+    firstTable.rows.every((row) => groups.every((colId) => typeof row[colId] === 'undefined')) ||
+    isMetricEmpty;
 
   if (isEmpty) {
     return <EmptyPlaceholder icon={LensIconChartDonut} />;

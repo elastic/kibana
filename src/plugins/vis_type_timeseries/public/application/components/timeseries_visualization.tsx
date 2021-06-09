@@ -12,7 +12,7 @@ import React, { useCallback, useEffect } from 'react';
 
 import { get } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-
+import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
 import { IUiSettingsClient } from 'src/core/public';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { PersistedState } from 'src/plugins/visualizations/public';
@@ -27,6 +27,7 @@ import { fetchIndexPattern } from '../../../common/index_patterns_utils';
 import { TimeseriesVisParams } from '../../types';
 import { getDataStart } from '../../services';
 import { convertSeriesToDataTable } from './lib/convert_series_to_datatable';
+import { getClickFilterData } from './lib/get_click_filter_data';
 import { X_ACCESSOR_INDEX } from '../visualizations/constants';
 import { LastValueModeIndicator } from './last_value_mode_indicator';
 import { getInterval } from './lib/get_interval';
@@ -102,6 +103,37 @@ function TimeseriesVisualization({
     [handlers, model]
   );
 
+  const handleFilterClick = useCallback(
+    async (series: PanelData[], points: Array<[GeometryValue, XYChartSeriesIdentifier]>) => {
+      const indexPatternValue = model.index_pattern || '';
+      const { indexPatterns } = getDataStart();
+      const { indexPattern } = await fetchIndexPattern(indexPatternValue, indexPatterns);
+
+      // it should work only if index pattern is found
+      if (!indexPattern) return;
+
+      const tables = indexPattern
+        ? await convertSeriesToDataTable(model, series, indexPattern)
+        : null;
+
+      if (!tables) return;
+
+      const data = getClickFilterData(points, tables, model);
+
+      const event = {
+        name: 'filterBucket',
+        data: {
+          data,
+          negate: false,
+          timeFieldName: indexPattern.timeFieldName,
+        },
+      };
+
+      handlers.event(event);
+    },
+    [handlers, model]
+  );
+
   const handleUiState = useCallback(
     (field: string, value: { column: string; order: string }) => {
       uiState.set(field, value);
@@ -156,6 +188,7 @@ function TimeseriesVisualization({
             visData={visData}
             uiState={uiState}
             onBrush={onBrush}
+            onFilterClick={handleFilterClick}
             onUiState={handleUiState}
             syncColors={syncColors}
             palettesService={palettesService}

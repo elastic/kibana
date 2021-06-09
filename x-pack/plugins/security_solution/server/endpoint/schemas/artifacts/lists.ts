@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { operator } from '../../../../../lists/common/schemas';
+import { listOperator as operator } from '@kbn/securitysolution-io-ts-list-types';
 
 export const translatedEntryMatchAnyMatcher = t.keyof({
   exact_cased_any: null,

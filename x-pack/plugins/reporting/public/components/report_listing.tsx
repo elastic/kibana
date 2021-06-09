@@ -515,6 +515,9 @@ class ReportListingUi extends Component<Props, State> {
     return (
       <Fragment>
         <EuiBasicTable
+          tableCaption={i18n.translate('xpack.reporting.listing.table.captionDescription', {
+            defaultMessage: 'Reports generated in Kibana applications',
+          })}
           itemId="id"
           items={this.state.jobs}
           loading={this.state.isLoading}

@@ -46,8 +46,17 @@ const LazyCopyToSpaceFlyout = lazy(() =>
 );
 
 const ALL_SPACES_TARGET = i18n.translate('xpack.spaces.shareToSpace.allSpacesTarget', {
-  defaultMessage: 'all',
+  defaultMessage: 'all spaces',
 });
+function getSpacesTargetString(spaces: string[]) {
+  if (spaces.includes(ALL_SPACES_ID)) {
+    return ALL_SPACES_TARGET;
+  }
+  return i18n.translate('xpack.spaces.shareToSpace.spacesTarget', {
+    defaultMessage: '{spacesCount, plural, one {# space} other {# spaces}}',
+    values: { spacesCount: spaces.length },
+  });
+}
 
 const arraysAreEqual = (a: unknown[], b: unknown[]) =>
   a.every((x) => b.includes(x)) && b.every((x) => a.includes(x));
@@ -59,44 +68,46 @@ function createDefaultChangeSpacesHandler(
 ) {
   return async (spacesToAdd: string[], spacesToRemove: string[]) => {
     const { type, id, title } = object;
+    const objects = [{ type, id }];
     const toastTitle = i18n.translate('xpack.spaces.shareToSpace.shareSuccessTitle', {
       values: { objectNoun: object.noun },
       defaultMessage: 'Updated {objectNoun}',
+      description: `Object noun can be plural or singular, examples: "Updated objects", "Updated job"`,
     });
+    await spacesManager.updateSavedObjectsSpaces(objects, spacesToAdd, spacesToRemove);
+
     const isSharedToAllSpaces = spacesToAdd.includes(ALL_SPACES_ID);
-    if (spacesToAdd.length > 0) {
-      await spacesManager.shareSavedObjectAdd({ type, id }, spacesToAdd);
-      const spaceTargets = isSharedToAllSpaces ? ALL_SPACES_TARGET : `${spacesToAdd.length}`;
-      const toastText =
-        !isSharedToAllSpaces && spacesToAdd.length === 1
-          ? i18n.translate('xpack.spaces.shareToSpace.shareAddSuccessTextSingular', {
-              defaultMessage: `'{object}' was added to 1 space.`,
-              values: { object: title },
-            })
-          : i18n.translate('xpack.spaces.shareToSpace.shareAddSuccessTextPlural', {
-              defaultMessage: `'{object}' was added to {spaceTargets} spaces.`,
-              values: { object: title, spaceTargets },
-            });
-      toastNotifications.addSuccess({ title: toastTitle, text: toastText });
+    let toastText: string;
+    if (spacesToAdd.length > 0 && spacesToRemove.length > 0 && !isSharedToAllSpaces) {
+      toastText = i18n.translate('xpack.spaces.shareToSpace.shareSuccessAddRemoveText', {
+        defaultMessage: `'{object}' was added to {spacesTargetAdd} and removed from {spacesTargetRemove}.`, // TODO: update to include # of references and/or # of tags
+        values: {
+          object: title,
+          spacesTargetAdd: getSpacesTargetString(spacesToAdd),
+          spacesTargetRemove: getSpacesTargetString(spacesToRemove),
+        },
+        description: `Uses output of xpack.spaces.shareToSpace.spacesTarget or xpack.spaces.shareToSpace.allSpacesTarget as 'spacesTarget...' inputs. Example strings: "'Finance dashboard' was added to 1 space and removed from 2 spaces.", "'Finance dashboard' was added to 3 spaces and removed from all spaces."`,
+      });
+    } else if (spacesToAdd.length > 0) {
+      toastText = i18n.translate('xpack.spaces.shareToSpace.shareSuccessAddText', {
+        defaultMessage: `'{object}' was added to {spacesTarget}.`, // TODO: update to include # of references and/or # of tags
+        values: {
+          object: title,
+          spacesTarget: getSpacesTargetString(spacesToAdd),
+        },
+        description: `Uses output of xpack.spaces.shareToSpace.spacesTarget or xpack.spaces.shareToSpace.allSpacesTarget as 'spacesTarget' input. Example strings: "'Finance dashboard' was added to 1 space.", "'Finance dashboard' was added to all spaces."`,
+      });
+    } else {
+      toastText = i18n.translate('xpack.spaces.shareToSpace.shareSuccessRemoveText', {
+        defaultMessage: `'{object}' was removed from {spacesTarget}.`, // TODO: update to include # of references and/or # of tags
+        values: {
+          object: title,
+          spacesTarget: getSpacesTargetString(spacesToRemove),
+        },
+        description: `Uses output of xpack.spaces.shareToSpace.spacesTarget or xpack.spaces.shareToSpace.allSpacesTarget as 'spacesTarget' input. Example strings: "'Finance dashboard' was removed from 1 space.", "'Finance dashboard' was removed from all spaces."`,
+      });
     }
-    if (spacesToRemove.length > 0) {
-      await spacesManager.shareSavedObjectRemove({ type, id }, spacesToRemove);
-      const isUnsharedFromAllSpaces = spacesToRemove.includes(ALL_SPACES_ID);
-      const spaceTargets = isUnsharedFromAllSpaces ? ALL_SPACES_TARGET : `${spacesToRemove.length}`;
-      const toastText =
-        !isUnsharedFromAllSpaces && spacesToRemove.length === 1
-          ? i18n.translate('xpack.spaces.shareToSpace.shareRemoveSuccessTextSingular', {
-              defaultMessage: `'{object}' was removed from 1 space.`,
-              values: { object: title },
-            })
-          : i18n.translate('xpack.spaces.shareToSpace.shareRemoveSuccessTextPlural', {
-              defaultMessage: `'{object}' was removed from {spaceTargets} spaces.`,
-              values: { object: title, spaceTargets },
-            });
-      if (!isSharedToAllSpaces) {
-        toastNotifications.addSuccess({ title: toastTitle, text: toastText });
-      }
-    }
+    toastNotifications.addSuccess({ title: toastTitle, text: toastText });
   };
 }
 
@@ -148,9 +159,11 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
     spaces: ShareToSpaceTarget[];
   }>({ isLoading: true, spaces: [] });
   useEffect(() => {
-    const getPermissions = spacesManager.getShareSavedObjectPermissions(savedObjectTarget.type);
-    Promise.all([shareToSpacesDataPromise, getPermissions])
-      .then(([shareToSpacesData, permissions]) => {
+    const { type, id } = savedObjectTarget;
+    const getShareableReferences = spacesManager.getShareableReferences([{ type, id }]); // NOTE: not used yet, this is just included so you can see the request/response in Dev Tools
+    const getPermissions = spacesManager.getShareSavedObjectPermissions(type);
+    Promise.all([shareToSpacesDataPromise, getShareableReferences, getPermissions])
+      .then(([shareToSpacesData, shareableReferences, permissions]) => {
         const activeSpaceId = !enableSpaceAgnosticBehavior && shareToSpacesData.activeSpaceId;
         const selectedSpaceIds = savedObjectTarget.namespaces.filter(
           (spaceId) => spaceId !== activeSpaceId

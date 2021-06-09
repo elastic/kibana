@@ -6,11 +6,13 @@
  */
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { acknowledgeSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { LIST_INDEX } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
-import { buildSiemResponse, transformError } from '../siem_server_deps';
-import { LIST_INDEX } from '../../common/constants';
-import { acknowledgeSchema } from '../../common/schemas';
+
+import { buildSiemResponse } from './utils';
 
 import { getListClient } from '.';
 

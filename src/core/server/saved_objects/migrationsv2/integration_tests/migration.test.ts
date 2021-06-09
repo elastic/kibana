@@ -95,7 +95,9 @@ describe('migration v2', () => {
       .getAllTypes()
       .reduce((versionMap, type) => {
         if (type.migrations) {
-          const highestVersion = Object.keys(type.migrations).sort(Semver.compare).reverse()[0];
+          const migrationsMap =
+            typeof type.migrations === 'function' ? type.migrations() : type.migrations;
+          const highestVersion = Object.keys(migrationsMap).sort(Semver.compare).reverse()[0];
           return {
             ...versionMap,
             [type.name]: highestVersion,
@@ -155,7 +157,10 @@ describe('migration v2', () => {
       const response = body[migratedIndex];
 
       expect(response).toBeDefined();
-      expect(Object.keys(response.aliases).sort()).toEqual(['.kibana', `.kibana_${kibanaVersion}`]);
+      expect(Object.keys(response.aliases!).sort()).toEqual([
+        '.kibana',
+        `.kibana_${kibanaVersion}`,
+      ]);
     });
 
     it('copies all the document of the previous index to the new one', async () => {
@@ -187,7 +192,8 @@ describe('migration v2', () => {
     });
   });
 
-  describe('migrating from the same Kibana version', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/91107
+  describe.skip('migrating from the same Kibana version', () => {
     const migratedIndex = `.kibana_${kibanaVersion}_001`;
 
     beforeAll(async () => {
@@ -213,7 +219,10 @@ describe('migration v2', () => {
       const response = body[migratedIndex];
 
       expect(response).toBeDefined();
-      expect(Object.keys(response.aliases).sort()).toEqual(['.kibana', `.kibana_${kibanaVersion}`]);
+      expect(Object.keys(response.aliases!).sort()).toEqual([
+        '.kibana',
+        `.kibana_${kibanaVersion}`,
+      ]);
     });
 
     it('copies all the document of the previous index to the new one', async () => {

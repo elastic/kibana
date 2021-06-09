@@ -6,9 +6,8 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { Type } from '@kbn/securitysolution-io-ts-utils';
+import type { ListItemArraySchema, Type } from '@kbn/securitysolution-io-ts-list-types';
 
-import { ListItemArraySchema } from '../../../common/schemas';
 import { ErrorWithStatusCode } from '../../error_with_status_code';
 import { SearchEsListItemSchema } from '../../schemas/elastic_response';
 
@@ -21,7 +20,7 @@ export interface TransformElasticToListItemOptions {
 }
 
 export interface TransformElasticHitToListItemOptions {
-  hits: Array<estypes.Hit<SearchEsListItemSchema>>;
+  hits: Array<estypes.SearchHit<SearchEsListItemSchema>>;
   type: Type;
 }
 

@@ -6,6 +6,7 @@
  */
 
 import { PluginInitializerContext, Plugin, CoreSetup } from 'src/core/server';
+import { RuleDataClient } from '../../rule_registry/server';
 import { ObservabilityConfig } from '.';
 import {
   bootstrapAnnotations,
@@ -16,11 +17,8 @@ import type { RuleRegistryPluginSetupContract } from '../../rule_registry/server
 import { uiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { getGlobalObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
-import { observabilityRuleRegistrySettings } from '../common/rules/observability_rule_registry_settings';
-import { observabilityRuleFieldMap } from '../common/rules/observability_rule_field_map';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
-export type ObservabilityRuleRegistry = ObservabilityPluginSetup['ruleRegistry'];
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
   constructor(private readonly initContext: PluginInitializerContext) {
@@ -51,19 +49,25 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       });
     }
 
-    const observabilityRuleRegistry = plugins.ruleRegistry.create({
-      ...observabilityRuleRegistrySettings,
-      fieldMap: observabilityRuleFieldMap,
+    const start = () => core.getStartServices().then(([coreStart]) => coreStart);
+
+    const ruleDataClient = new RuleDataClient({
+      getClusterClient: async () => {
+        const coreStart = await start();
+        return coreStart.elasticsearch.client.asInternalUser;
+      },
+      ready: () => Promise.resolve(),
+      alias: plugins.ruleRegistry.ruleDataService.getFullAssetName(),
     });
 
     registerRoutes({
       core: {
         setup: core,
-        start: () => core.getStartServices().then(([coreStart]) => coreStart),
+        start,
       },
-      ruleRegistry: observabilityRuleRegistry,
       logger: this.initContext.logger.get(),
       repository: getGlobalObservabilityServerRouteRepository(),
+      ruleDataClient,
     });
 
     return {
@@ -71,7 +75,6 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         const api = await annotationsApiPromise;
         return api?.getScopedAnnotationsClient(...args);
       },
-      ruleRegistry: observabilityRuleRegistry,
     };
   }
 

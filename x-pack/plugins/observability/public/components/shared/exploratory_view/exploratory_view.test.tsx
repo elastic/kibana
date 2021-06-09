@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { screen, waitFor } from '@testing-library/dom';
-import { render, mockUrlStorage, mockCore, mockAppIndexPattern } from './rtl_helpers';
+import { render, mockCore, mockAppIndexPattern } from './rtl_helpers';
 import { ExploratoryView } from './exploratory_view';
 import { getStubIndexPattern } from '../../../../../../../src/plugins/data/public/test_utils';
 import * as obsvInd from './utils/observability_index_patterns';
@@ -41,26 +41,26 @@ describe('ExploratoryView', () => {
   it('renders exploratory view', async () => {
     render(<ExploratoryView />);
 
-    await waitFor(() => {
-      screen.getByText(/open in lens/i);
-      screen.getByRole('heading', { name: /exploratory view/i });
-    });
+    expect(await screen.findByText(/open in lens/i)).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: /Performance Distribution/i })
+    ).toBeInTheDocument();
   });
 
   it('renders lens component when there is series', async () => {
-    mockUrlStorage({
+    const initSeries = {
       data: {
         'ux-series': {
-          dataType: 'ux',
-          reportType: 'pld',
-          breakdown: 'user_agent.name',
+          dataType: 'ux' as const,
+          reportType: 'pld' as const,
+          breakdown: 'user_agent .name',
           reportDefinitions: { 'service.name': ['elastic-co'] },
           time: { from: 'now-15m', to: 'now' },
         },
       },
-    });
+    };
 
-    render(<ExploratoryView />);
+    render(<ExploratoryView />, { initSeries });
 
     expect(await screen.findByText(/open in lens/i)).toBeInTheDocument();
     expect(await screen.findByText('Performance Distribution')).toBeInTheDocument();

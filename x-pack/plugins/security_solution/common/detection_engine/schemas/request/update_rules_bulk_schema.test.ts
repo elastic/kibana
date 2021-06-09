@@ -6,9 +6,7 @@
  */
 
 import { updateRulesBulkSchema, UpdateRulesBulkSchema } from './update_rules_bulk_schema';
-import { exactCheck } from '../../../exact_check';
-import { foldLeftRight } from '../../../test_utils';
-import { formatErrors } from '../../../format_errors';
+import { exactCheck, formatErrors, foldLeftRight } from '@kbn/securitysolution-io-ts-utils';
 import { getUpdateRulesSchemaMock } from './rule_schemas.mock';
 import { UpdateRulesSchema } from './rule_schemas';
 

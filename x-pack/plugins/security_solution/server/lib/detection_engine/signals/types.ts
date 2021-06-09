@@ -8,6 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { DslQuery, Filter } from 'src/plugins/data/common';
 import moment, { Moment } from 'moment';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import {
@@ -28,7 +29,6 @@ import {
 import { RefreshTypes } from '../types';
 import { ListClient } from '../../../../../lists/server';
 import { Logger, SavedObject } from '../../../../../../../src/core/server';
-import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { BuildRuleMessage } from './rule_messages';
 import { TelemetryEventsSender } from '../../telemetry/sender';
 import { RuleParams } from '../schemas/rule_schemas';
@@ -153,9 +153,9 @@ export interface GetResponse {
 }
 
 export type SignalSearchResponse = estypes.SearchResponse<SignalSource>;
-export type SignalSourceHit = estypes.Hit<SignalSource>;
+export type SignalSourceHit = estypes.SearchHit<SignalSource>;
 export type WrappedSignalHit = BaseHit<SignalHit>;
-export type BaseSignalHit = estypes.Hit<SignalSource>;
+export type BaseSignalHit = estypes.SearchHit<SignalSource>;
 
 export type EqlSignalSearchResponse = EqlSearchResponse<SignalSource>;
 

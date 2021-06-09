@@ -356,11 +356,21 @@
         "label": "AutocompleteStart",
         "description": [],
         "signature": [
-          "{ getQuerySuggestions: QuerySuggestionGetFn; hasQuerySuggestions: (language: string) => boolean; getValueSuggestions: ValueSuggestionsGetFn; }"
+          "{ getQuerySuggestions: ",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataAutocompletePluginApi",
+            "section": "def-public.QuerySuggestionGetFn",
+            "text": "QuerySuggestionGetFn"
+          },
+          "; hasQuerySuggestions: (language: string) => boolean; getValueSuggestions: ",
+          "ValueSuggestionsGetFn",
+          "; }"
         ],
         "source": {
           "path": "src/plugins/data/public/autocomplete/autocomplete_service.ts",
-          "lineNumber": 96
+          "lineNumber": 103
         },
         "deprecated": false,
         "initialIsOpen": false

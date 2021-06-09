@@ -26,6 +26,7 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import * as Rx from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
+import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
 import { CoreStart } from '../../../../../src/core/public';
 import { NavigationPublicPluginStart } from '../../../../../src/plugins/navigation/public';
 import { constants, ReportingStart } from '../../../../../x-pack/plugins/reporting/public';
@@ -37,6 +38,7 @@ interface ReportingExampleAppDeps {
   http: CoreStart['http'];
   navigation: NavigationPublicPluginStart;
   reporting: ReportingStart;
+  screenshotMode: ScreenshotModePluginSetup;
 }
 
 const sourceLogos = ['Beats', 'Cloud', 'Logging', 'Kibana'];
@@ -46,6 +48,7 @@ export const ReportingExampleApp = ({
   notifications,
   http,
   reporting,
+  screenshotMode,
 }: ReportingExampleAppDeps) => {
   const { getDefaultLayoutSelectors, ReportingAPIClient } = reporting;
   const [logos, setLogos] = useState<string[]>([]);
@@ -125,6 +128,8 @@ export const ReportingExampleApp = ({
                         </EuiFlexItem>
                       ))}
                     </EuiFlexGroup>
+
+                    <p>Screenshot Mode is {screenshotMode.isScreenshotMode() ? 'ON' : 'OFF'}!</p>
                   </div>
                 </EuiText>
               </EuiPageContentBody>
