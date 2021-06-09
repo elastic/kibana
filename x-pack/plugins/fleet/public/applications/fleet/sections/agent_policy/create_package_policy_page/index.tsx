@@ -278,6 +278,13 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
                   agentPolicyName: agentPolicy.name,
                 },
               })
+            : routeState?.agentPolicyId && agentPolicy && agentCount === 0
+            ? i18n.translate('xpack.fleet.createPackagePolicy.addAgentNextNotification', {
+                defaultMessage: `The policy has been updated. Add an agent to the '{agentPolicyName}' policy to deploy this policy.`,
+                values: {
+                  agentPolicyName: agentPolicy.name,
+                },
+              })
             : undefined,
         'data-test-subj': 'packagePolicyCreateSuccessToast',
       });
