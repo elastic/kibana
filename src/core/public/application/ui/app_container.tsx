@@ -108,7 +108,7 @@ export const AppContainer: FunctionComponent<Props> = ({
   return (
     <Fragment>
       {appNotFound && <AppNotFound />}
-      {showSpinner && appNotFound && (
+      {showSpinner && !appNotFound && (
         <EuiLoadingElastic
           className="appContainer__loading"
           aria-label="Loading application"
