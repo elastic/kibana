@@ -381,7 +381,7 @@
               "\nThe state of checking the results of a license type meeting the license minimum."
             ],
             "signature": [
-              "\"valid\" | \"invalid\" | \"expired\" | \"unavailable\""
+              "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
@@ -839,7 +839,7 @@
         "label": "LicenseCheckState",
         "description": [],
         "signature": [
-          "\"valid\" | \"invalid\" | \"expired\" | \"unavailable\""
+          "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
         ],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
@@ -987,7 +987,7 @@
               "plugin": "security",
               "link": {
                 "path": "x-pack/plugins/security/public/plugin.tsx",
-                "lineNumber": 82
+                "lineNumber": 84
               }
             },
             {
@@ -2414,7 +2414,7 @@
               "\nThe state of checking the results of a license type meeting the license minimum."
             ],
             "signature": [
-              "\"valid\" | \"invalid\" | \"expired\" | \"unavailable\""
+              "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
@@ -2947,7 +2947,7 @@
         "label": "LicenseCheckState",
         "description": [],
         "signature": [
-          "\"valid\" | \"invalid\" | \"expired\" | \"unavailable\""
+          "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
         ],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
@@ -3074,7 +3074,7 @@
               "plugin": "security",
               "link": {
                 "path": "x-pack/plugins/security/server/plugin.ts",
-                "lineNumber": 225
+                "lineNumber": 229
               }
             },
             {
