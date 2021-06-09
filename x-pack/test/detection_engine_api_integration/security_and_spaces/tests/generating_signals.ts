@@ -55,11 +55,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Signals from audit beat are of the expected structure', () => {
       beforeEach(async () => {
-        await esArchiver.load('auditbeat/hosts');
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       afterEach(async () => {
-        await esArchiver.unload('auditbeat/hosts');
+        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       it('should have the specific audit record for _id or none of these tests below will pass', async () => {
@@ -1160,11 +1160,11 @@ export default ({ getService }: FtrProviderContext) => {
      */
     describe('Signals generated from name clashes', () => {
       beforeEach(async () => {
-        await esArchiver.load('signals/numeric_name_clash');
+        await esArchiver.load('x-pack/test/functional/es_archives/signals/numeric_name_clash');
       });
 
       afterEach(async () => {
-        await esArchiver.unload('signals/numeric_name_clash');
+        await esArchiver.unload('x-pack/test/functional/es_archives/signals/numeric_name_clash');
       });
 
       it('should have the specific audit record for _id or none of these tests below will pass', async () => {
@@ -1314,11 +1314,11 @@ export default ({ getService }: FtrProviderContext) => {
      */
     describe('Signals generated from object clashes', () => {
       beforeEach(async () => {
-        await esArchiver.load('signals/object_clash');
+        await esArchiver.load('x-pack/test/functional/es_archives/signals/object_clash');
       });
 
       afterEach(async () => {
-        await esArchiver.unload('signals/object_clash');
+        await esArchiver.unload('x-pack/test/functional/es_archives/signals/object_clash');
       });
 
       it('should have the specific audit record for _id or none of these tests below will pass', async () => {
@@ -1471,11 +1471,13 @@ export default ({ getService }: FtrProviderContext) => {
      */
     describe('Signals generated from events with custom severity and risk score fields', () => {
       beforeEach(async () => {
-        await esArchiver.load('signals/severity_risk_overrides');
+        await esArchiver.load('x-pack/test/functional/es_archives/signals/severity_risk_overrides');
       });
 
       afterEach(async () => {
-        await esArchiver.unload('signals/severity_risk_overrides');
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/signals/severity_risk_overrides'
+        );
       });
 
       const executeRuleAndGetSignals = async (rule: QueryCreateSchema) => {
@@ -1616,130 +1618,17 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Signals generated from events with timestamp override field and ensures search_after continues to work when documents are missing timestamp override field', () => {
-      beforeEach(async () => {
-        await createSignalsIndex(supertest);
-        await esArchiver.load('auditbeat/hosts');
-      });
-
-      afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
-        await esArchiver.unload('auditbeat/hosts');
-      });
-
-      /**
-       * This represents our worst case scenario where this field is not mapped on any index
-       * We want to check that our logic continues to function within the constraints of search after
-       * Elasticsearch returns java's long.MAX_VALUE for unmapped date fields
-       * Javascript does not support numbers this large, but without passing in a number of this size
-       * The search_after will continue to return the same results and not iterate to the next set
-       * So to circumvent this limitation of javascript we return the stringified version of Java's
-       * Long.MAX_VALUE so that search_after does not enter into an infinite loop.
-       *
-       * ref: https://github.com/elastic/elasticsearch/issues/28806#issuecomment-369303620
-       */
-      it('should generate 200 signals when timestamp override does not exist', async () => {
-        const rule: QueryCreateSchema = {
-          ...getRuleForSignalTesting(['auditbeat-*']),
-          timestamp_override: 'event.fakeingested',
-          max_signals: 200,
-        };
-
-        const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
-        await waitForSignalsToBePresent(supertest, 200, [id]);
-        const signalsResponse = await getSignalsByIds(supertest, [id], 200);
-        const signals = signalsResponse.hits.hits.map((hit) => hit._source);
-
-        expect(signals.length).equal(200);
-      });
-    });
-
-    /**
-     * Here we test the functionality of timestamp overrides. If the rule specifies a timestamp override,
-     * then the documents will be queried and sorted using the timestamp override field.
-     * If no timestamp override field exists in the indices but one was provided to the rule,
-     * the rule's query will additionally search for events using the `@timestamp` field
-     */
-    describe('Signals generated from events with timestamp override field', async () => {
-      beforeEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await createSignalsIndex(supertest);
-        await esArchiver.load('security_solution/timestamp_override_1');
-        await esArchiver.load('security_solution/timestamp_override_2');
-        await esArchiver.load('security_solution/timestamp_override_3');
-        await esArchiver.load('security_solution/timestamp_override_4');
-      });
-
-      afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
-        await esArchiver.unload('security_solution/timestamp_override_1');
-        await esArchiver.unload('security_solution/timestamp_override_2');
-        await esArchiver.unload('security_solution/timestamp_override_3');
-        await esArchiver.unload('security_solution/timestamp_override_4');
-      });
-
-      it('should generate signals with event.ingested, @timestamp and (event.ingested + timestamp)', async () => {
-        const rule: QueryCreateSchema = {
-          ...getRuleForSignalTesting(['myfa*']),
-          timestamp_override: 'event.ingested',
-        };
-
-        const { id } = await createRule(supertest, rule);
-
-        await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
-        await waitForSignalsToBePresent(supertest, 3, [id]);
-        const signalsResponse = await getSignalsByIds(supertest, [id], 3);
-        const signals = signalsResponse.hits.hits.map((hit) => hit._source);
-        const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
-
-        expect(signalsOrderedByEventId.length).equal(3);
-      });
-
-      it('should generate 2 signals with @timestamp', async () => {
-        const rule: QueryCreateSchema = getRuleForSignalTesting(['myfa*']);
-
-        const { id } = await createRule(supertest, rule);
-
-        await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
-        await waitForSignalsToBePresent(supertest, 2, [id]);
-        const signalsResponse = await getSignalsByIds(supertest, [id]);
-        const signals = signalsResponse.hits.hits.map((hit) => hit._source);
-        const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
-
-        expect(signalsOrderedByEventId.length).equal(2);
-      });
-
-      it('should generate 2 signals when timestamp override does not exist', async () => {
-        const rule: QueryCreateSchema = {
-          ...getRuleForSignalTesting(['myfa*']),
-          timestamp_override: 'event.fakeingestfield',
-        };
-        const { id } = await createRule(supertest, rule);
-
-        await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
-        await waitForSignalsToBePresent(supertest, 2, [id]);
-        const signalsResponse = await getSignalsByIds(supertest, [id, id]);
-        const signals = signalsResponse.hits.hits.map((hit) => hit._source);
-        const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
-
-        expect(signalsOrderedByEventId.length).equal(2);
-      });
-    });
-
     describe('Signals generated from events with name override field', async () => {
       beforeEach(async () => {
         await deleteSignalsIndex(supertest);
         await createSignalsIndex(supertest);
-        await esArchiver.load('auditbeat/hosts');
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
-        await esArchiver.load('auditbeat/hosts');
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       it('should generate signals with name_override field', async () => {

@@ -16,6 +16,7 @@ import type {
 } from '../../../../types';
 import { appContextService } from '../../../';
 import { getRegistryDataStreamAssetBaseName } from '../index';
+import { FINAL_PIPELINE_ID } from '../ingest_pipeline/final_pipeline';
 
 interface Properties {
   [key: string]: any;
@@ -41,6 +42,8 @@ const DATASET_IS_PREFIX_TEMPLATE_PRIORITY = 150;
 
 const QUERY_DEFAULT_FIELD_TYPES = ['keyword', 'text'];
 const QUERY_DEFAULT_FIELD_LIMIT = 1024;
+
+const META_PROP_KEYS = ['metric_type', 'unit'];
 
 /**
  * getTemplate retrieves the default template but overwrites the index pattern with the given value.
@@ -84,6 +87,11 @@ export function getTemplate({
   if (pipelineName) {
     template.template.settings.index.default_pipeline = pipelineName;
   }
+  if (template.template.settings.index.final_pipeline) {
+    throw new Error(`Error template for ${templateIndexPattern} contains a final_pipeline`);
+  }
+  template.template.settings.index.final_pipeline = FINAL_PIPELINE_ID;
+
   return template;
 }
 
@@ -162,6 +170,22 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
         default:
           fieldProps.type = type;
       }
+
+      const fieldHasMetaProps = META_PROP_KEYS.some((key) => key in field);
+      if (fieldHasMetaProps) {
+        switch (type) {
+          case 'group':
+          case 'group-nested':
+            break;
+          default: {
+            const meta = {};
+            if ('metric_type' in field) Reflect.set(meta, 'metric_type', field.metric_type);
+            if ('unit' in field) Reflect.set(meta, 'unit', field.unit);
+            fieldProps.meta = meta;
+          }
+        }
+      }
+
       props[field.name] = fieldProps;
     });
   }
@@ -503,7 +527,6 @@ const updateExistingDataStream = async ({
     await esClient.indices.putMapping({
       index: dataStreamName,
       body: mappings,
-      // @ts-expect-error @elastic/elasticsearch doesn't declare it on PutMappingRequest
       write_index_only: true,
     });
     // if update fails, rollover data stream
@@ -525,7 +548,7 @@ const updateExistingDataStream = async ({
   try {
     await esClient.indices.putSettings({
       index: dataStreamName,
-      body: { index: { default_pipeline: settings.index.default_pipeline } },
+      body: { settings: { default_pipeline: settings.index.default_pipeline } },
     });
   } catch (err) {
     throw new Error(`could not update index template settings for ${dataStreamName}`);

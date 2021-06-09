@@ -24,11 +24,11 @@ export function initPatchCasesApi({ router, logger }: RouteDeps) {
           return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
         }
 
-        const casesClient = context.cases.getCasesClient();
+        const casesClient = await context.cases.getCasesClient();
         const cases = request.body as CasesPatchRequest;
 
         return response.ok({
-          body: await casesClient.update(cases),
+          body: await casesClient.cases.update(cases),
         });
       } catch (error) {
         logger.error(`Failed to patch cases in route: ${error}`);
