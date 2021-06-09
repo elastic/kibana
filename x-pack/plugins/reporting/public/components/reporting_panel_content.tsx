@@ -266,44 +266,12 @@ class ReportingPanelContentUi extends Component<Props, State> {
         }
       })
       .catch((error: any) => {
-        if (error.message === 'not exportable') {
-          return this.props.toasts.addWarning({
-            title: intl.formatMessage(
-              {
-                id: 'xpack.reporting.panelContent.whatCanBeExportedWarningTitle',
-                defaultMessage: 'Only saved {objectType} can be exported',
-              },
-              { objectType: this.state.objectType }
-            ),
-            text: toMountPoint(
-              <FormattedMessage
-                id="xpack.reporting.panelContent.whatCanBeExportedWarningDescription"
-                defaultMessage="Please save your work first"
-              />
-            ),
-          });
-        }
-
-        const defaultMessage =
-          error?.res?.status === 403 ? (
-            <FormattedMessage
-              id="xpack.reporting.panelContent.noPermissionToGenerateReportDescription"
-              defaultMessage="You don't have permission to generate this report."
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.reporting.panelContent.notification.cantReachServerDescription"
-              defaultMessage="Can't reach the server. Please try again."
-            />
-          );
-
-        this.props.toasts.addDanger({
+        this.props.toasts.addError(error, {
           title: intl.formatMessage({
             id: 'xpack.reporting.panelContent.notification.reportingErrorTitle',
-            defaultMessage: 'Reporting error',
+            defaultMessage: 'Failed to create report',
           }),
-          text: toMountPoint(error.message || defaultMessage),
-          'data-test-subj': 'queueReportError',
+          toastMessage: error.body.message,
         });
       });
   };
