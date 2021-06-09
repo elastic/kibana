@@ -6,7 +6,7 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { HostIsolationRequestSchema } from '../schema/actions';
+import { ActionStatusRequestSchema, HostIsolationRequestSchema } from '../schema/actions';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
@@ -51,6 +51,9 @@ export interface HostPendingActions {
     [key: string]: number;
   };
 }
+
 export interface PendingActionsResponse {
   data: HostPendingActions[];
 }
+
+export type PendingActionsRequestQuery = TypeOf<typeof ActionStatusRequestSchema.query>;
