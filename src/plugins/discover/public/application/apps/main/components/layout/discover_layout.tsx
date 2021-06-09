@@ -346,6 +346,7 @@ export function DiscoverLayout({
                 verticalPosition={contentCentered ? 'center' : undefined}
                 horizontalPosition={contentCentered ? 'center' : undefined}
                 paddingSize="none"
+                hasShadow={false}
                 className={classNames('dscPageContent', {
                   'dscPageContent--centered': contentCentered,
                 })}
