@@ -10,19 +10,16 @@ import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Route, Router, Switch } from 'react-router-dom';
 import { httpServiceMock } from 'src/core/public/mocks';
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { KibanaContextProvider, KibanaPageTemplate } from 'src/plugins/kibana_react/public';
 import { useLogSource } from '../../containers/logs/log_source';
 import {
   createLoadedUseLogSourceMock,
   createLoadingUseLogSourceMock,
 } from '../../containers/logs/log_source/log_source.mock';
 import { LinkToLogsPage } from './link_to_logs';
-import { createMockPageTemplate } from '../../test_utils/mock_page_template';
 
 jest.mock('../../containers/logs/log_source');
 const useLogSourceMock = useLogSource as jest.MockedFunction<typeof useLogSource>;
-
-const mockPageTemplate = createMockPageTemplate();
 
 const renderRoutes = (routes: React.ReactElement) => {
   const history = createMemoryHistory();
@@ -33,7 +30,7 @@ const renderRoutes = (routes: React.ReactElement) => {
     },
     observability: {
       navigation: {
-        PageTemplate: mockPageTemplate,
+        PageTemplate: KibanaPageTemplate,
       },
     },
   };
