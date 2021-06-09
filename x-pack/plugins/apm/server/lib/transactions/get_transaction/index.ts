@@ -21,11 +21,11 @@ export function getTransaction({
   setup,
 }: {
   transactionId: string;
-  traceId: string;
-  setup: Setup & SetupTimeRange;
+  traceId?: string;
+  setup: Setup | (Setup & SetupTimeRange);
 }) {
   return withApmSpan('get_transaction', async () => {
-    const { start, end, apmEventClient } = setup;
+    const { apmEventClient } = setup;
 
     const resp = await apmEventClient.search({
       apm: {
@@ -37,8 +37,8 @@ export function getTransaction({
           bool: {
             filter: asMutableArray([
               { term: { [TRANSACTION_ID]: transactionId } },
-              { term: { [TRACE_ID]: traceId } },
-              ...rangeQuery(start, end),
+              ...(traceId ? [{ term: { [TRACE_ID]: traceId } }] : []),
+              ...('start' in setup ? rangeQuery(setup.start, setup.end) : []),
             ]),
           },
         },

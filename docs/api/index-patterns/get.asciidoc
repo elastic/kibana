@@ -58,6 +58,7 @@ The API returns an index pattern object:
         "typeMeta": {},
         "fieldFormats": {},
         "fieldAttrs": {},
+        "runtimeFieldMap" {},
         "allowNoIndex: "..."
     }
 }

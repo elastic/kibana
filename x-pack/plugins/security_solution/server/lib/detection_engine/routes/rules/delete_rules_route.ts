@@ -19,9 +19,8 @@ import { deleteRules } from '../../rules/delete_rules';
 import { getIdError, transform } from './utils';
 import { buildSiemResponse } from '../utils';
 
-import { deleteNotifications } from '../../notifications/delete_notifications';
-import { deleteRuleActionsSavedObject } from '../../rule_actions/delete_rule_actions_saved_object';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
+import { readRules } from '../../rules/read_rules';
 
 export const deleteRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -57,35 +56,32 @@ export const deleteRulesRoute = (
         }
 
         const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
-        const rule = await deleteRules({
-          alertsClient,
-          id,
-          ruleId,
-        });
-        if (rule != null) {
-          await deleteNotifications({ alertsClient, ruleAlertId: rule.id });
-          await deleteRuleActionsSavedObject({
-            ruleAlertId: rule.id,
-            savedObjectsClient,
-          });
-          const ruleStatuses = await ruleStatusClient.find({
-            perPage: 6,
-            search: rule.id,
-            searchFields: ['alertId'],
-          });
-          ruleStatuses.saved_objects.forEach(async (obj) => ruleStatusClient.delete(obj.id));
-          const transformed = transform(rule, undefined, ruleStatuses.saved_objects[0]);
-          if (transformed == null) {
-            return siemResponse.error({ statusCode: 500, body: 'failed to transform alert' });
-          } else {
-            return response.ok({ body: transformed ?? {} });
-          }
-        } else {
+        const rule = await readRules({ alertsClient, id, ruleId });
+        if (!rule) {
           const error = getIdError({ id, ruleId });
           return siemResponse.error({
             body: error.message,
             statusCode: error.statusCode,
           });
+        }
+
+        const ruleStatuses = await ruleStatusClient.find({
+          perPage: 6,
+          search: rule.id,
+          searchFields: ['alertId'],
+        });
+        await deleteRules({
+          alertsClient,
+          savedObjectsClient,
+          ruleStatusClient,
+          ruleStatuses,
+          id: rule.id,
+        });
+        const transformed = transform(rule, undefined, ruleStatuses.saved_objects[0]);
+        if (transformed == null) {
+          return siemResponse.error({ statusCode: 500, body: 'failed to transform alert' });
+        } else {
+          return response.ok({ body: transformed ?? {} });
         }
       } catch (err) {
         const error = transformError(err);
