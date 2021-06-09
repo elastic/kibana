@@ -112,7 +112,7 @@ export const searchAfterAndBulkCreate = async ({
           buildRuleMessage(
             `${
               totalHits === 0 ? 'totalHits' : 'searchResult.hits.hits.length'
-            } was 0, exiting and moving on to next tuple`
+            } was 0, exiting early`
           )
         );
         break;
