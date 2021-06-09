@@ -6,7 +6,7 @@ if [[ ! "${DISABLE_CI_STATS_SHIPPING:-}" ]]; then
   echo "--- Ship Kibana Distribution Metrics to CI Stats"
   node scripts/ship_ci_stats \
     --metrics target/optimizer_bundle_metrics.json \
-    --metrics packages/kbn-ui-shared-deps/target/metrics.json
+    --metrics packages/kbn-ui-shared-deps/shared_built_assets/metrics.json
 fi
 
 echo "--- Upload Build Artifacts"
