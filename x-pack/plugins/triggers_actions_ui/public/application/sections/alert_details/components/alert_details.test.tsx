@@ -12,8 +12,7 @@ import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { act } from '@testing-library/react';
 import { AlertDetails } from './alert_details';
 import { Alert, ActionType, AlertTypeModel, AlertType } from '../../../../types';
-import { EuiTitle, EuiBadge, EuiFlexItem, EuiSwitch, EuiButtonEmpty, EuiText } from '@elastic/eui';
-import { ViewInApp } from './view_in_app';
+import { EuiBadge, EuiFlexItem, EuiSwitch, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import {
   ActionGroup,
   AlertExecutionStatusErrorReasons,
@@ -75,13 +74,7 @@ describe('alert_details', () => {
     expect(
       shallow(
         <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
-      ).containsMatchingElement(
-        <EuiTitle size="m">
-          <h1>
-            <span>{alert.name}</span>
-          </h1>
-        </EuiTitle>
-      )
+      ).find('EuiPageHeader')
     ).toBeTruthy();
   });
 
@@ -103,7 +96,7 @@ describe('alert_details', () => {
     expect(
       shallow(
         <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
-      ).containsMatchingElement(<EuiBadge>{alertType.name}</EuiBadge>)
+      ).find(<EuiBadge>{alertType.name}</EuiBadge>)
     ).toBeTruthy();
   });
 
@@ -290,7 +283,7 @@ describe('alert_details', () => {
       expect(
         shallow(
           <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
-        ).containsMatchingElement(<ViewInApp alert={alert} />)
+        ).find('ViewInApp')
       ).toBeTruthy();
     });
 

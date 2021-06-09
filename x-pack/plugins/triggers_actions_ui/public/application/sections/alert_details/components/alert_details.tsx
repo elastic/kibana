@@ -17,7 +17,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
-  EuiPage,
   EuiPageContentBody,
   EuiSwitch,
   EuiCallOut,
