@@ -29,6 +29,7 @@ const StatusComponent: React.FC<Props> = ({
   const props = useMemo(
     () => ({
       color: type === StatusAll ? allCaseStatus[StatusAll].color : statuses[type].color,
+      // if we are disabled, don't show the arrow and don't allow the user to click
       ...(withArrow && !disabled ? { iconType: 'arrowDown', iconSide: 'right' as const } : {}),
       ...(!disabled ? { iconOnClick: onClick } : { iconOnClick: noop }),
     }),

@@ -446,16 +446,15 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                 />
                 <TagList
                   data-test-subj="case-view-tag-list"
-                  disabled={!userCanCrud}
+                  userCanCrud={userCanCrud}
                   tags={caseData.tags}
                   onSubmit={onSubmitTags}
                   isLoading={isLoading && updateKey === 'tags'}
-                  owner={[caseData.owner]}
                 />
                 <EditConnector
                   caseFields={caseData.connector.fields}
                   connectors={connectors}
-                  disabled={!userCanCrud}
+                  userCanCrud={userCanCrud}
                   hideConnectorServiceNowSir={
                     subCaseId != null || caseData.type === CaseType.collection
                   }

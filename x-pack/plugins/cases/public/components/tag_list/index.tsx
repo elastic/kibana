@@ -27,12 +27,12 @@ import { Tags } from './tags';
 
 const CommonUseField = getUseField({ component: Field });
 
-interface TagListProps {
-  disabled?: boolean;
+// exporting so it can be used in the tests
+export interface TagListProps {
+  userCanCrud?: boolean;
   isLoading: boolean;
   onSubmit: (a: string[]) => void;
   tags: string[];
-  owner: string[];
 }
 
 const MyFlexGroup = styled(EuiFlexGroup)`
@@ -45,7 +45,7 @@ const MyFlexGroup = styled(EuiFlexGroup)`
 `;
 
 export const TagList = React.memo(
-  ({ disabled = false, isLoading, onSubmit, tags, owner }: TagListProps) => {
+  ({ userCanCrud = true, isLoading, onSubmit, tags }: TagListProps) => {
     const initialState = { tags };
     const { form } = useForm({
       defaultValue: initialState,
@@ -86,11 +86,10 @@ export const TagList = React.memo(
             <h4>{i18n.TAGS}</h4>
           </EuiFlexItem>
           {isLoading && <EuiLoadingSpinner data-test-subj="tag-list-loading" />}
-          {!isLoading && (
+          {!isLoading && userCanCrud && (
             <EuiFlexItem data-test-subj="tag-list-edit" grow={false}>
               <EuiButtonIcon
                 data-test-subj="tag-list-edit-button"
-                isDisabled={disabled}
                 aria-label={i18n.EDIT_TAGS_ARIA}
                 iconType={'pencil'}
                 onClick={setIsEditTags.bind(null, true)}

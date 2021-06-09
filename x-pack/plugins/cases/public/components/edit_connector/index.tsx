@@ -30,7 +30,8 @@ import { schema } from './schema';
 import { getConnectorFieldsFromUserActions } from './helpers';
 import * as i18n from './translations';
 
-interface EditConnectorProps {
+// exporting for use in tests
+export interface EditConnectorProps {
   caseFields: ConnectorTypeFields['fields'];
   connectors: ActionConnector[];
   isLoading: boolean;
@@ -42,7 +43,7 @@ interface EditConnectorProps {
   ) => void;
   selectedConnector: string;
   userActions: CaseUserActions[];
-  disabled?: boolean;
+  userCanCrud?: boolean;
   hideConnectorServiceNowSir?: boolean;
 }
 
@@ -104,7 +105,7 @@ export const EditConnector = React.memo(
   ({
     caseFields,
     connectors,
-    disabled = false,
+    userCanCrud = true,
     hideConnectorServiceNowSir = false,
     isLoading,
     onSubmit,
@@ -210,11 +211,10 @@ export const EditConnector = React.memo(
             <h4>{i18n.CONNECTORS}</h4>
           </EuiFlexItem>
           {isLoading && <EuiLoadingSpinner data-test-subj="connector-loading" />}
-          {!isLoading && !editConnector && (
+          {!isLoading && !editConnector && userCanCrud && (
             <EuiFlexItem data-test-subj="connector-edit" grow={false}>
               <EuiButtonIcon
                 data-test-subj="connector-edit-button"
-                isDisabled={disabled}
                 aria-label={i18n.EDIT_CONNECTOR_ARIA}
                 iconType={'pencil'}
                 onClick={onEditClick}
@@ -235,7 +235,7 @@ export const EditConnector = React.memo(
                       connectors,
                       dataTestSubj: 'caseConnectors',
                       defaultValue: selectedConnector,
-                      disabled,
+                      disabled: !userCanCrud,
                       hideConnectorServiceNowSir,
                       idAria: 'caseConnectors',
                       isEdit: editConnector,

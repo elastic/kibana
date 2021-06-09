@@ -9,7 +9,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
-import { EditConnector } from './index';
+import { EditConnector, EditConnectorProps } from './index';
 import { getFormMock, useFormMock } from '../__mock__/form';
 import { TestProviders } from '../../common/mock';
 import { connectorsMock } from '../../containers/configure/mock';
@@ -21,9 +21,9 @@ jest.mock('../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 const onSubmit = jest.fn();
-const defaultProps = {
+const defaultProps: EditConnectorProps = {
   connectors: connectorsMock,
-  disabled: false,
+  userCanCrud: true,
   isLoading: false,
   onSubmit,
   selectedConnector: 'none',
@@ -142,6 +142,18 @@ describe('EditConnector ', () => {
     );
     await waitFor(() =>
       expect(wrapper.find(`[data-test-subj="connector-loading"]`).last().exists()).toBeTruthy()
+    );
+  });
+
+  it('does not allow the connector to be edited when the user does not have write permissions', async () => {
+    const props = { ...defaultProps, userCanCrud: false };
+    const wrapper = mount(
+      <TestProviders>
+        <EditConnector {...props} />
+      </TestProviders>
+    );
+    await waitFor(() =>
+      expect(wrapper.find(`[data-test-subj="connector-edit"]`).exists()).toBeFalsy()
     );
   });
 });

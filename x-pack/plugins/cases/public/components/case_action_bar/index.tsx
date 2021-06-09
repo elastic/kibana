@@ -123,7 +123,6 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
                     onSwitchChange={onSyncAlertsChanged}
                   />
                 </EuiDescriptionListDescription>
-                )
               </EuiFlexItem>
             )}
             <EuiFlexItem>
