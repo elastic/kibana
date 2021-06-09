@@ -11,13 +11,7 @@ import $ from 'jquery';
 import moment from 'moment-timezone';
 // @ts-ignore
 import observeResize from '../../lib/observe_resize';
-import {
-  calculateInterval,
-  DEFAULT_TIME_FORMAT,
-  tickFormatters,
-  xaxisFormatterProvider,
-  generateTicksProvider,
-} from '../../../../vis_type_timelion/public';
+import { _LEGACY_ as visTypeTimelion } from '../../../../vis_type_timelion/public';
 import { TimelionVisualizationDependencies } from '../../application';
 
 const DEBOUNCE_DELAY = 50;
@@ -37,8 +31,9 @@ export function timechartFn(dependencies: TimelionVisualizationDependencies) {
       help: 'Draw a timeseries chart',
       render($scope: any, $elem: any) {
         const template = '<div class="chart-top-title"></div><div class="chart-canvas"></div>';
-        const getxAxisFormatter = xaxisFormatterProvider(uiSettings);
-        const generateTicks = generateTicksProvider();
+        const formatters = visTypeTimelion.tickFormatters() as any;
+        const getxAxisFormatter = visTypeTimelion.xaxisFormatterProvider(uiSettings);
+        const generateTicks = visTypeTimelion.generateTicksProvider();
 
         // TODO: I wonder if we should supply our own moment that sets this every time?
         // could just use angular's injection to provide a moment service?
@@ -225,7 +220,7 @@ export function timechartFn(dependencies: TimelionVisualizationDependencies) {
           if (legendCaption) {
             legendCaption.text(
               moment(pos.x).format(
-                _.get(dataset, '[0]._global.legend.timeFormat', DEFAULT_TIME_FORMAT)
+                _.get(dataset, '[0]._global.legend.timeFormat', visTypeTimelion.DEFAULT_TIME_FORMAT)
               )
             );
           }
@@ -288,7 +283,7 @@ export function timechartFn(dependencies: TimelionVisualizationDependencies) {
 
           // Get the X-axis tick format
           const time = timefilter.timefilter.getBounds() as any;
-          const interval = calculateInterval(
+          const interval = visTypeTimelion.calculateInterval(
             time.min.valueOf(),
             time.max.valueOf(),
             uiSettings.get('timelion:target_buckets') || 200,
@@ -348,7 +343,6 @@ export function timechartFn(dependencies: TimelionVisualizationDependencies) {
           if (options.yaxes) {
             options.yaxes.forEach((yaxis: any) => {
               if (yaxis && yaxis.units) {
-                const formatters = tickFormatters(yaxis) as any;
                 yaxis.tickFormatter = formatters[yaxis.units.type];
                 const byteModes = ['bytes', 'bytes/s'];
                 if (byteModes.includes(yaxis.units.type)) {

@@ -75,12 +75,12 @@ export class TimelionVisPlugin
   constructor(public initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup(
-    core: CoreSetup,
+    { uiSettings, http }: CoreSetup,
     { expressions, visualizations, data, charts }: TimelionVisSetupDependencies
   ) {
     const dependencies: TimelionVisDependencies = {
-      uiSettings: core.uiSettings,
-      http: core.http,
+      http,
+      uiSettings,
       timefilter: data.query.timefilter.timefilter,
       chartTheme: charts.theme,
     };

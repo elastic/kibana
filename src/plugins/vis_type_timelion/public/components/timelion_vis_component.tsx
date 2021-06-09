@@ -35,8 +35,6 @@ import { TimelionVisDependencies } from '../plugin';
 
 import './timelion_vis.scss';
 
-const GRID_LINE_STROKE = 'rgba(125,125,125,0.3)';
-
 interface TimelionVisComponentProps {
   fireEvent: IInterpreterRenderHandlers['event'];
   interval: string;

@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import { parseTimelionExpressionAsync } from '../../../vis_type_timelion/public';
+import { _LEGACY_ as visTypeTimelion } from '../../../vis_type_timelion/public';
 
 export const SUGGESTION_TYPE = {
   ARGUMENTS: 'arguments',
@@ -180,7 +180,7 @@ async function extractSuggestionsFromParsedResult(
 
 export async function suggest(expression, functionList, cursorPosition, argValueSuggestions) {
   try {
-    const result = await parseTimelionExpressionAsync(expression);
+    const result = await visTypeTimelion.parseTimelionExpressionAsync(expression);
     return await extractSuggestionsFromParsedResult(
       result,
       cursorPosition,
