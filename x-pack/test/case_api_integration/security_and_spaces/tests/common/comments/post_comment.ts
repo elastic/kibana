@@ -335,14 +335,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('alerts', () => {
       beforeEach(async () => {
-        await esArchiver.load('auditbeat/hosts');
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
         await createSignalsIndex(supertest);
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
-        await esArchiver.unload('auditbeat/hosts');
+        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       it('should change the status of the alert if sync alert is on', async () => {
