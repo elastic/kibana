@@ -6,8 +6,16 @@
  */
 
 import React from 'react';
-import { EuiPortal, EuiText, EuiBetaBadge } from '@elastic/eui';
+import {
+  EuiPortal,
+  EuiText,
+  EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import type { Section } from '../sections';
 import { SettingFlyout } from '../components';
@@ -39,20 +47,32 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({ section, childre
       )}
 
       <WithHeaderLayout
-        rightColumn={<></>}
         leftColumn={
-          <EuiText>
-            <h1>
-              <FormattedMessage id="xpack.fleet.fleetAppTitle" defaultMessage="Fleet" />
-              <EuiBetaBadge
-                label={<FormattedMessage id="xpack.fleet.betaLabel" defaultMessage="Beta" />}
-                tooltipContent={
-                  <FormattedMessage
-                    id="xpack.fleet.integrationsBetaDescription"
-                    defaultMessage="Fleet is not recommended for production environments."
+          <EuiFlexGroup direction="column" gutterSize="m">
+            <EuiFlexItem>
+              <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="l">
+                    <h1>
+                      <FormattedMessage id="xpack.fleet.overviewPageTitle" defaultMessage="Fleet" />
+                    </h1>
+                  </EuiTitle>
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <EuiBetaBadge
+                    label={i18n.translate('xpack.fleet.betaBadge.labelText', {
+                      defaultMessage: 'Beta',
+                    })}
+                    tooltipContent={i18n.translate('xpack.fleet.betaBadge.tooltipText', {
+                      defaultMessage:
+                        'This plugin is not recommended for production environments. Please report bugs in our Discuss forum.',
+                    })}
                   />
-                }
-              />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
               <EuiText color="subdued">
                 <p>
                   <FormattedMessage
@@ -61,8 +81,8 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({ section, childre
                   />
                 </p>
               </EuiText>
-            </h1>
-          </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         }
         tabs={[
           {
