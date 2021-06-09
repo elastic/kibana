@@ -20,6 +20,8 @@ import { mockAlertDetailsData } from './__mocks__';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { TimelineTabs } from '../../../../common/types/timeline';
 
+jest.mock('../../../common/lib/kibana');
+
 jest.mock('../link_to');
 describe('EventDetails', () => {
   const mount = useMountAppended();

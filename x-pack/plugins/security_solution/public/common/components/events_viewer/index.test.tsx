@@ -22,6 +22,8 @@ import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell
 import { useTimelineEvents } from '../../../timelines/containers';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 
+jest.mock('../../../common/lib/kibana');
+
 jest.mock('../../../timelines/containers', () => ({
   useTimelineEvents: jest.fn(),
 }));

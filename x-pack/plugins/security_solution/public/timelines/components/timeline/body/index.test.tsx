@@ -23,6 +23,8 @@ import { timelineActions } from '../../../store/timeline';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { defaultRowRenderers } from './renderers';
 
+jest.mock('../../../../common/lib/kibana');
+
 const mockSort: Sort[] = [
   {
     columnId: '@timestamp',

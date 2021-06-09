@@ -20,8 +20,6 @@ import { ProcessDraggable } from '../process_draggable';
 import { Args } from '../args';
 import { SessionUserHostWorkingDir } from './session_user_host_working_dir';
 
-jest.mock('../../../../../../common/lib/kibana');
-
 interface Props {
   id: string;
   hostName: string | null | undefined;

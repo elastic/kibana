@@ -114,6 +114,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
   const leadingControlColumns: ControlColumnProps[] = [defaultControlColumn];
   const trailingControlColumns: ControlColumnProps[] = [];
+
   return (
     <>
       <FullScreenContainer $isFullScreen={globalFullScreen}>

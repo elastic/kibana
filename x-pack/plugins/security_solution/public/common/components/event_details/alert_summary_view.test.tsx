@@ -17,6 +17,8 @@ import { TestProviders } from '../../mock';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
+jest.mock('../../lib/kibana');
+
 jest.mock('../../../detections/containers/detection_engine/rules/use_rule_async', () => {
   return {
     useRuleAsync: jest.fn(),

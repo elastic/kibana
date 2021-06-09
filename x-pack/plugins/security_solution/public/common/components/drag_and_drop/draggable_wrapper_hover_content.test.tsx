@@ -18,6 +18,7 @@ import { FilterManager } from '../../../../../../../src/plugins/data/public';
 import { useSourcererScope } from '../../containers/sourcerer';
 import { DraggableWrapperHoverContent } from './draggable_wrapper_hover_content';
 import { TimelineId } from '../../../../common/types/timeline';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 
 jest.mock('../link_to');
 
@@ -38,8 +39,8 @@ jest.mock('uuid', () => {
   };
 });
 const mockStartDragToTimeline = jest.fn();
-jest.mock('../../hooks/use_add_to_timeline', () => {
-  const original = jest.requireActual('../../hooks/use_add_to_timeline');
+jest.mock('../../../../../timelines/public/hooks/use_add_to_timeline', () => {
+  const original = jest.requireActual('../../../../../timelines/public/hooks/use_add_to_timeline');
   return {
     ...original,
     useAddToTimeline: () => ({ startDragToTimeline: mockStartDragToTimeline }),
@@ -49,18 +50,43 @@ const mockAddFilters = jest.fn();
 const mockGetTimelineFilterManager = jest.fn().mockReturnValue({
   addFilters: mockAddFilters,
 });
-jest.mock('../../../timelines/components/manage_timeline', () => {
-  const original = jest.requireActual('../../../timelines/components/manage_timeline');
+
+jest.mock('../../../common/hooks/use_selector', () => {
+  const original = jest.requireActual('../../../common/hooks/use_selector');
 
   return {
     ...original,
-    useManageTimeline: () => ({
-      getManageTimelineById: jest.fn().mockReturnValue({ indexToAdd: [] }),
-      getTimelineFilterManager: mockGetTimelineFilterManager,
-      isManagedTimeline: jest.fn().mockReturnValue(false),
-    }),
+    useDeepEqualSelector: jest.fn().mockReturnValue(mockGetTimelineFilterManager),
   };
 });
+
+// jest.mock('../../../timelines/store/timeline', () => ({
+//   const original = jest.requireActual('../../../timelines/components/manage_timeline');
+
+//   getManageTimelineById: jest.fn().mockReturnValue({ indexToAdd: [] }),
+// }));
+
+jest.mock('../../../timelines/store/timeline', () => {
+  const original = jest.requireActual('../../../timelines/store/timeline');
+
+  return {
+    ...original,
+    getManageTimelineById: jest.fn().mockReturnValue({ indexToAdd: [] }),
+  };
+});
+
+// jest.mock('../../../timelines/components/manage_timeline', () => {
+//   const original = jest.requireActual('../../../timelines/components/manage_timeline');
+
+//   return {
+//     ...original,
+//     useManageTimeline: () => ({
+//       getManageTimelineById: jest.fn().mockReturnValue({ indexToAdd: [] }),
+//       getTimelineFilterManager: mockGetTimelineFilterManager,
+//       isManagedTimeline: jest.fn().mockReturnValue(false),
+//     }),
+//   };
+// });
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 const timelineId = TimelineId.active;
@@ -152,7 +178,7 @@ describe('DraggableWrapperHoverContent', () => {
           wrapper.find(`[data-test-subj="filter-${hoverAction}-value"]`).first().simulate('click');
           wrapper.update();
 
-          expect(mockAddFilters).toBeCalledWith({
+          expect(useDeepEqualSelector(jest.fn())().addFilters).toBeCalledWith({
             meta: {
               alias: null,
               disabled: false,
