@@ -104,38 +104,40 @@ export class UptimePlugin
       },
     });
 
-    from(core.getStartServices()).pipe(
-      map(([coreStart]) => {
-        if (coreStart.application.capabilities.uptime.show) {
-          return [
-            {
-              label: 'Uptime',
-              sortKey: 200,
-              entries: [
-                {
-                  label: i18n.translate('xpack.uptime.overview.heading', {
-                    defaultMessage: 'Monitoring overview',
-                  }),
-                  app: 'uptime',
-                  path: '/',
-                  matchFullPath: true,
-                  ignoreTrailingSlash: true,
-                },
-                {
-                  label: i18n.translate('xpack.uptime.certificatesPage.heading', {
-                    defaultMessage: 'TLS Certificates',
-                  }),
-                  app: 'uptime',
-                  path: '/certificates',
-                  matchFullPath: true,
-                },
-              ],
-            },
-          ];
-        }
+    plugins.observability.navigation.registerSections(
+      from(core.getStartServices()).pipe(
+        map(([coreStart]) => {
+          if (coreStart.application.capabilities.uptime.show) {
+            return [
+              {
+                label: 'Uptime',
+                sortKey: 200,
+                entries: [
+                  {
+                    label: i18n.translate('xpack.uptime.overview.heading', {
+                      defaultMessage: 'Monitoring overview',
+                    }),
+                    app: 'uptime',
+                    path: '/',
+                    matchFullPath: true,
+                    ignoreTrailingSlash: true,
+                  },
+                  {
+                    label: i18n.translate('xpack.uptime.certificatesPage.heading', {
+                      defaultMessage: 'TLS Certificates',
+                    }),
+                    app: 'uptime',
+                    path: '/certificates',
+                    matchFullPath: true,
+                  },
+                ],
+              },
+            ];
+          }
 
-        return [];
-      })
+          return [];
+        })
+      )
     );
 
     core.application.register({
