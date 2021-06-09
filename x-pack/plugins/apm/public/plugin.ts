@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { of } from 'rxjs';
+import { of, from, pipe } from 'rxjs';
+import { map } from 'rxjs/operators';
 import type { ConfigSchema } from '.';
 import {
   AppMountParameters,
@@ -86,19 +87,45 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
     }
 
-    // register observability nav
+    // register observability nav if user has access to plugin
     plugins.observability.navigation.registerSections(
-      of([
-        {
-          label: 'APM',
-          sortKey: 200,
-          entries: [
-            { label: 'Services', app: 'apm', path: '/services' },
-            { label: 'Traces', app: 'apm', path: '/traces' },
-            { label: 'Service Map', app: 'apm', path: '/service-map' },
-          ],
-        },
-      ])
+      from(core.getStartServices()).pipe(
+        map(([coreStart]) => {
+          if (coreStart.application.capabilities.apm.show) {
+            return [
+              // APM navigation
+              {
+                label: 'APM',
+                sortKey: 200,
+                entries: [
+                  { label: 'Services', app: 'apm', path: '/services' },
+                  { label: 'Traces', app: 'apm', path: '/traces' },
+                  { label: 'Service Map', app: 'apm', path: '/service-map' },
+                ],
+              },
+
+              // UX navigation
+              {
+                label: 'User Experience',
+                sortKey: 201,
+                entries: [
+                  {
+                    label: i18n.translate('xpack.apm.ux.overview.heading', {
+                      defaultMessage: 'Overview',
+                    }),
+                    app: 'ux',
+                    path: '/',
+                    matchFullPath: true,
+                    ignoreTrailingSlash: true,
+                  },
+                ],
+              },
+            ];
+          }
+
+          return [];
+        })
+      )
     );
 
     const getApmDataHelper = async () => {
@@ -149,26 +176,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         return await dataHelper.fetchUxOverviewDate(params);
       },
     });
-
-    plugins.observability.navigation.registerSections(
-      of([
-        {
-          label: 'User Experience',
-          sortKey: 201,
-          entries: [
-            {
-              label: i18n.translate('xpack.apm.ux.overview.heading', {
-                defaultMessage: 'Overview',
-              }),
-              app: 'ux',
-              path: '/',
-              matchFullPath: true,
-              ignoreTrailingSlash: true,
-            },
-          ],
-        },
-      ])
-    );
 
     core.application.register({
       id: 'apm',
