@@ -648,11 +648,11 @@ describe('padBuckets', () => {
       padBuckets(10, 3000, {
         key: '2020-10-02T19:47:28.128Z-2020-10-02T19:48:28.128Z',
         from: 1601668048128,
-        // @ts-expect-error @elastic/elasticsearch doesn't decalre from_as_string property
         from_as_string: '2020-10-02T19:47:28.128Z',
         to: 1601668108128,
         to_as_string: '2020-10-02T19:48:28.128Z',
         doc_count: 0,
+        // @ts-expect-error result type doesn't define histogram
         histogram: {
           buckets: [],
         },
@@ -665,11 +665,11 @@ describe('padBuckets', () => {
       padBuckets(10, 3000, {
         key: '2020-10-02T19:47:28.128Z-2020-10-02T19:48:28.128Z',
         from: 1601668046000,
-        // @ts-expect-error @elastic/elasticsearch doesn't decalre from_as_string property
         from_as_string: '2020-10-02T19:47:26.000Z',
         to: 1601668076000,
         to_as_string: '2020-10-02T19:47:56.000Z',
         doc_count: 3,
+        // @ts-expect-error result type doesn't define histogram
         histogram: {
           buckets: [
             {
@@ -743,11 +743,11 @@ describe('padBuckets', () => {
       padBuckets(10, 3000, {
         key: '2020-10-02T20:39:45.793Z-2020-10-02T20:40:14.793Z',
         from: 1601671183000,
-        // @ts-expect-error @elastic/elasticsearch doesn't decalre from_as_string property
         from_as_string: '2020-10-02T20:39:43.000Z',
         to: 1601671213000,
         to_as_string: '2020-10-02T20:40:13.000Z',
         doc_count: 2,
+        // @ts-expect-error result type doesn't define histogram
         histogram: {
           buckets: [
             {
@@ -773,11 +773,11 @@ describe('padBuckets', () => {
       padBuckets(20, 3000, {
         key: '2020-10-02T20:39:45.793Z-2020-10-02T20:40:14.793Z',
         from: 1601671185793,
-        // @ts-expect-error @elastic/elasticsearch doesn't decalre from_as_string property
         from_as_string: '2020-10-02T20:39:45.793Z',
         to: 1601671245793,
         to_as_string: '2020-10-02T20:40:45.793Z',
         doc_count: 2,
+        // @ts-expect-error result type doesn't define histogram
         histogram: {
           buckets: [
             {
@@ -803,11 +803,11 @@ describe('padBuckets', () => {
       padBuckets(20, 3000, {
         key: '2021-02-02T10:08:32.161Z-2021-02-02T10:09:32.161Z',
         from: 1612260512161,
-        // @ts-expect-error @elastic/elasticsearch doesn't decalre from_as_string property
         from_as_string: '2021-02-02T10:08:32.161Z',
         to: 1612260572161,
         to_as_string: '2021-02-02T10:09:32.161Z',
         doc_count: 2,
+        // @ts-expect-error result type doesn't define histogram
         histogram: {
           buckets: [
             {
