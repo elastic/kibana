@@ -50,7 +50,7 @@ export async function getVisualizationCounts(
     },
   });
 
-  // @ts-expect-error @elastic/elasticsearch no way to declare aggregations for search response
+  // @ts-expect-error specify aggregations type explicitly
   const buckets = results.aggregations.groups.buckets;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
