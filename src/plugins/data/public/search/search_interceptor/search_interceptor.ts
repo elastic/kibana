@@ -43,6 +43,7 @@ import {
   PainlessError,
   SearchTimeoutError,
   TimeoutErrorMode,
+  SearchSessionIncompleteWarning,
 } from '../errors';
 import { toMountPoint } from '../../../../kibana_react/public';
 import { AbortError, KibanaServerError } from '../../../../kibana_utils/public';
@@ -379,8 +380,8 @@ export class SearchInterceptor {
   private showRestoreWarningToast = (sessionId?: string) => {
     this.deps.toasts.addWarning(
       {
-        title: 'Oopsy',
-        text: toMountPoint('Additional searches were added.'),
+        title: 'Search Session is still in progress!',
+        text: toMountPoint(SearchSessionIncompleteWarning()),
       },
       {
         toastLifeTimeMs: 30000,
