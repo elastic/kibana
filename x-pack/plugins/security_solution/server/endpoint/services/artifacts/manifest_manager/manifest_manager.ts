@@ -237,13 +237,16 @@ export class ManifestManager {
    * Writes new artifact SO.
    *
    * @param artifact An InternalArtifactCompleteSchema representing the artifact.
-   * @returns {Promise<Error | null>} An error, if encountered, or null.
+   * @returns {Promise<[Error | null, InternalArtifactCompleteSchema | undefined]>} An array with the error if encountered or null and the generated artifact or null.
    */
-  protected async pushArtifact(artifact: InternalArtifactCompleteSchema): Promise<Error | null> {
+  protected async pushArtifact(
+    artifact: InternalArtifactCompleteSchema
+  ): Promise<[Error | null, InternalArtifactCompleteSchema | undefined]> {
     const artifactId = getArtifactId(artifact);
+    let fleetArtifact;
     try {
       // Write the artifact SO
-      await this.artifactClient.createArtifact(artifact);
+      fleetArtifact = await this.artifactClient.createArtifact(artifact);
 
       // Cache the compressed body of the artifact
       this.cache.set(artifactId, Buffer.from(artifact.body, 'base64'));
@@ -251,26 +254,32 @@ export class ManifestManager {
       if (this.savedObjectsClient.errors.isConflictError(err)) {
         this.logger.debug(`Tried to create artifact ${artifactId}, but it already exists.`);
       } else {
-        return err;
+        return [err, undefined];
       }
     }
 
-    return null;
+    return [null, fleetArtifact];
   }
 
   /**
    * Writes new artifact SOs.
    *
    * @param artifacts An InternalArtifactCompleteSchema array representing the artifacts.
+   * @param newManifest A Manifest representing the new manifest
    * @returns {Promise<Error[]>} Any errors encountered.
    */
-  public async pushArtifacts(artifacts: InternalArtifactCompleteSchema[]): Promise<Error[]> {
+  public async pushArtifacts(
+    artifacts: InternalArtifactCompleteSchema[],
+    newManifest: Manifest
+  ): Promise<Error[]> {
     const errors: Error[] = [];
     for (const artifact of artifacts) {
       if (internalArtifactCompleteSchema.is(artifact)) {
-        const err = await this.pushArtifact(artifact);
+        const [err, fleetArtifact] = await this.pushArtifact(artifact);
         if (err) {
           errors.push(err);
+        } else if (fleetArtifact) {
+          newManifest.replaceArtifact(fleetArtifact);
         }
       } else {
         errors.push(new Error(`Incomplete artifact: ${getArtifactId(artifact)}`));
