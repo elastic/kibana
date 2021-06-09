@@ -10,7 +10,7 @@ export { fromExpression, toExpression, safeElementFromExpression } from './lib/a
 export { Fn } from './lib/fn';
 export { getType } from './lib/get_type';
 export { castProvider } from './lib/cast';
-// eslint-disable-next-line import/no-unresolved
+// @ts-expect-error
 export { parse } from '../../grammar';
 export { getByAlias } from './lib/get_by_alias';
 export { Registry } from './lib/registry';

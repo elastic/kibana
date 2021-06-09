@@ -26,11 +26,12 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 SRC_DEPS = [
-
+  "@npm//lodash",
 ]
 
 TYPES_DEPS = [
   "@npm//@types/jest",
+  "@npm//@types/lodash",
   "@npm//@types/node",
 ]
 
