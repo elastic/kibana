@@ -306,9 +306,9 @@ async function update(
     } catch (e) {
       error = e.isBoom
         ? e.output.payload.message
-        : `Error connecting to ${
+        : `Error creating mapping for ${
             connector != null ? connector.name : configuration.attributes.connector.name
-          } instance`;
+          }`;
     }
 
     const patch = await caseConfigureService.patch({
@@ -413,7 +413,7 @@ async function create(
     } catch (e) {
       error = e.isBoom
         ? e.output.payload.message
-        : `Error connecting to ${configuration.connector.name} instance`;
+        : `Error creating mapping for ${configuration.connector.name}`;
     }
 
     const post = await caseConfigureService.post({
