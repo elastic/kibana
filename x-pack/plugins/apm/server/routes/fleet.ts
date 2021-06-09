@@ -5,21 +5,19 @@
  * 2.0.
  */
 
+import { getApmPackgePolicies } from '../lib/fleet/get_apm_package_policies';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 
 const hasFleetDataRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/fleet/has_data',
   options: { tags: [] },
-  handler: async (resources) => {
-    const { core } = resources.context;
-    const savedObjectsClient = core.savedObjects.client;
-    const fleetPluginStart = await resources.plugins.fleet.start();
-
-    const packagePolicies = await fleetPluginStart.packagePolicyService.list(
-      savedObjectsClient,
-      { kuery: 'ingest-package-policies.package.name:apm' }
-    );
+  handler: async ({ core, plugins }) => {
+    const fleetPluginStart = await plugins.fleet.start();
+    const packagePolicies = await getApmPackgePolicies({
+      core,
+      fleetPluginStart,
+    });
     return { hasData: packagePolicies.total > 0 };
   },
 });

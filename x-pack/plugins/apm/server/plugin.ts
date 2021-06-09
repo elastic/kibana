@@ -103,19 +103,6 @@ export class APMPlugin
       });
     }
 
-    const resourcePlugins = mapValues(plugins, (value, key) => {
-      return {
-        setup: value,
-        start: () =>
-          core.getStartServices().then((services) => {
-            const [, pluginsStartContracts] = services;
-            return pluginsStartContracts[
-              key as keyof APMPluginStartDependencies
-            ];
-          }),
-      };
-    }) as APMRouteHandlerResources['plugins'];
-
     plugins.home?.tutorials.registerTutorial(
       tutorialProvider({
         isEnabled: this.currentConfig['xpack.apm.ui.enabled'],
