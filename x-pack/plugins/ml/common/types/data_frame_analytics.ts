@@ -76,7 +76,7 @@ export interface DataFrameAnalyticsConfig {
   };
   source: {
     index: IndexName | IndexName[];
-    query?: estypes.QueryContainer;
+    query?: estypes.QueryDslQueryContainer;
     runtime_mappings?: RuntimeMappings;
   };
   analysis: AnalysisConfig;

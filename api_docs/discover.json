@@ -56,7 +56,7 @@
         "description": [],
         "signature": [
           "() => Promise<typeof ",
-          "src/plugins/discover/public/application/helpers/get_sharing_data",
+          "src/plugins/discover/public/application/apps/main/utils/get_sharing_data",
           ">"
         ],
         "source": {
@@ -79,7 +79,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/discover/public/url_generator.ts",
-          "lineNumber": 22
+          "lineNumber": 16
         },
         "deprecated": false,
         "children": [
@@ -97,7 +97,7 @@
             ],
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 26
+              "lineNumber": 20
             },
             "deprecated": false
           },
@@ -115,7 +115,7 @@
             ],
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 31
+              "lineNumber": 25
             },
             "deprecated": false
           },
@@ -140,7 +140,7 @@
             ],
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 36
+              "lineNumber": 30
             },
             "deprecated": false
           },
@@ -165,7 +165,7 @@
             ],
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 41
+              "lineNumber": 35
             },
             "deprecated": false
           },
@@ -190,7 +190,7 @@
             ],
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 46
+              "lineNumber": 40
             },
             "deprecated": false
           },
@@ -215,7 +215,7 @@
             ],
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 52
+              "lineNumber": 46
             },
             "deprecated": false
           },
@@ -233,7 +233,7 @@
             ],
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 58
+              "lineNumber": 52
             },
             "deprecated": false
           },
@@ -251,7 +251,7 @@
             ],
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 63
+              "lineNumber": 57
             },
             "deprecated": false
           },
@@ -269,7 +269,7 @@
             ],
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 68
+              "lineNumber": 62
             },
             "deprecated": false
           },
@@ -287,7 +287,7 @@
             ],
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 73
+              "lineNumber": 67
             },
             "deprecated": false
           },
@@ -305,7 +305,7 @@
             ],
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 77
+              "lineNumber": 72
             },
             "deprecated": false
           },
@@ -323,7 +323,7 @@
             ],
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 81
+              "lineNumber": 77
             },
             "deprecated": false
           }
@@ -890,7 +890,7 @@
         ],
         "source": {
           "path": "src/plugins/discover/public/url_generator.ts",
-          "lineNumber": 20
+          "lineNumber": 14
         },
         "deprecated": false,
         "initialIsOpen": false

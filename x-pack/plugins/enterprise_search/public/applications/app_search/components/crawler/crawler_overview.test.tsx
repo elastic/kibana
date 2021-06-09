@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { rerender, setMockActions, setMockValues } from '../../../__mocks__';
+import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
 import '../../../__mocks__/shallow_useeffect.mock';
 
 import React from 'react';
@@ -13,6 +13,7 @@ import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 
 import { Loading } from '../../../shared/loading';
+import { rerender } from '../../../test_helpers';
 
 import { DomainsTable } from './components/domains_table';
 import { CrawlerOverview } from './crawler_overview';
