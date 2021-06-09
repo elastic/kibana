@@ -221,6 +221,7 @@ export function TimeseriesChart({
         <Suspense fallback={null}>
           <LazyAlertsFlyout
             alerts={alerts}
+            isInApp={true}
             observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
             onClose={() => {
               setSelectedAlertId(undefined);

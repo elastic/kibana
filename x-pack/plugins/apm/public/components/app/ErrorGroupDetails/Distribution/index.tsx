@@ -133,6 +133,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
           <Suspense fallback={null}>
             <LazyAlertsFlyout
               alerts={alerts}
+              isInApp={true}
               observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
               onClose={() => {
                 setSelectedAlertId(undefined);

@@ -139,6 +139,7 @@ export function getAlertAnnotations({
               }
             }}
             size={isSelected ? 'xl' : 'm'}
+            style={{ cursor: 'pointer' }}
             type="alert"
           />
         }

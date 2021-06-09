@@ -40,12 +40,14 @@ import { SeverityBadge } from '../severity_badge';
 
 type AlertsFlyoutProps = {
   alerts?: TopAlertResponse[];
+  isInApp?: boolean;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   selectedAlertId?: string;
 } & EuiFlyoutProps;
 
 export function AlertsFlyout({
   alerts,
+  isInApp = false,
   observabilityRuleTypeRegistry,
   onClose,
   selectedAlertId,
@@ -127,7 +129,7 @@ export function AlertsFlyout({
           listItems={overviewListItems}
         />
       </EuiFlyoutBody>
-      {alert.link && (
+      {alert.link && !isInApp && (
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
