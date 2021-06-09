@@ -10,14 +10,15 @@ import React from 'react';
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import * as i18n from './translations';
 import { CasesNavigation } from '../links';
+
 interface Props {
   allCasesNavigation: CasesNavigation;
   caseId: string;
 }
+
 export const DoesNotExist = ({ allCasesNavigation, caseId }: Props) => (
   <EuiEmptyPrompt
-    // @ts-ignore remove once https://github.com/elastic/eui/issues/4850 is resolved
-    iconColor={null}
+    iconColor="default"
     iconType="addDataApp"
     title={<h2>{i18n.DOES_NOT_EXIST_TITLE}</h2>}
     titleSize="xs"

@@ -8,6 +8,7 @@
 import { pageObjects as kibanaFunctionalPageObjects } from '../../../../test/functional/page_objects';
 
 import { CanvasPageProvider } from './canvas_page';
+import { ObservabilityPageProvider } from './observability_page';
 import { SecurityPageProvider } from './security_page';
 import { MonitoringPageProvider } from './monitoring_page';
 // @ts-ignore not ts yet
@@ -83,4 +84,5 @@ export const pageObjects = {
   navigationalSearch: NavigationalSearchProvider,
   banners: BannersPageProvider,
   detections: DetectionsPageProvider,
+  observability: ObservabilityPageProvider,
 };

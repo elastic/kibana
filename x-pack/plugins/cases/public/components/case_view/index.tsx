@@ -364,7 +364,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
               caseData={caseData}
               currentExternalIncident={currentExternalIncident}
               disabled={!userCanCrud}
-              isAlerting={ruleDetailsNavigation != null}
+              disableAlerting={ruleDetailsNavigation == null}
               isLoading={isLoading && (updateKey === 'status' || updateKey === 'settings')}
               onRefresh={handleRefresh}
               onUpdateField={onUpdateField}

@@ -24,6 +24,7 @@ import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { uiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { getGlobalObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
+import { CASES_APP_ID, OBSERVABILITY } from '../common/const';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
@@ -32,9 +33,6 @@ interface PluginSetup {
   ruleRegistry: RuleRegistryPluginSetupContract;
 }
 
-const OBS_CASES_ID = 'observabilityCases';
-const OBSERVABILITY = 'observability';
-
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -42,21 +40,18 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
 
   public setup(core: CoreSetup, plugins: PluginSetup) {
     plugins.features.registerKibanaFeature({
-      id: OBS_CASES_ID,
+      id: CASES_APP_ID,
       name: i18n.translate('xpack.observability.featureRegistry.linkObservabilityTitle', {
         defaultMessage: 'Cases',
       }),
       order: 1100,
       category: DEFAULT_APP_CATEGORIES.observability,
-      app: [OBS_CASES_ID, 'kibana'],
+      app: [CASES_APP_ID, 'kibana'],
       catalogue: [OBSERVABILITY],
       cases: [OBSERVABILITY],
-      management: {
-        insightsAndAlerting: ['triggersActions'],
-      },
       privileges: {
         all: {
-          app: [OBS_CASES_ID, 'kibana'],
+          app: [CASES_APP_ID, 'kibana'],
           catalogue: [OBSERVABILITY],
           cases: {
             all: [OBSERVABILITY],
@@ -66,13 +61,10 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
             all: [],
             read: [],
           },
-          management: {
-            insightsAndAlerting: ['triggersActions'],
-          },
-          ui: ['crud_cases', 'read_cases'], // uiCapabilities.observabilityCases.crud_cases or read_cases
+          ui: ['crud_cases', 'read_cases'], // uiCapabilities[CASES_APP_ID].crud_cases or read_cases
         },
         read: {
-          app: [OBS_CASES_ID, 'kibana'],
+          app: [CASES_APP_ID, 'kibana'],
           catalogue: [OBSERVABILITY],
           cases: {
             read: [OBSERVABILITY],
@@ -82,10 +74,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
             all: [],
             read: [],
           },
-          management: {
-            insightsAndAlerting: ['triggersActions'],
-          },
-          ui: ['read_cases'], // uiCapabilities.observabilityCases.read_cases
+          ui: ['read_cases'], // uiCapabilities[uiCapabilities[CASES_APP_ID]].read_cases
         },
       },
     });

@@ -41,7 +41,7 @@ interface CaseActionBarProps {
   caseData: Case;
   currentExternalIncident: CaseService | null;
   disabled?: boolean;
-  isAlerting: boolean;
+  disableAlerting: boolean;
   isLoading: boolean;
   onRefresh: () => void;
   onUpdateField: (args: OnUpdateFields) => void;
@@ -51,7 +51,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
   caseData,
   currentExternalIncident,
   disabled = false,
-  isAlerting,
+  disableAlerting,
   isLoading,
   onRefresh,
   onUpdateField,
@@ -108,7 +108,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
       <EuiFlexItem grow={false}>
         <EuiDescriptionList compressed>
           <EuiFlexGroup gutterSize="l" alignItems="center">
-            {isAlerting && (
+            {!disableAlerting && (
               <EuiFlexItem>
                 <EuiDescriptionListTitle>
                   <EuiFlexGroup component="span" alignItems="center" gutterSize="xs">

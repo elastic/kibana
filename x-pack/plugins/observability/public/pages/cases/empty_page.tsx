@@ -103,7 +103,7 @@ const EmptyPageComponent = React.memo<EmptyPageProps>(({ actions, message, title
 
   return (
     <EmptyPrompt
-      iconType="logoSecurity"
+      iconType="logoObservability"
       title={<h2>{title}</h2>}
       body={message && <p>{message}</p>}
       actions={<EuiFlexGroup justifyContent="center">{renderActions}</EuiFlexGroup>}
