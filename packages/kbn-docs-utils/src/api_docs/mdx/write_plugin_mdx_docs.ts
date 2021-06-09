@@ -68,7 +68,7 @@ export function writePluginDoc(
   // Append "obj" to avoid special names in here. 'case' is one in particular that
   // caused issues.
   const json = getJsonName(fileName) + 'Obj';
-  const owner = plugin.manifest.owner?.name ?? '-';
+  const name = plugin.manifest.owner?.name;
   let mdx =
     dedent(`
 ---
@@ -81,16 +81,15 @@ date: 2020-11-16
 tags: ['contributor', 'dev', 'apidocs', 'kibana', '${doc.id}']
 warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
 ---
-
 import ${json} from './${fileName}.json';
 
 ${plugin.manifest.description ?? ''}
 
 ${
-  plugin.manifest.owner?.githubTeam
-    ? `Contact [${owner}](https://github.com/orgs/elastic/teams/${plugin.manifest.owner?.githubTeam}) for questions regarding this plugin.`
-    : owner
-    ? `Contact ${owner} for questions regarding this plugin.`
+  plugin.manifest.owner?.githubTeam && name
+    ? `Contact [${name}](https://github.com/orgs/elastic/teams/${plugin.manifest.owner?.githubTeam}) for questions regarding this plugin.`
+    : name
+    ? `Contact ${name} for questions regarding this plugin.`
     : ''
 }
 
