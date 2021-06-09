@@ -29,8 +29,8 @@ export const mockFlashMessageHelpers = {
   flashErrorToast: jest.fn(),
 };
 
-jest.mock('../shared/flash_messages', () => ({
-  ...(jest.requireActual('../shared/flash_messages') as object),
+jest.mock('../../shared/flash_messages', () => ({
+  ...(jest.requireActual('../../shared/flash_messages') as object),
   ...mockFlashMessageHelpers,
   FlashMessagesLogic: {
     values: mockFlashMessagesValues,

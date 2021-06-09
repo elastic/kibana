@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import '../../../__mocks__/react_router_history.mock';
-import { mockFlashMessageHelpers, setMockValues, setMockActions } from '../../../__mocks__';
+import {
+  mockFlashMessageHelpers,
+  setMockValues,
+  setMockActions,
+} from '../../../__mocks__/kea_logic';
+import { mockUseParams } from '../../../__mocks__/react_router';
 import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 import { mockEngineValues } from '../../__mocks__';
 
 import React from 'react';
-import { Switch, Redirect, useParams } from 'react-router-dom';
+import { Switch, Redirect } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
@@ -43,7 +47,7 @@ describe('EngineRouter', () => {
   beforeEach(() => {
     setMockValues(values);
     setMockActions(actions);
-    (useParams as jest.Mock).mockReturnValue({ engineName: 'some-engine' });
+    mockUseParams.mockReturnValue({ engineName: 'some-engine' });
   });
 
   describe('useEffect', () => {
@@ -87,7 +91,7 @@ describe('EngineRouter', () => {
   // any route views as they would be rendering with the wrong data.
   it('renders a loading component if the engine stored in state is stale', () => {
     setMockValues({ ...values, engineName: 'some-engine' });
-    (useParams as jest.Mock).mockReturnValue({ engineName: 'some-new-engine' });
+    mockUseParams.mockReturnValue({ engineName: 'some-new-engine' });
     const wrapper = shallow(<EngineRouter />);
     expect(wrapper.find(Loading)).toHaveLength(1);
   });
