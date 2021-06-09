@@ -5313,7 +5313,6 @@
     "xpack.apm.agentConfig.servicePage.service.description": "構成するサービスを選択してください。",
     "xpack.apm.agentConfig.servicePage.service.fieldLabel": "サービス名",
     "xpack.apm.agentConfig.servicePage.service.title": "サービス",
-    "xpack.apm.agentConfig.settings.title": "構成オプション",
     "xpack.apm.agentConfig.settingsPage.discardChangesButton": "変更を破棄",
     "xpack.apm.agentConfig.settingsPage.notFound.message": "リクエストされた構成が存在しません",
     "xpack.apm.agentConfig.settingsPage.notFound.title": "申し訳ございません、エラーが発生しました",

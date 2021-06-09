@@ -5342,7 +5342,6 @@
     "xpack.apm.agentConfig.servicePage.service.description": "选择要配置的服务。",
     "xpack.apm.agentConfig.servicePage.service.fieldLabel": "服务名称",
     "xpack.apm.agentConfig.servicePage.service.title": "服务",
-    "xpack.apm.agentConfig.settings.title": "配置选项",
     "xpack.apm.agentConfig.settingsPage.discardChangesButton": "放弃更改",
     "xpack.apm.agentConfig.settingsPage.notFound.message": "请求的配置不存在",
     "xpack.apm.agentConfig.settingsPage.notFound.title": "抱歉，有错误",
