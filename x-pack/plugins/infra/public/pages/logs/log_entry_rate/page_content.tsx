@@ -141,8 +141,8 @@ export const LogEntryRatePageContent = memo(() => {
       <>
         <AnomaliesPageTemplate isEmptyState={true}>
           <LogEntryRateSetupContent onOpenSetup={showModuleList} />
-          <LogAnalysisSetupFlyout />
         </AnomaliesPageTemplate>
+        <LogAnalysisSetupFlyout />
       </>
     );
   }

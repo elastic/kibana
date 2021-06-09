@@ -94,10 +94,12 @@ export const LogEntryCategoriesPageContent = () => {
     );
   } else {
     return (
-      <CategoriesPageTemplate isEmptyState={true}>
-        <LogEntryCategoriesSetupContent onOpenSetup={showCategoriesModuleSetup} />
+      <>
+        <CategoriesPageTemplate isEmptyState={true}>
+          <LogEntryCategoriesSetupContent onOpenSetup={showCategoriesModuleSetup} />
+        </CategoriesPageTemplate>
         <LogAnalysisSetupFlyout allowedModules={allowedSetupModules} />
-      </CategoriesPageTemplate>
+      </>
     );
   }
 };
