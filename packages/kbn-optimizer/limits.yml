@@ -34,7 +34,7 @@ pageLoadAssetSize:
   indexManagement: 140608
   indexPatternManagement: 28222
   infra: 184320
-  fleet: 415829
+  fleet: 450005
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
@@ -87,7 +87,6 @@ pageLoadAssetSize:
   visDefaultEditor: 50178
   visTypeMarkdown: 30896
   visTypeMetric: 42790
-  visTypePie: 34051
   visTypeTable: 94934
   visTypeTagcloud: 37575
   visTypeTimelion: 68883
@@ -105,9 +104,10 @@ pageLoadAssetSize:
   indexPatternFieldEditor: 90489
   osquery: 107090
   fileUpload: 25664
-  fileDataVisualizer: 27530
+  dataVisualizer: 27530
   banners: 17946
   mapsEms: 26072
   timelines: 28613
   cases: 162385
   screenshotMode: 17856
+  visTypePie: 35583
