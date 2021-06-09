@@ -16,7 +16,7 @@
   "license": "Elastic License v2",
   "name": "AWS EC2 Flow Log Deletion",
   "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:aws.cloudtrail and event.provider:ec2.amazonaws.com and event.action:DeleteFlowLogs and event.outcome:success",
+  "query": "event.dataset:aws.cloudtrail and event.provider:ec2.amazonaws.com and event.action:DeleteFlowLogs and event.outcome:success\n",
   "references": [
     "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/ec2/delete-flow-logs.html",
     "https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DeleteFlowLogs.html"

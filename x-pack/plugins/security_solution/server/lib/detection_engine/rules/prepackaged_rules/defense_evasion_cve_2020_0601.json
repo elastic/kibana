@@ -10,7 +10,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Windows CryptoAPI Spoofing Vulnerability (CVE-2020-0601 - CurveBall)",
-  "query": "event.provider:\"Microsoft-Windows-Audit-CVE\" and message:\"[CVE-2020-0601]\"",
+  "query": "event.provider:\"Microsoft-Windows-Audit-CVE\" and message:\"[CVE-2020-0601]\"\n",
   "risk_score": 21,
   "rule_id": "56557cde-d923-4b88-adee-c61b3f3b5dc3",
   "severity": "low",
@@ -47,5 +47,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 6
+  "version": 7
 }

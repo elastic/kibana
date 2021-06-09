@@ -11,7 +11,7 @@
   "license": "Elastic License v2",
   "name": "Possible Okta DoS Attack",
   "note": "## Config\n\nThe Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:okta.system and event.action:(application.integration.rate_limit_exceeded or system.org.rate_limit.warning or system.org.rate_limit.violation or core.concurrency.org.limit.violation)",
+  "query": "event.dataset:okta.system and event.action:(application.integration.rate_limit_exceeded or system.org.rate_limit.warning or system.org.rate_limit.violation or core.concurrency.org.limit.violation)\n",
   "references": [
     "https://developer.okta.com/docs/reference/api/system-log/",
     "https://developer.okta.com/docs/reference/api/event-types/"

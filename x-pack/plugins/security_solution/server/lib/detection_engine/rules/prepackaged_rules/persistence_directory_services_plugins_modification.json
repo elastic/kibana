@@ -11,7 +11,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Persistence via DirectoryService Plugin Modification",
-  "query": "event.category:file and not event.type:deletion and file.path:/Library/DirectoryServices/PlugIns/*.dsplug",
+  "query": "event.category:file and not event.type:deletion and\n  file.path:/Library/DirectoryServices/PlugIns/*.dsplug\n",
   "references": [
     "https://blog.chichou.me/2019/11/21/two-macos-persistence-tricks-abusing-plugins/"
   ],
@@ -44,5 +44,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }

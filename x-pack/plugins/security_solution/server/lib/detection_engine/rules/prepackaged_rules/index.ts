@@ -544,7 +544,10 @@ import rule531 from './ml_spike_in_traffic_to_a_country.json';
 import rule532 from './command_and_control_tunneling_via_earthworm.json';
 import rule533 from './lateral_movement_evasion_rdp_shadowing.json';
 import rule534 from './threat_intel_module_match.json';
-import rule535 from './persistence_via_bits_job_notify_command.json';
+import rule535 from './defense_evasion_suspicious_execution_from_mounted_device.json';
+import rule536 from './defense_evasion_unusual_network_connection_via_dllhost.json';
+import rule537 from './defense_evasion_amsienable_key_mod.json';
+import rule538 from './persistence_via_bits_job_notify_command.json';
 
 export const rawRules = [
   rule1,
@@ -1082,4 +1085,7 @@ export const rawRules = [
   rule533,
   rule534,
   rule535,
+  rule536,
+  rule537,
+  rule538,
 ];

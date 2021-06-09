@@ -11,7 +11,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Execution via Electron Child Process Node.js Module",
-  "query": "event.category:process and event.type:(start or process_started) and process.args:(\"-e\" and const*require*child_process*)",
+  "query": "event.category:process and event.type:(start or process_started) and process.args:(\"-e\" and const*require*child_process*)\n",
   "references": [
     "https://www.matthewslipper.com/2019/09/22/everything-you-wanted-electron-child-process.html",
     "https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks/",
@@ -62,5 +62,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }

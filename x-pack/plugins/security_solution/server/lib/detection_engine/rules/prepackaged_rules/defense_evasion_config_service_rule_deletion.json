@@ -17,7 +17,7 @@
   "license": "Elastic License v2",
   "name": "AWS Config Service Tampering",
   "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:aws.cloudtrail and event.provider:config.amazonaws.com and event.action:(DeleteConfigRule or DeleteOrganizationConfigRule or DeleteConfigurationAggregator or DeleteConfigurationRecorder or DeleteConformancePack or DeleteOrganizationConformancePack or DeleteDeliveryChannel or DeleteRemediationConfiguration or DeleteRetentionConfiguration)",
+  "query": "event.dataset:aws.cloudtrail and event.provider:config.amazonaws.com and\n    event.action:(DeleteConfigRule or DeleteOrganizationConfigRule or DeleteConfigurationAggregator or\n    DeleteConfigurationRecorder or DeleteConformancePack or DeleteOrganizationConformancePack or\n    DeleteDeliveryChannel or DeleteRemediationConfiguration or DeleteRetentionConfiguration)\n",
   "references": [
     "https://docs.aws.amazon.com/config/latest/developerguide/how-does-config-work.html",
     "https://docs.aws.amazon.com/config/latest/APIReference/API_Operations.html"

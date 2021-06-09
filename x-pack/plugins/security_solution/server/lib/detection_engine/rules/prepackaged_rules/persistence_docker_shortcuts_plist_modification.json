@@ -11,7 +11,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Persistence via Docker Shortcut Modification",
-  "query": "event.category : file and event.action : modification and file.path : /Users/*/Library/Preferences/com.apple.dock.plist and not process.name : (xpcproxy or cfprefsd or plutil or jamf or PlistBuddy or InstallerRemotePluginService)",
+  "query": "event.category : file and event.action : modification and \n file.path : /Users/*/Library/Preferences/com.apple.dock.plist and \n not process.name : (xpcproxy or cfprefsd or plutil or jamf or PlistBuddy or InstallerRemotePluginService)\n",
   "references": [
     "https://github.com/specterops/presentations/raw/master/Leo Pitt/Hey_Im_Still_in_Here_Modern_macOS_Persistence_SO-CON2020.pdf"
   ],
@@ -44,5 +44,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }
