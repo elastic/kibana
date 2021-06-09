@@ -13,7 +13,6 @@ import { useIntraAppState } from '../../../hooks';
 
 interface AgentPolicyContextValue {
   getId(): string | undefined;
-  clear(): void;
 }
 
 const AgentPolicyContext = createContext<AgentPolicyContextValue>({});
@@ -25,12 +24,7 @@ export const AgentPolicyContextProvider: FunctionComponent = ({ children }) => {
   const getId = useCallback(() => {
     return ref.current;
   }, []);
-  const clear = useCallback(() => {
-    ref.current = undefined;
-  }, []);
-  return (
-    <AgentPolicyContext.Provider value={{ getId, clear }}>{children}</AgentPolicyContext.Provider>
-  );
+  return <AgentPolicyContext.Provider value={{ getId }}>{children}</AgentPolicyContext.Provider>;
 };
 
 export const useAgentPolicyContext = () => {
