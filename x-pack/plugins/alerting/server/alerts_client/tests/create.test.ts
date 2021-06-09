@@ -801,6 +801,111 @@ describe('create()', () => {
     expect(taskManager.schedule).toHaveBeenCalledTimes(0);
   });
 
+  test('should call useSavedObjectReferences.extractReferences and useSavedObjectReferences.injectReferences if defined for rule type', async () => {
+    const ruleParams = {
+      bar: true,
+      parameterThatIsSavedObjectId: '9',
+    };
+    const extractReferencesFn = jest.fn().mockReturnValue({
+      params: {
+        bar: true,
+        parameterThatIsSavedObjectRef: 'soRef_0',
+      },
+      references: [
+        {
+          name: 'soRef_0',
+          type: 'someSavedObjecType',
+          id: '9',
+        },
+      ],
+    });
+    const injectReferencesFn = jest.fn();
+    alertTypeRegistry.get.mockImplementation(() => ({
+      id: '123',
+      name: 'Test',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      async executor() {},
+      producer: 'alerts',
+      useSavedObjectReferences: {
+        extractReferences: extractReferencesFn,
+        injectReferences: injectReferencesFn,
+      },
+    }));
+    const data = getMockData({
+      params: ruleParams,
+    });
+    taskManager.schedule.mockResolvedValueOnce({
+      id: 'task-123',
+      taskType: 'alerting:123',
+      scheduledAt: new Date(),
+      attempts: 1,
+      status: TaskStatus.Idle,
+      runAt: new Date(),
+      startedAt: null,
+      retryAt: null,
+      state: {},
+      params: {},
+      ownerId: null,
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        actions: [],
+        scheduledTaskId: 'task-123',
+      },
+      references: [],
+    });
+    const result = await alertsClient.create({ data });
+
+    expect(extractReferencesFn).toHaveBeenCalledWith(ruleParams);
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      'alert',
+      {
+        actions: [
+          { actionRef: 'action_0', actionTypeId: 'test', group: 'default', params: { foo: true } },
+        ],
+        alertTypeId: '123',
+        apiKey: null,
+        apiKeyOwner: null,
+        consumer: 'bar',
+        createdAt: '2019-02-12T21:01:22.479Z',
+        createdBy: 'elastic',
+        enabled: true,
+        executionStatus: {
+          error: null,
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+        },
+        meta: { versionApiKeyLastmodified: 'v7.10.0' },
+        muteAll: false,
+        mutedInstanceIds: [],
+        name: 'abc',
+        notifyWhen: 'onActiveAlert',
+        params: { bar: true, parameterThatIsSavedObjectRef: 'soRef_0' },
+        schedule: { interval: '10s' },
+        tags: ['foo'],
+        throttle: null,
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+      },
+      {
+        id: 'mock-saved-object-id',
+        references: [
+          { id: '1', name: 'action_0', type: 'action' },
+          { id: '9', name: 'soRef_0', type: 'someSavedObjecType' },
+        ],
+      }
+    );
+
+    // TODO
+    // expect(injectReferencesFn).toHaveBeenCalledWith();
+    // expect(result).toEqual();
+  });
+
   test('should trim alert name when creating API key', async () => {
     const data = getMockData({ name: ' my alert name ' });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -1299,6 +1404,50 @@ describe('create()', () => {
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"params invalid: [param1]: expected value of type [string] but got [undefined]"`
     );
+  });
+
+  test('throws error if extracted references uses reserved name prefix', async () => {
+    const ruleParams = {
+      bar: true,
+      parameterThatIsSavedObjectId: '9',
+    };
+    const extractReferencesFn = jest.fn().mockReturnValue({
+      params: {
+        bar: true,
+        parameterThatIsSavedObjectRef: 'action_0',
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'someSavedObjecType',
+          id: '9',
+        },
+      ],
+    });
+    alertTypeRegistry.get.mockImplementation(() => ({
+      id: '123',
+      name: 'Test',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      async executor() {},
+      producer: 'alerts',
+      useSavedObjectReferences: {
+        extractReferences: extractReferencesFn,
+        injectReferences: jest.fn(),
+      },
+    }));
+    const data = getMockData({
+      params: ruleParams,
+    });
+    await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Error creating rule: extracted saved object reference names are cannot start with action_"`
+    );
+
+    expect(extractReferencesFn).toHaveBeenCalledWith(ruleParams);
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
   });
 
   test('throws error if loading actions fails', async () => {

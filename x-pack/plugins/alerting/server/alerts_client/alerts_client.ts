@@ -183,6 +183,8 @@ export interface GetAlertInstanceSummaryParams {
   dateStart?: string;
 }
 
+const reservedSavedObjectReferenceNamePrefix = 'action_';
+
 const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
   type: AlertingAuthorizationFilterType.KQL,
   fieldNames: { ruleTypeId: 'alert.attributes.alertTypeId', consumer: 'alert.attributes.consumer' },
@@ -282,18 +284,15 @@ export class AlertsClient {
       throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
     }
 
-    // Validate actions and create a saved object reference for each action
+    // Validate actions
     await this.validateActions(alertType, data.actions);
-    const { references: actionReferences, actions } = await this.denormalizeActions(data.actions);
 
-    // Extracts any references using configured reference extractor if available
-    const extractedRefsAndParams = alertType?.references?.extractReferences
-      ? alertType.references.extractReferences(validatedAlertTypeParams)
-      : null;
-    const extractedReferences = extractedRefsAndParams?.references ?? [];
-    const ruleParams = extractedRefsAndParams?.params ?? validatedAlertTypeParams;
-
-    const references = [...actionReferences, ...extractedReferences];
+    // Extract saved object references for this rule
+    const { references, params: updatedParams, actions } = await this.extractReferences(
+      alertType,
+      data.actions,
+      validatedAlertTypeParams
+    );
 
     const createTime = Date.now();
     const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
@@ -306,7 +305,7 @@ export class AlertsClient {
       updatedBy: username,
       createdAt: new Date(createTime).toISOString(),
       updatedAt: new Date(createTime).toISOString(),
-      params: ruleParams as RawAlert['params'],
+      params: updatedParams as RawAlert['params'],
       muteAll: false,
       mutedInstanceIds: [],
       notifyWhen,
@@ -769,7 +768,13 @@ export class AlertsClient {
     );
     await this.validateActions(alertType, data.actions);
 
-    const { actions, references } = await this.denormalizeActions(data.actions);
+    // Extract saved object references for this rule
+    const { references, params: updatedParams, actions } = await this.extractReferences(
+      alertType,
+      data.actions,
+      validatedAlertTypeParams
+    );
+
     const username = await this.getUserName();
 
     let createdAPIKey = null;
@@ -789,7 +794,7 @@ export class AlertsClient {
       ...attributes,
       ...data,
       ...apiKeyAttributes,
-      params: validatedAlertTypeParams as RawAlert['params'],
+      params: updatedParams as RawAlert['params'],
       actions,
       notifyWhen,
       updatedBy: username,
@@ -1534,6 +1539,65 @@ export class AlertsClient {
     }
   }
 
+  private async extractReferences<Params extends AlertTypeParams>(
+    ruleType: UntypedNormalizedAlertType,
+    ruleActions: NormalizedAlertAction[],
+    ruleParams: Params
+  ): Promise<{
+    actions: RawAlert['actions'];
+    params: Params;
+    references: SavedObjectReference[];
+  }> {
+    const { references: actionReferences, actions } = await this.denormalizeActions(ruleActions);
+
+    // Extracts any references using configured reference extractor if available
+    const extractedRefsAndParams = ruleType?.useSavedObjectReferences?.extractReferences
+      ? ruleType.useSavedObjectReferences.extractReferences(ruleParams)
+      : null;
+    const extractedReferences = extractedRefsAndParams?.references ?? [];
+    const params = (extractedRefsAndParams?.params as Params) ?? ruleParams;
+
+    // Validate that extract references don't use prefix reserved for actions
+    const referencesUsingReservedPrefix = extractedReferences.filter(
+      (reference: SavedObjectReference) =>
+        reference.name.startsWith(reservedSavedObjectReferenceNamePrefix)
+    );
+
+    if (referencesUsingReservedPrefix.length > 0) {
+      throw Boom.badRequest(
+        `Error creating rule: extracted saved object reference names are cannot start with ${reservedSavedObjectReferenceNamePrefix}`
+      );
+    }
+
+    const references = [...actionReferences, ...extractedReferences];
+    return {
+      actions,
+      params,
+      references,
+    };
+  }
+
+  private injectReferences<Params extends AlertTypeParams>(
+    ruleId: string,
+    ruleType: UntypedNormalizedAlertType,
+    ruleActions: RawAlert['actions'],
+    ruleParams: Params,
+    references: SavedObjectReference[]
+  ): {
+    actions: Alert['actions'];
+    params: Params;
+  } {
+    const actions = this.injectReferencesIntoActions(ruleId, ruleActions, references);
+    const params = ruleType?.useSavedObjectReferences?.injectReferences
+      ? (ruleType.useSavedObjectReferences.injectReferences(ruleParams, references) as Params)
+      : ruleParams;
+
+    return {
+      actions,
+      params,
+    };
+  }
+
   private async denormalizeActions(
     alertActions: NormalizedAlertAction[]
   ): Promise<{ actions: RawAlert['actions']; references: SavedObjectReference[] }> {
@@ -1551,7 +1615,7 @@ export class AlertsClient {
       alertActions.forEach(({ id, ...alertAction }, i) => {
         const actionResultValue = actionResults.find((action) => action.id === id);
         if (actionResultValue) {
-          const actionRef = `action_${i}`;
+          const actionRef = `${reservedSavedObjectReferenceNamePrefix}${i}`;
           references.push({
             id,
             name: actionRef,

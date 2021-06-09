@@ -99,19 +99,10 @@ export interface AlertExecutorOptions<
   updatedBy: string | null;
 }
 
-export interface ExtractedReferencesAndParams<Params extends AlertTypeParams> {
+export interface RuleParamsAndRefs<Params extends AlertTypeParams> {
   references: SavedObjectReference[];
   params: Params;
 }
-
-export type ExtractReferencesType<Params extends AlertTypeParams> = (
-  params: Params
-) => ExtractedReferencesAndParams<Params>;
-
-export type InjectReferencesType<Params extends AlertTypeParams> = (
-  params: Params,
-  references: SavedObjectReference[]
-) => Params;
 
 export type ExecutorType<
   Params extends AlertTypeParams = never,
@@ -139,10 +130,6 @@ export interface AlertType<
   validate?: {
     params?: AlertTypeParamsValidator<Params>;
   };
-  references?: {
-    extractReferences: ExtractReferencesType<Params>;
-    injectReferences: InjectReferencesType<Params>;
-  };
   actionGroups: Array<ActionGroup<ActionGroupIds>>;
   defaultActionGroupId: ActionGroup<ActionGroupIds>['id'];
   recoveryActionGroup?: ActionGroup<RecoveryActionGroupId>;
@@ -164,6 +151,10 @@ export interface AlertType<
     params?: ActionVariable[];
   };
   minimumLicenseRequired: LicenseType;
+  useSavedObjectReferences?: {
+    extractReferences: (params: Params) => RuleParamsAndRefs<Params>;
+    injectReferences: (params: Params, references: SavedObjectReference[]) => Params;
+  };
 }
 
 export type UntypedAlertType = AlertType<
