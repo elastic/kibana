@@ -25,6 +25,7 @@ import {
 } from '../../../common/agent_configuration/runtime_types/agent_configuration_intake_rt';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/aggregated_transactions';
 import { createApmServerRouteRepository } from '../create_apm_server_route_repository';
+import { syncAgentConfigsToApmPackagePolicies } from '../../lib/fleet/sync_agent_configs_to_apm_package_policies';
 
 // get list of configurations
 const agentConfigurationRoute = createApmServerRoute({
@@ -78,7 +79,7 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
   }),
   handler: async (resources) => {
     const setup = await setupRequest(resources);
-    const { params, logger } = resources;
+    const { params, logger, core } = resources;
 
     const { service } = params.body;
 
@@ -95,10 +96,23 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
       `Deleting config ${service.name}/${service.environment} (${config._id})`
     );
 
-    return await deleteConfiguration({
+    const deleteConfigurationResult = await deleteConfiguration({
       configurationId: config._id,
       setup,
     });
+
+    if (resources.plugins.fleet) {
+      await syncAgentConfigsToApmPackagePolicies({
+        core,
+        fleetPluginStart: await resources.plugins.fleet.start(),
+        setup,
+      });
+      logger.info(
+        `Updated Fleet integration policy for APM to remove the deleted agent configuration.`
+      );
+    }
+
+    return deleteConfigurationResult;
   },
 });
 
@@ -114,7 +128,7 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
   ]),
   handler: async (resources) => {
     const setup = await setupRequest(resources);
-    const { params, logger } = resources;
+    const { params, logger, core } = resources;
     const { body, query } = params;
 
     // if the config already exists, it is fetched and updated
@@ -142,6 +156,17 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
       configurationIntake: body,
       setup,
     });
+
+    if (resources.plugins.fleet) {
+      await syncAgentConfigsToApmPackagePolicies({
+        core,
+        fleetPluginStart: await resources.plugins.fleet.start(),
+        setup,
+      });
+      logger.info(
+        `Saved latest agent settings to Fleet integration policy for APM.`
+      );
+    }
   },
 });
 

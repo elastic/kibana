@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { LogicMounter, mockHttpValues } from '../../../__mocks__';
+import { LogicMounter, mockHttpValues } from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test/jest';
+
+import { ApiTokenTypes } from '../credentials/constants';
 
 import { EngineTypes } from './types';
 
@@ -47,6 +49,7 @@ describe('EngineLogic', () => {
     hasSchemaConflicts: false,
     hasUnconfirmedSchemaFields: false,
     engineNotFound: false,
+    searchKey: '',
   };
 
   beforeEach(() => {
@@ -260,6 +263,58 @@ describe('EngineLogic', () => {
           ...DEFAULT_VALUES,
           engine: mockUnconfirmedFieldsEngine,
           hasUnconfirmedSchemaFields: true,
+        });
+      });
+    });
+
+    describe('searchKey', () => {
+      it('should select the first available search key for this engine', () => {
+        const engine = {
+          ...mockEngineData,
+          apiTokens: [
+            {
+              key: 'private-123xyz',
+              name: 'privateKey',
+              type: ApiTokenTypes.Private,
+            },
+            {
+              key: 'search-123xyz',
+              name: 'searchKey',
+              type: ApiTokenTypes.Search,
+            },
+            {
+              key: 'search-8910abc',
+              name: 'searchKey2',
+              type: ApiTokenTypes.Search,
+            },
+          ],
+        };
+        mount({ engine });
+
+        expect(EngineLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          engine,
+          searchKey: 'search-123xyz',
+        });
+      });
+
+      it('should return an empty string if none are available', () => {
+        const engine = {
+          ...mockEngineData,
+          apiTokens: [
+            {
+              key: 'private-123xyz',
+              name: 'privateKey',
+              type: ApiTokenTypes.Private,
+            },
+          ],
+        };
+        mount({ engine });
+
+        expect(EngineLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          engine,
+          searchKey: '',
         });
       });
     });

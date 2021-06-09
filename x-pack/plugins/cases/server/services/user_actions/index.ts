@@ -12,6 +12,7 @@ import {
   CASE_USER_ACTION_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   SUB_CASE_SAVED_OBJECT,
+  MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
 import { ClientArgs } from '..';
 
@@ -36,19 +37,12 @@ export class CaseUserActionService {
     try {
       const id = subCaseId ?? caseId;
       const type = subCaseId ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
-      const caseUserActionInfo = await unsecuredSavedObjectsClient.find<CaseUserActionAttributes>({
-        type: CASE_USER_ACTION_SAVED_OBJECT,
-        fields: [],
-        hasReference: { type, id },
-        page: 1,
-        perPage: 1,
-      });
 
       return await unsecuredSavedObjectsClient.find<CaseUserActionAttributes>({
         type: CASE_USER_ACTION_SAVED_OBJECT,
         hasReference: { type, id },
         page: 1,
-        perPage: caseUserActionInfo.total,
+        perPage: MAX_DOCS_PER_PAGE,
         sortField: 'action_at',
         sortOrder: 'asc',
       });

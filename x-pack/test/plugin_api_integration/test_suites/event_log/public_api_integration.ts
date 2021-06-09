@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('empty_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     for (const namespace of [undefined, 'namespace-a']) {
@@ -161,7 +161,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe(`Index Lifecycle`, () => {
       it('should query across indicies matching the Event Log index pattern', async () => {
-        await esArchiver.load('event_log_multiple_indicies');
+        await esArchiver.load('x-pack/test/functional/es_archives/event_log_multiple_indicies');
 
         const id = `421f2511-5cd1-44fd-95df-e0df83e354d5`;
 
@@ -181,7 +181,7 @@ export default function ({ getService }: FtrProviderContext) {
           'test 2020-10-28T15:19:55.962Z',
         ]);
 
-        await esArchiver.unload('event_log_multiple_indicies');
+        await esArchiver.unload('x-pack/test/functional/es_archives/event_log_multiple_indicies');
       });
     });
   });
