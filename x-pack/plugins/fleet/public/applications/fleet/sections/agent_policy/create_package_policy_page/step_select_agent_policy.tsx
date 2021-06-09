@@ -55,15 +55,23 @@ const AgentPolicyDescriptionColumn = styled(EuiFlexItem)`
 export const StepSelectAgentPolicy: React.FunctionComponent<{
   pkgkey: string;
   updatePackageInfo: (packageInfo: PackageInfo | undefined) => void;
+  defaultAgentPolicyId?: string;
   agentPolicy: AgentPolicy | undefined;
   updateAgentPolicy: (agentPolicy: AgentPolicy | undefined) => void;
   setIsLoadingSecondStep: (isLoading: boolean) => void;
-}> = ({ pkgkey, updatePackageInfo, agentPolicy, updateAgentPolicy, setIsLoadingSecondStep }) => {
+}> = ({
+  pkgkey,
+  updatePackageInfo,
+  agentPolicy,
+  updateAgentPolicy,
+  setIsLoadingSecondStep,
+  defaultAgentPolicyId,
+}) => {
   const { isReady: isFleetReady } = useFleetStatus();
 
   // Selected agent policy state
   const [selectedPolicyId, setSelectedPolicyId] = useState<string | undefined>(
-    agentPolicy ? agentPolicy.id : undefined
+    agentPolicy?.id ?? defaultAgentPolicyId
   );
   const [selectedAgentPolicyError, setSelectedAgentPolicyError] = useState<Error>();
 

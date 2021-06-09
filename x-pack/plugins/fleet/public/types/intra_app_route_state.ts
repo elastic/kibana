@@ -13,6 +13,8 @@ import type { PackagePolicy } from './';
  * Supported routing state for the create package policy page routes
  */
 export interface CreatePackagePolicyRouteState {
+  /** Optionally specify which agent policy we should default to */
+  agentPolicyId?: string;
   /** On a successful save of the package policy, use navigate to the given app */
   onSaveNavigateTo?:
     | Parameters<ApplicationStart['navigateToApp']>

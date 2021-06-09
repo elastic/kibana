@@ -73,6 +73,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const handleNavigateTo = useNavigateToCallback();
   const routeState = useIntraAppState<CreatePackagePolicyRouteState>();
   const from: CreatePackagePolicyFrom = policyId ? 'policy' : 'package';
+  const forwardedAgentPolicyId = from === 'package' ? routeState?.agentPolicyId : undefined;
 
   // Agent policy and package info states
   const [agentPolicy, setAgentPolicy] = useState<AgentPolicy>();
@@ -297,12 +298,13 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       <StepSelectAgentPolicy
         pkgkey={pkgkey}
         updatePackageInfo={updatePackageInfo}
+        defaultAgentPolicyId={forwardedAgentPolicyId}
         agentPolicy={agentPolicy}
         updateAgentPolicy={updateAgentPolicy}
         setIsLoadingSecondStep={setIsLoadingSecondStep}
       />
     ),
-    [pkgkey, updatePackageInfo, agentPolicy, updateAgentPolicy]
+    [pkgkey, updatePackageInfo, agentPolicy, updateAgentPolicy, forwardedAgentPolicyId]
   );
 
   const ExtensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-create');

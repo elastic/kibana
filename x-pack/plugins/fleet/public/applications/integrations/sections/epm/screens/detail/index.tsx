@@ -249,6 +249,7 @@ export function Detail() {
       }
 
       const redirectBackRouteState: CreatePackagePolicyRouteState = {
+        agentPolicyId,
         onSaveNavigateTo: redirectToPath,
         onCancelNavigateTo: redirectToPath,
         onCancelUrl: currentPath,
