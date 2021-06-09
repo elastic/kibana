@@ -178,16 +178,6 @@ export function SettingsPage({
 
           {/* Settings panel */}
 
-          <EuiTitle size="s">
-            <h3>
-              {i18n.translate('xpack.apm.agentConfig.settings.title', {
-                defaultMessage: 'Configuration options',
-              })}
-            </h3>
-          </EuiTitle>
-
-          <EuiSpacer size="m" />
-
           {isLoading ? (
             <div style={{ textAlign: 'center' }}>
               <EuiLoadingSpinner size="m" />
