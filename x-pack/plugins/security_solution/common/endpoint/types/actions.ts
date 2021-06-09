@@ -47,6 +47,7 @@ export interface HostIsolationResponse {
 export interface PendingActionsResponse {
   agent_id: string;
   pending_actions: {
+    /** Number of actions pending for each type. The `key` could be one of the `ISOLATION_ACTIONS` values. */
     [key: string]: number;
   };
 }
