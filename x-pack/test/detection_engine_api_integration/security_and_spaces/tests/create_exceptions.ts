@@ -65,14 +65,14 @@ export default ({ getService }: FtrProviderContext) => {
     describe('creating rules with exceptions', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
-        await esArchiver.load('auditbeat/hosts');
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
         await deleteAllExceptions(es);
-        await esArchiver.unload('auditbeat/hosts');
+        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       describe('elastic admin', () => {
@@ -530,14 +530,14 @@ export default ({ getService }: FtrProviderContext) => {
       describe('tests with auditbeat data', () => {
         beforeEach(async () => {
           await createSignalsIndex(supertest);
-          await esArchiver.load('auditbeat/hosts');
+          await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
         });
 
         afterEach(async () => {
           await deleteSignalsIndex(supertest);
           await deleteAllAlerts(supertest);
           await deleteAllExceptions(es);
-          await esArchiver.unload('auditbeat/hosts');
+          await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         });
 
         it('should be able to execute against an exception list that does not include valid entries and get back 10 signals', async () => {
