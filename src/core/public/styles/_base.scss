@@ -26,5 +26,5 @@
 }
 
 .euiBody--collapsibleNavIsDocked .euiBottomBar {
-  margin-left: $euiCollapsibleNavWidth;
+  margin-left: 320px; // Hard-coded for now -- @cchaos
 }
