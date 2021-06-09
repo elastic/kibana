@@ -35,6 +35,7 @@ export const AGENT_NAMES: AgentName[] = [
   'java',
   'js-base',
   'nodejs',
+  'php',
   'python',
   'ruby',
   'rum-js',

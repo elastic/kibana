@@ -25,12 +25,12 @@ export default ({ getService }: FtrProviderContext): void => {
     beforeEach(async () => {
       await createSignalsIndex(supertest);
       legacySignalsIndexName = getIndexNameFromLoad(
-        await esArchiver.load('signals/legacy_signals_index')
+        await esArchiver.load('x-pack/test/functional/es_archives/signals/legacy_signals_index')
       );
     });
 
     afterEach(async () => {
-      await esArchiver.unload('signals/legacy_signals_index');
+      await esArchiver.unload('x-pack/test/functional/es_archives/signals/legacy_signals_index');
       await deleteSignalsIndex(supertest);
     });
 
@@ -59,7 +59,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it("returns the mappings version and a breakdown of signals' version", async () => {
       const outdatedIndexName = getIndexNameFromLoad(
-        await esArchiver.load('signals/outdated_signals_index')
+        await esArchiver.load('x-pack/test/functional/es_archives/signals/outdated_signals_index')
       );
 
       const { body } = await supertest
@@ -95,7 +95,7 @@ export default ({ getService }: FtrProviderContext): void => {
         },
       ]);
 
-      await esArchiver.unload('signals/outdated_signals_index');
+      await esArchiver.unload('x-pack/test/functional/es_archives/signals/outdated_signals_index');
     });
 
     it('rejects the request if the user does not have sufficient privileges', async () => {
