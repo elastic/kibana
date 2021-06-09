@@ -7,14 +7,14 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { DocLinksStart, NotificationsStart, CoreStart } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 
-import { IndexPattern, DataPublicPluginStart, IndexPatternSpec } from '../shared_imports';
+import { IndexPattern, IndexPatternSpec, useKibana } from '../shared_imports';
 // import { PluginStart, InternalFieldType } from '../types';
 // import { deserializeField, getRuntimeFieldValidator } from '../lib';
 // import { Props as FieldEditorProps } from './field_editor/field_editor';
 import { IndexPatternEditorFlyoutContent } from './index_pattern_editor_flyout_content';
+import { IndexPatternEditorContext } from '../types';
 
 export interface Props {
   /**
@@ -25,29 +25,6 @@ export interface Props {
    * Handler for the "cancel" footer button
    */
   onCancel: () => void;
-  /**
-   * The docLinks start service from core
-   */
-  docLinks: DocLinksStart;
-  /**
-   * The context object specific to where the editor is currently being consumed
-   */
-  // ctx: FieldEditorContext;
-  /**
-   * Optional field to edit
-   */
-  // field?: IndexPatternField;
-  /**
-   * Services
-   */
-  indexPatternService: DataPublicPluginStart['indexPatterns'];
-  notifications: NotificationsStart;
-  // fieldFormatEditors: PluginStart['fieldFormatEditors'];
-  // fieldFormats: DataPublicPluginStart['fieldFormats'];
-  // uiSettings: CoreStart['uiSettings'];
-  http: CoreStart['http'];
-  navigateToApp: CoreStart['application']['navigateToApp'];
-  canCreateIndexPattern: boolean;
 }
 
 /**
@@ -60,13 +37,19 @@ export interface Props {
 export const IndexPatternFlyoutContentContainer = ({
   onSave,
   onCancel,
+}: /*
   docLinks,
   indexPatternService,
   notifications,
   http,
   navigateToApp,
   canCreateIndexPattern,
-}: Props) => {
+  */
+Props) => {
+  const {
+    services: { indexPatternService, notifications },
+  } = useKibana<IndexPatternEditorContext>();
+
   const onSaveClick = async (indexPatternSpec: IndexPatternSpec) => {
     const indexPattern = await indexPatternService.createAndSave(indexPatternSpec);
     const message = i18n.translate('indexPatternEditor.saved', {
@@ -91,13 +74,8 @@ export const IndexPatternFlyoutContentContainer = ({
     <IndexPatternEditorFlyoutContent
       onSave={onSaveClick}
       onCancel={onCancel}
-      docLinks={docLinks}
       isSaving={false}
       existingIndexPatterns={existingIndexPatterns}
-      http={http}
-      indexPatternService={indexPatternService}
-      navigateToApp={navigateToApp}
-      canCreateIndexPattern={canCreateIndexPattern}
     />
   );
 };

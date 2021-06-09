@@ -19,24 +19,26 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
-import { DocLinksStart, CoreStart } from 'src/core/public';
-
 import { ensureMinimumTime, getIndices, extractTimeFields, getMatchedIndices } from '../lib';
 import { AdvancedParametersSection } from './field_editor/advanced_parameters_section';
 
 import {
   IndexPatternSpec,
-  DataPublicPluginStart,
   Form,
   UseField,
   useForm,
   TextField,
   useFormData,
-  HttpStart,
   ToggleField,
+  useKibana,
 } from '../shared_imports';
 
-import { MatchedItem, ResolveIndexResponseItemAlias, IndexPatternTableItem } from '../types';
+import {
+  MatchedItem,
+  ResolveIndexResponseItemAlias,
+  // IndexPatternTableItem,
+  IndexPatternEditorContext,
+} from '../types';
 
 import { schema } from './form_schema';
 import { TimestampField } from './form_fields';
@@ -52,18 +54,10 @@ export interface Props {
    * Handler for the "cancel" footer button
    */
   onCancel: () => void;
-  /**
-   * The docLinks start service from core
-   */
-  docLinks: DocLinksStart;
 
   // uiSettings: CoreStart['uiSettings'];
   isSaving: boolean;
   existingIndexPatterns: string[];
-  http: HttpStart;
-  indexPatternService: DataPublicPluginStart['indexPatterns'];
-  navigateToApp: CoreStart['application']['navigateToApp'];
-  canCreateIndexPattern: boolean;
 }
 
 export interface IndexPatternConfig {
@@ -93,17 +87,10 @@ const geti18nTexts = () => {
   };
 };
 
-const IndexPatternEditorFlyoutContentComponent = ({
-  onSave,
-  onCancel,
-  docLinks,
-  isSaving,
-  // existingIndexPatterns,
-  http,
-  indexPatternService,
-  navigateToApp,
-  canCreateIndexPattern,
-}: Props) => {
+const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }: Props) => {
+  const {
+    services: { http, indexPatternService },
+  } = useKibana<IndexPatternEditorContext>();
   const i18nTexts = geti18nTexts();
 
   // return type, interal type
@@ -282,9 +269,9 @@ const IndexPatternEditorFlyoutContentComponent = ({
       return (
         <EmptyState
           onRefresh={loadSources}
-          docLinks={docLinks}
-          navigateToApp={navigateToApp}
-          canSave={canCreateIndexPattern}
+          // docLinks={docLinks}
+          // navigateToApp={navigateToApp}
+          // canSave={canCreateIndexPattern}
           closeFlyout={onCancel}
           createAnyway={() => setGoToForm(true)}
         />
@@ -293,8 +280,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
       // first time
       return (
         <EmptyIndexPatternPrompt
-          canSave={canCreateIndexPattern}
-          docLinksIndexPatternIntro={docLinks.links.indexPatterns.introduction}
+          // canSave={canCreateIndexPattern}
+          // docLinksIndexPatternIntro={docLinks.links.indexPatterns.introduction}
           goToCreate={() => setGoToForm(true)}
         />
       );

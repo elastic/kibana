@@ -10,7 +10,6 @@ import './empty_state.scss';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { DocLinksStart, ApplicationStart } from 'kibana/public';
 import {
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
@@ -27,21 +26,25 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { IndexPatternEditorContext } from '../../types';
+
+import { useKibana } from '../../shared_imports';
+
 export const EmptyState = ({
   onRefresh,
-  navigateToApp,
-  docLinks,
-  canSave,
   closeFlyout,
   createAnyway,
 }: {
   onRefresh: () => void;
-  navigateToApp: ApplicationStart['navigateToApp'];
   closeFlyout: () => void;
-  docLinks: DocLinksStart;
-  canSave: boolean;
   createAnyway: () => void;
 }) => {
+  const {
+    services: {
+      docLinks,
+      application: { navigateToApp, capabilities },
+    },
+  } = useKibana<IndexPatternEditorContext>();
   const mlCard = (
     <EuiFlexItem>
       <EuiCard
@@ -223,7 +226,7 @@ export const EmptyState = ({
         </EuiPageContentBody>
       </EuiPageContent>
       <EuiSpacer />
-      {canSave && createAnywayLink}
+      {capabilities.management.kibana.indexPatterns && createAnywayLink}
     </>
   );
 };

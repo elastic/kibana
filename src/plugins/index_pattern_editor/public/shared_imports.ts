@@ -13,7 +13,12 @@ export {
   IndexPatternSpec,
 } from '../../data/public';
 
-export { createKibanaReactContext, toMountPoint, CodeEditor } from '../../kibana_react/public';
+export {
+  createKibanaReactContext,
+  toMountPoint,
+  CodeEditor,
+  useKibana,
+} from '../../kibana_react/public';
 
 export {
   useForm,

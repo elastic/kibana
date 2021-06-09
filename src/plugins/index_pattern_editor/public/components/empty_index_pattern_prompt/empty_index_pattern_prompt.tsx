@@ -16,18 +16,17 @@ import { EuiDescriptionListTitle } from '@elastic/eui';
 import { EuiDescriptionListDescription, EuiDescriptionList } from '@elastic/eui';
 import { EuiLink, EuiButton } from '@elastic/eui';
 import { Illustration } from './assets/index_pattern_illustration';
+import { useKibana } from '../../shared_imports';
+import { IndexPatternEditorContext } from '../../types';
 
 interface Props {
-  canSave: boolean;
-  docLinksIndexPatternIntro: string;
   goToCreate: () => void;
 }
 
-export const EmptyIndexPatternPrompt = ({
-  canSave,
-  docLinksIndexPatternIntro,
-  goToCreate,
-}: Props) => {
+export const EmptyIndexPatternPrompt = ({ goToCreate }: Props) => {
+  const {
+    services: { docLinks, application },
+  } = useKibana<IndexPatternEditorContext>();
   return (
     <EuiPageContent
       data-test-subj="emptyIndexPatternPrompt"
@@ -60,7 +59,7 @@ export const EmptyIndexPatternPrompt = ({
                 yesterday, or all indices that contain your log data."
               />
             </p>
-            {canSave && (
+            {application.capabilities.management.kibana.indexPatterns && (
               <EuiButton onClick={goToCreate} iconType="plusInCircle" fill={true}>
                 <FormattedMessage
                   id="indexPatternManagement.indexPatternTable.createBtn"
@@ -80,7 +79,7 @@ export const EmptyIndexPatternPrompt = ({
           />
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
-          <EuiLink href={docLinksIndexPatternIntro} target="_blank" external>
+          <EuiLink href={docLinks.links.indexPatterns.introduction} target="_blank" external>
             <FormattedMessage
               id="indexPatternManagement.emptyIndexPatternPrompt.documentation"
               defaultMessage="Read documentation"

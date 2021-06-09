@@ -6,8 +6,25 @@
  * Side Public License, v 1.
  */
 
+import {
+  ApplicationStart,
+  IUiSettingsClient,
+  NotificationsStart,
+  DocLinksStart,
+  HttpSetup,
+} from 'src/core/public';
+
 import { DataPublicPluginStart } from './shared_imports';
 import { OpenEditorOptions } from './open_editor';
+
+export interface IndexPatternEditorContext {
+  uiSettings: IUiSettingsClient;
+  docLinks: DocLinksStart;
+  http: HttpSetup;
+  notifications: NotificationsStart;
+  application: ApplicationStart;
+  indexPatternService: DataPublicPluginStart['indexPatterns'];
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginSetup {}

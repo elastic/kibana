@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { CoreStart, OverlayRef } from 'src/core/public';
+import { I18nProvider } from '@kbn/i18n/react';
 
 import {
   createKibanaReactContext,
@@ -16,7 +17,7 @@ import {
   DataPublicPluginStart,
 } from './shared_imports';
 
-import { CloseEditor } from './types';
+import { CloseEditor, IndexPatternEditorContext } from './types';
 import { IndexPatternFlyoutContentContainer } from './components/index_pattern_flyout_content_container';
 
 export interface OpenEditorOptions {
@@ -32,10 +33,15 @@ export const getEditorOpener = ({ core, indexPatternService }: Dependencies) => 
   options: OpenEditorOptions
 ): CloseEditor => {
   const { uiSettings, overlays, docLinks, notifications, http, application } = core;
-  const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
+  const {
+    Provider: KibanaReactContextProvider,
+  } = createKibanaReactContext<IndexPatternEditorContext>({
     uiSettings,
     docLinks,
-    http: core.http,
+    http,
+    notifications,
+    application,
+    indexPatternService,
   });
 
   let overlayRef: OverlayRef | null = null;
@@ -60,16 +66,9 @@ export const getEditorOpener = ({ core, indexPatternService }: Dependencies) => 
     overlayRef = overlays.openFlyout(
       toMountPoint(
         <KibanaReactContextProvider>
-          <IndexPatternFlyoutContentContainer
-            onSave={onSaveField}
-            onCancel={closeEditor}
-            docLinks={docLinks}
-            indexPatternService={indexPatternService}
-            notifications={notifications}
-            http={http}
-            navigateToApp={application.navigateToApp}
-            canCreateIndexPattern={application.capabilities.management.kibana.indexPatterns}
-          />
+          <I18nProvider>
+            <IndexPatternFlyoutContentContainer onSave={onSaveField} onCancel={closeEditor} />
+          </I18nProvider>
         </KibanaReactContextProvider>
       )
     );
