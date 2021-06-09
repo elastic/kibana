@@ -189,5 +189,7 @@ describe('embeddable enhancements', () => {
     expect(() => {
       start.migrate(embeddableState, '7.10.0');
     }).not.toThrow();
+
+    expect(start.migrate(embeddableState, '7.10.0')).toEqual(embeddableState);
   });
 });
