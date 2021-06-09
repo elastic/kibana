@@ -131,7 +131,7 @@ These estimates are based on historical data and should not be used as predictio
 
 We recommend provisioning enough {kib} instances to ensure a buffer between the observed maximum throughput (as estimated under `observed.max_throughput_per_minute`) and the average required throughput (as estimated under `observed.avg_required_throughput_per_minute`). Otherwise there might be insufficient capacity to handle spikes of ad-hoc tasks. How much of a buffer is needed largely depends on your use case, but keep in mind that estimated throughput takes into account recent spikes and, as long as they are representative of your system's behaviour, shouldn't require much of a buffer.
 
-We recommend provisioning at least as many {kib} instances as proposed by `proposed.proposed_kibana`, but keep in mind that this number is based on the estimated required throughput, which is based on average historical performance, and cannot accurately predict future requirements.
+We recommend provisioning at least as many {kib} instances as proposed by `proposed.provisioned_kibana`, but keep in mind that this number is based on the estimated required throughput, which is based on average historical performance, and cannot accurately predict future requirements.
 
 [WARNING]
 ============================================================================
@@ -139,7 +139,7 @@ Automatic capacity estimation is performed by each {kib} instance indipendently.
 
 If a {kib} instance is idle at the moment of capacity estimation, the number of active {kib} might be miscounted, miscalculating the available throughput as a consequence.
 
-When evaluating the `proposed.proposed_kibana`, we highly recommend verifying that the `observed.observed_kibana_instances` matches the number of provisioned {kib} instances.
+When evaluating the `proposed.provisioned_kibana`, we highly recommend verifying that the `observed.observed_kibana_instances` matches the number of provisioned {kib} instances.
 ============================================================================
 
 [float]

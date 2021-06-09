@@ -25,7 +25,7 @@ export interface CapacityEstimationStat extends JsonObject {
     avg_recurring_required_throughput_per_minute_per_kibana: number;
   };
   proposed: {
-    proposed_kibana: number;
+    provisioned_kibana: number;
     min_required_kibana: number;
     avg_recurring_required_throughput_per_minute_per_kibana: number;
     avg_required_throughput_per_minute_per_kibana: number;
@@ -209,7 +209,7 @@ export function estimateCapacity(
       ),
       proposed: mapValues(
         {
-          proposed_kibana: minRequiredKibanaInstances,
+          provisioned_kibana: minRequiredKibanaInstances,
           min_required_kibana: minRequiredKibanaInstancesForRecurringTasks,
           avg_recurring_required_throughput_per_minute_per_kibana: averageRecurringRequiredPerMinutePerKibana,
           avg_required_throughput_per_minute_per_kibana: averageRequiredThroughputPerMinutePerKibana,

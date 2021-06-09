@@ -478,7 +478,7 @@ describe('estimateCapacity', () => {
         ), // same as above bt for both instances
       },
       proposed: {
-        proposed_kibana: provisionedKibanaInstances + 1,
+        provisioned_kibana: provisionedKibanaInstances + 1,
         min_required_kibana: provisionedKibanaInstances,
         avg_recurring_required_throughput_per_minute_per_kibana: Math.ceil(
           recurringTasksPerMinute / (provisionedKibanaInstances + 1)
@@ -741,7 +741,7 @@ describe('estimateCapacity', () => {
           avg_required_throughput_per_minute_per_kibana: 229,
         },
         proposed: {
-          proposed_kibana: 2,
+          provisioned_kibana: 2,
           min_required_kibana: 1,
           avg_recurring_required_throughput_per_minute_per_kibana: 15,
           // once 2 kibana are provisioned, avg_required_throughput_per_minute_per_kibana is divided by 2, hence 115
@@ -817,7 +817,7 @@ describe('estimateCapacity', () => {
         },
         proposed: {
           // we propose provisioning 3 instances for recurring + non-recurring/ephemeral
-          proposed_kibana: 3,
+          provisioned_kibana: 3,
           // but need at least 2 for recurring
           min_required_kibana: 2,
           avg_recurring_required_throughput_per_minute_per_kibana: 210 / 3,

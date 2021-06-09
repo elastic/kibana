@@ -271,7 +271,7 @@ The API returns the following:
         },
         "proposed": {
           "min_required_kibana": 1,
-          "proposed_kibana": 1,
+          "provisioned_kibana": 1,
           "avg_recurring_required_throughput_per_minute_per_kibana": 28,
           "avg_required_throughput_per_minute_per_kibana": 28
         }
@@ -873,7 +873,7 @@ Evaluating the health stats above you can see the following output under `stats.
   },
   "proposed": {
     "min_required_kibana": 1, # <6>
-    "proposed_kibana": 1, # <7>
+    "provisioned_kibana": 1, # <7>
     "avg_recurring_required_throughput_per_minute_per_kibana": 28,
     "avg_required_throughput_per_minute_per_kibana": 28
   }
@@ -911,7 +911,7 @@ Suppose an alternate scenario, where you see the following output under `stats.c
   },
   "proposed": {
     "min_required_kibana": 2, # <7>
-    "proposed_kibana": 3, # <8>
+    "provisioned_kibana": 3, # <8>
     "avg_recurring_required_throughput_per_minute_per_kibana": 118, # <9>
     "avg_required_throughput_per_minute_per_kibana": 145 # <10>
   }
