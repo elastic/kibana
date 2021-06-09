@@ -1,100 +1,105 @@
 [role="xpack"]
 [[kibana-alerts]]
-= {kib} Alerts
+= {kib} Stack Monitoring Alerting
 
-The {stack} {monitor-features} provide
-<<alerting-getting-started,{kib} alerts>> out-of-the box to notify you of
-potential issues in the {stack}. These alerts are preconfigured based on the
-best practices recommended by Elastic. However, you can tailor them to meet your 
+The {stack} {monitor-features} provide out-of-the box
+<<alerting-getting-started,{kib} alerting>> to notify you of
+potential issues in the {stack}. These rules are preconfigured based on the
+best practices recommended by Elastic, but you can still tailor them to meet your 
 specific needs.
-
-When you open *{stack-monitor-app}*, the preconfigured {kib} alerts are
-created automatically. If you collect monitoring data from multiple clusters,
-these alerts can search, detect, and notify on various conditions across the
-clusters. The alerts are visible alongside your existing {watcher} cluster
-alerts. You can view details about the alerts that are active and view health
-and performance data for {es}, {ls}, and Beats in real time, as well as
-analyze past performance. You can also modify active alerts.
 
 [role="screenshot"]
 image::user/monitoring/images/monitoring-kibana-alerts.png["Kibana alerts in the Stack Monitoring app"]
 
-To review and modify all the available alerts, use
-<<alert-management,*{alerts-ui}*>> in *{stack-manage-app}*.
+These preconfigured {kib} rules are created automatically when you open the *{stack-monitor-app}*. 
+They are initially configured to detect and notify on various conditions across your monitored clusters. 
+You can view notifications for: *Cluster health*, *Resource utilization*, and *Errors and exceptions* for {es} in realtime.
+
+NOTE: The default watcher based "cluster alerts" for {stack-monitor-app} have been recreated as rules in kibana alerting.
+This causes the existing watcher email action `monitoring.cluster_alerts.email_notifications.email_address` to no longer work.
+The default action for all {stack-monitor-app} rules is to write to {kib} logs and disply a notification in the UI.
+
+[role="screenshot"]
+image::user/monitoring/images/monitoring-kibana-alerting-notification.png["Kibana alerting notifications in the Stack Monitoring app"]
+
+NOTE: To review and modify all available rules, use *Enter setup mode* on the *Cluster overview* page in *{stack-monitor-app}*
+
+[role="screenshot"]
+image::user/monitoring/images/monitoring-kibana-alerting-setup-mode.png["Kibana alerting modify rules in the Stack Monitoring app"]
 
 [discrete]
-[[kibana-alerts-cpu-threshold]]
-== CPU threshold
+[[kibana-alerting-cpu-threshold]]
+== CPU usage threshold
 
-This alert is triggered when a node runs a consistently high CPU load. By
+This alert is triggered when an {es} node runs a consistently high CPU load. By
 default, the trigger condition is set at 85% or more averaged over the last 5
 minutes. The alert is grouped across all the nodes of the cluster by running
 checks on a schedule time of 1 minute with a re-notify interval of 1 day. 
 
 [discrete]
-[[kibana-alerts-disk-usage-threshold]]
+[[kibana-alerting-disk-usage-threshold]]
 == Disk usage threshold
 
-This alert is triggered when a node is nearly at disk capacity. By
+This alert is triggered when an {es} node is nearly at disk capacity. By
 default, the trigger condition is set at 80% or more averaged over the last 5
 minutes. The alert is grouped across all the nodes of the cluster by running
 checks on a schedule time of 1 minute with a re-notify interval of 1 day. 
 
 [discrete]
-[[kibana-alerts-jvm-memory-threshold]]
+[[kibana-alerting-jvm-memory-threshold]]
 == JVM memory threshold
 
-This alert is triggered when a node runs a consistently high JVM memory usage. By
+This alert is triggered when an {es} node uses high amount of JVM memory. By
 default, the trigger condition is set at 85% or more averaged over the last 5
 minutes. The alert is grouped across all the nodes of the cluster by running
 checks on a schedule time of 1 minute with a re-notify interval of 1 day. 
 
 [discrete]
-[[kibana-alerts-missing-monitoring-data]]
+[[kibana-alerting-missing-monitoring-data]]
 == Missing monitoring data
 
-This alert is triggered when any stack products nodes or instances stop sending
+This alert is triggered when an {es} node stops sending
 monitoring data. By default, the trigger condition is set to missing for 15 minutes
-looking back 1 day. The alert is grouped across all the nodes of the cluster by running
+looking back 1 day. The alert is grouped across all the {es} nodes of the cluster by running
 checks on a schedule time of 1 minute with a re-notify interval of 6 hours. 
 
 [discrete]
-[[kibana-alerts-thread-pool-rejections]]
+[[kibana-alerting-thread-pool-rejections]]
 == Thread pool rejections (search/write)
 
-This alert is triggered when a node experiences thread pool rejections. By
+This alert is triggered when an {es} node experiences thread pool rejections. By
 default, the trigger condition is set at 300 or more over the last 5
 minutes. The alert is grouped across all the nodes of the cluster by running
 checks on a schedule time of 1 minute with a re-notify interval of 1 day. 
 Thresholds can be set independently for `search` and `write` type rejections.
 
 [discrete]
-[[kibana-alerts-ccr-read-exceptions]]
+[[kibana-alerting-ccr-read-exceptions]]
 == CCR read exceptions
 
 This alert is triggered if a read exception has been detected on any of the 
-replicated clusters. The trigger condition is met if 1 or more read exceptions 
+replicated {es} clusters. The trigger condition is met if 1 or more read exceptions 
 are detected in the last hour. The alert is grouped across all replicated clusters 
 by running checks on a schedule time of 1 minute with a re-notify interval of 6 hours. 
 
 [discrete]
-[[kibana-alerts-large-shard-size]]
+[[kibana-alerting-large-shard-size]]
 == Large shard size
 
 This alert is triggered if a large average shard size (across associated primaries) is found on any of the 
-specified index patterns. The trigger condition is met if an index's average shard size is 
+specified index patterns in a {es} cluster. The trigger condition is met if an index's average shard size is 
 55gb or higher in the last 5 minutes. The alert is grouped across all indices that match 
-the default pattern of `*` by running checks on a schedule time of 1 minute with a re-notify 
+the default pattern of `-.*` by running checks on a schedule time of 1 minute with a re-notify 
 interval of 12 hours.
 
 [discrete]
-[[kibana-alerts-cluster-alerts]]
-== Cluster alerts
+[[kibana-alerting-cluster-alerting]]
+== Cluster alerting
 
 These alerts summarize the current status of your {stack}. You can drill down into the metrics 
 to view more information about your cluster and specific nodes, instances, and indices.
 
-An alert will be triggered if any of the following conditions are met within the last minute:
+An action will be triggered if any of the following conditions are met within the last minute:
 
 * {es} cluster health status is yellow (missing at least one replica)
 or red (missing at least one primary).
