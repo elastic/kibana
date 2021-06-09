@@ -16,6 +16,7 @@ export interface IKibanaSearchResponse<RawResponse = any>
 |  --- | --- | --- |
 |  [id](./kibana-plugin-plugins-data-public.ikibanasearchresponse.id.md) | <code>string</code> | Some responses may contain a unique id to identify the request this response came from. |
 |  [isPartial](./kibana-plugin-plugins-data-public.ikibanasearchresponse.ispartial.md) | <code>boolean</code> | Indicates whether the results returned are complete or partial |
+|  [isRestored](./kibana-plugin-plugins-data-public.ikibanasearchresponse.isrestored.md) | <code>boolean</code> | Indicates whether the results returned are from the async-search index |
 |  [isRunning](./kibana-plugin-plugins-data-public.ikibanasearchresponse.isrunning.md) | <code>boolean</code> | Indicates whether search is still in flight |
 |  [loaded](./kibana-plugin-plugins-data-public.ikibanasearchresponse.loaded.md) | <code>number</code> | If relevant to the search strategy, return a loaded number that represents how progress is indicated. |
 |  [rawResponse](./kibana-plugin-plugins-data-public.ikibanasearchresponse.rawresponse.md) | <code>RawResponse</code> | The raw response returned by the internal search method (usually the raw ES response) |

@@ -65,6 +65,9 @@ export interface IKibanaSearchResponse<RawResponse = any> {
    */
   isPartial?: boolean;
 
+  /**
+   * Indicates whether the results returned are from the async-search index
+   */
   isRestored?: boolean;
 
   /**
