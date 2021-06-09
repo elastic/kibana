@@ -279,7 +279,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(toastTitle).to.eql(`Updated '${updatedAlertName}'`);
 
         const headingText = await pageObjects.alertDetailsUI.getHeadingText();
-        expect(headingText).to.be(updatedAlertName);
+        expect(headingText.includes(updatedAlertName)).to.be(true);
       });
 
       it('should reset alert when canceling an edit', async () => {
