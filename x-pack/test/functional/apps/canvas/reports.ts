@@ -31,11 +31,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ],
       });
       await security.testUser.setRoles(['kibana_admin', 'test_reporting_user']);
-      await esArchiver.load('canvas/reports');
+      await esArchiver.load('x-pack/test/functional/es_archives/canvas/reports');
       await browser.setWindowSize(1600, 850);
     });
     after('clean up archives', async () => {
-      await esArchiver.unload('canvas/reports');
+      await esArchiver.unload('x-pack/test/functional/es_archives/canvas/reports');
       await es.deleteByQuery({
         index: '.reporting-*',
         refresh: true,

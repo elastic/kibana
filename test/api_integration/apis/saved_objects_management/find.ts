@@ -145,8 +145,14 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('meta attributes injected properly', () => {
-      before(() => esArchiver.load('management/saved_objects/search'));
-      after(() => esArchiver.unload('management/saved_objects/search'));
+      before(() =>
+        esArchiver.load('test/api_integration/fixtures/es_archiver/management/saved_objects/search')
+      );
+      after(() =>
+        esArchiver.unload(
+          'test/api_integration/fixtures/es_archiver/management/saved_objects/search'
+        )
+      );
 
       it('should inject meta attributes for searches', async () =>
         await supertest

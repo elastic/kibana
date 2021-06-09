@@ -109,9 +109,7 @@ describe('when on integration detail', () => {
           pagePathGetters.integration_details_custom({ pkgkey: 'nginx-0.3.7' })[1]
         );
       });
-      expect(testRenderer.history.location.pathname).toEqual(
-        '/app/integrations/detail/nginx-0.3.7/overview'
-      );
+      expect(testRenderer.history.location.pathname).toEqual('/detail/nginx-0.3.7/overview');
     });
   });
 
