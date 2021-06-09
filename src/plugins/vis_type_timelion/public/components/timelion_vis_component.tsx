@@ -68,15 +68,9 @@ function TimelionVisComponent({
 
         yaxis.domain = {
           fit: true,
+          ...(yaxis.max ? { max: yaxis.max } : {}),
+          ...(yaxis.min ? { min: yaxis.min } : {}),
         };
-
-        if (yaxis.max) {
-          yaxis.domain.max = yaxis.max;
-        }
-
-        if (yaxis.min) {
-          yaxis.domain.min = yaxis.min;
-        }
       }
     });
   };
@@ -199,14 +193,16 @@ function TimelionVisComponent({
   );
 
   const yaxes = useMemo(() => {
-    const collectedYAxes = [];
+    const collectedYAxes: IAxis[] = [];
+
     chart.forEach((chartInst) => {
-      chartInst._global?.yaxes.forEach((yaxis) => {
+      chartInst._global?.yaxes.forEach((yaxis: IAxis) => {
         if (yaxis) {
           collectedYAxes.push(yaxis);
         }
       });
     });
+
     return collectedYAxes;
   }, [chart]);
 

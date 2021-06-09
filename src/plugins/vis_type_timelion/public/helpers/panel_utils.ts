@@ -33,6 +33,7 @@ export interface Axis {
   tickGenerator?(axis: Axis): number[];
   units?: { type: string; prefix: string; suffix: string };
   domain?: {
+    fit?: boolean;
     min?: number;
     max?: number;
   };
