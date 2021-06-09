@@ -296,6 +296,7 @@ export async function getTestUrl(job, customUrl) {
     );
   } catch (error) {
     // search may fail if the job doesn't already exist
+    // ignore this error as the outer function call will raise a toast
   }
 
   if (resp && resp.hits.total.value > 0) {
@@ -317,6 +318,7 @@ export async function getTestUrl(job, customUrl) {
       jobConfig = jobs[0];
     } catch (error) {
       // jobs may not exist as this might be called from the AD job wizards
+      // ignore this error as the outer function call will raise a toast
     }
 
     if (jobConfig === undefined || datafeedConfig === undefined) {
