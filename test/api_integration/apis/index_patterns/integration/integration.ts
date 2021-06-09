@@ -19,11 +19,13 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('integration', () => {
     before(async () => {
-      await esArchiver.load('index_patterns/basic_index');
+      await esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index');
     });
 
     after(async () => {
-      await esArchiver.unload('index_patterns/basic_index');
+      await esArchiver.unload(
+        'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+      );
     });
 
     it('create an index pattern, add a runtime field, add a field formatter, then re-create the same index pattern', async () => {

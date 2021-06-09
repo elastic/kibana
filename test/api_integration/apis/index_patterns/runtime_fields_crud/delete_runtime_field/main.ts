@@ -15,11 +15,13 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('main', () => {
     before(async () => {
-      await esArchiver.load('index_patterns/basic_index');
+      await esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index');
     });
 
     after(async () => {
-      await esArchiver.unload('index_patterns/basic_index');
+      await esArchiver.unload(
+        'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+      );
     });
 
     it('can delete a runtime field', async () => {
