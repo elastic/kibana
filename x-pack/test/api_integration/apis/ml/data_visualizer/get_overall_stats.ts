@@ -123,6 +123,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
   ];
 
+  // Move these tests to file_data_visualizer plugin
   describe('get_overall_stats', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
@@ -132,7 +133,7 @@ export default ({ getService }: FtrProviderContext) => {
     for (const testData of testDataList) {
       it(`${testData.testTitle}`, async () => {
         const { body } = await supertest
-          .post(`/api/ml/data_visualizer/get_overall_stats/${testData.index}`)
+          .post(`/internal/data_visualizer/get_overall_stats/${testData.index}`)
           .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
           .set(COMMON_REQUEST_HEADERS)
           .send(testData.requestBody)
