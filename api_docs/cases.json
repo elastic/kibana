@@ -1035,7 +1035,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
-          "lineNumber": 53
+          "lineNumber": 49
         },
         "deprecated": false,
         "children": [
@@ -1051,7 +1051,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
-              "lineNumber": 53
+              "lineNumber": 49
             },
             "deprecated": false,
             "isRequired": true
@@ -1074,7 +1074,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
-          "lineNumber": 59
+          "lineNumber": 55
         },
         "deprecated": false,
         "children": [
@@ -1091,7 +1091,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
-              "lineNumber": 60
+              "lineNumber": 56
             },
             "deprecated": false,
             "isRequired": true
@@ -1108,7 +1108,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
-              "lineNumber": 61
+              "lineNumber": 57
             },
             "deprecated": false,
             "isRequired": true
@@ -1129,7 +1129,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
-          "lineNumber": 75
+          "lineNumber": 71
         },
         "deprecated": false,
         "children": [
@@ -1145,7 +1145,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
-              "lineNumber": 76
+              "lineNumber": 72
             },
             "deprecated": false,
             "isRequired": true
@@ -1170,7 +1170,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
-          "lineNumber": 24
+          "lineNumber": 20
         },
         "deprecated": true,
         "references": [],
@@ -1187,7 +1187,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
-              "lineNumber": 24
+              "lineNumber": 20
             },
             "deprecated": false,
             "isRequired": true
@@ -1636,62 +1636,6 @@
       },
       {
         "parentPluginId": "cases",
-        "id": "def-common.OmitProp",
-        "type": "Function",
-        "tags": [],
-        "label": "OmitProp",
-        "description": [],
-        "signature": [
-          "<O extends ",
-          "Props",
-          ", K extends keyof O>(o: O, k: K) => Pick<O, Exclude<keyof O, K>>"
-        ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
-          "lineNumber": 17
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "cases",
-            "id": "def-common.OmitProp.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "o",
-            "description": [],
-            "signature": [
-              "O"
-            ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
-              "lineNumber": 17
-            },
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "cases",
-            "id": "def-common.OmitProp.$2",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "k",
-            "description": [],
-            "signature": [
-              "K"
-            ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
-              "lineNumber": 17
-            },
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "cases",
         "id": "def-common.throwErrors",
         "type": "Function",
         "tags": [],
@@ -1704,7 +1648,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
-          "lineNumber": 55
+          "lineNumber": 51
         },
         "deprecated": false,
         "children": [
@@ -1720,7 +1664,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
-              "lineNumber": 55
+              "lineNumber": 51
             },
             "deprecated": false,
             "isRequired": true
@@ -5278,7 +5222,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".none; fields: null; }); closure_type: \"close-by-user\" | \"close-by-pushing\"; owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { mappings: { action_type: \"append\" | \"overwrite\" | \"nothing\"; source: \"description\" | \"title\" | \"comments\"; target: string; }[]; owner: string; } & { id: string; version: string; error: string | null; owner: string; })[]"
+          ".none; fields: null; }); closure_type: \"close-by-user\" | \"close-by-pushing\"; } & { owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { mappings: { action_type: \"append\" | \"overwrite\" | \"nothing\"; source: \"description\" | \"title\" | \"comments\"; target: string; }[]; owner: string; } & { id: string; version: string; error: string | null; owner: string; })[]"
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
@@ -5335,7 +5279,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".none; fields: null; }); closure_type: \"close-by-user\" | \"close-by-pushing\"; owner: string; }"
+          ".none; fields: null; }); closure_type: \"close-by-user\" | \"close-by-pushing\"; } & { owner: string; }"
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
@@ -5392,7 +5336,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".none; fields: null; }); closure_type: \"close-by-user\" | \"close-by-pushing\"; owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; }"
+          ".none; fields: null; }); closure_type: \"close-by-user\" | \"close-by-pushing\"; } & { owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; }"
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
@@ -5506,7 +5450,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".none; fields: null; }); closure_type: \"close-by-user\" | \"close-by-pushing\"; owner: string; }"
+          ".none; fields: null; }); closure_type: \"close-by-user\" | \"close-by-pushing\"; } & { owner: string; }"
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
@@ -5563,7 +5507,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".none; fields: null; }); closure_type: \"close-by-user\" | \"close-by-pushing\"; owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { mappings: { action_type: \"append\" | \"overwrite\" | \"nothing\"; source: \"description\" | \"title\" | \"comments\"; target: string; }[]; owner: string; } & { id: string; version: string; error: string | null; owner: string; }"
+          ".none; fields: null; }); closure_type: \"close-by-user\" | \"close-by-pushing\"; } & { owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { mappings: { action_type: \"append\" | \"overwrite\" | \"nothing\"; source: \"description\" | \"title\" | \"comments\"; target: string; }[]; owner: string; } & { id: string; version: string; error: string | null; owner: string; }"
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
@@ -7187,7 +7131,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".none; fields: null; }); closure_type: \"close-by-user\" | \"close-by-pushing\"; owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; }, \"updated_at\" | \"owner\" | \"created_at\" | \"created_by\" | \"updated_by\" | \"closure_type\"> & { connector: ",
+          ".none; fields: null; }); closure_type: \"close-by-user\" | \"close-by-pushing\"; } & { owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; }, \"updated_at\" | \"owner\" | \"created_at\" | \"created_by\" | \"updated_by\" | \"closure_type\"> & { connector: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -7355,6 +7299,40 @@
         "source": {
           "path": "x-pack/plugins/cases/common/constants.ts",
           "lineNumber": 76
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.MAX_CONCURRENT_SEARCHES",
+        "type": "number",
+        "tags": [],
+        "label": "MAX_CONCURRENT_SEARCHES",
+        "description": [],
+        "signature": [
+          "10"
+        ],
+        "source": {
+          "path": "x-pack/plugins/cases/common/constants.ts",
+          "lineNumber": 97
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.MAX_DOCS_PER_PAGE",
+        "type": "number",
+        "tags": [],
+        "label": "MAX_DOCS_PER_PAGE",
+        "description": [],
+        "signature": [
+          "10000"
+        ],
+        "source": {
+          "path": "x-pack/plugins/cases/common/constants.ts",
+          "lineNumber": 96
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -9365,6 +9343,8 @@
           "<[",
           "IntersectionC",
           "<[",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ connector: ",
           "IntersectionC",
@@ -9572,9 +9552,11 @@
           "LiteralC",
           "<\"close-by-user\">, ",
           "LiteralC",
-          "<\"close-by-pushing\">]>; owner: ",
+          "<\"close-by-pushing\">]>; }>, ",
+          "TypeC",
+          "<{ owner: ",
           "StringC",
-          "; }>, ",
+          "; }>]>, ",
           "TypeC",
           "<{ created_at: ",
           "StringC",
@@ -9703,6 +9685,8 @@
         "signature": [
           "IntersectionC",
           "<[",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ connector: ",
           "IntersectionC",
@@ -9910,9 +9894,11 @@
           "LiteralC",
           "<\"close-by-user\">, ",
           "LiteralC",
-          "<\"close-by-pushing\">]>; owner: ",
+          "<\"close-by-pushing\">]>; }>, ",
+          "TypeC",
+          "<{ owner: ",
           "StringC",
-          "; }>, ",
+          "; }>]>, ",
           "TypeC",
           "<{ created_at: ",
           "StringC",
@@ -10019,6 +10005,8 @@
           "<[",
           "IntersectionC",
           "<[",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ connector: ",
           "IntersectionC",
@@ -10226,9 +10214,11 @@
           "LiteralC",
           "<\"close-by-user\">, ",
           "LiteralC",
-          "<\"close-by-pushing\">]>; owner: ",
+          "<\"close-by-pushing\">]>; }>, ",
+          "TypeC",
+          "<{ owner: ",
           "StringC",
-          "; }>, ",
+          "; }>]>, ",
           "TypeC",
           "<{ created_at: ",
           "StringC",
@@ -12728,7 +12718,7 @@
           "IntersectionC",
           "<[",
           "PartialC",
-          "<Pick<{ connector: ",
+          "<{ connector: ",
           "IntersectionC",
           "<[",
           "TypeC",
@@ -12934,9 +12924,7 @@
           "LiteralC",
           "<\"close-by-user\">, ",
           "LiteralC",
-          "<\"close-by-pushing\">]>; owner: ",
-          "StringC",
-          "; }, \"connector\" | \"closure_type\">>, ",
+          "<\"close-by-pushing\">]>; }>, ",
           "TypeC",
           "<{ version: ",
           "StringC",
@@ -12957,6 +12945,8 @@
         "label": "CasesConfigureRequestRt",
         "description": [],
         "signature": [
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ connector: ",
           "IntersectionC",
@@ -13164,9 +13154,11 @@
           "LiteralC",
           "<\"close-by-user\">, ",
           "LiteralC",
-          "<\"close-by-pushing\">]>; owner: ",
+          "<\"close-by-pushing\">]>; }>, ",
+          "TypeC",
+          "<{ owner: ",
           "StringC",
-          "; }>"
+          "; }>]>"
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
