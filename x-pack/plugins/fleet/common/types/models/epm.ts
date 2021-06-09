@@ -296,6 +296,7 @@ export interface RegistryDataStream {
 export interface RegistryElasticsearch {
   'index_template.settings'?: object;
   'index_template.mappings'?: object;
+  'index_template.user_settings'?: object;
 }
 
 export type RegistryVarType = 'integer' | 'bool' | 'password' | 'text' | 'yaml' | 'string';

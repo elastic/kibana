@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   const dockerServers = getService('dockerServers');
   const log = getService('log');
 
-  const mappingsPackage = 'overrides-0.1.0';
+  const mappingsPackage = 'overrides-0.2.0';
   const server = dockerServers.get('registry');
 
   const deletePackage = async (pkgkey: string) => {
@@ -44,14 +44,12 @@ export default function ({ getService }: FtrProviderContext) {
           path: `/_index_template/${templateName}`,
         }));
 
-        // make sure it has the right composed_of array, the contents should be the component templates
-        // that were installed
-        expect(body.index_templates[0].index_template.composed_of).to.contain(
-          `${templateName}-mappings`
-        );
-        expect(body.index_templates[0].index_template.composed_of).to.contain(
-          `${templateName}-settings`
-        );
+        // make sure composed_of array has the correct component templates in the correct order
+        expect(body.index_templates[0].index_template.composed_of).to.eql([
+          `${templateName}-mappings`,
+          `${templateName}-settings`,
+          `${templateName}-user_settings`,
+        ]);
 
         ({ body } = await es.transport.request({
           method: 'GET',
@@ -72,6 +70,16 @@ export default function ({ getService }: FtrProviderContext) {
         expect(
           body.component_templates[0].component_template.template.settings.index.lifecycle.name
         ).to.be('reference');
+
+        ({ body } = await es.transport.request({
+          method: 'GET',
+          path: `/_component_template/${templateName}-user_settings`,
+        }));
+
+        // Make sure that the lifecycle name gets set correct in the settings
+        expect(
+          body.component_templates[0].component_template.template.settings.index.lifecycle.name
+        ).to.be('overridden by user');
       } else {
         warnAndSkipTest(this, log);
       }

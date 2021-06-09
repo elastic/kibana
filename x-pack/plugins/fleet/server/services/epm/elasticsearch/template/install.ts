@@ -192,13 +192,12 @@ function putComponentTemplate(
 function buildComponentTemplates(registryElasticsearch: RegistryElasticsearch | undefined) {
   let mappingsTemplate;
   let settingsTemplate;
+  let userSettingsTemplate;
 
   if (registryElasticsearch && registryElasticsearch['index_template.mappings']) {
     mappingsTemplate = {
       template: {
-        mappings: {
-          ...registryElasticsearch['index_template.mappings'],
-        },
+        mappings: registryElasticsearch['index_template.mappings'],
       },
     };
   }
@@ -210,7 +209,16 @@ function buildComponentTemplates(registryElasticsearch: RegistryElasticsearch | 
       },
     };
   }
-  return { settingsTemplate, mappingsTemplate };
+
+  if (registryElasticsearch && registryElasticsearch['index_template.user_settings']) {
+    userSettingsTemplate = {
+      template: {
+        settings: registryElasticsearch['index_template.user_settings'],
+      },
+    };
+  }
+
+  return { settingsTemplate, mappingsTemplate, userSettingsTemplate };
 }
 
 async function installDataStreamComponentTemplates(
@@ -235,6 +243,12 @@ async function installDataStreamComponentTemplates(
     esClient
   );
 
+  const userSettings = putComponentTemplate(
+    compTemplates.userSettingsTemplate,
+    `${templateName}-user_settings`,
+    esClient
+  );
+
   if (mappings) {
     templates.push(mappings.name);
     componentPromises.push(mappings.clusterPromise);
@@ -243,6 +257,11 @@ async function installDataStreamComponentTemplates(
   if (settings) {
     templates.push(settings.name);
     componentPromises.push(settings.clusterPromise);
+  }
+
+  if (userSettings) {
+    templates.push(userSettings.name);
+    componentPromises.push(userSettings.clusterPromise);
   }
 
   // TODO: Check return values for errors
