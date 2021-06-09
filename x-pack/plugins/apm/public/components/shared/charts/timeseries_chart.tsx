@@ -24,9 +24,12 @@ import {
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useChartTheme } from '../../../../../observability/public';
+import {
+  LazyAlertsFlyout,
+  useChartTheme,
+} from '../../../../../observability/public';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
 import {
   Coordinate,
@@ -215,6 +218,16 @@ export function TimeseriesChart({
           setSelectedAlertId,
           theme,
         })}
+        <Suspense fallback={null}>
+          <LazyAlertsFlyout
+            alerts={alerts}
+            observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
+            onClose={() => {
+              setSelectedAlertId(undefined);
+            }}
+            selectedAlertId={selectedAlertId}
+          />
+        </Suspense>
       </Chart>
     </ChartContainer>
   );
