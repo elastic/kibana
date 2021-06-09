@@ -38,8 +38,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('with kibana index', () => {
-      before(() => esArchiver.load('saved_objects/basic'));
-      after(() => esArchiver.unload('saved_objects/basic'));
+      before(() =>
+        esArchiver.load('test/api_integration/fixtures/es_archiver/saved_objects/basic')
+      );
+      after(() =>
+        esArchiver.unload('test/api_integration/fixtures/es_archiver/saved_objects/basic')
+      );
 
       it('should return 200 with individual responses', async () =>
         await supertest

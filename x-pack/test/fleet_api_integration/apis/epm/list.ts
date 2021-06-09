@@ -22,11 +22,11 @@ export default function (providerContext: FtrProviderContext) {
   describe('EPM - list', async function () {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
-      await esArchiver.load('fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
     setupFleetAndAgents(providerContext);
     after(async () => {
-      await esArchiver.unload('fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
     describe('list api tests', async () => {

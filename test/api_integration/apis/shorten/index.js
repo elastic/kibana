@@ -13,8 +13,8 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
 
   describe('url shortener', () => {
-    before(() => esArchiver.load('saved_objects/basic'));
-    after(() => esArchiver.unload('saved_objects/basic'));
+    before(() => esArchiver.load('test/api_integration/fixtures/es_archiver/saved_objects/basic'));
+    after(() => esArchiver.unload('test/api_integration/fixtures/es_archiver/saved_objects/basic'));
 
     it('generates shortened urls', async () => {
       const resp = await supertest

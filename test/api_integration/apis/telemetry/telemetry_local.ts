@@ -36,8 +36,12 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   describe('/api/telemetry/v2/clusters/_stats', () => {
-    before('make sure there are some saved objects', () => esArchiver.load('saved_objects/basic'));
-    after('cleanup saved objects changes', () => esArchiver.unload('saved_objects/basic'));
+    before('make sure there are some saved objects', () =>
+      esArchiver.load('test/api_integration/fixtures/es_archiver/saved_objects/basic')
+    );
+    after('cleanup saved objects changes', () =>
+      esArchiver.unload('test/api_integration/fixtures/es_archiver/saved_objects/basic')
+    );
 
     before('create some telemetry-data tracked indices', async () => {
       await es.indices.create({ index: 'filebeat-telemetry_tests_logs' });
@@ -185,8 +189,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('UI Counters telemetry', () => {
-      before('Add UI Counters saved objects', () => esArchiver.load('saved_objects/ui_counters'));
-      after('cleanup saved objects changes', () => esArchiver.unload('saved_objects/ui_counters'));
+      before('Add UI Counters saved objects', () =>
+        esArchiver.load('test/api_integration/fixtures/es_archiver/saved_objects/ui_counters')
+      );
+      after('cleanup saved objects changes', () =>
+        esArchiver.unload('test/api_integration/fixtures/es_archiver/saved_objects/ui_counters')
+      );
       it('returns ui counters aggregated by day', async () => {
         const stats = await retrieveTelemetry(supertest);
         expect(stats.stack_stats.kibana.plugins.ui_counters).to.eql(basicUiCounters);
@@ -195,10 +203,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('Usage Counters telemetry', () => {
       before('Add UI Counters saved objects', () =>
-        esArchiver.load('saved_objects/usage_counters')
+        esArchiver.load('test/api_integration/fixtures/es_archiver/saved_objects/usage_counters')
       );
       after('cleanup saved objects changes', () =>
-        esArchiver.unload('saved_objects/usage_counters')
+        esArchiver.unload('test/api_integration/fixtures/es_archiver/saved_objects/usage_counters')
       );
 
       it('returns usage counters aggregated by day', async () => {

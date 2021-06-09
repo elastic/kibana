@@ -244,8 +244,12 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('with kibana index', () => {
       describe('with basic data existing', () => {
-        before(() => esArchiver.load('saved_objects/basic'));
-        after(() => esArchiver.unload('saved_objects/basic'));
+        before(() =>
+          esArchiver.load('test/api_integration/fixtures/es_archiver/saved_objects/basic')
+        );
+        after(() =>
+          esArchiver.unload('test/api_integration/fixtures/es_archiver/saved_objects/basic')
+        );
 
         it('should return 200 when skipping all the records', async () => {
           await supertest
