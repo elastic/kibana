@@ -45,9 +45,9 @@ export function useContextAppState({
   }, [stateContainer]);
 
   useEffect(() => {
-    const unsubscribeAppState = stateContainer.appState.subscribe(async (newState) => {
+    const unsubscribeAppState = stateContainer.appState.subscribe((newState) => {
       stateContainer.flushToUrl(true);
-      setState(newState);
+      setState((prevState) => ({ ...prevState, ...newState }));
     });
 
     return () => unsubscribeAppState();

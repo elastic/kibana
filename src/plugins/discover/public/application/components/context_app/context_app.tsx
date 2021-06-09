@@ -86,11 +86,14 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
     useNewFieldsApi,
     setAppState,
   });
-  const rows = [
-    ...(fetchedState.predecessors || []),
-    ...(fetchedState.anchor._id ? [fetchedState.anchor] : []),
-    ...(fetchedState.successors || []),
-  ];
+  const rows = useMemo(
+    () => [
+      ...(fetchedState.predecessors || []),
+      ...(fetchedState.anchor._id ? [fetchedState.anchor] : []),
+      ...(fetchedState.successors || []),
+    ],
+    [fetchedState]
+  );
 
   const addFilter = useCallback(
     async (field: IndexPatternField | string, values: unknown, operation: string) => {
