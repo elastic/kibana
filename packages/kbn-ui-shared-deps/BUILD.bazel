@@ -7,13 +7,7 @@ PKG_REQUIRE_NAME = "@kbn/ui-shared-deps"
 
 SOURCE_FILES = glob(
   [
-    "flot_charts/**/*",
-    "entry.js",
-    "index.js",
-    "polyfills.js",
-    "public_path_loader.js",
-    "public_path_module_creator.js",
-    "theme.ts",
+    "src/**/*",
   ],
   exclude = [
     "**/*.md",
@@ -28,7 +22,8 @@ filegroup(
 )
 
 NPM_MODULE_EXTRA_FILES = [
-  "index.d.ts",
+  "flot_charts/package.json",
+  "theme/package.json",
   "package.json",
   "README.md"
 ]
@@ -52,6 +47,7 @@ SRC_DEPS = [
   "@npm//core-js",
   "@npm//css-minimizer-webpack-plugin",
   "@npm//css-loader",
+  "@npm//fflate",
   "@npm//jquery",
   "@npm//loader-utils",
   # TODO: we can remove this once EUI patches the dependencies
@@ -91,19 +87,33 @@ ts_config(
   ],
 )
 
+ts_project(
+  name = "tsc",
+  args = ['--pretty'],
+  srcs = SRCS,
+  deps = DEPS,
+  allow_js = True,
+  declaration = True,
+  declaration_map = True,
+  incremental = True,
+  out_dir = "target",
+  source_map = True,
+  root_dir = "src",
+  tsconfig = ":tsconfig",
+)
+
 webpack(
-  name = "target",
+  name = "shared_built_assets",
   data = DEPS + [
     "//:package.json",
     ":srcs",
     ":tsconfig",
     ":webpack.config.js",
-    ":webpack.config.bazel.js",
   ],
   output_dir = True,
   args = [
     "--config",
-    "$(location webpack.config.bazel.js)",
+    "$(location webpack.config.js)",
     "--output-path",
     "$(@D)",
     "--display=minimal"
@@ -113,7 +123,7 @@ webpack(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = DEPS + [":target"],
+  deps = DEPS + [":tsc", ":shared_built_assets"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )

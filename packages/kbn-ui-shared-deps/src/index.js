@@ -8,14 +8,49 @@
 
 const Path = require('path');
 
-exports.distDir = Path.resolve(__dirname, 'target');
+/**
+ * Absolute path to the distributable directory
+ */
+exports.distDir = Path.resolve(__dirname, '..', 'shared_built_assets');
+
+/**
+ * Filename of files that must be loaded before the jsFilename
+ */
 exports.jsDepFilenames = ['kbn-ui-shared-deps.@elastic.js'];
+
+/**
+ * Filename of the main bundle file in the distributable directory
+ */
 exports.jsFilename = 'kbn-ui-shared-deps.js';
+
+/**
+ * Filename of the unthemed css file in the distributable directory
+ */
 exports.baseCssDistFilename = 'kbn-ui-shared-deps.css';
+
+/**
+ * Filename of the light-theme css file in the distributable directory
+ */
 exports.lightCssDistFilename = 'kbn-ui-shared-deps.v7.light.css';
+
+/**
+ * Filename of the light-theme css file in the distributable directory
+ */
 exports.lightV8CssDistFilename = 'kbn-ui-shared-deps.v8.light.css';
+
+/**
+ * Filename of the dark-theme css file in the distributable directory
+ */
 exports.darkCssDistFilename = 'kbn-ui-shared-deps.v7.dark.css';
+
+/**
+ * Filename of the dark-theme css file in the distributable directory
+ */
 exports.darkV8CssDistFilename = 'kbn-ui-shared-deps.v8.dark.css';
+
+/**
+ * Externals mapping inteded to be used in a webpack config
+ */
 exports.externals = {
   // stateful deps
   angular: '__kbnSharedDeps__.Angular',
@@ -63,4 +98,8 @@ exports.externals = {
   '@elastic/safer-lodash-set': '__kbnSharedDeps__.SaferLodashSet',
   'rison-node': '__kbnSharedDeps__.RisonNode',
 };
+
+/**
+ * Webpack loader for configuring the public path lookup from `window.__kbnPublicPath__`.
+ */
 exports.publicPathLoader = require.resolve('./public_path_loader');

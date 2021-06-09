@@ -17,21 +17,21 @@ const { REPO_ROOT } = require('@kbn/utils');
 const webpack = require('webpack');
 const { RawSource } = require('webpack-sources');
 
-const UiSharedDeps = require('./index');
+const UiSharedDeps = require('./src/index');
 
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 
-exports.getWebpackConfig = ({ dev = false } = {}) => ({
-  mode: dev ? 'development' : 'production',
+module.exports = {
+  mode: 'production',
   entry: {
-    'kbn-ui-shared-deps': './entry.js',
+    'kbn-ui-shared-deps': './src/entry.js',
     'kbn-ui-shared-deps.v7.dark': ['@elastic/eui/dist/eui_theme_dark.css'],
     'kbn-ui-shared-deps.v7.light': ['@elastic/eui/dist/eui_theme_light.css'],
     'kbn-ui-shared-deps.v8.dark': ['@elastic/eui/dist/eui_theme_amsterdam_dark.css'],
     'kbn-ui-shared-deps.v8.light': ['@elastic/eui/dist/eui_theme_amsterdam_light.css'],
   },
   context: __dirname,
-  devtool: dev ? '#cheap-source-map' : false,
+  devtool: '#cheap-source-map',
   output: {
     path: UiSharedDeps.distDir,
     filename: '[name].js',
@@ -45,7 +45,7 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
     noParse: [MOMENT_SRC],
     rules: [
       {
-        include: [require.resolve('./entry.js')],
+        include: [require.resolve('./src/entry.js')],
         use: [
           {
             loader: UiSharedDeps.publicPathLoader,
@@ -60,7 +60,7 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
         use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
       {
-        include: [require.resolve('./theme.ts')],
+        include: [require.resolve('./src/theme.ts')],
         use: [
           {
             loader: 'babel-loader',
@@ -71,7 +71,7 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
         ],
       },
       {
-        test: !dev ? /[\\\/]@elastic[\\\/]eui[\\\/].*\.js$/ : () => false,
+        test: /[\\\/]@elastic[\\\/]eui[\\\/].*\.js$/,
         use: [
           {
             loader: 'babel-loader',
@@ -155,53 +155,46 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
       filename: '[name].css',
     }),
     new webpack.DefinePlugin({
-      'process.env.NODE_ENV': dev ? '"development"' : '"production"',
+      'process.env.NODE_ENV': '"production"',
     }),
-    ...(dev
-      ? []
-      : [
-          new CompressionPlugin({
-            algorithm: 'brotliCompress',
-            filename: '[path].br',
-            test: /\.(js|css)$/,
-            cache: false,
-          }),
-          new CompressionPlugin({
-            algorithm: 'gzip',
-            filename: '[path].gz',
-            test: /\.(js|css)$/,
-            cache: false,
-          }),
-          new (class MetricsPlugin {
-            apply(compiler) {
-              compiler.hooks.emit.tap('MetricsPlugin', (compilation) => {
-                const metrics = [
-                  {
-                    group: 'page load bundle size',
-                    id: 'kbnUiSharedDeps-js',
-                    value: compilation.assets['kbn-ui-shared-deps.js'].size(),
-                  },
-                  {
-                    group: 'page load bundle size',
-                    id: 'kbnUiSharedDeps-css',
-                    value:
-                      compilation.assets['kbn-ui-shared-deps.css'].size() +
-                      compilation.assets['kbn-ui-shared-deps.v7.light.css'].size(),
-                  },
-                  {
-                    group: 'page load bundle size',
-                    id: 'kbnUiSharedDeps-elastic',
-                    value: compilation.assets['kbn-ui-shared-deps.@elastic.js'].size(),
-                  },
-                ];
+    new CompressionPlugin({
+      algorithm: 'brotliCompress',
+      filename: '[path].br',
+      test: /\.(js|css)$/,
+      cache: false,
+    }),
+    new CompressionPlugin({
+      algorithm: 'gzip',
+      filename: '[path].gz',
+      test: /\.(js|css)$/,
+      cache: false,
+    }),
+    new (class MetricsPlugin {
+      apply(compiler) {
+        compiler.hooks.emit.tap('MetricsPlugin', (compilation) => {
+          const metrics = [
+            {
+              group: 'page load bundle size',
+              id: 'kbnUiSharedDeps-js',
+              value: compilation.assets['kbn-ui-shared-deps.js'].size(),
+            },
+            {
+              group: 'page load bundle size',
+              id: 'kbnUiSharedDeps-css',
+              value:
+                compilation.assets['kbn-ui-shared-deps.css'].size() +
+                compilation.assets['kbn-ui-shared-deps.v7.light.css'].size(),
+            },
+            {
+              group: 'page load bundle size',
+              id: 'kbnUiSharedDeps-elastic',
+              value: compilation.assets['kbn-ui-shared-deps.@elastic.js'].size(),
+            },
+          ];
 
-                compilation.emitAsset(
-                  'metrics.json',
-                  new RawSource(JSON.stringify(metrics, null, 2))
-                );
-              });
-            }
-          })(),
-        ]),
+          compilation.emitAsset('metrics.json', new RawSource(JSON.stringify(metrics, null, 2)));
+        });
+      }
+    })(),
   ],
-});
+};
