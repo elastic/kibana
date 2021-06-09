@@ -317,26 +317,6 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
     },
 
-    bucketsResults({
-      jobId,
-      start,
-      end,
-      desc = true,
-    }: {
-      jobId: string;
-      start: string;
-      end: string;
-      desc: boolean;
-    }) {
-      const body = JSON.stringify({ desc, start, end, page: { from: 0, size: 1000 } });
-
-      return httpService.http<any>({
-        path: `${basePath()}/anomaly_detectors/${jobId}/results/buckets`,
-        method: 'POST',
-        body,
-      });
-    },
-
     overallBuckets({
       jobId,
       topN,

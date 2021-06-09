@@ -371,35 +371,33 @@ export class JobsList extends Component {
     const selectedJobsClass = this.props.selectedJobsCount ? 'jobs-selected' : '';
 
     return (
-      <>
-        <EuiBasicTable
-          data-test-subj={loading ? 'mlJobListTable loading' : 'mlJobListTable loaded'}
-          loading={loading === true}
-          noItemsMessage={
-            loading
-              ? i18n.translate('xpack.ml.jobsList.loadingJobsLabel', {
-                  defaultMessage: 'Loading jobs…',
-                })
-              : i18n.translate('xpack.ml.jobsList.noJobsFoundLabel', {
-                  defaultMessage: 'No jobs found',
-                })
-          }
-          itemId="id"
-          className={`jobs-list-table ${selectedJobsClass}`}
-          items={pageOfItems}
-          columns={columns}
-          pagination={pagination}
-          onChange={this.onTableChange}
-          selection={isManagementTable ? undefined : selectionControls}
-          itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
-          isExpandable={true}
-          sorting={sorting}
-          hasActions={true}
-          rowProps={(item) => ({
-            'data-test-subj': `mlJobListRow row-${item.id}`,
-          })}
-        />
-      </>
+      <EuiBasicTable
+        data-test-subj={loading ? 'mlJobListTable loading' : 'mlJobListTable loaded'}
+        loading={loading === true}
+        noItemsMessage={
+          loading
+            ? i18n.translate('xpack.ml.jobsList.loadingJobsLabel', {
+                defaultMessage: 'Loading jobs…',
+              })
+            : i18n.translate('xpack.ml.jobsList.noJobsFoundLabel', {
+                defaultMessage: 'No jobs found',
+              })
+        }
+        itemId="id"
+        className={`jobs-list-table ${selectedJobsClass}`}
+        items={pageOfItems}
+        columns={columns}
+        pagination={pagination}
+        onChange={this.onTableChange}
+        selection={isManagementTable ? undefined : selectionControls}
+        itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
+        isExpandable={true}
+        sorting={sorting}
+        hasActions={true}
+        rowProps={(item) => ({
+          'data-test-subj': `mlJobListRow row-${item.id}`,
+        })}
+      />
     );
   }
 }

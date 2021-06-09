@@ -21,21 +21,6 @@ export interface DatafeedResultsChartDataParams {
   end: number;
 }
 
-type MLSearchResp = Omit<estypes.SearchResponse, 'aggregations'>;
-
-interface AggResult {
-  key_as_string: string;
-  key: number;
-  doc_count: number;
-}
-export interface MLAggSearchResp extends MLSearchResp {
-  aggregations: {
-    doc_count_by_bucket_span: {
-      buckets: AggResult[];
-    };
-  };
-}
-
 export const defaultSearchQuery: estypes.QueryContainer = {
   bool: {
     must: [
