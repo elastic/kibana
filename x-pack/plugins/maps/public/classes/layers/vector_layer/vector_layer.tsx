@@ -182,7 +182,10 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
 
   isEditable(): boolean {
     const isEditable = this.getDataRequest(IS_EDITABLE_REQUEST_ID);
-    return isEditable ? (isEditable.getData() as EditableData).isEditable : false;
+    if (!(isEditable && isEditable.getData())) {
+      return false;
+    }
+    return (isEditable.getData() as EditableData).isEditable;
   }
 
   hasJoins() {
