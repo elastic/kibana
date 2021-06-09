@@ -28,8 +28,8 @@ export interface MlDatafeedsStatsResponse {
 
 interface Results {
   [id: string]: {
-    started?: estypes.StartDatafeedResponse['started'];
-    stopped?: estypes.StopDatafeedResponse['stopped'];
+    started?: estypes.MlStartDatafeedResponse['started'];
+    stopped?: estypes.MlStopDatafeedResponse['stopped'];
     error?: any;
   };
 }
@@ -246,7 +246,6 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
       job.data_description.time_field,
       query,
       datafeed.runtime_mappings,
-      // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
       datafeed.indices_options
     );
 
@@ -378,7 +377,6 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
     const data = {
       index: datafeed.indices,
       body,
-      // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
       ...(datafeed.indices_options ?? {}),
     };
 

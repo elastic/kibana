@@ -14,7 +14,8 @@ import {
   CaseType,
   AssociationType,
   ESConnectorFields,
-} from '../../common';
+} from '../../common/api';
+import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 
 interface UnsanitizedCaseConnector {
   connector_id: string;
@@ -58,6 +59,21 @@ interface SanitizedCaseSettings {
 interface SanitizedCaseType {
   type: string;
 }
+
+interface SanitizedCaseOwner {
+  owner: string;
+}
+
+const addOwnerToSO = <T = Record<string, unknown>>(
+  doc: SavedObjectUnsanitizedDoc<T>
+): SavedObjectSanitizedDoc<SanitizedCaseOwner> => ({
+  ...doc,
+  attributes: {
+    ...doc.attributes,
+    owner: SECURITY_SOLUTION_OWNER,
+  },
+  references: doc.references || [],
+});
 
 export const caseMigrations = {
   '7.10.0': (
@@ -113,6 +129,11 @@ export const caseMigrations = {
       references: doc.references || [],
     };
   },
+  '7.14.0': (
+    doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
+  ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {
+    return addOwnerToSO(doc);
+  },
 };
 
 export const configureMigrations = {
@@ -134,6 +155,11 @@ export const configureMigrations = {
       },
       references: doc.references || [],
     };
+  },
+  '7.14.0': (
+    doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
+  ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {
+    return addOwnerToSO(doc);
   },
 };
 
@@ -175,6 +201,11 @@ export const userActionsMigrations = {
       },
       references: doc.references || [],
     };
+  },
+  '7.14.0': (
+    doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
+  ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {
+    return addOwnerToSO(doc);
   },
 };
 
@@ -225,5 +256,26 @@ export const commentsMigrations = {
       attributes,
       references: doc.references || [],
     };
+  },
+  '7.14.0': (
+    doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
+  ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {
+    return addOwnerToSO(doc);
+  },
+};
+
+export const connectorMappingsMigrations = {
+  '7.14.0': (
+    doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
+  ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {
+    return addOwnerToSO(doc);
+  },
+};
+
+export const subCasesMigrations = {
+  '7.14.0': (
+    doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
+  ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {
+    return addOwnerToSO(doc);
   },
 };

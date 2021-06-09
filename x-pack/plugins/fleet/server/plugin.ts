@@ -36,6 +36,7 @@ import type {
   NewPackagePolicy,
   UpdatePackagePolicy,
 } from '../common';
+import { INTEGRATIONS_PLUGIN_ID } from '../common';
 import type { CloudSetup } from '../../cloud/server';
 
 import {
@@ -225,12 +226,12 @@ export class FleetPlugin
         id: PLUGIN_ID,
         name: 'Fleet',
         category: DEFAULT_APP_CATEGORIES.management,
-        app: [PLUGIN_ID, 'kibana'],
+        app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, 'kibana'],
         catalogue: ['fleet'],
         privileges: {
           all: {
             api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`],
-            app: [PLUGIN_ID, 'kibana'],
+            app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, 'kibana'],
             catalogue: ['fleet'],
             savedObject: {
               all: allSavedObjectTypes,
@@ -240,7 +241,7 @@ export class FleetPlugin
           },
           read: {
             api: [`${PLUGIN_ID}-read`],
-            app: [PLUGIN_ID, 'kibana'],
+            app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, 'kibana'],
             catalogue: ['fleet'], // TODO: check if this is actually available to read user
             savedObject: {
               all: [],
