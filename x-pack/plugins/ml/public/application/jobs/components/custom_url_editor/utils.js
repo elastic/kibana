@@ -17,10 +17,8 @@ import { parseInterval } from '../../../../../common/util/parse_interval';
 import { replaceTokensInUrlValue, isValidLabel } from '../../../util/custom_url_utils';
 import { getIndexPatternIdFromName } from '../../../util/index_utils';
 import { ml } from '../../../services/ml_api_service';
-import { mlJobService } from '../../../services/job_service';
 import { escapeForElasticsearchQuery } from '../../../util/string_utils';
 import { getSavedObjectsClient, getGetUrlGenerator } from '../../../util/dependency_cache';
-import { getProcessedFields } from '../../../components/data_grid';
 
 export function getNewCustomUrlDefaults(job, dashboards, indexPatterns) {
   // Returns the settings object in the format used by the custom URL editor
@@ -266,8 +264,7 @@ function buildAppStateQueryParam(queryFieldNames) {
 // Builds the full URL for testing out a custom URL configuration, which
 // may contain dollar delimited partition / influencer entity tokens and
 // drilldown time range settings.
-export function getTestUrl(job, customUrl) {
-  const urlValue = customUrl.url_value;
+export async function getTestUrl(job, customUrl) {
   const bucketSpanSecs = parseInterval(job.analysis_config.bucket_span).asSeconds();
 
   // By default, return configured url_value. Look to substitute any dollar-delimited
@@ -297,7 +294,7 @@ export function getTestUrl(job, customUrl) {
         },
         [job.job_id]
       )
-      .then((resp) => {
+      .then(async (resp) => {
         if (resp.hits.total.value > 0) {
           const record = resp.hits.hits[0]._source;
           testUrl = replaceTokensInUrlValue(customUrl, bucketSpanSecs, record, 'timestamp');
@@ -305,38 +302,34 @@ export function getTestUrl(job, customUrl) {
         } else {
           // No anomalies yet for this job, so do a preview of the search
           // configured in the job datafeed to obtain sample docs.
-          mlJobService.searchPreview(job).then((response) => {
-            let testDoc;
+
+          // load the non-combined job and datafeed so they can be used in the datafeed preview
+          const [
+            {
+              jobs: [jobConfig],
+            },
+            {
+              datafeeds: [datafeedConfig],
+            },
+          ] = await Promise.all([
+            ml.getJobs({ jobId: job.job_id }),
+            ml.getDatafeeds({ datafeedId: job.datafeed_config.datafeed_id }),
+          ]);
+
+          if (jobConfig === undefined || datafeedConfig === undefined) {
+            resolve(testUrl);
+          }
+
+          ml.jobs.datafeedPreview(undefined, jobConfig, datafeedConfig).then((response) => {
             const docTimeFieldName = job.data_description.time_field;
 
-            // Handle datafeeds which use aggregations or documents.
-            if (response.aggregations) {
-              // Create a dummy object which contains the fields necessary to build the URL.
-              const firstBucket = response.aggregations.buckets.buckets[0];
-              testDoc = {
-                [docTimeFieldName]: firstBucket.key,
-              };
-
-              // Look for bucket aggregations which match the tokens in the URL.
-              urlValue.replace(/\$([^?&$\'"]{1,40})\$/g, (match, name) => {
-                if (name !== 'earliest' && name !== 'latest' && firstBucket[name] !== undefined) {
-                  const tokenBuckets = firstBucket[name];
-                  if (tokenBuckets.buckets) {
-                    testDoc[name] = tokenBuckets.buckets[0].key;
-                  }
-                }
-              });
-            } else {
-              if (response.hits.total.value > 0) {
-                testDoc = getProcessedFields(response.hits.hits[0].fields);
-              }
-            }
-
-            if (testDoc !== undefined) {
+            // Create a dummy object which contains the fields necessary to build the URL.
+            const firstBucket = response[0];
+            if (firstBucket !== undefined) {
               testUrl = replaceTokensInUrlValue(
                 customUrl,
                 bucketSpanSecs,
-                testDoc,
+                firstBucket,
                 docTimeFieldName
               );
             }

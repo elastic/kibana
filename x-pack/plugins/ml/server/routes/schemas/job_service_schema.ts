@@ -109,15 +109,11 @@ export const revertModelSnapshotSchema = schema.object({
   ),
 });
 
-export const datafeedPreviewSchema = schema.oneOf([
-  schema.object({
-    job: schema.object(anomalyDetectionJobSchema),
-    datafeed: datafeedConfigSchema,
-  }),
-  schema.object({
-    datafeedId: schema.string(),
-  }),
-]);
+export const datafeedPreviewSchema = schema.object({
+  job: schema.maybe(schema.object(anomalyDetectionJobSchema)),
+  datafeed: schema.maybe(datafeedConfigSchema),
+  datafeedId: schema.maybe(schema.string()),
+});
 
 export const jobsExistSchema = schema.object({
   jobIds: schema.arrayOf(schema.string()),
