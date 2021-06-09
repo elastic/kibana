@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-import { Phases } from '../../../common/types';
-
-export type Phase = keyof Phases;
+export { BackToExternalAppButton } from './back_to_external_app_button';

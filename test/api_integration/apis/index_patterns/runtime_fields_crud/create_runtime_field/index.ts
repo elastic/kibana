@@ -6,4 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { EnvironmentService, Environment, EnvironmentServiceSetup } from './environment';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('create_runtime_field', () => {
+    loadTestFile(require.resolve('./errors'));
+    loadTestFile(require.resolve('./main'));
+  });
+}
