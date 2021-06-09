@@ -79,7 +79,7 @@ describe('ExceptionListsTable', () => {
       <TestProviders>
         <ExceptionListsTable
           history={mockHistory}
-          hasNoPermissions={false}
+          hasPermissions
           loading={false}
           formatUrl={jest.fn()}
         />

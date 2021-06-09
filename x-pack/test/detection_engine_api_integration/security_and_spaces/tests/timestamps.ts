@@ -35,15 +35,23 @@ export default ({ getService }: FtrProviderContext) => {
     describe('Signals generated from events with a timestamp in seconds is converted correctly into the forced ISO8601 format when copying', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
-        await esArchiver.load('security_solution/timestamp_in_seconds');
-        await esArchiver.load('security_solution/timestamp_override_5');
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/security_solution/timestamp_in_seconds'
+        );
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/security_solution/timestamp_override_5'
+        );
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
-        await esArchiver.unload('security_solution/timestamp_in_seconds');
-        await esArchiver.unload('security_solution/timestamp_override_5');
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/timestamp_in_seconds'
+        );
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/timestamp_override_5'
+        );
       });
 
       it('should convert the @timestamp which is epoch_seconds into the correct ISO format', async () => {
@@ -80,19 +88,35 @@ export default ({ getService }: FtrProviderContext) => {
       beforeEach(async () => {
         await deleteSignalsIndex(supertest);
         await createSignalsIndex(supertest);
-        await esArchiver.load('security_solution/timestamp_override_1');
-        await esArchiver.load('security_solution/timestamp_override_2');
-        await esArchiver.load('security_solution/timestamp_override_3');
-        await esArchiver.load('security_solution/timestamp_override_4');
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/security_solution/timestamp_override_1'
+        );
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/security_solution/timestamp_override_2'
+        );
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/security_solution/timestamp_override_3'
+        );
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/security_solution/timestamp_override_4'
+        );
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
-        await esArchiver.unload('security_solution/timestamp_override_1');
-        await esArchiver.unload('security_solution/timestamp_override_2');
-        await esArchiver.unload('security_solution/timestamp_override_3');
-        await esArchiver.unload('security_solution/timestamp_override_4');
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/timestamp_override_1'
+        );
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/timestamp_override_2'
+        );
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/timestamp_override_3'
+        );
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/timestamp_override_4'
+        );
       });
 
       it('should generate signals with event.ingested, @timestamp and (event.ingested + timestamp)', async () => {
@@ -168,13 +192,13 @@ export default ({ getService }: FtrProviderContext) => {
     describe('Signals generated from events with timestamp override field and ensures search_after continues to work when documents are missing timestamp override field', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
-        await esArchiver.load('auditbeat/hosts');
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
-        await esArchiver.unload('auditbeat/hosts');
+        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       /**
