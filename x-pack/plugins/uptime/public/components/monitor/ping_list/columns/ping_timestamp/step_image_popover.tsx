@@ -8,9 +8,9 @@
 import { EuiImage, EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { composeScreenshotRef } from '../../../../../lib/helper/compose_screenshot_images';
 import { ScreenshotRefImageData } from '../../../../../../common/runtime_types';
 import { fullSizeImageAlt } from './translations';
+import { useCompositeImage } from '../../../../../hooks';
 
 const POPOVER_IMG_HEIGHT = 360;
 const POPOVER_IMG_WIDTH = 640;
@@ -59,14 +59,10 @@ const RecomposedScreenshotImage: React.FC<
     url?: string;
   }
 > = (props) => {
-  const { imgRef, setUrl } = props;
-  React.useEffect(() => {
-    const canvas = document.createElement('canvas');
-    composeScreenshotRef(imgRef, canvas).then(() => {
-      const imgData = canvas.toDataURL('image/jpg', 1.0);
-      setUrl(imgData);
-    });
-  }, [imgRef, setUrl]);
+  const { imgRef, setUrl, url } = props;
+
+  useCompositeImage(imgRef, setUrl, url);
+
   return <DefaultImage {...props} url={props.url} />;
 };
 
