@@ -7,6 +7,7 @@
 
 import type { PackagePolicy, FullAgentPolicyInput, FullAgentPolicyInputStream } from '../types';
 import { DEFAULT_OUTPUT } from '../constants';
+import { merge } from 'lodash';
 
 export const storedPackagePoliciesToAgentInputs = (
   packagePolicies: PackagePolicy[]
@@ -31,10 +32,6 @@ export const storedPackagePoliciesToAgentInputs = (
           namespace: packagePolicy.namespace || 'default',
         },
         use_output: DEFAULT_OUTPUT.name,
-        ...Object.entries(input.config || {}).reduce((acc, [key, { value }]) => {
-          acc[key] = value;
-          return acc;
-        }, {} as { [k: string]: any }),
         ...(input.compiled_input || {}),
         ...(input.streams.length
           ? {
@@ -55,6 +52,14 @@ export const storedPackagePoliciesToAgentInputs = (
             }
           : {}),
       };
+
+      merge(
+        fullInput,
+        Object.entries(input.config || {}).reduce(
+          (acc, [key, { value }]) => ({ ...acc, [key]: value }),
+          {}
+        )
+      );
 
       if (packagePolicy.package) {
         fullInput.meta = {
