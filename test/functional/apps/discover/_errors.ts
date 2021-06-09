@@ -16,14 +16,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('errors', function describeIndexTests() {
     before(async function () {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('invalid_scripted_field');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.load('test/functional/fixtures/es_archiver/invalid_scripted_field');
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });
 
     after(async function () {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('test/functional/fixtures/es_archiver/empty_kibana');
     });
 
     describe('invalid scripted field error', () => {

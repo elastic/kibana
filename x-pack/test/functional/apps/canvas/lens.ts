@@ -13,7 +13,7 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
 
   describe('lens in canvas', function () {
     before(async () => {
-      await esArchiver.load('canvas/lens');
+      await esArchiver.load('x-pack/test/functional/es_archives/canvas/lens');
       // open canvas home
       await PageObjects.common.navigateToApp('canvas');
       // load test workpad
