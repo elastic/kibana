@@ -220,7 +220,7 @@ describe('when on integration detail', () => {
       expect(secondRowAgentCount.tagName).toEqual('A');
     });
 
-    it('should NOW show add agent button if agent count is greater than zero', async () => {
+    it('should NOT show add agent button if agent count is greater than zero', async () => {
       await mockedApi.waitForApi();
       const secondRowAgentCount = renderResult.getAllByTestId('rowAgentCount')[1];
       expect(secondRowAgentCount.textContent).toEqual('100');
