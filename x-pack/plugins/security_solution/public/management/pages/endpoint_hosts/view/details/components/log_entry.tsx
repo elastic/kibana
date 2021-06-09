@@ -46,12 +46,12 @@ export const LogEntry = memo(({ logEntry }: { logEntry: Immutable<ActivityLogEnt
   if (logEntry.type === 'action') {
     avatarSize = 'm';
     commentType = 'regular';
-    commentText = logEntry.item.data.comment || '';
+    commentText = logEntry.item.data.data.comment ?? '';
     displayResponseEvent = false;
     iconType = 'lockOpen';
-    username = logEntry.item.user_id;
-    if (logEntry.item.data) {
-      const data = logEntry.item.data;
+    username = logEntry.item.data.user_id;
+    if (logEntry.item.data.data) {
+      const data = logEntry.item.data.data;
       if (data.command === 'isolate') {
         iconType = 'lock';
         isIsolateAction = true;
@@ -61,10 +61,10 @@ export const LogEntry = memo(({ logEntry }: { logEntry: Immutable<ActivityLogEnt
       }
     }
   } else if (logEntry.type === 'response') {
-    if (logEntry.item.action_data.command === 'isolate') {
+    if (logEntry.item.data.action_data.command === 'isolate') {
       isIsolateAction = true;
     }
-    if (!!logEntry.item.completed_at && !logEntry.item.error) {
+    if (!!logEntry.item.data.completed_at && !logEntry.item.data.error) {
       isSuccessful = true;
     }
   }
@@ -92,7 +92,7 @@ export const LogEntry = memo(({ logEntry }: { logEntry: Immutable<ActivityLogEnt
       type={commentType}
       username={username}
       timestamp={FormattedDateAndTime({
-        date: new Date(logEntry.item['@timestamp']),
+        date: new Date(logEntry.item.data['@timestamp']),
         showRelativeTime: true,
       })}
       event={<b>{displayResponseEvent ? responseEvent : actionEvent}</b>}

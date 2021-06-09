@@ -235,20 +235,29 @@ describe('endpoint list middleware', () => {
     };
 
     const fleetActionGenerator = new FleetActionGenerator(Math.random().toString());
-    const activityLog = [
-      {
-        type: 'response',
-        item: fleetActionGenerator.generateResponse({
-          agent_id: endpointList.hosts[0].metadata.agent.id,
-        }),
-      },
-      {
-        type: 'action',
-        item: fleetActionGenerator.generate({
-          agents: [endpointList.hosts[0].metadata.agent.id],
-        }),
-      },
-    ] as ActivityLog;
+    const activityLog = {
+      total: 2,
+      items: [
+        {
+          type: 'response',
+          item: {
+            id: '',
+            data: fleetActionGenerator.generateResponse({
+              agent_id: endpointList.hosts[0].metadata.agent.id,
+            }),
+          },
+        },
+        {
+          type: 'action',
+          item: {
+            id: '',
+            data: fleetActionGenerator.generate({
+              agents: [endpointList.hosts[0].metadata.agent.id],
+            }),
+          },
+        },
+      ],
+    } as ActivityLog;
     const dispatchGetActivityLog = () => {
       dispatch({
         type: 'endpointDetailsActivityLogChanged',

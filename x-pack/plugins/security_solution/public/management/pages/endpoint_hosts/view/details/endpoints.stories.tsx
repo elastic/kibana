@@ -19,73 +19,89 @@ export const dummyEndpointActivityLog = (
   selectedEndpoint: string = ''
 ): AsyncResourceState<Immutable<ActivityLog>> => ({
   type: 'LoadedResourceState',
-  data: [
-    {
-      type: 'action',
-      item: {
-        action_id: '1',
-        '@timestamp': moment().subtract(1, 'hours').fromNow().toString(),
-        expiration: moment().add(3, 'day').fromNow().toString(),
-        type: 'INPUT_ACTION',
-        input_type: 'endpoint',
-        agents: [`${selectedEndpoint}`],
-        user_id: 'sys',
-        data: {
-          command: 'isolate',
+  data: {
+    total: 20,
+    items: [
+      {
+        type: 'action',
+        item: {
+          id: '',
+          data: {
+            action_id: '1',
+            '@timestamp': moment().subtract(1, 'hours').fromNow().toString(),
+            expiration: moment().add(3, 'day').fromNow().toString(),
+            type: 'INPUT_ACTION',
+            input_type: 'endpoint',
+            agents: [`${selectedEndpoint}`],
+            user_id: 'sys',
+            data: {
+              command: 'isolate',
+            },
+          },
         },
       },
-    },
-    {
-      type: 'action',
-      item: {
-        action_id: '2',
-        '@timestamp': moment().subtract(2, 'hours').fromNow().toString(),
-        expiration: moment().add(1, 'day').fromNow().toString(),
-        type: 'INPUT_ACTION',
-        input_type: 'endpoint',
-        agents: [`${selectedEndpoint}`],
-        user_id: 'ash',
-        data: {
-          command: 'isolate',
-          comment: 'Sem et tortor consequat id porta nibh venenatis cras sed.',
+      {
+        type: 'action',
+        item: {
+          id: '',
+          data: {
+            action_id: '2',
+            '@timestamp': moment().subtract(2, 'hours').fromNow().toString(),
+            expiration: moment().add(1, 'day').fromNow().toString(),
+            type: 'INPUT_ACTION',
+            input_type: 'endpoint',
+            agents: [`${selectedEndpoint}`],
+            user_id: 'ash',
+            data: {
+              command: 'isolate',
+              comment: 'Sem et tortor consequat id porta nibh venenatis cras sed.',
+            },
+          },
         },
       },
-    },
-    {
-      type: 'action',
-      item: {
-        action_id: '3',
-        '@timestamp': moment().subtract(4, 'hours').fromNow().toString(),
-        expiration: moment().add(1, 'day').fromNow().toString(),
-        type: 'INPUT_ACTION',
-        input_type: 'endpoint',
-        agents: [`${selectedEndpoint}`],
-        user_id: 'someone',
-        data: {
-          command: 'unisolate',
-          comment: 'Turpis egestas pretium aenean pharetra.',
+      {
+        type: 'action',
+        item: {
+          id: '',
+          data: {
+            action_id: '3',
+            '@timestamp': moment().subtract(4, 'hours').fromNow().toString(),
+            expiration: moment().add(1, 'day').fromNow().toString(),
+            type: 'INPUT_ACTION',
+            input_type: 'endpoint',
+            agents: [`${selectedEndpoint}`],
+            user_id: 'someone',
+            data: {
+              command: 'unisolate',
+              comment: 'Turpis egestas pretium aenean pharetra.',
+            },
+          },
         },
       },
-    },
-    {
-      type: 'action',
-      item: {
-        action_id: '4',
-        '@timestamp': moment().subtract(1, 'day').fromNow().toString(),
-        expiration: moment().add(3, 'day').fromNow().toString(),
-        type: 'INPUT_ACTION',
-        input_type: 'endpoint',
-        agents: [`${selectedEndpoint}`],
-        user_id: 'ash',
-        data: {
-          command: 'isolate',
-          comment:
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, \
-        sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+      {
+        type: 'action',
+        item: {
+          id: '',
+          data: {
+            action_id: '4',
+            '@timestamp': moment().subtract(1, 'day').fromNow().toString(),
+            expiration: moment().add(3, 'day').fromNow().toString(),
+            type: 'INPUT_ACTION',
+            input_type: 'endpoint',
+            agents: [`${selectedEndpoint}`],
+            user_id: 'ash',
+            data: {
+              command: 'isolate',
+              comment:
+                'Lorem \
+                  ipsum dolor sit amet, consectetur adipiscing elit, \
+                  sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+            },
+          },
         },
       },
-    },
-  ],
+    ],
+  },
 });
 
 export default {

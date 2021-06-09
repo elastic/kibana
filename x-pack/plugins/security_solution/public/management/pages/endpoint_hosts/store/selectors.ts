@@ -28,10 +28,12 @@ import {
 } from '../../../common/constants';
 import { Query } from '../../../../../../../../src/plugins/data/common/query/types';
 import {
+  getLastLoadedResourceState,
   isFailedResourceState,
   isLoadedResourceState,
   isLoadingResourceState,
 } from '../../../state';
+
 import { ServerApiError } from '../../../../common/types';
 import { isEndpointHostIsolated } from '../../../../common/utils/validators';
 
@@ -369,25 +371,16 @@ export const getActivityLogDataPaging = (
   };
 };
 
-export const getPreviousLogData = (state: Immutable<EndpointState>): Immutable<ActivityLog> => {
-  const logData = state.endpointDetails.activityLog.logData;
-  if (
-    logData.type === 'LoadingResourceState' &&
-    logData.previousState.type === 'LoadedResourceState'
-  ) {
-    return logData.previousState.data;
-  }
-  return [];
-};
-
-export const hasPreviousLogData = createSelector(getPreviousLogData, (logData): boolean => {
-  return logData.length > 0;
-});
-
 export const getActivityLogData = (
   state: Immutable<EndpointState>
 ): Immutable<EndpointState['endpointDetails']['activityLog']['logData']> =>
   state.endpointDetails.activityLog.logData;
+
+export const getLastLoadedActivityLogData: (
+  state: Immutable<EndpointState>
+) => Immutable<ActivityLog> | undefined = createSelector(getActivityLogData, (activityLog) => {
+  return getLastLoadedResourceState(activityLog)?.data;
+});
 
 export const getActivityLogRequestLoading: (
   state: Immutable<EndpointState>

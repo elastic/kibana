@@ -45,7 +45,7 @@ export const EndpointActivityLog = memo(
     return (
       <>
         <EuiSpacer size="l" />
-        {(activityLog.type === 'LoadedResourceState' && !activityLog.data.length) ||
+        {(activityLog.type === 'LoadedResourceState' && !activityLog.data.items.length) ||
         activityError ? (
           <EuiEmptyPrompt
             iconType="editorUnorderedList"
@@ -61,11 +61,8 @@ export const EndpointActivityLog = memo(
               <EuiLoadingContent lines={3} />
             ) : (
               activityLog.type === 'LoadedResourceState' &&
-              activityLog.data?.map((logEntry) => (
-                <LogEntry
-                  key={`${logEntry.item.action_id}-${logEntry.item['@timestamp']}`}
-                  logEntry={logEntry}
-                />
+              activityLog.data.items.map((logEntry) => (
+                <LogEntry key={`${logEntry.item.id}`} logEntry={logEntry} />
               ))
             )}
             <EuiButton size="s" fill onClick={getActivityLog}>

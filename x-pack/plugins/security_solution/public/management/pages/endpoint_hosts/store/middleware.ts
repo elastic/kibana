@@ -31,8 +31,7 @@ import {
   getCurrentIsolationRequestState,
   getActivityLogData,
   getActivityLogDataPaging,
-  getPreviousLogData,
-  hasPreviousLogData,
+  getLastLoadedActivityLogData,
 } from './selectors';
 import { EndpointState, PolicyIds } from '../types';
 import {
@@ -405,9 +404,16 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           query: { page, page_size: pageSize },
         });
 
-        if (hasPreviousLogData(getState())) {
-          const previousLogData = getPreviousLogData(getState());
-          const updatedLogData = [...new Set([...previousLogData, ...activityLog])] as ActivityLog;
+        const lastLoadedLogData = getLastLoadedActivityLogData(getState());
+        if (lastLoadedLogData !== undefined) {
+          const updatedLogDataItems = [
+            ...new Set([...lastLoadedLogData.items, ...activityLog.items]),
+          ] as ActivityLog['items'];
+
+          const updatedLogData = {
+            total: activityLog.total,
+            items: updatedLogDataItems,
+          };
           dispatch({
             type: 'endpointDetailsActivityLogChanged',
             payload: createLoadedResourceState<ActivityLog>(updatedLogData),
