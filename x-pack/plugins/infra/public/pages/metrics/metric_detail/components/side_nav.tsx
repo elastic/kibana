@@ -8,7 +8,6 @@
 import { EuiHideFor, EuiPageSideBar, EuiShowFor, EuiSideNav } from '@elastic/eui';
 import React, { useState, useCallback } from 'react';
 import { NavItem } from '../lib/side_nav_context';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 interface Props {
   loading: boolean;
   name: string;
@@ -35,7 +34,7 @@ export const MetricsSideNav = ({ loading, name, items }: Props) => {
   return (
     <>
       <EuiHideFor sizes={['xs', 's', 'm']}>
-        <StickyPageSideBar>{content}</StickyPageSideBar>
+        <EuiPageSideBar sticky={true}>{content}</EuiPageSideBar>
       </EuiHideFor>
       <EuiShowFor sizes={['xs', 's', 'm']}>
         <EuiPageSideBar>{mobileContent}</EuiPageSideBar>
@@ -43,11 +42,3 @@ export const MetricsSideNav = ({ loading, name, items }: Props) => {
     </>
   );
 };
-
-const StickyPageSideBar = euiStyled(EuiPageSideBar)`
-  position: sticky;
-  top: ${(props) =>
-    parseFloat(props.theme.eui.euiHeaderHeightCompensation) * 2 +
-    parseFloat(props.theme.eui.paddingSizes.s) +
-    'px'};
-`;
