@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from '@hapi/hapi';
+import { Server } from '@commercial/hapi';
 import { accessSync, constants, readFileSync, statSync } from 'fs';
 import { safeLoad } from 'js-yaml';
 import { dirname, join } from 'path';

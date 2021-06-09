@@ -8,11 +8,11 @@
     "build-graphql-types": "node scripts/generate_types_from_graphql.js"
   },
   "devDependencies": {
-    "@types/hapi__boom": "^7.4.1",
+    "@types/commercial__boom": "npm:@types/hapi__boom@^7.4.1",
     "@types/lodash": "^4.14.110"
   },
   "dependencies": {
-    "@hapi/boom": "npm:@commercial/boom@^7.4.12",
+    "@commercial/boom": "^7.4.12",
     "@types/color": "^3.0.0",
     "lodash": "^4.17.21"
   }

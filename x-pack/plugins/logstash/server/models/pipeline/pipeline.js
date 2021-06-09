@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import { badRequest } from '@hapi/boom';
+import { badRequest } from '@commercial/boom';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 

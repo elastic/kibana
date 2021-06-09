@@ -11,7 +11,7 @@ import { callWithInternalUserFactory } from '../client/call_with_internal_user_f
 import { mlLog } from '../client/log';
 
 import { wrapError } from '../client/errors';
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 
 import { isSecurityDisabled } from '../lib/security_utils';
 

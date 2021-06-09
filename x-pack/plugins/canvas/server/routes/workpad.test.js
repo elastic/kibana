@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from '@hapi/hapi';
+import Hapi from '@commercial/hapi';
 import {
   CANVAS_TYPE,
   API_ROUTE_WORKPAD,

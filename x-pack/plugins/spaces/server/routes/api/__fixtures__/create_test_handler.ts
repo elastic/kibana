@@ -5,7 +5,7 @@
  */
 
 // @ts-ignore
-import { Server } from '@hapi/hapi';
+import { Server } from '@commercial/hapi';
 import { Legacy } from 'kibana';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { createSpaces } from './create_spaces';

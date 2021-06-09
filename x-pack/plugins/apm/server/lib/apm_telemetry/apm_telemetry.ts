@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from '@hapi/hapi';
+import { Server } from '@commercial/hapi';
 import { countBy } from 'lodash';
 
 // Support telemetry for additional agent types by appending definitions in

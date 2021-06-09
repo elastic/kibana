@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 import { serializeProvider } from '@kbn/interpreter/common';
 import { API_ROUTE } from '../../common/constants';
 import { createHandlers } from '../lib/create_handlers';

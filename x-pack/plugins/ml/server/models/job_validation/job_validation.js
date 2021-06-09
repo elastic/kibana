@@ -7,7 +7,7 @@
 
 
 import { i18n } from '@kbn/i18n';
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 
 import { fieldsServiceProvider } from '../fields_service';
 import { renderTemplate } from '../../../common/util/string_utils';

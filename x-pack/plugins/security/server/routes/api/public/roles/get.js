@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import _ from 'lodash';
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 import { GLOBAL_RESOURCE } from '../../../../../common/constants';
 import { wrapError } from '../../../../lib/errors';
 import { spaceApplicationPrivilegesSerializer } from '../../../../lib/authorization';

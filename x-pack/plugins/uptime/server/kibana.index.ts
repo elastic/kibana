@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request, Server } from '@hapi/hapi';
+import { Request, Server } from '@commercial/hapi';
 import { compose } from './lib/compose/kibana';
 import { initUptimeServer } from './uptime_server';
 
