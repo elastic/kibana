@@ -45,7 +45,9 @@ export default function ({ getService }: FtrProviderContext) {
         before(async () => {
           await ml.api.cleanMlIndices();
 
-          await esArchiver.loadIfNeeded('ml/module_sample_ecommerce');
+          await esArchiver.loadIfNeeded(
+            'x-pack/test/functional/es_archives/ml/module_sample_ecommerce'
+          );
           await ml.testResources.createIndexPatternIfNeeded(ecIndexPattern, 'order_date');
 
           await ml.securityUI.loginAs(testUser.user);
@@ -53,14 +55,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         after(async () => {
           await ml.securityUI.logout();
-        });
-
-        it('should display the ML file data vis link on the Kibana home page', async () => {
-          await ml.testExecution.logTestStep('should load the Kibana home page');
-          await ml.navigation.navigateToKibanaHome();
-
-          await ml.testExecution.logTestStep('should display the ML file data vis link');
-          await ml.commonUI.assertKibanaHomeFileDataVisLinkExists();
         });
 
         it('should display the ML entry in Kibana app menu', async () => {

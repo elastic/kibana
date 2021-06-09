@@ -13,8 +13,12 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('conflicts', () => {
-    before(() => esArchiver.load('index_patterns/conflicts'));
-    after(() => esArchiver.unload('index_patterns/conflicts'));
+    before(() =>
+      esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/conflicts')
+    );
+    after(() =>
+      esArchiver.unload('test/api_integration/fixtures/es_archiver/index_patterns/conflicts')
+    );
 
     it('flags fields with mismatched types as conflicting', () =>
       supertest

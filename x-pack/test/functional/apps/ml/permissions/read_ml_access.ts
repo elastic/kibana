@@ -35,14 +35,6 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.securityUI.logout();
           });
 
-          it('should not display the ML file data vis link on the Kibana home page', async () => {
-            await ml.testExecution.logTestStep('should load the Kibana home page');
-            await ml.navigation.navigateToKibanaHome();
-
-            await ml.testExecution.logTestStep('should not display the ML file data vis link');
-            await ml.commonUI.assertKibanaHomeFileDataVisLinkNotExists();
-          });
-
           it('should display the ML entry in Kibana app menu', async () => {
             await ml.testExecution.logTestStep('should open the Kibana app menu');
             await ml.navigation.openKibanaNav();
@@ -114,9 +106,11 @@ export default function ({ getService }: FtrProviderContext) {
       const expectedUploadFileTitle = 'artificial_server_log';
 
       before(async () => {
-        await esArchiver.loadIfNeeded('ml/farequote');
-        await esArchiver.loadIfNeeded('ml/ihp_outlier');
-        await esArchiver.loadIfNeeded('ml/module_sample_ecommerce');
+        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
+        await esArchiver.loadIfNeeded(
+          'x-pack/test/functional/es_archives/ml/module_sample_ecommerce'
+        );
         await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
         await ml.testResources.createIndexPatternIfNeeded('ft_ihp_outlier', '@timestamp');
         await ml.testResources.createIndexPatternIfNeeded(ecIndexPattern, 'order_date');
