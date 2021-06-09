@@ -11,22 +11,17 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import type { AgentPolicy } from '../../../../types';
-import {
-  useGetOneEnrollmentAPIKey,
-  useGetSettings,
-  useLink,
-  useFleetStatus,
-} from '../../../../hooks';
-import { NewEnrollmentTokenModal } from '../../enrollment_token_list_page/components/new_enrollment_key_modal';
+import type { AgentPolicy } from '../../types';
+import { NewEnrollmentTokenModal } from '../../components';
+import { useGetOneEnrollmentAPIKey, useGetSettings, useLink, useFleetStatus } from '../../hooks';
 
-import { ManualInstructions } from '../../../../components/enrollment_instructions';
+import { ManualInstructions } from '../../components/enrollment_instructions';
 import {
   FleetServerRequirementPage,
   ServiceTokenStep,
   FleetServerCommandStep,
   useFleetServerInstructions,
-} from '../../agent_requirements_page';
+} from '../../applications/fleet/sections/agents/agent_requirements_page';
 
 import { DownloadStep, AgentPolicySelectionStep } from './steps';
 

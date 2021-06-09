@@ -12,8 +12,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import type { EnrollmentAPIKey } from '../../../types';
-import { PLATFORM_OPTIONS, usePlatform } from '../../../sections/agents/hooks/use_platform';
-import type { PLATFORM_TYPE } from '../../../sections/agents/hooks/use_platform';
+import { PLATFORM_OPTIONS, usePlatform } from '../../../hooks';
+import type { PLATFORM_TYPE } from '../../../hooks';
 
 interface Props {
   fleetServerHosts: string[];
