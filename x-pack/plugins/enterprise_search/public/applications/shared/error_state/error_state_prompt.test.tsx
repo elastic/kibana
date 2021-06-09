@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import '../../__mocks__/kea.mock';
+import '../../__mocks__/kea_logic';
 
 import React from 'react';
 

@@ -350,7 +350,7 @@ export class DiscoverPlugin
         return;
       }
       // this is used by application mount and tests
-      const { getInnerAngularModule } = await import('./get_inner_angular');
+      const { getInnerAngularModule } = await import('./application/angular/get_inner_angular');
       const module = getInnerAngularModule(
         innerAngularName,
         core,
@@ -421,7 +421,9 @@ export class DiscoverPlugin
       }
       const { core, plugins } = await this.initializeServices();
       getServices().kibanaLegacy.loadFontAwesome();
-      const { getInnerAngularModuleEmbeddable } = await import('./get_inner_angular');
+      const { getInnerAngularModuleEmbeddable } = await import(
+        './application/angular/get_inner_angular'
+      );
       getInnerAngularModuleEmbeddable(embeddableAngularName, core, plugins);
       const mountpoint = document.createElement('div');
       this.embeddableInjector = angular.bootstrap(mountpoint, [embeddableAngularName]);

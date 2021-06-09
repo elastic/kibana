@@ -1,0 +1,67 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "1",
+    "index": "runtime_conflicting_fields",
+    "source": {
+      "@timestamp": "2020-10-28T05:00:53.000Z",
+      "host": [{
+        "name": "host name 1_1"
+      }, {
+        "name": "host name 1_2"
+      }]
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "2",
+    "index": "runtime_conflicting_fields",
+    "source": {
+      "@timestamp": "2020-10-28T05:01:53.000Z",
+      "host": [{
+        "name": "host name 2_1"
+      }, {
+        "name": "host name 2_2"
+      }]
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "3",
+    "index": "runtime_conflicting_fields",
+    "source": {
+      "@timestamp": "2020-10-28T05:02:53.000Z",
+      "host": [{
+        "name": "host name 3_1"
+      }, {
+        "name": "host name 3_2"
+      }]
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "4",
+    "index": "runtime_conflicting_fields",
+    "source": {
+      "@timestamp": "2020-10-28T05:03:53.000Z",
+      "host": [{
+        "name": "host name 4_1"
+      }, {
+        "name": "host name 4_2"
+      }]
+    },
+    "type": "_doc"
+  }
+}

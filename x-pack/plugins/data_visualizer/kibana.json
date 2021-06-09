@@ -1,0 +1,29 @@
+{
+  "id": "dataVisualizer",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "data",
+    "usageCollection",
+    "embeddable",
+    "share",
+    "discover",
+    "fileUpload"
+  ],
+  "optionalPlugins": [
+    "security",
+    "maps",
+    "home",
+    "lens"
+  ],
+  "requiredBundles": [
+    "kibanaReact",
+    "maps",
+    "esUiShared"
+  ],
+  "extraPublicDirs": [
+    "common"
+  ]
+}
