@@ -75,7 +75,6 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     docLinks,
     application,
     http,
-    getMlCardState,
     data,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
@@ -184,7 +183,6 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
           onRefresh={loadSources}
           docLinks={docLinks}
           navigateToApp={application.navigateToApp}
-          getMlCardState={getMlCardState}
           canSave={canSave}
         />
       );
