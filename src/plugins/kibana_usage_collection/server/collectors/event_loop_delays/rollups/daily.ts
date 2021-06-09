@@ -30,12 +30,15 @@ export async function rollDailyData(
       filter: `${SAVED_OBJECTS_DAILY_TYPE}.updated_at < "now-3d/d"`,
     });
 
-    await Promise.allSettled([
+    const settledDeletes = await Promise.allSettled(
       savedObjects.map(async (savedObject) => {
         return await savedObjectsClient.delete(SAVED_OBJECTS_DAILY_TYPE, savedObject.id);
-      }),
-    ]);
-
+      })
+    );
+    const failedDeletes = settledDeletes.filter(({ status }) => status !== 'fulfilled');
+    if (failedDeletes.length) {
+      throw failedDeletes;
+    }
     return true;
   } catch (err) {
     logger.debug(`Failed to rollup transactional to daily entries`);

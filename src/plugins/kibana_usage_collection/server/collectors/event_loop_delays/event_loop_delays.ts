@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import * as perf_hooks from 'perf_hooks';
+import type { EventLoopDelayMonitor } from 'perf_hooks';
+import { monitorEventLoopDelay } from 'perf_hooks';
 import moment from 'moment';
-
 import { takeUntil, finalize, map } from 'rxjs/operators';
 import { Subject, timer } from 'rxjs';
 import type { ISavedObjectsRepository } from 'kibana/server';
@@ -34,10 +34,10 @@ export interface IntervalHistogram {
 }
 
 export class EventLoopDelaysCollector {
-  private readonly loopMonitor: perf_hooks.EventLoopDelayMonitor;
+  private readonly loopMonitor: EventLoopDelayMonitor;
   public lastCollected: moment.MomentInput;
   constructor(private readonly eventLoopMonitorResolution = 10) {
-    const monitor = perf_hooks.monitorEventLoopDelay({
+    const monitor = monitorEventLoopDelay({
       resolution: this.eventLoopMonitorResolution,
     });
     monitor.enable();
@@ -73,15 +73,15 @@ export class EventLoopDelaysCollector {
 
 export function startTrackingEventLoopDelaysUsage(
   internalRepository: ISavedObjectsRepository,
-  stopMonitoringEventLoop$: Subject<void>
+  stopMonitoringEventLoop$: Subject<void>,
+  collectionStartDelay = MONITOR_EVENT_LOOP_DELAYS_START,
+  collectionInterval = MONITOR_EVENT_LOOP_DELAYS_INTERVAL,
+  histogramReset = MONITOR_EVENT_LOOP_DELAYS_RESET
 ) {
   const eventLoopDelaysCollector = new EventLoopDelaysCollector();
 
-  const resetOnCount = parseInt(
-    `${MONITOR_EVENT_LOOP_DELAYS_RESET / MONITOR_EVENT_LOOP_DELAYS_INTERVAL}`,
-    10
-  );
-  timer(MONITOR_EVENT_LOOP_DELAYS_START, MONITOR_EVENT_LOOP_DELAYS_INTERVAL)
+  const resetOnCount = parseInt(`${histogramReset / collectionInterval}`, 10);
+  timer(collectionStartDelay, collectionInterval)
     .pipe(
       map((i) => (i + 1) % resetOnCount === 0),
       takeUntil(stopMonitoringEventLoop$),
