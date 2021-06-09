@@ -9,15 +9,17 @@
 import { render } from 'react-dom';
 import React, { useRef, useEffect } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
+import { IScope } from 'angular';
 import { getServices } from '../../../kibana_services';
-import { AngularScope, DocTableLegacyProps, injectAngularElement } from './create_doc_table_react';
+import { DocTableLegacyProps, injectAngularElement } from './create_doc_table_react';
+
+type AngularEmbeddableScope = IScope & { renderProps?: DocTableEmbeddableProps };
 
 export interface DocTableEmbeddableProps extends Partial<DocTableLegacyProps> {
   refs: HTMLElement;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getRenderFn(domNode: Element, props: any) {
+function getRenderFn(domNode: Element, props: DocTableEmbeddableProps) {
   const directive = {
     template: `<doc-table
         class="panel-content"
@@ -37,7 +39,7 @@ function getRenderFn(domNode: Element, props: any) {
         render-complete
         sorting="renderProps.sort"
         total-hit-count="renderProps.totalHitCount"
-        use-new-fields-api="renderProps.useNewFieldsApi"</doc-table>`,
+        use-new-fields-api="renderProps.useNewFieldsApi"></doc-table>`,
   };
 
   return async () => {
@@ -59,14 +61,17 @@ export function DiscoverDocTableEmbeddable(props: DocTableEmbeddableProps) {
 }
 
 function DocTableLegacyInner(renderProps: DocTableEmbeddableProps) {
-  const scope = useRef<AngularScope | undefined>();
+  const scope = useRef<AngularEmbeddableScope | undefined>();
 
   useEffect(() => {
-    if (renderProps.refs) {
+    if (renderProps.refs && !scope.current) {
       const fn = getRenderFn(renderProps.refs, renderProps);
       fn().then((newScope) => {
         scope.current = newScope;
       });
+    } else if (scope && scope.current) {
+      scope.current.renderProps = { ...renderProps };
+      scope.current.$applyAsync();
     }
   }, [renderProps]);
 

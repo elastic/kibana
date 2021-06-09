@@ -74,7 +74,7 @@ export class SavedSearchEmbeddable
   private readonly savedSearch: SavedSearch;
   private inspectorAdapters: Adapters;
   private panelTitle: string = '';
-  private filtersSearchSource?: ISearchSource;
+  private filtersSearchSource!: ISearchSource;
   private subscription?: Subscription;
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
   private filterManager: FilterManager;
@@ -336,12 +336,12 @@ export class SavedSearchEmbeddable
     searchProps.sort = this.input.sort || savedSearchSort;
     searchProps.sharedItemTitle = this.panelTitle;
     if (forceFetch || isFetchRequired) {
-      this.filtersSearchSource!.setField('filter', this.input.filters);
-      this.filtersSearchSource!.setField('query', this.input.query);
+      this.filtersSearchSource.setField('filter', this.input.filters);
+      this.filtersSearchSource.setField('query', this.input.query);
       if (this.input.query?.query || this.input.filters?.length) {
-        this.filtersSearchSource!.setField('highlightAll', true);
+        this.filtersSearchSource.setField('highlightAll', true);
       } else {
-        this.filtersSearchSource!.removeField('highlightAll');
+        this.filtersSearchSource.removeField('highlightAll');
       }
 
       this.prevFilters = this.input.filters;
@@ -355,7 +355,7 @@ export class SavedSearchEmbeddable
       }
     } else if (this.searchProps && this.node) {
       this.searchProps = searchProps;
-      ReactDOM.render(<SavedSearchEmbeddableComponentMemoized {...this.searchProps} />, this.node);
+      await this.renderReactComponent(this.node, this.searchProps);
     }
   }
 
@@ -379,7 +379,13 @@ export class SavedSearchEmbeddable
     }
     this.searchProps.refs = domNode;
     await this.pushContainerStateParamsToProps(this.searchProps);
-    ReactDOM.render(<SavedSearchEmbeddableComponentMemoized {...this.searchProps} />, domNode);
+    await this.renderReactComponent(domNode, this.searchProps);
+  }
+
+  private async renderReactComponent(domNode: HTMLElement, searchProps: SearchProps) {
+    return new Promise(() => {
+      ReactDOM.render(<SavedSearchEmbeddableComponentMemoized {...searchProps} />, domNode);
+    });
   }
 
   public reload() {
