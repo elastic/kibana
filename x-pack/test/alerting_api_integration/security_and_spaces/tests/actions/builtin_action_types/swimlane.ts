@@ -7,14 +7,12 @@
 
 import httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
+import getPort from 'get-port';
+import http from 'http';
 
 import { getHttpProxyServer } from '../../../../common/lib/get_proxy_server';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-
-import {
-  getExternalServiceSimulatorPath,
-  ExternalServiceSimulator,
-} from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
+import { getSwimlaneServer } from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
 export default function swimlaneTest({ getService }: FtrProviderContext) {
@@ -30,6 +28,12 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
       appId: '123456asdf',
       connectorType: 'all',
       mappings: {
+        alertIdConfig: {
+          id: 'ednjls',
+          name: 'Alert id',
+          key: 'alert-id',
+          fieldType: 'text',
+        },
         alertSourceConfig: {
           id: 'adnjls',
           name: 'Alert Source',
@@ -81,6 +85,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
       subAction: 'pushToService',
       subActionParams: {
         incident: {
+          alertId: 'fs345f78g',
           ruleName: 'Rule Name',
           severity: 'Critical',
           alertSource: 'Elastic',
@@ -100,11 +105,26 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
   };
 
   describe('Swimlane', () => {
-    let swimlaneSimulatorURL: string = '<could not determine kibana url>';
+    let simulatedActionId = '';
+    let swimlaneSimulatorURL: string = '';
+    let swimlaneServer: http.Server;
+    let proxyServer: httpProxy | undefined;
+    let proxyHaveBeenCalled = false;
+
     // need to wait for kibanaServer to settle ...
     before(async () => {
-      swimlaneSimulatorURL = kibanaServer.resolveUrl(
-        getExternalServiceSimulatorPath(ExternalServiceSimulator.SWIMLANE)
+      swimlaneServer = await getSwimlaneServer();
+      const availablePort = await getPort({ port: getPort.makeRange(9000, 9100) });
+      if (!swimlaneServer.listening) {
+        swimlaneServer.listen(availablePort);
+      }
+      swimlaneSimulatorURL = `http://localhost:${availablePort}`;
+      proxyServer = await getHttpProxyServer(
+        swimlaneSimulatorURL,
+        configService.get('kbnTestServer.serverArgs'),
+        () => {
+          proxyHaveBeenCalled = true;
+        }
       );
     });
 
@@ -249,9 +269,6 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
     });
 
     describe('Swimlane - Executor', () => {
-      let simulatedActionId: string;
-      let proxyServer: httpProxy | undefined;
-      let proxyHaveBeenCalled = false;
       before(async () => {
         const { body } = await supertest
           .post('/api/actions/connector')
@@ -266,14 +283,6 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
             secrets: mockSwimlane.secrets,
           });
         simulatedActionId = body.id;
-
-        proxyServer = await getHttpProxyServer(
-          kibanaServer.resolveUrl('/'),
-          configService.get('kbnTestServer.serverArgs'),
-          () => {
-            proxyHaveBeenCalled = true;
-          }
-        );
       });
 
       describe('Validation', () => {
@@ -380,7 +389,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: [subActionParams.incident.comments]: definition for this key is missing',
+                  'error validating action params: [subActionParams.comments]: types that failed validation:\n- [subActionParams.comments.0.0.commentId]: expected value of type [string] but got [undefined]\n- [subActionParams.comments.1]: expected value to equal [null]',
               });
             });
         });
@@ -404,7 +413,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: [subActionParams.incident.comments]: definition for this key is missing',
+                  'error validating action params: [subActionParams.comments]: types that failed validation:\n- [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n- [subActionParams.comments.1]: expected value to equal [null]',
               });
             });
         });

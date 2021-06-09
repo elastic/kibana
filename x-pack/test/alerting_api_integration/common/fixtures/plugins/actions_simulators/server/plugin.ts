@@ -51,7 +51,6 @@ export function getAllExternalServiceSimulatorPaths(): string[] {
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.JIRA}/rest/api/2/issue`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.JIRA}/rest/api/2/createmeta`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.RESILIENT}/rest/orgs/201/incidents`);
-  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SWIMLANE}/api`);
   return allPaths;
 }
 
@@ -67,6 +66,10 @@ export async function getHttpsWebhookServer(): Promise<https.Server> {
 
 export async function getSlackServer(): Promise<http.Server> {
   return await initSlack();
+}
+
+export async function getSwimlaneServer(): Promise<http.Server> {
+  return await initSwimlane();
 }
 
 interface FixtureSetupDeps {
@@ -120,7 +123,6 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
     const router: IRouter = core.http.createRouter();
 
     initPagerduty(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY));
-    initSwimlane(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.SWIMLANE));
     initServiceNow(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW));
     initJira(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.JIRA));
     initResilient(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.RESILIENT));
