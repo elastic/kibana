@@ -293,6 +293,9 @@ const allowlistProcessFields: AllowlistFields = {
   command_line: true,
   hash: true,
   pid: true,
+  pe: {
+    original_file_name: true,
+  },
   uptime: true,
   Ext: {
     architecture: true,
@@ -313,6 +316,9 @@ const allowlistBaseEventFields: AllowlistFields = {
     path: true,
     code_signature: true,
     malware_signature: true,
+    pe: {
+      original_file_name: true,
+    },
   },
   event: true,
   file: {
@@ -326,6 +332,7 @@ const allowlistBaseEventFields: AllowlistFields = {
     hash: true,
     Ext: {
       code_signature: true,
+      header_data: true,
       malware_classification: true,
       malware_signature: true,
       quarantine_result: true,
@@ -350,6 +357,9 @@ const allowlistBaseEventFields: AllowlistFields = {
       parent: allowlistProcessFields,
       ...allowlistProcessFields,
     },
+  },
+  user: {
+    id: true,
   },
 };
 
