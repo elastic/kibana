@@ -19,9 +19,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'spaceSelector',
   ]);
   const appsMenu = getService('appsMenu');
-  const globalNav = getService('globalNav');
   const testSubjects = getService('testSubjects');
-  describe('wowzeroni', function () {
+  describe('observability security feature controls', function () {
     this.tags(['skipFirefox']);
     before(async () => {
       await esArchiver.load('cases/default');
@@ -31,7 +30,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await esArchiver.unload('cases/default');
     });
 
-    describe('global observability all privileges', () => {
+    describe('observability cases all privileges', () => {
       before(async () => {
         await security.role.create('cases_observability_all_role', {
           elasticsearch: { cluster: [], indices: [], run_as: [] },
@@ -64,7 +63,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           security.user.delete('cases_observability_all_user'),
         ]);
       });
-      const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
       it('shows observability/cases navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text).slice(0, 2);
@@ -76,8 +74,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.observability.expectCreateCaseButtonEnabled();
       });
 
-      it.skip(`doesn't show read-only badge`, async () => {
-        await globalNav.badgeMissingOrFail();
+      it(`doesn't show read-only badge`, async () => {
+        await PageObjects.observability.expectNoReadOnlyCallout();
       });
 
       it(`allows a case to be created`, async () => {
@@ -88,25 +86,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.observability.expectCreateCase();
       });
 
-      it.only(`allows a workpad to be edited`, async () => {
-        await PageObjects.common.navigateToActualUrl('observabilityCases');
-        await delay(3000000);
-        await PageObjects.observability.expectAddElementButton();
+      it(`allows a case to be edited`, async () => {
+        await PageObjects.common.navigateToUrl(
+          'observabilityCases',
+          '4c32e6b0-c3c5-11eb-b389-3fadeeafa60f',
+          {
+            shouldUseHashForSubUrl: false,
+          }
+        );
+        await PageObjects.observability.expectAddCommentButton();
       });
     });
 
-    describe('global observability read-only privileges', () => {
+    describe('observability cases read-only privileges', () => {
       before(async () => {
         await security.role.create('cases_observability_read_role', {
-          elasticsearch: {
-            indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
-          },
+          elasticsearch: { cluster: [], indices: [], run_as: [] },
           kibana: [
             {
-              feature: {
-                observability: ['read'],
-              },
               spaces: ['*'],
+              base: [],
+              feature: { 'observability-cases': ['read'], logs: ['all'] },
             },
           ],
         });
@@ -131,53 +131,45 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await security.user.delete('cases_observability_read_user');
       });
 
-      it('shows observability navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Observability']);
+      it('shows observability/cases navlink', async () => {
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text).slice(0, 2);
+        expect(navLinks).to.eql(['Overview', 'Cases']);
       });
 
-      it(`landing page shows disabled "Create new workpad" button`, async () => {
-        await PageObjects.common.navigateToActualUrl('observabilityCases', '', {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
-        await PageObjects.observability.expectCreateWorkpadButtonDisabled();
+      it(`landing page shows disabled "Create new case" button`, async () => {
+        await PageObjects.common.navigateToActualUrl('observabilityCases');
+        await PageObjects.observability.expectCreateCaseButtonDisabled();
       });
 
-      it(`shows read-only badge`, async () => {
-        await globalNav.badgeExistsOrFail('Read only');
+      it(`shows read-only callout`, async () => {
+        await PageObjects.observability.expectReadOnlyCallout();
       });
 
-      it(`does not allow a workpad to be created`, async () => {
-        await PageObjects.common.navigateToActualUrl('observabilityCases', 'workpad/create', {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
+      it(`does not allow a case to be created`, async () => {
+        await PageObjects.common.navigateToUrl('observabilityCases', 'create', {
+          shouldUseHashForSubUrl: false,
         });
 
-        // expect redirection to observability landing
-        await PageObjects.observability.expectCreateWorkpadButtonDisabled();
+        // expect redirection to observability cases landing
+        await PageObjects.observability.expectCreateCaseButtonDisabled();
       });
 
-      it(`does not allow a workpad to be edited`, async () => {
-        await PageObjects.common.navigateToActualUrl(
-          'observability',
-          'workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31',
+      it(`does not allow a case to be edited`, async () => {
+        await PageObjects.common.navigateToUrl(
+          'observabilityCases',
+          '4c32e6b0-c3c5-11eb-b389-3fadeeafa60f',
           {
-            ensureCurrentUrl: true,
-            shouldLoginIfPrompted: false,
+            shouldUseHashForSubUrl: false,
           }
         );
-
-        await PageObjects.observability.expectNoAddElementButton();
+        await PageObjects.observability.expectAddCommentButtonDisabled();
       });
     });
 
     describe('no observability privileges', () => {
       before(async () => {
         await security.role.create('no_observability_privileges_role', {
-          elasticsearch: {
-            indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
-          },
+          elasticsearch: { cluster: [], indices: [], run_as: [] },
           kibana: [
             {
               feature: {
@@ -209,19 +201,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`returns a 403`, async () => {
-        await PageObjects.common.navigateToActualUrl('observabilityCases', '', {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
-        PageObjects.error.expectForbidden();
+        await PageObjects.common.navigateToActualUrl('observabilityCases');
+        await PageObjects.observability.expectForbidden();
       });
 
-      it(`create new workpad returns a 403`, async () => {
-        await PageObjects.common.navigateToActualUrl('observabilityCases', 'workpad/create', {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
+      it.skip(`create new case returns a 403`, async () => {
+        await PageObjects.common.navigateToUrl('observabilityCases', 'create', {
+          shouldUseHashForSubUrl: false,
         });
-        PageObjects.error.expectForbidden();
+        await PageObjects.observability.expectForbidden();
       });
     });
   });
