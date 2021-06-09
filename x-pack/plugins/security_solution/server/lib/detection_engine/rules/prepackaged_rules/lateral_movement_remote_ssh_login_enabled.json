@@ -11,7 +11,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Remote SSH Login Enabled via systemsetup Command",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:systemsetup and process.args:(\"-setremotelogin\" and on)",
+  "query": "event.category:process and event.type:(start or process_started) and\n process.name:systemsetup and\n process.args:(\"-setremotelogin\" and on)\n",
   "references": [
     "https://documents.trendmicro.com/assets/pdf/XCSSET_Technical_Brief.pdf",
     "https://ss64.com/osx/systemsetup.html",
@@ -46,5 +46,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 3
+  "version": 4
 }

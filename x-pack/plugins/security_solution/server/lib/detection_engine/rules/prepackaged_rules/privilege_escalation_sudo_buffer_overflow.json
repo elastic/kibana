@@ -14,7 +14,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Sudo Heap-Based Buffer Overflow Attempt",
-  "query": "event.category:process and event.type:start and process.name:(sudo or sudoedit) and process.args:(*\\\\ and (\"-i\" or \"-s\"))",
+  "query": "event.category:process and event.type:start and\n  process.name:(sudo or sudoedit) and\n  process.args:(*\\\\ and (\"-i\" or \"-s\"))\n",
   "references": [
     "https://cve.mitre.org/cgi-bin/cvename.cgi?name=2021-3156",
     "https://blog.qualys.com/vulnerabilities-research/2021/01/26/cve-2021-3156-heap-based-buffer-overflow-in-sudo-baron-samedit",
@@ -56,5 +56,5 @@
     "value": 100
   },
   "type": "threshold",
-  "version": 1
+  "version": 2
 }

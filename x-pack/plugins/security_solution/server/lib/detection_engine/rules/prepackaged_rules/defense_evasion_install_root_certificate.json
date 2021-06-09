@@ -14,7 +14,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Attempt to Install Root Certificate",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:security and process.args:\"add-trusted-cert\"",
+  "query": "event.category:process and event.type:(start or process_started) and\n  process.name:security and process.args:\"add-trusted-cert\"\n",
   "references": [
     "https://ss64.com/osx/security-cert.html"
   ],
@@ -54,5 +54,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }

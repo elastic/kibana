@@ -12,7 +12,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "RPC (Remote Procedure Call) from the Internet",
-  "query": "event.category:(network or network_traffic) and network.transport:tcp and (destination.port:135 or event.dataset:zeek.dce_rpc) and not source.ip:( 10.0.0.0/8 or 127.0.0.0/8 or 169.254.0.0/16 or 172.16.0.0/12 or 192.168.0.0/16 or 224.0.0.0/4 or \"::1\" or \"FE80::/10\" or \"FF00::/8\" ) and destination.ip:( 10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16 )",
+  "query": "event.category:(network or network_traffic) and network.transport:tcp and (destination.port:135 or event.dataset:zeek.dce_rpc) and\n  not source.ip:(\n    10.0.0.0/8 or\n    127.0.0.0/8 or\n    169.254.0.0/16 or\n    172.16.0.0/12 or\n    192.168.0.0/16 or\n    224.0.0.0/4 or\n    \"::1\" or\n    \"FE80::/10\" or\n    \"FF00::/8\"\n  ) and\n  destination.ip:(\n    10.0.0.0/8 or\n    172.16.0.0/12 or\n    192.168.0.0/16\n  )\n",
   "risk_score": 73,
   "rule_id": "143cb236-0956-4f42-a706-814bcaa0cf5a",
   "severity": "high",
@@ -42,5 +42,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 8
+  "version": 9
 }

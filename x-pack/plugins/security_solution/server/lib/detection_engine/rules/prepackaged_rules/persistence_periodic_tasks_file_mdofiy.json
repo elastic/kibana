@@ -11,7 +11,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Potential Persistence via Periodic Tasks",
-  "query": "event.category:\"file\" and not event.type:\"deletion\" and file.path:(/private/etc/periodic/* or /private/etc/defaults/periodic.conf or /private/etc/periodic.conf)",
+  "query": "event.category:\"file\" and not event.type:\"deletion\" and\n file.path:(/private/etc/periodic/* or /private/etc/defaults/periodic.conf or /private/etc/periodic.conf)\n",
   "references": [
     "https://opensource.apple.com/source/crontabs/crontabs-13/private/etc/defaults/periodic.conf.auto.html",
     "https://www.oreilly.com/library/view/mac-os-x/0596003706/re328.html",
@@ -53,5 +53,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }

@@ -9,7 +9,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Auditd Login from Forbidden Location",
-  "query": "event.module:auditd and event.action:\"attempted-log-in-from-unusual-place-to\"",
+  "query": "event.module:auditd and event.action:\"attempted-log-in-from-unusual-place-to\"\n",
   "references": [
     "https://github.com/linux-pam/linux-pam/blob/aac5a8fdc4aa3f7e56335a6343774cc1b63b408d/modules/pam_access/pam_access.c#L412"
   ],
@@ -57,5 +57,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }

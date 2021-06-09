@@ -13,7 +13,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "DNS Activity to the Internet",
-  "query": "event.category:(network or network_traffic) and (event.type:connection or type:dns) and (destination.port:53 or event.dataset:zeek.dns) and source.ip:( 10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16 ) and not destination.ip:( 10.0.0.0/8 or 127.0.0.0/8 or 169.254.0.0/16 or 172.16.0.0/12 or 192.168.0.0/16 or 224.0.0.0/4 or 255.255.255.255 or \"::1\" or \"FE80::/10\" or \"FF00::/8\")",
+  "query": "event.category:(network or network_traffic) and (event.type:connection or type:dns) and (destination.port:53 or event.dataset:zeek.dns)\n  and source.ip:(\n    10.0.0.0/8 or\n    172.16.0.0/12 or\n    192.168.0.0/16\n  ) and\n  not destination.ip:(\n    10.0.0.0/8 or\n    127.0.0.0/8 or\n    169.254.0.0/16 or\n    172.16.0.0/12 or\n    192.168.0.0/16 or\n    224.0.0.0/4 or\n    255.255.255.255 or\n    \"::1\" or\n    \"FE80::/10\" or\n    \"FF00::/8\")\n",
   "references": [
     "https://www.us-cert.gov/ncas/alerts/TA15-240A",
     "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-81-2.pdf"
@@ -40,5 +40,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 8
+  "version": 9
 }

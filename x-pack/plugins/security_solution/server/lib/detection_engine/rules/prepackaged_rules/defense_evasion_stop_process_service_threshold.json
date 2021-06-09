@@ -12,7 +12,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "High Number of Process and/or Service Terminations",
-  "query": "event.category:process and event.type:start and process.name:(net.exe or sc.exe or taskkill.exe) and process.args:(stop or pause or delete or \"/PID\" or \"/IM\" or \"/T\" or \"/F\" or \"/t\" or \"/f\" or \"/im\" or \"/pid\")",
+  "query": "event.category:process and event.type:start and process.name:(net.exe or sc.exe or taskkill.exe) and\n process.args:(stop or pause or delete or \"/PID\" or \"/IM\" or \"/T\" or \"/F\" or \"/t\" or \"/f\" or \"/im\" or \"/pid\")\n",
   "risk_score": 47,
   "rule_id": "035889c4-2686-4583-a7df-67f89c292f2c",
   "severity": "medium",
@@ -54,5 +54,5 @@
     "value": 10
   },
   "type": "threshold",
-  "version": 2
+  "version": 3
 }

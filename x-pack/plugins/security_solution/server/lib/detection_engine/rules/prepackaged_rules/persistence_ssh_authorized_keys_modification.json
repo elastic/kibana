@@ -11,7 +11,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "SSH Authorized Keys File Modification",
-  "query": "event.category:file and event.type:(change or creation) and file.name:(\"authorized_keys\" or \"authorized_keys2\") and not process.executable: (/Library/Developer/CommandLineTools/usr/bin/git or /usr/local/Cellar/maven/*/libexec/bin/mvn or /Library/Java/JavaVirtualMachines/jdk*.jdk/Contents/Home/bin/java or /usr/bin/vim or /usr/local/Cellar/coreutils/*/bin/gcat or /usr/bin/bsdtar or /usr/bin/nautilus or /usr/bin/scp or /usr/bin/touch or /var/lib/docker/*)",
+  "query": "event.category:file and event.type:(change or creation) and \n file.name:(\"authorized_keys\" or \"authorized_keys2\") and \n not process.executable:\n             (/Library/Developer/CommandLineTools/usr/bin/git or \n              /usr/local/Cellar/maven/*/libexec/bin/mvn or \n              /Library/Java/JavaVirtualMachines/jdk*.jdk/Contents/Home/bin/java or \n              /usr/bin/vim or \n              /usr/local/Cellar/coreutils/*/bin/gcat or \n              /usr/bin/bsdtar or\n              /usr/bin/nautilus or \n              /usr/bin/scp or\n              /usr/bin/touch or \n              /var/lib/docker/*)\n",
   "risk_score": 47,
   "rule_id": "2215b8bd-1759-4ffa-8ab8-55c8e6b32e7f",
   "severity": "medium",
@@ -49,5 +49,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }

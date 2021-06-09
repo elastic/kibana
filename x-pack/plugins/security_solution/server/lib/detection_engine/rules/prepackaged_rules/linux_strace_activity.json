@@ -14,7 +14,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Strace Process Activity",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:strace",
+  "query": "event.category:process and event.type:(start or process_started) and process.name:strace\n",
   "references": [
     "https://en.wikipedia.org/wiki/Strace"
   ],
@@ -29,5 +29,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 7
+  "version": 8
 }

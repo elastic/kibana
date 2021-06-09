@@ -14,7 +14,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "SoftwareUpdate Preferences Modification",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:defaults and process.args:(write and \"-bool\" and (com.apple.SoftwareUpdate or /Library/Preferences/com.apple.SoftwareUpdate.plist) and not (TRUE or true))",
+  "query": "event.category:process and event.type:(start or process_started) and\n process.name:defaults and \n process.args:(write and \"-bool\" and (com.apple.SoftwareUpdate or /Library/Preferences/com.apple.SoftwareUpdate.plist) and not (TRUE or true))\n",
   "references": [
     "https://blog.checkpoint.com/2017/07/13/osxdok-refuses-go-away-money/"
   ],
@@ -54,5 +54,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }

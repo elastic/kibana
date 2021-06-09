@@ -16,7 +16,7 @@
   "license": "Elastic License v2",
   "name": "AWS IAM Assume Role Policy Update",
   "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:aws.cloudtrail and event.provider:iam.amazonaws.com and event.action:UpdateAssumeRolePolicy and event.outcome:success",
+  "query": "event.dataset:aws.cloudtrail and event.provider:iam.amazonaws.com and event.action:UpdateAssumeRolePolicy and event.outcome:success\n",
   "references": [
     "https://labs.bishopfox.com/tech-blog/5-privesc-attack-vectors-in-aws"
   ],

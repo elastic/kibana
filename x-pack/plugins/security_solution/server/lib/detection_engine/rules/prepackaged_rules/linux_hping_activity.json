@@ -14,7 +14,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Hping Process Activity",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:(hping or hping2 or hping3)",
+  "query": "event.category:process and event.type:(start or process_started) and process.name:(hping or hping2 or hping3)\n",
   "references": [
     "https://en.wikipedia.org/wiki/Hping"
   ],
@@ -29,5 +29,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 7
+  "version": 8
 }

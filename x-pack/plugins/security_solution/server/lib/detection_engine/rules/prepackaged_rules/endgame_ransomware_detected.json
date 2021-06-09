@@ -11,7 +11,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Ransomware - Detected - Elastic Endgame",
-  "query": "event.kind:alert and event.module:endgame and endgame.metadata.type:detection and (event.action:ransomware_event or endgame.event_subtype_full:ransomware_event)",
+  "query": "event.kind:alert and event.module:endgame and endgame.metadata.type:detection and (event.action:ransomware_event or endgame.event_subtype_full:ransomware_event)\n",
   "risk_score": 99,
   "rule_id": "8cb4f625-7743-4dfb-ae1b-ad92be9df7bd",
   "severity": "critical",
@@ -20,5 +20,5 @@
     "Elastic Endgame"
   ],
   "type": "query",
-  "version": 6
+  "version": 7
 }

@@ -13,7 +13,7 @@
   "license": "Elastic License v2",
   "name": "Cobalt Strike Command and Control Beacon",
   "note": "## Threat intel\n\nThis activity has been observed in FIN7 campaigns.",
-  "query": "event.category:(network OR network_traffic) AND type:(tls OR http) AND network.transport:tcp AND destination.domain:/[a-z]{3}.stage.[0-9]{8}\\..*/",
+  "query": "event.category:(network OR network_traffic) AND type:(tls OR http) AND network.transport:tcp AND destination.domain:/[a-z]{3}.stage.[0-9]{8}\\..*/\n",
   "references": [
     "https://blog.morphisec.com/fin7-attacks-restaurant-industry",
     "https://www.fireeye.com/blog/threat-research/2017/04/fin7-phishing-lnk.html"

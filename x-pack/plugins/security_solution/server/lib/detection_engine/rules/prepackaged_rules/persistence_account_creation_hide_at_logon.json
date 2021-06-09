@@ -11,7 +11,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Potential Hidden Local User Account Creation",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:dscl and process.args:(IsHidden and create and (true or 1 or yes))",
+  "query": "event.category:process and event.type:(start or process_started) and\n process.name:dscl and process.args:(IsHidden and create and (true or 1 or yes))\n",
   "references": [
     "https://support.apple.com/en-us/HT203998"
   ],
@@ -51,5 +51,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }
