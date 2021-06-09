@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import '../../../__mocks__/react_router';
 import '../../../__mocks__/shallow_useeffect.mock';
 import { DEFAULT_INITIAL_APP_DATA } from '../../../../../common/__mocks__';
-import { setMockActions, setMockValues } from '../../../__mocks__';
+import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
 import { engines } from '../../__mocks__/engines.mock';
 
 import React from 'react';
@@ -17,7 +18,7 @@ import { shallow } from 'enzyme';
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiRadioGroup } from '@elastic/eui';
 
-import { AttributeSelector, RoleSelector } from '../../../shared/role_mapping';
+import { AttributeSelector, RoleSelector, RoleMappingFlyout } from '../../../shared/role_mapping';
 import { asRoleMapping } from '../../../shared/role_mapping/__mocks__/roles';
 
 import { STANDARD_ROLE_TYPES } from './constants';
@@ -58,6 +59,7 @@ describe('RoleMapping', () => {
     myRole: {
       availableRoleTypes: mockRole.ability.availableRoleTypes,
     },
+    roleMappingErrors: [],
   };
 
   beforeEach(() => {
@@ -105,5 +107,17 @@ describe('RoleMapping', () => {
     wrapper.update();
 
     expect(actions.handleEngineSelectionChange).toHaveBeenCalledWith([engines[0].name]);
+  });
+
+  it('enables flyout when attribute value is valid', () => {
+    setMockValues({
+      ...mockValues,
+      attributeValue: 'foo',
+      attributeName: 'role',
+      accessAllEngines: true,
+    });
+    const wrapper = shallow(<RoleMapping />);
+
+    expect(wrapper.find(RoleMappingFlyout).prop('disabled')).toBe(false);
   });
 });

@@ -170,6 +170,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         testSubjects.getCssSelector(`lnsFieldListPanelField-${field}`),
         testSubjects.getCssSelector('lnsWorkspace')
       );
+      await this.waitForLensDragDropToFinish();
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -183,6 +184,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         testSubjects.getCssSelector(`lnsFieldListPanelField-${field}`),
         testSubjects.getCssSelector('lnsGeoFieldWorkspace')
       );
+      await this.waitForLensDragDropToFinish();
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -246,6 +248,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await browser.pressKeys(reverse ? browser.keys.LEFT : browser.keys.RIGHT);
       }
       await browser.pressKeys(browser.keys.ENTER);
+      await this.waitForLensDragDropToFinish();
 
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
@@ -270,6 +273,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
       await browser.pressKeys(browser.keys.ENTER);
 
+      await this.waitForLensDragDropToFinish();
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
     /**
@@ -292,7 +296,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
       await browser.pressKeys(browser.keys.ENTER);
 
+      await this.waitForLensDragDropToFinish();
       await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    async waitForLensDragDropToFinish() {
+      await retry.try(async () => {
+        const exists = await find.existsByCssSelector('.lnsDragDrop-isActiveGroup');
+        if (exists) {
+          throw new Error('UI still in drag/drop mode');
+        }
+      });
     },
 
     /**
@@ -306,6 +320,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         testSubjects.getCssSelector(`lnsFieldListPanelField-${field}`),
         testSubjects.getCssSelector(dimension)
       );
+      await this.waitForLensDragDropToFinish();
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -320,6 +335,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         testSubjects.getCssSelector(from),
         testSubjects.getCssSelector(to)
       );
+      await this.waitForLensDragDropToFinish();
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -333,6 +349,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const dragging = `[data-test-subj='${dimension}']:nth-of-type(${startIndex}) .lnsDragDrop`;
       const dropping = `[data-test-subj='${dimension}']:nth-of-type(${endIndex}) [data-test-subj='lnsDragDrop-reorderableDropLayer'`;
       await browser.html5DragAndDrop(dragging, dropping);
+      await this.waitForLensDragDropToFinish();
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -744,12 +761,30 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return buttonEl.click();
     },
 
+    async setTableSummaryRowFunction(
+      summaryFunction: 'none' | 'sum' | 'avg' | 'count' | 'min' | 'max'
+    ) {
+      await testSubjects.click('lnsDatatable_summaryrow_function');
+      await testSubjects.click('lns-datatable-summary-' + summaryFunction);
+    },
+
+    async setTableSummaryRowLabel(newLabel: string) {
+      await testSubjects.setValue('lnsDatatable_summaryrow_label', newLabel, {
+        clearWithKeyboard: true,
+        typeCharByChar: true,
+      });
+    },
+
     async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text') {
       await testSubjects.click('lnsDatatable_dynamicColoring_groups_' + coloringType);
     },
 
     async openTablePalettePanel() {
       await testSubjects.click('lnsDatatable_dynamicColoring_trigger');
+    },
+
+    async closeTablePalettePanel() {
+      await testSubjects.click('lns-indexPattern-PalettePanelContainerBack');
     },
 
     // different picker from the next one

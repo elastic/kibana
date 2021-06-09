@@ -51,7 +51,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         waitForLogLine: 'package manifests loaded',
       },
     }),
-    esArchiver: xPackAPITestsConfig.get('esArchiver'),
     services: xPackAPITestsConfig.get('services'),
     junit: {
       reportName: 'X-Pack EPM API Integration Tests',
