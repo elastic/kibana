@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pMap from 'p-map';
 import Boom from '@hapi/boom';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
@@ -42,6 +43,7 @@ import { CasesService } from '../../services';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
+  MAX_CONCURRENT_SEARCHES,
   SUB_CASE_SAVED_OBJECT,
 } from '../../../common/constants';
 import {
@@ -162,9 +164,11 @@ async function throwIfInvalidUpdateOfTypeWithAlerts({
   };
 
   const requestsUpdatingTypeField = requests.filter((req) => req.type === CaseType.collection);
-  const casesAlertTotals = await Promise.all(
-    requestsUpdatingTypeField.map((caseToUpdate) => getAlertsForID(caseToUpdate))
-  );
+  const getAlertsMapper = async (caseToUpdate: ESCasePatchRequest) => getAlertsForID(caseToUpdate);
+  // Ensuring we don't too many concurrent get running.
+  const casesAlertTotals = await pMap(requestsUpdatingTypeField, getAlertsMapper, {
+    concurrency: MAX_CONCURRENT_SEARCHES,
+  });
 
   // grab the cases that have at least one alert comment attached to them
   const typeUpdateWithAlerts = casesAlertTotals.filter((caseInfo) => caseInfo.alerts.total > 0);

@@ -792,8 +792,8 @@ To do that we'll write a Jest integration test using `TestUtils` to start
 Kibana and esArchiver to load fixture data into Elasticsearch.
 
 1. Create the fixtures data you need in Elasticsearch
-2. Create a fixtures archive with `node scripts/es_archiver save <name> [index patterns...]`
-3. Load the fixtures in your test using esArchiver `esArchiver.load('name')`;
+2. Create a fixtures archive with `node scripts/es_archiver save <path> [index patterns...]`
+3. Load the fixtures in your test using esArchiver `esArchiver.load('path from root of repo')`;
 
 _todo: fully worked out example_
 
