@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-export * from './types';
-export * from './strategies/es_search';
-export * from './strategies/ese_search';
-export * from './strategies/eql_search';
-export { usageProvider, SearchUsage, searchUsageObserver } from './collectors';
-export * from './aggs';
-export * from './session';
-export * from './errors/no_search_id_in_session';
+import { KbnError } from '../../../../kibana_utils/common';
+
+export class NoSearchIdInSessionError extends KbnError {
+  constructor() {
+    super('No search ID in this session matching the given search request');
+  }
+}

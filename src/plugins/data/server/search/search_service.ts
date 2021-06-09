@@ -80,6 +80,7 @@ import { registerBsearchRoute } from './routes/bsearch';
 import { getKibanaContext } from './expressions/kibana_context';
 import { enhancedEsSearchStrategyProvider } from './strategies/ese_search';
 import { eqlSearchStrategyProvider } from './strategies/eql_search';
+import { NoSearchIdInSessionError } from './errors/no_search_id_in_session';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
@@ -299,7 +300,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
               id,
             };
           } catch (e) {
-            if (e.message === 'No search ID in this session matching the given search request') {
+            if (e instanceof NoSearchIdInSessionError) {
               this.logger.debug('Ignoring missing search ID');
               return request;
             } else {
