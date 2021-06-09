@@ -99,6 +99,24 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, scheduledQu
             draft[0].streams[showEditQueryFlyout].vars.interval.value = updatedQuery.interval;
             draft[0].streams[showEditQueryFlyout].vars.query.value = updatedQuery.query;
 
+            if (updatedQuery.platform?.length) {
+              draft[0].streams[showEditQueryFlyout].vars.platform = {
+                type: 'text',
+                value: updatedQuery.platform,
+              };
+            } else {
+              delete draft[0].streams[showEditQueryFlyout].vars.platform;
+            }
+
+            if (updatedQuery.version?.length) {
+              draft[0].streams[showEditQueryFlyout].vars.version = {
+                type: 'text',
+                value: updatedQuery.version,
+              };
+            } else {
+              delete draft[0].streams[showEditQueryFlyout].vars.version;
+            }
+
             return draft;
           })
         );

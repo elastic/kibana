@@ -643,11 +643,16 @@ function _enforceFrozenVars(
   newVars: Record<string, PackagePolicyConfigRecordEntry>
 ) {
   const resultVars: Record<string, PackagePolicyConfigRecordEntry> = {};
-  for (const [key, val] of Object.entries(oldVars)) {
-    if (val.frozen) {
+  for (const [key, val] of Object.entries(newVars)) {
+    if (oldVars[key]?.frozen) {
       resultVars[key] = val;
     } else {
       resultVars[key] = newVars[key];
+    }
+  }
+  for (const [key, val] of Object.entries(oldVars)) {
+    if (!newVars[key] && oldVars[key]?.frozen) {
+      resultVars[key] = val;
     }
   }
   return resultVars;

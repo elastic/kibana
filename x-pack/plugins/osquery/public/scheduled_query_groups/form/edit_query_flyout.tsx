@@ -26,6 +26,8 @@ import { PackagePolicyInputStream } from '../../../../fleet/common';
 import { CodeEditorField } from '../../queries/form/code_editor_field';
 import { Form, useForm, getUseField, Field, FIELD_TYPES } from '../../shared_imports';
 import { idFieldValidations, intervalFieldValidation, queryFieldValidation } from './validations';
+import { PlatformCheckBoxGroupField } from './platform_checkbox_group_field';
+import { ALL_OSQUERY_VERSIONS_OPTIONS } from './constants';
 
 const FORM_ID = 'editQueryFlyoutForm';
 
@@ -58,6 +60,8 @@ export const EditQueryFlyout: React.FC<EditQueryFlyoutProps> = ({
       id: payload.vars.id.value,
       query: payload.vars.query.value,
       interval: payload.vars.interval.value,
+      platform: payload.vars.platform?.value,
+      version: payload.vars.version?.value ? [payload.vars.version?.value] : [],
     }),
     schema: {
       id: {
@@ -84,6 +88,27 @@ export const EditQueryFlyout: React.FC<EditQueryFlyoutProps> = ({
         ),
         validations: [{ validator: intervalFieldValidation }],
       },
+      platform: {
+        type: FIELD_TYPES.TEXT,
+        label: i18n.translate(
+          'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.platformFieldLabel',
+          {
+            defaultMessage: 'Platform',
+          }
+        ),
+        validations: [],
+      },
+      version: {
+        type: FIELD_TYPES.COMBO_BOX,
+        label: i18n.translate(
+          'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.versionFieldLabel',
+          {
+            defaultMessage: 'Minimum Osquery version',
+          }
+        ),
+
+        validations: [],
+      },
     },
   });
 
@@ -108,10 +133,30 @@ export const EditQueryFlyout: React.FC<EditQueryFlyoutProps> = ({
             <EuiSpacer />
             <CommonUseField path="query" component={CodeEditorField} />
             <EuiSpacer />
-            {
-              // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-              <CommonUseField path="interval" euiFieldProps={{ append: 's' }} />
-            }
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <CommonUseField
+                  path="interval"
+                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                  euiFieldProps={{ append: 's' }}
+                />
+                <EuiSpacer />
+                <CommonUseField
+                  path="version"
+                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                  euiFieldProps={{
+                    noSuggestions: false,
+                    singleSelection: { asPlainText: true },
+                    placeholder: ALL_OSQUERY_VERSIONS_OPTIONS[0].label,
+                    options: ALL_OSQUERY_VERSIONS_OPTIONS,
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <CommonUseField path="platform" component={PlatformCheckBoxGroupField} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer />
           </Form>
         </EuiFlyoutBody>
         <EuiFlyoutFooter>

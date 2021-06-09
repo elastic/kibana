@@ -25,6 +25,7 @@ import {
 import { PackagePolicy, PackagePolicyInputStream } from '../../../fleet/common';
 import { FilterStateStore } from '../../../../../src/plugins/data/common';
 import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
+import { PlatformIcons } from './platforms';
 
 export enum ViewResultsActionButtonType {
   icon = 'icon',
@@ -372,6 +373,21 @@ const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQuer
     []
   );
 
+  const renderPlatformColumn = useCallback(
+    (platform: string) => <PlatformIcons platform={platform} />,
+    []
+  );
+
+  const renderVersionColumn = useCallback(
+    (version: string) =>
+      version
+        ? `${version}`
+        : i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.osqueryVersionAllLabel', {
+            defaultMessage: 'ALL',
+          }),
+    []
+  );
+
   const renderDiscoverResultsAction = useCallback(
     (item) => (
       <ViewResultsInDiscoverAction
@@ -416,6 +432,20 @@ const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQuer
         render: renderQueryColumn,
       },
       {
+        field: 'vars.platform.value',
+        name: i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.platformColumnTitle', {
+          defaultMessage: 'Platform',
+        }),
+        render: renderPlatformColumn,
+      },
+      {
+        field: 'vars.version.value',
+        name: i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.versionColumnTitle', {
+          defaultMessage: 'Min Osquery version',
+        }),
+        render: renderVersionColumn,
+      },
+      {
         name: editMode
           ? i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.actionsColumnTitle', {
               defaultMessage: 'Actions',
@@ -452,7 +482,9 @@ const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQuer
       renderDiscoverResultsAction,
       renderEditAction,
       renderLensResultsAction,
+      renderPlatformColumn,
       renderQueryColumn,
+      renderVersionColumn,
     ]
   );
 
