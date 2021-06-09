@@ -9,9 +9,10 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { SecurityApp } from './app';
-import { RenderAppProps } from './types';
+import { RenderAppProps, RenderAppPropsOld } from './types';
 
-export const renderApp = ({
+// TODO: remove renderAppOld when all sections migrated
+export const renderAppOld = ({
   element,
   history,
   onAppLeave,
@@ -19,7 +20,7 @@ export const renderApp = ({
   services,
   store,
   SubPluginRoutes,
-}: RenderAppProps): (() => void) => {
+}: RenderAppPropsOld): (() => void) => {
   render(
     <SecurityApp
       history={history}
@@ -29,6 +30,30 @@ export const renderApp = ({
       store={store}
     >
       <SubPluginRoutes />
+    </SecurityApp>,
+    element
+  );
+  return () => unmountComponentAtNode(element);
+};
+
+export const renderApp = ({
+  element,
+  history,
+  onAppLeave,
+  setHeaderActionMenu,
+  services,
+  store,
+  subPlugins,
+}: RenderAppProps): (() => void) => {
+  render(
+    <SecurityApp
+      history={history}
+      onAppLeave={onAppLeave}
+      services={services}
+      setHeaderActionMenu={setHeaderActionMenu}
+      store={store}
+    >
+      <subPlugins.overview.SubPluginRoutes />
     </SecurityApp>,
     element
   );

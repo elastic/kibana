@@ -11,9 +11,10 @@ import { Route, Switch } from 'react-router-dom';
 import { Overview } from './pages';
 import { NotFoundPage } from '../app/404';
 
+// TODO: import path from constants file
 export const OverviewRoutes = () => (
   <Switch>
-    <Route path="/" render={() => <Overview />} />
+    <Route path="/overview" render={() => <Overview />} />
     <Route render={() => <NotFoundPage />} />
   </Switch>
 );

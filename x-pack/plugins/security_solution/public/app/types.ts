@@ -18,15 +18,24 @@ import {
 } from 'redux';
 
 import { AppMountParameters, AppDeepLink } from '../../../../../src/core/public';
-import { StartServices } from '../types';
+import { StartedSubPlugins, StartServices } from '../types';
 
+/**
+ * The React properties used to render `SecurityApp` as well as the `element` to render it into.
+ */
+// TODO: remove RenderAppPropsOld when all sections migrated
+export interface RenderAppPropsOld extends AppMountParameters {
+  services: StartServices;
+  store: Store<State, Action>;
+  SubPluginRoutes: React.FC;
+}
 /**
  * The React properties used to render `SecurityApp` as well as the `element` to render it into.
  */
 export interface RenderAppProps extends AppMountParameters {
   services: StartServices;
   store: Store<State, Action>;
-  SubPluginRoutes: React.FC;
+  subPlugins: StartedSubPlugins;
 }
 
 import { State, SubPluginsInitReducer } from '../common/store';
