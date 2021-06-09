@@ -22,7 +22,7 @@ import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import type { DataStream } from '../../../types';
 import { WithHeaderLayout } from '../../../layouts';
 import { useGetDataStreams, useStartServices, usePagination, useBreadcrumbs } from '../../../hooks';
-import { PackageIcon } from '../../../components/package_icon';
+import { PackageIcon } from '../../../components';
 
 import { DataStreamRowActions } from './components/data_stream_row_actions';
 

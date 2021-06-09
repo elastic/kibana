@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { mockFlashMessageHelpers, mockHttpValues } from '../../../__mocks__';
-import { LogicMounter } from '../../../__mocks__/kea.mock';
+import {
+  LogicMounter,
+  mockFlashMessageHelpers,
+  mockHttpValues,
+} from '../../../__mocks__/kea_logic';
 
 import { engines } from '../../__mocks__/engines.mock';
 
@@ -44,6 +47,7 @@ describe('RoleMappingsLogic', () => {
     accessAllEngines: true,
     selectedAuthProviders: [ANY_AUTH_PROVIDER],
     selectedOptions: [],
+    roleMappingErrors: [],
   };
 
   const mappingsServerProps = { multipleAuthProvidersConfig: true, roleMappings: [asRoleMapping] };
@@ -410,11 +414,24 @@ describe('RoleMappingsLogic', () => {
       });
 
       it('handles error', async () => {
-        http.post.mockReturnValue(Promise.reject('this is an error'));
+        const setRoleMappingErrorsSpy = jest.spyOn(
+          RoleMappingsLogic.actions,
+          'setRoleMappingErrors'
+        );
+
+        http.post.mockReturnValue(
+          Promise.reject({
+            body: {
+              attributes: {
+                errors: ['this is an error'],
+              },
+            },
+          })
+        );
         RoleMappingsLogic.actions.handleSaveMapping();
         await nextTick();
 
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
+        expect(setRoleMappingErrorsSpy).toHaveBeenCalledWith(['this is an error']);
       });
     });
 
