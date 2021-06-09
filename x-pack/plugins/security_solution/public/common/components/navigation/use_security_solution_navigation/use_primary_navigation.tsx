@@ -6,13 +6,12 @@
  */
 
 import { getOr } from 'lodash/fp';
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiIcon, EuiSideNavProps } from '@elastic/eui';
-import { APP_ID } from '../../../../../common/constants';
 import { PrimaryNavigationProps } from './types';
 import { usePrimaryNavigationItems } from './use_navigation_items';
+import { KibanaPageTemplateProps } from '../../../../../../../../src/plugins/kibana_react/public';
 
 const translatedNavTitle = i18n.translate('xpack.securitySolution.navigation.mainLabel', {
   defaultMessage: 'Security',
@@ -28,7 +27,7 @@ export const usePrimaryNavigation = ({
   tabName,
   timeline,
   timerange,
-}: PrimaryNavigationProps): EuiSideNavProps<unknown>['items'] => {
+}: PrimaryNavigationProps): KibanaPageTemplateProps['solutionNav'] => {
   const mapLocationToTab = useCallback(
     (): string =>
       getOr(
@@ -55,7 +54,7 @@ export const usePrimaryNavigation = ({
     // we do need navTabs in case the selectedTabId appears after initial load (ex. checking permissions for anomalies)
   }, [pageName, tabName, navTabs, mapLocationToTab, selectedTabId]);
 
-  const topLevelNavItems = usePrimaryNavigationItems({
+  const navItems = usePrimaryNavigationItems({
     filters,
     navTabs,
     query,
@@ -66,12 +65,9 @@ export const usePrimaryNavigation = ({
     timerange,
   });
 
-  return [
-    {
-      name: translatedNavTitle,
-      icon: <EuiIcon type="logoSecurity" />,
-      id: APP_ID,
-      items: topLevelNavItems,
-    },
-  ];
+  return {
+    name: translatedNavTitle,
+    icon: 'logoSecurity',
+    items: navItems,
+  };
 };

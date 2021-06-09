@@ -28,7 +28,7 @@ export const usePrimaryNavigationItems = ({
   const history = useHistory();
   const { navigateToApp, getUrlForApp } = useKibana().services.application;
 
-  return Object.values(navTabs).map((tab) => {
+  const navItems = Object.values(navTabs).map((tab) => {
     const { id, href, name, disabled, pageId } = tab;
     // Rules of hooks prevents hooks from being called in callbacks as the order of the hooks
     // should be consistent across every render. The primary nav tabs here are from a constants file
@@ -75,4 +75,12 @@ export const usePrimaryNavigationItems = ({
       onClick: handleClick,
     };
   });
+
+  return [
+    {
+      id: APP_ID, // TODO: When separating into sub-sections (detect, explore, investigate). Those names can also serve as the section id
+      items: navItems,
+      name: '',
+    },
+  ];
 };

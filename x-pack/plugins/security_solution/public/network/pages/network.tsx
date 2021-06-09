@@ -19,7 +19,7 @@ import { EmbeddedMap } from '../components/embeddables/embedded_map';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { HeaderPage } from '../../common/components/header_page';
 import { LastEventTime } from '../../common/components/last_event_time';
-import { SecuritySolutionNavigationManager } from '../../common/components/navigation';
+import { SecuritySolutionTabNavigation } from '../../common/components/navigation';
 
 import { NetworkKpiComponent } from '../components/kpi_network';
 import { SiemSearchBar } from '../../common/components/search_bar';
@@ -158,7 +158,6 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
             <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
               <Display show={!globalFullScreen}>
                 <HeaderPage
-                  border
                   subtitle={
                     <LastEventTime
                       docValueFields={docValueFields}
@@ -195,9 +194,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                   <Display show={!globalFullScreen}>
                     <EuiSpacer />
 
-                    <SecuritySolutionNavigationManager
-                      navTabs={navTabsNetwork(hasMlUserPermissions)}
-                    />
+                    <SecuritySolutionTabNavigation navTabs={navTabsNetwork(hasMlUserPermissions)} />
 
                     <EuiSpacer />
                   </Display>
