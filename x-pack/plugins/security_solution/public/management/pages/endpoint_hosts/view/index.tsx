@@ -527,12 +527,12 @@ export const EndpointList = () => {
                   agentsLink: (
                     <LinkToApp
                       appId="fleet"
-                      appPath={`#${pagePathGetters.fleet_agent_list({
+                      appPath={`#${pagePathGetters.agent_list({
                         kuery: 'packages : "endpoint"',
                       })}`}
                       href={`${services?.application?.getUrlForApp(
                         'fleet'
-                      )}#${pagePathGetters.fleet_agent_list({
+                      )}#${pagePathGetters.agent_list({
                         kuery: 'packages : "endpoint"',
                       })}`}
                     >

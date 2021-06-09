@@ -70,7 +70,7 @@ const RowActions = React.memo<{
   const menuItems = [
     <EuiContextMenuItem
       icon="inspect"
-      href={getHref('fleet_agent_details', { agentId: agent.id })}
+      href={getHref('agent_details', { agentId: agent.id })}
       key="viewAgent"
     >
       <FormattedMessage id="xpack.fleet.agentList.viewActionText" defaultMessage="View agent" />
@@ -143,7 +143,7 @@ function safeMetadata(val: any) {
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
   const { notifications } = useStartServices();
-  useBreadcrumbs('fleet_agent_list');
+  useBreadcrumbs('agent_list');
   const { getHref } = useLink();
   const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
   const hasWriteCapabilites = useCapabilities().write;
@@ -355,7 +355,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         defaultMessage: 'Host',
       }),
       render: (host: string, agent: Agent) => (
-        <EuiLink href={getHref('fleet_agent_details', { agentId: agent.id })}>
+        <EuiLink href={getHref('agent_details', { agentId: agent.id })}>
           {safeMetadata(host)}
         </EuiLink>
       ),

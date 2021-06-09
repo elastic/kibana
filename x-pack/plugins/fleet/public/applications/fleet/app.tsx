@@ -30,7 +30,6 @@ import {
   sendGetPermissionsCheck,
   sendSetup,
   useBreadcrumbs,
-  useConfig,
   useStartServices,
   UIExtensionsContext,
 } from './hooks';
@@ -41,10 +40,9 @@ import { FLEET_ROUTING_PATHS } from './constants';
 import { DefaultLayout, WithoutHeaderLayout } from './layouts';
 import { AgentPolicyApp } from './sections/agent_policy';
 import { DataStreamApp } from './sections/data_stream';
-import { FleetApp } from './sections/agents';
-import { IngestManagerOverview } from './sections/overview';
-import { ProtectedRoute } from './index';
+import { AgentsApp } from './sections/agents';
 import { CreatePackagePolicyPage } from './sections/agent_policy/create_package_policy_page';
+import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list_page';
 
 const ErrorLayout = ({ children }: { children: JSX.Element }) => (
   <EuiErrorBoundary>
@@ -234,36 +232,29 @@ export const FleetAppContext: React.FC<{
 );
 
 export const AppRoutes = memo(() => {
-  const { agents } = useConfig();
-
   return (
     <Switch>
+      <Route path={FLEET_ROUTING_PATHS.agents}>
+        <AgentsApp />
+      </Route>
       <Route path={FLEET_ROUTING_PATHS.policies}>
-        <DefaultLayout section="agent_policy">
-          <AgentPolicyApp />
-        </DefaultLayout>
+        <AgentPolicyApp />
+      </Route>
+      <Route path={FLEET_ROUTING_PATHS.enrollment_tokens}>
+        <EnrollmentTokenListPage />
       </Route>
       <Route path={FLEET_ROUTING_PATHS.data_streams}>
-        <DefaultLayout section="data_stream">
-          <DataStreamApp />
-        </DefaultLayout>
+        <DataStreamApp />
       </Route>
-      <ProtectedRoute path={FLEET_ROUTING_PATHS.fleet} isAllowed={agents.enabled}>
-        <DefaultLayout section="fleet">
-          <FleetApp />
-        </DefaultLayout>
-      </ProtectedRoute>
-      <Route exact path={FLEET_ROUTING_PATHS.overview}>
-        <DefaultLayout section="overview">
-          <IngestManagerOverview />
-        </DefaultLayout>
-      </Route>
+
+      {/* TODO: Move this route to the Integrations app */}
       <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>
-        <DefaultLayout showNav={false}>
+        <DefaultLayout>
           <CreatePackagePolicyPage />
         </DefaultLayout>
       </Route>
-      <Redirect to="/" />
+
+      <Redirect to={FLEET_ROUTING_PATHS.agents} />
     </Switch>
   );
 });

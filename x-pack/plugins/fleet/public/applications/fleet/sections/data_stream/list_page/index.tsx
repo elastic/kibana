@@ -10,7 +10,6 @@ import type { EuiTableActionsColumnType, EuiTableFieldDataColumnType } from '@el
 import {
   EuiBadge,
   EuiButton,
-  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiEmptyPrompt,
@@ -20,42 +19,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 
 import type { DataStream } from '../../../types';
-import { WithHeaderLayout } from '../../../layouts';
 import { useGetDataStreams, useStartServices, usePagination, useBreadcrumbs } from '../../../hooks';
 import { PackageIcon } from '../../../components';
 
 import { DataStreamRowActions } from './components/data_stream_row_actions';
-
-const DataStreamListPageLayout: React.FunctionComponent = ({ children }) => (
-  <WithHeaderLayout
-    leftColumn={
-      <EuiFlexGroup direction="column" gutterSize="m">
-        <EuiFlexItem>
-          <EuiText>
-            <h1>
-              <FormattedMessage
-                id="xpack.fleet.dataStreamList.pageTitle"
-                defaultMessage="Data streams"
-              />
-            </h1>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.fleet.dataStreamList.pageSubtitle"
-                defaultMessage="Manage the data created by your agents."
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    }
-  >
-    {children}
-  </WithHeaderLayout>
-);
 
 export const DataStreamListPage: React.FunctionComponent<{}> = () => {
   useBreadcrumbs('data_streams');
@@ -232,7 +199,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
   }
 
   return (
-    <DataStreamListPageLayout>
+    <>
       <EuiInMemoryTable
         loading={isLoading}
         hasActions={true}
@@ -323,6 +290,6 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
           ],
         }}
       />
-    </DataStreamListPageLayout>
+    </>
   );
 };

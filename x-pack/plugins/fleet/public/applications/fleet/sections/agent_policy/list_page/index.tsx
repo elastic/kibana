@@ -246,7 +246,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
   };
 
   return (
-    <AgentPolicyListPageLayout>
+    <>
       {isCreateAgentPolicyFlyoutOpen ? (
         <CreateAgentPolicyFlyout
           onClose={() => {
@@ -322,6 +322,6 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         sorting={{ sort: sorting }}
         onChange={onTableChange}
       />
-    </AgentPolicyListPageLayout>
+    </>
   );
 };

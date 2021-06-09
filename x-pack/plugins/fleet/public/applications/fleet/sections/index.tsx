@@ -10,4 +10,4 @@ export { AgentPolicyApp } from './agent_policy';
 export { DataStreamApp } from './data_stream';
 export { FleetApp } from './agents';
 
-export type Section = 'overview' | 'agent_policy' | 'fleet' | 'data_stream';
+export type Section = 'agents' | 'agent_policies' | 'enrollment_tokens' | 'data_streams';

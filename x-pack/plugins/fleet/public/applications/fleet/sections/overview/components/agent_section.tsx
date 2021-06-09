@@ -35,7 +35,7 @@ export const OverviewAgentSection = () => {
           defaultMessage:
             'Use Fleet to enroll agents and manage their policies from a central location.',
         })}
-        linkTo={getHref('fleet_agent_list')}
+        linkTo={getHref('agent_list')}
         linkToText={i18n.translate('xpack.fleet.overviewPageFleetPanelAction', {
           defaultMessage: 'View agents',
         })}

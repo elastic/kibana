@@ -33,6 +33,7 @@ import {
 } from '../../../hooks';
 import type { EnrollmentAPIKey, GetAgentPoliciesResponseItem } from '../../../types';
 import { SearchBar } from '../../../components/search_bar';
+import { DefaultLayout } from '../../../layouts';
 
 import { NewEnrollmentTokenModal } from './components/new_enrollment_key_modal';
 import { ConfirmEnrollmentTokenDelete } from './components/confirm_delete_modal';
@@ -155,7 +156,7 @@ const DeleteButton: React.FunctionComponent<{ apiKey: EnrollmentAPIKey; refresh:
 };
 
 export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
-  useBreadcrumbs('fleet_enrollment_tokens');
+  useBreadcrumbs('enrollment_tokens');
   const [isModalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState('');
   const { pagination, setPagination, pageSizeOptions } = usePagination();
@@ -269,7 +270,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
   ];
 
   return (
-    <>
+    <DefaultLayout section="enrollment_tokens">
       {isModalOpen && (
         <NewEnrollmentTokenModal
           agentPolicies={agentPolicies}
@@ -344,6 +345,6 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
           setPagination(newPagination);
         }}
       />
-    </>
+    </DefaultLayout>
   );
 };
