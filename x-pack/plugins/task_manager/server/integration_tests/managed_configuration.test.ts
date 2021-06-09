@@ -54,7 +54,9 @@ describe('managed configuration', () => {
     logger = context.logger.get('taskManager');
 
     const taskManager = new TaskManagerPlugin(context);
-    (await taskManager.setup(coreMock.createSetup())).registerTaskDefinitions({
+    (
+      await taskManager.setup(coreMock.createSetup(), { usageCollection: undefined })
+    ).registerTaskDefinitions({
       foo: {
         title: 'Foo',
         createTaskRunner: jest.fn(),
