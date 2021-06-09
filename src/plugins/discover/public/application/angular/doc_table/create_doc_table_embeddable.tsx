@@ -69,7 +69,7 @@ function DocTableLegacyInner(renderProps: DocTableEmbeddableProps) {
       fn().then((newScope) => {
         scope.current = newScope;
       });
-    } else if (scope && scope.current) {
+    } else if (scope?.current) {
       scope.current.renderProps = { ...renderProps };
       scope.current.$applyAsync();
     }
