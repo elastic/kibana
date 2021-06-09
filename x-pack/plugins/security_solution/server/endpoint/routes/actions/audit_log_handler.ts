@@ -78,10 +78,16 @@ export const actionsLogRequestHandler = (
     }
 
     return res.ok({
-      body: result.body.hits.hits.map((e) => {
-        const type = /^.fleet-actions-\d+$/.test(e._index) ? 'action' : 'response';
-        return { type, item: e._source };
-      }),
+      body: {
+        total:
+          typeof result.body.hits.total === 'number'
+            ? result.body.hits.total
+            : result.body.hits.total.value,
+        items: result.body.hits.hits.map((e) => ({
+          type: e._index.startsWith('.fleet-actions') ? 'action' : 'response',
+          item: { id: e._id, data: e._source },
+        })),
+      },
     });
   };
 };
