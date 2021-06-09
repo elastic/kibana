@@ -22,6 +22,7 @@ export const mockAuditLog = (results: any = []): ApiResponse<any> => {
   return {
     body: {
       hits: {
+        total: results.length,
         hits: results.map((a: any) => {
           const _index = a._index;
           delete a._index;
