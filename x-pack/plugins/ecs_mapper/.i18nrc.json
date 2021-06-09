@@ -1,0 +1,7 @@
+{
+  "prefix": "ecsMapper",
+  "paths": {
+    "ecsMapper": "."
+  },
+  "translations": ["translations/ja-JP.json"]
+}
