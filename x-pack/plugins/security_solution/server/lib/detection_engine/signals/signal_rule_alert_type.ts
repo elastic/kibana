@@ -248,18 +248,20 @@ export const signalRulesAlertType = ({
           });
         } else if (isThresholdRule(type)) {
           const thresholdRuleSO = asTypeSpecificSO(savedObject, thresholdRuleParams);
-          result = await thresholdExecutor({
-            rule: thresholdRuleSO,
-            tuples,
-            exceptionItems,
-            services,
-            version,
-            logger,
-            buildRuleMessage,
-            startedAt,
-            bulkCreate,
-            wrapHits,
-          });
+          for (const tuple of tuples) {
+            result = await thresholdExecutor({
+              rule: thresholdRuleSO,
+              tuple,
+              exceptionItems,
+              services,
+              version,
+              logger,
+              buildRuleMessage,
+              startedAt,
+              bulkCreate,
+              wrapHits,
+            });
+          }
         } else if (isThreatMatchRule(type)) {
           const threatRuleSO = asTypeSpecificSO(savedObject, threatRuleParams);
           result = await threatMatchExecutor({
