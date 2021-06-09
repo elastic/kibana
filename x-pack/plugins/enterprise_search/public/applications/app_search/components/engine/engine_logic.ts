@@ -8,6 +8,8 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { HttpLogic } from '../../../shared/http';
+import { ApiTokenTypes } from '../credentials/constants';
+import { ApiToken } from '../credentials/types';
 
 import { EngineDetails, EngineTypes } from './types';
 
@@ -21,6 +23,7 @@ interface EngineValues {
   hasSchemaConflicts: boolean;
   hasUnconfirmedSchemaFields: boolean;
   engineNotFound: boolean;
+  searchKey: string;
 }
 
 interface EngineActions {
@@ -86,6 +89,14 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
     hasUnconfirmedSchemaFields: [
       () => [selectors.engine],
       (engine) => engine?.unconfirmedFields?.length > 0,
+    ],
+    searchKey: [
+      () => [selectors.engine],
+      (engine: Partial<EngineDetails>) => {
+        const isSearchKey = (token: ApiToken) => token.type === ApiTokenTypes.Search;
+        const searchKey = (engine.apiTokens || []).find(isSearchKey);
+        return searchKey?.key || '';
+      },
     ],
   }),
   listeners: ({ actions, values }) => ({

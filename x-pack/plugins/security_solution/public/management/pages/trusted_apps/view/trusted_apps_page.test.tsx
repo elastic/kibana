@@ -31,9 +31,9 @@ import {
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { isFailedResourceState, isLoadedResourceState } from '../state';
 import { forceHTMLElementOffsetWidth } from './components/effected_policy_select/test_utils';
-import { resolvePathVariables } from '../service/utils';
 import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
@@ -898,6 +898,36 @@ describe('When on the Trusted Apps Page', () => {
         fireEvent.click(renderResult.getByTestId('searchButton'));
         expect(await waitForAction('userChangedUrl')).not.toBeNull();
       });
+    });
+  });
+
+  describe('and the back button is present', () => {
+    let renderResult: ReturnType<AppContextTestRender['render']>;
+    beforeEach(async () => {
+      renderResult = render();
+      await act(async () => {
+        await waitForAction('trustedAppsListResourceStateChanged');
+      });
+      reactTestingLibrary.act(() => {
+        history.push('/trusted_apps', {
+          onBackButtonNavigateTo: [{ appId: 'appId' }],
+          backButtonLabel: 'back to fleet',
+          backButtonUrl: '/fleet',
+        });
+      });
+    });
+
+    it('back button is present', () => {
+      const button = renderResult.queryByTestId('backToOrigin');
+      expect(button).not.toBeNull();
+      expect(button).toHaveAttribute('href', '/fleet');
+    });
+
+    it('back button is not present', () => {
+      reactTestingLibrary.act(() => {
+        history.push('/trusted_apps');
+      });
+      expect(renderResult.queryByTestId('backToOrigin')).toBeNull();
     });
   });
 });

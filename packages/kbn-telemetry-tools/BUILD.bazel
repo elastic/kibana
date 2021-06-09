@@ -47,6 +47,7 @@ TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/normalize-path",
   "@npm//@types/testing-library__jest-dom",
+  "@npm//resize-observer-polyfill"
 ]
 
 DEPS = SRC_DEPS + TYPES_DEPS

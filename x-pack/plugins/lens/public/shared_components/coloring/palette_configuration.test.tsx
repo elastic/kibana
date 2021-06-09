@@ -15,6 +15,19 @@ import { CustomPaletteParams } from './types';
 import { applyPaletteParams } from './utils';
 import { CustomizablePalette } from './palette_configuration';
 
+// mocking random id generator function
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    htmlIdGenerator: (fn: unknown) => {
+      let counter = 0;
+      return () => counter++;
+    },
+  };
+});
+
 describe('palette utilities', () => {
   const paletteRegistry = chartPluginMock.createPaletteRegistry();
   describe('applyPaletteParams', () => {

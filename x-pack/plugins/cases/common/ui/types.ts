@@ -58,6 +58,7 @@ export interface CaseExternalService {
 
 interface BasicCase {
   id: string;
+  owner: string;
   closedAt: string | null;
   closedBy: ElasticUser | null;
   comments: Comment[];
@@ -129,7 +130,7 @@ export interface ElasticUser {
 
 export interface FetchCasesProps extends ApiProps {
   queryParams?: QueryParams;
-  filterOptions?: FilterOptions;
+  filterOptions?: FilterOptions & { owner: string[] };
 }
 
 export interface ApiProps {

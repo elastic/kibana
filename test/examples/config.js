@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import path, { resolve } from 'path';
+import { resolve } from 'path';
 import { services } from '../plugin_functional/services';
 import fs from 'fs';
 import { KIBANA_ROOT } from '@kbn/test';
@@ -48,9 +48,6 @@ export default async function ({ readConfigFile }) {
       serverArgs: ['xpack.security.enabled=false'],
     },
     apps: functionalConfig.get('apps'),
-    esArchiver: {
-      directory: path.resolve(__dirname, '../functional/fixtures/es_archiver'),
-    },
     screenshots: functionalConfig.get('screenshots'),
     junit: {
       reportName: 'Example plugin functional tests',

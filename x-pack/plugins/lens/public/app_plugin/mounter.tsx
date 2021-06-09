@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { DashboardFeatureFlagConfig } from 'src/plugins/dashboard/public';
 import { Provider } from 'react-redux';
 import { uniq, isEqual } from 'lodash';
+import { EmbeddableEditorState } from 'src/plugins/embeddable/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 import { LensReportManager, setReportManager, trackUiEvent } from '../lens_ui_telemetry';
@@ -71,6 +72,8 @@ export async function mountApp(
   const historyLocationState = params.history.location.state as HistoryLocationState;
   const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState(APP_ID);
 
+  const dashboardFeatureFlag = await getByValueFeatureFlag();
+
   const lensServices: LensAppServices = {
     data,
     storage,
@@ -92,7 +95,7 @@ export async function mountApp(
     },
 
     // Temporarily required until the 'by value' paradigm is default.
-    dashboardFeatureFlag: await getByValueFeatureFlag(),
+    dashboardFeatureFlag,
   };
 
   addHelpMenuToAppChrome(coreStart.chrome, coreStart.docLinks);
@@ -172,7 +175,6 @@ export async function mountApp(
   if (!initialContext) {
     data.query.filterManager.setAppFilters([]);
   }
-
   const preloadedState = getPreloadedState({
     query: data.query.queryString.getQuery(),
     // Do not use app-specific filters from previous app,
@@ -180,7 +182,7 @@ export async function mountApp(
     filters: !initialContext
       ? data.query.filterManager.getGlobalFilters()
       : data.query.filterManager.getFilters(),
-    searchSessionId: data.search.session.start(),
+    searchSessionId: data.search.session.getSessionId(),
     resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
     isLinkedToOriginatingApp: Boolean(embeddableEditorIncomingState?.originatingApp),
   });
@@ -197,7 +199,14 @@ export async function mountApp(
       );
       trackUiEvent('loaded');
       const initialInput = getInitialInput(props.id, props.editByValue);
-      loadDocument(redirectCallback, initialInput, lensServices, lensStore);
+      loadDocument(
+        redirectCallback,
+        initialInput,
+        lensServices,
+        lensStore,
+        embeddableEditorIncomingState,
+        dashboardFeatureFlag
+      );
       return (
         <Provider store={lensStore}>
           <App
@@ -265,7 +274,6 @@ export async function mountApp(
     params.element
   );
   return () => {
-    data.search.session.clear();
     unmountComponentAtNode(params.element);
     unlistenParentHistory();
     lensStore.dispatch(navigateAway());
@@ -276,7 +284,9 @@ export function loadDocument(
   redirectCallback: (savedObjectId?: string) => void,
   initialInput: LensEmbeddableInput | undefined,
   lensServices: LensAppServices,
-  lensStore: LensRootStore
+  lensStore: LensRootStore,
+  embeddableEditorIncomingState: EmbeddableEditorState | undefined,
+  dashboardFeatureFlag: DashboardFeatureFlagConfig
 ) {
   const { attributeService, chrome, notifications, data } = lensServices;
   const { persistedDoc } = lensStore.getState().app;
@@ -317,12 +327,20 @@ export function loadDocument(
           data.query.filterManager.setAppFilters(
             injectFilterReferences(doc.state.filters, doc.references)
           );
+          const currentSessionId = data.search.session.getSessionId();
           lensStore.dispatch(
             setState({
               query: doc.state.query,
               isAppLoading: false,
               indexPatternsForTopNav: indexPatterns,
               lastKnownDoc: doc,
+              searchSessionId:
+                dashboardFeatureFlag.allowByValueEmbeddables &&
+                Boolean(embeddableEditorIncomingState?.originatingApp) &&
+                !(initialInput as LensByReferenceInput)?.savedObjectId &&
+                currentSessionId
+                  ? currentSessionId
+                  : data.search.session.start(),
               ...(!isEqual(persistedDoc, doc) ? { persistedDoc: doc } : null),
             })
           );

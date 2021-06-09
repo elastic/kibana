@@ -10,7 +10,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DocViewTableRow } from './table_row';
 import { trimAngularSpan } from './table_helper';
-import { isNestedFieldParent } from '../../helpers/nested_fields';
+import { isNestedFieldParent } from '../../apps/main/utils/nested_fields';
 import { DocViewRenderProps } from '../../doc_views/doc_views_types';
 
 const COLLAPSE_LINE_LENGTH = 350;
