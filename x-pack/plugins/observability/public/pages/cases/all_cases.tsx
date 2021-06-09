@@ -10,7 +10,7 @@ import React from 'react';
 import { AllCases } from '../../components/app/cases/all_cases';
 import * as i18n from '../../components/app/cases/translations';
 
-import { savedObjectReadOnlyErrorMessage, CaseCallOut } from '../../components/app/cases/callout';
+import { permissionsReadOnlyErrorMessage, CaseCallOut } from '../../components/app/cases/callout';
 import { CaseFeatureNoPermissions } from './feature_no_permissions';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -22,8 +22,8 @@ export const AllCasesPage = React.memo(() => {
     <>
       {userPermissions != null && !userPermissions?.crud && userPermissions?.read && (
         <CaseCallOut
-          title={savedObjectReadOnlyErrorMessage.title}
-          messages={[{ ...savedObjectReadOnlyErrorMessage, title: '' }]}
+          title={permissionsReadOnlyErrorMessage.title}
+          messages={[{ ...permissionsReadOnlyErrorMessage, title: '' }]}
         />
       )}
       <ObservabilityPageTemplate

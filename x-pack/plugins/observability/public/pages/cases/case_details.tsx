@@ -12,7 +12,7 @@ import { CaseView } from '../../components/app/cases/case_view';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { useKibana } from '../../utils/kibana_react';
 import { CASES_APP_ID } from '../../components/app/cases/constants';
-import { CaseCallOut, savedObjectReadOnlyErrorMessage } from '../../components/app/cases/callout';
+import { CaseCallOut, permissionsReadOnlyErrorMessage } from '../../components/app/cases/callout';
 
 export const CaseDetailsPage = React.memo(() => {
   const {
@@ -33,8 +33,8 @@ export const CaseDetailsPage = React.memo(() => {
     <>
       {userPermissions != null && !userPermissions?.crud && userPermissions?.read && (
         <CaseCallOut
-          title={savedObjectReadOnlyErrorMessage.title}
-          messages={[{ ...savedObjectReadOnlyErrorMessage, title: '' }]}
+          title={permissionsReadOnlyErrorMessage.title}
+          messages={[{ ...permissionsReadOnlyErrorMessage, title: '' }]}
         />
       )}
       <CaseView

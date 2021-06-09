@@ -35,7 +35,7 @@ export const useMessagesStorage = (): UseMessagesStorage => {
   const hasMessage = useCallback(
     (plugin: string, id: string): boolean => {
       const pluginStorage = storage.get(`${plugin}-messages`) ?? [];
-      return pluginStorage.filter((val: string) => val === id).length > 0;
+      return pluginStorage.includes((val: string) => val === id);
     },
     [storage]
   );
@@ -43,7 +43,10 @@ export const useMessagesStorage = (): UseMessagesStorage => {
   const removeMessage = useCallback(
     (plugin: string, id: string) => {
       const pluginStorage = storage.get(`${plugin}-messages`) ?? [];
-      storage.set(`${plugin}-messages`, [...pluginStorage.filter((val: string) => val !== id)]);
+      storage.set(
+        `${plugin}-messages`,
+        pluginStorage.filter((val: string) => val !== id)
+      );
     },
     [storage]
   );
