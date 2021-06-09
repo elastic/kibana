@@ -60,7 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
             canvas: ['all', 'read', 'minimal_all', 'minimal_read', 'generate_report'],
             infrastructure: ['all', 'read'],
             logs: ['all', 'read'],
-            'observability-cases': ['all', 'read'],
+            observabilityCases: ['all', 'read'],
             uptime: ['all', 'read'],
             apm: ['all', 'read'],
             ml: ['all', 'read'],

@@ -36,12 +36,7 @@ const CallOutComponent = ({
   ]);
 
   return showCallOut ? (
-    <EuiCallOut
-      title={title}
-      color={type}
-      iconType="gear"
-      data-test-subj={`case-callout-${id} another-one`}
-    >
+    <EuiCallOut title={title} color={type} iconType="gear" data-test-subj={`case-callout-${id}`}>
       {!isEmpty(messages) && (
         <EuiDescriptionList data-test-subj={`callout-messages-${id}`} listItems={messages} />
       )}

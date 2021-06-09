@@ -35,7 +35,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await security.role.create('cases_observability_all_role', {
           elasticsearch: { cluster: [], indices: [], run_as: [] },
           kibana: [
-            { spaces: ['*'], base: [], feature: { 'observability-cases': ['all'], logs: ['all'] } },
+            { spaces: ['*'], base: [], feature: { observabilityCases: ['all'], logs: ['all'] } },
           ],
         });
 
@@ -106,7 +106,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             {
               spaces: ['*'],
               base: [],
-              feature: { 'observability-cases': ['read'], logs: ['all'] },
+              feature: { observabilityCases: ['read'], logs: ['all'] },
             },
           ],
         });

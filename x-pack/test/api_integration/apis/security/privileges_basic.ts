@@ -33,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
             maps: ['all', 'read'],
             canvas: ['all', 'read'],
             infrastructure: ['all', 'read'],
-            'observability-cases': ['all', 'read'],
+            observabilityCases: ['all', 'read'],
             logs: ['all', 'read'],
             uptime: ['all', 'read'],
             apm: ['all', 'read'],

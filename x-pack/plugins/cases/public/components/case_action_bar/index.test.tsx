@@ -21,7 +21,7 @@ describe('CaseActionBar', () => {
       onClick: () => {},
     },
     caseData: basicCase,
-    isAlerting: true,
+    disableAlerting: false,
     isLoading: false,
     onRefresh,
     onUpdateField,
