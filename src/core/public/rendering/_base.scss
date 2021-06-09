@@ -35,16 +35,24 @@
   position: relative; // This is temporary for apps that relied on this being present on `.application`
 }
 
+@mixin kbnAffordForHeader($headerHeight) {
+  @include euiHeaderAffordForFixed($headerHeight);
+
+  #app-fixed-viewport {
+    top: $headerHeight;
+  }
+}
+
 .kbnBody {
-  @include euiHeaderAffordForFixed($kbnHeaderOffset);
+  @include kbnAffordForHeader($kbnHeaderOffset);
 
   &.kbnBody--hasHeaderBanner {
-    @include euiHeaderAffordForFixed($kbnHeaderOffsetWithBanner);
+    @include kbnAffordForHeader($kbnHeaderOffsetWithBanner);
   }
   &.kbnBody--chromeHidden {
-    @include euiHeaderAffordForFixed(0);
+    @include kbnAffordForHeader(0);
   }
   &.kbnBody--chromeHidden.kbnBody--hasHeaderBanner {
-    @include euiHeaderAffordForFixed($kbnHeaderBannerHeight);
+    @include kbnAffordForHeader($kbnHeaderBannerHeight);
   }
 }
