@@ -11,6 +11,7 @@ import { act, waitFor } from '@testing-library/react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { ConnectorTypes, SECURITY_SOLUTION_OWNER } from '../../../common';
+import { useKibana } from '../../common/lib/kibana';
 import { TestProviders } from '../../common/mock';
 import { usePostCase } from '../../containers/use_post_case';
 import { usePostComment } from '../../containers/use_post_comment';
@@ -54,6 +55,7 @@ jest.mock('../connectors/jira/use_get_fields_by_issue_type');
 jest.mock('../connectors/jira/use_get_single_issue');
 jest.mock('../connectors/jira/use_get_issues');
 jest.mock('../connectors/servicenow/use_get_choices');
+jest.mock('../../common/lib/kibana');
 
 const useConnectorsMock = useConnectors as jest.Mock;
 const useCaseConfigureMock = useCaseConfigure as jest.Mock;
@@ -67,6 +69,7 @@ const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as jest.Mock;
 const useGetChoicesMock = useGetChoices as jest.Mock;
 const postCase = jest.fn();
 const pushCaseToExternalService = jest.fn();
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 const defaultPostCase = {
   isLoading: false,
@@ -130,7 +133,12 @@ describe('Create case', () => {
       tags: sampleTags,
       fetchTags,
     }));
+    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
+      actionTypeTitle: '.servicenow',
+      iconClass: 'logoSecurity',
+    });
   });
+
   beforeEach(() => {
     jest.clearAllMocks();
   });

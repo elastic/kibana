@@ -6,18 +6,20 @@
  */
 
 import { DEFAULT_INITIAL_APP_DATA } from '../../../common/__mocks__';
-import { setMockValues, rerender } from '../__mocks__';
+import { setMockValues } from '../__mocks__/kea_logic';
+import { mockUseRouteMatch } from '../__mocks__/react_router';
 import '../__mocks__/shallow_useeffect.mock';
 import '../__mocks__/enterprise_search_url.mock';
-import '../__mocks__/react_router_history.mock';
 
 import React from 'react';
 
-import { Redirect, useRouteMatch } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
 import { Layout, SideNav, SideNavLink } from '../shared/layout';
+
+import { rerender } from '../test_helpers';
 
 jest.mock('./app_logic', () => ({ AppLogic: jest.fn() }));
 import { AppLogic } from './app_logic';
@@ -184,14 +186,14 @@ describe('AppSearchNav', () => {
     const getEnginesLink = (wrapper: ShallowWrapper) => wrapper.find(SideNavLink).dive();
 
     it('does not render the engine subnav on top-level routes', () => {
-      (useRouteMatch as jest.Mock).mockReturnValueOnce(false);
+      mockUseRouteMatch.mockReturnValueOnce(false);
       const wrapper = shallow(<AppSearchNav />);
 
       expect(getEnginesLink(wrapper).find(EngineNav)).toHaveLength(0);
     });
 
     it('renders the engine subnav if currently on an engine route', () => {
-      (useRouteMatch as jest.Mock).mockReturnValueOnce(true);
+      mockUseRouteMatch.mockReturnValueOnce(true);
       const wrapper = shallow(<AppSearchNav />);
 
       expect(getEnginesLink(wrapper).find(EngineNav)).toHaveLength(1);

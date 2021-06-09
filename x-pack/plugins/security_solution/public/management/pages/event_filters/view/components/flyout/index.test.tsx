@@ -70,7 +70,7 @@ describe('Event filter flyout', () => {
   it('should renders correctly', () => {
     const component = render();
     expect(component.getAllByText('Add Endpoint Event Filter')).not.toBeNull();
-    expect(component.getByText('cancel')).not.toBeNull();
+    expect(component.getByText('Cancel')).not.toBeNull();
     expect(component.getByText('Endpoint Security')).not.toBeNull();
   });
 
@@ -136,7 +136,7 @@ describe('Event filter flyout', () => {
 
   it('should close when click on cancel button', () => {
     const component = render();
-    const cancelButton = component.getByText('cancel');
+    const cancelButton = component.getByText('Cancel');
     expect(onCancelMock).toHaveBeenCalledTimes(0);
 
     act(() => {
@@ -170,7 +170,7 @@ describe('Event filter flyout', () => {
       });
     });
 
-    const cancelButton = component.getByText('cancel');
+    const cancelButton = component.getByText('Cancel');
     expect(onCancelMock).toHaveBeenCalledTimes(0);
 
     act(() => {
@@ -184,7 +184,7 @@ describe('Event filter flyout', () => {
     const component = render({ id: 'fakeId', type: 'edit' });
 
     expect(component.getAllByText('Update Endpoint Event Filter')).not.toBeNull();
-    expect(component.getByText('cancel')).not.toBeNull();
+    expect(component.getByText('Cancel')).not.toBeNull();
     expect(component.getByText('Endpoint Security')).not.toBeNull();
   });
 

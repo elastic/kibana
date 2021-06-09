@@ -67,7 +67,7 @@ describe('Workload Statistics Aggregator', () => {
           ownerIds: {
             value: 1,
           },
-          // The `FiltersAggregate` doesn't cover the case of a nested `AggregationContainer`, in which `FiltersAggregate`
+          // The `FiltersAggregate` doesn't cover the case of a nested `AggregationsAggregationContainer`, in which `FiltersAggregate`
           // would not have a `buckets` property, but rather a keyed property that's inferred from the request.
           // @ts-expect-error
           idleTasks: {
@@ -266,7 +266,7 @@ describe('Workload Statistics Aggregator', () => {
         ownerIds: {
           value: 1,
         },
-        // The `FiltersAggregate` doesn't cover the case of a nested `AggregationContainer`, in which `FiltersAggregate`
+        // The `FiltersAggregate` doesn't cover the case of a nested `AggregationsAggregationContainer`, in which `FiltersAggregate`
         // would not have a `buckets` property, but rather a keyed property that's inferred from the request.
         // @ts-expect-error
         idleTasks: {
@@ -1084,7 +1084,7 @@ function setTaskTypeCount(
       ...rest.hits,
       total: {
         value: buckets.reduce((sum, bucket) => sum + bucket.doc_count, 0),
-        relation: 'eq' as estypes.TotalHitsRelation,
+        relation: 'eq' as estypes.SearchTotalHitsRelation,
       },
     },
     aggregations: {
