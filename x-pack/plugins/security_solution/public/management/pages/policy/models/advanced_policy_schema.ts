@@ -658,4 +658,24 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'windows.advanced.memory.signature',
+    first_supported_version: '7.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory.signature',
+      {
+        defaultMessage: "A value of 'false' disables Memory signature protection. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.memory.shellcode',
+    first_supported_version: '7.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory.shellcode',
+      {
+        defaultMessage: "A value of 'false' disables Memory Shellcode protection. Default: true.",
+      }
+    ),
+  },
 ];
