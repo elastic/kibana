@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import '../../../__mocks__/react_router_history.mock';
 import './__mocks__/overview_logic.mock';
 import { mockActions, setMockValues } from './__mocks__';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
+import pMap from 'p-map';
 import {
   KibanaRequest,
   Logger,
@@ -43,7 +43,11 @@ import {
   groupTotalAlertsByID,
   SavedObjectFindOptionsKueryNode,
 } from '../../common';
-import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
+import {
+  ENABLE_CASE_CONNECTOR,
+  MAX_CONCURRENT_SEARCHES,
+  MAX_DOCS_PER_PAGE,
+} from '../../../common/constants';
 import { defaultPage, defaultPerPage } from '../../routes/api';
 import {
   CASE_SAVED_OBJECT,
@@ -250,7 +254,7 @@ export class CasesService {
         filter,
       ]);
 
-      let response = await unsecuredSavedObjectsClient.find<
+      const response = await unsecuredSavedObjectsClient.find<
         CommentAttributes,
         GetCaseIdsByAlertIdAggs
       >({
@@ -259,23 +263,9 @@ export class CasesService {
         page: 1,
         perPage: 1,
         sortField: defaultSortField,
-        aggs: this.buildCaseIdsAggs(),
+        aggs: this.buildCaseIdsAggs(MAX_DOCS_PER_PAGE),
         filter: combinedFilter,
       });
-      if (response.total > 100) {
-        response = await unsecuredSavedObjectsClient.find<
-          CommentAttributes,
-          GetCaseIdsByAlertIdAggs
-        >({
-          type: CASE_COMMENT_SAVED_OBJECT,
-          fields: includeFieldsRequiredForAuthentication(),
-          page: 1,
-          perPage: 1,
-          sortField: defaultSortField,
-          aggs: this.buildCaseIdsAggs(response.total),
-          filter: combinedFilter,
-        });
-      }
       return response;
     } catch (error) {
       this.log.error(`Error on GET all cases for alert id ${alertId}: ${error}`);
@@ -393,16 +383,6 @@ export class CasesService {
     ensureSavedObjectsAreAuthorized: EnsureSOAuthCallback;
     subCaseOptions?: SavedObjectFindOptionsKueryNode;
   }): Promise<number> {
-    const casesStats = await this.findCases({
-      unsecuredSavedObjectsClient,
-      options: {
-        ...caseOptions,
-        fields: [],
-        page: 1,
-        perPage: 1,
-      },
-    });
-
     /**
      * This could be made more performant. What we're doing here is retrieving all cases
      * that match the API request's filters instead of just counts. This is because we need to grab
@@ -429,7 +409,7 @@ export class CasesService {
         ...caseOptions,
         fields: includeFieldsRequiredForAuthentication([caseTypeField]),
         page: 1,
-        perPage: casesStats.total,
+        perPage: MAX_DOCS_PER_PAGE,
       },
     });
 
@@ -447,7 +427,7 @@ export class CasesService {
     if (ENABLE_CASE_CONNECTOR && subCaseOptions) {
       subCasesTotal = await this.findSubCaseStatusStats({
         unsecuredSavedObjectsClient,
-        options: cloneDeep(subCaseOptions),
+        options: subCaseOptions,
         ids: caseIds,
       });
     }
@@ -505,16 +485,18 @@ export class CasesService {
     const refType =
       associationType === AssociationType.case ? CASE_SAVED_OBJECT : SUB_CASE_SAVED_OBJECT;
 
-    const allComments = await Promise.all(
-      ids.map((id) =>
-        this.getCommentsByAssociation({
-          unsecuredSavedObjectsClient,
-          associationType,
-          id,
-          options: { page: 1, perPage: 1 },
-        })
-      )
-    );
+    const getCommentsMapper = async (id: string) =>
+      this.getCommentsByAssociation({
+        unsecuredSavedObjectsClient,
+        associationType,
+        id,
+        options: { page: 1, perPage: 1 },
+      });
+
+    // Ensuring we don't too many concurrent get running.
+    const allComments = await pMap(ids, getCommentsMapper, {
+      concurrency: MAX_CONCURRENT_SEARCHES,
+    });
 
     const alerts = await this.getCommentsByAssociation({
       unsecuredSavedObjectsClient,
@@ -795,7 +777,7 @@ export class CasesService {
       this.log.debug(`Attempting to find cases`);
       return await unsecuredSavedObjectsClient.find<ESCaseAttributes>({
         sortField: defaultSortField,
-        ...cloneDeep(options),
+        ...options,
         type: CASE_SAVED_OBJECT,
       });
     } catch (error) {
@@ -815,24 +797,16 @@ export class CasesService {
       if (options?.page !== undefined || options?.perPage !== undefined) {
         return unsecuredSavedObjectsClient.find<SubCaseAttributes>({
           sortField: defaultSortField,
-          ...cloneDeep(options),
+          ...options,
           type: SUB_CASE_SAVED_OBJECT,
         });
       }
 
-      const stats = await unsecuredSavedObjectsClient.find<SubCaseAttributes>({
-        fields: [],
-        page: 1,
-        perPage: 1,
-        sortField: defaultSortField,
-        ...cloneDeep(options),
-        type: SUB_CASE_SAVED_OBJECT,
-      });
       return unsecuredSavedObjectsClient.find<SubCaseAttributes>({
         page: 1,
-        perPage: stats.total,
+        perPage: MAX_DOCS_PER_PAGE,
         sortField: defaultSortField,
-        ...cloneDeep(options),
+        ...options,
         type: SUB_CASE_SAVED_OBJECT,
       });
     } catch (error) {
@@ -902,26 +876,16 @@ export class CasesService {
         return unsecuredSavedObjectsClient.find<CommentAttributes>({
           type: CASE_COMMENT_SAVED_OBJECT,
           sortField: defaultSortField,
-          ...cloneDeep(options),
+          ...options,
         });
       }
-      // get the total number of comments that are in ES then we'll grab them all in one go
-      const stats = await unsecuredSavedObjectsClient.find<CommentAttributes>({
-        type: CASE_COMMENT_SAVED_OBJECT,
-        fields: [],
-        page: 1,
-        perPage: 1,
-        sortField: defaultSortField,
-        // spread the options after so the caller can override the default behavior if they want
-        ...cloneDeep(options),
-      });
 
       return unsecuredSavedObjectsClient.find<CommentAttributes>({
         type: CASE_COMMENT_SAVED_OBJECT,
         page: 1,
-        perPage: stats.total,
+        perPage: MAX_DOCS_PER_PAGE,
         sortField: defaultSortField,
-        ...cloneDeep(options),
+        ...options,
       });
     } catch (error) {
       this.log.error(`Error on GET all comments internal for ${JSON.stringify(id)}: ${error}`);
@@ -1022,20 +986,13 @@ export class CasesService {
   }: GetReportersArgs): Promise<SavedObjectsFindResponse<ESCaseAttributes>> {
     try {
       this.log.debug(`Attempting to GET all reporters`);
-      const firstReporters = await unsecuredSavedObjectsClient.find({
-        type: CASE_SAVED_OBJECT,
-        fields: ['created_by', OWNER_FIELD],
-        page: 1,
-        perPage: 1,
-        filter: cloneDeep(filter),
-      });
 
       return await unsecuredSavedObjectsClient.find<ESCaseAttributes>({
         type: CASE_SAVED_OBJECT,
         fields: ['created_by', OWNER_FIELD],
         page: 1,
-        perPage: firstReporters.total,
-        filter: cloneDeep(filter),
+        perPage: MAX_DOCS_PER_PAGE,
+        filter,
       });
     } catch (error) {
       this.log.error(`Error on GET all reporters: ${error}`);
@@ -1049,20 +1006,13 @@ export class CasesService {
   }: GetTagsArgs): Promise<SavedObjectsFindResponse<ESCaseAttributes>> {
     try {
       this.log.debug(`Attempting to GET all cases`);
-      const firstTags = await unsecuredSavedObjectsClient.find({
-        type: CASE_SAVED_OBJECT,
-        fields: ['tags', OWNER_FIELD],
-        page: 1,
-        perPage: 1,
-        filter: cloneDeep(filter),
-      });
 
       return await unsecuredSavedObjectsClient.find<ESCaseAttributes>({
         type: CASE_SAVED_OBJECT,
         fields: ['tags', OWNER_FIELD],
         page: 1,
-        perPage: firstTags.total,
-        filter: cloneDeep(filter),
+        perPage: MAX_DOCS_PER_PAGE,
+        filter,
       });
     } catch (error) {
       this.log.error(`Error on GET tags: ${error}`);

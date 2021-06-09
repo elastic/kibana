@@ -56,7 +56,7 @@
         "description": [],
         "signature": [
           "() => Promise<typeof ",
-          "src/plugins/discover/public/application/helpers/get_sharing_data",
+          "src/plugins/discover/public/application/apps/main/utils/get_sharing_data",
           ">"
         ],
         "source": {

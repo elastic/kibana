@@ -13,7 +13,7 @@ export default function ({ getService }) {
 
   describe('/api/settings', () => {
     describe('with trial license clusters', () => {
-      const archive = 'monitoring/multicluster';
+      const archive = 'x-pack/test/functional/es_archives/monitoring/multicluster';
 
       before('load clusters archive', () => {
         return esArchiver.load(archive);

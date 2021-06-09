@@ -10,7 +10,6 @@ import { DeleteTimelines } from '../types';
 
 import { TimelineDownloader } from './export_timeline';
 import { DeleteTimelineModalOverlay } from '../delete_timeline_modal';
-import { exportSelectedTimeline } from '../../../containers/api';
 
 export interface ExportTimeline {
   disableExportTimelineDownloader: () => void;
@@ -37,7 +36,6 @@ export const EditTimelineActionsComponent: React.FC<{
     <TimelineDownloader
       data-test-subj="TimelineDownloader"
       exportedIds={ids}
-      getExportedData={exportSelectedTimeline}
       isEnableDownloader={isEnableDownloader}
       onComplete={onComplete}
     />
@@ -55,4 +53,3 @@ export const EditTimelineActionsComponent: React.FC<{
 );
 
 export const EditTimelineActions = React.memo(EditTimelineActionsComponent);
-export const EditOneTimelineAction = React.memo(EditTimelineActionsComponent);
