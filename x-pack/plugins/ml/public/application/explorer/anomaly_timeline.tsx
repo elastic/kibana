@@ -94,13 +94,13 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       viewBySwimlaneData,
     } = explorerState;
 
-    const [severityUpdate, setSeverityUpdate] = useState(swimLaneSeverity ?? 0);
+    const [severityUpdate, setSeverityUpdate] = useState(swimLaneSeverity);
 
     useDebounce(
       () => {
         if (severityUpdate === swimLaneSeverity) return;
 
-        explorerService.setSwimLaneSeverity(severityUpdate);
+        explorerService.setSwimLaneSeverity(severityUpdate!);
       },
       500,
       [severityUpdate, swimLaneSeverity]
@@ -207,7 +207,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
             <EuiFlexItem grow={true}>
               <SeverityControl
-                value={severityUpdate}
+                value={severityUpdate ?? 0}
                 onChange={useCallback((update) => {
                   setSeverityUpdate(update);
                 }, [])}
