@@ -63,7 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
             uptime: ['all', 'read'],
             apm: ['all', 'read'],
             ml: ['all', 'read'],
-            siem: ['all', 'read'],
+            siem: ['all', 'read', 'minimal_all', 'minimal_read', 'cases_all', 'cases_read'],
             fleet: ['all', 'read'],
             stackAlerts: ['all', 'read'],
             actions: ['all', 'read'],
