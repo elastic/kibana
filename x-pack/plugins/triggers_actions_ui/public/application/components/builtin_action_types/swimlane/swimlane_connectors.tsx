@@ -58,13 +58,15 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<
   const editActionConfigCb = useCallback(
     (k: string, v: string) => {
       editActionConfig(k, v);
-      if (k === 'mappings' && Object.keys(v).length === 6) {
+      if (
+        Object.values(errors?.mappings ?? {}).every((mappingError) => mappingError.length === 0)
+      ) {
         setStepsStatuses((statuses) => ({ ...statuses, fields: 'complete' }));
-      } else if (stepsStatuses.fields === 'complete') {
+      } else {
         setStepsStatuses((statuses) => ({ ...statuses, fields: 'incomplete' }));
       }
     },
-    [editActionConfig, stepsStatuses.fields]
+    [editActionConfig, errors?.mappings]
   );
   return (
     <Fragment>

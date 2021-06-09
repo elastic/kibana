@@ -54,7 +54,7 @@ export const validateMappingForConnector = (
     connectorType === SwimlaneConnectorType.Alerts ? alertsRequiredFields : casesRequiredFields;
 
   return requiredFields.reduce((errors, field) => {
-    if (mapping == null || (mapping != null && mapping[field] == null)) {
+    if (mapping?.[field] == null) {
       errors = { ...errors, [field]: translationMapping[field] };
     }
 
