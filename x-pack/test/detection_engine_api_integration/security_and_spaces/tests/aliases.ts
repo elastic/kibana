@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('security_solution/alias');
     });
 
-    it('Should keep the original alias value such as "host_alias" from a source index when the value is indexed', async () => {
+    it('should keep the original alias value such as "host_alias" from a source index when the value is indexed', async () => {
       const rule = getRuleForSignalTesting(['alias']);
       const { id } = await createRule(supertest, rule);
       await waitForRuleSuccessOrStatus(supertest, id);
@@ -52,7 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     // TODO: Make aliases work to where we can have ECS fields such as host.name filled out
-    it.skip('Should copy alias data from a source index into the signals index in the same position when the target is ECS compatible', async () => {
+    it.skip('should copy alias data from a source index into the signals index in the same position when the target is ECS compatible', async () => {
       const rule = getRuleForSignalTesting(['alias']);
       const { id } = await createRule(supertest, rule);
       await waitForRuleSuccessOrStatus(supertest, id);
