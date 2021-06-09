@@ -73,6 +73,11 @@ export function TableDimensionEditor(
   const currentColorMode = column?.colorMode || 'none';
   const hasDynamicColoring = currentColorMode !== 'none';
 
+  const datasource = frame.datasourceLayers[state.layerId];
+  const showDynamicColoringFeature = Boolean(
+    isNumericField && !datasource?.getOperationForColumnId(accessor)?.isBucketed
+  );
+
   const visibleColumnsCount = state.columns.filter((c) => !c.hidden).length;
 
   const hasTransposedColumn = state.columns.some(({ isTransposed }) => isTransposed);
@@ -175,7 +180,7 @@ export function TableDimensionEditor(
           />
         </EuiFormRow>
       )}
-      {isNumericField && (
+      {showDynamicColoringFeature && (
         <>
           <EuiFormRow
             display="columnCompressed"
