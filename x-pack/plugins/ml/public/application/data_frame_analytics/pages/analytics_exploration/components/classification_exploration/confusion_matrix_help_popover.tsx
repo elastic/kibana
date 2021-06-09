@@ -47,7 +47,7 @@ export const MulticlassConfusionMatrixHelpPopover = () => {
       <p>
         <FormattedMessage
           id="xpack.ml.dataframeanalytics.confusionMatrixShadeExplanation"
-          defaultMessage="As the number of classes in the classification analysis increases, the confusion matrix also increases in complexity. For an easier overvew, darker cells indicate higher percentage of the predictions."
+          defaultMessage="As the number of classes in the classification analysis increases, the confusion matrix also increases in complexity. For an easier overview, darker cells indicate higher percentage of the predictions."
         />
       </p>
       <p>
