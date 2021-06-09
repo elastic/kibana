@@ -61,7 +61,7 @@ export const useUiSetting = jest.fn(createUseUiSettingMock());
 export const useUiSetting$ = jest.fn(createUseUiSetting$Mock());
 export const useHttp = jest.fn().mockReturnValue(createStartServicesMock().http);
 export const useTimeZone = jest.fn();
-export const useDateFormat = jest.fn();
+export const useDateFormat = jest.fn().mockReturnValue('MMM D, YYYY @ HH:mm:ss.SSS');
 export const useBasePath = jest.fn(() => '/test/base/path');
 export const useToasts = jest
   .fn()
