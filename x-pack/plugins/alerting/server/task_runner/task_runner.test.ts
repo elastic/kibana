@@ -418,8 +418,8 @@ describe('Task Runner', () => {
     });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
       event: { action: 'active-instance', category: ['alerts'], kind: 'alert' },
-        duration: 0,
-        start: '1970-01-01T00:00:00.000Z',
+      duration: 0,
+      start: '1970-01-01T00:00:00.000Z',
       kibana: {
         alerting: { action_group_id: 'default', action_subgroup: 'subDefault', instance_id: '1' },
         saved_objects: [
