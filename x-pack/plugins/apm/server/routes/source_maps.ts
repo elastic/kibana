@@ -60,7 +60,7 @@ const uploadSourceMapRoute = createApmServerRoute({
       sourceMap: sourceMapRt,
     }),
   }),
-  handler: async ({ context, params, plugins, logger }) => {
+  handler: async ({ context, params, plugins }) => {
     const { serviceName, serviceVersion } = params.path;
     const { bundleFilepath, sourceMap } = params.body;
     const fleetPluginStart = await plugins.fleet?.start();
