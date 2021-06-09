@@ -90,6 +90,7 @@ describe('ESSearchSource', () => {
       });
 
       const searchFilters: VectorSourceRequestMeta = {
+        isReadOnly: false,
         filters: [],
         zoom: 0,
         fieldNames: ['tooltipField', 'styleField'],
