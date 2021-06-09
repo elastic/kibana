@@ -8,13 +8,9 @@ exports[`rendering renders correctly 1`] = `
     data-test-subj="filters-global-container"
     show={true}
   >
-    <Wrapper
-      className="siemFiltersGlobal"
-    >
-      <p>
-        Additional filters here.
-      </p>
-    </Wrapper>
+    <p>
+      Additional filters here.
+    </p>
   </FiltersGlobalContainer>
 </InPortal>
 `;

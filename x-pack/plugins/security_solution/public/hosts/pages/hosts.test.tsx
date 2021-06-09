@@ -18,7 +18,7 @@ import {
   kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../common/mock';
-import { SiemNavigation } from '../../common/components/navigation';
+import { SecuritySolutionNavigationManager } from '../../common/components/navigation';
 import { inputsActions } from '../../common/store/inputs';
 import { State, createStore } from '../../common/store';
 import { Hosts } from './hosts';
@@ -102,7 +102,8 @@ describe('Hosts - rendering', () => {
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find(SiemNavigation).exists()).toBe(true);
+    console.log("WRAPPER: ", wrapper.debug()); // eslint-disable-line
+    expect(wrapper.find(SecuritySolutionNavigationManager).exists()).toBe(true);
   });
 
   test('it should add the new filters after init', async () => {

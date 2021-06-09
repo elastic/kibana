@@ -9,7 +9,7 @@ import { EuiPopover } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { IS_DRAGGING_CLASS_NAME } from '../drag_and_drop/helpers';
+import { IS_DRAGGING_CLASS_NAME } from '../drag_and_drop/drag_classnames';
 
 export const HOVER_ACTIONS_ALWAYS_SHOW_CLASS_NAME = 'hover-actions-always-show';
 

@@ -8,15 +8,15 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { WrapperPage } from '../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
 
 export const NotFoundPage = React.memo(() => (
-  <WrapperPage>
+  <SecuritySolutionPageWrapper>
     <FormattedMessage
       id="xpack.securitySolution.pages.fourohfour.noContentFoundDescription"
       defaultMessage="No content found"
     />
-  </WrapperPage>
+  </SecuritySolutionPageWrapper>
 ));
 
 NotFoundPage.displayName = 'NotFoundPage';

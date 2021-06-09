@@ -11,7 +11,7 @@ import { Store, Action } from 'redux';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import { AppLeaveHandler } from '../../../../../src/core/public';
+import { AppLeaveHandler, AppMountParameters } from '../../../../../src/core/public';
 
 import { ManageUserInfo } from '../detections/components/user_info';
 import { DEFAULT_DARK_MODE, APP_NAME } from '../../common/constants';
@@ -26,17 +26,26 @@ import { StartServices } from '../types';
 import { PageRouter } from './routes';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 import { UserPrivilegesProvider } from '../detections/components/user_privileges';
+import { AppMountProvider } from './app_mount_context';
 
 interface StartAppComponent {
   children: React.ReactNode;
   history: History;
   onAppLeave: (handler: AppLeaveHandler) => void;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   store: Store<State, Action>;
 }
 
-const StartAppComponent: FC<StartAppComponent> = ({ children, history, onAppLeave, store }) => {
+const StartAppComponent: FC<StartAppComponent> = ({
+  children,
+  history,
+  setHeaderActionMenu,
+  onAppLeave,
+  store,
+}) => {
   const { i18n } = useKibana().services;
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
+  const appMountParams = { onAppLeave, setHeaderActionMenu };
 
   return (
     <EuiErrorBoundary>
@@ -48,9 +57,9 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, onAppLeav
                 <MlCapabilitiesProvider>
                   <UserPrivilegesProvider>
                     <ManageUserInfo>
-                      <PageRouter history={history} onAppLeave={onAppLeave}>
-                        {children}
-                      </PageRouter>
+                      <AppMountProvider appMountParams={appMountParams}>
+                        <PageRouter history={history}>{children}</PageRouter>
+                      </AppMountProvider>
                     </ManageUserInfo>
                   </UserPrivilegesProvider>
                 </MlCapabilitiesProvider>
@@ -72,6 +81,7 @@ interface SecurityAppComponentProps {
   history: History;
   onAppLeave: (handler: AppLeaveHandler) => void;
   services: StartServices;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   store: Store<State, Action>;
 }
 
@@ -80,6 +90,7 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
   history,
   onAppLeave,
   services,
+  setHeaderActionMenu,
   store,
 }) => (
   <KibanaContextProvider
@@ -88,7 +99,12 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
       ...services,
     }}
   >
-    <StartApp history={history} onAppLeave={onAppLeave} store={store}>
+    <StartApp
+      history={history}
+      onAppLeave={onAppLeave}
+      setHeaderActionMenu={setHeaderActionMenu}
+      store={store}
+    >
       {children}
     </StartApp>
   </KibanaContextProvider>

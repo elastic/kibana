@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiDescriptionList, EuiFlexGroup, EuiIcon, EuiPage } from '@elastic/eui';
+import { EuiBadge, EuiDescriptionList, EuiFlexGroup, EuiIcon } from '@elastic/eui';
 import styled, { createGlobalStyle } from 'styled-components';
 
 import {
@@ -27,25 +27,6 @@ SecuritySolutionAppWrapper.displayName = 'SecuritySolutionAppWrapper';
   and `EuiPopover`, `EuiToolTip` global styles
 */
 export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimary: string } } }>`
-  // fixes double scrollbar on views with EventsTable
-  #kibana-body {
-    overflow: hidden;
-  }
-
-  div.kbnAppWrapper {
-    background-color: rgba(0,0,0,0);
-  }
-
-  div.application {
-    background-color: rgba(0,0,0,0);
-
-    // Security App wrapper
-    > div {
-      display: flex;
-      flex: 1 1 auto;
-    }
-  }
-
   .euiPopover__panel.euiPopover__panel-isOpen {
     z-index: 9900 !important;
     min-width: 24px;
@@ -84,6 +65,7 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
 
   .${SCROLLING_DISABLED_CLASS_NAME} ${SecuritySolutionAppWrapper} {
     max-height: calc(100vh - ${GLOBAL_HEADER_HEIGHT}px);
+    overflow-y: scroll;
   }
 
   /*
@@ -121,96 +103,6 @@ export const DescriptionListStyled = styled(EuiDescriptionList)`
 `;
 
 DescriptionListStyled.displayName = 'DescriptionListStyled';
-
-export const PageContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
-  height: 100%;
-  padding: 1rem;
-  overflow: hidden;
-  margin: 0px;
-`;
-
-PageContainer.displayName = 'PageContainer';
-
-export const PageContent = styled.div`
-  flex: 1 1 auto;
-  height: 100%;
-  position: relative;
-  overflow-y: hidden;
-  background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
-  margin-top: 62px;
-`;
-
-PageContent.displayName = 'PageContent';
-
-export const FlexPage = styled(EuiPage)`
-  flex: 1 0 0;
-`;
-
-FlexPage.displayName = 'FlexPage';
-
-export const PageHeader = styled.div`
-  background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
-  display: flex;
-  user-select: none;
-  padding: 1rem 1rem 0rem 1rem;
-  width: 100vw;
-  position: fixed;
-`;
-
-PageHeader.displayName = 'PageHeader';
-
-export const FooterContainer = styled.div`
-  flex: 0;
-  bottom: 0;
-  color: #666;
-  left: 0;
-  position: fixed;
-  text-align: left;
-  user-select: none;
-  width: 100%;
-  background-color: #f5f7fa;
-  padding: 16px;
-  border-top: 1px solid #d3dae6;
-`;
-
-FooterContainer.displayName = 'FooterContainer';
-
-export const PaneScrollContainer = styled.div`
-  height: 100%;
-  overflow-y: scroll;
-  > div:last-child {
-    margin-bottom: 3rem;
-  }
-`;
-
-PaneScrollContainer.displayName = 'PaneScrollContainer';
-
-export const Pane = styled.div`
-  height: 100%;
-  overflow: hidden;
-  user-select: none;
-`;
-
-Pane.displayName = 'Pane';
-
-export const PaneHeader = styled.div`
-  display: flex;
-`;
-
-PaneHeader.displayName = 'PaneHeader';
-
-export const Pane1FlexContent = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  height: 100%;
-`;
-
-Pane1FlexContent.displayName = 'Pane1FlexContent';
 
 export const CountBadge = (styled(EuiBadge)`
   margin-left: 5px;

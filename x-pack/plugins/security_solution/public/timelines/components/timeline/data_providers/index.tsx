@@ -14,11 +14,8 @@ import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { DroppableWrapper } from '../../../../common/components/drag_and_drop/droppable_wrapper';
-import {
-  droppableTimelineProvidersPrefix,
-  IS_DRAGGING_CLASS_NAME,
-} from '../../../../common/components/drag_and_drop/helpers';
-
+import { IS_DRAGGING_CLASS_NAME } from '../../../../common/components/drag_and_drop/drag_classnames';
+import { droppableTimelineProvidersPrefix } from '../../../../common/components/drag_and_drop/helpers';
 import { Empty } from './empty';
 import { Providers } from './providers';
 import { useManageTimeline } from '../../manage_timeline';

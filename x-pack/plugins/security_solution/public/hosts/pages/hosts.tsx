@@ -18,10 +18,10 @@ import { FiltersGlobal } from '../../common/components/filters_global';
 import { HeaderPage } from '../../common/components/header_page';
 import { LastEventTime } from '../../common/components/last_event_time';
 import { hasMlUserPermissions } from '../../../common/machine_learning/has_ml_user_permissions';
-import { SiemNavigation } from '../../common/components/navigation';
+import { SecuritySolutionNavigationManager } from '../../common/components/navigation';
 import { HostsKpiComponent } from '../components/kpi_hosts';
 import { SiemSearchBar } from '../../common/components/search_bar';
-import { WrapperPage } from '../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { TimelineId } from '../../../common/types/timeline';
@@ -164,10 +164,9 @@ const HostsComponent = () => {
             <SiemSearchBar indexPattern={indexPattern} id="global" />
           </FiltersGlobal>
 
-          <WrapperPage noPadding={globalFullScreen}>
+          <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
             <Display show={!globalFullScreen}>
               <HeaderPage
-                border
                 subtitle={
                   <LastEventTime
                     docValueFields={docValueFields}
@@ -190,7 +189,9 @@ const HostsComponent = () => {
 
               <EuiSpacer />
 
-              <SiemNavigation navTabs={navTabsHosts(hasMlUserPermissions(capabilities))} />
+              <SecuritySolutionNavigationManager
+                navTabs={navTabsHosts(hasMlUserPermissions(capabilities))}
+              />
 
               <EuiSpacer />
             </Display>
@@ -207,14 +208,14 @@ const HostsComponent = () => {
               from={from}
               type={hostsModel.HostsType.page}
             />
-          </WrapperPage>
+          </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>
       ) : (
-        <WrapperPage>
+        <SecuritySolutionPageWrapper>
           <HeaderPage border title={i18n.PAGE_TITLE} />
 
           <OverviewEmpty />
-        </WrapperPage>
+        </SecuritySolutionPageWrapper>
       )}
 
       <SpyRoute pageName={SecurityPageName.hosts} />
