@@ -21,6 +21,7 @@ import {
   SecuritySolutionBottomBar,
   SecuritySolutionBottomBarProps,
 } from './bottom_bar';
+import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
 
 /* eslint-disable react/display-name */
 
@@ -48,10 +49,13 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
   }
 `;
 
-const StyledKQLEuiPanel = styled(EuiPanel)`
+const StyledKQLEuiPanel = styled(EuiPanel)<{ $isFullScreen?: boolean }>`
   position: sticky;
-  top: 96px; // The height of the fixed kibana global header (search row + breadcrumbsRow)
-  z-index: 100;
+  z-index: ${({ theme }) => theme.eui.euiZLevel2};
+  top: ${({ $isFullScreen }) =>
+    $isFullScreen
+      ? '0px'
+      : '96px'}; // The height of the fixed kibana global header (search row + breadcrumbsRow)
 `;
 
 interface SecuritySolutionPageWrapperProps {
@@ -61,6 +65,7 @@ interface SecuritySolutionPageWrapperProps {
 export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapperProps> = React.memo(
   ({ children, onAppLeave }) => {
     const solutionNav = useSecuritySolutionNavigation();
+    const { globalFullScreen } = useGlobalFullScreen();
     const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
     const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
       getTimelineShowStatus(state, TimelineId.active)
@@ -76,7 +81,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
         restrictWidth={false}
         template="default"
       >
-        <StyledKQLEuiPanel color="subdued" paddingSize="s">
+        <StyledKQLEuiPanel $isFullScreen={globalFullScreen} color="subdued" paddingSize="s">
           <GlobalKQLHeader />
         </StyledKQLEuiPanel>
         <EuiPanel className="securityPageWrapper" data-test-subj="pageContainer">
