@@ -43,6 +43,10 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../task_manager/server';
+import {
+  FleetSetupContract as FleetPluginSetup,
+  FleetStartContract as FleetPluginStart,
+} from '../../fleet/server';
 import { APMConfig } from '.';
 import { getApmIndices } from './lib/settings/apm_indices/get_apm_indices';
 import { createApmEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
