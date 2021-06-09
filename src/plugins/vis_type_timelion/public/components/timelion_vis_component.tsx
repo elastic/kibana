@@ -126,23 +126,14 @@ function TimelionVisComponent({
       direction: LayoutDirection.Vertical,
     };
 
-    switch (chartLegendGlobal?.position) {
-      case 'ne':
-        legendPositionConf.vAlign = Position.Top;
-        legendPositionConf.hAlign = Position.Right;
-        break;
-      case 'nw':
-        legendPositionConf.vAlign = Position.Top;
-        legendPositionConf.hAlign = Position.Left;
-        break;
-      case 'se':
-        legendPositionConf.vAlign = Position.Bottom;
-        legendPositionConf.hAlign = Position.Right;
-        break;
-      case 'sw':
-        legendPositionConf.vAlign = Position.Bottom;
-        legendPositionConf.hAlign = Position.Left;
-        break;
+    const validatePosition = (position: string) => /^(n|s)(e|w)$/s.test(position);
+
+    // @todo test that
+    if (validatePosition(chartLegendGlobal?.position ?? '')) {
+      const [vAlign, hAlign] = chartLegendGlobal!.position.split('');
+
+      legendPositionConf.vAlign = vAlign === 'n' ? Position.Top : Position.Bottom;
+      legendPositionConf.hAlign = hAlign === 'e' ? Position.Right : Position.Left;
     }
 
     return legendPositionConf;
