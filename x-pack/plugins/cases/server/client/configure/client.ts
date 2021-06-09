@@ -4,13 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import pMap from 'p-map';
 import Boom from '@hapi/boom';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { SavedObjectsFindResponse, SavedObjectsUtils } from '../../../../../../src/core/server';
-import { SUPPORTED_CONNECTORS } from '../../../common/constants';
+import {
+  SavedObject,
+  SavedObjectsFindResponse,
+  SavedObjectsUtils,
+} from '../../../../../../src/core/server';
+import { MAX_CONCURRENT_SEARCHES, SUPPORTED_CONNECTORS } from '../../../common/constants';
 import {
   CaseConfigureResponseRt,
   CasesConfigurePatch,
@@ -26,6 +32,7 @@ import {
   CaseConfigurationsResponseRt,
   CasesConfigurePatchRt,
   ConnectorMappings,
+  ESCasesConfigureAttributes,
 } from '../../../common/api';
 import { createCaseError } from '../../common/error';
 import {
@@ -175,8 +182,9 @@ async function get(
       }))
     );
 
-    const configurations = await Promise.all(
-      myCaseConfigure.saved_objects.map(async (configuration) => {
+    const configurations = await pMap(
+      myCaseConfigure.saved_objects,
+      async (configuration: SavedObject<ESCasesConfigureAttributes>) => {
         const { connector, ...caseConfigureWithoutConnector } = configuration?.attributes ?? {
           connector: null,
         };
@@ -204,7 +212,7 @@ async function get(
           error,
           id: configuration.id,
         };
-      })
+      }
     );
 
     return CaseConfigurationsResponseRt.encode(configurations);
@@ -400,11 +408,13 @@ async function create(
     );
 
     if (myCaseConfigure.saved_objects.length > 0) {
-      await Promise.all(
-        myCaseConfigure.saved_objects.map((cc) =>
-          caseConfigureService.delete({ unsecuredSavedObjectsClient, configurationId: cc.id })
-        )
-      );
+      const deleteConfigurationMapper = async (c: SavedObject<ESCasesConfigureAttributes>) =>
+        caseConfigureService.delete({ unsecuredSavedObjectsClient, configurationId: c.id });
+
+      // Ensuring we don't too many concurrent deletions running.
+      await pMap(myCaseConfigure.saved_objects, deleteConfigurationMapper, {
+        concurrency: MAX_CONCURRENT_SEARCHES,
+      });
     }
 
     const savedObjectID = SavedObjectsUtils.generateId();

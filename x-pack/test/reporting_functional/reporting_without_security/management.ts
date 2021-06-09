@@ -30,13 +30,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Polling for jobs', () => {
     beforeEach(async () => {
-      await esArchiver.load('empty_kibana');
-      await esArchiver.load('reporting/ecommerce_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce_kibana');
     });
 
     afterEach(async () => {
-      await esArchiver.unload('empty_kibana');
-      await esArchiver.unload('reporting/ecommerce_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce_kibana');
       await reportingApi.deleteAllReports();
     });
 

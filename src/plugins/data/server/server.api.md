@@ -6,10 +6,8 @@
 
 import { $Values } from '@kbn/utility-types';
 import { Adapters } from 'src/plugins/inspector/common';
-import { Aggregate } from '@elastic/elasticsearch/api/types';
 import { Assign } from '@kbn/utility-types';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
-import { Bucket } from '@elastic/elasticsearch/api/types';
 import { ConfigDeprecationProvider } from '@kbn/config';
 import { CoreSetup } from 'src/core/server';
 import { CoreSetup as CoreSetup_2 } from 'kibana/server';
@@ -713,7 +711,7 @@ export interface IFieldType {
     // (undocumented)
     format?: any;
     // (undocumented)
-    lang?: string;
+    lang?: estypes.ScriptLanguage;
     // (undocumented)
     name: string;
     // (undocumented)
@@ -1423,22 +1421,22 @@ export const shimAbortSignal: <T>(promise: TransportRequestPromise<T>, signal?: 
 export function shimHitsTotal(response: estypes.SearchResponse<unknown>, { legacyHitsTotal }?: ISearchOptions): {
     hits: {
         total: any;
-        hits: estypes.Hit<unknown>[];
+        hits: estypes.SearchHit<unknown>[];
         max_score?: number | undefined;
     };
     took: number;
     timed_out: boolean;
     _shards: estypes.ShardStatistics;
-    aggregations?: Record<string, estypes.Aggregate> | undefined;
+    aggregations?: Record<string, estypes.AggregationsAggregate> | undefined;
     _clusters?: estypes.ClusterStatistics | undefined;
     documents?: unknown[] | undefined;
     fields?: Record<string, any> | undefined;
     max_score?: number | undefined;
     num_reduce_phases?: number | undefined;
-    profile?: estypes.Profile | undefined;
+    profile?: estypes.SearchProfile | undefined;
     pit_id?: string | undefined;
     _scroll_id?: string | undefined;
-    suggest?: Record<string, estypes.Suggest<unknown>[]> | undefined;
+    suggest?: Record<string, estypes.SearchSuggest<unknown>[]> | undefined;
     terminated_early?: boolean | undefined;
 };
 

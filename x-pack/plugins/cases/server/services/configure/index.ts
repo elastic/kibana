@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
 import { Logger, SavedObjectsClientContract } from 'kibana/server';
 
 import { SavedObjectFindOptionsKueryNode } from '../../common';
@@ -63,7 +62,7 @@ export class CaseConfigureService {
     try {
       this.log.debug(`Attempting to find all case configuration`);
       return await unsecuredSavedObjectsClient.find<ESCasesConfigureAttributes>({
-        ...cloneDeep(options),
+        ...options,
         // Get the latest configuration
         sortField: 'created_at',
         sortOrder: 'desc',

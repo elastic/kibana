@@ -78,11 +78,15 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('creating fields', () => {
       before(async () => {
-        await esArchiver.load('index_patterns/basic_index');
+        await esArchiver.load(
+          'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('index_patterns/basic_index');
+        await esArchiver.unload(
+          'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+        );
       });
 
       it('can specify optional fields attribute when creating an index pattern', async () => {

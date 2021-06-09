@@ -77,6 +77,7 @@ export const find = async (
 
     ensureSavedObjectsAreAuthorized([...cases.casesMap.values()]);
 
+    // casesStatuses are bounded by us. No need to limit concurrent calls.
     const [openCases, inProgressCases, closedCases] = await Promise.all([
       ...caseStatuses.map((status) => {
         const statusQuery = constructQueryOptions({ ...queryArgs, status, authorizationFilter });
