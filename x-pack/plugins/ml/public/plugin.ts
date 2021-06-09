@@ -51,7 +51,7 @@ import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../triggers_actions_ui/public';
-import { FileDataVisualizerPluginStart } from '../../file_data_visualizer/public';
+import { DataVisualizerPluginStart } from '../../data_visualizer/public';
 import { PluginSetupContract as AlertingSetup } from '../../alerting/public';
 import { registerManagementSection } from './application/management';
 
@@ -65,7 +65,7 @@ export interface MlStartDependencies {
   maps?: MapsStartApi;
   lens?: LensPublicStart;
   triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
-  fileDataVisualizer: FileDataVisualizerPluginStart;
+  dataVisualizer: DataVisualizerPluginStart;
 }
 
 export interface MlSetupDependencies {
@@ -123,7 +123,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             lens: pluginsStart.lens,
             kibanaVersion,
             triggersActionsUi: pluginsStart.triggersActionsUi,
-            fileDataVisualizer: pluginsStart.fileDataVisualizer,
+            dataVisualizer: pluginsStart.dataVisualizer,
           },
           params
         );
