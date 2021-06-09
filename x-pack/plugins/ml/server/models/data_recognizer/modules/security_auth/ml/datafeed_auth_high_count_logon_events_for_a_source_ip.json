@@ -1,5 +1,5 @@
 {
-  "job_id": "auth_high_count_auth_events_for_a_source_ip",
+  "job_id": "auth_high_count_logon_events_for_a_source_ip",
   "indices": [
     "auditbeat-*",
     "logs-*",

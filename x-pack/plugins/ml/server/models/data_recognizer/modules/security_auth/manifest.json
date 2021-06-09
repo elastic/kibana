@@ -18,8 +18,8 @@
   },
   "jobs": [
     {
-      "id": "auth_high_count_auth_events_for_a_source_ip",
-      "file": "auth_high_count_auth_events_for_a_source_ip.json"
+      "id": "auth_high_count_logon_events_for_a_source_ip",
+      "file": "auth_high_count_logon_events_for_a_source_ip.json"
     },
     {
       "id": "auth_high_count_logon_fails",
@@ -44,9 +44,9 @@
   ],
   "datafeeds": [
     {
-      "id": "datafeed-auth_high_count_auth_events_for_a_source_ip",
-      "file": "datafeed_auth_high_count_auth_events_for_a_source_ip.json",
-      "job_id": "auth_high_count_auth_events_for_a_source_ip"
+      "id": "datafeed-auth_high_count_logon_events_for_a_source_ip",
+      "file": "datafeed_auth_high_count_logon_events_for_a_source_ip.json",
+      "job_id": "auth_high_count_logon_events_for_a_source_ip"
     },
     {
       "id": "datafeed-auth_high_count_logon_fails",
