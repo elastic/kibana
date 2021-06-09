@@ -21455,7 +21455,6 @@
     "xpack.securitySolution.trustedapps.list.actions.delete": "削除",
     "xpack.securitySolution.trustedapps.list.actions.delete.description": "このエントリを削除",
     "xpack.securitySolution.trustedapps.list.addButton": "信頼できるアプリケーションを追加",
-    "xpack.securitySolution.trustedapps.list.backButton": "戻る",
     "xpack.securitySolution.trustedapps.list.columns.actions": "アクション",
     "xpack.securitySolution.trustedapps.list.pageTitle": "信頼できるアプリケーション",
     "xpack.securitySolution.trustedapps.listEmptyState.message": "現在、エンドポイントには信頼できるアプリケーションがありません。",
