@@ -16,8 +16,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Kpi Hosts', () => {
     describe('With filebeat', () => {
-      before(() => esArchiver.load('filebeat/kpi_hosts'));
-      after(() => esArchiver.unload('filebeat/kpi_hosts'));
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/filebeat/kpi_hosts'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/filebeat/kpi_hosts'));
 
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';
@@ -130,8 +130,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('With auditbeat', () => {
-      before(() => esArchiver.load('auditbeat/kpi_hosts'));
-      after(() => esArchiver.unload('auditbeat/kpi_hosts'));
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/auditbeat/kpi_hosts'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/kpi_hosts'));
 
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';

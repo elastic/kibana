@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { CREDENTIALS_TITLE } from '../credentials';
+
 export const SEARCH_UI_TITLE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.searchUI.title',
   { defaultMessage: 'Search UI' }
@@ -48,3 +50,9 @@ export const GENERATE_PREVIEW_BUTTON_LABEL = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.searchUI.generatePreviewButtonLabel',
   { defaultMessage: 'Generate search experience' }
 );
+export const NO_SEARCH_KEY_ERROR = (engineName: string) =>
+  i18n.translate('xpack.enterpriseSearch.appSearch.engine.searchUI.noSearchKeyErrorMessage', {
+    defaultMessage:
+      "It looks like you don't have any Public Search Keys with access to the '{engineName}' engine. Please visit the {credentialsTitle} page to set one up.",
+    values: { engineName, credentialsTitle: CREDENTIALS_TITLE },
+  });

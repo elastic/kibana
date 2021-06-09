@@ -29,7 +29,7 @@ export interface EsQueryAlertActionContext extends AlertInstanceContext {
   // threshold conditions
   conditions: string;
   // query matches
-  hits: estypes.Hit[];
+  hits: estypes.SearchHit[];
 }
 
 export function addMessages(

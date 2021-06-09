@@ -2017,4 +2017,149 @@ describe('migration visualization', () => {
       expect(params.use_kibana_indexes).toBeFalsy();
     });
   });
+
+  describe('7.14.0 tsvb - add empty value rule to savedObjects with less and greater then zero rules', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.14.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    const rule1 = { value: 0, operator: 'lte', color: 'rgb(145, 112, 184)' };
+    const rule2 = { value: 0, operator: 'gte', color: 'rgb(96, 146, 192)' };
+    const rule3 = { value: 0, operator: 'gt', color: 'rgb(84, 179, 153)' };
+    const rule4 = { value: 0, operator: 'lt', color: 'rgb(84, 179, 153)' };
+
+    const createTestDocWithType = (params: any) => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: `{
+          "type":"metrics",
+          "params": ${JSON.stringify(params)}
+        }`,
+      },
+    });
+
+    const checkEmptyRuleIsAddedToArray = (
+      rulesArrayProperty: string,
+      prevParams: any,
+      migratedParams: any,
+      rule: any
+    ) => {
+      expect(migratedParams).toHaveProperty(rulesArrayProperty);
+      expect(Array.isArray(migratedParams[rulesArrayProperty])).toBeTruthy();
+      expect(migratedParams[rulesArrayProperty].length).toBe(
+        prevParams[rulesArrayProperty].length + 1
+      );
+
+      const lastElementIndex = migratedParams[rulesArrayProperty].length - 1;
+      expect(migratedParams[rulesArrayProperty][lastElementIndex]).toHaveProperty('operator');
+      expect(migratedParams[rulesArrayProperty][lastElementIndex].operator).toEqual('empty');
+      expect(migratedParams[rulesArrayProperty][lastElementIndex].color).toEqual(rule.color);
+    };
+
+    const checkRuleIsNotAddedToArray = (
+      rulesArrayProperty: string,
+      prevParams: any,
+      migratedParams: any,
+      rule: any
+    ) => {
+      expect(migratedParams).toHaveProperty(rulesArrayProperty);
+      expect(Array.isArray(migratedParams[rulesArrayProperty])).toBeTruthy();
+      expect(migratedParams[rulesArrayProperty].length).toBe(prevParams[rulesArrayProperty].length);
+      // expects, that array contains one element...
+      expect(migratedParams[rulesArrayProperty][0].operator).toBe(rule.operator);
+    };
+
+    it('should add empty rule if operator = lte and value = 0', () => {
+      const params = {
+        bar_color_rules: [rule1],
+        background_color_rules: [rule1],
+        gauge_color_rules: [rule1],
+      };
+      const migratedTestDoc = migrate(createTestDocWithType(params));
+      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState);
+
+      checkEmptyRuleIsAddedToArray('bar_color_rules', params, migratedParams, rule1);
+      checkEmptyRuleIsAddedToArray('background_color_rules', params, migratedParams, rule1);
+      checkEmptyRuleIsAddedToArray('gauge_color_rules', params, migratedParams, rule1);
+    });
+
+    it('should add empty rule if operator = gte and value = 0', () => {
+      const params = {
+        bar_color_rules: [rule2],
+        background_color_rules: [rule2],
+        gauge_color_rules: [rule2],
+      };
+      const migratedTestDoc = migrate(createTestDocWithType(params));
+      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState);
+
+      checkEmptyRuleIsAddedToArray('bar_color_rules', params, migratedParams, rule2);
+      checkEmptyRuleIsAddedToArray('background_color_rules', params, migratedParams, rule2);
+      checkEmptyRuleIsAddedToArray('gauge_color_rules', params, migratedParams, rule2);
+    });
+
+    it('should not add empty rule if operator = gt or lt and value = any', () => {
+      const params = {
+        bar_color_rules: [rule3],
+        background_color_rules: [rule3],
+        gauge_color_rules: [rule4],
+      };
+      const migratedTestDoc = migrate(createTestDocWithType(params));
+      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState);
+
+      checkRuleIsNotAddedToArray('bar_color_rules', params, migratedParams, rule3);
+      checkRuleIsNotAddedToArray('background_color_rules', params, migratedParams, rule3);
+      checkRuleIsNotAddedToArray('gauge_color_rules', params, migratedParams, rule4);
+    });
+  });
+
+  describe('7.14.0 update pie visualization defaults', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.14.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+    const getTestDoc = (hasPalette = false) => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: JSON.stringify({
+          type: 'pie',
+          title: '[Flights] Delay Type',
+          params: {
+            type: 'pie',
+            ...(hasPalette && {
+              palette: {
+                type: 'palette',
+                name: 'default',
+              },
+            }),
+          },
+        }),
+      },
+    });
+
+    it('should decorate existing docs with the kibana legacy palette if the palette is not defined - pie', () => {
+      const migratedTestDoc = migrate(getTestDoc());
+      const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
+
+      expect(palette.name).toEqual('kibana_palette');
+    });
+
+    it('should not overwrite the palette with the legacy one if the palette already exists in the saved object', () => {
+      const migratedTestDoc = migrate(getTestDoc(true));
+      const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
+
+      expect(palette.name).toEqual('default');
+    });
+
+    it('should default the distinct colors per slice setting to true', () => {
+      const migratedTestDoc = migrate(getTestDoc());
+      const { distinctColors } = JSON.parse(migratedTestDoc.attributes.visState).params;
+
+      expect(distinctColors).toBe(true);
+    });
+  });
 });
