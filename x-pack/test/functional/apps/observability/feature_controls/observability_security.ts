@@ -23,13 +23,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   describe('wowzeroni', function () {
     this.tags(['skipFirefox']);
-    // before(async () => {
-    //   await esArchiver.load('uptimw/default');
-    // });
-    //
-    // after(async () => {
-    //   await esArchiver.unload('uptimw/default');
-    // });
+    before(async () => {
+      await esArchiver.load('cases/default');
+    });
+
+    after(async () => {
+      await esArchiver.unload('cases/default');
+    });
 
     describe('global observability all privileges', () => {
       before(async () => {
@@ -64,7 +64,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           security.user.delete('cases_observability_all_user'),
         ]);
       });
-      // const delay = (ms) => new Promise((res) => setTimeout(res, ms));
+      const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
       it('shows observability/cases navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text).slice(0, 2);
@@ -76,33 +76,26 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.observability.expectCreateCaseButtonEnabled();
       });
 
-      // it(`doesn't show read-only badge`, async () => {
-      //   await globalNav.badgeMissingOrFail();
-      // });
-      //
-      // it(`allows a workpad to be created`, async () => {
-      //   await PageObjects.common.navigateToActualUrl('observability');
-      //
-      //   await testSubjects.click('createNewCaseBtn');
-      //
-      //   await PageObjects.observability.expectCreateCase();
-      // });
-      //
-      // it(`allows a workpad to be edited`, async () => {
-      //   await PageObjects.common.navigateToActualUrl(
-      //     'observability',
-      //     'workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31',
-      //     {
-      //       ensureCurrentUrl: true,
-      //       shouldLoginIfPrompted: false,
-      //     }
-      //   );
-      //
-      //   await PageObjects.observability.expectAddElementButton();
-      // });
+      it.skip(`doesn't show read-only badge`, async () => {
+        await globalNav.badgeMissingOrFail();
+      });
+
+      it(`allows a case to be created`, async () => {
+        await PageObjects.common.navigateToActualUrl('observabilityCases');
+
+        await testSubjects.click('createNewCaseBtn');
+
+        await PageObjects.observability.expectCreateCase();
+      });
+
+      it.only(`allows a workpad to be edited`, async () => {
+        await PageObjects.common.navigateToActualUrl('observabilityCases');
+        await delay(3000000);
+        await PageObjects.observability.expectAddElementButton();
+      });
     });
 
-    describe.skip('global observability read-only privileges', () => {
+    describe('global observability read-only privileges', () => {
       before(async () => {
         await security.role.create('cases_observability_read_role', {
           elasticsearch: {
@@ -144,7 +137,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`landing page shows disabled "Create new workpad" button`, async () => {
-        await PageObjects.common.navigateToActualUrl('observability', '', {
+        await PageObjects.common.navigateToActualUrl('observabilityCases', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
@@ -156,7 +149,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`does not allow a workpad to be created`, async () => {
-        await PageObjects.common.navigateToActualUrl('observability', 'workpad/create', {
+        await PageObjects.common.navigateToActualUrl('observabilityCases', 'workpad/create', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
@@ -179,7 +172,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe.skip('no observability privileges', () => {
+    describe('no observability privileges', () => {
       before(async () => {
         await security.role.create('no_observability_privileges_role', {
           elasticsearch: {
@@ -216,7 +209,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`returns a 403`, async () => {
-        await PageObjects.common.navigateToActualUrl('observability', '', {
+        await PageObjects.common.navigateToActualUrl('observabilityCases', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
@@ -224,7 +217,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`create new workpad returns a 403`, async () => {
-        await PageObjects.common.navigateToActualUrl('observability', 'workpad/create', {
+        await PageObjects.common.navigateToActualUrl('observabilityCases', 'workpad/create', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
