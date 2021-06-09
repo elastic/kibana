@@ -10,13 +10,13 @@ import { MANAGEMENT_APP_ID } from './contants';
 import { ManagementAppLocator, MANAGEMENT_APP_LOCATOR } from './locator';
 
 test('locator has the right ID', () => {
-  const locator = new ManagementAppLocator({});
+  const locator = new ManagementAppLocator();
 
   expect(locator.id).toBe(MANAGEMENT_APP_LOCATOR);
 });
 
 test('returns management app ID', async () => {
-  const locator = new ManagementAppLocator({});
+  const locator = new ManagementAppLocator();
   const location = await locator.getLocation({
     sectionId: 'a',
     appId: 'b',
@@ -28,7 +28,7 @@ test('returns management app ID', async () => {
 });
 
 test('returns Kibana location for section ID and app ID pair', async () => {
-  const locator = new ManagementAppLocator({});
+  const locator = new ManagementAppLocator();
   const location = await locator.getLocation({
     sectionId: 'ingest',
     appId: 'index',
@@ -40,32 +40,14 @@ test('returns Kibana location for section ID and app ID pair', async () => {
   });
 });
 
-describe('when section ID is not provided', () => {
-  test('resolves app path using .getAppBasePath()', async () => {
-    const locator = new ManagementAppLocator({
-      getAppBasePath: jest.fn(async (appId) => '/x/' + appId),
-    });
-    const location = await locator.getLocation({
-      appId: 'y',
-    });
-
-    expect(location).toMatchObject({
-      app: MANAGEMENT_APP_ID,
-      route: '/x/y',
-      state: {},
-    });
+test('when app ID is not provided, returns path to just the section ID', async () => {
+  const locator = new ManagementAppLocator();
+  const location = await locator.getLocation({
+    sectionId: 'data',
   });
 
-  test('returns empty path if .getAppBasePath() is not provided', async () => {
-    const locator = new ManagementAppLocator({});
-    const location = await locator.getLocation({
-      appId: 'y',
-    });
-
-    expect(location).toMatchObject({
-      app: MANAGEMENT_APP_ID,
-      route: '',
-      state: {},
-    });
+  expect(location).toMatchObject({
+    route: '/data',
+    state: {},
   });
 });

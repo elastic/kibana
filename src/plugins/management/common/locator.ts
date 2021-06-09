@@ -13,27 +13,15 @@ import { MANAGEMENT_APP_ID } from './contants';
 export const MANAGEMENT_APP_LOCATOR = 'MANAGEMENT_APP_LOCATOR';
 
 export interface ManagementAppLocatorParams extends SerializableState {
-  sectionId?: string;
+  sectionId: string;
   appId?: string;
 }
 
-export interface ManagementAppDependencies {
-  getAppBasePath?: (appId: string) => Promise<string>;
-}
-
 export class ManagementAppLocator implements LocatorDefinition<ManagementAppLocatorParams> {
-  constructor(protected readonly deps: ManagementAppDependencies) {}
-
   public readonly id = MANAGEMENT_APP_LOCATOR;
 
   public readonly getLocation = async (params: ManagementAppLocatorParams) => {
-    let route = '';
-
-    if (params.sectionId) {
-      route = `/${params.sectionId}${params.appId ? '/' + params.appId : ''}`;
-    } else if (params.appId && this.deps.getAppBasePath) {
-      route = await this.deps.getAppBasePath(params.appId);
-    }
+    const route = `/${params.sectionId}${params.appId ? '/' + params.appId : ''}`;
 
     return {
       app: MANAGEMENT_APP_ID,
