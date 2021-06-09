@@ -132,7 +132,7 @@ const getColumns = (
       'data-test-subj': 'nodesCount',
       sortable: true,
       render: (total, cluster) => (
-        <IsClusterSupported {...cluster}>{numeral(total).format('0,0')}</IsClusterSupported>
+        <IsClusterSupported {...cluster}>{numeral(total || 0).format('0,0')}</IsClusterSupported>
       ),
     },
     {
