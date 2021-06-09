@@ -121,7 +121,7 @@ export class APIKeysGridPage extends Component<Props, State> {
       apiKeys,
     } = this.state;
 
-    if (apiKeys) {
+    if (!apiKeys) {
       if (isLoadingApp) {
         return (
           <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
