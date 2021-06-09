@@ -100,7 +100,7 @@ export const movingAverageOperation: OperationDefinition<
       references: referenceIds,
       timeShift: columnParams?.shift || previousColumn?.timeShift,
       filter: getFilter(previousColumn, columnParams),
-      timeShift: previousColumn?.timeShift,
+      timeScale: previousColumn?.timeScale,
       params: {
         window,
         ...getFormatFromPreviousColumn(previousColumn),

@@ -394,6 +394,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 <ReferenceEditor
                   key={index}
                   layer={state.layers[layerId]}
+                  layerId={layerId}
+                  activeData={props.activeData}
                   columnId={referenceId}
                   updateLayer={(
                     setter:
