@@ -35,8 +35,16 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Matrix DNS Histogram', () => {
     describe('Large data set', () => {
-      before(() => esArchiver.load('security_solution/matrix_dns_histogram/large_dns_query'));
-      after(() => esArchiver.unload('security_solution/matrix_dns_histogram/large_dns_query'));
+      before(() =>
+        esArchiver.load(
+          'x-pack/test/functional/es_archives/security_solution/matrix_dns_histogram/large_dns_query'
+        )
+      );
+      after(() =>
+        esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/matrix_dns_histogram/large_dns_query'
+        )
+      );
 
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';
