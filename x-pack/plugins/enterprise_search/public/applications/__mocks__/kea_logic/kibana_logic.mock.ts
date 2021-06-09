@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { mockHistory } from './react_router_history.mock';
+import { chartPluginMock } from '../../../../../../../src/plugins/charts/public/mocks';
 
-import { chartPluginMock } from '../../../../../../src/plugins/charts/public/mocks';
+import { mockHistory } from '../react_router/state.mock';
 
 export const mockKibanaValues = {
   config: { host: 'http://localhost:3002' },
@@ -24,6 +24,6 @@ export const mockKibanaValues = {
   renderHeaderActions: jest.fn(),
 };
 
-jest.mock('../shared/kibana', () => ({
+jest.mock('../../shared/kibana', () => ({
   KibanaLogic: { values: mockKibanaValues },
 }));
