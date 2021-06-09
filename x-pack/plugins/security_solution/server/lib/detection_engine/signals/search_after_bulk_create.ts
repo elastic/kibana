@@ -6,7 +6,7 @@
  */
 
 import { identity } from 'lodash';
-import { SortResults } from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { singleSearchAfter } from './single_search_after';
 import { filterEventsAgainstList } from './filters/filter_events_against_list';
 import { sendAlertTelemetryEvents } from './send_telemetry_events';
@@ -42,7 +42,7 @@ export const searchAfterAndBulkCreate = async ({
   let toReturn = createSearchAfterReturnType();
 
   // sortId tells us where to start our next consecutive search_after query
-  let sortIds: SortResults | undefined;
+  let sortIds: estypes.SearchSortResults | undefined;
   let hasSortId = true; // default to true so we execute the search on initial run
 
   // signalsCreatedCount keeps track of how many signals we have created,

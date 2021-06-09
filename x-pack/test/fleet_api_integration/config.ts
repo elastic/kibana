@@ -50,7 +50,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         waitForLogLine: 'package manifests loaded',
       },
     }),
-    esArchiver: xPackAPITestsConfig.get('esArchiver'),
     services: {
       ...xPackAPITestsConfig.get('services'),
     },

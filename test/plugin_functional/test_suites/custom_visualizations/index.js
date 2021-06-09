@@ -13,8 +13,8 @@ export default function ({ getService, loadTestFile }) {
 
   describe('custom visualizations', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/visualize');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/visualize');
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'Australia/North',
         defaultIndex: 'logstash-*',

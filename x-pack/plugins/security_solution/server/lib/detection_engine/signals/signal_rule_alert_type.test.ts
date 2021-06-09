@@ -157,7 +157,7 @@ describe('signal_rule_alert_type', () => {
     (mlExecutor as jest.Mock).mockClear();
     (mlExecutor as jest.Mock).mockResolvedValue(executorReturnValue);
     (parseScheduleDates as jest.Mock).mockReturnValue(moment(100));
-    const value: Partial<ApiResponse<estypes.FieldCapabilitiesResponse>> = {
+    const value: Partial<ApiResponse<estypes.FieldCapsResponse>> = {
       statusCode: 200,
       body: {
         indices: ['index1', 'index2', 'index3', 'index4'],
@@ -174,7 +174,7 @@ describe('signal_rule_alert_type', () => {
       },
     };
     alertServices.scopedClusterClient.asCurrentUser.fieldCaps.mockResolvedValue(
-      value as ApiResponse<estypes.FieldCapabilitiesResponse>
+      value as ApiResponse<estypes.FieldCapsResponse>
     );
     const ruleAlert = getAlertMock(getQueryRuleParams());
     alertServices.savedObjectsClient.get.mockResolvedValue({
