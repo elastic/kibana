@@ -91,10 +91,10 @@ const breadcrumbGetters: {
       }),
     },
   ],
-  add_integration_to_policy: ({ pkgTitle, pkgkey }) => [
+  add_integration_to_policy: ({ pkgTitle, pkgkey, integration }) => [
     INTEGRATIONS_BASE_BREADCRUMB,
     {
-      href: pagePathGetters.integration_details_overview({ pkgkey })[1],
+      href: pagePathGetters.integration_details_overview({ pkgkey, integration })[1],
       text: pkgTitle,
       useIntegrationsBasePath: true,
     },
