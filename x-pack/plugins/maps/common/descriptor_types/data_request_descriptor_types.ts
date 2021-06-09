@@ -29,6 +29,7 @@ export type MapFilters = {
   timeFilters: TimeRange;
   timeslice?: Timeslice;
   zoom: number;
+  isReadOnly: boolean;
 };
 
 type ESSearchSourceSyncMeta = {

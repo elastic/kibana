@@ -291,10 +291,6 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     return this._documentStyle;
   }
 
-  async getEditModeEnabled(): Promise<boolean> {
-    return this._isClustered ? false : super.getEditModeEnabled();
-  }
-
   async syncData(syncContext: DataRequestContext) {
     const dataRequestId = ACTIVE_COUNT_DATA_ID;
     const requestToken = Symbol(`layer-active-count:${this.getId()}`);

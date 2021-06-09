@@ -56,6 +56,7 @@ import { ITMSSource } from '../classes/sources/tms_source';
 import { IVectorSource } from '../classes/sources/vector_source';
 import { ESGeoGridSource } from '../classes/sources/es_geo_grid_source';
 import { ILayer } from '../classes/layers/layer';
+import { getIsReadOnly } from './ui_selectors';
 
 export function createLayerInstance(
   layerDescriptor: LayerDescriptor,
@@ -229,6 +230,7 @@ export const getDataFilters = createSelector(
   getFilters,
   getSearchSessionId,
   getSearchSessionMapBuffer,
+  getIsReadOnly,
   (
     mapExtent,
     mapBuffer,
@@ -239,7 +241,8 @@ export const getDataFilters = createSelector(
     query,
     filters,
     searchSessionId,
-    searchSessionMapBuffer
+    searchSessionMapBuffer,
+    isReadOnly
   ) => {
     return {
       extent: mapExtent,
@@ -251,6 +254,7 @@ export const getDataFilters = createSelector(
       query,
       filters,
       searchSessionId,
+      isReadOnly,
     };
   }
 );

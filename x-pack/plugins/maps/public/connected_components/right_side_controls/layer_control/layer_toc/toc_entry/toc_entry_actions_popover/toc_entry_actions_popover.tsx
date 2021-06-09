@@ -63,7 +63,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
       return;
     }
     const isLayerEditable = await this.props.layer.isEditable();
-    const editModeEnabled = await this.props.layer.getEditModeEnabled();
+    const editModeEnabled = await this._getEditModeEnabled();
     if (
       !this._isMounted ||
       (isLayerEditable === this.state.isLayerEditable &&
@@ -72,6 +72,20 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
       return;
     }
     this.setState({ isLayerEditable, editModeEnabled });
+  }
+
+  async _getEditModeEnabled(): Promise<boolean> {
+    const vectorLayer = this.props.layer as VectorLayer;
+    if (
+      !(await vectorLayer.isEditable()) ||
+      (await vectorLayer.isFilteredByGlobalTime()) ||
+      vectorLayer.isPreviewLayer() ||
+      !vectorLayer.isVisible() ||
+      vectorLayer.hasJoins()
+    ) {
+      return false;
+    }
+    return true;
   }
 
   _togglePopover = () => {

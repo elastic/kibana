@@ -97,7 +97,6 @@ export interface IVectorLayer extends ILayer {
   getPropertiesForTooltip(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   hasJoins(): boolean;
   canShowTooltip(): boolean;
-  getEditModeEnabled(): Promise<boolean>;
   isEditable(): boolean;
   getLeftJoinFields(): Promise<IField[]>;
   addFeature(geometry: Geometry | Position[]): Promise<void>;
@@ -179,19 +178,6 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return this.getJoins().filter((join) => {
       return join.hasCompleteConfig();
     });
-  }
-
-  async getEditModeEnabled(): Promise<boolean> {
-    if (
-      !(await this.isEditable()) ||
-      (await this.isFilteredByGlobalTime()) ||
-      this.isPreviewLayer() ||
-      !this.isVisible() ||
-      this.hasJoins()
-    ) {
-      return false;
-    }
-    return true;
   }
 
   isEditable(): boolean {
@@ -713,6 +699,9 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   }
 
   async _syncIsEditable({ syncContext }: { syncContext: DataRequestContext }) {
+    if (syncContext.dataFilters.isReadOnly) {
+      return;
+    }
     const { startLoading, stopLoading, onLoadError } = syncContext;
     const dataRequestId = IS_EDITABLE_REQUEST_ID;
     const requestToken = Symbol(`layer-${this.getId()}-${dataRequestId}`);

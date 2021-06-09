@@ -6,7 +6,6 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
-import { CatIndicesRecord } from '@elastic/elasticsearch/api/types';
 import { MatchingIndexesResp } from '../../common';
 
 export async function getMatchingIndexes(
@@ -19,7 +18,7 @@ export async function getMatchingIndexes(
       format: 'JSON',
     });
     const matchingIndexes = indexResults
-      .map((indexRecord: CatIndicesRecord) => indexRecord.index)
+      .map((indexRecord) => indexRecord.index)
       .filter((indexName) => !!indexName);
     return {
       success: true,
@@ -28,6 +27,7 @@ export async function getMatchingIndexes(
   } catch (error) {
     return {
       success: false,
+      error,
     };
   }
 }

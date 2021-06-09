@@ -21,7 +21,6 @@ import {
   getIsReadOnly,
   getOpenTOCDetails,
   getFlyoutDisplay,
-  getDrawMode,
 } from '../../../../../selectors/ui_selectors';
 import {
   fitToLayerExtent,
@@ -31,7 +30,6 @@ import {
   showTOCDetails,
   toggleLayerVisible,
 } from '../../../../../actions';
-import { DRAW_MODE } from '../../../../../../common';
 
 function mapStateToProps(state: MapStoreState, ownProps: OwnProps): ReduxStateProps {
   const flyoutDisplay = getFlyoutDisplay(state);
@@ -43,11 +41,7 @@ function mapStateToProps(state: MapStoreState, ownProps: OwnProps): ReduxStatePr
     isLegendDetailsOpen: getOpenTOCDetails(state).includes(ownProps.layer.getId()),
     isEditButtonDisabled:
       flyoutDisplay !== FLYOUT_STATE.NONE && flyoutDisplay !== FLYOUT_STATE.LAYER_PANEL,
-    editModeActiveForLayer:
-      (getDrawMode(state) === DRAW_MODE.DRAW_SHAPES ||
-        getDrawMode(state) === DRAW_MODE.DRAW_POINTS) &&
-      !!getEditState(state) &&
-      getEditState(state)!.layerId === ownProps.layer.getId(),
+    editModeActiveForLayer: getEditState(state)?.layerId === ownProps.layer.getId(),
   };
 }
 

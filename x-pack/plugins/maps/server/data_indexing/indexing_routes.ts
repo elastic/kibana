@@ -118,17 +118,7 @@ export function initIndexingRoutes({
         request.params.indexPattern,
         context.core.elasticsearch.client
       );
-      if (result.success) {
-        return response.ok({ body: result });
-      } else {
-        if (result.error) {
-          logger.error(result.error);
-        }
-        return response.custom({
-          body: result?.error?.message,
-          statusCode: 500,
-        });
-      }
+      return response.ok({ body: result });
     }
   );
 }
