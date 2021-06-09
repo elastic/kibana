@@ -60,7 +60,7 @@ export function setTimeShift(
   };
 }
 
-const timeShiftOptions = [
+export const timeShiftOptions = [
   {
     label: i18n.translate('xpack.lens.indexPattern.timeShift.hour', {
       defaultMessage: '1 hour (1h)',
@@ -284,7 +284,7 @@ export function TimeShift({
   );
 }
 
-function getDateHistogramInterval(
+export function getDateHistogramInterval(
   layer: IndexPatternLayer,
   indexPattern: IndexPattern,
   activeData: Record<string, Datatable> | undefined,

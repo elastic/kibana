@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
@@ -47,7 +47,10 @@ import './formula.scss';
 import { FormulaIndexPatternColumn } from '../formula';
 import { regenerateLayerFromAst } from '../parse';
 import { filterByVisibleOperation } from '../util';
-import { getColumnTimeShiftWarnings } from '../../../../dimension_panel/time_shift';
+import {
+  getColumnTimeShiftWarnings,
+  getDateHistogramInterval,
+} from '../../../../dimension_panel/time_shift';
 
 export const MemoizedFormulaEditor = React.memo(FormulaEditor);
 
@@ -80,6 +83,14 @@ export function FormulaEditor({
   const visibleOperationsMap = useMemo(() => filterByVisibleOperation(operationDefinitionMap), [
     operationDefinitionMap,
   ]);
+
+  const dateHistogramInterval = getDateHistogramInterval(layer, indexPattern, activeData, layerId);
+  const baseInterval =
+    'interval' in dateHistogramInterval
+      ? dateHistogramInterval.interval?.asMilliseconds()
+      : undefined;
+  const baseIntervalRef = useRef(baseInterval);
+  baseIntervalRef.current = baseInterval;
 
   // The Monaco editor needs to have the overflowDiv in the first render. Using an effect
   // requires a second render to work, so we are using an if statement to guarantee it happens
@@ -335,6 +346,7 @@ export function FormulaEditor({
             indexPattern,
             operationDefinitionMap: visibleOperationsMap,
             data,
+            dateHistogramInterval: baseIntervalRef.current,
           });
         }
       } else {
@@ -345,6 +357,7 @@ export function FormulaEditor({
           indexPattern,
           operationDefinitionMap: visibleOperationsMap,
           data,
+          dateHistogramInterval: baseIntervalRef.current,
         });
       }
 
@@ -354,7 +367,7 @@ export function FormulaEditor({
         ),
       };
     },
-    [indexPattern, visibleOperationsMap, data]
+    [indexPattern, visibleOperationsMap, data, baseIntervalRef]
   );
 
   const provideSignatureHelp = useCallback(
