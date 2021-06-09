@@ -60,7 +60,7 @@ export class KbnClientImportExport {
 
   async load(path: string, options?: { space?: string }) {
     const src = this.resolvePath(path);
-    this.log.debug('resolved import for', name, 'to', src);
+    this.log.debug('resolved import for', path, 'to', src);
 
     const objects = await parseArchive(src);
     this.log.info('importing', objects.length, 'saved objects', { space: options?.space });
