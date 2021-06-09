@@ -39,9 +39,8 @@ import {
   WEB_APPLICATION_LABEL,
 } from '../constants/labels';
 
-export function getKPITrendsLensConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
+export function getKPITrendsLensConfig({ indexPattern }: ConfigProps): DataSeries {
   return {
-    id: seriesId,
     defaultSeriesType: 'bar_stacked',
     reportType: 'kpi-over-time',
     seriesTypes: ['bar', 'bar_stacked'],

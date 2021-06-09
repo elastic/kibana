@@ -21,12 +21,12 @@ import { getDefaultConfigs } from '../configurations/default_configs';
 
 export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; label: string }>> = {
   synthetics: [
-    { id: 'dist', label: 'Performance distribution' },
     { id: 'kpi', label: 'KPI over time' },
+    { id: 'dist', label: 'Performance distribution' },
   ],
   ux: [
-    { id: 'dist', label: 'Performance distribution' },
     { id: 'kpi', label: 'KPI over time' },
+    { id: 'dist', label: 'Performance distribution' },
     { id: 'cwv', label: 'Core Web Vitals' },
   ],
   apm: [],
