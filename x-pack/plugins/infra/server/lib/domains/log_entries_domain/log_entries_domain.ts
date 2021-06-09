@@ -277,7 +277,7 @@ export class InfraLogEntriesDomain {
     indexName: string,
     startTime: number,
     endTime: number,
-    runtimeMappings: estypes.RuntimeFields
+    runtimeMappings: estypes.MappingRuntimeFields
   ) {
     let datasetBuckets: LogEntryDatasetBucket[] = [];
     let afterLatestBatchKey: CompositeDatasetKey | undefined;

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import '../../__mocks__/react_router_history.mock';
+import { mockLocation } from '../../__mocks__/react_router';
 
 import React from 'react';
-import { useLocation } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
@@ -63,7 +62,7 @@ describe('SideNavLink', () => {
   });
 
   it('sets an active class if the current path matches the nav link', () => {
-    (useLocation as jest.Mock).mockImplementationOnce(() => ({ pathname: '/test/' }));
+    mockLocation.pathname = '/test/';
 
     const wrapper = shallow(<SideNavLink to="/test">Link</SideNavLink>);
 
@@ -71,7 +70,7 @@ describe('SideNavLink', () => {
   });
 
   it('sets an active class if the current path is / and the link isRoot', () => {
-    (useLocation as jest.Mock).mockImplementationOnce(() => ({ pathname: '/' }));
+    mockLocation.pathname = '/';
 
     const wrapper = shallow(
       <SideNavLink to="/test" isRoot>
@@ -111,7 +110,7 @@ describe('SideNavLink', () => {
 
   describe('shouldShowActiveForSubroutes', () => {
     it("won't set an active class when route is a subroute of 'to'", () => {
-      (useLocation as jest.Mock).mockImplementationOnce(() => ({ pathname: '/documents/1234' }));
+      mockLocation.pathname = '/documents/1234';
 
       const wrapper = shallow(
         <SideNavLink to="/documents" isRoot>
@@ -123,7 +122,7 @@ describe('SideNavLink', () => {
     });
 
     it('sets an active class if the current path is a subRoute of "to", and shouldShowActiveForSubroutes is true', () => {
-      (useLocation as jest.Mock).mockImplementationOnce(() => ({ pathname: '/documents/1234' }));
+      mockLocation.pathname = '/documents/1234';
 
       const wrapper = shallow(
         <SideNavLink to="/documents" isRoot shouldShowActiveForSubroutes>

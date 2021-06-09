@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../../__mocks__';
-import '../../../../__mocks__/react_router_history.mock';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
+import { mockUseParams } from '../../../../__mocks__/react_router';
 import '../../../../__mocks__/shallow_useeffect.mock';
 import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
@@ -38,7 +37,7 @@ describe('ReindexJob', () => {
   };
 
   beforeEach(() => {
-    (useParams as jest.Mock).mockReturnValueOnce({ reindexJobId: 'abc1234567890' });
+    mockUseParams.mockReturnValueOnce({ reindexJobId: 'abc1234567890' });
     setMockValues(values);
     setMockActions(actions);
   });
