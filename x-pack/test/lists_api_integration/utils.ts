@@ -161,7 +161,6 @@ export const deleteAllExceptions = async (es: KibanaClient): Promise<void> => {
   return countDownES(async () => {
     return es.deleteByQuery({
       index: '.kibana',
-      // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
       q: 'type:exception-list or type:exception-list-agnostic',
       wait_for_completion: true,
       refresh: true,

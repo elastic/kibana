@@ -20,11 +20,13 @@ import type { FeaturesPluginStart } from '../../features/public';
 import type { LicensingPluginSetup } from '../../licensing/public';
 import type { SpacesPluginStart } from '../../spaces/public';
 import { SecurityLicenseService } from '../common/licensing';
+import type { SecurityLicense } from '../common/licensing';
 import { accountManagementApp } from './account_management';
 import type { AuthenticationServiceSetup, AuthenticationServiceStart } from './authentication';
 import { AuthenticationService } from './authentication';
 import type { ConfigType } from './config';
 import { ManagementService } from './management';
+import type { SecurityNavControlServiceStart } from './nav_control';
 import { SecurityNavControlService } from './nav_control';
 import { SecurityCheckupService } from './security_checkup';
 import { SessionExpired, SessionTimeout, UnauthorizedResponseHttpInterceptor } from './session';
@@ -68,7 +70,7 @@ export class SecurityPlugin
   public setup(
     core: CoreSetup<PluginStartDependencies>,
     { home, licensing, management, securityOss }: PluginSetupDependencies
-  ) {
+  ): SecurityPluginSetup {
     const { http, notifications } = core;
     const { anonymousPaths } = http;
 
@@ -132,13 +134,14 @@ export class SecurityPlugin
 
     return {
       authc: this.authc,
-      sessionTimeout: this.sessionTimeout,
       license,
-      __legacyCompat: { logoutUrl, tenant },
     };
   }
 
-  public start(core: CoreStart, { management, securityOss }: PluginStartDependencies) {
+  public start(
+    core: CoreStart,
+    { management, securityOss }: PluginStartDependencies
+  ): SecurityPluginStart {
     this.sessionTimeout.start();
     this.securityCheckupService.start({ securityOssStart: securityOss, docLinks: core.docLinks });
 
@@ -161,5 +164,24 @@ export class SecurityPlugin
   }
 }
 
-export type SecurityPluginSetup = ReturnType<SecurityPlugin['setup']>;
-export type SecurityPluginStart = ReturnType<SecurityPlugin['start']>;
+export interface SecurityPluginSetup {
+  /**
+   * Exposes authentication information about the currently logged in user.
+   */
+  authc: AuthenticationServiceSetup;
+  /**
+   * Exposes information about the available security features under the current license.
+   */
+  license: SecurityLicense;
+}
+
+export interface SecurityPluginStart {
+  /**
+   * Exposes the ability to add custom links to the dropdown menu in the top right, where the user's Avatar is.
+   */
+  navControlService: SecurityNavControlServiceStart;
+  /**
+   * Exposes authentication information about the currently logged in user.
+   */
+  authc: AuthenticationServiceStart;
+}
