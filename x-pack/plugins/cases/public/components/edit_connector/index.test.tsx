@@ -156,4 +156,93 @@ describe('EditConnector ', () => {
       expect(wrapper.find(`[data-test-subj="connector-edit"]`).exists()).toBeFalsy()
     );
   });
+
+  it('displays the permissions error message when one is provided', async () => {
+    const props = { ...defaultProps, permissionsError: 'error message' };
+    const wrapper = mount(
+      <TestProviders>
+        <EditConnector {...props} />
+      </TestProviders>
+    );
+
+    await waitFor(() =>
+      expect(
+        wrapper.find(`[data-test-subj="edit-connector-permissions-error-msg"]`).exists()
+      ).toBeTruthy()
+    );
+
+    await waitFor(() =>
+      expect(
+        wrapper.find(`[data-test-subj="edit-connector-no-connectors-msg"]`).exists()
+      ).toBeFalsy()
+    );
+  });
+
+  it('displays the default none connector message', async () => {
+    const props = { ...defaultProps };
+    const wrapper = mount(
+      <TestProviders>
+        <EditConnector {...props} />
+      </TestProviders>
+    );
+
+    await waitFor(() =>
+      expect(
+        wrapper.find(`[data-test-subj="edit-connector-permissions-error-msg"]`).exists()
+      ).toBeFalsy()
+    );
+
+    await waitFor(() =>
+      expect(
+        wrapper.find(`[data-test-subj="edit-connector-no-connectors-msg"]`).exists()
+      ).toBeTruthy()
+    );
+  });
+
+  it('does not display an error or default message when a connector was passed in', async () => {
+    const props = {
+      ...defaultProps,
+      selectedConnector: 'jira-1',
+      caseFields: {
+        issueType: 'hello',
+        priority: 'high',
+        parent: 'blah',
+      },
+    };
+
+    useFormMock.mockImplementation(() => ({ form: getFormMock({ connectorId: 'jira-1' }) }));
+    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
+      actionTypeTitle: '.jira',
+      iconClass: 'logoSecurity',
+    });
+
+    const wrapper = mount(
+      <TestProviders>
+        <EditConnector {...props} />
+      </TestProviders>
+    );
+
+    wrapper.find('[data-test-subj="connector-edit"] button').simulate('click');
+
+    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+    wrapper.update();
+    wrapper.find(`[data-test-subj="edit-connectors-cancel"]`).last().simulate('click');
+
+    await waitFor(() =>
+      expect(
+        wrapper.find(`[data-test-subj="edit-connector-permissions-error-msg"]`).exists()
+      ).toBeFalsy()
+    );
+
+    await waitFor(() =>
+      expect(
+        wrapper.find(`[data-test-subj="edit-connector-no-connectors-msg"]`).exists()
+      ).toBeFalsy()
+    );
+
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find(`[data-test-subj="connector-fields"]`).exists()).toBeTruthy();
+    });
+  });
 });

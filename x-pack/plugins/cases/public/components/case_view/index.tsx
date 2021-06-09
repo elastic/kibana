@@ -231,7 +231,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
       [updateCase, fetchCaseUserActions, caseId, subCaseId]
     );
 
-    const { loading: isLoadingConnectors, connectors } = useConnectors();
+    const { loading: isLoadingConnectors, connectors, permissionsError } = useConnectors();
 
     const [connectorName, isValidConnector] = useMemo(() => {
       const connector = connectors.find((c) => c.id === caseData.connector.id);
@@ -462,6 +462,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                   onSubmit={onSubmitConnector}
                   selectedConnector={caseData.connector.id}
                   userActions={caseUserActions}
+                  permissionsError={permissionsError}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

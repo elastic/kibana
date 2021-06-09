@@ -7,26 +7,31 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-import * as i18n from '../translations';
 import { fetchConnectors } from './api';
 import { ActionConnector } from './types';
 import { useToasts } from '../../common/lib/kibana';
+import * as i18n from './translations';
+
+interface ConnectorsState {
+  loading: boolean;
+  connectors: ActionConnector[];
+  permissionsError?: string;
+}
 
 export interface UseConnectorsResponse {
   loading: boolean;
   connectors: ActionConnector[];
   refetchConnectors: () => void;
+  permissionsError?: string;
 }
 
 export const useConnectors = (): UseConnectorsResponse => {
   const toasts = useToasts();
-  const [state, setState] = useState<{
-    loading: boolean;
-    connectors: ActionConnector[];
-  }>({
+  const [state, setState] = useState<ConnectorsState>({
     loading: true,
     connectors: [],
   });
+
   const isCancelledRef = useRef(false);
   const abortCtrlRef = useRef(new AbortController());
 
@@ -49,15 +54,23 @@ export const useConnectors = (): UseConnectorsResponse => {
       }
     } catch (error) {
       if (!isCancelledRef.current) {
+        let permissionsError: string | undefined;
         if (error.name !== 'AbortError') {
-          toasts.addError(
-            error.body && error.body.message ? new Error(error.body.message) : error,
-            { title: i18n.ERROR_TITLE }
-          );
+          // if the error was related to permissions then attempt to let the caller know if we have a callback
+          // if it's not permissions related then toast it, or if the callback is undefined toast it as well
+          if (error.body?.statusCode === 403 || error.body?.statusCode === 401) {
+            permissionsError = i18n.READ_PERMISSIONS_ERROR_MSG;
+          } else {
+            toasts.addError(
+              error.body && error.body.message ? new Error(error.body.message) : error,
+              { title: i18n.ERROR_TITLE }
+            );
+          }
         }
         setState({
           loading: false,
           connectors: [],
+          permissionsError,
         });
       }
     }
@@ -77,5 +90,6 @@ export const useConnectors = (): UseConnectorsResponse => {
     loading: state.loading,
     connectors: state.connectors,
     refetchConnectors,
+    permissionsError: state.permissionsError,
   };
 };

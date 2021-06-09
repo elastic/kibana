@@ -72,7 +72,7 @@ export class CasePlugin {
     this.clientFactory = new CasesClientFactory(this.log);
   }
 
-  public async setup(core: CoreSetup, plugins: PluginsSetup) {
+  public setup(core: CoreSetup, plugins: PluginsSetup) {
     const config = createConfig(this.initializerContext);
 
     if (!config.enabled) {

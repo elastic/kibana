@@ -45,6 +45,7 @@ export interface EditConnectorProps {
   userActions: CaseUserActions[];
   userCanCrud?: boolean;
   hideConnectorServiceNowSir?: boolean;
+  permissionsError?: string;
 }
 
 const MyFlexGroup = styled(EuiFlexGroup)`
@@ -111,6 +112,7 @@ export const EditConnector = React.memo(
     onSubmit,
     selectedConnector,
     userActions,
+    permissionsError,
   }: EditConnectorProps) => {
     const { form } = useForm({
       defaultValue: { connectorId: selectedConnector },
@@ -248,13 +250,20 @@ export const EditConnector = React.memo(
             </Form>
           </DisappearingFlexItem>
           <EuiFlexItem data-test-subj="edit-connector-fields-form-flex-item">
-            {(currentConnector == null || currentConnector?.id === 'none') && // Connector is none or not defined.
-              !(currentConnector === null && selectedConnector !== 'none') && // Connector has not been deleted.
-              !editConnector && (
-                <EuiText size="s">
+            {!editConnector && permissionsError ? (
+              <EuiText data-test-subj="edit-connector-permissions-error-msg" size="s">
+                <span>{permissionsError}</span>
+              </EuiText>
+            ) : (
+              !editConnector &&
+              (currentConnector == null ||
+                currentConnector?.id === 'none' ||
+                selectedConnector === 'none') && ( // Connector is none or not defined, or the selected connector is none
+                <EuiText data-test-subj="edit-connector-no-connectors-msg" size="s">
                   <span>{i18n.NO_CONNECTOR}</span>
                 </EuiText>
-              )}
+              )
+            )}
             <ConnectorFieldsForm
               connector={currentConnector}
               fields={fields}
