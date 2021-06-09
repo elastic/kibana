@@ -8,7 +8,6 @@
 import { act } from 'react-dom/test-utils';
 import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
 import { setupEnvironment } from '../../helpers/setup_environment';
-import { getDefaultHotPhasePolicy } from '../constants';
 
 describe('<EditPolicy /> request flyout', () => {
   let testBed: EditPolicyTestBed;
@@ -24,7 +23,7 @@ describe('<EditPolicy /> request flyout', () => {
   });
 
   beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+    httpRequestsMockHelpers.setDefaultResponses();
 
     await act(async () => {
       testBed = await setup();

@@ -11,6 +11,7 @@ import { useValues, useActions } from 'kea';
 
 import { EuiForm, EuiFormRow, EuiSelect, EuiComboBox, EuiButton } from '@elastic/eui';
 
+import { EngineLogic } from '../../engine';
 import {
   TITLE_FIELD_LABEL,
   TITLE_FIELD_HELP_TEXT,
@@ -27,7 +28,9 @@ import { ActiveField } from '../types';
 import { generatePreviewUrl } from '../utils';
 
 export const SearchUIForm: React.FC = () => {
+  const { searchKey } = useValues(EngineLogic);
   const {
+    dataLoading,
     validFields,
     validSortFields,
     validFacetFields,
@@ -70,9 +73,11 @@ export const SearchUIForm: React.FC = () => {
   const selectedFacetOptions = formatMultiOptions(facetFields);
 
   return (
-    <EuiForm>
+    <EuiForm component="form" action={previewHref} target="_blank" method="POST">
+      <input type="hidden" id="searchKey" name="searchKey" value={searchKey} />
       <EuiFormRow label={TITLE_FIELD_LABEL} helpText={TITLE_FIELD_HELP_TEXT} fullWidth>
         <EuiSelect
+          disabled={dataLoading}
           options={optionFields}
           value={selectedTitleOption && selectedTitleOption.value}
           onChange={(e) => onTitleFieldChange(e.target.value)}
@@ -85,6 +90,7 @@ export const SearchUIForm: React.FC = () => {
       </EuiFormRow>
       <EuiFormRow label={FILTER_FIELD_LABEL} helpText={FILTER_FIELD_HELP_TEXT} fullWidth>
         <EuiComboBox
+          isDisabled={dataLoading}
           options={facetOptionFields}
           selectedOptions={selectedFacetOptions}
           onChange={(newValues) => onFacetFieldsChange(newValues.map((field) => field.value!))}
@@ -96,6 +102,7 @@ export const SearchUIForm: React.FC = () => {
       </EuiFormRow>
       <EuiFormRow label={SORT_FIELD_LABEL} helpText={SORT_FIELD_HELP_TEXT} fullWidth>
         <EuiComboBox
+          isDisabled={dataLoading}
           options={sortOptionFields}
           selectedOptions={selectedSortOptions}
           onChange={(newValues) => onSortFieldsChange(newValues.map((field) => field.value!))}
@@ -108,6 +115,7 @@ export const SearchUIForm: React.FC = () => {
 
       <EuiFormRow label={URL_FIELD_LABEL} helpText={URL_FIELD_HELP_TEXT} fullWidth>
         <EuiSelect
+          disabled={dataLoading}
           options={optionFields}
           value={selectedURLOption && selectedURLOption.value}
           onChange={(e) => onUrlFieldChange(e.target.value)}
@@ -119,8 +127,8 @@ export const SearchUIForm: React.FC = () => {
         />
       </EuiFormRow>
       <EuiButton
-        href={previewHref}
-        target="_blank"
+        disabled={dataLoading}
+        type="submit"
         fill
         iconType="popout"
         iconSide="right"

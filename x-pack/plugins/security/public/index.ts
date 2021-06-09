@@ -13,7 +13,9 @@ import { SecurityPlugin, SecurityPluginSetup, SecurityPluginStart } from './plug
 export { SecurityPluginSetup, SecurityPluginStart };
 export { AuthenticatedUser } from '../common/model';
 export { SecurityLicense, SecurityLicenseFeatures } from '../common/licensing';
-export { UserMenuLink } from '../public/nav_control';
+export { UserMenuLink, SecurityNavControlServiceStart } from '../public/nav_control';
+
+export { AuthenticationServiceStart, AuthenticationServiceSetup } from './authentication';
 
 export const plugin: PluginInitializer<
   SecurityPluginSetup,
