@@ -63,11 +63,6 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
     ${({ theme }) => `background-color: ${theme.eui.euiColorPrimary} !important`};
   }
 
-  /* .${SCROLLING_DISABLED_CLASS_NAME} ${SecuritySolutionAppWrapper} {
-    max-height: calc(100vh - ${GLOBAL_HEADER_HEIGHT}px);
-    overflow-y: scroll;
-  } */
-
   /*
      EuiScreenReaderOnly has a default 1px height and width. These extra pixels
      were adding additional height to every table row in the alerts table on the
