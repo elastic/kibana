@@ -2223,9 +2223,58 @@ describe('Task Runner', () => {
       references: [],
     });
 
+    const logger = taskRunnerFactoryInitializerParams.logger;
     return taskRunner.run().catch((ex) => {
       expect(ex).toMatchInlineSnapshot(`[Error: Saved object [alert/1] not found]`);
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Executing Alert "1" has resulted in Error: Saved object [alert/1] not found`
+      );
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).nthCalledWith(
+        1,
+        `Unable to execute rule "1" because Saved object [alert/1] not found - this rule will not be rescheduled. To restart rule execution, try disabling and re-enabling this rule.`
+      );
       expect(isUnrecoverableError(ex)).toBeTruthy();
+    });
+  });
+
+  test('correctly logs warning when Alert Task Runner throws due to failing to fetch the alert in a space', async () => {
+    alertsClient.get.mockImplementation(() => {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError('alert', '1');
+    });
+
+    const taskRunner = new TaskRunner(
+      alertType,
+      {
+        ...mockedTaskInstance,
+        params: {
+          ...mockedTaskInstance.params,
+          spaceId: 'test space',
+        },
+      },
+      taskRunnerFactoryInitializerParams
+    );
+
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+
+    const logger = taskRunnerFactoryInitializerParams.logger;
+    return taskRunner.run().catch((ex) => {
+      expect(ex).toMatchInlineSnapshot(`[Error: Saved object [alert/1] not found]`);
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Executing Alert "1" has resulted in Error: Saved object [alert/1] not found`
+      );
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).nthCalledWith(
+        1,
+        `Unable to execute rule "1" in the "test space" space because Saved object [alert/1] not found - this rule will not be rescheduled. To restart rule execution, try disabling and re-enabling this rule.`
+      );
     });
   });
 
