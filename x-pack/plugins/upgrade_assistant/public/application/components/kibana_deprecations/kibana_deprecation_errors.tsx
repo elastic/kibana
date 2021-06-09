@@ -15,22 +15,22 @@ interface Props {
 
 const i18nTexts = {
   pluginError: {
-    title: i18n.translate('xpack.upgradeAssistant.kibanaDeprecationErrors.pluginErrorMessage', {
+    title: i18n.translate('xpack.upgradeAssistant.kibanaDeprecationErrors.pluginErrorTitle', {
       defaultMessage: 'Not all Kibana deprecations were retrieved successfully',
     }),
     description: i18n.translate(
-      'xpack.upgradeAssistant.kibanaDeprecationErrors.pluginErrorMessage',
+      'xpack.upgradeAssistant.kibanaDeprecationErrors.pluginErrorDescription',
       {
         defaultMessage: 'Check the Kibana server logs for errors.',
       }
     ),
   },
   loadingError: {
-    title: i18n.translate('xpack.upgradeAssistant.kibanaDeprecationErrors.loadingErrorMessage', {
+    title: i18n.translate('xpack.upgradeAssistant.kibanaDeprecationErrors.loadingErrorTitle', {
       defaultMessage: 'Could not retrieve Kibana deprecations',
     }),
     description: i18n.translate(
-      'xpack.upgradeAssistant.kibanaDeprecationErrors.loadingErrorMessage',
+      'xpack.upgradeAssistant.kibanaDeprecationErrors.loadingErrorDescription',
       {
         defaultMessage: 'Check the Kibana server logs for errors.',
       }
