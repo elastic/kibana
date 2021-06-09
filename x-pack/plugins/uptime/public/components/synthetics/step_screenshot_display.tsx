@@ -5,17 +5,27 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiImage, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiImage,
+  EuiLoadingSpinner,
+  EuiText,
+} from '@elastic/eui';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useContext, useEffect, useRef, useState, FC } from 'react';
 import useIntersection from 'react-use/lib/useIntersection';
-import { isScreenshotRef as isAScreenshotRef } from '../../../common/runtime_types';
+import {
+  isScreenshotRef as isAScreenshotRef,
+  ScreenshotRefImageData,
+} from '../../../common/runtime_types';
 import { UptimeSettingsContext, UptimeThemeContext } from '../../contexts';
 import { useFetcher } from '../../../../observability/public';
 import { getJourneyScreenshot } from '../../state/api/journey';
-import { composeScreenshotRef } from '../../lib/helper/compose_screenshot_images';
+import { useCompositeImage } from '../../hooks';
 
 interface StepScreenshotDisplayProps {
   screenshotExists?: boolean;
@@ -41,9 +51,50 @@ const StepImage = styled(EuiImage)`
   }
 `;
 
+const BaseStepImage = ({ stepIndex, stepName, img }: any) => {
+  return (
+    <StepImage
+      allowFullScreen={true}
+      alt={
+        stepName
+          ? i18n.translate('xpack.uptime.synthetics.screenshotDisplay.altText', {
+              defaultMessage: 'Screenshot for step with name "{stepName}"',
+              values: {
+                stepName,
+              },
+            })
+          : i18n.translate('xpack.uptime.synthetics.screenshotDisplay.altTextWithoutName', {
+              defaultMessage: 'Screenshot',
+            })
+      }
+      caption={`Step:${stepIndex} ${stepName}`}
+      hasShadow
+      url={img}
+    />
+  );
+};
+
+type ComposedStepImageProps = Pick<StepScreenshotDisplayProps, 'stepIndex' | 'stepName'> & {
+  url: string | undefined;
+  imgRef: ScreenshotRefImageData;
+  setUrl: React.Dispatch<string | undefined>;
+};
+
+const ComposedStepImage = ({
+  stepIndex,
+  stepName,
+  url,
+  imgRef,
+  setUrl: setImg,
+}: ComposedStepImageProps) => {
+  useCompositeImage(imgRef, setImg, url);
+  if (!url) return <EuiLoadingSpinner />;
+  return <BaseStepImage stepIndex={stepIndex} stepName={stepName} img={url} />;
+};
+
 export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
   checkGroup,
-  screenshotExists,
+  screenshotExists: isScreenshotBlob,
   isScreenshotRef,
   stepIndex,
   stepName,
@@ -72,7 +123,9 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
 
   const imgSrc = basePath + `/api/uptime/journey/screenshot/${checkGroup}/${stepIndex}`;
 
-  const [img, setImg] = useState<string | undefined>(undefined);
+  const [url, setUrl] = useState<string | undefined>(undefined);
+
+  // when the image is a composite, we need to fetch the data since we cannot specify a blob URL
   const { data } = useFetcher(() => {
     if (isScreenshotRef) {
       return getJourneyScreenshot(
@@ -80,43 +133,33 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
       );
     }
   }, [basePath, checkGroup, stepIndex, isScreenshotRef]);
+
+  // when older version screenshot, set `url` to full-size screenshot path
   useEffect(() => {
-    if (isAScreenshotRef(data)) {
-      const canvas = document.createElement('canvas');
-      composeScreenshotRef(data, canvas).then(() => {
-        const imgdata = canvas.toDataURL('image/jpg', 1.0);
-        setImg(imgdata);
-      });
-    } else {
-      setImg(imgSrc);
+    if (!isScreenshotRef) {
+      setUrl(imgSrc);
     }
-  }, [data, imgSrc]);
+  }, [imgSrc, isScreenshotRef]);
+
+  const shouldRenderImage = hasIntersected || !lazyLoad;
   return (
     <div
       ref={containerRef}
       style={{ backgroundColor: pageBackground, height: IMAGE_HEIGHT, width: IMAGE_WIDTH }}
     >
-      {(hasIntersected || !lazyLoad) && (screenshotExists || isScreenshotRef) && (
-        <StepImage
-          allowFullScreen={true}
-          alt={
-            stepName
-              ? i18n.translate('xpack.uptime.synthetics.screenshotDisplay.altText', {
-                  defaultMessage: 'Screenshot for step with name "{stepName}"',
-                  values: {
-                    stepName,
-                  },
-                })
-              : i18n.translate('xpack.uptime.synthetics.screenshotDisplay.altTextWithoutName', {
-                  defaultMessage: 'Screenshot',
-                })
-          }
-          caption={`Step:${stepIndex} ${stepName}`}
-          hasShadow
-          url={img}
+      {shouldRenderImage && isScreenshotBlob && (
+        <BaseStepImage stepName={stepName} stepIndex={stepIndex} url={url} />
+      )}
+      {shouldRenderImage && isScreenshotRef && isAScreenshotRef(data) && (
+        <ComposedStepImage
+          imgRef={data}
+          stepName={stepName}
+          stepIndex={stepIndex}
+          setUrl={setUrl}
+          url={url}
         />
       )}
-      {!screenshotExists && !isScreenshotRef && (
+      {!isScreenshotBlob && !isScreenshotRef && (
         <EuiFlexGroup
           alignItems="center"
           direction="column"
