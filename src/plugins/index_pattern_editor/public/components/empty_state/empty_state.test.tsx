@@ -12,9 +12,6 @@ import { shallow } from 'enzyme';
 import sinon from 'sinon';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test/jest';
-import { docLinksServiceMock } from '../../../../../core/public/mocks';
-
-const docLinks = docLinksServiceMock.createStartContract();
 
 jest.mock('react-router-dom', () => ({
   useHistory: () => ({
@@ -25,14 +22,7 @@ jest.mock('react-router-dom', () => ({
 describe('EmptyState', () => {
   it('should render normally', () => {
     const component = shallow(
-      <EmptyState
-        docLinks={docLinks}
-        onRefresh={() => {}}
-        navigateToApp={async () => {}}
-        canSave={true}
-        createAnyway={() => {}}
-        closeFlyout={() => {}}
-      />
+      <EmptyState onRefresh={() => {}} createAnyway={() => {}} closeFlyout={() => {}} />
     );
 
     expect(component).toMatchSnapshot();
@@ -44,14 +34,7 @@ describe('EmptyState', () => {
         const onRefreshHandler = sinon.stub();
 
         const component = mountWithIntl(
-          <EmptyState
-            docLinks={docLinks}
-            onRefresh={onRefreshHandler}
-            navigateToApp={async () => {}}
-            canSave={true}
-            createAnyway={() => {}}
-            closeFlyout={() => {}}
-          />
+          <EmptyState onRefresh={onRefreshHandler} createAnyway={() => {}} closeFlyout={() => {}} />
         );
 
         findTestSubject(component, 'refreshIndicesButton').simulate('click');
