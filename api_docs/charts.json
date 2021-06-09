@@ -11,11 +11,11 @@
         "label": "ColorPicker",
         "description": [],
         "signature": [
-          "({ onChange, color: selectedColor, label, useLegacyColors, colorIsOverwritten, onKeyDown, }: ColorPickerProps) => JSX.Element"
+          "({ onChange, color: selectedColor, label, useLegacyColors, colorIsOverwritten, onKeyDown, maxDepth, layerIndex, }: ColorPickerProps) => JSX.Element"
         ],
         "source": {
           "path": "src/plugins/charts/public/static/components/color_picker.tsx",
-          "lineNumber": 111
+          "lineNumber": 119
         },
         "deprecated": false,
         "children": [
@@ -24,14 +24,14 @@
             "id": "def-public.ColorPicker.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  onChange,\n  color: selectedColor,\n  label,\n  useLegacyColors = true,\n  colorIsOverwritten = true,\n  onKeyDown,\n}",
+            "label": "{\n  onChange,\n  color: selectedColor,\n  label,\n  useLegacyColors = true,\n  colorIsOverwritten = true,\n  onKeyDown,\n  maxDepth,\n  layerIndex,\n}",
             "description": [],
             "signature": [
               "ColorPickerProps"
             ],
             "source": {
               "path": "src/plugins/charts/public/static/components/color_picker.tsx",
-              "lineNumber": 111
+              "lineNumber": 119
             },
             "deprecated": false,
             "isRequired": true
@@ -632,6 +632,77 @@
       },
       {
         "parentPluginId": "charts",
+        "id": "def-public.lightenColor",
+        "type": "Function",
+        "tags": [],
+        "label": "lightenColor",
+        "description": [],
+        "signature": [
+          "(baseColor: string, step: number, totalSteps: number) => string"
+        ],
+        "source": {
+          "path": "src/plugins/charts/public/services/palettes/lighten_color.ts",
+          "lineNumber": 14
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.lightenColor.$1",
+            "type": "string",
+            "tags": [],
+            "label": "baseColor",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/lighten_color.ts",
+              "lineNumber": 14
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.lightenColor.$2",
+            "type": "number",
+            "tags": [],
+            "label": "step",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/lighten_color.ts",
+              "lineNumber": 14
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.lightenColor.$3",
+            "type": "number",
+            "tags": [],
+            "label": "totalSteps",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/lighten_color.ts",
+              "lineNumber": 14
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "charts",
         "id": "def-public.renderEndzoneTooltip",
         "type": "Function",
         "tags": [],
@@ -1132,6 +1203,86 @@
               "lineNumber": 16
             },
             "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.CustomPaletteArguments.stop",
+            "type": "Array",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 17
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.CustomPaletteArguments.range",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "range",
+            "description": [],
+            "signature": [
+              "\"number\" | \"percent\" | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 18
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.CustomPaletteArguments.rangeMin",
+            "type": "number",
+            "tags": [],
+            "label": "rangeMin",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 19
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.CustomPaletteArguments.rangeMax",
+            "type": "number",
+            "tags": [],
+            "label": "rangeMax",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 20
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.CustomPaletteArguments.continuity",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "continuity",
+            "description": [],
+            "signature": [
+              "\"above\" | \"below\" | \"all\" | \"none\" | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 21
+            },
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1145,7 +1296,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/charts/common/palette.ts",
-          "lineNumber": 19
+          "lineNumber": 24
         },
         "deprecated": false,
         "children": [
@@ -1161,7 +1312,7 @@
             ],
             "source": {
               "path": "src/plugins/charts/common/palette.ts",
-              "lineNumber": 20
+              "lineNumber": 25
             },
             "deprecated": false
           },
@@ -1174,7 +1325,81 @@
             "description": [],
             "source": {
               "path": "src/plugins/charts/common/palette.ts",
-              "lineNumber": 21
+              "lineNumber": 26
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.CustomPaletteState.stops",
+            "type": "Array",
+            "tags": [],
+            "label": "stops",
+            "description": [],
+            "signature": [
+              "number[]"
+            ],
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 27
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.CustomPaletteState.range",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "range",
+            "description": [],
+            "signature": [
+              "\"number\" | \"percent\""
+            ],
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 28
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.CustomPaletteState.rangeMin",
+            "type": "number",
+            "tags": [],
+            "label": "rangeMin",
+            "description": [],
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 29
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.CustomPaletteState.rangeMax",
+            "type": "number",
+            "tags": [],
+            "label": "rangeMax",
+            "description": [],
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 30
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.CustomPaletteState.continuity",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "continuity",
+            "description": [],
+            "signature": [
+              "\"above\" | \"below\" | \"all\" | \"none\" | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 31
             },
             "deprecated": false
           }
@@ -1408,28 +1633,10 @@
           },
           {
             "parentPluginId": "charts",
-            "id": "def-public.PaletteDefinition.renderEditor",
+            "id": "def-public.PaletteDefinition.getCategoricalColor",
             "type": "Function",
             "tags": [],
-            "label": "renderEditor",
-            "description": [
-              "\nRenders the UI for editing the internal state of the palette.\nNot each palette has to feature an internal state, so this is an optional property."
-            ],
-            "signature": [
-              "((domElement: Element, props: { state?: T | undefined; setState: (updater: (oldState: T) => T) => void; }) => void) | undefined"
-            ],
-            "source": {
-              "path": "src/plugins/charts/public/services/palettes/types.ts",
-              "lineNumber": 88
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "charts",
-            "id": "def-public.PaletteDefinition.getColor",
-            "type": "Function",
-            "tags": [],
-            "label": "getColor",
+            "label": "getCategoricalColor",
             "description": [
               "\nColor a series according to the internal rules of the palette."
             ],
@@ -1454,7 +1661,7 @@
             ],
             "source": {
               "path": "src/plugins/charts/public/services/palettes/types.ts",
-              "lineNumber": 97
+              "lineNumber": 87
             },
             "deprecated": false,
             "returnComment": [],
@@ -1480,7 +1687,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/charts/public/services/palettes/types.ts",
-                  "lineNumber": 98
+                  "lineNumber": 88
                 },
                 "deprecated": false
               },
@@ -1503,7 +1710,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/charts/public/services/palettes/types.ts",
-                  "lineNumber": 99
+                  "lineNumber": 89
                 },
                 "deprecated": false
               },
@@ -1521,7 +1728,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/charts/public/services/palettes/types.ts",
-                  "lineNumber": 100
+                  "lineNumber": 90
                 },
                 "deprecated": false
               }
@@ -1529,10 +1736,10 @@
           },
           {
             "parentPluginId": "charts",
-            "id": "def-public.PaletteDefinition.getColors",
+            "id": "def-public.PaletteDefinition.getCategoricalColors",
             "type": "Function",
             "tags": [],
-            "label": "getColors",
+            "label": "getCategoricalColors",
             "description": [
               "\nGet a spectrum of colors of the current palette.\nThis can be used if the chart wants to control color assignment locally."
             ],
@@ -1541,7 +1748,7 @@
             ],
             "source": {
               "path": "src/plugins/charts/public/services/palettes/types.ts",
-              "lineNumber": 106
+              "lineNumber": 96
             },
             "deprecated": false,
             "returnComment": [],
@@ -1555,7 +1762,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/charts/public/services/palettes/types.ts",
-                  "lineNumber": 106
+                  "lineNumber": 96
                 },
                 "deprecated": false
               },
@@ -1571,11 +1778,47 @@
                 ],
                 "source": {
                   "path": "src/plugins/charts/public/services/palettes/types.ts",
-                  "lineNumber": 106
+                  "lineNumber": 96
                 },
                 "deprecated": false
               }
             ]
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.PaletteDefinition.canDynamicColoring",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "canDynamicColoring",
+            "description": [
+              "\nDefine whether a palette supports dynamic coloring (i.e. gradient colors mapped to number values)"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 100
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.PaletteDefinition.getColorForValue",
+            "type": "Function",
+            "tags": [],
+            "label": "getColorForValue",
+            "description": [
+              "\nGet the assigned color for the given value based on its data domain and state settings.\nThis can be used for dynamic coloring based on uniform color distribution or custom stops."
+            ],
+            "signature": [
+              "((value: number | undefined, state: T, { min, max }: { min: number; max: number; }) => string | undefined) | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 105
+            },
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1599,7 +1842,7 @@
         ],
         "source": {
           "path": "src/plugins/charts/common/palette.ts",
-          "lineNumber": 28
+          "lineNumber": 38
         },
         "deprecated": false,
         "children": [
@@ -1615,7 +1858,7 @@
             ],
             "source": {
               "path": "src/plugins/charts/common/palette.ts",
-              "lineNumber": 29
+              "lineNumber": 39
             },
             "deprecated": false
           },
@@ -1628,7 +1871,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/charts/common/palette.ts",
-              "lineNumber": 30
+              "lineNumber": 40
             },
             "deprecated": false
           },
@@ -1644,7 +1887,7 @@
             ],
             "source": {
               "path": "src/plugins/charts/common/palette.ts",
-              "lineNumber": 31
+              "lineNumber": 41
             },
             "deprecated": false
           }
@@ -1660,7 +1903,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/charts/public/services/palettes/types.ts",
-          "lineNumber": 109
+          "lineNumber": 112
         },
         "deprecated": false,
         "children": [
@@ -1684,7 +1927,7 @@
             ],
             "source": {
               "path": "src/plugins/charts/public/services/palettes/types.ts",
-              "lineNumber": 110
+              "lineNumber": 113
             },
             "deprecated": false,
             "returnComment": [],
@@ -1698,7 +1941,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/charts/public/services/palettes/types.ts",
-                  "lineNumber": 110
+                  "lineNumber": 113
                 },
                 "deprecated": false
               }
@@ -1724,7 +1967,7 @@
             ],
             "source": {
               "path": "src/plugins/charts/public/services/palettes/types.ts",
-              "lineNumber": 111
+              "lineNumber": 114
             },
             "deprecated": false,
             "returnComment": [],
@@ -1953,7 +2196,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/charts/common/palette.ts",
-          "lineNumber": 24
+          "lineNumber": 34
         },
         "deprecated": false,
         "children": [
@@ -1966,7 +2209,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/charts/common/palette.ts",
-              "lineNumber": 25
+              "lineNumber": 35
             },
             "deprecated": false
           }
@@ -2693,7 +2936,7 @@
         ],
         "source": {
           "path": "src/plugins/charts/common/palette.ts",
-          "lineNumber": 53
+          "lineNumber": 63
         },
         "deprecated": false,
         "children": [],
@@ -2754,7 +2997,7 @@
         ],
         "source": {
           "path": "src/plugins/charts/common/palette.ts",
-          "lineNumber": 119
+          "lineNumber": 175
         },
         "deprecated": false,
         "children": [],
@@ -2820,6 +3063,86 @@
               "lineNumber": 16
             },
             "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-common.CustomPaletteArguments.stop",
+            "type": "Array",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 17
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-common.CustomPaletteArguments.range",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "range",
+            "description": [],
+            "signature": [
+              "\"number\" | \"percent\" | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 18
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-common.CustomPaletteArguments.rangeMin",
+            "type": "number",
+            "tags": [],
+            "label": "rangeMin",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 19
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-common.CustomPaletteArguments.rangeMax",
+            "type": "number",
+            "tags": [],
+            "label": "rangeMax",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 20
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-common.CustomPaletteArguments.continuity",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "continuity",
+            "description": [],
+            "signature": [
+              "\"above\" | \"below\" | \"all\" | \"none\" | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 21
+            },
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -2833,7 +3156,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/charts/common/palette.ts",
-          "lineNumber": 19
+          "lineNumber": 24
         },
         "deprecated": false,
         "children": [
@@ -2849,7 +3172,7 @@
             ],
             "source": {
               "path": "src/plugins/charts/common/palette.ts",
-              "lineNumber": 20
+              "lineNumber": 25
             },
             "deprecated": false
           },
@@ -2862,7 +3185,81 @@
             "description": [],
             "source": {
               "path": "src/plugins/charts/common/palette.ts",
-              "lineNumber": 21
+              "lineNumber": 26
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-common.CustomPaletteState.stops",
+            "type": "Array",
+            "tags": [],
+            "label": "stops",
+            "description": [],
+            "signature": [
+              "number[]"
+            ],
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 27
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-common.CustomPaletteState.range",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "range",
+            "description": [],
+            "signature": [
+              "\"number\" | \"percent\""
+            ],
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 28
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-common.CustomPaletteState.rangeMin",
+            "type": "number",
+            "tags": [],
+            "label": "rangeMin",
+            "description": [],
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 29
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-common.CustomPaletteState.rangeMax",
+            "type": "number",
+            "tags": [],
+            "label": "rangeMax",
+            "description": [],
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 30
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-common.CustomPaletteState.continuity",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "continuity",
+            "description": [],
+            "signature": [
+              "\"above\" | \"below\" | \"all\" | \"none\" | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 31
             },
             "deprecated": false
           }
@@ -2888,7 +3285,7 @@
         ],
         "source": {
           "path": "src/plugins/charts/common/palette.ts",
-          "lineNumber": 28
+          "lineNumber": 38
         },
         "deprecated": false,
         "children": [
@@ -2904,7 +3301,7 @@
             ],
             "source": {
               "path": "src/plugins/charts/common/palette.ts",
-              "lineNumber": 29
+              "lineNumber": 39
             },
             "deprecated": false
           },
@@ -2917,7 +3314,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/charts/common/palette.ts",
-              "lineNumber": 30
+              "lineNumber": 40
             },
             "deprecated": false
           },
@@ -2933,7 +3330,7 @@
             ],
             "source": {
               "path": "src/plugins/charts/common/palette.ts",
-              "lineNumber": 31
+              "lineNumber": 41
             },
             "deprecated": false
           }
@@ -2949,7 +3346,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/charts/common/palette.ts",
-          "lineNumber": 24
+          "lineNumber": 34
         },
         "deprecated": false,
         "children": [
@@ -2962,7 +3359,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/charts/common/palette.ts",
-              "lineNumber": 25
+              "lineNumber": 35
             },
             "deprecated": false
           }
@@ -3001,7 +3398,7 @@
         ],
         "source": {
           "path": "src/plugins/charts/common/palette.ts",
-          "lineNumber": 33
+          "lineNumber": 43
         },
         "deprecated": false,
         "initialIsOpen": false

@@ -109,7 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('autorefreshes and shows items on the server', async () => {
-        await esArchiver.load('data/search_sessions');
+        await esArchiver.load('x-pack/test/functional/es_archives/data/search_sessions');
 
         const searchSessionList = await PageObjects.searchSessionsManagement.getList();
         expect(searchSessionList.length).to.be(10);
@@ -190,11 +190,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           ]
         `);
 
-        await esArchiver.unload('data/search_sessions');
+        await esArchiver.unload('x-pack/test/functional/es_archives/data/search_sessions');
       });
 
       it('has working pagination controls', async () => {
-        await esArchiver.load('data/search_sessions');
+        await esArchiver.load('x-pack/test/functional/es_archives/data/search_sessions');
 
         log.debug(`loading first page of sessions`);
         const sessionListFirst = await PageObjects.searchSessionsManagement.getList();
@@ -223,7 +223,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           ]
         `);
 
-        await esArchiver.unload('data/search_sessions');
+        await esArchiver.unload('x-pack/test/functional/es_archives/data/search_sessions');
       });
     });
   });

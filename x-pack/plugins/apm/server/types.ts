@@ -157,6 +157,7 @@ const optionalDependencies = [
   'ml',
   'home',
   'maps',
+  'fleet',
 ] as const;
 
 type RequiredDependencies = Pick<

@@ -2,13 +2,6 @@
   "type": "index",
   "value": {
     "index": "without-timefield",
-    "mappings": {
-      "properties": {
-        "@timestamp": {
-          "type": "date"
-        }
-      }
-    },
     "settings": {
       "index": {
         "number_of_replicas": "0",
