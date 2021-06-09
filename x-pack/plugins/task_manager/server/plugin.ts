@@ -7,6 +7,7 @@
 
 import { combineLatest, Observable, Subject } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs/operators';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   PluginInitializerContext,
   Plugin,
@@ -29,6 +30,7 @@ import { healthRoute } from './routes';
 import { createMonitoringStats, MonitoringStats } from './monitoring';
 import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { EphemeralTask } from './task';
+import { registerTaskManagerUsageCollector } from './usage';
 
 export type TaskManagerSetupContract = {
   /**
@@ -65,7 +67,10 @@ export class TaskManagerPlugin
     this.definitions = new TaskTypeDictionary(this.logger);
   }
 
-  public setup(core: CoreSetup): TaskManagerSetupContract {
+  public setup(
+    core: CoreSetup,
+    plugins: { usageCollection: UsageCollectionSetup }
+  ): TaskManagerSetupContract {
     this.elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
 
     setupSavedObjects(core.savedObjects, this.config);
@@ -99,6 +104,15 @@ export class TaskManagerPlugin
         )
       );
     });
+
+    const usageCollection = plugins.usageCollection;
+    if (usageCollection) {
+      registerTaskManagerUsageCollector(
+        usageCollection,
+        this.monitoringStats$,
+        this.config.ephemeral_tasks.enabled
+      );
+    }
 
     return {
       index: this.config.index,
