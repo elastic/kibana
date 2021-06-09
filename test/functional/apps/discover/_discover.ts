@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load('discover');
 
       // and load a set of makelogs data
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -327,10 +327,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const intervalS = 5;
         await PageObjects.timePicker.startAutoRefresh(intervalS);
 
-        // check inspector panel request stats for timestamp
-        await inspector.open();
-
         const getRequestTimestamp = async () => {
+          // check inspector panel request stats for timestamp
+          await inspector.open();
           const requestStats = await inspector.getTableData();
           const requestStatsRow = requestStats.filter(
             (r) => r && r[0] && r[0].includes('Request timestamp')
@@ -338,6 +337,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           if (!requestStatsRow || !requestStatsRow[0] || !requestStatsRow[0][1]) {
             return '';
           }
+          await inspector.close();
           return requestStatsRow[0][1];
         };
 
