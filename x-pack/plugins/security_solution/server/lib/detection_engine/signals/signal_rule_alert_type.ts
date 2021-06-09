@@ -264,20 +264,22 @@ export const signalRulesAlertType = ({
           }
         } else if (isThreatMatchRule(type)) {
           const threatRuleSO = asTypeSpecificSO(savedObject, threatRuleParams);
-          result = await threatMatchExecutor({
-            rule: threatRuleSO,
-            tuples,
-            listClient,
-            exceptionItems,
-            services,
-            version,
-            searchAfterSize,
-            logger,
-            eventsTelemetry,
-            buildRuleMessage,
-            bulkCreate,
-            wrapHits,
-          });
+          for (const tuple of tuples) {
+            result = await threatMatchExecutor({
+              rule: threatRuleSO,
+              tuple,
+              listClient,
+              exceptionItems,
+              services,
+              version,
+              searchAfterSize,
+              logger,
+              eventsTelemetry,
+              buildRuleMessage,
+              bulkCreate,
+              wrapHits,
+            });
+          }
         } else if (isQueryRule(type)) {
           const queryRuleSO = validateQueryRuleTypes(savedObject);
           result = await queryExecutor({
