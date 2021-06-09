@@ -7,11 +7,9 @@
 
 import { When, Then } from 'cypress-cucumber-preprocessor/steps';
 import { verifyClientMetrics } from './client_metrics_helper';
-import { getDataTestSubj, waitForLoadingToFinish } from './utils';
+import { getDataTestSubj } from './utils';
 
 When('the user changes the selected percentile', () => {
-  waitForLoadingToFinish();
-
   getDataTestSubj('uxPercentileSelect').select('95');
 });
 

@@ -13,12 +13,15 @@ import { waitForLoadingToFinish } from './utils';
 When(/^the user filters by "([^"]*)"$/, (filterName) => {
   waitForLoadingToFinish();
   cy.get('.euiStat__title-isLoading').should('not.exist');
-  cy.get(`#local-filter-${filterName}`).click();
 
-  cy.get(`#local-filter-popover-${filterName}`, DEFAULT_TIMEOUT).within(() => {
-    if (filterName === 'os') {
-      const osItem = cy.get('li.euiSelectableListItem', DEFAULT_TIMEOUT).eq(2);
-      osItem.should('have.text', 'Mac OS X8 ');
+  cy.get(
+    `button[aria-label="expands filter group for ${filterName} filter"]`
+  ).click();
+
+  cy.get(`.euiPopover__panel-isOpen`, DEFAULT_TIMEOUT).within(() => {
+    if (filterName === 'OS') {
+      const osItem = cy.get('li.euiSelectableListItem', DEFAULT_TIMEOUT).eq(0);
+      osItem.should('have.text', 'Mac OS X ');
       osItem.click();
 
       // sometimes click doesn't work as expected so we need to retry here
@@ -29,7 +32,7 @@ When(/^the user filters by "([^"]*)"$/, (filterName) => {
       });
     } else {
       const deItem = cy.get('li.euiSelectableListItem', DEFAULT_TIMEOUT).eq(0);
-      deItem.should('have.text', 'DE28 ');
+      deItem.should('have.text', 'DE ');
       deItem.click();
 
       // sometimes click doesn't work as expected so we need to retry here
@@ -39,15 +42,11 @@ When(/^the user filters by "([^"]*)"$/, (filterName) => {
         }
       });
     }
-    cy.get('[data-cy=applyFilter]').click();
+    cy.contains('Apply').click();
   });
 
-  cy.get(`div#local-filter-values-${filterName}`, DEFAULT_TIMEOUT).within(
-    () => {
-      cy.get('span.euiBadge__content')
-        .eq(0)
-        .should('have.text', filterName === 'os' ? 'Mac OS X' : 'DE');
-    }
+  cy.get(`.globalFilterLabel__value`, DEFAULT_TIMEOUT).contains(
+    filterName === 'OS' ? 'Mac OS X' : 'DE'
   );
 });
 
@@ -56,7 +55,7 @@ Then(/^it filters the client metrics "([^"]*)"$/, (filterName) => {
   cy.get('.euiStat__title-isLoading').should('not.exist');
 
   const data =
-    filterName === 'os'
+    filterName === 'OS'
       ? ['82 ms', '5 ms', '77 ms', '8']
       : ['75 ms', '4 ms', '71 ms', '28'];
 
