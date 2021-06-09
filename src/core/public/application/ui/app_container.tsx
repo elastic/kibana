@@ -22,7 +22,7 @@ import type { MountPoint } from '../../types';
 import { AppLeaveHandler, AppStatus, AppUnmount, Mounter } from '../types';
 import { AppNotFound } from './app_not_found_screen';
 import { ScopedHistory } from '../scoped_history';
-import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
+import { APP_WRAPPER_CLASS } from '../../../utils';
 
 interface Props {
   /** Path application is mounted on without the global basePath */
