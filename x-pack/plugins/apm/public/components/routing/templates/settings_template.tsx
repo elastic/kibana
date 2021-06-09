@@ -39,7 +39,7 @@ export function SettingsTemplate({ children, selectedTab }: Props) {
       pageHeader={{
         tabs,
         pageTitle: i18n.translate('xpack.apm.settings.title', {
-          defaultMessage: 'APM Settings',
+          defaultMessage: 'Settings',
         }),
         rightSideItems: [], // hide EnvironmentFilter
       }}
