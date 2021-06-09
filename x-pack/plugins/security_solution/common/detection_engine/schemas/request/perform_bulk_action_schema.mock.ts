@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { BulkAction } from '../common/schemas';
+import { PerformBulkActionSchema } from './perform_bulk_action_schema';
 
-export const EXPORT_FAILURE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.components.genericDownloader.exportFailureTitle',
-  {
-    defaultMessage: 'Failed to export data…',
-  }
-);
+export const getPerformBulkActionSchemaMock = (): PerformBulkActionSchema => ({
+  query: '',
+  action: BulkAction.disable,
+});

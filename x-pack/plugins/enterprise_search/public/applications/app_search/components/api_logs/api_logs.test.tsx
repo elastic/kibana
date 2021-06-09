@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions, rerender } from '../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
 import '../../../__mocks__/shallow_useeffect.mock';
 import '../../__mocks__/engine_logic.mock';
 
@@ -16,6 +16,7 @@ import { shallow } from 'enzyme';
 import { EuiPageHeader } from '@elastic/eui';
 
 import { Loading } from '../../../shared/loading';
+import { rerender } from '../../../test_helpers';
 import { LogRetentionCallout, LogRetentionTooltip } from '../log_retention';
 
 import { ApiLogsTable, NewApiEventsPrompt } from './components';
