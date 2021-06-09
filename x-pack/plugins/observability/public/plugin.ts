@@ -66,6 +66,7 @@ export class Plugin
       ObservabilityPublicPluginsStart
     > {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private readonly casesAppUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private readonly navigationRegistry = createNavigationRegistry();
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
@@ -136,7 +137,7 @@ export class Plugin
         category,
         euiIconType,
         mount,
-        updater$,
+        updater$: this.casesAppUpdater$,
       });
     }
 
@@ -190,7 +191,7 @@ export class Plugin
     };
   }
   public start({ application }: CoreStart) {
-    toggleOverviewLinkInNav(this.appUpdater$, application);
+    toggleOverviewLinkInNav(this.appUpdater$, this.casesAppUpdater$, application);
 
     const PageTemplate = createLazyObservabilityPageTemplate({
       currentAppId$: application.currentAppId$,
