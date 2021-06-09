@@ -19,7 +19,7 @@ import {
 } from '../../../../../../alerting/server';
 import { BaseHit } from '../../../../../common/detection_engine/types';
 import { TermAggregationBucket } from '../../../types';
-import { GenericBulkCreateResponse } from '../bulk_create';
+import { GenericBulkCreateResponse } from '../bulk_create_factory';
 import {
   calculateThresholdSignalUuid,
   getThresholdAggregationParts,
@@ -127,9 +127,6 @@ const getTransformedHits = (
     }, []);
   };
 
-  // Recurse through the nested buckets and collect each unique combination of terms. Collect the
-  // cardinality and document count from the leaf buckets and return a signal for each set of terms.
-  // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
   return getCombinations(results.aggregations![aggParts.name].buckets, 0, aggParts.field).reduce(
     (acc: Array<BaseHit<SignalSource>>, bucket) => {
       const hit = bucket.topThresholdHits?.hits.hits[0];
