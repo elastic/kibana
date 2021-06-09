@@ -6,4 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { EnvironmentService, Environment, EnvironmentServiceSetup } from './environment';
+import { IndexPatternFieldEditorPlugin } from './plugin';
+
+export const plugin = () => new IndexPatternFieldEditorPlugin();
