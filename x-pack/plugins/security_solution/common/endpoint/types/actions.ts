@@ -44,10 +44,13 @@ export interface HostIsolationResponse {
   action: string;
 }
 
-export interface PendingActionsResponse {
+export interface HostPendingActions {
   agent_id: string;
   pending_actions: {
     /** Number of actions pending for each type. The `key` could be one of the `ISOLATION_ACTIONS` values. */
     [key: string]: number;
   };
+}
+export interface PendingActionsResponse {
+  data: HostPendingActions[];
 }
