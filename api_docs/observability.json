@@ -145,7 +145,11 @@
             "section": "def-public.AlertTypeModel",
             "text": "AlertTypeModel"
           },
-          "<any> & { format: Formatter; }) => void; getFormatter: (typeId: string) => Formatter | undefined; } & { registerFormatter: () => void; }"
+          "<any> & { format: ",
+          "Formatter",
+          "; }) => void; getFormatter: (typeId: string) => ",
+          "Formatter",
+          " | undefined; } & { registerFormatter: () => void; }"
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/rules/observability_rule_type_registry_mock.ts",
@@ -927,7 +931,7 @@
         "label": "useUiTracker",
         "description": [],
         "signature": [
-          "({\n  app: defaultApp,\n}: { app?: \"apm\" | \"fleet\" | \"infra_metrics\" | \"infra_logs\" | \"uptime\" | \"synthetics\" | \"observability-overview\" | \"stack_monitoring\" | \"ux\" | undefined; }) => ({ app, metric, metricType }: ",
+          "({\n  app: defaultApp,\n}: { app?: \"fleet\" | \"apm\" | \"infra_metrics\" | \"infra_logs\" | \"uptime\" | \"synthetics\" | \"observability-overview\" | \"stack_monitoring\" | \"ux\" | undefined; }) => ({ app, metric, metricType }: ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -964,7 +968,7 @@
                 "label": "app",
                 "description": [],
                 "signature": [
-                  "\"apm\" | \"fleet\" | \"infra_metrics\" | \"infra_logs\" | \"uptime\" | \"synthetics\" | \"observability-overview\" | \"stack_monitoring\" | \"ux\" | undefined"
+                  "\"fleet\" | \"apm\" | \"infra_metrics\" | \"infra_logs\" | \"uptime\" | \"synthetics\" | \"observability-overview\" | \"stack_monitoring\" | \"ux\" | undefined"
                 ],
                 "source": {
                   "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
@@ -3046,7 +3050,11 @@
             "section": "def-public.AlertTypeModel",
             "text": "AlertTypeModel"
           },
-          "<any> & { format: Formatter; }) => void; getFormatter: (typeId: string) => Formatter | undefined; }"
+          "<any> & { format: ",
+          "Formatter",
+          "; }) => void; getFormatter: (typeId: string) => ",
+          "Formatter",
+          " | undefined; }"
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
@@ -3184,7 +3192,11 @@
           "section": "def-public.AlertTypeModel",
           "text": "AlertTypeModel"
         },
-        "<any> & { format: Formatter; }) => void; getFormatter: (typeId: string) => Formatter | undefined; }; isAlertingExperienceEnabled: () => boolean; navigation: { registerSections: (sections$: ",
+        "<any> & { format: ",
+        "Formatter",
+        "; }) => void; getFormatter: (typeId: string) => ",
+        "Formatter",
+        " | undefined; }; isAlertingExperienceEnabled: () => boolean; navigation: { registerSections: (sections$: ",
         "Observable",
         "<",
         "NavigationSection",
@@ -3370,46 +3382,50 @@
                 "description": [],
                 "signature": [
                   "(",
-                  "TypeMapping",
+                  "MappingTypeMapping",
                   " & { all_field?: ",
-                  "AllField",
-                  " | undefined; date_detection?: boolean | undefined; dynamic?: boolean | \"strict\" | undefined; dynamic_date_formats?: string[] | undefined; dynamic_templates?: Record<string, ",
-                  "DynamicTemplate",
+                  "MappingAllField",
+                  " | undefined; date_detection?: boolean | undefined; dynamic?: boolean | \"true\" | \"false\" | \"runtime\" | \"strict\" | undefined; dynamic_date_formats?: string[] | undefined; dynamic_templates?: Record<string, ",
+                  "MappingDynamicTemplate",
                   "> | Record<string, ",
-                  "DynamicTemplate",
+                  "MappingDynamicTemplate",
                   ">[] | undefined; field_names_field?: ",
-                  "FieldNamesField",
+                  "MappingFieldNamesField",
                   " | undefined; index_field?: ",
-                  "IndexField",
+                  "MappingIndexField",
                   " | undefined; meta?: Record<string, any> | undefined; numeric_detection?: boolean | undefined; properties?: Record<string, ",
-                  "PropertyBase",
+                  "MappingProperty",
                   "> | undefined; routing_field?: ",
-                  "RoutingField",
+                  "MappingRoutingField",
                   " | undefined; size_field?: ",
-                  "SizeField",
+                  "MappingSizeField",
                   " | undefined; source_field?: ",
-                  "SourceField",
-                  " | undefined; }) | (Record<string, ",
-                  "TypeMapping",
+                  "MappingSourceField",
+                  " | undefined; runtime?: Record<string, ",
+                  "MappingRuntimeField",
+                  "> | undefined; }) | (Record<string, ",
+                  "MappingTypeMapping",
                   "> & { all_field?: ",
-                  "AllField",
-                  " | undefined; date_detection?: boolean | undefined; dynamic?: boolean | \"strict\" | undefined; dynamic_date_formats?: string[] | undefined; dynamic_templates?: Record<string, ",
-                  "DynamicTemplate",
+                  "MappingAllField",
+                  " | undefined; date_detection?: boolean | undefined; dynamic?: boolean | \"true\" | \"false\" | \"runtime\" | \"strict\" | undefined; dynamic_date_formats?: string[] | undefined; dynamic_templates?: Record<string, ",
+                  "MappingDynamicTemplate",
                   "> | Record<string, ",
-                  "DynamicTemplate",
+                  "MappingDynamicTemplate",
                   ">[] | undefined; field_names_field?: ",
-                  "FieldNamesField",
+                  "MappingFieldNamesField",
                   " | undefined; index_field?: ",
-                  "IndexField",
+                  "MappingIndexField",
                   " | undefined; meta?: Record<string, any> | undefined; numeric_detection?: boolean | undefined; properties?: Record<string, ",
-                  "PropertyBase",
+                  "MappingProperty",
                   "> | undefined; routing_field?: ",
-                  "RoutingField",
+                  "MappingRoutingField",
                   " | undefined; size_field?: ",
-                  "SizeField",
+                  "MappingSizeField",
                   " | undefined; source_field?: ",
-                  "SourceField",
-                  " | undefined; })"
+                  "MappingSourceField",
+                  " | undefined; runtime?: Record<string, ",
+                  "MappingRuntimeField",
+                  "> | undefined; })"
                 ],
                 "source": {
                   "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
@@ -3427,7 +3443,7 @@
                 "signature": [
                   "Pick<",
                   "KibanaClient",
-                  ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"helpers\" | \"count\" | \"search\" | \"security\" | \"eql\" | \"on\" | \"off\" | \"transform\" | \"emit\" | \"once\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
+                  ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"helpers\" | \"count\" | \"search\" | \"security\" | \"eql\" | \"on\" | \"off\" | \"transform\" | \"emit\" | \"once\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
                   "TransportRequestParams",
                   ", options?: ",
                   "TransportRequestOptions",
@@ -3474,12 +3490,12 @@
         "description": [],
         "signature": [
           "(kql: string | undefined) => ",
-          "QueryContainer",
+          "QueryDslQueryContainer",
           "[]"
         ],
         "source": {
           "path": "x-pack/plugins/observability/server/utils/queries.ts",
-          "lineNumber": 35
+          "lineNumber": 39
         },
         "deprecated": false,
         "children": [
@@ -3495,7 +3511,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/server/utils/queries.ts",
-              "lineNumber": 35
+              "lineNumber": 39
             },
             "deprecated": false,
             "isRequired": false
@@ -3513,7 +3529,7 @@
         "description": [],
         "signature": [
           "(start: number | undefined, end: number | undefined, field: string) => ",
-          "QueryContainer",
+          "QueryDslQueryContainer",
           "[]"
         ],
         "source": {
@@ -3534,7 +3550,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/server/utils/queries.ts",
-              "lineNumber": 21
+              "lineNumber": 22
             },
             "deprecated": false,
             "isRequired": false
@@ -3551,7 +3567,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/server/utils/queries.ts",
-              "lineNumber": 21
+              "lineNumber": 23
             },
             "deprecated": false,
             "isRequired": false
@@ -3568,7 +3584,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/server/utils/queries.ts",
-              "lineNumber": 21
+              "lineNumber": 24
             },
             "deprecated": false,
             "isRequired": true
@@ -3841,46 +3857,50 @@
         "description": [],
         "signature": [
           "(",
-          "TypeMapping",
+          "MappingTypeMapping",
           " & { all_field?: ",
-          "AllField",
-          " | undefined; date_detection?: boolean | undefined; dynamic?: boolean | \"strict\" | undefined; dynamic_date_formats?: string[] | undefined; dynamic_templates?: Record<string, ",
-          "DynamicTemplate",
+          "MappingAllField",
+          " | undefined; date_detection?: boolean | undefined; dynamic?: boolean | \"true\" | \"false\" | \"runtime\" | \"strict\" | undefined; dynamic_date_formats?: string[] | undefined; dynamic_templates?: Record<string, ",
+          "MappingDynamicTemplate",
           "> | Record<string, ",
-          "DynamicTemplate",
+          "MappingDynamicTemplate",
           ">[] | undefined; field_names_field?: ",
-          "FieldNamesField",
+          "MappingFieldNamesField",
           " | undefined; index_field?: ",
-          "IndexField",
+          "MappingIndexField",
           " | undefined; meta?: Record<string, any> | undefined; numeric_detection?: boolean | undefined; properties?: Record<string, ",
-          "PropertyBase",
+          "MappingProperty",
           "> | undefined; routing_field?: ",
-          "RoutingField",
+          "MappingRoutingField",
           " | undefined; size_field?: ",
-          "SizeField",
+          "MappingSizeField",
           " | undefined; source_field?: ",
-          "SourceField",
-          " | undefined; }) | (Record<string, ",
-          "TypeMapping",
+          "MappingSourceField",
+          " | undefined; runtime?: Record<string, ",
+          "MappingRuntimeField",
+          "> | undefined; }) | (Record<string, ",
+          "MappingTypeMapping",
           "> & { all_field?: ",
-          "AllField",
-          " | undefined; date_detection?: boolean | undefined; dynamic?: boolean | \"strict\" | undefined; dynamic_date_formats?: string[] | undefined; dynamic_templates?: Record<string, ",
-          "DynamicTemplate",
+          "MappingAllField",
+          " | undefined; date_detection?: boolean | undefined; dynamic?: boolean | \"true\" | \"false\" | \"runtime\" | \"strict\" | undefined; dynamic_date_formats?: string[] | undefined; dynamic_templates?: Record<string, ",
+          "MappingDynamicTemplate",
           "> | Record<string, ",
-          "DynamicTemplate",
+          "MappingDynamicTemplate",
           ">[] | undefined; field_names_field?: ",
-          "FieldNamesField",
+          "MappingFieldNamesField",
           " | undefined; index_field?: ",
-          "IndexField",
+          "MappingIndexField",
           " | undefined; meta?: Record<string, any> | undefined; numeric_detection?: boolean | undefined; properties?: Record<string, ",
-          "PropertyBase",
+          "MappingProperty",
           "> | undefined; routing_field?: ",
-          "RoutingField",
+          "MappingRoutingField",
           " | undefined; size_field?: ",
-          "SizeField",
+          "MappingSizeField",
           " | undefined; source_field?: ",
-          "SourceField",
-          " | undefined; })"
+          "MappingSourceField",
+          " | undefined; runtime?: Record<string, ",
+          "MappingRuntimeField",
+          "> | undefined; })"
         ],
         "source": {
           "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",

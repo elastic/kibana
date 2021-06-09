@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { flatten, merge, sortBy, sum, pickBy } from 'lodash';
-import { CompositeAggregationSource } from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { TelemetryTask } from '.';
@@ -59,7 +59,7 @@ export const tasks: TelemetryTask[] = [
     // the transaction count for that time range.
     executor: async ({ indices, search }) => {
       async function getBucketCountFromPaginatedQuery(
-        sources: CompositeAggregationSource[],
+        sources: estypes.AggregationsCompositeAggregationSource[],
         prevResult?: {
           transaction_count: number;
           expected_metric_document_count: number;

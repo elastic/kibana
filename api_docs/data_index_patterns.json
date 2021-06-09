@@ -1795,7 +1795,7 @@
                 "plugin": "indexPatternManagement",
                 "link": {
                   "path": "src/plugins/index_pattern_management/public/components/field_editor/field_editor.tsx",
-                  "lineNumber": 777
+                  "lineNumber": 778
                 }
               }
             ],
@@ -2858,14 +2858,14 @@
           {
             "parentPluginId": "data",
             "id": "def-common.IndexPatternField.lang",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "lang",
             "description": [
               "\nScript field language"
             ],
             "signature": [
-              "string | undefined"
+              "\"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined"
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/index_pattern_field.ts",
@@ -2876,12 +2876,12 @@
           {
             "parentPluginId": "data",
             "id": "def-common.IndexPatternField.lang",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "lang",
             "description": [],
             "signature": [
-              "string | undefined"
+              "\"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined"
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/index_pattern_field.ts",
@@ -3168,7 +3168,7 @@
             "label": "toJSON",
             "description": [],
             "signature": [
-              "() => { count: number; script: string | undefined; lang: string | undefined; conflictDescriptions: Record<string, string[]> | undefined; name: string; type: string; esTypes: string[] | undefined; scripted: boolean; searchable: boolean; aggregatable: boolean; readFromDocValues: boolean; subType: ",
+              "() => { count: number; script: string | undefined; lang: \"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined; conflictDescriptions: Record<string, string[]> | undefined; name: string; type: string; esTypes: string[] | undefined; scripted: boolean; searchable: boolean; aggregatable: boolean; readFromDocValues: boolean; subType: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -4876,14 +4876,14 @@
           {
             "parentPluginId": "data",
             "id": "def-common.FieldSpec.lang",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "lang",
             "description": [
               "\nScripted field langauge\nPainless is the only valid scripted field language"
             ],
             "signature": [
-              "string | undefined"
+              "\"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined"
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
@@ -5191,12 +5191,12 @@
           {
             "parentPluginId": "data",
             "id": "def-common.FieldSpecExportFmt.lang",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "lang",
             "description": [],
             "signature": [
-              "string | undefined"
+              "\"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined"
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
@@ -7003,28 +7003,28 @@
             "plugin": "lens",
             "link": {
               "path": "x-pack/plugins/lens/server/routes/field_stats.ts",
-              "lineNumber": 140
+              "lineNumber": 141
             }
           },
           {
             "plugin": "lens",
             "link": {
               "path": "x-pack/plugins/lens/server/routes/field_stats.ts",
-              "lineNumber": 249
+              "lineNumber": 250
             }
           },
           {
             "plugin": "lens",
             "link": {
               "path": "x-pack/plugins/lens/server/routes/field_stats.ts",
-              "lineNumber": 289
+              "lineNumber": 290
             }
           },
           {
             "plugin": "lens",
             "link": {
               "path": "x-pack/plugins/lens/server/routes/field_stats.ts",
-              "lineNumber": 331
+              "lineNumber": 332
             }
           },
           {
@@ -7928,12 +7928,12 @@
           {
             "parentPluginId": "data",
             "id": "def-common.IFieldType.lang",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "lang",
             "description": [],
             "signature": [
-              "string | undefined"
+              "\"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined"
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/types.ts",
@@ -10418,14 +10418,14 @@
             "plugin": "transform",
             "link": {
               "path": "x-pack/plugins/transform/server/routes/api/transforms.ts",
-              "lineNumber": 62
+              "lineNumber": 63
             }
           },
           {
             "plugin": "transform",
             "link": {
               "path": "x-pack/plugins/transform/server/routes/api/transforms.ts",
-              "lineNumber": 404
+              "lineNumber": 405
             }
           },
           {
