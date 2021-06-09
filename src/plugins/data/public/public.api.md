@@ -7,13 +7,11 @@
 import { $Values } from '@kbn/utility-types';
 import { Action } from 'history';
 import { Adapters as Adapters_2 } from 'src/plugins/inspector/common';
-import { Aggregate } from '@elastic/elasticsearch/api/types';
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import { ApplicationStart } from 'kibana/public';
 import { Assign } from '@kbn/utility-types';
 import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
 import Boom from '@hapi/boom';
-import { Bucket } from '@elastic/elasticsearch/api/types';
 import { ConfigDeprecationProvider } from '@kbn/config';
 import { CoreSetup } from 'src/core/public';
 import { CoreSetup as CoreSetup_2 } from 'kibana/public';
@@ -1245,7 +1243,7 @@ export interface IFieldType {
     // (undocumented)
     format?: any;
     // (undocumented)
-    lang?: string;
+    lang?: estypes.ScriptLanguage;
     // (undocumented)
     name: string;
     // (undocumented)
@@ -1520,8 +1518,8 @@ export class IndexPatternField implements IFieldType {
     // (undocumented)
     get filterable(): boolean;
     get isMapped(): boolean | undefined;
-    get lang(): string | undefined;
-    set lang(lang: string | undefined);
+    get lang(): "painless" | "expression" | "mustache" | "java" | undefined;
+    set lang(lang: "painless" | "expression" | "mustache" | "java" | undefined);
     // (undocumented)
     get name(): string;
     // (undocumented)
@@ -1545,7 +1543,7 @@ export class IndexPatternField implements IFieldType {
     toJSON(): {
         count: number;
         script: string | undefined;
-        lang: string | undefined;
+        lang: "painless" | "expression" | "mustache" | "java" | undefined;
         conflictDescriptions: Record<string, string[]> | undefined;
         name: string;
         type: string;
@@ -1990,7 +1988,7 @@ export type PhraseFilter = Filter & {
     script?: {
         script: {
             source?: any;
-            lang?: string;
+            lang?: estypes.ScriptLanguage;
             params: any;
         };
     };
@@ -2208,7 +2206,7 @@ export type RangeFilter = Filter & EsRangeFilter & {
     script?: {
         script: {
             params: any;
-            lang: string;
+            lang: estypes.ScriptLanguage;
             source: any;
         };
     };
@@ -2254,7 +2252,7 @@ export interface Reason {
         reason: string;
     };
     // (undocumented)
-    lang?: string;
+    lang?: estypes.ScriptLanguage;
     // (undocumented)
     position?: {
         offset: number;

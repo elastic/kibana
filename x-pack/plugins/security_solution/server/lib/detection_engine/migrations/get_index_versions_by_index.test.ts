@@ -43,9 +43,9 @@ describe('getIndexVersionsByIndex', () => {
   });
 
   it('properly transforms the response', async () => {
+    // @ts-expect-error mocking only what we need
     esClient.indices.getMapping.mockResolvedValue({
       body: {
-        // @ts-expect-error mocking only what we need
         index1: { mappings: { _meta: { version: 3 } } },
       },
     });

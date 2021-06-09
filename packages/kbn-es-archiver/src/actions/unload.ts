@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { resolve } from 'path';
+import { resolve, relative } from 'path';
 import { createReadStream } from 'fs';
 import { Readable, Writable } from 'stream';
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
 import { createPromiseFromStreams } from '@kbn/utils';
 
@@ -25,19 +25,17 @@ import {
 } from '../lib';
 
 export async function unloadAction({
-  name,
+  inputDir,
   client,
-  dataDir,
   log,
   kbnClient,
 }: {
-  name: string;
+  inputDir: string;
   client: KibanaClient;
-  dataDir: string;
   log: ToolingLog;
   kbnClient: KbnClient;
 }) {
-  const inputDir = resolve(dataDir, name);
+  const name = relative(REPO_ROOT, inputDir);
   const stats = createStats(name, log);
   const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();
 
