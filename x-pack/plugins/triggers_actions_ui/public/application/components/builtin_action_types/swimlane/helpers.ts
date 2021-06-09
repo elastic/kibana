@@ -15,13 +15,8 @@ const casesRequiredFields = [
   'caseIdConfig',
 ];
 const casesFields = [...casesRequiredFields];
-const alertsRequiredFields = ['ruleNameConfig', 'alertIdConfig'];
-const alertsFields = [
-  'alertSourceConfig',
-  'severityConfig',
-  'commentsConfig',
-  ...alertsRequiredFields,
-];
+const alertsRequiredFields = ['ruleNameConfig', 'alertIdConfig', 'alertSourceConfig'];
+const alertsFields = ['severityConfig', 'commentsConfig', ...alertsRequiredFields];
 
 const translationMapping: Record<string, string> = {
   caseIdConfig: i18n.SW_REQUIRED_CASE_ID,

@@ -56,11 +56,11 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
 
   /**
    * If the type of the connector is cases
-   * or there is no rule name or rule id
+   * or there is no rule name or rule id or alert source
    * a warning message is being shown to the user
    */
   const showMappingWarning =
-    connectorType === SwimlaneConnectorType.Cases || !hasRuleName || !hasAlertId;
+    connectorType === SwimlaneConnectorType.Cases || !hasRuleName || !hasAlertId || !hasAlertSource;
 
   const editSubActionProperty = useCallback(
     (key: string, value: any) => {
@@ -95,7 +95,7 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
       editAction(
         'subActionParams',
         {
-          incident: {},
+          incident: { alertId: '{{alert.id}}', ruleName: '{{rule.name}}' },
           comments: [],
         },
         index
@@ -113,7 +113,7 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
       editAction(
         'subActionParams',
         {
-          incident: {},
+          incident: { alertId: '{{alert.id}}', ruleName: '{{rule.name}}' },
           comments: [],
         },
         index
@@ -124,56 +124,6 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
 
   return !showMappingWarning ? (
     <>
-      {hasAlertId && (
-        <>
-          <EuiFormRow
-            id="swimlaneAlertId"
-            fullWidth
-            error={errors['subActionParams.incident.alertId'] ?? ''}
-            isInvalid={
-              errors['subActionParams.incident.alertId']?.length > 0 &&
-              incident.ruleName !== undefined
-            }
-            label={i18n.SW_ALERT_ID_FIELD_LABEL}
-          >
-            <TextFieldWithMessageVariables
-              index={index}
-              data-test-subj="alertId"
-              editAction={editSubActionProperty}
-              messageVariables={messageVariables}
-              paramsProperty={'alertId'}
-              inputTargetValue={incident.alertId ?? undefined}
-              errors={errors['subActionParams.incident.alertId'] as string[]}
-            />
-          </EuiFormRow>
-          <EuiSpacer size="m" />
-        </>
-      )}
-      {hasRuleName && (
-        <>
-          <EuiFormRow
-            id="swimlaneRuleName"
-            fullWidth
-            error={errors['subActionParams.incident.ruleName'] ?? ''}
-            isInvalid={
-              errors['subActionParams.incident.ruleName']?.length > 0 &&
-              incident.ruleName !== undefined
-            }
-            label={i18n.SW_RULE_NAME_FIELD_LABEL}
-          >
-            <TextFieldWithMessageVariables
-              index={index}
-              data-test-subj="ruleName"
-              editAction={editSubActionProperty}
-              messageVariables={messageVariables}
-              paramsProperty={'ruleName'}
-              inputTargetValue={incident.ruleName ?? undefined}
-              errors={errors['subActionParams.incident.ruleName'] as string[]}
-            />
-          </EuiFormRow>
-          <EuiSpacer size="m" />
-        </>
-      )}
       {hasAlertSource && (
         <>
           <EuiFormRow id="swimlaneAlertSource" fullWidth label={i18n.SW_ALERT_SOURCE_FIELD_LABEL}>
