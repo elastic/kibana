@@ -1025,30 +1025,7 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
                                 className="euiTextColor euiTextColor--subdued"
                               >
                                 <p>
-                                  Click
-                                  <span>
-                                     
-                                  </span>
-                                  <EuiLink
-                                    aria-label="Edit dashboard"
-                                    data-test-subj=""
-                                    onClick={[MockFunction]}
-                                  >
-                                    <button
-                                      aria-label="Edit dashboard"
-                                      className="euiLink euiLink--primary"
-                                      data-test-subj=""
-                                      disabled={false}
-                                      onClick={[MockFunction]}
-                                      type="button"
-                                    >
-                                      Edit
-                                    </button>
-                                  </EuiLink>
-                                  <span>
-                                     
-                                  </span>
-                                  in the menu bar above to start adding panels.
+                                  Click edit in the menu bar above to start adding panels.
                                 </p>
                               </div>
                             </EuiTextColor>

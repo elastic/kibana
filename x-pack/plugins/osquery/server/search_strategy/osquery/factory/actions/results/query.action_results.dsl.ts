@@ -52,7 +52,7 @@ export const buildActionResultsQuery = ({
                       lang: 'painless',
                       source:
                         "if (doc['error.keyword'].size()==0) { return 'success' } else { return 'error' }",
-                    },
+                    } as const,
                   },
                 },
               },
