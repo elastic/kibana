@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { setMockValues, rerender } from '../../../__mocks__';
+import { setMockValues } from '../../../__mocks__/kea_logic';
 import '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
+
+import { rerender } from '../../../test_helpers';
 
 import { ReindexJob } from './reindex_job';
 import { Schema, MetaEngineSchema } from './views';

@@ -73,7 +73,6 @@ export function registerSnapshotsRoutes({
             ignore_unavailable: true, // Allow request to succeed even if some snapshots are unavailable.
           });
 
-          // @ts-expect-error @elastic/elasticsearch remove this "as unknown" workaround when the types for this endpoint are correct. Track progress at https://github.com/elastic/elastic-client-generator/issues/250.
           const { responses: fetchedResponses } = response.body;
 
           // Decorate each snapshot with the repository with which it's associated.
@@ -135,7 +134,6 @@ export function registerSnapshotsRoutes({
           ignore_unavailable: true,
         });
 
-        // @ts-expect-error @elastic/elasticsearch remove this "as unknown" workaround when the types for this endpoint are correct. Track progress at https://github.com/elastic/elastic-client-generator/issues/250.
         const { responses: snapshotsResponse } = response.body;
 
         const snapshotsList =
@@ -144,7 +142,6 @@ export function registerSnapshotsRoutes({
           return res.notFound({ body: 'Snapshot not found' });
         }
         const selectedSnapshot = snapshotsList.find(
-          // @ts-expect-error @elastic/elasticsearch related to above incorrect type from client
           ({ snapshot: snapshotName }) => snapshot === snapshotName
         ) as SnapshotDetailsEs;
 
@@ -154,9 +151,7 @@ export function registerSnapshotsRoutes({
         }
 
         const successfulSnapshots = snapshotsList
-          // @ts-expect-error @elastic/elasticsearch related to above incorrect type from client
           .filter(({ state }) => state === 'SUCCESS')
-          // @ts-expect-error @elastic/elasticsearch related to above incorrect type from client
           .sort((a, b) => {
             return +new Date(b.end_time!) - +new Date(a.end_time!);
           }) as SnapshotDetailsEs[];

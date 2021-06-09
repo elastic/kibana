@@ -39,13 +39,13 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('log highlight apis', () => {
-    before(() => esArchiver.load('infra/simple_logs'));
-    after(() => esArchiver.unload('infra/simple_logs'));
+    before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/simple_logs'));
+    after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/simple_logs'));
 
     describe('/log_entries/highlights', () => {
       describe('with the default source', () => {
-        before(() => esArchiver.load('empty_kibana'));
-        after(() => esArchiver.unload('empty_kibana'));
+        before(() => esArchiver.load('x-pack/test/functional/es_archives/empty_kibana'));
+        after(() => esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana'));
 
         it('Handles empty responses', async () => {
           const { body } = await supertest

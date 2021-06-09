@@ -34,7 +34,11 @@ import {
   flattenSubCaseSavedObject,
   transformNewComment,
 } from '..';
-import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
+import {
+  CASE_SAVED_OBJECT,
+  MAX_DOCS_PER_PAGE,
+  SUB_CASE_SAVED_OBJECT,
+} from '../../../common/constants';
 import { AttachmentService, CasesService } from '../../services';
 import { createCaseError } from '../error';
 import { countAlertsForID } from '../index';
@@ -309,23 +313,13 @@ export class CommentableCase {
 
   public async encode(): Promise<CaseResponse> {
     try {
-      const collectionCommentStats = await this.caseService.getAllCaseComments({
-        unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
-        id: this.collection.id,
-        options: {
-          fields: [],
-          page: 1,
-          perPage: 1,
-        },
-      });
-
       const collectionComments = await this.caseService.getAllCaseComments({
         unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
         id: this.collection.id,
         options: {
           fields: [],
           page: 1,
-          perPage: collectionCommentStats.total,
+          perPage: MAX_DOCS_PER_PAGE,
         },
       });
 
@@ -335,7 +329,7 @@ export class CommentableCase {
       const caseResponse = {
         comments: flattenCommentSavedObjects(collectionComments.saved_objects),
         totalAlerts: collectionTotalAlerts,
-        ...this.formatCollectionForEncoding(collectionCommentStats.total),
+        ...this.formatCollectionForEncoding(collectionComments.total),
       };
 
       if (this.subCase) {
