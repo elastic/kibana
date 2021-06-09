@@ -1,5 +1,5 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
-load("@npm//peggy:index.bzl", "peggy")
+load("@npm//pegjs:index.bzl", "pegjs")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
 
 PKG_BASE_NAME = "kbn-interpreter"
@@ -37,16 +37,16 @@ TYPES_DEPS = [
 
 DEPS = SRC_DEPS + TYPES_DEPS
 
-peggy(
+pegjs(
   name = "grammar",
   data = [
-    ":grammar/grammar.peggy"
+    ":grammar/grammar.pegjs"
   ],
   output_dir = True,
   args = [
     "-o",
     "$(@D)/index.js",
-    "./%s/grammar/grammar.peggy" % package_name()
+    "./%s/grammar/grammar.pegjs" % package_name()
   ],
 )
 
