@@ -47,7 +47,7 @@ export async function listEnrollmentApiKeys(
     body: query ? { query } : undefined,
   });
 
-  // @ts-expect-error @elastic/elasticsearch
+  // @ts-expect-error @elastic/elasticsearch _source is optional
   const items = res.body.hits.hits.map(esDocToEnrollmentApiKey);
 
   return {
