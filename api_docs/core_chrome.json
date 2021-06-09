@@ -965,14 +965,11 @@
             "tags": [],
             "label": "url",
             "description": [
-              "\nThe route used to open the {@link AppBase.defaultPath | default path } of an application.\nIf unset, `baseUrl` will be used instead."
-            ],
-            "signature": [
-              "string | undefined"
+              "\nThe route used to open the default path and the deep links of an application."
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 39
+              "lineNumber": 38
             },
             "deprecated": false
           },
@@ -990,7 +987,7 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 44
+              "lineNumber": 43
             },
             "deprecated": false
           },
@@ -1008,7 +1005,7 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 49
+              "lineNumber": 48
             },
             "deprecated": false
           },
@@ -1026,7 +1023,7 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 55
+              "lineNumber": 54
             },
             "deprecated": false
           },
@@ -1044,7 +1041,7 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 61
+              "lineNumber": 60
             },
             "deprecated": false
           },
@@ -1059,7 +1056,7 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 66
+              "lineNumber": 65
             },
             "deprecated": false
           },
@@ -1077,7 +1074,7 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 75
+              "lineNumber": 74
             },
             "deprecated": false
           },
@@ -1095,7 +1092,7 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 80
+              "lineNumber": 79
             },
             "deprecated": false
           }

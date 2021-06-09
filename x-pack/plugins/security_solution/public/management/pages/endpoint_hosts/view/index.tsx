@@ -157,8 +157,8 @@ export const EndpointList = () => {
   const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackagePolicyRouteState>(
     'fleet',
     {
-      path: `#/integrations${
-        endpointPackageVersion ? `/endpoint-${endpointPackageVersion}/add-integration` : ''
+      path: `#/policies/add-integration${
+        endpointPackageVersion ? `/endpoint-${endpointPackageVersion}` : ''
       }`,
       state: {
         onCancelNavigateTo: [
