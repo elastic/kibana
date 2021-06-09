@@ -42,7 +42,7 @@ import { alertsErrorReasonTranslationsMapping } from '../../alerts_list/translat
 import { useKibana } from '../../../../common/lib/kibana';
 import { alertReducer } from '../../alert_form/alert_reducer';
 
-type AlertDetailsProps = {
+export type AlertDetailsProps = {
   alert: Alert;
   alertType: AlertType;
   actionTypes: ActionType[];
@@ -120,7 +120,6 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   const rightPageHeaderButtons = hasEditButton
     ? [
         <>
-          {' '}
           <EuiButtonEmpty
             data-test-subj="openEditAlertFlyoutButton"
             iconType="pencil"
