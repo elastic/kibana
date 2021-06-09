@@ -43,7 +43,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
       showOnlyIntegration
         ? (packageInfo.policy_templates || []).filter(
             (policyTemplate) => policyTemplate.name === showOnlyIntegration
-          ) || []
+          )
         : packageInfo.policy_templates || [],
     [packageInfo.policy_templates, showOnlyIntegration]
   );
