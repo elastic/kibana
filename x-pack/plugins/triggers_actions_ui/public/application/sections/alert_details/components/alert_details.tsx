@@ -153,10 +153,10 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
     <EuiPageBody>
       <EuiPageContent color="transparent">
         <EuiPageHeader
+          data-test-subj="alertDetailsTitle"
           bottomBorder
           pageTitle={
             <FormattedMessage
-              data-test-subj="alertDetailsTitle"
               id="xpack.triggersActionsUI.sections.alertDetails.alertDetailsTitle"
               defaultMessage="{alertName}"
               values={{ alertName: alert.name }}
