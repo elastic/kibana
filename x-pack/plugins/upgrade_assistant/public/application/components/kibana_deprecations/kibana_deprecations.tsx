@@ -130,23 +130,23 @@ export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponent
 
   if (kibanaDeprecations && kibanaDeprecations.length === 0) {
     return (
-      <NoDeprecationsPrompt
-        deprecationType={i18nTexts.deprecationLabel}
-        navigateToOverviewPage={() => history.push('/overview')}
-      />
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+        <NoDeprecationsPrompt
+          deprecationType={i18nTexts.deprecationLabel}
+          navigateToOverviewPage={() => history.push('/overview')}
+        />
+      </EuiPageContent>
     );
   }
 
-  let content: React.ReactNode;
-
   if (isLoading) {
-    content = (
+    return (
       <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
         <SectionLoading>{i18nTexts.isLoading}</SectionLoading>
       </EuiPageContent>
     );
   } else if (kibanaDeprecations?.length) {
-    content = (
+    return (
       <div data-test-subj="kibanaDeprecationsContent">
         <EuiPageHeader
           bottomBorder
@@ -189,8 +189,8 @@ export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponent
       </div>
     );
   } else if (error) {
-    content = <KibanaDeprecationErrors errorType="requestError" />;
+    return <KibanaDeprecationErrors errorType="requestError" />;
   }
 
-  return <>{content}</>;
+  return null;
 });
