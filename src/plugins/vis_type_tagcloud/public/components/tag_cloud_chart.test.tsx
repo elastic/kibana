@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { Wordcloud } from '@elastic/charts';
+import { Wordcloud, Settings } from '@elastic/charts';
 import { chartPluginMock } from '../../../charts/public/mocks';
 import type { Datatable } from '../../../expressions/public';
 import { mount } from 'enzyme';
@@ -117,7 +117,7 @@ describe('TagCloudChart', function () {
       {
         color: 'black',
         text: 'BR',
-        weight: 1,
+        weight: 0,
       },
     ]);
   });
@@ -130,23 +130,21 @@ describe('TagCloudChart', function () {
     expect(component.find(Wordcloud).prop('angleCount')).toBe(2);
   });
 
-  // it('calls filter callback', () => {
-  //   const component = shallow(<TagCloudChart {...wrapperProps} />);
-  //   component.find(Settings).first().prop('onElementClick')!([
-  //     [
-  //       [
-  //         {
-  //           groupByRollup: 6,
-  //           value: 6,
-  //           depth: 1,
-  //           path: [],
-  //           sortIndex: 1,
-  //           smAccessorValue: 'Logstash Airways',
-  //         },
-  //       ],
-  //       {} as SeriesIdentifier,
-  //     ],
-  //   ]);
-  //   expect(wrapperProps.fireEvent).toHaveBeenCalled();
-  // });
+  it('calls filter callback', () => {
+    const component = mount(<TagCloudChart {...wrapperProps} />);
+    component.find(Settings).prop('onElementClick')!([
+      [
+        {
+          text: 'BR',
+          weight: 0.17391304347826086,
+          color: '#d36086',
+        },
+        {
+          specId: 'tagCloud',
+          key: 'tagCloud',
+        },
+      ],
+    ]);
+    expect(wrapperProps.fireEvent).toHaveBeenCalled();
+  });
 });

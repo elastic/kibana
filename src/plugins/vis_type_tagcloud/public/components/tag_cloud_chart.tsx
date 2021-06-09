@@ -93,7 +93,10 @@ export const TagCloudChart = ({
       const tag = row[tagColumn] === undefined ? 'all' : row[tagColumn];
       return {
         text: (bucketFormatter ? bucketFormatter.convert(tag, 'text') : tag) as string,
-        weight: calculateWeight(row[metricColumn], minValue, maxValue, 0, 1) || 0,
+        weight:
+          tag === 'all' || visData.rows.length <= 1
+            ? 1
+            : calculateWeight(row[metricColumn], minValue, maxValue, 0, 1) || 0,
         color: getColor(palettesRegistry, palette.name, tag, values, syncColors) || 'rgba(0,0,0,0)',
       };
     });

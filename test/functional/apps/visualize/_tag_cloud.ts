@@ -62,10 +62,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug(data);
       expect(data).to.eql([
         '32,212,254,720',
-        '18,253,611,008',
         '21,474,836,480',
         '19,327,352,832',
         '20,401,094,656',
+        '18,253,611,008',
       ]);
     });
 
@@ -90,10 +90,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug(data);
       expect(data).to.eql([
         '32,212,254,720',
-        '18,253,611,008',
         '21,474,836,480',
         '19,327,352,832',
         '20,401,094,656',
+        '18,253,611,008',
       ]);
     });
 
@@ -105,10 +105,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const data = await PageObjects.tagCloud.getTextTag();
       expect(data).to.eql([
         '32,212,254,720',
-        '18,253,611,008',
         '21,474,836,480',
         '19,327,352,832',
         '20,401,094,656',
+        '18,253,611,008',
       ]);
     });
 
@@ -122,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show the tags and relative size', function () {
       return PageObjects.tagCloud.getTextSizes().then(function (results) {
         log.debug('results here ' + results);
-        expect(results).to.eql(['72px', '72px', '63px', '32px', '25px']);
+        expect(results).to.eql(['72px', '63px', '32px', '25px', '18px']);
       });
     });
 
@@ -177,7 +177,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should format tags with field formatter', async function () {
         const data = await PageObjects.tagCloud.getTextTag();
         log.debug(data);
-        expect(data).to.eql(['30GB', '17GB', '20GB', '18GB', '19GB']);
+        expect(data).to.eql(['30GB', '20GB', '18GB', '19GB', '17GB']);
       });
 
       it('should apply filter with unformatted value', async function () {
