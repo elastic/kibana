@@ -59,6 +59,8 @@ import { AdministrationListPage } from '../../../components/administration_list_
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
 import { TableRowActions } from './components/table_row_actions';
+import { EndpointHostIsolationStatus } from '../../../../common/components/endpoint/host_isolation';
+import { isEndpointHostIsolated } from '../../../../common/utils/validators';
 
 const MAX_PAGINATED_ITEM = 9999;
 
@@ -279,19 +281,26 @@ export const EndpointList = () => {
           defaultMessage: 'Agent Status',
         }),
         // eslint-disable-next-line react/display-name
-        render: (hostStatus: HostInfo['host_status']) => {
+        render: (hostStatus: HostInfo['host_status'], endpointInfo) => {
           return (
-            <EuiBadge
-              color={hostStatus != null ? HOST_STATUS_TO_BADGE_COLOR[hostStatus] : 'warning'}
-              data-test-subj="rowHostStatus"
-              className="eui-textTruncate"
-            >
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.list.hostStatusValue"
-                defaultMessage="{hostStatus, select, healthy {Healthy} unhealthy {Unhealthy} updating {Updating} offline {Offline} inactive {Inactive} other {Unhealthy}}"
-                values={{ hostStatus }}
+            <>
+              <EuiBadge
+                color={hostStatus != null ? HOST_STATUS_TO_BADGE_COLOR[hostStatus] : 'warning'}
+                data-test-subj="rowHostStatus"
+                className="eui-textTruncate"
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.list.hostStatusValue"
+                  defaultMessage="{hostStatus, select, healthy {Healthy} unhealthy {Unhealthy} updating {Updating} offline {Offline} inactive {Inactive} other {Unhealthy}}"
+                  values={{ hostStatus }}
+                />
+              </EuiBadge>
+              <EndpointHostIsolationStatus
+                isIsolated={isEndpointHostIsolated(endpointInfo.metadata)}
+                pendingIsolate={Math.random() < 0.5 ? 1 : 0}
+                pendingUnIsolate={Math.random() < 0.5 ? 1 : 0}
               />
-            </EuiBadge>
+            </>
           );
         },
       },

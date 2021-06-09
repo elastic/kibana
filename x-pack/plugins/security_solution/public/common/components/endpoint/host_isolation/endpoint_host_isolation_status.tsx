@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiBadge, EuiTextColor } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export interface EndpointHostIsolationStatusProps {
@@ -43,10 +43,48 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
       }
 
       // If there are multiple types of pending isolation actions, then show count of actions with tooltip that displays breakdown
-      // TODO:PT implement edge case
-      // if () {
-      //
-      // }
+      if (pendingIsolate && pendingUnIsolate) {
+        return (
+          <EuiBadge color="hollow">
+            <EuiToolTip
+              content={
+                <>
+                  <div>
+                    <FormattedMessage
+                      id="xpack.securitySolution.endpoint.hostIsolationStatus.tooltipPendingActions"
+                      defaultMessage="Pending actions:"
+                    />
+                  </div>
+                  <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+                    <EuiFlexItem grow>
+                      <FormattedMessage
+                        id="xpack.securitySolution.endpoint.hostIsolationStatus.tooltipPendingIsolate"
+                        defaultMessage="Isolate"
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>{pendingIsolate}</EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiFlexGroup gutterSize="none">
+                    <EuiFlexItem grow>
+                      <FormattedMessage
+                        id="xpack.securitySolution.endpoint.hostIsolationStatus.tooltipPendingUnIsolate"
+                        defaultMessage="Unisolate"
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>{pendingUnIsolate}</EuiFlexItem>
+                  </EuiFlexGroup>
+                </>
+              }
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.hostIsolationStatus.multiplePendingActions"
+                defaultMessage="{count} actions pending"
+                values={{ count: pendingIsolate + pendingUnIsolate }}
+              />
+            </EuiToolTip>
+          </EuiBadge>
+        );
+      }
 
       // Show 'pending [un]isolate' depending on what's pending
       return (
