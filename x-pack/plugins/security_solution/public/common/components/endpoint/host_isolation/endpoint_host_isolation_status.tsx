@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiTextColor } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export interface EndpointHostIsolationStatusProps {
@@ -33,7 +33,7 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
       // If nothing is pending, but host is isolated, then show isolation badge
       if (!pendingIsolate && !pendingUnIsolate) {
         return (
-          <EuiBadge color="ghost">
+          <EuiBadge color="hollow">
             <FormattedMessage
               id="xpack.securitySolution.endpoint.hostIsolationStatus.isolated"
               defaultMessage="Isolated"
@@ -43,25 +43,27 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
       }
 
       // If there are multiple types of pending isolation actions, then show count of actions with tooltip that displays breakdown
-      // TODO: implement edge case
+      // TODO:PT implement edge case
       // if () {
       //
       // }
 
       // Show 'pending [un]isolate' depending on what's pending
       return (
-        <EuiBadge>
-          {pendingIsolate ? (
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.hostIsolationStatus.isIsolating"
-              defaultMessage="Isolating pending"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.hostIsolationStatus.isIsolating"
-              defaultMessage="Unisolating pending"
-            />
-          )}
+        <EuiBadge color="hollow">
+          <EuiTextColor color="subdued">
+            {pendingIsolate ? (
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.hostIsolationStatus.isIsolating"
+                defaultMessage="Isolating pending"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.hostIsolationStatus.isUnIsolating"
+                defaultMessage="Unisolating pending"
+              />
+            )}
+          </EuiTextColor>
         </EuiBadge>
       );
     }, [isIsolated, pendingIsolate, pendingUnIsolate]);
