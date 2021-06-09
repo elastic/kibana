@@ -49,7 +49,6 @@ import { CreatePackagePolicyPageLayout } from './components';
 import type { CreatePackagePolicyFrom, PackagePolicyFormState } from './types';
 import type { PackagePolicyValidationResults } from './services';
 import { validatePackagePolicy, validationHasErrors } from './services';
-import { StepSelectPackage } from './step_select_package';
 import { StepSelectAgentPolicy } from './step_select_agent_policy';
 import { StepConfigurePackagePolicy } from './step_configure_package';
 import { StepDefinePackagePolicy } from './step_define_package_policy';
@@ -59,6 +58,10 @@ const StepsWithLessPadding = styled(EuiSteps)`
     padding-bottom: ${(props) => props.theme.eui.paddingSizes.m};
   }
 `;
+interface RouteParameters {
+  policyId: string;
+  pkgkey: string;
+}
 
 export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const { notifications } = useStartServices();
@@ -66,17 +69,17 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
   const {
-    params: { policyId, pkgkey },
-  } = useRouteMatch<{ policyId: string; pkgkey: string }>();
+    params: { policyId: routeParamsAgentPolicyId, pkgkey },
+  } = useRouteMatch<RouteParameters>();
   const { getHref, getPath } = useLink();
   const history = useHistory();
   const handleNavigateTo = useNavigateToCallback();
   const routeState = useIntraAppState<CreatePackagePolicyRouteState>();
-  const from: CreatePackagePolicyFrom = policyId ? 'policy' : 'package';
-  const forwardedAgentPolicyId = from === 'package' ? routeState?.agentPolicyId : undefined;
+  const from: CreatePackagePolicyFrom = routeParamsAgentPolicyId ? 'policy' : 'package';
+  const policyId = from === 'policy' ? routeParamsAgentPolicyId : routeState?.agentPolicyId;
 
   // Agent policy and package info states
-  const [agentPolicy, setAgentPolicy] = useState<AgentPolicy>();
+  const [agentPolicy, setAgentPolicy] = useState<AgentPolicy | undefined>();
   const [packageInfo, setPackageInfo] = useState<PackageInfo>();
   const [isLoadingSecondStep, setIsLoadingSecondStep] = useState<boolean>(false);
 
@@ -216,7 +219,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       return routeState.onCancelUrl;
     }
     return from === 'policy'
-      ? getHref('policy_details', { policyId: agentPolicyId || policyId })
+      ? getHref('policy_details', { policyId: agentPolicyId || policyId! })
       : getHref('integration_details_overview', { pkgkey });
   }, [agentPolicyId, policyId, from, getHref, pkgkey, routeState]);
 
@@ -256,7 +259,8 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             : routeState.onSaveNavigateTo
         );
       } else {
-        history.push(getPath('policy_details', { policyId: agentPolicy?.id || policyId }));
+        // Assume agentPolicy has been set if we get this far since the form validity depends on it
+        history.push(getPath('policy_details', { policyId: agentPolicy?.id! || policyId! }));
       }
 
       notifications.toasts.addSuccess({
@@ -298,29 +302,16 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       <StepSelectAgentPolicy
         pkgkey={pkgkey}
         updatePackageInfo={updatePackageInfo}
-        defaultAgentPolicyId={forwardedAgentPolicyId}
+        defaultAgentPolicyId={policyId}
         agentPolicy={agentPolicy}
         updateAgentPolicy={updateAgentPolicy}
         setIsLoadingSecondStep={setIsLoadingSecondStep}
       />
     ),
-    [pkgkey, updatePackageInfo, agentPolicy, updateAgentPolicy, forwardedAgentPolicyId]
+    [pkgkey, updatePackageInfo, agentPolicy, updateAgentPolicy, policyId]
   );
 
   const ExtensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-create');
-
-  const stepSelectPackage = useMemo(
-    () => (
-      <StepSelectPackage
-        agentPolicyId={policyId}
-        updateAgentPolicy={updateAgentPolicy}
-        packageInfo={packageInfo}
-        updatePackageInfo={updatePackageInfo}
-        setIsLoadingSecondStep={setIsLoadingSecondStep}
-      />
-    ),
-    [policyId, updateAgentPolicy, packageInfo, updatePackageInfo]
-  );
 
   const stepConfigurePackagePolicy = useMemo(
     () =>
@@ -372,19 +363,6 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   );
 
   const steps: EuiStepProps[] = [
-    from === 'package'
-      ? {
-          title: i18n.translate('xpack.fleet.createPackagePolicy.stepSelectAgentPolicyTitle', {
-            defaultMessage: 'Select an agent policy',
-          }),
-          children: stepSelectAgentPolicy,
-        }
-      : {
-          title: i18n.translate('xpack.fleet.createPackagePolicy.stepSelectPackageTitle', {
-            defaultMessage: 'Select an integration',
-          }),
-          children: stepSelectPackage,
-        },
     {
       title: i18n.translate('xpack.fleet.createPackagePolicy.stepConfigurePackagePolicyTitle', {
         defaultMessage: 'Configure integration',
@@ -392,6 +370,12 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       status: !packageInfo || !agentPolicy || isLoadingSecondStep ? 'disabled' : undefined,
       'data-test-subj': 'dataCollectionSetupStep',
       children: stepConfigurePackagePolicy,
+    },
+    {
+      title: i18n.translate('xpack.fleet.createPackagePolicy.stepSelectAgentPolicyTitle', {
+        defaultMessage: 'Select an agent policy',
+      }),
+      children: stepSelectAgentPolicy,
     },
   ];
 
