@@ -1447,12 +1447,12 @@
           {
             "parentPluginId": "data",
             "id": "def-public.Reason.lang",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "lang",
             "description": [],
             "signature": [
-              "string | undefined"
+              "\"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined"
             ],
             "source": {
               "path": "src/plugins/data/public/search/errors/types.ts",
@@ -2820,7 +2820,7 @@
                 "description": [],
                 "signature": [
                   "{ filter?: any; aggs?: Record<string, ",
-                  "AggregationContainer",
+                  "AggregationsAggregationContainer",
                   "> | undefined; fields?: string[] | undefined; searchAfter?: string[] | undefined; page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | \"_doc\" | undefined; search?: string | undefined; searchFields?: string[] | undefined; rootSearchFields?: string[] | undefined; hasReference?: ",
                   {
                     "pluginId": "core",
@@ -5459,7 +5459,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-          "lineNumber": 76
+          "lineNumber": 78
         },
         "deprecated": false,
         "children": [
@@ -5481,7 +5481,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 77
+              "lineNumber": 79
             },
             "deprecated": false
           },
@@ -5504,7 +5504,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 78
+              "lineNumber": 80
             },
             "deprecated": false
           },
@@ -5520,7 +5520,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 79
+              "lineNumber": 81
             },
             "deprecated": false
           },
@@ -5536,7 +5536,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 80
+              "lineNumber": 82
             },
             "deprecated": false
           },
@@ -5552,7 +5552,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 81
+              "lineNumber": 83
             },
             "deprecated": false
           },
@@ -5575,7 +5575,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 85
+              "lineNumber": 87
             },
             "deprecated": false
           },
@@ -5591,7 +5591,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 87
+              "lineNumber": 89
             },
             "deprecated": false,
             "children": [
@@ -5613,7 +5613,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 88
+                  "lineNumber": 90
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -5648,7 +5648,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 89
+                  "lineNumber": 91
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -5671,7 +5671,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 90
+                  "lineNumber": 92
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -5691,7 +5691,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 103
+              "lineNumber": 105
             },
             "deprecated": false,
             "children": [
@@ -5707,7 +5707,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 103
+                  "lineNumber": 105
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -5727,7 +5727,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 107
+              "lineNumber": 109
             },
             "deprecated": false,
             "children": [
@@ -5743,7 +5743,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 107
+                  "lineNumber": 109
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -5771,7 +5771,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 111
+              "lineNumber": 113
             },
             "deprecated": false,
             "children": [
@@ -5793,7 +5793,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 111
+                  "lineNumber": 113
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -5820,7 +5820,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 129
+              "lineNumber": 131
             },
             "deprecated": false,
             "children": [
@@ -5836,7 +5836,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 129
+                  "lineNumber": 131
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -5890,7 +5890,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 142
+              "lineNumber": 144
             },
             "deprecated": false,
             "children": [
@@ -5924,7 +5924,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 143
+                  "lineNumber": 145
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -5941,7 +5941,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 144
+                  "lineNumber": 146
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -5971,7 +5971,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 185
+              "lineNumber": 187
             },
             "deprecated": false,
             "children": [
@@ -5996,7 +5996,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 185
+                  "lineNumber": 187
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -6016,7 +6016,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 197
+              "lineNumber": 199
             },
             "deprecated": false,
             "children": [],
@@ -6042,7 +6042,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 287
+              "lineNumber": 289
             },
             "deprecated": false,
             "children": [],
@@ -6067,7 +6067,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 291
+              "lineNumber": 293
             },
             "deprecated": false,
             "children": [
@@ -6083,7 +6083,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 291
+                  "lineNumber": 293
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -6111,7 +6111,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 295
+              "lineNumber": 297
             },
             "deprecated": false,
             "children": [
@@ -6127,7 +6127,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 295
+                  "lineNumber": 297
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -6155,7 +6155,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 299
+              "lineNumber": 301
             },
             "deprecated": false,
             "children": [
@@ -6171,7 +6171,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 299
+                  "lineNumber": 301
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -6199,7 +6199,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 303
+              "lineNumber": 305
             },
             "deprecated": false,
             "children": [
@@ -6215,7 +6215,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 303
+                  "lineNumber": 305
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -6243,7 +6243,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 307
+              "lineNumber": 309
             },
             "deprecated": false,
             "children": [
@@ -6259,7 +6259,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 307
+                  "lineNumber": 309
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -6287,7 +6287,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 311
+              "lineNumber": 313
             },
             "deprecated": false,
             "children": [
@@ -6303,7 +6303,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 311
+                  "lineNumber": 313
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -6331,7 +6331,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 315
+              "lineNumber": 317
             },
             "deprecated": false,
             "children": [],
@@ -6349,7 +6349,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 329
+              "lineNumber": 331
             },
             "deprecated": false,
             "children": [],
@@ -6367,7 +6367,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 344
+              "lineNumber": 346
             },
             "deprecated": false,
             "children": [],
@@ -6385,7 +6385,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 351
+              "lineNumber": 353
             },
             "deprecated": false,
             "children": [],
@@ -6411,7 +6411,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 355
+              "lineNumber": 357
             },
             "deprecated": false,
             "children": [
@@ -6427,7 +6427,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 355
+                  "lineNumber": 357
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -6463,7 +6463,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 408
+              "lineNumber": 410
             },
             "deprecated": false,
             "children": [
@@ -6486,7 +6486,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 408
+                  "lineNumber": 410
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -6514,7 +6514,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 427
+              "lineNumber": 429
             },
             "deprecated": false,
             "children": [
@@ -6530,7 +6530,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 427
+                  "lineNumber": 429
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -6562,7 +6562,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 442
+              "lineNumber": 444
             },
             "deprecated": false,
             "children": [],
@@ -6592,7 +6592,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 456
+              "lineNumber": 458
             },
             "deprecated": false,
             "children": [
@@ -6610,7 +6610,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 456
+                  "lineNumber": 458
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -6646,7 +6646,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 465
+              "lineNumber": 467
             },
             "deprecated": false,
             "children": [
@@ -6670,7 +6670,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 465
+                  "lineNumber": 467
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -6694,7 +6694,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 465
+                  "lineNumber": 467
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -24860,7 +24860,7 @@
             "label": "reason",
             "description": [],
             "signature": [
-              "{ caused_by: { reason: string; type: string; }; reason: string; lang?: string | undefined; script?: string | undefined; script_stack?: string[] | undefined; type: string; }"
+              "{ caused_by: { reason: string; type: string; }; reason: string; lang?: \"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined; script?: string | undefined; script_stack?: string[] | undefined; type: string; }"
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
@@ -27106,69 +27106,69 @@
         "description": [],
         "signature": [
           "(",
-          "CompositeBucketKeys",
+          "AggregationsCompositeBucketKeys",
           " & { [property: string]: ",
-          "Aggregate",
+          "AggregationsAggregate",
           "; }) | ({ [property: string]: ",
-          "Aggregate",
+          "AggregationsAggregate",
           "; } & { [property: string]: ",
-          "Aggregate",
+          "AggregationsAggregate",
           "; }) | (",
-          "DateHistogramBucketKeys",
+          "AggregationsDateHistogramBucketKeys",
           " & { [property: string]: ",
-          "Aggregate",
+          "AggregationsAggregate",
           "; }) | ({ [property: string]: ",
-          "Aggregate",
+          "AggregationsAggregate",
           "; } & { [property: string]: ",
-          "Aggregate",
+          "AggregationsAggregate",
           "; }) | (",
-          "FiltersBucketItemKeys",
+          "AggregationsFiltersBucketItemKeys",
           " & { [property: string]: ",
-          "Aggregate",
+          "AggregationsAggregate",
           "; }) | ({ [property: string]: ",
-          "Aggregate",
+          "AggregationsAggregate",
           "; } & { [property: string]: ",
-          "Aggregate",
+          "AggregationsAggregate",
           "; }) | (",
-          "IpRangeBucketKeys",
+          "AggregationsIpRangeBucketKeys",
           " & { [property: string]: ",
-          "Aggregate",
+          "AggregationsAggregate",
           "; }) | ({ [property: string]: ",
-          "Aggregate",
+          "AggregationsAggregate",
           "; } & { [property: string]: ",
-          "Aggregate",
+          "AggregationsAggregate",
           "; }) | (",
-          "RangeBucketKeys",
+          "AggregationsRangeBucketKeys",
           " & { [property: string]: ",
-          "Aggregate",
+          "AggregationsAggregate",
           "; }) | ({ [property: string]: ",
-          "Aggregate",
+          "AggregationsAggregate",
           "; } & { [property: string]: ",
-          "Aggregate",
+          "AggregationsAggregate",
           "; }) | ({ [property: string]: ",
-          "Aggregate",
+          "AggregationsAggregate",
           "; } & { [property: string]: ",
-          "Aggregate",
+          "AggregationsAggregate",
           "; }) | (",
-          "RareTermsBucketKeys",
+          "AggregationsRareTermsBucketKeys",
           "<any> & { [property: string]: ",
-          "Aggregate",
+          "AggregationsAggregate",
           "; }) | ({ [property: string]: ",
-          "Aggregate",
+          "AggregationsAggregate",
           "; } & { [property: string]: ",
-          "Aggregate",
+          "AggregationsAggregate",
           "; }) | (",
-          "SignificantTermsBucketKeys",
+          "AggregationsSignificantTermsBucketKeys",
           "<any> & { [property: string]: ",
-          "Aggregate",
+          "AggregationsAggregate",
           "; }) | ({ [property: string]: ",
-          "Aggregate",
+          "AggregationsAggregate",
           "; } & { [property: string]: ",
-          "Aggregate",
+          "AggregationsAggregate",
           "; }) | (",
-          "KeyedBucketKeys",
+          "AggregationsKeyedBucketKeys",
           "<any> & { [property: string]: ",
-          "Aggregate",
+          "AggregationsAggregate",
           "; })"
         ],
         "source": {

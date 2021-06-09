@@ -707,14 +707,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
       describe('adding alerts using a connector', () => {
         beforeEach(async () => {
-          await esArchiver.load('auditbeat/hosts');
+          await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
           await createSignalsIndex(supertest);
         });
 
         afterEach(async () => {
           await deleteSignalsIndex(supertest);
           await deleteAllAlerts(supertest);
-          await esArchiver.unload('auditbeat/hosts');
+          await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         });
 
         it('should add a comment of type alert', async () => {
