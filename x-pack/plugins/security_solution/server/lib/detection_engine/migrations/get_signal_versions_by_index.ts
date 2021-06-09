@@ -72,9 +72,8 @@ export const getSignalVersionsByIndex = async ({
     },
   });
 
-  // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
-  const body = response.body as SignalVersionsAggResponse;
-  const indexBuckets = body.aggregations.signals_indices.buckets;
+  const aggs = response.body.aggregations as SignalVersionsAggResponse['aggregations'];
+  const indexBuckets = aggs.signals_indices.buckets;
 
   return index.reduce<SignalVersionsByIndex>((agg, _index) => {
     const bucket = indexBuckets.find((ib) => ib.key === _index);

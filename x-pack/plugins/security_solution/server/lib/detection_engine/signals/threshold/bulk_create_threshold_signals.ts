@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import { get } from 'lodash/fp';
 import set from 'set-value';
 import {
@@ -128,10 +128,13 @@ const getTransformedHits = (
     }, []);
   };
 
+  const aggs = results.aggregations as Record<
+    string,
+    estypes.AggregationsMultiBucketAggregate<TermAggregationBucket>
+  >;
   // Recurse through the nested buckets and collect each unique combination of terms. Collect the
   // cardinality and document count from the leaf buckets and return a signal for each set of terms.
-  // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
-  return getCombinations(results.aggregations![aggParts.name].buckets, 0, aggParts.field).reduce(
+  return getCombinations(aggs[aggParts.name].buckets, 0, aggParts.field!).reduce(
     (acc: Array<BaseHit<SignalSource>>, bucket) => {
       const hit = bucket.topThresholdHits?.hits.hits[0];
       if (hit == null) {
