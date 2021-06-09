@@ -258,7 +258,7 @@ describe('LayerPanel', () => {
     it('should not update the visualization if the datasource is incomplete', () => {
       (generateId as jest.Mock).mockReturnValue(`newid`);
       const updateAll = jest.fn();
-      const updateDatasource = jest.fn();
+      const updateDatasourceAsync = jest.fn();
 
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [
@@ -276,7 +276,7 @@ describe('LayerPanel', () => {
       const component = mountWithIntl(
         <LayerPanel
           {...getDefaultProps()}
-          updateDatasource={updateDatasource}
+          updateDatasourceAsync={updateDatasourceAsync}
           updateAll={updateAll}
         />
       );
@@ -296,14 +296,87 @@ describe('LayerPanel', () => {
         ][1].setState;
 
       act(() => {
+        stateFn(
+          {
+            indexPatternId: '1',
+            columns: {},
+            columnOrder: [],
+            incompleteColumns: { newId: { operationType: 'count' } },
+          },
+          { isDimensionComplete: false }
+        );
+      });
+      expect(updateAll).not.toHaveBeenCalled();
+      expect(updateDatasourceAsync).toHaveBeenCalled();
+
+      act(() => {
         stateFn({
           indexPatternId: '1',
           columns: {},
           columnOrder: [],
-          incompleteColumns: { newId: { operationType: 'count' } },
         });
       });
-      expect(updateAll).not.toHaveBeenCalled();
+      expect(updateAll).toHaveBeenCalled();
+    });
+
+    it('should remove the dimension when the datasource marks it as removed', () => {
+      const updateAll = jest.fn();
+      const updateDatasource = jest.fn();
+
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [{ columnId: 'y' }],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'lnsGroup',
+          },
+        ],
+      });
+
+      const component = mountWithIntl(
+        <LayerPanel
+          {...getDefaultProps()}
+          datasourceStates={{
+            ds1: {
+              isLoading: false,
+              state: {
+                layers: [
+                  {
+                    indexPatternId: '1',
+                    columns: {
+                      y: {
+                        operationType: 'moving_average',
+                        references: ['ref'],
+                      },
+                    },
+                    columnOrder: ['y'],
+                    incompleteColumns: {},
+                  },
+                ],
+              },
+            },
+          }}
+          updateDatasource={updateDatasource}
+          updateAll={updateAll}
+        />
+      );
+
+      act(() => {
+        component.find('[data-test-subj="lnsLayerPanel-dimensionLink"]').first().simulate('click');
+      });
+      component.update();
+
+      expect(mockDatasource.renderDimensionEditor).toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({ columnId: 'y' })
+      );
+      const stateFn =
+        mockDatasource.renderDimensionEditor.mock.calls[
+          mockDatasource.renderDimensionEditor.mock.calls.length - 1
+        ][1].setState;
 
       act(() => {
         stateFn(
@@ -311,11 +384,19 @@ describe('LayerPanel', () => {
             indexPatternId: '1',
             columns: {},
             columnOrder: [],
+            incompleteColumns: { y: { operationType: 'average' } },
           },
-          { shouldReplaceDimension: true }
+          {
+            isDimensionComplete: false,
+          }
         );
       });
       expect(updateAll).toHaveBeenCalled();
+      expect(mockVisualization.removeDimension).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columnId: 'y',
+        })
+      );
     });
 
     it('should keep the DimensionContainer open when configuring a new dimension', () => {
@@ -334,6 +415,7 @@ describe('LayerPanel', () => {
             accessors: [],
             filterOperations: () => true,
             supportsMoreColumns: true,
+            enableDimensionEditor: true,
             dataTestSubj: 'lnsGroup',
           },
         ],
@@ -348,6 +430,7 @@ describe('LayerPanel', () => {
             accessors: [{ columnId: 'newid' }],
             filterOperations: () => true,
             supportsMoreColumns: false,
+            enableDimensionEditor: true,
             dataTestSubj: 'lnsGroup',
           },
         ],
@@ -360,6 +443,20 @@ describe('LayerPanel', () => {
       component.update();
 
       expect(component.find('EuiFlyoutHeader').exists()).toBe(true);
+
+      const lastArgs =
+        mockDatasource.renderDimensionEditor.mock.calls[
+          mockDatasource.renderDimensionEditor.mock.calls.length - 1
+        ][1];
+
+      // Simulate what is called by the dimension editor
+      act(() => {
+        lastArgs.setState(lastArgs.state, {
+          isDimensionComplete: true,
+        });
+      });
+
+      expect(mockVisualization.renderDimensionEditor).toHaveBeenCalled();
     });
 
     it('should close the DimensionContainer when the active visualization changes', () => {

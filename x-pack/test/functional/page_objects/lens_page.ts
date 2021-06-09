@@ -180,6 +180,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         testSubjects.getCssSelector(`lnsFieldListPanelField-${field}`),
         testSubjects.getCssSelector('lnsWorkspace')
       );
+      await this.waitForLensDragDropToFinish();
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -193,6 +194,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         testSubjects.getCssSelector(`lnsFieldListPanelField-${field}`),
         testSubjects.getCssSelector('lnsGeoFieldWorkspace')
       );
+      await this.waitForLensDragDropToFinish();
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -256,6 +258,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await browser.pressKeys(reverse ? browser.keys.LEFT : browser.keys.RIGHT);
       }
       await browser.pressKeys(browser.keys.ENTER);
+      await this.waitForLensDragDropToFinish();
 
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
@@ -280,6 +283,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
       await browser.pressKeys(browser.keys.ENTER);
 
+      await this.waitForLensDragDropToFinish();
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
     /**
@@ -302,7 +306,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
       await browser.pressKeys(browser.keys.ENTER);
 
+      await this.waitForLensDragDropToFinish();
       await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    async waitForLensDragDropToFinish() {
+      await retry.try(async () => {
+        const exists = await find.existsByCssSelector('.lnsDragDrop-isActiveGroup');
+        if (exists) {
+          throw new Error('UI still in drag/drop mode');
+        }
+      });
     },
 
     /**
@@ -316,6 +330,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         testSubjects.getCssSelector(`lnsFieldListPanelField-${field}`),
         testSubjects.getCssSelector(dimension)
       );
+      await this.waitForLensDragDropToFinish();
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -330,6 +345,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         testSubjects.getCssSelector(from),
         testSubjects.getCssSelector(to)
       );
+      await this.waitForLensDragDropToFinish();
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -343,6 +359,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const dragging = `[data-test-subj='${dimension}']:nth-of-type(${startIndex}) .lnsDragDrop`;
       const dropping = `[data-test-subj='${dimension}']:nth-of-type(${endIndex}) [data-test-subj='lnsDragDrop-reorderableDropLayer'`;
       await browser.html5DragAndDrop(dragging, dropping);
+      await this.waitForLensDragDropToFinish();
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -372,6 +389,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
+    async isDimensionEditorOpen() {
+      return await testSubjects.exists('lns-indexPattern-dimensionContainerBack');
+    },
+
+    // closes the dimension editor flyout
+    async closeDimensionEditor() {
+      await retry.try(async () => {
+        await testSubjects.click('lns-indexPattern-dimensionContainerBack');
+        await testSubjects.missingOrFail('lns-indexPattern-dimensionContainerBack');
+      });
+    },
+
     async enableTimeShift() {
       await testSubjects.click('indexPattern-advanced-popover');
       await retry.try(async () => {
@@ -389,14 +418,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async useFixAction() {
       await testSubjects.click('errorFixAction');
-    },
-
-    // closes the dimension editor flyout
-    async closeDimensionEditor() {
-      await retry.try(async () => {
-        await testSubjects.click('lns-indexPattern-dimensionContainerBack');
-        await testSubjects.missingOrFail('lns-indexPattern-dimensionContainerBack');
-      });
     },
 
     async isTopLevelAggregation() {

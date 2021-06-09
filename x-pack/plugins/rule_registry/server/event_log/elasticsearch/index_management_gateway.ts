@@ -93,6 +93,7 @@ export class IndexManagementGateway {
     this.logger.debug(`Updating index template; name="${templateName}"`);
 
     try {
+      // @ts-expect-error settings is optional
       const { settings, ...templateWithoutSettings } = template;
 
       const es = await this.elasticsearch;

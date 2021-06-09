@@ -112,21 +112,21 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const setStateWrapper = (
     setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
   ) => {
+    const prevOperationType =
+      operationDefinitionMap[state.layers[layerId].columns[columnId]?.operationType]?.input;
+
     const hypotheticalLayer = typeof setter === 'function' ? setter(state.layers[layerId]) : setter;
     const hasIncompleteColumns = Boolean(hypotheticalLayer.incompleteColumns?.[columnId]);
-    const prevOperationType =
-      operationDefinitionMap[hypotheticalLayer.columns[columnId]?.operationType]?.input;
     setState(
       (prevState) => {
         const layer = typeof setter === 'function' ? setter(prevState.layers[layerId]) : setter;
         return mergeLayer({ state: prevState, layerId, newLayer: layer });
       },
       {
-        shouldReplaceDimension: Boolean(hypotheticalLayer.columns[columnId]),
-        // clear the dimension if there's an incomplete column pending && previous operation was a fullReference operation
-        shouldRemoveDimension: Boolean(
-          hasIncompleteColumns && prevOperationType === 'fullReference'
-        ),
+        isDimensionComplete:
+          prevOperationType === 'fullReference'
+            ? !hasIncompleteColumns
+            : Boolean(hypotheticalLayer.columns[columnId]),
       }
     );
   };
@@ -640,7 +640,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   return (
     <div id={columnId}>
-      {!isFullscreen ? (
+      {!isFullscreen && operationSupportMatrix.operationWithoutField.has('formula') ? (
         <EuiTabs size="s">
           <EuiTab
             isSelected={temporaryQuickFunction || selectedColumn?.operationType !== 'formula'}
@@ -655,33 +655,31 @@ export function DimensionEditor(props: DimensionEditorProps) {
               defaultMessage: 'Quick functions',
             })}
           </EuiTab>
-          {operationSupportMatrix.operationWithoutField.has('formula') ? (
-            <EuiTab
-              isSelected={!temporaryQuickFunction && selectedColumn?.operationType === 'formula'}
-              data-test-subj="lens-dimensionTabs-formula"
-              onClick={() => {
-                if (selectedColumn?.operationType !== 'formula') {
-                  setQuickFunction(false);
-                  const newLayer = insertOrReplaceColumn({
-                    layer: props.state.layers[props.layerId],
-                    indexPattern: currentIndexPattern,
-                    columnId,
-                    op: 'formula',
-                    visualizationGroups: dimensionGroups,
-                  });
-                  setStateWrapper(newLayer);
-                  trackUiEvent(`indexpattern_dimension_operation_formula`);
-                  return;
-                } else {
-                  setQuickFunction(false);
-                }
-              }}
-            >
-              {i18n.translate('xpack.lens.indexPattern.formulaLabel', {
-                defaultMessage: 'Formula',
-              })}
-            </EuiTab>
-          ) : null}
+          <EuiTab
+            isSelected={!temporaryQuickFunction && selectedColumn?.operationType === 'formula'}
+            data-test-subj="lens-dimensionTabs-formula"
+            onClick={() => {
+              if (selectedColumn?.operationType !== 'formula') {
+                setQuickFunction(false);
+                const newLayer = insertOrReplaceColumn({
+                  layer: props.state.layers[props.layerId],
+                  indexPattern: currentIndexPattern,
+                  columnId,
+                  op: 'formula',
+                  visualizationGroups: dimensionGroups,
+                });
+                setStateWrapper(newLayer);
+                trackUiEvent(`indexpattern_dimension_operation_formula`);
+                return;
+              } else {
+                setQuickFunction(false);
+              }
+            }}
+          >
+            {i18n.translate('xpack.lens.indexPattern.formulaLabel', {
+              defaultMessage: 'Formula',
+            })}
+          </EuiTab>
         </EuiTabs>
       ) : null}
 
