@@ -13,7 +13,6 @@ export const FLEET_SERVER_PACKAGE = 'fleet_server';
 
 export const requiredPackages = {
   System: 'system',
-  Endpoint: 'endpoint',
   ElasticAgent: 'elastic_agent',
   FleetServer: FLEET_SERVER_PACKAGE,
 } as const;
