@@ -82,7 +82,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     embeddable: deps.embeddable,
     maps: deps.maps,
     triggersActionsUi: deps.triggersActionsUi,
-    fileDataVisualizer: deps.fileDataVisualizer,
+    dataVisualizer: deps.dataVisualizer,
     ...coreStart,
   };
 
@@ -125,7 +125,7 @@ export const renderApp = (
     security: deps.security,
     urlGenerators: deps.share.urlGenerators,
     maps: deps.maps,
-    fileDataVisualizer: deps.fileDataVisualizer,
+    dataVisualizer: deps.dataVisualizer,
   });
 
   appMountParams.onAppLeave((actions) => actions.default());

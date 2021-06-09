@@ -52,6 +52,7 @@ const RecentCasesComponent = ({
         : {},
     [currentUser, recentCasesFilterBy]
   );
+
   return (
     <>
       <>

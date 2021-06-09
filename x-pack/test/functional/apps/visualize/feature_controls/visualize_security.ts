@@ -30,12 +30,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('visualize feature controls security', () => {
     before(async () => {
-      await esArchiver.load('visualize/default');
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.load('x-pack/test/functional/es_archives/visualize/default');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
     });
 
     after(async () => {
-      await esArchiver.unload('visualize/default');
+      await esArchiver.unload('x-pack/test/functional/es_archives/visualize/default');
       // logout, so the other tests don't accidentally run as the custom users we're testing below
       await PageObjects.security.forceLogout();
     });

@@ -9,13 +9,11 @@ import * as rt from 'io-ts';
 
 import { UserRT } from '../user';
 import { CaseConnectorRt, ConnectorMappingsRt, ESCaseConnector } from '../connectors';
-import { OmitProp } from '../runtime_types';
-import { OWNER_FIELD } from './constants';
 
 // TODO: we will need to add this type rt.literal('close-by-third-party')
 const ClosureTypeRT = rt.union([rt.literal('close-by-user'), rt.literal('close-by-pushing')]);
 
-const CasesConfigureBasicRt = rt.type({
+const CasesConfigureBasicWithoutOwnerRt = rt.type({
   /**
    * The external connector
    */
@@ -24,15 +22,17 @@ const CasesConfigureBasicRt = rt.type({
    * Whether to close the case after it has been synced with the external system
    */
   closure_type: ClosureTypeRT,
-  /**
-   * The plugin owner that manages this configuration
-   */
-  owner: rt.string,
 });
 
-const CasesConfigureBasicWithoutOwnerRt = rt.type(
-  OmitProp(CasesConfigureBasicRt.props, OWNER_FIELD)
-);
+const CasesConfigureBasicRt = rt.intersection([
+  CasesConfigureBasicWithoutOwnerRt,
+  rt.type({
+    /**
+     * The plugin owner that manages this configuration
+     */
+    owner: rt.string,
+  }),
+]);
 
 export const CasesConfigureRequestRt = CasesConfigureBasicRt;
 export const CasesConfigurePatchRt = rt.intersection([

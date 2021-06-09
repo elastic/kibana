@@ -149,13 +149,17 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             });
             break;
           case 'new-instance':
-            validateInstanceEvent(event, `created new instance: 'instance'`);
+            validateInstanceEvent(event, `created new instance: 'instance'`, false);
             break;
           case 'recovered-instance':
-            validateInstanceEvent(event, `instance 'instance' has recovered`);
+            validateInstanceEvent(event, `instance 'instance' has recovered`, true);
             break;
           case 'active-instance':
-            validateInstanceEvent(event, `active instance: 'instance' in actionGroup: 'default'`);
+            validateInstanceEvent(
+              event,
+              `active instance: 'instance' in actionGroup: 'default'`,
+              false
+            );
             break;
           // this will get triggered as we add new event actions
           default:
@@ -163,7 +167,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
         }
       }
 
-      function validateInstanceEvent(event: IValidatedEvent, subMessage: string) {
+      function validateInstanceEvent(
+        event: IValidatedEvent,
+        subMessage: string,
+        shouldHaveEventEnd: boolean
+      ) {
         validateEvent(event, {
           spaceId: Spaces.space1.id,
           savedObjects: [
@@ -172,6 +180,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           message: `test.patternFiring:${alertId}: 'abc' ${subMessage}`,
           instanceId: 'instance',
           actionGroupId: 'default',
+          shouldHaveEventEnd,
         });
       }
     });
@@ -288,10 +297,10 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             });
             break;
           case 'new-instance':
-            validateInstanceEvent(event, `created new instance: 'instance'`);
+            validateInstanceEvent(event, `created new instance: 'instance'`, false);
             break;
           case 'recovered-instance':
-            validateInstanceEvent(event, `instance 'instance' has recovered`);
+            validateInstanceEvent(event, `instance 'instance' has recovered`, true);
             break;
           case 'active-instance':
             expect(
@@ -299,7 +308,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             ).to.be(true);
             validateInstanceEvent(
               event,
-              `active instance: 'instance' in actionGroup(subgroup): 'default(${event?.kibana?.alerting?.action_subgroup})'`
+              `active instance: 'instance' in actionGroup(subgroup): 'default(${event?.kibana?.alerting?.action_subgroup})'`,
+              false
             );
             break;
           // this will get triggered as we add new event actions
@@ -308,7 +318,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
         }
       }
 
-      function validateInstanceEvent(event: IValidatedEvent, subMessage: string) {
+      function validateInstanceEvent(
+        event: IValidatedEvent,
+        subMessage: string,
+        shouldHaveEventEnd: boolean
+      ) {
         validateEvent(event, {
           spaceId: Spaces.space1.id,
           savedObjects: [
@@ -317,6 +331,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           message: `test.patternFiring:${alertId}: 'abc' ${subMessage}`,
           instanceId: 'instance',
           actionGroupId: 'default',
+          shouldHaveEventEnd,
         });
       }
     });
@@ -376,6 +391,7 @@ interface ValidateEventLogParams {
   savedObjects: SavedObject[];
   outcome?: string;
   message: string;
+  shouldHaveEventEnd?: boolean;
   errorMessage?: string;
   status?: string;
   actionGroupId?: string;
@@ -385,7 +401,7 @@ interface ValidateEventLogParams {
 
 export function validateEvent(event: IValidatedEvent, params: ValidateEventLogParams): void {
   const { spaceId, savedObjects, outcome, message, errorMessage } = params;
-  const { status, actionGroupId, instanceId, reason } = params;
+  const { status, actionGroupId, instanceId, reason, shouldHaveEventEnd } = params;
 
   if (status) {
     expect(event?.kibana?.alerting?.status).to.be(status);
@@ -411,16 +427,23 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
   if (duration !== undefined) {
     expect(typeof duration).to.be('number');
     expect(eventStart).to.be.ok();
-    expect(eventEnd).to.be.ok();
 
-    const durationDiff = Math.abs(
-      Math.round(duration! / NANOS_IN_MILLIS) - (eventEnd - eventStart)
-    );
+    if (shouldHaveEventEnd !== false) {
+      expect(eventEnd).to.be.ok();
 
-    // account for rounding errors
-    expect(durationDiff < 1).to.equal(true);
-    expect(eventStart <= eventEnd).to.equal(true);
-    expect(eventEnd <= dateNow).to.equal(true);
+      const durationDiff = Math.abs(
+        Math.round(duration! / NANOS_IN_MILLIS) - (eventEnd - eventStart)
+      );
+
+      // account for rounding errors
+      expect(durationDiff < 1).to.equal(true);
+      expect(eventStart <= eventEnd).to.equal(true);
+      expect(eventEnd <= dateNow).to.equal(true);
+    }
+
+    if (shouldHaveEventEnd === false) {
+      expect(eventEnd).not.to.be.ok();
+    }
   }
 
   expect(event?.event?.outcome).to.equal(outcome);
