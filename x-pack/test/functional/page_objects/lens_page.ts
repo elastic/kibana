@@ -389,6 +389,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
+    async isDimensionEditorOpen() {
+      return await testSubjects.exists('lns-indexPattern-dimensionContainerBack');
+    },
+
+    // closes the dimension editor flyout
+    async closeDimensionEditor() {
+      await retry.try(async () => {
+        await testSubjects.click('lns-indexPattern-dimensionContainerBack');
+        await testSubjects.missingOrFail('lns-indexPattern-dimensionContainerBack');
+      });
+    },
+
     async enableTimeShift() {
       await testSubjects.click('indexPattern-advanced-popover');
       await retry.try(async () => {
@@ -406,14 +418,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async useFixAction() {
       await testSubjects.click('errorFixAction');
-    },
-
-    // closes the dimension editor flyout
-    async closeDimensionEditor() {
-      await retry.try(async () => {
-        await testSubjects.click('lns-indexPattern-dimensionContainerBack');
-        await testSubjects.missingOrFail('lns-indexPattern-dimensionContainerBack');
-      });
     },
 
     async isTopLevelAggregation() {

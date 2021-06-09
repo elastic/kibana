@@ -588,6 +588,57 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
+    it('should not leave an incomplete column in the visualization config with field-based operation', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'min',
+      });
+
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
+        undefined
+      );
+    });
+
+    it('should not leave an incomplete column in the visualization config with reference-based operations', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'moving_average',
+        field: 'Records',
+      });
+
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
+        'Moving average of Count of records'
+      );
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
+        operation: 'median',
+        isPreviousIncompatible: true,
+        keepOpen: true,
+      });
+
+      expect(await PageObjects.lens.isDimensionEditorOpen()).to.eql(true);
+
+      await PageObjects.lens.closeDimensionEditor();
+
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
+        undefined
+      );
+    });
+
     it('should transition from unique count to last value', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');

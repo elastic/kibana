@@ -661,7 +661,7 @@
             "text": "NodeUsage"
           },
           " extends ",
-          "NodeUsageInformation"
+          "NodesUsageNodeUsage"
         ],
         "source": {
           "path": "src/plugins/telemetry/server/telemetry_collection/get_nodes_usage.ts",

@@ -502,10 +502,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       comboBox.prop('onChange')!([option]);
     });
 
-    expect(setState.mock.calls[0]).toEqual([
-      expect.any(Function),
-      { shouldRemoveDimension: false, shouldReplaceDimension: true },
-    ]);
+    expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
     expect(setState.mock.calls[0][0](defaultProps.state)).toEqual({
       ...initialState,
       layers: {
@@ -537,10 +534,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       comboBox.prop('onChange')!([option]);
     });
 
-    expect(setState.mock.calls[0]).toEqual([
-      expect.any(Function),
-      { shouldRemoveDimension: false, shouldReplaceDimension: true },
-    ]);
+    expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
     expect(setState.mock.calls[0][0](defaultProps.state)).toEqual({
       ...state,
       layers: {
@@ -571,10 +565,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       wrapper.find('button[data-test-subj="lns-indexPatternDimension-min"]').simulate('click');
     });
 
-    expect(setState.mock.calls[0]).toEqual([
-      expect.any(Function),
-      { shouldRemoveDimension: false, shouldReplaceDimension: true },
-    ]);
+    expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
     expect(setState.mock.calls[0][0](state)).toEqual({
       ...state,
       layers: {
@@ -645,10 +636,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       wrapper.find('button[data-test-subj="lns-indexPatternDimension-min"]').simulate('click');
     });
 
-    expect(setState.mock.calls[0]).toEqual([
-      expect.any(Function),
-      { shouldRemoveDimension: false, shouldReplaceDimension: true },
-    ]);
+    expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
     expect(setState.mock.calls[0][0](state)).toEqual({
       ...state,
       layers: {
@@ -683,10 +671,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       wrapper.find('button[data-test-subj="lns-indexPatternDimension-min"]').simulate('click');
     });
 
-    expect(setState.mock.calls[0]).toEqual([
-      expect.any(Function),
-      { shouldRemoveDimension: false, shouldReplaceDimension: true },
-    ]);
+    expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
     expect(setState.mock.calls[0][0](state)).toEqual({
       ...state,
       layers: {
@@ -752,10 +737,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           .simulate('click');
       });
 
-      expect(setState.mock.calls[0]).toEqual([
-        expect.any(Function),
-        { shouldRemoveDimension: false, shouldReplaceDimension: true },
-      ]);
+      expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[0][0](state)).toEqual({
         ...state,
         layers: {
@@ -881,7 +863,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
       expect(setState.mock.calls[0]).toEqual([
         expect.any(Function),
-        { shouldRemoveDimension: false, shouldReplaceDimension: false },
+        { isDimensionComplete: false },
       ]);
       expect(setState.mock.calls[0][0](state)).toEqual({
         ...state,
@@ -950,7 +932,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       // Now check that the dimension gets cleaned up on state update
       expect(setState.mock.calls[0]).toEqual([
         expect.any(Function),
-        { shouldRemoveDimension: false, shouldReplaceDimension: false },
+        { isDimensionComplete: false },
       ]);
       expect(setState.mock.calls[0][0](state)).toEqual({
         ...state,
@@ -1044,10 +1026,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       });
 
       expect(setState.mock.calls.length).toEqual(2);
-      expect(setState.mock.calls[1]).toEqual([
-        expect.any(Function),
-        { shouldRemoveDimension: false, shouldReplaceDimension: true },
-      ]);
+      expect(setState.mock.calls[1]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[1][0](state)).toEqual({
         ...state,
         layers: {
@@ -1145,10 +1124,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .find('[data-test-subj="indexPattern-time-scaling-enable"]')
         .hostNodes()
         .simulate('click');
-      expect(setState.mock.calls[0]).toEqual([
-        expect.any(Function),
-        { shouldRemoveDimension: false, shouldReplaceDimension: true },
-      ]);
+      expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {
@@ -1177,10 +1153,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       wrapper
         .find('button[data-test-subj="lns-indexPatternDimension-count incompatible"]')
         .simulate('click');
-      expect(setState.mock.calls[0]).toEqual([
-        expect.any(Function),
-        { shouldRemoveDimension: false, shouldReplaceDimension: true },
-      ]);
+      expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {
@@ -1207,10 +1180,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       });
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
       wrapper.find('button[data-test-subj="lns-indexPatternDimension-average"]').simulate('click');
-      expect(setState.mock.calls[0]).toEqual([
-        expect.any(Function),
-        { shouldRemoveDimension: false, shouldReplaceDimension: true },
-      ]);
+      expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {
@@ -1241,10 +1211,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .prop('onChange')!(({
         target: { value: 'h' },
       } as unknown) as ChangeEvent<HTMLSelectElement>);
-      expect(setState.mock.calls[0]).toEqual([
-        expect.any(Function),
-        { shouldRemoveDimension: false, shouldReplaceDimension: true },
-      ]);
+      expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {
@@ -1271,10 +1238,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .prop('onChange')!(({
         target: { value: 'h' },
       } as unknown) as ChangeEvent<HTMLSelectElement>);
-      expect(setState.mock.calls[0]).toEqual([
-        expect.any(Function),
-        { shouldRemoveDimension: false, shouldReplaceDimension: true },
-      ]);
+      expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {
@@ -1302,10 +1266,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         {} as any
       );
-      expect(setState.mock.calls[0]).toEqual([
-        expect.any(Function),
-        { shouldRemoveDimension: false, shouldReplaceDimension: true },
-      ]);
+      expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {
@@ -1595,10 +1556,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .find('[data-test-subj="indexPattern-filter-by-enable"]')
         .hostNodes()
         .simulate('click');
-      expect(setState.mock.calls[0]).toEqual([
-        expect.any(Function),
-        { shouldRemoveDimension: false, shouldReplaceDimension: true },
-      ]);
+      expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {
@@ -1629,10 +1587,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       wrapper
         .find('button[data-test-subj="lns-indexPatternDimension-count incompatible"]')
         .simulate('click');
-      expect(setState.mock.calls[0]).toEqual([
-        expect.any(Function),
-        { shouldRemoveDimension: false, shouldReplaceDimension: true },
-      ]);
+      expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {
@@ -1658,10 +1613,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         language: 'kuery',
         query: 'c: d',
       });
-      expect(setState.mock.calls[0]).toEqual([
-        expect.any(Function),
-        { shouldRemoveDimension: false, shouldReplaceDimension: true },
-      ]);
+      expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {
@@ -1690,10 +1642,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         {} as any
       );
-      expect(setState.mock.calls[0]).toEqual([
-        expect.any(Function),
-        { shouldRemoveDimension: false, shouldReplaceDimension: true },
-      ]);
+      expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {
@@ -1745,10 +1694,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     wrapper.find('button[data-test-subj="lns-indexPatternDimension-average"]').simulate('click');
 
-    expect(setState.mock.calls[0]).toEqual([
-      expect.any(Function),
-      { shouldRemoveDimension: false, shouldReplaceDimension: false },
-    ]);
+    expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: false }]);
     expect(setState.mock.calls[0][0](defaultProps.state)).toEqual({
       ...state,
       layers: {
@@ -1812,10 +1758,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     wrapper.find('button[data-test-subj="lns-indexPatternDimension-average"]').simulate('click');
 
-    expect(setState.mock.calls[0]).toEqual([
-      expect.any(Function),
-      { shouldRemoveDimension: false, shouldReplaceDimension: true },
-    ]);
+    expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
     expect(setState.mock.calls[0][0](initialState)).toEqual({
       ...initialState,
       layers: {
@@ -1840,10 +1783,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     wrapper.find('button[data-test-subj="lns-indexPatternDimension-count"]').simulate('click');
 
-    expect(setState.mock.calls[0]).toEqual([
-      expect.any(Function),
-      { shouldRemoveDimension: false, shouldReplaceDimension: true },
-    ]);
+    expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
     expect(setState.mock.calls[0][0](state)).toEqual({
       ...state,
       layers: {
@@ -1977,10 +1917,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       comboBox.prop('onChange')!([option]);
     });
 
-    expect(setState.mock.calls[0]).toEqual([
-      expect.any(Function),
-      { shouldRemoveDimension: false, shouldReplaceDimension: true },
-    ]);
+    expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
     expect(setState.mock.calls[0][0](defaultProps.state)).toEqual({
       ...state,
       layers: {

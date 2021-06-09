@@ -193,7 +193,12 @@ const savedSchema: MakeSchemaFrom<LensUsage['saved_overall']> = {
   lnsDatatable: { type: 'long' },
   lnsPie: { type: 'long' },
   lnsMetric: { type: 'long' },
-  formula: { type: 'long' },
+  formula: {
+    type: 'long',
+    _meta: {
+      description: 'Number of saved lens visualizations which are using at least one formula',
+    },
+  },
 };
 
 export const lensUsageSchema: MakeSchemaFrom<LensUsage> = {
