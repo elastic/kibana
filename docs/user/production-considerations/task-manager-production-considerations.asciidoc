@@ -125,7 +125,9 @@ A default {kib} instance can support up to `200/tpm`.
 [float]
 ===== Automatic estimation
 
-experimental[] As demonstrated in <<task-manager-health-evaluate-the-capacity-estimation, Evaluate your capacity estimation>>, the Task Manager <<task-manager-health-monitoring, health monitoring>> performs these estimations automatically.
+experimental[]
+
+As demonstrated in <<task-manager-health-evaluate-the-capacity-estimation, Evaluate your capacity estimation>>, the Task Manager <<task-manager-health-monitoring, health monitoring>> performs these estimations automatically.
 
 These estimates are based on historical data and should not be used as predictions, but can be used as a rough guide when scaling the system.
 
@@ -135,7 +137,11 @@ We recommend provisioning at least as many {kib} instances as proposed by `propo
 
 [WARNING]
 ============================================================================
-Automatic capacity estimation is performed by each {kib} instance indipendently. This estimation is performed by observing the task throughput in that instance, the number of {kib} instances executing tasks at that moment in time, and the recurring workload in {es}. If a {kib} instance is idle at the moment of capacity estimation, the number of active {kib} might be miscounted, miscalculating the available throughput as a consequence. When evaluating the `proposed.proposed_kibana`, we highly recommend verifying that the `observed.observed_kibana_instances` matches the number of provisioned {kib} instances.
+Automatic capacity estimation is performed by each {kib} instance indipendently. This estimation is performed by observing the task throughput in that instance, the number of {kib} instances executing tasks at that moment in time, and the recurring workload in {es}.
+
+If a {kib} instance is idle at the moment of capacity estimation, the number of active {kib} might be miscounted, miscalculating the available throughput as a consequence.
+
+When evaluating the `proposed.proposed_kibana`, we highly recommend verifying that the `observed.observed_kibana_instances` matches the number of provisioned {kib} instances.
 ============================================================================
 
 [float]

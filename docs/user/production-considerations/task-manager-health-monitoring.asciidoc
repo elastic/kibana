@@ -93,12 +93,15 @@ a| Runtime
 a| Capacity Estimation
 
 | experimental[] This section provides a rough estimate about the sufficiency of its capacity. As the name suggests, these are estimates based on historical data and should not be used as predictions. Use these estimations when following the Task Manager <<task-manager-scaling-guidance>>.
-The `status` indicates the sufficiency of the observed capacity. An `OK` status means capacity is sufficient. A `Warning` status means that capacity is sufficient for the scheduled recurring tasks, but non-recurring tasks often cause the cluster to exceed capacity. An `Error` status means that there is insufficient capacity across all types of tasks.
 
 |===
 
 Each section has a `timestamp` and a `status` that indicates when the last update to this section took place and whether the health of this section was evaluated as `OK`, `Warning` or `Error`.
 
 The root `status` indicates the `status` of the system overall.
+
+The Runtime `status` indicates whether task executions have exceeded any of the <<task-manager-configuring-health-monitoring,configured health thresholds>>. An `OK` status means none of the threshold have been exceeded. A `Warning` status means that at least one warning threshold has been exceeded. An `Error` status means that at least one error threshold has been exceeded.
+
+experimental[] The Capacity Estimation `status` indicates the sufficiency of the observed capacity. An `OK` status means capacity is sufficient. A `Warning` status means that capacity is sufficient for the scheduled recurring tasks, but non-recurring tasks often cause the cluster to exceed capacity. An `Error` status means that there is insufficient capacity across all types of tasks.
 
 By monitoring the `status` of the system overall, and the `status` of specific task types of interest, you can evaluate the health of the {kib} Task Management system.
