@@ -734,6 +734,7 @@ export function FormulaEditor({
                           className="lnsFormula__editorError"
                           iconType="alert"
                           size="xs"
+                          flush="right"
                           onClick={() => {
                             setIsWarningOpen(!isWarningOpen);
                           }}

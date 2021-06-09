@@ -349,13 +349,14 @@ export function DimensionEditor(props: DimensionEditorProps) {
           <EuiCallOut
             size="s"
             title={i18n.translate('xpack.lens.indexPattern.formulaWarning', {
-              defaultMessage: 'Staged formula',
+              defaultMessage: 'Formula currently applied',
             })}
+            iconType="alert"
             color="warning"
           >
             <p>
               {i18n.translate('xpack.lens.indexPattern.formulaWarningText', {
-                defaultMessage: 'Picking a quick function will erase your formula.',
+                defaultMessage: 'To overwrite your formula, select a quick function',
               })}
             </p>
           </EuiCallOut>
