@@ -339,8 +339,6 @@ export type {
   SavedObjectsDeleteByNamespaceOptions,
   SavedObjectsIncrementCounterOptions,
   SavedObjectsIncrementCounterField,
-  SavedObjectsComplexFieldMapping,
-  SavedObjectsCoreFieldMapping,
   SavedObjectsFieldMapping,
   SavedObjectsTypeMappingDefinition,
   SavedObjectsMappingProperties,

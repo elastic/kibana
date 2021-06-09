@@ -2041,6 +2041,12 @@
                 "description": "The total number of enrolled agents in an unhealthy state"
               }
             },
+            "updating": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents in an updating state"
+              }
+            },
             "offline": {
               "type": "long",
               "_meta": {
@@ -2051,6 +2057,52 @@
               "type": "long",
               "_meta": {
                 "description": "The total number of agents in any state, both enrolled and inactive"
+              }
+            }
+          }
+        },
+        "fleet_server": {
+          "properties": {
+            "total_enrolled": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents, in any state"
+              }
+            },
+            "total_all_statuses": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of Fleet Server agents in any state, both enrolled and inactive."
+              }
+            },
+            "healthy": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents in a healthy state."
+              }
+            },
+            "unhealthy": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents in an unhealthy state"
+              }
+            },
+            "updating": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents in an updating state"
+              }
+            },
+            "offline": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents currently offline"
+              }
+            },
+            "num_host_urls": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of Fleet Server hosts configured in Fleet settings."
               }
             }
           }
@@ -4664,82 +4716,6 @@
     },
     "security_solution": {
       "properties": {
-        "detections": {
-          "properties": {
-            "detection_rules": {
-              "properties": {
-                "custom": {
-                  "properties": {
-                    "enabled": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The number of custom detection rules enabled"
-                      }
-                    },
-                    "disabled": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The number of custom detection rules disabled"
-                      }
-                    }
-                  }
-                },
-                "elastic": {
-                  "properties": {
-                    "enabled": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The number of elastic prebuilt detection rules enabled"
-                      }
-                    },
-                    "disabled": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The number of elastic prebuilt detection rules disabled"
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "ml_jobs": {
-              "properties": {
-                "custom": {
-                  "properties": {
-                    "enabled": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The number of custom ML jobs rules enabled"
-                      }
-                    },
-                    "disabled": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The number of custom ML jobs rules disabled"
-                      }
-                    }
-                  }
-                },
-                "elastic": {
-                  "properties": {
-                    "enabled": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The number of elastic provided ML jobs rules enabled"
-                      }
-                    },
-                    "disabled": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The number of elastic provided ML jobs rules disabled"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
         "detectionMetrics": {
           "properties": {
             "detection_rules": {
@@ -5014,197 +4990,237 @@
               }
             },
             "ml_jobs": {
-              "type": "array",
-              "items": {
-                "properties": {
-                  "job_id": {
-                    "type": "keyword",
-                    "_meta": {
-                      "description": "Identifier for the anomaly detection job"
-                    }
-                  },
-                  "open_time": {
-                    "type": "keyword",
-                    "_meta": {
-                      "description": "For open jobs only, the elapsed time for which the job has been open"
-                    }
-                  },
-                  "create_time": {
-                    "type": "keyword",
-                    "_meta": {
-                      "description": "The time the job was created"
-                    }
-                  },
-                  "finished_time": {
-                    "type": "keyword",
-                    "_meta": {
-                      "description": "If the job closed or failed, this is the time the job finished"
-                    }
-                  },
-                  "state": {
-                    "type": "keyword",
-                    "_meta": {
-                      "description": "The status of the anomaly detection job"
-                    }
-                  },
-                  "data_counts": {
-                    "properties": {
-                      "bucket_count": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "The number of buckets processed"
+              "properties": {
+                "ml_job_usage": {
+                  "properties": {
+                    "custom": {
+                      "properties": {
+                        "enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "The number of custom ML jobs rules enabled"
+                          }
+                        },
+                        "disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "The number of custom ML jobs rules disabled"
+                          }
                         }
-                      },
-                      "empty_bucket_count": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "The number of buckets which did not contain any data"
-                        }
-                      },
-                      "input_bytes": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "The number of bytes of input data posted to the anomaly detection job"
-                        }
-                      },
-                      "input_record_count": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "The number of input documents posted to the anomaly detection job"
-                        }
-                      },
-                      "last_data_time": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "The timestamp at which data was last analyzed, according to server time"
-                        }
-                      },
-                      "processed_record_count": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "The number of input documents that have been processed by the anomaly detection job"
+                      }
+                    },
+                    "elastic": {
+                      "properties": {
+                        "enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "The number of elastic provided ML jobs rules enabled"
+                          }
+                        },
+                        "disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "The number of elastic provided ML jobs rules disabled"
+                          }
                         }
                       }
                     }
-                  },
-                  "model_size_stats": {
+                  }
+                },
+                "ml_job_metrics": {
+                  "type": "array",
+                  "items": {
                     "properties": {
-                      "bucket_allocation_failures_count": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "The number of buckets for which new entities in incoming data were not processed due to insufficient model memory"
-                        }
-                      },
-                      "model_bytes": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "The number of bytes of memory used by the models"
-                        }
-                      },
-                      "model_bytes_exceeded": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "The number of bytes over the high limit for memory usage at the last allocation failure"
-                        }
-                      },
-                      "model_bytes_memory_limit": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "The upper limit for model memory usage, checked on increasing values"
-                        }
-                      },
-                      "peak_model_bytes": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "The peak number of bytes of memory ever used by the models"
-                        }
-                      }
-                    }
-                  },
-                  "timing_stats": {
-                    "properties": {
-                      "bucket_count": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "The number of buckets processed"
-                        }
-                      },
-                      "exponential_average_bucket_processing_time_ms": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "Exponential moving average of all bucket processing times, in milliseconds"
-                        }
-                      },
-                      "exponential_average_bucket_processing_time_per_hour_ms": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "Exponentially-weighted moving average of bucket processing times calculated in a 1 hour time window, in milliseconds"
-                        }
-                      },
-                      "maximum_bucket_processing_time_ms": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "Maximum among all bucket processing times, in milliseconds"
-                        }
-                      },
-                      "minimum_bucket_processing_time_ms": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "Minimum among all bucket processing times, in milliseconds"
-                        }
-                      },
-                      "total_bucket_processing_time_ms": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "Sum of all bucket processing times, in milliseconds"
-                        }
-                      }
-                    }
-                  },
-                  "datafeed": {
-                    "properties": {
-                      "datafeed_id": {
+                      "job_id": {
                         "type": "keyword",
                         "_meta": {
-                          "description": "A numerical character string that uniquely identifies the datafeed"
+                          "description": "Identifier for the anomaly detection job"
+                        }
+                      },
+                      "open_time": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "For open jobs only, the elapsed time for which the job has been open"
+                        }
+                      },
+                      "create_time": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "The time the job was created"
+                        }
+                      },
+                      "finished_time": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "If the job closed or failed, this is the time the job finished"
                         }
                       },
                       "state": {
                         "type": "keyword",
                         "_meta": {
-                          "description": "The status of the datafeed"
+                          "description": "The status of the anomaly detection job"
                         }
                       },
-                      "timing_stats": {
+                      "data_counts": {
                         "properties": {
-                          "average_search_time_per_bucket_ms": {
-                            "type": "long",
-                            "_meta": {
-                              "description": "The average search time per bucket, in milliseconds"
-                            }
-                          },
                           "bucket_count": {
                             "type": "long",
                             "_meta": {
                               "description": "The number of buckets processed"
                             }
                           },
-                          "exponential_average_search_time_per_hour_ms": {
+                          "empty_bucket_count": {
                             "type": "long",
                             "_meta": {
-                              "description": "The exponential average search time per hour, in milliseconds"
+                              "description": "The number of buckets which did not contain any data"
                             }
                           },
-                          "search_count": {
+                          "input_bytes": {
                             "type": "long",
                             "_meta": {
-                              "description": "The number of searches run by the datafeed"
+                              "description": "The number of bytes of input data posted to the anomaly detection job"
                             }
                           },
-                          "total_search_time_ms": {
+                          "input_record_count": {
                             "type": "long",
                             "_meta": {
-                              "description": "The total time the datafeed spent searching, in milliseconds"
+                              "description": "The number of input documents posted to the anomaly detection job"
+                            }
+                          },
+                          "last_data_time": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The timestamp at which data was last analyzed, according to server time"
+                            }
+                          },
+                          "processed_record_count": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of input documents that have been processed by the anomaly detection job"
+                            }
+                          }
+                        }
+                      },
+                      "model_size_stats": {
+                        "properties": {
+                          "bucket_allocation_failures_count": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of buckets for which new entities in incoming data were not processed due to insufficient model memory"
+                            }
+                          },
+                          "model_bytes": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of bytes of memory used by the models"
+                            }
+                          },
+                          "model_bytes_exceeded": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of bytes over the high limit for memory usage at the last allocation failure"
+                            }
+                          },
+                          "model_bytes_memory_limit": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The upper limit for model memory usage, checked on increasing values"
+                            }
+                          },
+                          "peak_model_bytes": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The peak number of bytes of memory ever used by the models"
+                            }
+                          }
+                        }
+                      },
+                      "timing_stats": {
+                        "properties": {
+                          "bucket_count": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of buckets processed"
+                            }
+                          },
+                          "exponential_average_bucket_processing_time_ms": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "Exponential moving average of all bucket processing times, in milliseconds"
+                            }
+                          },
+                          "exponential_average_bucket_processing_time_per_hour_ms": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "Exponentially-weighted moving average of bucket processing times calculated in a 1 hour time window, in milliseconds"
+                            }
+                          },
+                          "maximum_bucket_processing_time_ms": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "Maximum among all bucket processing times, in milliseconds"
+                            }
+                          },
+                          "minimum_bucket_processing_time_ms": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "Minimum among all bucket processing times, in milliseconds"
+                            }
+                          },
+                          "total_bucket_processing_time_ms": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "Sum of all bucket processing times, in milliseconds"
+                            }
+                          }
+                        }
+                      },
+                      "datafeed": {
+                        "properties": {
+                          "datafeed_id": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "A numerical character string that uniquely identifies the datafeed"
+                            }
+                          },
+                          "state": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "The status of the datafeed"
+                            }
+                          },
+                          "timing_stats": {
+                            "properties": {
+                              "average_search_time_per_bucket_ms": {
+                                "type": "long",
+                                "_meta": {
+                                  "description": "The average search time per bucket, in milliseconds"
+                                }
+                              },
+                              "bucket_count": {
+                                "type": "long",
+                                "_meta": {
+                                  "description": "The number of buckets processed"
+                                }
+                              },
+                              "exponential_average_search_time_per_hour_ms": {
+                                "type": "long",
+                                "_meta": {
+                                  "description": "The exponential average search time per hour, in milliseconds"
+                                }
+                              },
+                              "search_count": {
+                                "type": "long",
+                                "_meta": {
+                                  "description": "The number of searches run by the datafeed"
+                                }
+                              },
+                              "total_search_time_ms": {
+                                "type": "long",
+                                "_meta": {
+                                  "description": "The total time the datafeed spent searching, in milliseconds"
+                                }
+                              }
                             }
                           }
                         }

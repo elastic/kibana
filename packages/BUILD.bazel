@@ -28,6 +28,7 @@ filegroup(
       "//packages/kbn-mapbox-gl:build",
       "//packages/kbn-monaco:build",
       "//packages/kbn-plugin-generator:build",
+      "//packages/kbn-rule-data-utils:build",
       "//packages/kbn-securitysolution-list-constants:build",
       "//packages/kbn-securitysolution-io-ts-types:build",
       "//packages/kbn-securitysolution-io-ts-alerting-types:build",

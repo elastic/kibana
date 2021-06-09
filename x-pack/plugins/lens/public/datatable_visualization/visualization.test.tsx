@@ -8,7 +8,7 @@
 import { Ast } from '@kbn/interpreter/common';
 import { buildExpression } from '../../../../../src/plugins/expressions/public';
 import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_service/mocks';
-import { DatatableVisualizationState, datatableVisualization } from './visualization';
+import { DatatableVisualizationState, getDatatableVisualization } from './visualization';
 import {
   Operation,
   DataType,
@@ -16,6 +16,7 @@ import {
   TableSuggestionColumn,
   VisualizationDimensionGroupConfig,
 } from '../types';
+import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 
 function mockFrame(): FramePublicAPI {
   return {
@@ -31,6 +32,10 @@ function mockFrame(): FramePublicAPI {
     filters: [],
   };
 }
+
+const datatableVisualization = getDatatableVisualization({
+  paletteService: chartPluginMock.createPaletteRegistry(),
+});
 
 describe('Datatable Visualization', () => {
   describe('#initialize', () => {
@@ -427,22 +432,28 @@ describe('Datatable Visualization', () => {
       );
       const columnArgs = buildExpression(expression).findFunction('lens_datatable_column');
       expect(columnArgs).toHaveLength(2);
-      expect(columnArgs[0].arguments).toEqual({
-        columnId: ['c'],
-        hidden: [],
-        width: [],
-        isTransposed: [],
-        transposable: [true],
-        alignment: [],
-      });
-      expect(columnArgs[1].arguments).toEqual({
-        columnId: ['b'],
-        hidden: [],
-        width: [],
-        isTransposed: [],
-        transposable: [true],
-        alignment: [],
-      });
+      expect(columnArgs[0].arguments).toEqual(
+        expect.objectContaining({
+          columnId: ['c'],
+          hidden: [],
+          width: [],
+          isTransposed: [],
+          transposable: [true],
+          alignment: [],
+          colorMode: ['none'],
+        })
+      );
+      expect(columnArgs[1].arguments).toEqual(
+        expect.objectContaining({
+          columnId: ['b'],
+          hidden: [],
+          width: [],
+          isTransposed: [],
+          transposable: [true],
+          alignment: [],
+          colorMode: ['none'],
+        })
+      );
     });
 
     it('returns no expression if the metric dimension is not defined', () => {

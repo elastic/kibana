@@ -17,6 +17,7 @@ import { Create } from '.';
 import { useKibana } from '../../../common/lib/kibana';
 import { Case } from '../../../../../cases/public/containers/types';
 import { basicCase } from '../../../../../cases/public/containers/mock';
+import { APP_ID } from '../../../../common/constants';
 
 jest.mock('../use_insert_timeline');
 jest.mock('../../../common/lib/kibana');
@@ -47,6 +48,7 @@ describe('Create case', () => {
     );
 
     expect(mockCreateCase).toHaveBeenCalled();
+    expect(mockCreateCase.mock.calls[0][0].owner).toEqual([APP_ID]);
   });
 
   it('should redirect to all cases on cancel click', async () => {

@@ -60,9 +60,20 @@ export function WorkspacePanelWrapper({
     },
     [dispatch, activeVisualization]
   );
-  const warningMessages =
-    activeVisualization?.getWarningMessages &&
-    activeVisualization.getWarningMessages(visualizationState, framePublicAPI);
+  const warningMessages: React.ReactNode[] = [];
+  if (activeVisualization?.getWarningMessages) {
+    warningMessages.push(
+      ...(activeVisualization.getWarningMessages(visualizationState, framePublicAPI) || [])
+    );
+  }
+  Object.entries(datasourceStates).forEach(([datasourceId, datasourceState]) => {
+    const datasource = datasourceMap[datasourceId];
+    if (!datasourceState.isLoading && datasource.getWarningMessages) {
+      warningMessages.push(
+        ...(datasource.getWarningMessages(datasourceState.state, framePublicAPI) || [])
+      );
+    }
+  });
   return (
     <>
       <div>

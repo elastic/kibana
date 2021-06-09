@@ -1,3 +1,9 @@
+# URL Generators are deprecated
+
+__Below is documentation of URL Generators, which are now deprecated and will be removed in favor of URL locators in 7.14.__
+
+---
+
 ## URL Generator Services
 
 Developers who maintain pages in Kibana that other developers may want to link to

@@ -9,15 +9,25 @@ import { combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { map, scan, shareReplay, switchMap } from 'rxjs/operators';
 
 export interface NavigationSection {
+  // the label of the section, should be translated
   label: string | undefined;
+  // the key to sort by in ascending order relative to other entries
   sortKey: number;
+  // the entries to render inside the section
   entries: NavigationEntry[];
 }
 
 export interface NavigationEntry {
+  // the label of the menu entry, should be translated
   label: string;
+  // the kibana app id
   app: string;
+  // the path after the application prefix corresponding to this entry
   path: string;
+  // whether to only match when the full path matches, defaults to `false`
+  matchFullPath?: boolean;
+  // whether to ignore trailing slashes, defaults to `true`
+  ignoreTrailingSlash?: boolean;
 }
 
 export interface NavigationRegistry {

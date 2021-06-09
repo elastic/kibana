@@ -28,8 +28,10 @@ import { policyFactory as policyConfigFactory } from './models/policy_config';
 import { HostMetadata } from './types';
 import { KbnClientWithApiKeySupport } from '../../scripts/endpoint/kbn_client_with_api_key_support';
 import { FleetAgentGenerator } from './data_generators/fleet_agent_generator';
+import { FleetActionGenerator } from './data_generators/fleet_action_generator';
 
 const fleetAgentGenerator = new FleetAgentGenerator();
+const fleetActionGenerator = new FleetActionGenerator();
 
 export async function indexHostsAndAlerts(
   client: Client,
@@ -119,7 +121,7 @@ async function indexHostDocs({
   const kibanaVersion = await fetchKibanaVersion(kbnClient);
   let hostMetadata: HostMetadata;
   let wasAgentEnrolled = false;
-  let enrolledAgent: undefined | estypes.Hit<FleetServerAgent>;
+  let enrolledAgent: undefined | estypes.SearchHit<FleetServerAgent>;
 
   for (let j = 0; j < numDocs; j++) {
     generator.updateHostData();
@@ -175,6 +177,9 @@ async function indexHostDocs({
           },
         },
       };
+
+      // Create some actions for this Host
+      await indexFleetActionsForHost(client, hostMetadata);
     }
 
     await client.index({
@@ -368,7 +373,7 @@ const indexFleetAgentForHost = async (
   endpointHost: HostMetadata,
   agentPolicyId: string,
   kibanaVersion: string = '8.0.0'
-): Promise<estypes.Hit<FleetServerAgent>> => {
+): Promise<estypes.SearchHit<FleetServerAgent>> => {
   const agentDoc = fleetAgentGenerator.generateEsHit({
     _source: {
       local_metadata: {
@@ -396,4 +401,44 @@ const indexFleetAgentForHost = async (
   });
 
   return agentDoc;
+};
+
+const indexFleetActionsForHost = async (
+  esClient: Client,
+  endpointHost: HostMetadata
+): Promise<void> => {
+  const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
+  const agentId = endpointHost.elastic.agent.id;
+
+  for (let i = 0; i < 5; i++) {
+    // create an action
+    const isolateAction = fleetActionGenerator.generate({
+      data: { comment: 'data generator: this host is bad' },
+    });
+
+    isolateAction.agents = [agentId];
+
+    await esClient.index(
+      {
+        index: '.fleet-actions',
+        body: isolateAction,
+      },
+      ES_INDEX_OPTIONS
+    );
+
+    // Create an action response for the above
+    const unIsolateAction = fleetActionGenerator.generateResponse({
+      action_id: isolateAction.action_id,
+      agent_id: agentId,
+      action_data: isolateAction.data,
+    });
+
+    await esClient.index(
+      {
+        index: '.fleet-actions-results',
+        body: unIsolateAction,
+      },
+      ES_INDEX_OPTIONS
+    );
+  }
 };

@@ -136,6 +136,7 @@ export async function getVectorSourceBounds({
     sourceQuery: sourceQuery ? sourceQuery : undefined,
     query: dataFilters.query,
     timeFilters: dataFilters.timeFilters,
+    timeslice: dataFilters.timeslice,
     filters: dataFilters.filters,
     applyGlobalQuery: source.getApplyGlobalQuery(),
     applyGlobalTime: source.getApplyGlobalTime(),
