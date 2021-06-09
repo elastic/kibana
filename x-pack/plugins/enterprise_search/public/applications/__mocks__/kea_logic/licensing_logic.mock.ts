@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { licensingMock } from '../../../../licensing/public/mocks';
+import { licensingMock } from '../../../../../licensing/public/mocks';
 
 export const mockLicensingValues = {
   license: licensingMock.createLicense(),
@@ -13,6 +13,6 @@ export const mockLicensingValues = {
   hasGoldLicense: false,
 };
 
-jest.mock('../shared/licensing', () => ({
+jest.mock('../../shared/licensing', () => ({
   LicensingLogic: { values: mockLicensingValues },
 }));
