@@ -29,7 +29,7 @@ describe('actionTypeRegistry.get() works', () => {
 });
 
 describe('swimlane connector validation', () => {
-  test('connector validation succeeds when connector is valid', () => {
+  test('connector validation succeeds when connector is valid', async () => {
     const actionConnector = {
       secrets: {
         apiToken: 'test',
@@ -54,13 +54,13 @@ describe('swimlane connector validation', () => {
       },
     } as SwimlaneActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: { errors: { apiUrl: [], appId: [], mappings: [], connectorType: [] } },
       secrets: { errors: { apiToken: [] } },
     });
   });
 
-  test('it validates correctly when connectorType=all', () => {
+  test('it validates correctly when connectorType=all', async () => {
     const actionConnector = {
       secrets: {
         apiToken: 'test',
@@ -76,13 +76,13 @@ describe('swimlane connector validation', () => {
       },
     } as SwimlaneActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: { errors: { apiUrl: [], appId: [], mappings: [], connectorType: [] } },
       secrets: { errors: { apiToken: [] } },
     });
   });
 
-  test('it validates correctly when connectorType=cases', () => {
+  test('it validates correctly when connectorType=cases', async () => {
     const actionConnector = {
       secrets: {
         apiToken: 'test',
@@ -98,7 +98,7 @@ describe('swimlane connector validation', () => {
       },
     } as SwimlaneActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
           apiUrl: [],
@@ -118,7 +118,7 @@ describe('swimlane connector validation', () => {
     });
   });
 
-  test('it validates correctly when connectorType=alerts', () => {
+  test('it validates correctly when connectorType=alerts', async () => {
     const actionConnector = {
       secrets: {
         apiToken: 'test',
@@ -134,7 +134,7 @@ describe('swimlane connector validation', () => {
       },
     } as SwimlaneActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
           apiUrl: [],
@@ -143,6 +143,7 @@ describe('swimlane connector validation', () => {
             {
               alertIdConfig: 'Alert ID is required.',
               ruleNameConfig: 'Rule name is required.',
+              alertSourceConfig: 'Alert source is required.',
             },
           ],
           connectorType: [],
@@ -152,7 +153,7 @@ describe('swimlane connector validation', () => {
     });
   });
 
-  test('it validates correctly required config/secrets fields', () => {
+  test('it validates correctly required config/secrets fields', async () => {
     const actionConnector = {
       secrets: {},
       id: 'test',
@@ -161,7 +162,7 @@ describe('swimlane connector validation', () => {
       config: {},
     } as SwimlaneActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
           apiUrl: ['URL is required.'],
@@ -176,7 +177,7 @@ describe('swimlane connector validation', () => {
 });
 
 describe('swimlane action params validation', () => {
-  test('action params validation succeeds when action params is valid', () => {
+  test('action params validation succeeds when action params is valid', async () => {
     const actionParams = {
       subActionParams: {
         ruleName: 'Rule Name',
@@ -184,7 +185,7 @@ describe('swimlane action params validation', () => {
       },
     };
 
-    expect(actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         'subActionParams.incident.ruleName': [],
         'subActionParams.incident.alertId': [],
@@ -192,12 +193,12 @@ describe('swimlane action params validation', () => {
     });
   });
 
-  test('it validates correctly required fields', () => {
+  test('it validates correctly required fields', async () => {
     const actionParams = {
       subActionParams: { incident: {} },
     };
 
-    expect(actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         'subActionParams.incident.ruleName': ['Rule name is required.'],
         'subActionParams.incident.alertId': ['Alert ID is required.'],
@@ -205,12 +206,12 @@ describe('swimlane action params validation', () => {
     });
   });
 
-  test('it succeeds when missing incident', () => {
+  test('it succeeds when missing incident', async () => {
     const actionParams = {
       subActionParams: {},
     };
 
-    expect(actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         'subActionParams.incident.ruleName': [],
         'subActionParams.incident.alertId': [],

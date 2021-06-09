@@ -7,6 +7,12 @@
 
 export const applicationFields = [
   {
+    id: 'a6ide',
+    name: 'Alert Id',
+    key: 'alert-id',
+    fieldType: 'text',
+  },
+  {
     id: 'adnjls',
     name: 'Alert Source',
     key: 'alert-source',
@@ -51,6 +57,7 @@ export const applicationFields = [
 ];
 
 export const mappings = {
+  alertIdConfig: applicationFields[0],
   alertSourceConfig: applicationFields[0],
   severityConfig: applicationFields[1],
   ruleNameConfig: applicationFields[2],

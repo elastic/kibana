@@ -43,22 +43,17 @@ describe('SwimlaneParamsFields renders', () => {
       <SwimlaneParamsFields
         actionParams={actionParams}
         errors={{
-          ruleName: [],
-          comments: [],
-          severity: [],
-          caseId: [],
-          caseName: [],
-          alertSource: [],
-          alertId: [],
+          'subActionParams.incident.ruleName': [],
+          'subActionParams.incident.alertId': [],
         }}
         actionConnector={connector}
         editAction={() => {}}
         index={0}
       />
     );
-    expect(wrapper.find('[data-test-subj="severity"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="comments"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="alertSource"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="ruleName"]').length > 0).toBeTruthy();
+
+    expect(wrapper.find('[data-test-subj="severity"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="comments"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="alertSource"]').exists()).toBeTruthy();
   });
 });

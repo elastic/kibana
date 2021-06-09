@@ -36,7 +36,7 @@ describe('SwimlaneActionConnectorFields renders', () => {
     const wrapper = mountWithIntl(
       <SwimlaneActionConnectorFields
         action={actionConnector}
-        errors={{ index: [], apiToken: [] }}
+        errors={{ connectorType: [], appId: [], apiUrl: [], mappings: [], apiToken: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
@@ -66,7 +66,7 @@ describe('SwimlaneActionConnectorFields renders', () => {
     const wrapper = mountWithIntl(
       <SwimlaneActionConnectorFields
         action={actionConnector}
-        errors={{ index: [], apiToken: [] }}
+        errors={{ connectorType: [], appId: [], apiUrl: [], mappings: [], apiToken: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
@@ -99,7 +99,7 @@ describe('SwimlaneActionConnectorFields renders', () => {
     const wrapper = mountWithIntl(
       <SwimlaneActionConnectorFields
         action={actionConnector}
-        errors={{ index: [], apiToken: [] }}
+        errors={{ connectorType: [], appId: [], apiUrl: [], mappings: [], apiToken: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}

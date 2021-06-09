@@ -68,6 +68,7 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<
     },
     [editActionConfig, errors?.mappings]
   );
+
   return (
     <Fragment>
       <EuiStepsHorizontal steps={setupSteps} />
