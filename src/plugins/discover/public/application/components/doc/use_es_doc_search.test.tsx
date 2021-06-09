@@ -89,6 +89,36 @@ describe('Test of <Doc /> helper / hook', () => {
     `);
   });
 
+  test('buildSearchBody with requestAllFields', () => {
+    const indexPattern = ({
+      getComputedFields: () => ({ storedFields: [], scriptFields: [], docvalueFields: [] }),
+    } as unknown) as IndexPattern;
+    const actual = buildSearchBody('1', indexPattern, true, true);
+    expect(actual).toMatchInlineSnapshot(`
+      Object {
+        "body": Object {
+          "_source": true,
+          "fields": Array [
+            Object {
+              "field": "*",
+              "include_unmapped": "true",
+            },
+          ],
+          "query": Object {
+            "ids": Object {
+              "values": Array [
+                "1",
+              ],
+            },
+          },
+          "runtime_mappings": Object {},
+          "script_fields": Array [],
+          "stored_fields": Array [],
+        },
+      }
+    `);
+  });
+
   test('buildSearchBody with runtime fields', () => {
     const indexPattern = ({
       getComputedFields: () => ({

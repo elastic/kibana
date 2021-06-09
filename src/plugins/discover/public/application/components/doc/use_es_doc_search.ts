@@ -23,7 +23,8 @@ type RequestBody = Pick<estypes.SearchRequest, 'body'>;
 export function buildSearchBody(
   id: string,
   indexPattern: IndexPattern,
-  useNewFieldsApi: boolean
+  useNewFieldsApi: boolean,
+  requestAllFields?: boolean
 ): RequestBody | undefined {
   const computedFields = indexPattern.getComputedFields();
   const runtimeFields = computedFields.runtimeFields as estypes.MappingRuntimeFields;
@@ -45,6 +46,9 @@ export function buildSearchBody(
     // @ts-expect-error
     request.body.fields = [{ field: '*', include_unmapped: 'true' }];
     request.body.runtime_mappings = runtimeFields ? runtimeFields : {};
+    if (requestAllFields) {
+      request.body._source = true;
+    }
   } else {
     request.body._source = true;
   }
@@ -60,14 +64,13 @@ export function useEsDocSearch({
   index,
   indexPatternId,
   indexPatternService,
-  requestFieldsFromSource,
+  requestAllFields,
 }: DocProps): [ElasticRequestState, ElasticSearchHit | null, IndexPattern | null] {
   const [indexPattern, setIndexPattern] = useState<IndexPattern | null>(null);
   const [status, setStatus] = useState(ElasticRequestState.Loading);
   const [hit, setHit] = useState<ElasticSearchHit | null>(null);
   const { data, uiSettings } = useMemo(() => getServices(), []);
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
-  const requestFieldsFromFields = useNewFieldsApi && !Boolean(requestFieldsFromSource);
 
   useEffect(() => {
     async function requestData() {
@@ -79,7 +82,8 @@ export function useEsDocSearch({
           .search({
             params: {
               index,
-              body: buildSearchBody(id, indexPatternEntity, requestFieldsFromFields)?.body,
+              body: buildSearchBody(id, indexPatternEntity, useNewFieldsApi, requestAllFields)
+                ?.body,
             },
           })
           .toPromise();
@@ -110,7 +114,7 @@ export function useEsDocSearch({
     indexPatternService,
     data.search,
     useNewFieldsApi,
-    requestFieldsFromFields,
+    requestAllFields,
   ]);
   return [status, hit, indexPattern];
 }

@@ -307,23 +307,28 @@ exports[`Source Viewer component renders json code editor 1`] = `
   width={123}
 >
   <JsonCodeEditorCommon
-    data-test-subj="source-viewer-json-editor"
     hasLineNumbers={true}
     jsonValue="{
-  \\"message\\": \\"Lorem ipsum dolor sit amet\\",
-  \\"extension\\": \\"html\\",
-  \\"not_mapped\\": \\"yes\\",
-  \\"bytes\\": 100,
-  \\"objectArray\\": [
-    {
-      \\"foo\\": true
-    }
-  ],
-  \\"relatedContent\\": {
-    \\"test\\": 1
-  },
-  \\"scripted\\": 123,
-  \\"_underscore\\": 123
+  \\"_index\\": \\"logstash-2014.09.09\\",
+  \\"_type\\": \\"doc\\",
+  \\"_id\\": \\"id123\\",
+  \\"_score\\": 1,
+  \\"_source\\": {
+    \\"message\\": \\"Lorem ipsum dolor sit amet\\",
+    \\"extension\\": \\"html\\",
+    \\"not_mapped\\": \\"yes\\",
+    \\"bytes\\": 100,
+    \\"objectArray\\": [
+      {
+        \\"foo\\": true
+      }
+    ],
+    \\"relatedContent\\": {
+      \\"test\\": 1
+    },
+    \\"scripted\\": 123,
+    \\"_underscore\\": 123
+  }
 }"
     onEditorDidMount={[Function]}
     width={123}
@@ -353,20 +358,26 @@ exports[`Source Viewer component renders json code editor 1`] = `
               <EuiCopy
                 afterMessage="Copied"
                 textToCopy="{
-  \\"message\\": \\"Lorem ipsum dolor sit amet\\",
-  \\"extension\\": \\"html\\",
-  \\"not_mapped\\": \\"yes\\",
-  \\"bytes\\": 100,
-  \\"objectArray\\": [
-    {
-      \\"foo\\": true
-    }
-  ],
-  \\"relatedContent\\": {
-    \\"test\\": 1
-  },
-  \\"scripted\\": 123,
-  \\"_underscore\\": 123
+  \\"_index\\": \\"logstash-2014.09.09\\",
+  \\"_type\\": \\"doc\\",
+  \\"_id\\": \\"id123\\",
+  \\"_score\\": 1,
+  \\"_source\\": {
+    \\"message\\": \\"Lorem ipsum dolor sit amet\\",
+    \\"extension\\": \\"html\\",
+    \\"not_mapped\\": \\"yes\\",
+    \\"bytes\\": 100,
+    \\"objectArray\\": [
+      {
+        \\"foo\\": true
+      }
+    ],
+    \\"relatedContent\\": {
+      \\"test\\": 1
+    },
+    \\"scripted\\": 123,
+    \\"_underscore\\": 123
+  }
 }"
               >
                 <EuiToolTip
@@ -466,20 +477,26 @@ exports[`Source Viewer component renders json code editor 1`] = `
                 }
               }
               value="{
-  \\"message\\": \\"Lorem ipsum dolor sit amet\\",
-  \\"extension\\": \\"html\\",
-  \\"not_mapped\\": \\"yes\\",
-  \\"bytes\\": 100,
-  \\"objectArray\\": [
-    {
-      \\"foo\\": true
-    }
-  ],
-  \\"relatedContent\\": {
-    \\"test\\": 1
-  },
-  \\"scripted\\": 123,
-  \\"_underscore\\": 123
+  \\"_index\\": \\"logstash-2014.09.09\\",
+  \\"_type\\": \\"doc\\",
+  \\"_id\\": \\"id123\\",
+  \\"_score\\": 1,
+  \\"_source\\": {
+    \\"message\\": \\"Lorem ipsum dolor sit amet\\",
+    \\"extension\\": \\"html\\",
+    \\"not_mapped\\": \\"yes\\",
+    \\"bytes\\": 100,
+    \\"objectArray\\": [
+      {
+        \\"foo\\": true
+      }
+    ],
+    \\"relatedContent\\": {
+      \\"test\\": 1
+    },
+    \\"scripted\\": 123,
+    \\"_underscore\\": 123
+  }
 }"
               width={123}
             >

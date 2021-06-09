@@ -34,9 +34,9 @@ export interface DocProps {
    */
   indexPatternService: IndexPatternsContract;
   /**
-   * If set, will always request fields from source, regardless of the global `fieldsFromSource` setting
+   * If set, will always request all fields, regardless of the global `fieldsFromSource` setting
    */
-  requestFieldsFromSource?: boolean;
+  requestAllFields?: boolean;
 }
 
 export function Doc(props: DocProps) {

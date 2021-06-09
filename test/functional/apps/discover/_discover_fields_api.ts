@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await docTable.clickRowToggle({ rowIndex: 0 });
 
       await PageObjects.discover.isShowingDocViewer();
-      await PageObjects.discover.clickDocViewerTab(2);
+      await PageObjects.discover.clickDocViewerTab(1);
       await PageObjects.discover.expectSourceViewerToExist();
     });
   });

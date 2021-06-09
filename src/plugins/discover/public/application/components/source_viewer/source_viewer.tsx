@@ -24,11 +24,11 @@ export const SourceViewer = ({ docProps, width, hasLineNumbers }: SourceViewerPr
   const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor>();
   const [jsonValue, setJsonValue] = useState<string>('');
 
-  const [reqState, hit] = useEsDocSearch({ ...docProps, requestFieldsFromSource: true });
+  const [reqState, hit] = useEsDocSearch({ ...docProps });
 
   useEffect(() => {
     if (reqState === ElasticRequestState.Found) {
-      setJsonValue(JSON.stringify(hit?._source, null, 2));
+      setJsonValue(JSON.stringify(hit, null, 2));
     }
   }, [reqState, hit]);
 
