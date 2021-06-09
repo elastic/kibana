@@ -18,11 +18,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     // tests upgrading a 7.10.0 saved object to the latest version
     describe('7.10.0 -> latest stack version', () => {
       before(async () => {
-        await esArchiver.load('cases/migrations/7.10.0');
+        await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/7.10.0');
       });
 
       after(async () => {
-        await esArchiver.unload('cases/migrations/7.10.0');
+        await esArchiver.unload('x-pack/test/functional/es_archives/cases/migrations/7.10.0');
       });
 
       it('migrates cases connector', async () => {
@@ -59,11 +59,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     // tests upgrading a 7.11.1 saved object to the latest version
     describe('7.11.1 -> latest stack version', () => {
       before(async () => {
-        await esArchiver.load('cases/migrations/7.11.1');
+        await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/7.11.1');
       });
 
       after(async () => {
-        await esArchiver.unload('cases/migrations/7.11.1');
+        await esArchiver.unload('x-pack/test/functional/es_archives/cases/migrations/7.11.1');
       });
 
       it('adds rule info to only alert comments for 7.12', async () => {

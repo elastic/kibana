@@ -24,10 +24,13 @@ export default function ({ getService, getPageObjects }) {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
-        await setup('monitoring/singlecluster_three_nodes_shard_relocation', {
-          from: 'Oct 5, 2017 @ 20:31:48.354',
-          to: 'Oct 5, 2017 @ 20:35:12.176',
-        });
+        await setup(
+          'x-pack/test/functional/es_archives/monitoring/singlecluster_three_nodes_shard_relocation',
+          {
+            from: 'Oct 5, 2017 @ 20:31:48.354',
+            to: 'Oct 5, 2017 @ 20:35:12.176',
+          }
+        );
 
         // go to indices listing
         await overview.clickEsIndices();
