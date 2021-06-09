@@ -63,6 +63,7 @@ SRC_DEPS = [
   "@npm//react-router",
   "@npm//react-router-dom",
   "@npm//regenerator-runtime",
+  "@npm//resize-observer-polyfill",
   "@npm//rison-node",
   "@npm//rxjs",
   "@npm//styled-components",
