@@ -94,7 +94,7 @@ export async function fetchMemoryUsageNodeStats(
 
   const { body: response } = await esClient.search(params);
   const stats: AlertMemoryUsageNodeStats[] = [];
-  // @ts-expect-error @elastic/elasticsearch Aggregate does not define buckets
+  // @ts-expect-error declare type for aggregations explicitly
   const { buckets: clusterBuckets } = response.aggregations?.clusters;
 
   if (!clusterBuckets?.length) {

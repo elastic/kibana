@@ -105,7 +105,7 @@ export async function fetchIndexShardSize(
   };
 
   const { body: response } = await esClient.search(params);
-  // @ts-expect-error @elastic/elasticsearch Aggregate does not specify buckets
+  // @ts-expect-error @ts-expect-error declare aggegations type explicitly
   const { buckets: clusterBuckets } = response.aggregations?.clusters;
   const stats: IndexShardSizeStats[] = [];
   if (!clusterBuckets?.length) {

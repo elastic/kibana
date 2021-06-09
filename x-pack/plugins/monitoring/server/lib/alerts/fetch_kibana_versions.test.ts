@@ -23,7 +23,7 @@ describe('fetchKibanaVersions', () => {
 
   it('fetch as expected', async () => {
     esClient.search.mockReturnValue(
-      // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
+      // @ts-expect-error not full response interface
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         aggregations: {
           index: {
