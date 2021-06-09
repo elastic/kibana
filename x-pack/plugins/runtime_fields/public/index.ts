@@ -5,17 +5,8 @@
  * 2.0.
  */
 
-import { RuntimeFieldsPlugin } from './plugin';
+export type { RuntimeFieldEditorFlyoutContentProps, RuntimeFieldFormState } from './components';
 
-export {
-  RuntimeFieldEditorFlyoutContent,
-  RuntimeFieldEditorFlyoutContentProps,
-  RuntimeFieldEditor,
-  RuntimeFieldFormState,
-} from './components';
+export { RuntimeFieldEditorFlyoutContent, RuntimeFieldEditor } from './components';
 export { RUNTIME_FIELD_OPTIONS } from './constants';
-export { RuntimeField, RuntimeType, PluginSetup as RuntimeFieldsSetup } from './types';
-
-export function plugin() {
-  return new RuntimeFieldsPlugin();
-}
+export type { RuntimeField, RuntimeType, PluginSetup as RuntimeFieldsSetup } from './types';
