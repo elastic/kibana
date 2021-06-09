@@ -12,7 +12,11 @@ describe('splitByFilters(req, panel, series)', () => {
   let panel;
   let series;
   let req;
+  let config;
+  let seriesIndex;
+
   beforeEach(() => {
+    config = {};
     panel = {
       time_field: 'timestamp',
     };
@@ -43,17 +47,18 @@ describe('splitByFilters(req, panel, series)', () => {
         },
       },
     };
+    seriesIndex = {};
   });
 
   test('calls next when finished', () => {
     const next = jest.fn();
-    splitByFilters(req, panel, series)(next)({});
+    splitByFilters(req, panel, series, config, seriesIndex)(next)({});
     expect(next.mock.calls.length).toEqual(1);
   });
 
   test('returns a valid terms agg', () => {
     const next = (doc) => doc;
-    const doc = splitByFilters(req, panel, series)(next)({});
+    const doc = splitByFilters(req, panel, series, config, seriesIndex)(next)({});
     expect(doc).toEqual({
       aggs: {
         test: {
@@ -97,7 +102,7 @@ describe('splitByFilters(req, panel, series)', () => {
   test('calls next and does not add a terms agg', () => {
     series.split_mode = 'everything';
     const next = jest.fn((doc) => doc);
-    const doc = splitByFilters(req, panel, series)(next)({});
+    const doc = splitByFilters(req, panel, series, config, seriesIndex)(next)({});
     expect(next.mock.calls.length).toEqual(1);
     expect(doc).toEqual({});
   });

@@ -5,22 +5,16 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { isEmpty } from 'lodash';
-import { Observable } from 'rxjs';
+import { schema } from '@kbn/config-schema';
 import { take } from 'rxjs/operators';
-import { APMConfig } from '../..';
 import {
-  AlertingPlugin,
-  AlertInstanceContext,
-  AlertInstanceState,
-  AlertTypeState,
-} from '../../../../alerting/server';
-import {
-  AlertType,
-  ALERT_TYPES_CONFIG,
-  ThresholdMetActionGroupId,
-} from '../../../common/alert_types';
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+} from '@kbn/rule-data-utils/target/technical_field_names';
+import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
+import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
+import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
@@ -31,11 +25,7 @@ import { environmentQuery } from '../../../server/utils/queries';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
-
-interface RegisterAlertParams {
-  alerting: AlertingPlugin['setup'];
-  config$: Observable<APMConfig>;
-}
+import { RegisterRuleDependencies } from './register_apm_alerts';
 
 const paramsSchema = schema.object({
   windowSize: schema.number(),
@@ -49,126 +39,139 @@ const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.ErrorCount];
 
 export function registerErrorCountAlertType({
   alerting,
+  logger,
+  ruleDataClient,
   config$,
-}: RegisterAlertParams) {
-  alerting.registerType<
-    TypeOf<typeof paramsSchema>,
-    AlertTypeState,
-    AlertInstanceState,
-    AlertInstanceContext,
-    ThresholdMetActionGroupId
-  >({
-    id: AlertType.ErrorCount,
-    name: alertTypeConfig.name,
-    actionGroups: alertTypeConfig.actionGroups,
-    defaultActionGroupId: alertTypeConfig.defaultActionGroupId,
-    validate: {
-      params: paramsSchema,
-    },
-    actionVariables: {
-      context: [
-        apmActionVariables.serviceName,
-        apmActionVariables.environment,
-        apmActionVariables.threshold,
-        apmActionVariables.triggerValue,
-        apmActionVariables.interval,
-      ],
-    },
-    producer: 'apm',
-    minimumLicenseRequired: 'basic',
-    executor: async ({ services, params }) => {
-      const config = await config$.pipe(take(1)).toPromise();
-      const alertParams = params;
-      const indices = await getApmIndices({
-        config,
-        savedObjectsClient: services.savedObjectsClient,
-      });
-      const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
+}: RegisterRuleDependencies) {
+  const createLifecycleRuleType = createLifecycleRuleTypeFactory({
+    ruleDataClient,
+    logger,
+  });
 
-      const searchParams = {
-        index: indices['apm_oss.errorIndices'],
-        size: 0,
-        body: {
-          track_total_hits: true,
-          query: {
-            bool: {
-              filter: [
-                {
-                  range: {
-                    '@timestamp': {
-                      gte: `now-${alertParams.windowSize}${alertParams.windowUnit}`,
+  alerting.registerType(
+    createLifecycleRuleType({
+      id: AlertType.ErrorCount,
+      name: alertTypeConfig.name,
+      actionGroups: alertTypeConfig.actionGroups,
+      defaultActionGroupId: alertTypeConfig.defaultActionGroupId,
+      validate: {
+        params: paramsSchema,
+      },
+      actionVariables: {
+        context: [
+          apmActionVariables.serviceName,
+          apmActionVariables.environment,
+          apmActionVariables.threshold,
+          apmActionVariables.triggerValue,
+          apmActionVariables.interval,
+        ],
+      },
+      producer: 'apm',
+      minimumLicenseRequired: 'basic',
+      executor: async ({ services, params }) => {
+        const config = await config$.pipe(take(1)).toPromise();
+        const alertParams = params;
+        const indices = await getApmIndices({
+          config,
+          savedObjectsClient: services.savedObjectsClient,
+        });
+
+        const searchParams = {
+          index: indices['apm_oss.errorIndices'],
+          size: 0,
+          body: {
+            query: {
+              bool: {
+                filter: [
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: `now-${alertParams.windowSize}${alertParams.windowUnit}`,
+                      },
+                    },
+                  },
+                  { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
+                  ...(alertParams.serviceName
+                    ? [{ term: { [SERVICE_NAME]: alertParams.serviceName } }]
+                    : []),
+                  ...environmentQuery(alertParams.environment),
+                ],
+              },
+            },
+            aggs: {
+              error_counts: {
+                multi_terms: {
+                  terms: [
+                    { field: SERVICE_NAME },
+                    { field: SERVICE_ENVIRONMENT, missing: '' },
+                  ],
+                  size: 10000,
+                },
+                aggs: {
+                  latest: {
+                    top_metrics: {
+                      metrics: asMutableArray([
+                        { field: SERVICE_NAME },
+                        { field: SERVICE_ENVIRONMENT },
+                      ] as const),
+                      sort: {
+                        '@timestamp': 'desc' as const,
+                      },
                     },
                   },
                 },
-                { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
-                ...(alertParams.serviceName
-                  ? [{ term: { [SERVICE_NAME]: alertParams.serviceName } }]
-                  : []),
-                ...environmentQuery(alertParams.environment),
-              ],
-            },
-          },
-          aggs: {
-            services: {
-              terms: {
-                field: SERVICE_NAME,
-                size: 50,
-              },
-              aggs: {
-                environments: {
-                  terms: {
-                    field: SERVICE_ENVIRONMENT,
-                    size: maxServiceEnvironments,
-                  },
-                },
               },
             },
           },
-        },
-      };
+        };
 
-      const { body: response } = await alertingEsClient(services, searchParams);
-      const errorCount = response.hits.total.value;
-
-      if (errorCount > alertParams.threshold) {
-        function scheduleAction({
-          serviceName,
-          environment,
-        }: {
-          serviceName: string;
-          environment?: string;
-        }) {
-          const alertInstanceName = [
-            AlertType.ErrorCount,
-            serviceName,
-            environment,
-          ]
-            .filter((name) => name)
-            .join('_');
-
-          const alertInstance = services.alertInstanceFactory(
-            alertInstanceName
-          );
-          alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
-            serviceName,
-            environment,
-            threshold: alertParams.threshold,
-            triggerValue: errorCount,
-            interval: `${alertParams.windowSize}${alertParams.windowUnit}`,
-          });
-        }
-        response.aggregations?.services.buckets.forEach((serviceBucket) => {
-          const serviceName = serviceBucket.key as string;
-          if (isEmpty(serviceBucket.environments?.buckets)) {
-            scheduleAction({ serviceName });
-          } else {
-            serviceBucket.environments.buckets.forEach((envBucket) => {
-              const environment = envBucket.key as string;
-              scheduleAction({ serviceName, environment });
-            });
-          }
+        const response = await alertingEsClient({
+          scopedClusterClient: services.scopedClusterClient,
+          params: searchParams,
         });
-      }
-    },
-  });
+
+        const errorCountResults =
+          response.aggregations?.error_counts.buckets.map((bucket) => {
+            const latest = bucket.latest.top[0].metrics;
+
+            return {
+              serviceName: latest['service.name'] as string,
+              environment: latest['service.environment'] as string | undefined,
+              errorCount: bucket.doc_count,
+            };
+          }) ?? [];
+
+        errorCountResults
+          .filter((result) => result.errorCount >= alertParams.threshold)
+          .forEach((result) => {
+            const { serviceName, environment, errorCount } = result;
+
+            services
+              .alertWithLifecycle({
+                id: [AlertType.ErrorCount, serviceName, environment]
+                  .filter((name) => name)
+                  .join('_'),
+                fields: {
+                  [SERVICE_NAME]: serviceName,
+                  ...(environment
+                    ? { [SERVICE_ENVIRONMENT]: environment }
+                    : {}),
+                  [PROCESSOR_EVENT]: ProcessorEvent.error,
+                  [ALERT_EVALUATION_VALUE]: errorCount,
+                  [ALERT_EVALUATION_THRESHOLD]: alertParams.threshold,
+                },
+              })
+              .scheduleActions(alertTypeConfig.defaultActionGroupId, {
+                serviceName,
+                environment: environment || ENVIRONMENT_NOT_DEFINED.text,
+                threshold: alertParams.threshold,
+                triggerValue: errorCount,
+                interval: `${alertParams.windowSize}${alertParams.windowUnit}`,
+              });
+          });
+
+        return {};
+      },
+    })
+  );
 }

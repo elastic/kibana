@@ -31,10 +31,15 @@ for different operating systems.
 [[reporting-required-privileges]]
 == Roles and privileges
 
-To generate a report, you must have the `reporting_user` role. You also need
-the appropriate {kib} privileges to access the objects that you
-want to report on and the {es} indices.  See <<secure-reporting, Reporting and security>>
-for an example.
+When security is enabled, access to the {report-features} is controlled by security privileges. In versions 7.12 and earlier, you can grant access to the {report-features}
+by assigning users the `reporting_user` role in {es}. In 7.14 and later, you can configure *Reporting* to use
+<<kibana-privileges, {kib} privileges>>. It is recommended that *Reporting* is configured to
+use {kib} privileges by setting <<xpack-reporting-roles-enabled,`xpack.reporting.roles.enabled`>> to `false`. By using {kib} privileges, you can define
+custom roles that grant *Reporting* privileges as sub-features of {kib} applications in *Role Management*.
+
+Users must also have the {kib} privileges to access the saved objects and associated {es} indices included in the generated reports.
+For an example, refer to <<secure-reporting, Reporting and
+security>>.
 
 [float]
 [[manually-generate-reports]]

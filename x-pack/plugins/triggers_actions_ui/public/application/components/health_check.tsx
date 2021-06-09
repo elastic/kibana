@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { Option, none, some, fold } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -15,12 +15,12 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import { DocLinksStart } from 'kibana/public';
-import { alertingFrameworkHealth } from '../lib/alert_api';
 import './health_check.scss';
 import { useHealthContext } from '../context/health_context';
 import { useKibana } from '../../common/lib/kibana';
 import { CenterJustifiedSpinner } from './center_justified_spinner';
 import { triggersActionsUiHealth } from '../../common/lib/health_api';
+import { alertingFrameworkHealth } from '../lib/alert_api';
 
 interface Props {
   inFlyout?: boolean;
@@ -69,16 +69,16 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
     fold(
       () =>
         waitForCheck ? (
-          <Fragment>
+          <>
             <EuiSpacer size="m" />
             <CenterJustifiedSpinner />
-          </Fragment>
+          </>
         ) : (
-          <Fragment>{children}</Fragment>
+          <>{children}</>
         ),
       (healthCheck) => {
         return healthCheck?.isSufficientlySecure && healthCheck?.hasPermanentEncryptionKey ? (
-          <Fragment>{children}</Fragment>
+          <>{children}</>
         ) : !healthCheck.isAlertsAvailable ? (
           <AlertsError docLinks={docLinks} className={className} />
         ) : !healthCheck.isSufficientlySecure && !healthCheck.hasPermanentEncryptionKey ? (

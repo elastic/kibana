@@ -103,6 +103,11 @@ export class Watcher {
         .pipe(ignoreElements())
         .subscribe(subscriber)
     );
+
+    // complete state subjects when run$ completes
+    subscriber.add(() => {
+      this.restart$.complete();
+    });
   });
 
   serverShouldRestart$() {

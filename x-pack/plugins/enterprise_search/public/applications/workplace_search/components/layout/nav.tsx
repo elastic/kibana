@@ -13,7 +13,6 @@ import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { SideNav, SideNavLink } from '../../../shared/layout';
 import { NAV } from '../../constants';
 import {
-  ALPHA_PATH,
   SOURCES_PATH,
   SECURITY_PATH,
   ROLE_MAPPINGS_PATH,
@@ -33,7 +32,7 @@ export const WorkplaceSearchNav: React.FC<Props> = ({
   settingsSubNav,
 }) => (
   <SideNav product={WORKPLACE_SEARCH_PLUGIN}>
-    <SideNavLink to={ALPHA_PATH} isRoot>
+    <SideNavLink to="/" isRoot>
       {NAV.OVERVIEW}
     </SideNavLink>
     <SideNavLink to={SOURCES_PATH} subNav={sourcesSubNav}>
@@ -42,7 +41,9 @@ export const WorkplaceSearchNav: React.FC<Props> = ({
     <SideNavLink to={GROUPS_PATH} subNav={groupsSubNav}>
       {NAV.GROUPS}
     </SideNavLink>
-    <SideNavLink to={ROLE_MAPPINGS_PATH}>{NAV.ROLE_MAPPINGS}</SideNavLink>
+    <SideNavLink shouldShowActiveForSubroutes to={ROLE_MAPPINGS_PATH}>
+      {NAV.ROLE_MAPPINGS}
+    </SideNavLink>
     <SideNavLink to={SECURITY_PATH}>{NAV.SECURITY}</SideNavLink>
     <SideNavLink subNav={settingsSubNav} to={ORG_SETTINGS_PATH}>
       {NAV.SETTINGS}

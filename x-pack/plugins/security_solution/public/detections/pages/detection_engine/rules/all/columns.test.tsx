@@ -5,50 +5,41 @@
  * 2.0.
  */
 
+import { scopedHistoryMock } from 'src/core/public/mocks';
 import uuid from 'uuid';
-import { createMemoryHistory } from 'history';
-
-const history = createMemoryHistory();
-
 import '../../../../../common/mock/match_media';
-import { mockRule } from './__mocks__/mock';
+import { deleteRulesAction, duplicateRulesAction, editRuleAction } from './actions';
 import { getActions } from './columns';
+import { mockRule } from './__mocks__/mock';
 
 jest.mock('./actions', () => ({
   duplicateRulesAction: jest.fn(),
   deleteRulesAction: jest.fn(),
+  editRuleAction: jest.fn(),
 }));
 
-import { duplicateRulesAction, deleteRulesAction } from './actions';
+const history = scopedHistoryMock.create();
+const duplicateRulesActionMock = duplicateRulesAction as jest.Mock;
+const deleteRulesActionMock = deleteRulesAction as jest.Mock;
+const editRuleActionMock = editRuleAction as jest.Mock;
 
 describe('AllRulesTable Columns', () => {
   describe('getActions', () => {
     const rule = mockRule(uuid.v4());
-    let results: string[] = [];
     const dispatch = jest.fn();
     const dispatchToaster = jest.fn();
     const reFetchRules = jest.fn();
     const refetchPrePackagedRulesStatus = jest.fn();
 
     beforeEach(() => {
-      results = [];
-
-      reFetchRules.mockImplementation(() => {
-        results.push('reFetchRules');
-        Promise.resolve();
-      });
+      duplicateRulesActionMock.mockClear();
+      deleteRulesActionMock.mockClear();
+      reFetchRules.mockClear();
     });
 
-    test('duplicate rule onClick should call refetch after the rule is duplicated', async () => {
-      (duplicateRulesAction as jest.Mock).mockImplementation(
-        () =>
-          new Promise<void>((resolve) =>
-            setTimeout(() => {
-              results.push('duplicateRulesAction');
-              resolve();
-            }, 500)
-          )
-      );
+    test('duplicate rule onClick should call rule edit after the rule is duplicated', async () => {
+      const ruleDuplicate = mockRule('newRule');
+      duplicateRulesActionMock.mockImplementation(() => Promise.resolve([ruleDuplicate]));
 
       const duplicateRulesActionObject = getActions(
         dispatch,
@@ -59,20 +50,11 @@ describe('AllRulesTable Columns', () => {
         true
       )[1];
       await duplicateRulesActionObject.onClick(rule);
-      expect(results).toEqual(['duplicateRulesAction', 'reFetchRules']);
+      expect(duplicateRulesActionMock).toHaveBeenCalled();
+      expect(editRuleActionMock).toHaveBeenCalledWith(ruleDuplicate, history);
     });
 
     test('delete rule onClick should call refetch after the rule is deleted', async () => {
-      (deleteRulesAction as jest.Mock).mockImplementation(
-        () =>
-          new Promise<void>((resolve) =>
-            setTimeout(() => {
-              results.push('deleteRulesAction');
-              resolve();
-            }, 500)
-          )
-      );
-
       const deleteRulesActionObject = getActions(
         dispatch,
         dispatchToaster,
@@ -82,7 +64,11 @@ describe('AllRulesTable Columns', () => {
         true
       )[3];
       await deleteRulesActionObject.onClick(rule);
-      expect(results).toEqual(['deleteRulesAction', 'reFetchRules']);
+      expect(deleteRulesActionMock).toHaveBeenCalledTimes(1);
+      expect(reFetchRules).toHaveBeenCalledTimes(1);
+      expect(deleteRulesActionMock.mock.invocationCallOrder[0]).toBeLessThan(
+        reFetchRules.mock.invocationCallOrder[0]
+      );
     });
   });
 });

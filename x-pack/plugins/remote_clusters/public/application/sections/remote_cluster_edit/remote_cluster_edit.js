@@ -27,10 +27,6 @@ import { getRouter, redirect } from '../../services';
 import { setBreadcrumbs } from '../../services/breadcrumb';
 import { RemoteClusterPageTitle, RemoteClusterForm, ConfiguredByNodeWarning } from '../components';
 
-const disabledFields = {
-  name: true,
-};
-
 export class RemoteClusterEdit extends Component {
   static propTypes = {
     isLoading: PropTypes.bool,
@@ -202,8 +198,7 @@ export class RemoteClusterEdit extends Component {
           </>
         ) : null}
         <RemoteClusterForm
-          fields={cluster}
-          disabledFields={disabledFields}
+          cluster={cluster}
           isSaving={isEditingCluster}
           saveError={getEditClusterError}
           save={this.save}

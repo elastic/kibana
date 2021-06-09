@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import LRU from 'lru-cache';
 import {
   IndexPatternsFetcher,
   FieldDescriptor,
 } from '../../../../../../src/plugins/data/server';
-import { APMRequestHandlerContext } from '../../routes/typings';
+import { APMRouteHandlerResources } from '../../routes/typings';
 import { withApmSpan } from '../../utils/with_apm_span';
 
 export interface IndexPatternTitleAndFields {
@@ -19,24 +18,14 @@ export interface IndexPatternTitleAndFields {
   fields: FieldDescriptor[];
 }
 
-const cache = new LRU<string, IndexPatternTitleAndFields | undefined>({
-  max: 100,
-  maxAge: 1000 * 60,
-});
-
 // TODO: this is currently cached globally. In the future we might want to cache this per user
 export const getDynamicIndexPattern = ({
+  config,
   context,
-}: {
-  context: APMRequestHandlerContext;
-}) => {
+  logger,
+}: Pick<APMRouteHandlerResources, 'logger' | 'config' | 'context'>) => {
   return withApmSpan('get_dynamic_index_pattern', async () => {
-    const indexPatternTitle = context.config['apm_oss.indexPattern'];
-
-    const CACHE_KEY = `apm_dynamic_index_pattern_${indexPatternTitle}`;
-    if (cache.has(CACHE_KEY)) {
-      return cache.get(CACHE_KEY);
-    }
+    const indexPatternTitle = config['apm_oss.indexPattern'];
 
     const indexPatternsFetcher = new IndexPatternsFetcher(
       context.core.elasticsearch.client.asCurrentUser
@@ -57,14 +46,11 @@ export const getDynamicIndexPattern = ({
         title: indexPatternTitle,
       };
 
-      cache.set(CACHE_KEY, indexPattern);
       return indexPattern;
     } catch (e) {
-      // since `getDynamicIndexPattern` can be called multiple times per request it can be expensive not to cache failed lookups
-      cache.set(CACHE_KEY, undefined);
       const notExists = e.output?.statusCode === 404;
       if (notExists) {
-        context.logger.error(
+        logger.error(
           `Could not get dynamic index pattern because indices "${indexPatternTitle}" don't exist`
         );
         return;

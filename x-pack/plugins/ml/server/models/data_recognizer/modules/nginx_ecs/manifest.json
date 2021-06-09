@@ -1,7 +1,7 @@
 {
   "id": "nginx_ecs",
-  "title": "Nginx access logs",
-  "description": "Find unusual activity in HTTP access logs from filebeat (ECS).",
+  "title": "Nginx access logs (Filebeat)",
+  "description": "Legacy jobs for finding unusual activity in HTTP access logs. The latest versions are installed with the Nginx integration in Fleet.",
   "type": "Web Access Logs",
   "logoFile": "logo.json",
   "defaultIndexPattern": "filebeat-*",

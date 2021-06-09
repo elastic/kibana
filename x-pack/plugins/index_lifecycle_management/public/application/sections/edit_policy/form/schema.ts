@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { PhaseExceptDelete, PhaseWithTiming } from '../../../../../common/types';
 import { FormSchema, fieldValidators } from '../../../../shared_imports';
 import { defaultIndexPriority } from '../../../constants';
 import { ROLLOVER_FORM_PATHS, CLOUD_DEFAULT_REPO } from '../constants';
@@ -16,6 +17,7 @@ import {
   ifExistsNumberNonNegative,
   rolloverThresholdsValidator,
   integerValidator,
+  minAgeGreaterThanPreviousPhase,
 } from './validations';
 
 const rolloverFormPaths = Object.values(ROLLOVER_FORM_PATHS);
@@ -105,8 +107,8 @@ const numberOfShardsField = {
   serializer: serializers.stringToNumber,
 };
 
-const getPriorityField = (phase: 'hot' | 'warm' | 'cold' | 'frozen') => ({
-  defaultValue: defaultIndexPriority[phase] as any,
+const getPriorityField = (phase: PhaseExceptDelete) => ({
+  defaultValue: defaultIndexPriority[phase],
   label: i18nTexts.editPolicy.indexPriorityFieldLabel,
   validations: [
     {
@@ -117,8 +119,11 @@ const getPriorityField = (phase: 'hot' | 'warm' | 'cold' | 'frozen') => ({
   serializer: serializers.stringToNumber,
 });
 
-const getMinAgeField = (defaultValue: string = '0') => ({
+const getMinAgeField = (phase: PhaseWithTiming, defaultValue?: string) => ({
   defaultValue,
+  // By passing an empty array we make sure to *not* trigger the validation when the field value changes.
+  // The validation will be triggered when the millisecond variant (in the _meta) is updated (in sync)
+  fieldsToValidateOnChange: [],
   validations: [
     {
       validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
@@ -129,8 +134,12 @@ const getMinAgeField = (defaultValue: string = '0') => ({
     {
       validator: integerValidator,
     },
+    {
+      validator: minAgeGreaterThanPreviousPhase(phase),
+    },
   ],
 });
+
 export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
   _meta: {
     hot: {
@@ -148,6 +157,9 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
           }),
         },
         maxStorageSizeUnit: {
+          defaultValue: 'gb',
+        },
+        maxPrimaryShardSizeUnit: {
           defaultValue: 'gb',
         },
         maxAgeUnit: {
@@ -172,6 +184,15 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
       },
       minAgeUnit: {
         defaultValue: 'd',
+      },
+      minAgeToMilliSeconds: {
+        defaultValue: -1,
+        fieldsToValidateOnChange: [
+          'phases.warm.min_age',
+          'phases.cold.min_age',
+          'phases.frozen.min_age',
+          'phases.delete.min_age',
+        ],
       },
       bestCompression: {
         label: i18nTexts.editPolicy.bestCompressionFieldLabel,
@@ -201,8 +222,20 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
           defaultMessage: 'Freeze index',
         }),
       },
+      readonlyEnabled: {
+        defaultValue: false,
+        label: i18nTexts.editPolicy.readonlyEnabledFieldLabel,
+      },
       minAgeUnit: {
         defaultValue: 'd',
+      },
+      minAgeToMilliSeconds: {
+        defaultValue: -1,
+        fieldsToValidateOnChange: [
+          'phases.cold.min_age',
+          'phases.frozen.min_age',
+          'phases.delete.min_age',
+        ],
       },
       dataTierAllocationType: {
         label: i18nTexts.editPolicy.allocationTypeOptionsFieldLabel,
@@ -228,6 +261,10 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
       minAgeUnit: {
         defaultValue: 'd',
       },
+      minAgeToMilliSeconds: {
+        defaultValue: -1,
+        fieldsToValidateOnChange: ['phases.frozen.min_age', 'phases.delete.min_age'],
+      },
       dataTierAllocationType: {
         label: i18nTexts.editPolicy.allocationTypeOptionsFieldLabel,
       },
@@ -245,6 +282,10 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
       },
       minAgeUnit: {
         defaultValue: 'd',
+      },
+      minAgeToMilliSeconds: {
+        defaultValue: -1,
+        fieldsToValidateOnChange: ['phases.delete.min_age'],
       },
     },
     searchableSnapshot: {
@@ -292,6 +333,23 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
             serializer: serializers.stringToNumber,
             fieldsToValidateOnChange: rolloverFormPaths,
           },
+          max_primary_shard_size: {
+            label: i18n.translate(
+              'xpack.indexLifecycleMgmt.hotPhase.maximumPrimaryShardSizeLabel',
+              {
+                defaultMessage: 'Maximum primary shard size',
+              }
+            ),
+            validations: [
+              {
+                validator: rolloverThresholdsValidator,
+              },
+              {
+                validator: ifExistsNumberGreaterThanZero,
+              },
+            ],
+            fieldsToValidateOnChange: rolloverFormPaths,
+          },
           max_size: {
             label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeLabel', {
               defaultMessage: 'Maximum index size',
@@ -320,7 +378,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
       },
     },
     warm: {
-      min_age: getMinAgeField(),
+      min_age: getMinAgeField('warm'),
       actions: {
         allocate: {
           number_of_replicas: numberOfReplicasField,
@@ -337,7 +395,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
       },
     },
     cold: {
-      min_age: getMinAgeField(),
+      min_age: getMinAgeField('cold'),
       actions: {
         allocate: {
           number_of_replicas: numberOfReplicasField,
@@ -349,7 +407,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
       },
     },
     frozen: {
-      min_age: getMinAgeField(),
+      min_age: getMinAgeField('frozen'),
       actions: {
         allocate: {
           number_of_replicas: numberOfReplicasField,
@@ -361,7 +419,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
       },
     },
     delete: {
-      min_age: getMinAgeField('365'),
+      min_age: getMinAgeField('delete', '365'),
       actions: {
         wait_for_snapshot: {
           policy: {

@@ -5,8 +5,7 @@
   "license": "Apache-2.0",
   "main": "./target/index.js",
   "types": "./target/index.d.ts",
-  "scripts": {
-    "build": "../../node_modules/.bin/tsc",
-    "kbn:bootstrap": "yarn build"
+  "peerDependencies": {
+    "moment": "^2.24.0"
   }
 }

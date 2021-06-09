@@ -31,6 +31,7 @@ const renderWizardArguments = {
   previewLayers: () => {},
   mapColors: [],
   currentStepId: null,
+  isOnFinalStep: false,
   enableNextBtn: () => {},
   disableNextBtn: () => {},
   startStepLoading: () => {},

@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
+import { errors } from '@elastic/elasticsearch';
 
-import { kibanaResponseFactory } from '../../../../../../src/core/server';
-import { register } from './get_route';
-import { API_BASE_PATH } from '../../../common/constants';
-import { LicenseStatus } from '../../types';
-
-import { licensingMock } from '../../../../../plugins/licensing/server/mocks';
+import { RequestHandler } from 'src/core/server';
 
 import {
   elasticsearchServiceMock,
@@ -20,6 +15,18 @@ import {
   httpServiceMock,
   coreMock,
 } from '../../../../../../src/core/server/mocks';
+
+import { kibanaResponseFactory } from '../../../../../../src/core/server';
+import { licensingMock } from '../../../../../plugins/licensing/server/mocks';
+
+import { API_BASE_PATH } from '../../../common/constants';
+
+import { handleEsError } from '../../shared_imports';
+
+import { register } from './get_route';
+import { ScopedClusterClientMock } from './types';
+
+const { createApiResponse } = elasticsearchServiceMock;
 
 // Re-implement the mock that was imported directly from `x-pack/mocks`
 function createCoreRequestHandlerContextMock() {
@@ -32,42 +39,170 @@ function createCoreRequestHandlerContextMock() {
 const xpackMocks = {
   createRequestHandlerContext: createCoreRequestHandlerContextMock,
 };
-interface TestOptions {
-  licenseCheckResult?: LicenseStatus;
-  apiResponses?: Array<() => Promise<unknown>>;
-  asserts: { statusCode: number; result?: Record<string, any>; apiArguments?: unknown[][] };
-}
-
 describe('GET remote clusters', () => {
-  const getRemoteClustersTest = (
-    description: string,
-    { licenseCheckResult = { valid: true }, apiResponses = [], asserts }: TestOptions
-  ) => {
-    test(description, async () => {
-      const elasticsearchMock = elasticsearchServiceMock.createLegacyClusterClient();
+  let handler: RequestHandler;
+  let mockRouteDependencies: ReturnType<typeof createMockRouteDependencies>;
+  let mockContext: ReturnType<typeof xpackMocks.createRequestHandlerContext>;
+  let scopedClusterClientMock: ScopedClusterClientMock;
 
-      const mockRouteDependencies = {
-        router: httpServiceMock.createRouter(),
-        getLicenseStatus: () => licenseCheckResult,
-        elasticsearchService: elasticsearchServiceMock.createInternalSetup(),
-        elasticsearch: elasticsearchMock,
-        config: {
-          isCloudEnabled: false,
+  let remoteInfoMockFn: ScopedClusterClientMock['asCurrentUser']['cluster']['remoteInfo'];
+  let getSettingsMockFn: ScopedClusterClientMock['asCurrentUser']['cluster']['getSettings'];
+
+  const createMockRequest = () =>
+    httpServerMock.createKibanaRequest({
+      method: 'get',
+      path: API_BASE_PATH,
+      headers: { authorization: 'foo' },
+    });
+
+  const createMockRouteDependencies = () => ({
+    router: httpServiceMock.createRouter(),
+    getLicenseStatus: () => ({ valid: true }),
+    lib: {
+      handleEsError,
+    },
+    config: {
+      isCloudEnabled: false,
+    },
+  });
+
+  beforeEach(() => {
+    mockContext = xpackMocks.createRequestHandlerContext();
+    scopedClusterClientMock = mockContext.core.elasticsearch.client;
+    remoteInfoMockFn = scopedClusterClientMock.asCurrentUser.cluster.remoteInfo;
+    getSettingsMockFn = scopedClusterClientMock.asCurrentUser.cluster.getSettings;
+    mockRouteDependencies = createMockRouteDependencies();
+
+    register(mockRouteDependencies);
+    const [[, handlerFn]] = mockRouteDependencies.router.get.mock.calls;
+    handler = handlerFn;
+  });
+
+  describe('success', () => {
+    test('returns remote clusters', async () => {
+      getSettingsMockFn.mockResolvedValueOnce(
+        createApiResponse({
+          body: {
+            persistent: {
+              cluster: {
+                remote: {
+                  test: {
+                    seeds: ['127.0.0.1:9300'],
+                    skip_unavailable: false,
+                    mode: 'sniff',
+                  },
+                },
+              },
+            },
+            transient: {},
+          },
+        })
+      );
+      remoteInfoMockFn.mockResolvedValueOnce(
+        createApiResponse({
+          body: {
+            test: {
+              connected: true,
+              mode: 'sniff',
+              seeds: ['127.0.0.1:9300'],
+              num_nodes_connected: 1,
+              max_connections_per_cluster: 3,
+              initial_connect_timeout: '30s',
+              skip_unavailable: false,
+            },
+          },
+        })
+      );
+
+      const mockRequest = createMockRequest();
+
+      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual([
+        {
+          name: 'test',
+          seeds: ['127.0.0.1:9300'],
+          isConnected: true,
+          connectedNodesCount: 1,
+          maxConnectionsPerCluster: 3,
+          initialConnectTimeout: '30s',
+          skipUnavailable: false,
+          isConfiguredByNode: false,
+          mode: 'sniff',
         },
-      };
+      ]);
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
+      expect(getSettingsMockFn).toHaveBeenCalledWith();
+      expect(remoteInfoMockFn).toHaveBeenCalledWith();
+    });
 
-      elasticsearchServiceMock
-        .createLegacyClusterClient()
-        .asScoped.mockReturnValue(mockScopedClusterClient);
+    test('returns an empty array when ES responds with an empty object', async () => {
+      getSettingsMockFn.mockResolvedValueOnce(createApiResponse({ body: {} as any }));
+      remoteInfoMockFn.mockResolvedValueOnce(createApiResponse({ body: {} }));
 
-      for (const apiResponse of apiResponses) {
-        mockScopedClusterClient.callAsCurrentUser.mockImplementationOnce(apiResponse);
-      }
+      const mockRequest = createMockRequest();
 
-      register(mockRouteDependencies);
-      const [[, handler]] = mockRouteDependencies.router.get.mock.calls;
+      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual([]);
+
+      expect(getSettingsMockFn).toHaveBeenCalledWith();
+      expect(remoteInfoMockFn).toHaveBeenCalledWith();
+    });
+  });
+
+  describe('failure', () => {
+    const error = new errors.ResponseError({
+      body: { message: 'test error' },
+      statusCode: 406,
+      headers: {},
+      meta: {} as any,
+      warnings: [],
+    });
+
+    test('returns an error if failure to get cluster settings', async () => {
+      getSettingsMockFn.mockRejectedValueOnce(error);
+
+      const mockRequest = createMockRequest();
+
+      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+
+      expect(response.status).toBe(406);
+      expect(response.payload).toEqual({
+        attributes: {
+          causes: undefined,
+          error: undefined,
+        },
+        message: 'Response Error',
+      });
+
+      expect(getSettingsMockFn).toHaveBeenCalled();
+      expect(remoteInfoMockFn).not.toHaveBeenCalled();
+    });
+
+    test('returns an error if failure to get cluster remote info', async () => {
+      getSettingsMockFn.mockResolvedValueOnce(
+        createApiResponse({
+          body: {
+            persistent: {
+              cluster: {
+                remote: {
+                  test: {
+                    seeds: ['127.0.0.1:9300'],
+                    skip_unavailable: false,
+                    mode: 'sniff',
+                  },
+                },
+              },
+            },
+            transient: {},
+          },
+        })
+      );
+
+      remoteInfoMockFn.mockRejectedValueOnce(error);
 
       const mockRequest = httpServerMock.createKibanaRequest({
         method: 'get',
@@ -75,139 +210,12 @@ describe('GET remote clusters', () => {
         headers: { authorization: 'foo' },
       });
 
-      const mockContext = xpackMocks.createRequestHandlerContext();
-      mockContext.core.elasticsearch.legacy.client = mockScopedClusterClient;
+      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
 
-      if (asserts.statusCode === 500) {
-        await expect(handler(mockContext, mockRequest, kibanaResponseFactory)).rejects.toThrowError(
-          asserts.result as Error
-        );
-      } else {
-        const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+      expect(response.status).toBe(406);
 
-        expect(response.status).toBe(asserts.statusCode);
-        expect(response.payload).toEqual(asserts.result);
-      }
-
-      if (Array.isArray(asserts.apiArguments)) {
-        for (const apiArguments of asserts.apiArguments) {
-          expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(...apiArguments);
-        }
-      } else {
-        expect(mockScopedClusterClient.callAsCurrentUser).not.toHaveBeenCalled();
-      }
-    });
-  };
-
-  describe('success', () => {
-    getRemoteClustersTest('returns remote clusters', {
-      apiResponses: [
-        async () => ({
-          persistent: {
-            cluster: {
-              remote: {
-                test: {
-                  seeds: ['127.0.0.1:9300'],
-                  skip_unavailable: false,
-                  mode: 'sniff',
-                },
-              },
-            },
-          },
-          transient: {},
-        }),
-        async () => ({
-          test: {
-            connected: true,
-            mode: 'sniff',
-            seeds: ['127.0.0.1:9300'],
-            num_nodes_connected: 1,
-            max_connections_per_cluster: 3,
-            initial_connect_timeout: '30s',
-            skip_unavailable: false,
-          },
-        }),
-      ],
-      asserts: {
-        apiArguments: [['cluster.getSettings'], ['cluster.remoteInfo']],
-        statusCode: 200,
-        result: [
-          {
-            name: 'test',
-            seeds: ['127.0.0.1:9300'],
-            isConnected: true,
-            connectedNodesCount: 1,
-            maxConnectionsPerCluster: 3,
-            initialConnectTimeout: '30s',
-            skipUnavailable: false,
-            isConfiguredByNode: false,
-            mode: 'sniff',
-          },
-        ],
-      },
-    });
-    getRemoteClustersTest('returns an empty array when ES responds with an empty object', {
-      apiResponses: [async () => ({}), async () => ({})],
-      asserts: {
-        apiArguments: [['cluster.getSettings'], ['cluster.remoteInfo']],
-        statusCode: 200,
-        result: [],
-      },
-    });
-  });
-
-  describe('failure', () => {
-    const error = Boom.notAcceptable('test error');
-
-    getRemoteClustersTest('returns an error if failure to get cluster settings', {
-      apiResponses: [
-        async () => {
-          throw error;
-        },
-        async () => ({
-          test: {
-            connected: true,
-            mode: 'sniff',
-            seeds: ['127.0.0.1:9300'],
-            num_nodes_connected: 1,
-            max_connections_per_cluster: 3,
-            initial_connect_timeout: '30s',
-            skip_unavailable: false,
-          },
-        }),
-      ],
-      asserts: {
-        apiArguments: [['cluster.getSettings']],
-        statusCode: 500,
-        result: error,
-      },
-    });
-
-    getRemoteClustersTest('returns an error if failure to get cluster remote info', {
-      apiResponses: [
-        async () => ({
-          persistent: {
-            cluster: {
-              remote: {
-                test: {
-                  seeds: ['127.0.0.1:9300'],
-                  skip_unavailable: false,
-                  mode: 'sniff',
-                },
-              },
-            },
-          },
-          transient: {},
-        }),
-        async () => {
-          throw error;
-        },
-      ],
-      asserts: {
-        apiArguments: [['cluster.getSettings'], ['cluster.remoteInfo']],
-        statusCode: 500,
-        result: error,
-      },
+      expect(getSettingsMockFn).toHaveBeenCalledWith();
+      expect(remoteInfoMockFn).toHaveBeenCalledWith();
     });
   });
 });

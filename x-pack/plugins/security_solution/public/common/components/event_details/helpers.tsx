@@ -7,6 +7,8 @@
 
 import { get, getOr, isEmpty, uniqBy } from 'lodash/fp';
 
+import React from 'react';
+import { EuiBasicTableColumn, EuiTitle } from '@elastic/eui';
 import {
   elementOrChildrenHasFocus,
   getFocusedDataColindexCell,
@@ -20,7 +22,6 @@ import {
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
   DEFAULT_COLUMN_MIN_WIDTH,
 } from '../../../timelines/components/timeline/body/constants';
-import { ToStringArray } from '../../../graphql/types';
 
 import * as i18n from './translations';
 
@@ -48,8 +49,40 @@ export interface Item {
   field: JSX.Element;
   fieldId: string;
   type: string;
-  values: ToStringArray;
+  values: string[];
 }
+
+export interface AlertSummaryRow {
+  title: string;
+  description: {
+    contextId: string;
+    eventId: string;
+    fieldName: string;
+    value: string;
+    fieldType: string;
+    linkValue: string | undefined;
+  };
+}
+
+export interface ThreatSummaryRow {
+  title: string;
+  description: {
+    contextId: string;
+    eventId: string;
+    fieldName: string;
+    values: string[];
+  };
+}
+
+export interface ThreatDetailsRow {
+  title: string;
+  description: {
+    fieldName: string;
+    value: string;
+  };
+}
+
+export type SummaryRow = AlertSummaryRow | ThreatSummaryRow | ThreatDetailsRow;
 
 export const getColumnHeaderFromBrowserField = ({
   browserField,
@@ -65,7 +98,7 @@ export const getColumnHeaderFromBrowserField = ({
   id: browserField.name || '',
   type: browserField.type,
   aggregatable: browserField.aggregatable,
-  width,
+  initialWidth: width,
 });
 
 /**
@@ -171,4 +204,34 @@ export const onEventDetailsTabKeyPressed = ({
       skipFocus: eventFieldsTableSkipFocus,
     });
   }
+};
+
+const getTitle = (title: string) => (
+  <EuiTitle size="xxs">
+    <h5>{title}</h5>
+  </EuiTitle>
+);
+getTitle.displayName = 'getTitle';
+
+export const getSummaryColumns = (
+  DescriptionComponent:
+    | React.FC<ThreatSummaryRow['description']>
+    | React.FC<AlertSummaryRow['description']>
+    | React.FC<ThreatDetailsRow['description']>
+): Array<EuiBasicTableColumn<SummaryRow>> => {
+  return [
+    {
+      field: 'title',
+      truncateText: false,
+      render: getTitle,
+      width: '160px',
+      name: '',
+    },
+    {
+      field: 'description',
+      truncateText: false,
+      render: DescriptionComponent,
+      name: '',
+    },
+  ];
 };

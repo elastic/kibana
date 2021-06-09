@@ -11,21 +11,22 @@ export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const find = getService('find');
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'header']);
 
   const USERS_PATH = 'security/users';
   const EDIT_USERS_PATH = `${USERS_PATH}/edit`;
+  const CREATE_USERS_PATH = `${USERS_PATH}/create`;
 
   const ROLES_PATH = 'security/roles';
   const EDIT_ROLES_PATH = `${ROLES_PATH}/edit`;
   const CLONE_ROLES_PATH = `${ROLES_PATH}/clone`;
+  const security = getService('security');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/61173
-  describe.skip('Management', function () {
+  describe('Management', function () {
     this.tags(['skipFirefox']);
 
     before(async () => {
-      // await PageObjects.security.login('elastic', 'changeme');
       await PageObjects.security.initTests();
       await kibanaServer.uiSettings.update({
         defaultIndex: 'logstash-*',
@@ -43,20 +44,26 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.navigateTo();
     });
 
+    after(async () => {
+      await security.role.delete('logstash-readonly');
+      await security.user.delete('dashuser', 'new-user');
+      await PageObjects.security.forceLogout();
+    });
+
     describe('Security', () => {
       describe('navigation', () => {
         it('Can navigate to create user section', async () => {
           await PageObjects.security.clickElasticsearchUsers();
           await PageObjects.security.clickCreateNewUser();
           const currentUrl = await browser.getCurrentUrl();
-          expect(currentUrl).to.contain(EDIT_USERS_PATH);
+          expect(currentUrl).to.contain(CREATE_USERS_PATH);
         });
 
         it('Clicking cancel in create user section brings user back to listing', async () => {
           await PageObjects.security.clickCancelEditUser();
           const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(USERS_PATH);
-          expect(currentUrl).to.not.contain(EDIT_USERS_PATH);
+          expect(currentUrl).to.not.contain(CREATE_USERS_PATH);
         });
 
         it('Clicking save in create user section brings user back to listing', async () => {
@@ -67,12 +74,11 @@ export default function ({ getService, getPageObjects }) {
           await testSubjects.setValue('passwordConfirmationInput', '123456');
           await testSubjects.setValue('userFormFullNameInput', 'Full User Name');
           await testSubjects.setValue('userFormEmailInput', 'example@example.com');
-
-          await PageObjects.security.clickSaveEditUser();
+          await PageObjects.security.clickSaveCreateUser();
 
           const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(USERS_PATH);
-          expect(currentUrl).to.not.contain(EDIT_USERS_PATH);
+          expect(currentUrl).to.not.contain(CREATE_USERS_PATH);
         });
 
         it('Can navigate to edit user section', async () => {
@@ -143,14 +149,11 @@ export default function ({ getService, getPageObjects }) {
           await testSubjects.setValue('passwordConfirmationInput', '123456');
           await testSubjects.setValue('userFormFullNameInput', 'dashuser');
           await testSubjects.setValue('userFormEmailInput', 'example@example.com');
-          await PageObjects.security.assignRoleToUser('kibana_dashboard_only_user');
           await PageObjects.security.assignRoleToUser('logstash-readonly');
-
-          await PageObjects.security.clickSaveEditUser();
-
+          await PageObjects.security.clickSaveCreateUser();
           await PageObjects.settings.navigateTo();
           await testSubjects.click('users');
-          await PageObjects.settings.clickLinkText('kibana_dashboard_only_user');
+          await find.clickByButtonText('logstash-readonly');
           const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(EDIT_ROLES_PATH);
         });

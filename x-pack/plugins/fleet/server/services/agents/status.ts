@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import pMap from 'p-map';
 
-import { AGENT_EVENT_SAVED_OBJECT_TYPE, AGENT_SAVED_OBJECT_TYPE } from '../../constants';
+import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import type { AgentStatus } from '../../types';
 import { AgentStatusKueryHelper } from '../../../common/services';
 import { esKuery } from '../../../../../../src/plugins/data/server';
@@ -55,17 +55,18 @@ export async function getAgentStatusForAgentPolicy(
   agentPolicyId?: string,
   filterKuery?: string
 ) {
-  const [all, online, error, offline, updating] = await pMap(
+  const [all, allActive, online, error, offline, updating] = await pMap(
     [
-      undefined,
+      undefined, // All agents, including inactive
+      undefined, // All active agents
       AgentStatusKueryHelper.buildKueryForOnlineAgents(),
       AgentStatusKueryHelper.buildKueryForErrorAgents(),
       AgentStatusKueryHelper.buildKueryForOfflineAgents(),
       AgentStatusKueryHelper.buildKueryForUpdatingAgents(),
     ],
-    (kuery) =>
+    (kuery, index) =>
       getAgentsByKuery(esClient, {
-        showInactive: false,
+        showInactive: index === 0,
         perPage: 0,
         page: 1,
         kuery: joinKuerys(
@@ -83,27 +84,14 @@ export async function getAgentStatusForAgentPolicy(
   );
 
   return {
-    events: await getEventsCount(soClient, agentPolicyId),
-    total: all.total,
+    total: allActive.total,
+    inactive: all.total - allActive.total,
     online: online.total,
     error: error.total,
     offline: offline.total,
     updating: updating.total,
     other: all.total - online.total - error.total - offline.total,
+    /* @deprecated Agent events do not exists anymore */
+    events: 0,
   };
-}
-
-async function getEventsCount(soClient: SavedObjectsClientContract, agentPolicyId?: string) {
-  const { total } = await soClient.find({
-    type: AGENT_EVENT_SAVED_OBJECT_TYPE,
-    searchFields: ['policy_id'],
-    search: agentPolicyId,
-    perPage: 0,
-    page: 1,
-    sortField: 'timestamp',
-    sortOrder: 'desc',
-    defaultSearchOperator: 'AND',
-  });
-
-  return total;
 }

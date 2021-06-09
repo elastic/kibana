@@ -12,15 +12,14 @@ import { fold } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
 import { createMapStream, createFilterStream } from '@kbn/utils';
 
-import { formatErrors } from '../../../common/format_errors';
+import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
+import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { importRuleValidateTypeDependents } from '../../../common/detection_engine/schemas/request/import_rules_type_dependents';
 import {
   ImportRulesSchemaDecoded,
   importRulesSchema,
   ImportRulesSchema,
 } from '../../../common/detection_engine/schemas/request/import_rules_schema';
-import { exactCheck } from '../../../common/exact_check';
-import { BadRequestError } from '../../lib/detection_engine/errors/bad_request_error';
 
 export interface RulesObjectsExportResultDetails {
   /** number of successfully exported objects */

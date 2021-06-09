@@ -9,7 +9,7 @@ Find all SavedObjects matching the search query
 <b>Signature:</b>
 
 ```typescript
-find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
+find<T = unknown, A = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T, A>>;
 ```
 
 ## Parameters
@@ -20,5 +20,5 @@ find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindRes
 
 <b>Returns:</b>
 
-`Promise<SavedObjectsFindResponse<T>>`
+`Promise<SavedObjectsFindResponse<T, A>>`
 

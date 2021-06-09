@@ -13,9 +13,13 @@ import { EuiPageHeader, EuiPageContent, EuiTitle, EuiText, EuiSpacer } from '@el
 import { i18n } from '@kbn/i18n';
 
 import { FlashMessages } from '../../../../shared/flash_messages';
+import { MultiInputRows } from '../../multi_input_rows';
 
-import { CurationQueries } from '../components';
-import { CREATE_NEW_CURATION_TITLE } from '../constants';
+import {
+  CREATE_NEW_CURATION_TITLE,
+  QUERY_INPUTS_BUTTON,
+  QUERY_INPUTS_PLACEHOLDER,
+} from '../constants';
 import { CurationsLogic } from '../index';
 
 export const CurationCreation: React.FC = () => {
@@ -25,7 +29,7 @@ export const CurationCreation: React.FC = () => {
     <>
       <EuiPageHeader pageTitle={CREATE_NEW_CURATION_TITLE} />
       <FlashMessages />
-      <EuiPageContent>
+      <EuiPageContent hasBorder>
         <EuiTitle>
           <h2>
             {i18n.translate(
@@ -46,7 +50,12 @@ export const CurationCreation: React.FC = () => {
           </p>
         </EuiText>
         <EuiSpacer />
-        <CurationQueries queries={['']} onSubmit={(queries) => createCuration(queries)} />
+        <MultiInputRows
+          id="createNewCuration"
+          addRowText={QUERY_INPUTS_BUTTON}
+          inputPlaceholder={QUERY_INPUTS_PLACEHOLDER}
+          onSubmit={(queries) => createCuration(queries)}
+        />
       </EuiPageContent>
     </>
   );

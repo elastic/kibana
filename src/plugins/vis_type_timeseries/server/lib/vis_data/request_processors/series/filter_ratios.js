@@ -12,19 +12,19 @@ import { esQuery } from '../../../../../../data/server';
 
 const filter = (metric) => metric.type === 'filter_ratio';
 
-export function ratios(req, panel, series, esQueryConfig, indexPattern) {
+export function ratios(req, panel, series, esQueryConfig, seriesIndex) {
   return (next) => (doc) => {
     if (series.metrics.some(filter)) {
       series.metrics.filter(filter).forEach((metric) => {
         overwrite(
           doc,
           `aggs.${series.id}.aggs.timeseries.aggs.${metric.id}-numerator.filter`,
-          esQuery.buildEsQuery(indexPattern, metric.numerator, [], esQueryConfig)
+          esQuery.buildEsQuery(seriesIndex.indexPattern, metric.numerator, [], esQueryConfig)
         );
         overwrite(
           doc,
           `aggs.${series.id}.aggs.timeseries.aggs.${metric.id}-denominator.filter`,
-          esQuery.buildEsQuery(indexPattern, metric.denominator, [], esQueryConfig)
+          esQuery.buildEsQuery(seriesIndex.indexPattern, metric.denominator, [], esQueryConfig)
         );
 
         let numeratorPath = `${metric.id}-numerator>_count`;

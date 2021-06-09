@@ -10,7 +10,6 @@ import React from 'react';
 import { Provider } from 'react-redux';
 
 import {
-  apolloClientObservable,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   kibanaObservable,
@@ -24,22 +23,10 @@ import { State } from '../../store/types';
 describe('Error Toast Dispatcher', () => {
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    kibanaObservable,
-    storage
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   beforeEach(() => {
-    store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
-      kibanaObservable,
-      storage
-    );
+    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
   describe('rendering', () => {

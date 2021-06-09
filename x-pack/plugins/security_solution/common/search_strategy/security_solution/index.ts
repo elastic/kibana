@@ -61,6 +61,7 @@ import {
 } from './network';
 import {
   MatrixHistogramQuery,
+  MatrixHistogramQueryEntities,
   MatrixHistogramRequestOptions,
   MatrixHistogramStrategyResponse,
 } from './matrix_histogram';
@@ -75,13 +76,14 @@ export type FactoryQueryTypes =
   | HostsKpiQueries
   | NetworkQueries
   | NetworkKpiQueries
-  | typeof MatrixHistogramQuery;
+  | typeof MatrixHistogramQuery
+  | typeof MatrixHistogramQueryEntities;
 
 export interface RequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
   filterQuery: ESQuery | string | undefined;
   defaultIndex: string[];
-  docValueFields?: estypes.DocValueField[];
+  docValueFields?: estypes.SearchDocValueField[];
   factoryQueryType?: FactoryQueryTypes;
 }
 
@@ -192,3 +194,9 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   : T extends typeof MatrixHistogramQuery
   ? MatrixHistogramRequestOptions
   : never;
+
+export interface DocValueFieldsInput {
+  field: string;
+
+  format: string;
+}

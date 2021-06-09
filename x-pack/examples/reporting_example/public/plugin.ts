@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import {
   AppMountParameters,
   AppNavLinkStatus,
@@ -9,7 +16,7 @@ import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { SetupDeps, StartDeps } from './types';
 
 export class ReportingExamplePlugin implements Plugin<void, void, {}, {}> {
-  public setup(core: CoreSetup, { developerExamples, ...depsSetup }: SetupDeps): void {
+  public setup(core: CoreSetup, { developerExamples, screenshotMode }: SetupDeps): void {
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
@@ -23,7 +30,7 @@ export class ReportingExamplePlugin implements Plugin<void, void, {}, {}> {
           unknown
         ];
         // Render the application
-        return renderApp(coreStart, { ...depsSetup, ...depsStart }, params);
+        return renderApp(coreStart, { ...depsStart, screenshotMode }, params);
       },
     });
 

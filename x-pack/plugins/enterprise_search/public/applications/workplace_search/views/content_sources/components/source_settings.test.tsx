@@ -7,7 +7,7 @@
 
 import '../../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockValues, setMockActions } from '../../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 import { fullContentSources, sourceConfigData } from '../../../__mocks__/content_sources.mock';
 
 import React from 'react';
@@ -23,7 +23,6 @@ import { SourceSettings } from './source_settings';
 describe('SourceSettings', () => {
   const updateContentSource = jest.fn();
   const removeContentSource = jest.fn();
-  const resetSourceState = jest.fn();
   const getSourceConfigData = jest.fn();
   const contentSource = fullContentSources[0];
   const buttonLoading = false;
@@ -41,7 +40,6 @@ describe('SourceSettings', () => {
     setMockActions({
       updateContentSource,
       removeContentSource,
-      resetSourceState,
       getSourceConfigData,
     });
   });

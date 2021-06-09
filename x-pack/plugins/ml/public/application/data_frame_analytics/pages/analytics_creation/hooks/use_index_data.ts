@@ -5,19 +5,24 @@
  * 2.0.
  */
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
+import { estypes } from '@elastic/elasticsearch';
 import { EuiDataGridColumn } from '@elastic/eui';
-
 import { CoreSetup } from 'src/core/public';
 
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
+import { isRuntimeMappings } from '../../../../../../common/util/runtime_field_utils';
+import { RuntimeMappings } from '../../../../../../common/types/fields';
+import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../../../common/constants/field_histograms';
+import { newJobCapsServiceAnalytics } from '../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 
 import { DataLoader } from '../../../../datavisualizer/index_based/data_loader';
 
 import {
   getFieldType,
   getDataGridSchemaFromKibanaFieldType,
+  getDataGridSchemaFromESFieldType,
   getFieldsFromKibanaIndexPattern,
   showDataGridColumnChartErrorMessageToast,
   useDataGrid,
@@ -25,32 +30,116 @@ import {
   EsSorting,
   UseIndexDataReturnType,
   getProcessedFields,
+  getCombinedRuntimeMappings,
 } from '../../../../components/data_grid';
-import type { SearchResponse7 } from '../../../../../../common/types/es_client';
 import { extractErrorMessage } from '../../../../../../common/util/errors';
 import { INDEX_STATUS } from '../../../common/analytics';
 import { ml } from '../../../../services/ml_api_service';
-import { getRuntimeFieldsMapping } from '../../../../components/data_grid/common';
 
-type IndexSearchResponse = SearchResponse7;
+type IndexSearchResponse = estypes.SearchResponse;
+
+interface MLEuiDataGridColumn extends EuiDataGridColumn {
+  isRuntimeFieldColumn?: boolean;
+}
+
+function getRuntimeFieldColumns(runtimeMappings: RuntimeMappings) {
+  return Object.keys(runtimeMappings).map((id) => {
+    const field = runtimeMappings[id];
+    const schema = getDataGridSchemaFromESFieldType(
+      field.type as estypes.MappingRuntimeField['type']
+    );
+    return { id, schema, isExpandable: schema !== 'boolean', isRuntimeFieldColumn: true };
+  });
+}
+
+function getIndexPatternColumns(indexPattern: IndexPattern, fieldsFilter: string[]) {
+  const { fields } = newJobCapsServiceAnalytics;
+
+  return fields
+    .filter((field) => fieldsFilter.includes(field.name))
+    .map((field) => {
+      const schema =
+        getDataGridSchemaFromESFieldType(field.type) || getDataGridSchemaFromKibanaFieldType(field);
+
+      return {
+        id: field.name,
+        schema,
+        isExpandable: schema !== 'boolean',
+        isRuntimeFieldColumn: false,
+      };
+    });
+}
 
 export const useIndexData = (
   indexPattern: IndexPattern,
   query: Record<string, any> | undefined,
-  toastNotifications: CoreSetup['notifications']['toasts']
+  toastNotifications: CoreSetup['notifications']['toasts'],
+  runtimeMappings?: RuntimeMappings
 ): UseIndexDataReturnType => {
-  const indexPatternFields = useMemo(() => getFieldsFromKibanaIndexPattern(indexPattern), [
-    indexPattern,
-  ]);
+  // Fetch 500 random documents to determine populated fields.
+  // This is a workaround to avoid passing potentially thousands of unpopulated fields
+  // (for example, as part of filebeat/metricbeat/ECS based indices)
+  // to the data grid component which would significantly slow down the page.
+  const [indexPatternFields, setIndexPatternFields] = useState<string[]>();
+  useEffect(() => {
+    async function fetchDataGridSampleDocuments() {
+      setErrorMessage('');
+      setStatus(INDEX_STATUS.LOADING);
 
-  // EuiDataGrid State
-  const columns: EuiDataGridColumn[] = [
-    ...indexPatternFields.map((id) => {
-      const field = indexPattern.fields.getByName(id);
-      const schema = getDataGridSchemaFromKibanaFieldType(field);
-      return { id, schema, isExpandable: schema !== 'boolean' };
-    }),
-  ];
+      const esSearchRequest = {
+        index: indexPattern.title,
+        body: {
+          fields: ['*'],
+          _source: false,
+          query: {
+            function_score: {
+              query: { match_all: {} },
+              random_score: {},
+            },
+          },
+          size: 500,
+        },
+      };
+
+      try {
+        const resp: IndexSearchResponse = await ml.esSearch(esSearchRequest);
+        const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
+
+        // Get all field names for each returned doc and flatten it
+        // to a list of unique field names used across all docs.
+        const allKibanaIndexPatternFields = getFieldsFromKibanaIndexPattern(indexPattern);
+        const populatedFields = [...new Set(docs.map(Object.keys).flat(1))]
+          .filter((d) => allKibanaIndexPatternFields.includes(d))
+          .sort();
+
+        setStatus(INDEX_STATUS.LOADED);
+        setIndexPatternFields(populatedFields);
+      } catch (e) {
+        setErrorMessage(extractErrorMessage(e));
+        setStatus(INDEX_STATUS.ERROR);
+      }
+    }
+
+    fetchDataGridSampleDocuments();
+  }, []);
+
+  // To be used for data grid column selection
+  // and will be applied to doc and chart queries.
+  const combinedRuntimeMappings = useMemo(
+    () => getCombinedRuntimeMappings(indexPattern, runtimeMappings),
+    [indexPattern, runtimeMappings]
+  );
+
+  // Available data grid columns, will be a combination of index pattern and runtime fields.
+  const [columns, setColumns] = useState<MLEuiDataGridColumn[]>([]);
+  useEffect(() => {
+    if (Array.isArray(indexPatternFields)) {
+      setColumns([
+        ...getIndexPatternColumns(indexPattern, indexPatternFields),
+        ...(combinedRuntimeMappings ? getRuntimeFieldColumns(combinedRuntimeMappings) : []),
+      ]);
+    }
+  }, [indexPattern, indexPatternFields, combinedRuntimeMappings]);
 
   const dataGrid = useDataGrid(columns);
 
@@ -71,70 +160,87 @@ export const useIndexData = (
     // custom comparison
   }, [JSON.stringify(query)]);
 
-  const getIndexData = async function () {
-    setErrorMessage('');
-    setStatus(INDEX_STATUS.LOADING);
-
-    const sort: EsSorting = sortingColumns.reduce((s, column) => {
-      s[column.id] = { order: column.direction };
-      return s;
-    }, {} as EsSorting);
-    const esSearchRequest = {
-      index: indexPattern.title,
-      body: {
-        query,
-        from: pagination.pageIndex * pagination.pageSize,
-        size: pagination.pageSize,
-        fields: ['*'],
-        _source: false,
-        ...(Object.keys(sort).length > 0 ? { sort } : {}),
-        ...getRuntimeFieldsMapping(indexPatternFields, indexPattern),
-      },
-    };
-
-    try {
-      const resp: IndexSearchResponse = await ml.esSearch(esSearchRequest);
-
-      const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields));
-      setRowCount(resp.hits.total.value);
-      setRowCountRelation(resp.hits.total.relation);
-      setTableItems(docs);
-      setStatus(INDEX_STATUS.LOADED);
-    } catch (e) {
-      setErrorMessage(extractErrorMessage(e));
-      setStatus(INDEX_STATUS.ERROR);
-    }
-  };
-
   useEffect(() => {
-    if (query !== undefined) {
-      getIndexData();
+    async function fetchIndexData() {
+      setErrorMessage('');
+      setStatus(INDEX_STATUS.LOADING);
+
+      const sort: EsSorting = sortingColumns.reduce((s, column) => {
+        s[column.id] = { order: column.direction };
+        return s;
+      }, {} as EsSorting);
+      const esSearchRequest = {
+        index: indexPattern.title,
+        body: {
+          query,
+          from: pagination.pageIndex * pagination.pageSize,
+          size: pagination.pageSize,
+          fields: [
+            ...(indexPatternFields ?? []),
+            ...(isRuntimeMappings(combinedRuntimeMappings)
+              ? Object.keys(combinedRuntimeMappings)
+              : []),
+          ],
+          _source: false,
+          ...(Object.keys(sort).length > 0 ? { sort } : {}),
+          ...(isRuntimeMappings(combinedRuntimeMappings)
+            ? { runtime_mappings: combinedRuntimeMappings }
+            : {}),
+        },
+      };
+
+      try {
+        const resp: IndexSearchResponse = await ml.esSearch(esSearchRequest);
+        const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
+
+        setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total.value);
+        setRowCountRelation(
+          typeof resp.hits.total === 'number'
+            ? ('eq' as estypes.SearchTotalHitsRelation)
+            : resp.hits.total.relation
+        );
+        setTableItems(docs);
+        setStatus(INDEX_STATUS.LOADED);
+      } catch (e) {
+        setErrorMessage(extractErrorMessage(e));
+        setStatus(INDEX_STATUS.ERROR);
+      }
+    }
+
+    if (indexPatternFields !== undefined && query !== undefined) {
+      fetchIndexData();
     }
     // custom comparison
-  }, [indexPattern.title, indexPatternFields, JSON.stringify([query, pagination, sortingColumns])]);
+  }, [
+    indexPattern.title,
+    indexPatternFields,
+    JSON.stringify([query, pagination, sortingColumns, combinedRuntimeMappings]),
+  ]);
 
   const dataLoader = useMemo(() => new DataLoader(indexPattern, toastNotifications), [
     indexPattern,
   ]);
 
-  const fetchColumnChartsData = async function (fieldHistogramsQuery: Record<string, any>) {
-    try {
-      const columnChartsData = await dataLoader.loadFieldHistograms(
-        columns
-          .filter((cT) => dataGrid.visibleColumns.includes(cT.id))
-          .map((cT) => ({
-            fieldName: cT.id,
-            type: getFieldType(cT.schema),
-          })),
-        fieldHistogramsQuery
-      );
-      dataGrid.setColumnCharts(columnChartsData);
-    } catch (e) {
-      showDataGridColumnChartErrorMessageToast(e, toastNotifications);
-    }
-  };
-
   useEffect(() => {
+    async function fetchColumnChartsData(fieldHistogramsQuery: Record<string, any>) {
+      try {
+        const columnChartsData = await dataLoader.loadFieldHistograms(
+          columns
+            .filter((cT) => dataGrid.visibleColumns.includes(cT.id))
+            .map((cT) => ({
+              fieldName: cT.id,
+              type: getFieldType(cT.schema),
+            })),
+          fieldHistogramsQuery,
+          DEFAULT_SAMPLER_SHARD_SIZE,
+          combinedRuntimeMappings
+        );
+        dataGrid.setColumnCharts(columnChartsData);
+      } catch (e) {
+        showDataGridColumnChartErrorMessageToast(e, toastNotifications);
+      }
+    }
+
     if (dataGrid.chartsVisible && query !== undefined) {
       fetchColumnChartsData(query);
     }
@@ -142,7 +248,7 @@ export const useIndexData = (
   }, [
     dataGrid.chartsVisible,
     indexPattern.title,
-    JSON.stringify([query, dataGrid.visibleColumns]),
+    JSON.stringify([query, dataGrid.visibleColumns, runtimeMappings]),
   ]);
 
   const renderCellValue = useRenderCellValue(indexPattern, pagination, tableItems);

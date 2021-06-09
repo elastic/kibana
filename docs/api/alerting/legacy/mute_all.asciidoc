@@ -4,7 +4,7 @@
 <titleabbrev>Legacy mute all alert instances</titleabbrev>
 ++++
 
-WARNING: Deprecated in 7.13.0. Use <<mute-all-alerts-api>> instead.
+deprecated::[7.13.0,Use <<mute-all-alerts-api>> instead.]
 
 Mute all alert instances.
 

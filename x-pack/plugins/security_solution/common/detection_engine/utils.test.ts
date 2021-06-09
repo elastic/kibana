@@ -7,12 +7,15 @@
 
 import {
   hasEqlSequenceQuery,
-  hasLargeValueList,
   hasNestedEntry,
   isThreatMatchRule,
+  normalizeMachineLearningJobIds,
   normalizeThresholdField,
 } from './utils';
-import { EntriesArray } from '../shared_imports';
+
+import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
+
+import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 
 describe('#hasLargeValueList', () => {
   test('it returns false if empty array', () => {
@@ -173,5 +176,22 @@ describe('normalizeThresholdField', () => {
   });
   it('converts an empty string to an empty array', () => {
     expect(normalizeThresholdField('')).toEqual([]);
+  });
+});
+
+describe('normalizeMachineLearningJobIds', () => {
+  it('converts a string to a string array', () => {
+    expect(normalizeMachineLearningJobIds('ml_job_id')).toEqual(['ml_job_id']);
+  });
+
+  it('preserves a single-valued array ', () => {
+    expect(normalizeMachineLearningJobIds(['ml_job_id'])).toEqual(['ml_job_id']);
+  });
+
+  it('preserves a multi-valued array ', () => {
+    expect(normalizeMachineLearningJobIds(['ml_job_id', 'other_ml_job_id'])).toEqual([
+      'ml_job_id',
+      'other_ml_job_id',
+    ]);
   });
 });

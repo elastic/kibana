@@ -18,7 +18,7 @@ import {
   DataProvidersAnd,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
-import { TimelineType } from '../../../graphql/types';
+import { TimelineType } from '../../../../common/types/timeline';
 
 interface FindValueToChangeInQuery {
   field: string;

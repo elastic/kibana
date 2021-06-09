@@ -7,7 +7,6 @@
 
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { useApolloClient } from '../../../common/utils/apollo_context';
 import {
   dispatchUpdateTimeline,
   queryTimelineById,
@@ -16,12 +15,10 @@ import { updateIsLoading as dispatchUpdateIsLoading } from '../../../timelines/s
 
 export const useTimelineClick = () => {
   const dispatch = useDispatch();
-  const apolloClient = useApolloClient();
 
   const handleTimelineClick = useCallback(
     (timelineId: string, graphEventId?: string) => {
       queryTimelineById({
-        apolloClient,
         graphEventId,
         timelineId,
         updateIsLoading: ({
@@ -34,7 +31,7 @@ export const useTimelineClick = () => {
         updateTimeline: dispatchUpdateTimeline(dispatch),
       });
     },
-    [apolloClient, dispatch]
+    [dispatch]
   );
 
   return handleTimelineClick;

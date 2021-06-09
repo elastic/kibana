@@ -103,12 +103,14 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
                     <EuiIcon
                       aria-hidden="true"
                       className="euiButtonIcon__icon"
+                      color="inherit"
                       size="m"
                       type="cross"
                     >
                       <span
                         aria-hidden="true"
                         className="euiButtonIcon__icon"
+                        color="inherit"
                         data-euiicon-type="cross"
                         size="m"
                       />
@@ -262,7 +264,7 @@ Array [
   -ms-flex: 1;
   flex: 1;
   overflow: hidden;
-  padding: 4px 16px 64px;
+  padding: 4px 16px 50px;
 }
 
 .c0 {
@@ -319,12 +321,14 @@ Array [
                   <EuiIcon
                     aria-hidden="true"
                     className="euiButtonIcon__icon"
+                    color="inherit"
                     size="m"
                     type="cross"
                   >
                     <span
                       aria-hidden="true"
                       className="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="cross"
                       size="m"
                     />
@@ -537,7 +541,7 @@ Array [
   -ms-flex: 1;
   flex: 1;
   overflow: hidden;
-  padding: 4px 16px 64px;
+  padding: 4px 16px 50px;
 }
 
 .c0 {
@@ -589,12 +593,14 @@ Array [
                 <EuiIcon
                   aria-hidden="true"
                   className="euiButtonIcon__icon"
+                  color="inherit"
                   size="m"
                   type="cross"
                 >
                   <span
                     aria-hidden="true"
                     className="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="cross"
                     size="m"
                   />
@@ -806,7 +812,7 @@ Array [
   -ms-flex: 1;
   flex: 1;
   overflow: hidden;
-  padding: 4px 16px 64px;
+  padding: 4px 16px 50px;
 }
 
 .c0 {
@@ -842,12 +848,14 @@ Array [
           <EuiIcon
             aria-hidden="true"
             className="euiButtonIcon__icon"
+            color="inherit"
             size="m"
             type="cross"
           >
             <span
               aria-hidden="true"
               className="euiButtonIcon__icon"
+              color="inherit"
               data-euiicon-type="cross"
               size="m"
             />

@@ -19,7 +19,6 @@ import nodeCrypto from '@elastic/node-crypto';
 import { ReportingCore } from '../../';
 import { CancellationToken } from '../../../common';
 import {
-  createMockConfig,
   createMockConfigSchema,
   createMockLevelLogger,
   createMockReportingCore,
@@ -34,7 +33,9 @@ let reportingCore: ReportingCore;
 
 beforeAll(async () => {
   const crypto = nodeCrypto({ encryptionKey });
-  const config = createMockConfig(
+
+  encryptedHeaders = await crypto.encrypt(headers);
+  reportingCore = await createMockReportingCore(
     createMockConfigSchema({
       encryptionKey,
       csv: {
@@ -45,10 +46,6 @@ beforeAll(async () => {
       },
     })
   );
-
-  encryptedHeaders = await crypto.encrypt(headers);
-
-  reportingCore = await createMockReportingCore(config);
 });
 
 test('gets the csv content from job parameters', async () => {

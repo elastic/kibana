@@ -8,9 +8,9 @@
 import { each, isEmpty, isEqual, pick } from 'lodash';
 import semverGte from 'semver/functions/gte';
 import moment, { Duration } from 'moment';
+import { estypes } from '@elastic/elasticsearch';
 // @ts-ignore
 import numeral from '@elastic/numeral';
-
 import { i18n } from '@kbn/i18n';
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
 import { parseInterval } from './parse_interval';
@@ -22,13 +22,9 @@ import { MlServerLimits } from '../types/ml_server_info';
 import { JobValidationMessage, JobValidationMessageId } from '../constants/messages';
 import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../constants/aggregation_types';
 import { MLCATEGORY } from '../constants/field_types';
-import {
-  getAggregationBucketsName,
-  getAggregations,
-  getDatafeedAggregations,
-} from './datafeed_utils';
+import { getAggregations, getDatafeedAggregations } from './datafeed_utils';
 import { findAggField } from './validation_utils';
-import { isPopulatedObject } from './object_utils';
+import { getFirstKeyInObject, isPopulatedObject } from './object_utils';
 import { isDefined } from '../types/guards';
 
 export interface ValidationResults {
@@ -50,14 +46,6 @@ export function calculateDatafeedFrequencyDefaultSeconds(bucketSpanSeconds: numb
   }
 
   return freq;
-}
-
-export function hasRuntimeMappings(job: CombinedJob): boolean {
-  const hasDatafeed = isPopulatedObject(job.datafeed_config);
-  if (hasDatafeed) {
-    return isPopulatedObject(job.datafeed_config.runtime_mappings);
-  }
-  return false;
 }
 
 export function isTimeSeriesViewJob(job: CombinedJob): boolean {
@@ -85,6 +73,43 @@ export function isMappableJob(job: CombinedJob, detectorIndex: number): boolean 
   return isMappable;
 }
 
+/**
+ * Validates that composite definition only have sources that are only terms and date_histogram
+ * if composite is defined.
+ * @param buckets
+ */
+export function hasValidComposite(buckets: estypes.AggregationsAggregationContainer) {
+  if (
+    isPopulatedObject(buckets, ['composite']) &&
+    isPopulatedObject(buckets.composite, ['sources']) &&
+    Array.isArray(buckets.composite.sources)
+  ) {
+    const sources = buckets.composite.sources;
+    return !sources.some((source) => {
+      const sourceName = getFirstKeyInObject(source);
+      if (sourceName !== undefined && isPopulatedObject(source[sourceName])) {
+        const sourceTypes = Object.keys(source[sourceName]);
+        return (
+          sourceTypes.length === 1 &&
+          sourceTypes[0] !== 'date_histogram' &&
+          sourceTypes[0] !== 'terms'
+        );
+      }
+      return false;
+    });
+  }
+  return true;
+}
+
+/**
+ * Validates if aggregation type is currently not supported
+ * e.g. any other type other than 'date_histogram' or 'aggregations'
+ * @param buckets
+ */
+export function isUnsupportedAggType(aggType: string) {
+  return aggType !== 'date_histogram' && aggType !== 'aggs' && aggType !== 'aggregations';
+}
+
 // Returns a flag to indicate whether the source data can be plotted in a time
 // series chart for the specified detector.
 export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex: number): boolean {
@@ -105,42 +130,45 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
       dtr.partition_field_name !== MLCATEGORY &&
       dtr.over_field_name !== MLCATEGORY;
 
-    // If the datafeed uses script fields, we can only plot the time series if
-    // model plot is enabled. Without model plot it will be very difficult or impossible
-    // to invert to a reverse search of the underlying metric data.
-    if (
-      isSourceDataChartable === true &&
-      job.datafeed_config?.script_fields !== null &&
-      typeof job.datafeed_config?.script_fields === 'object'
-    ) {
-      // Perform extra check to see if the detector is using a scripted field.
-      const scriptFields = Object.keys(job.datafeed_config.script_fields);
-      isSourceDataChartable =
-        scriptFields.indexOf(dtr.partition_field_name!) === -1 &&
-        scriptFields.indexOf(dtr.by_field_name!) === -1 &&
-        scriptFields.indexOf(dtr.over_field_name!) === -1;
-    }
-
     const hasDatafeed = isPopulatedObject(job.datafeed_config);
-    if (hasDatafeed) {
+
+    if (isSourceDataChartable && hasDatafeed) {
+      // Perform extra check to see if the detector is using a scripted field.
+      if (isPopulatedObject(job.datafeed_config.script_fields)) {
+        // If the datafeed uses script fields, we can only plot the time series if
+        // model plot is enabled. Without model plot it will be very difficult or impossible
+        // to invert to a reverse search of the underlying metric data.
+
+        const scriptFields = Object.keys(job.datafeed_config.script_fields);
+        return (
+          scriptFields.indexOf(dtr.partition_field_name!) === -1 &&
+          scriptFields.indexOf(dtr.by_field_name!) === -1 &&
+          scriptFields.indexOf(dtr.over_field_name!) === -1
+        );
+      }
+
       // We cannot plot the source data for some specific aggregation configurations
       const aggs = getDatafeedAggregations(job.datafeed_config);
-      if (aggs !== undefined) {
-        const aggBucketsName = getAggregationBucketsName(aggs);
+      if (isPopulatedObject(aggs)) {
+        const aggBucketsName = getFirstKeyInObject(aggs);
         if (aggBucketsName !== undefined) {
-          // if fieldName is a aggregated field under nested terms using bucket_script
-          const aggregations = getAggregations<{ [key: string]: any }>(aggs[aggBucketsName]) ?? {};
+          if (Object.keys(aggs[aggBucketsName]).some(isUnsupportedAggType)) {
+            return false;
+          }
+          // if fieldName is an aggregated field under nested terms using bucket_script
+          const aggregations =
+            getAggregations<estypes.AggregationsAggregationContainer>(aggs[aggBucketsName]) ?? {};
           const foundField = findAggField(aggregations, dtr.field_name, false);
           if (foundField?.bucket_script !== undefined) {
             return false;
           }
+
+          // composite sources should be terms and date_histogram only for now
+          return hasValidComposite(aggregations);
         }
       }
 
-      // We also cannot plot the source data if they datafeed uses any field defined by runtime_mappings
-      if (hasRuntimeMappings(job)) {
-        return false;
-      }
+      return true;
     }
   }
 
@@ -180,11 +208,22 @@ export function isModelPlotChartableForDetector(job: Job, detectorIndex: number)
 // Returns a reason to indicate why the job configuration is not supported
 // if the result is undefined, that means the single metric job should be viewable
 export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string | undefined {
-  // if job has runtime mappings with no model plot
-  if (hasRuntimeMappings(job) && !job.model_plot_config?.enabled) {
-    return i18n.translate('xpack.ml.timeSeriesJob.jobWithRunTimeMessage', {
-      defaultMessage: 'the datafeed contains runtime fields and model plot is disabled',
-    });
+  // if job has at least one composite source that is not terms or date_histogram
+  const aggs = getDatafeedAggregations(job.datafeed_config);
+  if (isPopulatedObject(aggs)) {
+    const aggBucketsName = getFirstKeyInObject(aggs);
+    if (aggBucketsName !== undefined && aggs[aggBucketsName] !== undefined) {
+      // if fieldName is an aggregated field under nested terms using bucket_script
+
+      if (!hasValidComposite(aggs[aggBucketsName])) {
+        return i18n.translate(
+          'xpack.ml.timeSeriesJob.jobWithUnsupportedCompositeAggregationMessage',
+          {
+            defaultMessage: 'the datafeed contains unsupported composite sources',
+          }
+        );
+      }
+    }
   }
   // only allow jobs with at least one detector whose function corresponds to
   // an ES aggregation which can be viewed in the single metric view and which
@@ -196,7 +235,7 @@ export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string |
 
   if (isChartableTimeSeriesViewJob === false) {
     return i18n.translate('xpack.ml.timeSeriesJob.notViewableTimeSeriesJobMessage', {
-      defaultMessage: 'not a viewable time series job',
+      defaultMessage: 'it is not a viewable time series job',
     });
   }
 }
@@ -792,7 +831,7 @@ export function getLatestDataOrBucketTimestamp(
  * in the job wizards and so would be lost in a clone.
  */
 export function processCreatedBy(customSettings: CustomSettings) {
-  if (Object.values(CREATED_BY_LABEL).includes(customSettings.created_by!)) {
+  if (Object.values(CREATED_BY_LABEL).includes(customSettings.created_by as CREATED_BY_LABEL)) {
     delete customSettings.created_by;
   }
 }
@@ -804,14 +843,16 @@ export function splitIndexPatternNames(indexPatternName: string): string[] {
 }
 
 /**
- * Resolves the longest bucket span from the list.
- * @param bucketSpans Collection of bucket spans
+ * Resolves the longest time interval from the list.
+ * @param timeIntervals Collection of the strings representing time intervals, e.g. ['15m', '1h', '2d']
  */
-export function resolveBucketSpanInSeconds(bucketSpans: string[]): number {
-  return Math.max(
-    ...bucketSpans
+export function resolveMaxTimeInterval(timeIntervals: string[]): number | undefined {
+  const result = Math.max(
+    ...timeIntervals
       .map((b) => parseInterval(b))
       .filter(isDefined)
       .map((v) => v.asSeconds())
   );
+
+  return Number.isFinite(result) ? result : undefined;
 }

@@ -84,4 +84,20 @@ describe('APIKeysAPIClient', () => {
       body: JSON.stringify({ apiKeys: mockAPIKeys, isAdmin: true }),
     });
   });
+
+  it('createApiKey() queries correct endpoint', async () => {
+    const httpMock = httpServiceMock.createStartContract();
+
+    const mockResponse = Symbol('mockResponse');
+    httpMock.post.mockResolvedValue(mockResponse);
+
+    const apiClient = new APIKeysAPIClient(httpMock);
+    const mockAPIKeys = { name: 'name', expiration: '7d' };
+
+    await expect(apiClient.createApiKey(mockAPIKeys)).resolves.toBe(mockResponse);
+    expect(httpMock.post).toHaveBeenCalledTimes(1);
+    expect(httpMock.post).toHaveBeenCalledWith('/internal/security/api_key', {
+      body: JSON.stringify(mockAPIKeys),
+    });
+  });
 });

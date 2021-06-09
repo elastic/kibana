@@ -28,10 +28,13 @@ import { TaskScheduling } from './task_scheduling';
 import { healthRoute } from './routes';
 import { createMonitoringStats, MonitoringStats } from './monitoring';
 
-export type TaskManagerSetupContract = { addMiddleware: (middleware: Middleware) => void } & Pick<
-  TaskTypeDictionary,
-  'registerTaskDefinitions'
->;
+export type TaskManagerSetupContract = {
+  /**
+   * @deprecated
+   */
+  index: string;
+  addMiddleware: (middleware: Middleware) => void;
+} & Pick<TaskTypeDictionary, 'registerTaskDefinitions'>;
 
 export type TaskManagerStartContract = Pick<
   TaskScheduling,
@@ -95,6 +98,7 @@ export class TaskManagerPlugin
     });
 
     return {
+      index: this.config.index,
       addMiddleware: (middleware: Middleware) => {
         this.assertStillInSetup('add Middleware');
         this.middleware = addMiddlewareToChain(this.middleware, middleware);

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { Observable } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { Case } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
-  case: Array<() => Promise<Case>>;
-  default: () => any;
+  case: Array<() => Observable<Case>>;
+  default?(): Observable<any>;
 }
 
 export function switchFn(): ExpressionFunctionDefinition<'switch', unknown, Arguments, unknown> {
@@ -32,25 +34,21 @@ export function switchFn(): ExpressionFunctionDefinition<'switch', unknown, Argu
       default: {
         aliases: ['finally'],
         resolve: false,
-        help: argHelp.default,
+        help: argHelp.default!,
       },
     },
     fn: async (input, args) => {
       const cases = args.case || [];
 
       for (let i = 0; i < cases.length; i++) {
-        const { matches, result } = await cases[i]();
+        const { matches, result } = await cases[i]().pipe(take(1)).toPromise();
 
         if (matches) {
           return result;
         }
       }
 
-      if (typeof args.default !== 'undefined') {
-        return await args.default();
-      }
-
-      return input;
+      return args.default?.().pipe(take(1)).toPromise() ?? input;
     },
   };
 }

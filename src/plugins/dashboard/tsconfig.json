@@ -32,5 +32,8 @@
     { "path": "../saved_objects/tsconfig.json" },
     { "path": "../ui_actions/tsconfig.json" },
     { "path": "../spaces_oss/tsconfig.json" },
+    { "path": "../charts/tsconfig.json" },
+    { "path": "../discover/tsconfig.json" },
+    { "path": "../visualizations/tsconfig.json" },
   ]
 }

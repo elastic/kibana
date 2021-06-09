@@ -79,6 +79,10 @@ const explorerAppState$: Observable<ExplorerAppState> = explorerState$.pipe(
         appState.mlExplorerSwimlane.viewByPerPage = state.viewByPerPage;
       }
 
+      if (state.swimLaneSeverity !== undefined) {
+        appState.mlExplorerSwimlane.severity = state.swimLaneSeverity;
+      }
+
       if (state.filterActive) {
         appState.mlExplorerFilter.influencersFilterQuery = state.influencersFilterQuery;
         appState.mlExplorerFilter.filterActive = state.filterActive;
@@ -107,6 +111,9 @@ const setFilterDataActionCreator = (
 export const explorerService = {
   appState$: explorerAppState$,
   state$: explorerState$,
+  clearExplorerData: () => {
+    explorerAction$.next({ type: EXPLORER_ACTION.CLEAR_EXPLORER_DATA });
+  },
   clearInfluencerFilterSettings: () => {
     explorerAction$.next({ type: EXPLORER_ACTION.CLEAR_INFLUENCER_FILTER_SETTINGS });
   },
@@ -137,6 +144,9 @@ export const explorerService = {
   setFilterData: (payload: Partial<Exclude<ExplorerAppState['mlExplorerFilter'], undefined>>) => {
     explorerAction$.next(setFilterDataActionCreator(payload));
   },
+  setChartsDataLoading: () => {
+    explorerAction$.next({ type: EXPLORER_ACTION.SET_CHARTS_DATA_LOADING });
+  },
   setSwimlaneContainerWidth: (payload: number) => {
     explorerAction$.next({
       type: EXPLORER_ACTION.SET_SWIMLANE_CONTAINER_WIDTH,
@@ -154,6 +164,9 @@ export const explorerService = {
   },
   setViewByPerPage: (payload: number) => {
     explorerAction$.next({ type: EXPLORER_ACTION.SET_VIEW_BY_PER_PAGE, payload });
+  },
+  setSwimLaneSeverity: (payload: number) => {
+    explorerAction$.next({ type: EXPLORER_ACTION.SET_SWIM_LANE_SEVERITY, payload });
   },
 };
 

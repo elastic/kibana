@@ -81,6 +81,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
     renameReplacement,
     partial,
     includeGlobalState,
+    includeAliases,
   } = restoreSettings;
 
   // States for choosing all indices, or a subset, including caching previously chosen subset list
@@ -622,6 +623,41 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             onChange={(e) => updateRestoreSettings({ includeGlobalState: e.target.checked })}
             disabled={!snapshotIncludeGlobalState}
             data-test-subj="includeGlobalStateSwitch"
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+
+      {/* Include aliases */}
+      <EuiDescribedFormGroup
+        title={
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.snapshotRestore.restoreForm.stepLogistics.includeAliasesTitle"
+                defaultMessage="Restore aliases"
+              />
+            </h3>
+          </EuiTitle>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.snapshotRestore.restoreForm.stepLogistics.includeAliasesDescription"
+            defaultMessage="Restores index aliases along with their associated indices."
+          />
+        }
+        fullWidth
+      >
+        <EuiFormRow hasEmptyLabelSpace={true} fullWidth>
+          <EuiSwitch
+            label={
+              <FormattedMessage
+                id="xpack.snapshotRestore.restoreForm.stepLogistics.includeAliasesLabel"
+                defaultMessage="Restore aliases"
+              />
+            }
+            checked={includeAliases === undefined ? true : includeAliases}
+            onChange={(e) => updateRestoreSettings({ includeAliases: e.target.checked })}
+            data-test-subj="includeAliasesSwitch"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>

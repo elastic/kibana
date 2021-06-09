@@ -9,20 +9,23 @@ import * as t from 'io-ts';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getTrace } from '../lib/traces/get_trace';
 import { getTransactionGroupList } from '../lib/transaction_groups';
-import { createRoute } from './create_route';
+import { createApmServerRoute } from './create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from './default_api_types';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { getRootTransactionByTraceId } from '../lib/transactions/get_transaction_by_trace';
+import { createApmServerRouteRepository } from './create_apm_server_route_repository';
+import { getTransaction } from '../lib/transactions/get_transaction';
 
-export const tracesRoute = createRoute({
+const tracesRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/traces',
   params: t.type({
     query: t.intersection([environmentRt, kueryRt, rangeRt]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
-    const { environment, kuery } = context.params.query;
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
+    const { params } = resources;
+    const { environment, kuery } = params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
       setup
     );
@@ -34,7 +37,7 @@ export const tracesRoute = createRoute({
   },
 });
 
-export const tracesByIdRoute = createRoute({
+const tracesByIdRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/traces/{traceId}',
   params: t.type({
     path: t.type({
@@ -43,13 +46,16 @@ export const tracesByIdRoute = createRoute({
     query: rangeRt,
   }),
   options: { tags: ['access:apm'] },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
-    return getTrace(context.params.path.traceId, setup);
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
+    const { params } = resources;
+
+    const { traceId } = params.path;
+    return getTrace(traceId, setup);
   },
 });
 
-export const rootTransactionByTraceIdRoute = createRoute({
+const rootTransactionByTraceIdRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/traces/{traceId}/root_transaction',
   params: t.type({
     path: t.type({
@@ -57,9 +63,32 @@ export const rootTransactionByTraceIdRoute = createRoute({
     }),
   }),
   options: { tags: ['access:apm'] },
-  handler: async ({ context, request }) => {
-    const { traceId } = context.params.path;
-    const setup = await setupRequest(context, request);
+  handler: async (resources) => {
+    const { params } = resources;
+    const { traceId } = params.path;
+    const setup = await setupRequest(resources);
     return getRootTransactionByTraceId(traceId, setup);
   },
 });
+
+const transactionByIdRoute = createApmServerRoute({
+  endpoint: 'GET /api/apm/transactions/{transactionId}',
+  params: t.type({
+    path: t.type({
+      transactionId: t.string,
+    }),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (resources) => {
+    const { params } = resources;
+    const { transactionId } = params.path;
+    const setup = await setupRequest(resources);
+    return { transaction: await getTransaction({ transactionId, setup }) };
+  },
+});
+
+export const traceRouteRepository = createApmServerRouteRepository()
+  .add(tracesByIdRoute)
+  .add(tracesRoute)
+  .add(rootTransactionByTraceIdRoute)
+  .add(transactionByIdRoute);

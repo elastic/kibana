@@ -8,9 +8,8 @@
 import React, { Fragment, useState } from 'react';
 
 import {
+  EuiButtonIcon,
   EuiFieldSearch,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiIconTip,
   EuiSpacer,
   EuiTable,
@@ -25,9 +24,10 @@ import { i18n } from '@kbn/i18n';
 
 import { ASRoleMapping } from '../../app_search/types';
 import { WSRoleMapping } from '../../workplace_search/types';
-import { MANAGE_BUTTON_LABEL } from '../constants';
-import { EuiLinkTo } from '../react_router_helpers';
+import { MANAGE_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../constants';
 import { RoleRules } from '../types';
+
+import './role_mappings_table.scss';
 
 import {
   ANY_AUTH_PROVIDER,
@@ -52,10 +52,10 @@ interface Props {
   accessItemKey: 'groups' | 'engines';
   accessHeader: string;
   roleMappings: Array<ASRoleMapping | WSRoleMapping>;
-  addMappingButton: React.ReactNode;
   accessAllEngines?: boolean;
   shouldShowAuthProvider?: boolean;
-  getRoleMappingPath(roleId: string): string;
+  initializeRoleMapping(roleMappingId: string): void;
+  handleDeleteMapping(roleMappingId: string): void;
 }
 
 const MAX_CELL_WIDTH = 24;
@@ -69,9 +69,9 @@ export const RoleMappingsTable: React.FC<Props> = ({
   accessItemKey,
   accessHeader,
   roleMappings,
-  addMappingButton,
-  getRoleMappingPath,
   shouldShowAuthProvider,
+  initializeRoleMapping,
+  handleDeleteMapping,
 }) => {
   const [filterValue, updateValue] = useState('');
 
@@ -94,21 +94,33 @@ export const RoleMappingsTable: React.FC<Props> = ({
   const getFirstAttributeName = (rules: RoleRules): string => Object.entries(rules)[0][0];
   const getFirstAttributeValue = (rules: RoleRules): string => Object.entries(rules)[0][1];
 
+  const rowActions = (id: string) => (
+    <>
+      <EuiButtonIcon
+        onClick={() => initializeRoleMapping(id)}
+        iconType="pencil"
+        aria-label={MANAGE_BUTTON_LABEL}
+        data-test-subj="ManageButton"
+      />{' '}
+      <EuiButtonIcon
+        onClick={() => handleDeleteMapping(id)}
+        iconType="trash"
+        aria-label={DELETE_BUTTON_LABEL}
+        data-test-subj="DeleteButton"
+      />
+    </>
+  );
+
   return (
     <>
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem>
-          <EuiFieldSearch
-            value={filterValue}
-            placeholder={FILTER_ROLE_MAPPINGS_PLACEHOLDER}
-            onChange={(e) => updateValue(e.target.value)}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{addMappingButton}</EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiFieldSearch
+        value={filterValue}
+        placeholder={FILTER_ROLE_MAPPINGS_PLACEHOLDER}
+        onChange={(e) => updateValue(e.target.value)}
+      />
       <EuiSpacer />
       {filteredResults.length > 0 ? (
-        <EuiTable>
+        <EuiTable className="roleMappingsTable">
           <EuiTableHeader>
             <EuiTableHeaderCell>{EXTERNAL_ATTRIBUTE_LABEL}</EuiTableHeaderCell>
             <EuiTableHeaderCell>{ATTRIBUTE_VALUE_LABEL}</EuiTableHeaderCell>
@@ -152,8 +164,8 @@ export const RoleMappingsTable: React.FC<Props> = ({
                       {authProvider.map(getAuthProviderDisplayValue).join(', ')}
                     </EuiTableRowCell>
                   )}
-                  <EuiTableRowCell>
-                    {id && <EuiLinkTo to={getRoleMappingPath(id)}>{MANAGE_BUTTON_LABEL}</EuiLinkTo>}
+                  <EuiTableRowCell align="right">
+                    {id && rowActions(id)}
                     {toolTip && <EuiIconTip position="left" content={toolTip.content} />}
                   </EuiTableRowCell>
                 </EuiTableRow>

@@ -1,0 +1,24 @@
+.quickButtonGroup {
+  .quickButtonGroup__button {
+    background-color: $euiColorEmptyShade;
+    @include kbnThemeStyle('v8') {
+      // sass-lint:disable-block no-important
+      border-width: $euiBorderWidthThin !important;
+      border-style: solid !important;
+      border-color: $euiBorderColor !important;
+    }
+  }
+
+  // Temporary fix for two tone icons to make them monochrome
+  .quickButtonGroup__button--dark {
+    .euiIcon path {
+      fill: $euiColorGhost;
+    }
+  }
+  // Temporary fix for two tone icons to make them monochrome
+  .quickButtonGroup__button--light {
+    .euiIcon path {
+      fill: $euiColorInk;
+    }
+  }
+}

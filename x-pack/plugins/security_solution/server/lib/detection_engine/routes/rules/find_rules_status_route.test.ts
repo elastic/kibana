@@ -6,11 +6,16 @@
  */
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { getFindResultStatus, ruleStatusRequest, getResult } from '../__mocks__/request_responses';
+import {
+  ruleStatusRequest,
+  getAlertMock,
+  getFindBulkResultStatus,
+} from '../__mocks__/request_responses';
 import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { findRulesStatusesRoute } from './find_rules_status_route';
 import { RuleStatusResponse } from '../../rules/types';
 import { AlertExecutionStatusErrorReasons } from '../../../../../../alerting/common';
+import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
 jest.mock('../../signals/rule_status_service');
 
@@ -21,8 +26,8 @@ describe('find_statuses', () => {
   beforeEach(async () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-    clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus()); // successful status search
-    clients.alertsClient.get.mockResolvedValue(getResult());
+    clients.savedObjectsClient.find.mockResolvedValue(getFindBulkResultStatus()); // successful status search
+    clients.alertsClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
     findRulesStatusesRoute(server.router);
   });
 
@@ -54,7 +59,7 @@ describe('find_statuses', () => {
     test('returns success if rule status client writes an error status', async () => {
       // 0. task manager tried to run the rule but couldn't, so the alerting framework
       // wrote an error to the executionStatus.
-      const failingExecutionRule = getResult();
+      const failingExecutionRule = getAlertMock(getQueryRuleParams());
       failingExecutionRule.executionStatus = {
         status: 'error',
         lastExecutionDate: failingExecutionRule.executionStatus.lastExecutionDate,

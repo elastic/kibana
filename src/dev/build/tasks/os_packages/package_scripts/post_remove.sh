@@ -34,10 +34,23 @@ case $1 in
 esac
 
 if [ "$REMOVE_DIRS" = "true" ]; then
+
+  if [ -d "<%= logDir %>" ]; then
+      echo -n "Deleting log directory..."
+      rm -rf "<%= logDir %>"
+      echo " OK"
+  fi
+
   if [ -d "<%= pluginsDir %>" ]; then
     echo -n "Deleting plugins directory..."
     rm -rf "<%= pluginsDir %>"
     echo " OK"
+  fi
+
+  if [ -d "<%= pidDir %>" ]; then
+      echo -n "Deleting PID directory..."
+      rm -rf "<%= pidDir %>"
+      echo " OK"
   fi
 
   if [ -d "<%= configDir %>" ]; then

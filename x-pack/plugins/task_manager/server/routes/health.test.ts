@@ -155,31 +155,6 @@ describe('healthRoute', () => {
     expect(await serviceStatus).toMatchObject({
       level: ServiceStatusLevels.unavailable,
       summary: 'Task Manager is unavailable',
-      meta: {
-        status: 'error',
-        ...summarizeMonitoringStats(
-          mockHealthStats({
-            last_update: expect.any(String),
-            stats: {
-              configuration: {
-                timestamp: expect.any(String),
-              },
-              workload: {
-                timestamp: expect.any(String),
-              },
-              runtime: {
-                timestamp: expect.any(String),
-                value: {
-                  polling: {
-                    last_successful_poll: expect.any(String),
-                  },
-                },
-              },
-            },
-          }),
-          getTaskManagerConfig({})
-        ),
-      },
     });
   });
 

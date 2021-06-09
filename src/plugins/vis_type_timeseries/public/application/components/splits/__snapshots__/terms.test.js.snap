@@ -26,13 +26,25 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
       </EuiFormRow>
     </EuiFlexItem>
     <EuiFlexItem>
-      <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        fullWidth={false}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
-        id="42"
+      <FieldSelect
+        data-test-subj="groupByField"
+        fields={
+          Object {
+            "kibana_sample_data_flights": Array [
+              Object {
+                "aggregatable": true,
+                "esTypes": Array [
+                  "keyword",
+                ],
+                "name": "OriginCityName",
+                "readFromDocValues": true,
+                "searchable": true,
+                "type": "string",
+              },
+            ],
+          }
+        }
+        indexPattern="kibana_sample_data_flights"
         label={
           <FormattedMessage
             defaultMessage="By"
@@ -41,32 +53,10 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
             values={Object {}}
           />
         }
-        labelType="label"
-      >
-        <FieldSelect
-          data-test-subj="groupByField"
-          fields={
-            Object {
-              "kibana_sample_data_flights": Array [
-                Object {
-                  "aggregatable": true,
-                  "esTypes": Array [
-                    "keyword",
-                  ],
-                  "name": "OriginCityName",
-                  "readFromDocValues": true,
-                  "searchable": true,
-                  "type": "string",
-                },
-              ],
-            }
-          }
-          indexPattern="kibana_sample_data_flights"
-          onChange={[Function]}
-          type="terms"
-          value="OriginCityName"
-        />
-      </EuiFormRow>
+        onChange={[Function]}
+        type="terms"
+        value="OriginCityName"
+      />
     </EuiFlexItem>
   </EuiFlexGroup>
   <EuiFlexGroup>

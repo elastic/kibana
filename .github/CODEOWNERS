@@ -24,6 +24,7 @@
 /src/plugins/vis_type_vega/ @elastic/kibana-app
 /src/plugins/vis_type_vislib/ @elastic/kibana-app
 /src/plugins/vis_type_xy/ @elastic/kibana-app
+/src/plugins/vis_type_pie/ @elastic/kibana-app
 /src/plugins/visualize/ @elastic/kibana-app
 /src/plugins/visualizations/ @elastic/kibana-app
 /packages/kbn-tinymath/ @elastic/kibana-app
@@ -54,6 +55,7 @@
 /src/plugins/share/ @elastic/kibana-app-services
 /src/plugins/ui_actions/ @elastic/kibana-app-services
 /src/plugins/index_pattern_field_editor @elastic/kibana-app-services
+/src/plugins/screenshot_mode @elastic/kibana-app-services
 /x-pack/examples/ui_actions_enhanced_examples/ @elastic/kibana-app-services
 /x-pack/plugins/data_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/embeddable_enhanced/ @elastic/kibana-app-services
@@ -79,6 +81,7 @@
 
 # Uptime
 /x-pack/plugins/uptime @elastic/uptime
+/x-pack/plugins/observability/public/components/shared/exploratory_view @elastic/uptime
 /x-pack/test/functional_with_es_ssl/apps/uptime  @elastic/uptime
 /x-pack/test/functional/apps/uptime @elastic/uptime
 /x-pack/test/api_integration/apis/uptime @elastic/uptime
@@ -86,16 +89,13 @@
 # Client Side Monitoring / Uptime (lives in APM directories but owned by Uptime)
 /x-pack/plugins/apm/e2e/cypress/support/step_definitions/csm @elastic/uptime
 /x-pack/plugins/apm/e2e/cypress/integration/csm_dashboard.feature @elastic/uptime
-/x-pack/plugins/apm/public/application/csmApp.tsx @elastic/uptime
+/x-pack/plugins/apm/public/application/uxApp.tsx @elastic/uptime
 /x-pack/plugins/apm/public/components/app/RumDashboard @elastic/uptime
 /x-pack/plugins/apm/server/lib/rum_client @elastic/uptime
 /x-pack/plugins/apm/server/routes/rum_client.ts @elastic/uptime
 /x-pack/plugins/apm/server/projections/rum_page_load_transactions.ts @elastic/uptime
 /x-pack/test/apm_api_integration/tests/csm/ @elastic/uptime
 
-# Beats
-/x-pack/plugins/beats_management/  @elastic/beats
-#CC# /x-pack/plugins/beats_management/ @elastic/beats
 
 # Presentation
 /src/plugins/dashboard/ @elastic/kibana-presentation
@@ -107,7 +107,6 @@
 /x-pack/plugins/dashboard_enhanced/ @elastic/kibana-presentation
 /x-pack/test/functional/apps/canvas/  @elastic/kibana-presentation
 #CC# /src/plugins/kibana_react/public/code_editor/ @elastic/kibana-presentation
-#CC# /x-pack/legacy/plugins/canvas/ @elastic/kibana-presentation
 #CC# /x-pack/plugins/dashboard_mode @elastic/kibana-presentation
 
 
@@ -129,8 +128,10 @@
 /x-pack/test/functional_basic/apps/ml/ @elastic/ml-ui
 /x-pack/test/functional_with_es_ssl/apps/ml/ @elastic/ml-ui
 
-# ML team owns and maintains the transform plugin despite it living in the Elasticsearch management section.
+# ML team owns and maintains the transform plugin despite it living in the Data management section.
 /x-pack/plugins/transform/  @elastic/ml-ui
+/x-pack/plugins/data_visualizer/ @elastic/ml-ui
+/x-pack/plugins/file_upload/ @elastic/ml-ui
 /x-pack/test/accessibility/apps/transform.ts  @elastic/ml-ui
 /x-pack/test/api_integration/apis/transform/ @elastic/ml-ui
 /x-pack/test/api_integration_basic/apis/transform/ @elastic/ml-ui
@@ -144,11 +145,13 @@
 /x-pack/test/functional/apps/maps/ @elastic/kibana-gis
 /x-pack/test/functional/es_archives/maps/ @elastic/kibana-gis
 /x-pack/test/visual_regression/tests/maps/index.js @elastic/kibana-gis
+/x-pack/plugins/stack_alerts/server/alert_types/geo_containment @elastic/kibana-gis
+/x-pack/plugins/stack_alerts/public/alert_types/geo_containment @elastic/kibana-gis
 #CC# /src/plugins/maps_legacy/ @elastic/kibana-gis
 #CC# /x-pack/plugins/file_upload @elastic/kibana-gis
-#CC# /x-pack/plugins/maps_legacy_licensing @elastic/kibana-gis
 /src/plugins/tile_map/ @elastic/kibana-gis
 /src/plugins/region_map/ @elastic/kibana-gis
+/packages/kbn-mapbox-gl @elastic/kibana-gis
 
 # Operations
 /src/dev/ @elastic/kibana-operations
@@ -165,7 +168,6 @@
 /packages/kbn-utils/ @elastic/kibana-operations
 /packages/kbn-cli-dev-mode/ @elastic/kibana-operations
 /src/cli/keystore/ @elastic/kibana-operations
-/src/legacy/server/warnings/ @elastic/kibana-operations
 /.ci/es-snapshots/ @elastic/kibana-operations
 /.github/workflows/ @elastic/kibana-operations
 /vars/ @elastic/kibana-operations
@@ -176,6 +178,7 @@
 /.bazelversion @elastic/kibana-operations
 /WORKSPACE.bazel @elastic/kibana-operations
 #CC# /packages/kbn-expect/ @elastic/kibana-operations
+/.buildkite/ @elastic/kibana-operations
 
 # Quality Assurance
 /src/dev/code_coverage @elastic/kibana-qa
@@ -188,6 +191,7 @@
 /src/core/  @elastic/kibana-core
 /src/plugins/saved_objects_tagging_oss  @elastic/kibana-core
 /config/kibana.yml @elastic/kibana-core
+/x-pack/plugins/banners/  @elastic/kibana-core
 /x-pack/plugins/features/  @elastic/kibana-core
 /x-pack/plugins/licensing/  @elastic/kibana-core
 /x-pack/plugins/global_search/  @elastic/kibana-core
@@ -202,10 +206,6 @@
 /packages/kbn-legacy-logging/ @elastic/kibana-core
 /packages/kbn-crypto/ @elastic/kibana-core
 /packages/kbn-http-tools/ @elastic/kibana-core
-/src/legacy/server/config/ @elastic/kibana-core
-/src/legacy/server/http/ @elastic/kibana-core
-/src/legacy/server/logging/ @elastic/kibana-core
-/src/plugins/status_page/ @elastic/kibana-core
 /src/plugins/saved_objects_management/ @elastic/kibana-core
 /src/dev/run_check_published_api_changes.ts @elastic/kibana-core
 /src/plugins/home/public @elastic/kibana-core
@@ -214,13 +214,9 @@
 /src/plugins/kibana_overview/ @elastic/kibana-core
 /x-pack/plugins/global_search_bar/ @elastic/kibana-core
 #CC# /src/core/server/csp/ @elastic/kibana-core
-#CC# /src/legacy/server/config/ @elastic/kibana-core
-#CC# /src/legacy/server/http/ @elastic/kibana-core
-#CC# /src/legacy/ui/public/documentation_links @elastic/kibana-core
 #CC# /src/plugins/legacy_export/ @elastic/kibana-core
 #CC# /src/plugins/xpack_legacy/ @elastic/kibana-core
 #CC# /src/plugins/saved_objects/ @elastic/kibana-core
-#CC# /src/plugins/status_page/ @elastic/kibana-core
 #CC# /x-pack/plugins/cloud/ @elastic/kibana-core
 #CC# /x-pack/plugins/features/ @elastic/kibana-core
 #CC# /x-pack/plugins/global_search/ @elastic/kibana-core
@@ -280,7 +276,7 @@
 /x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/ @elastic/kibana-alerting-services
 /x-pack/test/functional_with_es_ssl/fixtures/plugins/alerts/ @elastic/kibana-alerting-services
 /docs/user/alerting/ @elastic/kibana-alerting-services
-/docs/management/alerting/ @elastic/kibana-alerting-services
+/docs/management/connectors/ @elastic/kibana-alerting-services
 #CC# /x-pack/plugins/stack_alerts @elastic/kibana-alerting-services
 
 # Enterprise Search
@@ -311,28 +307,29 @@
 /x-pack/plugins/enterprise_search/server/collectors/workplace_search/ @elastic/workplace-search-frontend
 /x-pack/plugins/enterprise_search/server/saved_objects/workplace_search/ @elastic/workplace-search-frontend
 
-# Elasticsearch UI
-/src/plugins/dev_tools/ @elastic/es-ui
-/src/plugins/console/  @elastic/es-ui
-/src/plugins/es_ui_shared/  @elastic/es-ui
-/x-pack/plugins/cross_cluster_replication/  @elastic/es-ui
-/x-pack/plugins/index_lifecycle_management/  @elastic/es-ui
-/x-pack/plugins/console_extensions/  @elastic/es-ui
-/x-pack/plugins/grokdebugger/  @elastic/es-ui
-/x-pack/plugins/index_management/  @elastic/es-ui
-/x-pack/plugins/license_management/  @elastic/es-ui
-/x-pack/plugins/painless_lab/  @elastic/es-ui
-/x-pack/plugins/remote_clusters/  @elastic/es-ui
-/x-pack/plugins/rollup/  @elastic/es-ui
-/x-pack/plugins/searchprofiler/  @elastic/es-ui
-/x-pack/plugins/snapshot_restore/  @elastic/es-ui
-/x-pack/plugins/upgrade_assistant/  @elastic/es-ui
-/x-pack/plugins/watcher/  @elastic/es-ui
-/x-pack/plugins/ingest_pipelines/  @elastic/es-ui
-/packages/kbn-ace/ @elastic/es-ui
-/packages/kbn-monaco/ @elastic/es-ui
-#CC# /x-pack/plugins/console_extensions/ @elastic/es-ui
-#CC# /x-pack/plugins/cross_cluster_replication/ @elastic/es-ui
+# Stack Management
+/src/plugins/dev_tools/ @elastic/kibana-stack-management
+/src/plugins/console/  @elastic/kibana-stack-management
+/src/plugins/es_ui_shared/  @elastic/kibana-stack-management
+/x-pack/plugins/cross_cluster_replication/  @elastic/kibana-stack-management
+/x-pack/plugins/index_lifecycle_management/  @elastic/kibana-stack-management
+/x-pack/plugins/console_extensions/  @elastic/kibana-stack-management
+/x-pack/plugins/grokdebugger/  @elastic/kibana-stack-management
+/x-pack/plugins/index_management/  @elastic/kibana-stack-management
+/x-pack/plugins/license_api_guard/  @elastic/kibana-stack-management
+/x-pack/plugins/license_management/  @elastic/kibana-stack-management
+/x-pack/plugins/painless_lab/  @elastic/kibana-stack-management
+/x-pack/plugins/remote_clusters/  @elastic/kibana-stack-management
+/x-pack/plugins/rollup/  @elastic/kibana-stack-management
+/x-pack/plugins/searchprofiler/  @elastic/kibana-stack-management
+/x-pack/plugins/snapshot_restore/  @elastic/kibana-stack-management
+/x-pack/plugins/upgrade_assistant/  @elastic/kibana-stack-management
+/x-pack/plugins/watcher/  @elastic/kibana-stack-management
+/x-pack/plugins/ingest_pipelines/  @elastic/kibana-stack-management
+/packages/kbn-ace/ @elastic/kibana-stack-management
+/packages/kbn-monaco/ @elastic/kibana-stack-management
+#CC# /x-pack/plugins/console_extensions/ @elastic/kibana-stack-management
+#CC# /x-pack/plugins/cross_cluster_replication/ @elastic/kibana-stack-management
 
 # Security Solution
 /x-pack/test/endpoint_api_integration_no_ingest/ @elastic/security-solution
@@ -347,7 +344,8 @@
 #CC# /x-pack/plugins/security_solution/ @elastic/security-solution
 
 # Security Solution sub teams
-/x-pack/plugins/case @elastic/security-threat-hunting
+/x-pack/plugins/cases @elastic/security-threat-hunting
+/x-pack/plugins/timelines @elastic/security-threat-hunting
 /x-pack/test/case_api_integration @elastic/security-threat-hunting
 /x-pack/plugins/lists @elastic/security-detections-response
 

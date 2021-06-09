@@ -27,16 +27,16 @@ exports[`ToolTipFilter renders correctly against snapshot 1`] = `
           aria-label="Next"
           color="text"
           data-test-subj="previous-feature-button"
-          disabled={true}
           iconType="arrowLeft"
+          isDisabled={true}
           onClick={[MockFunction]}
         />
         <EuiButtonIcon
           aria-label="Next"
           color="text"
           data-test-subj="next-feature-button"
-          disabled={false}
           iconType="arrowRight"
+          isDisabled={false}
           onClick={[MockFunction]}
         />
       </span>

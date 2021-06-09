@@ -9,7 +9,7 @@ import { SavedObjectMigrationMap, SavedObjectUnsanitizedDoc } from 'kibana/serve
 import {
   SearchSessionSavedObjectAttributes as SearchSessionSavedObjectAttributesLatest,
   SearchSessionStatus,
-} from '../../common';
+} from '../../../../../src/plugins/data/common';
 
 /**
  * Search sessions were released in 7.12.0

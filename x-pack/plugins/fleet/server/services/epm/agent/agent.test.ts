@@ -65,6 +65,12 @@ custom: {{ custom }}
 {{#if key.patterns}}
 key.patterns: {{key.patterns}}
 {{/if}}
+{{#if emptyfield}}
+emptyfield: {{emptyfield}}
+{{/if}}
+{{#if nullfield}}
+nullfield: {{nullfield}}
+{{/if}}
 {{ testEmpty }}
       `;
     const vars = {
@@ -82,6 +88,8 @@ foo: bar
         `,
       },
       password: { type: 'password', value: '' },
+      emptyfield: { type: 'yaml', value: '' },
+      nullfield: { type: 'yaml' },
     };
 
     const output = compileTemplate(vars, streamTemplate);

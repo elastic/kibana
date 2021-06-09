@@ -11,7 +11,20 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 
 import apmObj from './apm.json';
 
+
+
+
+
+**Code health stats**
+
+| Public API count  | Any count | Items lacking comments | Missing exports | 
+|-------------------|-----------|------------------------|-----------------|
+| 37 | 0 | 37 | 30 |
+
 ## Client
+
+### Setup
+<DocDefinitionList data={[apmObj.client.setup]}/>
 
 ### Start
 <DocDefinitionList data={[apmObj.client.start]}/>
@@ -29,6 +42,9 @@ import apmObj from './apm.json';
 
 ### Classes
 <DocDefinitionList data={apmObj.server.classes}/>
+
+### Interfaces
+<DocDefinitionList data={apmObj.server.interfaces}/>
 
 ### Enums
 <DocDefinitionList data={apmObj.server.enums}/>

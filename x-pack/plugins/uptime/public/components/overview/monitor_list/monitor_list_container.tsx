@@ -8,10 +8,11 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { getMonitorList } from '../../../state/actions';
-import { monitorListSelector } from '../../../state/selectors';
+import { esKuerySelector, monitorListSelector } from '../../../state/selectors';
 import { MonitorListComponent } from './monitor_list';
 import { useUrlParams } from '../../../hooks';
 import { UptimeRefreshContext } from '../../../contexts';
+import { getConnectorsAction, getMonitorAlertsAction } from '../../../state/alerts/alerts';
 
 export interface MonitorListProps {
   filters?: string;
@@ -28,7 +29,7 @@ const getPageSizeValue = () => {
 };
 
 export const MonitorList: React.FC<MonitorListProps> = (props) => {
-  const { filters } = props;
+  const filters = useSelector(esKuerySelector);
 
   const [pageSize, setPageSize] = useState<number>(getPageSizeValue);
 
@@ -64,6 +65,14 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
     statusFilter,
     query,
   ]);
+
+  useEffect(() => {
+    dispatch(getMonitorAlertsAction.get());
+  }, [dispatch]);
+
+  useEffect(() => {
+    dispatch(getConnectorsAction.get());
+  }, [dispatch]);
 
   return (
     <MonitorListComponent

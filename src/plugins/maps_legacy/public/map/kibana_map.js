@@ -7,13 +7,11 @@
  */
 
 import { EventEmitter } from 'events';
-import { createZoomWarningMsg } from './map_messages';
 import $ from 'jquery';
 import { get, isEqual, escape } from 'lodash';
 import { zoomToPrecision } from './zoom_to_precision';
 import { i18n } from '@kbn/i18n';
 import { ORIGIN } from '../../../maps_ems/common';
-import { getToasts } from '../kibana_services';
 import { L } from '../leaflet';
 
 function makeFitControl(fitContainer, kibanaMap) {
@@ -479,22 +477,6 @@ export class KibanaMap extends EventEmitter {
     this._updateLegend();
   }
 
-  _addMaxZoomMessage = (layer) => {
-    const zoomWarningMsg = createZoomWarningMsg(
-      getToasts(),
-      this.getZoomLevel,
-      this.getMaxZoomLevel
-    );
-
-    this._leafletMap.on('zoomend', zoomWarningMsg);
-    this._containerNode.setAttribute('data-test-subj', 'zoomWarningEnabled');
-
-    layer.on('remove', () => {
-      this._leafletMap.off('zoomend', zoomWarningMsg);
-      this._containerNode.removeAttribute('data-test-subj');
-    });
-  };
-
   setLegendPosition(position) {
     if (this._legendPosition === position) {
       if (!this._leafletLegendControl) {
@@ -572,11 +554,6 @@ export class KibanaMap extends EventEmitter {
       });
 
       this._leafletBaseLayer = baseLayer;
-      if (settings.options.showZoomMessage) {
-        baseLayer.on('add', () => {
-          this._addMaxZoomMessage(baseLayer);
-        });
-      }
       this._leafletBaseLayer.addTo(this._leafletMap);
       this._leafletBaseLayer.bringToBack();
       if (settings.options.minZoom > this._leafletMap.getZoom()) {

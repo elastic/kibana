@@ -6,27 +6,23 @@
  */
 
 import { IndicesGetMappingParams } from 'elasticsearch';
-import { GraphQLSchema } from 'graphql';
 
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { AuthenticatedUser } from '../../../../security/common/model';
 import { ESQuery } from '../../../common/typed_json';
 import type { SecuritySolutionRequestHandlerContext } from '../../types';
 import {
+  DocValueFieldsInput,
   PaginationInput,
   PaginationInputPaginated,
   SortField,
-  SourceConfiguration,
   TimerangeInput,
-  DocValueFieldsInput,
-} from '../../graphql/types';
-
-export * from '../../utils/typed_resolvers';
+} from '../../../common/search_strategy';
+import { SourceConfiguration } from '../sources';
 
 export const internalFrameworkRequest = Symbol('internalFrameworkRequest');
 
 export interface FrameworkAdapter {
-  registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
   callWithRequest<Hit = {}, Aggregation = undefined>(
     req: FrameworkRequest,
     method: 'search',

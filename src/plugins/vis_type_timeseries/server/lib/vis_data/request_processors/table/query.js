@@ -10,16 +10,16 @@ import { getTimerange } from '../../helpers/get_timerange';
 import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { esQuery } from '../../../../../../data/server';
 
-export function query(req, panel, esQueryConfig, indexPattern) {
+export function query(req, panel, esQueryConfig, seriesIndex) {
   return (next) => (doc) => {
-    const { timeField } = getIntervalAndTimefield(panel, {}, indexPattern);
+    const { timeField } = getIntervalAndTimefield(panel, {}, seriesIndex);
     const { from, to } = getTimerange(req);
 
     doc.size = 0;
 
     const queries = !panel.ignore_global_filter ? req.body.query : [];
     const filters = !panel.ignore_global_filter ? req.body.filters : [];
-    doc.query = esQuery.buildEsQuery(indexPattern, queries, filters, esQueryConfig);
+    doc.query = esQuery.buildEsQuery(seriesIndex.indexPattern, queries, filters, esQueryConfig);
 
     const timerange = {
       range: {
@@ -33,7 +33,7 @@ export function query(req, panel, esQueryConfig, indexPattern) {
     doc.query.bool.must.push(timerange);
     if (panel.filter) {
       doc.query.bool.must.push(
-        esQuery.buildEsQuery(indexPattern, [panel.filter], [], esQueryConfig)
+        esQuery.buildEsQuery(seriesIndex.indexPattern, [panel.filter], [], esQueryConfig)
       );
     }
 

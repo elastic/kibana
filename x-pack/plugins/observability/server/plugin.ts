@@ -6,29 +6,31 @@
  */
 
 import { PluginInitializerContext, Plugin, CoreSetup } from 'src/core/server';
+import { RuleDataClient } from '../../rule_registry/server';
 import { ObservabilityConfig } from '.';
 import {
   bootstrapAnnotations,
-  ScopedAnnotationsClient,
   ScopedAnnotationsClientFactory,
   AnnotationsAPI,
 } from './lib/annotations/bootstrap_annotations';
+import type { RuleRegistryPluginSetupContract } from '../../rule_registry/server';
 import { uiSettings } from './ui_settings';
+import { registerRoutes } from './routes/register_routes';
+import { getGlobalObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
 
-type LazyScopedAnnotationsClientFactory = (
-  ...args: Parameters<ScopedAnnotationsClientFactory>
-) => Promise<ScopedAnnotationsClient | undefined>;
-
-export interface ObservabilityPluginSetup {
-  getScopedAnnotationsClient: LazyScopedAnnotationsClientFactory;
-}
+export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
   }
 
-  public setup(core: CoreSetup, plugins: {}): ObservabilityPluginSetup {
+  public setup(
+    core: CoreSetup,
+    plugins: {
+      ruleRegistry: RuleRegistryPluginSetupContract;
+    }
+  ) {
     const config = this.initContext.config.get<ObservabilityConfig>();
 
     let annotationsApiPromise: Promise<AnnotationsAPI> | undefined;
@@ -47,8 +49,29 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       });
     }
 
+    const start = () => core.getStartServices().then(([coreStart]) => coreStart);
+
+    const ruleDataClient = new RuleDataClient({
+      getClusterClient: async () => {
+        const coreStart = await start();
+        return coreStart.elasticsearch.client.asInternalUser;
+      },
+      ready: () => Promise.resolve(),
+      alias: plugins.ruleRegistry.ruleDataService.getFullAssetName(),
+    });
+
+    registerRoutes({
+      core: {
+        setup: core,
+        start,
+      },
+      logger: this.initContext.logger.get(),
+      repository: getGlobalObservabilityServerRouteRepository(),
+      ruleDataClient,
+    });
+
     return {
-      getScopedAnnotationsClient: async (...args) => {
+      getScopedAnnotationsClient: async (...args: Parameters<ScopedAnnotationsClientFactory>) => {
         const api = await annotationsApiPromise;
         return api?.getScopedAnnotationsClient(...args);
       },

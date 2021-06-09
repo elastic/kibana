@@ -4,29 +4,12 @@
     "classes": [],
     "functions": [
       {
+        "parentPluginId": "runtimeFields",
         "id": "def-public.RuntimeFieldEditor",
         "type": "Function",
-        "children": [
-          {
-            "type": "Object",
-            "label": "{ defaultValue, onChange, docLinks, ctx }",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "runtimeFields",
-                "scope": "public",
-                "docId": "kibRuntimeFieldsPluginApi",
-                "section": "def-public.Props",
-                "text": "Props"
-              }
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor/runtime_field_editor.tsx",
-              "lineNumber": 22
-            }
-          }
-        ],
+        "tags": [],
+        "label": "RuntimeFieldEditor",
+        "description": [],
         "signature": [
           "({ defaultValue, onChange, docLinks, ctx }: ",
           {
@@ -38,24 +21,19 @@
           },
           ") => JSX.Element"
         ],
-        "description": [],
-        "label": "RuntimeFieldEditor",
         "source": {
           "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor/runtime_field_editor.tsx",
           "lineNumber": 22
         },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.RuntimeFieldEditorFlyoutContent",
-        "type": "Function",
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "runtimeFields",
+            "id": "def-public.RuntimeFieldEditor.$1",
             "type": "Object",
-            "label": "{\n  onSave,\n  onCancel,\n  docLinks,\n  defaultValue: field,\n  ctx,\n}",
-            "isRequired": true,
+            "tags": [],
+            "label": "{ defaultValue, onChange, docLinks, ctx }",
+            "description": [],
             "signature": [
               {
                 "pluginId": "runtimeFields",
@@ -65,13 +43,24 @@
                 "text": "Props"
               }
             ],
-            "description": [],
             "source": {
-              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
-              "lineNumber": 78
-            }
+              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor/runtime_field_editor.tsx",
+              "lineNumber": 22
+            },
+            "deprecated": false,
+            "isRequired": true
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "runtimeFields",
+        "id": "def-public.RuntimeFieldEditorFlyoutContent",
+        "type": "Function",
+        "tags": [],
+        "label": "RuntimeFieldEditorFlyoutContent",
+        "description": [],
         "signature": [
           "({ onSave, onCancel, docLinks, defaultValue: field, ctx, }: ",
           {
@@ -83,60 +72,90 @@
           },
           ") => JSX.Element"
         ],
-        "description": [],
-        "label": "RuntimeFieldEditorFlyoutContent",
         "source": {
           "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
           "lineNumber": 78
         },
-        "tags": [],
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "runtimeFields",
+            "id": "def-public.RuntimeFieldEditorFlyoutContent.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  onSave,\n  onCancel,\n  docLinks,\n  defaultValue: field,\n  ctx,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "runtimeFields",
+                "scope": "public",
+                "docId": "kibRuntimeFieldsPluginApi",
+                "section": "def-public.Props",
+                "text": "Props"
+              }
+            ],
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
+              "lineNumber": 78
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       }
     ],
     "interfaces": [
       {
+        "parentPluginId": "runtimeFields",
         "id": "def-public.FormState",
         "type": "Interface",
+        "tags": [],
         "label": "FormState",
         "description": [],
-        "tags": [],
+        "source": {
+          "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
+          "lineNumber": 39
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "runtimeFields",
             "id": "def-public.FormState.isValid",
             "type": "CompoundType",
+            "tags": [],
             "label": "isValid",
             "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "source": {
               "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
               "lineNumber": 40
             },
-            "signature": [
-              "boolean | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "runtimeFields",
             "id": "def-public.FormState.isSubmitted",
             "type": "boolean",
+            "tags": [],
             "label": "isSubmitted",
             "description": [],
             "source": {
               "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
               "lineNumber": 41
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "runtimeFields",
             "id": "def-public.FormState.submit",
             "type": "Function",
+            "tags": [],
             "label": "submit",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
-              "lineNumber": 42
-            },
             "signature": [
               "(e?: React.FormEvent<HTMLFormElement> | React.MouseEvent<Element, MouseEvent> | undefined) => Promise<{ data: ",
               {
@@ -147,34 +166,57 @@
                 "text": "RuntimeField"
               },
               "; isValid: boolean; }>"
+            ],
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
+              "lineNumber": 42
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "runtimeFields",
+                "id": "def-public.e",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "e",
+                "description": [],
+                "signature": [
+                  "React.FormEvent<HTMLFormElement> | React.MouseEvent<Element, MouseEvent> | undefined"
+                ],
+                "source": {
+                  "path": "src/plugins/es_ui_shared/static/forms/hook_form_lib/types.ts",
+                  "lineNumber": 29
+                },
+                "deprecated": false
+              }
             ]
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
-          "lineNumber": 39
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "runtimeFields",
         "id": "def-public.Props",
         "type": "Interface",
+        "tags": [],
         "label": "Props",
         "description": [],
-        "tags": [],
+        "source": {
+          "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
+          "lineNumber": 55
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "runtimeFields",
             "id": "def-public.Props.onSave",
             "type": "Function",
+            "tags": [],
             "label": "onSave",
             "description": [
               "\nHandler for the \"save\" footer button"
             ],
-            "source": {
-              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
-              "lineNumber": 59
-            },
             "signature": [
               "(field: ",
               {
@@ -185,36 +227,67 @@
                 "text": "RuntimeField"
               },
               ") => void"
+            ],
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
+              "lineNumber": 59
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "runtimeFields",
+                "id": "def-public.field",
+                "type": "Object",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "runtimeFields",
+                    "scope": "public",
+                    "docId": "kibRuntimeFieldsPluginApi",
+                    "section": "def-public.RuntimeField",
+                    "text": "RuntimeField"
+                  }
+                ],
+                "source": {
+                  "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
+                  "lineNumber": 59
+                },
+                "deprecated": false
+              }
             ]
           },
           {
-            "tags": [],
+            "parentPluginId": "runtimeFields",
             "id": "def-public.Props.onCancel",
             "type": "Function",
+            "tags": [],
             "label": "onCancel",
             "description": [
               "\nHandler for the \"cancel\" footer button"
+            ],
+            "signature": [
+              "() => void"
             ],
             "source": {
               "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
               "lineNumber": 63
             },
-            "signature": [
-              "() => void"
-            ]
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
-            "tags": [],
+            "parentPluginId": "runtimeFields",
             "id": "def-public.Props.docLinks",
             "type": "Object",
+            "tags": [],
             "label": "docLinks",
             "description": [
               "\nThe docLinks start service from core"
             ],
-            "source": {
-              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
-              "lineNumber": 67
-            },
             "signature": [
               {
                 "pluginId": "core",
@@ -223,20 +296,22 @@
                 "section": "def-public.DocLinksStart",
                 "text": "DocLinksStart"
               }
-            ]
+            ],
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
+              "lineNumber": 67
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "runtimeFields",
             "id": "def-public.Props.defaultValue",
             "type": "Object",
+            "tags": [],
             "label": "defaultValue",
             "description": [
               "\nAn optional runtime field to edit"
             ],
-            "source": {
-              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
-              "lineNumber": 71
-            },
             "signature": [
               {
                 "pluginId": "runtimeFields",
@@ -246,156 +321,169 @@
                 "text": "RuntimeField"
               },
               " | undefined"
-            ]
+            ],
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
+              "lineNumber": 71
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "runtimeFields",
             "id": "def-public.Props.ctx",
             "type": "Object",
+            "tags": [],
             "label": "ctx",
             "description": [
               "\nOptional context object"
+            ],
+            "signature": [
+              "{ namesNotAllowed?: string[] | undefined; existingConcreteFields?: Field[] | undefined; } | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
               "lineNumber": 75
             },
-            "signature": [
-              "{ namesNotAllowed?: string[] | undefined; existingConcreteFields?: Field[] | undefined; } | undefined"
-            ]
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
-          "lineNumber": 55
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "runtimeFields",
         "id": "def-public.RuntimeField",
         "type": "Interface",
+        "tags": [],
         "label": "RuntimeField",
         "description": [],
-        "tags": [],
+        "source": {
+          "path": "x-pack/plugins/runtime_fields/public/types.ts",
+          "lineNumber": 33
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "runtimeFields",
             "id": "def-public.RuntimeField.name",
             "type": "string",
+            "tags": [],
             "label": "name",
             "description": [],
             "source": {
               "path": "x-pack/plugins/runtime_fields/public/types.ts",
               "lineNumber": 34
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "runtimeFields",
             "id": "def-public.RuntimeField.type",
             "type": "CompoundType",
+            "tags": [],
             "label": "type",
             "description": [],
+            "signature": [
+              "\"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\""
+            ],
             "source": {
               "path": "x-pack/plugins/runtime_fields/public/types.ts",
               "lineNumber": 35
             },
-            "signature": [
-              "\"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"long\" | \"double\""
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "runtimeFields",
             "id": "def-public.RuntimeField.script",
             "type": "Object",
+            "tags": [],
             "label": "script",
             "description": [],
+            "signature": [
+              "{ source: string; }"
+            ],
             "source": {
               "path": "x-pack/plugins/runtime_fields/public/types.ts",
               "lineNumber": 36
             },
-            "signature": [
-              "{ source: string; }"
-            ]
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/runtime_fields/public/types.ts",
-          "lineNumber": 33
-        },
         "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
       {
-        "tags": [],
+        "parentPluginId": "runtimeFields",
         "id": "def-public.RUNTIME_FIELD_OPTIONS",
         "type": "Array",
+        "tags": [],
         "label": "RUNTIME_FIELD_OPTIONS",
         "description": [],
+        "signature": [
+          "ComboBoxOption",
+          "<\"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\">[]"
+        ],
         "source": {
           "path": "x-pack/plugins/runtime_fields/public/constants.ts",
           "lineNumber": 14
         },
-        "signature": [
-          "ComboBoxOption",
-          "<\"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"long\" | \"double\">[]"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "runtimeFields",
         "id": "def-public.RuntimeType",
         "type": "Type",
-        "label": "RuntimeType",
         "tags": [],
+        "label": "RuntimeType",
         "description": [],
+        "signature": [
+          "\"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\""
+        ],
         "source": {
           "path": "x-pack/plugins/runtime_fields/public/types.ts",
           "lineNumber": 31
         },
-        "signature": [
-          "\"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"long\" | \"double\""
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "objects": [],
     "setup": {
+      "parentPluginId": "runtimeFields",
       "id": "def-public.PluginSetup",
       "type": "Interface",
+      "tags": [],
       "label": "PluginSetup",
       "description": [],
-      "tags": [],
-      "children": [
-        {
-          "id": "def-public.PluginSetup.loadEditor",
-          "type": "Function",
-          "label": "loadEditor",
-          "signature": [
-            "() => Promise<",
-            {
-              "pluginId": "runtimeFields",
-              "scope": "public",
-              "docId": "kibRuntimeFieldsPluginApi",
-              "section": "def-public.LoadEditorResponse",
-              "text": "LoadEditorResponse"
-            },
-            ">"
-          ],
-          "description": [],
-          "children": [],
-          "tags": [],
-          "returnComment": [],
-          "source": {
-            "path": "x-pack/plugins/runtime_fields/public/types.ts",
-            "lineNumber": 18
-          }
-        }
-      ],
       "source": {
         "path": "x-pack/plugins/runtime_fields/public/types.ts",
         "lineNumber": 17
       },
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "runtimeFields",
+          "id": "def-public.PluginSetup.loadEditor",
+          "type": "Function",
+          "tags": [],
+          "label": "loadEditor",
+          "description": [],
+          "signature": [
+            "() => Promise<",
+            "LoadEditorResponse",
+            ">"
+          ],
+          "source": {
+            "path": "x-pack/plugins/runtime_fields/public/types.ts",
+            "lineNumber": 18
+          },
+          "deprecated": false,
+          "children": [],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     }

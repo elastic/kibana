@@ -9,26 +9,26 @@ import { i18n } from '@kbn/i18n';
 import { flow } from 'lodash';
 import {
   ActionConnector,
-  CaseResponse,
   CaseFullExternalService,
+  CaseResponse,
   CaseUserActionsResponse,
+  CommentAttributes,
+  CommentRequestAlertType,
+  CommentRequestUserType,
   CommentResponse,
   CommentResponseAlertsType,
   CommentType,
   ConnectorMappingsAttributes,
   ConnectorTypes,
-  CommentAttributes,
-  CommentRequestUserType,
-  CommentRequestAlertType,
-} from '../../../common/api';
+} from '../../../common';
 import { ActionsClient } from '../../../../actions/server';
 import { externalServiceFormatters, FormatterConnectorTypes } from '../../connectors';
 import { CasesClientGetAlertsResponse } from '../../client/alerts/types';
 import {
   BasicParams,
   EntityInformation,
-  ExternalServiceParams,
   ExternalServiceComment,
+  ExternalServiceParams,
   Incident,
   MapIncident,
   PipedField,
@@ -38,7 +38,7 @@ import {
   TransformerArgs,
   TransformFieldsArgs,
 } from './types';
-import { getAlertIds } from '../../routes/api/utils';
+import { getAlertIds } from '../utils';
 
 interface CreateIncidentArgs {
   actionsClient: ActionsClient;
@@ -184,7 +184,7 @@ export const createIncident = async ({
 
   if (totalAlerts > 0) {
     comments.push({
-      comment: `Elastic Security Alerts attached to the case: ${totalAlerts}`,
+      comment: `Elastic Alerts attached to the case: ${totalAlerts}`,
       commentId: `${theCase.id}-total-alerts`,
     });
   }
@@ -329,11 +329,13 @@ export const isCommentAlertType = (
 export const getCommentContextFromAttributes = (
   attributes: CommentAttributes
 ): CommentRequestUserType | CommentRequestAlertType => {
+  const owner = attributes.owner;
   switch (attributes.type) {
     case CommentType.user:
       return {
         type: CommentType.user,
         comment: attributes.comment,
+        owner,
       };
     case CommentType.generatedAlert:
     case CommentType.alert:
@@ -342,11 +344,13 @@ export const getCommentContextFromAttributes = (
         alertId: attributes.alertId,
         index: attributes.index,
         rule: attributes.rule,
+        owner,
       };
     default:
       return {
         type: CommentType.user,
         comment: '',
+        owner,
       };
   }
 };

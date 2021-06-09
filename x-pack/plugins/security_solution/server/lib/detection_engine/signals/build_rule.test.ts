@@ -5,34 +5,40 @@
  * 2.0.
  */
 
-import {
-  buildRule,
-  removeInternalTagsFromRule,
-  buildRuleWithOverrides,
-  buildRuleWithoutOverrides,
-} from './build_rule';
+import { buildRuleWithOverrides, buildRuleWithoutOverrides } from './build_rule';
 import {
   sampleDocNoSortId,
-  sampleRuleAlertParams,
-  sampleRuleGuid,
-  sampleRuleSO,
   expectedRule,
   sampleDocSeverity,
+  sampleRuleSO,
 } from './__mocks__/es_results';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
-import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { INTERNAL_RULE_ID_KEY, INTERNAL_IMMUTABLE_KEY } from '../../../../common/constants';
-import { getRulesSchemaMock } from '../../../../common/detection_engine/schemas/response/rules_schema.mocks';
-import { RuleTypeParams } from '../types';
+import { getQueryRuleParams, getThreatRuleParams } from '../schemas/rule_schemas.mock';
+import { ThreatRuleParams } from '../schemas/rule_schemas';
 
-describe('buildRule', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
+describe('buildRuleWithoutOverrides', () => {
+  test('builds a rule using rule alert', () => {
+    const ruleSO = sampleRuleSO(getQueryRuleParams());
+    const rule = buildRuleWithoutOverrides(ruleSO);
+    expect(rule).toEqual(expectedRule());
+  });
+
+  test('builds a rule and removes internal tags', () => {
+    const ruleSO = sampleRuleSO(getQueryRuleParams());
+    ruleSO.attributes.tags = [
+      'some fake tag 1',
+      'some fake tag 2',
+      `${INTERNAL_RULE_ID_KEY}:rule-1`,
+      `${INTERNAL_IMMUTABLE_KEY}:true`,
+    ];
+    const rule = buildRuleWithoutOverrides(ruleSO);
+    expect(rule.tags).toEqual(['some fake tag 1', 'some fake tag 2']);
   });
 
   test('it builds a rule as expected with filters present', () => {
-    const ruleParams = sampleRuleAlertParams();
-    ruleParams.filters = [
+    const ruleSO = sampleRuleSO(getQueryRuleParams());
+    const ruleFilters = [
       {
         query: 'host.name: Rebecca',
       },
@@ -43,253 +49,14 @@ describe('buildRule', () => {
         query: 'host.name: Braden',
       },
     ];
-    const rule = buildRule({
-      actions: [],
-      doc: sampleDocNoSortId(),
-      ruleParams,
-      name: 'some-name',
-      id: sampleRuleGuid,
-      enabled: false,
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: 'some interval',
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
-    });
-    const expected: Partial<RulesSchema> = {
-      actions: [],
-      author: ['Elastic'],
-      building_block_type: 'default',
-      created_by: 'elastic',
-      description: 'Detecting root and admin users',
-      enabled: false,
-      false_positives: [],
-      from: 'now-6m',
-      id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-      immutable: false,
-      index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-      interval: 'some interval',
-      language: 'kuery',
-      license: 'Elastic License',
-      max_signals: 10000,
-      name: 'some-name',
-      output_index: '.siem-signals',
-      query: 'user.name: root or user.name: admin',
-      references: ['http://google.com'],
-      risk_score: 50,
-      risk_score_mapping: [],
-      rule_id: 'rule-1',
-      severity: 'high',
-      severity_mapping: [],
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      threat: [],
-      to: 'now',
-      type: 'query',
-      note: '',
-      updated_by: 'elastic',
-      updated_at: rule.updated_at,
-      created_at: rule.created_at,
-      throttle: 'no_actions',
-      filters: [
-        {
-          query: 'host.name: Rebecca',
-        },
-        {
-          query: 'host.name: Evan',
-        },
-        {
-          query: 'host.name: Braden',
-        },
-      ],
-      exceptions_list: getListArrayMock(),
-      version: 1,
-    };
-    expect(rule).toEqual(expected);
-  });
-
-  test('it omits a null value such as if "enabled" is null if is present', () => {
-    const ruleParams = sampleRuleAlertParams();
-    ruleParams.filters = undefined;
-    const rule = buildRule({
-      actions: [],
-      doc: sampleDocNoSortId(),
-      ruleParams,
-      name: 'some-name',
-      id: sampleRuleGuid,
-      enabled: true,
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: 'some interval',
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
-    });
-    const expected: Partial<RulesSchema> = {
-      actions: [],
-      author: ['Elastic'],
-      building_block_type: 'default',
-      created_by: 'elastic',
-      description: 'Detecting root and admin users',
-      enabled: true,
-      false_positives: [],
-      from: 'now-6m',
-      id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-      immutable: false,
-      index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-      interval: 'some interval',
-      language: 'kuery',
-      license: 'Elastic License',
-      max_signals: 10000,
-      name: 'some-name',
-      output_index: '.siem-signals',
-      query: 'user.name: root or user.name: admin',
-      references: ['http://google.com'],
-      risk_score: 50,
-      risk_score_mapping: [],
-      rule_id: 'rule-1',
-      severity: 'high',
-      severity_mapping: [],
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      threat: [],
-      to: 'now',
-      type: 'query',
-      note: '',
-      updated_by: 'elastic',
-      version: 1,
-      updated_at: rule.updated_at,
-      created_at: rule.created_at,
-      throttle: 'no_actions',
-      exceptions_list: getListArrayMock(),
-    };
-    expect(rule).toEqual(expected);
-  });
-
-  test('it omits a null value such as if "filters" is undefined if is present', () => {
-    const ruleParams = sampleRuleAlertParams();
-    ruleParams.filters = undefined;
-    const rule = buildRule({
-      actions: [],
-      doc: sampleDocNoSortId(),
-      ruleParams,
-      name: 'some-name',
-      id: sampleRuleGuid,
-      enabled: true,
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: 'some interval',
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
-    });
-    const expected: Partial<RulesSchema> = {
-      actions: [],
-      author: ['Elastic'],
-      building_block_type: 'default',
-      created_by: 'elastic',
-      description: 'Detecting root and admin users',
-      enabled: true,
-      false_positives: [],
-      from: 'now-6m',
-      id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-      immutable: false,
-      index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-      interval: 'some interval',
-      language: 'kuery',
-      license: 'Elastic License',
-      max_signals: 10000,
-      name: 'some-name',
-      note: '',
-      output_index: '.siem-signals',
-      query: 'user.name: root or user.name: admin',
-      references: ['http://google.com'],
-      risk_score: 50,
-      risk_score_mapping: [],
-      rule_id: 'rule-1',
-      severity: 'high',
-      severity_mapping: [],
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      threat: [],
-      to: 'now',
-      type: 'query',
-      updated_by: 'elastic',
-      version: 1,
-      updated_at: rule.updated_at,
-      created_at: rule.created_at,
-      throttle: 'no_actions',
-      exceptions_list: getListArrayMock(),
-    };
-    expect(rule).toEqual(expected);
-  });
-
-  test('it builds a rule and removes internal tags', () => {
-    const ruleParams = sampleRuleAlertParams();
-    const rule = buildRule({
-      actions: [],
-      doc: sampleDocNoSortId(),
-      ruleParams,
-      name: 'some-name',
-      id: sampleRuleGuid,
-      enabled: false,
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: 'some interval',
-      tags: [
-        'some fake tag 1',
-        'some fake tag 2',
-        `${INTERNAL_RULE_ID_KEY}:rule-1`,
-        `${INTERNAL_IMMUTABLE_KEY}:true`,
-      ],
-      throttle: 'no_actions',
-    });
-    const expected: Partial<RulesSchema> = {
-      actions: [],
-      author: ['Elastic'],
-      building_block_type: 'default',
-      created_by: 'elastic',
-      description: 'Detecting root and admin users',
-      enabled: false,
-      false_positives: [],
-      from: 'now-6m',
-      id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-      immutable: false,
-      index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-      interval: 'some interval',
-      language: 'kuery',
-      license: 'Elastic License',
-      max_signals: 10000,
-      name: 'some-name',
-      output_index: '.siem-signals',
-      query: 'user.name: root or user.name: admin',
-      references: ['http://google.com'],
-      risk_score: 50,
-      risk_score_mapping: [],
-      rule_id: 'rule-1',
-      severity: 'high',
-      severity_mapping: [],
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      threat: [],
-      to: 'now',
-      type: 'query',
-      note: '',
-      updated_by: 'elastic',
-      updated_at: rule.updated_at,
-      created_at: rule.created_at,
-      throttle: 'no_actions',
-      exceptions_list: getListArrayMock(),
-      version: 1,
-    };
-    expect(rule).toEqual(expected);
+    ruleSO.attributes.params.filters = ruleFilters;
+    const rule = buildRuleWithoutOverrides(ruleSO);
+    expect(rule.filters).toEqual(ruleFilters);
   });
 
   test('it creates a indicator/threat_mapping/threat_matching rule', () => {
-    const ruleParams: RuleTypeParams = {
-      ...sampleRuleAlertParams(),
+    const ruleParams: ThreatRuleParams = {
+      ...getThreatRuleParams(),
       threatMapping: [
         {
           entries: [
@@ -323,21 +90,8 @@ describe('buildRule', () => {
       threatIndex: ['threat_index'],
       threatLanguage: 'kuery',
     };
-    const threatMatchRule = buildRule({
-      actions: [],
-      doc: sampleDocNoSortId(),
-      ruleParams,
-      name: 'some-name',
-      id: sampleRuleGuid,
-      enabled: false,
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: 'some interval',
-      tags: [],
-      throttle: 'no_actions',
-    });
+    const ruleSO = sampleRuleSO(ruleParams);
+    const threatMatchRule = buildRuleWithoutOverrides(ruleSO);
     const expected: Partial<RulesSchema> = {
       threat_mapping: ruleParams.threatMapping,
       threat_filters: ruleParams.threatFilters,
@@ -350,106 +104,18 @@ describe('buildRule', () => {
   });
 });
 
-describe('removeInternalTagsFromRule', () => {
-  test('it removes internal tags from a typical rule', () => {
-    const rule = getRulesSchemaMock();
-    rule.tags = [
-      'some fake tag 1',
-      'some fake tag 2',
-      `${INTERNAL_RULE_ID_KEY}:rule-1`,
-      `${INTERNAL_IMMUTABLE_KEY}:true`,
-    ];
-    const noInternals = removeInternalTagsFromRule(rule);
-    expect(noInternals).toEqual(getRulesSchemaMock());
-  });
-
-  test('it works with an empty array', () => {
-    const rule = getRulesSchemaMock();
-    rule.tags = [];
-    const noInternals = removeInternalTagsFromRule(rule);
-    const expected = getRulesSchemaMock();
-    expected.tags = [];
-    expect(noInternals).toEqual(expected);
-  });
-
-  test('it works if tags contains normal values and no internal values', () => {
-    const rule = getRulesSchemaMock();
-    const noInternals = removeInternalTagsFromRule(rule);
-    expect(noInternals).toEqual(rule);
-  });
-});
-
-describe('buildRuleWithoutOverrides', () => {
-  test('builds a rule using rule SO', () => {
-    const ruleSO = sampleRuleSO();
-    const rule = buildRuleWithoutOverrides(ruleSO);
-    expect(rule).toEqual(expectedRule());
-  });
-
-  test('builds a rule using rule SO and removes internal tags', () => {
-    const ruleSO = sampleRuleSO();
-    ruleSO.attributes.tags = [
-      'some fake tag 1',
-      'some fake tag 2',
-      `${INTERNAL_RULE_ID_KEY}:rule-1`,
-      `${INTERNAL_IMMUTABLE_KEY}:true`,
-    ];
-    const rule = buildRuleWithoutOverrides(ruleSO);
-    expect(rule).toEqual(expectedRule());
-  });
-});
-
 describe('buildRuleWithOverrides', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  test('it builds a rule as expected with filters present', () => {
-    const ruleSO = sampleRuleSO();
-    ruleSO.attributes.params.filters = [
-      {
-        query: 'host.name: Rebecca',
-      },
-      {
-        query: 'host.name: Evan',
-      },
-      {
-        query: 'host.name: Braden',
-      },
-    ];
-    // @ts-expect-error @elastic/elasticsearch _source is optional
-    const rule = buildRuleWithOverrides(ruleSO, sampleDocNoSortId()._source);
-    const expected: RulesSchema = {
-      ...expectedRule(),
-      filters: ruleSO.attributes.params.filters,
-    };
-    expect(rule).toEqual(expected);
-  });
-
-  test('it builds a rule and removes internal tags', () => {
-    const ruleSO = sampleRuleSO();
-    ruleSO.attributes.tags = [
-      'some fake tag 1',
-      'some fake tag 2',
-      `${INTERNAL_RULE_ID_KEY}:rule-1`,
-      `${INTERNAL_IMMUTABLE_KEY}:true`,
-    ];
-    // @ts-expect-error @elastic/elasticsearch _source is optional
-    const rule = buildRuleWithOverrides(ruleSO, sampleDocNoSortId()._source);
-    expect(rule).toEqual(expectedRule());
-  });
-
   test('it applies rule name override in buildRule', () => {
-    const ruleSO = sampleRuleSO();
+    const ruleSO = sampleRuleSO(getQueryRuleParams());
     ruleSO.attributes.params.ruleNameOverride = 'someKey';
-    // @ts-expect-error @elastic/elasticsearch _source is optional
-    const rule = buildRuleWithOverrides(ruleSO, sampleDocNoSortId()._source);
+    const rule = buildRuleWithOverrides(ruleSO, sampleDocNoSortId()._source!);
     const expected = {
       ...expectedRule(),
       name: 'someValue',
       rule_name_override: 'someKey',
       meta: {
         ruleNameOverridden: true,
+        someMeta: 'someField',
       },
     };
     expect(rule).toEqual(expected);
@@ -457,7 +123,7 @@ describe('buildRuleWithOverrides', () => {
 
   test('it applies risk score override in buildRule', () => {
     const newRiskScore = 79;
-    const ruleSO = sampleRuleSO();
+    const ruleSO = sampleRuleSO(getQueryRuleParams());
     ruleSO.attributes.params.riskScoreMapping = [
       {
         field: 'new_risk_score',
@@ -468,16 +134,15 @@ describe('buildRuleWithOverrides', () => {
       },
     ];
     const doc = sampleDocNoSortId();
-    // @ts-expect-error @elastic/elasticsearch _source is optional
     doc._source.new_risk_score = newRiskScore;
-    // @ts-expect-error @elastic/elasticsearch _source is optional
-    const rule = buildRuleWithOverrides(ruleSO, doc._source);
+    const rule = buildRuleWithOverrides(ruleSO, doc._source!);
     const expected = {
       ...expectedRule(),
       risk_score: newRiskScore,
       risk_score_mapping: ruleSO.attributes.params.riskScoreMapping,
       meta: {
         riskScoreOverridden: true,
+        someMeta: 'someField',
       },
     };
     expect(rule).toEqual(expected);
@@ -485,7 +150,7 @@ describe('buildRuleWithOverrides', () => {
 
   test('it applies severity override in buildRule', () => {
     const eventSeverity = '42';
-    const ruleSO = sampleRuleSO();
+    const ruleSO = sampleRuleSO(getQueryRuleParams());
     ruleSO.attributes.params.severityMapping = [
       {
         field: 'event.severity',
@@ -495,14 +160,14 @@ describe('buildRuleWithOverrides', () => {
       },
     ];
     const doc = sampleDocSeverity(Number(eventSeverity));
-    // @ts-expect-error @elastic/elasticsearch _source is optional
-    const rule = buildRuleWithOverrides(ruleSO, doc._source);
+    const rule = buildRuleWithOverrides(ruleSO, doc._source!);
     const expected = {
       ...expectedRule(),
       severity: 'critical',
       severity_mapping: ruleSO.attributes.params.severityMapping,
       meta: {
         severityOverrideField: 'event.severity',
+        someMeta: 'someField',
       },
     };
     expect(rule).toEqual(expected);

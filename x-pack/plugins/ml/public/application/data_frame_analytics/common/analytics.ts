@@ -160,10 +160,23 @@ export interface RocCurveItem {
   tpr: number;
 }
 
+interface EvalClass {
+  class_name: string;
+  value: number;
+}
+
 export interface ClassificationEvaluateResponse {
   classification: {
     multiclass_confusion_matrix?: {
       confusion_matrix: ConfusionMatrix[];
+    };
+    recall?: {
+      classes: EvalClass[];
+      avg_recall: number;
+    };
+    accuracy?: {
+      classes: EvalClass[];
+      overall_accuracy: number;
     };
     auc_roc?: {
       curve?: RocCurveItem[];
@@ -353,7 +366,7 @@ export function getValuesFromResponse(response: RegressionEvaluateResponse) {
       if (response.regression.hasOwnProperty(statType)) {
         let currentStatValue =
           response.regression[statType as keyof RegressionEvaluateResponse['regression']]?.value;
-        if (currentStatValue && !isNaN(currentStatValue)) {
+        if (currentStatValue && Number.isFinite(currentStatValue)) {
           currentStatValue = Number(currentStatValue.toPrecision(DEFAULT_SIG_FIGS));
         }
         results[statType as keyof RegressionEvaluateExtractedResponse] = currentStatValue;
@@ -434,6 +447,8 @@ export enum REGRESSION_STATS {
 
 interface EvaluateMetrics {
   classification: {
+    accuracy?: object;
+    recall?: object;
     multiclass_confusion_matrix?: object;
     auc_roc?: { include_curve: boolean; class_name: string };
   };
@@ -486,6 +501,8 @@ export const loadEvalData = async ({
 
   const metrics: EvaluateMetrics = {
     classification: {
+      accuracy: {},
+      recall: {},
       ...(includeMulticlassConfusionMatrix ? { multiclass_confusion_matrix: {} } : {}),
       ...(rocCurveClassName !== undefined
         ? { auc_roc: { include_curve: true, class_name: rocCurveClassName } }
@@ -506,6 +523,9 @@ export const loadEvalData = async ({
       [jobType]: {
         actual_field: dependentVariable,
         predicted_field: predictedField,
+        ...(jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION
+          ? { top_classes_field: `${resultsField}.top_classes` }
+          : {}),
         metrics: metrics[jobType as keyof EvaluateMetrics],
       },
     },

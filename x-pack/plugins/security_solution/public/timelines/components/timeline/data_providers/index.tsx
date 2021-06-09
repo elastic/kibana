@@ -51,15 +51,17 @@ const DropTargetDataProvidersContainer = styled.div`
 const DropTargetDataProviders = styled.div`
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   padding-bottom: 2px;
   position: relative;
   border: 0.2rem dashed ${({ theme }) => theme.eui.euiColorMediumShade};
   border-radius: 5px;
   padding: ${({ theme }) => theme.eui.euiSizeXS} 0;
   margin: 2px 0 2px 0;
+  max-height: 33vh;
   min-height: 100px;
-  overflow-y: auto;
+  overflow: auto;
+  resize: vertical;
   background-color: ${({ theme }) => theme.eui.euiFormBackgroundColor};
 `;
 

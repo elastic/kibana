@@ -8,14 +8,19 @@
 import Boom from '@hapi/boom';
 
 import { GetFieldsResponse } from '../../../common/api';
-import { ConfigureFields } from '../types';
 import { createDefaultMapping, formatFields } from './utils';
+import { CasesClientArgs } from '..';
 
-export const getFields = async ({
-  actionsClient,
-  connectorType,
-  connectorId,
-}: ConfigureFields): Promise<GetFieldsResponse> => {
+interface ConfigurationGetFields {
+  connectorId: string;
+  connectorType: string;
+}
+
+export const getFields = async (
+  { connectorType, connectorId }: ConfigurationGetFields,
+  clientArgs: CasesClientArgs
+): Promise<GetFieldsResponse> => {
+  const { actionsClient } = clientArgs;
   const results = await actionsClient.execute({
     actionId: connectorId,
     params: {

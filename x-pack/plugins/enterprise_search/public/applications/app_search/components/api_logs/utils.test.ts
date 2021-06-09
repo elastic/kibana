@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { getDateString } from './utils';
+import dedent from 'dedent';
+
+import { getDateString, getStatusColor, attemptToFormatJson } from './utils';
 
 describe('getDateString', () => {
   const mockDate = jest
@@ -22,4 +24,30 @@ describe('getDateString', () => {
   });
 
   afterAll(() => mockDate.mockRestore());
+});
+
+describe('getStatusColor', () => {
+  it('returns a valid EUI badge color based on the status code', () => {
+    expect(getStatusColor(200)).toEqual('secondary');
+    expect(getStatusColor(301)).toEqual('primary');
+    expect(getStatusColor(404)).toEqual('warning');
+    expect(getStatusColor(503)).toEqual('danger');
+  });
+});
+
+describe('attemptToFormatJson', () => {
+  it('takes an unformatted JSON string and correctly newlines/indents it', () => {
+    expect(attemptToFormatJson('{"hello":"world","lorem":{"ipsum":"dolor","sit":"amet"}}'))
+      .toEqual(dedent`{
+        "hello": "world",
+        "lorem": {
+          "ipsum": "dolor",
+          "sit": "amet"
+        }
+      }`);
+  });
+
+  it('returns the original content if it is not properly formatted JSON', () => {
+    expect(attemptToFormatJson('{invalid json}')).toEqual('{invalid json}');
+  });
 });

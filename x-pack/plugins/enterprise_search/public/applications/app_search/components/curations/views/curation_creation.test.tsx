@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { setMockActions } from '../../../../__mocks__';
+import { setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { CurationQueries } from '../components';
+import { MultiInputRows } from '../../multi_input_rows';
 
 import { CurationCreation } from './curation_creation';
 
@@ -28,12 +28,12 @@ describe('CurationCreation', () => {
   it('renders', () => {
     const wrapper = shallow(<CurationCreation />);
 
-    expect(wrapper.find(CurationQueries)).toHaveLength(1);
+    expect(wrapper.find(MultiInputRows)).toHaveLength(1);
   });
 
-  it('calls createCuration on CurationQueries submit', () => {
+  it('calls createCuration on submit', () => {
     const wrapper = shallow(<CurationCreation />);
-    wrapper.find(CurationQueries).simulate('submit', ['some query']);
+    wrapper.find(MultiInputRows).simulate('submit', ['some query']);
 
     expect(actions.createCuration).toHaveBeenCalledWith(['some query']);
   });

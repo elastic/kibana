@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'src/core/server';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
-import {
-  CreateIndexRequest,
-  DeleteRequest,
-  IndexRequest,
-} from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { unwrapEsResponse } from '../../../../../../observability/server';
-import { APMRequestHandlerContext } from '../../../../routes/typings';
+import { APMRouteHandlerResources } from '../../../../routes/typings';
 import {
   ESSearchResponse,
   ESSearchRequest,
@@ -25,17 +20,15 @@ import {
 } from '../call_async_with_debug';
 import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
 
-export type APMIndexDocumentParams<T> = IndexRequest<T>;
+export type APMIndexDocumentParams<T> = estypes.IndexRequest<T>;
 
 export type APMInternalClient = ReturnType<typeof createInternalESClient>;
 
 export function createInternalESClient({
   context,
+  debug,
   request,
-}: {
-  context: APMRequestHandlerContext;
-  request: KibanaRequest;
-}) {
+}: Pick<APMRouteHandlerResources, 'context' | 'request'> & { debug: boolean }) {
   const { asInternalUser } = context.core.elasticsearch.client;
 
   function callEs<T extends { body: any }>({
@@ -53,7 +46,7 @@ export function createInternalESClient({
         title: getDebugTitle(request),
         body: getDebugBody(params, requestType),
       }),
-      debug: context.params.query._inspect,
+      debug,
       isCalledWithInternalUser: true,
       request,
       requestType,
@@ -81,14 +74,14 @@ export function createInternalESClient({
         params,
       });
     },
-    delete: (params: DeleteRequest): Promise<{ result: string }> => {
+    delete: (params: estypes.DeleteRequest): Promise<{ result: string }> => {
       return callEs({
         requestType: 'delete',
         cb: () => asInternalUser.delete(params),
         params,
       });
     },
-    indicesCreate: (params: CreateIndexRequest) => {
+    indicesCreate: (params: estypes.IndicesCreateRequest) => {
       return callEs({
         requestType: 'indices.create',
         cb: () => asInternalUser.indices.create(params),

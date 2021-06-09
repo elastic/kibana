@@ -14,6 +14,10 @@ import { UseMultiFields, FieldHook, FieldConfig } from '../../../../shared_impor
 interface GlobalFieldsTypes {
   deleteEnabled: boolean;
   searchableSnapshotRepo: string;
+  warmMinAgeMilliSeconds: number;
+  coldMinAgeMilliSeconds: number;
+  frozenMinAgeMilliSeconds: number;
+  deleteMinAgeMilliSeconds: number;
 }
 
 type GlobalFields = {
@@ -31,6 +35,18 @@ export const globalFields: Record<
   },
   searchableSnapshotRepo: {
     path: '_meta.searchableSnapshot.repository',
+  },
+  warmMinAgeMilliSeconds: {
+    path: '_meta.warm.minAgeToMilliSeconds',
+  },
+  coldMinAgeMilliSeconds: {
+    path: '_meta.cold.minAgeToMilliSeconds',
+  },
+  frozenMinAgeMilliSeconds: {
+    path: '_meta.frozen.minAgeToMilliSeconds',
+  },
+  deleteMinAgeMilliSeconds: {
+    path: '_meta.delete.minAgeToMilliSeconds',
   },
 };
 

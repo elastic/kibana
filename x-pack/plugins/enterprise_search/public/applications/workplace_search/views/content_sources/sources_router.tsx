@@ -82,7 +82,7 @@ export const SourcesRouter: React.FC = () => {
           </Route>
         ))}
         {staticSourceData.map(({ addPath, name }, i) => (
-          <Route key={i} exact path={`${getSourcesPath(addPath, isOrganization)}/re-authenticate`}>
+          <Route key={i} exact path={`${getSourcesPath(addPath, isOrganization)}/reauthenticate`}>
             <SetPageChrome trail={[NAV.SOURCES, NAV.ADD_SOURCE, name]} />
             <AddSource reAuthenticate sourceIndex={i} />
           </Route>

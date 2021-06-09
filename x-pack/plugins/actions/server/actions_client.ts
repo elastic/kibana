@@ -18,7 +18,7 @@ import {
   KibanaRequest,
   SavedObjectsUtils,
 } from '../../../../src/core/server';
-import { AuditLogger, EventOutcome } from '../../security/server';
+import { AuditLogger } from '../../security/server';
 import { ActionType } from '../common';
 import { ActionTypeRegistry } from './action_type_registry';
 import { validateConfig, validateSecrets, ActionExecutorContract } from './lib';
@@ -146,7 +146,7 @@ export class ActionsClient {
       connectorAuditEvent({
         action: ConnectorAuditAction.CREATE,
         savedObject: { type: 'action', id },
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
       })
     );
 
@@ -155,6 +155,7 @@ export class ActionsClient {
       {
         actionTypeId,
         name,
+        isMissingSecrets: false,
         config: validatedActionTypeConfig as SavedObjectAttributes,
         secrets: validatedActionTypeSecrets as SavedObjectAttributes,
       },
@@ -164,6 +165,7 @@ export class ActionsClient {
     return {
       id: result.id,
       actionTypeId: result.attributes.actionTypeId,
+      isMissingSecrets: result.attributes.isMissingSecrets,
       name: result.attributes.name,
       config: result.attributes.config,
       isPreconfigured: false,
@@ -218,7 +220,7 @@ export class ActionsClient {
       connectorAuditEvent({
         action: ConnectorAuditAction.UPDATE,
         savedObject: { type: 'action', id },
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
       })
     );
 
@@ -228,6 +230,7 @@ export class ActionsClient {
         ...attributes,
         actionTypeId,
         name,
+        isMissingSecrets: false,
         config: validatedActionTypeConfig as SavedObjectAttributes,
         secrets: validatedActionTypeSecrets as SavedObjectAttributes,
       },
@@ -245,6 +248,7 @@ export class ActionsClient {
     return {
       id,
       actionTypeId: result.attributes.actionTypeId as string,
+      isMissingSecrets: result.attributes.isMissingSecrets as boolean,
       name: result.attributes.name as string,
       config: result.attributes.config as Record<string, unknown>,
       isPreconfigured: false,
@@ -299,6 +303,7 @@ export class ActionsClient {
     return {
       id,
       actionTypeId: result.attributes.actionTypeId,
+      isMissingSecrets: result.attributes.isMissingSecrets,
       name: result.attributes.name,
       config: result.attributes.config,
       isPreconfigured: false,
@@ -452,7 +457,7 @@ export class ActionsClient {
     this.auditLogger?.log(
       connectorAuditEvent({
         action: ConnectorAuditAction.DELETE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'action', id },
       })
     );
@@ -510,7 +515,7 @@ async function injectExtraFindData(
   scopedClusterClient: IScopedClusterClient,
   actionResults: ActionResult[]
 ): Promise<FindActionResult[]> {
-  const aggs: Record<string, estypes.AggregationContainer> = {};
+  const aggs: Record<string, estypes.AggregationsAggregationContainer> = {};
   for (const actionResult of actionResults) {
     aggs[actionResult.id] = {
       filter: {

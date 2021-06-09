@@ -17,7 +17,6 @@
     "kbn:watch": "../../node_modules/.bin/tsc --watch"
   },
   "dependencies": {
-    "@kbn/dev-utils": "link:../kbn-dev-utils",
     "@kbn/optimizer": "link:../kbn-optimizer"
   }
 }

@@ -125,6 +125,7 @@ export async function getAgentsByKuery(
     size: perPage,
     sort: `${sortField}:${sortOrder}`,
     track_total_hits: true,
+    ignore_unavailable: true,
     body,
   });
 
@@ -139,7 +140,7 @@ export async function getAgentsByKuery(
 
   return {
     agents,
-    total: (res.body.hits.total as estypes.TotalHits).value,
+    total: (res.body.hits.total as estypes.SearchTotalHits).value,
     page,
     perPage,
   };
@@ -180,6 +181,7 @@ export async function countInactiveAgents(
     index: AGENTS_INDEX,
     size: 0,
     track_total_hits: true,
+    ignore_unavailable: true,
     body,
   });
   // @ts-expect-error value is number | TotalHits
@@ -210,11 +212,11 @@ export async function getAgentById(esClient: ElasticsearchClient, agentId: strin
 
 export function isAgentDocument(
   maybeDocument: any
-): maybeDocument is estypes.MultiGetHit<FleetServerAgent> {
+): maybeDocument is estypes.MgetHit<FleetServerAgent> {
   return '_id' in maybeDocument && '_source' in maybeDocument;
 }
 
-export type ESAgentDocumentResult = estypes.MultiGetHit<FleetServerAgent>;
+export type ESAgentDocumentResult = estypes.MgetHit<FleetServerAgent>;
 export async function getAgentDocuments(
   esClient: ElasticsearchClient,
   agentIds: string[]
@@ -249,12 +251,14 @@ export async function getAgentByAccessAPIKeyId(
 ): Promise<Agent> {
   const res = await esClient.search<FleetServerAgent>({
     index: AGENTS_INDEX,
+    ignore_unavailable: true,
     q: `access_api_key_id:${escapeSearchQueryPhrase(accessAPIKeyId)}`,
   });
 
-  const agent = searchHitToAgent(res.body.hits.hits[0]);
+  const searchHit = res.body.hits.hits[0];
+  const agent = searchHit && searchHitToAgent(searchHit);
 
-  if (!agent) {
+  if (!searchHit || !agent) {
     throw new AgentNotFoundError('Agent not found');
   }
   if (agent.access_api_key_id !== accessAPIKeyId) {

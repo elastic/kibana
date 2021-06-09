@@ -24,6 +24,7 @@ import { FixedDatePicker } from '../../../../../../components/fixed_datepicker';
 import { DEFAULT_K8S_PARTITION_FIELD } from '../../../../../../containers/ml/modules/metrics_k8s/module_descriptor';
 import { MetricsExplorerKueryBar } from '../../../../metrics_explorer/components/kuery_bar';
 import { convertKueryToElasticSearchQuery } from '../../../../../../utils/kuery';
+import { useUiTracker } from '../../../../../../../../observability/public';
 
 interface Props {
   jobType: 'hosts' | 'kubernetes';
@@ -40,6 +41,7 @@ export const JobSetupScreen = (props: Props) => {
   const k = useMetricK8sModuleContext();
   const [filter, setFilter] = useState<string>('');
   const [filterQuery, setFilterQuery] = useState<string>('');
+  const trackMetric = useUiTracker({ app: 'infra_metrics' });
   const { createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
   });
@@ -137,9 +139,25 @@ export const JobSetupScreen = (props: Props) => {
 
   useEffect(() => {
     if (setupStatus.type === 'succeeded') {
+      if (props.jobType === 'kubernetes') {
+        trackMetric({ metric: 'metrics_ml_anomaly_detection_k8s_enabled' });
+        if (
+          partitionField &&
+          (partitionField.length !== 1 || partitionField[0] !== DEFAULT_K8S_PARTITION_FIELD)
+        ) {
+          trackMetric({ metric: 'metrics_ml_anomaly_detection_k8s_partition_changed' });
+        }
+      } else {
+        trackMetric({ metric: 'metrics_ml_anomaly_detection_hosts_enabled' });
+        if (partitionField) {
+          trackMetric({ metric: 'metrics_ml_anomaly_detection_hosts_partition_changed' });
+        }
+        trackMetric({ metric: 'metrics_ml_anomaly_detection_hosts_enabled' });
+      }
+
       goHome();
     }
-  }, [setupStatus, goHome]);
+  }, [setupStatus, props.jobType, partitionField, trackMetric, goHome]);
 
   return (
     <>

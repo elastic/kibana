@@ -9,90 +9,85 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/serve
 import type { SavedObject } from 'kibana/server';
 
 import type { AgentPolicy } from '../../types';
-import { AgentReassignmentError } from '../../errors';
+import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
 import { reassignAgent, reassignAgents } from './reassign';
 
-const agentInManagedDoc = {
-  _id: 'agent-in-managed-policy',
-  _source: { policy_id: 'managed-agent-policy' },
+const agentInHostedDoc = {
+  _id: 'agent-in-hosted-policy',
+  _source: { policy_id: 'hosted-agent-policy' },
 };
-const agentInManagedDoc2 = {
-  _id: 'agent-in-managed-policy2',
-  _source: { policy_id: 'managed-agent-policy' },
+const agentInHostedDoc2 = {
+  _id: 'agent-in-hosted-policy2',
+  _source: { policy_id: 'hosted-agent-policy' },
 };
-const agentInUnmanagedDoc = {
-  _id: 'agent-in-unmanaged-policy',
-  _source: { policy_id: 'unmanaged-agent-policy' },
+const agentInRegularDoc = {
+  _id: 'agent-in-regular-policy',
+  _source: { policy_id: 'regular-agent-policy' },
 };
-const unmanagedAgentPolicySO = {
-  id: 'unmanaged-agent-policy',
+const regularAgentPolicySO = {
+  id: 'regular-agent-policy',
   attributes: { is_managed: false },
 } as SavedObject<AgentPolicy>;
-const unmanagedAgentPolicySO2 = {
-  id: 'unmanaged-agent-policy-2',
+const regularAgentPolicySO2 = {
+  id: 'regular-agent-policy-2',
   attributes: { is_managed: false },
 } as SavedObject<AgentPolicy>;
-const managedAgentPolicySO = {
-  id: 'managed-agent-policy',
+const hostedAgentPolicySO = {
+  id: 'hosted-agent-policy',
   attributes: { is_managed: true },
 } as SavedObject<AgentPolicy>;
 
 describe('reassignAgent (singular)', () => {
-  it('can reassign from unmanaged policy to unmanaged', async () => {
+  it('can reassign from regular agent policy to regular', async () => {
     const { soClient, esClient } = createClientsMock();
-    await reassignAgent(soClient, esClient, agentInUnmanagedDoc._id, unmanagedAgentPolicySO.id);
+    await reassignAgent(soClient, esClient, agentInRegularDoc._id, regularAgentPolicySO.id);
 
     // calls ES update with correct values
     expect(esClient.update).toBeCalledTimes(1);
     const calledWith = esClient.update.mock.calls[0];
-    expect(calledWith[0]?.id).toBe(agentInUnmanagedDoc._id);
-    expect(calledWith[0]?.body?.doc).toHaveProperty('policy_id', unmanagedAgentPolicySO.id);
+    expect(calledWith[0]?.id).toBe(agentInRegularDoc._id);
+    expect(calledWith[0]?.body?.doc).toHaveProperty('policy_id', regularAgentPolicySO.id);
   });
 
-  it('cannot reassign from unmanaged policy to managed', async () => {
+  it('cannot reassign from regular agent policy to hosted', async () => {
     const { soClient, esClient } = createClientsMock();
     await expect(
-      reassignAgent(soClient, esClient, agentInUnmanagedDoc._id, managedAgentPolicySO.id)
-    ).rejects.toThrowError(AgentReassignmentError);
+      reassignAgent(soClient, esClient, agentInRegularDoc._id, hostedAgentPolicySO.id)
+    ).rejects.toThrowError(HostedAgentPolicyRestrictionRelatedError);
 
     // does not call ES update
     expect(esClient.update).toBeCalledTimes(0);
   });
 
-  it('cannot reassign from managed policy', async () => {
+  it('cannot reassign from hosted agent policy', async () => {
     const { soClient, esClient } = createClientsMock();
     await expect(
-      reassignAgent(soClient, esClient, agentInManagedDoc._id, unmanagedAgentPolicySO.id)
-    ).rejects.toThrowError(AgentReassignmentError);
+      reassignAgent(soClient, esClient, agentInHostedDoc._id, regularAgentPolicySO.id)
+    ).rejects.toThrowError(HostedAgentPolicyRestrictionRelatedError);
     // does not call ES update
     expect(esClient.update).toBeCalledTimes(0);
 
     await expect(
-      reassignAgent(soClient, esClient, agentInManagedDoc._id, managedAgentPolicySO.id)
-    ).rejects.toThrowError(AgentReassignmentError);
+      reassignAgent(soClient, esClient, agentInHostedDoc._id, hostedAgentPolicySO.id)
+    ).rejects.toThrowError(HostedAgentPolicyRestrictionRelatedError);
     // does not call ES update
     expect(esClient.update).toBeCalledTimes(0);
   });
 });
 
 describe('reassignAgents (plural)', () => {
-  it('agents in managed policies are not updated', async () => {
+  it('agents in hosted policies are not updated', async () => {
     const { soClient, esClient } = createClientsMock();
-    const idsToReassign = [agentInUnmanagedDoc._id, agentInManagedDoc._id, agentInManagedDoc2._id];
-    await reassignAgents(
-      soClient,
-      esClient,
-      { agentIds: idsToReassign },
-      unmanagedAgentPolicySO2.id
-    );
+    const idsToReassign = [agentInRegularDoc._id, agentInHostedDoc._id, agentInHostedDoc2._id];
+    await reassignAgents(soClient, esClient, { agentIds: idsToReassign }, regularAgentPolicySO2.id);
 
     // calls ES update with correct values
     const calledWith = esClient.bulk.mock.calls[0][0];
-    // only 1 are unmanaged and bulk write two line per update
-    expect(calledWith.body.length).toBe(2);
+    // only 1 are regular and bulk write two line per update
+    expect(calledWith.body?.length).toBe(2);
     // @ts-expect-error
-    expect(calledWith.body[0].update._id).toEqual(agentInUnmanagedDoc._id);
+    expect(calledWith.body[0].update._id).toEqual(agentInRegularDoc._id);
   });
 });
 
@@ -112,12 +107,12 @@ function createClientsMock() {
   });
   soClientMock.get.mockImplementation(async (_, id) => {
     switch (id) {
-      case unmanagedAgentPolicySO.id:
-        return unmanagedAgentPolicySO;
-      case managedAgentPolicySO.id:
-        return managedAgentPolicySO;
-      case unmanagedAgentPolicySO2.id:
-        return unmanagedAgentPolicySO2;
+      case regularAgentPolicySO.id:
+        return regularAgentPolicySO;
+      case hostedAgentPolicySO.id:
+        return hostedAgentPolicySO;
+      case regularAgentPolicySO2.id:
+        return regularAgentPolicySO2;
       default:
         throw new Error(`${id} not found`);
     }
@@ -133,17 +128,17 @@ function createClientsMock() {
   esClientMock.mget.mockImplementation(async () => {
     return {
       body: {
-        docs: [agentInManagedDoc, agentInUnmanagedDoc, agentInManagedDoc2],
+        docs: [agentInHostedDoc, agentInRegularDoc, agentInHostedDoc2],
       },
     };
   });
   // @ts-expect-error
   esClientMock.get.mockImplementation(async ({ id }) => {
     switch (id) {
-      case agentInManagedDoc._id:
-        return { body: agentInManagedDoc };
-      case agentInUnmanagedDoc._id:
-        return { body: agentInUnmanagedDoc };
+      case agentInHostedDoc._id:
+        return { body: agentInHostedDoc };
+      case agentInRegularDoc._id:
+        return { body: agentInRegularDoc };
       default:
         throw new Error(`${id} not found`);
     }

@@ -4,29 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Observable } from 'rxjs';
-import * as Rx from 'rxjs';
-import { toArray, map } from 'rxjs/operators';
-import { AlertingPlugin } from '../../../../alerting/server';
 import { registerTransactionDurationAnomalyAlertType } from './register_transaction_duration_anomaly_alert_type';
-import { APMConfig } from '../..';
-import { ANOMALY_SEVERITY } from '../../../../ml/common';
+import { ANOMALY_SEVERITY } from '../../../common/ml_constants';
 import { Job, MlPluginSetup } from '../../../../ml/server';
 import * as GetServiceAnomalies from '../service_map/get_service_anomalies';
-
-type Operator<T1, T2> = (source: Rx.Observable<T1>) => Rx.Observable<T2>;
-const pipeClosure = <T1, T2>(fn: Operator<T1, T2>): Operator<T1, T2> => {
-  return (source: Rx.Observable<T1>) => {
-    return Rx.defer(() => fn(source));
-  };
-};
-const mockedConfig$ = (Rx.of('apm_oss.errorIndices').pipe(
-  pipeClosure((source$) => {
-    return source$.pipe(map((i) => i));
-  }),
-  toArray()
-) as unknown) as Observable<APMConfig>;
+import { createRuleTypeMocks } from './test_utils';
 
 describe('Transaction duration anomaly alert', () => {
   afterEach(() => {
@@ -34,28 +16,21 @@ describe('Transaction duration anomaly alert', () => {
   });
   describe("doesn't send alert", () => {
     it('ml is not defined', async () => {
-      let alertExecutor: any;
-      const alerting = {
-        registerType: ({ executor }) => {
-          alertExecutor = executor;
-        },
-      } as AlertingPlugin['setup'];
+      const { services, dependencies, executor } = createRuleTypeMocks();
 
       registerTransactionDurationAnomalyAlertType({
-        alerting,
+        ...dependencies,
         ml: undefined,
-        config$: mockedConfig$,
       });
-      expect(alertExecutor).toBeDefined();
 
-      const services = {
-        callCluster: jest.fn(),
-        alertInstanceFactory: jest.fn(),
-      };
       const params = { anomalySeverityType: ANOMALY_SEVERITY.MINOR };
 
-      await alertExecutor!({ services, params });
-      expect(services.callCluster).not.toHaveBeenCalled();
+      await executor({ params });
+
+      expect(
+        services.scopedClusterClient.asCurrentUser.search
+      ).not.toHaveBeenCalled();
+
       expect(services.alertInstanceFactory).not.toHaveBeenCalled();
     });
 
@@ -64,13 +39,7 @@ describe('Transaction duration anomaly alert', () => {
         .spyOn(GetServiceAnomalies, 'getMLJobs')
         .mockReturnValue(Promise.resolve([]));
 
-      let alertExecutor: any;
-
-      const alerting = {
-        registerType: ({ executor }) => {
-          alertExecutor = executor;
-        },
-      } as AlertingPlugin['setup'];
+      const { services, dependencies, executor } = createRuleTypeMocks();
 
       const ml = ({
         mlSystemProvider: () => ({ mlAnomalySearch: jest.fn() }),
@@ -78,117 +47,127 @@ describe('Transaction duration anomaly alert', () => {
       } as unknown) as MlPluginSetup;
 
       registerTransactionDurationAnomalyAlertType({
-        alerting,
+        ...dependencies,
         ml,
-        config$: mockedConfig$,
       });
-      expect(alertExecutor).toBeDefined();
 
-      const services = {
-        callCluster: jest.fn(),
-        alertInstanceFactory: jest.fn(),
-      };
       const params = { anomalySeverityType: ANOMALY_SEVERITY.MINOR };
 
-      await alertExecutor!({ services, params });
-      expect(services.callCluster).not.toHaveBeenCalled();
+      await executor({ params });
+      expect(
+        services.scopedClusterClient.asCurrentUser.search
+      ).not.toHaveBeenCalled();
+
       expect(services.alertInstanceFactory).not.toHaveBeenCalled();
     });
 
     it('anomaly is less than threshold', async () => {
-      jest
-        .spyOn(GetServiceAnomalies, 'getMLJobs')
-        .mockReturnValue(
-          Promise.resolve([{ job_id: '1' }, { job_id: '2' }] as Job[])
-        );
+      jest.spyOn(GetServiceAnomalies, 'getMLJobs').mockReturnValue(
+        Promise.resolve(([
+          {
+            job_id: '1',
+            custom_settings: { job_tags: { environment: 'development' } },
+          },
+          {
+            job_id: '2',
+            custom_settings: { job_tags: { environment: 'production' } },
+          },
+        ] as unknown) as Job[])
+      );
 
-      let alertExecutor: any;
-
-      const alerting = {
-        registerType: ({ executor }) => {
-          alertExecutor = executor;
-        },
-      } as AlertingPlugin['setup'];
+      const { services, dependencies, executor } = createRuleTypeMocks();
 
       const ml = ({
         mlSystemProvider: () => ({
           mlAnomalySearch: () => ({
-            hits: { total: { value: 0 } },
+            aggregations: {
+              anomaly_groups: {
+                buckets: [
+                  {
+                    doc_count: 1,
+                    latest_score: {
+                      top: [{ metrics: { record_score: 0, job_id: '1' } }],
+                    },
+                  },
+                ],
+              },
+            },
           }),
         }),
         anomalyDetectorsProvider: jest.fn(),
       } as unknown) as MlPluginSetup;
 
       registerTransactionDurationAnomalyAlertType({
-        alerting,
+        ...dependencies,
         ml,
-        config$: mockedConfig$,
       });
-      expect(alertExecutor).toBeDefined();
 
-      const services = {
-        callCluster: jest.fn(),
-        alertInstanceFactory: jest.fn(),
-      };
       const params = { anomalySeverityType: ANOMALY_SEVERITY.MINOR };
 
-      await alertExecutor!({ services, params });
-      expect(services.callCluster).not.toHaveBeenCalled();
+      await executor({ params });
+
+      expect(
+        services.scopedClusterClient.asCurrentUser.search
+      ).not.toHaveBeenCalled();
       expect(services.alertInstanceFactory).not.toHaveBeenCalled();
     });
   });
 
   describe('sends alert', () => {
-    it('with service name, environment and transaction type', async () => {
+    it('for all services that exceeded the threshold', async () => {
       jest.spyOn(GetServiceAnomalies, 'getMLJobs').mockReturnValue(
-        Promise.resolve([
+        Promise.resolve(([
           {
             job_id: '1',
-            custom_settings: {
-              job_tags: {
-                environment: 'production',
-              },
-            },
-          } as unknown,
+            custom_settings: { job_tags: { environment: 'development' } },
+          },
           {
             job_id: '2',
-            custom_settings: {
-              job_tags: {
-                environment: 'production',
-              },
-            },
-          } as unknown,
-        ] as Job[])
+            custom_settings: { job_tags: { environment: 'production' } },
+          },
+        ] as unknown) as Job[])
       );
 
-      let alertExecutor: any;
-
-      const alerting = {
-        registerType: ({ executor }) => {
-          alertExecutor = executor;
-        },
-      } as AlertingPlugin['setup'];
+      const {
+        services,
+        dependencies,
+        executor,
+        scheduleActions,
+      } = createRuleTypeMocks();
 
       const ml = ({
         mlSystemProvider: () => ({
           mlAnomalySearch: () => ({
-            hits: { total: { value: 2 } },
             aggregations: {
-              services: {
+              anomaly_groups: {
                 buckets: [
                   {
-                    key: 'foo',
-                    transaction_types: {
-                      buckets: [{ key: 'type-foo' }],
+                    latest_score: {
+                      top: [
+                        {
+                          metrics: {
+                            record_score: 80,
+                            job_id: '1',
+                            partition_field_value: 'foo',
+                            by_field_value: 'type-foo',
+                          },
+                        },
+                      ],
                     },
-                    record_avg: { value: 80 },
                   },
                   {
-                    key: 'bar',
-                    transaction_types: {
-                      buckets: [{ key: 'type-bar' }],
+                    latest_score: {
+                      top: [
+                        {
+                          metrics: {
+                            record_score: 20,
+                            job_id: '2',
+                            parttition_field_value: 'bar',
+                            by_field_value: 'type-bar',
+                          },
+                        },
+                      ],
                     },
-                    record_avg: { value: 20 },
                   },
                 ],
               },
@@ -199,145 +178,26 @@ describe('Transaction duration anomaly alert', () => {
       } as unknown) as MlPluginSetup;
 
       registerTransactionDurationAnomalyAlertType({
-        alerting,
+        ...dependencies,
         ml,
-        config$: mockedConfig$,
       });
-      expect(alertExecutor).toBeDefined();
 
-      const scheduleActions = jest.fn();
-      const services = {
-        callCluster: jest.fn(),
-        alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
-      };
       const params = { anomalySeverityType: ANOMALY_SEVERITY.MINOR };
 
-      await alertExecutor!({ services, params });
+      await executor({ params });
 
-      await alertExecutor!({ services, params });
-      [
-        'apm.transaction_duration_anomaly_foo_production_type-foo',
-        'apm.transaction_duration_anomaly_bar_production_type-bar',
-      ].forEach((instanceName) =>
-        expect(services.alertInstanceFactory).toHaveBeenCalledWith(instanceName)
+      expect(services.alertInstanceFactory).toHaveBeenCalledTimes(1);
+
+      expect(services.alertInstanceFactory).toHaveBeenCalledWith(
+        'apm.transaction_duration_anomaly_foo_development_type-foo'
       );
 
       expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
         serviceName: 'foo',
         transactionType: 'type-foo',
-        environment: 'production',
+        environment: 'development',
         threshold: 'minor',
-        thresholdValue: 'critical',
-      });
-      expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
-        serviceName: 'bar',
-        transactionType: 'type-bar',
-        environment: 'production',
-        threshold: 'minor',
-        thresholdValue: 'warning',
-      });
-    });
-
-    it('with service name', async () => {
-      jest.spyOn(GetServiceAnomalies, 'getMLJobs').mockReturnValue(
-        Promise.resolve([
-          {
-            job_id: '1',
-            custom_settings: {
-              job_tags: {
-                environment: 'production',
-              },
-            },
-          } as unknown,
-          {
-            job_id: '2',
-            custom_settings: {
-              job_tags: {
-                environment: 'testing',
-              },
-            },
-          } as unknown,
-        ] as Job[])
-      );
-
-      let alertExecutor: any;
-
-      const alerting = {
-        registerType: ({ executor }) => {
-          alertExecutor = executor;
-        },
-      } as AlertingPlugin['setup'];
-
-      const ml = ({
-        mlSystemProvider: () => ({
-          mlAnomalySearch: () => ({
-            hits: { total: { value: 2 } },
-            aggregations: {
-              services: {
-                buckets: [
-                  { key: 'foo', record_avg: { value: 80 } },
-                  { key: 'bar', record_avg: { value: 20 } },
-                ],
-              },
-            },
-          }),
-        }),
-        anomalyDetectorsProvider: jest.fn(),
-      } as unknown) as MlPluginSetup;
-
-      registerTransactionDurationAnomalyAlertType({
-        alerting,
-        ml,
-        config$: mockedConfig$,
-      });
-      expect(alertExecutor).toBeDefined();
-
-      const scheduleActions = jest.fn();
-      const services = {
-        callCluster: jest.fn(),
-        alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
-      };
-      const params = { anomalySeverityType: ANOMALY_SEVERITY.MINOR };
-
-      await alertExecutor!({ services, params });
-
-      await alertExecutor!({ services, params });
-      [
-        'apm.transaction_duration_anomaly_foo_production',
-        'apm.transaction_duration_anomaly_foo_testing',
-        'apm.transaction_duration_anomaly_bar_production',
-        'apm.transaction_duration_anomaly_bar_testing',
-      ].forEach((instanceName) =>
-        expect(services.alertInstanceFactory).toHaveBeenCalledWith(instanceName)
-      );
-
-      expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
-        serviceName: 'foo',
-        transactionType: undefined,
-        environment: 'production',
-        threshold: 'minor',
-        thresholdValue: 'critical',
-      });
-      expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
-        serviceName: 'bar',
-        transactionType: undefined,
-        environment: 'production',
-        threshold: 'minor',
-        thresholdValue: 'warning',
-      });
-      expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
-        serviceName: 'foo',
-        transactionType: undefined,
-        environment: 'testing',
-        threshold: 'minor',
-        thresholdValue: 'critical',
-      });
-      expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
-        serviceName: 'bar',
-        transactionType: undefined,
-        environment: 'testing',
-        threshold: 'minor',
-        thresholdValue: 'warning',
+        triggerValue: 'critical',
       });
     });
   });

@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiIconTip } from '@elastic/eui';
 
 import type { Agent, AgentPolicy, AgentDetailsReassignPolicyAction } from '../../../types';
-import { PAGE_ROUTING_PATHS } from '../../../constants';
+import { FLEET_ROUTING_PATHS } from '../../../constants';
 import { Loading, Error } from '../../../components';
 import {
   useGetOneAgent,
@@ -32,10 +32,10 @@ import {
   useBreadcrumbs,
   useStartServices,
   useKibanaVersion,
+  useIntraAppState,
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
 import { AgentHealth } from '../components';
-import { useIntraAppState } from '../../../hooks/use_intra_app_state';
 import { isAgentUpgradeable } from '../../../services';
 
 import { AgentRefreshContext } from './hooks';
@@ -194,17 +194,18 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
                 ),
             },
             {
-              content: (
-                <AgentDetailsActionMenu
-                  agent={agentData.item}
-                  assignFlyoutOpenByDefault={openReassignFlyoutOpenByDefault}
-                  onCancelReassign={
-                    routeState && routeState.onDoneNavigateTo
-                      ? reassignCancelClickHandler
-                      : undefined
-                  }
-                />
-              ),
+              content:
+                isAgentPolicyLoading || agentPolicyData?.item?.is_managed ? undefined : (
+                  <AgentDetailsActionMenu
+                    agent={agentData.item}
+                    assignFlyoutOpenByDefault={openReassignFlyoutOpenByDefault}
+                    onCancelReassign={
+                      routeState && routeState.onDoneNavigateTo
+                        ? reassignCancelClickHandler
+                        : undefined
+                    }
+                  />
+                ),
             },
           ].map((item, index) => (
             <EuiFlexItem grow={false} key={index}>
@@ -308,13 +309,13 @@ const AgentDetailsPageContent: React.FunctionComponent<{
   return (
     <Switch>
       <Route
-        path={PAGE_ROUTING_PATHS.fleet_agent_details_logs}
+        path={FLEET_ROUTING_PATHS.fleet_agent_details_logs}
         render={() => {
           return <AgentLogs agent={agent} />;
         }}
       />
       <Route
-        path={PAGE_ROUTING_PATHS.fleet_agent_details}
+        path={FLEET_ROUTING_PATHS.fleet_agent_details}
         render={() => {
           return <AgentDetailsContent agent={agent} agentPolicy={agentPolicy} />;
         }}

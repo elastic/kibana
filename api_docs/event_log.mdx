@@ -11,6 +11,16 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 
 import eventLogObj from './event_log.json';
 
+
+
+
+
+**Code health stats**
+
+| Public API count  | Any count | Items lacking comments | Missing exports | 
+|-------------------|-----------|------------------------|-----------------|
+| 70 | 0 | 70 | 4 |
+
 ## Server
 
 ### Setup
@@ -18,6 +28,12 @@ import eventLogObj from './event_log.json';
 
 ### Start
 <DocDefinitionList data={[eventLogObj.server.start]}/>
+
+### Functions
+<DocDefinitionList data={eventLogObj.server.functions}/>
+
+### Classes
+<DocDefinitionList data={eventLogObj.server.classes}/>
 
 ### Interfaces
 <DocDefinitionList data={eventLogObj.server.interfaces}/>

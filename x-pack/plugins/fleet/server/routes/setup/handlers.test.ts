@@ -13,7 +13,7 @@ import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import { appContextService } from '../../services/app_context';
 import { setupIngestManager } from '../../services/setup';
 
-import { FleetSetupHandler } from './handlers';
+import { fleetSetupHandler } from './handlers';
 
 jest.mock('../../services/setup', () => {
   return {
@@ -45,10 +45,15 @@ describe('FleetSetupHandler', () => {
   });
 
   it('POST /setup succeeds w/200 and body of resolved value', async () => {
-    mockSetupIngestManager.mockImplementation(() => Promise.resolve({ isIntialized: true }));
-    await FleetSetupHandler(context, request, response);
+    mockSetupIngestManager.mockImplementation(() =>
+      Promise.resolve({
+        isInitialized: true,
+        nonFatalErrors: [],
+      })
+    );
+    await fleetSetupHandler(context, request, response);
 
-    const expectedBody: PostIngestSetupResponse = { isInitialized: true };
+    const expectedBody: PostIngestSetupResponse = { isInitialized: true, nonFatalErrors: [] };
     expect(response.customError).toHaveBeenCalledTimes(0);
     expect(response.ok).toHaveBeenCalledWith({ body: expectedBody });
   });
@@ -57,7 +62,7 @@ describe('FleetSetupHandler', () => {
     mockSetupIngestManager.mockImplementation(() =>
       Promise.reject(new Error('SO method mocked to throw'))
     );
-    await FleetSetupHandler(context, request, response);
+    await fleetSetupHandler(context, request, response);
 
     expect(response.customError).toHaveBeenCalledTimes(1);
     expect(response.customError).toHaveBeenCalledWith({
@@ -73,7 +78,7 @@ describe('FleetSetupHandler', () => {
       Promise.reject(new RegistryError('Registry method mocked to throw'))
     );
 
-    await FleetSetupHandler(context, request, response);
+    await fleetSetupHandler(context, request, response);
     expect(response.customError).toHaveBeenCalledTimes(1);
     expect(response.customError).toHaveBeenCalledWith({
       statusCode: 502,

@@ -227,7 +227,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
           }
         >
           <>
-            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+            <EuiFlexGroup alignItems="flexStart" justifyContent="spaceBetween">
               <EuiFlexItem>
                 {/* Flex Column #1: Search Bar / Advanced Search Editor */}
                 {searchItems.savedSearch === undefined && (

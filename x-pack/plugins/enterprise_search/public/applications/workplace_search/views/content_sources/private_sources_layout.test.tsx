@@ -7,7 +7,7 @@
 
 import '../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockValues } from '../../../__mocks__';
+import { setMockValues } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -15,7 +15,10 @@ import { shallow } from 'enzyme';
 
 import { EuiCallOut } from '@elastic/eui';
 
+import { AccountHeader } from '../../components/layout';
 import { ViewContentHeader } from '../../components/shared/view_content_header';
+
+import { SourceSubNav } from './components/source_sub_nav';
 
 import {
   PRIVATE_CAN_CREATE_PAGE_TITLE,
@@ -40,6 +43,8 @@ describe('PrivateSourcesLayout', () => {
     const wrapper = shallow(<PrivateSourcesLayout>{children}</PrivateSourcesLayout>);
 
     expect(wrapper.find('[data-test-subj="TestChildren"]')).toHaveLength(1);
+    expect(wrapper.find(SourceSubNav)).toHaveLength(1);
+    expect(wrapper.find(AccountHeader)).toHaveLength(1);
   });
 
   it('uses correct title and description when private sources are enabled', () => {

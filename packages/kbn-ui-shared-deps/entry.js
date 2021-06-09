@@ -44,8 +44,12 @@ export const Theme = require('./theme.ts');
 export const Lodash = require('lodash');
 export const LodashFp = require('lodash/fp');
 
+import { unzlibSync, strFromU8 } from 'fflate';
+export const Fflate = { unzlibSync, strFromU8 };
+
 // runtime deps which don't need to be copied across all bundles
 export const TsLib = require('tslib');
 export const KbnAnalytics = require('@kbn/analytics');
 export const KbnStd = require('@kbn/std');
 export const SaferLodashSet = require('@elastic/safer-lodash-set');
+export const RisonNode = require('rison-node');

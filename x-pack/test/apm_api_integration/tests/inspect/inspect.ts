@@ -81,7 +81,6 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
         it('for agent configs', async () => {
           const { status, body } = await supertestRead({
             endpoint: 'GET /api/apm/settings/agent-configuration',
-            // @ts-expect-error
             params: {
               query: {
                 _inspect: true,

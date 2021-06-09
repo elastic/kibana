@@ -33,6 +33,10 @@ describe('transformActionVariables', () => {
           "name": "rule.tags",
         },
         Object {
+          "description": "The type of rule.",
+          "name": "rule.type",
+        },
+        Object {
           "description": "The date the rule scheduled the action.",
           "name": "date",
         },
@@ -126,6 +130,10 @@ describe('transformActionVariables', () => {
           Object {
             "description": "The tags of the rule.",
             "name": "rule.tags",
+          },
+          Object {
+            "description": "The type of rule.",
+            "name": "rule.type",
           },
           Object {
             "description": "The date the rule scheduled the action.",
@@ -229,6 +237,10 @@ describe('transformActionVariables', () => {
           Object {
             "description": "The tags of the rule.",
             "name": "rule.tags",
+          },
+          Object {
+            "description": "The type of rule.",
+            "name": "rule.type",
           },
           Object {
             "description": "The date the rule scheduled the action.",
@@ -335,6 +347,10 @@ describe('transformActionVariables', () => {
           Object {
             "description": "The tags of the rule.",
             "name": "rule.tags",
+          },
+          Object {
+            "description": "The type of rule.",
+            "name": "rule.type",
           },
           Object {
             "description": "The date the rule scheduled the action.",
@@ -459,6 +475,10 @@ describe('transformActionVariables', () => {
           Object {
             "description": "The tags of the rule.",
             "name": "rule.tags",
+          },
+          Object {
+            "description": "The type of rule.",
+            "name": "rule.type",
           },
           Object {
             "description": "The date the rule scheduled the action.",

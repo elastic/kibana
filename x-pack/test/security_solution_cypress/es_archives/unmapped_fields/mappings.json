@@ -1,0 +1,24 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": "unmapped-7.12.0-2021.03.10-000001",
+    "mappings": {
+      "dynamic": false,
+      "properties":{
+        "@timestamp":{
+          "type":"date"
+        },
+        "mydestination":{
+          "properties":{
+            "ip":{
+              "index": "false",
+              "type":"ip"
+            }
+          }
+        }
+      }
+    }
+  }
+}

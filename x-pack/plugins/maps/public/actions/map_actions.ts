@@ -10,7 +10,6 @@ import { AnyAction, Dispatch } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
-
 import { Filter, Query, TimeRange } from 'src/plugins/data/public';
 import { MapStoreState } from '../reducers/store';
 import {
@@ -20,6 +19,7 @@ import {
   getWaitingForMapReadyLayerListRaw,
   getQuery,
   getTimeFilters,
+  getTimeslice,
   getLayerList,
   getSearchSessionId,
   getSearchSessionMapBuffer,
@@ -38,10 +38,8 @@ import {
   SET_MOUSE_COORDINATES,
   SET_OPEN_TOOLTIPS,
   SET_QUERY,
-  SET_REFRESH_CONFIG,
   SET_SCROLL_ZOOM,
   TRACK_MAP_SETTINGS,
-  TRIGGER_REFRESH_TIMER,
   UPDATE_DRAW_STATE,
   UPDATE_MAP_SETTING,
 } from './map_action_constants';
@@ -53,7 +51,7 @@ import {
   MapCenter,
   MapCenterAndZoom,
   MapExtent,
-  MapRefreshConfig,
+  Timeslice,
 } from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common/constants';
 import { scaleBounds } from '../../common/elasticsearch_util';
@@ -227,17 +225,21 @@ function generateQueryTimestamp() {
 export function setQuery({
   query,
   timeFilters,
-  filters = [],
+  timeslice,
+  filters,
   forceRefresh = false,
   searchSessionId,
   searchSessionMapBuffer,
+  clearTimeslice,
 }: {
   filters?: Filter[];
   query?: Query;
   timeFilters?: TimeRange;
+  timeslice?: Timeslice;
   forceRefresh?: boolean;
   searchSessionId?: string;
   searchSessionMapBuffer?: MapExtent;
+  clearTimeslice?: boolean;
 }) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
@@ -249,21 +251,36 @@ export function setQuery({
         ? prevQuery.queryLastTriggeredAt
         : generateQueryTimestamp();
 
+    const prevTimeFilters = getTimeFilters(getState());
+
+    function getNextTimeslice() {
+      if (
+        clearTimeslice ||
+        (timeFilters !== undefined && !_.isEqual(timeFilters, prevTimeFilters))
+      ) {
+        return undefined;
+      }
+
+      return timeslice ? timeslice : getTimeslice(getState());
+    }
+
     const nextQueryContext = {
-      timeFilters: timeFilters ? timeFilters : getTimeFilters(getState()),
+      timeFilters: timeFilters ? timeFilters : prevTimeFilters,
+      timeslice: getNextTimeslice(),
       query: {
-        ...(query ? query : getQuery(getState())),
+        ...(query ? query : prevQuery),
         // ensure query changes to trigger re-fetch when "Refresh" clicked
         queryLastTriggeredAt: forceRefresh ? generateQueryTimestamp() : prevTriggeredAt,
       },
       filters: filters ? filters : getFilters(getState()),
-      searchSessionId,
+      searchSessionId: searchSessionId ? searchSessionId : getSearchSessionId(getState()),
       searchSessionMapBuffer,
     };
 
     const prevQueryContext = {
-      timeFilters: getTimeFilters(getState()),
-      query: getQuery(getState()),
+      timeFilters: prevTimeFilters,
+      timeslice: getTimeslice(getState()),
+      query: prevQuery,
       filters: getFilters(getState()),
       searchSessionId: getSearchSessionId(getState()),
       searchSessionMapBuffer: getSearchSessionMapBuffer(getState()),
@@ -277,31 +294,6 @@ export function setQuery({
     dispatch({
       type: SET_QUERY,
       ...nextQueryContext,
-    });
-
-    if (getMapSettings(getState()).autoFitToDataBounds) {
-      dispatch(autoFitToBounds());
-    } else {
-      await dispatch(syncDataForAllLayers());
-    }
-  };
-}
-
-export function setRefreshConfig({ isPaused, interval }: MapRefreshConfig) {
-  return {
-    type: SET_REFRESH_CONFIG,
-    isPaused,
-    interval,
-  };
-}
-
-export function triggerRefreshTimer() {
-  return async (
-    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
-    getState: () => MapStoreState
-  ) => {
-    dispatch({
-      type: TRIGGER_REFRESH_TIMER,
     });
 
     if (getMapSettings(getState()).autoFitToDataBounds) {

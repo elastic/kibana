@@ -6,7 +6,7 @@
  */
 
 import '../../../__mocks__/shallow_useeffect.mock';
-import { setMockActions, setMockValues } from '../../../__mocks__';
+import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
 import { groups } from '../../__mocks__/groups.mock';
 import { meta } from '../../__mocks__/meta.mock';
 
@@ -98,7 +98,7 @@ describe('GroupOverview', () => {
       messages: [mockSuccessMessage],
     });
     const wrapper = shallow(<Groups />);
-    const flashMessages = wrapper.find(FlashMessages).dive().shallow();
+    const flashMessages = wrapper.find(FlashMessages).dive().childAt(0).dive();
 
     expect(flashMessages.find('[data-test-subj="NewGroupManageButton"]')).toHaveLength(1);
   });

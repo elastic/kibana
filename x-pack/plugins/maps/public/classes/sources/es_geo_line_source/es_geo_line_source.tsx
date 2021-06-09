@@ -359,7 +359,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     return true;
   }
 
-  canFormatFeatureProperties() {
+  hasTooltipProperties() {
     return true;
   }
 

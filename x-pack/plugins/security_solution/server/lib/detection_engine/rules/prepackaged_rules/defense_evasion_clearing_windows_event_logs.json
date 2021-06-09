@@ -9,10 +9,10 @@
     "logs-endpoint.events.*",
     "logs-windows.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License v2",
   "name": "Clearing Windows Event Logs",
-  "query": "event.category:process and event.type:(process_started or start) and (process.name:\"wevtutil.exe\" or process.pe.original_file_name:\"wevtutil.exe\") and process.args:(\"/e:false\" or cl or \"clear-log\") or process.name:\"powershell.exe\" and process.args:\"Clear-EventLog\"",
+  "query": "process where event.type in (\"process_started\", \"start\") and\n  (process.name : \"wevtutil.exe\" or process.pe.original_file_name == \"wevtutil.exe\") and\n    process.args : (\"/e:false\", \"cl\", \"clear-log\") or\n  process.name : \"powershell.exe\" and process.args : \"Clear-EventLog\"\n",
   "risk_score": 21,
   "rule_id": "d331bbe2-6db4-4941-80a5-8270db72eb61",
   "severity": "low",
@@ -41,6 +41,6 @@
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 8
+  "type": "eql",
+  "version": 9
 }

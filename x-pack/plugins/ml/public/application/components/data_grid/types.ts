@@ -7,6 +7,7 @@
 
 import { Dispatch, SetStateAction } from 'react';
 
+import { estypes } from '@elastic/elasticsearch';
 import {
   EuiDataGridCellValueElementProps,
   EuiDataGridPaginationProps,
@@ -15,7 +16,6 @@ import {
 } from '@elastic/eui';
 
 import { Dictionary } from '../../../../common/types/common';
-import { HitsTotalRelation } from '../../../../common/types/es_client';
 import { ChartData } from '../../../../common/types/field_histograms';
 
 import { INDEX_STATUS } from '../../data_frame_analytics/common/analytics';
@@ -27,7 +27,7 @@ export type DataGridItem = Record<string, any>;
 
 // `undefined` is used to indicate a non-initialized state.
 export type ChartsVisible = boolean | undefined;
-export type RowCountRelation = HitsTotalRelation | undefined;
+export type RowCountRelation = estypes.SearchTotalHitsRelation | undefined;
 
 export type IndexPagination = Pick<EuiDataGridPaginationProps, 'pageIndex' | 'pageSize'>;
 
@@ -59,6 +59,7 @@ export interface UseIndexDataReturnType
     UseDataGridReturnType,
     | 'chartsVisible'
     | 'chartsButtonVisible'
+    | 'ccsWarning'
     | 'columnsWithCharts'
     | 'errorMessage'
     | 'invalidSortingColumnns'
@@ -84,6 +85,7 @@ export interface UseIndexDataReturnType
 }
 
 export interface UseDataGridReturnType {
+  ccsWarning: boolean;
   chartsVisible: ChartsVisible;
   chartsButtonVisible: boolean;
   columnsWithCharts: EuiDataGridColumn[];
@@ -97,6 +99,7 @@ export interface UseDataGridReturnType {
   resetPagination: () => void;
   rowCount: number;
   rowCountRelation: RowCountRelation;
+  setCcsWarning: Dispatch<SetStateAction<boolean>>;
   setColumnCharts: Dispatch<SetStateAction<ChartData[]>>;
   setErrorMessage: Dispatch<SetStateAction<string>>;
   setNoDataMessage: Dispatch<SetStateAction<string>>;

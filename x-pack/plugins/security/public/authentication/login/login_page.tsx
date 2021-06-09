@@ -23,7 +23,7 @@ import {
   LOGOUT_REASON_QUERY_STRING_PARAMETER,
 } from '../../../common/constants';
 import type { LoginState } from '../../../common/login_state';
-import { DisabledLoginForm, LoginForm } from './components';
+import { DisabledLoginForm, LoginForm, LoginFormMessageType } from './components';
 
 interface Props {
   http: HttpStart;
@@ -36,18 +36,34 @@ interface State {
   loginState: LoginState | null;
 }
 
-const infoMessageMap = new Map([
+const messageMap = new Map([
   [
     'SESSION_EXPIRED',
-    i18n.translate('xpack.security.login.sessionExpiredDescription', {
-      defaultMessage: 'Your session has timed out. Please log in again.',
-    }),
+    {
+      type: LoginFormMessageType.Info,
+      content: i18n.translate('xpack.security.login.sessionExpiredDescription', {
+        defaultMessage: 'Your session has timed out. Please log in again.',
+      }),
+    },
   ],
   [
     'LOGGED_OUT',
-    i18n.translate('xpack.security.login.loggedOutDescription', {
-      defaultMessage: 'You have logged out of Elastic.',
-    }),
+    {
+      type: LoginFormMessageType.Info,
+      content: i18n.translate('xpack.security.login.loggedOutDescription', {
+        defaultMessage: 'You have logged out of Elastic.',
+      }),
+    },
+  ],
+  [
+    'UNAUTHENTICATED',
+    {
+      type: LoginFormMessageType.Danger,
+      content: i18n.translate('xpack.security.unauthenticated.errorDescription', {
+        defaultMessage:
+          "We hit an authentication error. Please check your credentials and try again. If you still can't log in, contact your system administrator.",
+      }),
+    },
   ],
 ]);
 
@@ -226,7 +242,7 @@ export class LoginPage extends Component<Props, State> {
         notifications={this.props.notifications}
         selector={selector}
         // @ts-expect-error Map.get is ok with getting `undefined`
-        infoMessage={infoMessageMap.get(query[LOGOUT_REASON_QUERY_STRING_PARAMETER]?.toString())}
+        message={messageMap.get(query[LOGOUT_REASON_QUERY_STRING_PARAMETER]?.toString())}
         loginAssistanceMessage={this.props.loginAssistanceMessage}
         loginHelp={loginHelp}
         authProviderHint={query[AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER]?.toString()}

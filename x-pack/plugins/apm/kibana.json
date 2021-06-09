@@ -9,24 +9,32 @@
     "licensing",
     "triggersActionsUi",
     "embeddable",
-    "infra"
+    "infra",
+    "observability",
+    "ruleRegistry"
   ],
   "optionalPlugins": [
+    "spaces",
     "cloud",
     "usageCollection",
     "taskManager",
     "actions",
     "alerting",
-    "observability",
     "security",
     "ml",
     "home",
-    "maps"
+    "maps",
+    "fleet"
   ],
   "server": true,
   "ui": true,
-  "configPath": ["xpack", "apm"],
-  "extraPublicDirs": ["public/style/variables"],
+  "configPath": [
+    "xpack",
+    "apm"
+  ],
+  "extraPublicDirs": [
+    "public/style/variables"
+  ],
   "requiredBundles": [
     "home",
     "kibanaReact",

@@ -7,7 +7,9 @@
 
 import React, { lazy, Suspense } from 'react';
 import type { CoreVitalProps, HeaderMenuPortalProps } from './types';
-import type { FieldValueSuggestionsProps } from './field_value_suggestions';
+import type { FieldValueSuggestionsProps } from './field_value_suggestions/types';
+
+export { createLazyObservabilityPageTemplate } from './page_template';
 
 const CoreVitalsLazy = lazy(() => import('./core_web_vitals/index'));
 

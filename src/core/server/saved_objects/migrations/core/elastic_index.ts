@@ -14,7 +14,6 @@
 import _ from 'lodash';
 import { estypes } from '@elastic/elasticsearch';
 import { MigrationEsClient } from './migration_es_client';
-import { CountResponse, SearchResponse } from '../../../elasticsearch';
 import { IndexMapping } from '../../mappings';
 import { SavedObjectsMigrationVersion } from '../../types';
 import { AliasAction, RawDoc } from './call_cluster';
@@ -28,6 +27,46 @@ export interface FullIndexInfo {
   indexName: string;
   mappings: IndexMapping;
 }
+
+// When migrating from the outdated index we use a read query which excludes
+// saved objects which are no longer used. These saved objects will still be
+// kept in the outdated index for backup purposes, but won't be available in
+// the upgraded index.
+export const excludeUnusedTypesQuery: estypes.QueryDslQueryContainer = {
+  bool: {
+    must_not: [
+      // https://github.com/elastic/kibana/issues/91869
+      {
+        term: {
+          type: 'fleet-agent-events',
+        },
+      },
+      // https://github.com/elastic/kibana/issues/95617
+      {
+        term: {
+          type: 'tsvb-validation-telemetry',
+        },
+      },
+      // https://github.com/elastic/kibana/issues/96131
+      {
+        bool: {
+          must: [
+            {
+              match: {
+                type: 'search-session',
+              },
+            },
+            {
+              match: {
+                'search-session.persisted': false,
+              },
+            },
+          ],
+        },
+      },
+    ],
+  },
+};
 
 /**
  * A slight enhancement to indices.get, that adds indexName, and validates that the
@@ -55,11 +94,11 @@ export async function fetchInfo(client: MigrationEsClient, index: string): Promi
  * Creates a reader function that serves up batches of documents from the index. We aren't using
  * an async generator, as that feature currently breaks Kibana's tooling.
  *
- * @param {CallCluster} callCluster - The elastic search connection
- * @param {string} - The index to be read from
+ * @param client - The elastic search connection
+ * @param index - The index to be read from
  * @param {opts}
- * @prop {number} batchSize - The number of documents to read at a time
- * @prop {string} scrollDuration - The scroll duration used for scrolling through the index
+ * @prop batchSize - The number of documents to read at a time
+ * @prop scrollDuration - The scroll duration used for scrolling through the index
  */
 export function reader(
   client: MigrationEsClient,
@@ -69,30 +108,16 @@ export function reader(
   const scroll = scrollDuration;
   let scrollId: string | undefined;
 
-  // When migrating from the outdated index we use a read query which excludes
-  // saved objects which are no longer used. These saved objects will still be
-  // kept in the outdated index for backup purposes, but won't be availble in
-  // the upgraded index.
-  const excludeUnusedTypes = {
-    bool: {
-      must_not: {
-        term: {
-          type: 'fleet-agent-events', // https://github.com/elastic/kibana/issues/91869
-        },
-      },
-    },
-  };
-
   const nextBatch = () =>
     scrollId !== undefined
-      ? client.scroll<SearchResponse<SavedObjectsRawDocSource>>({
+      ? client.scroll<SavedObjectsRawDocSource>({
           scroll,
           scroll_id: scrollId,
         })
-      : client.search<SearchResponse<SavedObjectsRawDocSource>>({
+      : client.search<SavedObjectsRawDocSource>({
           body: {
             size: batchSize,
-            query: excludeUnusedTypes,
+            query: excludeUnusedTypesQuery,
           },
           index,
           scroll,
@@ -117,10 +142,6 @@ export function reader(
 /**
  * Writes the specified documents to the index, throws an exception
  * if any of the documents fail to save.
- *
- * @param {CallCluster} callCluster
- * @param {string} index
- * @param {RawDoc[]} docs
  */
 export async function write(client: MigrationEsClient, index: string, docs: RawDoc[]) {
   const { body } = await client.bulk({
@@ -158,9 +179,9 @@ export async function write(client: MigrationEsClient, index: string, docs: RawD
  * it performs the check *each* time it is called, rather than memoizing itself,
  * as this is used to determine if migrations are complete.
  *
- * @param {CallCluster} callCluster
- * @param {string} index
- * @param {SavedObjectsMigrationVersion} migrationVersion - The latest versions of the migrations
+ * @param client - The connection to ElasticSearch
+ * @param index
+ * @param migrationVersion - The latest versions of the migrations
  */
 export async function migrationsUpToDate(
   client: MigrationEsClient,
@@ -181,7 +202,7 @@ export async function migrationsUpToDate(
       return true;
     }
 
-    const { body } = await client.count<CountResponse>({
+    const { body } = await client.count({
       body: {
         query: {
           bool: {
@@ -245,9 +266,9 @@ export async function createIndex(
  * is a concrete index. This function will reindex `alias` into a new index, delete the `alias`
  * index, and then create an alias `alias` that points to the new index.
  *
- * @param {CallCluster} callCluster - The connection to ElasticSearch
- * @param {FullIndexInfo} info - Information about the mappings and name of the new index
- * @param {string} alias - The name of the index being converted to an alias
+ * @param client - The ElasticSearch connection
+ * @param info - Information about the mappings and name of the new index
+ * @param alias - The name of the index being converted to an alias
  */
 export async function convertToAlias(
   client: MigrationEsClient,
@@ -271,7 +292,7 @@ export async function convertToAlias(
  * alias, meaning that it will only point to one index at a time, so we
  * remove any other indices from the alias.
  *
- * @param {CallCluster} callCluster
+ * @param {CallCluster} client
  * @param {string} index
  * @param {string} alias
  * @param {AliasAction[]} aliasActions - Optional actions to be added to the updateAliases call
@@ -351,7 +372,7 @@ async function reindex(
 ) {
   // We poll instead of having the request wait for completion, as for large indices,
   // the request times out on the Elasticsearch side of things. We have a relatively tight
-  // polling interval, as the request is fairly efficent, and we don't
+  // polling interval, as the request is fairly efficient, and we don't
   // want to block index migrations for too long on this.
   const pollInterval = 250;
   const { body: reindexBody } = await client.reindex({
@@ -380,7 +401,6 @@ async function reindex(
       task_id: String(task),
     });
 
-    // @ts-expect-error @elastic/elasticsearch GetTaskResponse doesn't contain `error` property
     const e = body.error;
     if (e) {
       throw new Error(`Re-index failed [${e.type}] ${e.reason} :: ${JSON.stringify(e)}`);

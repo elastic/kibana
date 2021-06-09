@@ -55,7 +55,9 @@ const Nav = withRouter(({ history, pages }: NavProps) => {
 
 interface Props {
   basename: string;
-  DashboardContainerByValueRenderer: DashboardStart['DashboardContainerByValueRenderer'];
+  DashboardContainerByValueRenderer: ReturnType<
+    DashboardStart['getDashboardContainerByValueRenderer']
+  >;
 }
 
 const DashboardEmbeddableExplorerApp = ({ basename, DashboardContainerByValueRenderer }: Props) => {

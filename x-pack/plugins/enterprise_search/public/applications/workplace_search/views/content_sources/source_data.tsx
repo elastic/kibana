@@ -227,7 +227,7 @@ export const staticSourceData = [
       }
     ),
     connectStepDescription: connectStepDescription.files,
-    objTypes: [SOURCE_OBJ_TYPES.ALL_FILES],
+    objTypes: [SOURCE_OBJ_TYPES.FOLDERS, SOURCE_OBJ_TYPES.ALL_FILES],
     features: {
       basicOrgContext: [
         FeatureIds.SyncFrequency,
@@ -383,7 +383,11 @@ export const staticSourceData = [
       }
     ),
     connectStepDescription: connectStepDescription.files,
-    objTypes: [SOURCE_OBJ_TYPES.G_SUITE_FILES, SOURCE_OBJ_TYPES.ALL_STORED_FILES],
+    objTypes: [
+      SOURCE_OBJ_TYPES.FOLDERS,
+      SOURCE_OBJ_TYPES.G_SUITE_FILES,
+      SOURCE_OBJ_TYPES.ALL_STORED_FILES,
+    ],
     features: {
       basicOrgContext: [
         FeatureIds.SyncFrequency,
@@ -510,7 +514,7 @@ export const staticSourceData = [
       }
     ),
     connectStepDescription: connectStepDescription.files,
-    objTypes: [SOURCE_OBJ_TYPES.ALL_FILES],
+    objTypes: [SOURCE_OBJ_TYPES.FOLDERS, SOURCE_OBJ_TYPES.ALL_FILES],
     features: {
       basicOrgContext: [
         FeatureIds.SyncFrequency,
@@ -676,7 +680,7 @@ export const staticSourceData = [
       }
     ),
     connectStepDescription: connectStepDescription.files,
-    objTypes: [SOURCE_OBJ_TYPES.SITES, SOURCE_OBJ_TYPES.ALL_FILES],
+    objTypes: [SOURCE_OBJ_TYPES.FOLDERS, SOURCE_OBJ_TYPES.SITES, SOURCE_OBJ_TYPES.ALL_FILES],
     features: {
       basicOrgContext: [
         FeatureIds.SyncFrequency,

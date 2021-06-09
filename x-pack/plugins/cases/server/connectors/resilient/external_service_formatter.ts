@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ResilientFieldsType, ConnectorResillientTypeFields } from '../../../common/api';
+import { ResilientFieldsType, ConnectorResillientTypeFields } from '../../../common';
 import { ExternalServiceFormatter } from '../types';
 
 const format: ExternalServiceFormatter<ResilientFieldsType>['format'] = (theCase) => {

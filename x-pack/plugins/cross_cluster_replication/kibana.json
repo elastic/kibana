@@ -6,6 +6,7 @@
   "requiredPlugins": [
     "home",
     "licensing",
+    "licenseApiGuard",
     "management",
     "remoteClusters",
     "indexManagement",

@@ -12,14 +12,17 @@ import { docLinks } from '../shared/doc_links';
 export const SETUP_GUIDE_PATH = '/setup_guide';
 
 export const NOT_FOUND_PATH = '/404';
+export const LOGOUT_ROUTE = '/logout';
+export const KIBANA_ACCOUNT_ROUTE = '/security/account';
 
 export const LEAVE_FEEDBACK_EMAIL = 'support@elastic.co';
 export const LEAVE_FEEDBACK_URL = `mailto:${LEAVE_FEEDBACK_EMAIL}?Subject=Elastic%20Workplace%20Search%20Feedback`;
 
 export const DOCS_PREFIX = docLinks.workplaceSearchBase;
+export const PERMISSIONS_DOCS_URL = `${DOCS_PREFIX}/workplace-search-permissions.html`;
 export const DOCUMENT_PERMISSIONS_DOCS_URL = `${DOCS_PREFIX}/workplace-search-sources-document-permissions.html`;
 export const DOCUMENT_PERMISSIONS_SYNC_DOCS_URL = `${DOCUMENT_PERMISSIONS_DOCS_URL}#sources-permissions-synchronizing`;
-export const PRIVATE_SOURCES_DOCS_URL = `${DOCUMENT_PERMISSIONS_DOCS_URL}#sources-permissions-org-private`;
+export const PRIVATE_SOURCES_DOCS_URL = `${PERMISSIONS_DOCS_URL}#organizational-sources-private-sources`;
 export const EXTERNAL_IDENTITIES_DOCS_URL = `${DOCS_PREFIX}/workplace-search-external-identities-api.html`;
 export const SECURITY_DOCS_URL = `${DOCS_PREFIX}/workplace-search-security.html`;
 export const SMTP_DOCS_URL = `${DOCS_PREFIX}/workplace-search-smtp-mailer.html`;
@@ -47,8 +50,6 @@ export const ENT_SEARCH_LICENSE_MANAGEMENT = `${docLinks.enterpriseSearchBase}/l
 export const PERSONAL_PATH = '/p';
 
 export const ROLE_MAPPINGS_PATH = '/role_mappings';
-export const ROLE_MAPPING_PATH = `${ROLE_MAPPINGS_PATH}/:roleId`;
-export const ROLE_MAPPING_NEW_PATH = `${ROLE_MAPPINGS_PATH}/new`;
 
 export const USERS_PATH = '/users';
 export const SECURITY_PATH = '/security';
@@ -57,7 +58,6 @@ export const GROUPS_PATH = '/groups';
 export const GROUP_PATH = `${GROUPS_PATH}/:groupId`;
 export const GROUP_SOURCE_PRIORITIZATION_PATH = `${GROUPS_PATH}/:groupId/source_prioritization`;
 
-export const ALPHA_PATH = '/alpha';
 export const SOURCES_PATH = '/sources';
 export const PERSONAL_SOURCES_PATH = `${PERSONAL_PATH}${SOURCES_PATH}`;
 
@@ -73,11 +73,11 @@ export const ADD_GMAIL_PATH = `${SOURCES_PATH}/add/gmail`;
 export const ADD_GOOGLE_DRIVE_PATH = `${SOURCES_PATH}/add/google_drive`;
 export const ADD_JIRA_PATH = `${SOURCES_PATH}/add/jira_cloud`;
 export const ADD_JIRA_SERVER_PATH = `${SOURCES_PATH}/add/jira_server`;
-export const ADD_ONEDRIVE_PATH = `${SOURCES_PATH}/add/onedrive`;
+export const ADD_ONEDRIVE_PATH = `${SOURCES_PATH}/add/one_drive`;
 export const ADD_SALESFORCE_PATH = `${SOURCES_PATH}/add/salesforce`;
 export const ADD_SALESFORCE_SANDBOX_PATH = `${SOURCES_PATH}/add/salesforce_sandbox`;
 export const ADD_SERVICENOW_PATH = `${SOURCES_PATH}/add/servicenow`;
-export const ADD_SHAREPOINT_PATH = `${SOURCES_PATH}/add/sharepoint`;
+export const ADD_SHAREPOINT_PATH = `${SOURCES_PATH}/add/share_point`;
 export const ADD_SLACK_PATH = `${SOURCES_PATH}/add/slack`;
 export const ADD_ZENDESK_PATH = `${SOURCES_PATH}/add/zendesk`;
 export const ADD_CUSTOM_PATH = `${SOURCES_PATH}/add/custom`;
@@ -108,11 +108,11 @@ export const EDIT_GMAIL_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/gmail/edit`;
 export const EDIT_GOOGLE_DRIVE_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/google_drive/edit`;
 export const EDIT_JIRA_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/jira_cloud/edit`;
 export const EDIT_JIRA_SERVER_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/jira_server/edit`;
-export const EDIT_ONEDRIVE_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/onedrive/edit`;
+export const EDIT_ONEDRIVE_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/one_drive/edit`;
 export const EDIT_SALESFORCE_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/salesforce/edit`;
 export const EDIT_SALESFORCE_SANDBOX_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/salesforce_sandbox/edit`;
 export const EDIT_SERVICENOW_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/servicenow/edit`;
-export const EDIT_SHAREPOINT_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/sharepoint/edit`;
+export const EDIT_SHAREPOINT_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/share_point/edit`;
 export const EDIT_SLACK_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/slack/edit`;
 export const EDIT_ZENDESK_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/zendesk/edit`;
 export const EDIT_CUSTOM_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/custom/edit`;
@@ -133,4 +133,3 @@ export const getReindexJobRoute = (
   isOrganization: boolean
 ) =>
   getSourcesPath(generatePath(REINDEX_JOB_PATH, { sourceId, activeReindexJobId }), isOrganization);
-export const getRoleMappingPath = (roleId: string) => generatePath(ROLE_MAPPING_PATH, { roleId });

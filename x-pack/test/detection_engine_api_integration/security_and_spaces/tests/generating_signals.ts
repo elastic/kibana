@@ -6,11 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { orderBy } from 'lodash';
+import { orderBy, get } from 'lodash';
 
 import {
   EqlCreateSchema,
   QueryCreateSchema,
+  SavedQueryCreateSchema,
+  ThresholdCreateSchema,
 } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -19,6 +21,7 @@ import {
   createSignalsIndex,
   deleteAllAlerts,
   deleteSignalsIndex,
+  getOpenSignals,
   getRuleForSignalTesting,
   getSignalsByIds,
   getSignalsByRuleIds,
@@ -38,6 +41,7 @@ export const ID = 'BhbXBmkBR346wHgn4PeZ';
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const es = getService('es');
 
   describe('Generating signals from source indexes', () => {
     beforeEach(async () => {
@@ -51,11 +55,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Signals from audit beat are of the expected structure', () => {
       beforeEach(async () => {
-        await esArchiver.load('auditbeat/hosts');
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       afterEach(async () => {
-        await esArchiver.unload('auditbeat/hosts');
+        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       it('should have the specific audit record for _id or none of these tests below will pass', async () => {
@@ -99,6 +103,57 @@ export default ({ getService }: FtrProviderContext) => {
         const rule: QueryCreateSchema = {
           ...getRuleForSignalTesting(['auditbeat-*']),
           query: `_id:${ID}`,
+        };
+        const { id } = await createRule(supertest, rule);
+        await waitForRuleSuccessOrStatus(supertest, id);
+        await waitForSignalsToBePresent(supertest, 1, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, [id]);
+        // remove rule to cut down on touch points for test changes when the rule format changes
+        const { rule: removedRule, ...signalNoRule } = signalsOpen.hits.hits[0]._source.signal;
+        expect(signalNoRule).eql({
+          parents: [
+            {
+              id: 'BhbXBmkBR346wHgn4PeZ',
+              type: 'event',
+              index: 'auditbeat-8.0.0-2019.02.19-000001',
+              depth: 0,
+            },
+          ],
+          ancestors: [
+            {
+              id: 'BhbXBmkBR346wHgn4PeZ',
+              type: 'event',
+              index: 'auditbeat-8.0.0-2019.02.19-000001',
+              depth: 0,
+            },
+          ],
+          status: 'open',
+          depth: 1,
+          parent: {
+            id: 'BhbXBmkBR346wHgn4PeZ',
+            type: 'event',
+            index: 'auditbeat-8.0.0-2019.02.19-000001',
+            depth: 0,
+          },
+          original_time: '2019-02-19T17:40:03.790Z',
+          original_event: {
+            action: 'socket_closed',
+            dataset: 'socket',
+            kind: 'event',
+            module: 'system',
+          },
+          _meta: {
+            version: SIGNALS_TEMPLATE_VERSION,
+          },
+        });
+      });
+
+      it('should query and get back expected signal structure using a saved query rule', async () => {
+        const rule: SavedQueryCreateSchema = {
+          ...getRuleForSignalTesting(['auditbeat-*']),
+          type: 'saved_query',
+          query: `_id:${ID}`,
+          saved_id: 'doesnt-exist',
         };
         const { id } = await createRule(supertest, rule);
         await waitForRuleSuccessOrStatus(supertest, id);
@@ -216,55 +271,263 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('EQL Rules', () => {
-        it('generates signals from EQL sequences in the expected form', async () => {
+        it('generates a correctly formatted signal from EQL non-sequence queries', async () => {
           const rule: EqlCreateSchema = {
             ...getRuleForSignalTesting(['auditbeat-*']),
             rule_id: 'eql-rule',
             type: 'eql',
             language: 'eql',
-            query: 'sequence by host.name [any where true] [any where true]',
+            query: 'configuration where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
           };
           const { id } = await createRule(supertest, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 1, [id]);
           const signals = await getSignalsByRuleIds(supertest, ['eql-rule']);
-          const signal = signals.hits.hits[0]._source.signal;
+          expect(signals.hits.hits.length).eql(1);
+          const fullSignal = signals.hits.hits[0]._source;
 
-          expect(signal).eql({
-            rule: signal.rule,
-            group: signal.group,
-            original_time: signal.original_time,
-            status: 'open',
-            depth: 1,
-            ancestors: [
-              {
-                depth: 0,
-                id: 'gCF0B2kBR346wHgnb7m0',
-                index: 'auditbeat-8.0.0-2019.02.19-000001',
-                type: 'event',
+          expect(fullSignal).eql({
+            '@timestamp': fullSignal['@timestamp'],
+            agent: {
+              ephemeral_id: '0010d67a-14f7-41da-be30-489fea735967',
+              hostname: 'suricata-zeek-sensor-toronto',
+              id: 'a1d7b39c-f898-4dbe-a761-efb61939302d',
+              type: 'auditbeat',
+              version: '8.0.0',
+            },
+            auditd: {
+              data: {
+                audit_enabled: '1',
+                old: '1',
               },
-            ],
-            original_event: {
-              action: 'error',
-              category: 'user-login',
+              message_type: 'config_change',
+              result: 'success',
+              sequence: 1496,
+              session: 'unset',
+              summary: {
+                actor: {
+                  primary: 'unset',
+                },
+                object: {
+                  primary: '1',
+                  type: 'audit-config',
+                },
+              },
+            },
+            cloud: {
+              instance: {
+                id: '133555295',
+              },
+              provider: 'digitalocean',
+              region: 'tor1',
+            },
+            ecs: {
+              version: '1.0.0-beta2',
+            },
+            event: {
+              action: 'changed-audit-configuration',
+              category: 'configuration',
               module: 'auditd',
+              kind: 'signal',
             },
-            parent: {
-              depth: 0,
-              id: 'gCF0B2kBR346wHgnb7m0',
-              index: 'auditbeat-8.0.0-2019.02.19-000001',
-              type: 'event',
+            host: {
+              architecture: 'x86_64',
+              containerized: false,
+              hostname: 'suricata-zeek-sensor-toronto',
+              id: '8cc95778cce5407c809480e8e32ad76b',
+              name: 'suricata-zeek-sensor-toronto',
+              os: {
+                codename: 'bionic',
+                family: 'debian',
+                kernel: '4.15.0-45-generic',
+                name: 'Ubuntu',
+                platform: 'ubuntu',
+                version: '18.04.2 LTS (Bionic Beaver)',
+              },
             },
-            parents: [
-              {
+            service: {
+              type: 'auditd',
+            },
+            user: {
+              audit: {
+                id: 'unset',
+              },
+            },
+            signal: {
+              rule: fullSignal.signal.rule,
+              original_time: fullSignal.signal.original_time,
+              status: 'open',
+              depth: 1,
+              ancestors: [
+                {
+                  depth: 0,
+                  id: '9xbRBmkBR346wHgngz2D',
+                  index: 'auditbeat-8.0.0-2019.02.19-000001',
+                  type: 'event',
+                },
+              ],
+              original_event: {
+                action: 'changed-audit-configuration',
+                category: 'configuration',
+                module: 'auditd',
+              },
+              parent: {
                 depth: 0,
-                id: 'gCF0B2kBR346wHgnb7m0',
+                id: '9xbRBmkBR346wHgngz2D',
                 index: 'auditbeat-8.0.0-2019.02.19-000001',
                 type: 'event',
               },
-            ],
-            _meta: {
-              version: SIGNALS_TEMPLATE_VERSION,
+              parents: [
+                {
+                  depth: 0,
+                  id: '9xbRBmkBR346wHgngz2D',
+                  index: 'auditbeat-8.0.0-2019.02.19-000001',
+                  type: 'event',
+                },
+              ],
+              _meta: {
+                version: SIGNALS_TEMPLATE_VERSION,
+              },
+            },
+          });
+        });
+
+        it('generates up to max_signals for non-sequence EQL queries', async () => {
+          const rule: EqlCreateSchema = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            rule_id: 'eql-rule',
+            type: 'eql',
+            language: 'eql',
+            query: 'any where true',
+          };
+          const { id } = await createRule(supertest, rule);
+          await waitForRuleSuccessOrStatus(supertest, id);
+          await waitForSignalsToBePresent(supertest, 100, [id]);
+          const signals = await getSignalsByIds(supertest, [id], 1000);
+          const filteredSignals = signals.hits.hits.filter(
+            (signal) => signal._source.signal.depth === 1
+          );
+          expect(filteredSignals.length).eql(100);
+        });
+
+        it('uses the provided event_category_override', async () => {
+          const rule: EqlCreateSchema = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            rule_id: 'eql-rule',
+            type: 'eql',
+            language: 'eql',
+            query: 'config_change where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
+            event_category_override: 'auditd.message_type',
+          };
+          const { id } = await createRule(supertest, rule);
+          await waitForRuleSuccessOrStatus(supertest, id);
+          await waitForSignalsToBePresent(supertest, 1, [id]);
+          const signals = await getSignalsByRuleIds(supertest, ['eql-rule']);
+          expect(signals.hits.hits.length).eql(1);
+          const fullSignal = signals.hits.hits[0]._source;
+
+          expect(fullSignal).eql({
+            '@timestamp': fullSignal['@timestamp'],
+            agent: {
+              ephemeral_id: '0010d67a-14f7-41da-be30-489fea735967',
+              hostname: 'suricata-zeek-sensor-toronto',
+              id: 'a1d7b39c-f898-4dbe-a761-efb61939302d',
+              type: 'auditbeat',
+              version: '8.0.0',
+            },
+            auditd: {
+              data: {
+                audit_enabled: '1',
+                old: '1',
+              },
+              message_type: 'config_change',
+              result: 'success',
+              sequence: 1496,
+              session: 'unset',
+              summary: {
+                actor: {
+                  primary: 'unset',
+                },
+                object: {
+                  primary: '1',
+                  type: 'audit-config',
+                },
+              },
+            },
+            cloud: {
+              instance: {
+                id: '133555295',
+              },
+              provider: 'digitalocean',
+              region: 'tor1',
+            },
+            ecs: {
+              version: '1.0.0-beta2',
+            },
+            event: {
+              action: 'changed-audit-configuration',
+              category: 'configuration',
+              module: 'auditd',
+              kind: 'signal',
+            },
+            host: {
+              architecture: 'x86_64',
+              containerized: false,
+              hostname: 'suricata-zeek-sensor-toronto',
+              id: '8cc95778cce5407c809480e8e32ad76b',
+              name: 'suricata-zeek-sensor-toronto',
+              os: {
+                codename: 'bionic',
+                family: 'debian',
+                kernel: '4.15.0-45-generic',
+                name: 'Ubuntu',
+                platform: 'ubuntu',
+                version: '18.04.2 LTS (Bionic Beaver)',
+              },
+            },
+            service: {
+              type: 'auditd',
+            },
+            user: {
+              audit: {
+                id: 'unset',
+              },
+            },
+            signal: {
+              rule: fullSignal.signal.rule,
+              original_time: fullSignal.signal.original_time,
+              status: 'open',
+              depth: 1,
+              ancestors: [
+                {
+                  depth: 0,
+                  id: '9xbRBmkBR346wHgngz2D',
+                  index: 'auditbeat-8.0.0-2019.02.19-000001',
+                  type: 'event',
+                },
+              ],
+              original_event: {
+                action: 'changed-audit-configuration',
+                category: 'configuration',
+                module: 'auditd',
+              },
+              parent: {
+                depth: 0,
+                id: '9xbRBmkBR346wHgngz2D',
+                index: 'auditbeat-8.0.0-2019.02.19-000001',
+                type: 'event',
+              },
+              parents: [
+                {
+                  depth: 0,
+                  id: '9xbRBmkBR346wHgngz2D',
+                  index: 'auditbeat-8.0.0-2019.02.19-000001',
+                  type: 'event',
+                },
+              ],
+              _meta: {
+                version: SIGNALS_TEMPLATE_VERSION,
+              },
             },
           });
         });
@@ -275,69 +538,614 @@ export default ({ getService }: FtrProviderContext) => {
             rule_id: 'eql-rule',
             type: 'eql',
             language: 'eql',
-            query: 'sequence by host.name [any where true] [any where true]',
+            query: 'sequence by host.name [anomoly where true] [any where true]',
           };
           const { id } = await createRule(supertest, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 10, [id]);
+          await waitForSignalsToBePresent(supertest, 3, [id]);
+          const signals = await getSignalsByRuleIds(supertest, ['eql-rule']);
+          const buildingBlock = signals.hits.hits.find(
+            (signal) =>
+              signal._source.signal.depth === 1 &&
+              get(signal._source, 'signal.original_event.category') === 'anomoly'
+          );
+          expect(buildingBlock).not.eql(undefined);
+          const fullSignal = buildingBlock!._source;
+
+          expect(fullSignal).eql({
+            '@timestamp': fullSignal['@timestamp'],
+            agent: {
+              ephemeral_id: '1b4978a0-48be-49b1-ac96-323425b389ab',
+              hostname: 'zeek-sensor-amsterdam',
+              id: 'e52588e6-7aa3-4c89-a2c4-d6bc5c286db1',
+              type: 'auditbeat',
+              version: '8.0.0',
+            },
+            auditd: {
+              data: {
+                a0: '3',
+                a1: '107',
+                a2: '1',
+                a3: '7ffc186b58e0',
+                arch: 'x86_64',
+                auid: 'unset',
+                dev: 'eth0',
+                exit: '0',
+                gid: '0',
+                old_prom: '0',
+                prom: '256',
+                ses: 'unset',
+                syscall: 'setsockopt',
+                tty: '(none)',
+                uid: '0',
+              },
+              message_type: 'anom_promiscuous',
+              result: 'success',
+              sequence: 1392,
+              session: 'unset',
+              summary: {
+                actor: {
+                  primary: 'unset',
+                  secondary: 'root',
+                },
+                how: '/usr/bin/bro',
+                object: {
+                  primary: 'eth0',
+                  type: 'network-device',
+                },
+              },
+            },
+            cloud: { instance: { id: '133551048' }, provider: 'digitalocean', region: 'ams3' },
+            ecs: { version: '1.0.0-beta2' },
+            event: {
+              action: 'changed-promiscuous-mode-on-device',
+              category: 'anomoly',
+              module: 'auditd',
+              kind: 'signal',
+            },
+            host: {
+              architecture: 'x86_64',
+              containerized: false,
+              hostname: 'zeek-sensor-amsterdam',
+              id: '2ce8b1e7d69e4a1d9c6bcddc473da9d9',
+              name: 'zeek-sensor-amsterdam',
+              os: {
+                codename: 'bionic',
+                family: 'debian',
+                kernel: '4.15.0-45-generic',
+                name: 'Ubuntu',
+                platform: 'ubuntu',
+                version: '18.04.2 LTS (Bionic Beaver)',
+              },
+            },
+            process: {
+              executable: '/usr/bin/bro',
+              name: 'bro',
+              pid: 30157,
+              ppid: 30151,
+              title:
+                '/usr/bin/bro -i eth0 -U .status -p broctl -p broctl-live -p standalone -p local -p bro local.bro broctl broctl/standalone broctl',
+            },
+            service: { type: 'auditd' },
+            user: {
+              audit: { id: 'unset' },
+              effective: {
+                group: {
+                  id: '0',
+                  name: 'root',
+                },
+                id: '0',
+                name: 'root',
+              },
+              filesystem: {
+                group: {
+                  id: '0',
+                  name: 'root',
+                },
+                id: '0',
+                name: 'root',
+              },
+              group: { id: '0', name: 'root' },
+              id: '0',
+              name: 'root',
+              saved: {
+                group: {
+                  id: '0',
+                  name: 'root',
+                },
+                id: '0',
+                name: 'root',
+              },
+            },
+            signal: {
+              rule: fullSignal.signal.rule,
+              group: fullSignal.signal.group,
+              original_time: fullSignal.signal.original_time,
+              status: 'open',
+              depth: 1,
+              ancestors: [
+                {
+                  depth: 0,
+                  id: 'VhXOBmkBR346wHgnLP8T',
+                  index: 'auditbeat-8.0.0-2019.02.19-000001',
+                  type: 'event',
+                },
+              ],
+              original_event: {
+                action: 'changed-promiscuous-mode-on-device',
+                category: 'anomoly',
+                module: 'auditd',
+              },
+              parent: {
+                depth: 0,
+                id: 'VhXOBmkBR346wHgnLP8T',
+                index: 'auditbeat-8.0.0-2019.02.19-000001',
+                type: 'event',
+              },
+              parents: [
+                {
+                  depth: 0,
+                  id: 'VhXOBmkBR346wHgnLP8T',
+                  index: 'auditbeat-8.0.0-2019.02.19-000001',
+                  type: 'event',
+                },
+              ],
+              _meta: {
+                version: SIGNALS_TEMPLATE_VERSION,
+              },
+            },
+          });
+        });
+
+        it('generates shell signals from EQL sequences in the expected form', async () => {
+          const rule: EqlCreateSchema = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            rule_id: 'eql-rule',
+            type: 'eql',
+            language: 'eql',
+            query: 'sequence by host.name [anomoly where true] [any where true]',
+          };
+          const { id } = await createRule(supertest, rule);
+          await waitForRuleSuccessOrStatus(supertest, id);
+          await waitForSignalsToBePresent(supertest, 3, [id]);
           const signalsOpen = await getSignalsByRuleIds(supertest, ['eql-rule']);
           const sequenceSignal = signalsOpen.hits.hits.find(
             (signal) => signal._source.signal.depth === 2
           );
-          const signal = sequenceSignal!._source.signal;
-          const eventIds = signal.parents.map((event) => event.id);
+          const source = sequenceSignal!._source;
+          const eventIds = source.signal.parents.map((event) => event.id);
+          expect(source).eql({
+            '@timestamp': source['@timestamp'],
+            agent: {
+              ephemeral_id: '1b4978a0-48be-49b1-ac96-323425b389ab',
+              hostname: 'zeek-sensor-amsterdam',
+              id: 'e52588e6-7aa3-4c89-a2c4-d6bc5c286db1',
+              type: 'auditbeat',
+              version: '8.0.0',
+            },
+            auditd: { session: 'unset', summary: { actor: { primary: 'unset' } } },
+            cloud: { instance: { id: '133551048' }, provider: 'digitalocean', region: 'ams3' },
+            ecs: { version: '1.0.0-beta2' },
+            event: { kind: 'signal' },
+            host: {
+              architecture: 'x86_64',
+              containerized: false,
+              hostname: 'zeek-sensor-amsterdam',
+              id: '2ce8b1e7d69e4a1d9c6bcddc473da9d9',
+              name: 'zeek-sensor-amsterdam',
+              os: {
+                codename: 'bionic',
+                family: 'debian',
+                kernel: '4.15.0-45-generic',
+                name: 'Ubuntu',
+                platform: 'ubuntu',
+                version: '18.04.2 LTS (Bionic Beaver)',
+              },
+            },
+            service: { type: 'auditd' },
+            user: { audit: { id: 'unset' }, id: '0', name: 'root' },
+            signal: {
+              status: 'open',
+              depth: 2,
+              group: source.signal.group,
+              rule: source.signal.rule,
+              ancestors: [
+                {
+                  depth: 0,
+                  id: 'VhXOBmkBR346wHgnLP8T',
+                  index: 'auditbeat-8.0.0-2019.02.19-000001',
+                  type: 'event',
+                },
+                {
+                  depth: 1,
+                  id: eventIds[0],
+                  index: '.siem-signals-default',
+                  rule: source.signal.rule.id,
+                  type: 'signal',
+                },
+                {
+                  depth: 0,
+                  id: '4hbXBmkBR346wHgn6fdp',
+                  index: 'auditbeat-8.0.0-2019.02.19-000001',
+                  type: 'event',
+                },
+                {
+                  depth: 1,
+                  id: eventIds[1],
+                  index: '.siem-signals-default',
+                  rule: source.signal.rule.id,
+                  type: 'signal',
+                },
+              ],
+              parents: [
+                {
+                  depth: 1,
+                  id: eventIds[0],
+                  index: '.siem-signals-default',
+                  rule: source.signal.rule.id,
+                  type: 'signal',
+                },
+                {
+                  depth: 1,
+                  id: eventIds[1],
+                  index: '.siem-signals-default',
+                  rule: source.signal.rule.id,
+                  type: 'signal',
+                },
+              ],
+              _meta: {
+                version: SIGNALS_TEMPLATE_VERSION,
+              },
+            },
+          });
+        });
 
-          expect(signal).eql({
-            status: 'open',
-            depth: 2,
-            group: signal.group,
-            rule: signal.rule,
-            ancestors: [
-              {
-                depth: 0,
-                id: 'gCF0B2kBR346wHgnb7m0',
-                index: 'auditbeat-8.0.0-2019.02.19-000001',
-                type: 'event',
-              },
-              {
-                depth: 1,
+        it('generates up to max_signals with an EQL rule', async () => {
+          const rule: EqlCreateSchema = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            rule_id: 'eql-rule',
+            type: 'eql',
+            language: 'eql',
+            query: 'sequence by host.name [any where true] [any where true]',
+          };
+          const { id } = await createRule(supertest, rule);
+          await waitForRuleSuccessOrStatus(supertest, id);
+          // For EQL rules, max_signals is the maximum number of detected sequences: each sequence has a building block
+          // alert for each event in the sequence, so max_signals=100 results in 200 building blocks in addition to
+          // 100 regular alerts
+          await waitForSignalsToBePresent(supertest, 300, [id]);
+          const signalsOpen = await getSignalsByIds(supertest, [id], 1000);
+          expect(signalsOpen.hits.hits.length).eql(300);
+          const shellSignals = signalsOpen.hits.hits.filter(
+            (signal) => signal._source.signal.depth === 2
+          );
+          const buildingBlocks = signalsOpen.hits.hits.filter(
+            (signal) => signal._source.signal.depth === 1
+          );
+          expect(shellSignals.length).eql(100);
+          expect(buildingBlocks.length).eql(200);
+        });
+      });
+
+      describe('Threshold Rules', () => {
+        it('generates 1 signal from Threshold rules when threshold is met', async () => {
+          const ruleId = 'threshold-rule';
+          const rule: ThresholdCreateSchema = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            rule_id: ruleId,
+            type: 'threshold',
+            language: 'kuery',
+            query: '*:*',
+            threshold: {
+              field: 'host.id',
+              value: 700,
+            },
+          };
+          const { id } = await createRule(supertest, rule);
+          await waitForRuleSuccessOrStatus(supertest, id);
+          await waitForSignalsToBePresent(supertest, 1, [id]);
+          const signalsOpen = await getSignalsByRuleIds(supertest, [ruleId]);
+          expect(signalsOpen.hits.hits.length).eql(1);
+          const fullSignal = signalsOpen.hits.hits[0]._source;
+          const eventIds = fullSignal.signal.parents.map((event) => event.id);
+          expect(fullSignal).eql({
+            '@timestamp': fullSignal['@timestamp'],
+            'host.id': '8cc95778cce5407c809480e8e32ad76b',
+            event: { kind: 'signal' },
+            signal: {
+              _meta: { version: SIGNALS_TEMPLATE_VERSION },
+              parents: [
+                {
+                  depth: 0,
+                  id: eventIds[0],
+                  index: 'auditbeat-*',
+                  type: 'event',
+                },
+              ],
+              ancestors: [
+                {
+                  depth: 0,
+                  id: eventIds[0],
+                  index: 'auditbeat-*',
+                  type: 'event',
+                },
+              ],
+              status: 'open',
+              rule: fullSignal.signal.rule,
+              original_time: fullSignal.signal.original_time,
+              depth: 1,
+              parent: {
                 id: eventIds[0],
-                index: '.siem-signals-default',
-                rule: signal.rule.id,
-                type: 'signal',
-              },
-              {
-                depth: 0,
-                id: 'CCF0B2kBR346wHgngLtX',
-                index: 'auditbeat-8.0.0-2019.02.19-000001',
                 type: 'event',
+                index: 'auditbeat-*',
+                depth: 0,
               },
-              {
-                depth: 1,
-                id: eventIds[1],
-                index: '.siem-signals-default',
-                rule: signal.rule.id,
-                type: 'signal',
+              threshold_result: {
+                terms: [
+                  {
+                    field: 'host.id',
+                    value: '8cc95778cce5407c809480e8e32ad76b',
+                  },
+                ],
+                count: 788,
+                from: '1900-01-01T00:00:00.000Z',
               },
-            ],
-            parents: [
-              {
-                depth: 1,
+            },
+          });
+        });
+
+        it('generates 2 signals from Threshold rules when threshold is met', async () => {
+          const ruleId = 'threshold-rule';
+          const rule: ThresholdCreateSchema = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            rule_id: ruleId,
+            type: 'threshold',
+            language: 'kuery',
+            query: '*:*',
+            threshold: {
+              field: 'host.id',
+              value: 100,
+            },
+          };
+          const { id } = await createRule(supertest, rule);
+          await waitForRuleSuccessOrStatus(supertest, id);
+          await waitForSignalsToBePresent(supertest, 2, [id]);
+          const signalsOpen = await getSignalsByRuleIds(supertest, [ruleId]);
+          expect(signalsOpen.hits.hits.length).eql(2);
+        });
+
+        it('applies the provided query before bucketing ', async () => {
+          const ruleId = 'threshold-rule';
+          const rule: ThresholdCreateSchema = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            rule_id: ruleId,
+            type: 'threshold',
+            language: 'kuery',
+            query: 'host.id:"2ab45fc1c41e4c84bbd02202a7e5761f"',
+            threshold: {
+              field: 'process.name',
+              value: 21,
+            },
+          };
+          const { id } = await createRule(supertest, rule);
+          await waitForRuleSuccessOrStatus(supertest, id);
+          await waitForSignalsToBePresent(supertest, 1, [id]);
+          const signalsOpen = await getSignalsByRuleIds(supertest, [ruleId]);
+          expect(signalsOpen.hits.hits.length).eql(1);
+        });
+
+        it('generates no signals from Threshold rules when threshold is met and cardinality is not met', async () => {
+          const ruleId = 'threshold-rule';
+          const rule: ThresholdCreateSchema = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            rule_id: ruleId,
+            type: 'threshold',
+            language: 'kuery',
+            query: '*:*',
+            threshold: {
+              field: 'host.id',
+              value: 100,
+              cardinality: [
+                {
+                  field: 'destination.ip',
+                  value: 100,
+                },
+              ],
+            },
+          };
+          const createdRule = await createRule(supertest, rule);
+          const signalsOpen = await getOpenSignals(supertest, es, createdRule);
+          expect(signalsOpen.hits.hits.length).eql(0);
+        });
+
+        it('generates no signals from Threshold rules when cardinality is met and threshold is not met', async () => {
+          const ruleId = 'threshold-rule';
+          const rule: ThresholdCreateSchema = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            rule_id: ruleId,
+            type: 'threshold',
+            language: 'kuery',
+            query: '*:*',
+            threshold: {
+              field: 'host.id',
+              value: 1000,
+              cardinality: [
+                {
+                  field: 'destination.ip',
+                  value: 5,
+                },
+              ],
+            },
+          };
+          const createdRule = await createRule(supertest, rule);
+          const signalsOpen = await getOpenSignals(supertest, es, createdRule);
+          expect(signalsOpen.hits.hits.length).eql(0);
+        });
+
+        it('generates signals from Threshold rules when threshold and cardinality are both met', async () => {
+          const ruleId = 'threshold-rule';
+          const rule: ThresholdCreateSchema = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            rule_id: ruleId,
+            type: 'threshold',
+            language: 'kuery',
+            query: '*:*',
+            threshold: {
+              field: 'host.id',
+              value: 100,
+              cardinality: [
+                {
+                  field: 'destination.ip',
+                  value: 5,
+                },
+              ],
+            },
+          };
+          const createdRule = await createRule(supertest, rule);
+          const signalsOpen = await getOpenSignals(supertest, es, createdRule);
+          expect(signalsOpen.hits.hits.length).eql(1);
+          const fullSignal = signalsOpen.hits.hits[0]._source;
+          const eventIds = fullSignal.signal.parents.map((event) => event.id);
+          expect(fullSignal).eql({
+            '@timestamp': fullSignal['@timestamp'],
+            'host.id': '8cc95778cce5407c809480e8e32ad76b',
+            event: { kind: 'signal' },
+            signal: {
+              _meta: { version: SIGNALS_TEMPLATE_VERSION },
+              parents: [
+                {
+                  depth: 0,
+                  id: eventIds[0],
+                  index: 'auditbeat-*',
+                  type: 'event',
+                },
+              ],
+              ancestors: [
+                {
+                  depth: 0,
+                  id: eventIds[0],
+                  index: 'auditbeat-*',
+                  type: 'event',
+                },
+              ],
+              status: 'open',
+              rule: fullSignal.signal.rule,
+              original_time: fullSignal.signal.original_time,
+              depth: 1,
+              parent: {
                 id: eventIds[0],
-                index: '.siem-signals-default',
-                rule: signal.rule.id,
-                type: 'signal',
+                type: 'event',
+                index: 'auditbeat-*',
+                depth: 0,
               },
-              {
-                depth: 1,
-                id: eventIds[1],
-                index: '.siem-signals-default',
-                rule: signal.rule.id,
-                type: 'signal',
+              threshold_result: {
+                terms: [
+                  {
+                    field: 'host.id',
+                    value: '8cc95778cce5407c809480e8e32ad76b',
+                  },
+                ],
+                cardinality: [
+                  {
+                    field: 'destination.ip',
+                    value: 7,
+                  },
+                ],
+                count: 788,
+                from: '1900-01-01T00:00:00.000Z',
               },
-            ],
-            _meta: {
-              version: SIGNALS_TEMPLATE_VERSION,
+            },
+          });
+        });
+
+        it('should not generate signals if only one field meets the threshold requirement', async () => {
+          const ruleId = 'threshold-rule';
+          const rule: ThresholdCreateSchema = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            rule_id: ruleId,
+            type: 'threshold',
+            language: 'kuery',
+            query: '*:*',
+            threshold: {
+              field: ['host.id', 'process.name'],
+              value: 22,
+            },
+          };
+          const createdRule = await createRule(supertest, rule);
+          const signalsOpen = await getOpenSignals(supertest, es, createdRule);
+          expect(signalsOpen.hits.hits.length).eql(0);
+        });
+
+        it('generates signals from Threshold rules when bucketing by multiple fields', async () => {
+          const ruleId = 'threshold-rule';
+          const rule: ThresholdCreateSchema = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            rule_id: ruleId,
+            type: 'threshold',
+            language: 'kuery',
+            query: '*:*',
+            threshold: {
+              field: ['host.id', 'process.name', 'event.module'],
+              value: 21,
+            },
+          };
+          const createdRule = await createRule(supertest, rule);
+          const signalsOpen = await getOpenSignals(supertest, es, createdRule);
+          expect(signalsOpen.hits.hits.length).eql(1);
+          const fullSignal = signalsOpen.hits.hits[0]._source;
+          const eventIds = fullSignal.signal.parents.map((event) => event.id);
+          expect(fullSignal).eql({
+            '@timestamp': fullSignal['@timestamp'],
+            'event.module': 'system',
+            'host.id': '2ab45fc1c41e4c84bbd02202a7e5761f',
+            'process.name': 'sshd',
+            event: { kind: 'signal' },
+            signal: {
+              _meta: { version: SIGNALS_TEMPLATE_VERSION },
+              parents: [
+                {
+                  depth: 0,
+                  id: eventIds[0],
+                  index: 'auditbeat-*',
+                  type: 'event',
+                },
+              ],
+              ancestors: [
+                {
+                  depth: 0,
+                  id: eventIds[0],
+                  index: 'auditbeat-*',
+                  type: 'event',
+                },
+              ],
+              status: 'open',
+              rule: fullSignal.signal.rule,
+              original_time: fullSignal.signal.original_time,
+              depth: 1,
+              parent: {
+                id: eventIds[0],
+                type: 'event',
+                index: 'auditbeat-*',
+                depth: 0,
+              },
+              threshold_result: {
+                terms: [
+                  {
+                    field: 'event.module',
+                    value: 'system',
+                  },
+                  {
+                    field: 'host.id',
+                    value: '2ab45fc1c41e4c84bbd02202a7e5761f',
+                  },
+                  {
+                    field: 'process.name',
+                    value: 'sshd',
+                  },
+                ],
+                count: 21,
+                from: '1900-01-01T00:00:00.000Z',
+              },
             },
           });
         });
@@ -352,11 +1160,11 @@ export default ({ getService }: FtrProviderContext) => {
      */
     describe('Signals generated from name clashes', () => {
       beforeEach(async () => {
-        await esArchiver.load('signals/numeric_name_clash');
+        await esArchiver.load('x-pack/test/functional/es_archives/signals/numeric_name_clash');
       });
 
       afterEach(async () => {
-        await esArchiver.unload('signals/numeric_name_clash');
+        await esArchiver.unload('x-pack/test/functional/es_archives/signals/numeric_name_clash');
       });
 
       it('should have the specific audit record for _id or none of these tests below will pass', async () => {
@@ -506,11 +1314,11 @@ export default ({ getService }: FtrProviderContext) => {
      */
     describe('Signals generated from object clashes', () => {
       beforeEach(async () => {
-        await esArchiver.load('signals/object_clash');
+        await esArchiver.load('x-pack/test/functional/es_archives/signals/object_clash');
       });
 
       afterEach(async () => {
-        await esArchiver.unload('signals/object_clash');
+        await esArchiver.unload('x-pack/test/functional/es_archives/signals/object_clash');
       });
 
       it('should have the specific audit record for _id or none of these tests below will pass', async () => {
@@ -663,11 +1471,13 @@ export default ({ getService }: FtrProviderContext) => {
      */
     describe('Signals generated from events with custom severity and risk score fields', () => {
       beforeEach(async () => {
-        await esArchiver.load('signals/severity_risk_overrides');
+        await esArchiver.load('x-pack/test/functional/es_archives/signals/severity_risk_overrides');
       });
 
       afterEach(async () => {
-        await esArchiver.unload('signals/severity_risk_overrides');
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/signals/severity_risk_overrides'
+        );
       });
 
       const executeRuleAndGetSignals = async (rule: QueryCreateSchema) => {
@@ -804,6 +1614,115 @@ export default ({ getService }: FtrProviderContext) => {
           expect(s.signal.rule.risk_score_mapping).eql([
             { field: 'my_risk', operator: 'equals', value: '' },
           ]);
+        });
+      });
+    });
+
+    describe('Signals generated from events with name override field', async () => {
+      beforeEach(async () => {
+        await deleteSignalsIndex(supertest);
+        await createSignalsIndex(supertest);
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+      });
+
+      afterEach(async () => {
+        await deleteSignalsIndex(supertest);
+        await deleteAllAlerts(supertest);
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+      });
+
+      it('should generate signals with name_override field', async () => {
+        const rule: QueryCreateSchema = {
+          ...getRuleForSignalTesting(['auditbeat-*']),
+          rule_name_override: 'event.action',
+        };
+
+        const { id } = await createRule(supertest, rule);
+
+        await waitForRuleSuccessOrStatus(supertest, id);
+        await waitForSignalsToBePresent(supertest, 1, [id]);
+        const signalsResponse = await getSignalsByIds(supertest, [id], 1);
+        const signals = signalsResponse.hits.hits.map((hit) => hit._source);
+        const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
+        const fullSignal = signalsOrderedByEventId[0];
+
+        expect(fullSignal).eql({
+          '@timestamp': fullSignal['@timestamp'],
+          agent: {
+            ephemeral_id: '1b4978a0-48be-49b1-ac96-323425b389ab',
+            hostname: 'zeek-sensor-amsterdam',
+            id: 'e52588e6-7aa3-4c89-a2c4-d6bc5c286db1',
+            type: 'auditbeat',
+            version: '8.0.0',
+          },
+          cloud: { instance: { id: '133551048' }, provider: 'digitalocean', region: 'ams3' },
+          ecs: { version: '1.0.0-beta2' },
+          event: {
+            action: 'boot',
+            dataset: 'login',
+            kind: 'signal',
+            module: 'system',
+            origin: '/var/log/wtmp',
+          },
+          host: {
+            architecture: 'x86_64',
+            containerized: false,
+            hostname: 'zeek-sensor-amsterdam',
+            id: '2ce8b1e7d69e4a1d9c6bcddc473da9d9',
+            name: 'zeek-sensor-amsterdam',
+            os: {
+              codename: 'bionic',
+              family: 'debian',
+              kernel: '4.15.0-45-generic',
+              name: 'Ubuntu',
+              platform: 'ubuntu',
+              version: '18.04.2 LTS (Bionic Beaver)',
+            },
+          },
+          message: 'System boot',
+          service: { type: 'system' },
+          signal: {
+            _meta: {
+              version: SIGNALS_TEMPLATE_VERSION,
+            },
+            parents: [
+              {
+                depth: 0,
+                id: 'UBXOBmkBR346wHgnLP8T',
+                index: 'auditbeat-8.0.0-2019.02.19-000001',
+                type: 'event',
+              },
+            ],
+            ancestors: [
+              {
+                depth: 0,
+                id: 'UBXOBmkBR346wHgnLP8T',
+                index: 'auditbeat-8.0.0-2019.02.19-000001',
+                type: 'event',
+              },
+            ],
+            status: 'open',
+            rule: {
+              ...fullSignal.signal.rule,
+              name: 'boot',
+              rule_name_override: 'event.action',
+            },
+            original_time: fullSignal.signal.original_time,
+            depth: 1,
+            parent: {
+              id: 'UBXOBmkBR346wHgnLP8T',
+              type: 'event',
+              index: 'auditbeat-8.0.0-2019.02.19-000001',
+              depth: 0,
+            },
+            original_event: {
+              action: 'boot',
+              dataset: 'login',
+              kind: 'event',
+              module: 'system',
+              origin: '/var/log/wtmp',
+            },
+          },
         });
       });
     });

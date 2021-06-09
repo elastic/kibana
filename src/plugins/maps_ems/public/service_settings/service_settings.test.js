@@ -103,43 +103,8 @@ describe('service_settings (FKA tile_map test)', function () {
       expect(tmsService.attribution.includes('OpenStreetMap')).toEqual(true);
     });
 
-    describe('modify - url', function () {
-      let tilemapServices;
-
+    describe('tms mods', function () {
       let serviceSettings;
-      async function assertQuery(expected) {
-        const attrs = await serviceSettings.getAttributesForTMSLayer(tilemapServices[0]);
-        const urlObject = url.parse(attrs.url, true);
-        Object.keys(expected).forEach((key) => {
-          expect(urlObject.query[key]).toEqual(expected[key]);
-        });
-      }
-
-      it('accepts an object', async () => {
-        serviceSettings = makeServiceSettings();
-        serviceSettings.setQueryParams({ foo: 'bar' });
-        tilemapServices = await serviceSettings.getTMSServices();
-        await assertQuery({ foo: 'bar' });
-      });
-
-      it('merged additions with previous values', async () => {
-        // ensure that changes are always additive
-        serviceSettings = makeServiceSettings();
-        serviceSettings.setQueryParams({ foo: 'bar' });
-        serviceSettings.setQueryParams({ bar: 'stool' });
-        tilemapServices = await serviceSettings.getTMSServices();
-        await assertQuery({ foo: 'bar', bar: 'stool' });
-      });
-
-      it('overwrites conflicting previous values', async () => {
-        serviceSettings = makeServiceSettings();
-        // ensure that conflicts are overwritten
-        serviceSettings.setQueryParams({ foo: 'bar' });
-        serviceSettings.setQueryParams({ bar: 'stool' });
-        serviceSettings.setQueryParams({ foo: 'tstool' });
-        tilemapServices = await serviceSettings.getTMSServices();
-        await assertQuery({ foo: 'tstool', bar: 'stool' });
-      });
 
       it('should merge in tilemap url', async () => {
         serviceSettings = makeServiceSettings(
@@ -161,7 +126,7 @@ describe('service_settings (FKA tile_map test)', function () {
             id: 'road_map',
             name: 'Road Map - Bright',
             url:
-              'https://tiles.foobar/raster/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3',
+              'https://tiles.foobar/raster/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3&license=sspl',
             minZoom: 0,
             maxZoom: 10,
             attribution:
@@ -208,19 +173,19 @@ describe('service_settings (FKA tile_map test)', function () {
         );
 
         expect(desaturationFalse.url).toEqual(
-          'https://tiles.foobar/raster/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3'
+          'https://tiles.foobar/raster/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3&license=sspl'
         );
         expect(desaturationFalse.maxZoom).toEqual(10);
         expect(desaturationTrue.url).toEqual(
-          'https://tiles.foobar/raster/styles/osm-bright-desaturated/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3'
+          'https://tiles.foobar/raster/styles/osm-bright-desaturated/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3&license=sspl'
         );
         expect(desaturationTrue.maxZoom).toEqual(18);
         expect(darkThemeDesaturationFalse.url).toEqual(
-          'https://tiles.foobar/raster/styles/dark-matter/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3'
+          'https://tiles.foobar/raster/styles/dark-matter/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3&license=sspl'
         );
         expect(darkThemeDesaturationFalse.maxZoom).toEqual(22);
         expect(darkThemeDesaturationTrue.url).toEqual(
-          'https://tiles.foobar/raster/styles/dark-matter/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3'
+          'https://tiles.foobar/raster/styles/dark-matter/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3&license=sspl'
         );
         expect(darkThemeDesaturationTrue.maxZoom).toEqual(22);
       });
@@ -264,14 +229,13 @@ describe('service_settings (FKA tile_map test)', function () {
   describe('File layers', function () {
     it('should load manifest (all props)', async function () {
       const serviceSettings = makeServiceSettings();
-      serviceSettings.setQueryParams({ foo: 'bar' });
       const fileLayers = await serviceSettings.getFileLayers();
       expect(fileLayers.length).toEqual(19);
       const assertions = fileLayers.map(async function (fileLayer) {
         expect(fileLayer.origin).toEqual(ORIGIN.EMS);
         const fileUrl = await serviceSettings.getUrlForRegionLayer(fileLayer);
         const urlObject = url.parse(fileUrl, true);
-        Object.keys({ foo: 'bar', elastic_tile_service_tos: 'agree' }).forEach((key) => {
+        Object.keys({ elastic_tile_service_tos: 'agree' }).forEach((key) => {
           expect(typeof urlObject.query[key]).toEqual('string');
         });
       });

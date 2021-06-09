@@ -7,14 +7,14 @@
 
 import { FC } from 'react';
 
-import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
 
 import type { AggName } from '../../../common/types/aggregations';
 import type { Dictionary } from '../../../common/types/common';
 import type { EsFieldName } from '../../../common/types/fields';
 import type { PivotAgg, PivotSupportedAggs } from '../../../common/types/pivot_aggs';
 import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
-import { isPopulatedObject } from '../../../common/utils/object_utils';
+import { isPopulatedObject } from '../../../common/shared_imports';
 
 import { getAggFormConfig } from '../sections/create_transform/components/step_define/common/get_agg_form_config';
 import { PivotAggsConfigFilter } from '../sections/create_transform/components/step_define/common/filter_agg/types';
@@ -43,6 +43,7 @@ export const pivotAggsFieldSupport = {
     PIVOT_SUPPORTED_AGGS.CARDINALITY,
     PIVOT_SUPPORTED_AGGS.VALUE_COUNT,
     PIVOT_SUPPORTED_AGGS.FILTER,
+    PIVOT_SUPPORTED_AGGS.TOP_METRICS,
   ],
   [KBN_FIELD_TYPES.MURMUR3]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT, PIVOT_SUPPORTED_AGGS.FILTER],
   [KBN_FIELD_TYPES.NUMBER]: [
@@ -54,15 +55,76 @@ export const pivotAggsFieldSupport = {
     PIVOT_SUPPORTED_AGGS.SUM,
     PIVOT_SUPPORTED_AGGS.VALUE_COUNT,
     PIVOT_SUPPORTED_AGGS.FILTER,
+    PIVOT_SUPPORTED_AGGS.TOP_METRICS,
   ],
   [KBN_FIELD_TYPES.STRING]: [
     PIVOT_SUPPORTED_AGGS.CARDINALITY,
     PIVOT_SUPPORTED_AGGS.VALUE_COUNT,
     PIVOT_SUPPORTED_AGGS.FILTER,
+    PIVOT_SUPPORTED_AGGS.TOP_METRICS,
   ],
   [KBN_FIELD_TYPES._SOURCE]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT, PIVOT_SUPPORTED_AGGS.FILTER],
   [KBN_FIELD_TYPES.UNKNOWN]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT, PIVOT_SUPPORTED_AGGS.FILTER],
   [KBN_FIELD_TYPES.CONFLICT]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT, PIVOT_SUPPORTED_AGGS.FILTER],
+};
+
+export const TOP_METRICS_SORT_FIELD_TYPES = [
+  KBN_FIELD_TYPES.NUMBER,
+  KBN_FIELD_TYPES.DATE,
+  KBN_FIELD_TYPES.GEO_POINT,
+];
+
+export const SORT_DIRECTION = {
+  ASC: 'asc',
+  DESC: 'desc',
+} as const;
+
+export type SortDirection = typeof SORT_DIRECTION[keyof typeof SORT_DIRECTION];
+
+export const SORT_MODE = {
+  MIN: 'min',
+  MAX: 'max',
+  AVG: 'avg',
+  SUM: 'sum',
+  MEDIAN: 'median',
+} as const;
+
+export const NUMERIC_TYPES_OPTIONS = {
+  [KBN_FIELD_TYPES.NUMBER]: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.LONG],
+  [KBN_FIELD_TYPES.DATE]: [ES_FIELD_TYPES.DATE, ES_FIELD_TYPES.DATE_NANOS],
+};
+
+export type KbnNumericType = typeof KBN_FIELD_TYPES.NUMBER | typeof KBN_FIELD_TYPES.DATE;
+
+const SORT_NUMERIC_FIELD_TYPES = [
+  ES_FIELD_TYPES.DOUBLE,
+  ES_FIELD_TYPES.LONG,
+  ES_FIELD_TYPES.DATE,
+  ES_FIELD_TYPES.DATE_NANOS,
+] as const;
+
+export type SortNumericFieldType = typeof SORT_NUMERIC_FIELD_TYPES[number];
+
+export type SortMode = typeof SORT_MODE[keyof typeof SORT_MODE];
+
+export const TOP_METRICS_SPECIAL_SORT_FIELDS = {
+  _SCORE: '_score',
+} as const;
+
+export const isSpecialSortField = (sortField: unknown) => {
+  return Object.values(TOP_METRICS_SPECIAL_SORT_FIELDS).some((v) => v === sortField);
+};
+
+export const isValidSortDirection = (arg: unknown): arg is SortDirection => {
+  return Object.values(SORT_DIRECTION).some((v) => v === arg);
+};
+
+export const isValidSortMode = (arg: unknown): arg is SortMode => {
+  return Object.values(SORT_MODE).some((v) => v === arg);
+};
+
+export const isValidSortNumericType = (arg: unknown): arg is SortNumericFieldType => {
+  return SORT_NUMERIC_FIELD_TYPES.some((v) => v === arg);
 };
 
 /**
@@ -75,6 +137,10 @@ export interface PivotAggsConfigBase {
   agg: PivotSupportedAggs;
   aggName: AggName;
   dropDownName: string;
+  /**
+   * Indicates if aggregation supports multiple fields
+   */
+  isMultiField?: boolean;
   /** Indicates if aggregation supports sub-aggregations */
   isSubAggsSupported?: boolean;
   /** Dictionary of the sub-aggregations */
@@ -130,7 +196,7 @@ export function getAggConfigFromEsAgg(
 }
 
 export interface PivotAggsConfigWithUiBase extends PivotAggsConfigBase {
-  field: EsFieldName;
+  field: EsFieldName | EsFieldName[];
 }
 
 export interface PivotAggsConfigWithExtra<T> extends PivotAggsConfigWithUiBase {
@@ -166,11 +232,7 @@ export type PivotAggsConfigWithUiSupport =
 
 export function isPivotAggsConfigWithUiSupport(arg: unknown): arg is PivotAggsConfigWithUiSupport {
   return (
-    isPopulatedObject(arg) &&
-    arg.hasOwnProperty('agg') &&
-    arg.hasOwnProperty('aggName') &&
-    arg.hasOwnProperty('dropDownName') &&
-    arg.hasOwnProperty('field') &&
+    isPopulatedObject(arg, ['agg', 'aggName', 'dropDownName', 'field']) &&
     isPivotSupportedAggs(arg.agg)
   );
 }
@@ -181,15 +243,12 @@ export function isPivotAggsConfigWithUiSupport(arg: unknown): arg is PivotAggsCo
 type PivotAggsConfigWithExtendedForm = PivotAggsConfigFilter;
 
 export function isPivotAggsWithExtendedForm(arg: unknown): arg is PivotAggsConfigWithExtendedForm {
-  return isPopulatedObject(arg) && arg.hasOwnProperty('AggFormComponent');
+  return isPopulatedObject(arg, ['AggFormComponent']);
 }
 
 export function isPivotAggsConfigPercentiles(arg: unknown): arg is PivotAggsConfigPercentiles {
   return (
-    isPopulatedObject(arg) &&
-    arg.hasOwnProperty('agg') &&
-    arg.hasOwnProperty('field') &&
-    arg.hasOwnProperty('percents') &&
+    isPopulatedObject(arg, ['agg', 'field', 'percents']) &&
     arg.agg === PIVOT_SUPPORTED_AGGS.PERCENTILES
   );
 }

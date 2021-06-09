@@ -12,8 +12,6 @@ import {
   legacyClusterClientInstanceMock,
 } from './core_service.test.mocks';
 
-import Boom from '@hapi/boom';
-import { Request } from '@hapi/hapi';
 import { errors as esErrors } from 'elasticsearch';
 import { LegacyElasticsearchErrorHelpers } from '../../elasticsearch/legacy';
 
@@ -21,16 +19,6 @@ import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import * as kbnTestServer from '../../../test_helpers/kbn_server';
 import { InternalElasticsearchServiceStart } from '../../elasticsearch';
-
-interface User {
-  id: string;
-  roles?: string[];
-}
-
-interface StorageData {
-  value: User;
-  expires: number;
-}
 
 const cookieOptions = {
   name: 'sid',
@@ -197,172 +185,6 @@ describe('http service', () => {
     });
   });
 
-  describe('legacy server', () => {
-    describe('#registerAuth()', () => {
-      const sessionDurationMs = 1000;
-
-      let root: ReturnType<typeof kbnTestServer.createRoot>;
-      beforeEach(async () => {
-        root = kbnTestServer.createRoot({ plugins: { initialize: false } });
-      }, 30000);
-
-      afterEach(async () => {
-        MockLegacyScopedClusterClient.mockClear();
-        await root.shutdown();
-      });
-
-      it('runs auth for legacy routes and proxy request to legacy server route handlers', async () => {
-        const { http } = await root.setup();
-        const sessionStorageFactory = await http.createCookieSessionStorageFactory<StorageData>(
-          cookieOptions
-        );
-        http.registerAuth((req, res, toolkit) => {
-          if (req.headers.authorization) {
-            const user = { id: '42' };
-            const sessionStorage = sessionStorageFactory.asScoped(req);
-            sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
-            return toolkit.authenticated({ state: user });
-          } else {
-            return res.unauthorized();
-          }
-        });
-        await root.start();
-
-        const legacyUrl = '/legacy';
-        const kbnServer = kbnTestServer.getKbnServer(root);
-        kbnServer.server.route({
-          method: 'GET',
-          path: legacyUrl,
-          handler: () => 'ok from legacy server',
-        });
-
-        const response = await kbnTestServer.request
-          .get(root, legacyUrl)
-          .expect(200, 'ok from legacy server');
-
-        expect(response.header['set-cookie']).toHaveLength(1);
-      });
-
-      it('passes authHeaders as request headers to the legacy platform', async () => {
-        const token = 'Basic: name:password';
-        const { http } = await root.setup();
-        const sessionStorageFactory = await http.createCookieSessionStorageFactory<StorageData>(
-          cookieOptions
-        );
-        http.registerAuth((req, res, toolkit) => {
-          if (req.headers.authorization) {
-            const user = { id: '42' };
-            const sessionStorage = sessionStorageFactory.asScoped(req);
-            sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
-            return toolkit.authenticated({
-              state: user,
-              requestHeaders: {
-                authorization: token,
-              },
-            });
-          } else {
-            return res.unauthorized();
-          }
-        });
-        await root.start();
-
-        const legacyUrl = '/legacy';
-        const kbnServer = kbnTestServer.getKbnServer(root);
-        kbnServer.server.route({
-          method: 'GET',
-          path: legacyUrl,
-          handler: (req: Request) => ({
-            authorization: req.headers.authorization,
-            custom: req.headers.custom,
-          }),
-        });
-
-        await kbnTestServer.request
-          .get(root, legacyUrl)
-          .set({ custom: 'custom-header' })
-          .expect(200, { authorization: token, custom: 'custom-header' });
-      });
-
-      it('attach security header to a successful response handled by Legacy platform', async () => {
-        const authResponseHeader = {
-          'www-authenticate': 'Negotiate ade0234568a4209af8bc0280289eca',
-        };
-        const { http } = await root.setup();
-        const { registerAuth } = http;
-
-        registerAuth((req, res, toolkit) => {
-          return toolkit.authenticated({ responseHeaders: authResponseHeader });
-        });
-
-        await root.start();
-
-        const kbnServer = kbnTestServer.getKbnServer(root);
-        kbnServer.server.route({
-          method: 'GET',
-          path: '/legacy',
-          handler: () => 'ok',
-        });
-
-        const response = await kbnTestServer.request.get(root, '/legacy').expect(200);
-        expect(response.header['www-authenticate']).toBe(authResponseHeader['www-authenticate']);
-      });
-
-      it('attach security header to an error response handled by Legacy platform', async () => {
-        const authResponseHeader = {
-          'www-authenticate': 'Negotiate ade0234568a4209af8bc0280289eca',
-        };
-        const { http } = await root.setup();
-        const { registerAuth } = http;
-
-        registerAuth((req, res, toolkit) => {
-          return toolkit.authenticated({ responseHeaders: authResponseHeader });
-        });
-
-        await root.start();
-
-        const kbnServer = kbnTestServer.getKbnServer(root);
-        kbnServer.server.route({
-          method: 'GET',
-          path: '/legacy',
-          handler: () => {
-            throw Boom.badRequest();
-          },
-        });
-
-        const response = await kbnTestServer.request.get(root, '/legacy').expect(400);
-        expect(response.header['www-authenticate']).toBe(authResponseHeader['www-authenticate']);
-      });
-    });
-
-    describe('#basePath()', () => {
-      let root: ReturnType<typeof kbnTestServer.createRoot>;
-      beforeEach(async () => {
-        root = kbnTestServer.createRoot({ plugins: { initialize: false } });
-      }, 30000);
-
-      afterEach(async () => await root.shutdown());
-      it('basePath information for an incoming request is available in legacy server', async () => {
-        const reqBasePath = '/requests-specific-base-path';
-        const { http } = await root.setup();
-        http.registerOnPreRouting((req, res, toolkit) => {
-          http.basePath.set(req, reqBasePath);
-          return toolkit.next();
-        });
-
-        await root.start();
-
-        const legacyUrl = '/legacy';
-        const kbnServer = kbnTestServer.getKbnServer(root);
-        kbnServer.server.route({
-          method: 'GET',
-          path: legacyUrl,
-          handler: kbnServer.newPlatform.setup.core.http.basePath.get,
-        });
-
-        await kbnTestServer.request.get(root, legacyUrl).expect(200, reqBasePath);
-      });
-    });
-  });
   describe('legacy elasticsearch client', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
     beforeEach(async () => {
@@ -583,7 +405,7 @@ describe('http service', () => {
 
       const { body } = await kbnTestServer.request.get(root, '/new-platform/').expect(400);
 
-      expect(body.message).toEqual('[error_type]: error_reason');
+      expect(body.message).toMatch('[error_type]: error_reason');
     });
   });
 });

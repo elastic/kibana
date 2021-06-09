@@ -27,6 +27,7 @@ export declare enum KBN_FIELD_TYPES
 |  HISTOGRAM | <code>&quot;histogram&quot;</code> |  |
 |  IP | <code>&quot;ip&quot;</code> |  |
 |  IP\_RANGE | <code>&quot;ip_range&quot;</code> |  |
+|  MISSING | <code>&quot;missing&quot;</code> |  |
 |  MURMUR3 | <code>&quot;murmur3&quot;</code> |  |
 |  NESTED | <code>&quot;nested&quot;</code> |  |
 |  NUMBER | <code>&quot;number&quot;</code> |  |

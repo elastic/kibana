@@ -40,6 +40,7 @@ export const TotalCharts: React.FC = () => {
               {VIEW_ANALYTICS}
             </EuiButtonEmptyTo>
           }
+          hasBorder
         >
           <AnalyticsChart
             lines={[
@@ -62,6 +63,7 @@ export const TotalCharts: React.FC = () => {
               {VIEW_API_LOGS}
             </EuiButtonEmptyTo>
           }
+          hasBorder
         >
           <AnalyticsChart
             lines={[

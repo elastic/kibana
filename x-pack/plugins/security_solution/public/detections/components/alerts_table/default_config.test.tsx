@@ -6,7 +6,7 @@
  */
 
 import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
-import { buildAlertsRuleIdFilter } from './default_config';
+import { buildAlertsRuleIdFilter, buildThreatMatchFilter } from './default_config';
 
 jest.mock('./actions');
 
@@ -34,7 +34,34 @@ describe('alerts default_config', () => {
       expect(filters).toHaveLength(1);
       expect(filters[0]).toEqual(expectedFilter);
     });
+
+    describe('buildThreatMatchFilter', () => {
+      test('given a showOnlyThreatIndicatorAlerts=true this will return an array with a single filter', () => {
+        const filters: Filter[] = buildThreatMatchFilter(true);
+        const expectedFilter: Filter = {
+          meta: {
+            alias: null,
+            disabled: false,
+            negate: false,
+            key: 'signal.rule.threat_mapping',
+            type: 'exists',
+            value: 'exists',
+          },
+          // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
+          exists: {
+            field: 'signal.rule.threat_mapping',
+          },
+        };
+        expect(filters).toHaveLength(1);
+        expect(filters[0]).toEqual(expectedFilter);
+      });
+      test('given a showOnlyThreatIndicatorAlerts=false this will return an empty filter', () => {
+        const filters: Filter[] = buildThreatMatchFilter(false);
+        expect(filters).toHaveLength(0);
+      });
+    });
   });
+
   // TODO: move these tests to ../timelines/components/timeline/body/events/event_column_view.tsx
   // describe.skip('getAlertActions', () => {
   //   let setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;

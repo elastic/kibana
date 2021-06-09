@@ -24,6 +24,7 @@ interface KibanaLogicProps {
   charts: ChartsPluginStart;
   navigateToUrl: ApplicationStart['navigateToUrl'];
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
+  setChromeIsVisible(isVisible: boolean): void;
   setDocTitle(title: string): void;
   renderHeaderActions(HeaderActions: FC): void;
 }
@@ -47,6 +48,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
       {},
     ],
     setBreadcrumbs: [props.setBreadcrumbs, {}],
+    setChromeIsVisible: [props.setChromeIsVisible, {}],
     setDocTitle: [props.setDocTitle, {}],
     renderHeaderActions: [props.renderHeaderActions, {}],
   }),

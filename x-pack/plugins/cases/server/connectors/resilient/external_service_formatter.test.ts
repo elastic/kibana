@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseResponse } from '../../../common/api';
+import { CaseResponse } from '../../../common';
 import { resilientExternalServiceFormatter } from './external_service_formatter';
 
 describe('IBM Resilient formatter', () => {

@@ -25,8 +25,10 @@ const createApp = (props: Partial<PublicAppInfo> = {}): PublicAppInfo => ({
   appRoute: '/app/app1',
   status: AppStatus.accessible,
   navLinkStatus: AppNavLinkStatus.visible,
+  searchable: true,
   chromeless: false,
-  meta: { keywords: [], searchDeepLinks: [] },
+  keywords: [],
+  deepLinks: [],
   ...props,
 });
 
@@ -34,7 +36,7 @@ const createAppLink = (props: Partial<PublicAppInfo> = {}): AppLink => ({
   id: props.id ?? 'app1',
   path: props.appRoute ?? '/app/app1',
   subLinkTitles: [],
-  keywords: props.meta?.keywords ?? [], // start off with the top level app keywords
+  keywords: props.keywords ?? [], // start off with the top level app keywords
   app: createApp(props),
 });
 
@@ -43,6 +45,11 @@ describe('getAppResults', () => {
     const apps = [
       createApp({ id: 'dashboard', title: 'dashboard' }),
       createApp({ id: 'visualize', title: 'visualize' }),
+      createApp({
+        id: 'dashboard_not_searchable',
+        title: 'dashboard not searchable',
+        searchable: false,
+      }),
     ];
 
     const results = getAppResults('dashboard', apps);
@@ -51,59 +58,67 @@ describe('getAppResults', () => {
     expect(results[0]).toEqual(expect.objectContaining({ id: 'dashboard', score: 100 }));
   });
 
-  it('creates multiple links for apps with searchDeepLinks', () => {
+  it('creates multiple links for apps with deepLinks', () => {
     const apps = [
       createApp({
-        meta: {
-          searchDeepLinks: [
-            { id: 'sub1', title: 'Sub1', path: '/sub1', searchDeepLinks: [], keywords: [] },
-            {
-              id: 'sub2',
-              title: 'Sub2',
-              path: '/sub2',
-              searchDeepLinks: [
-                {
-                  id: 'sub2sub1',
-                  title: 'Sub2Sub1',
-                  path: '/sub2/sub1',
-                  searchDeepLinks: [],
-                  keywords: [],
-                },
-              ],
-              keywords: [],
-            },
-          ],
-          keywords: [],
-        },
+        deepLinks: [
+          {
+            id: 'sub1',
+            title: 'Sub1',
+            path: '/sub1',
+            deepLinks: [],
+            keywords: [],
+            navLinkStatus: AppNavLinkStatus.hidden,
+            searchable: true,
+          },
+          {
+            id: 'sub2',
+            title: 'Sub2',
+            path: '/sub2',
+            deepLinks: [
+              {
+                id: 'sub2sub1',
+                title: 'Sub2Sub1',
+                path: '/sub2/sub1',
+                deepLinks: [],
+                keywords: [],
+                navLinkStatus: AppNavLinkStatus.hidden,
+                searchable: true,
+              },
+            ],
+            keywords: [],
+            navLinkStatus: AppNavLinkStatus.visible,
+            searchable: false,
+          },
+        ],
+        keywords: [],
       }),
     ];
 
     const results = getAppResults('App 1', apps);
 
-    expect(results.length).toBe(4);
     expect(results.map(({ title }) => title)).toEqual([
       'App 1',
       'App 1 / Sub1',
-      'App 1 / Sub2',
       'App 1 / Sub2 / Sub2Sub1',
     ]);
   });
 
-  it('only includes searchDeepLinks when search term is non-empty', () => {
+  it('only includes deepLinks when search term is non-empty', () => {
     const apps = [
       createApp({
-        meta: {
-          searchDeepLinks: [
-            {
-              id: 'sub1',
-              title: 'Sub1',
-              path: '/sub1',
-              searchDeepLinks: [],
-              keywords: [],
-            },
-          ],
-          keywords: [],
-        },
+        deepLinks: [
+          {
+            id: 'sub1',
+            title: 'Sub1',
+            path: '/sub1',
+            deepLinks: [],
+            keywords: [],
+            navLinkStatus: AppNavLinkStatus.hidden,
+            searchable: true,
+          },
+        ],
+        keywords: [],
       }),
     ];
 
@@ -112,11 +127,7 @@ describe('getAppResults', () => {
   });
 
   it('retrieves the matching results from keywords', () => {
-    const apps = [
-      createApp({
-        meta: { searchDeepLinks: [], keywords: ['One'] },
-      }),
-    ];
+    const apps = [createApp({ deepLinks: [], keywords: ['One'] })];
     const results = getAppResults('One', apps);
     expect(results.map(({ title }) => title)).toEqual(['App 1']);
   });
@@ -124,27 +135,37 @@ describe('getAppResults', () => {
   it('retrieves the matching results from deeplink keywords', () => {
     const apps = [
       createApp({
-        meta: {
-          searchDeepLinks: [
-            { id: 'sub1', title: 'Sub1', path: '/sub1', searchDeepLinks: [], keywords: [] },
-            {
-              id: 'sub2',
-              title: 'Sub2',
-              path: '/sub2',
-              searchDeepLinks: [
-                {
-                  id: 'sub2sub1',
-                  title: 'Sub2Sub1',
-                  path: '/sub2/sub1',
-                  searchDeepLinks: [],
-                  keywords: ['TwoOne'],
-                },
-              ],
-              keywords: ['two'],
-            },
-          ],
-          keywords: [],
-        },
+        deepLinks: [
+          {
+            id: 'sub1',
+            title: 'Sub1',
+            path: '/sub1',
+            deepLinks: [],
+            keywords: [],
+            navLinkStatus: AppNavLinkStatus.hidden,
+            searchable: true,
+          },
+          {
+            id: 'sub2',
+            title: 'Sub2',
+            path: '/sub2',
+            deepLinks: [
+              {
+                id: 'sub2sub1',
+                title: 'Sub2Sub1',
+                path: '/sub2/sub1',
+                deepLinks: [],
+                keywords: ['TwoOne'],
+                navLinkStatus: AppNavLinkStatus.hidden,
+                searchable: true,
+              },
+            ],
+            keywords: ['two'],
+            navLinkStatus: AppNavLinkStatus.hidden,
+            searchable: true,
+          },
+        ],
+        keywords: [],
       }),
     ];
 
@@ -187,26 +208,17 @@ describe('scoreApp', () => {
   describe('when the term is included in the keywords but not in the title', () => {
     it(`returns 100 * ${keywordScoreWeighting} if one of the app meta keywords is an exact match`, () => {
       expect(
-        scoreApp(
-          'bar',
-          createAppLink({ title: 'foo', meta: { keywords: ['bar'], searchDeepLinks: [] } })
-        )
+        scoreApp('bar', createAppLink({ title: 'foo', keywords: ['bar'], deepLinks: [] }))
       ).toBe(100 * keywordScoreWeighting);
       expect(
-        scoreApp(
-          'bar',
-          createAppLink({ title: 'foo', meta: { keywords: ['BAR'], searchDeepLinks: [] } })
-        )
+        scoreApp('bar', createAppLink({ title: 'foo', keywords: ['BAR'], deepLinks: [] }))
       ).toBe(100 * keywordScoreWeighting);
     });
     it(`returns 90 * ${keywordScoreWeighting} if any of the keywords start with the term`, () => {
       expect(
         scoreApp(
           'viz',
-          createAppLink({
-            title: 'Foo',
-            meta: { keywords: ['Vizualize', 'Viz view'], searchDeepLinks: [] },
-          })
+          createAppLink({ title: 'Foo', keywords: ['Vizualize', 'Viz view'], deepLinks: [] })
         )
       ).toBe(90 * keywordScoreWeighting);
     });
@@ -214,19 +226,13 @@ describe('scoreApp', () => {
       expect(
         scoreApp(
           'board',
-          createAppLink({
-            title: 'Foo',
-            meta: { keywords: ['dashboard app'], searchDeepLinks: [] },
-          })
+          createAppLink({ title: 'Foo', keywords: ['dashboard app'], deepLinks: [] })
         )
       ).toBe(75 * keywordScoreWeighting);
       expect(
         scoreApp(
           'shboa',
-          createAppLink({
-            title: 'Foo',
-            meta: { keywords: ['dashboard app'], searchDeepLinks: [] },
-          })
+          createAppLink({ title: 'Foo', keywords: ['dashboard app'], deepLinks: [] })
         )
       ).toBe(75 * keywordScoreWeighting);
     });
@@ -235,26 +241,17 @@ describe('scoreApp', () => {
   describe('when the term is included in the keywords and the title', () => {
     it('returns 100 if one of the app meta keywords and the title is an exact match', () => {
       expect(
-        scoreApp(
-          'home',
-          createAppLink({ title: 'Home', meta: { keywords: ['home'], searchDeepLinks: [] } })
-        )
+        scoreApp('home', createAppLink({ title: 'Home', keywords: ['home'], deepLinks: [] }))
       ).toBe(100);
       expect(
-        scoreApp(
-          'Home',
-          createAppLink({ title: 'Home', meta: { keywords: ['HOME'], searchDeepLinks: [] } })
-        )
+        scoreApp('Home', createAppLink({ title: 'Home', keywords: ['HOME'], deepLinks: [] }))
       ).toBe(100);
     });
     it('returns 90 if either one of the keywords or the title start with the term', () => {
       expect(
         scoreApp(
           'vis',
-          createAppLink({
-            title: 'Visualize',
-            meta: { keywords: ['Visualise'], searchDeepLinks: [] },
-          })
+          createAppLink({ title: 'Visualize', keywords: ['Visualise'], deepLinks: [] })
         )
       ).toBe(90);
     });
@@ -262,19 +259,13 @@ describe('scoreApp', () => {
       expect(
         scoreApp(
           'board',
-          createAppLink({
-            title: 'Dashboard',
-            meta: { keywords: ['dashboard app'], searchDeepLinks: [] },
-          })
+          createAppLink({ title: 'Dashboard', keywords: ['dashboard app'], deepLinks: [] })
         )
       ).toBe(75);
       expect(
         scoreApp(
           'shboa',
-          createAppLink({
-            title: 'dashboard',
-            meta: { keywords: ['dashboard app'], searchDeepLinks: [] },
-          })
+          createAppLink({ title: 'dashboard', keywords: ['dashboard app'], deepLinks: [] })
         )
       ).toBe(75);
     });
@@ -285,19 +276,13 @@ describe('scoreApp', () => {
       expect(
         scoreApp(
           '0123456789',
-          createAppLink({
-            title: '012345',
-            meta: { keywords: ['0345', '9987'], searchDeepLinks: [] },
-          })
+          createAppLink({ title: '012345', keywords: ['0345', '9987'], deepLinks: [] })
         )
       ).toBe(60);
       expect(
         scoreApp(
           '--1234567-',
-          createAppLink({
-            title: '123456789',
-            meta: { keywords: ['--345--'], searchDeepLinks: [] },
-          })
+          createAppLink({ title: '123456789', keywords: ['--345--'], deepLinks: [] })
         )
       ).toBe(60);
     });
@@ -305,13 +290,13 @@ describe('scoreApp', () => {
       expect(
         scoreApp(
           '0123456789',
-          createAppLink({ title: '12345', meta: { keywords: ['12', '34'], searchDeepLinks: [] } })
+          createAppLink({ title: '12345', keywords: ['12', '34'], deepLinks: [] })
         )
       ).toBe(0);
       expect(
         scoreApp(
           '1-2-3-4-5',
-          createAppLink({ title: '123456789', meta: { keywords: ['12-789'], searchDeepLinks: [] } })
+          createAppLink({ title: '123456789', keywords: ['12-789'], deepLinks: [] })
         )
       ).toBe(0);
     });

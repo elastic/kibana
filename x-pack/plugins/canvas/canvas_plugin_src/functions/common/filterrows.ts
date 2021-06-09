@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { Observable } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { Datatable, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
-  fn: (datatable: Datatable) => Promise<boolean>;
+  fn: (datatable: Datatable) => Observable<boolean>;
 }
 
 export function filterrows(): ExpressionFunctionDefinition<
@@ -41,6 +43,8 @@ export function filterrows(): ExpressionFunctionDefinition<
           ...input,
           rows: [row],
         })
+          .pipe(take(1))
+          .toPromise()
       );
 
       return Promise.all(checks)

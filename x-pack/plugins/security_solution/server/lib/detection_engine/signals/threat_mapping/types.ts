@@ -5,12 +5,7 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
-import { ListClient } from '../../../../../../lists/server';
-import {
-  Type,
-  LanguageOrUndefined,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
-import {
+import type {
   ThreatQuery,
   ThreatMapping,
   ThreatMappingEntries,
@@ -19,19 +14,26 @@ import {
   ConcurrentSearches,
   ItemsPerSearch,
   ThreatIndicatorPathOrUndefined,
-} from '../../../../../common/detection_engine/schemas/types/threat_mapping';
-import { RuleTypeParams } from '../../types';
+  LanguageOrUndefined,
+  Type,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { ListClient } from '../../../../../../lists/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
 } from '../../../../../../alerting/server';
-import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas';
-import { ElasticsearchClient, Logger } from '../../../../../../../../src/core/server';
-import { RuleAlertAction } from '../../../../../common/detection_engine/types';
+import { ElasticsearchClient, Logger, SavedObject } from '../../../../../../../../src/core/server';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
-import { RuleRangeTuple, SearchAfterAndBulkCreateReturnType, SignalsEnrichment } from '../types';
+import {
+  AlertAttributes,
+  RuleRangeTuple,
+  SearchAfterAndBulkCreateReturnType,
+  SignalsEnrichment,
+} from '../types';
+import { ThreatRuleParams } from '../../schemas/rule_schemas';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 
@@ -51,25 +53,15 @@ export interface CreateThreatSignalsOptions {
   eventsTelemetry: TelemetryEventsSender | undefined;
   alertId: string;
   outputIndex: string;
-  params: RuleTypeParams;
+  ruleSO: SavedObject<AlertAttributes<ThreatRuleParams>>;
   searchAfterSize: number;
-  actions: RuleAlertAction[];
-  createdBy: string;
-  createdAt: string;
-  updatedBy: string;
-  updatedAt: string;
-  interval: string;
-  enabled: boolean;
-  tags: string[];
   refresh: false | 'wait_for';
-  throttle: string;
   threatFilters: unknown[];
   threatQuery: ThreatQuery;
   buildRuleMessage: BuildRuleMessage;
   threatIndex: ThreatIndex;
   threatIndicatorPath: ThreatIndicatorPathOrUndefined;
   threatLanguage: ThreatLanguageOrUndefined;
-  name: string;
   concurrentSearches: ConcurrentSearches;
   itemsPerSearch: ItemsPerSearch;
 }
@@ -91,20 +83,10 @@ export interface CreateThreatSignalOptions {
   eventsTelemetry: TelemetryEventsSender | undefined;
   alertId: string;
   outputIndex: string;
-  params: RuleTypeParams;
+  ruleSO: SavedObject<AlertAttributes<ThreatRuleParams>>;
   searchAfterSize: number;
-  actions: RuleAlertAction[];
-  createdBy: string;
-  createdAt: string;
-  updatedBy: string;
-  updatedAt: string;
-  interval: string;
-  enabled: boolean;
-  tags: string[];
   refresh: false | 'wait_for';
-  throttle: string;
   buildRuleMessage: BuildRuleMessage;
-  name: string;
   currentThreatList: ThreatListItem[];
   currentResult: SearchAfterAndBulkCreateReturnType;
 }
@@ -185,7 +167,7 @@ export interface ThreatListDoc {
  * This is an ECS document being returned, but the user could return or use non-ecs based
  * documents potentially.
  */
-export type ThreatListItem = estypes.Hit<ThreatListDoc>;
+export type ThreatListItem = estypes.SearchHit<ThreatListDoc>;
 
 export interface ThreatIndicator {
   [key: string]: unknown;

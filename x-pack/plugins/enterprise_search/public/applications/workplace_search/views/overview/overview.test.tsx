@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import '../../../__mocks__/react_router_history.mock';
 import './__mocks__/overview_logic.mock';
+import { mockActions, setMockValues } from './__mocks__';
 
 import React from 'react';
 
@@ -15,7 +15,6 @@ import { shallow, mount } from 'enzyme';
 import { Loading } from '../../../shared/loading';
 import { ViewContentHeader } from '../../components/shared/view_content_header';
 
-import { mockActions, setMockValues } from './__mocks__';
 import { OnboardingSteps } from './onboarding_steps';
 import { OrganizationStats } from './organization_stats';
 import { Overview } from './overview';

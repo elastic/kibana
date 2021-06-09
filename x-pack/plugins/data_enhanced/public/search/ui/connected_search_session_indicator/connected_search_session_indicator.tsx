@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { debounce, distinctUntilChanged, map, mapTo, switchMap, tap } from 'rxjs/operators';
+import { debounce, distinctUntilChanged, mapTo, switchMap, tap } from 'rxjs/operators';
 import { merge, of, timer } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
@@ -14,7 +14,6 @@ import { SearchSessionIndicator, SearchSessionIndicatorRef } from '../search_ses
 import {
   ISessionService,
   SearchSessionState,
-  TimefilterContract,
   SearchUsageCollector,
 } from '../../../../../../../src/plugins/data/public';
 import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/public';
@@ -24,7 +23,6 @@ import { useSearchSessionTour } from './search_session_tour';
 
 export interface SearchSessionIndicatorDeps {
   sessionService: ISessionService;
-  timeFilter: TimefilterContract;
   application: ApplicationStart;
   basePath: IBasePath;
   storage: IStorageWrapper;
@@ -39,17 +37,12 @@ export interface SearchSessionIndicatorDeps {
 export const createConnectedSearchSessionIndicator = ({
   sessionService,
   application,
-  timeFilter,
   storage,
   disableSaveAfterSessionCompletesTimeout,
   usageCollector,
   basePath,
 }: SearchSessionIndicatorDeps): React.FC => {
   const searchSessionsManagementUrl = basePath.prepend('/app/management/kibana/search_sessions');
-  const isAutoRefreshEnabled = () => !timeFilter.getRefreshInterval().pause;
-  const isAutoRefreshEnabled$ = timeFilter
-    .getRefreshIntervalUpdate$()
-    .pipe(map(isAutoRefreshEnabled), distinctUntilChanged());
 
   const debouncedSessionServiceState$ = sessionService.state$.pipe(
     debounce((_state) => timer(_state === SearchSessionState.None ? 50 : 300)) // switch to None faster to quickly remove indicator when navigating away
@@ -69,7 +62,6 @@ export const createConnectedSearchSessionIndicator = ({
 
   return () => {
     const state = useObservable(debouncedSessionServiceState$, SearchSessionState.None);
-    const autoRefreshEnabled = useObservable(isAutoRefreshEnabled$, isAutoRefreshEnabled());
     const isSaveDisabledByApp = sessionService.getSearchSessionIndicatorUiConfig().isDisabled();
     const disableSaveAfterSessionCompleteTimedOut = useObservable(
       disableSaveAfterSessionCompleteTimedOut$,
@@ -90,16 +82,6 @@ export const createConnectedSearchSessionIndicator = ({
 
     let managementDisabled = false;
     let managementDisabledReasonText: string = '';
-
-    if (autoRefreshEnabled) {
-      saveDisabled = true;
-      saveDisabledReasonText = i18n.translate(
-        'xpack.data.searchSessionIndicator.disabledDueToAutoRefreshMessage',
-        {
-          defaultMessage: 'Saving search session is not available when auto refresh is enabled.',
-        }
-      );
-    }
 
     if (disableSaveAfterSessionCompleteTimedOut) {
       saveDisabled = true;

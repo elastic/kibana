@@ -17,8 +17,10 @@ interface EsErrorHandlerParams {
   handleCustomError?: () => IKibanaResponse<any>;
 }
 
-/*
+/**
  * For errors returned by the new elasticsearch js client.
+ *
+ * @throws If "error" is not an error from the elasticsearch client this handler will throw "error".
  */
 export const handleEsError = ({
   error,
@@ -36,12 +38,14 @@ export const handleEsError = ({
     return response.customError({
       statusCode,
       body: {
-        message: body.error?.reason,
+        message:
+          // We use || instead of ?? as the switch here because reason could be an empty string
+          body?.error?.reason || body?.error?.caused_by?.reason || error.message || 'Unknown error',
         attributes: {
           // The full original ES error object
-          error: body.error,
+          error: body?.error,
           // We assume that this is an ES error object with a nested caused by chain if we can see the "caused_by" field at the top-level
-          causes: body.error?.caused_by ? getEsCause(body.error) : undefined,
+          causes: body?.error?.caused_by ? getEsCause(body.error) : undefined,
         },
       },
     });

@@ -10,7 +10,6 @@ import React from 'react';
 // @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
-// @ts-ignore
 import { ESSearchSource, sourceTitle } from './es_search_source';
 import { BlendedVectorLayer } from '../../layers/blended_vector_layer/blended_vector_layer';
 import { VectorLayer } from '../../layers/vector_layer';

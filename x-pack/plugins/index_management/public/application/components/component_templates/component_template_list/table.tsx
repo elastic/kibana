@@ -100,7 +100,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
           {...reactRouterNavigate(history, '/create_component_template')}
         >
           {i18n.translate('xpack.idxMgmt.componentTemplatesList.table.createButtonLabel', {
-            defaultMessage: 'Create a component template',
+            defaultMessage: 'Create component template',
           })}
         </EuiButton>,
       ],

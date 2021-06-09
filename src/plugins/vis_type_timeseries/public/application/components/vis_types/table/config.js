@@ -26,7 +26,6 @@ import {
   EuiFormRow,
   EuiCode,
   EuiHorizontalRule,
-  EuiFormLabel,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
@@ -171,14 +170,17 @@ export class TableSeriesConfig extends Component {
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFormLabel>
-              <FormattedMessage
-                id="visTypeTimeseries.table.showTrendArrowsLabel"
-                defaultMessage="Show trend arrows?"
+            <EuiFormRow
+              label={i18n.translate('visTypeTimeseries.table.showTrendArrowsLabel', {
+                defaultMessage: 'Show trend arrows?',
+              })}
+            >
+              <YesNo
+                value={model.trend_arrows}
+                name="trend_arrows"
+                onChange={this.props.onChange}
               />
-            </EuiFormLabel>
-            <EuiSpacer size="s" />
-            <YesNo value={model.trend_arrows} name="trend_arrows" onChange={this.props.onChange} />
+            </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
 
@@ -186,20 +188,16 @@ export class TableSeriesConfig extends Component {
 
         <EuiFlexGroup responsive={false} wrap={true}>
           <EuiFlexItem grow={true}>
-            <EuiFormRow
-              id={htmlId('field')}
+            <FieldSelect
               label={
                 <FormattedMessage id="visTypeTimeseries.table.fieldLabel" defaultMessage="Field" />
               }
-            >
-              <FieldSelect
-                fields={this.props.fields}
-                indexPattern={this.props.panel.index_pattern}
-                value={model.aggregate_by}
-                onChange={handleSelectChange('aggregate_by')}
-                fullWidth
-              />
-            </EuiFormRow>
+              fields={this.props.fields}
+              indexPattern={this.props.panel.index_pattern}
+              value={model.aggregate_by}
+              onChange={handleSelectChange('aggregate_by')}
+              fullWidth
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
             <EuiFormRow

@@ -6,38 +6,16 @@
  */
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
-import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import {
-  PluginSetup as DataPluginSetup,
-  PluginStart as DataPluginStart,
-  usageProvider,
-} from '../../../../src/plugins/data/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
-import { ENHANCED_ES_SEARCH_STRATEGY, EQL_SEARCH_STRATEGY } from '../common';
 import { registerSessionRoutes } from './routes';
 import { searchSessionSavedObjectType } from './saved_objects';
-import {
-  SearchSessionService,
-  enhancedEsSearchStrategyProvider,
-  eqlSearchStrategyProvider,
-} from './search';
-import { getUiSettings } from './ui_settings';
-import type { DataEnhancedRequestHandlerContext } from './type';
+import type {
+  DataEnhancedRequestHandlerContext,
+  DataEnhancedSetupDependencies as SetupDependencies,
+  DataEnhancedStartDependencies as StartDependencies,
+} from './type';
 import { ConfigSchema } from '../config';
 import { registerUsageCollector } from './collectors';
-import { SecurityPluginSetup } from '../../security/server';
-
-interface SetupDependencies {
-  data: DataPluginSetup;
-  usageCollection?: UsageCollectionSetup;
-  taskManager: TaskManagerSetupContract;
-  security?: SecurityPluginSetup;
-}
-
-export interface StartDependencies {
-  data: DataPluginStart;
-  taskManager: TaskManagerStartContract;
-}
+import { SearchSessionService } from './search';
 
 export class EnhancedDataServerPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies> {
@@ -50,32 +28,13 @@ export class EnhancedDataServerPlugin
     this.config = this.initializerContext.config.get<ConfigSchema>();
   }
 
-  public setup(core: CoreSetup<DataPluginStart>, deps: SetupDependencies) {
-    const usage = deps.usageCollection ? usageProvider(core) : undefined;
-
-    core.uiSettings.register(getUiSettings());
+  public setup(core: CoreSetup<StartDependencies>, deps: SetupDependencies) {
     core.savedObjects.registerType(searchSessionSavedObjectType);
-
-    deps.data.search.registerSearchStrategy(
-      ENHANCED_ES_SEARCH_STRATEGY,
-      enhancedEsSearchStrategyProvider(
-        this.config,
-        this.initializerContext.config.legacy.globalConfig$,
-        this.logger,
-        usage
-      )
-    );
-
-    deps.data.search.registerSearchStrategy(
-      EQL_SEARCH_STRATEGY,
-      eqlSearchStrategyProvider(this.logger)
-    );
 
     this.sessionService = new SearchSessionService(this.logger, this.config, deps.security);
 
     deps.data.__enhance({
       search: {
-        defaultStrategy: ENHANCED_ES_SEARCH_STRATEGY,
         sessionService: this.sessionService,
       },
     });

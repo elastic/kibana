@@ -22,18 +22,25 @@ export function IndexLifecycleManagementPageProvider({ getService }: FtrProvider
       policyName: string,
       warmEnabled: boolean = false,
       coldEnabled: boolean = false,
-      deletePhaseEnabled: boolean = false
+      deletePhaseEnabled: boolean = false,
+      minAges: { [key: string]: { value: string; unit: string } } = {
+        warm: { value: '10', unit: 'd' },
+        cold: { value: '15', unit: 'd' },
+        frozen: { value: '20', unit: 'd' },
+      }
     ) {
       await testSubjects.setValue('policyNameField', policyName);
       if (warmEnabled) {
         await retry.try(async () => {
           await testSubjects.click('enablePhaseSwitch-warm');
         });
+        await testSubjects.setValue('warm-selectedMinimumAge', minAges.warm.value);
       }
       if (coldEnabled) {
         await retry.try(async () => {
           await testSubjects.click('enablePhaseSwitch-cold');
         });
+        await testSubjects.setValue('cold-selectedMinimumAge', minAges.cold.value);
       }
       if (deletePhaseEnabled) {
         await retry.try(async () => {
@@ -48,11 +55,23 @@ export function IndexLifecycleManagementPageProvider({ getService }: FtrProvider
       policyName: string,
       warmEnabled: boolean = false,
       coldEnabled: boolean = false,
-      deletePhaseEnabled: boolean = false
+      deletePhaseEnabled: boolean = false,
+      minAges?: { [key: string]: { value: string; unit: string } }
     ) {
       await testSubjects.click('createPolicyButton');
-      await this.fillNewPolicyForm(policyName, warmEnabled, coldEnabled, deletePhaseEnabled);
+      await this.fillNewPolicyForm(
+        policyName,
+        warmEnabled,
+        coldEnabled,
+        deletePhaseEnabled,
+        minAges
+      );
       await this.saveNewPolicy();
+    },
+
+    async increasePolicyListPageSize() {
+      await testSubjects.click('tablePaginationPopoverButton');
+      await testSubjects.click(`tablePagination-100-rows`);
     },
 
     async getPolicyList() {

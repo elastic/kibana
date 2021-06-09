@@ -10,8 +10,10 @@ import { Ensure } from '@kbn/utility-types';
 import { EventEmitter } from 'events';
 import { KibanaRequest } from 'src/core/server';
 import { Observable } from 'rxjs';
+import { ObservableLike } from '@kbn/utility-types';
 import { Plugin as Plugin_2 } from 'src/core/server';
 import { PluginInitializerContext } from 'src/core/server';
+import { UnwrapObservable } from '@kbn/utility-types';
 import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
 
 // Warning: (ae-missing-release-tag) "AnyExpressionFunctionDefinition" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -108,16 +110,15 @@ export class Execution<Input = unknown, Output = unknown, InspectorAdapters exte
     // (undocumented)
     get inspectorAdapters(): InspectorAdapters;
     // (undocumented)
-    interpret<T>(ast: ExpressionAstNode, input: T): Promise<unknown>;
+    interpret<T>(ast: ExpressionAstNode, input: T): Observable<unknown>;
     // (undocumented)
-    invokeChain(chainArr: ExpressionAstFunction[], input: unknown): Promise<any>;
+    invokeChain(chainArr: ExpressionAstFunction[], input: unknown): Observable<any>;
     // (undocumented)
-    invokeFunction(fn: ExpressionFunction, input: unknown, args: Record<string, unknown>): Promise<any>;
+    invokeFunction(fn: ExpressionFunction, input: unknown, args: Record<string, unknown>): Observable<any>;
     // (undocumented)
-    resolveArgs(fnDef: ExpressionFunction, input: unknown, argAsts: any): Promise<any>;
-    // (undocumented)
-    get result(): Promise<Output | ExpressionValueError>;
-    start(input?: Input): void;
+    resolveArgs(fnDef: ExpressionFunction, input: unknown, argAsts: any): Observable<any>;
+    readonly result: Observable<Output | ExpressionValueError>;
+    start(input?: Input): Observable<Output | ExpressionValueError>;
     readonly state: ExecutionContainer<Output | ExpressionValueError>;
 }
 
@@ -211,7 +212,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     registerFunction(functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)): void;
     // (undocumented)
     registerType(typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)): void;
-    run<Input, Output>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams): Promise<Output>;
+    run<Input, Output>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams): Observable<Output | ExpressionValueError>;
     // (undocumented)
     readonly state: ExecutorContainer<Context>;
     // (undocumented)
@@ -919,7 +920,7 @@ export class TypesRegistry implements IRegistry<ExpressionType> {
 // Warning: (ae-missing-release-tag) "TypeString" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export type TypeString<T> = KnownTypeToString<UnwrapPromiseOrReturn<T>>;
+export type TypeString<T> = KnownTypeToString<T extends ObservableLike<any> ? UnwrapObservable<T> : UnwrapPromiseOrReturn<T>>;
 
 // Warning: (ae-missing-release-tag) "TypeToString" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //

@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import { mockIndices } from './hybrid_index_helper';
 
 export default function ({ getService, getPageObjects }) {
-  const es = getService('legacyEs');
+  const es = getService('es');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['rollup', 'common', 'security']);
   const security = getService('security');
@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }) {
 
       //Delete all data indices that were created.
       await esDeleteAllIndices([targetIndexName, rollupSourceIndexPattern]);
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await security.testUser.restoreDefaults();
     });
   });

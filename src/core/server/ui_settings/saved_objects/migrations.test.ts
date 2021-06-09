@@ -76,6 +76,23 @@ describe('ui_settings 7.12.0 migrations', () => {
     const migrated = migration(doc);
     expect(JSON.parse(migrated.attributes['timepicker:quickRanges'])).toEqual([migratedQuickRange]);
   });
+
+  // https://github.com/elastic/kibana/issues/95616
+  test('returns doc when "timepicker:quickRanges" is null', () => {
+    const doc = {
+      type: 'config',
+      id: '8.0.0',
+      attributes: {
+        buildNum: 9007199254740991,
+        'timepicker:quickRanges': null,
+      },
+      references: [],
+      updated_at: '2020-06-09T20:18:20.349Z',
+      migrationVersion: {},
+    };
+    const migrated = migration(doc);
+    expect(migrated).toEqual(doc);
+  });
 });
 
 describe('ui_settings 7.13.0 migrations', () => {

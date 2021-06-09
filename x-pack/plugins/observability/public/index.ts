@@ -21,12 +21,16 @@ export type {
 };
 export { enableInspectEsQueries } from '../common/ui_settings_keys';
 
+export interface ConfigSchema {
+  unsafe: { alertingExperience: { enabled: boolean }; cases: { enabled: boolean } };
+}
+
 export const plugin: PluginInitializer<
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
   ObservabilityPublicPluginsSetup,
   ObservabilityPublicPluginsStart
-> = (context: PluginInitializerContext) => {
+> = (context: PluginInitializerContext<ConfigSchema>) => {
   return new Plugin(context);
 };
 
@@ -53,5 +57,11 @@ export { useFetcher, FETCH_STATUS } from './hooks/use_fetcher';
 export * from './typings';
 
 export { useChartTheme } from './hooks/use_chart_theme';
+export { useBreadcrumbs } from './hooks/use_breadcrumbs';
 export { useTheme } from './hooks/use_theme';
 export { getApmTraceUrl } from './utils/get_apm_trace_url';
+export { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/utils';
+export type { SeriesUrl } from './components/shared/exploratory_view/types';
+
+export type { ObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
+export { createObservabilityRuleTypeRegistryMock } from './rules/observability_rule_type_registry_mock';

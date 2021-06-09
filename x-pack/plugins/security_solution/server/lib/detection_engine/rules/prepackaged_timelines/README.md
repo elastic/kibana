@@ -4,7 +4,7 @@
 
 
 
-1.  [Have the env params set up](https://github.com/elastic/kibana/blob/master/x-pack/plugins/siem/server/lib/detection_engine/README.md)
+1.  [Have the env params set up](https://github.com/elastic/kibana/blob/master/x-pack/plugins/security_solution/server/lib/detection_engine/README.md)
 
 2. Create a new timelines template into `x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_timelines`
 

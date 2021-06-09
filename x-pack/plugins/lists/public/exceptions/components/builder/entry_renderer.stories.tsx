@@ -5,24 +5,21 @@
  * 2.0.
  */
 
-import { Story, addDecorator } from '@storybook/react';
+import { Story } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { HttpStart } from 'kibana/public';
+import {
+  ListOperatorEnum as OperatorEnum,
+  ListOperatorTypeEnum as OperatorTypeEnum,
+} from '@kbn/securitysolution-io-ts-list-types';
 
-import { OperatorEnum, OperatorTypeEnum } from '../../../../common';
 import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
 import { fields } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
-import { getMockTheme } from '../../../common/test_utils/kibana_react.mock';
+import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 
 import { BuilderEntryItem, EntryItemProps } from './entry_renderer';
 
-const mockTheme = getMockTheme({
-  darkMode: false,
-  eui: euiLightVars,
-});
 const mockAutocompleteService = ({
   getValueSuggestions: () =>
     new Promise((resolve) => {
@@ -58,8 +55,6 @@ const mockAutocompleteService = ({
       }, 300);
     }),
 } as unknown) as AutocompleteStart;
-
-addDecorator((storyFn) => <ThemeProvider theme={mockTheme}>{storyFn()}</ThemeProvider>);
 
 export default {
   argTypes: {
@@ -163,6 +158,13 @@ export default {
     },
   },
   component: BuilderEntryItem,
+  decorators: [
+    (DecoratorStory: React.ComponentClass): React.ReactNode => (
+      <EuiThemeProvider>
+        <DecoratorStory />
+      </EuiThemeProvider>
+    ),
+  ],
   title: 'BuilderEntryItem',
 };
 

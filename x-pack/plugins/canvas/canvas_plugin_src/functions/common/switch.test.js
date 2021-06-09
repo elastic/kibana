@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import { functionWrapper } from '../../../test_helpers/function_wrapper';
 import { switchFn } from './switch';
 
 describe('switch', () => {
   const fn = functionWrapper(switchFn);
-  const getter = (value) => () => value;
+  const getter = (value) => () => of(value);
   const mockCases = [
     {
       type: 'case',
@@ -48,32 +49,32 @@ describe('switch', () => {
 
   describe('function', () => {
     describe('with no cases', () => {
-      it('should return the context if no default is provided', async () => {
+      it('should return the context if no default is provided', () => {
         const context = 'foo';
-        expect(await fn(context, {})).toBe(context);
+        expect(fn(context, {})).resolves.toBe(context);
       });
 
-      it('should return the default if provided', async () => {
+      it('should return the default if provided', () => {
         const context = 'foo';
-        const args = { default: () => 'bar' };
-        expect(await fn(context, args)).toBe(args.default());
+        const args = { default: () => of('bar') };
+        expect(fn(context, args)).resolves.toBe('bar');
       });
     });
 
     describe('with no matching cases', () => {
-      it('should return the context if no default is provided', async () => {
+      it('should return the context if no default is provided', () => {
         const context = 'foo';
         const args = { case: nonMatchingCases.map(getter) };
-        expect(await fn(context, args)).toBe(context);
+        expect(fn(context, args)).resolves.toBe(context);
       });
 
-      it('should return the default if provided', async () => {
+      it('should return the default if provided', () => {
         const context = 'foo';
         const args = {
           case: nonMatchingCases.map(getter),
-          default: () => 'bar',
+          default: () => of('bar'),
         };
-        expect(await fn(context, args)).toBe(args.default());
+        expect(fn(context, args)).resolves.toBe('bar');
       });
     });
 
@@ -82,7 +83,7 @@ describe('switch', () => {
         const context = 'foo';
         const args = { case: mockCases.map(getter) };
         const firstMatch = mockCases.find((c) => c.matches);
-        expect(await fn(context, args)).toBe(firstMatch.result);
+        expect(fn(context, args)).resolves.toBe(firstMatch.result);
       });
     });
   });

@@ -162,6 +162,7 @@ export const useAnalysisSetupState = <JobType extends string>({
         return await validateSetupIndices(
           sourceConfiguration.indices,
           sourceConfiguration.timestampField,
+          sourceConfiguration.runtimeMappings,
           services.http.fetch
         );
       },
@@ -188,6 +189,7 @@ export const useAnalysisSetupState = <JobType extends string>({
           sourceConfiguration.timestampField,
           startTime ?? 0,
           endTime ?? Date.now(),
+          sourceConfiguration.runtimeMappings,
           services.http.fetch
         );
       },

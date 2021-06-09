@@ -17,7 +17,7 @@ import { serviceNowITSMExternalServiceFormatter } from './servicenow/itsm_format
 import { serviceNowSIRExternalServiceFormatter } from './servicenow/sir_formatter';
 import { jiraExternalServiceFormatter } from './jira/external_service_formatter';
 import { resilientExternalServiceFormatter } from './resilient/external_service_formatter';
-import { CommentRequest, CommentType } from '../../common/api';
+import { CommentRequest, CommentType } from '../../common';
 
 export * from './types';
 export { transformConnectorComment } from './case';
@@ -29,22 +29,14 @@ export { transformConnectorComment } from './case';
 export const separator = '__SEPARATOR__';
 
 export const registerConnectors = ({
-  actionsRegisterType,
+  registerActionType,
   logger,
-  caseService,
-  caseConfigureService,
-  connectorMappingsService,
-  userActionService,
-  alertsService,
+  factory,
 }: RegisterConnectorsArgs) => {
-  actionsRegisterType(
+  registerActionType(
     getCaseConnector({
       logger,
-      caseService,
-      caseConfigureService,
-      connectorMappingsService,
-      userActionService,
-      alertsService,
+      factory,
     })
   );
 };

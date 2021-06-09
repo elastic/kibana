@@ -22,6 +22,7 @@ export interface NetworkEventsState {
       total: number;
       loading: boolean;
       error?: Error;
+      isWaterfallSupported: boolean;
     };
   };
 }
@@ -48,11 +49,13 @@ export const networkEventsReducer = handleActions<NetworkEventsState, Payload>(
                   loading: true,
                   events: [],
                   total: 0,
+                  isWaterfallSupported: true,
                 }
               : {
                   loading: true,
                   events: [],
                   total: 0,
+                  isWaterfallSupported: true,
                 },
           }
         : {
@@ -60,6 +63,7 @@ export const networkEventsReducer = handleActions<NetworkEventsState, Payload>(
               loading: true,
               events: [],
               total: 0,
+              isWaterfallSupported: true,
             },
           },
     }),
@@ -67,7 +71,7 @@ export const networkEventsReducer = handleActions<NetworkEventsState, Payload>(
     [String(getNetworkEventsSuccess)]: (
       state: NetworkEventsState,
       {
-        payload: { events, total, checkGroup, stepIndex },
+        payload: { events, total, checkGroup, stepIndex, isWaterfallSupported },
       }: Action<SyntheticsNetworkEventsApiResponse & FetchNetworkEventsParams>
     ) => {
       return {
@@ -80,11 +84,13 @@ export const networkEventsReducer = handleActions<NetworkEventsState, Payload>(
                     loading: false,
                     events,
                     total,
+                    isWaterfallSupported,
                   }
                 : {
                     loading: false,
                     events,
                     total,
+                    isWaterfallSupported,
                   },
             }
           : {
@@ -92,6 +98,7 @@ export const networkEventsReducer = handleActions<NetworkEventsState, Payload>(
                 loading: false,
                 events,
                 total,
+                isWaterfallSupported,
               },
             },
       };
@@ -111,12 +118,14 @@ export const networkEventsReducer = handleActions<NetworkEventsState, Payload>(
                   events: [],
                   total: 0,
                   error,
+                  isWaterfallSupported: true,
                 }
               : {
                   loading: false,
                   events: [],
                   total: 0,
                   error,
+                  isWaterfallSupported: true,
                 },
           }
         : {
@@ -125,6 +134,7 @@ export const networkEventsReducer = handleActions<NetworkEventsState, Payload>(
               events: [],
               total: 0,
               error,
+              isWaterfallSupported: true,
             },
           },
     }),

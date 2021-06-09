@@ -12,7 +12,7 @@ import { RouteDependencies } from '../../../types';
 export const registerStartRoute = ({
   router,
   license,
-  lib: { isEsError, formatEsError },
+  lib: { handleEsError },
 }: RouteDependencies) => {
   router.post(
     {
@@ -29,20 +29,16 @@ export const registerStartRoute = ({
       },
     },
     license.guardApiRoute(async (context, request, response) => {
+      const { client: clusterClient } = context.core.elasticsearch;
       try {
         const { jobIds } = request.body;
 
         const data = await Promise.all(
-          jobIds.map((id: string) =>
-            context.rollup!.client.callAsCurrentUser('rollup.startJob', { id })
-          )
+          jobIds.map((id: string) => clusterClient.asCurrentUser.rollup.startJob({ id }))
         ).then(() => ({ success: true }));
         return response.ok({ body: data });
       } catch (err) {
-        if (isEsError(err)) {
-          return response.customError({ statusCode: err.statusCode, body: err });
-        }
-        throw err;
+        return handleEsError({ error: err, response });
       }
     })
   );

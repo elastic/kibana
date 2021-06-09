@@ -7,15 +7,11 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { Map as MbMap } from 'mapbox-gl';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { i18n } from '@kbn/i18n';
 import { Filter } from 'src/plugins/data/public';
 import { Feature, Polygon } from 'geojson';
-import {
-  DRAW_TYPE,
-  ES_GEO_FIELD_TYPE,
-  ES_SPATIAL_RELATIONS,
-} from '../../../../../common/constants';
+import { DRAW_TYPE, ES_SPATIAL_RELATIONS } from '../../../../../common/constants';
 import { DrawState } from '../../../../../common/descriptor_types';
 import {
   createDistanceFilterWithMeta,
@@ -33,16 +29,12 @@ export interface Props {
   drawState?: DrawState;
   isDrawingFilter: boolean;
   mbMap: MbMap;
+  geoFieldNames: string[];
 }
 
 export class DrawFilterControl extends Component<Props, {}> {
   _onDraw = async (e: { features: Feature[] }) => {
-    if (
-      !e.features.length ||
-      !this.props.drawState ||
-      !this.props.drawState.geoFieldName ||
-      !this.props.drawState.indexPatternId
-    ) {
+    if (!e.features.length || !this.props.drawState || !this.props.geoFieldNames.length) {
       return;
     }
 
@@ -65,8 +57,7 @@ export class DrawFilterControl extends Component<Props, {}> {
       filter = createDistanceFilterWithMeta({
         alias: this.props.drawState.filterLabel ? this.props.drawState.filterLabel : '',
         distanceKm,
-        geoFieldName: this.props.drawState.geoFieldName,
-        indexPatternId: this.props.drawState.indexPatternId,
+        geoFieldNames: this.props.geoFieldNames,
         point: [
           _.round(circle.properties.center[0], precision),
           _.round(circle.properties.center[1], precision),
@@ -82,11 +73,7 @@ export class DrawFilterControl extends Component<Props, {}> {
           this.props.drawState.drawType === DRAW_TYPE.BOUNDS
             ? getBoundingBoxGeometry(geometry)
             : geometry,
-        indexPatternId: this.props.drawState.indexPatternId,
-        geoFieldName: this.props.drawState.geoFieldName,
-        geoFieldType: this.props.drawState.geoFieldType
-          ? this.props.drawState.geoFieldType
-          : ES_GEO_FIELD_TYPE.GEO_POINT,
+        geoFieldNames: this.props.geoFieldNames,
         geometryLabel: this.props.drawState.geometryLabel ? this.props.drawState.geometryLabel : '',
         relation: this.props.drawState.relation
           ? this.props.drawState.relation

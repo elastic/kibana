@@ -7,12 +7,12 @@
  */
 
 import { toSanitizedFieldType } from './fields_utils';
-import type { FieldSpec, RuntimeField } from '../../data/common';
+import type { FieldSpec } from '../../data/common';
 
 describe('fields_utils', () => {
   describe('toSanitizedFieldType', () => {
     const mockedField = {
-      lang: 'lang',
+      lang: 'painless',
       conflictDescriptions: {},
       aggregatable: true,
       name: 'name',
@@ -32,17 +32,6 @@ describe('fields_utils', () => {
           },
         ]
       `);
-    });
-
-    test('should filter runtime fields', async () => {
-      const fields: FieldSpec[] = [
-        {
-          ...mockedField,
-          runtimeField: {} as RuntimeField,
-        },
-      ];
-
-      expect(toSanitizedFieldType(fields)).toMatchInlineSnapshot(`Array []`);
     });
 
     test('should filter non-aggregatable fields', async () => {

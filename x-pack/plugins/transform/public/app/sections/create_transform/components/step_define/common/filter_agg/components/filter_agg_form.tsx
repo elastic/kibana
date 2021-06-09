@@ -16,7 +16,7 @@ import { getFilterAggTypeConfig } from '../config';
 import type { FilterAggType, PivotAggsConfigFilter } from '../types';
 import type { RuntimeMappings } from '../../types';
 import { getKibanaFieldTypeFromEsType } from '../../get_pivot_dropdown_options';
-import { isPopulatedObject } from '../../../../../../../../../common/utils/object_utils';
+import { isPopulatedObject } from '../../../../../../../../../common/shared_imports';
 
 /**
  * Resolves supported filters for provided field.
@@ -39,7 +39,7 @@ export function getSupportedFilterAggs(
     ];
   }
 
-  throw new Error(`The field ${fieldName} does not exist in the index or runtime mappings`);
+  throw new Error(`The field ${fieldName} does not exist in the index or runtime fields`);
 }
 
 /**

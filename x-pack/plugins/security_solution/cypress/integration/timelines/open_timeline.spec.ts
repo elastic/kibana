@@ -27,38 +27,36 @@ import {
   openTimelineById,
   openTimelineFromSettings,
   pinFirstEvent,
-  waitForEventsPanelToBeLoaded,
+  refreshTimelinesUntilTimeLinePresent,
 } from '../../tasks/timeline';
 import { waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
 
 import { TIMELINES_URL } from '../../urls/navigation';
 
 describe('Open timeline', () => {
-  let timelineId: string | null = null;
   before(() => {
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
     waitForTimelinesPanelToBeLoaded();
 
     createTimeline(timeline)
-      .then((response) => {
-        timelineId = response.body.data.persistTimeline.timeline.savedObjectId;
-      })
-      .then(() => {
-        const note = timeline.notes;
-        addNoteToTimeline(note, timelineId!).should((response) => {
-          expect(response.status).to.equal(200);
-          waitForTimelinesPanelToBeLoaded();
-          openTimelineById(timelineId!)
-            .click({ force: true })
-            .then(() => {
-              waitForEventsPanelToBeLoaded();
-              pinFirstEvent();
-              markAsFavorite();
-            });
-        });
+      .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
+      .then((timelineId: string) => {
+        refreshTimelinesUntilTimeLinePresent(timelineId)
+          // This cy.wait is here because we cannot do a pipe on a timeline as that will introduce multiple URL
+          // request responses and indeterminism since on clicks to activates URL's.
+          .then(() => cy.wait(1000))
+          .then(() =>
+            addNoteToTimeline(timeline.notes, timelineId).should((response) =>
+              expect(response.status).to.equal(200)
+            )
+          )
+          .then(() => openTimelineById(timelineId))
+          .then(() => pinFirstEvent())
+          .then(() => markAsFavorite());
       });
   });
+
   describe('Open timeline modal', () => {
     before(() => {
       openTimelineFromSettings();
@@ -97,7 +95,7 @@ describe('Open timeline', () => {
     });
 
     it('should display timeline content - description', () => {
-      cy.get(TIMELINE_DESCRIPTION).should('have.text', timeline.description); // This is the flake part where it sometimes does not show/load the timelines correctly
+      cy.get(TIMELINE_DESCRIPTION).should('have.text', timeline.description);
     });
   });
 });

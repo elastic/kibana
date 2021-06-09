@@ -22,12 +22,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
     'doc_table:legacy': false,
   };
+  const testSubjects = getService('testSubjects');
 
   describe('discover data grid doc table', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
-      await esArchiver.load('discover');
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+      await kibanaServer.importExport.load('discover');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
@@ -38,10 +40,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({});
     });
 
-    it('should show the first 12 rows by default', async function () {
+    it('should show rows by default', async function () {
       // with the default range the number of hits is ~14000
       const rows = await dataGrid.getDocTableRows();
-      expect(rows.length).to.be(12);
+      expect(rows.length).to.be.above(0);
     });
 
     it('should refresh the table content when changing time window', async function () {
@@ -99,6 +101,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
           expect(surroundingActionEl).to.be.ok();
           expect(singleActionEl).to.be.ok();
+          await dataGrid.closeFlyout();
+        });
+      });
+
+      it('should show allow adding columns from the detail panel', async function () {
+        await retry.try(async function () {
+          await dataGrid.clickRowToggle({ isAnchorRow: false, rowIndex: rowToInspect - 1 });
+
+          // add columns
+          const fields = ['_id', '_index', 'agent'];
+          for (const field of fields) {
+            await testSubjects.click(`toggleColumnButton_${field}`);
+          }
+
+          const headerWithFields = await dataGrid.getHeaderFields();
+          expect(headerWithFields.join(' ')).to.contain(fields.join(' '));
+
+          // remove columns
+          for (const field of fields) {
+            await testSubjects.click(`toggleColumnButton_${field}`);
+          }
+
+          const headerWithoutFields = await dataGrid.getHeaderFields();
+          expect(headerWithoutFields.join(' ')).not.to.contain(fields.join(' '));
+
           await dataGrid.closeFlyout();
         });
       });

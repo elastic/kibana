@@ -100,17 +100,20 @@ describe('esaggs expression function - public', () => {
 
     expect(handleEsaggsRequest).toHaveBeenCalledWith({
       abortSignal: mockHandlers.abortSignal,
-      aggs: { foo: 'bar' },
+      aggs: {
+        foo: 'bar',
+        hierarchical: true,
+      },
       filters: undefined,
       indexPattern: {},
       inspectorAdapters: mockHandlers.inspectorAdapters,
-      metricsAtAllLevels: args.metricsAtAllLevels,
       partialRows: args.partialRows,
       query: undefined,
       searchSessionId: 'abc123',
       searchSourceService: startDependencies.searchSource,
       timeFields: args.timeFields,
       timeRange: undefined,
+      getNow: undefined,
     });
   });
 

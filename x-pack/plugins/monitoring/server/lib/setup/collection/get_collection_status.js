@@ -38,18 +38,20 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nod
     filters.push({ term: { cluster_uuid: clusterUuid } });
   }
 
-  const nodesClause = [];
+  const nodesClause = {};
   if (nodeUuid) {
-    nodesClause.push({
-      bool: {
-        should: [
-          { term: { 'node_stats.node_id': nodeUuid } },
-          { term: { 'kibana_stats.kibana.uuid': nodeUuid } },
-          { term: { 'beats_stats.beat.uuid': nodeUuid } },
-          { term: { 'logstash_stats.logstash.uuid': nodeUuid } },
-        ],
+    nodesClause.must = [
+      {
+        bool: {
+          should: [
+            { term: { 'node_stats.node_id': nodeUuid } },
+            { term: { 'kibana_stats.kibana.uuid': nodeUuid } },
+            { term: { 'beats_stats.beat.uuid': nodeUuid } },
+            { term: { 'logstash_stats.logstash.uuid': nodeUuid } },
+          ],
+        },
       },
-    });
+    ];
   }
 
   const params = {
@@ -61,7 +63,7 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nod
       query: {
         bool: {
           filter: filters,
-          must: nodesClause,
+          ...nodesClause,
         },
       },
       aggs: {
@@ -77,9 +79,21 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nod
                 size,
               },
               aggs: {
-                by_timestamp: {
-                  max: {
-                    field: 'timestamp',
+                single_type: {
+                  filter: {
+                    bool: {
+                      should: [
+                        { term: { type: 'node_stats' } },
+                        { term: { 'metricset.name': 'node_stats' } },
+                      ],
+                    },
+                  },
+                  aggs: {
+                    by_timestamp: {
+                      max: {
+                        field: 'timestamp',
+                      },
+                    },
                   },
                 },
               },
@@ -90,9 +104,21 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nod
                 size,
               },
               aggs: {
-                by_timestamp: {
-                  max: {
-                    field: 'timestamp',
+                single_type: {
+                  filter: {
+                    bool: {
+                      should: [
+                        { term: { type: 'kibana_stats' } },
+                        { term: { 'metricset.name': 'stats' } },
+                      ],
+                    },
+                  },
+                  aggs: {
+                    by_timestamp: {
+                      max: {
+                        field: 'timestamp',
+                      },
+                    },
                   },
                 },
               },
@@ -103,21 +129,33 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nod
                 size,
               },
               aggs: {
-                by_timestamp: {
-                  max: {
-                    field: 'timestamp',
+                single_type: {
+                  filter: {
+                    bool: {
+                      should: [
+                        { term: { type: 'beats_stats' } },
+                        { term: { 'metricset.name': 'beats_stats' } },
+                      ],
+                    },
                   },
-                },
-                beat_type: {
-                  terms: {
-                    field: 'beats_stats.beat.type',
-                    size,
-                  },
-                },
-                cluster_uuid: {
-                  terms: {
-                    field: 'cluster_uuid',
-                    size,
+                  aggs: {
+                    by_timestamp: {
+                      max: {
+                        field: 'timestamp',
+                      },
+                    },
+                    beat_type: {
+                      terms: {
+                        field: 'beats_stats.beat.type',
+                        size,
+                      },
+                    },
+                    cluster_uuid: {
+                      terms: {
+                        field: 'cluster_uuid',
+                        size,
+                      },
+                    },
                   },
                 },
               },
@@ -128,15 +166,27 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nod
                 size,
               },
               aggs: {
-                by_timestamp: {
-                  max: {
-                    field: 'timestamp',
+                single_type: {
+                  filter: {
+                    bool: {
+                      should: [
+                        { term: { type: 'logstash_stats' } },
+                        { term: { 'metricset.name': 'stats' } },
+                      ],
+                    },
                   },
-                },
-                cluster_uuid: {
-                  terms: {
-                    field: 'cluster_uuid',
-                    size,
+                  aggs: {
+                    by_timestamp: {
+                      max: {
+                        field: 'timestamp',
+                      },
+                    },
+                    cluster_uuid: {
+                      terms: {
+                        field: 'cluster_uuid',
+                        size,
+                      },
+                    },
                   },
                 },
               },
@@ -224,8 +274,18 @@ function getUuidBucketName(productName) {
   }
 }
 
+function matchesMetricbeatIndex(metricbeatIndex, index) {
+  if (index.includes(metricbeatIndex)) {
+    return true;
+  }
+  if (metricbeatIndex.includes('*')) {
+    return new RegExp(metricbeatIndex).test(index);
+  }
+  return false;
+}
+
 function isBeatFromAPM(bucket) {
-  const beatType = get(bucket, 'beat_type');
+  const beatType = get(bucket, 'single_type.beat_type');
   if (!beatType) {
     return false;
   }
@@ -364,6 +424,7 @@ export const getCollectionStatus = async (
 ) => {
   const config = req.server.config();
   const kibanaUuid = config.get('server.uuid');
+  const metricbeatIndex = config.get('monitoring.ui.metricbeat.index');
   const size = config.get('monitoring.ui.max_bucket_size');
   const hasPermissions = await hasNecessaryPermissions(req);
 
@@ -399,8 +460,18 @@ export const getCollectionStatus = async (
 
   const status = PRODUCTS.reduce((products, product) => {
     const token = product.token || product.name;
-    const indexBuckets = indicesBuckets.filter((bucket) => bucket.key.includes(token));
     const uuidBucketName = getUuidBucketName(product.name);
+    const indexBuckets = indicesBuckets.filter((bucket) => {
+      if (bucket.key.includes(token)) {
+        return true;
+      }
+      if (matchesMetricbeatIndex(metricbeatIndex, bucket.key)) {
+        if (get(bucket, `${uuidBucketName}.buckets`, []).length) {
+          return true;
+        }
+      }
+      return false;
+    });
 
     const productStatus = {
       totalUniqueInstanceCount: 0,
@@ -422,7 +493,9 @@ export const getCollectionStatus = async (
     // If there is a single bucket, then they are fully migrated or fully on the internal collector
     else if (indexBuckets.length === 1) {
       const singleIndexBucket = indexBuckets[0];
-      const isFullyMigrated = singleIndexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN);
+      const isFullyMigrated =
+        singleIndexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN) ||
+        matchesMetricbeatIndex(metricbeatIndex, singleIndexBucket.key);
 
       const map = isFullyMigrated ? fullyMigratedUuidsMap : internalCollectorsUuidsMap;
       const uuidBuckets = get(singleIndexBucket, `${uuidBucketName}.buckets`, []);
@@ -430,17 +503,18 @@ export const getCollectionStatus = async (
         if (shouldSkipBucket(product, bucket)) {
           continue;
         }
-        const { key, by_timestamp: byTimestamp } = bucket;
+        const { key, single_type: singleType } = bucket;
         if (!map[key]) {
+          const { by_timestamp: byTimestamp } = singleType;
           map[key] = { lastTimestamp: get(byTimestamp, 'value') };
           if (product.name === KIBANA_SYSTEM_ID && key === kibanaUuid) {
             map[key].isPrimary = true;
           }
           if (product.name === BEATS_SYSTEM_ID) {
-            map[key].beatType = get(bucket.beat_type, 'buckets[0].key');
+            map[key].beatType = get(bucket.single_type, 'beat_type.buckets[0].key');
           }
-          if (bucket.cluster_uuid) {
-            map[key].clusterUuid = get(bucket.cluster_uuid, 'buckets[0].key', '') || null;
+          if (singleType.cluster_uuid) {
+            map[key].clusterUuid = get(singleType.cluster_uuid, 'buckets[0].key', '') || null;
           }
         }
       }
@@ -502,7 +576,8 @@ export const getCollectionStatus = async (
       for (const indexBucket of indexBuckets) {
         const isFullyMigrated =
           considerAllInstancesMigrated ||
-          indexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN);
+          indexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN) ||
+          matchesMetricbeatIndex(metricbeatIndex, indexBucket.key);
         const map = isFullyMigrated ? fullyMigratedUuidsMap : internalCollectorsUuidsMap;
         const otherMap = !isFullyMigrated ? fullyMigratedUuidsMap : internalCollectorsUuidsMap;
 
@@ -512,7 +587,8 @@ export const getCollectionStatus = async (
             continue;
           }
 
-          const { key, by_timestamp: byTimestamp } = bucket;
+          const { key, single_type: singleType } = bucket;
+          const { by_timestamp: byTimestamp } = singleType;
           if (!map[key]) {
             if (otherMap[key]) {
               partiallyMigratedUuidsMap[key] = otherMap[key] || {};
@@ -523,10 +599,10 @@ export const getCollectionStatus = async (
                 map[key].isPrimary = true;
               }
               if (product.name === BEATS_SYSTEM_ID) {
-                map[key].beatType = get(bucket.beat_type, 'buckets[0].key');
+                map[key].beatType = get(singleType.beat_type, 'buckets[0].key');
               }
-              if (bucket.cluster_uuid) {
-                map[key].clusterUuid = get(bucket.cluster_uuid, 'buckets[0].key', '') || null;
+              if (singleType.cluster_uuid) {
+                map[key].clusterUuid = get(singleType.cluster_uuid, 'buckets[0].key', '') || null;
               }
             }
           }

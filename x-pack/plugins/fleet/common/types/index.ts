@@ -7,6 +7,7 @@
 
 export * from './models';
 export * from './rest_spec';
+import type { PreconfiguredAgentPolicy, PreconfiguredPackage } from './models/preconfiguration';
 
 export interface FleetConfigType {
   enabled: boolean;
@@ -14,24 +15,16 @@ export interface FleetConfigType {
   registryProxyUrl?: string;
   agents: {
     enabled: boolean;
-    fleetServerEnabled: boolean;
-    tlsCheckDisabled: boolean;
-    pollingRequestTimeout: number;
-    maxConcurrentConnections: number;
-    kibana: {
-      host?: string[] | string;
-      ca_sha256?: string;
-    };
     elasticsearch: {
-      host?: string;
+      hosts?: string[];
       ca_sha256?: string;
     };
     fleet_server?: {
       hosts?: string[];
     };
-    agentPolicyRolloutRateLimitIntervalMs: number;
-    agentPolicyRolloutRateLimitRequestPerInterval: number;
   };
+  agentPolicies?: PreconfiguredAgentPolicy[];
+  packages?: PreconfiguredPackage[];
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`

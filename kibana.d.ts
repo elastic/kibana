@@ -13,18 +13,3 @@ import * as Public from 'src/core/public';
 import * as Server from 'src/core/server';
 
 export { Public, Server };
-
-/**
- * All exports from TS ambient definitions (where types are added for JS source in a .d.ts file).
- */
-import * as LegacyKibanaServer from './src/legacy/server/kbn_server';
-
-/**
- *  Re-export legacy types under a namespace.
- */
-export namespace Legacy {
-  export type KibanaConfig = LegacyKibanaServer.KibanaConfig;
-  export type Request = LegacyKibanaServer.Request;
-  export type ResponseToolkit = LegacyKibanaServer.ResponseToolkit;
-  export type Server = LegacyKibanaServer.Server;
-}

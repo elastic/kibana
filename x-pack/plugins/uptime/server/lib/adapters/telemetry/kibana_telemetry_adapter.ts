@@ -52,20 +52,104 @@ export class KibanaTelemetryAdapter {
             dateRangeStart: { type: 'array', items: { type: 'date' } },
             monitor_frequency: { type: 'array', items: { type: 'long' } },
             monitor_name_stats: {
-              avg_length: { type: 'float' },
-              max_length: { type: 'long' },
-              min_length: { type: 'long' },
+              avg_length: {
+                type: 'float',
+                _meta: {
+                  description: 'This field represents the average length of monitor names',
+                },
+              },
+              max_length: {
+                type: 'long',
+                _meta: {
+                  description: 'This field represents the max length of monitor names',
+                },
+              },
+              min_length: {
+                type: 'long',
+                _meta: {
+                  description: 'This field represents the min length of monitor names',
+                },
+              },
             },
             monitor_page: { type: 'long' },
-            no_of_unique_monitors: { type: 'long' },
-            no_of_unique_observer_locations: { type: 'long' },
+            no_of_unique_monitors: {
+              type: 'long',
+              _meta: {
+                description: 'This field represents the number of unique configured monitors',
+              },
+            },
+            no_of_unique_observer_locations: {
+              type: 'long',
+              _meta: {
+                description:
+                  'This field represents the number of unique monitor observer locations',
+              },
+            },
             observer_location_name_stats: {
-              avg_length: { type: 'float' },
-              max_length: { type: 'long' },
-              min_length: { type: 'long' },
+              avg_length: {
+                type: 'float',
+                _meta: {
+                  description:
+                    'This field represents the average length of monitor observer location names',
+                },
+              },
+              max_length: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'This field represents the max length of monitor observer location names',
+                },
+              },
+              min_length: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'This field represents the min length of monitor observer location names',
+                },
+              },
             },
             overview_page: { type: 'long' },
             settings_page: { type: 'long' },
+            fleet_monitor_name_stats: {
+              avg_length: {
+                type: 'float',
+                _meta: {
+                  description:
+                    'This field represents the average length of fleet managed monitor names',
+                },
+              },
+              max_length: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'This field represents the max length of fleet managed monitor names',
+                },
+              },
+              min_length: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'This field represents the min length of fleet managed monitor names',
+                },
+              },
+            },
+            fleet_monitor_frequency: {
+              type: 'array',
+              items: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'This field represents the average the monitor frequency of fleet managed monitors',
+                },
+              },
+            },
+            fleet_no_of_unique_monitors: {
+              type: 'long',
+              _meta: {
+                description:
+                  'This field represents the number of unique configured fleet managed monitors',
+              },
+            },
           },
         },
       },
@@ -74,6 +158,7 @@ export class KibanaTelemetryAdapter {
         if (savedObjectsClient) {
           const uptimeEsClient = createUptimeESClient({ esClient, savedObjectsClient });
           await this.countNoOfUniqueMonitorAndLocations(uptimeEsClient, savedObjectsClient);
+          await this.countNoOfUniqueFleetManagedMonitors(uptimeEsClient);
         }
         const report = this.getReport();
         return { last_24_hours: { hits: { ...report } } };
@@ -218,6 +303,79 @@ export class KibanaTelemetryAdapter {
     return bucket;
   }
 
+  public static async countNoOfUniqueFleetManagedMonitors(callCluster: UptimeESClient) {
+    const params = {
+      index: 'synthetics-*',
+      body: {
+        query: {
+          bool: {
+            must: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: 'now-1d/d',
+                    lt: 'now',
+                  },
+                },
+              },
+              {
+                term: {
+                  'monitor.fleet_managed': true,
+                },
+              },
+            ],
+          },
+        },
+        size: 0,
+        aggs: {
+          unique_monitors: {
+            cardinality: {
+              field: 'monitor.id',
+            },
+          },
+          monitor_name: {
+            string_stats: {
+              field: 'monitor.name',
+            },
+          },
+          monitors: {
+            terms: {
+              field: 'monitor.id',
+              size: 1000,
+            },
+            aggs: {
+              docs: {
+                top_hits: {
+                  size: 1,
+                  _source: ['monitor.timespan'],
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const { body: result } = await callCluster.search(params);
+
+    const numberOfUniqueMonitors: number = result?.aggregations?.unique_monitors?.value ?? 0;
+    const monitorNameStats = result?.aggregations?.monitor_name;
+    const uniqueMonitors: any = result?.aggregations?.monitors.buckets;
+
+    const bucketId = this.getBucketToIncrement();
+    const bucket = this.collector[bucketId];
+
+    bucket.fleet_no_of_unique_monitors = numberOfUniqueMonitors;
+    bucket.fleet_monitor_name_stats = {
+      min_length: monitorNameStats?.min_length ?? 0,
+      max_length: monitorNameStats?.max_length ?? 0,
+      avg_length: +(monitorNameStats?.avg_length?.toFixed(2) ?? 0),
+    };
+
+    bucket.fleet_monitor_frequency = this.getMonitorsFrequency(uniqueMonitors);
+    return bucket;
+  }
+
   private static getMonitorsFrequency(uniqueMonitors = []) {
     const frequencies: number[] = [];
     uniqueMonitors
@@ -285,6 +443,14 @@ export class KibanaTelemetryAdapter {
         dateRangeEnd: [],
         autoRefreshEnabled: false,
         autorefreshInterval: [],
+
+        fleet_no_of_unique_monitors: 0,
+        fleet_monitor_frequency: [],
+        fleet_monitor_name_stats: {
+          min_length: 0,
+          max_length: 0,
+          avg_length: 0,
+        },
       };
     }
     return bucketId;

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { setMockActions, setMockValues } from '../../../__mocks__/kea.mock';
+import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
+import '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiPageHeader } from '@elastic/eui';
 
@@ -32,10 +33,12 @@ describe('RelevanceTuningLayout', () => {
     setMockActions(actions);
   });
 
-  const subject = () => shallow(<RelevanceTuningLayout engineBreadcrumb={['test']} />);
+  const subject = () => shallow(<RelevanceTuningLayout />);
+  const findButtons = (wrapper: ShallowWrapper) =>
+    wrapper.find(EuiPageHeader).prop('rightSideItems') as React.ReactElement[];
 
   it('renders a Save button that will save the current changes', () => {
-    const buttons = subject().find(EuiPageHeader).prop('rightSideItems') as React.ReactElement[];
+    const buttons = findButtons(subject());
     expect(buttons.length).toBe(2);
     const saveButton = shallow(buttons[0]);
     saveButton.simulate('click');
@@ -43,7 +46,7 @@ describe('RelevanceTuningLayout', () => {
   });
 
   it('renders a Reset button that will remove all weights and boosts', () => {
-    const buttons = subject().find(EuiPageHeader).prop('rightSideItems') as React.ReactElement[];
+    const buttons = findButtons(subject());
     expect(buttons.length).toBe(2);
     const resetButton = shallow(buttons[1]);
     resetButton.simulate('click');
@@ -55,7 +58,7 @@ describe('RelevanceTuningLayout', () => {
       ...values,
       engineHasSchemaFields: false,
     });
-    const buttons = subject().find(EuiPageHeader).prop('rightSideItems') as React.ReactElement[];
+    const buttons = findButtons(subject());
     expect(buttons.length).toBe(0);
   });
 });

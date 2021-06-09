@@ -187,7 +187,7 @@ export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTy
         <EuiFlexGroup>
           {includedFeatures.map((featureId, i) => (
             <EuiFlexItem key={i}>
-              <EuiPanel hasShadow={false} color="subdued" paddingSize="l">
+              <EuiPanel hasShadow={false} paddingSize="l">
                 <FeaturesRouter featureId={featureId as IncludedFeatureIds} />
               </EuiPanel>
             </EuiFlexItem>

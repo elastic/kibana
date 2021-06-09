@@ -12,32 +12,21 @@ import {
   AlertInstanceState,
   AlertServices,
 } from '../../../../../alerting/server';
-import { SignalHit, SignalSearchResponse, WrappedSignalHit } from './types';
-import { RuleAlertAction } from '../../../../common/detection_engine/types';
-import { RuleTypeParams, RefreshTypes } from '../types';
+import { AlertAttributes, SignalHit, SignalSearchResponse, WrappedSignalHit } from './types';
+import { RefreshTypes } from '../types';
 import { generateId, makeFloatString, errorAggregator } from './utils';
 import { buildBulkBody } from './build_bulk_body';
 import { BuildRuleMessage } from './rule_messages';
-import { Logger } from '../../../../../../../src/core/server';
+import { Logger, SavedObject } from '../../../../../../../src/core/server';
 import { isEventTypeSignal } from './build_event_type_signal';
 
 interface SingleBulkCreateParams {
   filteredEvents: SignalSearchResponse;
-  ruleParams: RuleTypeParams;
+  ruleSO: SavedObject<AlertAttributes>;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   id: string;
   signalsIndex: string;
-  actions: RuleAlertAction[];
-  name: string;
-  createdAt: string;
-  createdBy: string;
-  updatedAt: string;
-  updatedBy: string;
-  interval: string;
-  enabled: boolean;
-  tags: string[];
-  throttle: string;
   refresh: RefreshTypes;
   buildRuleMessage: BuildRuleMessage;
 }
@@ -97,23 +86,14 @@ export interface BulkInsertSignalsResponse {
 export const singleBulkCreate = async ({
   buildRuleMessage,
   filteredEvents,
-  ruleParams,
+  ruleSO,
   services,
   logger,
   id,
   signalsIndex,
-  actions,
-  name,
-  createdAt,
-  createdBy,
-  updatedAt,
-  updatedBy,
-  interval,
-  enabled,
   refresh,
-  tags,
-  throttle,
 }: SingleBulkCreateParams): Promise<SingleBulkCreateResponse> => {
+  const ruleParams = ruleSO.attributes.params;
   filteredEvents.hits.hits = filterDuplicateRules(id, filteredEvents);
   logger.debug(buildRuleMessage(`about to bulk create ${filteredEvents.hits.hits.length} events`));
   if (filteredEvents.hits.hits.length === 0) {
@@ -141,21 +121,7 @@ export const singleBulkCreate = async ({
         ),
       },
     },
-    buildBulkBody({
-      doc,
-      ruleParams,
-      id,
-      actions,
-      name,
-      createdAt,
-      createdBy,
-      updatedAt,
-      updatedBy,
-      interval,
-      enabled,
-      tags,
-      throttle,
-    }),
+    buildBulkBody(ruleSO, doc),
   ]);
   const start = performance.now();
   const { body: response } = await services.scopedClusterClient.asCurrentUser.bulk({
@@ -170,26 +136,11 @@ export const singleBulkCreate = async ({
     )
   );
   logger.debug(buildRuleMessage(`took property says bulk took: ${response.took} milliseconds`));
-
   const createdItems = filteredEvents.hits.hits
     .map((doc, index) => ({
       _id: response.items[index].create?._id ?? '',
       _index: response.items[index].create?._index ?? '',
-      ...buildBulkBody({
-        doc,
-        ruleParams,
-        id,
-        actions,
-        name,
-        createdAt,
-        createdBy,
-        updatedAt,
-        updatedBy,
-        interval,
-        enabled,
-        tags,
-        throttle,
-      }),
+      ...buildBulkBody(ruleSO, doc),
     }))
     .filter((_, index) => get(response.items[index], 'create.status') === 201);
   const createdItemsCount = createdItems.length;

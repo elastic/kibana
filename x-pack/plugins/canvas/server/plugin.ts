@@ -6,25 +6,39 @@
  */
 
 import { CoreSetup, PluginInitializerContext, Plugin, Logger, CoreStart } from 'src/core/server';
+import {
+  PluginSetup as DataPluginSetup,
+  PluginStart as DataPluginStart,
+} from 'src/plugins/data/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { HomeServerPluginSetup } from 'src/plugins/home/server';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import { ESSQL_SEARCH_STRATEGY } from '../common/lib/constants';
+import { ReportingSetup } from '../../reporting/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import { getCanvasFeature } from './feature';
 import { initRoutes } from './routes';
 import { registerCanvasUsageCollector } from './collectors';
 import { loadSampleData } from './sample_data';
 import { setupInterpreter } from './setup_interpreter';
 import { customElementType, workpadType, workpadTemplateType } from './saved_objects';
 import { initializeTemplates } from './templates';
+import { essqlSearchStrategyProvider } from './lib/essql_strategy';
+import { getUISettings } from './ui_settings';
 
 interface PluginsSetup {
   expressions: ExpressionsServerSetup;
   features: FeaturesPluginSetup;
   home: HomeServerPluginSetup;
   bfetch: BfetchServerSetup;
+  data: DataPluginSetup;
+  reporting?: ReportingSetup;
   usageCollection?: UsageCollectionSetup;
+}
+
+interface PluginsStart {
+  data: DataPluginStart;
 }
 
 export class CanvasPlugin implements Plugin {
@@ -33,39 +47,13 @@ export class CanvasPlugin implements Plugin {
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(coreSetup: CoreSetup, plugins: PluginsSetup) {
+  public setup(coreSetup: CoreSetup<PluginsStart>, plugins: PluginsSetup) {
+    coreSetup.uiSettings.register(getUISettings());
     coreSetup.savedObjects.registerType(customElementType);
     coreSetup.savedObjects.registerType(workpadType);
     coreSetup.savedObjects.registerType(workpadTemplateType);
 
-    plugins.features.registerKibanaFeature({
-      id: 'canvas',
-      name: 'Canvas',
-      order: 300,
-      category: DEFAULT_APP_CATEGORIES.kibana,
-      app: ['canvas', 'kibana'],
-      catalogue: ['canvas'],
-      privileges: {
-        all: {
-          app: ['canvas', 'kibana'],
-          catalogue: ['canvas'],
-          savedObject: {
-            all: ['canvas-workpad', 'canvas-element'],
-            read: ['index-pattern'],
-          },
-          ui: ['save', 'show'],
-        },
-        read: {
-          app: ['canvas', 'kibana'],
-          catalogue: ['canvas'],
-          savedObject: {
-            all: [],
-            read: ['index-pattern', 'canvas-workpad', 'canvas-element'],
-          },
-          ui: ['show'],
-        },
-      },
-    });
+    plugins.features.registerKibanaFeature(getCanvasFeature(plugins));
 
     const canvasRouter = coreSetup.http.createRouter();
 
@@ -87,6 +75,11 @@ export class CanvasPlugin implements Plugin {
     registerCanvasUsageCollector(plugins.usageCollection, globalConfig.kibana.index);
 
     setupInterpreter(plugins.expressions);
+
+    coreSetup.getStartServices().then(([_, depsStart]) => {
+      const strategy = essqlSearchStrategyProvider(depsStart.data);
+      plugins.data.search.registerSearchStrategy(ESSQL_SEARCH_STRATEGY, strategy);
+    });
   }
 
   public start(coreStart: CoreStart) {

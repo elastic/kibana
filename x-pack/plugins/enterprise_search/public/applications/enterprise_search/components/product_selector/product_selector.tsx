@@ -29,8 +29,10 @@ import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/
 
 import AppSearchImage from '../../assets/app_search.png';
 import WorkplaceSearchImage from '../../assets/workplace_search.png';
+import { LicenseCallout } from '../license_callout';
 import { ProductCard } from '../product_card';
 import { SetupGuideCta } from '../setup_guide';
+import { TrialCallout } from '../trial_callout';
 
 interface ProductSelectorProps {
   access: {
@@ -53,6 +55,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ access }) => {
       <SendTelemetry action="viewed" metric="overview" />
 
       <EuiPageBody>
+        <TrialCallout />
         <EuiPageHeader>
           <EuiPageHeaderSection className="enterpriseSearchOverview__header">
             <EuiTitle size="l">
@@ -88,8 +91,8 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ access }) => {
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
-          <EuiSpacer />
-          {!config.host && <SetupGuideCta />}
+          <EuiSpacer size="xxl" />
+          {config.host ? <LicenseCallout /> : <SetupGuideCta />}
         </EuiPageContentBody>
       </EuiPageBody>
     </EuiPage>

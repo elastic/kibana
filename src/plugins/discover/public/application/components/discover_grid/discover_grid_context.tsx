@@ -17,6 +17,8 @@ export interface GridContext {
   onFilter: DocViewFilterFn;
   indexPattern: IndexPattern;
   isDarkMode: boolean;
+  selectedDocs: string[];
+  setSelectedDocs: (selected: string[]) => void;
 }
 
 const defaultContext = ({} as unknown) as GridContext;

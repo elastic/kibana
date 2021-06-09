@@ -7,6 +7,6 @@
 
 export default function ({ loadTestFile }) {
   describe('ccs test', function () {
-    loadTestFile(require.resolve('./ccs'));
+    loadTestFile(require.resolve('./ccs_discover'));
   });
 }

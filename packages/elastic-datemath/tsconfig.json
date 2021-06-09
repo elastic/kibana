@@ -1,10 +1,11 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "incremental": false,
-    "outDir": "./target",
     "declaration": true,
     "declarationMap": true,
+    "incremental": true,
+    "outDir": "target",
+    "rootDir": "src",
     "sourceMap": true,
     "sourceRoot": "../../../../packages/elastic-datemath/src",
     "types": [

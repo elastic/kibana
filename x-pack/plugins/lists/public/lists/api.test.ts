@@ -5,6 +5,15 @@
  * 2.0.
  */
 
+import {
+  createListIndex,
+  deleteList,
+  exportList,
+  findLists,
+  importList,
+  readListIndex,
+} from '@kbn/securitysolution-list-api';
+
 import { HttpFetchOptions } from '../../../../../src/core/public';
 import { httpServiceMock } from '../../../../../src/core/public/mocks';
 import { getAcknowledgeSchemaResponseMock } from '../../common/schemas/response/acknowledge_schema.mock';
@@ -13,20 +22,14 @@ import { getListItemIndexExistSchemaResponseMock } from '../../common/schemas/re
 import { getFoundListSchemaMock } from '../../common/schemas/response/found_list_schema.mock';
 
 import {
-  createListIndex,
-  deleteList,
-  exportList,
-  findLists,
-  importList,
-  readListIndex,
-} from './api';
-import {
   ApiPayload,
   DeleteListParams,
   ExportListParams,
   FindListsParams,
   ImportListParams,
 } from './types';
+
+// TODO: This test should be ported to: packages/kbn-securitysolution-list-api/src/list_api/index.test.ts once the mocks are ported from Kibana core
 
 describe('Value Lists API', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createStartContract>;

@@ -11,7 +11,7 @@ import { of } from 'rxjs';
 import type { SpacesApi, SpacesApiUi, SpacesApiUiComponent } from './api';
 
 const createApiMock = (): jest.Mocked<SpacesApi> => ({
-  activeSpace$: of(),
+  getActiveSpace$: jest.fn().mockReturnValue(of()),
   getActiveSpace: jest.fn(),
   ui: createApiUiMock(),
 });

@@ -7,11 +7,12 @@
 
 import '../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockValues, setMockActions } from '../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
+import { mockLocation, mockUseParams } from '../../../__mocks__/react_router';
+import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 import { contentSources } from '../../__mocks__/content_sources.mock';
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
 import { Route, Switch } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
@@ -30,6 +31,7 @@ import { SourceRouter } from './source_router';
 
 describe('SourceRouter', () => {
   const initializeSource = jest.fn();
+  const resetSourceState = jest.fn();
   const contentSource = contentSources[1];
   const customSource = contentSources[0];
   const mockValues = {
@@ -40,10 +42,11 @@ describe('SourceRouter', () => {
   beforeEach(() => {
     setMockActions({
       initializeSource,
+      resetSourceState,
     });
     setMockValues({ ...mockValues });
-    (useParams as jest.Mock).mockImplementationOnce(() => ({
-      sourceId: '1',
+    mockUseParams.mockImplementationOnce(() => ({
+      sourceId: contentSource.id,
     }));
   });
 
@@ -88,7 +91,7 @@ describe('SourceRouter', () => {
     const contentBreadCrumb = wrapper.find(SetPageChrome).at(1);
     const settingsBreadCrumb = wrapper.find(SetPageChrome).at(2);
 
-    expect(overviewBreadCrumb.prop('trail')).toEqual([...loadingBreadcrumbs, NAV.OVERVIEW]);
+    expect(overviewBreadCrumb.prop('trail')).toEqual([...loadingBreadcrumbs]);
     expect(contentBreadCrumb.prop('trail')).toEqual([...loadingBreadcrumbs, NAV.CONTENT]);
     expect(settingsBreadCrumb.prop('trail')).toEqual([...loadingBreadcrumbs, NAV.SETTINGS]);
   });
@@ -113,5 +116,15 @@ describe('SourceRouter', () => {
       ...loadingBreadcrumbs,
       NAV.DISPLAY_SETTINGS,
     ]);
+  });
+
+  describe('reset state', () => {
+    it('resets state when leaving source tree', () => {
+      mockLocation.pathname = '/home';
+      shallow(<SourceRouter />);
+      unmountHandler();
+
+      expect(resetSourceState).toHaveBeenCalled();
+    });
   });
 });

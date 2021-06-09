@@ -20,7 +20,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     after(function unloadMakelogs() {
-      return esArchiver.unload('logstash_functional');
+      return esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
     loadTestFile(require.resolve('./_saved_queries'));
@@ -47,6 +47,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_data_grid_doc_navigation'));
     loadTestFile(require.resolve('./_data_grid_doc_table'));
     loadTestFile(require.resolve('./_indexpattern_with_unmapped_fields'));
+    loadTestFile(require.resolve('./_runtime_fields_editor'));
     loadTestFile(require.resolve('./_huge_fields'));
   });
 }

@@ -1,8 +1,8 @@
 def call(script, label, enableJunitProcessing = false) {
-  def extraConfig = enableJunitProcessing ? "" : "--config ${env.WORKSPACE}/kibana/.ci/runbld_no_junit.yml"
+  // def extraConfig = enableJunitProcessing ? "" : "--config ${env.WORKSPACE}/kibana/.ci/runbld_no_junit.yml"
 
   sh(
-    script: "/usr/local/bin/runbld -d '${pwd()}' ${extraConfig} ${script}",
+    script: "bash ${script}",
     label: label ?: script
   )
 }

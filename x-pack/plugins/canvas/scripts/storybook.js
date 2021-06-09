@@ -44,7 +44,7 @@ run(
           'webpack',
           '--config',
           'x-pack/plugins/canvas/storybook/webpack.dll.config.js',
-          '--progress',
+          ...(process.stdout.isTTY && !process.env.CI ? ['--progress'] : []),
           '--hide-modules',
           '--display-entrypoints',
           'false',

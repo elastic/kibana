@@ -9,7 +9,7 @@
 import { getSplits } from '../../helpers/get_splits';
 import { getLastMetric } from '../../helpers/get_last_metric';
 import { mapBucket } from '../../helpers/map_bucket';
-import { METRIC_TYPES } from '../../../../../common/metric_types';
+import { METRIC_TYPES } from '../../../../../common/enums';
 
 export function stdMetric(bucket, panel, series, meta, extractFields) {
   return (next) => async (results) => {

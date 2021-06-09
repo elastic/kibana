@@ -4,7 +4,41 @@
 
 Selecting a <<services,*service*>> brings you to the *Service overview*.
 The *Service overview* contains a wide variety of charts and tables that provide
-visibility into how a service performs across your infrastructure.
+high-level visibility into how a service is performing across your infrastructure:
+
+* Service details like service version, runtime version, framework, and agent name and version
+* Container and orchestration information
+* Cloud provider, machine type, and availability zone
+* Latency, throughput, and errors over time
+* Service dependencies
+
+[discrete]
+[[service-time-comparison]]
+=== Time series comparison
+
+Comparing how a service performs relative to a previous time frame can offer additional insight into
+the health of your services. For example, has latency been slowly increasing over time, or did the service
+experience a sudden spike--enabling a time series comparison can provide the answer.
+
+[role="screenshot"]
+image::apm/images/time-series-comparison.png[Time series comparison]
+
+Select the *Comparison* box to enable or disable time series comparison.
+The time comparison options are based on the selected time filter range:
+
+[options="header"]
+|====
+|Time filter | Time comparison options
+
+|≤ 24 hours
+|One day or one week
+
+|> 24 hours and ≤ 7 days
+|One week
+
+|> 7 days
+|An identical amount of time immediately before the selected time range
+|====
 
 [discrete]
 [[service-latency]]
@@ -111,3 +145,7 @@ image::apm/images/metadata-icons.png[Service metadata]
 * Availability zones
 * Machine types
 * Project ID
+
+*Alerts*
+
+* Recently fired alerts

@@ -21,6 +21,8 @@ import { useGlobalFullScreen } from '../../../common/containers/use_full_screen'
 import * as i18n from '../translations';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
+import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
+import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 
 const EVENTS_HISTOGRAM_ID = 'eventsHistogramQuery';
@@ -96,6 +98,8 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
         defaultModel={eventsDefaultModel}
         end={endDate}
         id={TimelineId.hostsPageEvents}
+        renderCellValue={DefaultCellRenderer}
+        rowRenderers={defaultRowRenderers}
         scopeId={SourcererScopeName.default}
         start={startDate}
         pageFilters={pageFilters}

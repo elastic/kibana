@@ -66,12 +66,6 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
           }),
           options: jobIdOptions.map((v) => ({ label: v })),
         },
-        {
-          label: i18n.translate('xpack.ml.jobSelector.groupOptionsLabel', {
-            defaultMessage: 'Groups',
-          }),
-          options: groupIdOptions.map((v) => ({ label: v })),
-        },
       ]);
     } catch (e) {
       // TODO add error handling
@@ -105,15 +99,13 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
     <EuiFormRow
       fullWidth
       label={
-        <FormattedMessage
-          id="xpack.ml.jobSelector.formControlLabel"
-          defaultMessage="Select jobs or groups"
-        />
+        <FormattedMessage id="xpack.ml.jobSelector.formControlLabel" defaultMessage="Select job" />
       }
       isInvalid={!!errors?.length}
       error={errors}
     >
       <EuiComboBox<string>
+        singleSelection
         selectedOptions={selectedOptions}
         options={options}
         onChange={onSelectionChange}

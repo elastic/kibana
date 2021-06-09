@@ -10,7 +10,7 @@ jest.useFakeTimers();
 
 import sinon from 'sinon';
 import moment from 'moment';
-import { Timefilter } from './timefilter';
+import { AutoRefreshDoneFn, Timefilter } from './timefilter';
 import { Subscription } from 'rxjs';
 import { TimeRange, RefreshInterval } from '../../../common';
 import { createNowProviderMock } from '../../now_provider/mocks';
@@ -121,7 +121,7 @@ describe('setRefreshInterval', () => {
   beforeEach(() => {
     update = sinon.spy();
     fetch = sinon.spy();
-    autoRefreshFetch = sinon.spy();
+    autoRefreshFetch = sinon.spy((done) => done());
     timefilter.setRefreshInterval({
       pause: false,
       value: 0,
@@ -342,5 +342,46 @@ describe('calculateBounds', () => {
 
     stubNowTime('not_a_parsable_date');
     expect(() => timefilter.calculateBounds(timeRange)).toThrowError();
+  });
+});
+
+describe('getAutoRefreshFetch$', () => {
+  test('next auto refresh loop starts after "done" called', () => {
+    const autoRefreshFetch = jest.fn();
+    let doneCb: AutoRefreshDoneFn | undefined;
+    timefilter.getAutoRefreshFetch$().subscribe((done) => {
+      autoRefreshFetch();
+      doneCb = done;
+    });
+    timefilter.setRefreshInterval({ pause: false, value: 1000 });
+
+    expect(autoRefreshFetch).toBeCalledTimes(0);
+    jest.advanceTimersByTime(5000);
+    expect(autoRefreshFetch).toBeCalledTimes(1);
+
+    if (doneCb) doneCb();
+
+    jest.advanceTimersByTime(1005);
+    expect(autoRefreshFetch).toBeCalledTimes(2);
+  });
+
+  test('new getAutoRefreshFetch$ subscription restarts refresh loop', () => {
+    const autoRefreshFetch = jest.fn();
+    const fetch$ = timefilter.getAutoRefreshFetch$();
+    const sub1 = fetch$.subscribe((done) => {
+      autoRefreshFetch();
+      // this done will be never called, but loop will be reset by another subscription
+    });
+    timefilter.setRefreshInterval({ pause: false, value: 1000 });
+
+    expect(autoRefreshFetch).toBeCalledTimes(0);
+    jest.advanceTimersByTime(5000);
+    expect(autoRefreshFetch).toBeCalledTimes(1);
+
+    fetch$.subscribe(autoRefreshFetch);
+    expect(autoRefreshFetch).toBeCalledTimes(1);
+    sub1.unsubscribe();
+    jest.advanceTimersByTime(1005);
+    expect(autoRefreshFetch).toBeCalledTimes(2);
   });
 });

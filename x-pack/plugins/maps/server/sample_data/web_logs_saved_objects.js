@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { emsWorldLayerId } from '../../common';
 
 const layerList = [
   {
@@ -29,7 +30,7 @@ const layerList = [
     alpha: 0.5,
     sourceDescriptor: {
       type: 'EMS_FILE',
-      id: 'world_countries',
+      id: emsWorldLayerId,
       tooltipProperties: ['name', 'iso2'],
     },
     visible: true,

@@ -1,0 +1,135 @@
+[role="xpack"]
+[[action-types]]
+== Connectors
+
+Connectors provide a central place to store connection information for services and integrations with third party systems. Actions are instantiations of a connector that are linked to rules and run as background tasks on the {kib} server when rule conditions are met. {kib} provides the following types of connectors:
+
+[cols="2"]
+|===
+
+a| <<email-action-type, Email>>
+
+| Send email from your server.
+
+a| <<resilient-action-type, IBM Resilient>>
+
+| Create an incident in IBM Resilient.
+
+a| <<index-action-type, Index>>
+
+| Index data into Elasticsearch.
+
+a| <<jira-action-type, Jira>>
+
+| Create an incident in Jira.
+
+a| <<teams-action-type, Microsoft Teams>>
+
+| Send a message to a Microsoft Teams channel.
+
+a| <<pagerduty-action-type, PagerDuty>>
+
+| Send an event in PagerDuty.
+
+a| <<server-log-action-type, ServerLog>>
+
+| Add a message to a Kibana log.
+
+a| <<servicenow-action-type, ServiceNow>>
+
+| Create an incident in ServiceNow.
+
+a| <<slack-action-type, Slack>>
+
+| Send a message to a Slack channel or user.
+
+a| <<webhook-action-type, Webhook>>
+
+| Send a request to a web service.
+|===
+
+[NOTE]
+==============================================
+Some connector types are paid commercial features, while others are free.
+For a comparison of the Elastic subscription levels,
+see https://www.elastic.co/subscriptions[the subscription page].
+==============================================
+
+[float]
+[[connector-management]]
+=== Managing Connectors
+
+Rules use *Connectors* to route actions to different destinations like log files, ticketing systems, and messaging tools. While each {kib} app can offer their own types of rules, they typically share connectors. The *Connectors* tab offers a central place to view and manage all the connectors in the current space.
+
+For more information on connectors and the types of actions available see <<action-types>>.
+
+[role="screenshot"]
+image::images/connector-listing.png[Example connector listing in the Rules and Connectors UI]
+
+[float]
+=== Required permissions
+
+Access to connectors is granted based on your privileges to alerting-enabled features. See <<alerting-security, Alerting Security>> for more information.
+
+[float]
+=== Connector networking configuration
+
+Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+
+[float]
+[[connectors-list]]
+=== Connector list
+
+The *Connectors* tab lists all connectors in the current space. The *search bar* can be used to find specific connectors by name and/or type.
+
+[role="screenshot"]
+image::images/connector-filter-by-search.png[Filtering the connector list using the search bar]
+
+
+The *type* dropdown also lets you filter to a subset of connector types.
+
+[role="screenshot"]
+image::images/connector-filter-by-type.png[Filtering the connector list by types of connectors]
+
+You can delete individual connectors using the trash icon. Connectors can also be deleted in bulk by multi-selecting them and clicking the *Delete* button to the left of the search box. 
+
+[role="screenshot"]
+image::images/connector-delete.png[Deleting connectors individually or in bulk]
+
+[NOTE]
+============================================================================
+You can delete a connector even if there are still actions referencing it.
+When this happens the action will fail to execute, and appear as errors in the {kib} logs.
+============================================================================
+
+[float]
+[[creating-new-connector]]
+=== Creating a new connector
+
+New connectors can be created by clicking the *Create connector* button, which will guide you to select the type of connector and configure its properties. Refer to <<action-types>> for the types of connectors available and how to configure them. Once you create a connector it will be made available to you anytime you set up an action in the current space.
+
+[role="screenshot"]
+image::images/connector-select-type.png[Connector select type]
+
+[float]
+[[importing-and-exporting-connectors]]
+=== Importing and exporting connectors
+
+To import and export connectors, use the <<managing-saved-objects, Saved Objects Management UI>>.
+After a successful import, the proper banner is displayed:
+[role="screenshot"]
+image::images/coonectors-import-banner.png[Connectors import banner, width=50%]
+
+If a connector is missing user sensitive information because of the import,  a **Fix** button appears in the list view.
+[role="screenshot"]
+image::images/connectors-with-missing-secrets.png[Connectors with missing secrets]
+
+[float]
+[[create-connectors]]
+=== Preconfigured connectors
+
+For out-of-the-box and standardized connectors, you can <<preconfigured-connector-example, preconfigure connectors>>
+before {kib} starts.
+
+
+include::connectors/index.asciidoc[]

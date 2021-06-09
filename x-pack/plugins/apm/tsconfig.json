@@ -38,8 +38,10 @@
     { "path": "../ml/tsconfig.json" },
     { "path": "../observability/tsconfig.json" },
     { "path": "../reporting/tsconfig.json" },
+    { "path": "../rule_registry/tsconfig.json" },
     { "path": "../security/tsconfig.json" },
     { "path": "../task_manager/tsconfig.json" },
-    { "path": "../triggers_actions_ui/tsconfig.json" }
+    { "path": "../triggers_actions_ui/tsconfig.json" },
+    { "path": "../fleet/tsconfig.json" }
   ]
 }

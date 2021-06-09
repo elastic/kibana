@@ -6,11 +6,8 @@
  * Side Public License, v 1.
  */
 
-import Joi from 'joi';
+import { schema } from '@kbn/config-schema';
 
-const HANDLED_IN_KIBANA_PLATFORM = Joi.any().description(
-  'This key is handled in the new platform ONLY'
-);
 /**
  * @deprecated
  *
@@ -36,46 +33,65 @@ export interface LegacyLoggingConfig {
   };
 }
 
-export const legacyLoggingConfigSchema = Joi.object()
-  .keys({
-    appenders: HANDLED_IN_KIBANA_PLATFORM,
-    loggers: HANDLED_IN_KIBANA_PLATFORM,
-    root: HANDLED_IN_KIBANA_PLATFORM,
-
-    silent: Joi.boolean().default(false),
-    quiet: Joi.boolean().when('silent', {
-      is: true,
-      then: Joi.boolean().default(true).valid(true),
-      otherwise: Joi.boolean().default(false),
+export const legacyLoggingConfigSchema = schema.object({
+  silent: schema.boolean({ defaultValue: false }),
+  quiet: schema.conditional(
+    schema.siblingRef('silent'),
+    true,
+    schema.boolean({
+      defaultValue: true,
+      validate: (quiet) => {
+        if (!quiet) {
+          return 'must be true when `silent` is  true';
+        }
+      },
     }),
-    verbose: Joi.boolean().when('quiet', {
-      is: true,
-      then: Joi.valid(false).default(false),
-      otherwise: Joi.boolean().default(false),
+    schema.boolean({ defaultValue: false })
+  ),
+  verbose: schema.conditional(
+    schema.siblingRef('quiet'),
+    true,
+    schema.boolean({
+      defaultValue: false,
+      validate: (verbose) => {
+        if (verbose) {
+          return 'must be false when `quiet` is  true';
+        }
+      },
     }),
-    events: Joi.any().default({}),
-    dest: Joi.string().default('stdout'),
-    filter: Joi.any().default({}),
-    json: Joi.boolean().when('dest', {
-      is: 'stdout',
-      then: Joi.boolean().default(!process.stdout.isTTY),
-      otherwise: Joi.boolean().default(true),
+    schema.boolean({ defaultValue: false })
+  ),
+  events: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+  dest: schema.string({ defaultValue: 'stdout' }),
+  filter: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+  json: schema.conditional(
+    schema.siblingRef('dest'),
+    'stdout',
+    schema.boolean({
+      defaultValue: !process.stdout.isTTY,
     }),
-    timezone: Joi.string(),
-    rotate: Joi.object()
-      .keys({
-        enabled: Joi.boolean().default(false),
-        everyBytes: Joi.number()
-          // > 1MB
-          .greater(1048576)
-          // < 1GB
-          .less(1073741825)
-          // 10MB
-          .default(10485760),
-        keepFiles: Joi.number().greater(2).less(1024).default(7),
-        pollingInterval: Joi.number().greater(5000).less(3600000).default(10000),
-        usePolling: Joi.boolean().default(false),
-      })
-      .default(),
-  })
-  .default();
+    schema.boolean({
+      defaultValue: true,
+    })
+  ),
+  timezone: schema.maybe(schema.string()),
+  rotate: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+    everyBytes: schema.number({
+      min: 1048576, // > 1MB
+      max: 1073741825, // < 1GB
+      defaultValue: 10485760, // 10MB
+    }),
+    keepFiles: schema.number({
+      min: 2,
+      max: 1024,
+      defaultValue: 7,
+    }),
+    pollingInterval: schema.number({
+      min: 5000,
+      max: 3600000,
+      defaultValue: 10000,
+    }),
+    usePolling: schema.boolean({ defaultValue: false }),
+  }),
+});

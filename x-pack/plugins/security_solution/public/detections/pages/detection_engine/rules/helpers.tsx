@@ -12,13 +12,19 @@ import { useLocation } from 'react-router-dom';
 
 import styled from 'styled-components';
 import { EuiFlexItem } from '@elastic/eui';
+import {
+  Threats,
+  Type,
+  SeverityMapping,
+  Severity,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { ActionVariables } from '../../../../../../triggers_actions_ui/public';
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import { transformRuleToAlertAction } from '../../../../../common/detection_engine/transform_actions';
 import { Filter } from '../../../../../../../../src/plugins/data/public';
-import { ENDPOINT_LIST_ID } from '../../../../shared_imports';
 import { Rule } from '../../../containers/detection_engine/rules';
 import {
   AboutStepRule,
@@ -27,12 +33,6 @@ import {
   ScheduleStepRule,
   ActionsStepRule,
 } from './types';
-import {
-  SeverityMapping,
-  Type,
-  Severity,
-  Threats,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
 import { severityOptions } from '../../../components/rules/step_about_rule/data';
 
 export interface GetStepsData {
@@ -81,7 +81,7 @@ export const getActionsStepsData = (
 export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
   ruleType: rule.type,
   anomalyThreshold: rule.anomaly_threshold ?? 50,
-  machineLearningJobId: rule.machine_learning_job_id ?? '',
+  machineLearningJobId: rule.machine_learning_job_id ?? [],
   index: rule.index ?? [],
   threatIndex: rule.threat_index ?? [],
   threatQueryBar: {
@@ -405,8 +405,8 @@ export const getActionMessageParams = memoizeOne(
 );
 
 // typed as null not undefined as the initial state for this value is null.
-export const userHasNoPermissions = (canUserCRUD: boolean | null): boolean =>
-  canUserCRUD != null ? !canUserCRUD : false;
+export const userHasPermissions = (canUserCRUD: boolean | null): boolean =>
+  canUserCRUD != null ? canUserCRUD : true;
 
 export const MaxWidthEuiFlexItem = styled(EuiFlexItem)`
   max-width: 1000px;

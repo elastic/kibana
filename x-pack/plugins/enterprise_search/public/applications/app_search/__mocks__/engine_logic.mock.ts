@@ -6,11 +6,13 @@
  */
 
 import { EngineDetails } from '../components/engine/types';
+import { ENGINES_TITLE } from '../components/engines';
 import { generateEncodedPath } from '../utils/encode_path_params';
 
 export const mockEngineValues = {
   engineName: 'some-engine',
   engine: {} as EngineDetails,
+  searchKey: 'search-abc123',
 };
 
 export const mockEngineActions = {
@@ -20,6 +22,11 @@ export const mockEngineActions = {
 export const mockGenerateEnginePath = jest.fn((path, pathParams = {}) =>
   generateEncodedPath(path, { engineName: mockEngineValues.engineName, ...pathParams })
 );
+export const mockGetEngineBreadcrumbs = jest.fn((breadcrumbs = []) => [
+  ENGINES_TITLE,
+  mockEngineValues.engineName,
+  ...breadcrumbs,
+]);
 
 jest.mock('../components/engine', () => ({
   EngineLogic: {
@@ -27,4 +34,5 @@ jest.mock('../components/engine', () => ({
     actions: mockEngineActions,
   },
   generateEnginePath: mockGenerateEnginePath,
+  getEngineBreadcrumbs: mockGetEngineBreadcrumbs,
 }));

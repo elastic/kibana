@@ -17,7 +17,14 @@ import {
   TimelineEventsLastEventTimeStrategyResponse,
   TimelineKpiStrategyResponse,
 } from './events';
-import { DocValueFields, PaginationInputPaginated, TimerangeInput, SortField } from '../common';
+import {
+  DocValueFields,
+  PaginationInputPaginated,
+  TimerangeInput,
+  SortField,
+  Maybe,
+} from '../common';
+import { DataProviderType, TimelineType, TimelineStatus } from '../../types/timeline';
 
 export * from './events';
 
@@ -64,3 +71,141 @@ export type TimelineStrategyRequestType<
   : T extends TimelineEventsQueries.lastEventTime
   ? TimelineEventsLastEventTimeRequestOptions
   : never;
+
+export interface ColumnHeaderInput {
+  aggregatable?: Maybe<boolean>;
+  category?: Maybe<string>;
+  columnHeaderType?: Maybe<string>;
+  description?: Maybe<string>;
+  example?: Maybe<string>;
+  indexes?: Maybe<string[]>;
+  id?: Maybe<string>;
+  name?: Maybe<string>;
+  placeholder?: Maybe<string>;
+  searchable?: Maybe<boolean>;
+  type?: Maybe<string>;
+}
+
+export interface QueryMatchInput {
+  field?: Maybe<string>;
+
+  displayField?: Maybe<string>;
+
+  value?: Maybe<string>;
+
+  displayValue?: Maybe<string>;
+
+  operator?: Maybe<string>;
+}
+
+export interface DataProviderInput {
+  id?: Maybe<string>;
+  name?: Maybe<string>;
+  enabled?: Maybe<boolean>;
+  excluded?: Maybe<boolean>;
+  kqlQuery?: Maybe<string>;
+  queryMatch?: Maybe<QueryMatchInput>;
+  and?: Maybe<DataProviderInput[]>;
+  type?: Maybe<DataProviderType>;
+}
+
+export interface EqlOptionsInput {
+  eventCategoryField?: Maybe<string>;
+  tiebreakerField?: Maybe<string>;
+  timestampField?: Maybe<string>;
+  query?: Maybe<string>;
+  size?: Maybe<number>;
+}
+
+export interface FilterMetaTimelineInput {
+  alias?: Maybe<string>;
+  controlledBy?: Maybe<string>;
+  disabled?: Maybe<boolean>;
+  field?: Maybe<string>;
+  formattedValue?: Maybe<string>;
+  index?: Maybe<string>;
+  key?: Maybe<string>;
+  negate?: Maybe<boolean>;
+  params?: Maybe<string>;
+  type?: Maybe<string>;
+  value?: Maybe<string>;
+}
+
+export interface FilterTimelineInput {
+  exists?: Maybe<string>;
+  meta?: Maybe<FilterMetaTimelineInput>;
+  match_all?: Maybe<string>;
+  missing?: Maybe<string>;
+  query?: Maybe<string>;
+  range?: Maybe<string>;
+  script?: Maybe<string>;
+}
+
+export interface SerializedFilterQueryInput {
+  filterQuery?: Maybe<SerializedKueryQueryInput>;
+}
+
+export interface SerializedKueryQueryInput {
+  kuery?: Maybe<KueryFilterQueryInput>;
+  serializedQuery?: Maybe<string>;
+}
+
+export interface KueryFilterQueryInput {
+  kind?: Maybe<string>;
+  expression?: Maybe<string>;
+}
+
+export interface DateRangePickerInput {
+  start?: Maybe<number>;
+  end?: Maybe<number>;
+}
+
+export interface SortTimelineInput {
+  columnId?: Maybe<string>;
+  sortDirection?: Maybe<string>;
+}
+
+export enum RowRendererId {
+  alerts = 'alerts',
+  auditd = 'auditd',
+  auditd_file = 'auditd_file',
+  library = 'library',
+  netflow = 'netflow',
+  plain = 'plain',
+  registry = 'registry',
+  suricata = 'suricata',
+  system = 'system',
+  system_dns = 'system_dns',
+  system_endgame_process = 'system_endgame_process',
+  system_file = 'system_file',
+  system_fim = 'system_fim',
+  system_security_event = 'system_security_event',
+  system_socket = 'system_socket',
+  zeek = 'zeek',
+}
+
+export interface TimelineInput {
+  columns?: Maybe<ColumnHeaderInput[]>;
+  dataProviders?: Maybe<DataProviderInput[]>;
+  description?: Maybe<string>;
+  eqlOptions?: Maybe<EqlOptionsInput>;
+  eventType?: Maybe<string>;
+  excludedRowRendererIds?: Maybe<RowRendererId[]>;
+  filters?: Maybe<FilterTimelineInput[]>;
+  kqlMode?: Maybe<string>;
+  kqlQuery?: Maybe<SerializedFilterQueryInput>;
+  indexNames?: Maybe<string[]>;
+  title?: Maybe<string>;
+  templateTimelineId?: Maybe<string>;
+  templateTimelineVersion?: Maybe<number>;
+  timelineType?: Maybe<TimelineType>;
+  dateRange?: Maybe<DateRangePickerInput>;
+  savedQueryId?: Maybe<string>;
+  sort?: Maybe<SortTimelineInput[]>;
+  status?: Maybe<TimelineStatus>;
+}
+
+export enum FlowDirection {
+  uniDirectional = 'uniDirectional',
+  biDirectional = 'biDirectional',
+}

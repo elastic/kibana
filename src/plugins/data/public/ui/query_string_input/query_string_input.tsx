@@ -37,6 +37,7 @@ import { QueryLanguageSwitcher } from './language_switcher';
 import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '..';
+import { KIBANA_USER_QUERY_LANGUAGE_KEY } from '../../../common';
 
 export interface QueryStringInputProps {
   indexPatterns: Array<IIndexPattern | string>;
@@ -67,6 +68,14 @@ export interface QueryStringInputProps {
    */
   nonKqlMode?: 'lucene' | 'text';
   nonKqlModeHelpText?: string;
+  /**
+   * @param autoSubmit if user selects a value, in that case kuery will be auto submitted
+   */
+  autoSubmit?: boolean;
+  /**
+   * @param storageKey this key is used to use user preference between kql and non-kql mode
+   */
+  storageKey?: string;
 }
 
 interface Props extends QueryStringInputProps {
@@ -99,6 +108,10 @@ const KEY_CODES = {
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
 export default class QueryStringInputUI extends Component<Props, State> {
+  static defaultProps = {
+    storageKey: KIBANA_USER_QUERY_LANGUAGE_KEY,
+  };
+
   public state: State = {
     isSuggestionsVisible: false,
     index: null,
@@ -218,7 +231,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     const recentSearches = this.persistedLog.get();
     const matchingRecentSearches = recentSearches.filter((recentQuery) => {
       const recentQueryString = typeof recentQuery === 'object' ? toUser(recentQuery) : recentQuery;
-      return recentQueryString.includes(query);
+      return recentQueryString !== '' && recentQueryString.includes(query);
     });
     return matchingRecentSearches.map((recentSearch) => {
       const text = toUser(recentSearch);
@@ -379,14 +392,12 @@ export default class QueryStringInputUI extends Component<Props, State> {
     const newQueryString = value.substr(0, start) + text + value.substr(end);
 
     this.reportUiCounter?.(
-      METRIC_TYPE.LOADED,
-      `query_string:${type}:suggestions_select_position`,
-      listIndex
+      METRIC_TYPE.CLICK,
+      `query_string:${type}:suggestions_select_position_${listIndex}`
     );
     this.reportUiCounter?.(
-      METRIC_TYPE.LOADED,
-      `query_string:${type}:suggestions_select_q_length`,
-      end - start
+      METRIC_TYPE.CLICK,
+      `query_string:${type}:suggestions_select_q_length_${end - start}`
     );
 
     this.onQueryStringChange(newQueryString);
@@ -395,8 +406,13 @@ export default class QueryStringInputUI extends Component<Props, State> {
       selectionStart: start + (cursorIndex ? cursorIndex : text.length),
       selectionEnd: start + (cursorIndex ? cursorIndex : text.length),
     });
+    const isTypeRecentSearch = type === QuerySuggestionTypes.RecentSearch;
 
-    if (type === QuerySuggestionTypes.RecentSearch) {
+    const isAutoSubmitAndValid =
+      this.props.autoSubmit &&
+      (type === QuerySuggestionTypes.Value || [':*', ': *'].includes(value.trim()));
+
+    if (isTypeRecentSearch || isAutoSubmitAndValid) {
       this.setState({ isSuggestionsVisible: false, index: null });
       this.onSubmit({ query: newQueryString, language: this.props.query.language });
     }
@@ -490,12 +506,16 @@ export default class QueryStringInputUI extends Component<Props, State> {
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
 
-    this.services.storage.set('kibana.userQueryLanguage', language);
+    const storageKey = this.props.storageKey;
+    this.services.storage.set(storageKey!, language);
 
     const newQuery = { query: '', language };
     this.onChange(newQuery);
     this.onSubmit(newQuery);
-    this.reportUiCounter?.(METRIC_TYPE.LOADED, `query_string:language:${language}`);
+    this.reportUiCounter?.(
+      METRIC_TYPE.LOADED,
+      storageKey ? `${storageKey}:language:${language}` : `query_string:language:${language}`
+    );
   };
 
   private onOutsideClick = () => {
@@ -662,7 +682,14 @@ export default class QueryStringInputUI extends Component<Props, State> {
     );
     const inputClassName = classNames(
       'kbnQueryBar__textarea',
-      this.props.iconType ? 'kbnQueryBar__textarea--withIcon' : null
+      this.props.iconType ? 'kbnQueryBar__textarea--withIcon' : null,
+      this.props.prepend ? 'kbnQueryBar__textarea--hasPrepend' : null,
+      !this.props.disableLanguageSwitcher ? 'kbnQueryBar__textarea--hasAppend' : null
+    );
+    const inputWrapClassName = classNames(
+      'euiFormControlLayout__childrenWrapper kbnQueryBar__textareaWrap',
+      this.props.prepend ? 'kbnQueryBar__textareaWrap--hasPrepend' : null,
+      !this.props.disableLanguageSwitcher ? 'kbnQueryBar__textareaWrap--hasAppend' : null
     );
 
     return (
@@ -691,7 +718,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
           >
             <div
               role="search"
-              className="euiFormControlLayout__childrenWrapper kbnQueryBar__textareaWrap"
+              className={inputWrapClassName}
               ref={this.queryBarInputDivRefInstance}
             >
               <EuiTextArea
@@ -758,6 +785,9 @@ export default class QueryStringInputUI extends Component<Props, State> {
                     })}
                     onClick={() => {
                       this.onQueryStringChange('');
+                      if (this.props.autoSubmit) {
+                        this.onSubmit({ query: '', language: this.props.query.language });
+                      }
                     }}
                   >
                     <EuiIcon className="euiFormControlLayoutClearButton__icon" type="cross" />

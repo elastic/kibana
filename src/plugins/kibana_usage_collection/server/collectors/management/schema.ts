@@ -189,6 +189,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'discover:maxDocFieldsDisplayed': {
+    type: 'long',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   defaultColumns: {
     type: 'array',
     items: {
@@ -384,6 +388,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'bfetch:disableCompression': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'visualization:visualize:legacyChartsLibrary': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -412,6 +420,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:enableInspectEsQueries': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'banners:placement': {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
@@ -424,11 +436,23 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:enableAlertingExperience': {
+  'labs:presentation:timeToPresent': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:enableInspectEsQueries': {
+  'labs:canvas:enable_ui': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'labs:canvas:useDataService': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'labs:dashboard:enable_ui': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'labs:dashboard:deferBelowFold': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

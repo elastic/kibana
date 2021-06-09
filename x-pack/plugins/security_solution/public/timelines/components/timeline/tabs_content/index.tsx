@@ -20,6 +20,8 @@ import {
   TimelineEventsCountBadge,
 } from '../../../../common/hooks/use_timeline_events_count';
 import { timelineActions } from '../../../store/timeline';
+import { RowRenderer } from '../body/renderers/row_renderer';
+import { CellValueElementProps } from '../cell_rendering';
 import {
   getActiveTabSelector,
   getNoteIdsSelector,
@@ -46,6 +48,8 @@ const NotesTabContent = lazy(() => import('../notes_tab_content'));
 const PinnedTabContent = lazy(() => import('../pinned_tab_content'));
 
 interface BasicTimelineTab {
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  rowRenderers: RowRenderer[];
   setTimelineFullScreen?: (fullScreen: boolean) => void;
   timelineFullScreen?: boolean;
   timelineId: TimelineId;
@@ -53,16 +57,32 @@ interface BasicTimelineTab {
   graphEventId?: string;
 }
 
-const QueryTab: React.FC<{ timelineId: TimelineId }> = memo(({ timelineId }) => (
+const QueryTab: React.FC<{
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  rowRenderers: RowRenderer[];
+  timelineId: TimelineId;
+}> = memo(({ renderCellValue, rowRenderers, timelineId }) => (
   <Suspense fallback={<EuiLoadingContent lines={10} />}>
-    <QueryTabContent timelineId={timelineId} />
+    <QueryTabContent
+      renderCellValue={renderCellValue}
+      rowRenderers={rowRenderers}
+      timelineId={timelineId}
+    />
   </Suspense>
 ));
 QueryTab.displayName = 'QueryTab';
 
-const EqlTab: React.FC<{ timelineId: TimelineId }> = memo(({ timelineId }) => (
+const EqlTab: React.FC<{
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  rowRenderers: RowRenderer[];
+  timelineId: TimelineId;
+}> = memo(({ renderCellValue, rowRenderers, timelineId }) => (
   <Suspense fallback={<EuiLoadingContent lines={10} />}>
-    <EqlTabContent timelineId={timelineId} />
+    <EqlTabContent
+      renderCellValue={renderCellValue}
+      rowRenderers={rowRenderers}
+      timelineId={timelineId}
+    />
   </Suspense>
 ));
 EqlTab.displayName = 'EqlTab';
@@ -81,9 +101,17 @@ const NotesTab: React.FC<{ timelineId: TimelineId }> = memo(({ timelineId }) => 
 ));
 NotesTab.displayName = 'NotesTab';
 
-const PinnedTab: React.FC<{ timelineId: TimelineId }> = memo(({ timelineId }) => (
+const PinnedTab: React.FC<{
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  rowRenderers: RowRenderer[];
+  timelineId: TimelineId;
+}> = memo(({ renderCellValue, rowRenderers, timelineId }) => (
   <Suspense fallback={<EuiLoadingContent lines={10} />}>
-    <PinnedTabContent timelineId={timelineId} />
+    <PinnedTabContent
+      renderCellValue={renderCellValue}
+      rowRenderers={rowRenderers}
+      timelineId={timelineId}
+    />
   </Suspense>
 ));
 PinnedTab.displayName = 'PinnedTab';
@@ -91,7 +119,7 @@ PinnedTab.displayName = 'PinnedTab';
 type ActiveTimelineTabProps = BasicTimelineTab & { activeTimelineTab: TimelineTabs };
 
 const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
-  ({ activeTimelineTab, timelineId, timelineType }) => {
+  ({ activeTimelineTab, renderCellValue, rowRenderers, timelineId, timelineType }) => {
     const getTab = useCallback(
       (tab: TimelineTabs) => {
         switch (tab) {
@@ -119,14 +147,26 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     return (
       <>
         <HideShowContainer $isVisible={TimelineTabs.query === activeTimelineTab}>
-          <QueryTab timelineId={timelineId} />
+          <QueryTab
+            renderCellValue={renderCellValue}
+            rowRenderers={rowRenderers}
+            timelineId={timelineId}
+          />
         </HideShowContainer>
         <HideShowContainer $isVisible={TimelineTabs.pinned === activeTimelineTab}>
-          <PinnedTab timelineId={timelineId} />
+          <PinnedTab
+            renderCellValue={renderCellValue}
+            rowRenderers={rowRenderers}
+            timelineId={timelineId}
+          />
         </HideShowContainer>
         {timelineType === TimelineType.default && (
           <HideShowContainer $isVisible={TimelineTabs.eql === activeTimelineTab}>
-            <EqlTab timelineId={timelineId} />
+            <EqlTab
+              renderCellValue={renderCellValue}
+              rowRenderers={rowRenderers}
+              timelineId={timelineId}
+            />
           </HideShowContainer>
         )}
         <HideShowContainer $isVisible={isGraphOrNotesTabs}>
@@ -160,6 +200,8 @@ const StyledEuiTab = styled(EuiTab)`
 `;
 
 const TabsContentComponent: React.FC<BasicTimelineTab> = ({
+  renderCellValue,
+  rowRenderers,
   timelineId,
   timelineFullScreen,
   timelineType,
@@ -300,6 +342,8 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
 
       <ActiveTimelineTab
         activeTimelineTab={activeTab}
+        renderCellValue={renderCellValue}
+        rowRenderers={rowRenderers}
         timelineId={timelineId}
         timelineType={timelineType}
       />

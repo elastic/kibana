@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
+
 import { HttpFetchError } from 'kibana/public';
 
 import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
@@ -37,7 +39,6 @@ import type {
   PostTransformsUpdateResponseSchema,
 } from '../../../../common/api_schemas/update_transforms';
 
-import type { SearchResponse7 } from '../../../../common/shared_imports';
 import { EsIndex } from '../../../../common/types/es_index';
 
 import type { SavedSearchQuery } from '../use_search_items';
@@ -134,10 +135,21 @@ const apiFactory = () => ({
   ): Promise<GetTransformsAuditMessagesResponseSchema | HttpFetchError> {
     return Promise.resolve([]);
   },
-  async esSearch(payload: any): Promise<SearchResponse7 | HttpFetchError> {
+  async esSearch(payload: any): Promise<estypes.SearchResponse | HttpFetchError> {
+    const hits = [];
+
+    // simulate a cross cluster search result
+    // against a cluster that doesn't support fields
+    if (payload.index.includes(':')) {
+      hits.push({
+        _id: 'the-doc',
+        _index: 'the-index',
+      });
+    }
+
     return Promise.resolve({
       hits: {
-        hits: [],
+        hits,
         total: {
           value: 0,
           relation: 'eq',

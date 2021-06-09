@@ -20,5 +20,9 @@ export {
   SAVED_OBJECT_REL_PRIMARY,
 } from './types';
 
+export { ClusterClientAdapter } from './es/cluster_client_adapter';
+
+export { createReadySignal } from './lib/ready_signal';
+
 export const config = { schema: ConfigSchema };
 export const plugin = (context: PluginInitializerContext) => new Plugin(context);

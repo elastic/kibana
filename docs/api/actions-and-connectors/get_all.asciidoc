@@ -56,6 +56,7 @@ The API returns the following:
       "executionTimeField": null
     },
     "is_preconfigured": false,
+    "is_missing_secrets": false,
     "referenced_by_count": 3
   }
 ]

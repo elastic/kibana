@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -41,18 +40,15 @@ export class IndexPrivileges extends Component<Props, State> {
     };
   }
 
-  public componentDidMount() {
-    this.loadAvailableFields(this.props.role.elasticsearch.indices);
-  }
-
   public render() {
     const { indices = [] } = this.props.role.elasticsearch;
 
-    const { indexPatterns, license, availableIndexPrivileges } = this.props;
+    const { indexPatterns, license, availableIndexPrivileges, indicesAPIClient } = this.props;
     const { allowRoleDocumentLevelSecurity, allowRoleFieldLevelSecurity } = license.getFeatures();
 
     const props = {
       indexPatterns,
+      indicesAPIClient,
       // If editing an existing role while that has been disabled, always show the FLS/DLS fields because currently
       // a role is only marked as disabled if it has FLS/DLS setup (usually before the user changed to a license that
       // doesn't permit FLS/DLS).
@@ -69,7 +65,6 @@ export class IndexPrivileges extends Component<Props, State> {
         validator={this.props.validator}
         availableIndexPrivileges={availableIndexPrivileges}
         indexPrivilege={indexPrivilege}
-        availableFields={this.state.availableFields[indexPrivilege.names.join(',')]}
         onChange={this.onIndexPrivilegeChange(idx)}
         onDelete={this.onIndexPrivilegeDelete(idx)}
       />
@@ -116,8 +111,6 @@ export class IndexPrivileges extends Component<Props, State> {
           indices: newIndices,
         },
       });
-
-      this.loadAvailableFields(newIndices);
     };
   };
 
@@ -140,44 +133,5 @@ export class IndexPrivileges extends Component<Props, State> {
 
   public isPlaceholderPrivilege = (indexPrivilege: RoleIndexPrivilege) => {
     return indexPrivilege.names.length === 0;
-  };
-
-  public loadAvailableFields(privileges: RoleIndexPrivilege[]) {
-    // readonly roles cannot be edited, and therefore do not need to fetch available fields.
-    if (isRoleReadOnly(this.props.role)) {
-      return;
-    }
-
-    const patterns = privileges.map((index) => index.names.join(','));
-
-    const cachedPatterns = Object.keys(this.state.availableFields);
-    const patternsToFetch = _.difference(patterns, cachedPatterns);
-
-    const fetchRequests = patternsToFetch.map(this.loadFieldsForPattern);
-
-    Promise.all(fetchRequests).then((response) => {
-      this.setState({
-        availableFields: {
-          ...this.state.availableFields,
-          ...response.reduce((acc, o) => ({ ...acc, ...o }), {}),
-        },
-      });
-    });
-  }
-
-  public loadFieldsForPattern = async (pattern: string) => {
-    if (!pattern) {
-      return { [pattern]: [] };
-    }
-
-    try {
-      return {
-        [pattern]: await this.props.indicesAPIClient.getFields(pattern),
-      };
-    } catch (e) {
-      return {
-        [pattern]: [],
-      };
-    }
   };
 }

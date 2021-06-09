@@ -25,8 +25,8 @@ const puid = new Puid();
 export class Report implements Partial<ReportSource> {
   public _index?: string;
   public _id: string;
-  public _primary_term?: unknown; // set by ES
-  public _seq_no: unknown; // set by ES
+  public _primary_term?: number; // set by ES
+  public _seq_no?: number; // set by ES
 
   public readonly kibana_name: ReportSource['kibana_name'];
   public readonly kibana_id: ReportSource['kibana_id'];

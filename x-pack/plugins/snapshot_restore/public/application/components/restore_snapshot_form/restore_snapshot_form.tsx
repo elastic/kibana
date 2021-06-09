@@ -104,7 +104,7 @@ export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({
         updateCurrentStep={updateCurrentStep}
       />
       <EuiSpacer size="l" />
-      <EuiForm>
+      <EuiForm data-test-subj="restoreSnapshotsForm">
         <CurrentStepForm
           snapshotDetails={snapshotDetails}
           restoreSettings={restoreSettings}
@@ -125,7 +125,12 @@ export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({
         <EuiFlexGroup>
           {currentStep > 1 ? (
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="arrowLeft" onClick={() => onBack()}>
+              <EuiButtonEmpty
+                iconType="arrowLeft"
+                onClick={() => onBack()}
+                disabled={!validation.isValid}
+                data-test-subj="backButton"
+              >
                 <FormattedMessage
                   id="xpack.snapshotRestore.restoreForm.backButtonLabel"
                   defaultMessage="Back"
@@ -140,6 +145,7 @@ export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({
                 iconType="arrowRight"
                 onClick={() => onNext()}
                 disabled={!validation.isValid}
+                data-test-subj="nextButton"
               >
                 <FormattedMessage
                   id="xpack.snapshotRestore.restoreForm.nextButtonLabel"
@@ -156,6 +162,7 @@ export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({
                 iconType="check"
                 onClick={() => executeRestore()}
                 isLoading={isSaving}
+                data-test-subj="restoreButton"
               >
                 {isSaving ? (
                   <FormattedMessage

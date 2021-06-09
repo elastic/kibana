@@ -83,8 +83,7 @@ export const Analytics: React.FC = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={3}>
-          {/* TODO: Update this panel to use the bordered version once available */}
-          <EuiPanel hasShadow={false} color="transparent">
+          <EuiPanel hasBorder>
             <AnalyticsChart
               lines={[
                 {
@@ -196,6 +195,7 @@ export const Analytics: React.FC = () => {
       <EuiSpacer size="xl" />
 
       <DataPanel
+        hasBorder
         title={<h2>{RECENT_QUERIES}</h2>}
         subtitle={i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.analytics.recentQueriesDescription',

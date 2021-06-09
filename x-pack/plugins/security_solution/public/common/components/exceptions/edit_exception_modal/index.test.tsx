@@ -20,14 +20,14 @@ import {
 import { useAddOrUpdateException } from '../use_add_exception';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { EntriesArray } from '../../../../../../lists/common/schemas/types';
-import * as builder from '../builder';
+import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 import {
   getRulesEqlSchemaMock,
   getRulesSchemaMock,
 } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
 import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
+import { ExceptionBuilder } from '../../../../shared_imports';
 
 const mockTheme = getMockTheme({
   eui: {
@@ -46,20 +46,30 @@ jest.mock('../use_add_exception');
 jest.mock('../../../containers/source');
 jest.mock('../use_fetch_or_create_rule_exception_list');
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
-jest.mock('../builder');
 jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_async');
+jest.mock('../../../../shared_imports', () => {
+  const originalModule = jest.requireActual('../../../../shared_imports');
+  const emptyComp = <span data-test-subj="edit-exception-modal-builder" />;
+  return {
+    ...originalModule,
+    ExceptionBuilder: {
+      getExceptionBuilderComponentLazy: () => emptyComp,
+    },
+  };
+});
 
 describe('When the edit exception modal is opened', () => {
   const ruleName = 'test rule';
 
   let ExceptionBuilderComponent: jest.SpyInstance<
-    ReturnType<typeof builder.ExceptionBuilderComponent>
+    ReturnType<typeof ExceptionBuilder.getExceptionBuilderComponentLazy>
   >;
 
   beforeEach(() => {
+    const emptyComp = <span data-test-subj="edit-exception-modal-builder" />;
     ExceptionBuilderComponent = jest
-      .spyOn(builder, 'ExceptionBuilderComponent')
-      .mockReturnValue(<></>);
+      .spyOn(ExceptionBuilder, 'getExceptionBuilderComponentLazy')
+      .mockReturnValue(emptyComp);
 
     (useSignalIndex as jest.Mock).mockReturnValue({
       loading: false,

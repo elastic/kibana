@@ -193,7 +193,14 @@ describe('<RepositoryAdd />', () => {
   });
 
   describe('form payload & api errors', () => {
-    const repository = getRepository();
+    const fsRepository = getRepository({
+      settings: {
+        chunkSize: '10mb',
+        location: '/tmp/es-backups',
+        maxSnapshotBytesPerSec: '1g',
+        maxRestoreBytesPerSec: '1g',
+      },
+    });
 
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRepositoryTypesResponse(repositoryTypes);
@@ -202,33 +209,237 @@ describe('<RepositoryAdd />', () => {
     });
 
     describe('not source only', () => {
-      beforeEach(() => {
-        // Fill step 1 required fields and go to step 2
-        testBed.form.setInputValue('nameInput', repository.name);
-        testBed.actions.selectRepositoryType(repository.type);
-        testBed.actions.clickNextButton();
-      });
+      test('should send the correct payload for FS repository', async () => {
+        const { form, actions, component } = testBed;
 
-      test('should send the correct payload', async () => {
-        const { form, actions } = testBed;
+        // Fill step 1 required fields and go to step 2
+        form.setInputValue('nameInput', fsRepository.name);
+        actions.selectRepositoryType(fsRepository.type);
+        actions.clickNextButton();
 
         // Fill step 2
-        form.setInputValue('locationInput', repository.settings.location);
+        form.setInputValue('locationInput', fsRepository.settings.location);
         form.toggleEuiSwitch('compressToggle');
+        form.setInputValue('chunkSizeInput', fsRepository.settings.chunkSize);
+        form.setInputValue('maxSnapshotBytesInput', fsRepository.settings.maxSnapshotBytesPerSec);
+        form.setInputValue('maxRestoreBytesInput', fsRepository.settings.maxRestoreBytesPerSec);
+        form.toggleEuiSwitch('readOnlyToggle');
 
         await act(async () => {
           actions.clickSubmitButton();
-          await nextTick();
         });
+
+        component.update();
 
         const latestRequest = server.requests[server.requests.length - 1];
 
         expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual({
-          name: repository.name,
-          type: repository.type,
+          name: fsRepository.name,
+          type: fsRepository.type,
           settings: {
-            location: repository.settings.location,
+            ...fsRepository.settings,
             compress: true,
+            readonly: true,
+          },
+        });
+      });
+
+      test('should send the correct payload for Azure repository', async () => {
+        const azureRepository = getRepository({
+          type: 'azure',
+          settings: {
+            chunkSize: '10mb',
+            maxSnapshotBytesPerSec: '1g',
+            maxRestoreBytesPerSec: '1g',
+            client: 'client',
+            container: 'container',
+            basePath: 'path',
+          },
+        });
+
+        const { form, actions, component } = testBed;
+
+        // Fill step 1 required fields and go to step 2
+        form.setInputValue('nameInput', azureRepository.name);
+        actions.selectRepositoryType(azureRepository.type);
+        actions.clickNextButton();
+
+        // Fill step 2
+        form.setInputValue('clientInput', azureRepository.settings.client);
+        form.setInputValue('containerInput', azureRepository.settings.container);
+        form.setInputValue('basePathInput', azureRepository.settings.basePath);
+        form.toggleEuiSwitch('compressToggle');
+        form.setInputValue('chunkSizeInput', azureRepository.settings.chunkSize);
+        form.setInputValue(
+          'maxSnapshotBytesInput',
+          azureRepository.settings.maxSnapshotBytesPerSec
+        );
+        form.setInputValue('maxRestoreBytesInput', azureRepository.settings.maxRestoreBytesPerSec);
+        form.toggleEuiSwitch('readOnlyToggle');
+
+        await act(async () => {
+          actions.clickSubmitButton();
+        });
+
+        component.update();
+
+        const latestRequest = server.requests[server.requests.length - 1];
+
+        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual({
+          name: azureRepository.name,
+          type: azureRepository.type,
+          settings: {
+            ...azureRepository.settings,
+            compress: false,
+            readonly: true,
+          },
+        });
+      });
+
+      test('should send the correct payload for GCS repository', async () => {
+        const gcsRepository = getRepository({
+          type: 'gcs',
+          settings: {
+            chunkSize: '10mb',
+            maxSnapshotBytesPerSec: '1g',
+            maxRestoreBytesPerSec: '1g',
+            client: 'test_client',
+            bucket: 'test_bucket',
+            basePath: 'test_path',
+          },
+        });
+
+        const { form, actions, component } = testBed;
+
+        // Fill step 1 required fields and go to step 2
+        form.setInputValue('nameInput', gcsRepository.name);
+        actions.selectRepositoryType(gcsRepository.type);
+        actions.clickNextButton();
+
+        // Fill step 2
+        form.setInputValue('clientInput', gcsRepository.settings.client);
+        form.setInputValue('bucketInput', gcsRepository.settings.bucket);
+        form.setInputValue('basePathInput', gcsRepository.settings.basePath);
+        form.toggleEuiSwitch('compressToggle');
+        form.setInputValue('chunkSizeInput', gcsRepository.settings.chunkSize);
+        form.setInputValue('maxSnapshotBytesInput', gcsRepository.settings.maxSnapshotBytesPerSec);
+        form.setInputValue('maxRestoreBytesInput', gcsRepository.settings.maxRestoreBytesPerSec);
+        form.toggleEuiSwitch('readOnlyToggle');
+
+        await act(async () => {
+          actions.clickSubmitButton();
+        });
+
+        component.update();
+
+        const latestRequest = server.requests[server.requests.length - 1];
+
+        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual({
+          name: gcsRepository.name,
+          type: gcsRepository.type,
+          settings: {
+            ...gcsRepository.settings,
+            compress: false,
+            readonly: true,
+          },
+        });
+      });
+
+      test('should send the correct payload for HDFS repository', async () => {
+        const hdfsRepository = getRepository({
+          type: 'hdfs',
+          settings: {
+            uri: 'uri',
+            path: 'test_path',
+            chunkSize: '10mb',
+            maxSnapshotBytesPerSec: '1g',
+            maxRestoreBytesPerSec: '1g',
+          },
+        });
+
+        const { form, actions, component } = testBed;
+
+        // Fill step 1 required fields and go to step 2
+        form.setInputValue('nameInput', hdfsRepository.name);
+        actions.selectRepositoryType(hdfsRepository.type);
+        actions.clickNextButton();
+
+        // Fill step 2
+        form.setInputValue('uriInput', hdfsRepository.settings.uri);
+        form.setInputValue('pathInput', hdfsRepository.settings.path);
+        form.toggleEuiSwitch('compressToggle');
+        form.setInputValue('chunkSizeInput', hdfsRepository.settings.chunkSize);
+        form.setInputValue('maxSnapshotBytesInput', hdfsRepository.settings.maxSnapshotBytesPerSec);
+        form.setInputValue('maxRestoreBytesInput', hdfsRepository.settings.maxRestoreBytesPerSec);
+        form.toggleEuiSwitch('readOnlyToggle');
+
+        await act(async () => {
+          actions.clickSubmitButton();
+        });
+
+        component.update();
+
+        const latestRequest = server.requests[server.requests.length - 1];
+
+        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual({
+          name: hdfsRepository.name,
+          type: hdfsRepository.type,
+          settings: {
+            ...hdfsRepository.settings,
+            uri: `hdfs://${hdfsRepository.settings.uri}`,
+            compress: false,
+            readonly: true,
+          },
+        });
+      });
+
+      test('should send the correct payload for S3 repository', async () => {
+        const { form, actions, component } = testBed;
+
+        const s3Repository = getRepository({
+          type: 's3',
+          settings: {
+            bucket: 'test_bucket',
+            client: 'test_client',
+            basePath: 'test_path',
+            bufferSize: '1g',
+            chunkSize: '10mb',
+            maxSnapshotBytesPerSec: '1g',
+            maxRestoreBytesPerSec: '1g',
+          },
+        });
+
+        // Fill step 1 required fields and go to step 2
+        form.setInputValue('nameInput', s3Repository.name);
+        actions.selectRepositoryType(s3Repository.type);
+        actions.clickNextButton();
+
+        // Fill step 2
+        form.setInputValue('bucketInput', s3Repository.settings.bucket);
+        form.setInputValue('clientInput', s3Repository.settings.client);
+        form.setInputValue('basePathInput', s3Repository.settings.basePath);
+        form.setInputValue('bufferSizeInput', s3Repository.settings.bufferSize);
+        form.toggleEuiSwitch('compressToggle');
+        form.setInputValue('chunkSizeInput', s3Repository.settings.chunkSize);
+        form.setInputValue('maxSnapshotBytesInput', s3Repository.settings.maxSnapshotBytesPerSec);
+        form.setInputValue('maxRestoreBytesInput', s3Repository.settings.maxRestoreBytesPerSec);
+        form.toggleEuiSwitch('readOnlyToggle');
+
+        await act(async () => {
+          actions.clickSubmitButton();
+        });
+
+        component.update();
+
+        const latestRequest = server.requests[server.requests.length - 1];
+
+        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual({
+          name: s3Repository.name,
+          type: s3Repository.type,
+          settings: {
+            ...s3Repository.settings,
+            compress: false,
+            readonly: true,
           },
         });
       });
@@ -236,7 +447,13 @@ describe('<RepositoryAdd />', () => {
       test('should surface the API errors from the "save" HTTP request', async () => {
         const { component, form, actions, find, exists } = testBed;
 
-        form.setInputValue('locationInput', repository.settings.location);
+        // Fill step 1 required fields and go to step 2
+        form.setInputValue('nameInput', fsRepository.name);
+        actions.selectRepositoryType(fsRepository.type);
+        actions.clickNextButton();
+
+        // Fill step 2
+        form.setInputValue('locationInput', fsRepository.settings.location);
         form.toggleEuiSwitch('compressToggle');
 
         const error = {
@@ -249,9 +466,9 @@ describe('<RepositoryAdd />', () => {
 
         await act(async () => {
           actions.clickSubmitButton();
-          await nextTick();
-          component.update();
         });
+
+        component.update();
 
         expect(exists('saveRepositoryApiError')).toBe(true);
         expect(find('saveRepositoryApiError').text()).toContain(error.message);
@@ -261,31 +478,32 @@ describe('<RepositoryAdd />', () => {
     describe('source only', () => {
       beforeEach(() => {
         // Fill step 1 required fields and go to step 2
-        testBed.form.setInputValue('nameInput', repository.name);
-        testBed.actions.selectRepositoryType(repository.type);
+        testBed.form.setInputValue('nameInput', fsRepository.name);
+        testBed.actions.selectRepositoryType(fsRepository.type);
         testBed.form.toggleEuiSwitch('sourceOnlyToggle'); // toggle source
         testBed.actions.clickNextButton();
       });
 
       test('should send the correct payload', async () => {
-        const { form, actions } = testBed;
+        const { form, actions, component } = testBed;
 
         // Fill step 2
-        form.setInputValue('locationInput', repository.settings.location);
+        form.setInputValue('locationInput', fsRepository.settings.location);
 
         await act(async () => {
           actions.clickSubmitButton();
-          await nextTick();
         });
+
+        component.update();
 
         const latestRequest = server.requests[server.requests.length - 1];
 
         expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual({
-          name: repository.name,
+          name: fsRepository.name,
           type: 'source',
           settings: {
-            delegateType: repository.type,
-            location: repository.settings.location,
+            delegateType: fsRepository.type,
+            location: fsRepository.settings.location,
           },
         });
       });

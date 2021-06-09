@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { join } from 'path';
+import Path from 'path';
+import Fs from 'fs';
+import Util from 'util';
 import { REPO_ROOT } from '@kbn/dev-utils';
 import { Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config/target/mocks';
@@ -16,7 +18,15 @@ import { InternalCoreStart } from '../../../internal_types';
 import { Root } from '../../../root';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
+const logFilePath = Path.join(__dirname, 'migration_test_kibana.log');
 
+const asyncUnlink = Util.promisify(Fs.unlink);
+async function removeLogFile() {
+  // ignore errors if it doesn't exist
+  await asyncUnlink(logFilePath).catch(() => void 0);
+}
+
+// FAILING on 7.13: https://github.com/elastic/kibana/issues/96895
 describe.skip('migration from 7.7.2-xpack with 100k objects', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
@@ -48,7 +58,7 @@ describe.skip('migration from 7.7.2-xpack with 100k objects', () => {
           appenders: {
             file: {
               type: 'file',
-              fileName: join(__dirname, 'migration_test_kibana.log'),
+              fileName: logFilePath,
               layout: {
                 type: 'json',
               },
@@ -93,9 +103,10 @@ describe.skip('migration from 7.7.2-xpack with 100k objects', () => {
   const migratedIndex = `.kibana_${kibanaVersion}_001`;
 
   beforeAll(async () => {
+    await removeLogFile();
     await startServers({
       oss: false,
-      dataArchive: join(__dirname, 'archives', '7.7.2_xpack_100k_obj.zip'),
+      dataArchive: Path.join(__dirname, 'archives', '7.7.2_xpack_100k_obj.zip'),
     });
   });
 

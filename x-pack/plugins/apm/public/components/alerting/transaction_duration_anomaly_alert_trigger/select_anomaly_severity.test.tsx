@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
 import { IntlProvider } from 'react-intl';
-import { ANOMALY_SEVERITY } from '../../../../../ml/common';
+import { ANOMALY_SEVERITY } from '../../../../common/ml_constants';
 import { SelectAnomalySeverity } from './select_anomaly_severity';
 
 function Wrapper({ children }: { children?: ReactNode }) {

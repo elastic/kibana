@@ -10,8 +10,8 @@ import { bufferTime, filter as rxFilter, switchMap } from 'rxjs/operators';
 import { reject, isUndefined, isNumber } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, ElasticsearchClient } from 'src/core/server';
+import util from 'util';
 import { estypes } from '@elastic/elasticsearch';
-import { EsContext } from '.';
 import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
 import { FindOptionsType } from '../event_log_client';
 import { esKuery } from '../../../../../src/plugins/data/server';
@@ -26,10 +26,12 @@ export interface Doc {
   body: IEvent;
 }
 
+type Wait = () => Promise<boolean>;
+
 export interface ConstructorOpts {
   logger: Logger;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
-  context: EsContext;
+  wait: Wait;
 }
 
 export interface QueryEventsBySavedObjectResult {
@@ -39,18 +41,21 @@ export interface QueryEventsBySavedObjectResult {
   data: IValidatedEvent[];
 }
 
-export class ClusterClientAdapter {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AliasAny = any;
+
+export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string } = Doc> {
   private readonly logger: Logger;
   private readonly elasticsearchClientPromise: Promise<ElasticsearchClient>;
-  private readonly docBuffer$: Subject<Doc>;
-  private readonly context: EsContext;
+  private readonly docBuffer$: Subject<TDoc>;
+  private readonly wait: Wait;
   private readonly docsBufferedFlushed: Promise<void>;
 
   constructor(opts: ConstructorOpts) {
     this.logger = opts.logger;
     this.elasticsearchClientPromise = opts.elasticsearchClientPromise;
-    this.context = opts.context;
-    this.docBuffer$ = new Subject<Doc>();
+    this.wait = opts.wait;
+    this.docBuffer$ = new Subject<TDoc>();
 
     // buffer event log docs for time / buffer length, ignore empty
     // buffers, then index the buffered docs; kick things off with a
@@ -75,17 +80,20 @@ export class ClusterClientAdapter {
     await this.docsBufferedFlushed;
   }
 
-  public indexDocument(doc: Doc): void {
+  public indexDocument(doc: TDoc): void {
     this.docBuffer$.next(doc);
   }
 
-  async indexDocuments(docs: Doc[]): Promise<void> {
+  async indexDocuments(docs: TDoc[]): Promise<void> {
     // If es initialization failed, don't try to index.
     // Also, don't log here, we log the failure case in plugin startup
     // instead, otherwise we'd be spamming the log (if done here)
-    if (!(await this.context.waitTillReady())) {
+    if (!(await this.wait())) {
+      this.logger.debug(`Initialization failed, not indexing ${docs.length} documents`);
       return;
     }
+
+    this.logger.debug(`Indexing ${docs.length} documents`);
 
     const bulkBody: Array<Record<string, unknown>> = [];
 
@@ -98,7 +106,13 @@ export class ClusterClientAdapter {
 
     try {
       const esClient = await this.elasticsearchClientPromise;
-      await esClient.bulk({ body: bulkBody });
+      const response = await esClient.bulk({ body: bulkBody });
+
+      if (response.body.errors) {
+        const error = new Error('Error writing some bulk events');
+        error.stack += '\n' + util.inspect(response.body.items, { depth: null });
+        this.logger.error(error);
+      }
     } catch (err) {
       this.logger.error(
         `error writing bulk events: "${err.message}"; docs: ${JSON.stringify(bulkBody)}`
@@ -156,7 +170,9 @@ export class ClusterClientAdapter {
       // instances at the same time.
       const existsNow = await this.doesIndexTemplateExist(name);
       if (!existsNow) {
-        throw new Error(`error creating index template: ${err.message}`);
+        const error = new Error(`error creating index template: ${err.message}`);
+        Object.assign(error, { wrapped: err });
+        throw error;
       }
     }
   }
@@ -224,7 +240,7 @@ export class ClusterClientAdapter {
       });
       throw err;
     }
-    const musts: estypes.QueryContainer[] = [
+    const musts: estypes.QueryDslQueryContainer[] = [
       {
         nested: {
           path: 'kibana.saved_objects',

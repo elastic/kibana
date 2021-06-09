@@ -15,6 +15,7 @@ import {
   EuiPopover,
   EuiTextAlign,
   EuiSpacer,
+  EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -190,19 +191,21 @@ export class SetViewControl extends Component<Props, State> {
         anchorPosition="leftUp"
         panelPaddingSize="s"
         button={
-          <EuiButtonIcon
-            className="mapToolbarOverlay__button"
-            onClick={this._togglePopover}
-            data-test-subj="toggleSetViewVisibilityButton"
-            iconType="crosshairs"
-            color="text"
-            aria-label={i18n.translate('xpack.maps.setViewControl.goToButtonLabel', {
-              defaultMessage: 'Go to',
-            })}
-            title={i18n.translate('xpack.maps.setViewControl.goToButtonLabel', {
-              defaultMessage: 'Go to',
-            })}
-          />
+          <EuiPanel paddingSize="none" className="mapToolbarOverlay__button">
+            <EuiButtonIcon
+              size="s"
+              onClick={this._togglePopover}
+              data-test-subj="toggleSetViewVisibilityButton"
+              iconType="crosshairs"
+              color="text"
+              aria-label={i18n.translate('xpack.maps.setViewControl.goToButtonLabel', {
+                defaultMessage: 'Go to',
+              })}
+              title={i18n.translate('xpack.maps.setViewControl.goToButtonLabel', {
+                defaultMessage: 'Go to',
+              })}
+            />
+          </EuiPanel>
         }
         isOpen={this.state.isPopoverOpen}
         closePopover={this._closePopover}

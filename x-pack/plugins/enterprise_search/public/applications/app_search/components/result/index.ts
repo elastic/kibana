@@ -6,4 +6,5 @@
  */
 
 export { ResultFieldValue } from './result_field_value';
+export { ResultToken } from './result_token';
 export { Result } from './result';

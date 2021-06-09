@@ -175,6 +175,12 @@ export const ComponentStrings = {
         defaultMessage: 'Asset thumbnail',
       }),
   },
+  CanvasLoading: {
+    getLoadingLabel: () =>
+      i18n.translate('xpack.canvas.canvasLoading.loadingMessage', {
+        defaultMessage: 'Loading',
+      }),
+  },
   ColorManager: {
     getAddAriaLabel: () =>
       i18n.translate('xpack.canvas.colorManager.addAriaLabel', {
@@ -512,6 +518,20 @@ export const ComponentStrings = {
     getTitle: () =>
       i18n.translate('xpack.canvas.keyboardShortcutsDoc.flyoutHeaderTitle', {
         defaultMessage: 'Keyboard shortcuts',
+      }),
+  },
+  LabsControl: {
+    getLabsButtonLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderLabsControlSettings.labsButtonLabel', {
+        defaultMessage: 'Labs',
+      }),
+    getAriaLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderLabsControlSettings.labsAriaLabel', {
+        defaultMessage: 'View labs projects',
+      }),
+    getTooltip: () =>
+      i18n.translate('xpack.canvas.workpadHeaderLabsControlSettings.labsTooltip', {
+        defaultMessage: 'View labs projects',
       }),
   },
   Link: {
@@ -1369,6 +1389,14 @@ export const ComponentStrings = {
     getTitle: () =>
       i18n.translate('xpack.canvas.workpadHeaderKioskControl.controlTitle', {
         defaultMessage: 'Cycle fullscreen pages',
+      }),
+    getAutoplayListDurationManualText: () =>
+      i18n.translate('xpack.canvas.workpadHeaderKioskControl.autoplayListDurationManual', {
+        defaultMessage: 'Manually',
+      }),
+    getDisableTooltip: () =>
+      i18n.translate('xpack.canvas.workpadHeaderKioskControl.disableTooltip', {
+        defaultMessage: 'Disable auto-play',
       }),
   },
   WorkpadHeaderRefreshControlSettings: {

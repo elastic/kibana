@@ -25,6 +25,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
       <span
         aria-hidden="true"
         className="euiButtonIcon__icon"
+        color="inherit"
         data-euiicon-type="cross"
         size="m"
       />
@@ -212,8 +213,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
                 className="euiSpacer euiSpacer--s"
               />
               <div
-                className="euiCard euiCard--hasShadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
-                onClick={[Function]}
+                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
               >
                 <div
                   className="euiCard__top"
@@ -334,6 +334,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
       <span
         aria-hidden="true"
         className="euiButtonIcon__icon"
+        color="inherit"
         data-euiicon-type="cross"
         size="m"
       />
@@ -521,8 +522,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
                 className="euiSpacer euiSpacer--s"
               />
               <div
-                className="euiCard euiCard--hasShadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned canvasElementCard"
-                onClick={[Function]}
+                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned canvasElementCard"
               >
                 <div
                   className="euiCard__top"
@@ -545,14 +545,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
                   >
                     
                   </span>
-                  <div
-                    className="euiText euiText--small euiCard__description"
-                    id="generated-idDescription"
-                  >
-                    <p>
-                      
-                    </p>
-                  </div>
+                  
                 </div>
                 <div
                   className="euiCard__footer"
@@ -647,6 +640,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
       <span
         aria-hidden="true"
         className="euiButtonIcon__icon"
+        color="inherit"
         data-euiicon-type="cross"
         size="m"
       />
@@ -834,8 +828,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
                 className="euiSpacer euiSpacer--s"
               />
               <div
-                className="euiCard euiCard--hasShadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
-                onClick={[Function]}
+                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
               >
                 <div
                   className="euiCard__top"
@@ -855,14 +848,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
                   >
                     My Chart
                   </span>
-                  <div
-                    className="euiText euiText--small euiCard__description"
-                    id="generated-idDescription"
-                  >
-                    <p>
-                      
-                    </p>
-                  </div>
+                  
                 </div>
                 <div
                   className="euiCard__footer"
@@ -955,6 +941,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
       <span
         aria-hidden="true"
         className="euiButtonIcon__icon"
+        color="inherit"
         data-euiicon-type="cross"
         size="m"
       />
@@ -1142,8 +1129,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
                 className="euiSpacer euiSpacer--s"
               />
               <div
-                className="euiCard euiCard--hasShadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
-                onClick={[Function]}
+                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
               >
                 <div
                   className="euiCard__top"
@@ -1163,14 +1149,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
                   >
                     
                   </span>
-                  <div
-                    className="euiText euiText--small euiCard__description"
-                    id="generated-idDescription"
-                  >
-                    <p>
-                      
-                    </p>
-                  </div>
+                  
                 </div>
                 <div
                   className="euiCard__footer"

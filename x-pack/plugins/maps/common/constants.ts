@@ -41,6 +41,7 @@ export const GIS_API_PATH = `api/${APP_ID}`;
 export const INDEX_SETTINGS_API_PATH = `${GIS_API_PATH}/indexSettings`;
 export const FONTS_API_PATH = `${GIS_API_PATH}/fonts`;
 export const INDEX_SOURCE_API_PATH = `${GIS_API_PATH}/docSource`;
+export const INDEX_FEATURE_PATH = `/${GIS_API_PATH}/feature`;
 export const API_ROOT_PATH = `/${GIS_API_PATH}`;
 
 export const MVT_GETTILE_API_PATH = 'mvt/getTile';
@@ -53,6 +54,8 @@ export const KBN_TOO_MANY_FEATURES_IMAGE_ID = '__kbn_too_many_features_image_id_
 // Identifies centroid feature.
 // Centroids are a single point for representing lines, multiLines, polygons, and multiPolygons
 export const KBN_IS_CENTROID_FEATURE = '__kbn_is_centroid_feature__';
+
+export const MVT_TOKEN_PARAM_NAME = 'token';
 
 const MAP_BASE_URL = `/${MAPS_APP_PATH}/${MAP_PATH}`;
 export function getNewMapPath() {
@@ -82,7 +85,7 @@ export enum SOURCE_TYPES {
   ES_SEARCH = 'ES_SEARCH',
   ES_PEW_PEW = 'ES_PEW_PEW',
   ES_TERM_SOURCE = 'ES_TERM_SOURCE',
-  EMS_XYZ = 'EMS_XYZ', // identifies a custom TMS source. Name is a little unfortunate.
+  EMS_XYZ = 'EMS_XYZ', // identifies a custom TMS source. EMS-prefix in the name is a little unfortunate :(
   WMS = 'WMS',
   KIBANA_TILEMAP = 'KIBANA_TILEMAP',
   REGIONMAP_FILE = 'REGIONMAP_FILE',
@@ -293,10 +296,14 @@ export enum DATA_MAPPING_FUNCTION {
 }
 export const DEFAULT_PERCENTILES = [50, 75, 90, 95, 99];
 
-export type RawValue = string | number | boolean | undefined | null;
+export type RawValue = string | string[] | number | boolean | undefined | null;
 
 export type FieldFormatter = (value: RawValue) => string | number;
 
 export const INDEX_META_DATA_CREATED_BY = 'maps-drawing-data-ingest';
 
 export const MAX_DRAWING_SIZE_BYTES = 10485760; // 10MB
+
+export const emsWorldLayerId = 'world_countries';
+export const emsRegionLayerId = 'administrative_regions_lvl2';
+export const emsUsaZipLayerId = 'usa_zip_codes';

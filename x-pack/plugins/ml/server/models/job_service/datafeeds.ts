@@ -28,11 +28,13 @@ export interface MlDatafeedsStatsResponse {
 
 interface Results {
   [id: string]: {
-    started?: estypes.StartDatafeedResponse['started'];
-    stopped?: estypes.StopDatafeedResponse['stopped'];
+    started?: estypes.MlStartDatafeedResponse['started'];
+    stopped?: estypes.MlStopDatafeedResponse['stopped'];
     error?: any;
   };
 }
+
+export type DatafeedsService = ReturnType<typeof datafeedsProvider>;
 
 export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClient) {
   async function forceStartDatafeeds(datafeedIds: string[], start?: number, end?: number) {
@@ -169,24 +171,38 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
   }
 
   async function getDatafeedByJobId(
+    jobId: string[],
+    excludeGenerated?: boolean
+  ): Promise<Datafeed[] | undefined>;
+
+  async function getDatafeedByJobId(
     jobId: string,
     excludeGenerated?: boolean
-  ): Promise<Datafeed | undefined> {
+  ): Promise<Datafeed | undefined>;
+
+  async function getDatafeedByJobId(
+    jobId: string | string[],
+    excludeGenerated?: boolean
+  ): Promise<Datafeed | Datafeed[] | undefined> {
+    const jobIds = Array.isArray(jobId) ? jobId : [jobId];
+
     async function findDatafeed() {
       // if the job was doesn't use the standard datafeedId format
       // get all the datafeeds and match it with the jobId
       const {
         body: { datafeeds },
-      } = await mlClient.getDatafeeds(excludeGenerated ? { exclude_generated: true } : {}); //
-      for (const result of datafeeds) {
-        if (result.job_id === jobId) {
-          return result;
-        }
+      } = await mlClient.getDatafeeds(excludeGenerated ? { exclude_generated: true } : {});
+      if (typeof jobId === 'string') {
+        return datafeeds.find((v) => v.job_id === jobId);
+      }
+
+      if (Array.isArray(jobId)) {
+        return datafeeds.filter((v) => jobIds.includes(v.job_id));
       }
     }
     // if the job was created by the wizard,
     // then we can assume it uses the standard format of the datafeedId
-    const assumedDefaultDatafeedId = `datafeed-${jobId}`;
+    const assumedDefaultDatafeedId = jobIds.map((v) => `datafeed-${v}`).join(',');
     try {
       const {
         body: { datafeeds: datafeedsResults },
@@ -194,12 +210,22 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
         datafeed_id: assumedDefaultDatafeedId,
         ...(excludeGenerated ? { exclude_generated: true } : {}),
       });
-      if (
-        Array.isArray(datafeedsResults) &&
-        datafeedsResults.length === 1 &&
-        datafeedsResults[0].job_id === jobId
-      ) {
-        return datafeedsResults[0];
+      if (Array.isArray(datafeedsResults)) {
+        const result = datafeedsResults.filter((d) => jobIds.includes(d.job_id));
+
+        if (typeof jobId === 'string') {
+          if (datafeedsResults.length === 1 && datafeedsResults[0].job_id === jobId) {
+            return datafeedsResults[0];
+          } else {
+            return await findDatafeed();
+          }
+        }
+
+        if (result.length === jobIds.length) {
+          return datafeedsResults;
+        } else {
+          return await findDatafeed();
+        }
       } else {
         return await findDatafeed();
       }
@@ -220,7 +246,6 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
       job.data_description.time_field,
       query,
       datafeed.runtime_mappings,
-      // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
       datafeed.indices_options
     );
 
@@ -352,7 +377,6 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
     const data = {
       index: datafeed.indices,
       body,
-      // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
       ...(datafeed.indices_options ?? {}),
     };
 

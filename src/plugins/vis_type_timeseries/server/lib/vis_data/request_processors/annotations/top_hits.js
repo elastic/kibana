@@ -7,11 +7,16 @@
  */
 
 import { overwrite } from '../../helpers';
+import { validateField } from '../../../../../common/fields_utils';
 
-export function topHits(req, panel, annotation) {
+export function topHits(req, panel, annotation, esQueryConfig, annotationIndex) {
   return (next) => (doc) => {
     const fields = (annotation.fields && annotation.fields.split(/[,\s]+/)) || [];
-    const timeField = annotation.time_field;
+    const timeField = annotation.time_field || annotationIndex.indexPattern?.timeFieldName || '';
+
+    if (panel.use_kibana_indexes) {
+      validateField(timeField, annotationIndex);
+    }
 
     overwrite(doc, `aggs.${annotation.id}.aggs.hits.top_hits`, {
       sort: [

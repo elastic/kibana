@@ -4,43 +4,43 @@
     "classes": [],
     "functions": [
       {
+        "parentPluginId": "infra",
         "id": "def-public.LazyLogStreamWrapper",
         "type": "Function",
-        "children": [
-          {
-            "type": "CompoundType",
-            "label": "props",
-            "isRequired": true,
-            "signature": [
-              "React.PropsWithChildren<",
-              {
-                "pluginId": "infra",
-                "scope": "public",
-                "docId": "kibInfraPluginApi",
-                "section": "def-public.LogStreamProps",
-                "text": "LogStreamProps"
-              },
-              ">"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/infra/public/components/log_stream/lazy_log_stream_wrapper.tsx",
-              "lineNumber": 13
-            }
-          }
-        ],
+        "tags": [],
+        "label": "LazyLogStreamWrapper",
+        "description": [],
         "signature": [
           "(props: React.PropsWithChildren<",
           "LogStreamProps",
           ">) => JSX.Element"
         ],
-        "description": [],
-        "label": "LazyLogStreamWrapper",
         "source": {
           "path": "x-pack/plugins/infra/public/components/log_stream/lazy_log_stream_wrapper.tsx",
           "lineNumber": 13
         },
-        "tags": [],
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "infra",
+            "id": "def-public.LazyLogStreamWrapper.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "LogStreamProps",
+              ">"
+            ],
+            "source": {
+              "path": "x-pack/plugins/infra/public/components/log_stream/lazy_log_stream_wrapper.tsx",
+              "lineNumber": 13
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -48,138 +48,252 @@
     "interfaces": [],
     "enums": [
       {
+        "parentPluginId": "infra",
         "id": "def-public.InfraFormatterType",
         "type": "Enum",
-        "label": "InfraFormatterType",
         "tags": [],
+        "label": "InfraFormatterType",
         "description": [],
         "source": {
           "path": "x-pack/plugins/infra/public/lib/lib.ts",
           "lineNumber": 147
         },
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "misc": [
       {
+        "parentPluginId": "infra",
         "id": "def-public.InfraAppId",
         "type": "Type",
-        "label": "InfraAppId",
         "tags": [],
+        "label": "InfraAppId",
         "description": [],
+        "signature": [
+          "\"metrics\" | \"logs\""
+        ],
         "source": {
           "path": "x-pack/plugins/infra/public/index.ts",
           "lineNumber": 29
         },
-        "signature": [
-          "\"metrics\" | \"logs\""
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "objects": [
       {
+        "parentPluginId": "infra",
         "id": "def-public.FORMATTERS",
         "type": "Object",
         "tags": [],
+        "label": "FORMATTERS",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/infra/common/formatters/index.ts",
+          "lineNumber": 15
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "infra",
             "id": "def-public.FORMATTERS.number",
             "type": "Function",
+            "tags": [],
             "label": "number",
             "description": [],
+            "signature": [
+              "(val: number) => string"
+            ],
             "source": {
               "path": "x-pack/plugins/infra/common/formatters/index.ts",
               "lineNumber": 16
             },
-            "signature": [
-              "(val: number) => string"
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "infra",
+                "id": "def-public.val",
+                "type": "number",
+                "tags": [],
+                "label": "val",
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/infra/common/formatters/number.ts",
+                  "lineNumber": 8
+                },
+                "deprecated": false
+              }
             ]
           },
           {
-            "tags": [],
+            "parentPluginId": "infra",
             "id": "def-public.FORMATTERS.abbreviatedNumber",
             "type": "Function",
+            "tags": [],
             "label": "abbreviatedNumber",
             "description": [
               "// Because the implimentation for formatting large numbers is the same as formatting\n// bytes we are re-using the same code, we just format the number using the abbreviated number format."
+            ],
+            "signature": [
+              "(bytes: number) => string"
             ],
             "source": {
               "path": "x-pack/plugins/infra/common/formatters/index.ts",
               "lineNumber": 19
             },
-            "signature": [
-              "(bytes: number) => string"
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "infra",
+                "id": "def-public.bytes",
+                "type": "number",
+                "tags": [],
+                "label": "bytes",
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/infra/common/formatters/bytes.ts",
+                  "lineNumber": 42
+                },
+                "deprecated": false
+              }
             ]
           },
           {
-            "tags": [],
+            "parentPluginId": "infra",
             "id": "def-public.FORMATTERS.bytes",
             "type": "Function",
+            "tags": [],
             "label": "bytes",
             "description": [
               "// bytes in bytes formatted string out"
+            ],
+            "signature": [
+              "(bytes: number) => string"
             ],
             "source": {
               "path": "x-pack/plugins/infra/common/formatters/index.ts",
               "lineNumber": 21
             },
-            "signature": [
-              "(bytes: number) => string"
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "infra",
+                "id": "def-public.bytes",
+                "type": "number",
+                "tags": [],
+                "label": "bytes",
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/infra/common/formatters/bytes.ts",
+                  "lineNumber": 42
+                },
+                "deprecated": false
+              }
             ]
           },
           {
-            "tags": [],
+            "parentPluginId": "infra",
             "id": "def-public.FORMATTERS.bits",
             "type": "Function",
+            "tags": [],
             "label": "bits",
             "description": [
               "// bytes in bits formatted string out"
+            ],
+            "signature": [
+              "(bytes: number) => string"
             ],
             "source": {
               "path": "x-pack/plugins/infra/common/formatters/index.ts",
               "lineNumber": 23
             },
-            "signature": [
-              "(bytes: number) => string"
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "infra",
+                "id": "def-public.bytes",
+                "type": "number",
+                "tags": [],
+                "label": "bytes",
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/infra/common/formatters/bytes.ts",
+                  "lineNumber": 42
+                },
+                "deprecated": false
+              }
             ]
           },
           {
-            "tags": [],
+            "parentPluginId": "infra",
             "id": "def-public.FORMATTERS.percent",
             "type": "Function",
+            "tags": [],
             "label": "percent",
             "description": [],
+            "signature": [
+              "(val: number) => string"
+            ],
             "source": {
               "path": "x-pack/plugins/infra/common/formatters/index.ts",
               "lineNumber": 24
             },
-            "signature": [
-              "(val: number) => string"
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "infra",
+                "id": "def-public.val",
+                "type": "number",
+                "tags": [],
+                "label": "val",
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/infra/common/formatters/percent.ts",
+                  "lineNumber": 9
+                },
+                "deprecated": false
+              }
             ]
           },
           {
-            "tags": [],
+            "parentPluginId": "infra",
             "id": "def-public.FORMATTERS.highPercision",
             "type": "Function",
+            "tags": [],
             "label": "highPercision",
             "description": [],
+            "signature": [
+              "(val: number) => string"
+            ],
             "source": {
               "path": "x-pack/plugins/infra/common/formatters/index.ts",
               "lineNumber": 25
             },
-            "signature": [
-              "(val: number) => string"
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "infra",
+                "id": "def-public.val",
+                "type": "number",
+                "tags": [],
+                "label": "val",
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/infra/common/formatters/high_precision.ts",
+                  "lineNumber": 8
+                },
+                "deprecated": false
+              }
             ]
           }
         ],
-        "description": [],
-        "label": "FORMATTERS",
-        "source": {
-          "path": "x-pack/plugins/infra/common/formatters/index.ts",
-          "lineNumber": 15
-        },
         "initialIsOpen": false
       }
     ]
@@ -191,56 +305,107 @@
     "enums": [],
     "misc": [
       {
+        "parentPluginId": "infra",
         "id": "def-server.InfraConfig",
         "type": "Type",
-        "label": "InfraConfig",
         "tags": [],
+        "label": "InfraConfig",
         "description": [],
+        "signature": [
+          "{ readonly sources?: Readonly<{ default?: Readonly<{ fields?: Readonly<{ host?: string | undefined; message?: string[] | undefined; container?: string | undefined; timestamp?: string | undefined; tiebreaker?: string | undefined; pod?: string | undefined; } & {}> | undefined; logAlias?: string | undefined; metricAlias?: string | undefined; } & {}> | undefined; } & {}> | undefined; readonly enabled: boolean; readonly inventory: Readonly<{} & { compositeSize: number; }>; }"
+        ],
         "source": {
           "path": "x-pack/plugins/infra/server/plugin.ts",
           "lineNumber": 65
         },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "infra",
+        "id": "def-server.InfraRequestHandlerContext",
+        "type": "Type",
+        "tags": [],
+        "label": "InfraRequestHandlerContext",
+        "description": [],
         "signature": [
-          "{ readonly sources?: Readonly<{ default?: Readonly<{ fields?: Readonly<{ host?: string | undefined; message?: string[] | undefined; timestamp?: string | undefined; tiebreaker?: string | undefined; container?: string | undefined; pod?: string | undefined; } & {}> | undefined; logAlias?: string | undefined; metricAlias?: string | undefined; } & {}> | undefined; } & {}> | undefined; readonly enabled: boolean; readonly query: Readonly<{} & { partitionSize: number; partitionFactor: number; }>; }"
+          "InfraMlRequestHandlerContext",
+          " & ",
+          "InfraSpacesRequestHandlerContext"
         ],
+        "source": {
+          "path": "x-pack/plugins/infra/server/types.ts",
+          "lineNumber": 24
+        },
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "objects": [],
     "setup": {
+      "parentPluginId": "infra",
       "id": "def-server.InfraPluginSetup",
       "type": "Interface",
+      "tags": [],
       "label": "InfraPluginSetup",
       "description": [],
-      "tags": [],
-      "children": [
-        {
-          "tags": [],
-          "id": "def-server.InfraPluginSetup.defineInternalSourceConfiguration",
-          "type": "Function",
-          "label": "defineInternalSourceConfiguration",
-          "description": [],
-          "source": {
-            "path": "x-pack/plugins/infra/server/plugin.ts",
-            "lineNumber": 76
-          },
-          "signature": [
-            "(sourceId: string, sourceProperties: ",
-            {
-              "pluginId": "infra",
-              "scope": "common",
-              "docId": "kibInfraPluginApi",
-              "section": "def-common.InfraStaticSourceConfiguration",
-              "text": "InfraStaticSourceConfiguration"
-            },
-            ") => void"
-          ]
-        }
-      ],
       "source": {
         "path": "x-pack/plugins/infra/server/plugin.ts",
         "lineNumber": 75
       },
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "infra",
+          "id": "def-server.InfraPluginSetup.defineInternalSourceConfiguration",
+          "type": "Function",
+          "tags": [],
+          "label": "defineInternalSourceConfiguration",
+          "description": [],
+          "signature": [
+            "(sourceId: string, sourceProperties: ",
+            "InfraStaticSourceConfiguration",
+            ") => void"
+          ],
+          "source": {
+            "path": "x-pack/plugins/infra/server/plugin.ts",
+            "lineNumber": 76
+          },
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "infra",
+              "id": "def-server.sourceId",
+              "type": "string",
+              "tags": [],
+              "label": "sourceId",
+              "description": [],
+              "source": {
+                "path": "x-pack/plugins/infra/server/plugin.ts",
+                "lineNumber": 77
+              },
+              "deprecated": false
+            },
+            {
+              "parentPluginId": "infra",
+              "id": "def-server.sourceProperties",
+              "type": "Object",
+              "tags": [],
+              "label": "sourceProperties",
+              "description": [],
+              "signature": [
+                "InfraStaticSourceConfiguration"
+              ],
+              "source": {
+                "path": "x-pack/plugins/infra/server/plugin.ts",
+                "lineNumber": 78
+              },
+              "deprecated": false
+            }
+          ]
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     }

@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import mockRolledUpData, { mockIndices } from './hybrid_index_helper';
 
 export default function ({ getService, getPageObjects }) {
-  const es = getService('legacyEs');
+  const es = getService('es');
   const esArchiver = getService('esArchiver');
   const find = getService('find');
   const retry = getService('retry');
@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }) {
         'waiting for 3 records to be loaded into elasticsearch.',
         10000,
         async () => {
-          const response = await es.indices.get({
+          const { body: response } = await es.indices.get({
             index: `${rollupSourceIndexPrefix}*`,
             allow_no_indices: false,
           });
@@ -53,9 +53,8 @@ export default function ({ getService, getPageObjects }) {
 
       await retry.try(async () => {
         //Create a rollup for kibana to recognize
-        await es.transport.request({
-          path: `/_rollup/job/${rollupJobName}`,
-          method: 'PUT',
+        await es.rollup.putJob({
+          id: rollupJobName,
           body: {
             index_pattern: `${rollupSourceIndexPrefix}*`,
             rollup_index: rollupTargetIndexName,
@@ -104,10 +103,7 @@ export default function ({ getService, getPageObjects }) {
 
     after(async () => {
       // Delete the rollup job.
-      await es.transport.request({
-        path: `/_rollup/job/${rollupJobName}`,
-        method: 'DELETE',
-      });
+      await es.rollup.deleteJob({ id: rollupJobName });
 
       await esDeleteAllIndices([
         rollupTargetIndexName,
@@ -115,7 +111,7 @@ export default function ({ getService, getPageObjects }) {
         `${rollupSourceIndexPrefix}*`,
       ]);
 
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
     });
   });
 }

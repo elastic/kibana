@@ -20,7 +20,7 @@ analyze past performance. You can also modify active alerts.
 image::user/monitoring/images/monitoring-kibana-alerts.png["Kibana alerts in the Stack Monitoring app"]
 
 To review and modify all the available alerts, use
-<<managing-alerts-and-actions,*{alerts-ui}*>> in *{stack-manage-app}*.
+<<alert-management,*{alerts-ui}*>> in *{stack-manage-app}*.
 
 [discrete]
 [[kibana-alerts-cpu-threshold]]
@@ -81,10 +81,10 @@ by running checks on a schedule time of 1 minute with a re-notify interval of 6 
 [[kibana-alerts-large-shard-size]]
 == Large shard size
 
-This alert is triggered if a large (primary) shard size is found on any of the 
-specified index patterns. The trigger condition is met if an index's shard size is 
+This alert is triggered if a large average shard size (across associated primaries) is found on any of the 
+specified index patterns. The trigger condition is met if an index's average shard size is 
 55gb or higher in the last 5 minutes. The alert is grouped across all indices that match 
-the default patter of `*` by running checks on a schedule time of 1 minute with a re-notify 
+the default pattern of `*` by running checks on a schedule time of 1 minute with a re-notify 
 interval of 12 hours.
 
 [discrete]

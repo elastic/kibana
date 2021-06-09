@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
+
 export const kibanaContextMock = {
   services: {
+    uiSettings: { get: jest.fn() },
     chrome: { recentlyAccessed: { add: jest.fn() } },
     application: { navigateToApp: jest.fn() },
     http: {
@@ -17,6 +20,7 @@ export const kibanaContextMock = {
     share: {
       urlGenerators: { getUrlGenerator: jest.fn() },
     },
+    data: dataPluginMock.createStartContract(),
   },
 };
 

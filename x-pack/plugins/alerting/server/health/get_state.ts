@@ -8,27 +8,38 @@
 import { i18n } from '@kbn/i18n';
 import { defer, of, interval, Observable, throwError, timer } from 'rxjs';
 import { catchError, mergeMap, retryWhen, switchMap } from 'rxjs/operators';
-import { ServiceStatus, ServiceStatusLevels } from '../../../../../src/core/server';
+import {
+  Logger,
+  SavedObjectsServiceStart,
+  ServiceStatus,
+  ServiceStatusLevels,
+} from '../../../../../src/core/server';
 import { TaskManagerStartContract } from '../../../task_manager/server';
-import { HEALTH_TASK_ID } from './task';
+import { HEALTH_TASK_ID, scheduleAlertingHealthCheck } from './task';
 import { HealthStatus } from '../types';
+import { getAlertingHealthStatus } from './get_health';
+import { AlertsConfig } from '../config';
 
 export const MAX_RETRY_ATTEMPTS = 3;
 const HEALTH_STATUS_INTERVAL = 60000 * 5; // Five minutes
 const RETRY_DELAY = 5000; // Wait 5 seconds before retrying on errors
 
-async function getLatestTaskState(taskManager: TaskManagerStartContract) {
+async function getLatestTaskState(
+  taskManager: TaskManagerStartContract,
+  logger: Logger,
+  savedObjects: SavedObjectsServiceStart,
+  config: Promise<AlertsConfig>
+) {
   try {
-    const result = await taskManager.get(HEALTH_TASK_ID);
-    return result;
+    return await taskManager.get(HEALTH_TASK_ID);
   } catch (err) {
-    const errMessage = err && err.message ? err.message : err.toString();
-    if (!errMessage.includes('NotInitialized')) {
-      throw err;
+    // if task is not found
+    if (err?.output?.statusCode === 404) {
+      await scheduleAlertingHealthCheck(logger, config, taskManager);
+      return await getAlertingHealthStatus(savedObjects);
     }
+    throw err;
   }
-
-  return null;
 }
 
 const LEVEL_SUMMARY = {
@@ -53,13 +64,16 @@ const LEVEL_SUMMARY = {
 };
 
 const getHealthServiceStatus = async (
-  taskManager: TaskManagerStartContract
+  taskManager: TaskManagerStartContract,
+  logger: Logger,
+  savedObjects: SavedObjectsServiceStart,
+  config: Promise<AlertsConfig>
 ): Promise<ServiceStatus<unknown>> => {
-  const doc = await getLatestTaskState(taskManager);
+  const doc = await getLatestTaskState(taskManager, logger, savedObjects, config);
   const level =
-    doc?.state?.health_status === HealthStatus.OK
+    doc.state?.health_status === HealthStatus.OK
       ? ServiceStatusLevels.available
-      : doc?.state?.health_status === HealthStatus.Warning
+      : doc.state?.health_status === HealthStatus.Warning
       ? ServiceStatusLevels.degraded
       : ServiceStatusLevels.unavailable;
   return {
@@ -70,9 +84,12 @@ const getHealthServiceStatus = async (
 
 export const getHealthServiceStatusWithRetryAndErrorHandling = (
   taskManager: TaskManagerStartContract,
+  logger: Logger,
+  savedObjects: SavedObjectsServiceStart,
+  config: Promise<AlertsConfig>,
   retryDelay?: number
 ): Observable<ServiceStatus<unknown>> => {
-  return defer(() => getHealthServiceStatus(taskManager)).pipe(
+  return defer(() => getHealthServiceStatus(taskManager, logger, savedObjects, config)).pipe(
     retryWhen((errors) => {
       return errors.pipe(
         mergeMap((error, i) => {
@@ -85,6 +102,7 @@ export const getHealthServiceStatusWithRetryAndErrorHandling = (
       );
     }),
     catchError((error) => {
+      logger.warn(`Alerting framework is unavailable due to the error: ${error}`);
       return of({
         level: ServiceStatusLevels.unavailable,
         summary: LEVEL_SUMMARY[ServiceStatusLevels.unavailable.toString()],
@@ -96,9 +114,20 @@ export const getHealthServiceStatusWithRetryAndErrorHandling = (
 
 export const getHealthStatusStream = (
   taskManager: TaskManagerStartContract,
+  logger: Logger,
+  savedObjects: SavedObjectsServiceStart,
+  config: Promise<AlertsConfig>,
   healthStatusInterval?: number,
   retryDelay?: number
 ): Observable<ServiceStatus<unknown>> =>
   interval(healthStatusInterval ?? HEALTH_STATUS_INTERVAL).pipe(
-    switchMap(() => getHealthServiceStatusWithRetryAndErrorHandling(taskManager, retryDelay))
+    switchMap(() =>
+      getHealthServiceStatusWithRetryAndErrorHandling(
+        taskManager,
+        logger,
+        savedObjects,
+        config,
+        retryDelay
+      )
+    )
   );

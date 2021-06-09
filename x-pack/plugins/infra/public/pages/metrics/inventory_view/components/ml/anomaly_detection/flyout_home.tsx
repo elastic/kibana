@@ -112,7 +112,11 @@ export const FlyoutHome = (props: Props) => {
           <EuiTab isSelected={tab === 'jobs'} onClick={() => setTab('jobs')}>
             Jobs
           </EuiTab>
-          <EuiTab isSelected={tab === 'anomalies'} onClick={() => setTab('anomalies')}>
+          <EuiTab
+            isSelected={tab === 'anomalies'}
+            onClick={() => setTab('anomalies')}
+            data-test-subj="anomalyFlyoutAnomaliesTab"
+          >
             Anomalies
           </EuiTab>
         </EuiTabs>

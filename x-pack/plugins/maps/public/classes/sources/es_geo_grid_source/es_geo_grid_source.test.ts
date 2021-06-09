@@ -125,7 +125,7 @@ describe('ESGeoGridSource', () => {
     getHttp.mockReturnValue({
       basePath: {
         prepend(path: string) {
-          return `rootdir${path};`;
+          return `rootdir${path}`;
         },
       },
     });
@@ -282,8 +282,8 @@ describe('ESGeoGridSource', () => {
       expect(urlTemplateWithMeta.layerName).toBe('source_layer');
       expect(urlTemplateWithMeta.minSourceZoom).toBe(0);
       expect(urlTemplateWithMeta.maxSourceZoom).toBe(24);
-      expect(urlTemplateWithMeta.urlTemplate).toBe(
-        "rootdir/api/maps/mvt/getGridTile;?x={x}&y={y}&z={z}&geometryFieldName=bar&index=undefined&requestBody=(foobar:ES_DSL_PLACEHOLDER,params:('0':('0':index,'1':(fields:())),'1':('0':size,'1':0),'2':('0':filter,'1':!((geo_bounding_box:(bar:(bottom_right:!(180,-82.67628),top_left:!(-180,82.67628))),meta:(alias:!n,disabled:!f,key:bar,negate:!f)))),'3':('0':query),'4':('0':index,'1':(fields:())),'5':('0':query,'1':(language:KQL,query:'',queryLastTriggeredAt:'2019-04-25T20:53:22.331Z')),'6':('0':aggs,'1':(gridSplit:(aggs:(gridCentroid:(geo_centroid:(field:bar))),geotile_grid:(bounds:!n,field:bar,precision:!n,shard_size:65535,size:65535))))))&requestType=heatmap&geoFieldType=geo_point"
+      expect(urlTemplateWithMeta.urlTemplate).toEqual(
+        "rootdir/api/maps/mvt/getGridTile/{z}/{x}/{y}.pbf?geometryFieldName=bar&index=undefined&requestBody=(foobar:ES_DSL_PLACEHOLDER,params:('0':('0':index,'1':(fields:())),'1':('0':size,'1':0),'2':('0':filter,'1':!((geo_bounding_box:(bar:(bottom_right:!(180,-82.67628),top_left:!(-180,82.67628))),meta:(alias:!n,disabled:!f,key:bar,negate:!f)))),'3':('0':query),'4':('0':index,'1':(fields:())),'5':('0':query,'1':(language:KQL,query:'',queryLastTriggeredAt:'2019-04-25T20:53:22.331Z')),'6':('0':aggs,'1':(gridSplit:(aggs:(gridCentroid:(geo_centroid:(field:bar))),geotile_grid:(bounds:!n,field:bar,precision:!n,shard_size:65535,size:65535))))))&requestType=heatmap&geoFieldType=geo_point"
       );
     });
 
@@ -293,9 +293,13 @@ describe('ESGeoGridSource', () => {
         searchSessionId: '1',
       });
 
-      expect(urlTemplateWithMeta.urlTemplate).toBe(
-        "rootdir/api/maps/mvt/getGridTile;?x={x}&y={y}&z={z}&geometryFieldName=bar&index=undefined&requestBody=(foobar:ES_DSL_PLACEHOLDER,params:('0':('0':index,'1':(fields:())),'1':('0':size,'1':0),'2':('0':filter,'1':!((geo_bounding_box:(bar:(bottom_right:!(180,-82.67628),top_left:!(-180,82.67628))),meta:(alias:!n,disabled:!f,key:bar,negate:!f)))),'3':('0':query),'4':('0':index,'1':(fields:())),'5':('0':query,'1':(language:KQL,query:'',queryLastTriggeredAt:'2019-04-25T20:53:22.331Z')),'6':('0':aggs,'1':(gridSplit:(aggs:(gridCentroid:(geo_centroid:(field:bar))),geotile_grid:(bounds:!n,field:bar,precision:!n,shard_size:65535,size:65535))))))&requestType=heatmap&geoFieldType=geo_point&searchSessionId=1"
-      );
+      expect(
+        urlTemplateWithMeta.urlTemplate.startsWith(
+          "rootdir/api/maps/mvt/getGridTile/{z}/{x}/{y}.pbf?geometryFieldName=bar&index=undefined&requestBody=(foobar:ES_DSL_PLACEHOLDER,params:('0':('0':index,'1':(fields:())),'1':('0':size,'1':0),'2':('0':filter,'1':!((geo_bounding_box:(bar:(bottom_right:!(180,-82.67628),top_left:!(-180,82.67628))),meta:(alias:!n,disabled:!f,key:bar,negate:!f)))),'3':('0':query),'4':('0':index,'1':(fields:())),'5':('0':query,'1':(language:KQL,query:'',queryLastTriggeredAt:'2019-04-25T20:53:22.331Z')),'6':('0':aggs,'1':(gridSplit:(aggs:(gridCentroid:(geo_centroid:(field:bar))),geotile_grid:(bounds:!n,field:bar,precision:!n,shard_size:65535,size:65535))))))&requestType=heatmap&geoFieldType=geo_point"
+        )
+      ).toBe(true);
+
+      expect(urlTemplateWithMeta.urlTemplate.endsWith('&searchSessionId=1')).toBe(true);
     });
   });
 

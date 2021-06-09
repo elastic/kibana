@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
@@ -56,17 +56,19 @@ export const QueryDetail: React.FC<Props> = ({ breadcrumbs }) => {
       />
       <EuiSpacer />
 
-      <AnalyticsChart
-        lines={[
-          {
-            id: i18n.translate(
-              'xpack.enterpriseSearch.appSearch.engine.analytics.queryDetail.chartTooltip',
-              { defaultMessage: 'Queries per day' }
-            ),
-            data: convertToChartData({ startDate, data: queriesPerDayForQuery }),
-          },
-        ]}
-      />
+      <EuiPanel hasBorder>
+        <AnalyticsChart
+          lines={[
+            {
+              id: i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.analytics.queryDetail.chartTooltip',
+                { defaultMessage: 'Queries per day' }
+              ),
+              data: convertToChartData({ startDate, data: queriesPerDayForQuery }),
+            },
+          ]}
+        />
+      </EuiPanel>
       <EuiSpacer />
 
       <AnalyticsSection

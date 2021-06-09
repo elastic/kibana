@@ -22,20 +22,27 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import { hasEqlSequenceQuery, isEqlRule } from '../../../../../common/detection_engine/utils';
+import type {
+  ExceptionListType,
+  OsTypeArray,
+  OsType,
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import {
+  hasEqlSequenceQuery,
+  isEqlRule,
+  isThresholdRule,
+} from '../../../../../common/detection_engine/utils';
 import { useFetchIndex } from '../../../containers/source';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
-import {
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-  ExceptionListType,
-} from '../../../../../public/lists_plugin_deps';
+import { ExceptionBuilder } from '../../../../../public/shared_imports';
+
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
 import { useKibana } from '../../../lib/kibana';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
-import { ExceptionBuilderComponent } from '../builder';
 import { useAddOrUpdateException } from '../use_add_exception';
 import { AddExceptionComments } from '../add_exception_comments';
 import {
@@ -44,6 +51,7 @@ import {
   entryHasListType,
   entryHasNonEcsType,
   lowercaseHashValues,
+  filterIndexPatterns,
 } from '../helpers';
 import { Loader } from '../../loader';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
@@ -118,10 +126,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     memoSignalIndexName
   );
 
-  const memoMlJobIds = useMemo(
-    () => (maybeRule?.machine_learning_job_id != null ? [maybeRule.machine_learning_job_id] : []),
-    [maybeRule]
-  );
+  const memoMlJobIds = useMemo(() => maybeRule?.machine_learning_job_id ?? [], [maybeRule]);
   const { loading: mlJobLoading, jobs } = useGetInstalledJob(memoMlJobIds);
 
   const memoRuleIndices = useMemo(() => {
@@ -279,6 +284,21 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     return false;
   }, [maybeRule]);
 
+  const osDisplay = (osTypes: OsTypeArray): string => {
+    const translateOS = (currentOs: OsType): string => {
+      return currentOs === 'linux'
+        ? sharedI18n.OPERATING_SYSTEM_LINUX
+        : currentOs === 'macos'
+        ? sharedI18n.OPERATING_SYSTEM_MAC
+        : sharedI18n.OPERATING_SYSTEM_WINDOWS;
+    };
+    return osTypes
+      .reduce((osString, currentOs) => {
+        return `${translateOS(currentOs)}, ${osString}`;
+      }, '')
+      .slice(0, -2);
+  };
+
   return (
     <Modal onClose={onCancel} data-test-subj="add-exception-modal">
       <ModalHeader>
@@ -287,6 +307,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
             ? i18n.EDIT_ENDPOINT_EXCEPTION_TITLE
             : i18n.EDIT_EXCEPTION_TITLE}
         </EuiModalHeaderTitle>
+        <EuiSpacer size="xs" />
         <ModalHeaderSubtitle className="eui-textTruncate" title={ruleName}>
           {ruleName}
         </ModalHeaderSubtitle>
@@ -312,23 +333,37 @@ export const EditExceptionModal = memo(function EditExceptionModal({
               )}
               <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
               <EuiSpacer />
-              <ExceptionBuilderComponent
-                httpService={http}
-                autocompleteService={data.autocomplete}
-                exceptionListItems={[exceptionItem]}
-                listType={exceptionListType}
-                listId={exceptionItem.list_id}
-                listNamespaceType={exceptionItem.namespace_type}
-                ruleName={ruleName}
-                isOrDisabled
-                isAndDisabled={false}
-                isNestedDisabled={false}
-                data-test-subj="edit-exception-modal-builder"
-                id-aria="edit-exception-modal-builder"
-                onChange={handleBuilderOnChange}
-                indexPatterns={indexPatterns}
-                ruleType={maybeRule?.type}
-              />
+              {exceptionListType === 'endpoint' && (
+                <>
+                  <EuiText size="xs">
+                    <dl>
+                      <dt>{sharedI18n.OPERATING_SYSTEM_LABEL}</dt>
+                      <dd>{osDisplay(exceptionItem.os_types)}</dd>
+                    </dl>
+                  </EuiText>
+                  <EuiSpacer />
+                </>
+              )}
+              {ExceptionBuilder.getExceptionBuilderComponentLazy({
+                allowLargeValueLists:
+                  !isEqlRule(maybeRule?.type) && !isThresholdRule(maybeRule?.type),
+                httpService: http,
+                autocompleteService: data.autocomplete,
+                exceptionListItems: [exceptionItem],
+                listType: exceptionListType,
+                listId: exceptionItem.list_id,
+                listNamespaceType: exceptionItem.namespace_type,
+                listTypeSpecificIndexPatternFilter: filterIndexPatterns,
+                ruleName,
+                isOrDisabled: true,
+                isAndDisabled: false,
+                osTypes: exceptionItem.os_types,
+                isNestedDisabled: false,
+                dataTestSubj: 'edit-exception-modal-builder',
+                idAria: 'edit-exception-modal-builder',
+                onChange: handleBuilderOnChange,
+                indexPatterns,
+              })}
 
               <EuiSpacer />
 
@@ -354,7 +389,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
               </EuiFormRow>
               {exceptionListType === 'endpoint' && (
                 <>
-                  <EuiSpacer />
+                  <EuiSpacer size="s" />
                   <EuiText data-test-subj="edit-exception-endpoint-text" color="subdued" size="s">
                     {i18n.ENDPOINT_QUARANTINE_TEXT}
                   </EuiText>

@@ -13,11 +13,12 @@ import {
   getErrorsForDateReference,
   dateBasedOperationToExpression,
   hasDateField,
+  buildLabelFunction,
 } from './utils';
 import { OperationDefinition } from '..';
-import { getFormatFromPreviousColumn } from '../helpers';
+import { getFormatFromPreviousColumn, getFilter } from '../helpers';
 
-const ofName = (name?: string) => {
+const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.cumulativeSumOf', {
     defaultMessage: 'Cumulative sum of {name}',
     values: {
@@ -28,7 +29,7 @@ const ofName = (name?: string) => {
         }),
     },
   });
-};
+});
 
 export type CumulativeSumIndexPatternColumn = FormattedIndexPatternColumn &
   ReferenceBasedIndexPatternColumn & {
@@ -48,7 +49,7 @@ export const cumulativeSumOperation: OperationDefinition<
   selectionStyle: 'field',
   requiredReferences: [
     {
-      input: ['field'],
+      input: ['field', 'managedReference'],
       specificOperations: ['count', 'sum'],
       validateMetadata: (meta) => meta.dataType === 'number' && !meta.isBucketed,
     },
@@ -64,20 +65,33 @@ export const cumulativeSumOperation: OperationDefinition<
   },
   getDefaultLabel: (column, indexPattern, columns) => {
     const ref = columns[column.references[0]];
-    return ofName(ref && 'sourceField' in ref ? ref.sourceField : undefined);
+    return ofName(
+      ref && 'sourceField' in ref
+        ? indexPattern.getFieldByName(ref.sourceField)?.displayName
+        : undefined,
+      undefined,
+      column.timeShift
+    );
   },
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'cumulative_sum');
   },
-  buildColumn: ({ referenceIds, previousColumn, layer }) => {
+  buildColumn: ({ referenceIds, previousColumn, layer, indexPattern }, columnParams) => {
     const ref = layer.columns[referenceIds[0]];
     return {
-      label: ofName(ref && 'sourceField' in ref ? ref.sourceField : undefined),
+      label: ofName(
+        ref && 'sourceField' in ref
+          ? indexPattern.getFieldByName(ref.sourceField)?.displayName
+          : undefined,
+        undefined,
+        previousColumn?.timeShift
+      ),
       dataType: 'number',
       operationType: 'cumulative_sum',
       isBucketed: false,
       scale: 'ratio',
-      filter: previousColumn?.filter,
+      timeShift: previousColumn?.timeShift,
+      filter: getFilter(previousColumn, columnParams),
       references: referenceIds,
       params: getFormatFromPreviousColumn(previousColumn),
     };
@@ -103,4 +117,5 @@ export const cumulativeSumOperation: OperationDefinition<
     )?.join(', ');
   },
   filterable: true,
+  shiftable: true,
 };

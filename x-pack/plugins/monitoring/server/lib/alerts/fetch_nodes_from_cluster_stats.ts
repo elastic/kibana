@@ -89,9 +89,12 @@ export async function fetchNodesFromClusterStats(
   };
 
   const { body: response } = await esClient.search(params);
-  const nodes = [];
+  const nodes: AlertClusterStatsNodes[] = [];
   // @ts-expect-error @elastic/elasticsearch Aggregate does not define buckets
-  const clusterBuckets = response.aggregations.clusters.buckets;
+  const clusterBuckets = response.aggregations?.clusters?.buckets;
+  if (!clusterBuckets?.length) {
+    return nodes;
+  }
   for (const clusterBucket of clusterBuckets) {
     const clusterUuid = clusterBucket.key;
     const hits = clusterBucket.top.hits.hits;

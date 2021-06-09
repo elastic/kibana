@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import { NetworkEvent } from '../../../common/runtime_types';
 
@@ -20,7 +20,7 @@ export const secondsToMillis = (seconds: number) =>
 
 export const getNetworkEvents: UMElasticsearchQueryFn<
   GetNetworkEventsParams,
-  { events: NetworkEvent[]; total: number }
+  { events: NetworkEvent[]; total: number; isWaterfallSupported: boolean }
 > = async ({ uptimeEsClient, checkGroup, stepIndex }) => {
   const params = {
     track_total_hits: true,
@@ -30,7 +30,7 @@ export const getNetworkEvents: UMElasticsearchQueryFn<
           { term: { 'synthetics.type': 'journey/network_info' } },
           { term: { 'monitor.check_group': checkGroup } },
           { term: { 'synthetics.step.index': Number(stepIndex) } },
-        ] as QueryContainer[],
+        ] as QueryDslQueryContainer[],
       },
     },
     // NOTE: This limit may need tweaking in the future. Users can technically perform multiple
@@ -40,46 +40,43 @@ export const getNetworkEvents: UMElasticsearchQueryFn<
   };
 
   const { body: result } = await uptimeEsClient.search({ body: params });
+  let isWaterfallSupported = false;
+  const events = result.hits.hits.map<NetworkEvent>((event: any) => {
+    if (event._source.http && event._source.url) {
+      isWaterfallSupported = true;
+    }
+    const requestSentTime = secondsToMillis(event._source.synthetics.payload.request_sent_time);
+    const loadEndTime = secondsToMillis(event._source.synthetics.payload.load_end_time);
+    const securityDetails = event._source.tls?.server?.x509;
+
+    return {
+      timestamp: event._source['@timestamp'],
+      method: event._source.http?.request?.method,
+      url: event._source.url?.full,
+      status: event._source.http?.response?.status,
+      mimeType: event._source.http?.response?.mime_type,
+      requestSentTime,
+      loadEndTime,
+      timings: event._source.synthetics.payload.timings,
+      transferSize: event._source.synthetics.payload.transfer_size,
+      resourceSize: event._source.synthetics.payload.resource_size,
+      certificates: securityDetails
+        ? {
+            issuer: securityDetails.issuer?.common_name,
+            subjectName: securityDetails.subject.common_name,
+            validFrom: securityDetails.not_before,
+            validTo: securityDetails.not_after,
+          }
+        : undefined,
+      requestHeaders: event._source.http?.request?.headers,
+      responseHeaders: event._source.http?.response?.headers,
+      ip: event._source.http?.response?.remote_i_p_address,
+    };
+  });
 
   return {
     total: result.hits.total.value,
-    events: result.hits.hits.map<NetworkEvent>((event: any) => {
-      const requestSentTime = secondsToMillis(event._source.synthetics.payload.request_sent_time);
-      const loadEndTime = secondsToMillis(event._source.synthetics.payload.load_end_time);
-      const requestStartTime =
-        event._source.synthetics.payload.response &&
-        event._source.synthetics.payload.response.timing
-          ? secondsToMillis(event._source.synthetics.payload.response.timing.request_time)
-          : undefined;
-      const securityDetails = event._source.synthetics.payload.response?.security_details;
-
-      return {
-        timestamp: event._source['@timestamp'],
-        method: event._source.synthetics.payload?.method,
-        url: event._source.synthetics.payload?.url,
-        status: event._source.synthetics.payload?.status,
-        mimeType: event._source.synthetics.payload?.response?.mime_type,
-        requestSentTime,
-        requestStartTime,
-        loadEndTime,
-        timings: event._source.synthetics.payload.timings,
-        bytesDownloadedCompressed: event._source.synthetics.payload.response?.encoded_data_length,
-        certificates: securityDetails
-          ? {
-              issuer: securityDetails.issuer,
-              subjectName: securityDetails.subject_name,
-              validFrom: securityDetails.valid_from
-                ? secondsToMillis(securityDetails.valid_from)
-                : undefined,
-              validTo: securityDetails.valid_to
-                ? secondsToMillis(securityDetails.valid_to)
-                : undefined,
-            }
-          : undefined,
-        requestHeaders: event._source.synthetics.payload.request?.headers,
-        responseHeaders: event._source.synthetics.payload.response?.headers,
-        ip: event._source.synthetics.payload.response?.remote_i_p_address,
-      };
-    }),
+    events,
+    isWaterfallSupported,
   };
 };

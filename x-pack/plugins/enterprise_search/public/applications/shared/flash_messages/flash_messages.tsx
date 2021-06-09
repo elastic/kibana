@@ -7,32 +7,38 @@
 
 import React, { Fragment } from 'react';
 
-import { useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
-import { EuiCallOut, EuiCallOutProps, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiGlobalToastList } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
+import { FLASH_MESSAGE_TYPES, DEFAULT_TOAST_TIMEOUT } from './constants';
 import { FlashMessagesLogic } from './flash_messages_logic';
 
-const FLASH_MESSAGE_TYPES = {
-  success: { color: 'success' as EuiCallOutProps['color'], icon: 'check' },
-  info: { color: 'primary' as EuiCallOutProps['color'], icon: 'iInCircle' },
-  warning: { color: 'warning' as EuiCallOutProps['color'], icon: 'alert' },
-  error: { color: 'danger' as EuiCallOutProps['color'], icon: 'alert' },
-};
+export const FlashMessages: React.FC = ({ children }) => (
+  <>
+    <Callouts>{children}</Callouts>
+    <Toasts />
+  </>
+);
 
-export const FlashMessages: React.FC = ({ children }) => {
+export const Callouts: React.FC = ({ children }) => {
   const { messages } = useValues(FlashMessagesLogic);
 
-  // If we have no messages to display, do not render the element at all
-  if (!messages.length) return null;
-
   return (
-    <div data-test-subj="FlashMessages">
+    <div
+      aria-live="polite"
+      role="region"
+      aria-label={i18n.translate('xpack.enterpriseSearch.flashMessages.regionAriaLabel', {
+        defaultMessage: 'Flash messages',
+      })}
+      data-test-subj="FlashMessages"
+    >
       {messages.map(({ type, message, description }, index) => (
         <Fragment key={index}>
           <EuiCallOut
             color={FLASH_MESSAGE_TYPES[type].color}
-            iconType={FLASH_MESSAGE_TYPES[type].icon}
+            iconType={FLASH_MESSAGE_TYPES[type].iconType}
             title={message}
           >
             {description}
@@ -42,5 +48,18 @@ export const FlashMessages: React.FC = ({ children }) => {
       ))}
       {children}
     </div>
+  );
+};
+
+export const Toasts: React.FC = () => {
+  const { toastMessages } = useValues(FlashMessagesLogic);
+  const { dismissToastMessage } = useActions(FlashMessagesLogic);
+
+  return (
+    <EuiGlobalToastList
+      toasts={toastMessages}
+      dismissToast={dismissToastMessage}
+      toastLifeTimeMs={DEFAULT_TOAST_TIMEOUT}
+    />
   );
 };

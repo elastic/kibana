@@ -6,25 +6,22 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useContext, useCallback, useEffect } from 'react';
+import React, { useContext, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiFormRow, EuiText, EuiLink, htmlIdGenerator } from '@elastic/eui';
-import { getCoreStart, getDataStart } from '../../../../services';
+import { getCoreStart } from '../../../../services';
 import { PanelModelContext } from '../../../contexts/panel_model_context';
 
-import {
-  isStringTypeIndexPattern,
-  fetchIndexPattern,
-} from '../../../../../common/index_patterns_utils';
+import { isStringTypeIndexPattern } from '../../../../../common/index_patterns_utils';
 
 import { FieldTextSelect } from './field_text_select';
 import { ComboBoxSelect } from './combo_box_select';
 
 import type { IndexPatternValue, FetchedIndexPattern } from '../../../../../common/types';
-
-const USE_KIBANA_INDEXES_KEY = 'use_kibana_indexes';
+import { DefaultIndexPatternContext } from '../../../contexts/default_index_context';
+import { USE_KIBANA_INDEXES_KEY } from '../../../../../common/constants';
 
 interface IndexPatternSelectProps {
   value: IndexPatternValue;
@@ -32,6 +29,7 @@ interface IndexPatternSelectProps {
   onChange: Function;
   disabled?: boolean;
   allowIndexSwitchingMode?: boolean;
+  fetchedIndex: FetchedIndexPattern | null;
 }
 
 const defaultIndexPatternHelpText = i18n.translate(
@@ -57,11 +55,13 @@ export const IndexPatternSelect = ({
   indexPatternName,
   onChange,
   disabled,
+  fetchedIndex,
   allowIndexSwitchingMode,
 }: IndexPatternSelectProps) => {
   const htmlId = htmlIdGenerator();
   const panelModel = useContext(PanelModelContext);
-  const [fetchedIndex, setFetchedIndex] = useState<FetchedIndexPattern | null>();
+  const defaultIndex = useContext(DefaultIndexPatternContext);
+
   const useKibanaIndices = Boolean(panelModel?.[USE_KIBANA_INDEXES_KEY]);
   const Component = useKibanaIndices ? ComboBoxSelect : FieldTextSelect;
 
@@ -96,23 +96,6 @@ export const IndexPatternSelect = ({
     });
   }, [fetchedIndex]);
 
-  useEffect(() => {
-    async function fetchIndex() {
-      const { indexPatterns } = getDataStart();
-
-      setFetchedIndex(
-        value
-          ? await fetchIndexPattern(value, indexPatterns)
-          : {
-              indexPattern: undefined,
-              indexPatternString: undefined,
-            }
-      );
-    }
-
-    fetchIndex();
-  }, [value]);
-
   if (!fetchedIndex) {
     return null;
   }
@@ -146,7 +129,7 @@ export const IndexPatternSelect = ({
         allowSwitchMode={allowIndexSwitchingMode}
         onIndexChange={onIndexChange}
         onModeChange={onModeChange}
-        placeholder={panelModel?.default_index_pattern ?? ''}
+        placeholder={defaultIndex?.title ?? ''}
         data-test-subj="metricsIndexPatternInput"
       />
     </EuiFormRow>

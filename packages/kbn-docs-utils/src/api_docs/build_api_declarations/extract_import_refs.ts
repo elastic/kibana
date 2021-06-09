@@ -9,7 +9,7 @@
 import { KibanaPlatformPlugin, ToolingLog } from '@kbn/dev-utils';
 import { getApiSectionId, getPluginApiDocId, getPluginForPath } from '../utils';
 import { ApiScope, TextWithLinks } from '../types';
-import { getRelativePath } from './utils';
+import { getRelativePath, pathsOutsideScopes } from './utils';
 
 /**
  *
@@ -31,13 +31,8 @@ export function extractImportReferences(
   log: ToolingLog
 ): TextWithLinks {
   const texts: TextWithLinks = [];
-  let pos = 0;
   let textSegment: string | undefined = text;
-  const max = 5;
   while (textSegment) {
-    pos++;
-    if (pos > max) break;
-
     const ref = extractImportRef(textSegment);
     if (ref) {
       const { name, path, index, length } = ref;
@@ -68,7 +63,7 @@ export function extractImportReferences(
         texts.push({
           pluginId: plugin.manifest.id,
           scope: getScopeFromPath(path, plugin, log),
-          docId: getPluginApiDocId(plugin.manifest.id, log, {
+          docId: getPluginApiDocId(plugin.manifest.id, {
             serviceFolders: plugin.manifest.serviceFolders,
             apiPath: path,
             directory: plugin.directory,
@@ -115,7 +110,7 @@ function getScopeFromPath(path: string, plugin: KibanaPlatformPlugin, log: Tooli
   } else if (path.startsWith(`${plugin.directory}/common/`)) {
     return ApiScope.COMMON;
   } else {
-    log.warning(`Unexpected path encountered ${path}`);
+    pathsOutsideScopes[path] = plugin.directory;
     return ApiScope.COMMON;
   }
 }

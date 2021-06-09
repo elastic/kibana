@@ -283,7 +283,7 @@ describe('GET all roles', () => {
               indices: [],
               applications: [
                 {
-                  application,
+                  application: reservedPrivilegesApplicationWildcard,
                   privileges: ['reserved_customApplication1', 'reserved_customApplication2'],
                   resources: ['*'],
                 },
@@ -1030,7 +1030,7 @@ describe('GET all roles', () => {
     );
 
     getRolesTest(
-      `reserved privilege assigned with a feature privilege returns empty kibana section with _transform_error set to ['kibana']`,
+      `reserved privilege assigned with a feature privilege returns populated kibana section`,
       {
         apiResponse: async () => ({
           first_role: {
@@ -1039,7 +1039,12 @@ describe('GET all roles', () => {
             applications: [
               {
                 application,
-                privileges: ['reserved_foo', 'feature_foo.foo-privilege-1'],
+                privileges: ['feature_foo.foo-privilege-1'],
+                resources: ['*'],
+              },
+              {
+                application: reservedPrivilegesApplicationWildcard,
+                privileges: ['reserved_foo'],
                 resources: ['*'],
               },
             ],
@@ -1068,8 +1073,22 @@ describe('GET all roles', () => {
                 indices: [],
                 run_as: [],
               },
-              kibana: [],
-              _transform_error: ['kibana'],
+              kibana: [
+                {
+                  base: [],
+                  feature: {
+                    foo: ['foo-privilege-1'],
+                  },
+                  spaces: ['*'],
+                },
+                {
+                  base: [],
+                  feature: {},
+                  _reserved: ['foo'],
+                  spaces: ['*'],
+                },
+              ],
+              _transform_error: [],
               _unrecognized_applications: [],
             },
           ],

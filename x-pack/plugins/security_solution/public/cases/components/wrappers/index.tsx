@@ -19,8 +19,3 @@ export const SectionWrapper = styled.div`
   max-width: 1175px;
   width: 100%;
 `;
-
-export const HeaderWrapper = styled.div`
-  padding: ${({ theme }) =>
-    `${theme.eui.paddingSizes.l} ${theme.eui.paddingSizes.l} 0 ${theme.eui.paddingSizes.l}`};
-`;

@@ -15,13 +15,16 @@ import {
 export const ArtifactConstants = {
   GLOBAL_ALLOWLIST_NAME: 'endpoint-exceptionlist',
   /**
-   * Saved objects no longer used for storing artifacts. Value
+   * Saved objects no longer used for storing artifacts
    * @deprecated
    */
   SAVED_OBJECT_TYPE: 'endpoint:user-artifact',
-  SUPPORTED_OPERATING_SYSTEMS: ['macos', 'windows'],
+  SUPPORTED_OPERATING_SYSTEMS: ['macos', 'windows', 'linux'],
   SUPPORTED_TRUSTED_APPS_OPERATING_SYSTEMS: ['macos', 'windows', 'linux'],
   GLOBAL_TRUSTED_APPS_NAME: 'endpoint-trustlist',
+
+  SUPPORTED_EVENT_FILTERS_OPERATING_SYSTEMS: ['macos', 'windows', 'linux'],
+  GLOBAL_EVENT_FILTERS_NAME: 'endpoint-eventfilterlist',
 };
 
 export const ManifestConstants = {

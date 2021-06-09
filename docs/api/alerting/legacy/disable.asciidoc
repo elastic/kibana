@@ -4,7 +4,7 @@
 <titleabbrev>Legacy disable alert</titleabbrev>
 ++++
 
-WARNING: Deprecated in 7.13.0. Use <<disable-rule-api>> instead.
+deprecated::[7.13.0,Use <<disable-rule-api>> instead.]
 
 Disable an alert.
 

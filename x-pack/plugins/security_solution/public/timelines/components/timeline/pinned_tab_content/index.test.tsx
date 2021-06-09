@@ -9,11 +9,11 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
-import { Direction } from '../../../../graphql/types';
+import { DefaultCellRenderer } from '../cell_rendering/default_cell_renderer';
 import { defaultHeaders, mockTimelineData } from '../../../../common/mock';
 import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock/test_providers';
-
+import { defaultRowRenderers } from '../body/renderers';
 import { Sort } from '../body/sort';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
@@ -22,6 +22,7 @@ import { useTimelineEventsDetails } from '../../../containers/details/index';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
 import { PinnedTabContentComponent, Props as PinnedTabContentComponentProps } from '.';
+import { Direction } from '../../../../../common/search_strategy';
 
 jest.mock('../../../containers/index', () => ({
   useTimelineEvents: jest.fn(),
@@ -94,6 +95,8 @@ describe('PinnedTabContent', () => {
       timelineId: TimelineId.test,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
+      renderCellValue: DefaultCellRenderer,
+      rowRenderers: defaultRowRenderers,
       sort,
       pinnedEventIds: {},
       showExpandedDetails: false,

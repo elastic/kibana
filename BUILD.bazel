@@ -2,6 +2,8 @@
 # other packages builds and need to be included as inputs
 exports_files(
   [
+    "tsconfig.base.json",
+    "tsconfig.browser.json",
     "tsconfig.json",
     "package.json"
   ],

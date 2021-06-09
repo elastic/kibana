@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { first, last } from 'lodash';
-import { RectAnnotation, AnnotationDomainTypes, LineAnnotation } from '@elastic/charts';
+import { RectAnnotation, AnnotationDomainType, LineAnnotation } from '@elastic/charts';
 
 import {
   Comparator,
@@ -44,7 +44,7 @@ export const ThresholdAnnotations = ({
     <>
       <LineAnnotation
         id={`${id}-thresholds`}
-        domainType={AnnotationDomainTypes.YDomain}
+        domainType={AnnotationDomainType.YDomain}
         data-test-subj="threshold-line"
         dataValues={sortedThresholds.map((t) => ({
           dataValue: t,

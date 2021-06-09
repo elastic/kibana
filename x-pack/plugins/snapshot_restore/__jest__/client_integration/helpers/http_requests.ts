@@ -108,6 +108,14 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setRestoreSnapshotResponse = (response?: HttpResponse) => {
+    server.respondWith('POST', `${API_BASE_PATH}restore/:repository/:snapshot`, [
+      200,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(response),
+    ]);
+  };
+
   return {
     setLoadRepositoriesResponse,
     setLoadRepositoryTypesResponse,
@@ -119,6 +127,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     setAddPolicyResponse,
     setGetPolicyResponse,
     setCleanupRepositoryResponse,
+    setRestoreSnapshotResponse,
   };
 };
 

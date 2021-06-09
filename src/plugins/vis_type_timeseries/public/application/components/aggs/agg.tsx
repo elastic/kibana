@@ -13,7 +13,7 @@ import { aggToComponent } from '../lib/agg_to_component';
 import { isMetricEnabled } from '../../lib/check_ui_restrictions';
 import { UnsupportedAgg } from './unsupported_agg';
 import { TemporaryUnsupportedAgg } from './temporary_unsupported_agg';
-import { MetricsItemsSchema, PanelSchema, SeriesItemsSchema } from '../../../../common/types';
+import type { Metric, Panel, Series } from '../../../../common/types';
 import { DragHandleProps } from '../../../types';
 import { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
 import { IFieldType } from '../../../../../data/common/index_patterns/fields';
@@ -21,10 +21,10 @@ import { IFieldType } from '../../../../../data/common/index_patterns/fields';
 interface AggProps extends HTMLAttributes<HTMLElement> {
   disableDelete: boolean;
   fields: IFieldType[];
-  model: MetricsItemsSchema;
-  panel: PanelSchema;
-  series: SeriesItemsSchema;
-  siblings: MetricsItemsSchema[];
+  model: Metric;
+  panel: Panel;
+  series: Series;
+  siblings: Metric[];
   uiRestrictions: TimeseriesUIRestrictions;
   dragHandleProps: DragHandleProps;
   onAdd: () => void;
@@ -48,9 +48,9 @@ export function Agg(props: AggProps) {
     ...props.style,
   };
 
-  const indexPattern =
-    (props.series.override_index_pattern && props.series.series_index_pattern) ||
-    props.panel.index_pattern;
+  const indexPattern = props.series.override_index_pattern
+    ? props.series.series_index_pattern
+    : props.panel.index_pattern;
 
   return (
     <div className={props.className} style={style}>

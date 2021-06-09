@@ -9,7 +9,21 @@ exports[`is rendered 1`] = `
     height={250}
     language="loglang"
     onChange={[Function]}
-    options={Object {}}
+    options={
+      Object {
+        "minimap": Object {
+          "enabled": false,
+        },
+        "renderLineHighlight": "none",
+        "scrollBeyondLastLine": false,
+        "scrollbar": Object {
+          "useShadows": false,
+        },
+        "wordBasedSuggestions": false,
+        "wordWrap": "on",
+        "wrappingIndent": "indent",
+      }
+    }
     overrideServices={Object {}}
     theme="euiColors"
     value="

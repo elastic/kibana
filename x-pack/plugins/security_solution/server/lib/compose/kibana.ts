@@ -9,7 +9,6 @@ import { CoreSetup } from '../../../../../../src/core/server';
 import { SetupPlugins } from '../../plugin';
 
 import { KibanaBackendFrameworkAdapter } from '../framework/kibana_framework_adapter';
-import { ElasticsearchHostsAdapter, Hosts } from '../hosts';
 
 import { ElasticsearchIndexFieldAdapter, IndexFields } from '../index_fields';
 
@@ -24,13 +23,12 @@ export function compose(
   plugins: SetupPlugins,
   endpointContext: EndpointAppContext
 ): AppBackendLibs {
-  const framework = new KibanaBackendFrameworkAdapter(core, plugins);
+  const framework = new KibanaBackendFrameworkAdapter();
   const sources = new Sources(new ConfigurationSourcesAdapter());
   const sourceStatus = new SourceStatus(new ElasticsearchSourceStatusAdapter(framework));
 
   const domainLibs: AppDomainLibs = {
     fields: new IndexFields(new ElasticsearchIndexFieldAdapter()),
-    hosts: new Hosts(new ElasticsearchHostsAdapter(framework, endpointContext)),
   };
 
   const libs: AppBackendLibs = {

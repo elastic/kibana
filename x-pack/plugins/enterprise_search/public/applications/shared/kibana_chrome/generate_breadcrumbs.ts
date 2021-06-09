@@ -24,7 +24,7 @@ import { letBrowserHandleEvent, createHref } from '../react_router_helpers';
  * Types
  */
 
-interface Breadcrumb {
+export interface Breadcrumb {
   text: string;
   path?: string;
   // Used to navigate outside of the React Router basename,
@@ -64,16 +64,20 @@ export const useGenerateBreadcrumbs = (trail: BreadcrumbTrail): Breadcrumbs => {
 /**
  * Convert IBreadcrumb objects to React-Router-friendly EUI breadcrumb objects
  * https://elastic.github.io/eui/#/navigation/breadcrumbs
+ *
+ * NOTE: Per EUI best practices, we remove the link behavior and
+ * generate an inactive breadcrumb for the last breadcrumb in the list.
  */
 
 export const useEuiBreadcrumbs = (breadcrumbs: Breadcrumbs): EuiBreadcrumb[] => {
   const { navigateToUrl, history } = useValues(KibanaLogic);
   const { http } = useValues(HttpLogic);
 
-  return breadcrumbs.map(({ text, path, shouldNotCreateHref }) => {
+  return breadcrumbs.map(({ text, path, shouldNotCreateHref }, i) => {
     const breadcrumb: EuiBreadcrumb = { text };
+    const isLastBreadcrumb = i === breadcrumbs.length - 1;
 
-    if (path) {
+    if (path && !isLastBreadcrumb) {
       breadcrumb.href = createHref(path, { history, http }, { shouldNotCreateHref });
       breadcrumb.onClick = (event) => {
         if (letBrowserHandleEvent(event)) return;

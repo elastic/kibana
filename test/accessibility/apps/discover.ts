@@ -19,17 +19,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Discover a11y tests', () => {
     before(async () => {
-      await esArchiver.load('discover');
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.load('test/functional/fixtures/es_archiver/discover');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.update({
         defaultIndex: 'logstash-*',
+        'doc_table:legacy': true,
       });
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     after(async () => {
-      await esArchiver.unload('logstash_functional');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
     it('Discover main page', async () => {

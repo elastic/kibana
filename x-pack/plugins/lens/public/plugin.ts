@@ -6,6 +6,7 @@
  */
 
 import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { DashboardStart } from '../../../../src/plugins/dashboard/public';
@@ -53,6 +54,7 @@ import {
   EmbeddableComponentProps,
   getEmbeddableComponent,
 } from './editor_frame_service/embeddable/embeddable_component';
+import { HeatmapVisualization } from './heatmap_visualization';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -62,6 +64,7 @@ export interface LensPluginSetupDependencies {
   visualizations: VisualizationsSetup;
   charts: ChartsPluginSetup;
   globalSearch?: GlobalSearchPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface LensPluginStartDependencies {
@@ -96,7 +99,7 @@ export interface LensPublicStart {
    *
    * @experimental
    */
-  navigateToPrefilledEditor: (input: LensEmbeddableInput) => void;
+  navigateToPrefilledEditor: (input: LensEmbeddableInput, openInNewTab?: boolean) => void;
   /**
    * Method which returns true if the user has permission to use Lens as defined by application capabilities.
    */
@@ -117,6 +120,7 @@ export class LensPlugin {
   private xyVisualization: XyVisualization;
   private metricVisualization: MetricVisualization;
   private pieVisualization: PieVisualization;
+  private heatmapVisualization: HeatmapVisualization;
 
   private stopReportManager?: () => void;
 
@@ -127,6 +131,7 @@ export class LensPlugin {
     this.xyVisualization = new XyVisualization();
     this.metricVisualization = new MetricVisualization();
     this.pieVisualization = new PieVisualization();
+    this.heatmapVisualization = new HeatmapVisualization();
   }
 
   setup(
@@ -139,6 +144,7 @@ export class LensPlugin {
       visualizations,
       charts,
       globalSearch,
+      usageCollection,
     }: LensPluginSetupDependencies
   ) {
     this.attributeService = async () => {
@@ -153,6 +159,7 @@ export class LensPlugin {
         embeddable,
         charts,
         expressions,
+        usageCollection,
       },
       this.attributeService
     );
@@ -174,6 +181,7 @@ export class LensPlugin {
     this.datatableVisualization.setup(core, dependencies);
     this.metricVisualization.setup(core, dependencies);
     this.pieVisualization.setup(core, dependencies);
+    this.heatmapVisualization.setup(core, dependencies);
 
     visualizations.registerAlias(getLensAliasConfig());
 
@@ -243,8 +251,9 @@ export class LensPlugin {
 
     return {
       EmbeddableComponent: getEmbeddableComponent(startDependencies.embeddable),
-      navigateToPrefilledEditor: (input: LensEmbeddableInput) => {
-        if (input.timeRange) {
+      navigateToPrefilledEditor: (input: LensEmbeddableInput, openInNewTab?: boolean) => {
+        // for openInNewTab, we set the time range in url via getEditPath below
+        if (input.timeRange && !openInNewTab) {
           startDependencies.data.query.timefilter.timefilter.setTime(input.timeRange);
         }
         const transfer = new EmbeddableStateTransfer(
@@ -252,7 +261,8 @@ export class LensPlugin {
           core.application.currentAppId$
         );
         transfer.navigateToEditor('lens', {
-          path: getEditPath(undefined),
+          openInNewTab,
+          path: getEditPath(undefined, openInNewTab ? input.timeRange : undefined),
           state: {
             originatingApp: '',
             valueInput: input,

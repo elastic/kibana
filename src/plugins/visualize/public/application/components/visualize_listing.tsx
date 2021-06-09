@@ -196,7 +196,7 @@ export const VisualizeListing = () => {
         initialPageSize={savedObjectsPublic.settings.getPerPage()}
         initialFilter={''}
         rowHeader="title"
-        noItemsFragment={noItemsFragment}
+        emptyPrompt={noItemsFragment}
         entityName={i18n.translate('visualize.listing.table.entityName', {
           defaultMessage: 'visualization',
         })}

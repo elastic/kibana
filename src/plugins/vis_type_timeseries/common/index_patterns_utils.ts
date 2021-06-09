@@ -7,8 +7,8 @@
  */
 
 import { uniq } from 'lodash';
-import { PanelSchema, IndexPatternValue, FetchedIndexPattern } from '../common/types';
-import { IndexPatternsService } from '../../data/common';
+import type { Panel, IndexPatternValue, FetchedIndexPattern } from '../common/types';
+import { IIndexPattern, IndexPatternsService } from '../../data/common';
 
 export const isStringTypeIndexPattern = (
   indexPatternValue: IndexPatternValue
@@ -17,10 +17,7 @@ export const isStringTypeIndexPattern = (
 export const getIndexPatternKey = (indexPatternValue: IndexPatternValue) =>
   isStringTypeIndexPattern(indexPatternValue) ? indexPatternValue : indexPatternValue?.id ?? '';
 
-export const extractIndexPatternValues = (
-  panel: PanelSchema,
-  defaultIndex?: PanelSchema['default_index_pattern']
-) => {
+export const extractIndexPatternValues = (panel: Panel, defaultIndex: IIndexPattern | null) => {
   const patterns: IndexPatternValue[] = [];
 
   if (panel.index_pattern) {
@@ -43,8 +40,8 @@ export const extractIndexPatternValues = (
     });
   }
 
-  if (patterns.length === 0 && defaultIndex) {
-    patterns.push(defaultIndex);
+  if (patterns.length === 0 && defaultIndex?.id) {
+    patterns.push({ id: defaultIndex.id });
   }
 
   return uniq<IndexPatternValue>(patterns).sort();
@@ -52,7 +49,12 @@ export const extractIndexPatternValues = (
 
 export const fetchIndexPattern = async (
   indexPatternValue: IndexPatternValue | undefined,
-  indexPatternsService: Pick<IndexPatternsService, 'getDefault' | 'get' | 'find'>
+  indexPatternsService: Pick<IndexPatternsService, 'getDefault' | 'get' | 'find'>,
+  options: {
+    fetchKibanaIndexForStringIndexes: boolean;
+  } = {
+    fetchKibanaIndexForStringIndexes: false,
+  }
 ): Promise<FetchedIndexPattern> => {
   let indexPattern: FetchedIndexPattern['indexPattern'];
   let indexPatternString: string = '';
@@ -61,13 +63,16 @@ export const fetchIndexPattern = async (
     indexPattern = await indexPatternsService.getDefault();
   } else {
     if (isStringTypeIndexPattern(indexPatternValue)) {
-      indexPattern = (await indexPatternsService.find(indexPatternValue)).find(
-        (index) => index.title === indexPatternValue
-      );
-
+      if (options.fetchKibanaIndexForStringIndexes) {
+        indexPattern = (await indexPatternsService.find(indexPatternValue)).find(
+          (index) => index.title === indexPatternValue
+        );
+      }
       if (!indexPattern) {
         indexPatternString = indexPatternValue;
       }
+
+      indexPatternString = indexPatternValue;
     } else if (indexPatternValue.id) {
       indexPattern = await indexPatternsService.get(indexPatternValue.id);
     }

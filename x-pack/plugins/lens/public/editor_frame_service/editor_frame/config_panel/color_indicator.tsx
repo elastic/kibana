@@ -74,7 +74,7 @@ export function ColorIndicator({
   }
 
   return (
-    <EuiFlexGroup gutterSize="none" alignItems="center">
+    <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
       {indicatorIcon}
       <EuiFlexItem>{children}</EuiFlexItem>
     </EuiFlexGroup>

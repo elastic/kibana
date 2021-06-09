@@ -6,12 +6,16 @@
  */
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import { estypes } from '@elastic/elasticsearch';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { debounce } from 'lodash';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { i18n } from '@kbn/i18n';
-import { isEsSearchResponse } from '../../../../../../../../../common/api_schemas/type_guards';
+import {
+  isEsSearchResponseWithAggregations,
+  isMultiBucketAggregate,
+} from '../../../../../../../../../common/api_schemas/type_guards';
 import { useApi } from '../../../../../../../hooks';
 import { CreateTransformWizardContext } from '../../../../wizard/wizard';
 import { FilterAggConfigTerm } from '../types';
@@ -29,7 +33,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
   const { indexPattern, runtimeMappings } = useContext(CreateTransformWizardContext);
   const toastNotifications = useToastNotifications();
 
-  const [options, setOptions] = useState([]);
+  const [options, setOptions] = useState<EuiComboBoxOptionOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -62,7 +66,14 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
 
       setIsLoading(false);
 
-      if (!isEsSearchResponse(response)) {
+      if (
+        !(
+          isEsSearchResponseWithAggregations(response) &&
+          isMultiBucketAggregate<estypes.AggregationsKeyedBucketKeys>(
+            response.aggregations.field_values
+          )
+        )
+      ) {
         toastNotifications.addWarning(
           i18n.translate('xpack.transform.agg.popoverForm.filerAgg.term.errorFetchSuggestions', {
             defaultMessage: 'Unable to fetch suggestions',
@@ -72,9 +83,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
       }
 
       setOptions(
-        response.aggregations.field_values.buckets.map(
-          (value: { key: string; doc_count: number }) => ({ label: value.key })
-        )
+        response.aggregations.field_values.buckets.map((value) => ({ label: value.key + '' }))
       );
     }, 600),
     [selectedField]

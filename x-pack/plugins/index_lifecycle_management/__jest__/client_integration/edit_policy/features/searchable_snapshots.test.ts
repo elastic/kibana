@@ -7,7 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 import { licensingMock } from '../../../../../licensing/public/mocks';
-import { setupEnvironment } from '../../helpers/setup_environment';
+import { setupEnvironment } from '../../helpers';
 import { getDefaultHotPhasePolicy } from '../constants';
 import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
 
@@ -20,13 +20,7 @@ describe('<EditPolicy /> searchable snapshots', () => {
   });
 
   beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
-    httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
-    httpRequestsMockHelpers.setListNodes({
-      nodesByRoles: {},
-      nodesByAttributes: { test: ['123'] },
-      isUsingDeprecatedDataRoleConfig: false,
-    });
+    httpRequestsMockHelpers.setDefaultResponses();
 
     await act(async () => {
       testBed = await setup();
@@ -36,31 +30,35 @@ describe('<EditPolicy /> searchable snapshots', () => {
     component.update();
   });
 
-  test('enabling searchable snapshot should hide force merge, freeze and shrink in subsequent phases', async () => {
+  test('enabling searchable snapshot should hide force merge, freeze, readonly and shrink in subsequent phases', async () => {
     const { actions } = testBed;
 
-    await actions.warm.enable(true);
-    await actions.cold.enable(true);
+    await actions.togglePhase('warm');
+    await actions.togglePhase('cold');
 
     expect(actions.warm.forceMergeFieldExists()).toBeTruthy();
     expect(actions.warm.shrinkExists()).toBeTruthy();
+    expect(actions.warm.readonlyExists()).toBeTruthy();
     expect(actions.cold.searchableSnapshotsExists()).toBeTruthy();
     expect(actions.cold.freezeExists()).toBeTruthy();
+    expect(actions.cold.readonlyExists()).toBeTruthy();
 
     await actions.hot.setSearchableSnapshot('my-repo');
 
     expect(actions.warm.forceMergeFieldExists()).toBeFalsy();
     expect(actions.warm.shrinkExists()).toBeFalsy();
+    expect(actions.warm.readonlyExists()).toBeFalsy();
     // searchable snapshot in cold is still visible
     expect(actions.cold.searchableSnapshotsExists()).toBeTruthy();
     expect(actions.cold.freezeExists()).toBeFalsy();
+    expect(actions.cold.readonlyExists()).toBeFalsy();
   });
 
   test('disabling rollover toggle, but enabling default rollover', async () => {
     const { actions } = testBed;
-    await actions.hot.toggleDefaultRollover(false);
-    await actions.hot.toggleRollover(false);
-    await actions.hot.toggleDefaultRollover(true);
+    await actions.rollover.toggleDefault();
+    await actions.rollover.toggle();
+    await actions.rollover.toggleDefault();
 
     expect(actions.hot.forceMergeFieldExists()).toBeTruthy();
     expect(actions.hot.shrinkExists()).toBeTruthy();
@@ -72,9 +70,11 @@ describe('<EditPolicy /> searchable snapshots', () => {
 
     const repository = 'myRepo';
     await actions.hot.setSearchableSnapshot(repository);
-    await actions.cold.enable(true);
-    await actions.cold.toggleSearchableSnapshot(true);
-    await actions.frozen.enable(true);
+    await actions.togglePhase('cold');
+    await actions.cold.setMinAgeValue('10');
+    await actions.cold.toggleSearchableSnapshot();
+    await actions.togglePhase('frozen');
+    await actions.frozen.setMinAgeValue('15');
 
     await actions.savePolicy();
     const latestRequest = server.requests[server.requests.length - 1];
@@ -91,9 +91,11 @@ describe('<EditPolicy /> searchable snapshots', () => {
     const { actions } = testBed;
 
     await actions.hot.setSearchableSnapshot('myRepo');
-    await actions.cold.enable(true);
-    await actions.cold.toggleSearchableSnapshot(true);
-    await actions.frozen.enable(true);
+    await actions.togglePhase('cold');
+    await actions.cold.setMinAgeValue('10');
+    await actions.cold.toggleSearchableSnapshot();
+    await actions.togglePhase('frozen');
+    await actions.frozen.setMinAgeValue('15');
 
     // We update the repository in one phase
     await actions.frozen.setSearchableSnapshot('changed');
@@ -129,7 +131,7 @@ describe('<EditPolicy /> searchable snapshots', () => {
 
       test('defaults searchable snapshot to true on cloud', async () => {
         const { find, actions } = testBed;
-        await actions.cold.enable(true);
+        await actions.togglePhase('cold');
         expect(
           find('searchableSnapshotField-cold.searchableSnapshotToggle').props()['aria-checked']
         ).toBe(true);
@@ -156,8 +158,9 @@ describe('<EditPolicy /> searchable snapshots', () => {
 
       test('correctly sets snapshot repository default to "found-snapshots"', async () => {
         const { actions } = testBed;
-        await actions.cold.enable(true);
-        await actions.cold.toggleSearchableSnapshot(true);
+        await actions.togglePhase('cold');
+        await actions.cold.setMinAgeValue('10');
+        await actions.cold.toggleSearchableSnapshot();
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
         expect(latestRequest.method).toBe('POST');
@@ -199,7 +202,7 @@ describe('<EditPolicy /> searchable snapshots', () => {
       expect(actions.cold.searchableSnapshotsExists()).toBeFalsy();
       expect(actions.frozen.searchableSnapshotsExists()).toBeFalsy();
 
-      await actions.cold.enable(true);
+      await actions.togglePhase('cold');
 
       // Still hidden in hot
       expect(actions.hot.searchableSnapshotsExists()).toBeFalsy();

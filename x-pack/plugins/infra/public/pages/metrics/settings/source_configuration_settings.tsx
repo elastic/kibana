@@ -10,24 +10,23 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
   EuiPage,
   EuiPageBody,
+  EuiPanel,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useContext, useMemo } from 'react';
-
+import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { Source } from '../../../containers/metrics_source';
+import { useInfraMLCapabilitiesContext } from '../../../containers/ml/infra_ml_capabilities';
+import { Prompt } from '../../../utils/navigation_warning_prompt';
 import { FieldsConfigurationPanel } from './fields_configuration_panel';
 import { IndicesConfigurationPanel } from './indices_configuration_panel';
-import { NameConfigurationPanel } from '../../../components/source_configuration/name_configuration_panel';
-import { useSourceConfigurationFormState } from './source_configuration_form_state';
-import { SourceLoadingPage } from '../../../components/source_loading_page';
-import { Prompt } from '../../../utils/navigation_warning_prompt';
 import { MLConfigurationPanel } from './ml_configuration_panel';
-import { useInfraMLCapabilitiesContext } from '../../../containers/ml/infra_ml_capabilities';
+import { NameConfigurationPanel } from './name_configuration_panel';
+import { useSourceConfigurationFormState } from './source_configuration_form_state';
 
 interface SourceConfigurationSettingsProps {
   shouldAllowEdit: boolean;

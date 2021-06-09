@@ -146,6 +146,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
         <EuiFormRow hasEmptyLabelSpace fullWidth>
           <Fragment>
             <EuiSwitch
+              data-test-subj="modifyIndexSettingsSwitch"
               label={
                 <FormattedMessage
                   id="xpack.snapshotRestore.restoreForm.stepSettings.indexSettingsLabel"

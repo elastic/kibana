@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { setMockValues } from '../../../__mocks__/kea.mock';
+import { setMockValues } from '../../../__mocks__/kea_logic';
+import '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
@@ -13,7 +14,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiPageHeader } from '@elastic/eui';
 
-import { DocumentCreationButton } from './document_creation_button';
+import { DocumentCreationButton } from './components';
 import { SearchExperience } from './search_experience';
 
 import { Documents } from '.';
@@ -30,7 +31,7 @@ describe('Documents', () => {
   });
 
   it('renders', () => {
-    const wrapper = shallow(<Documents engineBreadcrumb={['test']} />);
+    const wrapper = shallow(<Documents />);
     expect(wrapper.find(SearchExperience).exists()).toBe(true);
   });
 
@@ -44,7 +45,7 @@ describe('Documents', () => {
         myRole: { canManageEngineDocuments: true },
       });
 
-      const wrapper = shallow(<Documents engineBreadcrumb={['test']} />);
+      const wrapper = shallow(<Documents />);
       expect(getHeader(wrapper).find(DocumentCreationButton).exists()).toBe(true);
     });
 
@@ -54,7 +55,7 @@ describe('Documents', () => {
         myRole: { canManageEngineDocuments: false },
       });
 
-      const wrapper = shallow(<Documents engineBreadcrumb={['test']} />);
+      const wrapper = shallow(<Documents />);
       expect(getHeader(wrapper).find(DocumentCreationButton).exists()).toBe(false);
     });
 
@@ -65,7 +66,7 @@ describe('Documents', () => {
         isMetaEngine: true,
       });
 
-      const wrapper = shallow(<Documents engineBreadcrumb={['test']} />);
+      const wrapper = shallow(<Documents />);
       expect(getHeader(wrapper).find(DocumentCreationButton).exists()).toBe(false);
     });
   });
@@ -77,7 +78,7 @@ describe('Documents', () => {
         isMetaEngine: true,
       });
 
-      const wrapper = shallow(<Documents engineBreadcrumb={['test']} />);
+      const wrapper = shallow(<Documents />);
       expect(wrapper.find('[data-test-subj="MetaEnginesCallout"]').exists()).toBe(true);
     });
 
@@ -87,7 +88,7 @@ describe('Documents', () => {
         isMetaEngine: false,
       });
 
-      const wrapper = shallow(<Documents engineBreadcrumb={['test']} />);
+      const wrapper = shallow(<Documents />);
       expect(wrapper.find('[data-test-subj="MetaEnginesCallout"]').exists()).toBe(false);
     });
   });

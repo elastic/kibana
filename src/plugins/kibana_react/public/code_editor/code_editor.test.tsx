@@ -89,8 +89,8 @@ test('editor mount setup', () => {
   // Verify our mount callback will be called
   expect(editorWillMount.mock.calls.length).toBe(1);
 
-  // Verify our theme will be setup
-  expect((monaco.editor.defineTheme as jest.Mock).mock.calls.length).toBe(1);
+  // Verify that both, default and transparent theme will be setup
+  expect((monaco.editor.defineTheme as jest.Mock).mock.calls.length).toBe(2);
 
   // Verify our language features have been registered
   expect((monaco.languages.onLanguage as jest.Mock).mock.calls.length).toBe(1);

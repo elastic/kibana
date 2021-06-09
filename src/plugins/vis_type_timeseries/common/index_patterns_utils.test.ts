@@ -11,7 +11,7 @@ import {
   isStringTypeIndexPattern,
   fetchIndexPattern,
 } from './index_patterns_utils';
-import { PanelSchema } from './types';
+import { Panel } from './types';
 import { IndexPattern, IndexPatternsService } from '../../data/common';
 
 describe('isStringTypeIndexPattern', () => {
@@ -24,7 +24,7 @@ describe('isStringTypeIndexPattern', () => {
 });
 
 describe('extractIndexPatterns', () => {
-  let panel: PanelSchema;
+  let panel: Panel;
 
   beforeEach(() => {
     panel = {
@@ -40,11 +40,11 @@ describe('extractIndexPatterns', () => {
         },
       ],
       annotations: [{ index_pattern: 'notes-*' }, { index_pattern: 'example-1-*' }],
-    } as PanelSchema;
+    } as Panel;
   });
 
   test('should return index patterns', () => {
-    expect(extractIndexPatternValues(panel, '')).toEqual([
+    expect(extractIndexPatternValues(panel, null)).toEqual([
       '*',
       'example-1-*',
       'example-2-*',
@@ -81,7 +81,7 @@ describe('fetchIndexPattern', () => {
   });
 
   describe('text-based index', () => {
-    test('should return the Kibana index if it exists', async () => {
+    test('should return the Kibana index if it exists (fetchKibabaIndexForStringIndexes is true)', async () => {
       mockedIndices = [
         {
           id: 'indexId',
@@ -89,7 +89,9 @@ describe('fetchIndexPattern', () => {
         },
       ] as IndexPattern[];
 
-      const value = await fetchIndexPattern('indexTitle', indexPatternsService);
+      const value = await fetchIndexPattern('indexTitle', indexPatternsService, {
+        fetchKibanaIndexForStringIndexes: true,
+      });
 
       expect(value).toMatchInlineSnapshot(`
         Object {
@@ -102,8 +104,10 @@ describe('fetchIndexPattern', () => {
       `);
     });
 
-    test('should return only indexPatternString if Kibana index does not exist', async () => {
-      const value = await fetchIndexPattern('indexTitle', indexPatternsService);
+    test('should return only indexPatternString if Kibana index does not exist (fetchKibanaIndexForStringIndexes is true)', async () => {
+      const value = await fetchIndexPattern('indexTitle', indexPatternsService, {
+        fetchKibanaIndexForStringIndexes: true,
+      });
 
       expect(value).toMatchInlineSnapshot(`
         Object {

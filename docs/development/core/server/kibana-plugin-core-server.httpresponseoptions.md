@@ -17,5 +17,6 @@ export interface HttpResponseOptions
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [body](./kibana-plugin-core-server.httpresponseoptions.body.md) | <code>HttpResponsePayload</code> | HTTP message to send to the client |
+|  [bypassErrorFormat](./kibana-plugin-core-server.httpresponseoptions.bypasserrorformat.md) | <code>boolean</code> | Bypass the default error formatting |
 |  [headers](./kibana-plugin-core-server.httpresponseoptions.headers.md) | <code>ResponseHeaders</code> | HTTP Headers with additional information about response |
 

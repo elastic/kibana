@@ -6,4 +6,9 @@
  * Side Public License, v 1.
  */
 
-export { PresentationUtilPluginStart, DashboardPicker } from '../../../presentation_util/public';
+export {
+  PresentationUtilPluginStart,
+  LazyDashboardPicker,
+  withSuspense,
+  useLabs,
+} from '../../../presentation_util/public';

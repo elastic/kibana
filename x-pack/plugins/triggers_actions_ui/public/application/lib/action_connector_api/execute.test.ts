@@ -14,7 +14,7 @@ beforeEach(() => jest.resetAllMocks());
 
 describe('executeAction', () => {
   test('should call execute API', async () => {
-    const id = '123';
+    const id = '12/3';
     const params = {
       stringParams: 'someString',
       numericParams: 123,
@@ -32,7 +32,7 @@ describe('executeAction', () => {
     });
     expect(http.post.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/actions/connector/123/_execute",
+        "/api/actions/connector/12%2F3/_execute",
         Object {
           "body": "{\\"params\\":{\\"stringParams\\":\\"someString\\",\\"numericParams\\":123}}",
         },

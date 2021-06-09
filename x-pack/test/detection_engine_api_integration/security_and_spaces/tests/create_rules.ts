@@ -61,13 +61,13 @@ export default ({ getService }: FtrProviderContext) => {
     describe('creating rules', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
-        await esArchiver.load('auditbeat/hosts');
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
-        await esArchiver.unload('auditbeat/hosts');
+        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       describe('elastic admin', () => {
@@ -224,6 +224,21 @@ export default ({ getService }: FtrProviderContext) => {
           expect(bodyToCompare).to.eql(getSimpleRuleOutputWithoutRuleId());
         });
 
+        it('creates a single Machine Learning rule from a legacy ML Rule format', async () => {
+          const legacyMlRule = {
+            ...getSimpleMlRule(),
+            machine_learning_job_id: 'some_job_id',
+          };
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send(legacyMlRule)
+            .expect(200);
+
+          const bodyToCompare = removeServerGeneratedProperties(body);
+          expect(bodyToCompare).to.eql(getSimpleMlRuleOutput());
+        });
+
         it('should create a single Machine Learning rule', async () => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
@@ -282,12 +297,16 @@ export default ({ getService }: FtrProviderContext) => {
         await createSignalsIndex(supertest);
         // to edit these files run the following script
         // cd $HOME/kibana/x-pack && nvm use && node ../scripts/es_archiver edit security_solution/timestamp_override
-        await esArchiver.load('security_solution/timestamp_override');
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/security_solution/timestamp_override'
+        );
       });
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
-        await esArchiver.unload('security_solution/timestamp_override');
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/timestamp_override'
+        );
       });
 
       it('should create a single rule which has a timestamp override for an index pattern that does not exist and write a partial failure status', async () => {

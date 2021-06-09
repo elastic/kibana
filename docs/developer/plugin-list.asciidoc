@@ -6,7 +6,7 @@ NOTE:
 
     node scripts/build_plugin_list_docs
 
-  You can update the template within packages/kbn-dev-utils/target/plugin_list/generate_plugin_list.js
+  You can update the template within node_modules/@kbn/dev-utils/target/plugin_list/generate_plugin_list.js
 
 ////
 
@@ -125,7 +125,7 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 
 
 |{kib-repo}blob/{branch}/src/plugins/kibana_usage_collection/README.md[kibanaUsageCollection]
-|This plugin registers the basic usage collectors from Kibana:
+|This plugin registers the Platform Usage Collectors in Kibana.
 
 
 |{kib-repo}blob/{branch}/src/plugins/kibana_utils/README.md[kibanaUtils]
@@ -181,6 +181,10 @@ Content is fetched from the remote (https://feeds.elastic.co and https://feeds-s
 oss plugins.
 
 
+|{kib-repo}blob/{branch}/src/plugins/screenshot_mode/README.md[screenshotMode]
+|The service exposed by this plugin informs consumers whether they should optimize for non-interactivity. In this way plugins can avoid loading unnecessary code, data or other services.
+
+
 |{kib-repo}blob/{branch}/src/plugins/security_oss/README.md[securityOss]
 |securityOss is responsible for educating users about Elastic's free security features,
 so they can properly protect the data within their clusters.
@@ -216,14 +220,27 @@ which also contains the timelion APIs and backend, look at the vis_type_timelion
 
 
 |<<uiactions-plugin>>
-|An API for:
+|UI Actions plugins provides API to manage *triggers* and *actions*.
 
-- creating custom functionality (`actions`)
-- creating custom user interaction events (`triggers`)
-- attaching and detaching `actions` to `triggers`.
-- emitting `trigger` events
-- executing `actions` attached to a given `trigger`.
-- exposing a context menu for the user to choose the appropriate action when there are multiple actions attached to a single trigger.
+*Trigger* is an abstract description of user's intent to perform an action
+(like user clicking on a value inside chart). It allows us to do runtime
+binding between code from different plugins. For, example one such
+trigger is when somebody applies filters on dashboard; another one is when
+somebody opens a Dashboard panel context menu.
+
+*Actions* are pieces of code that execute in response to a trigger. For example,
+to the dashboard filtering trigger multiple actions can be attached. Once a user
+filters on the dashboard all possible actions are displayed to the user in a
+popup menu and the user has to chose one.
+
+In general this plugin provides:
+
+- Creating custom functionality (actions).
+- Creating custom user interaction events (triggers).
+- Attaching and detaching actions to triggers.
+- Emitting trigger events.
+- Executing actions attached to a given trigger.
+- Exposing a context menu for the user to choose the appropriate action when there are multiple actions attached to a single trigger.
 
 
 |{kib-repo}blob/{branch}/src/plugins/url_forwarding/README.md[urlForwarding]
@@ -246,6 +263,10 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 |{kib-repo}blob/{branch}/src/plugins/vis_type_metric/README.md[visTypeMetric]
 |Contains the metric visualization.
+
+
+|{kib-repo}blob/{branch}/src/plugins/vis_type_pie/README.md[visTypePie]
+|Contains the pie chart implementation using the elastic-charts library. The goal is to eventually deprecate the old implementation and keep only this. Until then, the library used is defined by the Legacy charts library advanced setting.
 
 
 |{kib-repo}blob/{branch}/src/plugins/vis_type_table/README.md[visTypeTable]
@@ -304,7 +325,7 @@ which will load the visualization's editor.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/alerting/README.md[alerting]
-|The Kibana alerting plugin provides a common place to set up alerts. You can:
+|The Kibana Alerting plugin provides a common place to set up rules. You can:
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/apm/readme.md[apm]
@@ -315,21 +336,17 @@ which will load the visualization's editor.
 |Allow to add a header banner that will be displayed on every page of the Kibana application
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/beats_management/readme.md[beatsManagement]
-|Notes:
-Failure to have auth enabled in Kibana will make for a broken UI. UI-based errors not yet in place
-
-
 |{kib-repo}blob/{branch}/x-pack/plugins/canvas/README.md[canvas]
 |"Never look back. The past is done. The future is a blank canvas." ― Suzy Kassem, Rise Up and Salute the Sun
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cases/README.md[cases]
-|Experimental Feature
+|Case management in Kibana
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud/README.md[cloud]
 |The cloud plugin adds cloud specific features to Kibana.
+The client-side plugin configures following values:
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/console_extensions/README.md[consoleExtensions]
@@ -349,7 +366,11 @@ Failure to have auth enabled in Kibana will make for a broken UI. UI-based error
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/data_enhanced/README.md[dataEnhanced]
-|The data_enhanced plugin is the x-pack counterpart to the OSS data plugin.
+|The data_enhanced plugin is the x-pack counterpart to the src/plguins/data plugin.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/data_visualizer/README.md[dataVisualizer]
+|The data_visualizer plugin enables you to explore the fields in your data.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/discover_enhanced/README.md[discoverEnhanced]
@@ -431,6 +452,10 @@ the infrastructure monitoring use-case within Kibana.
 |Visualization editor allowing to quickly and easily configure compelling visualizations to use on dashboards and canvas workpads.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/license_api_guard/README.md[licenseApiGuard]
+|This plugin is used by ES UI plugins to reject API requests when the plugin is unsupported by the user's license.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/license_management/README.md[licenseManagement]
 |This plugin enables users to activate a trial license, downgrade to Basic, and upload a new license.
 
@@ -452,8 +477,10 @@ using the CURL scripts in the scripts folder.
 |Visualize geo data from Elasticsearch or 3rd party geo-services.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/maps_legacy_licensing/README.md[mapsLegacyLicensing]
-|This plugin provides access to the detailed tile map services from Elastic.
+|{kib-repo}blob/{branch}/x-pack/plugins/metrics_entities/README.md[metricsEntities]
+|This is the metrics and entities plugin where you add can add transforms for your project
+and group those transforms into modules. You can also re-use existing transforms in your
+modules as well.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/ml/readme.md[ml]
@@ -487,6 +514,10 @@ Elastic.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/rollup/README.md[rollup]
 |Welcome to the Kibana rollup plugin! This plugin provides Kibana support for Elasticsearch's rollup feature. Please refer to the Elasticsearch documentation to understand rollup indices and how to create rollup jobs.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/rule_registry/README.md[ruleRegistry]
+|The rule registry plugin aims to make it easy for rule type producers to have their rules produce the data that they need to build rich experiences on top of a unified experience, without the risk of mapping conflicts.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/runtime_fields/README.md[runtimeFields]
@@ -535,6 +566,10 @@ Documentation: https://www.elastic.co/guide/en/kibana/master/task-manager-produc
 
 |{kib-repo}blob/{branch}/x-pack/plugins/telemetry_collection_xpack/README.md[telemetryCollectionXpack]
 |Gathers all usage collection, retrieving them from both: OSS and X-Pack plugins.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/timelines/README.md[timelines]
+|Timelines is a plugin that provides a grid component with accompanying server side apis to help users identify events of interest and perform root cause analysis within Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/transform/readme.md[transform]

@@ -12,9 +12,8 @@ import { chain, tryCatch } from 'fp-ts/lib/TaskEither';
 import { flow } from 'fp-ts/lib/function';
 
 import * as t from 'io-ts';
-import { pickBy } from 'lodash/fp';
-import { validateNonExact } from '../../../../common/validate';
-import { toError, toPromise } from '../../../../common/fp_utils';
+import { validateNonExact, parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
+import { toError, toPromise } from '@kbn/securitysolution-list-api';
 
 import {
   SIGNALS_ID,
@@ -28,10 +27,9 @@ import {
   isThreatMatchRule,
   isQueryRule,
 } from '../../../../common/detection_engine/utils';
-import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { SetupPlugins } from '../../../plugin';
 import { getInputIndex } from './get_input_output_index';
-import { SignalRuleAlertTypeDefinition, RuleAlertAttributes } from './types';
+import { AlertAttributes, SignalRuleAlertTypeDefinition } from './types';
 import {
   getListsClient,
   getExceptions,
@@ -40,8 +38,8 @@ import {
   hasTimestampFields,
   hasReadIndexPrivileges,
   getRuleRangeTuples,
+  isMachineLearningParams,
 } from './utils';
-import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
 import {
   scheduleNotificationActions,
@@ -52,7 +50,6 @@ import { buildRuleMessageFactory } from './rule_messages';
 import { ruleStatusSavedObjectsClientFactory } from './rule_status_saved_objects_client';
 import { getNotificationResultsLink } from '../notifications/utils';
 import { TelemetryEventsSender } from '../../telemetry/sender';
-import { RuleTypeParams } from '../types';
 import { eqlExecutor } from './executors/eql';
 import { queryExecutor } from './executors/query';
 import { threatMatchExecutor } from './executors/threat_match';
@@ -64,6 +61,9 @@ import {
   queryRuleParams,
   threatRuleParams,
   thresholdRuleParams,
+  ruleParams,
+  RuleParams,
+  savedQueryRuleParams,
 } from '../schemas/rule_schemas';
 
 export const signalRulesAlertType = ({
@@ -85,15 +85,17 @@ export const signalRulesAlertType = ({
     actionGroups: siemRuleActionGroups,
     defaultActionGroupId: 'default',
     validate: {
-      /**
-       * TODO: Fix typing inconsistancy between `RuleTypeParams` and `CreateRulesOptions`
-       * Once that's done, you should be able to do:
-       * ```
-       * params: signalParamsSchema(),
-       * ```
-       */
-      params: (signalParamsSchema() as unknown) as {
-        validate: (object: unknown) => RuleTypeParams;
+      params: {
+        validate: (object: unknown): RuleParams => {
+          const [validated, errors] = validateNonExact(object, ruleParams);
+          if (errors != null) {
+            throw new Error(errors);
+          }
+          if (validated == null) {
+            throw new Error('Validation of rule params failed');
+          }
+          return validated;
+        },
       },
     },
     producer: SERVER_APP_ID,
@@ -107,7 +109,7 @@ export const signalRulesAlertType = ({
       spaceId,
       updatedBy: updatedByUser,
     }) {
-      const { ruleId, index, maxSignals, meta, outputIndex, timestampOverride, type } = params;
+      const { ruleId, maxSignals, meta, outputIndex, timestampOverride, type } = params;
 
       const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
       let hasError: boolean = false;
@@ -117,10 +119,8 @@ export const signalRulesAlertType = ({
         alertId,
         ruleStatusClient,
       });
-      const savedObject = await services.savedObjectsClient.get<RuleAlertAttributes>(
-        'alert',
-        alertId
-      );
+
+      const savedObject = await services.savedObjectsClient.get<AlertAttributes>('alert', alertId);
       const {
         actions,
         name,
@@ -143,7 +143,8 @@ export const signalRulesAlertType = ({
       // move this collection of lines into a function in utils
       // so that we can use it in create rules route, bulk, etc.
       try {
-        if (!isEmpty(index)) {
+        if (!isMachineLearningParams(params)) {
+          const index = params.index;
           const hasTimestampOverride = timestampOverride != null && !isEmpty(timestampOverride);
           const inputIndices = await getInputIndex(services, version, index);
           const [privileges, timestampFieldCaps] = await Promise.all([
@@ -260,7 +261,7 @@ export const signalRulesAlertType = ({
             buildRuleMessage,
           });
         } else if (isQueryRule(type)) {
-          const queryRuleSO = asTypeSpecificSO(savedObject, queryRuleParams);
+          const queryRuleSO = validateQueryRuleTypes(savedObject);
           result = await queryExecutor({
             rule: queryRuleSO,
             tuples,
@@ -329,7 +330,7 @@ export const signalRulesAlertType = ({
               `[+] Finished indexing ${result.createdSignalsCount} signals into ${outputIndex}`
             )
           );
-          if (!hasError && !wroteWarningStatus) {
+          if (!hasError && !wroteWarningStatus && !result.warning) {
             await ruleStatusService.success('succeeded', {
               bulkCreateTimeDurations: result.bulkCreateTimes,
               searchAfterTimeDurations: result.searchAfterTimes,
@@ -381,6 +382,14 @@ export const signalRulesAlertType = ({
   };
 };
 
+const validateQueryRuleTypes = (ruleSO: SavedObject<AlertAttributes>) => {
+  if (ruleSO.attributes.params.type === 'query') {
+    return asTypeSpecificSO(ruleSO, queryRuleParams);
+  } else {
+    return asTypeSpecificSO(ruleSO, savedQueryRuleParams);
+  }
+};
+
 /**
  * This function takes a generic rule SavedObject and a type-specific schema for the rule params
  * and validates the SavedObject params against the schema. If they validate, it returns a SavedObject
@@ -392,11 +401,10 @@ export const signalRulesAlertType = ({
  * @param schema io-ts schema for the specific rule type the SavedObject claims to be
  */
 export const asTypeSpecificSO = <T extends t.Mixed>(
-  ruleSO: SavedObject<RuleAlertAttributes>,
+  ruleSO: SavedObject<AlertAttributes>,
   schema: T
 ) => {
-  const nonNullParams = pickBy((value: unknown) => value !== null, ruleSO.attributes.params);
-  const [validated, errors] = validateNonExact(nonNullParams, schema);
+  const [validated, errors] = validateNonExact(ruleSO.attributes.params, schema);
   if (validated == null || errors != null) {
     throw new Error(`Rule attempted to execute with invalid params: ${errors}`);
   }

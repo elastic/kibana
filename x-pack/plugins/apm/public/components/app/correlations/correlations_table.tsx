@@ -24,12 +24,10 @@ import { ImpactBar } from '../../shared/ImpactBar';
 import { useUiTracker } from '../../../../../observability/public';
 
 type CorrelationsApiResponse =
-  | APIReturnType<'GET /api/apm/correlations/failed_transactions'>
-  | APIReturnType<'GET /api/apm/correlations/slow_transactions'>;
+  | APIReturnType<'GET /api/apm/correlations/errors/failed_transactions'>
+  | APIReturnType<'GET /api/apm/correlations/latency/slow_transactions'>;
 
-type SignificantTerm = NonNullable<
-  NonNullable<CorrelationsApiResponse>['significantTerms']
->[0];
+type SignificantTerm = CorrelationsApiResponse['significantTerms'][0];
 
 export type SelectedSignificantTerm = Pick<
   SignificantTerm,

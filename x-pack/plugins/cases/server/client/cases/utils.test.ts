@@ -6,7 +6,6 @@
  */
 
 import { actionsClientMock } from '../../../../actions/server/actions_client.mock';
-import { flattenCaseSavedObject } from '../../routes/api/utils';
 import { mockCases } from '../../routes/api/__fixtures__';
 
 import { BasicParams, ExternalServiceParams, Incident } from './types';
@@ -29,6 +28,8 @@ import {
   transformers,
   transformFields,
 } from './utils';
+import { flattenCaseSavedObject } from '../../common';
+import { SECURITY_SOLUTION_OWNER } from '../../../common';
 
 const formatComment = {
   commentId: commentObj.id,
@@ -539,7 +540,7 @@ describe('utils', () => {
           commentId: 'comment-user-1',
         },
         {
-          comment: 'Elastic Security Alerts attached to the case: 3',
+          comment: 'Elastic Alerts attached to the case: 3',
           commentId: 'mock-id-1-total-alerts',
         },
       ]);
@@ -569,7 +570,7 @@ describe('utils', () => {
           commentId: 'comment-user-1',
         },
         {
-          comment: 'Elastic Security Alerts attached to the case: 4',
+          comment: 'Elastic Alerts attached to the case: 4',
           commentId: 'mock-id-1-total-alerts',
         },
       ]);
@@ -701,6 +702,7 @@ describe('utils', () => {
             action_id: '9b91d8f0-6647-11eb-a291-51bf6b175a53',
             case_id: 'fcdedd20-6646-11eb-a291-51bf6b175a53',
             comment_id: null,
+            owner: SECURITY_SOLUTION_OWNER,
           },
         ]);
 

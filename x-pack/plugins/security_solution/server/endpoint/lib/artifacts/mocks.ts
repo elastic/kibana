@@ -71,7 +71,7 @@ const toArtifactRecord = (artifactName: string, artifact: InternalArtifactComple
   encoded_sha256: artifact.encodedSha256,
   encoded_size: artifact.encodedSize,
   encryption_algorithm: artifact.encryptionAlgorithm,
-  relative_url: `/api/endpoint/artifacts/download/${artifactName}/${artifact.decodedSha256}`,
+  relative_url: `/api/fleet/artifacts/${artifactName}/${artifact.decodedSha256}`,
 });
 
 export const toArtifactRecords = (artifacts: Record<string, InternalArtifactCompleteSchema>) =>
@@ -92,6 +92,36 @@ export const createPackagePolicyWithInitialManifestMock = (): PackagePolicy => {
       artifact_manifest: {
         value: {
           artifacts: {
+            'endpoint-eventfilterlist-linux-v1': {
+              compression_algorithm: 'zlib',
+              decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+              decoded_size: 14,
+              encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+              encoded_size: 22,
+              encryption_algorithm: 'none',
+              relative_url:
+                '/api/fleet/artifacts/endpoint-eventfilterlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+            },
+            'endpoint-eventfilterlist-macos-v1': {
+              compression_algorithm: 'zlib',
+              decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+              decoded_size: 14,
+              encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+              encoded_size: 22,
+              encryption_algorithm: 'none',
+              relative_url:
+                '/api/fleet/artifacts/endpoint-eventfilterlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+            },
+            'endpoint-eventfilterlist-windows-v1': {
+              compression_algorithm: 'zlib',
+              decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+              decoded_size: 14,
+              encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+              encoded_size: 22,
+              encryption_algorithm: 'none',
+              relative_url:
+                '/api/fleet/artifacts/endpoint-eventfilterlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+            },
             'endpoint-exceptionlist-macos-v1': {
               compression_algorithm: 'zlib',
               encryption_algorithm: 'none',
@@ -100,7 +130,7 @@ export const createPackagePolicyWithInitialManifestMock = (): PackagePolicy => {
               decoded_size: 14,
               encoded_size: 22,
               relative_url:
-                '/api/endpoint/artifacts/download/endpoint-exceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                '/api/fleet/artifacts/endpoint-exceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
             },
             'endpoint-exceptionlist-windows-v1': {
               compression_algorithm: 'zlib',
@@ -110,7 +140,7 @@ export const createPackagePolicyWithInitialManifestMock = (): PackagePolicy => {
               decoded_size: 14,
               encoded_size: 22,
               relative_url:
-                '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                '/api/fleet/artifacts/endpoint-exceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
             },
           },
           manifest_version: '1.0.0',
@@ -135,7 +165,7 @@ export const createPackagePolicyWithManifestMock = (): PackagePolicy => {
               decoded_size: 432,
               encoded_size: 147,
               relative_url:
-                '/api/endpoint/artifacts/download/endpoint-exceptionlist-macos-v1/96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+                '/api/fleet/artifacts/endpoint-exceptionlist-macos-v1/96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
             },
             'endpoint-exceptionlist-windows-v1': {
               compression_algorithm: 'zlib',
@@ -145,7 +175,7 @@ export const createPackagePolicyWithManifestMock = (): PackagePolicy => {
               decoded_size: 432,
               encoded_size: 147,
               relative_url:
-                '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-v1/96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+                '/api/fleet/artifacts/endpoint-exceptionlist-windows-v1/96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
             },
           },
           manifest_version: '1.0.1',

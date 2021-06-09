@@ -7,35 +7,21 @@
  */
 
 import { config } from './kibana_config';
-import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
+import { getDeprecationsFor } from './config/test_utils';
 
 const CONFIG_PATH = 'kibana';
 
-const applyKibanaDeprecations = (settings: Record<string, any> = {}) => {
-  const deprecations = config.deprecations!(configDeprecationFactory);
-  const deprecationMessages: string[] = [];
-  const _config: any = {};
-  _config[CONFIG_PATH] = settings;
-  const migrated = applyDeprecations(
-    _config,
-    deprecations.map((deprecation) => ({
-      deprecation,
-      path: CONFIG_PATH,
-    })),
-    () => ({ message }) => deprecationMessages.push(message)
-  );
-  return {
-    messages: deprecationMessages,
-    migrated,
-  };
-};
+const applyKibanaDeprecations = (settings: Record<string, any> = {}) =>
+  getDeprecationsFor({
+    provider: config.deprecations!,
+    settings,
+    path: CONFIG_PATH,
+  });
 
 it('set correct defaults ', () => {
   const configValue = config.schema.validate({});
   expect(configValue).toMatchInlineSnapshot(`
     Object {
-      "autocompleteTerminateAfter": "PT1M40S",
-      "autocompleteTimeout": "PT1S",
       "enabled": true,
       "index": ".kibana",
     }

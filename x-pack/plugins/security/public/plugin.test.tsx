@@ -19,7 +19,6 @@ import { licensingMock } from '../../licensing/public/mocks';
 import { ManagementService } from './management';
 import type { PluginStartDependencies } from './plugin';
 import { SecurityPlugin } from './plugin';
-import { SessionTimeout } from './session';
 
 describe('Security Plugin', () => {
   beforeAll(() => {
@@ -43,7 +42,6 @@ describe('Security Plugin', () => {
           }
         )
       ).toEqual({
-        __legacyCompat: { logoutUrl: '/some-base-path/logout', tenant: '/some-base-path' },
         authc: { getCurrentUser: expect.any(Function), areAPIKeysEnabled: expect.any(Function) },
         license: {
           isLicenseAvailable: expect.any(Function),
@@ -52,7 +50,6 @@ describe('Security Plugin', () => {
           getFeatures: expect.any(Function),
           features$: expect.any(Observable),
         },
-        sessionTimeout: expect.any(SessionTimeout),
       });
     });
 
@@ -103,6 +100,10 @@ describe('Security Plugin', () => {
           features: {} as FeaturesPluginStart,
         })
       ).toEqual({
+        authc: {
+          getCurrentUser: expect.any(Function),
+          areAPIKeysEnabled: expect.any(Function),
+        },
         navControlService: {
           getUserMenuLinks$: expect.any(Function),
           addUserMenuLinks: expect.any(Function),

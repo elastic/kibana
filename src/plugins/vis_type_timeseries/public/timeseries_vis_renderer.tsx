@@ -7,17 +7,21 @@
  */
 
 import React, { lazy } from 'react';
+import { get } from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { I18nProvider } from '@kbn/i18n/react';
 import { IUiSettingsClient } from 'kibana/public';
-import type { PersistedState } from '../../visualizations/public';
-import { VisualizationContainer } from '../../visualizations/public';
-import { ExpressionRenderDefinition } from '../../expressions/common/expression_renderers';
-import { TimeseriesRenderValue } from './metrics_fn';
-import { isVisTableData, TimeseriesVisData } from '../common/types';
-import { TimeseriesVisParams } from './types';
+
+import { VisualizationContainer, PersistedState } from '../../visualizations/public';
+
+import type { TimeseriesVisData } from '../common/types';
+import { isVisTableData } from '../common/vis_data_utils';
 import { getChartsSetup } from './services';
+
+import type { TimeseriesVisParams } from './types';
+import type { ExpressionRenderDefinition } from '../../expressions/common';
+import type { TimeseriesRenderValue } from './metrics_fn';
 
 const TimeseriesVisualization = lazy(
   () => import('./application/components/timeseries_visualization')
@@ -38,11 +42,14 @@ export const getTimeseriesVisRenderer: (deps: {
   name: 'timeseries_vis',
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
+    // Build optimization. Move app styles from main bundle
+    // @ts-expect-error TS error, cannot find type declaration for scss
+    await import('./application/index.scss');
+
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
     const { palettes } = getChartsSetup();
-
     const showNoResult = !checkIfDataExists(config.visData, config.visParams);
     const palettesService = await palettes.getPalettes();
 
@@ -52,6 +59,7 @@ export const getTimeseriesVisRenderer: (deps: {
           data-test-subj="timeseriesVis"
           handlers={handlers}
           showNoResult={showNoResult}
+          error={get(config.visData, [config.visParams.id, 'error'])}
         >
           <TimeseriesVisualization
             // it is mandatory to bind uiSettings because of "this" usage inside "get" method

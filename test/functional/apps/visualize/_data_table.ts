@@ -28,6 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const vizName1 = 'Visualization DataTable';
 
     before(async function () {
+      await PageObjects.visualize.initTests();
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       log.debug('clickDataTable');
@@ -267,16 +268,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should apply correct filter', async () => {
-        await retry.try(async () => {
-          await PageObjects.visChart.filterOnTableCell(1, 3);
-          await PageObjects.visChart.waitForVisualizationRenderingStabilized();
-          const data = await PageObjects.visChart.getTableVisContent();
-          expect(data).to.be.eql([
-            ['png', '1,373'],
-            ['gif', '918'],
-            ['Other', '445'],
-          ]);
-        });
+        await PageObjects.visChart.filterOnTableCell(1, 3);
+        await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+        const data = await PageObjects.visChart.getTableVisContent();
+        expect(data).to.be.eql([
+          ['png', '1,373'],
+          ['gif', '918'],
+          ['Other', '445'],
+        ]);
       });
     });
 

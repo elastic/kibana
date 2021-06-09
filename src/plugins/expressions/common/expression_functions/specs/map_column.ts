@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { Observable } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../types';
 import { Datatable, getType } from '../../expression_types';
@@ -13,7 +15,7 @@ import { Datatable, getType } from '../../expression_types';
 export interface MapColumnArguments {
   id?: string | null;
   name: string;
-  expression?: (datatable: Datatable) => Promise<boolean | number | string | null>;
+  expression?(datatable: Datatable): Observable<boolean | number | string | null>;
   copyMetaFrom?: string | null;
 }
 
@@ -42,7 +44,7 @@ export const mapColumn: ExpressionFunctionDefinition<
       types: ['string', 'null'],
       help: i18n.translate('expressions.functions.mapColumn.args.idHelpText', {
         defaultMessage:
-          'An optional id of the resulting column. When `null` the name/column argument is used as id.',
+          'An optional id of the resulting column. When no id is provided, the id will be looked up from the existing column by the provided name argument. If no column with this name exists yet, a new column with this name and an identical id will be added to the table.',
       }),
       required: false,
       default: null,
@@ -51,7 +53,7 @@ export const mapColumn: ExpressionFunctionDefinition<
       types: ['string'],
       aliases: ['_', 'column'],
       help: i18n.translate('expressions.functions.mapColumn.args.nameHelpText', {
-        defaultMessage: 'The name of the resulting column.',
+        defaultMessage: 'The name of the resulting column. Names are not required to be unique.',
       }),
       required: true,
     },
@@ -79,10 +81,22 @@ export const mapColumn: ExpressionFunctionDefinition<
     },
   },
   fn: (input, args) => {
-    const expression = args.expression || (() => Promise.resolve(null));
-    const columnId = args.id != null ? args.id : args.name;
+    const expression = (...params: Parameters<Required<MapColumnArguments>['expression']>) =>
+      args
+        .expression?.(...params)
+        .pipe(take(1))
+        .toPromise() ?? Promise.resolve(null);
 
     const columns = [...input.columns];
+    const existingColumnIndex = columns.findIndex(({ id, name }) => {
+      if (args.id) {
+        return id === args.id;
+      }
+      return name === args.name;
+    });
+    const columnId =
+      existingColumnIndex === -1 ? args.id ?? args.name : columns[existingColumnIndex].id;
+
     const rowPromises = input.rows.map((row) => {
       return expression({
         type: 'datatable',
@@ -95,7 +109,6 @@ export const mapColumn: ExpressionFunctionDefinition<
     });
 
     return Promise.all(rowPromises).then((rows) => {
-      const existingColumnIndex = columns.findIndex(({ name }) => name === args.name);
       const type = rows.length ? getType(rows[0][columnId]) : 'null';
       const newColumn = {
         id: columnId,

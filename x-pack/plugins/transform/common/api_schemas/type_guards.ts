@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { SearchResponse7 } from '../../../ml/common';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { EsIndex } from '../types/es_index';
-import { isPopulatedObject } from '../utils/object_utils';
+import { isPopulatedObject } from '../shared_imports';
 
 // To be able to use the type guards on the client side, we need to make sure we don't import
 // the code of '@kbn/config-schema' but just its types, otherwise the client side code will
@@ -28,20 +28,13 @@ import type { GetTransformsStatsResponseSchema } from './transforms_stats';
 import type { PostTransformsUpdateResponseSchema } from './update_transforms';
 
 const isGenericResponseSchema = <T>(arg: any): arg is T => {
-  return (
-    isPopulatedObject(arg) &&
-    {}.hasOwnProperty.call(arg, 'count') &&
-    {}.hasOwnProperty.call(arg, 'transforms') &&
-    Array.isArray(arg.transforms)
-  );
+  return isPopulatedObject(arg, ['count', 'transforms']) && Array.isArray(arg.transforms);
 };
 
 export const isGetTransformNodesResponseSchema = (
   arg: unknown
 ): arg is GetTransformNodesResponseSchema => {
-  return (
-    isPopulatedObject(arg) && {}.hasOwnProperty.call(arg, 'count') && typeof arg.count === 'number'
-  );
+  return isPopulatedObject(arg, ['count']) && typeof arg.count === 'number';
 };
 
 export const isGetTransformsResponseSchema = (arg: unknown): arg is GetTransformsResponseSchema => {
@@ -59,7 +52,7 @@ export const isDeleteTransformsResponseSchema = (
 ): arg is DeleteTransformsResponseSchema => {
   return (
     isPopulatedObject(arg) &&
-    Object.values(arg).every((d) => ({}.hasOwnProperty.call(d, 'transformDeleted')))
+    Object.values(arg).every((d) => isPopulatedObject(d, ['transformDeleted']))
   );
 };
 
@@ -67,8 +60,22 @@ export const isEsIndices = (arg: unknown): arg is EsIndex[] => {
   return Array.isArray(arg);
 };
 
-export const isEsSearchResponse = (arg: unknown): arg is SearchResponse7 => {
-  return isPopulatedObject(arg) && {}.hasOwnProperty.call(arg, 'hits');
+export const isEsSearchResponse = (arg: unknown): arg is estypes.SearchResponse => {
+  return isPopulatedObject(arg, ['hits']);
+};
+
+type SearchResponseWithAggregations = Required<Pick<estypes.SearchResponse, 'aggregations'>> &
+  estypes.SearchResponse;
+export const isEsSearchResponseWithAggregations = (
+  arg: unknown
+): arg is SearchResponseWithAggregations => {
+  return isEsSearchResponse(arg) && {}.hasOwnProperty.call(arg, 'aggregations');
+};
+
+export const isMultiBucketAggregate = <TBucket = unknown>(
+  arg: unknown
+): arg is estypes.AggregationsMultiBucketAggregate<TBucket> => {
+  return isPopulatedObject(arg, ['buckets']);
 };
 
 export const isFieldHistogramsResponseSchema = (
@@ -87,9 +94,7 @@ export const isPostTransformsPreviewResponseSchema = (
   arg: unknown
 ): arg is PostTransformsPreviewResponseSchema => {
   return (
-    isPopulatedObject(arg) &&
-    {}.hasOwnProperty.call(arg, 'generated_dest_index') &&
-    {}.hasOwnProperty.call(arg, 'preview') &&
+    isPopulatedObject(arg, ['generated_dest_index', 'preview']) &&
     typeof arg.generated_dest_index !== undefined &&
     Array.isArray(arg.preview)
   );
@@ -98,21 +103,19 @@ export const isPostTransformsPreviewResponseSchema = (
 export const isPostTransformsUpdateResponseSchema = (
   arg: unknown
 ): arg is PostTransformsUpdateResponseSchema => {
-  return isPopulatedObject(arg) && {}.hasOwnProperty.call(arg, 'id') && typeof arg.id === 'string';
+  return isPopulatedObject(arg, ['id']) && typeof arg.id === 'string';
 };
 
 export const isPutTransformsResponseSchema = (arg: unknown): arg is PutTransformsResponseSchema => {
   return (
-    isPopulatedObject(arg) &&
-    {}.hasOwnProperty.call(arg, 'transformsCreated') &&
-    {}.hasOwnProperty.call(arg, 'errors') &&
+    isPopulatedObject(arg, ['transformsCreated', 'errors']) &&
     Array.isArray(arg.transformsCreated) &&
     Array.isArray(arg.errors)
   );
 };
 
 const isGenericSuccessResponseSchema = (arg: unknown) =>
-  isPopulatedObject(arg) && Object.values(arg).every((d) => ({}.hasOwnProperty.call(d, 'success')));
+  isPopulatedObject(arg) && Object.values(arg).every((d) => isPopulatedObject(d, ['success']));
 
 export const isStartTransformsResponseSchema = (
   arg: unknown

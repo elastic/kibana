@@ -8,6 +8,7 @@
 
 import { PluginServices, PluginServiceProviders, PluginServiceProvider } from '../create';
 import { dashboardsServiceFactory } from '../stub/dashboards';
+import { labsServiceFactory } from './labs';
 import { capabilitiesServiceFactory } from './capabilities';
 import { PresentationUtilServices } from '..';
 
@@ -17,12 +18,14 @@ export { PresentationUtilServices } from '..';
 export interface StorybookParams {
   canAccessDashboards?: boolean;
   canCreateNewDashboards?: boolean;
-  canEditDashboards?: boolean;
+  canSaveVisualizations?: boolean;
+  canSetAdvancedSettings?: boolean;
 }
 
 export const providers: PluginServiceProviders<PresentationUtilServices, StorybookParams> = {
-  dashboards: new PluginServiceProvider(dashboardsServiceFactory),
   capabilities: new PluginServiceProvider(capabilitiesServiceFactory),
+  dashboards: new PluginServiceProvider(dashboardsServiceFactory),
+  labs: new PluginServiceProvider(labsServiceFactory),
 };
 
 export const pluginServices = new PluginServices<PresentationUtilServices>();

@@ -7,10 +7,13 @@
  */
 
 import { useEffect, useState, useMemo } from 'react';
+import type { estypes } from '@elastic/elasticsearch';
 import { IndexPattern, getServices } from '../../../kibana_services';
 import { DocProps } from './doc';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
+
+type RequestBody = Pick<estypes.SearchRequest, 'body'>;
 
 export enum ElasticRequestState {
   Loading,
@@ -28,21 +31,32 @@ export function buildSearchBody(
   id: string,
   indexPattern: IndexPattern,
   useNewFieldsApi: boolean
-): Record<string, any> {
+): RequestBody | undefined {
   const computedFields = indexPattern.getComputedFields();
-
-  return {
-    query: {
-      ids: {
-        values: [id],
+  const runtimeFields = computedFields.runtimeFields as estypes.MappingRuntimeFields;
+  const request: RequestBody = {
+    body: {
+      query: {
+        ids: {
+          values: [id],
+        },
       },
+      stored_fields: computedFields.storedFields,
+      script_fields: computedFields.scriptFields,
     },
-    stored_fields: computedFields.storedFields,
-    _source: !useNewFieldsApi,
-    fields: useNewFieldsApi ? [{ field: '*', include_unmapped: 'true' }] : undefined,
-    script_fields: computedFields.scriptFields,
-    docvalue_fields: computedFields.docvalueFields,
   };
+  if (!request.body) {
+    return undefined;
+  }
+  if (useNewFieldsApi) {
+    // @ts-expect-error
+    request.body.fields = [{ field: '*', include_unmapped: 'true' }];
+    request.body.runtime_mappings = runtimeFields ? runtimeFields : {};
+  } else {
+    request.body._source = true;
+  }
+  request.body.fields = [...(request.body?.fields || []), ...(computedFields.docvalueFields || [])];
+  return request;
 }
 
 /**
@@ -70,7 +84,7 @@ export function useEsDocSearch({
           .search({
             params: {
               index,
-              body: buildSearchBody(id, indexPatternEntity, useNewFieldsApi),
+              body: buildSearchBody(id, indexPatternEntity, useNewFieldsApi)?.body,
             },
           })
           .toPromise();

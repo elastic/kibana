@@ -117,6 +117,7 @@ export function createExecutionHandler<
           params: transformActionParams({
             actionsPlugin,
             alertId,
+            alertType: alertType.id,
             actionTypeId: action.actionTypeId,
             alertName,
             spaceId,
@@ -127,6 +128,7 @@ export function createExecutionHandler<
             alertActionSubgroup: actionSubgroup,
             context,
             actionParams: action.params,
+            actionId: action.id,
             state,
             kibanaBaseUrl,
             alertParams,
@@ -136,7 +138,8 @@ export function createExecutionHandler<
       .map((action) => ({
         ...action,
         params: injectActionParams({
-          alertId,
+          ruleId: alertId,
+          spaceId,
           actionParams: action.params,
           actionTypeId: action.actionTypeId,
         }),
@@ -179,8 +182,14 @@ export function createExecutionHandler<
             action_subgroup: actionSubgroup,
           },
           saved_objects: [
-            { rel: SAVED_OBJECT_REL_PRIMARY, type: 'alert', id: alertId, ...namespace },
-            { type: 'action', id: action.id, ...namespace },
+            {
+              rel: SAVED_OBJECT_REL_PRIMARY,
+              type: 'alert',
+              id: alertId,
+              type_id: alertType.id,
+              ...namespace,
+            },
+            { type: 'action', id: action.id, type_id: action.actionTypeId, ...namespace },
           ],
         },
       };

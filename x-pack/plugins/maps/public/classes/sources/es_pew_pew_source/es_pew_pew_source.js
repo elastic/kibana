@@ -226,7 +226,7 @@ export class ESPewPewSource extends AbstractESAggSource {
     return turfBboxToBounds(turfBbox(multiPoint(corners)));
   }
 
-  canFormatFeatureProperties() {
+  hasTooltipProperties() {
     return true;
   }
 }

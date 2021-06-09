@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import {
   ScaleType,
-  AnnotationDomainTypes,
+  AnnotationDomainType,
   Position,
   Axis,
   BarSeries,
@@ -238,7 +238,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
           {showThreshold && threshold && threshold.value ? (
             <LineAnnotation
               id={`threshold-line`}
-              domainType={AnnotationDomainTypes.YDomain}
+              domainType={AnnotationDomainType.YDomain}
               dataValues={[{ dataValue: threshold.value }]}
               style={{
                 line: {

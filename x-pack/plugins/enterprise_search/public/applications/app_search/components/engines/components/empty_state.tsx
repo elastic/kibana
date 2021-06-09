@@ -12,17 +12,15 @@ import { useValues, useActions } from 'kea';
 import { EuiPageContent, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../../shared/telemetry';
 import { AppLogic } from '../../../app_logic';
+import { EngineIcon } from '../../../icons';
 import { ENGINE_CREATION_PATH } from '../../../routes';
 
 import { SampleEngineCreationCta } from '../../sample_engine_creation_cta/sample_engine_creation_cta';
 
 import { EnginesOverviewHeader } from './header';
-
-import './empty_state.scss';
 
 export const EmptyState: React.FC = () => {
   const {
@@ -32,14 +30,12 @@ export const EmptyState: React.FC = () => {
 
   return (
     <>
-      <SetPageChrome />
       <EnginesOverviewHeader />
-      <EuiPageContent className="emptyState">
+      <EuiPageContent color="subdued">
         {canManageEngines ? (
           <EuiEmptyPrompt
             data-test-subj="AdminEmptyEnginesPrompt"
-            className="emptyState__prompt"
-            iconType="eyeClosed"
+            iconType={EngineIcon}
             title={
               <h2>
                 {i18n.translate('xpack.enterpriseSearch.appSearch.emptyState.title', {
@@ -74,7 +70,7 @@ export const EmptyState: React.FC = () => {
                     { defaultMessage: 'Create an engine' }
                   )}
                 </EuiButtonTo>
-                <EuiSpacer size="xl" />
+                <EuiSpacer size="xxl" />
                 <SampleEngineCreationCta />
               </>
             }
@@ -82,8 +78,7 @@ export const EmptyState: React.FC = () => {
         ) : (
           <EuiEmptyPrompt
             data-test-subj="NonAdminEmptyEnginesPrompt"
-            className="emptyState__prompt"
-            iconType="eyeClosed"
+            iconType={EngineIcon}
             title={
               <h2>
                 {i18n.translate('xpack.enterpriseSearch.appSearch.emptyState.nonAdmin.title', {

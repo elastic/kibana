@@ -25,9 +25,15 @@ export const getPluginsBundlePaths = ({
 
   while (pluginsToProcess.length > 0) {
     const pluginId = pluginsToProcess.pop() as string;
+    const plugin = uiPlugins.internal.get(pluginId);
+    if (!plugin) {
+      continue;
+    }
+    const { version } = plugin;
+
     pluginBundlePaths.set(pluginId, {
-      publicPath: `${regularBundlePath}/plugin/${pluginId}/`,
-      bundlePath: `${regularBundlePath}/plugin/${pluginId}/${pluginId}.plugin.js`,
+      publicPath: `${regularBundlePath}/plugin/${pluginId}/${version}/`,
+      bundlePath: `${regularBundlePath}/plugin/${pluginId}/${version}/${pluginId}.plugin.js`,
     });
 
     const pluginBundleIds = uiPlugins.internal.get(pluginId)?.requiredBundles ?? [];

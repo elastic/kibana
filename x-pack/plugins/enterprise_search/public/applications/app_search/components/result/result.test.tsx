@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { mockKibanaValues } from '../../../__mocks__/kea_logic';
+
 import React from 'react';
 import { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
 
@@ -12,8 +14,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiPanel } from '@elastic/eui';
 
-import { ReactRouterHelper } from '../../../shared/react_router_helpers/eui_components';
-import { SchemaTypes } from '../../../shared/types';
+import { SchemaType } from '../../../shared/schema/types';
 
 import { Result } from './result';
 import { ResultField } from './result_field';
@@ -44,9 +45,9 @@ describe('Result', () => {
   };
 
   const schema = {
-    title: 'text' as SchemaTypes,
-    description: 'text' as SchemaTypes,
-    length: 'number' as SchemaTypes,
+    title: SchemaType.Text,
+    description: SchemaType.Text,
+    length: SchemaType.Number,
   };
 
   it('renders', () => {
@@ -64,36 +65,27 @@ describe('Result', () => {
     ]);
   });
 
-  it('passes showScore, resultMeta, and isMetaEngine to ResultHeader', () => {
-    const wrapper = shallow(<Result {...props} showScore isMetaEngine />);
-    expect(wrapper.find(ResultHeader).props()).toEqual({
-      isMetaEngine: true,
-      showScore: true,
-      resultMeta: {
+  describe('header', () => {
+    it('renders a header', () => {
+      const wrapper = shallow(<Result {...props} showScore isMetaEngine />);
+      const header = wrapper.find(ResultHeader);
+
+      expect(header.exists()).toBe(true);
+      expect(header.prop('isMetaEngine')).toBe(true); // passed through from props
+      expect(header.prop('showScore')).toBe(true); // passed through from props
+      expect(header.prop('resultMeta')).toEqual({
         id: '1',
         score: 100,
         engine: 'my-engine',
-      },
+      }); // passed through from meta in result prop
+      expect(header.prop('documentLink')).toBe(undefined); // based on shouldLinkToDetailPage prop
     });
-  });
 
-  describe('document detail link', () => {
-    it('will render a link if shouldLinkToDetailPage is true', () => {
+    it('passes documentLink when shouldLinkToDetailPage is true', () => {
       const wrapper = shallow(<Result {...props} shouldLinkToDetailPage />);
-      wrapper.find(ReactRouterHelper).forEach((link) => {
-        expect(link.prop('to')).toEqual('/engines/my-engine/documents/1');
-      });
-      expect(wrapper.hasClass('appSearchResult--link')).toBe(true);
-      expect(wrapper.find('.appSearchResult__content--link').exists()).toBe(true);
-      expect(wrapper.find('.appSearchResult__actionButton--link').exists()).toBe(true);
-    });
+      const header = wrapper.find(ResultHeader);
 
-    it('will not render a link if shouldLinkToDetailPage is not set', () => {
-      const wrapper = shallow(<Result {...props} />);
-      expect(wrapper.find(ReactRouterHelper).exists()).toBe(false);
-      expect(wrapper.hasClass('appSearchResult--link')).toBe(false);
-      expect(wrapper.find('.appSearchResult__content--link').exists()).toBe(false);
-      expect(wrapper.find('.appSearchResult__actionButton--link').exists()).toBe(false);
+      expect(header.prop('documentLink')).toBe('/engines/my-engine/documents/1');
     });
   });
 
@@ -103,30 +95,30 @@ describe('Result', () => {
         title: 'Hide',
         onClick: jest.fn(),
         iconType: 'eyeClosed',
-        iconColor: 'danger',
       },
       {
         title: 'Bookmark',
         onClick: jest.fn(),
         iconType: 'starFilled',
-        iconColor: 'primary',
       },
     ];
 
-    it('will render an action button for each action passed', () => {
+    it('passes actions to the header', () => {
       const wrapper = shallow(<Result {...props} actions={actions} />);
-      expect(wrapper.find('.appSearchResult__actionButton')).toHaveLength(2);
-
-      wrapper.find('.appSearchResult__actionButton').first().simulate('click');
-      expect(actions[0].onClick).toHaveBeenCalled();
-
-      wrapper.find('.appSearchResult__actionButton').last().simulate('click');
-      expect(actions[1].onClick).toHaveBeenCalled();
+      expect(wrapper.find(ResultHeader).prop('actions')).toEqual(actions);
     });
 
-    it('will render custom actions seamlessly next to the document detail link', () => {
+    it('adds a link action to the start of the actions array if shouldLinkToDetailPage is passed', () => {
       const wrapper = shallow(<Result {...props} actions={actions} shouldLinkToDetailPage />);
-      expect(wrapper.find('.appSearchResult__actionButton')).toHaveLength(3);
+
+      const passedActions = wrapper.find(ResultHeader).prop('actions');
+      expect(passedActions.length).toEqual(3); // In addition to the 2 actions passed, we also have a link action
+
+      const linkAction = passedActions[0];
+      expect(linkAction.title).toEqual('Visit document details');
+
+      linkAction.onClick();
+      expect(mockKibanaValues.navigateToUrl).toHaveBeenCalledWith('/engines/my-engine/documents/1');
     });
   });
 
@@ -145,9 +137,7 @@ describe('Result', () => {
   });
 
   it('will render field details with type highlights if schemaForTypeHighlights has been provided', () => {
-    const wrapper = shallow(
-      <Result {...props} shouldLinkToDetailPage schemaForTypeHighlights={schema} />
-    );
+    const wrapper = shallow(<Result {...props} schemaForTypeHighlights={schema} />);
     expect(wrapper.find(ResultField).map((rf) => rf.prop('type'))).toEqual([
       'text',
       'text',

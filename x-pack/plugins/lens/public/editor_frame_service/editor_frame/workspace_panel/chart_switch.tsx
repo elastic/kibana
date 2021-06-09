@@ -16,6 +16,7 @@ import {
   EuiSelectable,
   EuiIconTip,
   EuiSelectableOption,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -219,12 +220,15 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
       // reorganize visualizations in groups
       const grouped: Record<
         string,
-        Array<
-          VisualizationType & {
-            visualizationId: string;
-            selection: VisualizationSelection;
-          }
-        >
+        {
+          priority: number;
+          visualizations: Array<
+            VisualizationType & {
+              visualizationId: string;
+              selection: VisualizationSelection;
+            }
+          >;
+        }
       > = {};
       // Will need it later on to quickly pick up the metadata from it
       const lookup: Record<
@@ -240,13 +244,17 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
             visualizationType.label.toLowerCase().includes(lowercasedSearchTerm) ||
             visualizationType.fullLabel?.toLowerCase().includes(lowercasedSearchTerm);
           if (isSearchMatch) {
-            grouped[visualizationType.groupLabel] = grouped[visualizationType.groupLabel] || [];
+            grouped[visualizationType.groupLabel] = grouped[visualizationType.groupLabel] || {
+              priority: 0,
+              visualizations: [],
+            };
             const visualizationEntry = {
               ...visualizationType,
               visualizationId,
               selection: getSelection(visualizationId, visualizationType.id),
             };
-            grouped[visualizationType.groupLabel].push(visualizationEntry);
+            grouped[visualizationType.groupLabel].priority += visualizationType.sortPriority || 0;
+            grouped[visualizationType.groupLabel].visualizations.push(visualizationEntry);
             lookup[`${visualizationId}:${visualizationType.id}`] = visualizationEntry;
           }
         }
@@ -254,9 +262,11 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
 
       return {
         visualizationTypes: Object.keys(grouped)
-          .sort()
+          .sort((groupA, groupB) => {
+            return grouped[groupB].priority - grouped[groupA].priority;
+          })
           .flatMap((group): SelectableEntry[] => {
-            const visualizations = grouped[group];
+            const { visualizations } = grouped[group];
             if (visualizations.length === 0) {
               return [];
             }
@@ -277,6 +287,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
                 .map(
                   (v): SelectableEntry => ({
                     'aria-label': v.fullLabel || v.label,
+                    className: 'lnsChartSwitch__option',
                     isGroupLabel: false,
                     key: `${v.visualizationId}:${v.id}`,
                     value: `${v.visualizationId}:${v.id}`,
@@ -286,22 +297,45 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
                       <EuiIcon className="lnsChartSwitch__chartIcon" type={v.icon || 'empty'} />
                     ),
                     append:
-                      v.selection.dataLoss !== 'nothing' ? (
-                        <EuiIconTip
-                          aria-label={i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
-                            defaultMessage: 'Warning',
-                          })}
-                          type="alert"
-                          color="warning"
-                          content={i18n.translate('xpack.lens.chartSwitch.dataLossDescription', {
-                            defaultMessage:
-                              'Selecting this chart type will result in a partial loss of currently applied configuration selections.',
-                          })}
-                          iconProps={{
-                            className: 'lnsChartSwitch__chartIcon',
-                            'data-test-subj': `lnsChartSwitchPopoverAlert_${v.id}`,
-                          }}
-                        />
+                      v.selection.dataLoss !== 'nothing' || v.showBetaBadge ? (
+                        <EuiFlexGroup
+                          gutterSize="xs"
+                          responsive={false}
+                          className="lnsChartSwitch__append"
+                        >
+                          {v.selection.dataLoss !== 'nothing' ? (
+                            <EuiFlexItem grow={false}>
+                              <EuiIconTip
+                                aria-label={i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
+                                  defaultMessage: 'Warning',
+                                })}
+                                type="alert"
+                                color="warning"
+                                content={i18n.translate(
+                                  'xpack.lens.chartSwitch.dataLossDescription',
+                                  {
+                                    defaultMessage:
+                                      'Selecting this chart type will result in a partial loss of currently applied configuration selections.',
+                                  }
+                                )}
+                                iconProps={{
+                                  className: 'lnsChartSwitch__chartIcon',
+                                  'data-test-subj': `lnsChartSwitchPopoverAlert_${v.id}`,
+                                }}
+                              />
+                            </EuiFlexItem>
+                          ) : null}
+                          {v.showBetaBadge ? (
+                            <EuiFlexItem grow={false}>
+                              <EuiBadge color="hollow">
+                                <FormattedMessage
+                                  id="xpack.lens.chartSwitch.betaLabel"
+                                  defaultMessage="Beta"
+                                />
+                              </EuiBadge>
+                            </EuiFlexItem>
+                          ) : null}
+                        </EuiFlexGroup>
                       ) : null,
                     // Apparently checked: null is not valid for TS
                     ...(subVisualizationId === v.id && { checked: 'on' }),
@@ -354,6 +388,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
           </EuiFlexGroup>
         </EuiPopoverTitle>
         <EuiSelectable
+          className="lnsChartSwitch__options"
           height={computeListHeight(visualizationTypes, MAX_LIST_HEIGHT)}
           searchable
           singleSelection

@@ -9,6 +9,7 @@ import { ApiResponse } from '@elastic/elasticsearch';
 import { performance } from 'perf_hooks';
 import { Logger } from 'src/core/server';
 import { SavedObject } from 'src/core/types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -16,17 +17,17 @@ import {
 } from '../../../../../../alerting/server';
 import { buildEqlSearchRequest } from '../../../../../common/detection_engine/get_query_filter';
 import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
-import { ExceptionListItemSchema } from '../../../../../common/shared_imports';
 import { isOutdated } from '../../migrations/helpers';
 import { getIndexVersion } from '../../routes/index/get_index_version';
 import { MIN_EQL_RULE_INDEX_VERSION } from '../../routes/index/get_signals_template';
+import { EqlRuleParams } from '../../schemas/rule_schemas';
 import { RefreshTypes } from '../../types';
 import { buildSignalFromEvent, buildSignalGroupFromSequence } from '../build_bulk_body';
 import { getInputIndex } from '../get_input_output_index';
 import { RuleStatusService } from '../rule_status_service';
 import { bulkInsertSignals, filterDuplicateSignals } from '../single_bulk_create';
 import {
-  EqlRuleAttributes,
+  AlertAttributes,
   EqlSignalSearchResponse,
   SearchAfterAndBulkCreateReturnType,
   WrappedSignalHit,
@@ -43,7 +44,7 @@ export const eqlExecutor = async ({
   logger,
   refresh,
 }: {
-  rule: SavedObject<EqlRuleAttributes>;
+  rule: SavedObject<AlertAttributes<EqlRuleParams>>;
   exceptionItems: ExceptionListItemSchema[];
   ruleStatusService: RuleStatusService;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
@@ -91,6 +92,11 @@ export const eqlExecutor = async ({
     ruleParams.eventCategoryOverride
   );
   const eqlSignalSearchStart = performance.now();
+  logger.debug(
+    `EQL query request path: ${request.path}, method: ${request.method}, body: ${JSON.stringify(
+      request.body
+    )}`
+  );
   // TODO: fix this later
   const { body: response } = (await services.scopedClusterClient.asCurrentUser.transport.request(
     request

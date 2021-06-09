@@ -7,7 +7,7 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
-import { ProvidedType } from '@kbn/test/types/ftr';
+import { ProvidedType } from '@kbn/test';
 import { Calendar } from '../../../../plugins/ml/server/models/calendar/index';
 import { Annotation } from '../../../../plugins/ml/common/types/annotations';
 import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
@@ -23,6 +23,7 @@ import {
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
 } from '../../../../plugins/ml/common/constants/index_patterns';
 import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
+import { PutTrainedModelConfig } from '../../../../plugins/ml/common/types/trained_models';
 
 export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
   const es = getService('es');
@@ -383,7 +384,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       });
     },
 
-    async createCalendarEvents(calendarId: string, events: estypes.ScheduledEvent[]) {
+    async createCalendarEvents(calendarId: string, events: estypes.MlCalendarEvent[]) {
       log.debug(`Creating events for calendar with id '${calendarId}'...`);
       await esSupertest.post(`/_ml/calendars/${calendarId}/events`).send({ events }).expect(200);
       await this.waitForEventsToExistInCalendar(calendarId, events);
@@ -395,7 +396,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     },
 
     assertAllEventsExistInCalendar: (
-      eventsToCheck: estypes.ScheduledEvent[],
+      eventsToCheck: estypes.MlCalendarEvent[],
       calendar: Calendar
     ): boolean => {
       const updatedCalendarEvents = calendar.events;
@@ -408,7 +409,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
             (updatedEvent) =>
               updatedEvent.description === eventToCheck.description &&
               // updatedEvent are fetched with suptertest which converts start_time and end_time to number
-              // sometimes eventToCheck declared manually with types incompatible with estypes.ScheduledEvent
+              // sometimes eventToCheck declared manually with types incompatible with estypes.MlCalendarEvent
               String(updatedEvent.start_time) === String(eventToCheck.start_time) &&
               String(updatedEvent.end_time) === String(eventToCheck.end_time)
           ) < 0
@@ -428,7 +429,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async waitForEventsToExistInCalendar(
       calendarId: string,
-      eventsToCheck: estypes.ScheduledEvent[],
+      eventsToCheck: estypes.MlCalendarEvent[],
       errorMsg?: string
     ) {
       await retry.waitForWithTimeout(`'${calendarId}' events to exist`, 5 * 1000, async () => {
@@ -891,26 +892,17 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       await this.waitForAnalyticsState(dfaConfig.id, DATA_FRAME_TASK_STATE.STOPPED);
     },
 
-    async asignJobToSpaces(jobId: string, jobType: JobType, spacesToAdd: string[], space?: string) {
-      const { body } = await kbnSupertest
-        .post(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/assign_job_to_space`)
-        .set(COMMON_REQUEST_HEADERS)
-        .send({ jobType, jobIds: [jobId], spaces: spacesToAdd })
-        .expect(200);
-
-      expect(body).to.eql({ [jobId]: { success: true } });
-    },
-
-    async removeJobFromSpaces(
+    async updateJobSpaces(
       jobId: string,
       jobType: JobType,
+      spacesToAdd: string[],
       spacesToRemove: string[],
       space?: string
     ) {
       const { body } = await kbnSupertest
-        .post(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/remove_job_from_space`)
+        .post(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/update_jobs_spaces`)
         .set(COMMON_REQUEST_HEADERS)
-        .send({ jobType, jobIds: [jobId], spaces: spacesToRemove })
+        .send({ jobType, jobIds: [jobId], spacesToAdd, spacesToRemove })
         .expect(200);
 
       expect(body).to.eql({ [jobId]: { success: true } });
@@ -934,6 +926,18 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           expect(body[jobType]).to.not.have.property(jobId);
         }
       }
+    },
+
+    async createTrainedModel(modelId: string, body: PutTrainedModelConfig) {
+      log.debug(`Creating trained model with id "${modelId}"`);
+      const model = await esSupertest
+        .put(`/_ml/trained_models/${modelId}`)
+        .send(body)
+        .expect(200)
+        .then((res: any) => res.body);
+
+      log.debug('> Trained model crated');
+      return model;
     },
   };
 }

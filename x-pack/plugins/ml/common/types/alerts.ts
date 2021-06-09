@@ -7,7 +7,7 @@
 
 import { AnomalyResultType } from './anomalies';
 import { ANOMALY_RESULT_TYPE } from '../constants/anomalies';
-import { AlertTypeParams } from '../../../alerting/common';
+import type { AlertTypeParams, Alert } from '../../../alerting/common';
 
 export type PreviewResultsKeys = 'record_results' | 'bucket_results' | 'influencer_results';
 export type TopHitsResultsKeys = 'top_record_hits' | 'top_bucket_hits' | 'top_influencer_hits';
@@ -25,6 +25,7 @@ export interface AlertExecutionResult {
   bucketRange: { start: string; end: string };
   topRecords: RecordAnomalyAlertDoc[];
   topInfluencers?: InfluencerAnomalyAlertDoc[];
+  message: string;
 }
 
 export interface PreviewResponse {
@@ -93,4 +94,17 @@ export type MlAnomalyDetectionAlertParams = {
   severity: number;
   resultType: AnomalyResultType;
   includeInterim: boolean;
+  lookbackInterval: string | null | undefined;
+  topNBuckets: number | null | undefined;
 } & AlertTypeParams;
+
+export type MlAnomalyDetectionAlertAdvancedSettings = Pick<
+  MlAnomalyDetectionAlertParams,
+  'lookbackInterval' | 'topNBuckets'
+>;
+
+export type MlAnomalyDetectionAlertRule = Omit<Alert<MlAnomalyDetectionAlertParams>, 'apiKey'>;
+
+export interface JobAlertingRuleStats {
+  alerting_rules?: MlAnomalyDetectionAlertRule[];
+}

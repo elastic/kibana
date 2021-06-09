@@ -53,26 +53,49 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
     schema: {
       auditLoggingEnabled: {
         type: 'boolean',
+        _meta: {
+          description:
+            'Indicates if audit logging is both enabled and supported by the current license.',
+        },
       },
       loginSelectorEnabled: {
         type: 'boolean',
+        _meta: {
+          description: 'Indicates if the login selector UI is enabled.',
+        },
       },
       accessAgreementEnabled: {
         type: 'boolean',
+        _meta: {
+          description:
+            'Indicates if the access agreement UI is both enabled and supported by the current license.',
+        },
       },
       authProviderCount: {
         type: 'long',
+        _meta: {
+          description:
+            'The number of configured auth providers (including disabled auth providers).',
+        },
       },
       enabledAuthProviders: {
         type: 'array',
         items: {
           type: 'keyword',
+          _meta: {
+            description:
+              'The types of enabled auth providers (such as `saml`, `basic`, `pki`, etc).',
+          },
         },
       },
       httpAuthSchemes: {
         type: 'array',
         items: {
           type: 'keyword',
+          _meta: {
+            description:
+              'The set of enabled http auth schemes. Used for api-based usage, and when credentials are provided via reverse-proxy.',
+          },
         },
       },
     },

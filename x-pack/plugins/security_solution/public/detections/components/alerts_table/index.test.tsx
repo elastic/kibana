@@ -40,6 +40,8 @@ describe('AlertsTableComponent', () => {
           clearEventsDeleted={jest.fn()}
           showBuildingBlockAlerts={false}
           onShowBuildingBlockAlertsChanged={jest.fn()}
+          showOnlyThreatIndicatorAlerts={false}
+          onShowOnlyThreatIndicatorAlertsChanged={jest.fn()}
         />
       </TestProviders>
     );

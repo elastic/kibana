@@ -61,7 +61,7 @@ describe('Workload Statistics Aggregator', () => {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
           },
-          // The `FiltersAggregate` doesn't cover the case of a nested `AggregationContainer`, in which `FiltersAggregate`
+          // The `FiltersAggregate` doesn't cover the case of a nested `AggregationsAggregationContainer`, in which `FiltersAggregate`
           // would not have a `buckets` property, but rather a keyed property that's inferred from the request.
           // @ts-expect-error
           idleTasks: {
@@ -102,7 +102,7 @@ describe('Workload Statistics Aggregator', () => {
         expect(taskStore.aggregate).toHaveBeenCalledWith({
           aggs: {
             taskType: {
-              terms: { field: 'task.taskType' },
+              terms: { size: 100, field: 'task.taskType' },
               aggs: {
                 status: {
                   terms: { field: 'task.status' },
@@ -238,7 +238,7 @@ describe('Workload Statistics Aggregator', () => {
             },
           ],
         },
-        // The `FiltersAggregate` doesn't cover the case of a nested `AggregationContainer`, in which `FiltersAggregate`
+        // The `FiltersAggregate` doesn't cover the case of a nested `AggregationsAggregationContainer`, in which `FiltersAggregate`
         // would not have a `buckets` property, but rather a keyed property that's inferred from the request.
         // @ts-expect-error
         idleTasks: {
@@ -944,7 +944,7 @@ function setTaskTypeCount(
       ...rest.hits,
       total: {
         value: buckets.reduce((sum, bucket) => sum + bucket.doc_count, 0),
-        relation: 'eq' as estypes.TotalHitsRelation,
+        relation: 'eq' as estypes.SearchTotalHitsRelation,
       },
     },
     aggregations: {

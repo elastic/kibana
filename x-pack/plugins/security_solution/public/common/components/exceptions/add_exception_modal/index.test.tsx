@@ -12,18 +12,18 @@ import { waitFor } from '@testing-library/react';
 
 import { AddExceptionModal } from './';
 import { useCurrentUser } from '../../../../common/lib/kibana';
-import { useAsync } from '../../../../shared_imports';
+import { ExceptionBuilder } from '../../../../shared_imports';
+import { useAsync } from '@kbn/securitysolution-list-hooks';
 import { getExceptionListSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_schema.mock';
 import { useFetchIndex } from '../../../containers/source';
 import { stubIndexPattern } from 'src/plugins/data/common/index_patterns/index_pattern.stub';
 import { useAddOrUpdateException } from '../use_add_exception';
 import { useFetchOrCreateRuleExceptionList } from '../use_fetch_or_create_rule_exception_list';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
-import * as builder from '../builder';
 import * as helpers from '../helpers';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { EntriesArray } from '../../../../../../lists/common/schemas/types';
-import { ExceptionListItemSchema } from '../../../../../../lists/common';
+import type { EntriesArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+
 import {
   getRulesEqlSchemaMock,
   getRulesSchemaMock,
@@ -49,8 +49,10 @@ jest.mock('../../../containers/source');
 jest.mock('../../../../detections/containers/detection_engine/rules');
 jest.mock('../use_add_exception');
 jest.mock('../use_fetch_or_create_rule_exception_list');
-jest.mock('../builder');
-jest.mock('../../../../shared_imports');
+jest.mock('@kbn/securitysolution-list-hooks', () => ({
+  ...jest.requireActual('@kbn/securitysolution-list-hooks'),
+  useAsync: jest.fn(),
+}));
 jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_async');
 
 describe('When the add exception modal is opened', () => {
@@ -59,13 +61,14 @@ describe('When the add exception modal is opened', () => {
     ReturnType<typeof helpers.defaultEndpointExceptionItems>
   >;
   let ExceptionBuilderComponent: jest.SpyInstance<
-    ReturnType<typeof builder.ExceptionBuilderComponent>
+    ReturnType<typeof ExceptionBuilder.getExceptionBuilderComponentLazy>
   >;
   beforeEach(() => {
+    const emptyComp = <span data-test-subj="alert-exception-builder" />;
     defaultEndpointItems = jest.spyOn(helpers, 'defaultEndpointExceptionItems');
     ExceptionBuilderComponent = jest
-      .spyOn(builder, 'ExceptionBuilderComponent')
-      .mockReturnValue(<></>);
+      .spyOn(ExceptionBuilder, 'getExceptionBuilderComponentLazy')
+      .mockReturnValue(emptyComp);
 
     (useAsync as jest.Mock).mockImplementation(() => ({
       start: jest.fn(),
@@ -163,6 +166,9 @@ describe('When the add exception modal is opened', () => {
     it('should contain the endpoint specific documentation text', () => {
       expect(wrapper.find('[data-test-subj="add-exception-endpoint-text"]').exists()).toBeTruthy();
     });
+    it('should render the os selection dropdown', () => {
+      expect(wrapper.find('[data-test-subj="os-selection-dropdown"]').exists()).toBeTruthy();
+    });
   });
 
   describe('when there is alert data passed to an endpoint list exception', () => {
@@ -219,6 +225,9 @@ describe('When the add exception modal is opened', () => {
     });
     it('should not display the eql sequence callout', () => {
       expect(wrapper.find('[data-test-subj="eql-sequence-callout"]').exists()).not.toBeTruthy();
+    });
+    it('should not render the os selection dropdown', () => {
+      expect(wrapper.find('[data-test-subj="os-selection-dropdown"]').exists()).toBeFalsy();
     });
   });
 

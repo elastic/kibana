@@ -17,8 +17,14 @@
 
   &:focus,
   &:focus-within,
+  .kbnFieldButton__button:focus:focus-visible,
   &.kbnFieldButton-isActive {
-    animation: none !important; // sass-lint:disable-line no-important
+    @include kbnThemeStyle('v7') {
+      animation: none !important; // sass-lint:disable-line no-important
+    }
+    @include kbnThemeStyle('v8') {
+      outline: none !important; // sass-lint:disable-line no-important
+    }
   }
 
   &:focus .kbnFieldButton__name span,

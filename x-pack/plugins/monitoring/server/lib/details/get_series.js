@@ -43,7 +43,15 @@ function getUuid(req, metric) {
 }
 
 function defaultCalculation(bucket, key) {
-  const value = get(bucket, key, null);
+  const mbKey = `metric_mb_deriv.normalized_value`;
+  const legacyValue = get(bucket, key, null);
+  const mbValue = get(bucket, mbKey, null);
+  let value;
+  if (!isNaN(mbValue) && mbValue > 0) {
+    value = mbValue;
+  } else {
+    value = legacyValue;
+  }
   // negatives suggest derivatives that have been reset (usually due to restarts that reset the count)
   if (value < 0) {
     return null;
@@ -54,6 +62,17 @@ function defaultCalculation(bucket, key) {
 
 function createMetricAggs(metric) {
   if (metric.derivative) {
+    const mbDerivative = metric.mbField
+      ? {
+          metric_mb_deriv: {
+            derivative: {
+              buckets_path: 'metric_mb',
+              gap_policy: 'skip',
+              unit: NORMALIZED_DERIVATIVE_UNIT,
+            },
+          },
+        }
+      : {};
     return {
       metric_deriv: {
         derivative: {
@@ -62,6 +81,7 @@ function createMetricAggs(metric) {
           unit: NORMALIZED_DERIVATIVE_UNIT,
         },
       },
+      ...mbDerivative,
       ...metric.aggs,
     };
   }
@@ -97,6 +117,13 @@ async function fetchSeries(
       },
       ...createMetricAggs(metric),
     };
+    if (metric.mbField) {
+      dateHistogramSubAggs.metric_mb = {
+        [metric.metricAgg]: {
+          field: metric.mbField,
+        },
+      };
+    }
   }
 
   let aggs = {
@@ -209,7 +236,7 @@ function isObject(value) {
 }
 
 function countBuckets(data, count = 0) {
-  if (data.buckets) {
+  if (data && data.buckets) {
     count += data.buckets.length;
     for (const bucket of data.buckets) {
       for (const key of Object.keys(bucket)) {
@@ -218,7 +245,7 @@ function countBuckets(data, count = 0) {
         }
       }
     }
-  } else {
+  } else if (data) {
     for (const key of Object.keys(data)) {
       if (isObject(data[key])) {
         count = countBuckets(data[key], count);

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Node, SourceFile, Project } from 'ts-morph';
+import { Node, SourceFile, Project, ReferenceFindableNode } from 'ts-morph';
 
 export interface NamedNode extends Node {
   getName(): string;
@@ -16,7 +16,7 @@ export interface NamedNode extends Node {
  * ts-morph has a Node.isNamedNode fn but it isn't returning true for all types
  * that will have node.getName.
  */
-export function isNamedNode(node: Node | NamedNode): node is NamedNode {
+export function isNamedNode(node: Node | NamedNode | ReferenceFindableNode): node is NamedNode {
   return (node as NamedNode).getName !== undefined;
 }
 

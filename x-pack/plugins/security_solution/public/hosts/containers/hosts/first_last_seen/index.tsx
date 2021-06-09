@@ -9,6 +9,7 @@ import deepEqual from 'fast-deep-equal';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
   HostsQueries,
@@ -17,7 +18,7 @@ import {
 } from '../../../../../common/search_strategy/security_solution';
 
 import * as i18n from './translations';
-import { DocValueFields } from '../../../../../common/search_strategy';
+import { Direction, DocValueFields } from '../../../../../common/search_strategy';
 import {
   isCompleteResponse,
   isErrorResponse,
@@ -30,13 +31,13 @@ export interface FirstLastSeenHostArgs {
   errorMessage: string | null;
   firstSeen?: string | null;
   lastSeen?: string | null;
-  order: 'asc' | 'desc' | null;
+  order: Direction.asc | Direction.desc | null;
 }
 interface UseHostFirstLastSeen {
   docValueFields: DocValueFields[];
   hostName: string;
   indexNames: string[];
-  order: 'asc' | 'desc';
+  order: Direction.asc | Direction.desc;
 }
 
 export const useFirstLastSeenHost = ({
@@ -45,7 +46,7 @@ export const useFirstLastSeenHost = ({
   indexNames,
   order,
 }: UseHostFirstLastSeen): [boolean, FirstLastSeenHostArgs] => {
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
@@ -69,6 +70,7 @@ export const useFirstLastSeenHost = ({
       id: ID,
     }
   );
+  const { addError, addWarning } = useAppToasts();
 
   const firstLastSeenHostSearch = useCallback(
     (request: HostFirstLastSeenRequestOptions) => {
@@ -93,8 +95,7 @@ export const useFirstLastSeenHost = ({
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_FIRST_LAST_SEEN_HOST);
+                addWarning(i18n.ERROR_FIRST_LAST_SEEN_HOST);
                 searchSubscription$.current.unsubscribe();
               }
             },
@@ -104,9 +105,8 @@ export const useFirstLastSeenHost = ({
                 ...prevResponse,
                 errorMessage: msg,
               }));
-              notifications.toasts.addDanger({
+              addError(msg, {
                 title: i18n.FAIL_FIRST_LAST_SEEN_HOST,
-                text: msg.message,
               });
               searchSubscription$.current.unsubscribe();
             },
@@ -116,7 +116,7 @@ export const useFirstLastSeenHost = ({
       abortCtrl.current.abort();
       asyncSearch();
     },
-    [data.search, notifications.toasts]
+    [data.search, addError, addWarning]
   );
 
   useEffect(() => {

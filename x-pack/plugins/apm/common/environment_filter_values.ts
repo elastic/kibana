@@ -22,17 +22,47 @@ const environmentLabels: Record<string, string> = {
 };
 
 export const ENVIRONMENT_ALL = {
+  esFieldValue: undefined,
   value: ENVIRONMENT_ALL_VALUE,
   text: environmentLabels[ENVIRONMENT_ALL_VALUE],
 };
 
 export const ENVIRONMENT_NOT_DEFINED = {
+  esFieldValue: undefined,
   value: ENVIRONMENT_NOT_DEFINED_VALUE,
   text: environmentLabels[ENVIRONMENT_NOT_DEFINED_VALUE],
 };
 
 export function getEnvironmentLabel(environment: string) {
   return environmentLabels[environment] || environment;
+}
+
+export function omitEsFieldValue({
+  esFieldValue,
+  value,
+  text,
+}: {
+  esFieldValue?: string;
+  value: string;
+  text: string;
+}) {
+  return { value, text };
+}
+
+export function parseEnvironmentUrlParam(environment: string) {
+  if (environment === ENVIRONMENT_ALL_VALUE) {
+    return ENVIRONMENT_ALL;
+  }
+
+  if (environment === ENVIRONMENT_NOT_DEFINED_VALUE) {
+    return ENVIRONMENT_NOT_DEFINED;
+  }
+
+  return {
+    esFieldValue: environment,
+    value: environment,
+    text: environment,
+  };
 }
 
 // returns the environment url param that should be used

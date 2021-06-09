@@ -7,30 +7,39 @@
 
 import React, { useState } from 'react';
 
-import { useDebounce } from 'react-use';
+import useDebounce from 'react-use/lib/useDebounce';
 import { useValuesList } from '../../../hooks/use_values_list';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { FieldValueSelection } from './field_value_selection';
-
-export interface FieldValueSuggestionsProps {
-  value?: string;
-  label: string;
-  indexPattern: IIndexPattern;
-  sourceField: string;
-  onChange: (val?: string) => void;
-}
+import { FieldValueSuggestionsProps } from './types';
+import { FieldValueCombobox } from './field_value_combobox';
 
 export function FieldValueSuggestions({
+  fullWidth,
   sourceField,
   label,
   indexPattern,
-  value,
+  selectedValue,
+  filters,
+  button,
+  time,
+  width,
+  forceOpen,
+  anchorPosition,
+  singleSelection,
+  asCombobox = true,
   onChange: onSelectionChange,
 }: FieldValueSuggestionsProps) {
   const [query, setQuery] = useState('');
   const [debouncedValue, setDebouncedValue] = useState('');
 
-  const { values, loading } = useValuesList({ indexPattern, query, sourceField });
+  const { values, loading } = useValuesList({
+    indexPattern,
+    query,
+    sourceField,
+    filters,
+    time,
+    keepHistory: true,
+  });
 
   useDebounce(
     () => {
@@ -40,14 +49,22 @@ export function FieldValueSuggestions({
     [debouncedValue]
   );
 
+  const SelectionComponent = asCombobox ? FieldValueCombobox : FieldValueSelection;
+
   return (
-    <FieldValueSelection
+    <SelectionComponent
+      fullWidth={fullWidth}
+      singleSelection={singleSelection}
       values={values as string[]}
       label={label}
       onChange={onSelectionChange}
       setQuery={setDebouncedValue}
       loading={loading}
-      value={value}
+      selectedValue={selectedValue}
+      button={button}
+      forceOpen={forceOpen}
+      anchorPosition={anchorPosition}
+      width={width}
     />
   );
 }

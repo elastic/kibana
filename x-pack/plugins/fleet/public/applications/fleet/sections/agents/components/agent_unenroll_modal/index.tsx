@@ -40,11 +40,11 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
       setIsSubmitting(true);
       const { error } = isSingleAgent
         ? await sendPostAgentUnenroll((agents[0] as Agent).id, {
-            force: forceUnenroll,
+            revoke: forceUnenroll,
           })
         : await sendPostBulkAgentUnenroll({
             agents: Array.isArray(agents) ? agents.map((agent) => agent.id) : agents,
-            force: forceUnenroll,
+            revoke: forceUnenroll,
           });
       if (error) {
         throw error;

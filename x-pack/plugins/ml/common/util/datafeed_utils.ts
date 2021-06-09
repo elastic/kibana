@@ -18,10 +18,3 @@ export const getDatafeedAggregations = (
 ): Aggregation | undefined => {
   return getAggregations<Aggregation>(datafeedConfig);
 };
-
-export const getAggregationBucketsName = (aggregations: any): string | undefined => {
-  if (aggregations !== null && typeof aggregations === 'object') {
-    const keys = Object.keys(aggregations);
-    return keys.length > 0 ? keys[0] : undefined;
-  }
-};

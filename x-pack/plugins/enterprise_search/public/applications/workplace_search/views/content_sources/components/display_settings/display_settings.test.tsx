@@ -7,8 +7,7 @@
 
 import '../../../../../__mocks__/shallow_useeffect.mock';
 
-import { mockKibanaValues } from '../../../../../__mocks__';
-import { setMockValues, setMockActions } from '../../../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logic';
 import { exampleResult } from '../../../../__mocks__/content_sources.mock';
 
 import React from 'react';
@@ -25,11 +24,11 @@ import { DisplaySettings } from './display_settings';
 import { FieldEditorModal } from './field_editor_modal';
 
 describe('DisplaySettings', () => {
-  const { navigateToUrl } = mockKibanaValues;
   const { exampleDocuments, searchResultConfig } = exampleResult;
   const initializeDisplaySettings = jest.fn();
   const setServerData = jest.fn();
   const setColorField = jest.fn();
+  const handleSelectedTabChanged = jest.fn();
 
   const values = {
     isOrganization: true,
@@ -46,6 +45,7 @@ describe('DisplaySettings', () => {
       initializeDisplaySettings,
       setServerData,
       setColorField,
+      handleSelectedTabChanged,
     });
     setMockValues({ ...values });
   });
@@ -83,7 +83,7 @@ describe('DisplaySettings', () => {
       const tabsEl = wrapper.find(EuiTabbedContent);
       tabsEl.prop('onTabClick')!(tabs[0]);
 
-      expect(navigateToUrl).toHaveBeenCalledWith('/sources/123/display_settings/');
+      expect(handleSelectedTabChanged).toHaveBeenCalledWith('search_results');
     });
 
     it('handles second tab click', () => {
@@ -91,7 +91,7 @@ describe('DisplaySettings', () => {
       const tabsEl = wrapper.find(EuiTabbedContent);
       tabsEl.prop('onTabClick')!(tabs[1]);
 
-      expect(navigateToUrl).toHaveBeenCalledWith('/sources/123/display_settings/result_detail');
+      expect(handleSelectedTabChanged).toHaveBeenCalledWith('result_detail');
     });
   });
 

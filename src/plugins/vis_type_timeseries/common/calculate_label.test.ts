@@ -7,39 +7,40 @@
  */
 
 import { calculateLabel } from './calculate_label';
-import type { MetricsItemsSchema } from './types';
+import type { Metric } from './types';
+import { SanitizedFieldType } from './types';
 
 describe('calculateLabel(metric, metrics)', () => {
   test('returns the metric.alias if set', () => {
-    expect(calculateLabel({ alias: 'Example' } as MetricsItemsSchema)).toEqual('Example');
+    expect(calculateLabel({ alias: 'Example' } as Metric)).toEqual('Example');
   });
 
   test('returns "Count" for a count metric', () => {
-    expect(calculateLabel({ type: 'count' } as MetricsItemsSchema)).toEqual('Count');
+    expect(calculateLabel({ type: 'count' } as Metric)).toEqual('Count');
   });
 
   test('returns "Calculation" for a bucket script metric', () => {
-    expect(calculateLabel({ type: 'calculation' } as MetricsItemsSchema)).toEqual('Bucket Script');
+    expect(calculateLabel({ type: 'calculation' } as Metric)).toEqual('Bucket Script');
   });
 
   test('returns formatted label for series_agg', () => {
-    const label = calculateLabel({ type: 'series_agg', function: 'max' } as MetricsItemsSchema);
+    const label = calculateLabel({ type: 'series_agg', function: 'max' } as Metric);
 
     expect(label).toEqual('Series Agg (max)');
   });
 
   test('returns formatted label for basic aggs', () => {
-    const label = calculateLabel({ type: 'avg', field: 'memory' } as MetricsItemsSchema);
+    const label = calculateLabel({ type: 'avg', field: 'memory' } as Metric);
 
     expect(label).toEqual('Average of memory');
   });
 
   test('returns formatted label for pipeline aggs', () => {
-    const metric = ({ id: 2, type: 'derivative', field: 1 } as unknown) as MetricsItemsSchema;
+    const metric = ({ id: 2, type: 'derivative', field: 1 } as unknown) as Metric;
     const metrics = ([
       { id: 1, type: 'max', field: 'network.out.bytes' },
       metric,
-    ] as unknown) as MetricsItemsSchema[];
+    ] as unknown) as Metric[];
     const label = calculateLabel(metric, metrics);
 
     expect(label).toEqual('Derivative of Max of network.out.bytes');
@@ -50,36 +51,58 @@ describe('calculateLabel(metric, metrics)', () => {
       id: 2,
       type: 'derivative',
       field: '1[50.0]',
-    } as unknown) as MetricsItemsSchema;
+    } as unknown) as Metric;
     const metrics = ([
       { id: 1, type: 'percentile', field: 'network.out.bytes' },
       metric,
-    ] as unknown) as MetricsItemsSchema[];
+    ] as unknown) as Metric[];
     const label = calculateLabel(metric, metrics);
 
     expect(label).toEqual('Derivative of Percentile of network.out.bytes (50.0)');
   });
 
   test('returns formatted label for pipeline aggs (deep)', () => {
-    const metric = ({ id: 3, type: 'derivative', field: 2 } as unknown) as MetricsItemsSchema;
+    const metric = ({ id: 3, type: 'derivative', field: 2 } as unknown) as Metric;
     const metrics = ([
       { id: 1, type: 'max', field: 'network.out.bytes' },
       { id: 2, type: 'moving_average', field: 1 },
       metric,
-    ] as unknown) as MetricsItemsSchema[];
+    ] as unknown) as Metric[];
     const label = calculateLabel(metric, metrics);
 
     expect(label).toEqual('Derivative of Moving Average of Max of network.out.bytes');
   });
 
   test('returns formatted label for pipeline aggs uses alias for field metric', () => {
-    const metric = ({ id: 2, type: 'derivative', field: 1 } as unknown) as MetricsItemsSchema;
+    const metric = ({ id: 2, type: 'derivative', field: 1 } as unknown) as Metric;
     const metrics = ([
       { id: 1, type: 'max', field: 'network.out.bytes', alias: 'Outbound Traffic' },
       metric,
-    ] as unknown) as MetricsItemsSchema[];
+    ] as unknown) as Metric[];
     const label = calculateLabel(metric, metrics);
 
     expect(label).toEqual('Derivative of Outbound Traffic');
+  });
+
+  test('should throw an error if field not found', () => {
+    const metric = ({ id: 2, type: 'max', field: 3 } as unknown) as Metric;
+    const metrics = ([
+      { id: 1, type: 'max', field: 'network.out.bytes', alias: 'Outbound Traffic' },
+      metric,
+    ] as unknown) as Metric[];
+    const fields: SanitizedFieldType[] = [{ name: '2', label: '2', type: 'field' }];
+
+    expect(() => calculateLabel(metric, metrics, fields)).toThrowError('Field "3" not found');
+  });
+
+  test('should not throw an error if field not found (isThrowErrorOnFieldNotFound is false)', () => {
+    const metric = ({ id: 2, type: 'max', field: 3 } as unknown) as Metric;
+    const metrics = ([
+      { id: 1, type: 'max', field: 'network.out.bytes', alias: 'Outbound Traffic' },
+      metric,
+    ] as unknown) as Metric[];
+    const fields: SanitizedFieldType[] = [{ name: '2', label: '2', type: 'field' }];
+
+    expect(calculateLabel(metric, metrics, fields, false)).toBe('Max of 3');
   });
 });

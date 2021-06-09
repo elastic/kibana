@@ -32,7 +32,7 @@ import { toastNotificationServiceProvider } from '../../../../services/toast_not
 import { ml } from '../../../../services/ml_api_service';
 import { withKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { collapseLiteralStrings } from '../../../../../../shared_imports';
-import { DATAFEED_STATE } from '../../../../../../common/constants/states';
+import { DATAFEED_STATE, JOB_STATE } from '../../../../../../common/constants/states';
 
 export class EditJobFlyoutUI extends Component {
   _initialJobFormState = null;
@@ -176,11 +176,13 @@ export class EditJobFlyoutUI extends Component {
   extractJob(job, hasDatafeed) {
     this.extractInitialJobFormState(job, hasDatafeed);
     const datafeedRunning = hasDatafeed && job.datafeed_config.state !== DATAFEED_STATE.STOPPED;
+    const jobClosed = job.state === JOB_STATE.CLOSED;
 
     this.setState({
       job,
       hasDatafeed,
       datafeedRunning,
+      jobClosed,
       jobModelMemoryLimitValidationError: '',
       jobGroupsValidationError: '',
       ...cloneDeep(this._initialJobFormState),
@@ -318,16 +320,19 @@ export class EditJobFlyoutUI extends Component {
         isValidJobDetails,
         isValidJobCustomUrls,
         datafeedRunning,
+        jobClosed,
       } = this.state;
 
       const tabs = [
         {
           id: 'job-details',
+          'data-test-subj': 'mlEditJobFlyout-jobDetails',
           name: i18n.translate('xpack.ml.jobsList.editJobFlyout.jobDetailsTitle', {
             defaultMessage: 'Job details',
           }),
           content: (
             <JobDetails
+              jobClosed={jobClosed}
               datafeedRunning={datafeedRunning}
               jobDescription={jobDescription}
               jobGroups={jobGroups}
@@ -342,6 +347,7 @@ export class EditJobFlyoutUI extends Component {
         },
         {
           id: 'detectors',
+          'data-test-subj': 'mlEditJobFlyout-detectors',
           name: i18n.translate('xpack.ml.jobsList.editJobFlyout.detectorsTitle', {
             defaultMessage: 'Detectors',
           }),
@@ -355,6 +361,7 @@ export class EditJobFlyoutUI extends Component {
         },
         {
           id: 'datafeed',
+          'data-test-subj': 'mlEditJobFlyout-datafeed',
           name: i18n.translate('xpack.ml.jobsList.editJobFlyout.datafeedTitle', {
             defaultMessage: 'Datafeed',
           }),
@@ -372,6 +379,7 @@ export class EditJobFlyoutUI extends Component {
         },
         {
           id: 'custom-urls',
+          'data-test-subj': 'mlEditJobFlyout-customUrls',
           name: i18n.translate('xpack.ml.jobsList.editJobFlyout.customUrlsTitle', {
             defaultMessage: 'Custom URLs',
           }),
@@ -391,6 +399,7 @@ export class EditJobFlyoutUI extends Component {
             this.closeFlyout();
           }}
           size="m"
+          data-test-subj="mlJobEditFlyout"
         >
           <EuiFlyoutHeader>
             <EuiTitle>
@@ -415,6 +424,7 @@ export class EditJobFlyoutUI extends Component {
                     this.closeFlyout();
                   }}
                   flush="left"
+                  data-test-subj="mlEditJobFlyoutCloseButton"
                 >
                   <FormattedMessage
                     id="xpack.ml.jobsList.editJobFlyout.closeButtonLabel"
@@ -427,6 +437,7 @@ export class EditJobFlyoutUI extends Component {
                   onClick={this.save}
                   fill
                   isDisabled={isValidJobDetails === false || isValidJobCustomUrls === false}
+                  data-test-subj="mlEditJobFlyoutSaveButton"
                 >
                   <FormattedMessage
                     id="xpack.ml.jobsList.editJobFlyout.saveButtonLabel"

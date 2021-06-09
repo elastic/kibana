@@ -4,22 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import * as rt from 'io-ts';
 import { set } from '@elastic/safer-lodash-set/fp';
 import readline from 'readline';
 import fs from 'fs';
 import { Readable } from 'stream';
 import { createListStream } from '@kbn/utils';
+import { schema } from '@kbn/config-schema';
 
 import { KibanaRequest } from 'src/core/server';
-import { SetupPlugins } from '../../../plugin';
+import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
+import { SetupPlugins, StartPlugins } from '../../../plugin';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
 import { FrameworkRequest } from '../../framework';
 
 export const buildFrameworkRequest = async (
   context: SecuritySolutionRequestHandlerContext,
-  security: SetupPlugins['security'],
+  security: StartPlugins['security'] | SetupPlugins['security'] | undefined,
   request: KibanaRequest
 ): Promise<FrameworkRequest> => {
   const savedObjectsClient = context.core.savedObjects.client;
@@ -34,6 +36,14 @@ export const buildFrameworkRequest = async (
       request
     )
   );
+};
+
+export const escapeHatch = schema.object({}, { unknowns: 'allow' });
+
+type ErrorFactory = (message: string) => Error;
+
+export const throwErrors = (createError: ErrorFactory) => (errors: rt.Errors) => {
+  throw createError(formatErrors(errors).join('\n'));
 };
 
 export const getReadables = (dataPath: string): Promise<Readable> =>

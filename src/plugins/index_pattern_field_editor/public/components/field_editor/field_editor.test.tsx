@@ -6,18 +6,19 @@
  * Side Public License, v 1.
  */
 
+import React, { useState, useMemo } from 'react';
 import { act } from 'react-dom/test-utils';
 
 import '../../test_utils/setup_environment';
 import { registerTestBed, TestBed, getCommonActions } from '../../test_utils';
+import { RuntimeFieldPainlessError } from '../../lib';
 import { Field } from '../../types';
 import { FieldEditor, Props, FieldEditorFormState } from './field_editor';
+import { docLinksServiceMock } from '../../../../../core/public/mocks';
 
 const defaultProps: Props = {
   onChange: jest.fn(),
-  links: {
-    runtimePainless: 'https://elastic.co',
-  },
+  links: docLinksServiceMock.createStartContract() as any,
   ctx: {
     existingConcreteFields: [],
     namesNotAllowed: [],
@@ -206,6 +207,67 @@ describe('<FieldEditor />', () => {
       await submitFormAndGetData(lastState);
       component.update();
       expect(getLastStateUpdate().isValid).toBe(true);
+      expect(form.getErrorsMessages()).toEqual([]);
+    });
+
+    test('should clear the painless syntax error whenever the field type changes', async () => {
+      const field: Field = {
+        name: 'myRuntimeField',
+        type: 'keyword',
+        script: { source: 'emit(6)' },
+      };
+
+      const TestComponent = () => {
+        const dummyError = {
+          reason: 'Awwww! Painless syntax error',
+          message: '',
+          position: { offset: 0, start: 0, end: 0 },
+          scriptStack: [''],
+        };
+        const [error, setError] = useState<RuntimeFieldPainlessError | null>(null);
+        const clearError = useMemo(() => () => setError(null), []);
+        const syntaxError = useMemo(() => ({ error, clear: clearError }), [error, clearError]);
+
+        return (
+          <>
+            <FieldEditor {...defaultProps} field={field} syntaxError={syntaxError} />
+
+            {/* Button to forward dummy syntax error */}
+            <button onClick={() => setError(dummyError)} data-test-subj="setPainlessErrorButton">
+              Set painless error
+            </button>
+          </>
+        );
+      };
+
+      const customTestbed = registerTestBed(TestComponent, {
+        memoryRouter: {
+          wrapComponent: false,
+        },
+      })() as TestBed<string>;
+
+      testBed = {
+        ...customTestbed,
+        actions: getCommonActions(customTestbed),
+      };
+
+      const {
+        form,
+        component,
+        find,
+        actions: { changeFieldType },
+      } = testBed;
+
+      // We set some dummy painless error
+      act(() => {
+        find('setPainlessErrorButton').simulate('click');
+      });
+      component.update();
+
+      expect(form.getErrorsMessages()).toEqual(['Awwww! Painless syntax error']);
+
+      // We change the type and expect the form error to not be there anymore
+      await changeFieldType('keyword');
       expect(form.getErrorsMessages()).toEqual([]);
     });
   });

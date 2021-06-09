@@ -71,6 +71,14 @@ export function FieldEditor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialField]);
 
+  // In case of cleared field and the user closes the popover, restore the initial field
+  useEffect(() => {
+    if (!open) {
+      setCurrentField(initialField);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
   function updateField() {
     const { name, selected, type, ...updatableProperties } = currentField;
     if (fieldName !== initialField.name) {
@@ -218,8 +226,8 @@ export function FieldEditor({
                 >
                   <EuiComboBox
                     onChange={(choices) => {
-                      // value is always defined because it's an unclearable single selection
-                      const newFieldName = choices[0].value!;
+                      // when user hits backspace the selection gets cleared, so prevent it from breaking
+                      const newFieldName = choices.length ? choices[0].value! : '';
 
                       updateProp('name', newFieldName);
                     }}
@@ -357,7 +365,7 @@ export function FieldEditor({
                     <EuiButton
                       size="s"
                       fill
-                      disabled={isEqual(initialField, currentField)}
+                      disabled={isEqual(initialField, currentField) || currentField.name === ''}
                       onClick={updateField}
                     >
                       {i18n.translate('xpack.graph.fieldManager.updateLabel', {

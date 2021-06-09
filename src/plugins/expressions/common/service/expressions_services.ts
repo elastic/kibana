@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { take } from 'rxjs/operators';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { KibanaRequest } from 'src/core/server';
 
@@ -228,7 +229,7 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
   ): void => this.renderers.register(definition);
 
   public readonly run: ExpressionsServiceStart['run'] = (ast, input, params) =>
-    this.executor.run(ast, input, params);
+    this.executor.run(ast, input, params).pipe(take(1)).toPromise<any>();
 
   public readonly getFunction: ExpressionsServiceStart['getFunction'] = (name) =>
     this.executor.getFunction(name);

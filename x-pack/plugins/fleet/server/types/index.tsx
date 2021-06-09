@@ -12,9 +12,6 @@ export {
   AgentSOAttributes,
   AgentStatus,
   AgentType,
-  NewAgentEvent,
-  AgentEvent,
-  AgentEventSOAttributes,
   AgentAction,
   AgentPolicyAction,
   AgentPolicyActionV7_9,
@@ -74,9 +71,7 @@ export {
   InstallType,
   InstallSource,
   InstallResult,
-  // Agent Request types
-  PostAgentEnrollRequest,
-  PostAgentCheckinRequest,
+  GetCategoriesRequest,
   DataType,
   dataTypes,
   // Fleet Server types

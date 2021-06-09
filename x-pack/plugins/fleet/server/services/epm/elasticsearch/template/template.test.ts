@@ -301,6 +301,64 @@ describe('EPM template', () => {
     expect(mappings).toEqual(keywordWithNormalizedMultiFieldsMapping);
   });
 
+  it('tests processing keyword field with multi fields with long field', () => {
+    const keywordWithMultiFieldsLiteralYml = `
+      - name: keywordWithMultiFields
+        type: keyword
+        multi_fields:
+          - name: number_memory_devices
+            type: long
+            normalizer: lowercase
+      `;
+
+    const keywordWithMultiFieldsMapping = {
+      properties: {
+        keywordWithMultiFields: {
+          ignore_above: 1024,
+          type: 'keyword',
+          fields: {
+            number_memory_devices: {
+              type: 'long',
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(keywordWithMultiFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(keywordWithMultiFieldsMapping);
+  });
+
+  it('tests processing keyword field with multi fields with double field', () => {
+    const keywordWithMultiFieldsLiteralYml = `
+      - name: keywordWithMultiFields
+        type: keyword
+        multi_fields:
+          - name: number
+            type: double
+            normalizer: lowercase
+      `;
+
+    const keywordWithMultiFieldsMapping = {
+      properties: {
+        keywordWithMultiFields: {
+          ignore_above: 1024,
+          type: 'keyword',
+          fields: {
+            number: {
+              type: 'double',
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(keywordWithMultiFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(keywordWithMultiFieldsMapping);
+  });
+
   it('tests processing object field with no other attributes', () => {
     const objectFieldLiteralYml = `
 - name: objectField
@@ -551,6 +609,96 @@ describe('EPM template', () => {
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(JSON.stringify(mappings)).toEqual(JSON.stringify(constantKeywordMapping));
+  });
+
+  it('processes meta fields', () => {
+    const metaFieldLiteralYaml = `
+- name: fieldWithMetas
+  type: integer
+  unit: byte
+  metric_type: gauge
+  `;
+    const metaFieldMapping = {
+      properties: {
+        fieldWithMetas: {
+          type: 'long',
+          meta: {
+            metric_type: 'gauge',
+            unit: 'byte',
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(metaFieldLiteralYaml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(JSON.stringify(mappings)).toEqual(JSON.stringify(metaFieldMapping));
+  });
+
+  it('processes meta fields with only one meta value', () => {
+    const metaFieldLiteralYaml = `
+- name: fieldWithMetas
+  type: integer
+  metric_type: gauge
+  `;
+    const metaFieldMapping = {
+      properties: {
+        fieldWithMetas: {
+          type: 'long',
+          meta: {
+            metric_type: 'gauge',
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(metaFieldLiteralYaml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(JSON.stringify(mappings)).toEqual(JSON.stringify(metaFieldMapping));
+  });
+
+  it('processes grouped meta fields', () => {
+    const metaFieldLiteralYaml = `
+- name: groupWithMetas
+  type: group
+  unit: byte
+  metric_type: gauge
+  fields:
+    - name: fieldA
+      type: integer
+      unit: byte
+      metric_type: gauge
+    - name: fieldB
+      type: integer
+      unit: byte
+      metric_type: gauge
+  `;
+    const metaFieldMapping = {
+      properties: {
+        groupWithMetas: {
+          properties: {
+            fieldA: {
+              type: 'long',
+              meta: {
+                metric_type: 'gauge',
+                unit: 'byte',
+              },
+            },
+            fieldB: {
+              type: 'long',
+              meta: {
+                metric_type: 'gauge',
+                unit: 'byte',
+              },
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(metaFieldLiteralYaml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(JSON.stringify(mappings)).toEqual(JSON.stringify(metaFieldMapping));
   });
 
   it('tests priority and index pattern for data stream without dataset_is_prefix', () => {

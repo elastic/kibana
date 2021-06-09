@@ -159,6 +159,14 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     }
   }, [JSON.stringify(jobIds)]);
 
+  useEffect(() => {
+    return () => {
+      // upon component unmounting
+      // clear any data to prevent next page from rendering old charts
+      explorerService.clearExplorerData();
+    };
+  }, []);
+
   /**
    * TODO get rid of the intermediate state in explorerService.
    * URL state should be the only source of truth for related props.
@@ -169,7 +177,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       explorerService.setFilterData(filterData);
     }
 
-    const { viewByFieldName, viewByFromPage, viewByPerPage } =
+    const { viewByFieldName, viewByFromPage, viewByPerPage, severity } =
       explorerUrlState?.mlExplorerSwimlane ?? {};
 
     if (viewByFieldName !== undefined) {
@@ -182,6 +190,10 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
 
     if (viewByFromPage !== undefined) {
       explorerService.setViewByFromPage(viewByFromPage);
+    }
+
+    if (severity !== undefined) {
+      explorerService.setSwimLaneSeverity(severity);
     }
   }, []);
 
@@ -230,6 +242,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
           swimlaneContainerWidth: explorerState.swimlaneContainerWidth,
           viewByPerPage: explorerState.viewByPerPage,
           viewByFromPage: explorerState.viewByFromPage,
+          swimLaneSeverity: explorerState.swimLaneSeverity,
         }
       : undefined;
 

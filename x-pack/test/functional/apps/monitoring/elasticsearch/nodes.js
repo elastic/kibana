@@ -21,10 +21,13 @@ export default function ({ getService, getPageObjects }) {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
-        await setup('monitoring/singlecluster-three-nodes-shard-relocation', {
-          from: 'Oct 5, 2017 @ 20:28:28.475',
-          to: 'Oct 5, 2017 @ 20:34:38.341',
-        });
+        await setup(
+          'x-pack/test/functional/es_archives/monitoring/singlecluster_three_nodes_shard_relocation',
+          {
+            from: 'Oct 5, 2017 @ 20:28:28.475',
+            to: 'Oct 5, 2017 @ 20:34:38.341',
+          }
+        );
 
         // go to nodes listing
         await overview.clickEsNodes();
@@ -57,7 +60,6 @@ export default function ({ getService, getPageObjects }) {
           expect(rows.length).to.be(3);
 
           const nodesAll = await nodesList.getNodesAll();
-          console.log(JSON.stringify(nodesAll, null, 2));
           const tableData = [
             {
               name: 'whatever-01',
@@ -251,10 +253,13 @@ export default function ({ getService, getPageObjects }) {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
-        await setup('monitoring/singlecluster-three-nodes-shard-relocation', {
-          from: 'Oct 5, 2017 @ 20:31:48.354',
-          to: 'Oct 5, 2017 @ 20:35:12.176',
-        });
+        await setup(
+          'x-pack/test/functional/es_archives/monitoring/singlecluster_three_nodes_shard_relocation',
+          {
+            from: 'Oct 5, 2017 @ 20:31:48.354',
+            to: 'Oct 5, 2017 @ 20:35:12.176',
+          }
+        );
 
         // go to nodes listing
         await overview.clickEsNodes();

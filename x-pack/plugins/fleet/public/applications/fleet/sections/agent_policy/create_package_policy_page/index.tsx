@@ -39,12 +39,11 @@ import {
 } from '../../../hooks';
 import { Loading } from '../../../components';
 import { ConfirmDeployAgentPolicyModal } from '../components';
-import { useIntraAppState } from '../../../hooks/use_intra_app_state';
-import { useUIExtension } from '../../../hooks/use_ui_extension';
-import { ExtensionWrapper } from '../../../components/extension_wrapper';
+import { useIntraAppState, useUIExtension } from '../../../hooks';
+import { ExtensionWrapper } from '../../../components';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { PLUGIN_ID } from '../../../../../../common/constants';
-import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
+import { pkgKeyFromPackageInfo } from '../../../services';
 
 import { CreatePackagePolicyPageLayout } from './components';
 import type { CreatePackagePolicyFrom, PackagePolicyFormState } from './types';
@@ -333,6 +332,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             packagePolicy={packagePolicy}
             updatePackagePolicy={updatePackagePolicy}
             validationResults={validationResults!}
+            submitAttempted={formState === 'INVALID'}
           />
 
           {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}

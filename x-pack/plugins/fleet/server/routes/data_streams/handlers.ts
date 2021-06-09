@@ -6,15 +6,15 @@
  */
 
 import { keyBy, keys, merge } from 'lodash';
-import type { RequestHandler, SavedObjectsClientContract } from 'src/core/server';
+import type { RequestHandler, SavedObjectsBulkGetObject } from 'src/core/server';
 
 import type { DataStream } from '../../types';
-import { KibanaAssetType, KibanaSavedObjectType } from '../../../common';
+import { KibanaSavedObjectType } from '../../../common';
 import type { GetDataStreamsResponse } from '../../../common';
-import { getPackageSavedObjects, getKibanaSavedObject } from '../../services/epm/packages/get';
+import { getPackageSavedObjects } from '../../services/epm/packages/get';
 import { defaultIngestErrorHandler } from '../../errors';
 
-const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*';
+const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*,synthetics-*-*';
 
 interface ESDataStreamInfo {
   name: string;
@@ -33,7 +33,7 @@ interface ESDataStreamInfo {
   };
   status: string;
   template: string;
-  ilm_policy: string;
+  ilm_policy?: string;
   hidden: boolean;
 }
 
@@ -77,6 +77,51 @@ export const getListHandler: RequestHandler = async (context, request, response)
     // Map package SOs
     const packageSavedObjectsByName = keyBy(packageSavedObjects.saved_objects, 'id');
     const packageMetadata: any = {};
+
+    // Get dashboard information for all packages
+    const dashboardIdsByPackageName = packageSavedObjects.saved_objects.reduce<
+      Record<string, string[]>
+    >((allDashboards, pkgSavedObject) => {
+      const dashboards: string[] = [];
+      (pkgSavedObject.attributes?.installed_kibana || []).forEach((o) => {
+        if (o.type === KibanaSavedObjectType.dashboard) {
+          dashboards.push(o.id);
+        }
+      });
+      allDashboards[pkgSavedObject.id] = dashboards;
+      return allDashboards;
+    }, {});
+    const allDashboardSavedObjectsResponse = await context.core.savedObjects.client.bulkGet<{
+      title?: string;
+    }>(
+      Object.values(dashboardIdsByPackageName).reduce<SavedObjectsBulkGetObject[]>(
+        (allDashboards, dashboardIds) => {
+          return allDashboards.concat(
+            dashboardIds.map((id) => ({
+              id,
+              type: KibanaSavedObjectType.dashboard,
+              fields: ['title'],
+            }))
+          );
+        },
+        []
+      )
+    );
+    // Ignore dashboards not found
+    const allDashboardSavedObjects = allDashboardSavedObjectsResponse.saved_objects.filter((so) => {
+      if (so.error) {
+        if (so.error.statusCode === 404) {
+          return false;
+        }
+        throw so.error;
+      }
+      return true;
+    });
+
+    const allDashboardSavedObjectsById = keyBy(
+      allDashboardSavedObjects,
+      (dashboardSavedObject) => dashboardSavedObject.id
+    );
 
     // Query additional information for each data stream
     const dataStreamPromises = dataStreamNames.map(async (dataStreamName) => {
@@ -158,19 +203,23 @@ export const getListHandler: RequestHandler = async (context, request, response)
         // - and we didn't pick the metadata in an earlier iteration of this map()
         if (!packageMetadata[pkgName]) {
           // then pick the dashboards from the package saved object
-          const dashboards =
-            pkgSavedObject.attributes?.installed_kibana?.filter(
-              (o) => o.type === KibanaSavedObjectType.dashboard
-            ) || [];
-          // and then pick the human-readable titles from the dashboard saved objects
-          const enhancedDashboards = await getEnhancedDashboards(
-            context.core.savedObjects.client,
-            dashboards
-          );
+          const packageDashboardIds = dashboardIdsByPackageName[pkgName] || [];
+          const packageDashboards = packageDashboardIds.reduce<
+            Array<{ id: string; title: string }>
+          >((dashboards, dashboardId) => {
+            const dashboard = allDashboardSavedObjectsById[dashboardId];
+            if (dashboard) {
+              dashboards.push({
+                id: dashboard.id,
+                title: dashboard.attributes.title || dashboard.id,
+              });
+            }
+            return dashboards;
+          }, []);
 
           packageMetadata[pkgName] = {
             version: pkgSavedObject.attributes?.version || '',
-            dashboards: enhancedDashboards,
+            dashboards: packageDashboards,
           };
         }
 
@@ -194,22 +243,4 @@ export const getListHandler: RequestHandler = async (context, request, response)
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }
-};
-
-const getEnhancedDashboards = async (
-  savedObjectsClient: SavedObjectsClientContract,
-  dashboards: any[]
-) => {
-  const dashboardsPromises = dashboards.map(async (db) => {
-    const dbSavedObject: any = await getKibanaSavedObject(
-      savedObjectsClient,
-      KibanaAssetType.dashboard,
-      db.id
-    );
-    return {
-      id: db.id,
-      title: dbSavedObject.attributes?.title || db.id,
-    };
-  });
-  return await Promise.all(dashboardsPromises);
 };

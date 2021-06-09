@@ -12,6 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
+  const find = getService('find');
   const inspector = getService('inspector');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -24,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
 
   describe('line charts - split series', function () {
+    let isNewChartsLibraryEnabled = false;
     const initLineChart = async function () {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
@@ -40,7 +42,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.clickGo();
     };
 
-    before(initLineChart);
+    before(async () => {
+      isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled();
+      await PageObjects.visualize.initTests(isNewChartsLibraryEnabled);
+      await initLineChart();
+    });
 
     afterEach(async () => {
       await inspector.close();
@@ -305,7 +311,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should have advanced accordion and json input', async () => {
           await testSubjects.click('advancedParams-1');
-          await testSubjects.existOrFail('advancedParams-1 > codeEditorContainer');
+          await find.byCssSelector('.euiAccordion .react-monaco-editor-container');
         });
       });
 
@@ -336,7 +342,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should have advanced accordion and json input', async () => {
           await testSubjects.click('advancedParams-1');
-          await testSubjects.existOrFail('advancedParams-1 > codeEditorContainer');
+          await find.byCssSelector('.euiAccordion .react-monaco-editor-container');
         });
       });
     });

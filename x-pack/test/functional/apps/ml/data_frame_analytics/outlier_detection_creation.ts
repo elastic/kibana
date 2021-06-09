@@ -6,6 +6,7 @@
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -14,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('outlier detection creation', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/ihp_outlier');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
       await ml.testResources.createIndexPatternIfNeeded('ft_ihp_outlier', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -25,15 +26,23 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.cleanMlIndices();
     });
 
+    const jobId = `ihp_1_${Date.now()}`;
+
     const testDataList = [
       {
         suiteTitle: 'iowa house prices',
         jobType: 'outlier_detection',
-        jobId: `ihp_1_${Date.now()}`,
-        jobDescription: 'This is the job description',
+        jobId,
+        jobDescription: 'Outlier detection job based on ft_ihp_outlier dataset with runtime fields',
         source: 'ft_ihp_outlier',
         get destinationIndex(): string {
-          return `user-${this.jobId}`;
+          return `user-${jobId}`;
+        },
+        runtimeFields: {
+          lowercase_central_air: {
+            type: 'keyword',
+            script: 'emit(params._source.CentralAir.toLowerCase())',
+          },
         },
         modelMemory: '5mb',
         createIndexPattern: true,
@@ -52,25 +61,46 @@ export default function ({ getService }: FtrProviderContext) {
           ],
           scatterplotMatrixColorsWizard: [
             // markers
-            { key: '#52B398', value: 25 },
+            { color: '#52B398', percentage: 15 },
             // grey boilerplate
-            { key: '#6A717D', value: 30 },
+            { color: '#6A717D', percentage: 33 },
           ],
           scatterplotMatrixColorStatsResults: [
             // red markers
-            { key: '#D98071', value: 1 },
+            { color: '#D98071', percentage: 1 },
             // tick/grid/axis, grey markers
-            { key: '#6A717D', value: 30 },
-            { key: '#D3DAE6', value: 8 },
-            { key: '#98A1B3', value: 25 },
+            { color: '#6A717D', percentage: 33 },
+            { color: '#D3DAE6', percentage: 8 },
+            { color: '#98A1B3', percentage: 12 },
             // anti-aliasing
-            { key: '#F5F7FA', value: 27 },
+            { color: '#F5F7FA', percentage: 30 },
+          ],
+          runtimeFieldsEditorContent: [
+            '{',
+            '  "lowercase_central_air": {',
+            '    "type": "keyword",',
           ],
           row: {
             type: 'outlier_detection',
             status: 'stopped',
             progress: '100',
           },
+          rowDetails: {
+            jobDetails: [
+              {
+                section: 'state',
+                expectedEntries: {
+                  id: jobId,
+                  state: 'stopped',
+                  data_counts:
+                    '{"training_docs_count":1460,"test_docs_count":0,"skipped_docs_count":0}',
+                  description:
+                    'Outlier detection job based on ft_ihp_outlier dataset with runtime fields',
+                },
+              },
+              { section: 'progress', expectedEntries: { Phase: '4/4' } },
+            ],
+          } as AnalyticsTableRowDetails,
         },
       },
     ];
@@ -106,6 +136,22 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertJobTypeSelectExists();
           await ml.dataFrameAnalyticsCreation.selectJobType(testData.jobType);
 
+          await ml.testExecution.logTestStep('displays the runtime mappings editor switch');
+          await ml.dataFrameAnalyticsCreation.assertRuntimeMappingSwitchExists();
+
+          await ml.testExecution.logTestStep('enables the runtime mappings editor');
+          await ml.dataFrameAnalyticsCreation.toggleRuntimeMappingsEditorSwitch(true);
+          await ml.dataFrameAnalyticsCreation.assertRuntimeMappingsEditorContent(['']);
+
+          await ml.testExecution.logTestStep('sets runtime mappings');
+          await ml.dataFrameAnalyticsCreation.setRuntimeMappingsEditorContent(
+            JSON.stringify(testData.runtimeFields)
+          );
+          await ml.dataFrameAnalyticsCreation.applyRuntimeMappings();
+          await ml.dataFrameAnalyticsCreation.assertRuntimeMappingsEditorContent(
+            testData.expected.runtimeFieldsEditorContent
+          );
+
           await ml.testExecution.logTestStep('does not display the dependent variable input');
           await ml.dataFrameAnalyticsCreation.assertDependentVariableInputMissing();
 
@@ -125,6 +171,16 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('displays the include fields selection');
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
+
+          await ml.testExecution.logTestStep(
+            'sets the sample size to 10000 for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsCreation.setScatterplotMatrixSampleSizeSelectValue('10000');
+
+          await ml.testExecution.logTestStep(
+            'sets the randomize query switch to true for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsCreation.setScatterplotMatrixRandomizeQueryCheckState(true);
 
           await ml.testExecution.logTestStep('displays the scatterplot matrix');
           await ml.dataFrameAnalyticsCreation.assertScatterplotMatrix(
@@ -209,6 +265,11 @@ export default function ({ getService }: FtrProviderContext) {
             status: testData.expected.row.status,
             progress: testData.expected.row.progress,
           });
+
+          await ml.dataFrameAnalyticsTable.assertAnalyticsRowDetails(
+            testData.jobId,
+            testData.expected.rowDetails
+          );
         });
 
         it('edits the analytics job and displays it correctly in the job list', async () => {
@@ -255,9 +316,23 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
           await ml.dataFrameAnalyticsResults.assertFeatureInfluenceCellNotEmpty();
+
+          await ml.testExecution.logTestStep(
+            'sets the sample size to 10000 for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsResults.setScatterplotMatrixSampleSizeSelectValue('10000');
+
+          await ml.testExecution.logTestStep(
+            'sets the randomize query switch to true for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsResults.setScatterplotMatrixRandomizeQueryCheckState(true);
+
+          await ml.testExecution.logTestStep('displays the scatterplot matrix');
           await ml.dataFrameAnalyticsResults.assertScatterplotMatrix(
             testData.expected.scatterplotMatrixColorStatsResults
           );
+
+          await ml.commonUI.resetAntiAliasing();
         });
 
         it('displays the analytics job in the map view', async () => {

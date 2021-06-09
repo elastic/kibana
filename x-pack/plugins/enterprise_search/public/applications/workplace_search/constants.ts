@@ -9,6 +9,13 @@ import { i18n } from '@kbn/i18n';
 
 import { UPDATE_BUTTON_LABEL, SAVE_BUTTON_LABEL, CANCEL_BUTTON_LABEL } from '../shared/constants';
 
+export const WORKPLACE_SEARCH_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.title',
+  {
+    defaultMessage: 'Workplace Search',
+  }
+);
+
 export const NAV = {
   OVERVIEW: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.overview', {
     defaultMessage: 'Overview',
@@ -33,7 +40,7 @@ export const NAV = {
     defaultMessage: 'Content',
   }),
   ROLE_MAPPINGS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.roleMappings', {
-    defaultMessage: 'Role Mappings',
+    defaultMessage: 'Users & roles',
   }),
   SECURITY: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.security', {
     defaultMessage: 'Security',
@@ -73,6 +80,30 @@ export const NAV = {
   ),
   SEARCH: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.searchApplication', {
     defaultMessage: 'Go to search application',
+  }),
+};
+
+export const ACCOUNT_NAV = {
+  SOURCES: i18n.translate('xpack.enterpriseSearch.workplaceSearch.accountNav.sources.link', {
+    defaultMessage: 'Content sources',
+  }),
+  ORG_DASHBOARD: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.accountNav.orgDashboard.link',
+    {
+      defaultMessage: 'Go to organizational dashboard',
+    }
+  ),
+  SEARCH: i18n.translate('xpack.enterpriseSearch.workplaceSearch.accountNav.search.link', {
+    defaultMessage: 'Search',
+  }),
+  ACCOUNT: i18n.translate('xpack.enterpriseSearch.workplaceSearch.accountNav.account.link', {
+    defaultMessage: 'My account',
+  }),
+  SETTINGS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.accountNav.settings.link', {
+    defaultMessage: 'Account settings',
+  }),
+  LOGOUT: i18n.translate('xpack.enterpriseSearch.workplaceSearch.accountNav.logout.link', {
+    defaultMessage: 'Logout',
   }),
 };
 
@@ -718,5 +749,16 @@ export const REMOVE_BUTTON = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.remove.button',
   {
     defaultMessage: 'Remove',
+  }
+);
+
+export const COPY_TEXT = i18n.translate('xpack.enterpriseSearch.workplaceSearch.copyText', {
+  defaultMessage: 'Copy',
+});
+
+export const STATUS_POPOVER_TOOLTIP = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.statusPopoverTooltip',
+  {
+    defaultMessage: 'Click to view info',
   }
 );

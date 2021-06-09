@@ -49,6 +49,7 @@ export const renderApp = (
     history: params.history,
     navigateToUrl: core.application.navigateToUrl,
     setBreadcrumbs: core.chrome.setBreadcrumbs,
+    setChromeIsVisible: core.chrome.setIsVisible,
     setDocTitle: core.chrome.docTitle.change,
     renderHeaderActions: (HeaderActions) =>
       params.setHeaderActionMenu((el) => renderHeaderActions(HeaderActions, store, el)),

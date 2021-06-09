@@ -256,14 +256,18 @@ export interface RejectedPromiseState<ResolvedValue, RejectedValue> {
   value: RejectedValue;
 }
 
-type SettledPromise<ResolvedValue, RejectedValue> =
+export type SettledPromiseState<ResolvedValue, RejectedValue> =
   | ResolvedPromiseState<ResolvedValue>
   | RejectedPromiseState<ResolvedValue, RejectedValue>;
 
-type PromiseState<ResolvedValue, RejectedValue = unknown> =
+export type PromiseState<ResolvedValue, RejectedValue = unknown> =
   | UninitializedPromiseState
   | PendingPromiseState<ResolvedValue>
-  | SettledPromise<ResolvedValue, RejectedValue>;
+  | SettledPromiseState<ResolvedValue, RejectedValue>;
+
+export const isRejectedPromiseState = (
+  promiseState: PromiseState<any, any>
+): promiseState is RejectedPromiseState<any, any> => promiseState.state === 'rejected';
 
 interface CancelablePromise<ResolvedValue> {
   // reject the promise prematurely with a CanceledPromiseError

@@ -12,22 +12,21 @@ import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import { NoteSavedObject } from '../../../../../common/types/timeline/note';
 import { PinnedEventSavedObject } from '../../../../../common/types/timeline/pinned_event';
 import {
+  AllTimelinesResponse,
+  ExportTimelineNotFoundError,
+  PageInfoTimeline,
+  ResponseTimelines,
+  ResponseFavoriteTimeline,
+  ResponseTimeline,
   SavedTimeline,
+  SortTimeline,
   TimelineSavedObject,
   TimelineTypeLiteralWithNull,
-  ExportTimelineNotFoundError,
   TimelineStatusLiteralWithNull,
-} from '../../../../../common/types/timeline';
-import {
-  ResponseTimeline,
-  PageInfoTimeline,
-  SortTimeline,
-  ResponseFavoriteTimeline,
-  TimelineResult,
   TimelineType,
   TimelineStatus,
-  Maybe,
-} from '../../../../graphql/types';
+  TimelineResult,
+} from '../../../../../common/types/timeline';
 import { FrameworkRequest } from '../../../framework';
 import * as note from '../notes/saved_object';
 import * as pinnedEvent from '../pinned_events';
@@ -36,21 +35,9 @@ import { pickSavedTimeline } from './pick_saved_timeline';
 import { timelineSavedObjectType } from '../../saved_object_mappings/';
 import { draftTimelineDefaults } from '../../utils/default_timeline';
 import { AuthenticatedUser } from '../../../../../../security/server';
+import { Maybe } from '../../../../../common/search_strategy';
 export { pickSavedTimeline } from './pick_saved_timeline';
 export { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
-
-interface ResponseTimelines {
-  timeline: TimelineSavedObject[];
-  totalCount: number;
-}
-
-export interface AllTimelinesResponse extends ResponseTimelines {
-  defaultTimelineCount: number;
-  templateTimelineCount: number;
-  elasticTemplateTimelineCount: number;
-  customTemplateTimelineCount: number;
-  favoriteCount: number;
-}
 
 export interface ResponseTemplateTimeline {
   code?: Maybe<number>;

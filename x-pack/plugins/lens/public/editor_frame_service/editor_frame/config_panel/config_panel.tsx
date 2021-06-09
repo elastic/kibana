@@ -63,7 +63,8 @@ export function LayerPanels(
     () => (datasourceId: string, newState: unknown) => {
       dispatch({
         type: 'UPDATE_DATASOURCE_STATE',
-        updater: () => newState,
+        updater: (prevState: unknown) =>
+          typeof newState === 'function' ? newState(prevState) : newState,
         datasourceId,
         clearStagedPreview: false,
       });
@@ -76,12 +77,16 @@ export function LayerPanels(
         type: 'UPDATE_STATE',
         subType: 'UPDATE_ALL_STATES',
         updater: (prevState) => {
+          const updatedDatasourceState =
+            typeof newDatasourceState === 'function'
+              ? newDatasourceState(prevState.datasourceStates[datasourceId].state)
+              : newDatasourceState;
           return {
             ...prevState,
             datasourceStates: {
               ...prevState.datasourceStates,
               [datasourceId]: {
-                state: newDatasourceState,
+                state: updatedDatasourceState,
                 isLoading: false,
               },
             },
@@ -134,7 +139,7 @@ export function LayerPanels(
         ) : null
       )}
       {activeVisualization.appendLayer && visualizationState && (
-        <EuiFlexItem grow={true}>
+        <EuiFlexItem grow={true} className="lnsConfigPanel__addLayerBtnWrapper">
           <EuiToolTip
             className="eui-fullWidth"
             title={i18n.translate('xpack.lens.xyChart.addLayer', {
@@ -154,6 +159,8 @@ export function LayerPanels(
               aria-label={i18n.translate('xpack.lens.xyChart.addLayerButton', {
                 defaultMessage: 'Add layer',
               })}
+              fill
+              color="text"
               onClick={() => {
                 const id = generateId();
                 dispatch({

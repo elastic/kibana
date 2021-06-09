@@ -23,8 +23,6 @@ Select the appropriate *Scaling* option for your use case.
 * *Limit results to 10000.* The layer displays features from the first `index.max_result_window` documents.
 Results exceeding `index.max_result_window` are not displayed.
 
-* *Show top hits per entity.* The layer displays the <<maps-top-hits-aggregation, most relevant documents per entity>>.
-
 * *Show clusters when results exceed 10000.* When results exceed `index.max_result_window`, the layer uses {ref}/search-aggregations-bucket-geotilegrid-aggregation.html[GeoTile grid aggregation] to group your documents into clusters and displays metrics for each cluster. When results are less then `index.max_result_window`, the layer displays features from individual documents.
 
 * *Use vector tiles.* Vector tiles partition your map into 6 to 8 tiles.
@@ -35,6 +33,9 @@ Tiles exceeding `index.max_result_window` have a visual indicator when there are
 
 *Point to point*:: Aggregated data paths between the source and destination.
 The index must contain at least 2 fields mapped as {ref}/geo-point.html[geo_point], source and destination.
+
+*Top hits per entity*:: The layer displays the <<maps-top-hits-aggregation, most relevant documents per entity>>.
+The index must contain at least one field mapped as {ref}/geo-point.html[geo_point] or {ref}/geo-shape.html[geo_shape].
 
 *Tracks*:: Create lines from points.
 The index must contain at least one field mapped as {ref}/geo-point.html[geo_point].

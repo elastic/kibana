@@ -7,7 +7,7 @@
 
 import './dimension_container.scss';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   EuiFlyoutHeader,
   EuiFlyoutFooter,
@@ -18,6 +18,8 @@ import {
   EuiFlexItem,
   EuiFocusTrap,
   EuiOutsideClickDetector,
+  EuiWindowEvent,
+  keys,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -27,86 +29,111 @@ export function DimensionContainer({
   groupLabel,
   handleClose,
   panel,
+  panelRef,
 }: {
   isOpen: boolean;
   handleClose: () => void;
   panel: React.ReactElement;
   groupLabel: string;
+  panelRef: (el: HTMLDivElement) => void;
 }) {
   const [focusTrapIsEnabled, setFocusTrapIsEnabled] = useState(false);
 
-  const closeFlyout = () => {
+  const closeFlyout = useCallback(() => {
     handleClose();
     setFocusTrapIsEnabled(false);
-  };
+  }, [handleClose]);
+
+  const closeOnEscape = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === keys.ESCAPE) {
+        event.preventDefault();
+        closeFlyout();
+      }
+    },
+    [closeFlyout]
+  );
 
   useEffect(() => {
     if (isOpen) {
-      // without setTimeout here the flyout pushes content when animating
-      setTimeout(() => {
-        setFocusTrapIsEnabled(true);
-      }, 255);
+      document.body.classList.add('lnsBody--overflowHidden');
+    } else {
+      document.body.classList.remove('lnsBody--overflowHidden');
     }
-  }, [isOpen]);
+    return () => {
+      document.body.classList.remove('lnsBody--overflowHidden');
+    };
+  });
 
   return isOpen ? (
-    <EuiFocusTrap disabled={!focusTrapIsEnabled} clickOutsideDisables={true}>
-      <EuiOutsideClickDetector onOutsideClick={closeFlyout} isDisabled={!isOpen}>
-        <div
-          role="dialog"
-          aria-labelledby="lnsDimensionContainerTitle"
-          className="lnsDimensionContainer"
-        >
-          <EuiFlyoutHeader hasBorder className="lnsDimensionContainer__header">
-            <EuiFlexGroup
-              gutterSize="none"
-              alignItems="center"
-              className="lnsDimensionContainer__headerLink"
-              onClick={closeFlyout}
-            >
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  color="text"
-                  data-test-subj="lns-indexPattern-dimensionContainerBack"
-                  className="lnsDimensionContainer__backIcon"
-                  onClick={closeFlyout}
-                  iconType="sortLeft"
-                  aria-label={i18n.translate('xpack.lens.dimensionContainer.closeConfiguration', {
-                    defaultMessage: 'Close configuration',
-                  })}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={true}>
-                <EuiTitle size="xs">
-                  <h2
-                    id="lnsDimensionContainerTitle"
-                    className="lnsDimensionContainer__headerTitle"
-                  >
-                    <strong>
-                      {i18n.translate('xpack.lens.configure.configurePanelTitle', {
-                        defaultMessage: '{groupLabel} configuration',
-                        values: {
-                          groupLabel,
-                        },
-                      })}
-                    </strong>
-                  </h2>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutHeader>
-          <EuiFlexItem className="eui-yScrollWithShadows" grow={1}>
-            {panel}
-          </EuiFlexItem>
-          <EuiFlyoutFooter className="lnsDimensionContainer__footer">
-            <EuiButtonEmpty flush="left" size="s" iconType="cross" onClick={closeFlyout}>
-              {i18n.translate('xpack.lens.dimensionContainer.close', {
-                defaultMessage: 'Close',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlyoutFooter>
-        </div>
-      </EuiOutsideClickDetector>
-    </EuiFocusTrap>
+    <div ref={panelRef}>
+      <EuiFocusTrap disabled={!focusTrapIsEnabled} clickOutsideDisables={true}>
+        <EuiWindowEvent event="keydown" handler={closeOnEscape} />
+        <EuiOutsideClickDetector onOutsideClick={closeFlyout} isDisabled={!isOpen}>
+          <div
+            role="dialog"
+            aria-labelledby="lnsDimensionContainerTitle"
+            className="lnsDimensionContainer euiFlyout"
+            onAnimationEnd={() => {
+              if (isOpen) {
+                // EuiFocusTrap interferes with animating elements with absolute position:
+                // running this onAnimationEnd, otherwise the flyout pushes content when animating
+                setFocusTrapIsEnabled(true);
+              }
+            }}
+          >
+            <EuiFlyoutHeader hasBorder className="lnsDimensionContainer__header">
+              <EuiFlexGroup
+                gutterSize="none"
+                alignItems="center"
+                className="lnsDimensionContainer__headerLink"
+                onClick={closeFlyout}
+                responsive={false}
+              >
+                <EuiFlexItem grow={true}>
+                  <EuiTitle size="xs">
+                    <h2
+                      id="lnsDimensionContainerTitle"
+                      className="lnsDimensionContainer__headerTitle"
+                    >
+                      <strong>
+                        {i18n.translate('xpack.lens.configure.configurePanelTitle', {
+                          defaultMessage: '{groupLabel} configuration',
+                          values: {
+                            groupLabel,
+                          },
+                        })}
+                      </strong>
+                    </h2>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    color="text"
+                    data-test-subj="lns-indexPattern-dimensionContainerBack"
+                    className="lnsDimensionContainer__backIcon"
+                    onClick={closeFlyout}
+                    iconType="cross"
+                    aria-label={i18n.translate('xpack.lens.dimensionContainer.closeConfiguration', {
+                      defaultMessage: 'Close configuration',
+                    })}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlyoutHeader>
+            <EuiFlexItem className="eui-yScrollWithShadows" grow={1}>
+              {panel}
+            </EuiFlexItem>
+            <EuiFlyoutFooter className="lnsDimensionContainer__footer">
+              <EuiButtonEmpty flush="left" size="s" iconType="cross" onClick={closeFlyout}>
+                {i18n.translate('xpack.lens.dimensionContainer.close', {
+                  defaultMessage: 'Close',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlyoutFooter>
+          </div>
+        </EuiOutsideClickDetector>
+      </EuiFocusTrap>
+    </div>
   ) : null;
 }

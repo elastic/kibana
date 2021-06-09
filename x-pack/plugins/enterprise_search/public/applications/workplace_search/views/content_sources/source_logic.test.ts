@@ -10,12 +10,12 @@ import {
   mockFlashMessageHelpers,
   mockHttpValues,
   mockKibanaValues,
-  expectedAsyncError,
-} from '../../../__mocks__';
+} from '../../../__mocks__/kea_logic';
 import { fullContentSources, contentItems } from '../../__mocks__/content_sources.mock';
 import { meta } from '../../__mocks__/meta.mock';
 
 import { DEFAULT_META } from '../../../shared/constants';
+import { expectedAsyncError } from '../../../test_helpers';
 
 jest.mock('../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
@@ -33,6 +33,7 @@ describe('SourceLogic', () => {
     flashAPIErrors,
     setSuccessMessage,
     setQueuedSuccessMessage,
+    setErrorMessage,
   } = mockFlashMessageHelpers;
   const { navigateToUrl } = mockKibanaValues;
   const { mount, getListeners } = new LogicMounter(SourceLogic);
@@ -204,6 +205,19 @@ describe('SourceLogic', () => {
 
         expect(navigateToUrl).toHaveBeenCalledWith(NOT_FOUND_PATH);
       });
+
+      it('renders error messages passed in success response from server', async () => {
+        const errors = ['ERROR'];
+        const promise = Promise.resolve({
+          ...contentSource,
+          errors,
+        });
+        http.get.mockReturnValue(promise);
+        SourceLogic.actions.initializeSource(contentSource.id);
+        await promise;
+
+        expect(setErrorMessage).toHaveBeenCalledWith(errors);
+      });
     });
 
     describe('initializeFederatedSummary', () => {
@@ -214,7 +228,7 @@ describe('SourceLogic', () => {
         SourceLogic.actions.initializeFederatedSummary(contentSource.id);
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/org/sources/123/federated_summary'
+          '/api/workplace_search/account/sources/123/federated_summary'
         );
         await promise;
         expect(onUpdateSummarySpy).toHaveBeenCalledWith(contentSource.summary);

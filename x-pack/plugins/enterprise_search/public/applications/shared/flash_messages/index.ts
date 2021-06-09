@@ -14,5 +14,7 @@ export {
   setErrorMessage,
   setQueuedSuccessMessage,
   setQueuedErrorMessage,
+  flashSuccessToast,
+  flashErrorToast,
   clearFlashMessages,
 } from './set_message_helpers';

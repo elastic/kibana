@@ -13,8 +13,8 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "GCP Virtual Private Cloud Route Creation",
-  "note": "The GCP Filebeat module must be enabled to use this rule.",
-  "query": "event.dataset:(googlecloud.audit or gcp.audit) and event.action:(v*.compute.routes.insert or beta.compute.routes.insert)",
+  "note": "## Config\n\nThe GCP Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:(googlecloud.audit or gcp.audit) and event.action:(v*.compute.routes.insert or \"beta.compute.routes.insert\")",
   "references": [
     "https://cloud.google.com/vpc/docs/routes",
     "https://cloud.google.com/vpc/docs/using-routes"
@@ -32,5 +32,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 4
+  "version": 5
 }

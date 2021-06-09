@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 
 import { Inspect, Maybe, TimerangeInput } from '../../../common';
@@ -21,4 +22,8 @@ export interface HostDetailsRequestOptions extends Partial<RequestOptionsPaginat
   skip?: boolean;
   timerange: TimerangeInput;
   inspect?: Maybe<Inspect>;
+}
+
+export interface AggregationRequest {
+  [aggField: string]: estypes.AggregationsAggregationContainer;
 }

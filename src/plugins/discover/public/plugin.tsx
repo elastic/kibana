@@ -62,6 +62,7 @@ import {
 import { SearchEmbeddableFactory } from './application/embeddable';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { replaceUrlHashQuery } from '../../kibana_utils/public/';
+import { IndexPatternFieldEditorStart } from '../../../plugins/index_pattern_field_editor/public';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -133,6 +134,7 @@ export interface DiscoverStartPlugins {
   inspector: InspectorPublicPluginStart;
   savedObjects: SavedObjectsStart;
   usageCollection?: UsageCollectionSetup;
+  indexPatternFieldEditor: IndexPatternFieldEditorStart;
 }
 
 const innerAngularName = 'app/discover';
@@ -162,7 +164,10 @@ export class DiscoverPlugin
   public initializeInnerAngular?: () => void;
   public initializeServices?: () => Promise<{ core: CoreStart; plugins: DiscoverStartPlugins }>;
 
-  setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
+  setup(
+    core: CoreSetup<DiscoverStartPlugins, DiscoverStart>,
+    plugins: DiscoverSetupPlugins
+  ): DiscoverSetup {
     const baseUrl = core.http.basePath.prepend('/app/discover');
 
     if (plugins.share) {
@@ -188,7 +193,8 @@ export class DiscoverPlugin
         defaultMessage: 'JSON',
       }),
       order: 20,
-      component: ({ hit }) => <JsonCodeEditor json={hit} hasLineNumbers />,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      component: ({ hit }) => <JsonCodeEditor json={hit as any} hasLineNumbers />,
     });
 
     const {
@@ -323,7 +329,7 @@ export class DiscoverPlugin
         return;
       }
       // this is used by application mount and tests
-      const { getInnerAngularModule } = await import('./get_inner_angular');
+      const { getInnerAngularModule } = await import('./application/angular/get_inner_angular');
       const module = getInnerAngularModule(
         innerAngularName,
         core,
@@ -394,7 +400,9 @@ export class DiscoverPlugin
       }
       const { core, plugins } = await this.initializeServices();
       getServices().kibanaLegacy.loadFontAwesome();
-      const { getInnerAngularModuleEmbeddable } = await import('./get_inner_angular');
+      const { getInnerAngularModuleEmbeddable } = await import(
+        './application/angular/get_inner_angular'
+      );
       getInnerAngularModuleEmbeddable(embeddableAngularName, core, plugins);
       const mountpoint = document.createElement('div');
       this.embeddableInjector = angular.bootstrap(mountpoint, [embeddableAngularName]);

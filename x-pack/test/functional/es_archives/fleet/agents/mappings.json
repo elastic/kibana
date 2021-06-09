@@ -51,7 +51,6 @@
           "canvas-workpad": "b0a1706d356228dbdcb4a17e6b9eb231",
           "alert": "7b44fba6773e37c806ce290ea9b7024e",
           "siem-detection-engine-rule-status": "ae783f41c6937db6b7a2ef5c93a9e9b0",
-          "map": "23d7aa4a720d4938ccde3983f87bd58d",
           "uptime-dynamic-settings": "fcdb453a30092f022f2642db29523d80",
           "cases": "32aa96a6d3855ddda53010ae2048ac22",
           "apm-telemetry": "3525d7c22c42bc80f5e6e9cb3f2b26a2",
@@ -2128,7 +2127,8 @@
         "map": {
           "properties": {
             "bounds": {
-              "type": "geo_shape"
+              "dynamic": false,
+              "properties": {}
             },
             "description": {
               "type": "text"
@@ -3089,7 +3089,7 @@
       ".fleet-actions": {
       }
     },
-    "index": ".fleet-actions_1",
+    "index": ".fleet-actions-7",
     "mappings": {
       "_meta": {
         "migrationHash": "6527beea5a4a2f33acb599585ed4710442ece7f2"
@@ -3136,7 +3136,7 @@
       ".fleet-agents": {
       }
     },
-    "index": ".fleet-agents_1",
+    "index": ".fleet-agent-7",
     "mappings": {
       "_meta": {
         "migrationHash": "87cab95ac988d78a78d0d66bbf05361b65dcbacf"
@@ -3373,7 +3373,7 @@
       ".fleet-enrollment-api-keys": {
       }
     },
-    "index": ".fleet-enrollment-api-keys_1",
+    "index": ".fleet-enrollment-api-keys-7",
     "mappings": {
       "_meta": {
         "migrationHash": "06bef724726f3bea9f474a09be0a7f7881c28d4a"
@@ -3422,7 +3422,7 @@
       ".fleet-policies": {
       }
     },
-    "index": ".fleet-policies_1",
+    "index": ".fleet-policies-7",
     "mappings": {
       "_meta": {
         "migrationHash": "c2c2a49b19562942fa7c1ff1537e66e751cdb4fa"
@@ -3466,7 +3466,7 @@
       ".fleet-servers": {
       }
     },
-    "index": ".fleet-servers_1",
+    "index": ".fleet-servers-7",
     "mappings": {
       "_meta": {
         "migrationHash": "e2782448c7235ec9af66ca7997e867d715ac379c"

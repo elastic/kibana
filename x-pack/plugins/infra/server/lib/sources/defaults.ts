@@ -16,7 +16,10 @@ export const defaultSourceConfiguration: InfraSourceConfiguration = {
   name: 'Default',
   description: '',
   metricAlias: METRICS_INDEX_PATTERN,
-  logAlias: LOGS_INDEX_PATTERN,
+  logIndices: {
+    type: 'index_name',
+    indexName: LOGS_INDEX_PATTERN,
+  },
   fields: {
     container: 'container.id',
     host: 'host.name',

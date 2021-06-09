@@ -34,7 +34,7 @@ import {
 } from '../../../../../observability/public';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { useLicenseContext } from '../../../context/license/use_license_context';
-import { LicensePrompt } from '../../shared/LicensePrompt';
+import { LicensePrompt } from '../../shared/license_prompt';
 import { IUrlParams } from '../../../context/url_params_context/types';
 
 const latencyTab = {

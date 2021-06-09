@@ -33,10 +33,11 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
   const { notifications } = useStartServices();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isSingleAgent = Array.isArray(agents) && agents.length === 1;
+  const isAllAgents = agents === '';
   async function onSubmit() {
     try {
       setIsSubmitting(true);
-      const { error } = isSingleAgent
+      const { data, error } = isSingleAgent
         ? await sendPostAgentUpgrade((agents[0] as Agent).id, {
             version,
           })
@@ -47,22 +48,63 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
       if (error) {
         throw error;
       }
+
+      const counts = Object.entries(data || {}).reduce(
+        (acc, [agentId, result]) => {
+          ++acc.total;
+          ++acc[result.success ? 'success' : 'error'];
+          return acc;
+        },
+        {
+          total: 0,
+          success: 0,
+          error: 0,
+        }
+      );
       setIsSubmitting(false);
       const successMessage = isSingleAgent
         ? i18n.translate('xpack.fleet.upgradeAgents.successSingleNotificationTitle', {
-            defaultMessage: 'Upgrading agent',
+            defaultMessage: 'Upgraded {count} agent',
+            values: { count: 1 },
           })
         : i18n.translate('xpack.fleet.upgradeAgents.successMultiNotificationTitle', {
-            defaultMessage: 'Upgrading agents',
+            defaultMessage:
+              'Upgraded {isMixed, select, true {{success} of {total}} other {{isAllAgents, select, true {all selected} other {{success}} }}} agents',
+            values: {
+              isMixed: counts.success !== counts.total,
+              success: counts.success,
+              total: counts.total,
+              isAllAgents,
+            },
           });
-      notifications.toasts.addSuccess(successMessage);
+      if (counts.success === counts.total) {
+        notifications.toasts.addSuccess(successMessage);
+      } else if (counts.error === counts.total) {
+        notifications.toasts.addDanger(
+          i18n.translate('xpack.fleet.upgradeAgents.bulkResultAllErrorsNotificationTitle', {
+            defaultMessage:
+              'Error upgrading {count, plural, one {agent} other {{count} agents} =true {all selected agents}}',
+            values: { count: isAllAgents || agentCount },
+          })
+        );
+      } else {
+        notifications.toasts.addWarning({
+          title: successMessage,
+          text: i18n.translate('xpack.fleet.upgradeAgents.bulkResultErrorResultsSummary', {
+            defaultMessage:
+              '{count} {count, plural, one {agent was} other {agents were}} not successful',
+            values: { count: counts.error },
+          }),
+        });
+      }
       onClose();
     } catch (error) {
       setIsSubmitting(false);
       notifications.toasts.addError(error, {
         title: i18n.translate('xpack.fleet.upgradeAgents.fatalErrorNotificationTitle', {
-          defaultMessage: 'Error upgrading {count, plural, one {agent} other {agents}}',
-          values: { count: agentCount },
+          defaultMessage:
+            'Error upgrading {count, plural, one {agent} other {{count} agents} =true {all selected agents}}',
+          values: { count: isAllAgents || agentCount },
         }),
       });
     }
@@ -75,19 +117,20 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
           <EuiFlexItem grow={false}>
             {isSingleAgent ? (
               <FormattedMessage
-                id="xpack.fleet.upgradeAgents.deleteSingleTitle"
-                defaultMessage="Upgrade agent?"
+                id="xpack.fleet.upgradeAgents.upgradeSingleTitle"
+                defaultMessage="Upgrade agent to latest version"
               />
             ) : (
               <FormattedMessage
-                id="xpack.fleet.upgradeAgents.deleteMultipleTitle"
-                defaultMessage="Upgrade {count} agents?"
-                values={{ count: agentCount }}
+                id="xpack.fleet.upgradeAgents.upgradeMultipleTitle"
+                defaultMessage="Upgrade {count, plural, one {agent} other {{count} agents} =true {all selected agents}} to latest version"
+                values={{ count: isAllAgents || agentCount }}
               />
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiBetaBadge
+              iconType="beaker"
               label={
                 <FormattedMessage
                   id="xpack.fleet.upgradeAgents.experimentalLabel"
@@ -122,8 +165,8 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
         ) : (
           <FormattedMessage
             id="xpack.fleet.upgradeAgents.confirmMultipleButtonLabel"
-            defaultMessage="Upgrade {count} agents"
-            values={{ count: agentCount }}
+            defaultMessage="Upgrade {count, plural, one {agent} other {{count} agents} =true {all selected agents}}"
+            values={{ count: isAllAgents || agentCount }}
           />
         )
       }
@@ -132,7 +175,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
         {isSingleAgent ? (
           <FormattedMessage
             id="xpack.fleet.upgradeAgents.upgradeSingleDescription"
-            defaultMessage="This action upgrades the agent running on '{hostName}' to version {version}. You can't undo this upgrade."
+            defaultMessage="This action will upgrade the agent running on '{hostName}' to version {version}. This action can not be undone. Are you sure you wish to continue?"
             values={{
               hostName: ((agents[0] as Agent).local_metadata.host as any).hostname,
               version,
@@ -141,7 +184,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
         ) : (
           <FormattedMessage
             id="xpack.fleet.upgradeAgents.upgradeMultipleDescription"
-            defaultMessage="This action upgrades multiple agents to version {version}. You can't undo this upgrade."
+            defaultMessage="This action will upgrade multiple agents to version {version}. This action can not be undone. Are you sure you wish to continue?"
             values={{ version }}
           />
         )}

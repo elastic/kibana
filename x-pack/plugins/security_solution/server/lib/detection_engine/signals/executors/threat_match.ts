@@ -7,19 +7,20 @@
 
 import { SavedObject } from 'src/core/types';
 import { Logger } from 'src/core/server';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
 } from '../../../../../../alerting/server';
 import { ListClient } from '../../../../../../lists/server';
-import { ExceptionListItemSchema } from '../../../../../common/shared_imports';
 import { RefreshTypes } from '../../types';
 import { getInputIndex } from '../get_input_output_index';
-import { RuleRangeTuple, ThreatRuleAttributes } from '../types';
+import { RuleRangeTuple, AlertAttributes } from '../types';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import { createThreatSignals } from '../threat_mapping/create_threat_signals';
+import { ThreatRuleParams } from '../../schemas/rule_schemas';
 
 export const threatMatchExecutor = async ({
   rule,
@@ -34,7 +35,7 @@ export const threatMatchExecutor = async ({
   eventsTelemetry,
   buildRuleMessage,
 }: {
-  rule: SavedObject<ThreatRuleAttributes>;
+  rule: SavedObject<AlertAttributes<ThreatRuleParams>>;
   tuples: RuleRangeTuple[];
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];
@@ -56,7 +57,6 @@ export const threatMatchExecutor = async ({
     type: ruleParams.type,
     filters: ruleParams.filters ?? [],
     language: ruleParams.language,
-    name: rule.attributes.name,
     savedId: ruleParams.savedId,
     services,
     exceptionItems,
@@ -65,18 +65,9 @@ export const threatMatchExecutor = async ({
     eventsTelemetry,
     alertId: rule.id,
     outputIndex: ruleParams.outputIndex,
-    params: ruleParams,
+    ruleSO: rule,
     searchAfterSize,
-    actions: rule.attributes.actions,
-    createdBy: rule.attributes.createdBy,
-    createdAt: rule.attributes.createdAt,
-    updatedBy: rule.attributes.updatedBy,
-    interval: rule.attributes.schedule.interval,
-    updatedAt: rule.updated_at ?? '',
-    enabled: rule.attributes.enabled,
     refresh,
-    tags: rule.attributes.tags,
-    throttle: rule.attributes.throttle,
     threatFilters: ruleParams.threatFilters ?? [],
     threatQuery: ruleParams.threatQuery,
     threatLanguage: ruleParams.threatLanguage,

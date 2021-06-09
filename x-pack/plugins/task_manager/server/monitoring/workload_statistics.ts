@@ -86,7 +86,6 @@ export interface WorkloadAggregation {
 
 // The type of a bucket in the scheduleDensity range aggregation
 type ScheduleDensityResult = AggregationResultOf<
-  // @ts-expect-error AggregationRange reqires from: number
   WorkloadAggregation['aggs']['idleTasks']['aggs']['scheduleDensity'],
   {}
 >['buckets'][0];
@@ -116,7 +115,7 @@ export function createWorkloadAggregator(
       taskStore.aggregate({
         aggs: {
           taskType: {
-            terms: { field: 'task.taskType' },
+            terms: { size: 100, field: 'task.taskType' },
             aggs: {
               status: {
                 terms: { field: 'task.status' },
@@ -137,9 +136,7 @@ export function createWorkloadAggregator(
                   field: 'task.runAt',
                   ranges: [
                     {
-                      // @ts-expect-error @elastic/elasticsearch The `AggregationRange` type only supports `double` for `from` and `to` but it can be a string too for time based ranges
                       from: `now`,
-                      // @ts-expect-error @elastic/elasticsearch The `AggregationRange` type only supports `double` for `from` and `to` but it can be a string too for time based ranges
                       to: `now+${asInterval(scheduleDensityBuckets * pollInterval)}`,
                     },
                   ],
@@ -355,7 +352,7 @@ export function summarizeWorkloadStat(
 }
 
 function hasAggregations(
-  aggregations?: Record<string, estypes.Aggregate>
+  aggregations?: Record<string, estypes.AggregationsAggregate>
 ): aggregations is WorkloadAggregationResponse {
   return !!(
     aggregations?.taskType &&
@@ -368,9 +365,9 @@ export interface WorkloadAggregationResponse {
   taskType: TaskTypeAggregation;
   schedule: ScheduleAggregation;
   idleTasks: IdleTasksAggregation;
-  [otherAggs: string]: estypes.Aggregate;
+  [otherAggs: string]: estypes.AggregationsAggregate;
 }
-export interface TaskTypeAggregation extends estypes.FiltersAggregate {
+export interface TaskTypeAggregation extends estypes.AggregationsFiltersAggregate {
   buckets: Array<{
     doc_count: number;
     key: string | number;
@@ -386,7 +383,7 @@ export interface TaskTypeAggregation extends estypes.FiltersAggregate {
   doc_count_error_upper_bound?: number | undefined;
   sum_other_doc_count?: number | undefined;
 }
-export interface ScheduleAggregation extends estypes.FiltersAggregate {
+export interface ScheduleAggregation extends estypes.AggregationsFiltersAggregate {
   buckets: Array<{
     doc_count: number;
     key: string | number;
@@ -411,7 +408,7 @@ export type ScheduleDensityHistogram = DateRangeBucket & {
     >;
   };
 };
-export interface IdleTasksAggregation extends estypes.FiltersAggregate {
+export interface IdleTasksAggregation extends estypes.AggregationsFiltersAggregate {
   doc_count: number;
   scheduleDensity: {
     buckets: ScheduleDensityHistogram[];

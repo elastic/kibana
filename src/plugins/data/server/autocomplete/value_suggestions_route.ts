@@ -8,7 +8,7 @@
 
 import { get, map } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import { IRouter, SharedGlobalConfig } from 'kibana/server';
+import { IRouter } from 'kibana/server';
 
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -16,11 +16,9 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { IFieldType } from '../index';
 import { findIndexPatternById, getFieldByName } from '../index_patterns';
 import { getRequestAbortedSignal } from '../lib';
+import { ConfigSchema } from '../../config';
 
-export function registerValueSuggestionsRoute(
-  router: IRouter,
-  config$: Observable<SharedGlobalConfig>
-) {
+export function registerValueSuggestionsRoute(router: IRouter, config$: Observable<ConfigSchema>) {
   router.post(
     {
       path: '/api/kibana/suggestions/values/{index}',
@@ -36,6 +34,7 @@ export function registerValueSuggestionsRoute(
             field: schema.string(),
             query: schema.string(),
             filters: schema.maybe(schema.any()),
+            fieldMeta: schema.maybe(schema.any()),
           },
           { unknowns: 'allow' }
         ),
@@ -43,19 +42,24 @@ export function registerValueSuggestionsRoute(
     },
     async (context, request, response) => {
       const config = await config$.pipe(first()).toPromise();
-      const { field: fieldName, query, filters } = request.body;
+      const { field: fieldName, query, filters, fieldMeta } = request.body;
       const { index } = request.params;
       const { client } = context.core.elasticsearch.legacy;
       const signal = getRequestAbortedSignal(request.events.aborted$);
 
       const autocompleteSearchOptions = {
-        timeout: `${config.kibana.autocompleteTimeout.asMilliseconds()}ms`,
-        terminate_after: config.kibana.autocompleteTerminateAfter.asMilliseconds(),
+        timeout: `${config.autocomplete.valueSuggestions.timeout.asMilliseconds()}ms`,
+        terminate_after: config.autocomplete.valueSuggestions.terminateAfter.asMilliseconds(),
       };
 
-      const indexPattern = await findIndexPatternById(context.core.savedObjects.client, index);
+      let field: IFieldType | undefined = fieldMeta;
 
-      const field = indexPattern && getFieldByName(fieldName, indexPattern);
+      if (!field?.name && !field?.type) {
+        const indexPattern = await findIndexPatternById(context.core.savedObjects.client, index);
+
+        field = indexPattern && getFieldByName(fieldName, indexPattern);
+      }
+
       const body = await getBody(autocompleteSearchOptions, field || fieldName, query, filters);
 
       const result = await client.callAsCurrentUser('search', { index, body }, { signal });
@@ -74,7 +78,7 @@ async function getBody(
   { timeout, terminate_after }: Record<string, any>,
   field: IFieldType | string,
   query: string,
-  filters: estypes.QueryContainer[] = []
+  filters: estypes.QueryDslQueryContainer[] = []
 ) {
   const isFieldObject = (f: any): f is IFieldType => Boolean(f && f.name);
 

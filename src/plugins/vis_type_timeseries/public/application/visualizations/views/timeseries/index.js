@@ -16,7 +16,7 @@ import {
   Chart,
   Position,
   Settings,
-  AnnotationDomainTypes,
+  AnnotationDomainType,
   LineAnnotation,
   TooltipType,
   StackMode,
@@ -30,8 +30,12 @@ import { AreaSeriesDecorator } from './decorators/area_decorator';
 import { BarSeriesDecorator } from './decorators/bar_decorator';
 import { getStackAccessors } from './utils/stack_format';
 import { getBaseTheme, getChartClasses } from './utils/theme';
+import { TOOLTIP_MODES } from '../../../../../common/enums';
 import { emptyLabel } from '../../../../../common/empty_label';
 import { getSplitByTermsColor } from '../../../lib/get_split_by_terms_color';
+import { renderEndzoneTooltip } from '../../../../../../charts/public';
+import { getAxisLabelString } from '../../../components/lib/get_axis_label_string';
+import { calculateDomainForSeries } from './utils/series_domain_calculation';
 
 const generateAnnotationData = (values, formatter) =>
   values.map(({ key, docs }) => ({
@@ -54,14 +58,16 @@ export const TimeSeries = ({
   legend,
   legendPosition,
   tooltipMode,
-  xAxisLabel,
   series,
   yAxis,
   onBrush,
+  onFilterClick,
   xAxisFormatter,
   annotations,
   syncColors,
   palettesService,
+  interval,
+  isLastBucketDropped,
 }) => {
   const chartRef = useRef();
   // const [palettesRegistry, setPalettesRegistry] = useState(null);
@@ -80,13 +86,23 @@ export const TimeSeries = ({
     };
   }, []);
 
-  const tooltipFormatter = decorateFormatter(xAxisFormatter);
+  let tooltipFormatter = decorateFormatter(xAxisFormatter);
+  if (!isLastBucketDropped) {
+    const domainBounds = calculateDomainForSeries(series);
+    tooltipFormatter = renderEndzoneTooltip(
+      interval,
+      domainBounds?.domainStart,
+      domainBounds?.domainEnd,
+      xAxisFormatter
+    );
+  }
+
   const uiSettings = getUISettings();
   const timeZone = getTimezone(uiSettings);
   const hasBarChart = series.some(({ bars }) => bars?.show);
 
   // apply legend style change if bgColor is configured
-  const classes = classNames('tvbVisTimeSeries', getChartClasses(backgroundColor));
+  const classes = classNames(getChartClasses(backgroundColor));
 
   // If the color isn't configured by the user, use the color mapping service
   // to assign a color from the Kibana palette. Colors will be shared across the
@@ -100,7 +116,11 @@ export const TimeSeries = ({
       return;
     }
     const [min, max] = x;
-    onBrush(min, max);
+    onBrush(min, max, series);
+  };
+
+  const handleElementClick = (points) => {
+    onFilterClick(series, points);
   };
 
   const getSeriesColor = useCallback(
@@ -127,6 +147,7 @@ export const TimeSeries = ({
         showLegendExtra={true}
         legendPosition={legendPosition}
         onBrushEnd={onBrushEndListener}
+        onElementClick={(args) => handleElementClick(args)}
         animateData={false}
         onPointerUpdate={handleCursorUpdate}
         theme={[
@@ -148,7 +169,11 @@ export const TimeSeries = ({
         baseTheme={baseTheme}
         tooltip={{
           snap: true,
-          type: tooltipMode === 'show_focused' ? TooltipType.Follow : TooltipType.VerticalCursor,
+          type:
+            tooltipMode === TOOLTIP_MODES.SHOW_FOCUSED
+              ? TooltipType.Follow
+              : TooltipType.VerticalCursor,
+          boundary: document.getElementById('app-fixed-viewport') ?? undefined,
           headerFormatter: tooltipFormatter,
         }}
         externalPointerEvents={{ tooltip: { visible: false } }}
@@ -162,7 +187,7 @@ export const TimeSeries = ({
           <LineAnnotation
             key={id}
             id={id}
-            domainType={AnnotationDomainTypes.XDomain}
+            domainType={AnnotationDomainType.XDomain}
             dataValues={dataValues}
             marker={<EuiIcon type={ICON_TYPES_MAP[icon] || 'asterisk'} />}
             hideLinesTooltips={true}
@@ -280,7 +305,7 @@ export const TimeSeries = ({
       <Axis
         id="bottom"
         position={Position.Bottom}
-        title={xAxisLabel}
+        title={getAxisLabelString(interval)}
         tickFormat={xAxisFormatter}
         gridLine={{
           ...GRID_LINE_CONFIG,
@@ -302,10 +327,11 @@ TimeSeries.propTypes = {
   showGrid: PropTypes.bool,
   legend: PropTypes.bool,
   legendPosition: PropTypes.string,
-  xAxisLabel: PropTypes.string,
   series: PropTypes.array,
   yAxis: PropTypes.array,
   onBrush: PropTypes.func,
   xAxisFormatter: PropTypes.func,
   annotations: PropTypes.array,
+  interval: PropTypes.number,
+  isLastBucketDropped: PropTypes.bool,
 };

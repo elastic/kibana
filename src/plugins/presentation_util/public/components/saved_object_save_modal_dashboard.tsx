@@ -10,32 +10,16 @@ import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  OnSaveProps,
-  SaveModalState,
-  SavedObjectSaveModal,
-} from '../../../../plugins/saved_objects/public';
+import { OnSaveProps, SavedObjectSaveModal } from '../../../../plugins/saved_objects/public';
 
-import './saved_object_save_modal_dashboard.scss';
 import { pluginServices } from '../services';
+import { SaveModalDashboardProps } from './types';
 import { SaveModalDashboardSelector } from './saved_object_save_modal_dashboard_selector';
 
-interface SaveModalDocumentInfo {
-  id?: string;
-  title: string;
-  description?: string;
-}
+import './saved_object_save_modal_dashboard.scss';
 
-export interface SaveModalDashboardProps {
-  documentInfo: SaveModalDocumentInfo;
-  objectType: string;
-  onClose: () => void;
-  onSave: (props: OnSaveProps & { dashboardId: string | null; addToLibrary: boolean }) => void;
-  tagOptions?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
-}
-
-export function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
-  const { documentInfo, tagOptions, objectType, onClose } = props;
+function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
+  const { documentInfo, tagOptions, objectType, onClose, canSaveByReference } = props;
   const { id: documentId } = documentInfo;
   const initialCopyOnSave = !Boolean(documentId);
 
@@ -49,7 +33,7 @@ export function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
     documentId || disableDashboardOptions ? null : 'existing'
   );
   const [isAddToLibrarySelected, setAddToLibrary] = useState<boolean>(
-    !initialCopyOnSave || disableDashboardOptions
+    canSaveByReference && (!initialCopyOnSave || disableDashboardOptions)
   );
   const [selectedDashboard, setSelectedDashboard] = useState<{ id: string; name: string } | null>(
     null
@@ -65,13 +49,16 @@ export function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
           onChange={(option) => {
             setDashboardOption(option);
           }}
+          canSaveByReference={canSaveByReference}
           {...{ copyOnSave, documentId, dashboardOption, setAddToLibrary, isAddToLibrarySelected }}
         />
       )
     : null;
 
   const onCopyOnSaveChange = (newCopyOnSave: boolean) => {
-    setAddToLibrary(true);
+    if (canSaveByReference) {
+      setAddToLibrary(true);
+    }
     setDashboardOption(null);
     setCopyOnSave(newCopyOnSave);
   };
@@ -132,3 +119,7 @@ export function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
     />
   );
 }
+
+// required for dynamic import using React.lazy()
+// eslint-disable-next-line import/no-default-export
+export default SavedObjectSaveModalDashboard;

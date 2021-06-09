@@ -15,6 +15,8 @@ import { contextServiceMock } from '../../context/context_service.mock';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { createHttpServer } from '../test_utils';
 import { HttpService } from '../http_service';
+import { Router } from '../router';
+import { loggerMock } from '@kbn/logging/target/mocks';
 
 let server: HttpService;
 let logger: ReturnType<typeof loggingSystemMock.create>;
@@ -1834,5 +1836,59 @@ describe('ETag', () => {
       .get('/route')
       .set('If-None-Match', '"etag-1"')
       .expect(304, '');
+  });
+});
+
+describe('registerRouterAfterListening', () => {
+  it('allows a router to be registered before server has started listening', async () => {
+    const { server: innerServer, createRouter, registerRouterAfterListening } = await server.setup(
+      setupDeps
+    );
+    const router = createRouter('/');
+
+    router.get({ path: '/', validate: false }, (context, req, res) => {
+      return res.ok({ body: 'hello' });
+    });
+
+    const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
+
+    const otherRouter = new Router('/test', loggerMock.create(), enhanceWithContext);
+    otherRouter.get({ path: '/afterListening', validate: false }, (context, req, res) => {
+      return res.ok({ body: 'hello from other router' });
+    });
+
+    registerRouterAfterListening(otherRouter);
+
+    await server.start();
+
+    await supertest(innerServer.listener).get('/').expect(200);
+    await supertest(innerServer.listener).get('/test/afterListening').expect(200);
+  });
+
+  it('allows a router to be registered after server has started listening', async () => {
+    const { server: innerServer, createRouter, registerRouterAfterListening } = await server.setup(
+      setupDeps
+    );
+    const router = createRouter('/');
+
+    router.get({ path: '/', validate: false }, (context, req, res) => {
+      return res.ok({ body: 'hello' });
+    });
+
+    await server.start();
+
+    await supertest(innerServer.listener).get('/').expect(200);
+    await supertest(innerServer.listener).get('/test/afterListening').expect(404);
+
+    const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
+
+    const otherRouter = new Router('/test', loggerMock.create(), enhanceWithContext);
+    otherRouter.get({ path: '/afterListening', validate: false }, (context, req, res) => {
+      return res.ok({ body: 'hello from other router' });
+    });
+
+    registerRouterAfterListening(otherRouter);
+
+    await supertest(innerServer.listener).get('/test/afterListening').expect(200);
   });
 });
