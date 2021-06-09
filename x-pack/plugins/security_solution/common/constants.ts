@@ -61,6 +61,7 @@ export const DEFAULT_INDICATOR_SOURCE_PATH = 'threatintel.indicator';
 export const INDICATOR_DESTINATION_PATH = 'threat.indicator';
 
 export enum SecurityPageName {
+  alerts = 'alerts',
   detections = 'detections',
   overview = 'overview',
   hosts = 'hosts',
@@ -68,6 +69,8 @@ export enum SecurityPageName {
   timelines = 'timelines',
   case = 'case',
   administration = 'administration',
+  rules = 'rules',
+  exceptions = 'exceptions'
 }
 
 export const APP_OVERVIEW_PATH = `${APP_PATH}/overview`;
