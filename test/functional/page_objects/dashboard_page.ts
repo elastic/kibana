@@ -41,7 +41,10 @@ export class DashboardPageObject extends FtrService {
   private readonly visualize = this.ctx.getPageObject('visualize');
   private readonly discover = this.ctx.getPageObject('discover');
 
-  async initTests({ kibanaIndex = 'dashboard/legacy', defaultIndex = 'logstash-*' } = {}) {
+  async initTests({
+    kibanaIndex = 'test/functional/fixtures/es_archiver/dashboard/legacy',
+    defaultIndex = 'logstash-*',
+  } = {}) {
     this.log.debug('load kibana index with visualizations and log data');
     await this.esArchiver.load(kibanaIndex);
     await this.kibanaServer.uiSettings.replace({ defaultIndex });
