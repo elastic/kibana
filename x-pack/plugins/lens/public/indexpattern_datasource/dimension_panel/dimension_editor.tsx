@@ -347,6 +347,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       {temporaryQuickFunction && selectedColumn?.operationType === 'formula' && (
         <>
           <EuiCallOut
+            className="lnsIndexPatternDimensionEditor__warning"
             size="s"
             title={i18n.translate('xpack.lens.indexPattern.formulaWarning', {
               defaultMessage: 'Formula currently applied',
