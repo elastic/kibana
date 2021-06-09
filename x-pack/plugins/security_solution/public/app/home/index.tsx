@@ -22,7 +22,7 @@ import { useInitSourcerer, useSourcererScope } from '../../common/containers/sou
 import { useKibana } from '../../common/lib/kibana';
 import { DETECTIONS_SUB_PLUGIN_ID } from '../../../common/constants';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
-import { useUpgradeEndpointPackage } from '../../common/hooks/endpoint/upgrade';
+import { useUpgradeSecurityPackages } from '../../common/hooks/use_upgrade_security_packages';
 import { useThrottledResizeObserver } from '../../common/components/utils';
 import { AppLeaveHandler } from '../../../../../../src/core/public';
 
@@ -73,12 +73,12 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children, onAppLeave }) =>
       ? SourcererScopeName.detections
       : SourcererScopeName.default
   );
-  // side effect: this will attempt to upgrade the endpoint package if it is not up to date
-  // this will run when a user navigates to the Security Solution app and when they navigate between
+  // side effect: this will attempt to upgrade the endpoint + security_detectiong_engine packages if they are not
+  // up to date. this will run when a user navigates to the Security Solution app and when they navigate between
   // tabs in the app. This is useful for keeping the endpoint package as up to date as possible until
   // a background task solution can be built on the server side. Once a background task solution is available we
   // can remove this.
-  useUpgradeEndpointPackage();
+  useUpgradeSecurityPackages();
 
   return (
     <SecuritySolutionAppWrapper>
