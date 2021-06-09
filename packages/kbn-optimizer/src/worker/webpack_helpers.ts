@@ -152,10 +152,6 @@ export function isConcatenatedModule(module: any): module is WebpackConcatenated
 }
 
 export function getModulePath(module: WebpackNormalModule) {
-  if (module.resource.includes('bazel')) {
-    debugger;
-  }
-
   const queryIndex = module.resource.indexOf('?');
   return queryIndex === -1 ? module.resource : module.resource.slice(0, queryIndex);
 }
