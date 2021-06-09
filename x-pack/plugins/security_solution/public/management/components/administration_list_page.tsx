@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import { SecurityPageName } from '../../../common/constants';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { HeaderPage } from '../../common/components/header_page';
-import { SecuritySolutionNavigationManager } from '../../common/components/navigation';
+import { SecuritySolutionTabNavigation } from '../../common/components/navigation';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { AdministrationSubTab } from '../types';
 import {
@@ -57,7 +57,7 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
           {actions}
         </HeaderPage>
 
-        <SecuritySolutionNavigationManager
+        <SecuritySolutionTabNavigation
           navTabs={{
             [AdministrationSubTab.endpoints]: {
               name: ENDPOINTS_TAB,

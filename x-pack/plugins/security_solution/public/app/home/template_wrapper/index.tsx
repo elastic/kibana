@@ -19,8 +19,7 @@ import {
   SecuritySolutionBottomBar,
   SecuritySolutionBottomBarProps,
 } from './bottom_bar';
-import { SecuritySolutionNavigationManager } from '../../../common/components/navigation';
-import { navTabs } from '../home_navigations';
+import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
 
 /* eslint-disable react/display-name */
 
@@ -48,6 +47,12 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
   }
 `;
 
+const StyledKQLEuiPanel = styled(EuiPanel)`
+  position: sticky;
+  top: 96px;
+  z-index: 100;
+`;
+
 interface SecuritySolutionPageWrapperProps {
   children: React.ReactNode;
   noPadding?: boolean;
@@ -58,6 +63,7 @@ interface SecuritySolutionPageWrapperProps {
 export const SecuritySolutionTemplateWrapper: React.FC<
   SecuritySolutionPageWrapperProps & CommonProps
 > = React.memo(({ children }) => {
+  const solutionNav = useSecuritySolutionNavigation();
   const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
   const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
     getTimelineShowStatus(state, TimelineId.active)
@@ -69,17 +75,13 @@ export const SecuritySolutionTemplateWrapper: React.FC<
       bottomBarProps={SecuritySolutionBottomBarProps}
       bottomBar={<SecuritySolutionBottomBar />}
       paddingSize="none"
-      pageSideBar={<SecuritySolutionNavigationManager navTabs={navTabs} isPrimary />}
+      solutionNav={solutionNav}
       restrictWidth={false}
       template="default"
     >
-      <EuiPanel
-        color="subdued"
-        paddingSize="s"
-        style={{ position: 'sticky', top: '96px', zIndex: 100 }}
-      >
+      <StyledKQLEuiPanel color="subdued" paddingSize="s">
         <GlobalKQLHeader />
-      </EuiPanel>
+      </StyledKQLEuiPanel>
       <EuiPanel className="securityPageWrapper" data-test-subj="pageContainer">
         {children}
       </EuiPanel>

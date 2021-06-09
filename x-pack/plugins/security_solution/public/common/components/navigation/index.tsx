@@ -13,23 +13,20 @@ import { useRouteSpy } from '../../utils/route/use_route_spy';
 import { useUrlState } from '../url_state/helpers';
 import { setBreadcrumbs } from './breadcrumbs';
 import { TabNavigation } from './tab_navigation';
-import { NavigationManagerComponentProps, SecuritySolutionNavigationManagerProps } from './types';
-import { SecuritySolutionNavigation } from './primary_navigation';
+import { TabNavigationComponentProps, SecuritySolutionTabNavigationProps } from './types';
 import { RouteSpyState } from '../../utils/route/types';
 
 /**
- * @description - This component handels all of the navigation seen within the Security Solution application.
- * For the primary sideNav the SecuritySolutionNavigation is rendered when `isPrimary` is true, while all tabs within pages are rendered
- * using the TabNavigation component. This allows us to manage breadcrumbs, telemetry, and general url syncing in a single place.
+ * @description - This component handels all of the tab navigation seen within a Security Soluton application page, not the Security Solution primary side navigation
+ * For the primary side nav see './use_security_solution_navigation'
  */
-export const NavigationManagerComponent: React.FC<
-  RouteSpyState & SecuritySolutionNavigationManagerProps & NavigationManagerComponentProps
+export const TabNavigationComponent: React.FC<
+  RouteSpyState & SecuritySolutionTabNavigationProps & TabNavigationComponentProps
 > = React.memo(
   ({
     detailName,
     display,
     flowTarget,
-    isPrimary,
     navTabs,
     pageName,
     pathName,
@@ -69,14 +66,7 @@ export const NavigationManagerComponent: React.FC<
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [chrome, pageName, pathName, search, navTabs, urlState, state]);
 
-    return isPrimary ? (
-      <SecuritySolutionNavigation
-        navTabs={navTabs}
-        pageName={pageName}
-        tabName={tabName}
-        urlState={urlState}
-      />
-    ) : (
+    return (
       <TabNavigation
         query={urlState.query}
         display={display}
@@ -93,22 +83,22 @@ export const NavigationManagerComponent: React.FC<
     );
   }
 );
-NavigationManagerComponent.displayName = 'NavigationManagerComponent';
+TabNavigationComponent.displayName = 'TabNavigationComponent';
 
-export const SecuritySolutionNavigationManager: React.FC<SecuritySolutionNavigationManagerProps> = React.memo(
+export const SecuritySolutionTabNavigation: React.FC<SecuritySolutionTabNavigationProps> = React.memo(
   (props) => {
     const [routeProps] = useRouteSpy();
     const urlStateProps = useUrlState();
     const navigationManagerProps: RouteSpyState &
-      NavigationManagerComponentProps &
-      SecuritySolutionNavigationManagerProps = {
+      TabNavigationComponentProps &
+      SecuritySolutionTabNavigationProps = {
       ...routeProps,
       ...urlStateProps,
       ...props,
     };
 
-    return <NavigationManagerComponent {...navigationManagerProps} />;
+    return <TabNavigationComponent {...navigationManagerProps} />;
   },
   (prevProps, nextProps) => deepEqual(prevProps.navTabs, nextProps.navTabs)
 );
-SecuritySolutionNavigationManager.displayName = 'SecuritySolutionNavigationManager';
+SecuritySolutionTabNavigation.displayName = 'SecuritySolutionTabNavigation';
