@@ -44,7 +44,7 @@ export interface HostIsolationResponse {
   action: string;
 }
 
-export interface HostPendingActions {
+export interface EndpointPendingActions {
   agent_id: string;
   pending_actions: {
     /** Number of actions pending for each type. The `key` could be one of the `ISOLATION_ACTIONS` values. */
@@ -53,7 +53,7 @@ export interface HostPendingActions {
 }
 
 export interface PendingActionsResponse {
-  data: HostPendingActions[];
+  data: EndpointPendingActions[];
 }
 
 export type PendingActionsRequestQuery = TypeOf<typeof ActionStatusRequestSchema.query>;
