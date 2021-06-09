@@ -32,9 +32,9 @@ export function getActionType(): ActionTypeModel<
     iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.SW_SELECT_MESSAGE_TEXT,
     actionTypeTitle: i18n.SW_ACTION_TYPE_TITLE,
-    validateConnector: (
+    validateConnector: async (
       action: SwimlaneActionConnector
-    ): ConnectorValidationResult<SwimlaneConfig, SwimlaneSecrets> => {
+    ): Promise<ConnectorValidationResult<SwimlaneConfig, SwimlaneSecrets>> => {
       const configErrors = {
         apiUrl: new Array<string>(),
         appId: new Array<string>(),
@@ -77,7 +77,9 @@ export function getActionType(): ActionTypeModel<
 
       return validationResult;
     },
-    validateParams: (actionParams: SwimlaneActionParams): GenericValidationResult<unknown> => {
+    validateParams: async (
+      actionParams: SwimlaneActionParams
+    ): Promise<GenericValidationResult<unknown>> => {
       const errors = {
         'subActionParams.incident.ruleName': new Array<string>(),
         'subActionParams.incident.alertId': new Array<string>(),
