@@ -265,6 +265,10 @@ The plugin exposes the static DefaultEditorController class to consume.
 |Contains the metric visualization.
 
 
+|{kib-repo}blob/{branch}/src/plugins/vis_type_pie/README.md[visTypePie]
+|Contains the pie chart implementation using the elastic-charts library. The goal is to eventually deprecate the old implementation and keep only this. Until then, the library used is defined by the Legacy charts library advanced setting.
+
+
 |{kib-repo}blob/{branch}/src/plugins/vis_type_table/README.md[visTypeTable]
 |Contains the data table visualization, that allows presenting data in a simple table format.
 
@@ -332,11 +336,6 @@ which will load the visualization's editor.
 |Allow to add a header banner that will be displayed on every page of the Kibana application
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/beats_management/readme.md[beatsManagement]
-|Notes:
-Failure to have auth enabled in Kibana will make for a broken UI. UI-based errors not yet in place
-
-
 |{kib-repo}blob/{branch}/x-pack/plugins/canvas/README.md[canvas]
 |"Never look back. The past is done. The future is a blank canvas." ― Suzy Kassem, Rise Up and Salute the Sun
 
@@ -370,6 +369,10 @@ The client-side plugin configures following values:
 |The data_enhanced plugin is the x-pack counterpart to the src/plguins/data plugin.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/data_visualizer/README.md[dataVisualizer]
+|The data_visualizer plugin enables you to explore the fields in your data.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/discover_enhanced/README.md[discoverEnhanced]
 |Contains the enhancements to the OSS discover app.
 
@@ -395,10 +398,6 @@ actitivies.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/features/README.md[features]
 |The features plugin enhance Kibana with a per-feature privilege system.
-
-
-|{kib-repo}blob/{branch}/x-pack/plugins/file_data_visualizer[fileDataVisualizer]
-|WARNING: Missing README.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/file_upload[fileUpload]

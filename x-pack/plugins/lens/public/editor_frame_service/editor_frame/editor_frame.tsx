@@ -7,7 +7,10 @@
 
 import React, { useEffect, useReducer, useState, useCallback } from 'react';
 import { CoreStart } from 'kibana/public';
+import { isEqual } from 'lodash';
 import { PaletteRegistry } from 'src/plugins/charts/public';
+import { IndexPattern } from '../../../../../../src/plugins/data/public';
+import { getAllIndexPatterns } from '../../utils';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
 import { Datasource, FramePublicAPI, Visualization } from '../../types';
 import { reducer, getInitialState } from './state_management';
@@ -20,7 +23,6 @@ import { Document } from '../../persistence/saved_object_store';
 import { DragDropIdentifier, RootDragDropProvider } from '../../drag_drop';
 import { getSavedObjectFormat } from './save';
 import { generateId } from '../../id_generator';
-import { Filter, Query, SavedQuery } from '../../../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
 import { EditorFrameStartPlugins } from '../service';
 import { initializeDatasources, createDatasourceLayers } from './state_helpers';
@@ -30,37 +32,45 @@ import {
   switchToSuggestion,
 } from './suggestion_helpers';
 import { trackUiEvent } from '../../lens_ui_telemetry';
+import {
+  useLensSelector,
+  useLensDispatch,
+  LensAppState,
+  DispatchSetState,
+  onChangeFromEditorFrame,
+} from '../../state_management';
 
 export interface EditorFrameProps {
-  doc?: Document;
   datasourceMap: Record<string, Datasource>;
   visualizationMap: Record<string, Visualization>;
-  initialDatasourceId: string | null;
-  initialVisualizationId: string | null;
   ExpressionRenderer: ReactExpressionRendererType;
   palettes: PaletteRegistry;
   onError: (e: { message: string }) => void;
   core: CoreStart;
   plugins: EditorFrameStartPlugins;
-  dateRange: {
-    fromDate: string;
-    toDate: string;
-  };
-  query: Query;
-  filters: Filter[];
-  savedQuery?: SavedQuery;
-  searchSessionId: string;
-  onChange: (arg: {
-    filterableIndexPatterns: string[];
-    doc: Document;
-    isSaveable: boolean;
-  }) => void;
   showNoDataPopover: () => void;
   initialContext?: VisualizeFieldContext;
 }
 
 export function EditorFrame(props: EditorFrameProps) {
-  const [state, dispatch] = useReducer(reducer, props, getInitialState);
+  const {
+    filters,
+    searchSessionId,
+    savedQuery,
+    query,
+    persistedDoc,
+    indexPatternsForTopNav,
+    lastKnownDoc,
+    activeData,
+    isSaveable,
+    resolvedDateRange: dateRange,
+  } = useLensSelector((state) => state.app);
+  const [state, dispatch] = useReducer(reducer, { ...props, doc: persistedDoc }, getInitialState);
+  const dispatchLens = useLensDispatch();
+  const dispatchChange: DispatchSetState = useCallback(
+    (s: Partial<LensAppState>) => dispatchLens(onChangeFromEditorFrame(s)),
+    [dispatchLens]
+  );
   const [visualizeTriggerFieldContext, setVisualizeTriggerFieldContext] = useState(
     props.initialContext
   );
@@ -81,7 +91,7 @@ export function EditorFrame(props: EditorFrameProps) {
         initializeDatasources(
           props.datasourceMap,
           state.datasourceStates,
-          props.doc?.references,
+          persistedDoc?.references,
           visualizeTriggerFieldContext,
           { isFullEditor: true }
         )
@@ -109,11 +119,11 @@ export function EditorFrame(props: EditorFrameProps) {
 
   const framePublicAPI: FramePublicAPI = {
     datasourceLayers,
-    activeData: state.activeData,
-    dateRange: props.dateRange,
-    query: props.query,
-    filters: props.filters,
-    searchSessionId: props.searchSessionId,
+    activeData,
+    dateRange,
+    query,
+    filters,
+    searchSessionId,
     availablePalettes: props.palettes,
 
     addNewLayer() {
@@ -160,19 +170,19 @@ export function EditorFrame(props: EditorFrameProps) {
 
   useEffect(
     () => {
-      if (props.doc) {
+      if (persistedDoc) {
         dispatch({
           type: 'VISUALIZATION_LOADED',
           doc: {
-            ...props.doc,
+            ...persistedDoc,
             state: {
-              ...props.doc.state,
-              visualization: props.doc.visualizationType
-                ? props.visualizationMap[props.doc.visualizationType].initialize(
+              ...persistedDoc.state,
+              visualization: persistedDoc.visualizationType
+                ? props.visualizationMap[persistedDoc.visualizationType].initialize(
                     framePublicAPI,
-                    props.doc.state.visualization
+                    persistedDoc.state.visualization
                   )
-                : props.doc.state.visualization,
+                : persistedDoc.state.visualization,
             },
           },
         });
@@ -184,7 +194,7 @@ export function EditorFrame(props: EditorFrameProps) {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props.doc]
+    [persistedDoc]
   );
 
   // Initialize visualization as soon as all datasources are ready
@@ -205,7 +215,7 @@ export function EditorFrame(props: EditorFrameProps) {
 
   // Get suggestions for visualize field when all datasources are ready
   useEffect(() => {
-    if (allLoaded && visualizeTriggerFieldContext && !props.doc) {
+    if (allLoaded && visualizeTriggerFieldContext && !persistedDoc) {
       applyVisualizeFieldSuggestions({
         datasourceMap: props.datasourceMap,
         datasourceStates: state.datasourceStates,
@@ -220,6 +230,51 @@ export function EditorFrame(props: EditorFrameProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allLoaded]);
 
+  const getStateToUpdate: (
+    arg: {
+      filterableIndexPatterns: string[];
+      doc: Document;
+      isSaveable: boolean;
+    },
+    oldState: {
+      isSaveable: boolean;
+      indexPatternsForTopNav: IndexPattern[];
+      persistedDoc?: Document;
+      lastKnownDoc?: Document;
+    }
+  ) => Promise<Partial<LensAppState> | undefined> = async (
+    { filterableIndexPatterns, doc, isSaveable: incomingIsSaveable },
+    prevState
+  ) => {
+    const batchedStateToUpdate: Partial<LensAppState> = {};
+
+    if (incomingIsSaveable !== prevState.isSaveable) {
+      batchedStateToUpdate.isSaveable = incomingIsSaveable;
+    }
+
+    if (!isEqual(prevState.persistedDoc, doc) && !isEqual(prevState.lastKnownDoc, doc)) {
+      batchedStateToUpdate.lastKnownDoc = doc;
+    }
+    const hasIndexPatternsChanged =
+      prevState.indexPatternsForTopNav.length !== filterableIndexPatterns.length ||
+      filterableIndexPatterns.some(
+        (id) => !prevState.indexPatternsForTopNav.find((indexPattern) => indexPattern.id === id)
+      );
+    // Update the cached index patterns if the user made a change to any of them
+    if (hasIndexPatternsChanged) {
+      const { indexPatterns } = await getAllIndexPatterns(
+        filterableIndexPatterns,
+        props.plugins.data.indexPatterns
+      );
+      if (indexPatterns) {
+        batchedStateToUpdate.indexPatternsForTopNav = indexPatterns;
+      }
+    }
+    if (Object.keys(batchedStateToUpdate).length) {
+      return batchedStateToUpdate;
+    }
+  };
+
   // The frame needs to call onChange every time its internal state changes
   useEffect(
     () => {
@@ -232,31 +287,43 @@ export function EditorFrame(props: EditorFrameProps) {
         return;
       }
 
-      props.onChange(
-        getSavedObjectFormat({
-          activeDatasources: Object.keys(state.datasourceStates).reduce(
-            (datasourceMap, datasourceId) => ({
-              ...datasourceMap,
-              [datasourceId]: props.datasourceMap[datasourceId],
-            }),
-            {}
-          ),
-          visualization: activeVisualization,
-          state,
-          framePublicAPI,
-        })
-      );
+      const savedObjectFormat = getSavedObjectFormat({
+        activeDatasources: Object.keys(state.datasourceStates).reduce(
+          (datasourceMap, datasourceId) => ({
+            ...datasourceMap,
+            [datasourceId]: props.datasourceMap[datasourceId],
+          }),
+          {}
+        ),
+        visualization: activeVisualization,
+        state,
+        framePublicAPI,
+      });
+
+      // Frame loader (app or embeddable) is expected to call this when it loads and updates
+      // This should be replaced with a top-down state
+      getStateToUpdate(savedObjectFormat, {
+        isSaveable,
+        persistedDoc,
+        indexPatternsForTopNav,
+        lastKnownDoc,
+      }).then((batchedStateToUpdate) => {
+        if (batchedStateToUpdate) {
+          dispatchChange(batchedStateToUpdate);
+        }
+      });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       activeVisualization,
       state.datasourceStates,
       state.visualization,
-      state.activeData,
-      props.query,
-      props.filters,
-      props.savedQuery,
+      activeData,
+      query,
+      filters,
+      savedQuery,
       state.title,
+      dispatchChange,
     ]
   );
 
@@ -326,9 +393,9 @@ export function EditorFrame(props: EditorFrameProps) {
             }
             dispatch={dispatch}
             core={props.core}
-            query={props.query}
-            dateRange={props.dateRange}
-            filters={props.filters}
+            query={query}
+            dateRange={dateRange}
+            filters={filters}
             showNoDataPopover={props.showNoDataPopover}
             dropOntoWorkspace={dropOntoWorkspace}
             hasSuggestionForField={hasSuggestionForField}

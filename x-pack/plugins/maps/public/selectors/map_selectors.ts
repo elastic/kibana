@@ -45,7 +45,6 @@ import {
   MapCenter,
   MapExtent,
   MapQuery,
-  MapRefreshConfig,
   TooltipState,
   VectorLayerDescriptor,
 } from '../../common/descriptor_types';
@@ -176,6 +175,8 @@ export const getMouseCoordinates = ({ map }: MapStoreState) => map.mapState.mous
 export const getTimeFilters = ({ map }: MapStoreState): TimeRange =>
   map.mapState.timeFilters ? map.mapState.timeFilters : getTimeFilter().getTime();
 
+export const getTimeslice = ({ map }: MapStoreState) => map.mapState.timeslice;
+
 export const getQuery = ({ map }: MapStoreState): MapQuery | undefined => map.mapState.query;
 
 export const getFilters = ({ map }: MapStoreState): Filter[] => map.mapState.filters;
@@ -197,18 +198,6 @@ export const getDrawState = ({ map }: MapStoreState): DrawState | undefined =>
 
 export const isDrawingFilter = ({ map }: MapStoreState): boolean => {
   return !!map.mapState.drawState;
-};
-
-export const getRefreshConfig = ({ map }: MapStoreState): MapRefreshConfig => {
-  if (map.mapState.refreshConfig) {
-    return map.mapState.refreshConfig;
-  }
-
-  const refreshInterval = getTimeFilter().getRefreshInterval();
-  return {
-    isPaused: refreshInterval.pause,
-    interval: refreshInterval.value,
-  };
 };
 
 export const getRefreshTimerLastTriggeredAt = ({ map }: MapStoreState): string | undefined =>
@@ -234,6 +223,7 @@ export const getDataFilters = createSelector(
   getMapBuffer,
   getMapZoom,
   getTimeFilters,
+  getTimeslice,
   getRefreshTimerLastTriggeredAt,
   getQuery,
   getFilters,
@@ -244,6 +234,7 @@ export const getDataFilters = createSelector(
     mapBuffer,
     mapZoom,
     timeFilters,
+    timeslice,
     refreshTimerLastTriggeredAt,
     query,
     filters,
@@ -255,6 +246,7 @@ export const getDataFilters = createSelector(
       buffer: searchSessionId && searchSessionMapBuffer ? searchSessionMapBuffer : mapBuffer,
       zoom: mapZoom,
       timeFilters,
+      timeslice,
       refreshTimerLastTriggeredAt,
       query,
       filters,

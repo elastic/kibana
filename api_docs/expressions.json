@@ -4875,7 +4875,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "state",
-                "description": [],
+                "description": [
+                  "expression AST to extract references from"
+                ],
                 "signature": [
                   {
                     "pluginId": "expressions",
@@ -4954,7 +4956,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "state",
-                "description": [],
+                "description": [
+                  "expression AST to extract references from"
+                ],
                 "signature": [
                   {
                     "pluginId": "expressions",
@@ -5017,7 +5021,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "state",
-                "description": [],
+                "description": [
+                  "expression AST to update"
+                ],
                 "signature": [
                   {
                     "pluginId": "expressions",
@@ -5040,7 +5046,9 @@
                 "type": "Array",
                 "tags": [],
                 "label": "references",
-                "description": [],
+                "description": [
+                  "array of saved object references"
+                ],
                 "signature": [
                   "SavedObjectReference",
                   "[]"
@@ -5096,7 +5104,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "state",
-                "description": [],
+                "description": [
+                  "expression AST to update"
+                ],
                 "signature": [
                   {
                     "pluginId": "kibanaUtils",
@@ -5119,7 +5129,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "version",
-                "description": [],
+                "description": [
+                  "defines which migration version to run"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -25765,7 +25777,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "state",
-                "description": [],
+                "description": [
+                  "expression AST to extract references from"
+                ],
                 "signature": [
                   {
                     "pluginId": "expressions",
@@ -25844,7 +25858,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "state",
-                "description": [],
+                "description": [
+                  "expression AST to extract references from"
+                ],
                 "signature": [
                   {
                     "pluginId": "expressions",
@@ -25907,7 +25923,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "state",
-                "description": [],
+                "description": [
+                  "expression AST to update"
+                ],
                 "signature": [
                   {
                     "pluginId": "expressions",
@@ -25930,7 +25948,9 @@
                 "type": "Array",
                 "tags": [],
                 "label": "references",
-                "description": [],
+                "description": [
+                  "array of saved object references"
+                ],
                 "signature": [
                   "SavedObjectReference",
                   "[]"
@@ -25986,7 +26006,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "state",
-                "description": [],
+                "description": [
+                  "expression AST to update"
+                ],
                 "signature": [
                   {
                     "pluginId": "kibanaUtils",
@@ -26009,7 +26031,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "version",
-                "description": [],
+                "description": [
+                  "defines which migration version to run"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -39127,7 +39151,7 @@
                     "label": "types",
                     "description": [],
                     "signature": [
-                      "(\"boolean\" | \"string\" | \"number\" | \"null\")[]"
+                      "(\"number\" | \"boolean\" | \"string\" | \"null\")[]"
                     ],
                     "source": {
                       "path": "src/plugins/expressions/common/expression_functions/specs/map_column.ts",

@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import '../../../../__mocks__/react_router_history.mock';
-import { setMockValues } from '../../../../__mocks__';
+import { setMockValues } from '../../../../__mocks__/kea_logic';
+import { mockUseParams } from '../../../../__mocks__/react_router';
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
@@ -24,7 +23,7 @@ describe('QueryDetail', () => {
   const mockBreadcrumbs = ['Engines', 'some-engine', 'Analytics'];
 
   beforeEach(() => {
-    (useParams as jest.Mock).mockReturnValue({ query: 'some-query' });
+    mockUseParams.mockReturnValue({ query: 'some-query' });
 
     setMockValues({
       totalQueriesForQuery: 100,
@@ -50,7 +49,7 @@ describe('QueryDetail', () => {
   });
 
   it('renders empty "" search titles correctly', () => {
-    (useParams as jest.Mock).mockReturnValue({ query: '""' });
+    mockUseParams.mockReturnValue({ query: '""' });
     const wrapper = shallow(<QueryDetail breadcrumbs={mockBreadcrumbs} />);
 
     expect(wrapper.find(AnalyticsLayout).prop('title')).toEqual('""');

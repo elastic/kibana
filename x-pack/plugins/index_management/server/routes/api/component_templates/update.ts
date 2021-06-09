@@ -15,11 +15,7 @@ const paramsSchema = schema.object({
   name: schema.string(),
 });
 
-export const registerUpdateRoute = ({
-  router,
-  license,
-  lib: { isEsError },
-}: RouteDependencies): void => {
+export const registerUpdateRoute = ({ router, lib: { isEsError } }: RouteDependencies): void => {
   router.put(
     {
       path: addBasePath('/component_templates/{name}'),
@@ -28,7 +24,7 @@ export const registerUpdateRoute = ({
         params: paramsSchema,
       },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
+    async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.dataManagement!.client;
       const { name } = req.params;
       const { template, version, _meta } = req.body;
@@ -57,6 +53,6 @@ export const registerUpdateRoute = ({
 
         throw error;
       }
-    })
+    }
   );
 };

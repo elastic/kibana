@@ -114,7 +114,7 @@ class FieldsService {
         this._savedObjectsClient
       );
       const rollupConfigs:
-        | estypes.RollupCapabilitiesJob[]
+        | estypes.RollupGetRollupCapabilitiesRollupCapabilitySummary[]
         | null = await rollupService.getRollupJobs();
 
       // if a rollup index has been specified, yet there are no
@@ -137,7 +137,9 @@ class FieldsService {
   }
 }
 
-function combineAllRollupFields(rollupConfigs: estypes.RollupCapabilitiesJob[]): RollupFields {
+function combineAllRollupFields(
+  rollupConfigs: estypes.RollupGetRollupCapabilitiesRollupCapabilitySummary[]
+): RollupFields {
   const rollupFields: RollupFields = {};
   rollupConfigs.forEach((conf) => {
     Object.keys(conf.fields).forEach((fieldName) => {

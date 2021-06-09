@@ -126,8 +126,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
 
       if (opts.palette) {
-        await testSubjects.click('lns-palettePicker');
-        await find.clickByCssSelector(`#${opts.palette}`);
+        await this.setPalette(opts.palette);
       }
 
       if (!opts.keepOpen) {
@@ -171,6 +170,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         testSubjects.getCssSelector(`lnsFieldListPanelField-${field}`),
         testSubjects.getCssSelector('lnsWorkspace')
       );
+      await this.waitForLensDragDropToFinish();
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -184,6 +184,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         testSubjects.getCssSelector(`lnsFieldListPanelField-${field}`),
         testSubjects.getCssSelector('lnsGeoFieldWorkspace')
       );
+      await this.waitForLensDragDropToFinish();
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -247,6 +248,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await browser.pressKeys(reverse ? browser.keys.LEFT : browser.keys.RIGHT);
       }
       await browser.pressKeys(browser.keys.ENTER);
+      await this.waitForLensDragDropToFinish();
 
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
@@ -271,6 +273,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
       await browser.pressKeys(browser.keys.ENTER);
 
+      await this.waitForLensDragDropToFinish();
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
     /**
@@ -293,7 +296,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
       await browser.pressKeys(browser.keys.ENTER);
 
+      await this.waitForLensDragDropToFinish();
       await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    async waitForLensDragDropToFinish() {
+      await retry.try(async () => {
+        const exists = await find.existsByCssSelector('.lnsDragDrop-isActiveGroup');
+        if (exists) {
+          throw new Error('UI still in drag/drop mode');
+        }
+      });
     },
 
     /**
@@ -307,6 +320,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         testSubjects.getCssSelector(`lnsFieldListPanelField-${field}`),
         testSubjects.getCssSelector(dimension)
       );
+      await this.waitForLensDragDropToFinish();
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -321,6 +335,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         testSubjects.getCssSelector(from),
         testSubjects.getCssSelector(to)
       );
+      await this.waitForLensDragDropToFinish();
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -334,6 +349,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const dragging = `[data-test-subj='${dimension}']:nth-of-type(${startIndex}) .lnsDragDrop`;
       const dropping = `[data-test-subj='${dimension}']:nth-of-type(${endIndex}) [data-test-subj='lnsDragDrop-reorderableDropLayer'`;
       await browser.html5DragAndDrop(dragging, dropping);
+      await this.waitForLensDragDropToFinish();
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -361,6 +377,25 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await retry.try(async () => {
         await testSubjects.click(`lns-layerPanel-${layerIndex} > ${dimension}`);
       });
+    },
+
+    async enableTimeShift() {
+      await testSubjects.click('indexPattern-advanced-popover');
+      await retry.try(async () => {
+        await testSubjects.click('indexPattern-time-shift-enable');
+      });
+    },
+
+    async setTimeShift(shift: string) {
+      await comboBox.setCustom('indexPattern-dimension-time-shift', shift);
+    },
+
+    async hasFixAction() {
+      return await testSubjects.exists('errorFixAction');
+    },
+
+    async useFixAction() {
+      await testSubjects.click('errorFixAction');
     },
 
     // closes the dimension editor flyout
@@ -671,6 +706,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return el.getVisibleText();
     },
 
+    async getDatatableCellStyle(rowIndex = 0, colIndex = 0) {
+      const el = await this.getDatatableCell(rowIndex, colIndex);
+      const styleString = await el.getAttribute('style');
+      return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
+        const [prop, value] = cssLine.split(':');
+        if (prop && value) {
+          memo[prop.trim()] = value.trim();
+        }
+        return memo;
+      }, {});
+    },
+
     async getDatatableHeader(index = 0) {
       return find.byCssSelector(
         `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridHeader"] [role=columnheader]:nth-child(${
@@ -712,6 +759,64 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         );
       }
       return buttonEl.click();
+    },
+
+    async setTableSummaryRowFunction(
+      summaryFunction: 'none' | 'sum' | 'avg' | 'count' | 'min' | 'max'
+    ) {
+      await testSubjects.click('lnsDatatable_summaryrow_function');
+      await testSubjects.click('lns-datatable-summary-' + summaryFunction);
+    },
+
+    async setTableSummaryRowLabel(newLabel: string) {
+      await testSubjects.setValue('lnsDatatable_summaryrow_label', newLabel, {
+        clearWithKeyboard: true,
+        typeCharByChar: true,
+      });
+    },
+
+    async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text') {
+      await testSubjects.click('lnsDatatable_dynamicColoring_groups_' + coloringType);
+    },
+
+    async openTablePalettePanel() {
+      await testSubjects.click('lnsDatatable_dynamicColoring_trigger');
+    },
+
+    async closeTablePalettePanel() {
+      await testSubjects.click('lns-indexPattern-PalettePanelContainerBack');
+    },
+
+    // different picker from the next one
+    async changePaletteTo(paletteName: string) {
+      await testSubjects.click('lnsDatatable_dynamicColoring_palette_picker');
+      await testSubjects.click(`${paletteName}-palette`);
+    },
+
+    async setPalette(paletteName: string) {
+      await testSubjects.click('lns-palettePicker');
+      await find.clickByCssSelector(`#${paletteName}`);
+    },
+
+    async closePaletteEditor() {
+      await retry.try(async () => {
+        await testSubjects.click('lns-indexPattern-PalettePanelContainerBack');
+        await testSubjects.missingOrFail('lns-indexPattern-PalettePanelContainerBack');
+      });
+    },
+
+    async openColorStopPopup(index = 0) {
+      const stopEls = await testSubjects.findAll('euiColorStopThumb');
+      if (stopEls[index]) {
+        await stopEls[index].click();
+      }
+    },
+
+    async setColorStopValue(value: number | string) {
+      await testSubjects.setValue(
+        'lnsDatatable_dynamicColoring_progression_custom_stops_value',
+        String(value)
+      );
     },
 
     async toggleColumnVisibility(dimension: string) {

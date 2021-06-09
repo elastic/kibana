@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { Map as MbMap } from 'mapbox-gl';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { Query } from 'src/plugins/data/public';
 import _ from 'lodash';
 import React, { ReactElement, ReactNode } from 'react';

@@ -613,8 +613,16 @@ export function copyToSpaceTestSuiteFactory(
       });
 
       describe('single-namespace types', () => {
-        beforeEach(() => esArchiver.load('saved_objects/spaces'));
-        afterEach(() => esArchiver.unload('saved_objects/spaces'));
+        beforeEach(() =>
+          esArchiver.load(
+            'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
+        afterEach(() =>
+          esArchiver.unload(
+            'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
 
         const dashboardObject = { type: 'dashboard', id: 'cts_dashboard' };
 
@@ -755,8 +763,16 @@ export function copyToSpaceTestSuiteFactory(
         const spaces = ['space_2'];
         const includeReferences = false;
         describe(`multi-namespace types with overwrite=${overwrite} and createNewCopies=${createNewCopies}`, () => {
-          before(() => esArchiver.load('saved_objects/spaces'));
-          after(() => esArchiver.unload('saved_objects/spaces'));
+          before(() =>
+            esArchiver.load(
+              'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+            )
+          );
+          after(() =>
+            esArchiver.unload(
+              'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+            )
+          );
 
           const testCases = tests.multiNamespaceTestCases(overwrite, createNewCopies);
           testCases.forEach(({ testTitle, objects, statusCode, response }) => {

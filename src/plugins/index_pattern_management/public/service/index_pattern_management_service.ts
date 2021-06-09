@@ -9,7 +9,6 @@
 import { HttpSetup } from '../../../../core/public';
 import { IndexPatternCreationManager, IndexPatternCreationConfig } from './creation';
 import { IndexPatternListManager, IndexPatternListConfig } from './list';
-import { EnvironmentService } from './environment';
 interface SetupDependencies {
   httpClient: HttpSetup;
 }
@@ -22,12 +21,10 @@ interface SetupDependencies {
 export class IndexPatternManagementService {
   indexPatternCreationManager: IndexPatternCreationManager;
   indexPatternListConfig: IndexPatternListManager;
-  environmentService: EnvironmentService;
 
   constructor() {
     this.indexPatternCreationManager = new IndexPatternCreationManager();
     this.indexPatternListConfig = new IndexPatternListManager();
-    this.environmentService = new EnvironmentService();
   }
 
   public setup({ httpClient }: SetupDependencies) {
@@ -40,7 +37,6 @@ export class IndexPatternManagementService {
     return {
       creation: creationManagerSetup,
       list: indexPatternListConfigSetup,
-      environment: this.environmentService.setup(),
     };
   }
 

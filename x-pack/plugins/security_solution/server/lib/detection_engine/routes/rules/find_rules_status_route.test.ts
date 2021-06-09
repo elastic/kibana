@@ -7,9 +7,9 @@
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import {
-  getFindResultStatus,
   ruleStatusRequest,
   getAlertMock,
+  getFindBulkResultStatus,
 } from '../__mocks__/request_responses';
 import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { findRulesStatusesRoute } from './find_rules_status_route';
@@ -26,7 +26,7 @@ describe('find_statuses', () => {
   beforeEach(async () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-    clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus()); // successful status search
+    clients.savedObjectsClient.find.mockResolvedValue(getFindBulkResultStatus()); // successful status search
     clients.alertsClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
     findRulesStatusesRoute(server.router);
   });

@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { FOLLOWER_INDEX_ADVANCED_SETTINGS } from '../../../../../plugins/cross_cluster_replication/common/constants';
 import { getFollowerIndexPayload } from './fixtures';
-import { registerHelpers as registerElasticSearchHelpers, getRandomString } from './lib';
+import { registerHelpers as registerElasticSearchHelpers } from './lib';
 import { registerHelpers as registerRemoteClustersHelpers } from './remote_clusters.helpers';
 import { registerHelpers as registerFollowerIndicesnHelpers } from './follower_indices.helpers';
 
@@ -47,23 +47,23 @@ export default function ({ getService }) {
         const payload = getFollowerIndexPayload();
         payload.remoteCluster = 'unknown-cluster';
 
-        const { body } = await createFollowerIndex(undefined, payload).expect(404);
-        expect(body.attributes.cause[0]).to.contain('no such remote cluster');
+        const { body } = await createFollowerIndex('test', payload).expect(404);
+        expect(body.attributes.error.reason).to.contain('no such remote cluster');
       });
 
       it('should throw a 404 error trying to follow an unknown index', async () => {
         const payload = getFollowerIndexPayload();
-        const { body } = await createFollowerIndex(undefined, payload).expect(404);
-        expect(body.attributes.cause[0]).to.contain('no such index');
+        const { body } = await createFollowerIndex('test', payload).expect(404);
+        expect(body.attributes.error.reason).to.contain('no such index');
       });
 
       // NOTE: If this test fails locally it's probably because you have another cluster running.
       it('should create a follower index that follows an existing leader index', async () => {
         // First let's create an index to follow
-        const leaderIndex = await createIndex();
+        const leaderIndex = await createIndex('leader1');
 
         const payload = getFollowerIndexPayload(leaderIndex);
-        const { body } = await createFollowerIndex(undefined, payload).expect(200);
+        const { body } = await createFollowerIndex('index1', payload).expect(200);
 
         // There is a race condition in which Elasticsearch can respond without acknowledging,
         // i.e. `body.follow_index_shards_acked` is sometimes true and sometimes false.
@@ -74,17 +74,17 @@ export default function ({ getService }) {
 
     describe('get()', () => {
       it('should return a 404 when the follower index does not exist', async () => {
-        const name = getRandomString();
+        const name = 'test';
         const { body } = await getFollowerIndex(name).expect(404);
 
-        expect(body.attributes.cause[0]).to.contain('no such index');
+        expect(body.attributes.error.reason).to.contain('no such index');
       });
 
       // NOTE: If this test fails locally it's probably because you have another cluster running.
       it('should return a follower index that was created', async () => {
-        const leaderIndex = await createIndex();
+        const leaderIndex = await createIndex('leader2');
 
-        const name = getRandomString();
+        const name = 'index2';
         const payload = getFollowerIndexPayload(leaderIndex);
         await createFollowerIndex(name, payload);
 
@@ -98,8 +98,8 @@ export default function ({ getService }) {
     describe('update()', () => {
       it('should update a follower index advanced settings', async () => {
         // Create a follower index
-        const leaderIndex = await createIndex();
-        const followerIndex = getRandomString();
+        const leaderIndex = await createIndex('leader3');
+        const followerIndex = 'index3';
         const initialValue = 1234;
         const payload = getFollowerIndexPayload(leaderIndex, undefined, {
           maxReadRequestOperationCount: initialValue,
@@ -128,9 +128,8 @@ export default function ({ getService }) {
          * When we then retrieve the follower index it will have all the advanced settings
          * coming from ES. We can then compare those settings with our hard-coded values.
          */
-        const leaderIndex = await createIndex();
-
-        const name = getRandomString();
+        const leaderIndex = await createIndex('leader4');
+        const name = 'index4';
         const payload = getFollowerIndexPayload(leaderIndex);
         await createFollowerIndex(name, payload);
 
