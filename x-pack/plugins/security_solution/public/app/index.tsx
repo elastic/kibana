@@ -11,7 +11,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { SecurityApp } from './app';
 import { RenderAppProps, RenderAppPropsOld } from './types';
 
-// TODO: remove renderAppOld when all sections migrated
+// TODO: [1101] remove renderAppOld when all sections migrated
 export const renderAppOld = ({
   element,
   history,
@@ -53,6 +53,7 @@ export const renderApp = ({
       setHeaderActionMenu={setHeaderActionMenu}
       store={store}
     >
+      {/* TODO: [1101] add subPlugins routes here when migrating sections, once all migrated we will be able to inject all subPlugins routes directly */}
       <subPlugins.overview.SubPluginRoutes />
     </SecurityApp>,
     element

@@ -13,5 +13,5 @@
 import { renderApp, renderAppOld } from './app';
 
 import { createStore, createInitialState } from './common/store';
-// TODO: remove renderAppOld when all sections migrated
+// TODO: [1101] remove renderAppOld when all sections migrated
 export { renderApp, renderAppOld, createStore, createInitialState };

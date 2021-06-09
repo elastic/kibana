@@ -129,7 +129,7 @@ export interface PluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginStart {}
 
-// TODO: remove and use APP_ID directly when all sections migrated
+// TODO: [1101] remove securitySubPlugins and use APP_ID directly when all sections migrated
 const securitySubPlugins = [
   APP_ID,
   `${APP_ID}:${SecurityPageName.detections}`,

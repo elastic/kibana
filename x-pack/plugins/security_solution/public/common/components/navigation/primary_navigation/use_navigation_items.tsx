@@ -50,7 +50,7 @@ export const usePrimaryNavigationItems = ({
     const handleClick = (ev: React.MouseEvent) => {
       ev.preventDefault();
       if (id in SecurityPageName && pageId == null) {
-        // TODO: remove condition and use deepLinkId for all sections when all migrated
+        // TODO: [1101] remove condition and use deepLinkId for all sections when all migrated
         if (id === 'overview') {
           navigateToApp(APP_ID, { deepLinkId: id, path: urlSearch });
         } else {

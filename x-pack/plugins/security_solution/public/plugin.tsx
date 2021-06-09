@@ -466,7 +466,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private async store(
     coreStart: CoreStart,
     startPlugins: StartPlugins,
-    subPlugins?: StartedSubPlugins
+    subPlugins?: StartedSubPlugins // TODO: [1101] make it required when all sub plugins migrated
   ): Promise<SecurityAppStore> {
     if (!this._store) {
       const experimentalFeatures = parseExperimentalConfigValue(
