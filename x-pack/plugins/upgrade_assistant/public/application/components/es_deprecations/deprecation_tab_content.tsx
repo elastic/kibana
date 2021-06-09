@@ -9,7 +9,7 @@ import { find, groupBy } from 'lodash';
 import React, { FunctionComponent, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiSpacer, EuiHorizontalRule, EuiPageContent } from '@elastic/eui';
+import { EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
 
 import { APP_WRAPPER_CLASS } from '../../../../../../../src/core/public';
 import { EnrichedDeprecationInfo } from '../../../../common/types';
@@ -141,13 +141,7 @@ export const DeprecationTabContent: FunctionComponent<CheckupTabProps> = ({
   let content: React.ReactNode;
 
   if (isLoading) {
-    content = (
-      <div className={APP_WRAPPER_CLASS}>
-        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
-          <SectionLoading>{i18nTexts.isLoading}</SectionLoading>
-        </EuiPageContent>
-      </div>
-    );
+    content = <SectionLoading>{i18nTexts.isLoading}</SectionLoading>;
   } else if (deprecations?.length) {
     const levelGroups = groupBy(deprecations, 'level');
     const levelToDeprecationCountMap = Object.keys(levelGroups).reduce((counts, level) => {
