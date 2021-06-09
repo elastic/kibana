@@ -124,7 +124,7 @@ export const NodeList = memo(() => {
   const showWarning = children === true || ancestors === true || generations === true;
   const rowProps = useMemo(() => ({ 'data-test-subj': 'resolver:node-list:item' }), []);
   return (
-    <StyledPanel>
+    <StyledPanel hasBorder>
       <Breadcrumbs breadcrumbs={breadcrumbs} />
       {showWarning && <LimitWarning numberDisplayed={numberOfProcesses} />}
       <EuiSpacer size="l" />
