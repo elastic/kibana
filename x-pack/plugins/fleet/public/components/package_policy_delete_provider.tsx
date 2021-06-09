@@ -10,9 +10,9 @@ import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { useStartServices, sendRequest, sendDeletePackagePolicy, useConfig } from '../../../hooks';
-import { AGENT_API_ROUTES, AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
-import type { AgentPolicy } from '../../../types';
+import { useStartServices, sendRequest, sendDeletePackagePolicy, useConfig } from '../hooks';
+import { AGENT_API_ROUTES, AGENT_SAVED_OBJECT_TYPE } from '../../common/constants';
+import type { AgentPolicy } from '../types';
 
 interface Props {
   agentPolicy: AgentPolicy;

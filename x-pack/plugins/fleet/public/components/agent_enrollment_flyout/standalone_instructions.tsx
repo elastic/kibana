@@ -22,9 +22,9 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import type { AgentPolicy } from '../../../../types';
-import { useStartServices, useLink, sendGetOneAgentPolicyFull } from '../../../../hooks';
-import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../../services';
+import type { AgentPolicy } from '../../types';
+import { useStartServices, useLink, sendGetOneAgentPolicyFull } from '../../hooks';
+import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../services';
 
 import { DownloadStep, AgentPolicySelectionStep } from './steps';
 
