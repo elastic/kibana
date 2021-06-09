@@ -14075,7 +14075,6 @@
     "xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixLabel": "分類混同行列",
     "xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixPredictedLabel": "予測されたクラス",
     "xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixTestingHelpText": "データセットをテストするための正規化された混同行列",
-    "xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixTooltip": "マルチクラス混同行列には、分析が実際のクラスで正しくデータポイントを分類した発生数と、別のクラスで誤分類した発生数が含まれます。",
     "xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixTrainingHelpText": "データセットを学習するための正規化された混同行列",
     "xpack.ml.dataframe.analytics.classificationExploration.evaluateJobStatusLabel": "ジョブ状態",
     "xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionAvgRecallTooltip": "平均再現率は、実際のクラスメンバーのデータポイントのうち正しくクラスメンバーとして特定された数を示します。",
