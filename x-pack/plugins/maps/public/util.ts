@@ -11,6 +11,7 @@ import { FeatureCollection, Geometry, Position } from 'geojson';
 import * as topojson from 'topojson-client';
 import { GeometryCollection } from 'topojson-specification';
 import _ from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 import fetch from 'node-fetch';
 import { GET_MATCHING_INDEXES_PATH, INDEX_FEATURE_PATH } from '../common';
 
@@ -163,7 +164,7 @@ export const addFeatureToIndex = async (
   geometry: Geometry | Position[],
   path: string
 ) => {
-  const data = convertDotNotationStringToObj(path, geometry);
+  const data = set({}, path, geometry);
   return await getHttp().fetch({
     path: `${INDEX_FEATURE_PATH}`,
     method: 'POST',
@@ -172,17 +173,6 @@ export const addFeatureToIndex = async (
       data,
     }),
   });
-};
-
-const convertDotNotationStringToObj = (
-  dotNotationStr: string,
-  value: unknown
-): Record<string, any> => {
-  const container: Record<string, any> = {};
-  dotNotationStr.split('.').map((k, i, values) => {
-    container[k] = i === values.length - 1 ? value : {};
-  });
-  return container;
 };
 
 export const getMatchingIndexes = async (indexPattern: string) => {
