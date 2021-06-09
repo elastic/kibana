@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { performance } from 'perf_hooks';
 import { countBy, isEmpty, get } from 'lodash';
 import { ElasticsearchClient, Logger } from 'kibana/server';
 import { BuildRuleMessage } from './rule_messages';
