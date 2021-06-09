@@ -28,8 +28,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('discover async search', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('discover/default');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.load('x-pack/test/functional/es_archives/discover/default');
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.header.waitUntilLoadingHasFinished();
