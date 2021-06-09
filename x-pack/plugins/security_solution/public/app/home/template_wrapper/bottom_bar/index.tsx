@@ -48,6 +48,7 @@ export const SecuritySolutionBottomBar = React.memo(
 
 export const SecuritySolutionBottomBarProps: KibanaPageTemplateProps['bottomBarProps'] = {
   className: BOTTOM_BAR_CLASSNAME,
+  'data-test-subj': 'timeline-bottom-bar-container',
   position: 'fixed',
   usePortal: false,
 };

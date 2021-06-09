@@ -12,6 +12,7 @@ import {
   TIMELINE_DATA_PROVIDERS_ACTION_MENU,
   IS_DRAGGING_DATA_PROVIDERS,
   TIMELINE_FLYOUT_HEADER,
+  TIMELINE_DROPPED_DATA_CONTAINER,
 } from '../../screens/timeline';
 import { HOSTS_NAMES_DRAGGABLE } from '../../screens/hosts/all_hosts';
 
@@ -46,7 +47,7 @@ describe('timeline data providers', () => {
   it('renders the data provider of a host dragged from the All Hosts widget on the hosts page', () => {
     dragAndDropFirstHostToTimeline();
     openTimelineUsingToggle();
-    cy.get(TIMELINE_DROPPED_DATA_PROVIDERS)
+    cy.get(`${TIMELINE_DROPPED_DATA_CONTAINER} ${TIMELINE_DROPPED_DATA_PROVIDERS}`)
       .first()
       .invoke('text')
       .then((dataProviderText) => {
