@@ -22,6 +22,7 @@ import {
   EuiSpacer,
   EuiTabs,
   EuiTab,
+  EuiToolTip,
 } from '@elastic/eui';
 import {
   Axis,
@@ -37,7 +38,7 @@ import {
 import { DATAFEED_STATE } from '../../../../../../common/constants/states';
 import { CombinedJobWithStats } from '../../../../../../common/types/anomaly_detection_jobs';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
-import { ml } from '../../../../services/ml_api_service';
+import { useMlApiContext } from '../../../../contexts/kibana';
 import { useCurrentEuiTheme } from '../../../../components/color_range_legend';
 import { JobMessagesPane } from '../job_details/job_messages_pane';
 import { EditQueryDelay } from './edit_query_delay';
@@ -73,6 +74,9 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
   const [bucketData, setBucketData] = useState<number[][]>([]);
   const [sourceData, setSourceData] = useState<number[][]>([]);
 
+  const {
+    results: { getDatafeedResultChartData },
+  } = useMlApiContext();
   const { displayErrorToast } = useToastNotificationService();
   const { euiTheme } = useCurrentEuiTheme();
 
@@ -120,11 +124,7 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
     const startTimestamp = moment(startMoment).valueOf();
 
     try {
-      const chartData = await ml.results.getDatafeedResultChartData(
-        jobId,
-        startTimestamp,
-        endTimestamp
-      );
+      const chartData = await getDatafeedResultChartData(jobId, startTimestamp, endTimestamp);
 
       setSourceData(chartData.datafeedResults);
       setBucketData(chartData.bucketResults);
@@ -244,18 +244,43 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
               <EuiFlexItem>
                 <EuiFlexGroup gutterSize="none" alignItems="center">
                   <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      color="primary"
-                      size="l"
-                      onClick={() => {
-                        handleEndDateChange(CHART_DIRECTION.BACK);
-                      }}
-                      iconType="arrowLeft"
-                    />
+                    <EuiToolTip
+                      content={
+                        <FormattedMessage
+                          id="xpack.ml.jobsList.datafeedModal.chartLeftArrowTooltip"
+                          defaultMessage="Previous time window"
+                        />
+                      }
+                    >
+                      <EuiButtonEmpty
+                        aria-label={i18n.translate(
+                          'xpack.ml.jobsList.datafeedModal.chartIntervalLeftArrow',
+                          {
+                            defaultMessage: 'Previous time window',
+                          }
+                        )}
+                        color="primary"
+                        size="l"
+                        onClick={() => {
+                          handleEndDateChange(CHART_DIRECTION.BACK);
+                        }}
+                        iconType="arrowLeft"
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <Chart size={CHART_SIZE}>
-                      <Settings showLegend legendPosition={Position.Bottom} />
+                      <Settings
+                        showLegend
+                        legendPosition={Position.Bottom}
+                        theme={{
+                          lineSeriesStyle: {
+                            point: {
+                              visible: false,
+                            },
+                          },
+                        }}
+                      />
                       <Axis
                         id="bottom"
                         position={Position.Bottom}
@@ -269,7 +294,7 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
                       <Axis
                         id="left"
                         title={i18n.translate('xpack.ml.jobsList.datafeedModal.yAxisTitle', {
-                          defaultMessage: 'Record count',
+                          defaultMessage: 'Count',
                         })}
                         position={Position.Left}
                       />
@@ -300,14 +325,29 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
                     </Chart>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      color="primary"
-                      size="l"
-                      onClick={() => {
-                        handleEndDateChange(CHART_DIRECTION.FORWARD);
-                      }}
-                      iconType="arrowRight"
-                    />
+                    <EuiToolTip
+                      content={
+                        <FormattedMessage
+                          id="xpack.ml.jobsList.datafeedModal.chartRightArrowTooltip"
+                          defaultMessage="Next time window"
+                        />
+                      }
+                    >
+                      <EuiButtonEmpty
+                        aria-label={i18n.translate(
+                          'xpack.ml.jobsList.datafeedModal.chartIntervalRightArrow',
+                          {
+                            defaultMessage: 'Next time window',
+                          }
+                        )}
+                        color="primary"
+                        size="l"
+                        onClick={() => {
+                          handleEndDateChange(CHART_DIRECTION.FORWARD);
+                        }}
+                        iconType="arrowRight"
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>

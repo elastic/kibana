@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { each, sortBy, slice, get, cloneDeep } from 'lodash';
+import { sortBy, slice, get, cloneDeep } from 'lodash';
 import moment from 'moment';
 import Boom from '@hapi/boom';
 import { IScopedClusterClient } from 'kibana/server';
@@ -625,10 +625,12 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     const { getDatafeedByJobId } = datafeedsProvider(client!, mlClient);
     const datafeedConfig = await getDatafeedByJobId(jobId);
 
-    const {
-      body: { jobs },
-    } = await mlClient.getJobs({ job_id: jobId });
-    const jobConfig = jobs[0];
+    const { body: jobsResponse } = await mlClient.getJobs({ job_id: jobId });
+    if (jobsResponse.count === 0 || jobsResponse.jobs === undefined) {
+      throw Boom.notFound(`Job with the id "${jobId}" not found`);
+    }
+
+    const jobConfig = jobsResponse.jobs[0];
     const timefield = jobConfig.data_description.time_field;
     const bucketSpan = jobConfig.analysis_config.bucket_span;
 
@@ -678,7 +680,6 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
         },
         size: 0,
       },
-      // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
       ...(datafeedConfig?.indices_options ?? {}),
     };
 
@@ -700,10 +701,10 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       body: { desc: true, start: String(start), end: String(end), page: { from: 0, size: 1000 } },
     });
 
-    const bucketResults = get(bucketResp, ['body', 'buckets'], []);
-    each(bucketResults, (dataForTime) => {
-      const timestamp = Number(get(dataForTime, ['timestamp']));
-      const eventCount = get(dataForTime, ['event_count']);
+    const bucketResults = bucketResp?.body?.buckets ?? [];
+    bucketResults.forEach((dataForTime) => {
+      const timestamp = Number(dataForTime?.timestamp);
+      const eventCount = dataForTime?.event_count;
       finalResults.bucketResults.push([timestamp, eventCount]);
     });
 

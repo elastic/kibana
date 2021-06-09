@@ -23,7 +23,6 @@ import {
   getCategorizerStoppedPartitionsSchema,
 } from './schemas/results_service_schema';
 import type { MlClient } from '../lib/ml_client';
-import { DatafeedResultsChartDataParams } from '../../common/types/results';
 
 function getAnomaliesTableData(mlClient: MlClient, payload: any) {
   const rs = resultsServiceProvider(mlClient);
@@ -377,9 +376,7 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
       try {
         const { getDatafeedResultsChartData } = resultsServiceProvider(mlClient, client);
-        const resp = await getDatafeedResultsChartData(
-          request.body as DatafeedResultsChartDataParams
-        );
+        const resp = await getDatafeedResultsChartData(request.body);
 
         return response.ok({
           body: resp,

@@ -21,7 +21,7 @@ export interface DatafeedResultsChartDataParams {
   end: number;
 }
 
-export const defaultSearchQuery: estypes.QueryContainer = {
+export const defaultSearchQuery: estypes.QueryDslQueryContainer = {
   bool: {
     must: [
       {
