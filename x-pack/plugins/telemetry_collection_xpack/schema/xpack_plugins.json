@@ -2692,7 +2692,10 @@
               "type": "long"
             },
             "formula": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Number of saved lens visualizations which are using at least one formula"
+              }
             }
           }
         },
@@ -2738,7 +2741,10 @@
               "type": "long"
             },
             "formula": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Number of saved lens visualizations which are using at least one formula"
+              }
             }
           }
         },
@@ -2784,7 +2790,10 @@
               "type": "long"
             },
             "formula": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Number of saved lens visualizations which are using at least one formula"
+              }
             }
           }
         }
