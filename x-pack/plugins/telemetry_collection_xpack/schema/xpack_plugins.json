@@ -5601,6 +5601,13 @@
         }
       }
     },
+    "task_manager": {
+      "properties": {
+        "ephemeral_tasks_enabled": {
+          "type": "boolean"
+        }
+      }
+    },
     "upgrade-assistant-telemetry": {
       "properties": {
         "features": {
