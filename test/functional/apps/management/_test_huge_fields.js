@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_testhuge_reader'], false);
       await esArchiver.emptyKibanaIndex();
-      await esArchiver.loadIfNeeded('large_fields');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/large_fields');
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.createIndexPattern('testhuge', 'date');
     });
@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }) {
 
     after(async () => {
       await security.testUser.restoreDefaults();
-      await esArchiver.unload('large_fields');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/large_fields');
     });
   });
 }

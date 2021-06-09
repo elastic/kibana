@@ -19,7 +19,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
    */
   describe('dashboard error handling', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('dashboard/current/kibana');
+      await esArchiver.loadIfNeeded(
+        'test/functional/fixtures/es_archiver/dashboard/current/kibana'
+      );
       await PageObjects.common.navigateToApp('dashboard');
     });
 

@@ -1203,7 +1203,7 @@
                 "plugin": "security",
                 "link": {
                   "path": "x-pack/plugins/security/server/plugin.ts",
-                  "lineNumber": 263
+                  "lineNumber": 267
                 }
               },
               {
@@ -1245,7 +1245,7 @@
                 "plugin": "securitySolution",
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 212
+                  "lineNumber": 206
                 }
               },
               {
@@ -2002,28 +2002,28 @@
               "plugin": "security",
               "link": {
                 "path": "x-pack/plugins/security/server/plugin.ts",
-                "lineNumber": 57
+                "lineNumber": 60
               }
             },
             {
               "plugin": "security",
               "link": {
                 "path": "x-pack/plugins/security/server/plugin.ts",
-                "lineNumber": 263
+                "lineNumber": 267
               }
             },
             {
               "plugin": "security",
               "link": {
                 "path": "x-pack/plugins/security/server/plugin.ts",
-                "lineNumber": 281
+                "lineNumber": 285
               }
             },
             {
               "plugin": "security",
               "link": {
                 "path": "x-pack/plugins/security/server/plugin.ts",
-                "lineNumber": 297
+                "lineNumber": 301
               }
             },
             {
@@ -2086,7 +2086,7 @@
               "plugin": "securitySolution",
               "link": {
                 "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 212
+                "lineNumber": 206
               }
             }
           ]

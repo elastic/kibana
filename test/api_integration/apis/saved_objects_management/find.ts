@@ -26,8 +26,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('with kibana index', () => {
-      before(() => esArchiver.load('saved_objects/basic'));
-      after(() => esArchiver.unload('saved_objects/basic'));
+      before(() =>
+        esArchiver.load('test/api_integration/fixtures/es_archiver/saved_objects/basic')
+      );
+      after(() =>
+        esArchiver.unload('test/api_integration/fixtures/es_archiver/saved_objects/basic')
+      );
 
       it('should return 200 with individual responses', async () =>
         await supertest
@@ -86,8 +90,12 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       describe('`hasReference` and `hasReferenceOperator` parameters', () => {
-        before(() => esArchiver.load('saved_objects/references'));
-        after(() => esArchiver.unload('saved_objects/references'));
+        before(() =>
+          esArchiver.load('test/api_integration/fixtures/es_archiver/saved_objects/references')
+        );
+        after(() =>
+          esArchiver.unload('test/api_integration/fixtures/es_archiver/saved_objects/references')
+        );
 
         it('search for a reference', async () => {
           await supertest
@@ -228,8 +236,14 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('meta attributes injected properly', () => {
-      before(() => esArchiver.load('management/saved_objects/search'));
-      after(() => esArchiver.unload('management/saved_objects/search'));
+      before(() =>
+        esArchiver.load('test/api_integration/fixtures/es_archiver/management/saved_objects/search')
+      );
+      after(() =>
+        esArchiver.unload(
+          'test/api_integration/fixtures/es_archiver/management/saved_objects/search'
+        )
+      );
 
       it('should inject meta attributes for searches', async () =>
         await supertest

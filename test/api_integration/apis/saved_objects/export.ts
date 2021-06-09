@@ -27,8 +27,12 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('with kibana index', () => {
       describe('basic amount of saved objects', () => {
-        before(() => esArchiver.load('saved_objects/basic'));
-        after(() => esArchiver.unload('saved_objects/basic'));
+        before(() =>
+          esArchiver.load('test/api_integration/fixtures/es_archiver/saved_objects/basic')
+        );
+        after(() =>
+          esArchiver.unload('test/api_integration/fixtures/es_archiver/saved_objects/basic')
+        );
 
         it('should return objects in dependency order', async () => {
           await supertest
@@ -265,8 +269,12 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       describe('10,000 objects', () => {
-        before(() => esArchiver.load('saved_objects/10k'));
-        after(() => esArchiver.unload('saved_objects/10k'));
+        before(() =>
+          esArchiver.load('test/api_integration/fixtures/es_archiver/saved_objects/10k')
+        );
+        after(() =>
+          esArchiver.unload('test/api_integration/fixtures/es_archiver/saved_objects/10k')
+        );
 
         it('should return 400 when exporting without type or objects passed in', async () => {
           await supertest
@@ -493,7 +501,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe('10,001 objects', () => {
         let customVisId: string;
         before(async () => {
-          await esArchiver.load('saved_objects/10k');
+          await esArchiver.load('test/api_integration/fixtures/es_archiver/saved_objects/10k');
           await supertest
             .post('/api/saved_objects/visualization')
             .send({
@@ -508,7 +516,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
         after(async () => {
           await supertest.delete(`/api/saved_objects/visualization/${customVisId}`).expect(200);
-          await esArchiver.unload('saved_objects/10k');
+          await esArchiver.unload('test/api_integration/fixtures/es_archiver/saved_objects/10k');
         });
 
         it('should allow exporting more than 10,000 objects if permitted by maxImportExportSize', async () => {

@@ -47,8 +47,12 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('kibana stats api', () => {
-    before('make sure there are some saved objects', () => esArchiver.load('saved_objects/basic'));
-    after('cleanup saved objects changes', () => esArchiver.unload('saved_objects/basic'));
+    before('make sure there are some saved objects', () =>
+      esArchiver.load('test/api_integration/fixtures/es_archiver/saved_objects/basic')
+    );
+    after('cleanup saved objects changes', () =>
+      esArchiver.unload('test/api_integration/fixtures/es_archiver/saved_objects/basic')
+    );
 
     describe('basic', () => {
       it('should return the stats without cluster_uuid with no query string params', () => {
