@@ -18,14 +18,13 @@ import React, { Component, Fragment, useContext } from 'react';
 import memoizeOne from 'memoize-one';
 import {
   EuiBadge,
-  EuiButtonIcon,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
   EuiLoadingSpinner,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -466,24 +465,25 @@ class AnnotationsTableUI extends Component {
         // find the original annotation because the table might not show everything
         const annotationId = annotation._id;
         const originalAnnotation = annotations.find((d) => d._id === annotationId);
-        const editAnnotationsTooltipText = (
+        const editAnnotationsText = (
           <FormattedMessage
             id="xpack.ml.annotationsTable.editAnnotationsTooltip"
             defaultMessage="Edit annotation"
           />
         );
-        const editAnnotationsTooltipAriaLabelText = i18n.translate(
+        const editAnnotationsAriaLabelText = i18n.translate(
           'xpack.ml.annotationsTable.editAnnotationsTooltipAriaLabel',
           { defaultMessage: 'Edit annotation' }
         );
         return (
-          <EuiToolTip position="bottom" content={editAnnotationsTooltipText}>
-            <EuiButtonIcon
-              onClick={() => annotationUpdatesService.setValue(originalAnnotation ?? annotation)}
-              iconType="pencil"
-              aria-label={editAnnotationsTooltipAriaLabelText}
-            />
-          </EuiToolTip>
+          <EuiButtonEmpty
+            size="xs"
+            aria-label={editAnnotationsAriaLabelText}
+            iconType="pencil"
+            onClick={() => annotationUpdatesService.setValue(originalAnnotation ?? annotation)}
+          >
+            {editAnnotationsText}
+          </EuiButtonEmpty>
         );
       },
     });
@@ -492,7 +492,7 @@ class AnnotationsTableUI extends Component {
       // add datafeed modal action
       actions.push({
         render: (annotation) => {
-          const viewDataFeedTooltipText = (
+          const viewDataFeedText = (
             <FormattedMessage
               id="xpack.ml.annotationsTable.viewDatafeedTooltip"
               defaultMessage="View datafeed"
@@ -503,18 +503,19 @@ class AnnotationsTableUI extends Component {
             { defaultMessage: 'View datafeed' }
           );
           return (
-            <EuiToolTip position="bottom" content={viewDataFeedTooltipText}>
-              <EuiButtonIcon
-                onClick={() =>
-                  this.setState({
-                    datafeedModalVisible: true,
-                    datafeedEnd: annotation.end_timestamp,
-                  })
-                }
-                iconType="visAreaStacked"
-                aria-label={viewDataFeedTooltipAriaLabelText}
-              />
-            </EuiToolTip>
+            <EuiButtonEmpty
+              size="xs"
+              aria-label={viewDataFeedTooltipAriaLabelText}
+              iconType="visAreaStacked"
+              onClick={() =>
+                this.setState({
+                  datafeedModalVisible: true,
+                  datafeedEnd: annotation.end_timestamp,
+                })
+              }
+            >
+              {viewDataFeedText}
+            </EuiButtonEmpty>
           );
         },
       });
@@ -545,14 +546,15 @@ class AnnotationsTableUI extends Component {
               );
 
           return (
-            <EuiToolTip position="bottom" content={openInSingleMetricViewerTooltipText}>
-              <EuiButtonIcon
-                onClick={() => this.openSingleMetricView(annotation)}
-                disabled={!isDrillDownAvailable}
-                iconType="visLine"
-                aria-label={openInSingleMetricViewerAriaLabelText}
-              />
-            </EuiToolTip>
+            <EuiButtonEmpty
+              size="xs"
+              disabled={!isDrillDownAvailable}
+              aria-label={openInSingleMetricViewerAriaLabelText}
+              iconType="visLine"
+              onClick={() => this.openSingleMetricView(annotation)}
+            >
+              {openInSingleMetricViewerTooltipText}
+            </EuiButtonEmpty>
           );
         },
       });

@@ -145,7 +145,11 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
         bucketSpan: job.analysis_config.bucket_span,
         isInitialized: true,
       });
-      setInterval(getIntervalOptions(job.analysis_config.bucket_span)[0].value);
+      const intervalOptions = getIntervalOptions(job.analysis_config.bucket_span);
+      const initialInterval = intervalOptions.length
+        ? intervalOptions[intervalOptions.length - 1]
+        : undefined;
+      setInterval(initialInterval?.value || '72 hours');
     } catch (error) {
       displayErrorToast(error);
     }
@@ -191,6 +195,9 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiDatePicker
+              aria-label={i18n.translate('xpack.ml.jobsList.datafeedModal.chartIntervalEndTime', {
+                defaultMessage: 'Chart interval end time',
+              })}
               showTimeSelect
               selected={endDate}
               onChange={handleChange}
@@ -248,7 +255,7 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <Chart size={CHART_SIZE}>
-                      <Settings showLegend showLegendExtra legendPosition={Position.Bottom} />
+                      <Settings showLegend legendPosition={Position.Bottom} />
                       <Axis
                         id="bottom"
                         position={Position.Bottom}
