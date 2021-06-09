@@ -49,7 +49,7 @@ export class KbnClientImportExport {
     }
 
     const absolutePath = Path.resolve(this.baseDir, path);
-    if (existsSync(absolutePath)) {
+    if (!existsSync(absolutePath)) {
       throw new Error(
         `unable to resolve path [${path}] to import/export, resolved relative to [${this.baseDir}]`
       );
@@ -58,8 +58,8 @@ export class KbnClientImportExport {
     return absolutePath;
   }
 
-  async load(name: string, options?: { space?: string }) {
-    const src = this.resolvePath(name);
+  async load(path: string, options?: { space?: string }) {
+    const src = this.resolvePath(path);
     this.log.debug('resolved import for', name, 'to', src);
 
     const objects = await parseArchive(src);
@@ -93,8 +93,8 @@ export class KbnClientImportExport {
     }
   }
 
-  async unload(name: string, options?: { space?: string }) {
-    const src = this.resolvePath(name);
+  async unload(path: string, options?: { space?: string }) {
+    const src = this.resolvePath(path);
     this.log.debug('unloading docs from archive at', src);
 
     const objects = await parseArchive(src);
@@ -112,8 +112,8 @@ export class KbnClientImportExport {
     this.log.success(deleted, 'saved objects deleted');
   }
 
-  async save(name: string, options: { types: string[]; space?: string }) {
-    const dest = this.resolvePath(name);
+  async save(path: string, options: { types: string[]; space?: string }) {
+    const dest = this.resolvePath(path);
     this.log.debug('saving export to', dest);
 
     const resp = await this.req(options.space, {
