@@ -60,7 +60,7 @@ export class MarkdownEditor extends Component {
       series,
       model,
       dateFormat,
-      this.props.getConfig,
+      getConfig,
       this.fieldFormatMap
     );
     const rows = [];

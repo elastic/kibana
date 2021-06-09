@@ -164,7 +164,7 @@ function TimeseriesVisualization({
         {shouldDisplayLastValueIndicator && (
           <EuiFlexItem className="tvbLastValueIndicator" grow={false}>
             <LastValueModeIndicator
-              seriesData={series[0].data ?? undefined}
+              seriesData={series?.[0]?.data}
               ignoreDaylightTime={model.ignore_daylight_time}
               panelInterval={getInterval(visData, model)}
               modelInterval={model.interval ?? AUTO_INTERVAL}
