@@ -7,11 +7,14 @@
  */
 
 import { ScopedHistory, Capabilities } from 'kibana/public';
+import { LocatorPublic } from 'src/plugins/share/common';
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
 import { ChromeBreadcrumb } from '../../../core/public/';
+import { ManagementAppLocatorParams } from '../common/locator';
 
 export interface ManagementSetup {
   sections: SectionsServiceSetup;
+  locator: LocatorPublic<ManagementAppLocatorParams>;
 }
 
 export interface DefinedSections {
