@@ -8,7 +8,7 @@
 import type { PackageInfo, AgentPolicy, PackagePolicy } from '../types';
 
 export const isPackageLimited = (packageInfo: PackageInfo): boolean => {
-  return !!packageInfo.policy_templates?.find(
+  return (packageInfo.policy_templates || []).some(
     (policyTemplate) => policyTemplate.multiple === false
   );
 };
