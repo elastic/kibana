@@ -46,10 +46,10 @@ entry.
 +
 In the following example, two custom host settings
 are defined.  The first provides a custom host setting for mail server
-`mail.example.com` using port 465 that supplies server certificate authorization
+`mail.example.com` using port 465 that supplies server certificate authentication
 data from both a file and inline, and requires TLS for the
 connection.  The second provides a custom host setting for https server
-`webhook.example.com` which turns off server certificate authorization.
+`webhook.example.com` which turns off server certificate authentication.
 +
 [source,yaml]
 --
