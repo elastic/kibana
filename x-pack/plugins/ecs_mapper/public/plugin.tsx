@@ -10,12 +10,12 @@ import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup } from 'src/core/public';
 
+import { EuiFlexGroup, EuiFlexItem, EuiBetaBadge } from '@elastic/eui';
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { ILicense } from '../../licensing/common/types';
 
 import { PLUGIN } from '../common';
 import { PluginDependencies } from './types';
-import { EuiFlexGroup, EuiFlexItem, EuiBetaBadge } from '@elastic/eui';
 
 const checkLicenseStatus = (license: ILicense) => {
   const { state, message } = license.check(PLUGIN.id, PLUGIN.minimumLicenseType);

@@ -19,16 +19,8 @@ interface AppDependencies {
   initialLicenseStatus: LicenseStatus;
 }
 
-export const renderApp = ({
-  el,
-  I18nContext,
-}: AppDependencies) => {
-  render(
-    <I18nContext>
-      Placeholder for ECS Mapper
-    </I18nContext>,
-    el
-  );
+export const renderApp = ({ el, I18nContext }: AppDependencies) => {
+  render(<I18nContext>Placeholder for ECS Mapper</I18nContext>, el);
 
   return () => unmountComponentAtNode(el);
 };

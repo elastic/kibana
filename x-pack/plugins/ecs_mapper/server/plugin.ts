@@ -8,11 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
 
+import { schema } from '@kbn/config-schema';
 import { PLUGIN } from '../common/constants';
 import { License } from './services';
 import { Dependencies } from './types';
 import { registerExecuteRoute } from './routes/api';
-import { schema } from '@kbn/config-schema';
 
 export const config = {
   schema: schema.object({
