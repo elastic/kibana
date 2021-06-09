@@ -102,7 +102,6 @@ describe('Hosts - rendering', () => {
         </Router>
       </TestProviders>
     );
-    console.log("WRAPPER: ", wrapper.debug()); // eslint-disable-line
     expect(wrapper.find(SecuritySolutionTabNavigation).exists()).toBe(true);
   });
 
