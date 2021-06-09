@@ -14,8 +14,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('sources', () => {
-    before(() => esArchiver.load('auditbeat/default'));
-    after(() => esArchiver.unload('auditbeat/default'));
+    before(() => esArchiver.load('x-pack/test/functional/es_archives/auditbeat/default'));
+    after(() => esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/default'));
 
     it('Make sure that we get source information when auditbeat indices is there', async () => {
       const { body: sourceStatus } = await supertest

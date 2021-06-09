@@ -163,11 +163,14 @@ export const createHostUnIsolation = async ({
  */
 export const getCaseIdsFromAlertId = async ({
   alertId,
+  owner,
 }: {
   alertId: string;
+  owner: string[];
 }): Promise<CasesFromAlertsResponse> =>
   KibanaServices.get().http.fetch<CasesFromAlertsResponse>(getCasesFromAlertsUrl(alertId), {
     method: 'get',
+    query: { ...(owner.length > 0 ? { owner } : {}) },
   });
 
 /**

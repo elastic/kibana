@@ -10,7 +10,7 @@ import moment from 'moment';
 import _, { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
-import { Aggregate, Bucket } from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 import {
   IEsSearchResponse,
@@ -57,7 +57,9 @@ export interface AggConfigsOptions {
 
 export type CreateAggConfigParams = Assign<AggConfigSerialized, { type: string | IAggType }>;
 
-export type GenericBucket = Bucket & { [property: string]: Aggregate };
+export type GenericBucket = estypes.AggregationsBucket & {
+  [property: string]: estypes.AggregationsAggregate;
+};
 
 /**
  * @name AggConfigs
@@ -412,7 +414,7 @@ export class AggConfigs {
     const transformedRawResponse = cloneDeep(response.rawResponse);
     if (!transformedRawResponse.aggregations) {
       transformedRawResponse.aggregations = {
-        doc_count: response.rawResponse.hits?.total as Aggregate,
+        doc_count: response.rawResponse.hits?.total as estypes.AggregationsAggregate,
       };
     }
     const aggCursor = transformedRawResponse.aggregations!;
