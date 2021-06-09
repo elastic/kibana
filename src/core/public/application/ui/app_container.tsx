@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import './app_container.scss';
 
 import React, {
   Fragment,
@@ -16,11 +17,11 @@ import React, {
 } from 'react';
 import { EuiLoadingElastic } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import type { MountPoint } from '../../types';
 import { AppLeaveHandler, AppStatus, AppUnmount, Mounter } from '../types';
 import { AppNotFound } from './app_not_found_screen';
 import { ScopedHistory } from '../scoped_history';
-import './app_container.scss';
 import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
 
 interface Props {
@@ -111,7 +112,9 @@ export const AppContainer: FunctionComponent<Props> = ({
       {showSpinner && !appNotFound && (
         <EuiLoadingElastic
           className="appContainer__loading"
-          aria-label="Loading application"
+          aria-label={i18n.translate('core.application.appContainer.loadingAriaLabel', {
+            defaultMessage: 'Loading application',
+          })}
           size="xxl"
         />
       )}
