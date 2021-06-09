@@ -25,7 +25,7 @@ import { tinymathFunctions, groupArgsByType } from '../util';
 import type { GenericOperationDefinition } from '../..';
 import { getFunctionSignatureLabel, getHelpTextContent } from './formula_help';
 import { hasFunctionFieldArgument } from '../validation';
-import { timeShiftOptions } from '../../../../dimension_panel/time_shift';
+import { timeShiftOptions, timeShiftOptionOrder } from '../../../../time_shift_utils';
 import { parseTimeShift } from '../../../../../../../../../src/plugins/data/common';
 
 export enum SUGGESTION_TYPE {
@@ -391,6 +391,9 @@ export function getSuggestion(
   const filterText: string = label;
 
   switch (type) {
+    case SUGGESTION_TYPE.SHIFTS:
+      sortText = String(timeShiftOptionOrder[label]).padStart(4, '0');
+      break;
     case SUGGESTION_TYPE.FIELD:
       kind = monaco.languages.CompletionItemKind.Value;
       break;

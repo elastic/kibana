@@ -47,10 +47,7 @@ import './formula.scss';
 import { FormulaIndexPatternColumn } from '../formula';
 import { regenerateLayerFromAst } from '../parse';
 import { filterByVisibleOperation } from '../util';
-import {
-  getColumnTimeShiftWarnings,
-  getDateHistogramInterval,
-} from '../../../../dimension_panel/time_shift';
+import { getColumnTimeShiftWarnings, getDateHistogramInterval } from '../../../../time_shift_utils';
 
 export const MemoizedFormulaEditor = React.memo(FormulaEditor);
 

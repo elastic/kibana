@@ -54,6 +54,12 @@ export function generateFormula(
       (previousColumn.filter.language === 'kuery' ? 'kql=' : 'lucene=') +
       `'${previousColumn.filter.query.replace(/'/g, `\\'`)}'`; // replace all
   }
+  if (previousColumn.timeShift) {
+    if (previousColumn.operationType !== 'count' || previousColumn.filter) {
+      previousFormula += ', ';
+    }
+    previousFormula += `shift='${previousColumn.timeShift}'`;
+  }
   if (previousFormula) {
     // close the formula at the end
     previousFormula += ')';

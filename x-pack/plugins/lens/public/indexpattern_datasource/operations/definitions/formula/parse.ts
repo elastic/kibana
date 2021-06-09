@@ -31,7 +31,8 @@ function parseAndExtract(
   layer: IndexPatternLayer,
   columnId: string,
   indexPattern: IndexPattern,
-  operationDefinitionMap: Record<string, GenericOperationDefinition>
+  operationDefinitionMap: Record<string, GenericOperationDefinition>,
+  label?: string
 ) {
   const { root, error } = tryToParse(text, operationDefinitionMap);
   if (error || !root) {
@@ -45,7 +46,14 @@ function parseAndExtract(
   /*
     { name: 'add', args: [ { name: 'abc', args: [5] }, 5 ] }
     */
-  const extracted = extractColumns(columnId, operationDefinitionMap, root, layer, indexPattern);
+  const extracted = extractColumns(
+    columnId,
+    operationDefinitionMap,
+    root,
+    layer,
+    indexPattern,
+    label || text
+  );
   return { extracted, isValid: true };
 }
 
@@ -54,7 +62,8 @@ function extractColumns(
   operations: Record<string, GenericOperationDefinition>,
   ast: TinymathAST,
   layer: IndexPatternLayer,
-  indexPattern: IndexPattern
+  indexPattern: IndexPattern,
+  label: string
 ): Array<{ column: IndexPatternColumn; location?: TinymathLocation }> {
   const columns: Array<{ column: IndexPatternColumn; location?: TinymathLocation }> = [];
 
@@ -102,7 +111,7 @@ function extractColumns(
       );
       const newColId = getManagedId(idPrefix, columns.length);
       newCol.customLabel = true;
-      newCol.label = newColId;
+      newCol.label = label;
       columns.push({ column: newCol, location: node.location });
       // replace by new column id
       return newColId;
@@ -121,7 +130,7 @@ function extractColumns(
       mathColumn.params.tinymathAst = consumedParam!;
       columns.push({ column: mathColumn });
       mathColumn.customLabel = true;
-      mathColumn.label = getManagedId(idPrefix, columns.length - 1);
+      mathColumn.label = label;
 
       const mappedParams = getOperationParams(nodeOperation, namedArguments || []);
       const newCol = (nodeOperation as OperationDefinition<
@@ -137,12 +146,13 @@ function extractColumns(
       );
       const newColId = getManagedId(idPrefix, columns.length);
       newCol.customLabel = true;
-      newCol.label = newColId;
+      newCol.label = label;
       columns.push({ column: newCol, location: node.location });
       // replace by new column id
       return newColId;
     }
   }
+
   const root = parseNode(ast);
   if (root === undefined) {
     return [];
@@ -154,9 +164,8 @@ function extractColumns(
   });
   mathColumn.references = variables.map(({ value }) => value);
   mathColumn.params.tinymathAst = root!;
-  const newColId = getManagedId(idPrefix, columns.length);
   mathColumn.customLabel = true;
-  mathColumn.label = newColId;
+  mathColumn.label = label;
   columns.push({ column: mathColumn });
   return columns;
 }
@@ -174,7 +183,8 @@ export function regenerateLayerFromAst(
     layer,
     columnId,
     indexPattern,
-    filterByVisibleOperation(operationDefinitionMap)
+    filterByVisibleOperation(operationDefinitionMap),
+    currentColumn.customLabel ? currentColumn.label : undefined
   );
 
   const columns = { ...layer.columns };
