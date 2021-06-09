@@ -101,7 +101,7 @@ describe('Timelines', (): void => {
       const eql = 'any where process.name == "which"';
       addEqlToTimeline(eql);
 
-      cy.wait('@updateTimeline').its('response.statusCode').should('eq', 200);
+      cy.wait('@updateTimeline', { timeout: 10000 }).its('response.statusCode').should('eq', 200);
 
       cy.get(`${TIMELINE_TAB_CONTENT_EQL} ${SERVER_SIDE_EVENT_COUNT}`)
         .invoke('text')
@@ -112,7 +112,7 @@ describe('Timelines', (): void => {
     it('can be marked as favorite', () => {
       cy.intercept('PATCH', '/api/timeline/_favorite').as('markAsFavourite');
       markAsFavorite();
-      cy.wait('@markAsFavourite').its('response.statusCode').should('eq', 200);
+      cy.wait('@markAsFavourite', { timeout: 10000 }).its('response.statusCode').should('eq', 200);
 
       cy.get(FAVORITE_TIMELINE).should('have.text', 'Remove from favorites');
       cy.visit(OVERVIEW_URL);
