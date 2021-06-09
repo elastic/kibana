@@ -6,13 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { pick } from 'lodash';
 import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/server';
-import {
-  ExpressionsService,
-  ExpressionsServiceSetup,
-  ExpressionsServiceStart,
-  setUiSettingsFactory,
-} from '../common';
+import { ExpressionsService, ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
 
 export type ExpressionsServerSetup = ExpressionsServiceSetup;
 
@@ -29,19 +25,12 @@ export class ExpressionsServerPlugin
       environment: 'server',
     });
 
-    const setup = this.expressions.setup();
+    const setup = this.expressions.setup(pick(core, 'getStartServices'));
 
     return Object.freeze(setup);
   }
 
   public start(core: CoreStart): ExpressionsServerStart {
-    setUiSettingsFactory(({ getKibanaRequest }) => {
-      const savedObjectClient = core.savedObjects.getScopedClient(getKibanaRequest());
-      const uiSettingsClient = core.uiSettings.asScopedToClient(savedObjectClient);
-
-      return uiSettingsClient;
-    });
-
     const start = this.expressions.start();
 
     return Object.freeze(start);

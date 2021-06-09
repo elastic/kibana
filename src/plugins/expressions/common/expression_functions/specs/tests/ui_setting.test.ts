@@ -9,23 +9,25 @@
 jest.mock('../../../../common');
 
 import { IUiSettingsClient } from 'src/core/public';
-import { getUiSettingsFactory } from '../../../../common';
-import { uiSetting } from '../ui_setting';
+import { getUiSettingFn } from '../ui_setting';
 
 describe('uiSetting', () => {
   describe('fn', () => {
+    let getStartDependencies: jest.MockedFunction<
+      Parameters<typeof getUiSettingFn>[0]['getStartDependencies']
+    >;
+    let uiSetting: ReturnType<typeof getUiSettingFn>;
     let uiSettings: jest.Mocked<IUiSettingsClient>;
-    let uiSettingsFactory: jest.MockedFunction<ReturnType<typeof getUiSettingsFactory>>;
 
     beforeEach(() => {
       uiSettings = ({
         get: jest.fn(),
       } as unknown) as jest.Mocked<IUiSettingsClient>;
-      uiSettingsFactory = (jest.fn(() => uiSettings) as unknown) as typeof uiSettingsFactory;
+      getStartDependencies = (jest.fn(async () => ({
+        uiSettings,
+      })) as unknown) as typeof getStartDependencies;
 
-      (getUiSettingsFactory as jest.MockedFunction<typeof getUiSettingsFactory>).mockReturnValue(
-        uiSettingsFactory
-      );
+      uiSetting = getUiSettingFn({ getStartDependencies });
     });
 
     it('should return a value', () => {
@@ -60,7 +62,7 @@ describe('uiSetting', () => {
         getKibanaRequest: () => request,
       } as any);
 
-      const [[{ getKibanaRequest }]] = uiSettingsFactory.mock.calls;
+      const [[getKibanaRequest]] = getStartDependencies.mock.calls;
 
       expect(getKibanaRequest()).toBe(request);
     });
@@ -68,7 +70,7 @@ describe('uiSetting', () => {
     it('should throw an error if request is not provided on the server-side', async () => {
       await uiSetting.fn(null, { parameter: 'something' }, {} as any);
 
-      const [[{ getKibanaRequest }]] = uiSettingsFactory.mock.calls;
+      const [[getKibanaRequest]] = getStartDependencies.mock.calls;
 
       expect(getKibanaRequest).toThrow();
     });
