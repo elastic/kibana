@@ -143,7 +143,7 @@ export default ({ getService }: FtrProviderContext) => {
           'auditbeat_process_hosts_ecs',
           'security_linux',
           'security_auth',
-          'siem_auditbeat'
+          'siem_auditbeat',
         ],
       },
     },
