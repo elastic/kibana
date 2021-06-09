@@ -18,26 +18,32 @@ import {
 import * as i18n from '../translations';
 
 interface AllRulesUtilityBarProps {
-  userHasNoPermissions: boolean;
-  numberSelectedItems: number;
-  paginationTotal: number;
+  canBulkEdit: boolean;
+  isAllSelected?: boolean;
   isAutoRefreshOn?: boolean;
-  showBulkActions: boolean;
-  onRefresh?: (refreshRule: boolean) => void;
+  numberSelectedItems: number;
   onGetBatchItemsPopoverContent?: (closePopover: () => void) => JSX.Element[];
+  onRefresh?: (refreshRule: boolean) => void;
   onRefreshSwitch?: (checked: boolean) => void;
+  onToggleSelectAll?: () => void;
+  paginationTotal: number;
+  showBulkActions: boolean;
+  hasPagination?: boolean;
 }
 
 export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
   ({
-    userHasNoPermissions,
-    onRefresh,
-    paginationTotal,
+    canBulkEdit,
+    isAllSelected,
+    isAutoRefreshOn,
     numberSelectedItems,
     onGetBatchItemsPopoverContent,
-    isAutoRefreshOn,
-    showBulkActions = true,
+    onRefresh,
     onRefreshSwitch,
+    onToggleSelectAll,
+    paginationTotal,
+    showBulkActions = true,
+    hasPagination,
   }) => {
     const handleGetBatchItemsPopoverContent = useCallback(
       (closePopover: () => void): JSX.Element | null => {
@@ -99,7 +105,19 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
                 <UtilityBarText dataTestSubj="selectedRules">
                   {i18n.SELECTED_RULES(numberSelectedItems)}
                 </UtilityBarText>
-                {!userHasNoPermissions && (
+
+                {canBulkEdit && onToggleSelectAll && hasPagination && (
+                  <UtilityBarAction
+                    dataTestSubj="selectAllRules"
+                    iconType={isAllSelected ? 'cross' : 'pagesSelect'}
+                    iconSide="left"
+                    onClick={onToggleSelectAll}
+                  >
+                    {isAllSelected ? i18n.CLEAR_SELECTION : i18n.SELECT_ALL_RULES(paginationTotal)}
+                  </UtilityBarAction>
+                )}
+
+                {canBulkEdit && (
                   <UtilityBarAction
                     dataTestSubj="bulkActions"
                     iconSide="right"

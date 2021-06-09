@@ -347,17 +347,13 @@
             "label": "security",
             "description": [],
             "signature": [
-              "{ authc: ",
-              "AuthenticationServiceSetup",
-              "; sessionTimeout: ",
-              "SessionTimeout",
-              "; license: Readonly<{ isLicenseAvailable: () => boolean; isEnabled: () => boolean; getType: () => \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; getFeatures: () => ",
-              "SecurityLicenseFeatures",
-              "; features$: ",
-              "Observable",
-              "<",
-              "SecurityLicenseFeatures",
-              ">; }>; __legacyCompat: { logoutUrl: string; tenant: string; }; }"
+              {
+                "pluginId": "security",
+                "scope": "public",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-public.SecurityPluginSetup",
+                "text": "SecurityPluginSetup"
+              }
             ],
             "source": {
               "path": "x-pack/plugins/cases/public/types.ts",
@@ -456,17 +452,15 @@
             "section": "def-public.StartPlugins",
             "text": "StartPlugins"
           },
-          " & { security: { authc: ",
-          "AuthenticationServiceSetup",
-          "; sessionTimeout: ",
-          "SessionTimeout",
-          "; license: Readonly<{ isLicenseAvailable: () => boolean; isEnabled: () => boolean; getType: () => \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; getFeatures: () => ",
-          "SecurityLicenseFeatures",
-          "; features$: ",
-          "Observable",
-          "<",
-          "SecurityLicenseFeatures",
-          ">; }>; __legacyCompat: { logoutUrl: string; tenant: string; }; }; }"
+          " & { security: ",
+          {
+            "pluginId": "security",
+            "scope": "public",
+            "docId": "kibSecurityPluginApi",
+            "section": "def-public.SecurityPluginSetup",
+            "text": "SecurityPluginSetup"
+          },
+          "; }"
         ],
         "source": {
           "path": "x-pack/plugins/cases/public/types.ts",
