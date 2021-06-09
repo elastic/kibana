@@ -54,8 +54,6 @@ export interface SearchProps extends Partial<DiscoverGridProps> {
   hits?: ElasticSearchHit[];
   totalHitCount?: number;
   onMoveColumn?: (column: string, index: number) => void;
-  useLegacyTable?: boolean;
-  refs?: HTMLElement;
 }
 
 interface SearchEmbeddableConfig {
@@ -285,7 +283,6 @@ export class SavedSearchEmbeddable
       useNewFieldsApi: !this.services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false),
       showTimeCol: !this.services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
       ariaLabelledBy: 'documentsAriaLabel',
-      useLegacyTable: this.services.uiSettings.get(DOC_TABLE_LEGACY),
     };
 
     const timeRangeSearchSource = searchSource.create();
@@ -355,7 +352,7 @@ export class SavedSearchEmbeddable
       }
     } else if (this.searchProps && this.node) {
       this.searchProps = searchProps;
-      await this.renderReactComponent(this.node, this.searchProps);
+      this.renderReactComponent(this.node, this.searchProps);
     }
   }
 
@@ -377,20 +374,24 @@ export class SavedSearchEmbeddable
     if (!this.searchProps) {
       return;
     }
-    this.searchProps.refs = domNode;
     await this.pushContainerStateParamsToProps(this.searchProps);
-    await this.renderReactComponent(domNode, this.searchProps);
+    this.renderReactComponent(domNode, this.searchProps);
   }
 
-  private async renderReactComponent(domNode: HTMLElement, searchProps: SearchProps) {
-    return new Promise(() => {
-      ReactDOM.render(<SavedSearchEmbeddableComponentMemoized {...searchProps} />, domNode);
-    });
+  private renderReactComponent(domNode: HTMLElement, searchProps: SearchProps) {
+    const useLegacyTable = this.services.uiSettings.get(DOC_TABLE_LEGACY);
+    const props = {
+      searchProps,
+      useLegacyTable,
+      refs: domNode,
+    };
+    ReactDOM.render(<SavedSearchEmbeddableComponentMemoized {...props} />, domNode);
   }
 
   public reload() {
-    if (this.searchProps)
+    if (this.searchProps) {
       this.pushContainerStateParamsToProps(this.searchProps, { forceFetch: true });
+    }
   }
 
   public getSavedSearch(): SavedSearch {
@@ -407,9 +408,7 @@ export class SavedSearchEmbeddable
     if (this.searchProps) {
       delete this.searchProps;
     }
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
+    this.subscription?.unsubscribe();
 
     if (this.abortController) this.abortController.abort();
   }

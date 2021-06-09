@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { render } from 'react-dom';
 import React, { useRef, useEffect } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { IScope } from 'angular';
@@ -47,7 +46,9 @@ function getRenderFn(domNode: Element, props: DocTableEmbeddableProps) {
       const injector = await getServices().getEmbeddableInjector();
       return await injectAngularElement(domNode, directive.template, props, injector);
     } catch (e) {
-      render(<div>error</div>, domNode);
+      // eslint-disable-next-line no-console
+      console.error(e);
+      throw e;
     }
   };
 }
@@ -77,9 +78,7 @@ function DocTableLegacyInner(renderProps: DocTableEmbeddableProps) {
 
   useEffect(() => {
     return () => {
-      if (scope.current) {
-        scope.current.$destroy();
-      }
+      scope.current?.$destroy();
     };
   }, []);
   return <React.Fragment />;
