@@ -232,8 +232,10 @@ export const expandFirstTimelineEventDetails = () => {
   cy.get(TOGGLE_TIMELINE_EXPAND_EVENT).first().click({ force: true });
 };
 
-export const markAsFavorite = (): Cypress.Chainable<JQuery<HTMLElement>> => {
-  return cy.get(STAR_ICON).should('exist').click({ force: true });
+export const markAsFavorite = () => {
+  cy.root().pipe(($el) => {
+    return $el.find(STAR_ICON).trigger('click');
+  });
 };
 
 export const openTimelineFieldsBrowser = () => {
