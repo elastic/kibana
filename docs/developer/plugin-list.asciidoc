@@ -377,6 +377,10 @@ The client-side plugin configures following values:
 |Contains the enhancements to the OSS discover app.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/ecs_mapper/README.md[ecsMapper]
+|This tool generates a starter Elasticsearch pipeline from a CSV to help you quickly get started in mapping new data sources to ECS.
+
+
 |<<enhanced-embeddables-plugin>>
 |Enhances Embeddables by registering a custom factory provider. The enhanced factory provider
 adds dynamic actions to every embeddables state, in order to support drilldowns.
