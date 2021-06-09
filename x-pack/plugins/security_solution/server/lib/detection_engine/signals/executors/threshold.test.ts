@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { alertsMock, AlertServicesMock } from '../../../../../../alerting/server/mocks';
 import { thresholdExecutor } from './threshold';
@@ -55,7 +56,7 @@ describe('threshold_executor', () => {
       const exceptionItems = [getExceptionListItemSchemaMock({ entries: [getEntryListMock()] })];
       const response = await thresholdExecutor({
         rule: thresholdSO,
-        tuples: [],
+        tuple: { to: moment(), from: moment(), maxSignals: 100 },
         exceptionItems,
         services: alertServices,
         version,
