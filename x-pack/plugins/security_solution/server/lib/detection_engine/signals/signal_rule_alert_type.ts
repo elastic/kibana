@@ -282,20 +282,22 @@ export const signalRulesAlertType = ({
           }
         } else if (isQueryRule(type)) {
           const queryRuleSO = validateQueryRuleTypes(savedObject);
-          result = await queryExecutor({
-            rule: queryRuleSO,
-            tuples,
-            listClient,
-            exceptionItems,
-            services,
-            version,
-            searchAfterSize,
-            logger,
-            eventsTelemetry,
-            buildRuleMessage,
-            bulkCreate,
-            wrapHits,
-          });
+          for (const tuple of tuples) {
+            result = await queryExecutor({
+              rule: queryRuleSO,
+              tuple,
+              listClient,
+              exceptionItems,
+              services,
+              version,
+              searchAfterSize,
+              logger,
+              eventsTelemetry,
+              buildRuleMessage,
+              bulkCreate,
+              wrapHits,
+            });
+          }
         } else if (isEqlRule(type)) {
           const eqlRuleSO = asTypeSpecificSO(savedObject, eqlRuleParams);
           result = await eqlExecutor({
