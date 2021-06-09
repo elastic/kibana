@@ -124,10 +124,10 @@ describe('AllRules', () => {
         loadingRulesAction: null,
         loadingRuleIds: [],
         selectedRuleIds: [],
-        exportRuleIds: [],
         lastUpdated: 0,
         isRefreshOn: true,
         isRefreshing: false,
+        isAllSelected: false,
         showIdleModal: false,
       };
 
@@ -189,7 +189,7 @@ describe('AllRules', () => {
     const wrapper = shallow(
       <AllRules
         createPrePackagedRules={jest.fn()}
-        hasNoPermissions={false}
+        hasPermissions
         loading={false}
         loadingCreatePrePackagedRules={false}
         refetchPrePackagedRulesStatus={jest.fn()}
@@ -209,7 +209,7 @@ describe('AllRules', () => {
       <TestProviders>
         <AllRules
           createPrePackagedRules={jest.fn()}
-          hasNoPermissions={false}
+          hasPermissions
           loading={false}
           loadingCreatePrePackagedRules={false}
           refetchPrePackagedRulesStatus={jest.fn()}
@@ -245,7 +245,7 @@ describe('AllRules', () => {
       <TestProviders>
         <AllRules
           createPrePackagedRules={jest.fn()}
-          hasNoPermissions={false}
+          hasPermissions
           loading={false}
           loadingCreatePrePackagedRules={false}
           refetchPrePackagedRulesStatus={jest.fn()}
@@ -279,7 +279,7 @@ describe('AllRules', () => {
         <TestProviders>
           <AllRules
             createPrePackagedRules={jest.fn()}
-            hasNoPermissions={false}
+            hasPermissions
             loading={false}
             loadingCreatePrePackagedRules={false}
             refetchPrePackagedRulesStatus={jest.fn()}
@@ -304,7 +304,7 @@ describe('AllRules', () => {
       <TestProviders>
         <AllRules
           createPrePackagedRules={jest.fn()}
-          hasNoPermissions={false}
+          hasPermissions
           loading={false}
           loadingCreatePrePackagedRules={false}
           refetchPrePackagedRulesStatus={jest.fn()}
@@ -332,7 +332,7 @@ describe('AllRules', () => {
       <TestProviders>
         <AllRules
           createPrePackagedRules={jest.fn()}
-          hasNoPermissions={false}
+          hasPermissions
           loading={false}
           loadingCreatePrePackagedRules={false}
           refetchPrePackagedRulesStatus={jest.fn()}

@@ -39,6 +39,10 @@ export type StartServices = CoreStart &
     security: SecurityPluginSetup;
   };
 
+export interface Owner {
+  owner: string[];
+}
+
 export interface CasesUiStart {
   getAllCases: (props: AllCasesProps) => ReactElement<AllCasesProps>;
   getAllCasesSelectorModal: (

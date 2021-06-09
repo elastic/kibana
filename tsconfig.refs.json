@@ -119,5 +119,6 @@
     { "path": "./x-pack/plugins/index_lifecycle_management/tsconfig.json" },
     { "path": "./x-pack/plugins/uptime/tsconfig.json" },
     { "path": "./x-pack/plugins/xpack_legacy/tsconfig.json" },
+    { "path": "./x-pack/test/tsconfig.json" },
   ]
 }

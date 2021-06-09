@@ -19,6 +19,7 @@ import {
   TooltipValue,
   niceTimeFormatter,
   ElementClickListener,
+  GeometryValue,
   RectAnnotation,
   RectAnnotationDatum,
 } from '@elastic/charts';
@@ -141,7 +142,8 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
   const onClickPoint: ElementClickListener = useCallback(
     ([[geometryValue]]) => {
       if (!Array.isArray(geometryValue)) {
-        const { x: timestamp } = geometryValue;
+        // casting to GeometryValue as we are using cartesian charts
+        const { x: timestamp } = geometryValue as GeometryValue;
         jumpToTime(timestamp);
         stopAutoReload();
       }
