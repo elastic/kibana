@@ -115,7 +115,7 @@ export const AppContainer: FunctionComponent<Props> = ({
           size="xxl"
         />
       )}
-      <div className={APP_WRAPPER_CLASS} key={appId} ref={elementRef} />
+      <div className={APP_WRAPPER_CLASS} key={appId} ref={elementRef} aria-busy={showSpinner} />
     </Fragment>
   );
 };
