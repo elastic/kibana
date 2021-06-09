@@ -17,6 +17,9 @@ import { SetupModeRenderer } from '../../../components/renderers';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { CODE_PATH_ALL } from '../../../../common/constants';
 import { EnableAlertsModal } from '../../../alerts/enable_alerts_modal.tsx';
+import { AlertsDropdown } from '../../../alerts/alerts_dropdown';
+import { HeaderMenuPortal } from '../../../../../observability/public';
+import { Legacy } from '../../../legacy_shims';
 
 const CODE_PATHS = [CODE_PATH_ALL];
 
@@ -71,23 +74,30 @@ uiRoutes.when('/overview', {
           }
 
           this.renderReact(
-            <SetupModeRenderer
-              scope={$scope}
-              injector={$injector}
-              render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
-                <SetupModeContext.Provider value={{ setupModeSupported: true }}>
-                  {flyoutComponent}
-                  <Overview
-                    cluster={data}
-                    alerts={this.alerts}
-                    setupMode={setupMode}
-                    showLicenseExpiration={showLicenseExpiration}
-                  />
-                  <EnableAlertsModal />
-                  {bottomBarComponent}
-                </SetupModeContext.Provider>
-              )}
-            />
+            <>
+              <HeaderMenuPortal
+                setHeaderActionMenu={Legacy.shims.appMountParameters.setHeaderActionMenu}
+              >
+                <AlertsDropdown />
+              </HeaderMenuPortal>
+              <SetupModeRenderer
+                scope={$scope}
+                injector={$injector}
+                render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
+                  <SetupModeContext.Provider value={{ setupModeSupported: true }}>
+                    {flyoutComponent}
+                    <Overview
+                      cluster={data}
+                      alerts={this.alerts}
+                      setupMode={setupMode}
+                      showLicenseExpiration={showLicenseExpiration}
+                    />
+                    <EnableAlertsModal />
+                    {bottomBarComponent}
+                  </SetupModeContext.Provider>
+                )}
+              />
+            </>
           );
         }
       );
