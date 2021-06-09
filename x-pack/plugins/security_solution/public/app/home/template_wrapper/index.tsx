@@ -7,8 +7,10 @@
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { CommonProps, EuiPanel } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
+import { AppLeaveHandler } from '../../../../../../../src/core/public';
 import { KibanaPageTemplate } from '../../../../../../../src/plugins/kibana_react/public';
+import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
 import { TimelineId } from '../../../../common/types/timeline';
 import { IS_DRAGGING_CLASS_NAME } from '../../../common/components/drag_and_drop/drag_classnames';
 import { getTimelineShowStatusByIdSelector } from '../../../timelines/components/flyout/selectors';
@@ -19,7 +21,6 @@ import {
   SecuritySolutionBottomBar,
   SecuritySolutionBottomBarProps,
 } from './bottom_bar';
-import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
 
 /* eslint-disable react/display-name */
 
@@ -49,42 +50,39 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
 
 const StyledKQLEuiPanel = styled(EuiPanel)`
   position: sticky;
-  top: 96px;
+  top: 96px; // The height of the fixed kibana global header (search row + breadcrumbsRow)
   z-index: 100;
 `;
 
 interface SecuritySolutionPageWrapperProps {
-  children: React.ReactNode;
-  noPadding?: boolean;
-  noTimeline?: boolean;
-  restrictWidth?: boolean | number | string;
+  onAppLeave: (handler: AppLeaveHandler) => void;
 }
 
-export const SecuritySolutionTemplateWrapper: React.FC<
-  SecuritySolutionPageWrapperProps & CommonProps
-> = React.memo(({ children }) => {
-  const solutionNav = useSecuritySolutionNavigation();
-  const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
-  const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
-    getTimelineShowStatus(state, TimelineId.active)
-  );
+export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapperProps> = React.memo(
+  ({ children, onAppLeave }) => {
+    const solutionNav = useSecuritySolutionNavigation();
+    const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
+    const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
+      getTimelineShowStatus(state, TimelineId.active)
+    );
 
-  return (
-    <StyledKibanaPageTemplate
-      $isShowingTimelineOverlay={isShowingTimelineOverlay}
-      bottomBarProps={SecuritySolutionBottomBarProps}
-      bottomBar={<SecuritySolutionBottomBar />}
-      paddingSize="none"
-      solutionNav={solutionNav}
-      restrictWidth={false}
-      template="default"
-    >
-      <StyledKQLEuiPanel color="subdued" paddingSize="s">
-        <GlobalKQLHeader />
-      </StyledKQLEuiPanel>
-      <EuiPanel className="securityPageWrapper" data-test-subj="pageContainer">
-        {children}
-      </EuiPanel>
-    </StyledKibanaPageTemplate>
-  );
-});
+    return (
+      <StyledKibanaPageTemplate
+        $isShowingTimelineOverlay={isShowingTimelineOverlay}
+        bottomBarProps={SecuritySolutionBottomBarProps}
+        bottomBar={<SecuritySolutionBottomBar onAppLeave={onAppLeave} />}
+        paddingSize="none"
+        solutionNav={solutionNav}
+        restrictWidth={false}
+        template="default"
+      >
+        <StyledKQLEuiPanel color="subdued" paddingSize="s">
+          <GlobalKQLHeader />
+        </StyledKQLEuiPanel>
+        <EuiPanel className="securityPageWrapper" data-test-subj="pageContainer">
+          {children}
+        </EuiPanel>
+      </StyledKibanaPageTemplate>
+    );
+  }
+);

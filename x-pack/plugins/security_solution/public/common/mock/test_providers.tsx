@@ -25,10 +25,8 @@ import { FieldHook } from '../../shared_imports';
 import { SUB_PLUGINS_REDUCER } from './utils';
 import { createSecuritySolutionStorageMock, localStorageMock } from './mock_local_storage';
 import { UserPrivilegesProvider } from '../../detections/components/user_privileges';
-import { AppMountProvider } from '../../app/app_mount_context';
 
 const state: State = mockGlobalState;
-const noop = () => {};
 
 interface Props {
   children?: React.ReactNode;
@@ -55,9 +53,7 @@ const TestProvidersComponent: React.FC<Props> = ({
     <MockKibanaContextProvider>
       <ReduxStoreProvider store={store}>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <AppMountProvider appMountParams={{ onAppLeave: noop, setHeaderActionMenu: noop }}>
-            <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
-          </AppMountProvider>
+          <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
         </ThemeProvider>
       </ReduxStoreProvider>
     </MockKibanaContextProvider>
@@ -78,9 +74,7 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
       <ReduxStoreProvider store={store}>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
           <UserPrivilegesProvider>
-            <AppMountProvider appMountParams={{ onAppLeave: noop, setHeaderActionMenu: noop }}>
-              <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
-            </AppMountProvider>
+            <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
           </UserPrivilegesProvider>
         </ThemeProvider>
       </ReduxStoreProvider>
