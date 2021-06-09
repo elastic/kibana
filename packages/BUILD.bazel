@@ -40,6 +40,7 @@ filegroup(
       "//packages/kbn-securitysolution-utils:build",
       "//packages/kbn-securitysolution-es-utils:build",
       "//packages/kbn-server-http-tools:build",
+      "//packages/kbn-server-route-repository:build",
       "//packages/kbn-std:build",
       "//packages/kbn-telemetry-tools:build",
       "//packages/kbn-tinymath:build",

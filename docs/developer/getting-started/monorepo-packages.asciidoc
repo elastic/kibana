@@ -97,6 +97,7 @@ yarn kbn watch-bazel
 - @kbn/securitysolution-list-utils
 - @kbn/securitysolution-utils
 - @kbn/server-http-tools
+- @kbn/server-route-repository
 - @kbn/std
 - @kbn/telemetry-utils
 - @kbn/tinymath
