@@ -8,10 +8,11 @@
 
 import { inspect } from 'util';
 import Fs from 'fs/promises';
+import { existsSync } from 'fs';
 import Path from 'path';
 
 import FormData from 'form-data';
-import { ToolingLog, isAxiosResponseError, createFailError } from '@kbn/dev-utils';
+import { ToolingLog, isAxiosResponseError, createFailError, REPO_ROOT } from '@kbn/dev-utils';
 
 import { KbnClientRequester, uriencode, ReqOptions } from './kbn_client_requester';
 import { KbnClientSavedObjects } from './kbn_client_saved_objects';
@@ -39,7 +40,7 @@ export class KbnClientImportExport {
     public readonly log: ToolingLog,
     public readonly requester: KbnClientRequester,
     public readonly savedObjects: KbnClientSavedObjects,
-    public readonly dir?: string
+    public readonly baseDir: string = REPO_ROOT
   ) {}
 
   private resolvePath(path: string) {
@@ -47,13 +48,14 @@ export class KbnClientImportExport {
       path = `${path}.json`;
     }
 
-    if (!this.dir && !Path.isAbsolute(path)) {
+    const absolutePath = Path.resolve(this.baseDir, path);
+    if (existsSync(absolutePath)) {
       throw new Error(
-        'unable to resolve relative path to import/export without a configured dir, either path absolute path or specify --dir'
+        `unable to resolve path [${path}] to import/export, resolved relative to [${this.baseDir}]`
       );
     }
 
-    return this.dir ? Path.resolve(this.dir, path) : path;
+    return absolutePath;
   }
 
   async load(name: string, options?: { space?: string }) {
