@@ -40,17 +40,27 @@ export interface EndpointActionResponse {
 
 export interface ActivityLogAction {
   type: 'action';
-  item: EndpointAction;
+  item: {
+    // document _id
+    id: string;
+    // document _source
+    data: EndpointAction;
+  };
 }
-
 export interface ActivityLogActionResponse {
   type: 'response';
-  item: EndpointActionResponse;
+  item: {
+    // document id
+    id: string;
+    // document _source
+    data: EndpointActionResponse;
+  };
 }
-
 export type ActivityLogEntry = ActivityLogAction | ActivityLogActionResponse;
-
-export type ActivityLog = ActivityLogEntry[];
+export interface ActivityLog {
+  total: number;
+  items: ActivityLogEntry[];
+}
 
 export type HostIsolationRequestBody = TypeOf<typeof HostIsolationRequestSchema.body>;
 

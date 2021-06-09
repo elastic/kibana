@@ -32,6 +32,7 @@ import { registerActionAuditLogRoutes } from './audit_log';
 import uuid from 'uuid';
 import { aMockAction, aMockResponse, MockAction, mockAuditLog, MockResponse } from './mocks';
 import { SecuritySolutionRequestHandlerContext } from '../../../types';
+import { ActivityLog } from '../../../../common/endpoint/types';
 
 describe('Action Log API', () => {
   describe('schema', () => {
@@ -125,7 +126,7 @@ describe('Action Log API', () => {
           _source: a.build(),
         }));
         const responsesData = responses.map((r) => ({
-          _index: '.fleet-actions-results',
+          _index: '.ds-.fleet-actions-results-2021.06.09-000001',
           _source: r.build(),
         }));
         const mockResult = mockAuditLog([...actionsData, ...responsesData]);
@@ -150,9 +151,8 @@ describe('Action Log API', () => {
     it('should return an empty array when nothing in audit log', async () => {
       havingActionsAndResponses([], []);
       const response = await getActivityLog();
-
       expect(response.ok).toBeCalled();
-      expect(response.ok.mock.calls[0][0]?.body as any).toHaveLength(0);
+      expect((response.ok.mock.calls[0][0]?.body as ActivityLog).items).toHaveLength(0);
     });
 
     it('should have actions and action responses', async () => {
@@ -165,12 +165,12 @@ describe('Action Log API', () => {
         [aMockResponse(actionID, mockID), aMockResponse(actionID, mockID)]
       );
       const response = await getActivityLog();
-      const responseBody = response.ok.mock.calls[0][0]?.body as [];
+      const responseBody = response.ok.mock.calls[0][0]?.body as ActivityLog;
 
       expect(response.ok).toBeCalled();
-      expect(responseBody).toHaveLength(5);
-      expect(responseBody.filter((x: any) => x.type === 'response')).toHaveLength(2);
-      expect(responseBody.filter((x: any) => x.type === 'action')).toHaveLength(3);
+      expect(responseBody.items).toHaveLength(5);
+      expect(responseBody.items.filter((x: any) => x.type === 'response')).toHaveLength(2);
+      expect(responseBody.items.filter((x: any) => x.type === 'action')).toHaveLength(3);
     });
 
     it('should throw errors when no results for some agentID', async () => {
