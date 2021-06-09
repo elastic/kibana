@@ -15,7 +15,7 @@ import {
   ResolveLogSourceConfigurationError,
 } from '../../../common/log_sources';
 import { useLinkProps } from '../../hooks/use_link_props';
-import { PageTemplate } from '../../pages/logs/page_template';
+import { LogsPageTemplate } from '../../pages/logs/page_template';
 
 export const LogSourceErrorPage: React.FC<{
   errors: Error[];
@@ -24,7 +24,7 @@ export const LogSourceErrorPage: React.FC<{
   const settingsLinkProps = useLinkProps({ app: 'logs', pathname: '/settings' });
 
   return (
-    <PageTemplate isEmptyState={true}>
+    <LogsPageTemplate isEmptyState={true}>
       <EuiEmptyPrompt
         iconType="alert"
         iconColor="danger"
@@ -67,7 +67,7 @@ export const LogSourceErrorPage: React.FC<{
           </EuiButtonEmpty>,
         ]}
       />
-    </PageTemplate>
+    </LogsPageTemplate>
   );
 };
 

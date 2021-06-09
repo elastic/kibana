@@ -24,7 +24,7 @@ import {
 } from '../../../../../../components/logging/log_analysis_setup';
 import { useMetricHostsModuleContext } from '../../../../../../containers/ml/modules/metrics_hosts/module';
 import { useMetricK8sModuleContext } from '../../../../../../containers/ml/modules/metrics_k8s/module';
-import { LoadingPage } from '../../../../../../components/loading_page';
+import { LoadingPage, LoadingPrompt } from '../../../../../../components/loading_page';
 import { useLinkProps } from '../../../../../../hooks/use_link_props';
 import { AnomaliesTable } from './anomalies_table/anomalies_table';
 
@@ -81,12 +81,12 @@ export const FlyoutHome = (props: Props) => {
   });
 
   if (!hasInfraMLCapabilities) {
-    return <SubscriptionSplashContent />;
+    return <SubscriptionSplashContent includePageTemplate={false} />;
   } else if (!hasInfraMLReadCapabilities) {
     return <MissingResultsPrivilegesPrompt />;
   } else if (hostSetupStatus.type === 'initializing' || k8sSetupStatus.type === 'initializing') {
     return (
-      <LoadingPage
+      <LoadingPrompt
         message={i18n.translate('xpack.infra.ml.anomalyFlyout.jobStatusLoadingMessage', {
           defaultMessage: 'Checking status of metrics jobs...',
         })}

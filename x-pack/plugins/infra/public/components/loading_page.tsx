@@ -21,16 +21,22 @@ export const LoadingPage = ({
 }: LoadingPageProps) => {
   return (
     <PageTemplate isEmptyState={true} data-test-subj={dataTestSubj}>
-      <EuiEmptyPrompt
-        body={
-          <EuiFlexGroup alignItems="center" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="xl" style={{ marginRight: '8px' }} />
-            </EuiFlexItem>
-            <EuiFlexItem>{message}</EuiFlexItem>
-          </EuiFlexGroup>
-        }
-      />
+      <LoadingPrompt message={message} />
     </PageTemplate>
+  );
+};
+
+export const LoadingPrompt = ({ message }: LoadingPageProps) => {
+  return (
+    <EuiEmptyPrompt
+      body={
+        <EuiFlexGroup alignItems="center" gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" style={{ marginRight: '8px' }} />
+          </EuiFlexItem>
+          <EuiFlexItem>{message}</EuiFlexItem>
+        </EuiFlexGroup>
+      }
+    />
   );
 };
