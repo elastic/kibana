@@ -67,6 +67,7 @@ export class AnalyticsManager {
   async setInferenceModels() {
     try {
       const models = await this.getAnalyticsModels();
+      // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
       this.inferenceModels = models;
     } catch (error) {
       // eslint-disable-next-line
@@ -77,6 +78,7 @@ export class AnalyticsManager {
   async setJobStats() {
     try {
       const jobStats = await this.getAnalyticsStats();
+      // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
       this.jobStats = jobStats;
     } catch (error) {
       // eslint-disable-next-line
@@ -133,8 +135,10 @@ export class AnalyticsManager {
 
     if (analyticsId !== undefined) {
       const jobStats = this.findJobStats(analyticsId);
+      // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
       jobData = { ...jobData, stats: { ...jobStats } };
     } else {
+      // @ts-expect-error @elastic-elasticsearch Data frame types incompletes
       jobData = jobData.map((job: any) => {
         const jobStats = this.findJobStats(job.id);
         return { ...job, stats: { ...jobStats } };
@@ -270,6 +274,7 @@ export class AnalyticsManager {
     // fetch model data and create model elements
     let data = await this.getAnalyticsModelData(modelId);
     const modelNodeId = `${data.model_id}-${JOB_MAP_NODE_TYPES.TRAINED_MODEL}`;
+    // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
     const sourceJobId = data?.metadata?.analytics_config?.id;
     let nextLinkId: string | undefined;
     let nextType: JobMapNodeTypes | undefined;
@@ -288,17 +293,22 @@ export class AnalyticsManager {
     // fetch source job data and create elements
     if (sourceJobId !== undefined) {
       try {
+        // @ts-expect-error @elastic-elasticsearch Data frame types incompletes
         data = await this.getAnalyticsData(sourceJobId);
+        // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
         nextLinkId = data?.source?.index[0];
         nextType = JOB_MAP_NODE_TYPES.INDEX;
 
+        // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
         previousNodeId = `${data.id}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
 
         resultElements.push({
           data: {
             id: previousNodeId,
+            // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
             label: data.id,
             type: JOB_MAP_NODE_TYPES.ANALYTICS,
+            // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
             analysisType: getAnalysisType(data?.analysis),
           },
         });
@@ -332,16 +342,20 @@ export class AnalyticsManager {
     const modelElements = [];
     const details: any = {};
     const data = await this.getAnalyticsData(jobId);
+    // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
     const nextLinkId = data?.source?.index[0];
     const nextType: JobMapNodeTypes = JOB_MAP_NODE_TYPES.INDEX;
 
+    // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
     const previousNodeId = `${data.id}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
 
     resultElements.push({
       data: {
         id: previousNodeId,
+        // @ts-expect-error @elastic-elasticsearch Data frame types incompletes
         label: data.id,
         type: JOB_MAP_NODE_TYPES.ANALYTICS,
+        // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
         analysisType: getAnalysisType(data?.analysis),
         isRoot: true,
       },
@@ -530,20 +544,27 @@ export class AnalyticsManager {
           const jobs = await this.getAnalyticsData();
           const comparator = rootTransform !== undefined ? rootTransform : rootIndexPattern;
 
+          // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
           for (let i = 0; i < jobs.length; i++) {
             if (
+              // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
               jobs[i]?.source?.index[0] === comparator &&
+              // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
               this.isDuplicateElement(jobs[i].id, result.elements) === false
             ) {
+              // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
               const nodeId = `${jobs[i].id}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
               result.elements.push({
                 data: {
                   id: nodeId,
+                  // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
                   label: jobs[i].id,
                   type: JOB_MAP_NODE_TYPES.ANALYTICS,
+                  // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
                   analysisType: getAnalysisType(jobs[i]?.analysis),
                 },
               });
+              // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
               result.details[nodeId] = jobs[i];
               const source = `${comparator}-${JOB_MAP_NODE_TYPES.INDEX}`;
               result.elements.push({
@@ -555,6 +576,7 @@ export class AnalyticsManager {
               });
               // Get inference model for analytics job and create model node
               ({ modelElement, modelDetails, edgeElement } = this.getAnalyticsModelElements(
+                // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
                 jobs[i].id
               ));
               if (isAnalyticsMapNodeElement(modelElement)) {
@@ -590,10 +612,14 @@ export class AnalyticsManager {
 
       if (analyticsId !== undefined) {
         const jobData = await this.getAnalyticsData(analyticsId);
+        // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
         const currentJobNodeId = `${jobData.id}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
+        // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
         rootIndex = Array.isArray(jobData?.dest?.index)
-          ? jobData?.dest?.index[0]
-          : jobData?.dest?.index;
+          ? // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
+            jobData?.dest?.index[0]
+          : // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
+            jobData?.dest?.index;
         rootIndexNodeId = `${rootIndex}-${JOB_MAP_NODE_TYPES.INDEX}`;
 
         // Fetch inference model for incoming job id and add node and edge
@@ -632,21 +658,28 @@ export class AnalyticsManager {
         rootIndexNodeId = `${rootIndex}-${JOB_MAP_NODE_TYPES.INDEX}`;
       }
 
+      // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
       for (let i = 0; i < jobs.length; i++) {
         if (
+          // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
           jobs[i]?.source?.index[0] === rootIndex &&
+          // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
           this.isDuplicateElement(jobs[i].id, result.elements) === false
         ) {
           // Create node for associated job
+          // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
           const nodeId = `${jobs[i].id}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
           result.elements.push({
             data: {
               id: nodeId,
+              // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
               label: jobs[i].id,
               type: JOB_MAP_NODE_TYPES.ANALYTICS,
+              // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
               analysisType: getAnalysisType(jobs[i]?.analysis),
             },
           });
+          // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
           result.details[nodeId] = jobs[i];
 
           result.elements.push({

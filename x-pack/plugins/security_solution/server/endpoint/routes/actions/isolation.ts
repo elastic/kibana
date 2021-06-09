@@ -20,6 +20,7 @@ import {
 } from '../../../types';
 import { getAgentIDsForEndpoints } from '../../services';
 import { EndpointAppContext } from '../../types';
+import { APP_ID } from '../../../../common/constants';
 import { userCanIsolate } from '../../../../common/endpoint/actions';
 
 /**
@@ -103,8 +104,9 @@ export const isolationRequestHandler = function (
     if (req.body.alert_ids && req.body.alert_ids.length > 0) {
       const newIDs: string[][] = await Promise.all(
         req.body.alert_ids.map(async (a: string) =>
-          (await endpointContext.service.getCasesClient(req, context)).getCaseIdsByAlertId({
-            alertId: a,
+          (await endpointContext.service.getCasesClient(req)).cases.getCaseIDsByAlertID({
+            alertID: a,
+            options: { owner: APP_ID },
           })
         )
       );
@@ -162,11 +164,12 @@ export const isolationRequestHandler = function (
     }
 
     caseIDs.forEach(async (caseId) => {
-      (await endpointContext.service.getCasesClient(req, context)).addComment({
+      (await endpointContext.service.getCasesClient(req)).attachments.add({
         caseId,
         comment: {
           comment: commentLines.join('\n'),
           type: CommentType.user,
+          owner: APP_ID,
         },
       });
     });
