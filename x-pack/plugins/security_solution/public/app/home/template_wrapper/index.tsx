@@ -15,6 +15,7 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { IS_DRAGGING_CLASS_NAME } from '../../../common/components/drag_and_drop/drag_classnames';
 import { getTimelineShowStatusByIdSelector } from '../../../timelines/components/flyout/selectors';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { GLOBAL_HEADER_HEIGHT } from '../../../../common/constants';
 import { GlobalKQLHeader } from './global_kql_header';
 import {
   BOTTOM_BAR_CLASSNAME,
@@ -51,7 +52,7 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
 const StyledKQLEuiPanel = styled(EuiPanel)`
   position: sticky;
   z-index: ${({ theme }) => theme.eui.euiZLevel2};
-  top: 96px; // The height of the fixed kibana global header (search row + breadcrumbsRow)
+  top: ${GLOBAL_HEADER_HEIGHT}px; // The height of the fixed kibana global header (search row + breadcrumbsRow)
 `;
 
 interface SecuritySolutionPageWrapperProps {
