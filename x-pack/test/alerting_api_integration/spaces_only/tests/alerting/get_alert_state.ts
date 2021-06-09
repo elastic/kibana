@@ -79,7 +79,6 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
         expect(value.state.instanceStateValue).to.be(true);
         expect(value.state.start).not.to.be(undefined);
         expect(value.state.duration).not.to.be(undefined);
-        expect(value.state.uuid).not.to.be(undefined);
       });
     });
 
@@ -137,7 +136,6 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
           expect(value.state.instanceStateValue).to.be(true);
           expect(value.state.start).not.to.be(undefined);
           expect(value.state.duration).not.to.be(undefined);
-          expect(value.state.uuid).not.to.be(undefined);
         });
       });
     });

@@ -73,28 +73,22 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
         alertId?: string;
         start?: string;
         durationToDate?: number;
-        id?: string;
       } = {};
-      const previousAlertIds: string[] = [];
       for (let i = 0; i < instanceEvents.length; ++i) {
         switch (instanceEvents[i]?.event?.action) {
           case 'new-instance':
             expect(instanceEvents[i]?.kibana?.alerting?.instance_id).to.equal('instance');
             // a new alert should generate a unique UUID for the duration of its activeness
-            expect(previousAlertIds.includes(instanceEvents[i]?.event?.id!)).to.be(false);
             expect(instanceEvents[i]?.event?.end).to.be(undefined);
 
             currentAlertSpan.alertId = instanceEvents[i]?.kibana?.alerting?.instance_id;
             currentAlertSpan.start = instanceEvents[i]?.event?.start;
             currentAlertSpan.durationToDate = instanceEvents[i]?.event?.duration;
-            currentAlertSpan.id = instanceEvents[i]?.event?.id;
-            previousAlertIds.push(instanceEvents[i]?.event?.id!);
             break;
 
           case 'active-instance':
             expect(instanceEvents[i]?.kibana?.alerting?.instance_id).to.equal('instance');
             expect(instanceEvents[i]?.event?.start).to.equal(currentAlertSpan.start);
-            expect(instanceEvents[i]?.event?.id).to.equal(currentAlertSpan.id);
             expect(instanceEvents[i]?.event?.end).to.be(undefined);
 
             if (instanceEvents[i]?.event?.duration! !== 0) {
@@ -108,7 +102,6 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
           case 'recovered-instance':
             expect(instanceEvents[i]?.kibana?.alerting?.instance_id).to.equal('instance');
             expect(instanceEvents[i]?.event?.start).to.equal(currentAlertSpan.start);
-            expect(instanceEvents[i]?.event?.id).to.equal(currentAlertSpan.id);
             expect(instanceEvents[i]?.event?.end).not.to.be(undefined);
             expect(
               new Date(instanceEvents[i]?.event?.end!).valueOf() -

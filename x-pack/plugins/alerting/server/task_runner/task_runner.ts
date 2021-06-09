@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Dictionary, pickBy, mapValues, without, cloneDeep } from 'lodash';
 import type { Request } from '@hapi/hapi';
@@ -619,7 +618,7 @@ function trackAlertDurations<
   // Inject start time into instance state of new instances
   for (const id of newAlertIds) {
     const state = currentAlerts[id].getState();
-    currentAlerts[id].replaceState({ ...state, start: currentTime, uuid: uuidv4() });
+    currentAlerts[id].replaceState({ ...state, start: currentTime });
   }
 
   // Calculate duration to date for active instances
@@ -633,7 +632,6 @@ function trackAlertDurations<
     currentAlerts[id].replaceState({
       ...state,
       ...(state.start ? { start: state.start } : {}),
-      ...(state.uuid ? { uuid: state.uuid } : {}),
       ...(duration !== undefined ? { duration } : {}),
     });
   }
@@ -747,7 +745,6 @@ function generateNewAndRecoveredInstanceEvents<
         ...(state?.start ? { start: state.start as string } : {}),
         ...(state?.end ? { end: state.end as string } : {}),
         ...(state?.duration !== undefined ? { duration: state.duration as number } : {}),
-        ...(state?.uuid ? { id: state.uuid as string } : {}),
       },
       kibana: {
         alerting: {
