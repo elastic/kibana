@@ -82,7 +82,16 @@ describe('Event filter form', () => {
     component = renderComponentWithdata();
 
     expect(component.getByTestId('alert-exception-builder')).not.toBeNull();
-    expect(component.getByText(NAME_ERROR)).not.toBeNull();
+  });
+
+  it('should display name error only when on blur and empty name', () => {
+    component = renderComponentWithdata();
+    expect(component.queryByText(NAME_ERROR)).toBeNull();
+    const nameInput = component.getByPlaceholderText(NAME_PLACEHOLDER);
+    act(() => {
+      fireEvent.blur(nameInput);
+    });
+    expect(component.queryByText(NAME_ERROR)).not.toBeNull();
   });
 
   it('should change name', async () => {

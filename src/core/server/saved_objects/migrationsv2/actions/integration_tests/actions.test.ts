@@ -242,9 +242,7 @@ describe('migration actions', () => {
     it('rejects if there is a non-retryable error', async () => {
       expect.assertions(1);
       const task = removeWriteBlock({ client, index: 'no_such_index' });
-      await expect(task()).rejects.toMatchInlineSnapshot(
-        `[ResponseError: index_not_found_exception]`
-      );
+      await expect(task()).rejects.toThrow('index_not_found_exception');
     });
   });
 
@@ -264,7 +262,7 @@ describe('migration actions', () => {
               // Allocate 1 replica so that this index stays yellow
               number_of_replicas: '1',
               // Disable all shard allocation so that the index status is red
-              index: { routing: { allocation: { enable: 'none' } } },
+              routing: { allocation: { enable: 'none' } },
             },
           },
         },
@@ -284,7 +282,7 @@ describe('migration actions', () => {
         index: 'red_then_yellow_index',
         body: {
           // Enable all shard allocation so that the index status turns yellow
-          index: { routing: { allocation: { enable: 'all' } } },
+          settings: { routing: { allocation: { enable: 'all' } } },
         },
       });
 
@@ -354,7 +352,7 @@ describe('migration actions', () => {
           index: 'clone_red_then_yellow_index',
           body: {
             // Enable all shard allocation so that the index status goes yellow
-            index: { routing: { allocation: { enable: 'all' } } },
+            settings: { routing: { allocation: { enable: 'all' } } },
           },
         });
         indexYellow = true;
@@ -859,9 +857,7 @@ describe('migration actions', () => {
         sourceIndex: 'no_such_index',
         targetIndex: 'existing_index_2',
       });
-      await expect(task()).rejects.toMatchInlineSnapshot(
-        `[ResponseError: index_not_found_exception]`
-      );
+      await expect(task()).rejects.toThrow('index_not_found_exception');
 
       task = verifyReindex({
         client,
@@ -1142,10 +1138,7 @@ describe('migration actions', () => {
         timeout: '10s',
       });
 
-      await expect(task()).rejects.toMatchInlineSnapshot(`
-                        [Error: pickupUpdatedMappings task failed with the following error:
-                        {"type":"index_not_found_exception","reason":"no such index [no_such_index]","resource.type":"index_or_alias","resource.id":"no_such_index","index_uuid":"_na_","index":"no_such_index"}]
-                    `);
+      await expect(task()).rejects.toThrow('index_not_found_exception');
     });
     it('resolves left wait_for_task_completion_timeout when the task does not complete within the timeout', async () => {
       const res = (await pickupUpdatedMappings(
@@ -1433,7 +1426,7 @@ describe('migration actions', () => {
           index: 'red_then_yellow_index',
           body: {
             // Disable all shard allocation so that the index status is red
-            index: { routing: { allocation: { enable: 'all' } } },
+            settings: { routing: { allocation: { enable: 'all' } } },
           },
         });
         indexYellow = true;
@@ -1455,7 +1448,7 @@ describe('migration actions', () => {
       // failure
       await expect(
         createIndex({ client, indexName: 'existing_index_2_alias', mappings: undefined as any })()
-      ).rejects.toMatchInlineSnapshot(`[ResponseError: invalid_index_name_exception]`);
+      ).rejects.toThrow('invalid_index_name_exception');
     });
   });
 
