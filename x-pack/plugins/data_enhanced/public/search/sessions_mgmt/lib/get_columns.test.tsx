@@ -97,6 +97,12 @@ describe('Search Sessions Management table column factory', () => {
           "width": "20%",
         },
         Object {
+          "field": "numSearches",
+          "name": "# Searches",
+          "render": [Function],
+          "sortable": true,
+        },
+        Object {
           "field": "status",
           "name": "Status",
           "render": [Function],
@@ -147,10 +153,29 @@ describe('Search Sessions Management table column factory', () => {
     });
   });
 
+  // Num of searches column
+  describe('num of searches', () => {
+    test('renders', () => {
+      const [, , numOfSearches] = getColumns(
+        mockCoreStart,
+        mockPluginsSetup,
+        api,
+        mockConfig,
+        tz,
+        handleAction
+      ) as Array<EuiTableFieldDataColumnType<UISession>>;
+
+      const numOfSearchesLine = mount(
+        numOfSearches.render!(mockSession.numSearches, mockSession) as ReactElement
+      );
+      expect(numOfSearchesLine.text()).toMatchInlineSnapshot(`"3"`);
+    });
+  });
+
   // Status column
   describe('status', () => {
     test('render in_progress', () => {
-      const [, , status] = getColumns(
+      const [, , , status] = getColumns(
         mockCoreStart,
         mockPluginsSetup,
         api,
@@ -166,7 +191,7 @@ describe('Search Sessions Management table column factory', () => {
     });
 
     test('error handling', () => {
-      const [, , status] = getColumns(
+      const [, , , status] = getColumns(
         mockCoreStart,
         mockPluginsSetup,
         api,
@@ -189,7 +214,7 @@ describe('Search Sessions Management table column factory', () => {
     test('render using Browser timezone', () => {
       tz = 'Browser';
 
-      const [, , , createdDateCol] = getColumns(
+      const [, , , , createdDateCol] = getColumns(
         mockCoreStart,
         mockPluginsSetup,
         api,
@@ -206,7 +231,7 @@ describe('Search Sessions Management table column factory', () => {
     test('render using AK timezone', () => {
       tz = 'US/Alaska';
 
-      const [, , , createdDateCol] = getColumns(
+      const [, , , , createdDateCol] = getColumns(
         mockCoreStart,
         mockPluginsSetup,
         api,
@@ -221,7 +246,7 @@ describe('Search Sessions Management table column factory', () => {
     });
 
     test('error handling', () => {
-      const [, , , createdDateCol] = getColumns(
+      const [, , , , createdDateCol] = getColumns(
         mockCoreStart,
         mockPluginsSetup,
         api,
