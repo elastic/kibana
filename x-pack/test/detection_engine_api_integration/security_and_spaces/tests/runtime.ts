@@ -32,13 +32,13 @@ export default ({ getService }: FtrProviderContext) => {
     describe('Regular runtime field mappings', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
-        await esArchiver.load('security_solution/runtime');
+        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/runtime');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
-        await esArchiver.unload('security_solution/runtime');
+        await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/runtime');
       });
 
       it('should copy normal non-runtime data set from the source index into the signals index in the same position when the target is ECS compatible', async () => {
@@ -68,13 +68,17 @@ export default ({ getService }: FtrProviderContext) => {
     describe('Runtime field mappings that have conflicts within them', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
-        await esArchiver.load('security_solution/runtime_conflicting_fields');
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/security_solution/runtime_conflicting_fields'
+        );
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
-        await esArchiver.unload('security_solution/runtime_conflicting_fields');
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/runtime_conflicting_fields'
+        );
       });
 
       // TODO: Make the overrides of runtime fields override the host.name in this use case.
