@@ -232,9 +232,11 @@ export function Detail() {
         redirectToPath = [
           PLUGIN_ID,
           {
-            path: pagePathGetters.policy_details({
-              policyId: agentPolicyId,
-            })[1],
+            path: `#${
+              pagePathGetters.policy_details({
+                policyId: agentPolicyId,
+              })[1]
+            }`,
           },
         ];
       } else {
