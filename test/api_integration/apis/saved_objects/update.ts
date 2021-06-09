@@ -14,15 +14,17 @@ export default function ({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('update', () => {
-    before(() =>
-      kibanaServer.importExport.load(
-        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
-      )
+    before(
+      async () =>
+        await kibanaServer.importExport.load(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+        )
     );
-    after(() =>
-      kibanaServer.importExport.unload(
-        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
-      )
+    after(
+      async () =>
+        await kibanaServer.importExport.unload(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+        )
     );
     it('should return 200', async () => {
       await supertest

@@ -261,17 +261,19 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('`has_reference` and `has_reference_operator` parameters', () => {
-      before(() =>
-        kibanaServer.importExport.load(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json',
-          { space: SPACE_ID }
-        )
+      before(
+        async () =>
+          await kibanaServer.importExport.load(
+            'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json',
+            { space: SPACE_ID }
+          )
       );
-      after(() =>
-        kibanaServer.importExport.unload(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json',
-          { space: SPACE_ID }
-        )
+      after(
+        async () =>
+          await kibanaServer.importExport.unload(
+            'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json',
+            { space: SPACE_ID }
+          )
       );
 
       it('search for a reference', async () => {
@@ -333,17 +335,19 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('searching for special characters', () => {
-      before(() =>
-        kibanaServer.importExport.load(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/find_edgecases.json',
-          { space: SPACE_ID }
-        )
+      before(
+        async () =>
+          await kibanaServer.importExport.load(
+            'test/api_integration/fixtures/kbn_archiver/saved_objects/find_edgecases.json',
+            { space: SPACE_ID }
+          )
       );
-      after(() =>
-        kibanaServer.importExport.unload(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/find_edgecases.json',
-          { space: SPACE_ID }
-        )
+      after(
+        async () =>
+          await kibanaServer.importExport.unload(
+            'test/api_integration/fixtures/kbn_archiver/saved_objects/find_edgecases.json',
+            { space: SPACE_ID }
+          )
       );
 
       it('can search for objects with dashes', async () =>

@@ -25,15 +25,17 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('with kibana index', () => {
-      before(() =>
-        kibanaServer.importExport.load(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
-        )
+      before(
+        async () =>
+          await kibanaServer.importExport.load(
+            'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+          )
       );
-      after(() =>
-        kibanaServer.importExport.unload(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
-        )
+      after(
+        async () =>
+          await kibanaServer.importExport.unload(
+            'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+          )
       );
 
       it('should return 200 with individual responses', async () =>
@@ -93,15 +95,17 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       describe('`hasReference` and `hasReferenceOperator` parameters', () => {
-        before(() =>
-          kibanaServer.importExport.load(
-            'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json'
-          )
+        before(
+          async () =>
+            await kibanaServer.importExport.load(
+              'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json'
+            )
         );
-        after(() =>
-          kibanaServer.importExport.unload(
-            'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json'
-          )
+        after(
+          async () =>
+            await kibanaServer.importExport.unload(
+              'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json'
+            )
         );
 
         it('search for a reference', async () => {
