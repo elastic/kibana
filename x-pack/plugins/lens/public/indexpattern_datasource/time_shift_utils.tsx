@@ -89,7 +89,7 @@ export const timeShiftOptions = [
   },
 ];
 
-export const timeShiftOptionOrder = timeShiftOptions.reduce(
+export const timeShiftOptionOrder = timeShiftOptions.reduce<{ [key: string]: number }>(
   (optionMap, { value }, index) => ({
     ...optionMap,
     [value]: index,

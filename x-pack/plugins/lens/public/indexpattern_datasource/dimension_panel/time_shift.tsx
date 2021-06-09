@@ -17,7 +17,7 @@ import {
   IndexPatternColumn,
   operationDefinitionMap,
 } from '../operations';
-import { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from '../types';
+import { IndexPattern, IndexPatternLayer } from '../types';
 import { IndexPatternDimensionEditorProps } from './dimension_panel';
 import { getLayerTimeShiftChecks, timeShiftOptions } from '../time_shift_utils';
 
