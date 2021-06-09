@@ -333,8 +333,9 @@ export function loadDocument(
             ...(!isEqual(persistedDoc, doc) ? { persistedDoc: doc } : null),
           })
         );
+      } else {
+        redirectCallback();
       }
-      redirectCallback();
     },
     () => {
       lensStore.dispatch(
