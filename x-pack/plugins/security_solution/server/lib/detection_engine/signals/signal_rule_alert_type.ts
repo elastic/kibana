@@ -65,8 +65,8 @@ import {
   RuleParams,
   savedQueryRuleParams,
 } from '../schemas/rule_schemas';
-import { bulkCreateFactory } from './bulk_create';
-import { buildWrappedSignalsFactory } from './build_wrapped_signals_factory';
+import { bulkCreateFactory } from './bulk_create_factory';
+import { wrapHitsFactory } from './wrap_hits_factory';
 
 export const signalRulesAlertType = ({
   logger,
@@ -228,7 +228,7 @@ export const signalRulesAlertType = ({
           refresh
         );
 
-        const wrapHits = buildWrappedSignalsFactory({
+        const wrapHits = wrapHitsFactory({
           ruleSO: savedObject,
           signalsIndex: params.outputIndex,
         });

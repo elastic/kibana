@@ -31,7 +31,7 @@ import { Logger, SavedObject } from '../../../../../../../src/core/server';
 import { BuildRuleMessage } from './rule_messages';
 import { TelemetryEventsSender } from '../../telemetry/sender';
 import { RuleParams } from '../schemas/rule_schemas';
-import { GenericBulkCreateResponse } from './bulk_create';
+import { GenericBulkCreateResponse } from './bulk_create_factory';
 
 // used for gap detection code
 // eslint-disable-next-line @typescript-eslint/naming-convention

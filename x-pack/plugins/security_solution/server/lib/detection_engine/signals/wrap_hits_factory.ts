@@ -10,7 +10,7 @@ import { generateId } from './utils';
 import { buildBulkBody } from './build_bulk_body';
 import { filterDuplicateSignals } from './filter_duplicate_signals';
 
-export const buildWrappedSignalsFactory = ({
+export const wrapHitsFactory = ({
   ruleSO,
   signalsIndex,
 }: {
