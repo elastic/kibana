@@ -2,14 +2,9 @@
   "id": "runtimeFields",
   "version": "kibana",
   "server": false,
-  "ui": true,
-  "requiredPlugins": [
-  ],
-  "optionalPlugins": [
-  ],
+  "ui": false,
+  "requiredPlugins": [],
+  "optionalPlugins": [],
   "configPath": ["xpack", "runtime_fields"],
-  "requiredBundles": [
-    "kibanaReact",
-    "esUiShared"
-  ]
+  "requiredBundles": ["kibanaReact", "esUiShared"]
 }

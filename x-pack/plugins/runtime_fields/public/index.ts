@@ -9,4 +9,4 @@ export type { RuntimeFieldEditorFlyoutContentProps, RuntimeFieldFormState } from
 
 export { RuntimeFieldEditorFlyoutContent, RuntimeFieldEditor } from './components';
 export { RUNTIME_FIELD_OPTIONS } from './constants';
-export type { RuntimeField, RuntimeType, PluginSetup as RuntimeFieldsSetup } from './types';
+export type { RuntimeField, RuntimeType } from './types';
