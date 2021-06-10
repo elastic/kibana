@@ -8801,8 +8801,6 @@
     "xpack.fleet.agentDetailsIntegrations.viewLogsButton": "ログを表示",
     "xpack.fleet.agentEnrollment.agentDescription": "Elastic エージェントをホストに追加し、データを収集して、Elastic Stack に送信します。",
     "xpack.fleet.agentEnrollment.agentsNotInitializedText": "エージェントを登録する前に、{link}。",
-    "xpack.fleet.agentEnrollment.cancelButtonLabel": "キャンセル",
-    "xpack.fleet.agentEnrollment.continueButtonLabel": "続行",
     "xpack.fleet.agentEnrollment.copyPolicyButton": "クリップボードにコピー",
     "xpack.fleet.agentEnrollment.copyRunInstructionsButton": "クリップボードにコピー",
     "xpack.fleet.agentEnrollment.downloadDescription": "Elasticエージェントダウンロードページでは、エージェントバイナリと検証署名をダウンロードできます。",

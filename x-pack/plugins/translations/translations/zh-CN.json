@@ -8878,8 +8878,6 @@
     "xpack.fleet.agentDetailsIntegrations.viewLogsButton": "查看日志",
     "xpack.fleet.agentEnrollment.agentDescription": "将 Elastic 代理添加到您的主机，以收集数据并将其发送到 Elastic Stack。",
     "xpack.fleet.agentEnrollment.agentsNotInitializedText": "注册代理前，请{link}。",
-    "xpack.fleet.agentEnrollment.cancelButtonLabel": "取消",
-    "xpack.fleet.agentEnrollment.continueButtonLabel": "继续",
     "xpack.fleet.agentEnrollment.copyPolicyButton": "复制到剪贴板",
     "xpack.fleet.agentEnrollment.copyRunInstructionsButton": "复制到剪贴板",
     "xpack.fleet.agentEnrollment.downloadDescription": "可从 Elastic 代理下载页面下载代理二进制文件及其验证签名。",
