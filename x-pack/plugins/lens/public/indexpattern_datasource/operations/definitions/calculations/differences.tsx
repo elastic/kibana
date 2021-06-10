@@ -109,5 +109,22 @@ export const derivativeOperation: OperationDefinition<
   },
   timeScalingMode: 'optional',
   filterable: true,
+  documentation: {
+    section: 'calculation',
+    signature: i18n.translate('xpack.lens.indexPattern.differences.signature', {
+      defaultMessage: 'metric: number',
+    }),
+    description: i18n.translate('xpack.lens.indexPattern.differences.documentation', {
+      defaultMessage: `
+Calculates the difference to the last value of a metric over time. To use this function, you need to configure a date histogram dimension as well.
+Differences requires the data to be sequential. If your data is empty when using differences, try increasing the date histogram interval.
+
+This calculation will be done separately for separate series defined by filters or top values dimensions.
+
+Example: Visualize the change in bytes received over time:
+\`differences(sum(bytes))\`
+      `,
+    }),
+  },
   shiftable: true,
 };

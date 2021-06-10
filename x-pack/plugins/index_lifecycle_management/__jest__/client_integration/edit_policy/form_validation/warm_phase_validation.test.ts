@@ -7,7 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 import { i18nTexts } from '../../../../public/application/sections/edit_policy/i18n_texts';
-import { setupEnvironment } from '../../helpers/setup_environment';
+import { setupEnvironment } from '../../helpers';
 import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
 
 describe('<EditPolicy /> warm phase validation', () => {

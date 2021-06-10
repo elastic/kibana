@@ -16,8 +16,8 @@ import {
 import { ROLLOVER_FORM_PATHS } from '../constants';
 
 import { i18nTexts } from '../i18n_texts';
-import { PolicyFromES } from '../../../../../common/types';
-import { FormInternal, MinAgePhase } from '../types';
+import { PhaseWithTiming, PolicyFromES } from '../../../../../common/types';
+import { FormInternal } from '../types';
 
 const { numberGreaterThanField, containsCharsField, emptyField, startsWithField } = fieldValidators;
 
@@ -164,7 +164,7 @@ export const createPolicyNameValidations = ({
  * For example, the user can't define '5 days' for cold phase if the
  * warm phase is set to '10 days'.
  */
-export const minAgeGreaterThanPreviousPhase = (phase: MinAgePhase) => ({
+export const minAgeGreaterThanPreviousPhase = (phase: PhaseWithTiming) => ({
   formData,
 }: {
   formData: Record<string, number>;
@@ -173,7 +173,7 @@ export const minAgeGreaterThanPreviousPhase = (phase: MinAgePhase) => ({
     return;
   }
 
-  const getValueFor = (_phase: MinAgePhase) => {
+  const getValueFor = (_phase: PhaseWithTiming) => {
     const milli = formData[`_meta.${_phase}.minAgeToMilliSeconds`];
 
     const esFormat =

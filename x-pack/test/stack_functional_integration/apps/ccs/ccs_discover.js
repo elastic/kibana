@@ -227,7 +227,6 @@ export default ({ getService, getPageObjects }) => {
         url: process.env.TEST_KIBANA_URLDATA,
         certificateAuthorities: config.get('servers.kibana.certificateAuthorities'),
         uiSettingDefaults: kibanaServer.uiSettings,
-        importExportDir: config.get('kbnArchiver.directory'),
       });
 
       const esArchiver = new EsArchiver({
