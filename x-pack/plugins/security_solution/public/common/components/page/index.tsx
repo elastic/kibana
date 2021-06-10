@@ -8,11 +8,7 @@
 import { EuiBadge, EuiDescriptionList, EuiFlexGroup, EuiIcon } from '@elastic/eui';
 import styled, { createGlobalStyle } from 'styled-components';
 
-import {
-  GLOBAL_HEADER_HEIGHT,
-  FULL_SCREEN_TOGGLED_CLASS_NAME,
-  SCROLLING_DISABLED_CLASS_NAME,
-} from '../../../../common/constants';
+import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../common/constants';
 
 export const SecuritySolutionAppWrapper = styled.div`
   display: flex;
@@ -61,11 +57,6 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
   /* applies a "toggled" button style to the Full Screen button */
   .${FULL_SCREEN_TOGGLED_CLASS_NAME} {
     ${({ theme }) => `background-color: ${theme.eui.euiColorPrimary} !important`};
-  }
-
-  .${SCROLLING_DISABLED_CLASS_NAME} ${SecuritySolutionAppWrapper} {
-    max-height: calc(100vh - ${GLOBAL_HEADER_HEIGHT}px);
-    overflow-y: scroll;
   }
 
   /*

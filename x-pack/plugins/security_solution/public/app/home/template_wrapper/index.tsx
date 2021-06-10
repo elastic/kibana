@@ -7,20 +7,21 @@
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { CommonProps, EuiPanel } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
+import { AppLeaveHandler } from '../../../../../../../src/core/public';
 import { KibanaPageTemplate } from '../../../../../../../src/plugins/kibana_react/public';
+import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
 import { TimelineId } from '../../../../common/types/timeline';
 import { IS_DRAGGING_CLASS_NAME } from '../../../common/components/drag_and_drop/drag_classnames';
 import { getTimelineShowStatusByIdSelector } from '../../../timelines/components/flyout/selectors';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { GLOBAL_HEADER_HEIGHT } from '../../../../common/constants';
 import { GlobalKQLHeader } from './global_kql_header';
 import {
   BOTTOM_BAR_CLASSNAME,
   SecuritySolutionBottomBar,
   SecuritySolutionBottomBarProps,
 } from './bottom_bar';
-import { SecuritySolutionNavigationManager } from '../../../common/components/navigation';
-import { navTabs } from '../home_navigations';
 
 /* eslint-disable react/display-name */
 
@@ -48,41 +49,41 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
   }
 `;
 
+const StyledKQLEuiPanel = styled(EuiPanel)`
+  position: sticky;
+  z-index: ${({ theme }) => theme.eui.euiZLevel2};
+  top: ${GLOBAL_HEADER_HEIGHT}px; // The height of the fixed kibana global header (search row + breadcrumbsRow)
+`;
+
 interface SecuritySolutionPageWrapperProps {
-  children: React.ReactNode;
-  noPadding?: boolean;
-  noTimeline?: boolean;
-  restrictWidth?: boolean | number | string;
+  onAppLeave: (handler: AppLeaveHandler) => void;
 }
 
-export const SecuritySolutionTemplateWrapper: React.FC<
-  SecuritySolutionPageWrapperProps & CommonProps
-> = React.memo(({ children }) => {
-  const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
-  const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
-    getTimelineShowStatus(state, TimelineId.active)
-  );
+export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapperProps> = React.memo(
+  ({ children, onAppLeave }) => {
+    const solutionNav = useSecuritySolutionNavigation();
+    const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
+    const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
+      getTimelineShowStatus(state, TimelineId.active)
+    );
 
-  return (
-    <StyledKibanaPageTemplate
-      $isShowingTimelineOverlay={isShowingTimelineOverlay}
-      bottomBarProps={SecuritySolutionBottomBarProps}
-      bottomBar={<SecuritySolutionBottomBar />}
-      paddingSize="none"
-      pageSideBar={<SecuritySolutionNavigationManager navTabs={navTabs} isPrimary />}
-      restrictWidth={false}
-      template="default"
-    >
-      <EuiPanel
-        color="subdued"
-        paddingSize="s"
-        style={{ position: 'sticky', top: '96px', zIndex: 100 }}
+    return (
+      <StyledKibanaPageTemplate
+        $isShowingTimelineOverlay={isShowingTimelineOverlay}
+        bottomBarProps={SecuritySolutionBottomBarProps}
+        bottomBar={<SecuritySolutionBottomBar onAppLeave={onAppLeave} />}
+        paddingSize="none"
+        solutionNav={solutionNav}
+        restrictWidth={false}
+        template="default"
       >
-        <GlobalKQLHeader />
-      </EuiPanel>
-      <EuiPanel className="securityPageWrapper" data-test-subj="pageContainer">
-        {children}
-      </EuiPanel>
-    </StyledKibanaPageTemplate>
-  );
-});
+        <StyledKQLEuiPanel color="subdued" paddingSize="s">
+          <GlobalKQLHeader />
+        </StyledKQLEuiPanel>
+        <EuiPanel className="securityPageWrapper" data-test-subj="pageContainer">
+          {children}
+        </EuiPanel>
+      </StyledKibanaPageTemplate>
+    );
+  }
+);

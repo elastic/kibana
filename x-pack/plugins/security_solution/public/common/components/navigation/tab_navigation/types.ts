@@ -11,10 +11,10 @@ import { SourcererScopePatterns } from '../../../store/sourcerer/model';
 import { TimelineUrl } from '../../../../timelines/store/timeline/model';
 import { Filter, Query } from '../../../../../../../../src/plugins/data/public';
 
-import { SecuritySolutionNavigationManagerProps } from '../types';
+import { SecuritySolutionTabNavigationProps } from '../types';
 import { SiemRouteType } from '../../../utils/route/types';
 
-export interface TabNavigationProps extends SecuritySolutionNavigationManagerProps {
+export interface TabNavigationProps extends SecuritySolutionTabNavigationProps {
   pathName: string;
   pageName: string;
   tabName: SiemRouteType | undefined;
