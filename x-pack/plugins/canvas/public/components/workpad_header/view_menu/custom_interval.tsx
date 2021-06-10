@@ -56,12 +56,7 @@ export const CustomInterval = ({ gutterSize, buttonSize, onSubmit, defaultValue 
 
         <EuiFlexItem grow={false}>
           <EuiFormRow hasEmptyLabelSpace={true} display="rowCompressed">
-            <EuiButton
-              disabled={isInvalid}
-              size={buttonSize}
-              type="submit"
-              style={{ minWidth: 'auto' }}
-            >
+            <EuiButton disabled={isInvalid} size={buttonSize} type="submit" minWidth="auto">
               {strings.getButtonLabel()}
             </EuiButton>
           </EuiFormRow>
