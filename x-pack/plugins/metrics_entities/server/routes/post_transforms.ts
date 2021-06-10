@@ -37,9 +37,9 @@ export const postTransforms = (router: IRouter): void => {
         auto_start: autoStart = false,
         settings: {
           max_page_search_size: maxPageSearchSize = 500,
-          docs_per_second: docsPerSecond = null,
+          docs_per_second: docsPerSecond = undefined,
         } = {
-          docsPerSecond: null,
+          docsPerSecond: undefined,
           maxPageSearchSize: 500,
         },
         frequency = '1m',

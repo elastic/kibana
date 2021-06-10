@@ -1112,7 +1112,7 @@
         ],
         "source": {
           "path": "src/core/public/index.ts",
-          "lineNumber": 203
+          "lineNumber": 204
         },
         "deprecated": false,
         "children": [
@@ -1136,7 +1136,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 205
+              "lineNumber": 206
             },
             "deprecated": false
           },
@@ -1160,7 +1160,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 207
+              "lineNumber": 208
             },
             "deprecated": false
           },
@@ -1184,7 +1184,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 209
+              "lineNumber": 210
             },
             "deprecated": false
           },
@@ -1208,7 +1208,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 211
+              "lineNumber": 212
             },
             "deprecated": false
           },
@@ -1232,7 +1232,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 213
+              "lineNumber": 214
             },
             "deprecated": false
           },
@@ -1252,7 +1252,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 220
+              "lineNumber": 221
             },
             "deprecated": true,
             "references": []
@@ -1279,7 +1279,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 224
+              "lineNumber": 225
             },
             "deprecated": false,
             "returnComment": [],
@@ -1299,7 +1299,7 @@
         ],
         "source": {
           "path": "src/core/public/index.ts",
-          "lineNumber": 248
+          "lineNumber": 249
         },
         "deprecated": false,
         "children": [
@@ -1323,7 +1323,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 250
+              "lineNumber": 251
             },
             "deprecated": false
           },
@@ -1347,7 +1347,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 252
+              "lineNumber": 253
             },
             "deprecated": false
           },
@@ -1371,7 +1371,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 254
+              "lineNumber": 255
             },
             "deprecated": false
           },
@@ -1395,7 +1395,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 256
+              "lineNumber": 257
             },
             "deprecated": false
           },
@@ -1419,7 +1419,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 258
+              "lineNumber": 259
             },
             "deprecated": false
           },
@@ -1443,7 +1443,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 260
+              "lineNumber": 261
             },
             "deprecated": false
           },
@@ -1467,7 +1467,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 262
+              "lineNumber": 263
             },
             "deprecated": false
           },
@@ -1491,7 +1491,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 264
+              "lineNumber": 265
             },
             "deprecated": false
           },
@@ -1515,7 +1515,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 266
+              "lineNumber": 267
             },
             "deprecated": false
           },
@@ -1539,7 +1539,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 268
+              "lineNumber": 269
             },
             "deprecated": false
           },
@@ -1563,7 +1563,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 270
+              "lineNumber": 271
             },
             "deprecated": false
           },
@@ -1583,7 +1583,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 277
+              "lineNumber": 278
             },
             "deprecated": true,
             "references": [
@@ -5501,7 +5501,7 @@
             ],
             "signature": [
               "Record<string, ",
-              "AggregationContainer",
+              "AggregationsAggregationContainer",
               "> | undefined"
             ],
             "source": {
@@ -7427,7 +7427,7 @@
         ],
         "source": {
           "path": "src/core/public/index.ts",
-          "lineNumber": 234
+          "lineNumber": 235
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -10981,7 +10981,7 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 472
+          "lineNumber": 470
         },
         "deprecated": false,
         "children": [
@@ -11005,7 +11005,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 474
+              "lineNumber": 472
             },
             "deprecated": false
           },
@@ -11029,7 +11029,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 476
+              "lineNumber": 474
             },
             "deprecated": false
           },
@@ -11053,7 +11053,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 478
+              "lineNumber": 476
             },
             "deprecated": false
           },
@@ -11086,7 +11086,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 480
+              "lineNumber": 478
             },
             "deprecated": false
           },
@@ -11110,7 +11110,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 485
+              "lineNumber": 483
             },
             "deprecated": false
           },
@@ -11134,7 +11134,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 487
+              "lineNumber": 485
             },
             "deprecated": false
           },
@@ -11158,7 +11158,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 489
+              "lineNumber": 487
             },
             "deprecated": false
           },
@@ -11182,7 +11182,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 491
+              "lineNumber": 489
             },
             "deprecated": false
           },
@@ -11206,7 +11206,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 493
+              "lineNumber": 491
             },
             "deprecated": false
           },
@@ -11230,7 +11230,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 495
+              "lineNumber": 493
             },
             "deprecated": false
           },
@@ -11254,7 +11254,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 497
+              "lineNumber": 495
             },
             "deprecated": false
           },
@@ -11280,7 +11280,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 499
+              "lineNumber": 497
             },
             "deprecated": false,
             "returnComment": [],
@@ -11300,7 +11300,7 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 520
+          "lineNumber": 518
         },
         "deprecated": false,
         "children": [
@@ -11324,7 +11324,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 522
+              "lineNumber": 520
             },
             "deprecated": false
           },
@@ -11348,7 +11348,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 524
+              "lineNumber": 522
             },
             "deprecated": false
           },
@@ -11372,7 +11372,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 526
+              "lineNumber": 524
             },
             "deprecated": false
           },
@@ -11396,7 +11396,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 528
+              "lineNumber": 526
             },
             "deprecated": false
           },
@@ -11420,7 +11420,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 530
+              "lineNumber": 528
             },
             "deprecated": false
           },
@@ -11444,7 +11444,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 532
+              "lineNumber": 530
             },
             "deprecated": false
           }
@@ -14152,7 +14152,7 @@
             "signature": [
               "Pick<",
               "KibanaClient",
-              ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"helpers\" | \"count\" | \"search\" | \"security\" | \"eql\" | \"on\" | \"off\" | \"transform\" | \"emit\" | \"once\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
+              ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"helpers\" | \"count\" | \"search\" | \"security\" | \"eql\" | \"on\" | \"off\" | \"transform\" | \"emit\" | \"once\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
               "TransportRequestParams",
               ", options?: ",
               "TransportRequestOptions",
@@ -15356,7 +15356,7 @@
             "signature": [
               "Pick<",
               "KibanaClient",
-              ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"helpers\" | \"count\" | \"search\" | \"security\" | \"eql\" | \"on\" | \"off\" | \"transform\" | \"emit\" | \"once\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
+              ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"helpers\" | \"count\" | \"search\" | \"security\" | \"eql\" | \"on\" | \"off\" | \"transform\" | \"emit\" | \"once\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
               "TransportRequestParams",
               ", options?: ",
               "TransportRequestOptions",
@@ -15384,7 +15384,7 @@
             "signature": [
               "Pick<",
               "KibanaClient",
-              ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"helpers\" | \"count\" | \"search\" | \"security\" | \"eql\" | \"on\" | \"off\" | \"transform\" | \"emit\" | \"once\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
+              ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"helpers\" | \"count\" | \"search\" | \"security\" | \"eql\" | \"on\" | \"off\" | \"transform\" | \"emit\" | \"once\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
               "TransportRequestParams",
               ", options?: ",
               "TransportRequestOptions",
@@ -16059,14 +16059,14 @@
             "plugin": "securitySolution",
             "link": {
               "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
-              "lineNumber": 447
+              "lineNumber": 457
             }
           },
           {
             "plugin": "securitySolution",
             "link": {
               "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
-              "lineNumber": 466
+              "lineNumber": 476
             }
           },
           {
@@ -20463,7 +20463,7 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 439
+          "lineNumber": 437
         },
         "deprecated": false,
         "children": [
@@ -20567,7 +20567,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 440
+              "lineNumber": 438
             },
             "deprecated": false
           }
@@ -22343,7 +22343,7 @@
         "signature": [
           "Pick<",
           "KibanaClient",
-          ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"helpers\" | \"count\" | \"search\" | \"security\" | \"eql\" | \"on\" | \"off\" | \"transform\" | \"emit\" | \"once\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
+          ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"helpers\" | \"count\" | \"search\" | \"security\" | \"eql\" | \"on\" | \"off\" | \"transform\" | \"emit\" | \"once\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
           "TransportRequestParams",
           ", options?: ",
           "TransportRequestOptions",
@@ -24056,7 +24056,7 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 510
+          "lineNumber": 508
         },
         "deprecated": false,
         "initialIsOpen": false
