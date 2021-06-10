@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './expression_functions';
-export * from './expression_renderers';
+export * from './renderer_strings';

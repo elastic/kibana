@@ -10,6 +10,7 @@ import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../core/
 import { ExpressionsStart, ExpressionsSetup } from '../../../src/plugins/expressions/public';
 import { PLUGIN_NAME } from '../common';
 import { revealImageFunction } from './expression_functions';
+import { revealImageRenderer } from './expression_renderers';
 
 interface SetupDeps {
   expressions: ExpressionsSetup;
@@ -22,7 +23,7 @@ interface StartDeps {
 export class ExpressionRevealImagePlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionRevealImagePluginSetup {
     expressions.registerFunction(revealImageFunction);
-    expressions.registerRenderer(null);
+    expressions.registerRenderer(revealImageRenderer);
   }
 
   public start(core: CoreStart): ExpressionRevealImagePluginStart {
