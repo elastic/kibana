@@ -18,7 +18,7 @@ import {
   AlertServices,
 } from '../../../../../../alerting/server';
 import { BaseHit } from '../../../../../common/detection_engine/types';
-import { TermAggregationBucket } from '../../../types';
+import { Hit, TermAggregationBucket } from '../../../types';
 import { GenericBulkCreateResponse } from '../bulk_create_factory';
 import {
   calculateThresholdSignalUuid,
@@ -75,7 +75,7 @@ const getTransformedHits = (
     return [];
   }
 
-  const getCombinations = (buckets: TermAggregationBucket[], i: number, field: string) => {
+  const getCombinations = (buckets: TermAggregationBucket[], i: number, field: string | null) => {
     return buckets.reduce((acc: MultiAggBucket[], bucket: TermAggregationBucket) => {
       if (i < threshold.field.length - 1) {
         const nextLevelIdx = i + 1;
@@ -90,7 +90,7 @@ const getTransformedHits = (
           const el = {
             terms: [
               {
-                field,
+                field: field ?? '',
                 value: bucket.key,
               },
               ...val.terms,
@@ -105,7 +105,7 @@ const getTransformedHits = (
         const el = {
           terms: [
             {
-              field,
+              field: field ?? '',
               value: bucket.key,
             },
           ].filter((term) => term.field != null),
@@ -127,70 +127,69 @@ const getTransformedHits = (
     }, []);
   };
 
-  return getCombinations(results.aggregations![aggParts.name].buckets, 0, aggParts.field).reduce(
-    (acc: Array<BaseHit<SignalSource>>, bucket) => {
-      const hit = bucket.topThresholdHits?.hits.hits[0];
-      if (hit == null) {
-        return acc;
-      }
-
-      const timestampArray = get(timestampOverride ?? '@timestamp', hit.fields);
-      if (timestampArray == null) {
-        return acc;
-      }
-
-      const timestamp = timestampArray[0];
-      if (typeof timestamp !== 'string') {
-        return acc;
-      }
-
-      const termsHash = getThresholdTermsHash(bucket.terms);
-      const signalHit = thresholdSignalHistory[termsHash];
-
-      const source = {
-        '@timestamp': timestamp,
-        ...bucket.terms.reduce<object>((termAcc, term) => {
-          if (!term.field.startsWith('signal.')) {
-            return {
-              ...termAcc,
-              [term.field]: term.value,
-            };
-          }
-          return termAcc;
-        }, {}),
-        threshold_result: {
-          terms: bucket.terms,
-          cardinality: bucket.cardinality,
-          count: bucket.docCount,
-          // Store `from` in the signal so that we know the lower bound for the
-          // threshold set in the timeline search. The upper bound will always be
-          // the `original_time` of the signal (the timestamp of the latest event
-          // in the set).
-          from:
-            signalHit?.lastSignalTimestamp != null
-              ? new Date(signalHit!.lastSignalTimestamp)
-              : from,
-        },
-      };
-
-      acc.push({
-        _index: inputIndex,
-        _id: calculateThresholdSignalUuid(
-          ruleId,
-          startedAt,
-          threshold.field,
-          bucket.terms
-            .map((term) => term.value)
-            .sort()
-            .join(',')
-        ),
-        _source: source,
-      });
-
+  return getCombinations(
+    (results.aggregations![aggParts.name] as { buckets: TermAggregationBucket[] }).buckets,
+    0,
+    aggParts.field
+  ).reduce((acc: Array<BaseHit<SignalSource>>, bucket) => {
+    const hit = bucket.topThresholdHits?.hits.hits[0];
+    if (hit == null) {
       return acc;
-    },
-    []
-  );
+    }
+
+    const timestampArray = get(timestampOverride ?? '@timestamp', hit.fields);
+    if (timestampArray == null) {
+      return acc;
+    }
+
+    const timestamp = timestampArray[0];
+    if (typeof timestamp !== 'string') {
+      return acc;
+    }
+
+    const termsHash = getThresholdTermsHash(bucket.terms);
+    const signalHit = thresholdSignalHistory[termsHash];
+
+    const source = {
+      '@timestamp': timestamp,
+      ...bucket.terms.reduce<object>((termAcc, term) => {
+        if (!term.field.startsWith('signal.')) {
+          return {
+            ...termAcc,
+            [term.field]: term.value,
+          };
+        }
+        return termAcc;
+      }, {}),
+      threshold_result: {
+        terms: bucket.terms,
+        cardinality: bucket.cardinality,
+        count: bucket.docCount,
+        // Store `from` in the signal so that we know the lower bound for the
+        // threshold set in the timeline search. The upper bound will always be
+        // the `original_time` of the signal (the timestamp of the latest event
+        // in the set).
+        from:
+          signalHit?.lastSignalTimestamp != null ? new Date(signalHit!.lastSignalTimestamp) : from,
+      },
+    };
+
+    acc.push({
+      _index: inputIndex,
+      _id: calculateThresholdSignalUuid(
+        ruleId,
+        startedAt,
+        threshold.field,
+        bucket.terms
+          .map((term) => term.value)
+          .sort()
+          .join(',')
+      ),
+      _source: source,
+    });
+
+    return acc;
+  }, []);
 };
 
 export const transformThresholdResultsToEcs = (
@@ -250,5 +249,5 @@ export const bulkCreateThresholdSignals = async (
     params.thresholdSignalHistory
   );
 
-  return params.bulkCreate(params.wrapHits(ecsResults.hits.hits));
+  return params.bulkCreate(params.wrapHits(ecsResults.hits.hits as Hit[]));
 };

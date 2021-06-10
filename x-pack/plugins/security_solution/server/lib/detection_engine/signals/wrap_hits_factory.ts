@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { SearchAfterAndBulkCreateParams, WrapHits, WrappedSignalHit } from './types';
+import {
+  SearchAfterAndBulkCreateParams,
+  SignalSourceHit,
+  WrapHits,
+  WrappedSignalHit,
+} from './types';
 import { generateId } from './utils';
 import { buildBulkBody } from './build_bulk_body';
 import { filterDuplicateSignals } from './filter_duplicate_signals';
@@ -20,13 +25,9 @@ export const wrapHitsFactory = ({
   const wrappedDocs: WrappedSignalHit[] = events.flatMap((doc) => [
     {
       _index: signalsIndex,
-      _id: generateId(
-        doc._index,
-        doc._id,
-        doc._version ? doc._version.toString() : '',
-        ruleSO.attributes.params.ruleId ?? ''
-      ),
-      _source: buildBulkBody(ruleSO, doc),
+      // TODO: bring back doc._version
+      _id: generateId(doc._index, doc._id, '', ruleSO.attributes.params.ruleId ?? ''),
+      _source: buildBulkBody(ruleSO, doc as SignalSourceHit),
     },
   ]);
 

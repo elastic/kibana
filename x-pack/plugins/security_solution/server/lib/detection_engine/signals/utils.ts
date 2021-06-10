@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { createHash } from 'crypto';
 import moment from 'moment';
 import uuidv5 from 'uuid/v5';
@@ -39,6 +38,7 @@ import {
   WrappedSignalHit,
   RuleRangeTuple,
   BaseSignalHit,
+  SignalSourceHit,
 } from './types';
 import { BuildRuleMessage } from './rule_messages';
 import { ShardError } from '../../types';
@@ -615,7 +615,7 @@ export const getValidDateFromDoc = ({
     doc.fields != null && doc.fields[timestamp] != null
       ? doc.fields[timestamp][0]
       : doc._source != null
-      ? doc._source[timestamp]
+      ? (doc._source as { [key: string]: unknown })[timestamp]
       : undefined;
   const lastTimestamp =
     typeof timestampValue === 'string' || typeof timestampValue === 'number'
@@ -690,6 +690,7 @@ export const createSearchAfterReturnType = ({
 };
 
 export const createSearchResultReturnType = (): SignalSearchResponse => {
+  const hits: SignalSourceHit[] = [];
   return {
     took: 0,
     timed_out: false,
@@ -703,7 +704,7 @@ export const createSearchResultReturnType = (): SignalSearchResponse => {
     hits: {
       total: 0,
       max_score: 0,
-      hits: [],
+      hits,
     },
   };
 };

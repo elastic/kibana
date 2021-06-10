@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { DslQuery, Filter } from 'src/plugins/data/common';
 import moment, { Moment } from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -18,13 +19,7 @@ import {
   AlertExecutorOptions,
   AlertServices,
 } from '../../../../../alerting/server';
-import {
-  BaseSearchResponse,
-  Hit,
-  SearchHit,
-  SearchResponse,
-  TermAggregationBucket,
-} from '../../types';
+import { BaseSearchResponse, Hit, SearchHit, TermAggregationBucket } from '../../types';
 import {
   EqlSearchResponse,
   BaseHit,
@@ -157,10 +152,10 @@ export interface GetResponse {
   _source: SearchTypes;
 }
 
-export type SignalSearchResponse = SearchResponse<SignalSource>;
-export type SignalSourceHit = SearchHit;
+export type SignalSearchResponse = estypes.SearchResponse<SignalSource>;
+export type SignalSourceHit = estypes.SearchHit<SignalSource>;
 export type WrappedSignalHit = BaseHit<SignalHit>;
-export type BaseSignalHit = SearchHit;
+export type BaseSignalHit = estypes.SearchHit<SignalSource>;
 
 export type EqlSignalSearchResponse = EqlSearchResponse<SignalSource>;
 
