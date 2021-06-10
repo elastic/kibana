@@ -302,7 +302,7 @@ describe('HasDataContextProvider', () => {
 
           expect(result.current).toEqual({
             hasData: {
-              apm: { hasData: true, status: 'success' },
+              apm: { hasData: { hasData: true, indices: 'apm-*' }, status: 'success' },
               synthetics: { hasData: undefined, status: 'success' },
               infra_logs: { hasData: undefined, status: 'success' },
               infra_metrics: { hasData: undefined, status: 'success' },
@@ -342,7 +342,13 @@ describe('HasDataContextProvider', () => {
 
           expect(result.current).toEqual({
             hasData: {
-              apm: { hasData: false, status: 'success' },
+              apm: {
+                hasData: {
+                  hasData: false,
+                  indices: 'apm-*',
+                },
+                status: 'success',
+              },
               synthetics: { hasData: undefined, status: 'success' },
               infra_logs: { hasData: undefined, status: 'success' },
               infra_metrics: { hasData: undefined, status: 'success' },

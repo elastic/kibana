@@ -14,13 +14,17 @@ import { FETCH_STATUS } from '../hooks/use_fetcher';
 import { usePluginContext } from '../hooks/use_plugin_context';
 import { useTimeRange } from '../hooks/use_time_range';
 import { getObservabilityAlerts } from '../services/get_observability_alerts';
-import { ObservabilityFetchDataPlugins, UXHasDataResponse } from '../typings/fetch_overview_data';
+import {
+  HasDataResponse,
+  ObservabilityFetchDataPlugins,
+  UXHasDataResponse,
+} from '../typings/fetch_overview_data';
 
 type DataContextApps = ObservabilityFetchDataPlugins | 'alert';
 
 export type HasDataMap = Record<
   DataContextApps,
-  { status: FETCH_STATUS; hasData?: boolean | UXHasDataResponse | Alert[] }
+  { status: FETCH_STATUS; hasData?: boolean | HasDataResponse | UXHasDataResponse | Alert[] }
 >;
 
 export interface HasDataContextValue {
@@ -110,7 +114,8 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
   });
 
   const hasAnyData = (Object.keys(hasData) as ObservabilityFetchDataPlugins[]).some(
-    (app) => hasData[app]?.hasData === true
+    (app) =>
+      hasData[app]?.hasData === true || (hasData[app]?.hasData as HasDataResponse)?.hasData === true
   );
 
   return (
