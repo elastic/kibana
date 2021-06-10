@@ -52,7 +52,10 @@ function parseAndExtract(
     root,
     layer,
     indexPattern,
-    label || text
+    i18n.translate('xpack.lens.indexPattern.formulaPartLabel', {
+      defaultMessage: 'Part of {label}',
+      values: { label: label || text },
+    })
   );
   return { extracted, isValid: true };
 }
