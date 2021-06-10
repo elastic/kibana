@@ -6,7 +6,7 @@
  */
 
 import { get, isEmpty } from 'lodash';
-import { Hit, QueryContainer, TotalHits } from '@elastic/elasticsearch/api/types';
+import { estypes } from '@elastic/elasticsearch';
 
 import { EVENT_ENRICHMENT_INDICATOR_FIELD_MAP } from '../../../../../../common/cti/constants';
 import { CtiEnrichment } from '../../../../../../common/search_strategy/security_solution/cti';
@@ -19,8 +19,8 @@ const isValidEventField = (field: string): field is EventField =>
 
 export const buildIndicatorShouldClauses = (
   eventFields: Record<string, unknown>
-): QueryContainer[] => {
-  return validEventFields.reduce<QueryContainer[]>((shoulds, eventField) => {
+): estypes.QueryDslQueryContainer[] => {
+  return validEventFields.reduce<estypes.QueryDslQueryContainer[]>((shoulds, eventField) => {
     const eventFieldValue = eventFields[eventField];
 
     if (!isEmpty(eventFieldValue)) {
@@ -38,7 +38,7 @@ export const buildIndicatorShouldClauses = (
   }, []);
 };
 
-export const buildIndicatorEnrichments = (hits: Hit[]): CtiEnrichment[] => {
+export const buildIndicatorEnrichments = (hits: estypes.SearchHit[]): CtiEnrichment[] => {
   return hits.flatMap<CtiEnrichment>(({ matched_queries: matchedQueries, ...hit }) => {
     return (
       matchedQueries?.reduce<CtiEnrichment[]>((enrichments, matchedQuery) => {
@@ -56,7 +56,7 @@ export const buildIndicatorEnrichments = (hits: Hit[]): CtiEnrichment[] => {
 };
 
 const buildIndicatorMatchedFields = (
-  hit: Hit,
+  hit: estypes.SearchHit,
   eventField: EventField
 ): Record<string, unknown[]> => {
   const indicatorField = EVENT_ENRICHMENT_INDICATOR_FIELD_MAP[eventField];
@@ -70,7 +70,7 @@ const buildIndicatorMatchedFields = (
   };
 };
 
-export const getTotalCount = (total: number | TotalHits | null): number => {
+export const getTotalCount = (total: number | estypes.SearchTotalHits | null): number => {
   if (total == null) {
     return 0;
   }
