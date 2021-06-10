@@ -111,7 +111,7 @@ export default function ({ getService, getPageObjects }) {
         `${rollupSourceIndexPrefix}*`,
       ]);
 
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
     });
   });
 }

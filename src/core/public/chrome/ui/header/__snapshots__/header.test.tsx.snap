@@ -357,6 +357,7 @@ exports[`Header renders 1`] = `
         "href": "",
         "id": "cloud-deployment-link",
         "title": "Manage cloud deployment",
+        "url": "",
       },
       "closed": false,
       "hasError": false,
@@ -1607,6 +1608,7 @@ exports[`Header renders 1`] = `
           "href": "",
           "id": "kibana",
           "title": "kibana",
+          "url": "",
         },
       ],
       "closed": false,
@@ -1924,6 +1926,7 @@ exports[`Header renders 1`] = `
                           "href": "",
                           "id": "kibana",
                           "title": "kibana",
+                          "url": "",
                         },
                       ],
                       "closed": false,
@@ -3027,6 +3030,7 @@ exports[`Header renders 1`] = `
                             "href": "",
                             "id": "kibana",
                             "title": "kibana",
+                            "url": "",
                           },
                         ],
                         "closed": false,
@@ -4115,6 +4119,7 @@ exports[`Header renders 1`] = `
                                 <EuiButtonContent
                                   className="euiButtonEmpty__content"
                                   iconSide="left"
+                                  iconSize="m"
                                   textProps={
                                     Object {
                                       "className": "euiButtonEmpty__text",
@@ -4297,6 +4302,7 @@ exports[`Header renders 1`] = `
                         <EuiButtonContent
                           className="euiButtonEmpty__content"
                           iconSide="left"
+                          iconSize="m"
                           textProps={
                             Object {
                               "className": "euiButtonEmpty__text",
@@ -4729,6 +4735,7 @@ exports[`Header renders 1`] = `
             "href": "",
             "id": "cloud-deployment-link",
             "title": "Manage cloud deployment",
+            "url": "",
           },
           "closed": false,
           "hasError": false,
@@ -4788,6 +4795,7 @@ exports[`Header renders 1`] = `
               "href": "",
               "id": "kibana",
               "title": "kibana",
+              "url": "",
             },
           ],
           "closed": false,
@@ -5154,10 +5162,12 @@ exports[`Header renders 1`] = `
                                 >
                                   <EuiIcon
                                     className="euiListGroupItem__icon"
+                                    color="inherit"
                                     type="home"
                                   >
                                     <span
                                       className="euiListGroupItem__icon"
+                                      color="inherit"
                                       data-euiicon-type="home"
                                     />
                                   </EuiIcon>
@@ -5469,6 +5479,7 @@ exports[`Header renders 1`] = `
                                     >
                                       <span
                                         class="euiListGroupItem__icon"
+                                        color="inherit"
                                         data-euiicon-type="lock"
                                       />
                                       <span
@@ -5500,10 +5511,12 @@ exports[`Header renders 1`] = `
                                   >
                                     <EuiIcon
                                       className="euiListGroupItem__icon"
+                                      color="inherit"
                                       type="lock"
                                     >
                                       <span
                                         className="euiListGroupItem__icon"
+                                        color="inherit"
                                         data-euiicon-type="lock"
                                       />
                                     </EuiIcon>
@@ -5547,6 +5560,7 @@ exports[`Header renders 1`] = `
                     <EuiButtonContent
                       className="euiButtonEmpty__content"
                       iconSide="left"
+                      iconSize="s"
                       iconType="cross"
                       textProps={
                         Object {
@@ -5559,13 +5573,15 @@ exports[`Header renders 1`] = `
                       >
                         <EuiIcon
                           className="euiButtonContent__icon"
-                          size="m"
+                          color="inherit"
+                          size="s"
                           type="cross"
                         >
                           <span
                             className="euiButtonContent__icon"
+                            color="inherit"
                             data-euiicon-type="cross"
-                            size="m"
+                            size="s"
                           />
                         </EuiIcon>
                         <span

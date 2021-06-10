@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  mountWithIntl,
-  mockKibanaValues,
-  setMockActions,
-  setMockValues,
-} from '../../../../__mocks__';
+import { mockKibanaValues, setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
 import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
@@ -20,6 +15,7 @@ import { shallow, ReactWrapper } from 'enzyme';
 import { EuiPageHeader, EuiBasicTable } from '@elastic/eui';
 
 import { Loading } from '../../../../shared/loading';
+import { mountWithIntl } from '../../../../test_helpers';
 import { EmptyState } from '../components';
 
 import { Curations, CurationsTable } from './curations';

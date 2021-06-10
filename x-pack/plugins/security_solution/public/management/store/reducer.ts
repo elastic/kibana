@@ -19,14 +19,12 @@ import {
 import { ImmutableCombineReducers } from '../../common/store';
 import { Immutable } from '../../../common/endpoint/types';
 import { ManagementState } from '../types';
-import {
-  endpointListReducer,
-  initialEndpointListState,
-} from '../pages/endpoint_hosts/store/reducer';
+import { endpointListReducer } from '../pages/endpoint_hosts/store/reducer';
 import { initialTrustedAppsPageState } from '../pages/trusted_apps/store/builders';
 import { trustedAppsPageReducer } from '../pages/trusted_apps/store/reducer';
 import { initialEventFiltersPageState } from '../pages/event_filters/store/builders';
 import { eventFiltersPageReducer } from '../pages/event_filters/store/reducer';
+import { initialEndpointPageState } from '../pages/endpoint_hosts/store/builders';
 
 const immutableCombineReducers: ImmutableCombineReducers = combineReducers;
 
@@ -35,7 +33,7 @@ const immutableCombineReducers: ImmutableCombineReducers = combineReducers;
  */
 export const mockManagementState: Immutable<ManagementState> = {
   [MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE]: initialPolicyDetailsState(),
-  [MANAGEMENT_STORE_ENDPOINTS_NAMESPACE]: initialEndpointListState,
+  [MANAGEMENT_STORE_ENDPOINTS_NAMESPACE]: initialEndpointPageState(),
   [MANAGEMENT_STORE_TRUSTED_APPS_NAMESPACE]: initialTrustedAppsPageState(),
   [MANAGEMENT_STORE_EVENT_FILTERS_NAMESPACE]: initialEventFiltersPageState(),
 };
