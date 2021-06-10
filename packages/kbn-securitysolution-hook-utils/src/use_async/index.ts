@@ -7,25 +7,27 @@
  */
 
 import { useCallback, useState } from 'react';
+import { Task } from '../types';
 
 import { useIsMounted } from '../use_is_mounted';
 
-export interface Async<Args extends unknown[], Result> {
-  loading: boolean;
-  error: unknown | undefined;
-  result: Result | undefined;
-  start: (...args: Args) => void;
-}
-
 /**
  *
- * @param fn Async function
+ * This hook wraps a promise-returning thunk (task) in order to conditionally
+ * initiate the work, and automatically provide state corresponding to the
+ * task's status.
  *
- * @returns An {@link AsyncTask} containing the underlying task's state along with a start callback
+ * In order to function properly and not rerender unnecessarily, ensure that
+ * your task is a stable function reference.
+ *
+ * @param fn a function returning a promise.
+ *
+ * @returns An {@link Task} containing the task's current state along with a
+ * start callback
  */
 export const useAsync = <Args extends unknown[], Result>(
   fn: (...args: Args) => Promise<Result>
-): Async<Args, Result> => {
+): Task<Args, Result> => {
   const isMounted = useIsMounted();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<unknown | undefined>();
