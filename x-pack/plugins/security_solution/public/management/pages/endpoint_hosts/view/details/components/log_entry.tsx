@@ -8,11 +8,11 @@
 import React, { memo } from 'react';
 import styled from 'styled-components';
 
-import { EuiAvatar, EuiAvatarProps, EuiCommentProps, EuiComment, EuiText } from '@elastic/eui';
+import { EuiComment, EuiCommentProps, EuiText } from '@elastic/eui';
 import { Immutable, ActivityLogEntry } from '../../../../../../../common/endpoint/types';
 import { FormattedDateAndTime } from '../../../../../../common/components/endpoint/formatted_date_time';
-import { useEuiTheme } from '../../../../../../common/lib/theme/use_eui_theme';
-import * as i18 from '../../translations';
+import { LogEntryTimelineIcon } from './log_entry_timeline_icon';
+import { useLogEntryUIElements } from '../../hooks/hooks';
 
 const StyledEuiComment = styled(EuiComment)`
   .euiCommentEvent__headerTimestamp {
@@ -33,81 +33,34 @@ const StyledEuiComment = styled(EuiComment)`
     }
   }
 `;
-export const LogEntry = memo(({ logEntry }: { logEntry: Immutable<ActivityLogEntry> }) => {
-  const euiTheme = useEuiTheme();
-  let iconType = 'dot';
-  let commentType: EuiCommentProps['type'] = 'update';
-  let commentText;
-  let avatarSize: EuiAvatarProps['size'] = 's';
-  let isIsolateAction = false;
-  let isSuccessful = false;
-  let displayComment = false;
-  let displayResponseEvent = true;
-  let username: EuiCommentProps['username'] = '';
-  if (logEntry.type === 'action') {
-    avatarSize = 'm';
-    commentType = 'regular';
-    commentText = logEntry.item.data.data.comment ?? '';
-    displayResponseEvent = false;
-    iconType = 'lockOpen';
-    username = logEntry.item.data.user_id;
-    if (logEntry.item.data.data) {
-      const data = logEntry.item.data.data;
-      if (data.command === 'isolate') {
-        iconType = 'lock';
-        isIsolateAction = true;
-      }
-      if (data.comment) {
-        displayComment = true;
-      }
-    }
-  } else if (logEntry.type === 'response') {
-    if (logEntry.item.data.action_data.command === 'isolate') {
-      isIsolateAction = true;
-    }
-    if (!!logEntry.item.data.completed_at && !logEntry.item.data.error) {
-      isSuccessful = true;
-    }
-  }
 
-  const timelineIcon = (
-    <EuiAvatar
-      name="Timeline Icon"
-      size={avatarSize}
-      color={
-        logEntry.type === 'response' && !isSuccessful
-          ? euiTheme.euiColorVis9_behindText
-          : euiTheme.euiColorLightestShade
-      }
-      iconColor="default"
-      iconType={iconType}
-    />
-  );
-  const actionEventTitle = `${
-    isIsolateAction
-      ? i18.ACTIVITY_LOG.LogEntry.action.isolated
-      : i18.ACTIVITY_LOG.LogEntry.action.unisolated
-  } ${i18.ACTIVITY_LOG.LogEntry.host}`;
-  const responseEventTitle = `${i18.ACTIVITY_LOG.LogEntry.host}  ${
-    isIsolateAction
-      ? i18.ACTIVITY_LOG.LogEntry.response.isolation
-      : i18.ACTIVITY_LOG.LogEntry.response.unisolation
-  } ${
-    isSuccessful
-      ? i18.ACTIVITY_LOG.LogEntry.response.successful
-      : i18.ACTIVITY_LOG.LogEntry.response.failed
-  }`;
+export const LogEntry = memo(({ logEntry }: { logEntry: Immutable<ActivityLogEntry> }) => {
+  const {
+    actionEventTitle,
+    avatarSize,
+    commentText,
+    commentType,
+    displayComment,
+    displayResponseEvent,
+    iconType,
+    isResponseEvent,
+    isSuccessful,
+    responseEventTitle,
+    username,
+  } = useLogEntryUIElements(logEntry);
 
   return (
     <StyledEuiComment
-      type={commentType}
+      type={(commentType ?? 'regular') as EuiCommentProps['type']}
       username={username}
       timestamp={FormattedDateAndTime({
         date: new Date(logEntry.item.data['@timestamp']),
         showRelativeTime: true,
       })}
       event={<b>{displayResponseEvent ? responseEventTitle : actionEventTitle}</b>}
-      timelineIcon={timelineIcon}
+      timelineIcon={
+        <LogEntryTimelineIcon {...{ avatarSize, iconType, isResponseEvent, isSuccessful }} />
+      }
       data-test-subj="timelineEntry"
     >
       {displayComment ? (
