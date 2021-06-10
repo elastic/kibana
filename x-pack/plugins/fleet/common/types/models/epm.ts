@@ -276,6 +276,7 @@ export enum RegistryDataStreamKeys {
   ingest_pipeline = 'ingest_pipeline',
   elasticsearch = 'elasticsearch',
   dataset_is_prefix = 'dataset_is_prefix',
+  permissions = 'permissions',
 }
 
 export interface RegistryDataStream {
@@ -291,11 +292,17 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.ingest_pipeline]?: string;
   [RegistryDataStreamKeys.elasticsearch]?: RegistryElasticsearch;
   [RegistryDataStreamKeys.dataset_is_prefix]?: boolean;
+  [RegistryDataStreamKeys.permissions]?: RegistryDataStreamPermissions;
 }
 
 export interface RegistryElasticsearch {
   'index_template.settings'?: object;
   'index_template.mappings'?: object;
+}
+
+export interface RegistryDataStreamPermissions {
+  cluster?: string[];
+  indices?: string[];
 }
 
 export type RegistryVarType = 'integer' | 'bool' | 'password' | 'text' | 'yaml' | 'string';

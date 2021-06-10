@@ -56,10 +56,10 @@ export default function ({ getService }: FtrProviderContext) {
         await deleteCaseAction(supertest, actionID);
       });
       beforeEach(async () => {
-        await esArchiver.load('cases/signals/default');
+        await esArchiver.load('x-pack/test/functional/es_archives/cases/signals/default');
       });
       afterEach(async () => {
-        await esArchiver.unload('cases/signals/default');
+        await esArchiver.unload('x-pack/test/functional/es_archives/cases/signals/default');
         await deleteAllCaseItems(es);
       });
 
