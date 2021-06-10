@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const a11y = getService('a11y');
+  const testSubjects = getService('testSubjects');
 
   describe('Management', () => {
     before(async () => {
@@ -41,6 +42,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.clickIndexPatternLogstash();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await a11y.testAppSnapshot();
+    });
+
+    it('Index pattern field editor', async () => {
+      await PageObjects.settings.clickAddField();
+      await a11y.testAppSnapshot();
+
+      // make sure all settings are expanded before taking a snapshot
+      await PageObjects.settings.setFieldName('test');
+      await PageObjects.settings.setFieldType('Keyword');
+      await PageObjects.settings.setFieldScript("emit('hello world')");
+      await PageObjects.settings.toggleRow('formatRow');
+      await PageObjects.settings.setFieldFormat('string');
+      await PageObjects.settings.toggleRow('customLabelRow');
+      await PageObjects.settings.setCustomLabel('custom label');
+      await testSubjects.click('toggleAdvancedSetting');
+
+      await a11y.testAppSnapshot();
+      await testSubjects.click('euiFlyoutCloseButton');
+      await PageObjects.settings.closeIndexPatternFieldEditor();
     });
 
     it('Open create index pattern wizard', async () => {
