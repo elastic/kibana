@@ -34,7 +34,7 @@ import {
   User,
 } from '../../common/api';
 import { ENABLE_CASE_CONNECTOR } from '../../common/constants';
-import { UpdateAlertRequest } from '../client/alerts/client';
+import { UpdateAlertRequest } from '../client/alerts/types';
 
 /**
  * Default sort field for querying saved objects.

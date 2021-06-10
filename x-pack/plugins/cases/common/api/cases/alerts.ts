@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-export * from './case';
-export * from './configure';
-export * from './comment';
-export * from './status';
-export * from './user_actions';
-export * from './sub_case';
-export * from './constants';
-export * from './alerts';
+import * as rt from 'io-ts';
+
+const AlertRt = rt.type({
+  alertId: rt.array(rt.string),
+  index: rt.array(rt.string),
+});
+
+export const AlertResponseRt = rt.array(AlertRt);
+
+export type AlertResponse = rt.TypeOf<typeof AlertResponseRt>;

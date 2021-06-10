@@ -24,14 +24,64 @@ import {
   AllReportersFindRequest,
   CasesByAlertIDRequest,
   CasesByAlertIDRequestRt,
+  AlertResponse,
 } from '../../../common/api';
 import { countAlertsForID, flattenCaseSavedObject } from '../../common';
 import { createCaseError } from '../../common/error';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
-import { CasesClientArgs } from '..';
+import { CasesClient, CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
 import { CasesService } from '../../services';
+
+export interface GetAllAlertsAttachToCase {
+  caseId: string;
+}
+
+export const getAllAlertsAttachToCase = async (
+  { caseId }: GetAllAlertsAttachToCase,
+  clientArgs: CasesClientArgs,
+  casesClient: CasesClient
+): Promise<AlertResponse> => {
+  const { unsecuredSavedObjectsClient, authorization, caseService } = clientArgs;
+  const theCase = await casesClient.cases.get({
+    id: caseId,
+    includeComments: false,
+    includeSubCaseComments: false,
+  });
+
+  await authorization.ensureAuthorized({
+    entities: [{ owner: theCase.owner, id: caseId }],
+    operation: Operations.getAlertsAttachedToCase,
+  });
+
+  const {
+    filter: authorizationFilter,
+    ensureSavedObjectsAreAuthorized,
+  } = await authorization.getAuthorizationFilter(Operations.getAlertsAttachedToCase);
+
+  const alerts = await caseService.getAllAlertsAttachToCase({
+    unsecuredSavedObjectsClient,
+    caseId: theCase.id,
+    filter: authorizationFilter,
+  });
+
+  ensureSavedObjectsAreAuthorized(
+    alerts.map((alert) => ({
+      owner: alert.attributes.owner,
+      id: alert.id,
+    }))
+  );
+
+  return alerts.map((alert) => ({
+    alertId: Array.isArray(alert.attributes.alertId)
+      ? alert.attributes.alertId
+      : [alert.attributes.alertId],
+    index: Array.isArray(alert.attributes.index)
+      ? alert.attributes.index
+      : [alert.attributes.index],
+  }));
+};
 
 /**
  * Parameters for finding cases IDs using an alert ID
