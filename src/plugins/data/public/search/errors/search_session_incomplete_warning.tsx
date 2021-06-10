@@ -12,8 +12,7 @@ import React from 'react';
 export const SearchSessionIncompleteWarning = () => (
   <>
     <EuiSpacer size="s" />
-    This search session had to run some additional search requests in order to fully render. You may
-    wait for them on screen or come back to them later.
+    It needs more time to fully render. You can wait here or come back to it later.
     <EuiText textAlign="right">
       <EuiButton
         color="warning"

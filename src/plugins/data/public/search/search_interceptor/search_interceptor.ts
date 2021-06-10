@@ -380,7 +380,7 @@ export class SearchInterceptor {
   private showRestoreWarningToast = (sessionId?: string) => {
     this.deps.toasts.addWarning(
       {
-        title: 'Search Session is still in progress!',
+        title: 'Your search session is still running',
         text: toMountPoint(SearchSessionIncompleteWarning()),
       },
       {
