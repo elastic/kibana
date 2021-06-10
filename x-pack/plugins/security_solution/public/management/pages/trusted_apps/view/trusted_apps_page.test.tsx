@@ -633,18 +633,21 @@ describe('When on the Trusted Apps Page', () => {
             });
           });
 
-          it('should close the flyout', async () => {
+          it('should close the flyout', () => {
             expect(renderResult.queryByTestId('addTrustedAppFlyout')).toBeNull();
           });
 
-          it('should show success toast notification', async () => {
+          it('should show success toast notification', () => {
             expect(coreStart.notifications.toasts.addSuccess.mock.calls[0][0]).toEqual(
               '"one app" has been added to the Trusted Applications list.'
             );
           });
 
-          it('should trigger the List to reload', async () => {
-            expect(coreStart.http.get.mock.calls[0][0]).toEqual(TRUSTED_APPS_LIST_API);
+          it('should trigger the List to reload', () => {
+            const isCalled = coreStart.http.get.mock.calls.some(
+              (call) => call[0].toString() === TRUSTED_APPS_LIST_API
+            );
+            expect(isCalled).toEqual(true);
           });
         });
 
@@ -666,18 +669,18 @@ describe('When on the Trusted Apps Page', () => {
             });
           });
 
-          it('should continue to show the flyout', async () => {
+          it('should continue to show the flyout', () => {
             expect(renderResult.getByTestId('addTrustedAppFlyout')).not.toBeNull();
           });
 
-          it('should enable the Cancel Button', async () => {
+          it('should enable the Cancel Button', () => {
             expect(
               (renderResult.getByTestId('addTrustedAppFlyout-cancelButton') as HTMLButtonElement)
                 .disabled
             ).toBe(false);
           });
 
-          it('should show the dialog close button', async () => {
+          it('should show the dialog close button', () => {
             expect(renderResult.getByTestId('euiFlyoutCloseButton')).not.toBeNull();
           });
 
@@ -688,7 +691,7 @@ describe('When on the Trusted Apps Page', () => {
             ).toBe(false);
           });
 
-          it('should show API errors in the form', async () => {
+          it('should show API errors in the form', () => {
             expect(renderResult.container.querySelector('.euiForm__errors')).not.toBeNull();
           });
         });
@@ -898,6 +901,36 @@ describe('When on the Trusted Apps Page', () => {
         fireEvent.click(renderResult.getByTestId('searchButton'));
         expect(await waitForAction('userChangedUrl')).not.toBeNull();
       });
+    });
+  });
+
+  describe('and the back button is present', () => {
+    let renderResult: ReturnType<AppContextTestRender['render']>;
+    beforeEach(async () => {
+      renderResult = render();
+      await act(async () => {
+        await waitForAction('trustedAppsListResourceStateChanged');
+      });
+      reactTestingLibrary.act(() => {
+        history.push('/trusted_apps', {
+          onBackButtonNavigateTo: [{ appId: 'appId' }],
+          backButtonLabel: 'back to fleet',
+          backButtonUrl: '/fleet',
+        });
+      });
+    });
+
+    it('back button is present', () => {
+      const button = renderResult.queryByTestId('backToOrigin');
+      expect(button).not.toBeNull();
+      expect(button).toHaveAttribute('href', '/fleet');
+    });
+
+    it('back button is not present', () => {
+      reactTestingLibrary.act(() => {
+        history.push('/trusted_apps');
+      });
+      expect(renderResult.queryByTestId('backToOrigin')).toBeNull();
     });
   });
 });
