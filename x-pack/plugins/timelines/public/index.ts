@@ -8,15 +8,10 @@
 import { PluginInitializerContext } from '../../../../src/core/public';
 
 import { TimelinesPlugin } from './plugin';
-
-export {
-  tGridActions,
-  tGridSelectors,
-  tGridReducer,
-  TGridModelForTimeline,
-  TimelineState,
-  TimelinesUIStart,
-} from './types';
+export * as tGridActions from './store/t_grid/actions';
+export * as tGridSelectors from './store/t_grid/selectors';
+export { tGridReducer } from './store/t_grid/reducer';
+export type { TGridModelForTimeline, TimelineState, TimelinesUIStart } from './types';
 export {
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,
