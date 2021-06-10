@@ -131,6 +131,11 @@ function mergeWithSubFeatures(
         ),
       },
     };
+
+    mergedConfig.cases = {
+      all: mergeArrays(mergedConfig.cases?.all ?? [], subFeaturePrivilege.cases?.all ?? []),
+      read: mergeArrays(mergedConfig.cases?.read ?? [], subFeaturePrivilege.cases?.read ?? []),
+    };
   }
   return mergedConfig;
 }

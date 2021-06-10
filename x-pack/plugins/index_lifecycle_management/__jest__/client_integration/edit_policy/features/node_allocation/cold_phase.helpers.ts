@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createEnablePhaseAction, createNodeAllocationActions } from '../../../helpers';
+import { createNodeAllocationActions, createTogglePhaseAction } from '../../../helpers';
 import { initTestBed } from '../../init_test_bed';
 
 type SetupReturn = ReturnType<typeof setupColdPhaseNodeAllocation>;
@@ -18,7 +18,7 @@ export const setupColdPhaseNodeAllocation = async () => {
   return {
     ...testBed,
     actions: {
-      enable: createEnablePhaseAction(testBed, 'cold'),
+      toggleColdPhase: () => createTogglePhaseAction(testBed)('cold'),
       ...createNodeAllocationActions(testBed, 'cold'),
     },
   };
