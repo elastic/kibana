@@ -28,7 +28,9 @@ import {
   ORG_SETTINGS_PATH,
   ROLE_MAPPINGS_PATH,
   SECURITY_PATH,
+  PERSONAL_SETTINGS_PATH,
 } from './routes';
+import { AccountSettings } from './views/account_settings';
 import { SourcesRouter } from './views/content_sources';
 import { SourceAdded } from './views/content_sources/components/source_added';
 import { SourceSubNav } from './views/content_sources/components/source_sub_nav';
@@ -101,6 +103,11 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
       <Route path={PERSONAL_SOURCES_PATH}>
         <PrivateSourcesLayout restrictWidth readOnlyMode={readOnlyMode}>
           <SourcesRouter />
+        </PrivateSourcesLayout>
+      </Route>
+      <Route path={PERSONAL_SETTINGS_PATH}>
+        <PrivateSourcesLayout restrictWidth readOnlyMode={readOnlyMode}>
+          <AccountSettings />
         </PrivateSourcesLayout>
       </Route>
       <Route path={SOURCES_PATH}>

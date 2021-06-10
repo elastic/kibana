@@ -6,9 +6,15 @@
  */
 
 import Boom from '@hapi/boom';
-import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
+import pMap from 'p-map';
 
-import { AssociationType } from '../../../common/api';
+import { SavedObject } from 'kibana/public';
+import {
+  CASE_SAVED_OBJECT,
+  MAX_CONCURRENT_SEARCHES,
+  SUB_CASE_SAVED_OBJECT,
+} from '../../../common/constants';
+import { AssociationType, CommentAttributes } from '../../../common/api';
 import { CasesClientArgs } from '../types';
 import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
 import { createCaseError } from '../../common/error';
@@ -88,14 +94,16 @@ export async function deleteAll(
       })),
     });
 
-    await Promise.all(
-      comments.saved_objects.map((comment) =>
-        attachmentService.delete({
-          unsecuredSavedObjectsClient,
-          attachmentId: comment.id,
-        })
-      )
-    );
+    const mapper = async (comment: SavedObject<CommentAttributes>) =>
+      attachmentService.delete({
+        unsecuredSavedObjectsClient,
+        attachmentId: comment.id,
+      });
+
+    // Ensuring we don't too many concurrent deletions running.
+    await pMap(comments.saved_objects, mapper, {
+      concurrency: MAX_CONCURRENT_SEARCHES,
+    });
 
     const deleteDate = new Date().toISOString();
 

@@ -10,7 +10,6 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiSpacer,
   EuiTitle,
   EuiText,
@@ -42,44 +41,36 @@ export function AgentConfigurations() {
 
   return (
     <>
-      <EuiTitle>
-        <h2>
-          {i18n.translate('xpack.apm.agentConfig.titleText', {
-            defaultMessage: 'Agent central configuration',
-          })}
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="s" />
       <EuiText color="subdued">
         {i18n.translate('xpack.apm.settings.agentConfig.descriptionText', {
           defaultMessage: `Fine-tune your agent configuration from within the APM app. Changes are automatically propagated to your APM agents, so there’s no need to redeploy.`,
         })}
       </EuiText>
-      <EuiSpacer size="l" />
-      <EuiPanel>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="s">
-              <h2>
-                {i18n.translate(
-                  'xpack.apm.agentConfig.configurationsPanelTitle',
-                  { defaultMessage: 'Configurations' }
-                )}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
 
-          {hasConfigurations ? <CreateConfigurationButton /> : null}
-        </EuiFlexGroup>
+      <EuiSpacer size="m" />
 
-        <EuiSpacer size="m" />
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="s">
+            <h2>
+              {i18n.translate(
+                'xpack.apm.agentConfig.configurationsPanelTitle',
+                { defaultMessage: 'Configurations' }
+              )}
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
 
-        <AgentConfigurationList
-          status={status}
-          configurations={data.configurations}
-          refetch={refetch}
-        />
-      </EuiPanel>
+        {hasConfigurations ? <CreateConfigurationButton /> : null}
+      </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
+
+      <AgentConfigurationList
+        status={status}
+        configurations={data.configurations}
+        refetch={refetch}
+      />
     </>
   );
 }

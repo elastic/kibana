@@ -633,7 +633,10 @@
             "text": "ReportingSetup"
           },
           ", ",
-          "ReportingPublicPluginSetupDendencies"
+          "ReportingPublicPluginSetupDendencies",
+          ", ",
+          "ReportingPublicPluginStartDendencies",
+          ">"
         ],
         "source": {
           "path": "x-pack/plugins/reporting/public/plugin.ts",
@@ -874,7 +877,13 @@
       "label": "ReportingStart",
       "description": [],
       "signature": [
-        "ReportingSetup"
+        {
+          "pluginId": "reporting",
+          "scope": "public",
+          "docId": "kibReportingPluginApi",
+          "section": "def-public.ReportingSetup",
+          "text": "ReportingSetup"
+        }
       ],
       "source": {
         "path": "x-pack/plugins/reporting/public/index.ts",
@@ -921,7 +930,9 @@
               "path": "x-pack/plugins/reporting/server/core.ts",
               "lineNumber": 72
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "reporting",
@@ -971,9 +982,9 @@
                     "section": "def-server.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
-                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; index: string; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; zoom: number; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ hostname?: string | undefined; port?: number | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; index: string; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; zoom: number; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; port?: number | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
                   "ByteSizeValue",
-                  "; useByteOrderMarkEncoding: boolean; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
+                  "; useByteOrderMarkEncoding: boolean; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
@@ -1894,7 +1905,16 @@
             "docId": "kibReportingPluginApi",
             "section": "def-server.ReportingSetupDeps",
             "text": "ReportingSetupDeps"
-          }
+          },
+          ", ",
+          {
+            "pluginId": "reporting",
+            "scope": "server",
+            "docId": "kibReportingPluginApi",
+            "section": "def-server.ReportingStartDeps",
+            "text": "ReportingStartDeps"
+          },
+          ">"
         ],
         "source": {
           "path": "x-pack/plugins/reporting/server/plugin.ts",
@@ -1933,9 +1953,9 @@
                     "section": "def-server.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
-                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; index: string; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; zoom: number; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ hostname?: string | undefined; port?: number | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; index: string; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; zoom: number; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; port?: number | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
                   "ByteSizeValue",
-                  "; useByteOrderMarkEncoding: boolean; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
+                  "; useByteOrderMarkEncoding: boolean; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/plugin.ts",
@@ -2145,9 +2165,9 @@
             "section": "def-server.ReportingConfig",
             "text": "ReportingConfig"
           },
-          " extends Config<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; index: string; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; zoom: number; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ hostname?: string | undefined; port?: number | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+          " extends Config<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; index: string; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; zoom: number; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; port?: number | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
           "ByteSizeValue",
-          "; useByteOrderMarkEncoding: boolean; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
+          "; useByteOrderMarkEncoding: boolean; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
         ],
         "source": {
           "path": "x-pack/plugins/reporting/server/config/config.ts",
@@ -2285,13 +2305,11 @@
             "label": "taskManager",
             "description": [],
             "signature": [
-              {
-                "pluginId": "taskManager",
-                "scope": "server",
-                "docId": "kibTaskManagerPluginApi",
-                "section": "def-server.TaskManagerSetupContract",
-                "text": "TaskManagerSetupContract"
-              }
+              "{ index: string; addMiddleware: (middleware: ",
+              "Middleware",
+              ") => void; } & Pick<",
+              "TaskTypeDictionary",
+              ", \"registerTaskDefinitions\">"
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/types.ts",
@@ -2390,13 +2408,11 @@
             "label": "taskManager",
             "description": [],
             "signature": [
-              {
-                "pluginId": "taskManager",
-                "scope": "server",
-                "docId": "kibTaskManagerPluginApi",
-                "section": "def-server.TaskManagerStartContract",
-                "text": "TaskManagerStartContract"
-              }
+              "Pick<",
+              "TaskScheduling",
+              ", \"schedule\" | \"runNow\" | \"ensureScheduled\"> & Pick<",
+              "TaskStore",
+              ", \"remove\" | \"get\" | \"fetch\"> & { removeIfExists: (id: string) => Promise<void>; }"
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/types.ts",
@@ -2438,7 +2454,9 @@
             "path": "x-pack/plugins/reporting/server/types.ts",
             "lineNumber": 45
           },
-          "deprecated": false
+          "deprecated": false,
+          "returnComment": [],
+          "children": []
         }
       ],
       "lifecycle": "start",

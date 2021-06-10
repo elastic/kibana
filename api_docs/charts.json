@@ -179,7 +179,9 @@
             "type": "Array",
             "tags": [],
             "label": "xValues",
-            "description": [],
+            "description": [
+              "sorted and unquie x values"
+            ],
             "signature": [
               "number[]"
             ],
@@ -352,7 +354,17 @@
           "> | undefined, splitChartAccessor?: string | number | ",
           "AccessorFn",
           " | undefined, negate?: boolean) => (points: [",
-          "GeometryValue"
+          "GeometryValue",
+          ", ",
+          "XYChartSeriesIdentifier",
+          "][]) => ",
+          {
+            "pluginId": "charts",
+            "scope": "public",
+            "docId": "kibChartsPluginApi",
+            "section": "def-public.ClickTriggerEvent",
+            "text": "ClickTriggerEvent"
+          }
         ],
         "source": {
           "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
@@ -407,7 +419,9 @@
             "type": "Object",
             "tags": [],
             "label": "splitSeriesAccessorFnMap",
-            "description": [],
+            "description": [
+              "needed when using `splitSeriesAccessors` as `AccessorFn`"
+            ],
             "signature": [
               "Map<React.ReactText, ",
               "AccessorFn",
@@ -588,13 +602,32 @@
         "label": "LegendToggle",
         "description": [],
         "signature": [
-          "React.MemoExoticComponent<({ onClick, showLegend, legendPosition }: LegendToggleProps) => JSX.Element>"
+          "React.NamedExoticComponent<LegendToggleProps> & { readonly type: ({ onClick, showLegend, legendPosition }: LegendToggleProps) => JSX.Element; }"
         ],
         "source": {
           "path": "src/plugins/charts/public/static/components/legend_toggle.tsx",
           "lineNumber": 51
         },
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.props",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "source": {
+              "path": "node_modules/@types/react/index.d.ts",
+              "lineNumber": 359
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -1575,7 +1608,28 @@
               "path": "src/plugins/charts/public/services/palettes/types.ts",
               "lineNumber": 81
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "charts",
+                "id": "def-public.state",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [
+                  "The internal state of the palette"
+                ],
+                "signature": [
+                  "T | undefined"
+                ],
+                "source": {
+                  "path": "src/plugins/charts/public/services/palettes/types.ts",
+                  "lineNumber": 81
+                },
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "charts",
@@ -1609,7 +1663,76 @@
               "path": "src/plugins/charts/public/services/palettes/types.ts",
               "lineNumber": 87
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "charts",
+                "id": "def-public.series",
+                "type": "Array",
+                "tags": [],
+                "label": "series",
+                "description": [
+                  "The current series along with its ancestors."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "charts",
+                    "scope": "public",
+                    "docId": "kibChartsPluginApi",
+                    "section": "def-public.SeriesLayer",
+                    "text": "SeriesLayer"
+                  },
+                  "[]"
+                ],
+                "source": {
+                  "path": "src/plugins/charts/public/services/palettes/types.ts",
+                  "lineNumber": 88
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "charts",
+                "id": "def-public.chartConfiguration",
+                "type": "Object",
+                "tags": [],
+                "label": "chartConfiguration",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "charts",
+                    "scope": "public",
+                    "docId": "kibChartsPluginApi",
+                    "section": "def-public.ChartColorConfiguration",
+                    "text": "ChartColorConfiguration"
+                  },
+                  " | undefined"
+                ],
+                "source": {
+                  "path": "src/plugins/charts/public/services/palettes/types.ts",
+                  "lineNumber": 89
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "charts",
+                "id": "def-public.state",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [
+                  "The internal state of the palette"
+                ],
+                "signature": [
+                  "T | undefined"
+                ],
+                "source": {
+                  "path": "src/plugins/charts/public/services/palettes/types.ts",
+                  "lineNumber": 90
+                },
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "charts",
@@ -1627,7 +1750,39 @@
               "path": "src/plugins/charts/public/services/palettes/types.ts",
               "lineNumber": 96
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "charts",
+                "id": "def-public.size",
+                "type": "number",
+                "tags": [],
+                "label": "size",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/charts/public/services/palettes/types.ts",
+                  "lineNumber": 96
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "charts",
+                "id": "def-public.state",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "T | undefined"
+                ],
+                "source": {
+                  "path": "src/plugins/charts/public/services/palettes/types.ts",
+                  "lineNumber": 96
+                },
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "charts",
@@ -1774,7 +1929,23 @@
               "path": "src/plugins/charts/public/services/palettes/types.ts",
               "lineNumber": 113
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "charts",
+                "id": "def-public.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/charts/public/services/palettes/types.ts",
+                  "lineNumber": 113
+                },
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "charts",
@@ -1798,7 +1969,9 @@
               "path": "src/plugins/charts/public/services/palettes/types.ts",
               "lineNumber": 114
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           }
         ],
         "initialIsOpen": false
@@ -2105,13 +2278,10 @@
       {
         "parentPluginId": "charts",
         "id": "def-public.defaultCountLabel",
-        "type": "Any",
+        "type": "string",
         "tags": [],
         "label": "defaultCountLabel",
         "description": [],
-        "signature": [
-          "any"
-        ],
         "source": {
           "path": "src/plugins/charts/public/static/components/collections.ts",
           "lineNumber": 26
@@ -2127,7 +2297,7 @@
         "label": "LabelRotation",
         "description": [],
         "signature": [
-          "{ readonly Horizontal: number; readonly Vertical: number; readonly Angled: number; } number"
+          "number"
         ],
         "source": {
           "path": "src/plugins/charts/public/static/components/collections.ts",
@@ -2206,7 +2376,7 @@
         "label": "ColorMode",
         "description": [],
         "signature": [
-          "Readonly<{ Background: \"Background\"; Labels: \"Labels\"; None: \"None\"; }>"
+          "{ readonly Background: \"Background\"; readonly Labels: \"Labels\"; readonly None: \"None\"; }"
         ],
         "source": {
           "path": "src/plugins/charts/public/static/components/collections.ts",
@@ -2223,7 +2393,7 @@
         "label": "LabelRotation",
         "description": [],
         "signature": [
-          "Readonly<{ Horizontal: number; Vertical: number; Angled: number; }>"
+          "{ readonly Horizontal: number; readonly Vertical: number; readonly Angled: number; }"
         ],
         "source": {
           "path": "src/plugins/charts/public/static/components/collections.ts",
@@ -2301,13 +2471,10 @@
               {
                 "parentPluginId": "charts",
                 "id": "def-public.vislibColorMaps.ColorSchemas.Blues.label",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "label",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
                   "lineNumber": 39
@@ -2371,13 +2538,10 @@
               {
                 "parentPluginId": "charts",
                 "id": "def-public.vislibColorMaps.ColorSchemas.Greens.label",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "label",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
                   "lineNumber": 57
@@ -2441,13 +2605,10 @@
               {
                 "parentPluginId": "charts",
                 "id": "def-public.vislibColorMaps.ColorSchemas.Greys.label",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "label",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
                   "lineNumber": 75
@@ -2511,13 +2672,10 @@
               {
                 "parentPluginId": "charts",
                 "id": "def-public.vislibColorMaps.ColorSchemas.Reds.label",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "label",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
                   "lineNumber": 93
@@ -2581,13 +2739,10 @@
               {
                 "parentPluginId": "charts",
                 "id": "def-public.vislibColorMaps.ColorSchemas.YellowToRed.label",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "label",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
                   "lineNumber": 111
@@ -2651,13 +2806,10 @@
               {
                 "parentPluginId": "charts",
                 "id": "def-public.vislibColorMaps.ColorSchemas.GreenToRed.label",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "label",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
                   "lineNumber": 130
@@ -2694,7 +2846,13 @@
       "label": "ChartsPluginStart",
       "description": [],
       "signature": [
-        "ChartsPluginSetup"
+        {
+          "pluginId": "charts",
+          "scope": "public",
+          "docId": "kibChartsPluginApi",
+          "section": "def-public.ChartsPluginSetup",
+          "text": "ChartsPluginSetup"
+        }
       ],
       "source": {
         "path": "src/plugins/charts/public/plugin.ts",
@@ -2763,7 +2921,18 @@
             "docId": "kibExpressionsPluginApi",
             "section": "def-common.ExecutionContext",
             "text": "ExecutionContext"
-          }
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          "SerializableState",
+          ">>"
         ],
         "source": {
           "path": "src/plugins/charts/common/palette.ts",
@@ -2821,7 +2990,10 @@
             "docId": "kibInspectorPluginApi",
             "section": "def-common.Adapters",
             "text": "Adapters"
-          }
+          },
+          ", ",
+          "SerializableState",
+          ">>"
         ],
         "source": {
           "path": "src/plugins/charts/common/palette.ts",
