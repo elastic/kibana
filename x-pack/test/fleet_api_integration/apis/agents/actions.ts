@@ -15,10 +15,10 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('fleet_agents_actions', () => {
     before(async () => {
-      await esArchiver.load('fleet/agents');
+      await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
     });
     after(async () => {
-      await esArchiver.unload('fleet/agents');
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
     });
 
     it('should return a 200 if this a valid actions request', async () => {

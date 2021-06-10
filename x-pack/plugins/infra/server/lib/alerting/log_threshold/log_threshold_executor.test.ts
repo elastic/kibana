@@ -24,7 +24,7 @@ import {
   GroupedSearchQueryResponse,
 } from '../../../../common/alerting/logs/log_threshold/types';
 import { alertsMock } from '../../../../../alerting/server/mocks';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 
 // Mocks //
 const numericField = {
@@ -70,7 +70,7 @@ const baseAlertParams: Pick<AlertParams, 'count' | 'timeSize' | 'timeUnit'> = {
 const TIMESTAMP_FIELD = '@timestamp';
 const FILEBEAT_INDEX = 'filebeat-*';
 
-const runtimeMappings: estypes.RuntimeFields = {
+const runtimeMappings: estypes.MappingRuntimeFields = {
   runtime_field: {
     type: 'keyword',
     script: {
