@@ -289,7 +289,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
                 {errorConfusionMatrix !== null && <ErrorCallout error={errorConfusionMatrix} />}
                 {errorConfusionMatrix === null && (
                   <>
-                    <EuiFlexGroup gutterSize="none">
+                    <EuiFlexGroup gutterSize="none" alignItems="center">
                       <EuiTitle size="xxs">
                         <span>{getHelpText(dataSubsetTitle)}</span>
                       </EuiTitle>
