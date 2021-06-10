@@ -27,6 +27,7 @@ import {
 
 import { getCreateThreatMatchRulesSchemaMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas.mock';
 import { getThreatMatchingSchemaPartialMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema.mocks';
+import { SIGNALS_TEMPLATE_VERSION } from '../../../../plugins/security_solution/server/lib/detection_engine/routes/index/get_signals_template';
 
 const format = (value: unknown): string => JSON.stringify(value, null, 2);
 
@@ -201,7 +202,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           signal: {
             _meta: {
-              version: 35,
+              version: SIGNALS_TEMPLATE_VERSION,
             },
             ancestors: [
               {
