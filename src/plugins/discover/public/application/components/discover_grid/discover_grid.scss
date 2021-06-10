@@ -47,7 +47,8 @@
 
 // We only truncate if the cell is not a control column.
 .euiDataGridHeader {
-  display: flex; // fixing row header in firefox
+  // This display property is temporary until https://github.com/elastic/eui/issues/4729 is resolved.
+  display: flex;
 
   .euiDataGridHeaderCell__content {
     @include euiTextTruncate;
