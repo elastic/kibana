@@ -55,6 +55,7 @@ describe('healthRoute', () => {
       id,
       getTaskManagerConfig({
         monitored_stats_required_freshness: 1000,
+        monitored_stats_warn_drift_in_seconds: 100,
         monitored_aggregated_stats_refresh_rate: 60000,
       })
     );
@@ -98,15 +99,49 @@ describe('healthRoute', () => {
     expect(logger.error).toHaveBeenCalledTimes(1);
   });
 
-  it.skip('logs at a warn level if the status is warning', async () => {
+  it(`logs at a warn level if the status is warning`, async () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.create().get();
 
-    // const mockStat = mockHealthStats();
-    // await sleep(10);
-    // const skippedMockStat = mockHealthStats();
-    // await sleep(10);
-    const warnStat = mockHealthStats({ status: HealthStatus.Warning });
+    const warnRuntimeStat = mockHealthStats({
+      stats: {
+        runtime: {
+          customStatus: HealthStatus.Warning,
+        },
+      },
+    });
+    const oneSecondFromNow = Date.now() + 1000;
+    const warnConfigurationStat = mockHealthStats({
+      last_update: new Date(oneSecondFromNow).toISOString(),
+      stats: {
+        configuration: {
+          customStatus: HealthStatus.Warning,
+        },
+        runtime: {
+          value: {
+            polling: {
+              last_successful_poll: new Date(oneSecondFromNow).toISOString(),
+            },
+          },
+        },
+      },
+    });
+    const twoSecondsFromNow = Date.now() + 2000;
+    const warnWorkloadStat = mockHealthStats({
+      last_update: new Date(twoSecondsFromNow).toISOString(),
+      stats: {
+        workload: {
+          customStatus: HealthStatus.Warning,
+        },
+        runtime: {
+          value: {
+            polling: {
+              last_successful_poll: new Date(twoSecondsFromNow).toISOString(),
+            },
+          },
+        },
+      },
+    });
 
     const stats$ = new Subject<MonitoringStats>();
 
@@ -122,24 +157,191 @@ describe('healthRoute', () => {
       })
     );
 
-    // stats$.next(mockStat);
-    // await sleep(500);
-    // stats$.next(skippedMockStat);
-    // await sleep(600);
-    stats$.next(warnStat);
-    await sleep(600);
-    stats$.next(warnStat);
-    await sleep(600);
-    // await sleep(600);
+    stats$.next(warnRuntimeStat);
+    await sleep(1001);
+    stats$.next(warnConfigurationStat);
+    await sleep(1001);
+    stats$.next(warnWorkloadStat);
 
-    // console.log('warnStat', warnStat.status)
-    // console.log('warn', (logger as jest.Mocked<Logger>).warn.mock.calls)
-    // console.log('error', (logger as jest.Mocked<Logger>).error.mock.calls)
-    // console.log('debug', (logger as jest.Mocked<Logger>).debug.mock.calls)
+    const warnRuntimeLog = JSON.parse(
+      ((logger as jest.Mocked<Logger>).warn.mock.calls[0][0] as string).replace(
+        'Latest Monitored Stats (warning status): ',
+        ''
+      )
+    );
+    expect(warnRuntimeLog).toMatchObject({
+      id,
+      timestamp: expect.any(String),
+      status: expect.any(String),
+      ...summarizeMonitoringStats(warnRuntimeStat, getTaskManagerConfig({})),
+    });
+
+    const warnConfigurationLog = JSON.parse(
+      ((logger as jest.Mocked<Logger>).warn.mock.calls[1][0] as string).replace(
+        'Latest Monitored Stats (warning status): ',
+        ''
+      )
+    );
+    expect(warnConfigurationLog).toMatchObject({
+      id,
+      timestamp: expect.any(String),
+      status: expect.any(String),
+      ...summarizeMonitoringStats(warnConfigurationStat, getTaskManagerConfig({})),
+    });
+
+    const warnWorkloadLog = JSON.parse(
+      ((logger as jest.Mocked<Logger>).warn.mock.calls[2][0] as string).replace(
+        'Latest Monitored Stats (warning status): ',
+        ''
+      )
+    );
+    expect(warnWorkloadLog).toMatchObject({
+      id,
+      timestamp: expect.any(String),
+      status: expect.any(String),
+      ...summarizeMonitoringStats(warnWorkloadStat, getTaskManagerConfig({})),
+    });
+
+    expect(logger.warn).toHaveBeenCalledTimes(3);
+  });
+
+  it(`logs at an error level if the status is error`, async () => {
+    const router = httpServiceMock.createRouter();
+    const logger = loggingSystemMock.create().get();
+
+    const errorRuntimeStat = mockHealthStats({
+      stats: {
+        runtime: {
+          customStatus: HealthStatus.Error,
+        },
+      },
+    });
+    const errorConfigurationStat = mockHealthStats({
+      stats: {
+        configuration: {
+          customStatus: HealthStatus.Error,
+        },
+      },
+    });
+    const errorWorkloadStat = mockHealthStats({
+      stats: {
+        workload: {
+          customStatus: HealthStatus.Error,
+        },
+      },
+    });
+
+    const stats$ = new Subject<MonitoringStats>();
+
+    const id = uuid.v4();
+    healthRoute(
+      router,
+      stats$,
+      logger,
+      id,
+      getTaskManagerConfig({
+        monitored_stats_required_freshness: 1000,
+        monitored_aggregated_stats_refresh_rate: 60000,
+      })
+    );
+
+    stats$.next(errorRuntimeStat);
+    await sleep(1001);
+    stats$.next(errorConfigurationStat);
+    await sleep(1001);
+    stats$.next(errorWorkloadStat);
+
+    const errorRuntimeLog = JSON.parse(
+      ((logger as jest.Mocked<Logger>).error.mock.calls[0][0] as string).replace(
+        'Latest Monitored Stats (error status): ',
+        ''
+      )
+    );
+    expect(errorRuntimeLog).toMatchObject({
+      id,
+      timestamp: expect.any(String),
+      status: expect.any(String),
+      ...summarizeMonitoringStats(errorRuntimeStat, getTaskManagerConfig({})),
+    });
+
+    const errorConfigurationLog = JSON.parse(
+      ((logger as jest.Mocked<Logger>).error.mock.calls[1][0] as string).replace(
+        'Latest Monitored Stats (error status): ',
+        ''
+      )
+    );
+    expect(errorConfigurationLog).toMatchObject({
+      id,
+      timestamp: expect.any(String),
+      status: expect.any(String),
+      ...summarizeMonitoringStats(errorConfigurationStat, getTaskManagerConfig({})),
+    });
+
+    const errorWorkloadLog = JSON.parse(
+      ((logger as jest.Mocked<Logger>).error.mock.calls[2][0] as string).replace(
+        'Latest Monitored Stats (error status): ',
+        ''
+      )
+    );
+    expect(errorWorkloadLog).toMatchObject({
+      id,
+      timestamp: expect.any(String),
+      status: expect.any(String),
+      ...summarizeMonitoringStats(errorWorkloadStat, getTaskManagerConfig({})),
+    });
+
+    expect(logger.error).toHaveBeenCalledTimes(3);
+  });
+
+  it(`logs at a warn level if the drift is over configured value`, async () => {
+    const router = httpServiceMock.createRouter();
+    const logger = loggingSystemMock.create().get();
+
+    const stat = mockHealthStats({
+      stats: {
+        runtime: {
+          value: {
+            drift: [1, 2, 3, 10000],
+          },
+        },
+      },
+    });
+    const nonWarnStat = mockHealthStats({
+      last_update: new Date(Date.now() + 1000).toISOString(),
+      stats: {
+        runtime: {
+          value: {
+            drift: [1, 2, 3, 9999],
+            polling: {
+              last_successful_poll: new Date(Date.now() + 1000).toISOString(),
+            },
+          },
+        },
+      },
+    });
+
+    const stats$ = new Subject<MonitoringStats>();
+
+    const id = uuid.v4();
+    healthRoute(
+      router,
+      stats$,
+      logger,
+      id,
+      getTaskManagerConfig({
+        monitored_stats_required_freshness: 1000,
+        monitored_stats_warn_drift_in_seconds: 10,
+        monitored_aggregated_stats_refresh_rate: 60000,
+      })
+    );
+
+    stats$.next(stat);
+    await sleep(1001);
+    stats$.next(nonWarnStat);
 
     const warnLog = JSON.parse(
       ((logger as jest.Mocked<Logger>).warn.mock.calls[0][0] as string).replace(
-        'Latest Monitored Stats: ',
+        'Latest Monitored Stats (warning status): ',
         ''
       )
     );
@@ -147,10 +349,24 @@ describe('healthRoute', () => {
       id,
       timestamp: expect.any(String),
       status: expect.any(String),
-      ...summarizeMonitoringStats(warnStat, getTaskManagerConfig({})),
+      ...summarizeMonitoringStats(stat, getTaskManagerConfig({})),
+    });
+
+    const debugLog = JSON.parse(
+      ((logger as jest.Mocked<Logger>).debug.mock.calls[0][0] as string).replace(
+        'Latest Monitored Stats: ',
+        ''
+      )
+    );
+    expect(debugLog).toMatchObject({
+      id,
+      timestamp: expect.any(String),
+      status: expect.any(String),
+      ...summarizeMonitoringStats(nonWarnStat, getTaskManagerConfig({})),
     });
 
     expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.debug).toHaveBeenCalledTimes(1);
   });
 
   it('returns a error status if the overall stats have not been updated within the required hot freshness', async () => {

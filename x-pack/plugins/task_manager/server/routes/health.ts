@@ -94,14 +94,19 @@ export function healthRoute(
     )
     .subscribe(([monitoredHealth, serviceStatus]) => {
       serviceStatus$.next(serviceStatus);
-      if (monitoredHealth.status !== HealthStatus.OK) {
-        if (monitoredHealth.status === HealthStatus.Warning) {
-          logger.warn(
-            `Latest Monitored Stats (warning status): ${JSON.stringify(monitoredHealth)}`
-          );
-        } else if (monitoredHealth.status === HealthStatus.Error) {
-          logger.error(`Latest Monitored Stats (error status): ${JSON.stringify(monitoredHealth)}`);
-        }
+
+      let logAsWarn = monitoredHealth.status === HealthStatus.Warning;
+      const logAsError = monitoredHealth.status === HealthStatus.Error;
+      const driftInSeconds = (monitoredHealth.stats.runtime?.value.drift.p99 ?? 0) / 1000;
+
+      if (driftInSeconds >= config.monitored_stats_warn_drift_in_seconds) {
+        logAsWarn = true;
+      }
+
+      if (logAsError) {
+        logger.error(`Latest Monitored Stats (error status): ${JSON.stringify(monitoredHealth)}`);
+      } else if (logAsWarn) {
+        logger.warn(`Latest Monitored Stats (warning status): ${JSON.stringify(monitoredHealth)}`);
       } else {
         logger.debug(`Latest Monitored Stats: ${JSON.stringify(monitoredHealth)}`);
       }
@@ -156,14 +161,13 @@ function hasExpiredHotTimestamps(
   now: number,
   requiredFreshness: number
 ): boolean {
-  return (
+  const diff =
     now -
-      getOldestTimestamp(
-        monitoringStats.last_update,
-        monitoringStats.stats.runtime?.value.polling.last_successful_poll
-      ) >
-    requiredFreshness
-  );
+    getOldestTimestamp(
+      monitoringStats.last_update,
+      monitoringStats.stats.runtime?.value.polling.last_successful_poll
+    );
+  return diff > requiredFreshness;
 }
 
 function hasExpiredColdTimestamps(

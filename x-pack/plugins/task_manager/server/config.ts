@@ -18,6 +18,7 @@ export const DEFAULT_VERSION_CONFLICT_THRESHOLD = 80;
 // Refresh aggregated monitored stats at a default rate of once a minute
 export const DEFAULT_MONITORING_REFRESH_RATE = 60 * 1000;
 export const DEFAULT_MONITORING_STATS_RUNNING_AVERGAE_WINDOW = 50;
+export const DEFAULT_MONITORING_STATS_WARN_DRIFT_IN_SECONDS = 60;
 
 export const taskExecutionFailureThresholdSchema = schema.object(
   {
@@ -108,6 +109,9 @@ export const configSchema = schema.object(
       custom: schema.recordOf(schema.string(), taskExecutionFailureThresholdSchema, {
         defaultValue: {},
       }),
+    }),
+    monitored_stats_warn_drift_in_seconds: schema.number({
+      defaultValue: DEFAULT_MONITORING_STATS_WARN_DRIFT_IN_SECONDS,
     }),
   },
   {
