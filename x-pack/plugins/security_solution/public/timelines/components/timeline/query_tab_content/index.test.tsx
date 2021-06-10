@@ -26,7 +26,6 @@ import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
 import { Direction } from '../../../../../common/search_strategy';
 
-jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../containers/index', () => ({
   useTimelineEvents: jest.fn(),
 }));
@@ -59,6 +58,15 @@ jest.mock('../../../../common/lib/kibana', () => {
         },
         savedObjects: {
           client: {},
+        },
+        timelines: {
+          getLastUpdated: jest.fn(),
+          getLoadingPanel: jest.fn(),
+          getUseDraggableKeyboardWrapper: () =>
+            jest.fn().mockReturnValue({
+              onBlur: jest.fn(),
+              onKeyDown: jest.fn(),
+            }),
         },
       },
     }),

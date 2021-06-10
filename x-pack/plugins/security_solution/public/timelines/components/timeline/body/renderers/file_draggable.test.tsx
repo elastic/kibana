@@ -13,6 +13,8 @@ import { TestProviders } from '../../../../../common/mock';
 import { FileDraggable } from './file_draggable';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 
+jest.mock('../../../../../common/lib/kibana');
+
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {

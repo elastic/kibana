@@ -15,6 +15,8 @@ import { getColumnsWithTimestamp } from '../../../common/components/event_detail
 
 import { FieldName } from './field_name';
 
+jest.mock('../../../common/lib/kibana');
+
 const categoryId = 'base';
 const timestampFieldId = '@timestamp';
 

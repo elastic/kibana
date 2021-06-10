@@ -23,6 +23,7 @@ import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
 import { PinnedTabContentComponent, Props as PinnedTabContentComponentProps } from '.';
 import { Direction } from '../../../../../common/search_strategy';
+import { useDraggableKeyboardWrapper as mockUseDraggableKeyboardWrapper } from '../../../../../../timelines/public/components';
 
 jest.mock('../../../containers/index', () => ({
   useTimelineEvents: jest.fn(),
@@ -56,6 +57,10 @@ jest.mock('../../../../common/lib/kibana', () => {
         },
         savedObjects: {
           client: {},
+        },
+        timelines: {
+          getLastUpdated: jest.fn(),
+          getUseDraggableKeyboardWrapper: () => mockUseDraggableKeyboardWrapper,
         },
       },
     }),

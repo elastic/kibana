@@ -21,6 +21,8 @@ import { FIELDS_PANE_WIDTH } from './helpers';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { ColumnHeaderOptions } from '../../../../common';
 
+jest.mock('../../../common/lib/kibana');
+
 const selectedCategoryId = 'base';
 const selectedCategoryFields = mockBrowserFields[selectedCategoryId].fields;
 const timestampFieldId = '@timestamp';

@@ -42,6 +42,9 @@ describe('ExceptionListsTable', () => {
             addError: jest.fn(),
           },
         },
+        timelines: {
+          getLastUpdated: () => null,
+        },
       },
     });
 

@@ -14,6 +14,8 @@ import { useMountAppended } from '../../../common/utils/use_mount_appended';
 
 import { CertificateFingerprint } from '.';
 
+jest.mock('../../../common/lib/kibana');
+
 describe('CertificateFingerprint', () => {
   const mount = useMountAppended();
   test('renders the expected label', () => {
