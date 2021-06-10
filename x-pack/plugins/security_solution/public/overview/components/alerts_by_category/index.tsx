@@ -67,7 +67,8 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
   const goToHostAlerts = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+      navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.hosts,
         path: getTabsOnHostsUrl(HostsTableType.alerts, urlSearch),
       });
     },

@@ -36,7 +36,6 @@ import {
   APP_ID,
   APP_ICON_SOLUTION,
   APP_DETECTIONS_PATH,
-  APP_HOSTS_PATH,
   APP_OVERVIEW_PATH,
   APP_NETWORK_PATH,
   APP_TIMELINES_PATH,
@@ -179,27 +178,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
 
     core.application.register({
-      id: `${APP_ID}:${SecurityPageName.hosts}`,
-      title: HOSTS,
-      order: 9002,
-      euiIconType: APP_ICON_SOLUTION,
-      category: DEFAULT_APP_CATEGORIES.security,
-      appRoute: APP_HOSTS_PATH,
-      updater$: this.hostsUpdater$,
-      mount: async (params: AppMountParameters) => {
-        const [coreStart, startPlugins] = await core.getStartServices();
-        const { hosts: subPlugin } = await this.subPlugins();
-        const { renderAppOld } = await this.lazyApplicationDependencies();
-        return renderAppOld({
-          ...params,
-          services: await startServices,
-          store: await this.store(coreStart, startPlugins),
-          SubPluginRoutes: subPlugin.start(this.storage).SubPluginRoutes,
-        });
-      },
-    });
-
-    core.application.register({
       id: `${APP_ID}:${SecurityPageName.network}`,
       title: NETWORK,
       order: 9002,
@@ -297,6 +275,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           path: OVERVIEW_PATH,
           navLinkStatus: AppNavLinkStatus.visible,
           order: 9000,
+          euiIconType: APP_ICON_SOLUTION,
+        },
+        {
+          id: SecurityPageName.hosts,
+          title: HOSTS,
+          path: '/hosts',
+          navLinkStatus: AppNavLinkStatus.visible,
+          order: 9002,
           euiIconType: APP_ICON_SOLUTION,
         },
       ],

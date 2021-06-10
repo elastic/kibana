@@ -96,7 +96,8 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   const goToHostEvents = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+      navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.hosts,
         path: getTabsOnHostsUrl(HostsTableType.events, urlSearch),
       });
     },
