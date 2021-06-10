@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { ChangePassword } from './change_password';
-
-export type { ChangePasswordProps } from './change_password';
+export { AccountSettings } from './account_settings';
