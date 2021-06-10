@@ -64,8 +64,16 @@ export const DatafeedPreview: FC<{
     if (combinedJob.datafeed_config && combinedJob.datafeed_config.indices.length) {
       try {
         const { datafeed_config: datafeed, ...job } = combinedJob;
-        const preview = await datafeedPreview(undefined, job, datafeed);
-        setPreviewJsonString(JSON.stringify(preview, null, 2));
+        if (job.analysis_config.detectors.length === 0) {
+          setPreviewJsonString(
+            i18n.translate('xpack.ml.newJob.wizard.datafeedPreviewFlyout.noDetectors', {
+              defaultMessage: 'No detectors configured',
+            })
+          );
+        } else {
+          const preview = await datafeedPreview(undefined, job, datafeed);
+          setPreviewJsonString(JSON.stringify(preview, null, 2));
+        }
       } catch (error) {
         setPreviewJsonString(JSON.stringify(error, null, 2));
       }
