@@ -412,8 +412,8 @@ export const getEndpointHostIsolationStatusPropsCallback: (
         const endpointPendingActions = pendingActionsState.data.get(endpoint.elastic.agent.id);
 
         if (endpointPendingActions) {
-          pendingIsolate = endpointPendingActions.pending_actions?.isolate ?? 0;
-          pendingUnIsolate = endpointPendingActions.pending_actions?.unisolate ?? 0;
+          pendingIsolate = endpointPendingActions?.isolate ?? 0;
+          pendingUnIsolate = endpointPendingActions?.unisolate ?? 0;
         }
       }
 

@@ -32,8 +32,9 @@ import {
   getIsIsolationRequestPending,
   getCurrentIsolationRequestState,
   getActivityLogData,
+  detailsData,
 } from './selectors';
-import { EndpointState, PolicyIds } from '../types';
+import { AgentIdsPendingActions, EndpointState, PolicyIds } from '../types';
 import {
   sendGetEndpointSpecificPackagePolicies,
   sendGetEndpointSecurityPackage,
@@ -57,6 +58,7 @@ import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isol
 import { AppAction } from '../../../../common/store/actions';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import { ServerReturnedEndpointPackageInfo } from './action';
+import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
 
 type EndpointPageStore = ImmutableMiddlewareAPI<EndpointState, AppAction>;
 
@@ -110,6 +112,8 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           type: 'serverReturnedEndpointList',
           payload: endpointResponse,
         });
+
+        loadEndpointsPendingActions(store);
 
         try {
           const endpointsTotalCount = await endpointsTotal(coreStart.http);
@@ -331,6 +335,8 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
         });
       }
 
+      loadEndpointsPendingActions(store);
+
       // call the activity log api
       dispatch({
         type: 'endpointDetailsActivityLogChanged',
@@ -529,3 +535,48 @@ async function getEndpointPackageInfo(
     logError(error);
   }
 }
+
+/**
+ * retrieves the Endpoint pending actions for all of the existing endpoints being displayed on the list
+ * or the details tab.
+ *
+ * @param store
+ */
+const loadEndpointsPendingActions = async ({
+  getState,
+  dispatch,
+}: EndpointPageStore): Promise<void> => {
+  const state = getState();
+  const detailsEndpoint = detailsData(state);
+  const listEndpoints = listData(state);
+  const agentsIds = new Set<string>();
+
+  // get all agent ids for the endpoints in the list
+  if (detailsEndpoint) {
+    agentsIds.add(detailsEndpoint.elastic.agent.id);
+  }
+
+  for (const endpointInfo of listEndpoints) {
+    agentsIds.add(endpointInfo.metadata.elastic.agent.id);
+  }
+
+  if (agentsIds.size === 0) {
+    return;
+  }
+
+  try {
+    const { data: pendingActions } = await fetchPendingActionsByAgentId(Array.from(agentsIds));
+    const agentIdToPendingActions: AgentIdsPendingActions = new Map();
+
+    for (const pendingAction of pendingActions) {
+      agentIdToPendingActions.set(pendingAction.agent_id, pendingAction.pending_actions);
+    }
+
+    dispatch({
+      type: 'endpointPendingActionsStateChanged',
+      payload: createLoadedResourceState(agentIdToPendingActions),
+    });
+  } catch (error) {
+    logError(error);
+  }
+};

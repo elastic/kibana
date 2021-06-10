@@ -93,9 +93,15 @@ export interface EndpointState {
   hostStatus?: HostStatus;
   /** Host isolation request state for a single endpoint */
   isolationRequestState: AsyncResourceState<HostIsolationResponse>;
-  /** Holds a map of `agentId` to `EndpointPendingActions` that is used by both the list and details view. */
-  endpointPendingActions: AsyncResourceState<Map<string, EndpointPendingActions>>;
+  /**
+   * Holds a map of `agentId` to `EndpointPendingActions` that is used by both the list and details view
+   * Getting pending endpoint actions is "supplemental" data, so there is no need to show other Async
+   * states other than Loaded
+   */
+  endpointPendingActions: AsyncResourceState<AgentIdsPendingActions>;
 }
+
+export type AgentIdsPendingActions = Map<string, EndpointPendingActions['pending_actions']>;
 
 /**
  * packagePolicy contains a list of Package Policy IDs (received via Endpoint metadata policy response) mapped to a boolean whether they exist or not.
