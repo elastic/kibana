@@ -8,7 +8,7 @@
 import { ES_GEO_FIELD_TYPE, SCALING_TYPES } from '../../../../common/constants';
 
 jest.mock('../../../kibana_services');
-jest.mock('./load_index_settings');
+jest.mock('./util/load_index_settings');
 
 import { getIndexPatternService, getSearchService, getHttp } from '../../../kibana_services';
 import { SearchSource } from 'src/plugins/data/public';

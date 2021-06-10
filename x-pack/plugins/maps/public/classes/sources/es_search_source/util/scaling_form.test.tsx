@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-jest.mock('../../../kibana_services', () => ({}));
+jest.mock('../../../../kibana_services', () => ({}));
 
 jest.mock('./load_index_settings', () => ({
   loadIndexSettings: async () => {
