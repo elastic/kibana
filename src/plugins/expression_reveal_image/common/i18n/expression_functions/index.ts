@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './expression_functions';
+export * from './function_help';
+export * from './function_errors';

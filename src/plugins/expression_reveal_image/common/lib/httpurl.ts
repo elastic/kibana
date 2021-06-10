@@ -6,4 +6,9 @@
  * Side Public License, v 1.
  */
 
-export * from './expression_functions';
+// A cheap regex to distinguish an HTTP URL string from a data URL string
+const httpurlRegex = /^https?:\/\/\S+(?:[0-9]+)?\/\S{1,}/;
+
+export function isValidHttpUrl(str: string): boolean {
+  return httpurlRegex.test(str);
+}

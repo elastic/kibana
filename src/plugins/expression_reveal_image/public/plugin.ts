@@ -9,18 +9,19 @@ import { i18n } from '@kbn/i18n';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { ExpressionsStart, ExpressionsSetup } from '../../../src/plugins/expressions/public';
 import { PLUGIN_NAME } from '../common';
-
-interface StartDeps {
-  expression: ExpressionsStart;
-}
+import { revealImageFunction } from './expression_functions';
 
 interface SetupDeps {
   expressions: ExpressionsSetup;
 }
 
+interface StartDeps {
+  expression: ExpressionsStart;
+}
+
 export class ExpressionRevealImagePlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionRevealImagePluginSetup {
-    expressions.registerFunction(null);
+    expressions.registerFunction(revealImageFunction);
     expressions.registerRenderer(null);
   }
 

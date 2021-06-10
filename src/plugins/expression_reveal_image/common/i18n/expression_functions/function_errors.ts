@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './expression_functions';
+import { errors as revealImage } from './dict/reveal_image';
+
+export const getFunctionErrors = () => ({
+  revealImage,
+});

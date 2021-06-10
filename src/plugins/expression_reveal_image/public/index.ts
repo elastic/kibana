@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import './index.scss';
-
 import { ExpressionRevealImagePlugin } from './plugin';
 
 // This exports static code and TypeScript types,

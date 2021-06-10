@@ -6,4 +6,9 @@
  * Side Public License, v 1.
  */
 
-export * from './expression_functions';
+import { isValidDataUrl } from './dataurl';
+import { isValidHttpUrl } from './httpurl';
+
+export function isValidUrl(url: string) {
+  return isValidDataUrl(url) || isValidHttpUrl(url);
+}

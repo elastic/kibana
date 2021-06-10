@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './expression_functions';
+export const BASE64 = '`base64`';
+export const URL = 'URL';
