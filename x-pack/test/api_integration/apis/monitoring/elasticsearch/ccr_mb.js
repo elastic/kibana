@@ -13,7 +13,7 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('ccr mb', () => {
-    const archive = 'monitoring/ccr_mb';
+    const archive = 'x-pack/test/functional/es_archives/monitoring/ccr_mb';
     const timeRange = {
       min: '2018-09-19T00:00:00.000Z',
       max: '2018-09-19T23:59:59.000Z',

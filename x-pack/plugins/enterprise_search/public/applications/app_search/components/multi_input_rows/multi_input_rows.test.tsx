@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { setMockActions, setMockValues, rerender } from '../../../__mocks__';
+import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
 import '../../../__mocks__/shallow_useeffect.mock';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
+
+import { rerender } from '../../../test_helpers';
 
 import { InputRow } from './input_row';
 

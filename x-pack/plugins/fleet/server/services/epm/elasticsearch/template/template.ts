@@ -16,6 +16,7 @@ import type {
 } from '../../../../types';
 import { appContextService } from '../../../';
 import { getRegistryDataStreamAssetBaseName } from '../index';
+import { FINAL_PIPELINE_ID } from '../ingest_pipeline/final_pipeline';
 
 interface Properties {
   [key: string]: any;
@@ -86,6 +87,11 @@ export function getTemplate({
   if (pipelineName) {
     template.template.settings.index.default_pipeline = pipelineName;
   }
+  if (template.template.settings.index.final_pipeline) {
+    throw new Error(`Error template for ${templateIndexPattern} contains a final_pipeline`);
+  }
+  template.template.settings.index.final_pipeline = FINAL_PIPELINE_ID;
+
   return template;
 }
 
@@ -521,7 +527,6 @@ const updateExistingDataStream = async ({
     await esClient.indices.putMapping({
       index: dataStreamName,
       body: mappings,
-      // @ts-expect-error @elastic/elasticsearch doesn't declare it on PutMappingRequest
       write_index_only: true,
     });
     // if update fails, rollover data stream
@@ -543,7 +548,7 @@ const updateExistingDataStream = async ({
   try {
     await esClient.indices.putSettings({
       index: dataStreamName,
-      body: { index: { default_pipeline: settings.index.default_pipeline } },
+      body: { settings: { default_pipeline: settings.index.default_pipeline } },
     });
   } catch (err) {
     throw new Error(`could not update index template settings for ${dataStreamName}`);

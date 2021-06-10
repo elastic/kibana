@@ -98,6 +98,64 @@
       },
       {
         "parentPluginId": "security",
+        "id": "def-public.AuthenticationServiceSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "AuthenticationServiceSetup",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/security/public/authentication/authentication_service.ts",
+          "lineNumber": 33
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-public.AuthenticationServiceSetup.getCurrentUser",
+            "type": "Function",
+            "tags": [],
+            "label": "getCurrentUser",
+            "description": [
+              "\nReturns currently authenticated user and throws if current user isn't authenticated."
+            ],
+            "signature": [
+              "() => Promise<",
+              "AuthenticatedUser",
+              ">"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security/public/authentication/authentication_service.ts",
+              "lineNumber": 37
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-public.AuthenticationServiceSetup.areAPIKeysEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "areAPIKeysEnabled",
+            "description": [
+              "\nDetermines if API Keys are currently enabled."
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security/public/authentication/authentication_service.ts",
+              "lineNumber": 42
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
         "id": "def-public.SecurityLicense",
         "type": "Interface",
         "tags": [],
@@ -410,6 +468,104 @@
       },
       {
         "parentPluginId": "security",
+        "id": "def-public.SecurityNavControlServiceStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "SecurityNavControlServiceStart",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx",
+          "lineNumber": 32
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-public.SecurityNavControlServiceStart.getUserMenuLinks$",
+            "type": "Function",
+            "tags": [],
+            "label": "getUserMenuLinks$",
+            "description": [
+              "\nReturns an Observable of the array of user menu links (the links that show up under the user's Avatar in the UI) registered by other plugins"
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "security",
+                "scope": "public",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-public.UserMenuLink",
+                "text": "UserMenuLink"
+              },
+              "[]>"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx",
+              "lineNumber": 36
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-public.SecurityNavControlServiceStart.addUserMenuLinks",
+            "type": "Function",
+            "tags": [],
+            "label": "addUserMenuLinks",
+            "description": [
+              "\nRegisters the provided user menu links to be displayed in the user menu (the links that show up under the user's Avatar in the UI)."
+            ],
+            "signature": [
+              "(newUserMenuLink: ",
+              {
+                "pluginId": "security",
+                "scope": "public",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-public.UserMenuLink",
+                "text": "UserMenuLink"
+              },
+              "[]) => void"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx",
+              "lineNumber": 41
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "security",
+                "id": "def-public.newUserMenuLink",
+                "type": "Array",
+                "tags": [],
+                "label": "newUserMenuLink",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "security",
+                    "scope": "public",
+                    "docId": "kibSecurityPluginApi",
+                    "section": "def-public.UserMenuLink",
+                    "text": "UserMenuLink"
+                  },
+                  "[]"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx",
+                  "lineNumber": 41
+                },
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
         "id": "def-public.UserMenuLink",
         "type": "Interface",
         "tags": [],
@@ -500,55 +656,161 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "security",
+        "id": "def-public.AuthenticationServiceStart",
+        "type": "Type",
+        "tags": [],
+        "label": "AuthenticationServiceStart",
+        "description": [
+          "\nStart has the same contract as Setup for now."
+        ],
+        "signature": [
+          {
+            "pluginId": "security",
+            "scope": "public",
+            "docId": "kibSecurityPluginApi",
+            "section": "def-public.AuthenticationServiceSetup",
+            "text": "AuthenticationServiceSetup"
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/security/public/authentication/authentication_service.ts",
+          "lineNumber": 48
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "setup": {
       "parentPluginId": "security",
       "id": "def-public.SecurityPluginSetup",
-      "type": "Type",
+      "type": "Interface",
       "tags": [],
       "label": "SecurityPluginSetup",
       "description": [],
-      "signature": [
-        "{ authc: ",
-        "AuthenticationServiceSetup",
-        "; sessionTimeout: ",
-        "SessionTimeout",
-        "; license: Readonly<{ isLicenseAvailable: () => boolean; isEnabled: () => boolean; getType: () => \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; getFeatures: () => ",
-        "SecurityLicenseFeatures",
-        "; features$: ",
-        "Observable",
-        "<",
-        "SecurityLicenseFeatures",
-        ">; }>; __legacyCompat: { logoutUrl: string; tenant: string; }; }"
-      ],
       "source": {
         "path": "x-pack/plugins/security/public/plugin.tsx",
-        "lineNumber": 164
+        "lineNumber": 167
       },
       "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "security",
+          "id": "def-public.SecurityPluginSetup.authc",
+          "type": "Object",
+          "tags": [],
+          "label": "authc",
+          "description": [
+            "\nExposes authentication information about the currently logged in user."
+          ],
+          "signature": [
+            {
+              "pluginId": "security",
+              "scope": "public",
+              "docId": "kibSecurityPluginApi",
+              "section": "def-public.AuthenticationServiceSetup",
+              "text": "AuthenticationServiceSetup"
+            }
+          ],
+          "source": {
+            "path": "x-pack/plugins/security/public/plugin.tsx",
+            "lineNumber": 171
+          },
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "security",
+          "id": "def-public.SecurityPluginSetup.license",
+          "type": "Object",
+          "tags": [],
+          "label": "license",
+          "description": [
+            "\nExposes information about the available security features under the current license."
+          ],
+          "signature": [
+            {
+              "pluginId": "security",
+              "scope": "common",
+              "docId": "kibSecurityPluginApi",
+              "section": "def-common.SecurityLicense",
+              "text": "SecurityLicense"
+            }
+          ],
+          "source": {
+            "path": "x-pack/plugins/security/public/plugin.tsx",
+            "lineNumber": 175
+          },
+          "deprecated": false
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
     "start": {
       "parentPluginId": "security",
       "id": "def-public.SecurityPluginStart",
-      "type": "Type",
+      "type": "Interface",
       "tags": [],
       "label": "SecurityPluginStart",
       "description": [],
-      "signature": [
-        "{ navControlService: ",
-        "SecurityNavControlServiceStart",
-        "; authc: ",
-        "AuthenticationServiceSetup",
-        "; }"
-      ],
       "source": {
         "path": "x-pack/plugins/security/public/plugin.tsx",
-        "lineNumber": 165
+        "lineNumber": 178
       },
       "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "security",
+          "id": "def-public.SecurityPluginStart.navControlService",
+          "type": "Object",
+          "tags": [],
+          "label": "navControlService",
+          "description": [
+            "\nExposes the ability to add custom links to the dropdown menu in the top right, where the user's Avatar is."
+          ],
+          "signature": [
+            {
+              "pluginId": "security",
+              "scope": "public",
+              "docId": "kibSecurityPluginApi",
+              "section": "def-public.SecurityNavControlServiceStart",
+              "text": "SecurityNavControlServiceStart"
+            }
+          ],
+          "source": {
+            "path": "x-pack/plugins/security/public/plugin.tsx",
+            "lineNumber": 182
+          },
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "security",
+          "id": "def-public.SecurityPluginStart.authc",
+          "type": "Object",
+          "tags": [],
+          "label": "authc",
+          "description": [
+            "\nExposes authentication information about the currently logged in user."
+          ],
+          "signature": [
+            {
+              "pluginId": "security",
+              "scope": "public",
+              "docId": "kibSecurityPluginApi",
+              "section": "def-public.AuthenticationServiceSetup",
+              "text": "AuthenticationServiceSetup"
+            }
+          ],
+          "source": {
+            "path": "x-pack/plugins/security/public/plugin.tsx",
+            "lineNumber": 186
+          },
+          "deprecated": false
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -832,7 +1094,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-          "lineNumber": 56
+          "lineNumber": 62
         },
         "deprecated": false,
         "children": [
@@ -847,7 +1109,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 60
+              "lineNumber": 66
             },
             "deprecated": false
           },
@@ -862,7 +1124,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 64
+              "lineNumber": 70
             },
             "deprecated": false
           },
@@ -880,7 +1142,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 68
+              "lineNumber": 74
             },
             "deprecated": false
           },
@@ -895,7 +1157,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 72
+              "lineNumber": 78
             },
             "deprecated": false
           }
@@ -911,7 +1173,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-          "lineNumber": 75
+          "lineNumber": 81
         },
         "deprecated": false,
         "children": [
@@ -926,7 +1188,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 79
+              "lineNumber": 85
             },
             "deprecated": false
           },
@@ -941,7 +1203,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 83
+              "lineNumber": 89
             },
             "deprecated": false
           },
@@ -956,7 +1218,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 87
+              "lineNumber": 93
             },
             "deprecated": false
           }
@@ -974,7 +1236,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-          "lineNumber": 93
+          "lineNumber": 99
         },
         "deprecated": false,
         "children": [
@@ -992,7 +1254,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 97
+              "lineNumber": 103
             },
             "deprecated": false
           },
@@ -1010,7 +1272,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 101
+              "lineNumber": 107
             },
             "deprecated": false
           },
@@ -1025,7 +1287,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 105
+              "lineNumber": 111
             },
             "deprecated": false
           },
@@ -1043,7 +1305,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 109
+              "lineNumber": 115
             },
             "deprecated": false
           }
@@ -1061,7 +1323,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-          "lineNumber": 46
+          "lineNumber": 52
         },
         "deprecated": false,
         "children": [
@@ -1077,7 +1339,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 47
+              "lineNumber": 53
             },
             "deprecated": false
           }
@@ -1314,13 +1576,6 @@
                 }
               },
               {
-                "plugin": "cases",
-                "link": {
-                  "path": "x-pack/plugins/cases/server/plugin.ts",
-                  "lineNumber": 89
-                }
-              },
-              {
                 "plugin": "dashboardMode",
                 "link": {
                   "path": "x-pack/plugins/dashboard_mode/server/interceptors/dashboard_mode_request_interceptor.ts",
@@ -1463,7 +1718,13 @@
             "label": "license",
             "description": [],
             "signature": [
-              "SecurityLicense"
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.SecurityLicense",
+                "text": "SecurityLicense"
+              }
             ],
             "source": {
               "path": "x-pack/plugins/security/server/plugin.ts",
@@ -1613,7 +1874,116 @@
   "common": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "security",
+        "id": "def-common.SecurityLicense",
+        "type": "Interface",
+        "tags": [],
+        "label": "SecurityLicense",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+          "lineNumber": 14
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.SecurityLicense.isLicenseAvailable",
+            "type": "Function",
+            "tags": [],
+            "label": "isLicenseAvailable",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+              "lineNumber": 15
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.SecurityLicense.isEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isEnabled",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+              "lineNumber": 16
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.SecurityLicense.getType",
+            "type": "Function",
+            "tags": [],
+            "label": "getType",
+            "description": [],
+            "signature": [
+              "() => \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+              "lineNumber": 17
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.SecurityLicense.getFeatures",
+            "type": "Function",
+            "tags": [],
+            "label": "getFeatures",
+            "description": [],
+            "signature": [
+              "() => ",
+              "SecurityLicenseFeatures"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+              "lineNumber": 18
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.SecurityLicense.features$",
+            "type": "Object",
+            "tags": [],
+            "label": "features$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              "SecurityLicenseFeatures",
+              ">"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+              "lineNumber": 19
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": []
