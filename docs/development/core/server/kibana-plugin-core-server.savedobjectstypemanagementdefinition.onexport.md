@@ -13,7 +13,7 @@ See [the transform type documentation](./kibana-plugin-core-server.savedobjectse
 <b>Signature:</b>
 
 ```typescript
-onExport?: SavedObjectsExportTransform;
+onExport?: SavedObjectsExportTransform<Attributes>;
 ```
 
 ## Remarks

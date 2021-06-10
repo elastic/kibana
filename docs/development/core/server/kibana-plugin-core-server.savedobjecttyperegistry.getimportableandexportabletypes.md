@@ -9,9 +9,9 @@ Return all [types](./kibana-plugin-core-server.savedobjectstype.md) currently re
 <b>Signature:</b>
 
 ```typescript
-getImportableAndExportableTypes(): SavedObjectsType[];
+getImportableAndExportableTypes(): SavedObjectsType<any>[];
 ```
 <b>Returns:</b>
 
-`SavedObjectsType[]`
+`SavedObjectsType<any>[]`
 

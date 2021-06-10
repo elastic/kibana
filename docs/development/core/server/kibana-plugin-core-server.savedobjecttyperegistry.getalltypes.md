@@ -11,9 +11,9 @@ To only get the visible types (which is the most common use case), use `getVisib
 <b>Signature:</b>
 
 ```typescript
-getAllTypes(): SavedObjectsType[];
+getAllTypes(): SavedObjectsType<any>[];
 ```
 <b>Returns:</b>
 
-`SavedObjectsType[]`
+`SavedObjectsType<any>[]`
 

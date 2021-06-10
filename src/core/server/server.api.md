@@ -2535,8 +2535,17 @@ export class SavedObjectsExportError extends Error {
     readonly type: string;
 }
 
+// @public (undocumented)
+export interface SavedObjectsExportExcludedObject {
+    id: string;
+    reason?: string;
+    type: string;
+}
+
 // @public
 export interface SavedObjectsExportResultDetails {
+    excludedObjects: SavedObjectsExportExcludedObject[];
+    excludedObjectsCount: number;
     exportedCount: number;
     missingRefCount: number;
     missingReferences: Array<{
@@ -2546,7 +2555,7 @@ export interface SavedObjectsExportResultDetails {
 }
 
 // @public
-export type SavedObjectsExportTransform = <T = unknown>(context: SavedObjectsExportTransformContext, objects: Array<SavedObject<T>>) => SavedObject[] | Promise<SavedObject[]>;
+export type SavedObjectsExportTransform<T = unknown> = (context: SavedObjectsExportTransformContext, objects: Array<SavedObject<T>>) => SavedObject[] | Promise<SavedObject[]>;
 
 // @public
 export interface SavedObjectsExportTransformContext {
@@ -2955,7 +2964,7 @@ export class SavedObjectsSerializer {
 // @public
 export interface SavedObjectsServiceSetup {
     addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory) => void;
-    registerType: (type: SavedObjectsType) => void;
+    registerType: <Attributes = any>(type: SavedObjectsType<Attributes>) => void;
     setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider) => void;
 }
 
@@ -2981,12 +2990,12 @@ export interface SavedObjectStatusMeta {
 }
 
 // @public (undocumented)
-export interface SavedObjectsType {
+export interface SavedObjectsType<Attributes = any> {
     convertToAliasScript?: string;
     convertToMultiNamespaceTypeVersion?: string;
     hidden: boolean;
     indexPattern?: string;
-    management?: SavedObjectsTypeManagementDefinition;
+    management?: SavedObjectsTypeManagementDefinition<Attributes>;
     mappings: SavedObjectsTypeMappingDefinition;
     migrations?: SavedObjectMigrationMap | (() => SavedObjectMigrationMap);
     name: string;
@@ -2994,18 +3003,20 @@ export interface SavedObjectsType {
 }
 
 // @public
-export interface SavedObjectsTypeManagementDefinition {
+export interface SavedObjectsTypeManagementDefinition<Attributes = any> {
     defaultSearchField?: string;
-    getEditUrl?: (savedObject: SavedObject<any>) => string;
-    getInAppUrl?: (savedObject: SavedObject<any>) => {
+    getEditUrl?: (savedObject: SavedObject<Attributes>) => string;
+    getInAppUrl?: (savedObject: SavedObject<Attributes>) => {
         path: string;
         uiCapabilitiesPath: string;
     };
-    getTitle?: (savedObject: SavedObject<any>) => string;
+    getTitle?: (savedObject: SavedObject<Attributes>) => string;
     icon?: string;
     importableAndExportable?: boolean;
-    onExport?: SavedObjectsExportTransform;
-    onImport?: SavedObjectsImportHook;
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsExportablePredicate" needs to be exported by the entry point index.d.ts
+    isExportable?: SavedObjectsExportablePredicate<Attributes>;
+    onExport?: SavedObjectsExportTransform<Attributes>;
+    onImport?: SavedObjectsImportHook<Attributes>;
 }
 
 // @public
@@ -3070,11 +3081,11 @@ export class SavedObjectsUtils {
 
 // @public
 export class SavedObjectTypeRegistry {
-    getAllTypes(): SavedObjectsType[];
-    getImportableAndExportableTypes(): SavedObjectsType[];
+    getAllTypes(): SavedObjectsType<any>[];
+    getImportableAndExportableTypes(): SavedObjectsType<any>[];
     getIndex(type: string): string | undefined;
-    getType(type: string): SavedObjectsType | undefined;
-    getVisibleTypes(): SavedObjectsType[];
+    getType(type: string): SavedObjectsType<any> | undefined;
+    getVisibleTypes(): SavedObjectsType<any>[];
     isHidden(type: string): boolean;
     isImportableAndExportable(type: string): boolean;
     isMultiNamespace(type: string): boolean;
