@@ -20,6 +20,7 @@
     "indexPatternFieldEditor"
   ],
   "requiredBundles": [
+    "home",
     "kibanaReact",
     "maps",
     "esUiShared"

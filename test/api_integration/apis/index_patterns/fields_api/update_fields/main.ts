@@ -22,6 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       indexPattern = (
         await supertest.post('/api/index_patterns/index_pattern').send({
+          override: true,
           index_pattern: {
             title: basicIndex,
           },
