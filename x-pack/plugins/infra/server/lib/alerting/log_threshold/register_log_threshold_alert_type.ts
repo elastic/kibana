@@ -90,6 +90,7 @@ export async function registerLogThresholdAlertType(
 
   alertingPlugin.registerType<
     AlertTypeParams,
+    never, // Only use if defining useSavedObjectReferences hook
     AlertTypeState,
     AlertInstanceState,
     AlertInstanceContext,

@@ -81,6 +81,7 @@ export class TaskRunnerFactory {
 
     return new TaskRunner<
       Params,
+      ExtractedParams,
       State,
       InstanceState,
       InstanceContext,

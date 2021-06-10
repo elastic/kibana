@@ -1539,13 +1539,16 @@ export class AlertsClient {
     }
   }
 
-  private async extractReferences<Params extends AlertTypeParams>(
+  private async extractReferences<
+    Params extends AlertTypeParams,
+    ExtractedParams extends AlertTypeParams
+  >(
     ruleType: UntypedNormalizedAlertType,
     ruleActions: NormalizedAlertAction[],
     ruleParams: Params
   ): Promise<{
     actions: RawAlert['actions'];
-    params: Params;
+    params: ExtractedParams;
     references: SavedObjectReference[];
   }> {
     const { references: actionReferences, actions } = await this.denormalizeActions(ruleActions);
@@ -1555,7 +1558,7 @@ export class AlertsClient {
       ? ruleType.useSavedObjectReferences.extractReferences(ruleParams)
       : null;
     const extractedReferences = extractedRefsAndParams?.references ?? [];
-    const params = (extractedRefsAndParams?.params as Params) ?? ruleParams;
+    const params = (extractedRefsAndParams?.params as ExtractedParams) ?? ruleParams;
 
     // Validate that extract references don't use prefix reserved for actions
     const referencesUsingReservedPrefix = extractedReferences.filter(
@@ -1577,26 +1580,26 @@ export class AlertsClient {
     };
   }
 
-  private injectReferences<Params extends AlertTypeParams>(
-    ruleId: string,
-    ruleType: UntypedNormalizedAlertType,
-    ruleActions: RawAlert['actions'],
-    ruleParams: Params,
-    references: SavedObjectReference[]
-  ): {
-    actions: Alert['actions'];
-    params: Params;
-  } {
-    const actions = this.injectReferencesIntoActions(ruleId, ruleActions, references);
-    const params = ruleType?.useSavedObjectReferences?.injectReferences
-      ? (ruleType.useSavedObjectReferences.injectReferences(ruleParams, references) as Params)
-      : ruleParams;
+  // private injectReferences<Params extends AlertTypeParams>(
+  //   ruleId: string,
+  //   ruleType: UntypedNormalizedAlertType,
+  //   ruleActions: RawAlert['actions'],
+  //   ruleParams: Params,
+  //   references: SavedObjectReference[]
+  // ): {
+  //   actions: Alert['actions'];
+  //   params: Params;
+  // } {
+  //   const actions = this.injectReferencesIntoActions(ruleId, ruleActions, references);
+  //   const params = ruleType?.useSavedObjectReferences?.injectReferences
+  //     ? (ruleType.useSavedObjectReferences.injectReferences(ruleParams, references) as Params)
+  //     : ruleParams;
 
-    return {
-      actions,
-      params,
-    };
-  }
+  //   return {
+  //     actions,
+  //     params,
+  //   };
+  // }
 
   private async denormalizeActions(
     alertActions: NormalizedAlertAction[]
