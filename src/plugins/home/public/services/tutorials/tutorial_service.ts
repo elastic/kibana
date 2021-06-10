@@ -23,7 +23,7 @@ export type TutorialModuleNoticeComponent = React.FC<{
 }>;
 
 type CustomStatusCheckCallback = () => Promise<boolean>;
-type CustomStatusCheck = Record<string, CustomStatusCheckCallback>;
+type CustomComponent = () => Promise<React.ReactNode>;
 
 export class TutorialService {
   private tutorialVariables: TutorialVariables = {};
@@ -32,7 +32,9 @@ export class TutorialService {
     [key: string]: TutorialDirectoryHeaderLinkComponent;
   } = {};
   private tutorialModuleNotices: { [key: string]: TutorialModuleNoticeComponent } = {};
-  private customStatusCheck: CustomStatusCheck = {};
+  private customStatusCheck: Record<string, CustomStatusCheckCallback> = {};
+  private customComponent: Record<string, CustomComponent> = {};
+  private tutorial: any;
 
   public setup() {
     return {
@@ -82,6 +84,10 @@ export class TutorialService {
       registerCustomStatusCheck: (name: string, fnCallback: CustomStatusCheckCallback) => {
         this.customStatusCheck[name] = fnCallback;
       },
+
+      registerCustomComponent: (name: string, component: CustomComponent) => {
+        this.customComponent[name] = component;
+      },
     };
   }
 
@@ -101,8 +107,20 @@ export class TutorialService {
     return Object.values(this.tutorialModuleNotices);
   }
 
-  public getCustomStatusCheck(name: string) {
-    return this.customStatusCheck[name];
+  public getCustomStatusCheck() {
+    return this.customStatusCheck[this.tutorial?.customComponentName];
+  }
+
+  public getCustomComponent() {
+    return this.customComponent[this.tutorial?.customComponentName];
+  }
+
+  public setTutorial(tutorial: any) {
+    this.tutorial = tutorial;
+  }
+
+  public getTutorial() {
+    return this.tutorial;
   }
 }
 

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -165,6 +164,13 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         return hasFleetApmIntegrations();
       }
     );
+
+    // Registers custom component that is going to be render on fleet section
+    pluginSetupDeps.home?.tutorials.registerCustomComponent(
+      'TutorialFleetInstructions',
+      () => import('./components/shared/tutorial_fleet_instructions')
+    );
+
     plugins.observability.dashboard.register({
       appName: 'apm',
       hasData: async () => {

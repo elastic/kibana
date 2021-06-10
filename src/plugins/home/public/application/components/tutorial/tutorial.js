@@ -67,12 +67,12 @@ class TutorialUi extends React.Component {
 
   async componentDidMount() {
     const tutorial = await this.props.getTutorial(this.props.tutorialId);
-
     if (!this._isMounted) {
       return;
     }
 
     if (tutorial) {
+      getServices().tutorialService.setTutorial(tutorial);
       // eslint-disable-next-line react/no-did-mount-set-state
       this.setState(
         {
@@ -172,12 +172,15 @@ class TutorialUi extends React.Component {
     const instructionSet = this.getInstructionSets()[instructionSetIndex];
     const esHitsCheckConfig = _.get(instructionSet, `statusCheck.esHitsCheck`);
 
-    //Checks if the tutorial registered in the SERVER contains the customStatusCheckName property
-    const { customStatusCheckName } = this.state.tutorial;
+    //Checks if a custom status check callback  was registered in the CLIENT
+    //that matches the same name registered in the SERVER (customStatusCheckName)
+    const customStatusCheckCallback = getServices().tutorialService.getCustomStatusCheck();
 
     const [esHitsStatusCheck, customStatusCheck] = await Promise.all([
       ...(esHitsCheckConfig ? [this.fetchEsHitsStatus(esHitsCheckConfig)] : []),
-      ...(customStatusCheckName ? [this.fetchCustomStatusCheck(customStatusCheckName)] : []),
+      ...(customStatusCheckCallback
+        ? [this.fetchCustomStatusCheck(customStatusCheckCallback)]
+        : []),
     ]);
 
     const nextStatusCheckState =
@@ -194,17 +197,10 @@ class TutorialUi extends React.Component {
     }));
   };
 
-  fetchCustomStatusCheck = async (customStatusCheckName) => {
+  fetchCustomStatusCheck = async (customStatusCheckCallback) => {
     try {
-      //Checks if a custom status check callback  was registered in the CLIENT
-      //that matches the same name registered in the SERVER (customStatusCheckName)
-      const customStatusCheckCallback = getServices().tutorialService.getCustomStatusCheck(
-        customStatusCheckName
-      );
-      if (customStatusCheckCallback) {
-        const response = await customStatusCheckCallback();
-        return response ? StatusCheckStates.HAS_DATA : StatusCheckStates.NO_DATA;
-      }
+      const response = await customStatusCheckCallback();
+      return response ? StatusCheckStates.HAS_DATA : StatusCheckStates.NO_DATA;
     } catch (e) {
       return StatusCheckStates.ERROR;
     }

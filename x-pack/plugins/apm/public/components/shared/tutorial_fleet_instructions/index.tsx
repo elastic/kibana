@@ -1,23 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import {
-  EuiButton,
-  EuiCard,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiImage,
-  EuiLoadingSpinner,
-  EuiPanel,
-} from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
+import { EuiCard } from '@elastic/eui';
+import { EuiImage } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { HttpStart } from 'kibana/public';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { getServices } from '../../kibana_services';
+import { APIReturnType } from '../../../services/rest/createCallApmApi';
+
+interface Props {
+  http: HttpStart;
+  basePath: string;
+  isDarkTheme: boolean;
+}
 
 const CentralizedContainer = styled.div`
   display: flex;
@@ -25,15 +29,10 @@ const CentralizedContainer = styled.div`
   align-items: center;
 `;
 
-interface APIResponse {
-  hasData: boolean;
-}
+type APIResponseType = APIReturnType<'GET /api/apm/fleet/has_data'>;
 
-export function APMFleet() {
-  const { http, getBasePath, uiSettings } = getServices();
-  const isDarkTheme = uiSettings.get('theme:darkMode');
-  const basePath = getBasePath();
-  const [data, setData] = useState<APIResponse | undefined>();
+function TutorialFleetInstructions({ http, basePath, isDarkTheme }: Props) {
+  const [data, setData] = useState<APIResponseType | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -41,9 +40,8 @@ export function APMFleet() {
       setIsLoading(true);
       try {
         const response = await http.get('/api/apm/fleet/has_data');
-        setData(response as APIResponse);
+        setData(response as APIResponseType);
       } catch (e) {
-        // eslint-disable-next-line no-console
         console.error('Error while fetching fleet details.', e);
       }
       setIsLoading(false);
@@ -58,13 +56,17 @@ export function APMFleet() {
       </CentralizedContainer>
     );
   }
+
   // When APM integration is enable in Fleet
   if (data?.hasData) {
     return (
       <EuiButton iconType="gear" fill href={`${basePath}/app/fleet#/policies`}>
-        {i18n.translate('home.apm.tutorial.apmServer.fleet.manageApmIntegration.button', {
-          defaultMessage: 'Manage APM integration in Fleet',
-        })}
+        {i18n.translate(
+          'xpack.apm.tutorial.apmServer.fleet.manageApmIntegration.button',
+          {
+            defaultMessage: 'Manage APM integration in Fleet',
+          }
+        )}
       </EuiButton>
     );
   }
@@ -76,22 +78,28 @@ export function APMFleet() {
           <EuiCard
             display="plain"
             textAlign="left"
-            title={i18n.translate('home.apm.tutorial.apmServer.fleet.title', {
+            title={i18n.translate('xpack.apm.tutorial.apmServer.fleet.title', {
               defaultMessage: 'Elastic APM (beta) now available in Fleet!',
             })}
-            description={i18n.translate('home.apm.tutorial.apmServer.fleet.message', {
-              defaultMessage:
-                'The APM integration installs Elasticsearch templates and Ingest Node pipelines for APM data.',
-            })}
+            description={i18n.translate(
+              'xpack.apm.tutorial.apmServer.fleet.message',
+              {
+                defaultMessage:
+                  'The APM integration installs Elasticsearch templates and Ingest Node pipelines for APM data.',
+              }
+            )}
             footer={
               <EuiButton
                 iconType="analyzeEvent"
                 color="secondary"
                 href={`${basePath}/app/fleet#/integrations/detail/apm-0.2.0/overview`}
               >
-                {i18n.translate('home.apm.tutorial.apmServer.fleet.apmIntegration.button', {
-                  defaultMessage: 'APM integration',
-                })}
+                {i18n.translate(
+                  'xpack.apm.tutorial.apmServer.fleet.apmIntegration.button',
+                  {
+                    defaultMessage: 'APM integration',
+                  }
+                )}
               </EuiButton>
             }
           />
@@ -110,3 +118,5 @@ export function APMFleet() {
     </EuiPanel>
   );
 }
+// eslint-disable-next-line import/no-default-export
+export default TutorialFleetInstructions;

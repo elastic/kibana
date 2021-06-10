@@ -154,6 +154,7 @@ export const tutorialSchema = schema.object({
   savedObjects: schema.maybe(schema.arrayOf(schema.any())),
   savedObjectsInstallMsg: schema.maybe(schema.string()),
   customStatusCheckName: schema.maybe(schema.string()),
+  customComponentName: schema.maybe(schema.string()),
 });
 
 export type TutorialSchema = TypeOf<typeof tutorialSchema>;
