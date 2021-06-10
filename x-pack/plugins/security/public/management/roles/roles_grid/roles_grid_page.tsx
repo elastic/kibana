@@ -129,55 +129,53 @@ export class RolesGridPage extends Component<Props, State> {
           />
         ) : null}
 
-        {
-          <EuiInMemoryTable
-            itemId="name"
-            responsive={false}
-            columns={this.getColumnConfig()}
-            hasActions={true}
-            selection={{
-              selectable: (role: Role) => !role.metadata || !role.metadata._reserved,
-              selectableMessage: (selectable: boolean) => (!selectable ? 'Role is reserved' : ''),
-              onSelectionChange: (selection: Role[]) => this.setState({ selection }),
-            }}
-            pagination={{
-              initialPageSize: 20,
-              pageSizeOptions: [10, 20, 30, 50, 100],
-            }}
-            items={this.state.visibleRoles}
-            loading={roles.length === 0}
-            search={{
-              toolsLeft: this.renderToolsLeft(),
-              toolsRight: this.renderToolsRight(),
-              box: {
-                incremental: true,
-                'data-test-subj': 'searchRoles',
-              },
-              onChange: (query: Record<string, any>) => {
-                this.setState({
-                  filter: query.queryText,
-                  visibleRoles: this.getVisibleRoles(
-                    this.state.roles,
-                    query.queryText,
-                    this.state.includeReservedRoles
-                  ),
-                });
-              },
-            }}
-            sorting={{
-              sort: {
-                field: 'name',
-                direction: 'asc',
-              },
-            }}
-            rowProps={() => {
-              return {
-                'data-test-subj': 'roleRow',
-              };
-            }}
-            isSelectable
-          />
-        }
+        <EuiInMemoryTable
+          itemId="name"
+          responsive={false}
+          columns={this.getColumnConfig()}
+          hasActions={true}
+          selection={{
+            selectable: (role: Role) => !role.metadata || !role.metadata._reserved,
+            selectableMessage: (selectable: boolean) => (!selectable ? 'Role is reserved' : ''),
+            onSelectionChange: (selection: Role[]) => this.setState({ selection }),
+          }}
+          pagination={{
+            initialPageSize: 20,
+            pageSizeOptions: [10, 20, 30, 50, 100],
+          }}
+          items={this.state.visibleRoles}
+          loading={roles.length === 0}
+          search={{
+            toolsLeft: this.renderToolsLeft(),
+            toolsRight: this.renderToolsRight(),
+            box: {
+              incremental: true,
+              'data-test-subj': 'searchRoles',
+            },
+            onChange: (query: Record<string, any>) => {
+              this.setState({
+                filter: query.queryText,
+                visibleRoles: this.getVisibleRoles(
+                  this.state.roles,
+                  query.queryText,
+                  this.state.includeReservedRoles
+                ),
+              });
+            },
+          }}
+          sorting={{
+            sort: {
+              field: 'name',
+              direction: 'asc',
+            },
+          }}
+          rowProps={() => {
+            return {
+              'data-test-subj': 'roleRow',
+            };
+          }}
+          isSelectable
+        />
       </>
     );
   };

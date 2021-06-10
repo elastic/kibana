@@ -230,12 +230,6 @@ export class UsersGridPage extends Component<Props, State> {
               defaultMessage="Users"
             />
           }
-          description={
-            <FormattedMessage
-              id="xpack.security.management.users.usersDescription"
-              defaultMessage="Manage your users."
-            />
-          }
           rightSideItems={[
             <EuiButton
               data-test-subj="createUserButton"
