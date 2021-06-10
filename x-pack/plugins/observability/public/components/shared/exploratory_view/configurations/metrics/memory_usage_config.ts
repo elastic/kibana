@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-import { DataSeries } from '../../types';
+import { DataSeries, ConfigProps } from '../../types';
 import { FieldLabels } from '../constants';
 
-interface Props {
-  seriesId: string;
-}
-
-export function getMemoryUsageLensConfig({ seriesId }: Props): DataSeries {
+export function getMemoryUsageLensConfig({}: ConfigProps): DataSeries {
   return {
-    id: seriesId,
     reportType: 'memory-usage',
     defaultSeriesType: 'line',
     seriesTypes: ['line', 'bar'],

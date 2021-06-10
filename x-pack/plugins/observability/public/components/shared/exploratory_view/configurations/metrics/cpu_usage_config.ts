@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-import { DataSeries } from '../../types';
+import { DataSeries, ConfigProps } from '../../types';
 import { FieldLabels } from '../constants';
 
-interface Props {
-  seriesId: string;
-}
-
-export function getCPUUsageLensConfig({ seriesId }: Props): DataSeries {
+export function getCPUUsageLensConfig({}: ConfigProps): DataSeries {
   return {
-    id: seriesId,
     reportType: 'cpu-usage',
     defaultSeriesType: 'line',
     seriesTypes: ['line', 'bar'],
