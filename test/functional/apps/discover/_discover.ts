@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       log.debug('load kibana index with default index pattern');
 
-      await kibanaServer.importExport.load('discover');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       log.info(
         `\n### SAVED OBJECT TYPES IN index: [.kibana]: \n\t${await savedObjectInfo.types()}`
       );
