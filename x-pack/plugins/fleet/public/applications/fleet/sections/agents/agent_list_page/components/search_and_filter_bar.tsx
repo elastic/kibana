@@ -20,9 +20,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import type { AgentPolicy } from '../../../../types';
-import { SearchBar } from '../../../../components';
+import { AgentEnrollmentFlyout, SearchBar } from '../../../../components';
 import { AGENTS_INDEX } from '../../../../constants';
-import { AgentEnrollmentFlyout } from '../../components';
 
 const statusFilters = [
   {
