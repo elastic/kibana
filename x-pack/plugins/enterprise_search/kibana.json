@@ -12,5 +12,5 @@
     "name": "Enterprise Search",
     "githubTeam": "enterprise-search-frontend"
   },
-  "description": "Adds the admin dashboards for the Enterprise Search products"
+  "description": "Adds dashboards for discovering and managing Enterprise Search products"
 }
