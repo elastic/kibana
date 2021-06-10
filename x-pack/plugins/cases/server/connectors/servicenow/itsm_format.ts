@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { ServiceNowITSMFieldsType, ConnectorServiceNowITSMTypeFields } from '../../../common';
-import { ExternalServiceFormatter } from '../types';
+import { ConnectorServiceNowITSMTypeFields } from '../../../common/api';
+import { ServiceNowITSMFormat } from './types';
 
-const format: ExternalServiceFormatter<ServiceNowITSMFieldsType>['format'] = (theCase) => {
+export const format: ServiceNowITSMFormat = (theCase, alerts) => {
   const { severity = null, urgency = null, impact = null, category = null, subcategory = null } =
     (theCase.connector.fields as ConnectorServiceNowITSMTypeFields['fields']) ?? {};
   return { severity, urgency, impact, category, subcategory };
-};
-
-export const serviceNowITSMExternalServiceFormatter: ExternalServiceFormatter<ServiceNowITSMFieldsType> = {
-  format,
 };
