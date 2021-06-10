@@ -14,6 +14,7 @@ import type {
   UseDraggableKeyboardWrapper,
   UseDraggableKeyboardWrapperProps,
 } from './components';
+<<<<<<< Updated upstream
 import type { TGridIntegratedProps } from './components/t_grid/integrated';
 import type { TGridStandaloneProps } from './components/t_grid/standalone';
 import type { UseAddToTimelineProps, UseAddToTimeline } from './hooks/use_add_to_timeline';
@@ -24,6 +25,20 @@ export interface TimelinesUIStart {
     props: GetTGridProps<T>
   ) => ReactElement<GetTGridProps<T>>;
   getTGridReducer: () => any;
+=======
+import { TGridIntegratedProps } from './components/t_grid/integrated';
+import { UseAddToTimelineProps, UseAddToTimeline } from './hooks/use_add_to_timeline';
+import { tGridActions } from './store/t_grid';
+import { tGridReducer } from './store/t_grid/reducer';
+import { TimelineState } from './store/t_grid/types';
+
+export interface TimelinesPluginSetup {
+  getTGrid: (props: TGridProps) => ReactElement<TGridProps>;
+  getTimelineStore?: () => ReduxDeps;
+  getCreatedTgridStore?: (
+    type: 'standalone' | 'embedded'
+  ) => ReduxDeps | ((type: 'standalone' | 'embedded') => Store);
+>>>>>>> Stashed changes
   getLoadingPanel: (props: LoadingPanelProps) => ReactElement<LoadingPanelProps>;
   getLastUpdated: (props: LastUpdatedAtProps) => ReactElement<LastUpdatedAtProps>;
   getUseAddToTimeline: () => (props: UseAddToTimelineProps) => UseAddToTimeline;

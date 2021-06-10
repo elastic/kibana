@@ -51,3 +51,10 @@ export {
 export function plugin(initializerContext: PluginInitializerContext) {
   return new TimelinesPlugin(initializerContext);
 }
+<<<<<<< Updated upstream
+=======
+export { TimelinesPluginSetup } from './types';
+export * as TGridActions from './store/t_grid/actions';
+export * from '../common/utils/accessibility';
+export { tGridSelectors } from './store/t_grid';
+>>>>>>> Stashed changes

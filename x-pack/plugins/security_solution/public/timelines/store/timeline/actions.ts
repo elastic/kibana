@@ -24,7 +24,7 @@ import {
   SerializedFilterQuery,
 } from '../../../../common/types/timeline';
 import { InsertTimeline } from './types';
-import { tGridActions } from '../../../../../timelines/public';
+import { TGridActions } from '../../../../../timelines/public';
 export const {
   applyDeltaToColumnWidth,
   clearEventsDeleted,
@@ -43,8 +43,21 @@ export const {
   updateItemsPerPage,
   updateItemsPerPageOptions,
   updateSort,
+<<<<<<< Updated upstream
   upsertColumn,
 } = tGridActions;
+=======
+  setSelected,
+  clearSelected,
+  setEventsLoading,
+  clearEventsLoading,
+  setEventsDeleted,
+  clearEventsDeleted,
+  initializeTGrid,
+  setTGridIsLoading,
+  setTGridSelectAll,
+} = TGridActions;
+>>>>>>> Stashed changes
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timeline');
 

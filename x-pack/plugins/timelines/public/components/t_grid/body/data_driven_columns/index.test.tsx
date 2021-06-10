@@ -9,12 +9,21 @@ import { shallow } from 'enzyme';
 
 import React from 'react';
 
-import '../../../../../common/mock/match_media';
 import { defaultHeaders } from '../column_headers/default_headers';
 
 import { DataDrivenColumns } from '.';
 import { mockTimelineData } from '../../../../mock/mock_timeline_data';
 import { TestCellRenderer } from '../../../../mock/cell_renderer';
+
+window.matchMedia = jest.fn().mockImplementation((query) => {
+  return {
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+  };
+});
 
 describe('Columns', () => {
   const headersSansTimestamp = defaultHeaders.filter((h) => h.id !== '@timestamp');

@@ -18,8 +18,14 @@ import { ColumnHeaderType } from '../../../../../../common/types/timeline';
 import { Direction } from '../../../../../../common/search_strategy';
 import { TestProviders } from '../../../../../mock';
 import { tGridActions } from '../../../../../store/t_grid';
+import { mockGlobalState } from '../../../../../mock/global_state';
 
 const mockDispatch = jest.fn();
+jest.mock('../../../../../hooks/use_selector', () => ({
+  useShallowEqualSelector: () => mockGlobalState.timelineById.test,
+  useDeepEqualSelector: () => mockGlobalState.timelineById.test,
+}));
+
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
 

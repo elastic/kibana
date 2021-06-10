@@ -47,16 +47,5 @@ exports[`Header renders correctly against snapshot 1`] = `
       }
     />
   </Memo(HeaderContentComponent)>
-  <Filter
-    header={
-      Object {
-        "columnHeaderType": "not-filtered",
-        "id": "@timestamp",
-        "initialWidth": 190,
-        "type": "number",
-      }
-    }
-    onFilterChange={[Function]}
-  />
 </Fragment>
 `;

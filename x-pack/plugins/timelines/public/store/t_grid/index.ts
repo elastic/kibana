@@ -25,7 +25,7 @@ export * from './types';
 import { TimelineState, tGridSelectors, TGridEpicDependencies } from '../../types';
 import { tGridReducer } from './reducer';
 
-type State = CombinedState<TimelineState>;
+export type State = CombinedState<TimelineState>;
 type ComposeType = typeof compose;
 declare global {
   interface Window {

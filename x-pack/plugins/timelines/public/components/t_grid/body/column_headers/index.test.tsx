@@ -8,7 +8,6 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import '../../../../../common/mock/match_media';
 import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../constants';
 import { defaultHeaders } from './default_headers';
 import { Sort } from '../sort';
@@ -22,8 +21,24 @@ import { TimelineTabs } from '../../../../../common/types/timeline';
 import { tGridActions } from '../../../../store/t_grid';
 import { testTrailingControlColumns } from '../../../../mock/mock_timeline_control_columns';
 import { TestProviders } from '../../../../mock';
+import { mockGlobalState } from '../../../../mock/global_state';
 
 const mockDispatch = jest.fn();
+jest.mock('../../../../hooks/use_selector', () => ({
+  useShallowEqualSelector: () => mockGlobalState.timelineById.test,
+  useDeepEqualSelector: () => mockGlobalState.timelineById.test,
+}));
+
+window.matchMedia = jest.fn().mockImplementation((query) => {
+  return {
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+  };
+});
+
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
 

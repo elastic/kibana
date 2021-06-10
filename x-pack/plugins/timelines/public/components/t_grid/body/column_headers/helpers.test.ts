@@ -14,8 +14,17 @@ import {
   EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH,
   SHOW_CHECK_BOXES_COLUMN_WIDTH,
 } from '../constants';
-import '../../../../../common/mock/match_media';
 import { mockBrowserFields } from '../../../../mock/browser_fields';
+
+window.matchMedia = jest.fn().mockImplementation((query) => {
+  return {
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+  };
+});
 
 describe('helpers', () => {
   describe('getColumnWidthFromType', () => {

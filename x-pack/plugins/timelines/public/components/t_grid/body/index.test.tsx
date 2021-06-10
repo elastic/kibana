@@ -8,8 +8,6 @@
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 
-import '../../../../common/mock/match_media';
-
 import { BodyComponent, StatefulBodyProps } from '.';
 import { Sort } from './sort';
 import { Direction } from '../../../../common/search_strategy';
@@ -37,15 +35,15 @@ jest.mock('react-redux', () => {
   };
 });
 
-jest.mock('../../../../common/hooks/use_selector', () => ({
+jest.mock('../../../hooks/use_selector', () => ({
   useShallowEqualSelector: () => mockGlobalState.timelineById.test,
   useDeepEqualSelector: () => mockGlobalState.timelineById.test,
 }));
 
-jest.mock('../../../../common/components/link_to');
+// jest.mock('../../../../common/components/link_to');
 
-// Prevent Resolver from rendering
-jest.mock('../../graph_overlay');
+// // Prevent Resolver from rendering
+// jest.mock('../../graph_overlay');
 
 jest.mock(
   'react-visibility-sensor',
@@ -53,12 +51,21 @@ jest.mock(
     children({ isVisible: true })
 );
 
-jest.mock('../../../../common/lib/helpers/scheduler', () => ({
-  requestIdleCallbackViaScheduler: (callback: () => void, opts?: unknown) => {
-    callback();
-  },
-  maxDelay: () => 3000,
-}));
+// jest.mock('../../../../common/lib/helpers/scheduler', () => ({
+//   requestIdleCallbackViaScheduler: (callback: () => void, opts?: unknown) => {
+//     callback();
+//   },
+//   maxDelay: () => 3000,
+// }));
+window.matchMedia = jest.fn().mockImplementation((query) => {
+  return {
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+  };
+});
 
 describe('Body', () => {
   const mount = useMountAppended();

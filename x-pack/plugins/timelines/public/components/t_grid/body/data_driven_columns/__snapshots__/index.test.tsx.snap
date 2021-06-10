@@ -138,7 +138,6 @@ exports[`Columns it renders the expected columns 1`] = `
     }
     index={0}
     key="message"
-    notesCount={0}
     renderCellValue={[Function]}
     timelineId="test"
   />
@@ -276,7 +275,6 @@ exports[`Columns it renders the expected columns 1`] = `
     }
     index={1}
     key="event.category"
-    notesCount={0}
     renderCellValue={[Function]}
     timelineId="test"
   />
@@ -414,7 +412,6 @@ exports[`Columns it renders the expected columns 1`] = `
     }
     index={2}
     key="event.action"
-    notesCount={0}
     renderCellValue={[Function]}
     timelineId="test"
   />
@@ -552,7 +549,6 @@ exports[`Columns it renders the expected columns 1`] = `
     }
     index={3}
     key="host.name"
-    notesCount={0}
     renderCellValue={[Function]}
     timelineId="test"
   />
@@ -690,7 +686,6 @@ exports[`Columns it renders the expected columns 1`] = `
     }
     index={4}
     key="source.ip"
-    notesCount={0}
     renderCellValue={[Function]}
     timelineId="test"
   />
@@ -828,7 +823,6 @@ exports[`Columns it renders the expected columns 1`] = `
     }
     index={5}
     key="destination.ip"
-    notesCount={0}
     renderCellValue={[Function]}
     timelineId="test"
   />
@@ -966,7 +960,6 @@ exports[`Columns it renders the expected columns 1`] = `
     }
     index={6}
     key="user.name"
-    notesCount={0}
     renderCellValue={[Function]}
     timelineId="test"
   />

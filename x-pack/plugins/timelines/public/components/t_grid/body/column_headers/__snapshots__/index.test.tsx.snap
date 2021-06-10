@@ -506,23 +506,7 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
     ]
   }
   isSelectAllChecked={false}
-  leadingControlColumns={
-    Array [
-      Object {
-        "headerCellRender": Object {
-          "$$typeof": Symbol(react.memo),
-          "compare": null,
-          "type": [Function],
-        },
-        "id": "default-timeline-control-column",
-        "rowCellRender": Object {
-          "$$typeof": Symbol(react.memo),
-          "compare": null,
-          "type": [Function],
-        },
-      },
-    ]
-  }
+  leadingControlColumns={Array []}
   onSelectAll={[Function]}
   showEventsSelect={false}
   showSelectAllCheckbox={false}

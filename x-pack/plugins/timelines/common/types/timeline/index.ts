@@ -260,6 +260,7 @@ export type TemplateTimelineTypeLiteralWithNull = runtimeTypes.TypeOf<
 export enum TimelineType {
   default = 'default',
   template = 'template',
+  test = 'test',
 }
 
 export const TimelineTypeLiteralRt = runtimeTypes.union([
