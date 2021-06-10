@@ -34,7 +34,7 @@ export interface PluginSetupContract {
   ) => void;
 
   /**
-   * Register a customized view for all rule types. Stack Management provides a generic overview, but a developer can register a
+   * Register a customized view for all rule types with this application id. Stack Management provides a generic overview, but a developer can register a
    * custom navigation to provide the user an extra link to a more curated view. The alerting plugin doesn't actually do
    * anything with this information, but it can be used by other plugins via the `getNavigation` functionality. Currently
    * the trigger_actions_ui plugin uses it to expose the link from the generic rule view in Stack Management.
