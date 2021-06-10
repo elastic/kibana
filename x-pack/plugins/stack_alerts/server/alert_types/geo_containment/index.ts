@@ -26,6 +26,7 @@ export function register(params: RegisterParams) {
   const { logger, alerting } = params;
   alerting.registerType<
     GeoContainmentParams,
+    never, // Only use if defining useSavedObjectReferences hook
     GeoContainmentState,
     GeoContainmentInstanceState,
     GeoContainmentInstanceContext,
