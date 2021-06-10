@@ -51,9 +51,11 @@ export function DocViewTable({
         arr.push(key);
       }
     });
-    setMultiFields(map);
+    if (showMultiFields) {
+      setMultiFields(map);
+    }
     setFieldsWithParents(arr);
-  }, [indexPattern, hit]);
+  }, [indexPattern, hit, showMultiFields]);
 
   const toggleColumn = useCallback(
     (field: string) => {

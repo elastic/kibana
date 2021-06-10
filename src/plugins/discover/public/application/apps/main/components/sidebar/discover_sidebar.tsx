@@ -27,7 +27,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { DiscoverField } from './discover_field';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DiscoverFieldSearch } from './discover_field_search';
-import { FIELDS_LIMIT_SETTING } from '../../../../../../common';
+import { FIELDS_LIMIT_SETTING, SHOW_MULTIFIELDS } from '../../../../../../common';
 import { groupFields } from './lib/group_fields';
 import { IndexPatternField } from '../../../../../../../data/public';
 import { getDetails } from './lib/get_details';
@@ -97,6 +97,7 @@ export function DiscoverSidebar({
   const [fieldsToRender, setFieldsToRender] = useState(FIELDS_PER_PAGE);
   const [fieldsPerPage, setFieldsPerPage] = useState(FIELDS_PER_PAGE);
   const availableFieldsContainer = useRef<HTMLUListElement | null>(null);
+  const showMultiFields = services.uiSettings.get(SHOW_MULTIFIELDS);
 
   useEffect(() => {
     const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
@@ -206,7 +207,7 @@ export function DiscoverSidebar({
   }, [fields]);
 
   const multiFields = useMemo(() => {
-    if (!useNewFieldsApi || !fields) {
+    if (!useNewFieldsApi || !fields || !showMultiFields) {
       return undefined;
     }
     const map = new Map<string, Array<{ field: IndexPatternField; isSelected: boolean }>>();
@@ -224,7 +225,7 @@ export function DiscoverSidebar({
       map.set(parent, value);
     });
     return map;
-  }, [fields, useNewFieldsApi, selectedFields]);
+  }, [fields, useNewFieldsApi, selectedFields, showMultiFields]);
 
   const deleteField = useMemo(
     () =>
