@@ -9,6 +9,8 @@
 import { functionWrapper } from './utils';
 import { variableSet } from '../var_set';
 import { ExecutionContext } from '../../../execution/types';
+import { createUnitTestExecutor } from '../../../test_helpers';
+import { first } from 'rxjs/operators';
 
 describe('expression_functions', () => {
   describe('var_set', () => {
@@ -55,6 +57,26 @@ describe('expression_functions', () => {
       expect(variables.new2).toEqual(input);
       expect(variables.new3).toEqual(3);
       expect(actual).toEqual(input);
+    });
+
+    describe('running function thru executor', () => {
+      const executor = createUnitTestExecutor();
+      executor.registerFunction(variableSet);
+
+      it('sets the variables', async () => {
+        const vars = {};
+        const result = await executor
+          .run('var_set name=test1 name=test2 value=1', 2, { variables: vars })
+          .pipe(first())
+          .toPromise();
+
+        expect(result).toEqual(2);
+
+        expect(vars).toEqual({
+          test1: 1,
+          test2: 2,
+        });
+      });
     });
   });
 });
