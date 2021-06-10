@@ -53,6 +53,13 @@ export const Synonyms: React.FC = () => {
       <SetPageChrome trail={getEngineBreadcrumbs([SYNONYMS_TITLE])} />
       <EuiPageHeader
         pageTitle={SYNONYMS_TITLE}
+        description={i18n.translate(
+          'xpack.enterpriseSearch.appSearch.engine.synonyms.description',
+          {
+            defaultMessage:
+              'Use synonyms to relate queries together that contextually have the same meaning in your dataset.',
+          }
+        )}
         rightSideItems={[
           <EuiButton fill onClick={() => openModal(null)}>
             {i18n.translate(
