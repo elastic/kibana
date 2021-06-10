@@ -41,7 +41,7 @@ export const MulticlassConfusionMatrixHelpPopover = () => {
       <p>
         <FormattedMessage
           id="xpack.ml.dataframe.analytics.confusionMatrixAxisExplanation"
-          defaultMessage="The matrix contains the actual labels on the left side while the predicted labels are on the top. The proportion of correct and incorrect predictions is broken down for each class. This enables you to examine how the classification analysis confused the different classes while it made its predictions."
+          defaultMessage="The matrix contains the actual labels on the left side while the predicted labels are on the top. The proportion of correct and incorrect predictions is broken down for each class. This enables you to examine how the classification analysis confused the different classes while it made its predictions. If you want to see the exact number of occurrences, select a cell in the matrix and click the appearing icon."
         />
       </p>
       <p>
