@@ -18,7 +18,7 @@ export interface AlertingExampleDeps {
   features: FeaturesPluginSetup;
 }
 
-export const noopAlertType: AlertType<{}, {}, {}, {}, 'default'> = {
+export const noopAlertType: AlertType<{}, {}, {}, {}, {}, 'default'> = {
   id: 'test.noop',
   name: 'Test: Noop',
   actionGroups: [{ id: 'default', name: 'Default' }],
@@ -30,6 +30,7 @@ export const noopAlertType: AlertType<{}, {}, {}, {}, 'default'> = {
 
 export const alwaysFiringAlertType: AlertType<
   { instances: Array<{ id: string; state: any }> },
+  never, // Only use if defining useSavedObjectReferences hook
   {
     globalStateValue: boolean;
     groupInSeriesIndex: number;
@@ -64,7 +65,7 @@ export const alwaysFiringAlertType: AlertType<
   },
 };
 
-export const failingAlertType: AlertType<never, never, never, never, 'default' | 'other'> = {
+export const failingAlertType: AlertType<never, never, never, never, never, 'default' | 'other'> = {
   id: 'test.failing',
   name: 'Test: Failing',
   actionGroups: [

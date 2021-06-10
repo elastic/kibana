@@ -56,7 +56,7 @@ describe('has()', () => {
 
 describe('register()', () => {
   test('throws if AlertType Id contains invalid characters', () => {
-    const alertType: AlertType<never, never, never, never, 'default'> = {
+    const alertType: AlertType<never, never, never, never, never, 'default'> = {
       id: 'test',
       name: 'Test',
       actionGroups: [
@@ -88,7 +88,7 @@ describe('register()', () => {
   });
 
   test('throws if AlertType Id isnt a string', () => {
-    const alertType: AlertType<never, never, never, never, 'default'> = {
+    const alertType: AlertType<never, never, never, never, never, 'default'> = {
       id: (123 as unknown) as string,
       name: 'Test',
       actionGroups: [
@@ -110,7 +110,7 @@ describe('register()', () => {
   });
 
   test('throws if AlertType action groups contains reserved group id', () => {
-    const alertType: AlertType<never, never, never, never, 'default' | 'NotReserved'> = {
+    const alertType: AlertType<never, never, never, never, never, 'default' | 'NotReserved'> = {
       id: 'test',
       name: 'Test',
       actionGroups: [
@@ -142,7 +142,7 @@ describe('register()', () => {
   });
 
   test('allows an AlertType to specify a custom recovery group', () => {
-    const alertType: AlertType<never, never, never, never, 'default', 'backToAwesome'> = {
+    const alertType: AlertType<never, never, never, never, never, 'default', 'backToAwesome'> = {
       id: 'test',
       name: 'Test',
       actionGroups: [
@@ -182,6 +182,7 @@ describe('register()', () => {
       never,
       never,
       never,
+      never,
       'default' | 'backToAwesome',
       'backToAwesome'
     > = {
@@ -216,7 +217,7 @@ describe('register()', () => {
   });
 
   test('registers the executor with the task manager', () => {
-    const alertType: AlertType<never, never, never, never, 'default'> = {
+    const alertType: AlertType<never, never, never, never, never, 'default'> = {
       id: 'test',
       name: 'Test',
       actionGroups: [
@@ -246,7 +247,7 @@ describe('register()', () => {
   });
 
   test('shallow clones the given alert type', () => {
-    const alertType: AlertType<never, never, never, never, 'default'> = {
+    const alertType: AlertType<never, never, never, never, never, 'default'> = {
       id: 'test',
       name: 'Test',
       actionGroups: [
@@ -491,8 +492,8 @@ function alertTypeWithVariables<ActionGroupIds extends string>(
   id: ActionGroupIds,
   context: string,
   state: string
-): AlertType<never, never, never, never, ActionGroupIds> {
-  const baseAlert: AlertType<never, never, never, never, ActionGroupIds> = {
+): AlertType<never, never, never, never, never, ActionGroupIds> {
+  const baseAlert: AlertType<never, never, never, never, never, ActionGroupIds> = {
     id,
     name: `${id}-name`,
     actionGroups: [],

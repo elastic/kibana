@@ -854,6 +854,7 @@ describe('status check alert', () => {
     // @ts-ignore
     let alert: AlertType<
       AlertTypeParams,
+      never,
       AlertTypeState,
       AlertInstanceState,
       AlertInstanceContext,

@@ -57,7 +57,7 @@ describe('getLicenseCheckForAlertType', () => {
   let license: Subject<ILicense>;
   let licenseState: ILicenseState;
   const mockNotifyUsage = jest.fn();
-  const alertType: AlertType<never, never, never, never, 'default', 'recovered'> = {
+  const alertType: AlertType<never, never, never, never, never, 'default', 'recovered'> = {
     id: 'test',
     name: 'Test',
     actionGroups: [
@@ -191,7 +191,7 @@ describe('ensureLicenseForAlertType()', () => {
   let license: Subject<ILicense>;
   let licenseState: ILicenseState;
   const mockNotifyUsage = jest.fn();
-  const alertType: AlertType<never, never, never, never, string, string> = {
+  const alertType: AlertType<never, never, never, never, never, string, string> = {
     id: 'test',
     name: 'Test',
     actionGroups: [

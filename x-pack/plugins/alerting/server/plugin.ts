@@ -85,6 +85,7 @@ export const LEGACY_EVENT_LOG_ACTIONS = {
 export interface PluginSetupContract {
   registerType<
     Params extends AlertTypeParams = AlertTypeParams,
+    ExtractedParams extends AlertTypeParams = AlertTypeParams,
     State extends AlertTypeState = AlertTypeState,
     InstanceState extends AlertInstanceState = AlertInstanceState,
     InstanceContext extends AlertInstanceContext = AlertInstanceContext,
@@ -93,6 +94,7 @@ export interface PluginSetupContract {
   >(
     alertType: AlertType<
       Params,
+      ExtractedParams,
       State,
       InstanceState,
       InstanceContext,
@@ -264,6 +266,7 @@ export class AlertingPlugin {
     return {
       registerType<
         Params extends AlertTypeParams = AlertTypeParams,
+        ExtractedParams extends AlertTypeParams = AlertTypeParams,
         State extends AlertTypeState = AlertTypeState,
         InstanceState extends AlertInstanceState = AlertInstanceState,
         InstanceContext extends AlertInstanceContext = AlertInstanceContext,
@@ -272,6 +275,7 @@ export class AlertingPlugin {
       >(
         alertType: AlertType<
           Params,
+          ExtractedParams,
           State,
           InstanceState,
           InstanceContext,

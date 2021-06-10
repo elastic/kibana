@@ -67,6 +67,7 @@ interface AlertTaskInstance extends ConcreteTaskInstance {
 
 export class TaskRunner<
   Params extends AlertTypeParams,
+  ExtractedParams extends AlertTypeParams,
   State extends AlertTypeState,
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
@@ -78,6 +79,7 @@ export class TaskRunner<
   private taskInstance: AlertTaskInstance;
   private alertType: NormalizedAlertType<
     Params,
+    ExtractedParams,
     State,
     InstanceState,
     InstanceContext,
@@ -89,6 +91,7 @@ export class TaskRunner<
   constructor(
     alertType: NormalizedAlertType<
       Params,
+      ExtractedParams,
       State,
       InstanceState,
       InstanceContext,
@@ -168,6 +171,7 @@ export class TaskRunner<
   ) {
     return createExecutionHandler<
       Params,
+      ExtractedParams,
       State,
       InstanceState,
       InstanceContext,

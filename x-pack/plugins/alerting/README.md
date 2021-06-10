@@ -228,6 +228,7 @@ type MyRuleTypeActionGroups = 'default' | 'warning';
   
 const myRuleType: AlertType<
 	MyRuleTypeParams,
+	MyRuleTypeExtractedParams,
 	MyRuleTypeState,
 	MyRuleTypeAlertState,
 	MyRuleTypeAlertContext,
@@ -318,6 +319,9 @@ const myRuleType: AlertType<
 		};
 	},
 	producer: 'alerting',
+	useSavedObjectReferences?: {
+		
+	}
 };
 
 server.newPlatform.setup.plugins.alerting.registerType(myRuleType);

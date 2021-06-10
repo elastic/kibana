@@ -39,6 +39,7 @@ function getTShirtSizeByIdAndThreshold(
 
 export const alertType: AlertType<
   AlwaysFiringParams,
+  never,
   { count?: number },
   { triggerdOnCycle: number },
   never,

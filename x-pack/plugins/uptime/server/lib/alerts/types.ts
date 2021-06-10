@@ -17,6 +17,7 @@ export type UptimeAlertTypeFactory<ActionGroupIds extends string> = (
   plugins: UptimeCorePlugins
 ) => AlertType<
   UptimeAlertTypeParam,
+  never, // Only use if defining useSavedObjectReferences hook
   UptimeAlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,

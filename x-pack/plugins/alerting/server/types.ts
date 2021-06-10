@@ -119,6 +119,7 @@ export interface AlertTypeParamsValidator<Params extends AlertTypeParams> {
 }
 export interface AlertType<
   Params extends AlertTypeParams = never,
+  ExtractedParams extends AlertTypeParams = never,
   State extends AlertTypeState = never,
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
@@ -152,8 +153,8 @@ export interface AlertType<
   };
   minimumLicenseRequired: LicenseType;
   useSavedObjectReferences?: {
-    extractReferences: (params: Params) => RuleParamsAndRefs<Params>;
-    injectReferences: (params: Params, references: SavedObjectReference[]) => Params;
+    extractReferences: (params: Params) => RuleParamsAndRefs<ExtractedParams>;
+    injectReferences: (params: ExtractedParams, references: SavedObjectReference[]) => Params;
   };
 }
 

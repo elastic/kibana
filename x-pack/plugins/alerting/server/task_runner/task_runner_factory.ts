@@ -57,6 +57,7 @@ export class TaskRunnerFactory {
 
   public create<
     Params extends AlertTypeParams,
+    ExtractedParams extends AlertTypeParams,
     State extends AlertTypeState,
     InstanceState extends AlertInstanceState,
     InstanceContext extends AlertInstanceContext,
@@ -65,6 +66,7 @@ export class TaskRunnerFactory {
   >(
     alertType: NormalizedAlertType<
       Params,
+      ExtractedParams,
       State,
       InstanceState,
       InstanceContext,
