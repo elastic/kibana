@@ -22,7 +22,6 @@ import {
   LAYER_STYLE_TYPE,
   FIELD_ORIGIN,
 } from '../../../../common/constants';
-import { isTotalHitsGreaterThan, TotalHits } from '../../../../common/elasticsearch_util';
 import { ESGeoGridSource } from '../../sources/es_geo_grid_source/es_geo_grid_source';
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
 import { IESSource } from '../../sources/es_source';
@@ -45,10 +44,6 @@ import { ESSearchSource } from '../../sources/es_search_source/es_search_source'
 import { isSearchSourceAbortError } from '../../sources/es_source/es_source';
 
 const ACTIVE_COUNT_DATA_ID = 'ACTIVE_COUNT_DATA_ID';
-
-interface CountData {
-  isSyncClustered: boolean;
-}
 
 function getAggType(
   dynamicProperty: IDynamicStyleProperty<DynamicStylePropertyOptions>
@@ -216,7 +211,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     let isClustered = false;
     const countDataRequest = this.getDataRequest(ACTIVE_COUNT_DATA_ID);
     if (countDataRequest) {
-      const requestData = countDataRequest.getData() as CountData;
+      const requestData = countDataRequest.getData() as { isSyncClustered: boolean };
       if (requestData && requestData.isSyncClustered) {
         isClustered = true;
       }
@@ -322,22 +317,11 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
       let isSyncClustered;
       try {
         syncContext.startLoading(dataRequestId, requestToken, searchFilters);
-        const abortController = new AbortController();
-        syncContext.registerCancelCallback(requestToken, () => abortController.abort());
-        const maxResultWindow = await this._documentSource.getMaxResultWindow();
-        const searchSource = await this._documentSource.makeSearchSource(searchFilters, 0);
-        searchSource.setField('trackTotalHits', maxResultWindow + 1);
-        const resp = await searchSource.fetch({
-          abortSignal: abortController.signal,
-          sessionId: syncContext.dataFilters.searchSessionId,
-          legacyHitsTotal: false,
-        });
-        isSyncClustered = isTotalHitsGreaterThan(
-          (resp.hits.total as unknown) as TotalHits,
-          maxResultWindow
-        );
-        const countData = { isSyncClustered } as CountData;
-        syncContext.stopLoading(dataRequestId, requestToken, countData, searchFilters);
+        isSyncClustered = !(await this._documentSource.canLoadAllDocuments(
+          searchFilters,
+          syncContext.registerCancelCallback.bind(null, requestToken)
+        ));
+        syncContext.stopLoading(dataRequestId, requestToken, { isSyncClustered }, searchFilters);
       } catch (error) {
         if (!(error instanceof DataRequestAbortError) || !isSearchSourceAbortError(error)) {
           syncContext.onLoadError(dataRequestId, requestToken, error.message);

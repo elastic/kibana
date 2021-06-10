@@ -13,13 +13,14 @@ import { i18n } from '@kbn/i18n';
 import { IFieldType, IndexPattern } from 'src/plugins/data/public';
 import { GeoJsonProperties } from 'geojson';
 import { AbstractESSource } from '../es_source';
-import { getHttp, getSearchService } from '../../../kibana_services';
+import { getHttp, getSearchService, getTimeFilter } from '../../../kibana_services';
 import {
   addFieldToDSL,
   getField,
   hitsToGeoJson,
   isTotalHitsGreaterThan,
   PreIndexedShape,
+  TotalHits,
 } from '../../../../common/elasticsearch_util';
 // @ts-expect-error
 import { UpdateSourceEditor } from './update_source_editor';
@@ -45,11 +46,14 @@ import { ESDocField } from '../../fields/es_doc_field';
 
 import { registerSource } from '../source_registry';
 import {
+  DataMeta,
   ESSearchSourceDescriptor,
+  Timeslice,
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
+import { TimeRange } from '../../../../../../../src/plugins/data/common';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { IField } from '../../fields/field';
 import { GeoJsonWithMeta, SourceTooltipConfig } from '../vector_source';
@@ -61,6 +65,16 @@ import { isValidStringConfig } from '../../util/valid_string_config';
 import { TopHitsUpdateSourceEditor } from './top_hits';
 import { getDocValueAndSourceFields, ScriptField } from './get_docvalue_source_fields';
 import { ITiledSingleLayerMvtParams } from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
+
+export function timerangeToTimeextent(timerange: TimeRange): Timeslice | undefined {
+  const timeRangeBounds = getTimeFilter().calculateBounds(timerange);
+  return timeRangeBounds.min !== undefined && timeRangeBounds.max !== undefined
+    ? {
+        from: timeRangeBounds.min.valueOf(),
+        to: timeRangeBounds.max.valueOf(),
+      }
+    : undefined;
+}
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esSearchTitle', {
   defaultMessage: 'Documents',
@@ -341,7 +355,6 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   async _getSearchHits(
     layerName: string,
     searchFilters: VectorSourceRequestMeta,
-    maxResultWindow: number,
     registerCancelCallback: (callback: () => void) => void
   ) {
     const indexPattern = await this.getIndexPattern();
@@ -353,8 +366,18 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     );
 
     const initialSearchContext = { docvalue_fields: docValueFields }; // Request fields in docvalue_fields insted of _source
+
+    // Use Kibana global time extent instead of timeslice extent when all documents for global time extent can be loaded
+    // to allow for client-side masking of timeslice
+    const searchFiltersWithoutTimeslice = { ...searchFilters };
+    delete searchFiltersWithoutTimeslice.timeslice;
+    const useSearchFiltersWithoutTimeslice =
+      searchFilters.timeslice !== undefined &&
+      (await this.canLoadAllDocuments(searchFiltersWithoutTimeslice, registerCancelCallback));
+
+    const maxResultWindow = await this.getMaxResultWindow();
     const searchSource = await this.makeSearchSource(
-      searchFilters,
+      useSearchFiltersWithoutTimeslice ? searchFiltersWithoutTimeslice : searchFilters,
       maxResultWindow,
       initialSearchContext
     );
@@ -378,11 +401,17 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       searchSessionId: searchFilters.searchSessionId,
     });
 
+    const isTimeExtentForTimeslice =
+      searchFilters.timeslice !== undefined && !useSearchFiltersWithoutTimeslice;
     return {
       hits: resp.hits.hits.reverse(), // Reverse hits so top documents by sort are drawn on top
       meta: {
         resultsCount: resp.hits.hits.length,
         areResultsTrimmed: isTotalHitsGreaterThan(resp.hits.total, resp.hits.hits.length),
+        timeExtent: isTimeExtentForTimeslice
+          ? searchFilters.timeslice
+          : timerangeToTimeextent(searchFilters.timeFilters),
+        isTimeExtentForTimeslice,
       },
     };
   }
@@ -411,16 +440,9 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   ): Promise<GeoJsonWithMeta> {
     const indexPattern = await this.getIndexPattern();
 
-    const indexSettings = await loadIndexSettings(indexPattern.title);
-
     const { hits, meta } = this._isTopHits()
       ? await this._getTopHits(layerName, searchFilters, registerCancelCallback)
-      : await this._getSearchHits(
-          layerName,
-          searchFilters,
-          indexSettings.maxResultWindow,
-          registerCancelCallback
-        );
+      : await this._getSearchHits(layerName, searchFilters, registerCancelCallback);
 
     const unusedMetaFields = indexPattern.metaFields.filter((metaField) => {
       return !['_id', '_index'].includes(metaField);
@@ -724,6 +746,52 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
         ? urlTemplate + `&searchSessionId=${searchFilters.searchSessionId}`
         : urlTemplate,
     };
+  }
+
+  updateDueToTimeslice(prevMeta: DataMeta, timeslice?: Timeslice): boolean {
+    if (this._isTopHits() || this._descriptor.scalingType === SCALING_TYPES.MVT) {
+      return true;
+    }
+
+    if (
+      prevMeta.timeExtent === undefined ||
+      prevMeta.areResultsTrimmed === undefined ||
+      prevMeta.areResultsTrimmed
+    ) {
+      return true;
+    }
+
+    if (!timeslice) {
+      const isTimeExtentForTimeslice =
+        prevMeta.isTimeExtentForTimeslice !== undefined ? prevMeta.isTimeExtentForTimeslice : false;
+      return isTimeExtentForTimeslice
+        ? // Previous request only covers timeslice extent. Will need to re-fetch data to cover global time extent
+          true
+        : // Previous request covers global time extent.
+          // No need to re-fetch data since previous request already has data for the entire global time extent.
+          false;
+    }
+
+    const isWithin =
+      timeslice.from >= prevMeta.timeExtent.from && timeslice.to <= prevMeta.timeExtent.to;
+    return !isWithin;
+  }
+
+  async canLoadAllDocuments(
+    searchFilters: VectorSourceRequestMeta,
+    registerCancelCallback: (callback: () => void) => void
+  ) {
+    const abortController = new AbortController();
+    registerCancelCallback(() => abortController.abort());
+    const maxResultWindow = await this.getMaxResultWindow();
+    const searchSource = await this.makeSearchSource(searchFilters, 0);
+    searchSource.setField('trackTotalHits', maxResultWindow + 1);
+    const resp = await searchSource.fetch({
+      abortSignal: abortController.signal,
+      sessionId: searchFilters.searchSessionId,
+      legacyHitsTotal: false,
+    });
+    return !isTotalHitsGreaterThan((resp.hits.total as unknown) as TotalHits, maxResultWindow);
   }
 }
 

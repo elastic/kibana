@@ -15,7 +15,12 @@ import { copyPersistentState } from '../../reducers/copy_persistent_state';
 
 import { IField } from '../fields/field';
 import { FieldFormatter, LAYER_TYPE, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
-import { AbstractSourceDescriptor, Attribution } from '../../../common/descriptor_types';
+import {
+  AbstractSourceDescriptor,
+  Attribution,
+  DataMeta,
+  Timeslice,
+} from '../../../common/descriptor_types';
 import { LICENSED_FEATURES } from '../../licensed_features';
 import { PreIndexedShape } from '../../../common/elasticsearch_util';
 
@@ -66,6 +71,7 @@ export interface ISource {
   getMinZoom(): number;
   getMaxZoom(): number;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
+  updateDueToTimeslice(prevMeta: DataMeta, timeslice?: Timeslice): boolean;
 }
 
 export class AbstractSource implements ISource {
@@ -195,5 +201,9 @@ export class AbstractSource implements ISource {
 
   async getLicensedFeatures(): Promise<LICENSED_FEATURES[]> {
     return [];
+  }
+
+  updateDueToTimeslice(prevMeta: DataMeta, timeslice?: Timeslice): boolean {
+    return true;
   }
 }

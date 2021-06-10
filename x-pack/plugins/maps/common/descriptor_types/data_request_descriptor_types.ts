@@ -83,6 +83,9 @@ export type VectorStyleRequestMeta = MapFilters & {
 export type ESSearchSourceResponseMeta = {
   areResultsTrimmed?: boolean;
   resultsCount?: number;
+  // results time extent, either Kibana time range or timeslider time slice
+  timeExtent?: Timeslice;
+  isTimeExtentForTimeslice?: boolean;
 
   // top hits meta
   areEntitiesTrimmed?: boolean;
