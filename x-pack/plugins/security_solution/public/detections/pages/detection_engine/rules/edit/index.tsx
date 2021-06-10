@@ -47,7 +47,7 @@ import {
   getStepsData,
   redirectToDetections,
   getActionMessageParams,
-  userHasNoPermissions,
+  userHasPermissions,
   MaxWidthEuiFlexItem,
 } from '../helpers';
 import * as ruleI18n from '../translations';
@@ -328,7 +328,7 @@ const EditRulePageComponent: FC = () => {
   ) {
     history.replace(getDetectionEngineUrl());
     return null;
-  } else if (userHasNoPermissions(canUserCRUD)) {
+  } else if (!userHasPermissions(canUserCRUD)) {
     history.replace(getRuleDetailsUrl(ruleId ?? ''));
     return null;
   }

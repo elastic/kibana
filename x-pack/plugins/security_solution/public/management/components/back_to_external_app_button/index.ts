@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const EXPORT_FAILURE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.components.genericDownloader.exportFailureTitle',
-  {
-    defaultMessage: 'Failed to export data…',
-  }
-);
+export { BackToExternalAppButton } from './back_to_external_app_button';

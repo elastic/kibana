@@ -24,7 +24,7 @@ import { importTimelines } from '../../containers/api';
 
 import { useEditTimelineBatchActions } from './edit_timeline_batch_actions';
 import { useEditTimelineActions } from './edit_timeline_actions';
-import { EditOneTimelineAction } from './export_timeline';
+import { EditTimelineActions } from './export_timeline';
 import { SearchRow } from './search_row';
 import { TimelinesTable } from './timelines_table';
 import * as i18n from './translations';
@@ -170,7 +170,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
 
     return (
       <>
-        <EditOneTimelineAction
+        <EditTimelineActions
           deleteTimelines={deleteTimelines}
           ids={actionItemId}
           isDeleteTimelineModalOpen={isDeleteTimelineModalOpen}

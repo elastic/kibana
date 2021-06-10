@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-import { Phases } from '../../../common/types';
+import { BulkAction } from '../common/schemas';
+import { PerformBulkActionSchema } from './perform_bulk_action_schema';
 
-export type Phase = keyof Phases;
+export const getPerformBulkActionSchemaMock = (): PerformBulkActionSchema => ({
+  query: '',
+  action: BulkAction.disable,
+});
