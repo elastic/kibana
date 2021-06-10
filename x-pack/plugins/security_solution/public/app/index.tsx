@@ -54,6 +54,7 @@ export const renderApp = ({
       store={store}
     >
       <subPlugins.overview.SubPluginRoutes />
+      <subPlugins.detections.SubPluginRoutes />
     </SecurityApp>,
     element
   );

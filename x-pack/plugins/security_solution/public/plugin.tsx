@@ -155,27 +155,27 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       return services;
     })();
 
-    core.application.register({
-      id: `${APP_ID}:${SecurityPageName.detections}`,
-      title: DETECTION_ENGINE,
-      order: 9001,
-      euiIconType: APP_ICON_SOLUTION,
-      category: DEFAULT_APP_CATEGORIES.security,
-      appRoute: APP_DETECTIONS_PATH,
-      updater$: this.detectionsUpdater$,
-      mount: async (params: AppMountParameters) => {
-        const [coreStart, startPlugins] = await core.getStartServices();
-        const { detections: subPlugin } = await this.subPlugins();
-        const { renderAppOld } = await this.lazyApplicationDependencies();
+    // core.application.register({
+    //   id: `${APP_ID}:${SecurityPageName.detections}`,
+    //   title: DETECTION_ENGINE,
+    //   order: 9001,
+    //   euiIconType: APP_ICON_SOLUTION,
+    //   category: DEFAULT_APP_CATEGORIES.security,
+    //   appRoute: APP_DETECTIONS_PATH,
+    //   updater$: this.detectionsUpdater$,
+    //   mount: async (params: AppMountParameters) => {
+    //     const [coreStart, startPlugins] = await core.getStartServices();
+    //     const { detections: subPlugin } = await this.subPlugins();
+    //     const { renderAppOld } = await this.lazyApplicationDependencies();
 
-        return renderAppOld({
-          ...params,
-          services: await startServices,
-          store: await this.store(coreStart, startPlugins),
-          SubPluginRoutes: subPlugin.start(this.storage).SubPluginRoutes,
-        });
-      },
-    });
+    //     return renderAppOld({
+    //       ...params,
+    //       services: await startServices,
+    //       store: await this.store(coreStart, startPlugins),
+    //       SubPluginRoutes: subPlugin.start(this.storage).SubPluginRoutes,
+    //     });
+    //   },
+    // });
 
     core.application.register({
       id: `${APP_ID}:${SecurityPageName.hosts}`,
@@ -298,12 +298,20 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           order: 9000,
           euiIconType: APP_ICON_SOLUTION,
         },
+        {
+          id: SecurityPageName.detections,
+          title: DETECTION_ENGINE,
+          path:'/detections',
+          navLinkStatus: AppNavLinkStatus.visible,
+          order: 9000,
+          euiIconType: APP_ICON_SOLUTION,
+        }
       ],
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
         const { renderApp } = await this.lazyApplicationDependencies();
-
+console.log(subPlugins)
         return renderApp({
           ...params,
           services: await startServices,
