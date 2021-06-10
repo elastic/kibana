@@ -58,7 +58,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({
   );
 
   if (isDeleted) {
-    allCasesNavigation.onClick(({ preventDefault: () => null } as unknown) as MouseEvent);
+    allCasesNavigation.onClick(null);
     return null;
   }
   return (

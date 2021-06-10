@@ -81,8 +81,10 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
   return casesUi.getCaseView({
     allCasesNavigation: {
       href: allCasesHref,
-      onClick: async (e) => {
-        e.preventDefault();
+      onClick: async (ev) => {
+        if (ev != null) {
+          ev.preventDefault();
+        }
         return navigateToApp(`${CASES_APP_ID}`, {
           path: allCasesLink,
         });
@@ -90,8 +92,10 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
     },
     caseDetailsNavigation: {
       href: caseDetailsHref,
-      onClick: async (e) => {
-        e.preventDefault();
+      onClick: async (ev) => {
+        if (ev != null) {
+          ev.preventDefault();
+        }
         return navigateToApp(`${CASES_APP_ID}`, {
           path: getCaseDetailsUrl({ id: caseId }),
         });
@@ -100,8 +104,10 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
     caseId,
     configureCasesNavigation: {
       href: configureCasesHref,
-      onClick: async (e) => {
-        e.preventDefault();
+      onClick: async (ev) => {
+        if (ev != null) {
+          ev.preventDefault();
+        }
         return navigateToApp(`${CASES_APP_ID}`, {
           path: configureCasesLink,
         });
