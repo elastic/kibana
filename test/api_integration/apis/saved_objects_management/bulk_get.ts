@@ -19,8 +19,16 @@ export default function ({ getService }: FtrProviderContext) {
     const validObject = { type: 'visualization', id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab' };
     const invalidObject = { type: 'wigwags', id: 'foo' };
 
-    before(() => kibanaServer.importExport.load('saved_objects/basic'));
-    after(() => kibanaServer.importExport.unload('saved_objects/basic'));
+    before(() =>
+      kibanaServer.importExport.load(
+        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+      )
+    );
+    after(() =>
+      kibanaServer.importExport.unload(
+        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+      )
+    );
 
     it('should return 200 for object that exists and inject metadata', async () =>
       await supertest
