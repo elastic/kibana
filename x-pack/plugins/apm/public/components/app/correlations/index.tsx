@@ -52,10 +52,11 @@ const errorRateTab = {
   }),
   component: ErrorCorrelations,
 };
+// @todo: Rename tab
 const demo1Tab = {
   key: 'demo1',
   label: i18n.translate('xpack.apm.correlations.tabs.demo1Label', {
-    defaultMessage: 'Demo 1',
+    defaultMessage: 'ML Correlations',
   }),
   component: MlCorrelations,
 };

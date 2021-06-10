@@ -26,8 +26,8 @@ import { fetchTransactionDurationPecentiles } from './query_percentiles';
 import { fetchTransactionDurationCorrelation } from './query_correlation';
 import { fetchTransactionDurationHistogramRangesteps } from './query_histogram_rangesteps';
 import { fetchTransactionDurationRanges } from './query_ranges';
+import { range } from './utils';
 
-const PERCENTILES = 20;
 const CORRELATION_THRESHOLD = 0.03;
 const KS_TEST_THRESHOLD = 0.1;
 
@@ -99,12 +99,15 @@ export const asyncSearchServiceProvider = (
         fieldCandidates,
         totalHits,
       } = await fetchTransactionDurationFieldCandidates(esClient, params);
+
       progress.loadedFieldCanditates = 1;
 
+      // Create an array of ranges [2, 4, 6, ..., 98]
+      const percents = Array.from(range(2, 100, 2));
       const percentiles = await fetchTransactionDurationPecentiles(
         esClient,
         params,
-        [...Array(PERCENTILES).keys()]
+        percents
       );
 
       if (isCancelled) {

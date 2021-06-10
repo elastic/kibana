@@ -82,10 +82,9 @@ export const fetchTransactionDurationPecentiles = async (
       'fetchTransactionDurationPecentiles failed, did not return aggregations.'
     );
   }
-
   return (
     (resp.body.aggregations
-      .transaction_duration_percentiles as estypes.TDigestPercentilesAggregate)
+      .transaction_duration_percentiles as estypes.AggregationsTDigestPercentilesAggregate)
       .values ?? {}
   );
 };

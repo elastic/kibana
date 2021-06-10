@@ -33,10 +33,8 @@ import { CorrelationsChart } from './correlations_chart';
 import {
   CorrelationsTable,
   SelectedSignificantTerm,
-  SignificantTerm,
 } from './correlations_table';
 import { useCorrelations } from './use_correlations';
-import { ImpactBar } from '../../shared/ImpactBar';
 import { createHref, push } from '../../shared/Links/url_helpers';
 
 export function roundToDecimalPlace(
@@ -64,9 +62,11 @@ interface Props {
   onClose: () => void;
 }
 
-interface MlCorrelationsTerms extends SignificantTerm {
+interface MlCorrelationsTerms {
   correlation: number;
   ksTest: number;
+  fieldName: string;
+  fieldValue: string;
 }
 
 export function MlCorrelations({ onClose }: Props) {
@@ -159,12 +159,7 @@ export function MlCorrelations({ onClose }: Props) {
         { defaultMessage: 'Correlation' }
       ),
       render: (_: any, term: MlCorrelationsTerms) => {
-        return (
-          <div>
-            <ImpactBar size="m" value={term.correlation * 100} />
-            {`${Math.trunc(term.correlation * 100)}%`}
-          </div>
-        );
+        return <div>{roundToDecimalPlace(term.correlation, 3)}</div>;
       },
     },
     {
@@ -346,7 +341,7 @@ export function MlCorrelations({ onClose }: Props) {
           <CorrelationsTable
             columns={mlCorrelationcolumns}
             percentageColumnName={i18n.translate(
-              'xpack.apm.correlations.latency.percentageColumnName',
+              'xpack.apm.correlations.latency.ksTestColumnName',
               { defaultMessage: 'KS test p value' }
             )}
             significantTerms={histograms.map((d) => {

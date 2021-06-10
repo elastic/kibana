@@ -104,7 +104,7 @@ export const getTransactionDurationCorrelationRequest = (
         transaction_duration_correlation: {
           bucket_correlation: bucketCorrelation,
         } as estypes.AggregationsAggregationContainer,
-        // KS test value
+        // KS test p value = ks_test.less
         ks_test: {
           bucket_count_ks_test: {
             buckets_path: 'latency_ranges>_count',
