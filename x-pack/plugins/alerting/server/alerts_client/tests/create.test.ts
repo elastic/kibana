@@ -859,7 +859,7 @@ describe('create()', () => {
       },
       references: [],
     });
-    const result = await alertsClient.create({ data });
+    /* const result = */ await alertsClient.create({ data });
 
     expect(extractReferencesFn).toHaveBeenCalledWith(ruleParams);
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(

@@ -192,6 +192,7 @@ export class AlertTypeRegistry {
         createTaskRunner: (context: RunContext) =>
           this.taskRunnerFactory.create<
             Params,
+            ExtractedParams,
             State,
             InstanceState,
             InstanceContext,
