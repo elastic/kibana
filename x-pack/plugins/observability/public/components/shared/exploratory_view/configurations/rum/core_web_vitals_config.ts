@@ -32,7 +32,7 @@ export function getCoreWebVitalsConfig({ indexPattern }: ConfigProps): DataSerie
 
   return {
     defaultSeriesType: 'bar_horizontal_percentage_stacked',
-    reportType: 'kpi-over-time',
+    reportType: 'core-web-vitals',
     seriesTypes: ['bar_horizontal_percentage_stacked'],
     xAxisColumn: {
       sourceField: USE_BREAK_DOWN_COLUMN,

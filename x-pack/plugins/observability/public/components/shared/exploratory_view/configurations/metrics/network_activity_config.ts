@@ -10,7 +10,7 @@ import { FieldLabels } from '../constants';
 
 export function getNetworkActivityLensConfig({}: ConfigProps): DataSeries {
   return {
-    reportType: 'network-activity',
+    reportType: 'kpi-over-time',
     defaultSeriesType: 'line',
     seriesTypes: ['line', 'bar'],
     xAxisColumn: {

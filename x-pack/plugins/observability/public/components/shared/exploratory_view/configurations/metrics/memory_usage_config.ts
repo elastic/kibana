@@ -10,7 +10,7 @@ import { FieldLabels } from '../constants';
 
 export function getMemoryUsageLensConfig({}: ConfigProps): DataSeries {
   return {
-    reportType: 'memory-usage',
+    reportType: 'kpi-over-time',
     defaultSeriesType: 'line',
     seriesTypes: ['line', 'bar'],
     xAxisColumn: {

@@ -12,7 +12,7 @@ import { TRANSACTION_DURATION } from '../constants/elasticsearch_fieldnames';
 
 export function getServiceLatencyLensConfig({ indexPattern }: ConfigProps): DataSeries {
   return {
-    reportType: 'service-latency',
+    reportType: 'kpi-over-time',
     defaultSeriesType: 'line',
     seriesTypes: ['line', 'bar'],
     xAxisColumn: {

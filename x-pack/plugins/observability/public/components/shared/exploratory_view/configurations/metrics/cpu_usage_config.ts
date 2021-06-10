@@ -10,7 +10,7 @@ import { FieldLabels } from '../constants';
 
 export function getCPUUsageLensConfig({}: ConfigProps): DataSeries {
   return {
-    reportType: 'cpu-usage',
+    reportType: 'kpi-over-time',
     defaultSeriesType: 'line',
     seriesTypes: ['line', 'bar'],
     xAxisColumn: {
