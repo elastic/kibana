@@ -199,7 +199,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
 
   const [
     loading,
-    { events, updatedAt, loadPage, pageInfo, refetch, totalCount = 0 },
+    { events, updatedAt, loadPage, pageInfo, refetch, totalCount = 0, inspect },
   ] = useTimelineEvents({
     docValueFields: [],
     excludeEcsData: true,
@@ -275,6 +275,8 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
         <>
           <HeaderSection
             id={!resolverIsShowing(graphEventId) ? STANDALONE_ID : undefined}
+            inspect={inspect}
+            loading={loading}
             height={headerFilterGroup ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT}
             subtitle={utilityBar ? undefined : subtitle}
             title={justTitle}

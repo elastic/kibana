@@ -7,19 +7,13 @@
 
 import { omit, union } from 'lodash/fp';
 
+import { isEmpty } from 'lodash';
 import type { ToggleDetailPanel } from './actions';
-import { TimelineById, TimelineId } from './types';
-import type { TGridModel } from './model';
+import { TGridPersistInput, TimelineById, TimelineId } from './types';
+import type { TGridModel, TGridModelSettings } from './model';
 
-import type {
-  ColumnHeaderOptions,
-  SerializedFilterQuery,
-  SortColumnTimeline,
-  TimelineExpandedDetail,
-} from '../../../common/types/timeline';
-import type { RowRendererId } from '../../../common/types/timeline';
+import type { ColumnHeaderOptions, SortColumnTimeline } from '../../../common/types/timeline';
 import { getTGridManageDefaults, tGridDefaults } from './defaults';
-import { Filter } from '../../../../../../src/plugins/data/public';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 export type Maybe<T> = T | null;
@@ -61,62 +55,26 @@ interface TimelineNonEcsData {
   value?: Maybe<string[]>;
 }
 
-interface CreateTGridParams {
-  columns: ColumnHeaderOptions[];
-  dateRange: {
-    start: string;
-    end: string;
-  };
-  excludedRowRendererIds?: RowRendererId[];
-  expandedDetail?: TimelineExpandedDetail;
-  filters?: Filter[];
-  id: string;
-  itemsPerPage?: number;
-  itemsPerPageOptions?: number[];
-  indexNames: string[];
-  kqlQuery?: {
-    filterQuery: SerializedFilterQuery | null;
-  };
-  sort?: SortColumnTimeline[];
-  showCheckboxes?: boolean;
+interface CreateTGridParams extends TGridPersistInput {
   timelineById: TimelineById;
 }
 
 /** Adds a new `Timeline` to the provided collection of `TimelineById` */
 export const createInitTGrid = ({
-  columns,
-  dateRange,
-  excludedRowRendererIds = tGridDefaults.excludedRowRendererIds,
-  expandedDetail = tGridDefaults.expandedDetail,
-  filters = tGridDefaults.filters,
   id,
-  itemsPerPage = tGridDefaults.itemsPerPage,
-  itemsPerPageOptions = tGridDefaults.itemsPerPageOptions,
-  indexNames,
-  kqlQuery = { filterQuery: null },
-  sort = tGridDefaults.sort,
-  showCheckboxes = false,
   timelineById,
+  ...tGridProps
 }: CreateTGridParams): TimelineById => {
+  const timeline = timelineById[id];
   return {
     ...timelineById,
     [id]: {
+      ...timeline,
       ...tGridDefaults,
-      ...getTGridManageDefaults(id),
-      columns,
-      dateRange,
-      expandedDetail,
-      excludedRowRendererIds,
-      filters,
-      itemsPerPage,
-      itemsPerPageOptions,
-      indexNames,
-      kqlQuery,
-      sort,
+      ...tGridProps,
       isLoading: false,
       isTGridLoading: false,
       savedObjectId: null,
-      showCheckboxes,
       version: null,
     },
   };
@@ -189,21 +147,27 @@ export const removeTimelineColumn = ({
 interface InitializeTgridParams {
   id: string;
   timelineById: TimelineById;
+  tGridSettingsProps: Partial<TGridModelSettings>;
 }
 
-export const getInitializeTgrid = ({
+export const setInitializeTgridSettings = ({
   id,
   timelineById,
-  ...timelineProps
+  tGridSettingsProps,
 }: InitializeTgridParams): TimelineById => {
   const timeline = timelineById[id];
 
   return {
     ...timelineById,
     [id]: {
-      ...getTGridManageDefaults(id),
       ...timeline,
-      ...timelineProps,
+      ...getTGridManageDefaults(id),
+      ...tGridSettingsProps,
+      ...(!timeline || (isEmpty(timeline.columns) && !isEmpty(tGridSettingsProps.defaultColumns))
+        ? { columns: tGridSettingsProps.defaultColumns }
+        : {}),
+      sort: tGridDefaults.sort,
+      loadingEventIds: tGridDefaults.loadingEventIds,
     },
   };
 };

@@ -76,7 +76,7 @@ const AlertsTableComponent: React.FC<Props> = ({
 
   useEffect(() => {
     dispatch(
-      timelineActions.initializeTGrid({
+      timelineActions.initializeTGridSettings({
         id: timelineId,
         documentType: i18n.ALERTS_DOCUMENT_TYPE,
         filterManager,

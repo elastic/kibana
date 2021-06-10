@@ -42,6 +42,7 @@ import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from '../styles';
 import * as i18n from './translations';
 import { ExitFullScreen } from '../../exit_full_screen';
 import { Sort } from '../body/sort';
+import { InspectButtonContainer } from '../../inspect';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const UTILITY_BAR_HEIGHT = 19; // px
@@ -229,7 +230,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
 
   const [
     loading,
-    { events, updatedAt, loadPage, pageInfo, refetch, totalCount = 0 },
+    { events, updatedAt, loadPage, pageInfo, refetch, totalCount = 0, inspect },
   ] = useTimelineEvents({
     docValueFields,
     fields,
@@ -279,28 +280,28 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   }, [loading]);
 
   return (
-    <StyledEuiPanel
-      data-test-subj="events-viewer-panel"
-      $isFullScreen={globalFullScreen && id !== TimelineId.active}
-    >
-      {canQueryTimeline ? (
-        <>
-          <HeaderSection
-            id={!resolverIsShowing(graphEventId) ? id : undefined}
-            height={headerFilterGroup ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT}
-            subtitle={utilityBar ? undefined : subtitle}
-            title={globalFullScreen ? titleWithExitFullScreen : justTitle}
-          >
-            {HeaderSectionContent}
-          </HeaderSection>
-          {utilityBar && !resolverIsShowing(graphEventId) && (
-            <UtilityBar>{utilityBar?.(refetch, totalCountMinusDeleted)}</UtilityBar>
-          )}
-          <EventsContainerLoading
-            data-timeline-id={id}
-            data-test-subj={`events-container-loading-${loading}`}
-          >
-            {/* <TimelineRefetch
+    <InspectButtonContainer>
+      <StyledEuiPanel data-test-subj="events-viewer-panel" $isFullScreen={globalFullScreen}>
+        {canQueryTimeline ? (
+          <>
+            <HeaderSection
+              id={!resolverIsShowing(graphEventId) ? id : undefined}
+              inspect={inspect}
+              loading={loading}
+              height={headerFilterGroup ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT}
+              subtitle={utilityBar ? undefined : subtitle}
+              title={globalFullScreen ? titleWithExitFullScreen : justTitle}
+            >
+              {HeaderSectionContent}
+            </HeaderSection>
+            {utilityBar && !resolverIsShowing(graphEventId) && (
+              <UtilityBar>{utilityBar?.(refetch, totalCountMinusDeleted)}</UtilityBar>
+            )}
+            <EventsContainerLoading
+              data-timeline-id={id}
+              data-test-subj={`events-container-loading-${loading}`}
+            >
+              {/* <TimelineRefetch
                 id={id}
                 inputId="global"
                 inspect={inspect}
@@ -308,48 +309,49 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                 refetch={refetch}
               /> */}
 
-            {/* {graphEventId && <GraphOverlay isEventViewer={true} timelineId={id} />} */}
-            <FullWidthFlexGroup $visible={!graphEventId} gutterSize="none">
-              <ScrollableFlexItem grow={1}>
-                <StatefulBody
-                  activePage={pageInfo.activePage}
-                  browserFields={browserFields}
-                  data={nonDeletedEvents}
-                  id={id}
-                  isEventViewer={true}
-                  onRuleChange={onRuleChange}
-                  // refetch={refetch}
-                  renderCellValue={renderCellValue}
-                  rowRenderers={rowRenderers}
-                  sort={sort}
-                  tabType={TimelineTabs.query}
-                  totalPages={calculateTotalPages({
-                    itemsCount: totalCountMinusDeleted,
-                    itemsPerPage,
-                  })}
-                  leadingControlColumns={leadingControlColumns}
-                  trailingControlColumns={trailingControlColumns}
-                />
-                <Footer
-                  activePage={pageInfo.activePage}
-                  data-test-subj="events-viewer-footer"
-                  updatedAt={updatedAt}
-                  height={footerHeight}
-                  id={id}
-                  isLive={isLive}
-                  isLoading={loading}
-                  itemsCount={nonDeletedEvents.length}
-                  itemsPerPage={itemsPerPage}
-                  itemsPerPageOptions={itemsPerPageOptions}
-                  onChangePage={loadPage}
-                  totalCount={totalCountMinusDeleted}
-                />
-              </ScrollableFlexItem>
-            </FullWidthFlexGroup>
-          </EventsContainerLoading>
-        </>
-      ) : null}
-    </StyledEuiPanel>
+              {/* {graphEventId && <GraphOverlay isEventViewer={true} timelineId={id} />} */}
+              <FullWidthFlexGroup $visible={!graphEventId} gutterSize="none">
+                <ScrollableFlexItem grow={1}>
+                  <StatefulBody
+                    activePage={pageInfo.activePage}
+                    browserFields={browserFields}
+                    data={nonDeletedEvents}
+                    id={id}
+                    isEventViewer={true}
+                    onRuleChange={onRuleChange}
+                    // refetch={refetch}
+                    renderCellValue={renderCellValue}
+                    rowRenderers={rowRenderers}
+                    sort={sort}
+                    tabType={TimelineTabs.query}
+                    totalPages={calculateTotalPages({
+                      itemsCount: totalCountMinusDeleted,
+                      itemsPerPage,
+                    })}
+                    leadingControlColumns={leadingControlColumns}
+                    trailingControlColumns={trailingControlColumns}
+                  />
+                  <Footer
+                    activePage={pageInfo.activePage}
+                    data-test-subj="events-viewer-footer"
+                    updatedAt={updatedAt}
+                    height={footerHeight}
+                    id={id}
+                    isLive={isLive}
+                    isLoading={loading}
+                    itemsCount={nonDeletedEvents.length}
+                    itemsPerPage={itemsPerPage}
+                    itemsPerPageOptions={itemsPerPageOptions}
+                    onChangePage={loadPage}
+                    totalCount={totalCountMinusDeleted}
+                  />
+                </ScrollableFlexItem>
+              </FullWidthFlexGroup>
+            </EventsContainerLoading>
+          </>
+        ) : null}
+      </StyledEuiPanel>
+    </InspectButtonContainer>
   );
 };
 

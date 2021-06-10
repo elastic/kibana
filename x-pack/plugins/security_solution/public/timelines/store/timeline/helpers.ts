@@ -23,7 +23,6 @@ import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline'
 import {
   ColumnHeaderOptions,
   TimelineEventsType,
-  TimelineExpandedDetail,
   TimelineTypeLiteral,
   TimelineType,
   RowRendererId,
@@ -32,6 +31,7 @@ import {
   TimelineTabs,
   SerializedFilterQuery,
   ToggleDetailPanel,
+  TimelinePersistInput,
 } from '../../../../common/types/timeline';
 import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
 
@@ -169,47 +169,20 @@ export const addTimelineToStore = ({
   };
 };
 
-interface AddNewTimelineParams {
-  columns: ColumnHeaderOptions[];
-  dataProviders?: DataProvider[];
-  dateRange?: {
-    start: string;
-    end: string;
-  };
-  excludedRowRendererIds?: RowRendererId[];
-  expandedDetail?: TimelineExpandedDetail;
-  filters?: Filter[];
-  id: string;
-  itemsPerPage?: number;
-  indexNames: string[];
-  kqlQuery?: {
-    filterQuery: SerializedFilterQuery | null;
-  };
-  show?: boolean;
-  sort?: Sort[];
-  showCheckboxes?: boolean;
+interface AddNewTimelineParams extends TimelinePersistInput {
   timelineById: TimelineById;
   timelineType: TimelineTypeLiteral;
 }
 
 /** Adds a new `Timeline` to the provided collection of `TimelineById` */
 export const addNewTimeline = ({
-  columns,
-  dataProviders = [],
-  dateRange: maybeDateRange,
-  excludedRowRendererIds = [],
-  expandedDetail = {},
-  filters = timelineDefaults.filters,
   id,
-  itemsPerPage = timelineDefaults.itemsPerPage,
-  indexNames,
-  kqlQuery = { filterQuery: null },
-  sort = timelineDefaults.sort,
-  show = false,
-  showCheckboxes = false,
   timelineById,
   timelineType,
+  dateRange: maybeDateRange,
+  ...timelineProps
 }: AddNewTimelineParams): TimelineById => {
+  const timeline = timelineById[id];
   const { from: startDateRange, to: endDateRange } = normalizeTimeRange({ from: '', to: '' });
   const dateRange = maybeDateRange ?? { start: startDateRange, end: endDateRange };
   const templateTimelineInfo =
@@ -224,22 +197,13 @@ export const addNewTimeline = ({
     [id]: {
       id,
       ...timelineDefaults,
-      columns,
-      dataProviders,
+      ...(timeline ? timeline : {}),
+      ...timelineProps,
       dateRange,
-      expandedDetail,
-      excludedRowRendererIds,
-      filters,
-      itemsPerPage,
-      indexNames,
-      kqlQuery,
-      sort,
-      show,
       savedObjectId: null,
       version: null,
       isSaving: false,
       isLoading: false,
-      showCheckboxes,
       timelineType,
       ...templateTimelineInfo,
     },

@@ -6,7 +6,8 @@
  */
 
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
-import { TGridModel } from './model';
+import type { ColumnHeaderOptions } from '../../../common';
+import type { TGridModel, TGridModelSettings } from './model';
 
 export interface AutoSavedWarningMsg {
   timelineId: string | null;
@@ -48,4 +49,18 @@ export enum TimelineId {
   casePage = 'timeline-case',
   test = 'test', // Reserved for testing purposes
   alternateTest = 'alternateTest',
+}
+
+export interface InitialyzeTGridSettings extends Partial<TGridModelSettings> {
+  id: string;
+}
+
+export interface TGridPersistInput extends Partial<Omit<TGridModel, keyof TGridModelSettings>> {
+  id: string;
+  dateRange: {
+    start: string;
+    end: string;
+  };
+  columns: ColumnHeaderOptions[];
+  indexNames: string[];
 }

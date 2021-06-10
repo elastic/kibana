@@ -199,7 +199,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
 
   useEffect(() => {
     dispatch(
-      timelineActions.initializeTGrid({
+      timelineActions.initializeTGridSettings({
         id: timelineId,
       })
     );

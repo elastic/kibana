@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import type { EuiDataGridColumn } from '@elastic/eui';
 import actionCreatorFactory from 'typescript-fsa';
-import type { FilterManager } from '../../../../../../src/plugins/data/public';
 import type { TimelineNonEcsData } from '../../../common/search_strategy';
 import type {
   ColumnHeaderOptions,
   SortColumnTimeline,
   TimelineExpandedDetailType,
-  TGridPersistInput,
 } from '../../../common/types/timeline';
 import { TimelineTabs } from '../../../common/types/timeline';
+import { InitialyzeTGridSettings, TGridPersistInput } from './types';
 
 const actionCreator = actionCreatorFactory('x-pack/timelines/t-grid');
 
@@ -97,23 +95,7 @@ export const clearEventsDeleted = actionCreator<{
   id: string;
 }>('CLEAR_TIMELINE_EVENTS_DELETED');
 
-export const initializeTGrid = actionCreator<{
-  id: string;
-  defaultColumns?: Array<
-    Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> &
-      ColumnHeaderOptions
-  >;
-  documentType?: string;
-  excludedRowRendererIds?: string[];
-  filterManager?: FilterManager;
-  footerText?: string;
-  isLoading?: boolean;
-  loadingText?: string;
-  queryFields?: string[];
-  selectAll?: boolean;
-  title?: string;
-  unit?: (n: number) => string;
-}>('INITIALIZE_TGRID');
+export const initializeTGridSettings = actionCreator<InitialyzeTGridSettings>('INITIALIZE_TGRID');
 
 export const setTGridIsLoading = actionCreator<{ id: string; isTGridLoading: boolean }>(
   'SET_TGRID_IS_LOADING'
