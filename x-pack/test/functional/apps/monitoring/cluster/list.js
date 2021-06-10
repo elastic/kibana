@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }) {
       const UNSUPPORTED_CLUSTER_UUID = '6d-9tDFTRe-qT5GoBytdlQ';
 
       before(async () => {
-        await setup('monitoring/multicluster', {
+        await setup('x-pack/test/functional/es_archives/monitoring/multicluster', {
           from: 'Aug 15, 2017 @ 21:00:00.000',
           to: 'Aug 16, 2017 @ 00:00:00.000',
         });
@@ -78,7 +78,7 @@ export default function ({ getService, getPageObjects }) {
       const SUPPORTED_CLUSTER_UUID = 'NDKg6VXAT6-TaGzEK2Zy7g';
 
       before(async () => {
-        await setup('monitoring/multi_basic', {
+        await setup('x-pack/test/functional/es_archives/monitoring/multi_basic', {
           from: 'Sep 7, 2017 @ 20:12:04.011',
           to: 'Sep 7, 2017 @ 20:18:55.733',
         });

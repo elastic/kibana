@@ -23,7 +23,7 @@ interface Props {
   basePath?: HttpStart['basePath'];
   dataTestSubj: string;
   onClick?: Function;
-  navigateToApp: CoreStart['application']['navigateToApp'];
+  navigateToUrl: CoreStart['application']['navigateToUrl'];
   externalLink?: boolean;
 }
 
@@ -36,11 +36,11 @@ export function createEuiListItem({
   appId,
   basePath,
   onClick = () => {},
-  navigateToApp,
+  navigateToUrl,
   dataTestSubj,
   externalLink = false,
 }: Props) {
-  const { href, id, title, disabled, euiIconType, icon, tooltip } = link;
+  const { href, id, title, disabled, euiIconType, icon, tooltip, url } = link;
 
   return {
     label: tooltip ?? title,
@@ -57,7 +57,7 @@ export function createEuiListItem({
         !isModifiedOrPrevented(event)
       ) {
         event.preventDefault();
-        navigateToApp(id);
+        navigateToUrl(url);
       }
     },
     isActive: appId === id,

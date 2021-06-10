@@ -37,7 +37,7 @@ export type Func = () => Promise<void>;
 
 interface ExceptionListsTableProps {
   history: History;
-  hasNoPermissions: boolean;
+  hasPermissions: boolean;
   loading: boolean;
   formatUrl: FormatUrl;
 }
@@ -59,7 +59,7 @@ const exceptionReferenceModalInitialState: ReferenceModalState = {
 };
 
 export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
-  ({ formatUrl, history, hasNoPermissions, loading }) => {
+  ({ formatUrl, history, hasPermissions, loading }) => {
     const {
       services: { http, notifications, timelines },
     } = useKibana();
@@ -358,7 +358,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
               <>
                 <AllRulesUtilityBar
                   showBulkActions={false}
-                  userHasNoPermissions={hasNoPermissions}
+                  canBulkEdit={hasPermissions}
                   paginationTotal={exceptionListsWithRuleRefs.length ?? 0}
                   numberSelectedItems={0}
                   onRefresh={handleRefresh}
@@ -366,7 +366,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
                 <EuiBasicTable
                   data-test-subj="exceptions-table"
                   columns={exceptionsColumns}
-                  isSelectable={!hasNoPermissions ?? false}
+                  isSelectable={hasPermissions}
                   itemId="id"
                   items={tableItems}
                   noItemsMessage={emptyPrompt}
