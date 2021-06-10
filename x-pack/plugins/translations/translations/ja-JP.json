@@ -14055,7 +14055,6 @@
     "xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionMeanRecallStat": "平均再現率",
     "xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionOverallAccuracyStat": "全体的な精度",
     "xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionOverallAccuracyTooltip": "合計予測数に対する正しいクラス予測数の比率。",
-    "xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionRocInfoTooltip": "受信者操作特性 (ROC) 曲線は、異なる予測確率しきい値で分類プロセスのパフォーマンスを表すプロットです。",
     "xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionRocTitle": "受信者操作特性 (ROC) 曲線",
     "xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionTitle": "モデル評価",
     "xpack.ml.dataframe.analytics.classificationExploration.showActions": "アクションを表示",

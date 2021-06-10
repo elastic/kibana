@@ -50,6 +50,7 @@ import {
 import { isTrainingFilter } from './is_training_filter';
 import { useRocCurve } from './use_roc_curve';
 import { useConfusionMatrix } from './use_confusion_matrix';
+import { RocCurveHelpPopover } from './roc_curve_help_popover';
 
 export interface EvaluatePanelProps {
   jobConfig: DataFrameAnalyticsConfig;
@@ -417,7 +418,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
             </EuiFlexGroup>
             {/* AUC ROC Chart */}
             <EuiSpacer size="l" />
-            <EuiFlexGroup gutterSize="none">
+            <EuiFlexGroup gutterSize="none" alignItems="center">
               <EuiTitle size="xxs">
                 <span>
                   <FormattedMessage
@@ -427,16 +428,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
                 </span>
               </EuiTitle>
               <EuiFlexItem grow={false}>
-                <EuiIconTip
-                  anchorClassName="mlDataFrameAnalyticsClassificationInfoTooltip"
-                  content={i18n.translate(
-                    'xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionRocInfoTooltip',
-                    {
-                      defaultMessage:
-                        'The receiver operating characteristic (ROC) curve is a plot that represents the performance of the classification process at different predicted probability thresholds.',
-                    }
-                  )}
-                />
+                <RocCurveHelpPopover />
               </EuiFlexItem>
             </EuiFlexGroup>
             {Array.isArray(errorRocCurve) && (
