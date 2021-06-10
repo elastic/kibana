@@ -7,14 +7,20 @@
 
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
+import { TrackApplicationView } from '../../../../../src/plugins/usage_collection/public';
+import { OVERVIEW_PATH, SecurityPageName } from '../../common/constants';
 
 import { Overview } from './pages';
-import { NotFoundPage } from '../app/404';
 
-// TODO: [1101] import path from constants file
 export const OverviewRoutes = () => (
   <Switch>
-    <Route path="/overview" render={() => <Overview />} />
-    <Route render={() => <NotFoundPage />} />
+    <Route
+      path={OVERVIEW_PATH}
+      render={() => (
+        <TrackApplicationView viewId={SecurityPageName.overview}>
+          <Overview />
+        </TrackApplicationView>
+      )}
+    />
   </Switch>
 );
