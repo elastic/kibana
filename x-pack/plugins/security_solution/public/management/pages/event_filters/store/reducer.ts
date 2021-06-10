@@ -86,6 +86,7 @@ const eventFiltersInitForm: CaseReducer<EventFiltersInitForm> = (state, action) 
       entry: action.payload.entry,
       hasNameError: !action.payload.entry.name,
       hasOSError: !action.payload.entry.os_types?.length,
+      newComment: '',
       submissionResourceState: {
         type: 'UninitialisedResourceState',
       },

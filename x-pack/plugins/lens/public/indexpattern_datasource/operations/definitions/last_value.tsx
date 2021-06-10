@@ -277,4 +277,20 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       </>
     );
   },
+  documentation: {
+    section: 'elasticsearch',
+    signature: i18n.translate('xpack.lens.indexPattern.lastValue.signature', {
+      defaultMessage: 'field: string',
+    }),
+    description: i18n.translate('xpack.lens.indexPattern.lastValue.documentation', {
+      defaultMessage: `
+Returns the value of a field from the last document, ordered by the default time field of the index pattern.
+
+This function is usefull the retrieve the latest state of an entity.
+
+Example: Get the current status of server A: 
+\`last_value(server.status, kql=\'server.name="A"\')\`
+      `,
+    }),
+  },
 };
