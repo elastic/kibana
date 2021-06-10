@@ -28,7 +28,7 @@ import {
 } from '../../../../data/common';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
-import { SavedSearchEmbeddableComponentMemoized } from './saved_search_embeddable_component';
+import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import { UiActionsStart } from '../../../../ui_actions/public';
 import { getServices } from '../../kibana_services';
 import {
@@ -385,7 +385,7 @@ export class SavedSearchEmbeddable
       useLegacyTable,
       refs: domNode,
     };
-    ReactDOM.render(<SavedSearchEmbeddableComponentMemoized {...props} />, domNode);
+    ReactDOM.render(<SavedSearchEmbeddableComponent {...props} />, domNode);
   }
 
   public reload() {
