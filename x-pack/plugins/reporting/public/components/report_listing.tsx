@@ -9,12 +9,10 @@ import {
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageContent,
   EuiPageHeader,
   EuiSpacer,
   EuiText,
   EuiTextColor,
-  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
