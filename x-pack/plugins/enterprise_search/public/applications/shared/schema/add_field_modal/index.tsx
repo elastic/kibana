@@ -10,6 +10,7 @@ import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -83,8 +84,13 @@ export const SchemaAddFieldModal: React.FC<Props> = ({
         <EuiModalHeaderTitle>{ADD_FIELD_MODAL_TITLE}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <p>{ADD_FIELD_MODAL_DESCRIPTION}</p>
-        <EuiSpacer />
+        <EuiCallOut
+          color="warning"
+          size="s"
+          iconType="iInCircle"
+          title={<p>{ADD_FIELD_MODAL_DESCRIPTION}</p>}
+        />
+        <EuiSpacer size="m" />
         <EuiForm component="form" id={FORM_ID} onSubmit={submitForm}>
           <EuiFlexGroup gutterSize="m">
             <EuiFlexItem>
