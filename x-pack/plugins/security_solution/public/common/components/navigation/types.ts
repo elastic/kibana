@@ -10,23 +10,14 @@ import { SecurityPageName } from '../../../app/types';
 import { UrlState } from '../url_state/types';
 import { SiemRouteType } from '../../utils/route/types';
 
-export interface SecuritySolutionNavigationManagerProps {
+export interface SecuritySolutionTabNavigationProps {
   display?: 'default' | 'condensed';
-  isPrimary?: boolean;
   navTabs: Record<string, NavTab>;
 }
-
-interface CommonNavigationProps {
+export interface TabNavigationComponentProps {
   pageName: string;
   tabName: SiemRouteType | undefined;
   urlState: UrlState;
-}
-
-export interface SecuritySolutionNavigationProps extends CommonNavigationProps {
-  navTabs: Record<string, NavTab>;
-}
-
-export interface NavigationManagerComponentProps extends CommonNavigationProps {
   pathName: string;
 }
 

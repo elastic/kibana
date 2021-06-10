@@ -8,6 +8,7 @@
 import React, { useRef } from 'react';
 
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
+import { AppLeaveHandler, AppMountParameters } from '../../../../../../src/core/public';
 import { SecuritySolutionAppWrapper } from '../../common/components/page';
 import { HelpMenu } from '../../common/components/help_menu';
 import { useSyncUrlState } from '../../common/components/url_state';
@@ -22,9 +23,15 @@ import { SecuritySolutionTemplateWrapper } from './template_wrapper';
 
 interface HomePageProps {
   children: React.ReactNode;
+  onAppLeave: (handler: AppLeaveHandler) => void;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
-const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
+const HomePageComponent: React.FC<HomePageProps> = ({
+  children,
+  onAppLeave,
+  setHeaderActionMenu,
+}) => {
   const { application } = useKibana().services;
   const subPluginId = useRef<string>('');
 
@@ -56,9 +63,11 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
 
   return (
     <SecuritySolutionAppWrapper className="kbnAppWrapper">
-      <GlobalHeader />
+      <GlobalHeader setHeaderActionMenu={setHeaderActionMenu} />
       <DragDropContextWrapper browserFields={browserFields}>
-        <SecuritySolutionTemplateWrapper>{children}</SecuritySolutionTemplateWrapper>
+        <SecuritySolutionTemplateWrapper onAppLeave={onAppLeave}>
+          {children}
+        </SecuritySolutionTemplateWrapper>
       </DragDropContextWrapper>
       <HelpMenu />
     </SecuritySolutionAppWrapper>

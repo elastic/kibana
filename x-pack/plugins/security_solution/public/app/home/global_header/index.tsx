@@ -14,11 +14,11 @@ import React, { useEffect, useMemo } from 'react';
 import { createPortalNode, OutPortal, InPortal } from 'react-reverse-portal';
 import { i18n } from '@kbn/i18n';
 
+import { AppMountParameters } from '../../../../../../../src/core/public';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
 import { ADD_DATA_PATH, APP_DETECTIONS_PATH } from '../../../../common/constants';
-import { useAppMountContext } from '../../app_mount_context';
 
 const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.buttonAddData', {
   defaultMessage: 'Add data',
@@ -28,49 +28,50 @@ const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.butt
  * This component uses the reverse portal to add the Add Data and ML job settings buttons on the
  * right hand side of the Kibana global header
  */
-export const GlobalHeader = React.memo(() => {
-  const portalNode = useMemo(() => createPortalNode(), []);
-  const { http } = useKibana().services;
-  const { setHeaderActionMenu } = useAppMountContext();
+export const GlobalHeader = React.memo(
+  ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => {
+    const portalNode = useMemo(() => createPortalNode(), []);
+    const { http } = useKibana().services;
 
-  useEffect(() => {
-    let unmount = () => {};
+    useEffect(() => {
+      let unmount = () => {};
 
-    setHeaderActionMenu((element) => {
-      const mount = toMountPoint(<OutPortal node={portalNode} />);
-      unmount = mount(element);
-      return unmount;
-    });
+      setHeaderActionMenu((element) => {
+        const mount = toMountPoint(<OutPortal node={portalNode} />);
+        unmount = mount(element);
+        return unmount;
+      });
 
-    return () => {
-      portalNode.unmount();
-      unmount();
-    };
-  }, [portalNode, setHeaderActionMenu]);
+      return () => {
+        portalNode.unmount();
+        unmount();
+      };
+    }, [portalNode, setHeaderActionMenu]);
 
-  const basePath = http.basePath.get();
-  return (
-    <InPortal node={portalNode}>
-      <EuiHeaderSection side="right">
-        {window.location.pathname.includes(APP_DETECTIONS_PATH) && (
+    const basePath = http.basePath.get();
+    return (
+      <InPortal node={portalNode}>
+        <EuiHeaderSection side="right">
+          {window.location.pathname.includes(APP_DETECTIONS_PATH) && (
+            <EuiHeaderSectionItem>
+              <MlPopover />
+            </EuiHeaderSectionItem>
+          )}
           <EuiHeaderSectionItem>
-            <MlPopover />
+            <EuiHeaderLinks>
+              <EuiHeaderLink
+                color="primary"
+                data-test-subj="add-data"
+                href={`${basePath}${ADD_DATA_PATH}`}
+                iconType="indexOpen"
+              >
+                {BUTTON_ADD_DATA}
+              </EuiHeaderLink>
+            </EuiHeaderLinks>
           </EuiHeaderSectionItem>
-        )}
-        <EuiHeaderSectionItem>
-          <EuiHeaderLinks>
-            <EuiHeaderLink
-              color="primary"
-              data-test-subj="add-data"
-              href={`${basePath}${ADD_DATA_PATH}`}
-              iconType="indexOpen"
-            >
-              {BUTTON_ADD_DATA}
-            </EuiHeaderLink>
-          </EuiHeaderLinks>
-        </EuiHeaderSectionItem>
-      </EuiHeaderSection>
-    </InPortal>
-  );
-});
+        </EuiHeaderSection>
+      </InPortal>
+    );
+  }
+);
 GlobalHeader.displayName = 'GlobalHeader';

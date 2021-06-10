@@ -141,6 +141,8 @@ export const TIMELINE_DESCRIPTION = '[data-test-subj="timeline-description"]';
 
 export const TIMELINE_DESCRIPTION_INPUT = '[data-test-subj="save-timeline-description"]';
 
+export const TIMELINE_DROPPED_DATA_CONTAINER = '[data-test-subj="timeline-bottom-bar-container"]';
+
 export const TIMELINE_DROPPED_DATA_PROVIDERS = '[data-test-subj="providerContainer"]';
 
 export const TIMELINE_FIELDS_BUTTON =

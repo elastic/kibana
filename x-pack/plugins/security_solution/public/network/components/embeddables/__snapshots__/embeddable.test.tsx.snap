@@ -5,6 +5,7 @@ exports[`Embeddable it renders 1`] = `
   className="siemEmbeddable"
 >
   <Panel
+    hasBorder={true}
     paddingSize="none"
   >
     <p>

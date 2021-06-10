@@ -47,8 +47,16 @@ export default function ({ getService }) {
   const kibanaServer = getService('kibanaServer');
 
   describe('kibana stats api', () => {
-    before(() => kibanaServer.importExport.load('saved_objects/basic'));
-    after(() => kibanaServer.importExport.unload('saved_objects/basic'));
+    before(async () => {
+      await kibanaServer.importExport.load(
+        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+      );
+    });
+    after(async () => {
+      await kibanaServer.importExport.unload(
+        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+      );
+    });
 
     describe('basic', () => {
       it('should return the stats without cluster_uuid with no query string params', () => {
