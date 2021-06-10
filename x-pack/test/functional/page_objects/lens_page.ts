@@ -42,6 +42,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return await testSubjects.findAll('lnsFieldListPanelField');
     },
 
+    async isLensPageOrFail() {
+      return await testSubjects.existOrFail('lnsApp');
+    },
+
     /**
      * Move the date filter to the specified time range, defaults to
      * a range that has data in our dataset.
@@ -88,7 +92,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param title - the title of the list item to be clicked
      */
     clickVisualizeListItemTitle(title: string) {
-      return testSubjects.click(`visListingTitleLink-${title}`);
+      return retry.try(async () => {
+        await testSubjects.click(`visListingTitleLink-${title}`);
+        await this.isLensPageOrFail();
+      });
     },
 
     /**
@@ -776,12 +783,30 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return buttonEl.click();
     },
 
+    async setTableSummaryRowFunction(
+      summaryFunction: 'none' | 'sum' | 'avg' | 'count' | 'min' | 'max'
+    ) {
+      await testSubjects.click('lnsDatatable_summaryrow_function');
+      await testSubjects.click('lns-datatable-summary-' + summaryFunction);
+    },
+
+    async setTableSummaryRowLabel(newLabel: string) {
+      await testSubjects.setValue('lnsDatatable_summaryrow_label', newLabel, {
+        clearWithKeyboard: true,
+        typeCharByChar: true,
+      });
+    },
+
     async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text') {
       await testSubjects.click('lnsDatatable_dynamicColoring_groups_' + coloringType);
     },
 
     async openTablePalettePanel() {
       await testSubjects.click('lnsDatatable_dynamicColoring_trigger');
+    },
+
+    async closeTablePalettePanel() {
+      await testSubjects.click('lns-indexPattern-PalettePanelContainerBack');
     },
 
     // different picker from the next one
