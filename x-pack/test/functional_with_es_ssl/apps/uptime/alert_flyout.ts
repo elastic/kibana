@@ -6,8 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { delay } from 'bluebird';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('uptime alerts', () => {
