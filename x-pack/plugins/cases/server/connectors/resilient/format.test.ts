@@ -6,7 +6,7 @@
  */
 
 import { CaseResponse } from '../../../common';
-import { resilientExternalServiceFormatter } from './external_service_formatter';
+import { format } from './format';
 
 describe('IBM Resilient formatter', () => {
   const theCase = {
@@ -14,13 +14,13 @@ describe('IBM Resilient formatter', () => {
   } as CaseResponse;
 
   it('it formats correctly', async () => {
-    const res = await resilientExternalServiceFormatter.format(theCase, []);
+    const res = await format(theCase, []);
     expect(res).toEqual({ ...theCase.connector.fields });
   });
 
   it('it formats correctly when fields do not exist ', async () => {
     const invalidFields = { tags: ['a tag'], connector: { fields: null } } as CaseResponse;
-    const res = await resilientExternalServiceFormatter.format(invalidFields, []);
+    const res = await format(invalidFields, []);
     expect(res).toEqual({ incidentTypes: null, severityCode: null });
   });
 });
