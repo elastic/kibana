@@ -21,7 +21,7 @@ export interface DocTableLegacyProps {
   searchDescription?: string;
   searchTitle?: string;
   onFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
-  rows: estypes.Hit[];
+  rows: estypes.SearchHit[];
   indexPattern: IIndexPattern;
   minimumVisibleRows?: number;
   onAddColumn?: (column: string) => void;
