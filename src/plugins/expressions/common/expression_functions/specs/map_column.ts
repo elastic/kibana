@@ -10,7 +10,7 @@ import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../types';
-import { Datatable, getType } from '../../expression_types';
+import { Datatable, DatatableColumn, getType } from '../../expression_types';
 
 export interface MapColumnArguments {
   id?: string | null;
@@ -110,10 +110,10 @@ export const mapColumn: ExpressionFunctionDefinition<
 
     return Promise.all(rowPromises).then((rows) => {
       const type = rows.length ? getType(rows[0][columnId]) : 'null';
-      const newColumn = {
+      const newColumn: DatatableColumn = {
         id: columnId,
         name: args.name,
-        meta: { type },
+        meta: { type, params: { id: type } },
       };
       if (args.copyMetaFrom) {
         const metaSourceFrom = columns.find(({ id }) => id === args.copyMetaFrom);
