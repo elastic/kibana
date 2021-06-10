@@ -1,15 +1,8 @@
-const ciStats = require('./ci_stats');
-
-// TODO - this is okay for now but should really be replaced with an API call, especially once retries are enabled
-const BUILD_STATUS = process.env.BUILD_FAILED === 'true' ? 'FAILURE' : 'SUCCESS';
+const { CiStats } = require('kibana-buildkite-library');
 
 (async () => {
   try {
-    if (process.env.CI_STATS_BUILD_ID) {
-      await ciStats.post(`/v1/build/_complete?id=${process.env.CI_STATS_BUILD_ID}`, {
-        result: BUILD_STATUS,
-      });
-    }
+    await CiStats.onComplete();
   } catch (ex) {
     console.error(ex);
     process.exit(1);

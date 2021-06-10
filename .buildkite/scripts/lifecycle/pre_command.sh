@@ -2,6 +2,12 @@
 
 set -euo pipefail
 
+if [[ ! -d '.buildkite/node_modules' ]]; then
+  cd '.buildkite'
+  yarn install
+  cd -
+fi
+
 # Set up a custom ES Snapshot Manifest if one has been specified for this build
 {
   ES_SNAPSHOT_MANIFEST=${ES_SNAPSHOT_MANIFEST:-$(buildkite-agent meta-data get ES_SNAPSHOT_MANIFEST --default '')}

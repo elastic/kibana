@@ -1,0 +1,9 @@
+{
+  "name": "kibana-buildkite",
+  "version": "1.0.0",
+  "author": "",
+  "private": true,
+  "dependencies": {
+    "kibana-buildkite-library": "git+https://github.com/elastic/kibana-buildkite-library.git"
+  }
+}
