@@ -27,14 +27,16 @@ image::../siem/images/workflow.png[Elastic Security workflow]
 
 Here's an overview of the flow and its components:
 
-* Data is shipped from your hosts to {es} via beat modules and the Elastic
-Endpoint Security agent integration:
-** {security-guide}/install-endpoint.html[{es-sec-endpoint}] - Elastic agent integration that
-protects your hosts {security-guide}/detection-engine-overview.html#malware-prevention[against malware] and ships these data sets:
+* Data is shipped from your hosts to {es} via beat modules and the Elastic https://www.elastic.co/endpoint-security/[Endpoint Security agent integration]. This integration provides capabilities such as collecting events, detecting and preventing {security-guide}/detection-engine-overview.html#malware-prevention[malicious activity], and artifact delivery. The {fleet-guide}/fleet-overview.html[{fleet}] app is used to
+install and manage {agents}s and integrations on your hosts.
++
+The Endpoint Security integration ships the following data sets:
++
 ***  *Windows*: Process, network, file, DNS, registry, DLL and driver loads,
 malware security detections
 *** *Linux/macOS*: Process, network, file
-** https://www.elastic.co/integrations?solution=security[Beat modules]: {beats}
++
+* https://www.elastic.co/integrations?solution=security[Beat modules]: {beats}
 are lightweight data shippers. Beat modules provide a way of collecting and
 parsing specific data sets from common sources, such as cloud and OS events,
 logs, and metrics. Common security-related modules are listed {security-guide}/ingest-data.html#enable-beat-modules[here].
@@ -47,11 +49,11 @@ activity via the following:
 event is discovered, a detection alert is generated. External systems, such as
 Slack and email, can be used to send notifications when alerts are generated.
 You can create your own rules and make use of our {security-guide}/prebuilt-rules.html[prebuilt ones].
-*** {security-guide}/detections-ui-exceptions.html [Exceptions]: Reduce noise and the number of
+*** {security-guide}/detections-ui-exceptions.html[Exceptions]: Reduce noise and the number of
 false positives. Exceptions are associated with rules and prevent alerts when
 an exception's conditions are met. *Value lists* contain source event
 values that can be used as part of an exception's conditions. When
-{es-sec-endpoint} is installed on your hosts, you can add malware exceptions
+Elastic {endpoint-sec} is installed on your hosts, you can add malware exceptions
 directly to the endpoint from the Security app.
 *** {security-guide}/machine-learning.html#included-jobs[{ml-cap} jobs]: Automatic anomaly detection of host and
 network events. Anomaly scores are provided per host and can be used with
@@ -64,7 +66,7 @@ others, as well as attached to Cases.
 ** {security-guide}/cases-overview.html[Cases]: An internal system for opening, tracking, and sharing
 security issues directly in the Security app. Cases can be integrated with
 external ticketing systems.
-** {security-guide}/admin-page-ov.html[Administration]: View and manage hosts running {es-sec-endpoint}.
+** {security-guide}/admin-page-ov.html[Administration]: View and manage hosts running {endpoint-sec}.
 
 {security-guide}/ingest-data.html[Ingest data to Elastic Security] and {security-guide}/install-endpoint.html[Configure and install the Elastic Endpoint integration] describe how to ship security-related
 data to {es}.
@@ -84,27 +86,18 @@ and maps.
 [discrete]
 === Compatibility with cold tier nodes
 
-Cold tier is a {ref}/data-tiers.html[data tier] that holds time series data that is accessed only occasionally. In {stack} version >=7.11.0, {es-sec} supports cold tier data for the following {es} indices:
+Cold tier is a {ref}/data-tiers.html[data tier] that holds time series data that is accessed only occasionally. In {stack} version >=7.11.0, {elastic-sec} supports cold tier data for the following {es} indices:
 
 * Index patterns specified in `securitySolution:defaultIndex`
 * Index patterns specified in the definitions of detection rules, except for indicator match rules
-* Index patterns specified in the data sources selector on various {es-sec-app} pages
+* Index patterns specified in the data sources selector on various {security-app} pages
 
-{es-sec} does NOT support cold tier data for the following {es} indices:
+{elastic-sec} does NOT support cold tier data for the following {es} indices:
 
-* Index patterns controlled by {es-sec}, including signals and list indices
+* Index patterns controlled by {elastic-sec}, including signals and list indices
 * Index patterns specified in indicator match rules
 
 Using cold tier data for unsupported indices may result in detection rule timeouts and overall performance degradation.
-
-[discrete]
-=== Additional Elastic Endpoint Security information
-
-The Elastic https://www.elastic.co/endpoint-security/[Endpoint Security agent integration]
-provides capabilities such as collecting events, detecting and preventing
-malicious activity, exceptions, and artifact delivery. The
-{fleet-guide}/fleet-overview.html[{fleet}] app is used to
-install and manage Elastic agents and integrations on your hosts.
 
 [discrete]
 [[self-protection]]
@@ -139,7 +132,7 @@ For {stack} version >= 7.11.0, self-protection defines the following permissions
 [[siem-integration]]
 === Integration with other Elastic products
 
-You can use {es-sec} with other Elastic products and features to help you
+You can use {elastic-sec} with other Elastic products and features to help you
 identify and investigate suspicious activity:
 
 * https://www.elastic.co/products/stack/machine-learning[{ml-cap}]
@@ -152,7 +145,7 @@ identify and investigate suspicious activity:
 [[data-sources]]
 === APM transaction data sources
 
-By default, {es-sec} monitors {apm-app-ref}/apm-getting-started.html[APM]
+By default, {elastic-sec} monitors {apm-app-ref}/apm-getting-started.html[APM]
 `apm-*-transaction*` indices. To add additional APM indices, update the
 index patterns in the `securitySolution:defaultIndex` setting ({kib} -> Stack Management -> Advanced Settings -> `securitySolution:defaultIndex`).
 
@@ -163,7 +156,7 @@ index patterns in the `securitySolution:defaultIndex` setting ({kib} -> Stack Ma
 The {ecs-ref}[Elastic Common Schema (ECS)] defines a common set of fields to be used for
 storing event data in Elasticsearch. ECS helps users normalize their event data
 to better analyze, visualize, and correlate the data represented in their
-events. {es-sec} supports events and indicator index data from any ECS-compliant data source.
+events. {elastic-sec} supports events and indicator index data from any ECS-compliant data source.
 
-IMPORTANT: {es-sec} requires {ecs-ref}[ECS-compliant data]. If you use third-party data collectors to ship data to {es}, the data must be mapped to ECS.
-{security-guide}/siem-field-reference.html[Elastic Security ECS field reference] lists ECS fields used in {es-sec}.
+IMPORTANT: {elastic-sec} requires {ecs-ref}[ECS-compliant data]. If you use third-party data collectors to ship data to {es}, the data must be mapped to ECS.
+{security-guide}/siem-field-reference.html[Elastic Security ECS field reference] lists ECS fields used in {elastic-sec}.
