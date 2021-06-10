@@ -153,9 +153,9 @@ export interface GetResponse {
 }
 
 export type SignalSearchResponse = estypes.SearchResponse<SignalSource>;
-export type SignalSourceHit = estypes.Hit<SignalSource>;
+export type SignalSourceHit = estypes.SearchHit<SignalSource>;
 export type WrappedSignalHit = BaseHit<SignalHit>;
-export type BaseSignalHit = estypes.Hit<SignalSource>;
+export type BaseSignalHit = estypes.SearchHit<SignalSource>;
 
 export type EqlSignalSearchResponse = EqlSearchResponse<SignalSource>;
 
