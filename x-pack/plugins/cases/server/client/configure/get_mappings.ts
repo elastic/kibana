@@ -6,29 +6,25 @@
  */
 
 import { SavedObjectsFindResponse } from 'kibana/server';
-import { ConnectorMappings, ConnectorTypes } from '../../../common/api';
+import { ConnectorMappings } from '../../../common/api';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { createCaseError } from '../../common/error';
 import { CasesClientArgs } from '..';
 import { MappingsArgs } from './types';
 
 export const getMappings = async (
-  { connectorType, connectorId }: MappingsArgs,
+  { connector }: MappingsArgs,
   clientArgs: CasesClientArgs
 ): Promise<SavedObjectsFindResponse<ConnectorMappings>['saved_objects']> => {
   const { unsecuredSavedObjectsClient, connectorMappingsService, logger } = clientArgs;
 
   try {
-    if (connectorType === ConnectorTypes.none) {
-      return [];
-    }
-
     const myConnectorMappings = await connectorMappingsService.find({
       unsecuredSavedObjectsClient,
       options: {
         hasReference: {
           type: ACTION_SAVED_OBJECT_TYPE,
-          id: connectorId,
+          id: connector.id,
         },
       },
     });
@@ -36,7 +32,7 @@ export const getMappings = async (
     return myConnectorMappings.saved_objects;
   } catch (error) {
     throw createCaseError({
-      message: `Failed to retrieve mapping connector id: ${connectorId} type: ${connectorType}: ${error}`,
+      message: `Failed to retrieve mapping connector id: ${connector.id} type: ${connector.type}: ${error}`,
       error,
       logger,
     });
