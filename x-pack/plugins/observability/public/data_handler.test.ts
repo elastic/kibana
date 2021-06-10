@@ -23,7 +23,7 @@ const params = {
 describe('registerDataHandler', () => {
   const originalConsole = global.console;
   beforeAll(() => {
-    // mocks console to avoid poluting the test output
+    // mocks console to avoid polluting the test output
     global.console = ({ error: jest.fn() } as unknown) as typeof console;
   });
 
@@ -58,7 +58,7 @@ describe('registerDataHandler', () => {
           },
         };
       },
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'apm-*' }),
     });
 
     it('registered data handler', () => {

@@ -26,6 +26,7 @@ import {
   LOGS_FREQUENCY_LABEL,
   MEMORY_USAGE_LABEL,
   METRIC_LABEL,
+  MOBILE_RESPONSE_LABEL,
   MONITOR_DURATION_LABEL,
   MONITOR_ID_LABEL,
   MONITOR_NAME_LABEL,
@@ -104,7 +105,7 @@ export const DataViewLabels: Record<ReportViewTypeId, string> = {
   mem: MEMORY_USAGE_LABEL,
   nwk: NETWORK_ACTIVITY_LABEL,
   cwv: CORE_WEB_VITALS_LABEL,
-  mrp: 'Mobile response duration',
+  mkpi: MOBILE_RESPONSE_LABEL,
 };
 
 export const ReportToDataTypeMap: Record<ReportViewTypeId, AppDataType> = {
@@ -119,7 +120,7 @@ export const ReportToDataTypeMap: Record<ReportViewTypeId, AppDataType> = {
   logs: 'infra_logs',
   cpu: 'infra_metrics',
   cwv: 'ux',
-  mrp: 'ux',
+  mkpi: 'apm',
 };
 
 export const USE_BREAK_DOWN_COLUMN = 'USE_BREAK_DOWN_COLUMN';

@@ -208,6 +208,13 @@ export const CORE_WEB_VITALS_LABEL = i18n.translate(
   }
 );
 
+export const MOBILE_RESPONSE_LABEL = i18n.translate(
+  'xpack.observability.expView.fieldLabels.mobileReponse',
+  {
+    defaultMessage: 'Mobile response',
+  }
+);
+
 export const MEMORY_USAGE_LABEL = i18n.translate(
   'xpack.observability.expView.fieldLabels.memoryUsage',
   {

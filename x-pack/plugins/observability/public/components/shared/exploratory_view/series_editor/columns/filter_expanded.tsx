@@ -6,16 +6,20 @@
  */
 
 import React, { useState, Fragment } from 'react';
-import { EuiFieldSearch, EuiSpacer, EuiButtonEmpty, EuiFilterGroup } from '@elastic/eui';
+import { EuiFieldSearch, EuiSpacer, EuiButtonEmpty, EuiFilterGroup, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 import { rgba } from 'polished';
 import { i18n } from '@kbn/i18n';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
-import { UrlFilter } from '../../types';
+import { DataSeries, UrlFilter } from '../../types';
 import { FilterValueButton } from './filter_value_btn';
 import { useValuesList } from '../../../../../hooks/use_values_list';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { ESFilter } from '../../../../../../../../../typings/elasticsearch';
+import { PersistableFilter } from '../../../../../../../lens/common';
+import { ExistsFilter } from '../../../../../../../../../src/plugins/data/common/es_query/filters';
 
 interface Props {
   seriesId: string;
@@ -24,9 +28,18 @@ interface Props {
   isNegated?: boolean;
   goBack: () => void;
   nestedField?: string;
+  filters: DataSeries['filters'];
 }
 
-export function FilterExpanded({ seriesId, field, label, goBack, nestedField, isNegated }: Props) {
+export function FilterExpanded({
+  seriesId,
+  field,
+  label,
+  goBack,
+  nestedField,
+  isNegated,
+  filters: defaultFilters,
+}: Props) {
   const { indexPattern } = useAppIndexPatternContext();
 
   const [value, setValue] = useState('');
@@ -37,12 +50,25 @@ export function FilterExpanded({ seriesId, field, label, goBack, nestedField, is
 
   const series = getSeries(seriesId);
 
+  const queryFilters: ESFilter[] = [];
+
+  defaultFilters?.forEach((qFilter: PersistableFilter | ExistsFilter) => {
+    if (qFilter.query) {
+      queryFilters.push(qFilter.query);
+    }
+    const asExistFilter = qFilter as ExistsFilter;
+    if (asExistFilter?.exists) {
+      queryFilters.push(asExistFilter.exists as QueryDslQueryContainer);
+    }
+  });
+
   const { values, loading } = useValuesList({
     query: value,
     indexPattern,
     sourceField: field,
     time: series.time,
     keepHistory: true,
+    filters: queryFilters,
   });
 
   const filters = series?.filters ?? [];
@@ -70,6 +96,13 @@ export function FilterExpanded({ seriesId, field, label, goBack, nestedField, is
       />
       <EuiSpacer size="s" />
       <ListWrapper>
+        {displayValues.length === 0 && !loading && (
+          <EuiText>
+            {i18n.translate('xpack.observability.filters.expanded.noFilter', {
+              defaultMessage: 'No filters found.',
+            })}
+          </EuiText>
+        )}
         {displayValues.map((opt) => (
           <Fragment key={opt}>
             <EuiFilterGroup fullWidth={true} color="primary">
