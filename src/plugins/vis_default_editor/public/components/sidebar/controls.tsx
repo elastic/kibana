@@ -7,7 +7,14 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiToolTip,
+  EuiIconTip,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -84,25 +91,32 @@ function DefaultEditorControls({
                 </EuiButton>
               </EuiToolTip>
             ) : (
-              <EuiToolTip
-                content={i18n.translate('visDefaultEditor.sidebar.updateButtonTooltip', {
-                  defaultMessage: 'You can also use Ctrl + Enter.',
-                })}
-              >
-                <EuiButton
-                  data-test-subj="visualizeEditorRenderButton"
-                  disabled={!isDirty}
-                  fill
-                  iconType="play"
-                  onClick={applyChanges}
-                  size="s"
-                >
-                  <FormattedMessage
-                    id="visDefaultEditor.sidebar.updateChartButtonLabel"
-                    defaultMessage="Update"
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="visualizeEditorRenderButton"
+                    disabled={!isDirty}
+                    fill
+                    iconType="play"
+                    onClick={applyChanges}
+                    size="s"
+                  >
+                    <FormattedMessage
+                      id="visDefaultEditor.sidebar.updateChartButtonLabel"
+                      defaultMessage="Update"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    content={i18n.translate('visDefaultEditor.sidebar.updateInfoTooltip', {
+                      defaultMessage: 'Use CTRL + Enter as a shortcut',
+                    })}
+                    type="iInCircle"
+                    color="subdued"
                   />
-                </EuiButton>
-              </EuiToolTip>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
