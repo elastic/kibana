@@ -39,6 +39,7 @@ const typeIcons: { [key: string]: { [key: string]: string } } = {
   },
   db: {
     cassandra: cassandraIcon,
+    dynamodb: awsIcon,
     elasticsearch: elasticsearchIcon,
     mongodb: mongodbIcon,
     mysql: mysqlIcon,
