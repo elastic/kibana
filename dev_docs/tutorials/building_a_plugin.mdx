@@ -239,15 +239,13 @@ interface DemoStartPlugins {
 }
 
 export class DemoPlugin {
-  public setup(core: CoreSetup, plugins: DemoSetupPlugins) {
-    [2];
+  public setup(core: CoreSetup, plugins: DemoSetupPlugins) { [2];
     const { foobar } = plugins;
     foobar.getFoo(); // 'foo'
     foobar.getBar(); // throws because getBar does not exist
   }
 
-  public start(core: CoreStart, plugins: DemoStartPlugins) {
-    [3];
+  public start(core: CoreStart, plugins: DemoStartPlugins) { [3];
     const { foobar } = plugins;
     foobar.getFoo(); // throws because getFoo does not exist
     foobar.getBar(); // 'bar'
