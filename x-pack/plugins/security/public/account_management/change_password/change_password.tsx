@@ -19,11 +19,14 @@ import { ChangePasswordForm } from '../../management/users/components/change_pas
 
 export interface ChangePasswordProps {
   user: AuthenticatedUser;
+}
+
+export interface ChangePasswordPropsInternal extends ChangePasswordProps {
   userAPIClient: PublicMethodsOf<UserAPIClient>;
   notifications: NotificationsSetup;
 }
 
-export class ChangePassword extends Component<ChangePasswordProps, {}> {
+export class ChangePassword extends Component<ChangePasswordPropsInternal, {}> {
   public render() {
     const canChangePassword = canUserChangePassword(this.props.user);
 

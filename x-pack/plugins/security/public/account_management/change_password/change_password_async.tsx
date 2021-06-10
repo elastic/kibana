@@ -14,10 +14,10 @@ import type { ChangePasswordProps } from './change_password';
 
 export const getChangePasswordComponent = async (
   core: CoreStart
-): Promise<React.FC<Pick<ChangePasswordProps, 'user'>>> => {
+): Promise<React.FC<ChangePasswordProps>> => {
   const { ChangePassword } = await import('./change_password');
 
-  return (props: Pick<ChangePasswordProps, 'user'>) => {
+  return (props: ChangePasswordProps) => {
     return (
       <ChangePassword
         notifications={core.notifications}
