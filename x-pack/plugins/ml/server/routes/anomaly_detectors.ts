@@ -284,7 +284,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const options: estypes.CloseJobRequest = {
+        const options: estypes.MlCloseJobRequest = {
           job_id: request.params.jobId,
         };
         const force = request.query.force;
@@ -323,7 +323,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const options: estypes.DeleteJobRequest = {
+        const options: estypes.MlDeleteJobRequest = {
           job_id: request.params.jobId,
           wait_for_completion: false,
         };
@@ -517,13 +517,11 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       try {
         const { body } = await mlClient.getOverallBuckets({
           job_id: request.params.jobId,
-          body: {
-            top_n: request.body.topN,
-            bucket_span: request.body.bucketSpan,
-            start: request.body.start !== undefined ? String(request.body.start) : undefined,
-            end: request.body.end !== undefined ? String(request.body.end) : undefined,
-            overall_score: request.body.overall_score ?? 0,
-          },
+          top_n: request.body.topN,
+          bucket_span: request.body.bucketSpan,
+          start: request.body.start !== undefined ? String(request.body.start) : undefined,
+          end: request.body.end !== undefined ? String(request.body.end) : undefined,
+          overall_score: request.body.overall_score ?? 0,
         });
         return response.ok({
           body,

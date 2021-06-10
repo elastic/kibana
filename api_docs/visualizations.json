@@ -1888,7 +1888,7 @@
             "label": "group",
             "description": [],
             "signature": [
-              "\"buckets\" | \"metrics\" | \"none\""
+              "\"none\" | \"buckets\" | \"metrics\""
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
