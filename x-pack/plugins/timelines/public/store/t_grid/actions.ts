@@ -12,6 +12,7 @@ import type {
   SortColumnTimeline,
   TimelineExpandedDetailType,
 } from '../../../common/types/timeline';
+// eslint-disable-next-line no-duplicate-imports
 import { TimelineTabs } from '../../../common/types/timeline';
 import { InitialyzeTGridSettings, TGridPersistInput } from './types';
 

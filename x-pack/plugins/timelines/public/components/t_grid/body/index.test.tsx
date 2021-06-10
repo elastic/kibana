@@ -40,23 +40,12 @@ jest.mock('../../../hooks/use_selector', () => ({
   useDeepEqualSelector: () => mockGlobalState.timelineById.test,
 }));
 
-// jest.mock('../../../../common/components/link_to');
-
-// // Prevent Resolver from rendering
-// jest.mock('../../graph_overlay');
-
 jest.mock(
   'react-visibility-sensor',
   () => ({ children }: { children: (args: { isVisible: boolean }) => React.ReactNode }) =>
     children({ isVisible: true })
 );
 
-// jest.mock('../../../../common/lib/helpers/scheduler', () => ({
-//   requestIdleCallbackViaScheduler: (callback: () => void, opts?: unknown) => {
-//     callback();
-//   },
-//   maxDelay: () => 3000,
-// }));
 window.matchMedia = jest.fn().mockImplementation((query) => {
   return {
     matches: false,
@@ -144,82 +133,5 @@ describe('Body', () => {
         });
       });
     }, 20000);
-  });
-
-  describe('event details', () => {
-    beforeEach(() => {
-      mockDispatch.mockReset();
-    });
-    test('call the right reduce action to show event details for query tab', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <BodyComponent {...props} />
-        </TestProviders>
-      );
-
-      wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
-      wrapper.update();
-      expect(mockDispatch).toBeCalledTimes(1);
-      expect(mockDispatch.mock.calls[0][0]).toEqual({
-        payload: {
-          panelView: 'eventDetail',
-          params: {
-            eventId: '1',
-            indexName: undefined,
-          },
-          tabType: 'query',
-          timelineId: 'timeline-test',
-        },
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
-      });
-    });
-
-    test('call the right reduce action to show event details for pinned tab', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <BodyComponent {...props} tabType={TimelineTabs.pinned} />
-        </TestProviders>
-      );
-
-      wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
-      wrapper.update();
-      expect(mockDispatch).toBeCalledTimes(1);
-      expect(mockDispatch.mock.calls[0][0]).toEqual({
-        payload: {
-          panelView: 'eventDetail',
-          params: {
-            eventId: '1',
-            indexName: undefined,
-          },
-          tabType: 'pinned',
-          timelineId: 'timeline-test',
-        },
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
-      });
-    });
-
-    test('call the right reduce action to show event details for notes tab', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <BodyComponent {...props} tabType={TimelineTabs.notes} />
-        </TestProviders>
-      );
-
-      wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
-      wrapper.update();
-      expect(mockDispatch).toBeCalledTimes(1);
-      expect(mockDispatch.mock.calls[0][0]).toEqual({
-        payload: {
-          panelView: 'eventDetail',
-          params: {
-            eventId: '1',
-            indexName: undefined,
-          },
-          tabType: 'notes',
-          timelineId: 'timeline-test',
-        },
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
-      });
-    });
   });
 });
