@@ -770,9 +770,9 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       return true;
     }
 
+    const isTimeExtentForTimeslice =
+      prevMeta.isTimeExtentForTimeslice !== undefined ? prevMeta.isTimeExtentForTimeslice : false;
     if (!timeslice) {
-      const isTimeExtentForTimeslice =
-        prevMeta.isTimeExtentForTimeslice !== undefined ? prevMeta.isTimeExtentForTimeslice : false;
       return isTimeExtentForTimeslice
         ? // Previous request only covers timeslice extent. Will need to re-fetch data to cover global time extent
           true
@@ -781,8 +781,9 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
           false;
     }
 
-    const isWithin =
-      timeslice.from >= prevMeta.timeExtent.from && timeslice.to <= prevMeta.timeExtent.to;
+    const isWithin = isTimeExtentForTimeslice
+      ? timeslice.from >= prevMeta.timeExtent.from && timeslice.to <= prevMeta.timeExtent.to
+      : true;
     return !isWithin;
   }
 
