@@ -51,6 +51,9 @@ describe('reference editor', () => {
       http: {} as HttpSetup,
       data: {} as DataPublicPluginStart,
       dimensionGroups: [],
+      isFullscreen: false,
+      toggleFullscreen: jest.fn(),
+      setIsCloseable: jest.fn(),
     };
   }
 
