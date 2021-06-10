@@ -90,7 +90,7 @@ const getTransformedHits = (
           const el = {
             terms: [
               {
-                field: field ?? '',
+                field,
                 value: bucket.key,
               },
               ...val.terms,
@@ -99,13 +99,13 @@ const getTransformedHits = (
             topThresholdHits: val.topThresholdHits,
             docCount: val.docCount,
           };
-          acc.push(el);
+          acc.push(el as MultiAggBucket);
         });
       } else {
         const el = {
           terms: [
             {
-              field: field ?? '',
+              field,
               value: bucket.key,
             },
           ].filter((term) => term.field != null),
@@ -120,7 +120,7 @@ const getTransformedHits = (
           topThresholdHits: bucket.top_threshold_hits,
           docCount: bucket.doc_count,
         };
-        acc.push(el);
+        acc.push(el as MultiAggBucket);
       }
 
       return acc;
