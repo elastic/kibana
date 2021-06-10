@@ -25,7 +25,7 @@ export function useContextAppState({
   const stateContainer = useMemo(() => {
     return getState({
       defaultSize: parseInt(config.get(CONTEXT_DEFAULT_SIZE_SETTING), 10),
-      timeFieldName: indexPattern.timeFieldName as string,
+      timeFieldName: indexPattern.timeFieldName!,
       storeInSessionStorage: config.get('state:storeInSessionStorage'),
       history: history(),
       toasts: core.notifications.toasts,

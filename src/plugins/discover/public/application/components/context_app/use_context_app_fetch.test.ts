@@ -171,33 +171,6 @@ describe('test useContextAppFetch', () => {
     expect(result.current.fetchedState.successors).toEqual(mockSuccessorHits);
   });
 
-  it('should set context rows statuses to failed when tieBreakingField array is empty', async () => {
-    const { props, dangerNotification } = initDefaults([]);
-
-    const { result } = renderHook(() => {
-      return useContextAppFetch(props);
-    });
-
-    expect(result.current.fetchedState.predecessorsStatus.value).toBe(LoadingStatus.UNINITIALIZED);
-    expect(result.current.fetchedState.successorsStatus.value).toBe(LoadingStatus.UNINITIALIZED);
-
-    await act(async () => {
-      await result.current.fetchContextRows(mockAnchorHit);
-    });
-
-    expect(dangerNotification.mock.calls.length).toBe(2); // for successors and predecessors
-    expect(result.current.fetchedState.predecessorsStatus).toEqual({
-      value: LoadingStatus.FAILED,
-      reason: FailureReason.INVALID_TIEBREAKER,
-    });
-    expect(result.current.fetchedState.successorsStatus).toEqual({
-      value: LoadingStatus.FAILED,
-      reason: FailureReason.INVALID_TIEBREAKER,
-    });
-    expect(result.current.fetchedState.predecessors).toEqual([]);
-    expect(result.current.fetchedState.successors).toEqual([]);
-  });
-
   it('should set context rows statuses to failed when invalid indexPatternId provided', async () => {
     const { props, dangerNotification } = initDefaults(['_doc'], '');
 

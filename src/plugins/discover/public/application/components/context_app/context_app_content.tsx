@@ -10,7 +10,7 @@ import React, { useState, Fragment, useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiHorizontalRule, EuiText } from '@elastic/eui';
 import { CONTEXT_STEP_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../common';
-import { IndexPattern, IndexPatternField } from '../../../../../data/common/index_patterns';
+import { IndexPattern, IndexPatternField } from '../../../../../data/common';
 import { SortDirection } from '../../../../../data/public';
 import {
   DocTableLegacy,
@@ -23,7 +23,7 @@ import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { AppState } from '../../angular/context_state';
 import { EsHitRecord, EsHitRecordList } from '../../angular/context/api/context';
 import { DiscoverServices } from '../../../build_services';
-import { clamp } from './utils/clamp';
+import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './utils/constants';
 
 export interface ContextAppContentProps {
   columns: string[];
@@ -52,6 +52,10 @@ export interface ContextAppContentProps {
 }
 
 const controlColumnIds = ['openDetails'];
+
+export function clamp(value: number) {
+  return Math.max(Math.min(MAX_CONTEXT_SIZE, value), MIN_CONTEXT_SIZE);
+}
 
 const DataGridMemoized = React.memo(DiscoverGrid);
 const DocTableLegacyMemoized = React.memo(DocTableLegacy);

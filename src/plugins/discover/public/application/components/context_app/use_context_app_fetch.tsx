@@ -129,21 +129,6 @@ export function useContextAppFetch({
         defaultMessage: 'Unable to load documents',
       });
 
-      if (!tieBreakerField) {
-        setState(createError(statusKey, FailureReason.INVALID_TIEBREAKER));
-        toastNotifications.addDanger({
-          title: errorTitle,
-          text: toMountPoint(
-            <MarkdownSimple>
-              {i18n.translate('discover.context.invalidTieBreakerFiledSetting', {
-                defaultMessage: 'Invalid tie breaker field setting',
-              })}
-            </MarkdownSimple>
-          ),
-        });
-        return;
-      }
-
       try {
         setState({ [statusKey]: { value: LoadingStatus.LOADING } });
         const rows = await fetchSurroundingDocs(
