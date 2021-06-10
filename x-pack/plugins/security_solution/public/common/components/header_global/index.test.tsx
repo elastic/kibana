@@ -17,11 +17,6 @@ jest.mock('../../../common/lib/kibana');
 describe('HeaderGlobal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
-      crud: false,
-      read: false,
-    });
   });
 
   it('does not display the cases tab when the user does not have read permissions', () => {
