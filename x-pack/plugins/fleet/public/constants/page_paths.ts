@@ -48,7 +48,7 @@ export const FLEET_ROUTING_PATHS = {
   policy_details: '/policies/:policyId/:tabId?',
   policy_details_settings: '/policies/:policyId/settings',
   add_integration_from_policy: '/policies/:policyId/add-integration',
-  add_integration_to_policy: '/integrations/:pkgkey/add-integration/:integration?/:policyId?',
+  add_integration_to_policy: '/integrations/:pkgkey/add-integration/:integration?',
   edit_integration: '/policies/:policyId/edit-integration/:packagePolicyId',
   fleet: '/fleet',
   fleet_agent_list: '/fleet/agents',
