@@ -7966,7 +7966,7 @@
     "xpack.enterpriseSearch.roleMapping.filterRoleMappingsPlaceholder": "ロールをフィルタリング...",
     "xpack.enterpriseSearch.roleMapping.individualAuthProviderLabel": "個別の認証プロバイダーを選択",
     "xpack.enterpriseSearch.roleMapping.manageRoleMappingTitle": "ロールマッピングを管理",
-    "xpack.enterpriseSearch.roleMapping.moResults.message": "'{filterValue}'の結果が見つかりません。",
+    "xpack.enterpriseSearch.roleMapping.noResults.message": "の結果が見つかりません。",
     "xpack.enterpriseSearch.roleMapping.newRoleMappingTitle": "ロールマッピングを追加",
     "xpack.enterpriseSearch.roleMapping.roleLabel": "ロール",
     "xpack.enterpriseSearch.roleMapping.roleMappingsTitle": "ユーザーとロール",
