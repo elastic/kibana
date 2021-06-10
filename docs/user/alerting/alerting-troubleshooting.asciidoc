@@ -1,6 +1,6 @@
 [role="xpack"]
 [[alerting-troubleshooting]]
-== Alerting Troubleshooting
+== Troubleshooting
 
 The Alerting framework provides many options for diagnosing problems with Rules and Connectors.
 

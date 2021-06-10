@@ -1,6 +1,6 @@
 [role="xpack"]
 [[alerting-common-issues]]
-== Alerting Common Issues
+=== Common Issues
 
 This page describes how to resolve common problems you might encounter with Alerting.
 If your problem isn’t described here, please review open issues in the following GitHub repositories:
@@ -11,7 +11,7 @@ Have a question? Contact us in the https://discuss.elastic.co/[discuss forum].
 
 [float]
 [[rules-small-check-interval-run-late]]
-=== Rules with small check intervals run late
+==== Rules with small check intervals run late
 
 *Problem*:
 
@@ -29,7 +29,7 @@ For more details, see <<task-manager-health-scheduled-tasks-small-schedule-inter
 
 [float]
 [[scheduled-rules-run-late]]
-=== Rules run late
+==== Rules run late
 
 *Problem*:
 
@@ -56,7 +56,7 @@ For more details on monitoring and diagnosing task execution in Task Manager, se
 
 [float]
 [[connector-tls-settings]]
-=== Connectors have TLS errors when executing actions
+==== Connectors have TLS errors when executing actions
 
 *Problem*:
 
@@ -72,7 +72,7 @@ see <<action-settings,Action settings>>.
 
 [float]
 [[rules-long-execution-time]]
-=== Identify long-running rules
+==== Identify long-running rules
 
 The following query can help you identify rules that are taking a long time to execute and might impact the overall health of your deployment.
 
