@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mountWithIntl, setMockActions, setMockValues } from '../../../../__mocks__';
+import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
 import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
@@ -15,6 +15,8 @@ import { shallow, ShallowWrapper } from 'enzyme';
 import { EuiBasicTable, EuiButtonIcon, EuiInMemoryTable } from '@elastic/eui';
 
 import { KibanaLogic } from '../../../../shared/kibana';
+import { mountWithIntl } from '../../../../test_helpers';
+
 import { CrawlerDomain } from '../types';
 
 import { DomainsTable } from './domains_table';
