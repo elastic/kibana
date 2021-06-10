@@ -8,36 +8,37 @@
 
 import './index.scss';
 import React from 'react';
+import { History } from 'history';
+import { Provider } from 'react-redux';
+import { first } from 'rxjs/operators';
 import { I18nProvider } from '@kbn/i18n/react';
 import { parse, ParsedQuery } from 'query-string';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Switch, Route, RouteComponentProps, HashRouter, Redirect } from 'react-router-dom';
 
-import { first } from 'rxjs/operators';
 import { DashboardListing } from './listing';
+import { dashboardStateStore } from './state';
 import { DashboardApp } from './dashboard_app';
-import { addHelpMenuToAppChrome, DashboardPanelStorage } from './lib';
+import { DashboardNoMatch } from './listing/dashboard_no_match';
+import { KibanaContextProvider } from '../services/kibana_react';
+import { addHelpMenuToAppChrome, DashboardSessionStorage } from './lib';
 import { createDashboardListingFilterUrl } from '../dashboard_constants';
-import { getDashboardPageTitle, dashboardReadonlyBadge } from '../dashboard_strings';
 import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
-import { DashboardAppServices, DashboardEmbedSettings, RedirectToProps } from './types';
+import { getDashboardPageTitle, dashboardReadonlyBadge } from '../dashboard_strings';
+import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
+import { DashboardAppServices, DashboardEmbedSettings, RedirectToProps } from '../types';
 import {
   DashboardFeatureFlagConfig,
   DashboardSetupDependencies,
   DashboardStart,
   DashboardStartDependencies,
 } from '../plugin';
-
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
-import { KibanaContextProvider } from '../services/kibana_react';
-
 import {
   AppMountParameters,
   CoreSetup,
   PluginInitializerContext,
   ScopedHistory,
 } from '../services/core';
-import { DashboardNoMatch } from './listing/dashboard_no_match';
 
 export const dashboardUrlParams = {
   showTopMenu: 'show-top-menu',
@@ -89,12 +90,14 @@ export async function mountApp({
   const activeSpaceId =
     spacesApi && (await spacesApi.getActiveSpace$().pipe(first()).toPromise())?.id;
   let globalEmbedSettings: DashboardEmbedSettings | undefined;
+  let routerHistory: History;
 
   const dashboardServices: DashboardAppServices = {
     navigation,
     onAppLeave,
     savedObjects,
     urlForwarding,
+    visualizations,
     usageCollection,
     core: coreStart,
     data: dataStart,
@@ -109,10 +112,6 @@ export async function mountApp({
     indexPatterns: dataStart.indexPatterns,
     savedQueryService: dataStart.query.savedQueries,
     savedObjectsClient: coreStart.savedObjects.client,
-    dashboardPanelStorage: new DashboardPanelStorage(
-      core.notifications.toasts,
-      activeSpaceId || 'default'
-    ),
     savedDashboards: dashboardStart.getSavedDashboardLoader(),
     savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
     allowByValueEmbeddables: initializerContext.config.get<DashboardFeatureFlagConfig>()
@@ -127,7 +126,10 @@ export async function mountApp({
       visualizeCapabilities: { save: Boolean(coreStart.application.capabilities.visualize?.save) },
       storeSearchSession: Boolean(coreStart.application.capabilities.dashboard.storeSearchSession),
     },
-    visualizations,
+    dashboardSessionStorage: new DashboardSessionStorage(
+      core.notifications.toasts,
+      activeSpaceId || 'default'
+    ),
   };
 
   const getUrlStateStorage = (history: RouteComponentProps['history']) =>
@@ -137,10 +139,9 @@ export async function mountApp({
       ...withNotifyOnErrors(core.notifications.toasts),
     });
 
-  const redirect = (routeProps: RouteComponentProps, redirectTo: RedirectToProps) => {
-    const historyFunction = redirectTo.useReplace
-      ? routeProps.history.replace
-      : routeProps.history.push;
+  const redirect = (redirectTo: RedirectToProps) => {
+    if (!routerHistory) return;
+    const historyFunction = redirectTo.useReplace ? routerHistory.replace : routerHistory.push;
     let destination;
     if (redirectTo.destination === 'dashboard') {
       destination = redirectTo.id
@@ -168,12 +169,15 @@ export async function mountApp({
     if (routeParams.embed && !globalEmbedSettings) {
       globalEmbedSettings = getDashboardEmbedSettings(routeParams);
     }
+    if (!routerHistory) {
+      routerHistory = routeProps.history;
+    }
     return (
       <DashboardApp
         history={routeProps.history}
         embedSettings={globalEmbedSettings}
         savedDashboardId={routeProps.match.params.id}
-        redirectTo={(props: RedirectToProps) => redirect(routeProps, props)}
+        redirectTo={redirect}
       />
     );
   };
@@ -183,13 +187,15 @@ export async function mountApp({
     const routeParams = parse(routeProps.history.location.search);
     const title = (routeParams.title as string) || undefined;
     const filter = (routeParams.filter as string) || undefined;
-
+    if (!routerHistory) {
+      routerHistory = routeProps.history;
+    }
     return (
       <DashboardListing
         initialFilter={filter}
         title={title}
         kbnUrlStateStorage={getUrlStateStorage(routeProps.history)}
-        redirectTo={(props: RedirectToProps) => redirect(routeProps, props)}
+        redirectTo={redirect}
       />
     );
   };
@@ -215,26 +221,32 @@ export async function mountApp({
 
   const app = (
     <I18nProvider>
-      <KibanaContextProvider services={dashboardServices}>
-        <presentationUtil.ContextProvider>
-          <HashRouter>
-            <Switch>
-              <Route
-                path={[
-                  DashboardConstants.CREATE_NEW_DASHBOARD_URL,
-                  `${DashboardConstants.VIEW_DASHBOARD_URL}/:id`,
-                ]}
-                render={renderDashboard}
-              />
-              <Route exact path={DashboardConstants.LANDING_PAGE_PATH} render={renderListingPage} />
-              <Route exact path="/">
-                <Redirect to={DashboardConstants.LANDING_PAGE_PATH} />
-              </Route>
-              <Route render={renderNoMatch} />
-            </Switch>
-          </HashRouter>
-        </presentationUtil.ContextProvider>
-      </KibanaContextProvider>
+      <Provider store={dashboardStateStore}>
+        <KibanaContextProvider services={dashboardServices}>
+          <presentationUtil.ContextProvider>
+            <HashRouter>
+              <Switch>
+                <Route
+                  path={[
+                    DashboardConstants.CREATE_NEW_DASHBOARD_URL,
+                    `${DashboardConstants.VIEW_DASHBOARD_URL}/:id`,
+                  ]}
+                  render={renderDashboard}
+                />
+                <Route
+                  exact
+                  path={DashboardConstants.LANDING_PAGE_PATH}
+                  render={renderListingPage}
+                />
+                <Route exact path="/">
+                  <Redirect to={DashboardConstants.LANDING_PAGE_PATH} />
+                </Route>
+                <Route render={renderNoMatch} />
+              </Switch>
+            </HashRouter>
+          </presentationUtil.ContextProvider>
+        </KibanaContextProvider>
+      </Provider>
     </I18nProvider>
   );
 

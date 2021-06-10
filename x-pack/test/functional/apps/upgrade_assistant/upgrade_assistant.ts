@@ -24,13 +24,13 @@ export default function upgradeAssistantFunctionalTests({
     this.tags('skipFirefox');
 
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await security.testUser.setRoles(['global_upgrade_assistant_role']);
     });
 
     after(async () => {
       await PageObjects.upgradeAssistant.waitForTelemetryHidden();
-      await esArchiver.unload('empty_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
       await security.testUser.restoreDefaults();
     });
 

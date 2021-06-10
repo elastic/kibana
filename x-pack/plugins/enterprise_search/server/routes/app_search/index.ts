@@ -9,6 +9,7 @@ import { RouteDependencies } from '../../plugin';
 
 import { registerAnalyticsRoutes } from './analytics';
 import { registerApiLogsRoutes } from './api_logs';
+import { registerCrawlerRoutes } from './crawler';
 import { registerCredentialsRoutes } from './credentials';
 import { registerCurationsRoutes } from './curations';
 import { registerDocumentsRoutes, registerDocumentRoutes } from './documents';
@@ -42,4 +43,5 @@ export const registerAppSearchRoutes = (dependencies: RouteDependencies) => {
   registerResultSettingsRoutes(dependencies);
   registerApiLogsRoutes(dependencies);
   registerOnboardingRoutes(dependencies);
+  registerCrawlerRoutes(dependencies);
 };

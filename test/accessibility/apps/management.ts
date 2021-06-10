@@ -16,8 +16,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Management', () => {
     before(async () => {
-      await esArchiver.load('discover');
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.load('test/functional/fixtures/es_archiver/discover');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.update({
         defaultIndex: 'logstash-*',
       });
@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('logstash_functional');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
     it('main view', async () => {
