@@ -13,7 +13,7 @@ import { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const es = getService('es');
   const PageObjects = getPageObjects(['common']);
   const browser = getService('browser');
 
@@ -76,8 +76,32 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   ];
 
   describe('deprecations service', () => {
-    before(() => esArchiver.load('../functional/fixtures/es_archiver/deprecations_service'));
-    after(() => esArchiver.unload('../functional/fixtures/es_archiver/deprecations_service'));
+    before(async () => {
+      await es.index(
+        {
+          id: 'test-deprecations-plugin:ff3733a0-9fty-11e7-ahb3-3dcb94193fab',
+          index: '.kibana',
+          body: {
+            type: 'test-deprecations-plugin',
+            updated_at: '2021-02-11T18:51:23.794Z',
+            'test-deprecations-plugin': {
+              title: 'Test saved object',
+            },
+          },
+        },
+        {
+          headers: {
+            'x-elastic-product-origin': 'kibana',
+          },
+        }
+      );
+    });
+    after(async () => {
+      await es.delete({
+        id: 'test-deprecations-plugin:ff3733a0-9fty-11e7-ahb3-3dcb94193fab',
+        index: '.kibana',
+      });
+    });
 
     describe('GET /api/deprecations/', async () => {
       it('returns registered config deprecations and feature deprecations', async () => {
