@@ -15,7 +15,7 @@ import { cloneDeep } from 'lodash';
 import { esFilters, SortDirection } from '../../../../../data/public';
 import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
 import { ContextErrorMessage } from '../context_error_message';
-import { IndexPattern, IndexPatternField } from '../../../../../data/common/index_patterns';
+import { IndexPattern, IndexPatternField } from '../../../../../data/common';
 import { LoadingStatus } from '../../angular/context_query_state';
 import { getServices } from '../../../kibana_services';
 import { AppState, isEqualFilters } from '../../angular/context_state';
