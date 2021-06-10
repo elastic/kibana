@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { ExternalServiceFormatter } from '../types';
-import { ConnectorSwimlaneTypeFields, SwimlaneFieldsType } from '../../../common';
+import { ConnectorSwimlaneTypeFields } from '../../../common';
+import { Format } from './types';
 
-const format: ExternalServiceFormatter<SwimlaneFieldsType>['format'] = (theCase) => {
+export const format: Format = (theCase) => {
   const { caseId = theCase.id } =
     (theCase.connector.fields as ConnectorSwimlaneTypeFields['fields']) ?? {};
   return { caseId };
-};
-
-export const swimlaneExternalServiceFormatter: ExternalServiceFormatter<SwimlaneFieldsType> = {
-  format,
 };
