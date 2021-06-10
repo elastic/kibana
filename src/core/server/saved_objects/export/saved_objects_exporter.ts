@@ -18,7 +18,6 @@ import {
   SavedObjectExportBaseOptions,
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportByTypeOptions,
-  SavedObjectsExportTransform,
 } from './types';
 import { SavedObjectsExportError } from './errors';
 import { collectExportedObjects } from './collect_exported_objects';
@@ -34,8 +33,8 @@ export type ISavedObjectsExporter = PublicMethodsOf<SavedObjectsExporter>;
  */
 export class SavedObjectsExporter {
   readonly #savedObjectsClient: SavedObjectsClientContract;
-  readonly #exportTransforms: Record<string, SavedObjectsExportTransform>;
   readonly #exportSizeLimit: number;
+  readonly #typeRegistry: ISavedObjectTypeRegistry;
   readonly #log: Logger;
 
   constructor({
@@ -52,15 +51,7 @@ export class SavedObjectsExporter {
     this.#log = logger;
     this.#savedObjectsClient = savedObjectsClient;
     this.#exportSizeLimit = exportSizeLimit;
-    this.#exportTransforms = typeRegistry.getAllTypes().reduce((transforms, type) => {
-      if (type.management?.onExport) {
-        return {
-          ...transforms,
-          [type.name]: type.management.onExport,
-        };
-      }
-      return transforms;
-    }, {} as Record<string, SavedObjectsExportTransform>);
+    this.#typeRegistry = typeRegistry;
   }
 
   /**
@@ -121,12 +112,13 @@ export class SavedObjectsExporter {
     const {
       objects: collectedObjects,
       missingRefs: missingReferences,
+      excludedObjects,
     } = await collectExportedObjects({
       objects: savedObjects,
       includeReferences: includeReferencesDeep,
       namespace,
       request,
-      exportTransforms: this.#exportTransforms,
+      typeRegistry: this.#typeRegistry,
       savedObjectsClient: this.#savedObjectsClient,
     });
 
@@ -142,6 +134,8 @@ export class SavedObjectsExporter {
       exportedCount: exportedObjects.length,
       missingRefCount: missingReferences.length,
       missingReferences,
+      excludedObjectsCount: excludedObjects.length,
+      excludedObjects,
     };
     this.#log.debug(`Exporting [${redactedObjects.length}] saved objects.`);
     return createListStream([...redactedObjects, ...(excludeExportDetails ? [] : [exportDetails])]);

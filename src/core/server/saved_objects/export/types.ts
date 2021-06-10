@@ -72,6 +72,20 @@ export interface SavedObjectsExportResultDetails {
     /** the missing reference type. */
     type: string;
   }>;
+  /** number of objects that were excluded from the export */
+  excludedObjectsCount: number;
+  /** excluded objects details */
+  excludedObjects: SavedObjectsExportExcludedObject[];
+}
+
+/** @public */
+export interface SavedObjectsExportExcludedObject {
+  /** id of the excluded object */
+  id: string;
+  /** type of the excluded object */
+  type: string;
+  /** optional cause of the exclusion */
+  reason?: string;
 }
 
 /**

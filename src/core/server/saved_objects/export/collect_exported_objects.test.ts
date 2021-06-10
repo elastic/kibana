@@ -10,8 +10,10 @@ import { applyExportTransformsMock } from './collect_exported_objects.test.mocks
 import { savedObjectsClientMock } from '../../mocks';
 import { httpServerMock } from '../../http/http_server.mocks';
 import { SavedObject, SavedObjectError } from '../../../types';
+import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import type { SavedObjectsExportTransform } from './types';
 import { collectExportedObjects } from './collect_exported_objects';
+import { IsObjectExportablePredicate } from '../types';
 
 const createObject = (parts: Partial<SavedObject>): SavedObject => ({
   id: 'id',
@@ -33,8 +35,30 @@ const toIdTuple = (obj: SavedObject) => ({ type: obj.type, id: obj.id });
 describe('collectExportedObjects', () => {
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
+  let typeRegistry: SavedObjectTypeRegistry;
+
+  const registerType = (
+    name: string,
+    {
+      onExport,
+      isExportable,
+    }: { onExport?: SavedObjectsExportTransform; isExportable?: IsObjectExportablePredicate } = {}
+  ) => {
+    typeRegistry.registerType({
+      name,
+      hidden: false,
+      namespaceType: 'single',
+      mappings: { properties: {} },
+      management: {
+        importableAndExportable: true,
+        onExport,
+        isExportable,
+      },
+    });
+  };
 
   beforeEach(() => {
+    typeRegistry = new SavedObjectTypeRegistry();
     savedObjectsClient = savedObjectsClientMock.create();
     request = httpServerMock.createKibanaRequest();
     applyExportTransformsMock.mockImplementation(({ objects }) => objects);
@@ -58,12 +82,13 @@ describe('collectExportedObjects', () => {
       });
 
       const fooTransform: SavedObjectsExportTransform = jest.fn();
+      registerType('foo', { onExport: fooTransform });
 
       await collectExportedObjects({
         objects: [obj1, obj2],
         savedObjectsClient,
         request,
-        exportTransforms: { foo: fooTransform },
+        typeRegistry,
         includeReferences: true,
       });
 
@@ -73,6 +98,42 @@ describe('collectExportedObjects', () => {
         transforms: { foo: fooTransform },
         request,
       });
+    });
+
+    it('calls `isExportable` with the correct parameters', async () => {
+      const foo1 = createObject({
+        type: 'foo',
+        id: '1',
+      });
+      const foo2 = createObject({
+        type: 'foo',
+        id: '2',
+      });
+      const bar3 = createObject({
+        type: 'bar',
+        id: '3',
+      });
+
+      const fooExportable: IsObjectExportablePredicate = jest.fn().mockReturnValue(true);
+      registerType('foo', { isExportable: fooExportable });
+
+      const barExportable: IsObjectExportablePredicate = jest.fn().mockReturnValue(true);
+      registerType('bar', { isExportable: barExportable });
+
+      await collectExportedObjects({
+        objects: [foo1, foo2, bar3],
+        savedObjectsClient,
+        request,
+        typeRegistry,
+        includeReferences: true,
+      });
+
+      expect(fooExportable).toHaveBeenCalledTimes(2);
+      expect(fooExportable).toHaveBeenCalledWith(foo1);
+      expect(fooExportable).toHaveBeenCalledWith(foo2);
+
+      expect(barExportable).toHaveBeenCalledTimes(1);
+      expect(barExportable).toHaveBeenCalledWith(bar3);
     });
 
     it('returns the collected objects', async () => {
@@ -96,6 +157,10 @@ describe('collectExportedObjects', () => {
         id: '3',
       });
 
+      registerType('foo');
+      registerType('bar');
+      registerType('dolly');
+
       applyExportTransformsMock.mockImplementationOnce(({ objects }) => [...objects, dolly3]);
       savedObjectsClient.bulkGet.mockResolvedValueOnce({
         saved_objects: [bar2],
@@ -105,12 +170,123 @@ describe('collectExportedObjects', () => {
         objects: [foo1],
         savedObjectsClient,
         request,
-        exportTransforms: {},
+        typeRegistry,
         includeReferences: true,
       });
 
       expect(missingRefs).toHaveLength(0);
       expect(objects.map(toIdTuple)).toEqual([foo1, dolly3, bar2].map(toIdTuple));
+    });
+
+    it('excludes objects filtered by the `isExportable` predicate', async () => {
+      const foo1 = createObject({
+        type: 'foo',
+        id: '1',
+      });
+      const foo2 = createObject({
+        type: 'foo',
+        id: '2',
+      });
+      const bar3 = createObject({
+        type: 'bar',
+        id: '3',
+      });
+
+      registerType('foo', { isExportable: (obj) => obj.id !== '2' });
+      registerType('bar', { isExportable: () => true });
+
+      const { objects, excludedObjects } = await collectExportedObjects({
+        objects: [foo1, foo2, bar3],
+        savedObjectsClient,
+        request,
+        typeRegistry,
+        includeReferences: true,
+      });
+
+      expect(objects).toEqual([foo1, bar3]);
+      expect(excludedObjects).toEqual([foo2].map(toIdTuple));
+    });
+
+    it('excludes references filtered by the `isExportable` predicate', async () => {
+      const foo1 = createObject({
+        type: 'foo',
+        id: '1',
+        references: [
+          {
+            type: 'bar',
+            id: '2',
+            name: 'bar-2',
+          },
+          {
+            type: 'excluded',
+            id: '1',
+            name: 'excluded-1',
+          },
+        ],
+      });
+      const bar2 = createObject({
+        type: 'bar',
+        id: '2',
+      });
+      const excluded1 = createObject({
+        type: 'excluded',
+        id: '1',
+      });
+
+      registerType('foo');
+      registerType('bar');
+      registerType('excluded', { isExportable: () => false });
+
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [bar2, excluded1],
+      });
+
+      const { objects, excludedObjects } = await collectExportedObjects({
+        objects: [foo1],
+        savedObjectsClient,
+        request,
+        typeRegistry,
+        includeReferences: true,
+      });
+
+      expect(objects).toEqual([foo1, bar2]);
+      expect(excludedObjects).toEqual([excluded1].map(toIdTuple));
+    });
+
+    it('excludes additional objects filtered by the `isExportable` predicate', async () => {
+      const foo1 = createObject({
+        type: 'foo',
+        id: '1',
+      });
+      const bar2 = createObject({
+        type: 'bar',
+        id: '2',
+      });
+      const excluded1 = createObject({
+        type: 'excluded',
+        id: '1',
+      });
+
+      registerType('foo');
+      registerType('bar');
+      registerType('excluded', { isExportable: () => false });
+
+      applyExportTransformsMock.mockImplementationOnce(({ objects }) => [
+        ...objects,
+        bar2,
+        excluded1,
+      ]);
+
+      const { objects, excludedObjects } = await collectExportedObjects({
+        objects: [foo1],
+        savedObjectsClient,
+        request,
+        typeRegistry,
+        includeReferences: true,
+      });
+
+      expect(objects).toEqual([foo1, bar2]);
+      expect(excludedObjects).toEqual([excluded1].map(toIdTuple));
     });
 
     it('returns the missing references', async () => {
@@ -163,7 +339,7 @@ describe('collectExportedObjects', () => {
         objects: [foo1],
         savedObjectsClient,
         request,
-        exportTransforms: {},
+        typeRegistry,
         includeReferences: true,
       });
 
@@ -185,7 +361,7 @@ describe('collectExportedObjects', () => {
         objects: [obj1, obj2],
         savedObjectsClient,
         request,
-        exportTransforms: {},
+        typeRegistry,
         includeReferences: true,
       });
 
@@ -228,7 +404,7 @@ describe('collectExportedObjects', () => {
         objects: [foo1],
         savedObjectsClient,
         request,
-        exportTransforms: {},
+        typeRegistry,
         includeReferences: true,
       });
 
@@ -302,7 +478,7 @@ describe('collectExportedObjects', () => {
         objects: [foo1],
         savedObjectsClient,
         request,
-        exportTransforms: {},
+        typeRegistry,
         includeReferences: true,
       });
 
@@ -366,7 +542,7 @@ describe('collectExportedObjects', () => {
         objects: [foo1, bar2],
         savedObjectsClient,
         request,
-        exportTransforms: {},
+        typeRegistry,
         includeReferences: true,
       });
 
@@ -411,7 +587,7 @@ describe('collectExportedObjects', () => {
         objects: [foo1],
         savedObjectsClient,
         request,
-        exportTransforms: {},
+        typeRegistry,
         includeReferences: true,
       });
 
@@ -474,7 +650,7 @@ describe('collectExportedObjects', () => {
         objects: [foo1],
         savedObjectsClient,
         request,
-        exportTransforms: {},
+        typeRegistry,
         includeReferences: true,
       });
 
@@ -489,6 +665,66 @@ describe('collectExportedObjects', () => {
         [toIdTuple(baz4)],
         expect.any(Object)
       );
+    });
+
+    it('excludes references filtered by the `isExportable` predicate for additional objects returned by the export transform', async () => {
+      const foo1 = createObject({
+        type: 'foo',
+        id: '1',
+      });
+      const bar2 = createObject({
+        type: 'bar',
+        id: '2',
+        references: [
+          {
+            type: 'dolly',
+            id: '3',
+            name: 'dolly-3',
+          },
+          {
+            type: 'baz',
+            id: '4',
+            name: 'baz-4',
+          },
+        ],
+      });
+      const dolly3 = createObject({
+        type: 'dolly',
+        id: '3',
+        references: [
+          {
+            type: 'baz',
+            id: '4',
+            name: 'baz-4',
+          },
+        ],
+      });
+      const baz4 = createObject({
+        type: 'baz',
+        id: '4',
+      });
+
+      registerType('foo');
+      registerType('bar');
+      registerType('dolly');
+      registerType('baz', { isExportable: () => false });
+
+      applyExportTransformsMock.mockImplementationOnce(({ objects }) => [...objects, bar2]);
+
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [dolly3, baz4],
+      });
+
+      const { objects, excludedObjects } = await collectExportedObjects({
+        objects: [foo1],
+        savedObjectsClient,
+        request,
+        typeRegistry,
+        includeReferences: true,
+      });
+
+      expect(objects).toEqual([foo1, bar2, dolly3]);
+      expect(excludedObjects).toEqual([baz4].map(toIdTuple));
     });
   });
 
@@ -510,7 +746,7 @@ describe('collectExportedObjects', () => {
         objects: [obj1],
         savedObjectsClient,
         request,
-        exportTransforms: {},
+        typeRegistry,
         includeReferences: false,
       });
 

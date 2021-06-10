@@ -253,7 +253,7 @@ export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolat
  *
  * @public
  */
-export interface SavedObjectsType {
+export interface SavedObjectsType<Attributes = unknown> {
   /**
    * The name of the type, which is also used as the internal id.
    */
@@ -337,7 +337,7 @@ export interface SavedObjectsType {
   /**
    * An optional {@link SavedObjectsTypeManagementDefinition | saved objects management section} definition for the type.
    */
-  management?: SavedObjectsTypeManagementDefinition;
+  management?: SavedObjectsTypeManagementDefinition<Attributes>;
 }
 
 /**
@@ -345,7 +345,7 @@ export interface SavedObjectsType {
  *
  * @public
  */
-export interface SavedObjectsTypeManagementDefinition {
+export interface SavedObjectsTypeManagementDefinition<Attributes = unknown> {
   /**
    * Is the type importable or exportable. Defaults to `false`.
    */
@@ -432,4 +432,43 @@ export interface SavedObjectsTypeManagementDefinition {
    * @remarks `importableAndExportable` must be `true` to specify this property.
    */
   onImport?: SavedObjectsImportHook;
+
+  /**
+   * Allow to specify exportability on the object's granularity level.
+   *
+   * @example
+   * Registering a type with per-object exportability
+   * ```ts
+   * // src/plugins/my_plugin/server/plugin.ts
+   * import { myType } from './saved_objects';
+   *
+   * export class Plugin() {
+   *   setup: (core: CoreSetup) => {
+   *     core.savedObjects.registerType({
+   *        ...myType,
+   *        management: {
+   *          ...myType.management,
+   *          isExportable: (object) => {
+   *            if (object.attributes.myCustomAttr === 'foo') {
+   *              return false;
+   *            }
+   *            return true;
+   *          }
+   *        },
+   *     });
+   *   }
+   * }
+   * ```
+   *
+   * @remarks an exportable predicate should be deterministic
+   * @remarks this is only used when `importableAndExportable` is true
+   */
+  isExportable?: IsObjectExportablePredicate;
 }
+
+/**
+ * @public
+ */
+export type IsObjectExportablePredicate<Attributes = unknown> = (
+  obj: SavedObject<Attributes>
+) => boolean | Promise<boolean>;
