@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
 
-import { APP_WRAPPER_CLASS } from '../../../../../../../src/core/public';
 import { EnrichedDeprecationInfo } from '../../../../common/types';
 import { SectionLoading } from '../../../shared_imports';
 import { GroupByOption, LevelFilterOption, UpgradeAssistantTabProps } from '../types';
@@ -128,8 +127,7 @@ export const DeprecationTabContent: FunctionComponent<CheckupTabProps> = ({
 
   if (deprecations && deprecations.length === 0) {
     return (
-      <div className={APP_WRAPPER_CLASS} data-test-subj={`${checkupLabel}TabContent`}>
-        <EuiSpacer size="l" />
+      <div data-test-subj={`${checkupLabel}TabContent`}>
         <NoDeprecationsPrompt
           deprecationType={checkupLabel}
           navigateToOverviewPage={navigateToOverviewPage}
