@@ -11,7 +11,7 @@ image::images/alerting-overview.png[Rules and Connectors UI]
 
 [IMPORTANT]
 ==============================================
-To make sure you can access alerting and actions, see the <<alerting-setup-prerequisites, setup and pre-requisites>> section.
+To make sure you can access alerting and actions, see the <<alerting-prerequisites, setup and pre-requisites>> section.
 ==============================================
 
 [float]
@@ -22,7 +22,7 @@ Actions typically involve interaction with {kib} services or third party integra
 This section describes all of these elements and how they operate together.
 
 [float]
-=== What is a rule?
+=== Rules
 
 A rule specifies a background task that runs on the {kib} server to check for specific conditions. It consists of three main parts: 
 
@@ -30,7 +30,10 @@ A rule specifies a background task that runs on the {kib} server to check for sp
 * *Schedule*: when/how often should detection checks run?
 * *Actions*: what happens when a condition is detected?
 
-For example, when monitoring a set of servers, a rule might check for average CPU usage > 0.9 on each server for the last two minutes (condition), checked every minute (schedule), sending a warning email message via SMTP with subject `CPU on {{server}} is high` (action).
+For example, when monitoring a set of servers, a rule might: 
+* Check for average CPU usage > 0.9 on each server for the last two minutes (condition).
+* Check every minute (schedule).
+* Send a warning email message via SMTP with subject `CPU on {{server}} is high` (action).
 
 image::images/what-is-a-rule.svg[Three components of a rule]
 
@@ -40,7 +43,7 @@ The following sections describe each part of the rule in more detail.
 [[alerting-concepts-conditions]]
 ==== Conditions
 
-Under the hood, {kib} rules detect conditions by running a javascript function on the {kib} server, which gives it the flexibility to support a wide range of conditions, anything from the results of a simple {es} query to heavy computations involving data from multiple sources or external systems. 
+Under the hood, {kib} rules detect conditions by running a Javascript function on the {kib} server, which gives it the flexibility to support a wide range of conditions, anything from the results of a simple {es} query to heavy computations involving data from multiple sources or external systems. 
 
 These conditions are packaged and exposed as *rule types*. A rule type hides the underlying details of the condition, and exposes a set of parameters
 to control the details of the conditions to detect.
@@ -68,22 +71,22 @@ Actions are invocations of connectors, which allow interaction with {kib} servic
 
 When defining actions in a rule, you specify:
 
-* the *connector type*: the type of service or integration to use
-* the connection for that type by referencing a <<alerting-concepts-connectors, connector>>
-* a mapping of rule values to properties exposed for that type of action
+* The *connector type*: the type of service or integration to use
+* The connection for that type by referencing a <<alerting-concepts-connectors, connector>>
+* A mapping of rule values to properties exposed for that type of action
 
 The result is a template: all the parameters needed to invoke a service are supplied except for specific values that are only known at the time the rule condition is detected. 
 
 In the server monitoring example, the `email` connector type is used, and `server` is mapped to the body of the email, using the template string `CPU on {{server}} is high`.
 
-When the rule detects the condition, it creates an <<alerting-concepts-alert-instances, alert>> containing the details of the condition, renders the template with these details such as server name, and executes the action on the {kib} server by invoking the `email` connector type. 
+When the rule detects the condition, it creates an <<alerting-concepts-alerts, alert>> containing the details of the condition, renders the template with these details such as server name, and executes the action on the {kib} server by invoking the `email` connector type. 
 
 image::images/what-is-an-action.svg[Actions are like templates that are rendered when an alert detects a condition]
 
 See <<action-types>> for details on the types of connectors provided by {kib}.
 
 [float]
-[[alerting-concepts-alert-instances]]
+[[alerting-concepts-alerts]]
 === Alerts
 
 When checking for a condition, a rule might identify multiple occurrences of the condition. {kib} tracks each of these *alerts* separately and takes an action per alert.
@@ -91,22 +94,6 @@ When checking for a condition, a rule might identify multiple occurrences of the
 Using the server monitoring example, each server with average CPU > 0.9 is tracked as an alert. This means a separate email is sent for each server that exceeds the threshold.
 
 image::images/alerts.svg[{kib} tracks each detected condition as an alert and takes action on each alert]
-
-[float]
-[[alerting-concepts-suppressing-duplicate-notifications]]
-=== Suppressing duplicate notifications
-
-Since actions are executed per alert, a rule can end up generating a large number of actions. Take the following example where a rule is monitoring three servers every minute for CPU usage > 0.9:
-
-* Minute 1: server X123 > 0.9. *One email* is sent for server X123.
-* Minute 2: X123 and Y456 > 0.9. *Two emails* are sent, one for X123 and one for Y456.
-* Minute 3: X123, Y456, Z789 > 0.9. *Three emails* are sent, one for each of X123, Y456, Z789.
-
-In the above example, three emails are sent for server X123 in the span of 3 minutes for the same rule. Often it's desirable to suppress frequent re-notification. Operations like muting and throttling can be applied at the alert level. If we set the rule re-notify interval to 5 minutes, we reduce noise by only getting emails for new servers that exceed the threshold:
-
-* Minute 1: server X123 > 0.9. *One email* is sent for server X123.
-* Minute 2: X123 and Y456 > 0.9. *One email* is sent for Y456.
-* Minute 3: X123, Y456, Z789 > 0.9. *One email* is sent for Z789.
 
 [float]
 [[alerting-concepts-connectors]]
@@ -120,7 +107,7 @@ Rather than repeatedly entering connection information and credentials for each 
 image::images/rule-concepts-connectors.svg[Connectors provide a central place to store service connection settings]
 
 [float]
-=== Summary
+== Putting it all together
 
 A *rule* consists of conditions, *actions*, and a schedule. When conditions are met, *alerts* are created that render *actions* and invoke them. To make action setup and update easier, actions use *connectors* that centralize the information used to connect with {kib} services and third-party integrations. The following example ties these concepts together:
 
@@ -130,7 +117,6 @@ image::images/rule-concepts-summary.svg[Rules, connectors, alerts and actions wo
 . Alerts create *actions* as long as they are not muted or throttled. When actions are created, the template that was setup in the rule is filled with actual values. In this example, three actions are created, and the template string {{server}} is replaced with the server name for each alert.
 . {kib} invokes the actions, sending them to a third party *integration* like an email service.
 . If the third party integration has connection parameters or credentials, {kib} will fetch these from the *connector* referenced in the action.
-
 
 [float]
 [[alerting-concepts-differences]]
@@ -152,63 +138,7 @@ Pre-packaged *rule types* simplify setup and hide the details of complex, domain
 
 [float]
 [[alerting-setup-prerequisites]]
-== Setup and prerequisites
-
-If you are using an *on-premises* Elastic Stack deployment:
-
-* In the kibana.yml configuration file, add the <<general-alert-action-settings,`xpack.encryptedSavedObjects.encryptionKey`>> setting.
-* For emails to have a footer with a link back to {kib}, set the <<server-publicBaseUrl, `server.publicBaseUrl`>> configuration setting.
-
-If you are using an *on-premises* Elastic Stack deployment with <<using-kibana-with-security, *security*>>:
-
-* You must enable Transport Layer Security (TLS) for communication <<configuring-tls-kib-es, between {es} and {kib}>>. {kib} alerting uses <<api-keys, API keys>> to secure background rule checks and actions, and API keys require {ref}/configuring-tls.html#tls-http[TLS on the HTTP interface]. A proxy will not suffice.
-
-[float]
-[[alerting-setup-production]]
-== Production considerations and scaling guidance
-
-When relying on alerting and actions as mission critical services, make sure you follow the <<alerting-production-considerations,Alerting production considerations>>.
-
-See <<alerting-scaling-guidance>> for more information on the scalability of {kib} alerting.
-
-[float]
-[[alerting-security]]
-== Security
-
-To access alerting in a space, a user must have access to one of the following features:
-
-* Alerting
-* <<xpack-apm,*APM*>>
-* <<logs-app,*Logs*>>
-* <<xpack-ml,*{ml-cap}*>>
-* <<metrics-app,*Metrics*>>
-* <<xpack-siem,*Security*>>
-* <<uptime-app,*Uptime*>>
-
-See <<kibana-feature-privileges, feature privileges>> for more information on configuring roles that provide access to these features.
-Also note that a user will need +read+ privileges for the *Actions and Connectors* feature to attach actions to a rule or to edit a rule that has an action attached to it.
-
-[float]
-[[alerting-spaces]]
-=== Space isolation
-
-Rules and connectors are isolated to the {kib} space in which they were created. A rule or connector created in one space will not be visible in another. 
-
-[float]
-[[alerting-authorization]]
-=== Authorization
-
-Rules, including all background detection and the actions they generate are authorized using an <<api-keys, API key>> associated with the last user to edit the rule. Upon creating or modifying a rule, an API key is generated for that user, capturing a snapshot of their privileges at that moment in time. The API key is then used to run all background tasks associated with the rule including detection checks and executing actions. 
-
-[IMPORTANT]
-==============================================
-If a rule requires certain privileges to run, such as index privileges, keep in mind that if a user without those privileges updates the rule, the rule will no longer function.  
-==============================================
-
-[float]
-[[alerting-restricting-actions]]
-=== Restricting actions
-
-For security reasons you may wish to limit the extent to which {kib} can connect to external services. <<action-settings>> allows you to disable certain <<action-types>> and allowlist the hostnames that {kib} can connect with.
+== Prerequisites
+<<alerting-prerequisites, Alerting prerequisites>> 
 
 --
