@@ -17,8 +17,7 @@ describe('rollDailyData', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('returns false if no savedObjectsClient', async () => {
-    const result = await rollDailyData(logger, undefined);
-    expect(result).toBe(false);
+    await rollDailyData(logger, undefined);
     expect(mockSavedObjectsClient.find).toBeCalledTimes(0);
   });
 
@@ -27,9 +26,7 @@ describe('rollDailyData', () => {
       saved_objects: [{ id: 'test_id_1' }, { id: 'test_id_2' }],
     } as SavedObjectsFindResponse);
 
-    const result = await rollDailyData(logger, mockSavedObjectsClient);
-
-    expect(result).toBe(true);
+    await rollDailyData(logger, mockSavedObjectsClient);
     expect(mockSavedObjectsClient.find).toBeCalledWith({
       type: 'event_loop_delays_daily',
       filter: `event_loop_delays_daily.updated_at < "now-3d/d"`,
@@ -52,8 +49,7 @@ describe('rollDailyData', () => {
     const mockError = new Error('find error');
     mockSavedObjectsClient.find.mockRejectedValueOnce(mockError);
 
-    const result = await rollDailyData(logger, mockSavedObjectsClient);
-    expect(result).toBe(false);
+    await rollDailyData(logger, mockSavedObjectsClient);
     expect(logger.debug).toBeCalledTimes(2);
     expect(logger.debug).toHaveBeenNthCalledWith(
       1,
@@ -73,8 +69,7 @@ describe('rollDailyData', () => {
     mockSavedObjectsClient.delete.mockResolvedValueOnce(true);
     mockSavedObjectsClient.delete.mockRejectedValueOnce(mockError2);
 
-    const result = await rollDailyData(logger, mockSavedObjectsClient);
-    expect(result).toBe(false);
+    await rollDailyData(logger, mockSavedObjectsClient);
     expect(mockSavedObjectsClient.delete).toBeCalledTimes(3);
     expect(logger.debug).toBeCalledTimes(2);
     expect(logger.debug).toHaveBeenNthCalledWith(

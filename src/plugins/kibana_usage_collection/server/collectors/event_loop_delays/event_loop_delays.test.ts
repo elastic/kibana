@@ -26,18 +26,15 @@ describe('EventLoopDelaysCollector', () => {
   beforeEach(() => jest.clearAllMocks());
   afterAll(() => jest.useRealTimers());
 
-  test('#constructor enables monitoring with specified resolution', () => {
-    const resolution = 500;
-    new EventLoopDelaysCollector(resolution);
-    expect(monitorEventLoopDelay).toBeCalledWith({ resolution });
+  test('#constructor enables monitoring', () => {
+    new EventLoopDelaysCollector();
+    expect(monitorEventLoopDelay).toBeCalledWith({ resolution: 10 });
     expect(mockMonitorEnable).toBeCalledTimes(1);
   });
 
-  test('#collect returns event loop delays histogram and updates lastCollected', () => {
+  test('#collect returns event loop delays histogram', () => {
     const eventLoopDelaysCollector = new EventLoopDelaysCollector();
-    expect(eventLoopDelaysCollector.lastCollected).toBe(undefined);
     const histogramData = eventLoopDelaysCollector.collect();
-    expect(eventLoopDelaysCollector.lastCollected).toBe(mockNow);
     expect(mockMonitorPercentile).toHaveBeenNthCalledWith(1, 50);
     expect(mockMonitorPercentile).toHaveBeenNthCalledWith(2, 75);
     expect(mockMonitorPercentile).toHaveBeenNthCalledWith(3, 95);

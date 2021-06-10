@@ -30,3 +30,8 @@ export const MONITOR_EVENT_LOOP_DELAYS_RESET = 24 * 60 * 60 * 1000;
  * Start monitoring the event loop delays after 1 minute
  */
 export const MONITOR_EVENT_LOOP_DELAYS_START = 1 * 60 * 1000;
+
+/**
+ * Event loop monitoring sampling rate in milliseconds.
+ */
+export const MONITOR_EVENT_LOOP_DELAYS_RESOLUTION = 10;

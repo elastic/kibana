@@ -10,6 +10,7 @@ import type {
   SavedObjectAttributes,
   SavedObjectsServiceSetup,
   ISavedObjectsRepository,
+  SavedObject,
 } from 'kibana/server';
 import moment from 'moment';
 import type { IntervalHistogram } from './event_loop_delays';
@@ -39,6 +40,17 @@ export function serializeSavedObjectId({ date, pid }: { date: moment.MomentInput
   const formattedDate = moment(date).format('DDMMYYYY');
 
   return `${pid}::${formattedDate}`;
+}
+
+export async function deleteHistogramSavedObjects(
+  savedObjects: Array<SavedObject<EventLoopDelaysDaily>>,
+  internalRepository: ISavedObjectsRepository
+) {
+  return await Promise.allSettled(
+    savedObjects.map(async (savedObject) => {
+      return await internalRepository.delete(SAVED_OBJECTS_DAILY_TYPE, savedObject.id);
+    })
+  );
 }
 
 export async function storeHistogram(

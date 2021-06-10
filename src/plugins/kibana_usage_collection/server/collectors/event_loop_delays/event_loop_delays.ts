@@ -8,14 +8,14 @@
 
 import type { EventLoopDelayMonitor } from 'perf_hooks';
 import { monitorEventLoopDelay } from 'perf_hooks';
-import moment from 'moment';
 import { takeUntil, finalize, map } from 'rxjs/operators';
-import { Subject, timer } from 'rxjs';
+import { Observable, timer } from 'rxjs';
 import type { ISavedObjectsRepository } from 'kibana/server';
 import {
   MONITOR_EVENT_LOOP_DELAYS_START,
   MONITOR_EVENT_LOOP_DELAYS_INTERVAL,
   MONITOR_EVENT_LOOP_DELAYS_RESET,
+  MONITOR_EVENT_LOOP_DELAYS_RESOLUTION,
 } from './constants';
 import { storeHistogram } from './saved_objects';
 
@@ -35,10 +35,9 @@ export interface IntervalHistogram {
 
 export class EventLoopDelaysCollector {
   private readonly loopMonitor: EventLoopDelayMonitor;
-  public lastCollected: moment.MomentInput;
-  constructor(private readonly eventLoopMonitorResolution = 10) {
+  constructor() {
     const monitor = monitorEventLoopDelay({
-      resolution: this.eventLoopMonitorResolution,
+      resolution: MONITOR_EVENT_LOOP_DELAYS_RESOLUTION,
     });
     monitor.enable();
     this.loopMonitor = monitor;
@@ -46,7 +45,6 @@ export class EventLoopDelaysCollector {
 
   public collect(): IntervalHistogram {
     const { min, max, mean, exceeds, stddev } = this.loopMonitor;
-    this.lastCollected = moment.now();
 
     return {
       min,
@@ -71,9 +69,14 @@ export class EventLoopDelaysCollector {
   }
 }
 
+/**
+ * The monitoring of the event loop starts immediately.
+ * The first collection of the histogram happens after 1 minute.
+ * The daily histogram data is updated every 1 hour.
+ */
 export function startTrackingEventLoopDelaysUsage(
   internalRepository: ISavedObjectsRepository,
-  stopMonitoringEventLoop$: Subject<void>,
+  stopMonitoringEventLoop$: Observable<void>,
   collectionStartDelay = MONITOR_EVENT_LOOP_DELAYS_START,
   collectionInterval = MONITOR_EVENT_LOOP_DELAYS_INTERVAL,
   histogramReset = MONITOR_EVENT_LOOP_DELAYS_RESET

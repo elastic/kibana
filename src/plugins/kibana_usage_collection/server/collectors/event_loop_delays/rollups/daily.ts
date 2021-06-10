@@ -9,7 +9,11 @@
 import type { Logger } from '@kbn/logging';
 import { ISavedObjectsRepository } from '../../../../../../core/server';
 
-import { EventLoopDelaysDaily, SAVED_OBJECTS_DAILY_TYPE } from '../saved_objects';
+import {
+  EventLoopDelaysDaily,
+  deleteHistogramSavedObjects,
+  SAVED_OBJECTS_DAILY_TYPE,
+} from '../saved_objects';
 
 /**
  * Deletes docs older than 3 days
@@ -19,30 +23,22 @@ import { EventLoopDelaysDaily, SAVED_OBJECTS_DAILY_TYPE } from '../saved_objects
 export async function rollDailyData(
   logger: Logger,
   savedObjectsClient?: ISavedObjectsRepository
-): Promise<boolean> {
+): Promise<void> {
   if (!savedObjectsClient) {
-    return false;
+    return;
   }
-
   try {
     const { saved_objects: savedObjects } = await savedObjectsClient.find<EventLoopDelaysDaily>({
       type: SAVED_OBJECTS_DAILY_TYPE,
       filter: `${SAVED_OBJECTS_DAILY_TYPE}.updated_at < "now-3d/d"`,
     });
-
-    const settledDeletes = await Promise.allSettled(
-      savedObjects.map(async (savedObject) => {
-        return await savedObjectsClient.delete(SAVED_OBJECTS_DAILY_TYPE, savedObject.id);
-      })
-    );
+    const settledDeletes = await deleteHistogramSavedObjects(savedObjects, savedObjectsClient);
     const failedDeletes = settledDeletes.filter(({ status }) => status !== 'fulfilled');
     if (failedDeletes.length) {
       throw failedDeletes;
     }
-    return true;
   } catch (err) {
     logger.debug(`Failed to rollup transactional to daily entries`);
     logger.debug(err);
-    return false;
   }
 }

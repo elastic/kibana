@@ -85,7 +85,10 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     this.uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
     core.metrics.getOpsMetrics$().subscribe(this.metric$);
     this.coreUsageData = core.coreUsageData;
-    startTrackingEventLoopDelaysUsage(this.savedObjectsClient, this.stopMonitoringEventLoop$);
+    startTrackingEventLoopDelaysUsage(
+      this.savedObjectsClient,
+      this.stopMonitoringEventLoop$.asObservable()
+    );
   }
 
   public stop() {
