@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 7.x releases.
 
+* <<release-notes-7.13.2>>
 * <<release-notes-7.13.1>>
 * <<release-notes-7.13.0>>
 * <<release-notes-7.12.1>>
@@ -53,6 +54,30 @@ Review important information about the {kib} 7.x releases.
 * <<release-notes-7.0.0-alpha1>>
 
 --
+
+[[release-notes-7.13.2]]
+== {kib} 7.13.2
+
+coming::[7.13.2]
+
+The 7.13.2 release includes the following bug fixes.
+
+[float]
+[[fixes-v7.13.2]]
+=== Bug Fixes
+Fleet::
+* Fixes packages being upgraded accidentally after adding to policy {kibana-pull}101542[#101542]
+Lens & Visualizations::
+* Fixes an issue where upgrading from 7.12.1 to 7.13.0 breaks *TSVB* vizualizations that don't have a defined timefield {kibana-pull}100864[#100864]
+Logs::
+* Fixes the filter button in the log entry details flyout {kibana-pull}101011[#101011]
+Machine Learning::
+* Updates datafeed_high_count_network_denies.json {kibana-pull}101681[#101681]
+* Fixes management app race condition {kibana-pull}100785[#100785]
+Maps::
+* Fixes an issue where EMS Boundaries with joins were unable to render {kibana-pull}101604[#101604]
+Sharing::
+* Fixes the embeddables migrate function {kibana-pull}101470[#101470]
 
 [[release-notes-7.13.1]]
 == {kib} 7.13.1
