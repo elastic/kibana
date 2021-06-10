@@ -18,10 +18,12 @@ export default function enterSpaceFunctonalTests({
   describe.skip('Enter Space', function () {
     this.tags('includeFirefox');
     before(async () => {
-      await esArchiver.load('spaces/enter_space');
+      await esArchiver.load('x-pack/test/functional/es_archives/spaces/enter_space');
       await PageObjects.security.forceLogout();
     });
-    after(async () => await esArchiver.unload('spaces/enter_space'));
+    after(
+      async () => await esArchiver.unload('x-pack/test/functional/es_archives/spaces/enter_space')
+    );
 
     afterEach(async () => {
       await PageObjects.security.forceLogout();

@@ -27,12 +27,12 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
 
     async loadData() {
       log.debug('loadData');
-      await esArchiver.load('dashboard/drilldowns');
+      await esArchiver.load('x-pack/test/functional/es_archives/dashboard/drilldowns');
     }
 
     async unloadData() {
       log.debug('unloadData');
-      await esArchiver.unload('dashboard/drilldowns');
+      await esArchiver.unload('x-pack/test/functional/es_archives/dashboard/drilldowns');
     }
 
     async expectsCreateDrilldownFlyoutOpen() {
