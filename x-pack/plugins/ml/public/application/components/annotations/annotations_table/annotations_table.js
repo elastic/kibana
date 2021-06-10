@@ -735,9 +735,7 @@ class AnnotationsTableUI extends Component {
               });
             }}
             end={this.state.datafeedEnd}
-            timefield={this.props.jobs[0].data_description.time_field}
             jobId={this.state.jobId}
-            bucketSpan={this.props.jobs[0].analysis_config.bucket_span}
           />
         ) : null}
       </Fragment>

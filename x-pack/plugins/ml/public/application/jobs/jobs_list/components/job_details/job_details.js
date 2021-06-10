@@ -7,26 +7,29 @@
 
 import PropTypes from 'prop-types';
 import React, { Component, Fragment } from 'react';
-
-import { EuiTabbedContent, EuiLoadingSpinner } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { EuiButtonIcon, EuiTabbedContent, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 
 import { extractJobDetails } from './extract_job_details';
 import { JsonPane } from './json_tab';
 import { DatafeedPreviewPane } from './datafeed_preview_tab';
 import { AnnotationsTable } from '../../../../components/annotations/annotations_table';
+import { DatafeedModal } from '../datafeed_modal';
 import { AnnotationFlyout } from '../../../../components/annotations/annotation_flyout';
 import { ModelSnapshotTable } from '../../../../components/model_snapshots';
 import { ForecastsTable } from './forecasts_table';
 import { JobDetailsPane } from './job_details_pane';
 import { JobMessagesPane } from './job_messages_pane';
-import { i18n } from '@kbn/i18n';
 import { withKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 
 export class JobDetailsUI extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {};
+    this.state = {
+      datafeedModalVisible: false,
+    };
     if (this.props.addYourself) {
       this.props.addYourself(props.jobId, (j) => this.updateJob(j));
     }
@@ -137,6 +140,30 @@ export class JobDetailsUI extends Component {
       ];
 
       if (showFullDetails && datafeed.items.length) {
+        datafeed.titleAction = (
+          <EuiToolTip
+            content={
+              <FormattedMessage
+                id="xpack.ml.jobDetails.viewDatafeedTooltipText"
+                defaultMessage="View datafeed"
+              />
+            }
+          >
+            <EuiButtonIcon
+              size="xs"
+              aria-label={i18n.translate('xpack.ml.jobDetails.viewDatafeedAriaLabel', {
+                defaultMessage: 'View datafeed',
+              })}
+              iconType="visAreaStacked"
+              onClick={() =>
+                this.setState({
+                  datafeedModalVisible: true,
+                })
+              }
+            />
+          </EuiToolTip>
+        );
+
         // Datafeed should be at index 2 in tabs array for full details
         tabs.splice(2, 0, {
           id: 'datafeed',
@@ -145,10 +172,23 @@ export class JobDetailsUI extends Component {
             defaultMessage: 'Datafeed',
           }),
           content: (
-            <JobDetailsPane
-              data-test-subj="mlJobDetails-datafeed"
-              sections={[datafeed, datafeedTimingStats]}
-            />
+            <>
+              <JobDetailsPane
+                data-test-subj="mlJobDetails-datafeed"
+                sections={[datafeed, datafeedTimingStats]}
+              />
+              {this.props.jobId && this.state.datafeedModalVisible ? (
+                <DatafeedModal
+                  onClose={() => {
+                    this.setState({
+                      datafeedModalVisible: false,
+                    });
+                  }}
+                  end={job.data_counts.latest_bucket_timestamp}
+                  jobId={this.props.jobId}
+                />
+              ) : null}
+            </>
           ),
         });
 
