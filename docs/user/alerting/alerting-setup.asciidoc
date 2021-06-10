@@ -5,7 +5,7 @@
 <titleabbrev>Setup</titleabbrev>
 ++++
 
-The Alerting feature is automatically enabled in {kib} but may require some additional configuration.
+The Alerting feature is automatically enabled in {kib}, but might require some additional configuration.
 
 [float]
 [[alerting-prerequisites]]
