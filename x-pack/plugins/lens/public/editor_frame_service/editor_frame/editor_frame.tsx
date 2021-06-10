@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useReducer, useState, useCallback } from 'react';
+import React, { useEffect, useReducer, useState, useCallback, useRef } from 'react';
 import { CoreStart } from 'kibana/public';
 import { isEqual } from 'lodash';
 import { PaletteRegistry } from 'src/plugins/charts/public';
@@ -30,6 +30,7 @@ import {
   applyVisualizeFieldSuggestions,
   getTopSuggestionForField,
   switchToSuggestion,
+  Suggestion,
 } from './suggestion_helpers';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import {
@@ -327,45 +328,37 @@ export function EditorFrame(props: EditorFrameProps) {
     ]
   );
 
-  const getSuggestionForField = React.useCallback(
-    (field: DragDropIdentifier) => {
-      const { activeDatasourceId, datasourceStates } = state;
-      const activeVisualizationId = state.visualization.activeId;
-      const visualizationState = state.visualization.state;
-      const { visualizationMap, datasourceMap } = props;
+  // Using a ref to prevent rerenders in the child components while keeping the latest state
+  const getSuggestionForField = useRef<(field: DragDropIdentifier) => Suggestion | undefined>();
+  getSuggestionForField.current = (field: DragDropIdentifier) => {
+    const { activeDatasourceId, datasourceStates } = state;
+    const activeVisualizationId = state.visualization.activeId;
+    const visualizationState = state.visualization.state;
+    const { visualizationMap, datasourceMap } = props;
 
-      if (!field || !activeDatasourceId) {
-        return;
-      }
+    if (!field || !activeDatasourceId) {
+      return;
+    }
 
-      return getTopSuggestionForField(
-        datasourceLayers,
-        activeVisualizationId,
-        visualizationMap,
-        visualizationState,
-        datasourceMap[activeDatasourceId],
-        datasourceStates,
-        field
-      );
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      state.visualization.state,
-      props.datasourceMap,
-      props.visualizationMap,
-      state.activeDatasourceId,
-      state.datasourceStates,
-    ]
-  );
+    return getTopSuggestionForField(
+      datasourceLayers,
+      activeVisualizationId,
+      visualizationMap,
+      visualizationState,
+      datasourceMap[activeDatasourceId],
+      datasourceStates,
+      field
+    );
+  };
 
   const hasSuggestionForField = useCallback(
-    (field: DragDropIdentifier) => getSuggestionForField(field) !== undefined,
+    (field: DragDropIdentifier) => getSuggestionForField.current!(field) !== undefined,
     [getSuggestionForField]
   );
 
   const dropOntoWorkspace = useCallback(
     (field) => {
-      const suggestion = getSuggestionForField(field);
+      const suggestion = getSuggestionForField.current!(field);
       if (suggestion) {
         trackUiEvent('drop_onto_workspace');
         switchToSuggestion(dispatch, suggestion, 'SWITCH_VISUALIZATION');
@@ -377,6 +370,7 @@ export function EditorFrame(props: EditorFrameProps) {
   return (
     <RootDragDropProvider>
       <FrameLayout
+        isFullscreen={Boolean(state.isFullscreenDatasource)}
         dataPanel={
           <DataPanelWrapper
             datasourceMap={props.datasourceMap}
@@ -414,6 +408,7 @@ export function EditorFrame(props: EditorFrameProps) {
               visualizationState={state.visualization.state}
               framePublicAPI={framePublicAPI}
               core={props.core}
+              isFullscreen={Boolean(state.isFullscreenDatasource)}
             />
           )
         }
@@ -429,11 +424,12 @@ export function EditorFrame(props: EditorFrameProps) {
               visualizationState={state.visualization.state}
               visualizationMap={props.visualizationMap}
               dispatch={dispatch}
+              isFullscreen={Boolean(state.isFullscreenDatasource)}
               ExpressionRenderer={props.ExpressionRenderer}
               core={props.core}
               plugins={props.plugins}
               visualizeTriggerFieldContext={visualizeTriggerFieldContext}
-              getSuggestionForField={getSuggestionForField}
+              getSuggestionForField={getSuggestionForField.current}
             />
           )
         }
