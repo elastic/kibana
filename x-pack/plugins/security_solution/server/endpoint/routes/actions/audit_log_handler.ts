@@ -28,7 +28,7 @@ export const actionsLogRequestHandler = (
   return async (context, req, res) => {
     const {
       params: { agent_id: elasticAgentId },
-      query: { page, page_size: pageSize },
+      query: { page = 1, page_size: pageSize = 50 },
     } = req;
 
     const size = pageSize;

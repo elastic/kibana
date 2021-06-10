@@ -21,7 +21,7 @@ export const initialEndpointPageState = (): Immutable<EndpointState> => {
     endpointDetails: {
       activityLog: {
         page: 1,
-        pageSize: 10,
+        pageSize: 50,
         logData: createUninitialisedResourceState(),
       },
       hostDetails: {
