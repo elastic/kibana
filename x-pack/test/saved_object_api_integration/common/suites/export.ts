@@ -139,11 +139,11 @@ const getTestTitle = ({ failure, title }: ExportTestCase) =>
   `${failure?.reason || 'success'} ["${title}"]`;
 
 const EMPTY_RESULT = {
+  excludedObjects: [],
+  excludedObjectsCount: 0,
   exportedCount: 0,
   missingRefCount: 0,
   missingReferences: [],
-  excludedObjectsCount: 0,
-  excludedObjects: [],
 };
 
 export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
