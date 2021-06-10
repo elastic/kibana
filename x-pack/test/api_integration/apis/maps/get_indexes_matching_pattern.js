@@ -19,7 +19,7 @@ export default function ({ getService }) {
         .expect(200);
 
       expect(resp.body.success).to.be(true);
-      expect(resp.body.matchingIndexes.length).to.be.greaterThan(0);
+      expect(resp.body.matchingIndexes.length).to.be(1);
     });
 
     it('should return an empty array when no indexes match pattern', async () => {

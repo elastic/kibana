@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '../../../../../../../../../../../.cache/bazel/_bazel_aaron/624b00c49acd21a09431ae49da30ba85/execroot/kibana/bazel-out/k8-fastbuild/bin/packages/kbn-i18n';
 import {
   DEFAULT_MAX_RESULT_WINDOW,
   DEFAULT_MAX_INNER_RESULT_WINDOW,
   INDEX_SETTINGS_API_PATH,
-} from '../../../../common/constants';
-import { getHttp, getToasts } from '../../../kibana_services';
+} from '../../../../../common/constants';
+import { getHttp, getToasts } from '../../../../kibana_services';
 
 let toastDisplayed = false;
 const indexSettings = new Map<string, Promise<INDEX_SETTINGS>>();

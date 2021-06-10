@@ -69,15 +69,15 @@ export async function syncVectorSource({
   } = syncContext;
   const dataRequestId = SOURCE_DATA_REQUEST_ID;
   const requestToken = Symbol(`${layerId}-${dataRequestId}`);
-  const doRefresh = syncContext.forceRefresh
-    ? true
-    : !(await canSkipSourceUpdate({
+  const canSkipFetch = syncContext.forceRefresh
+    ? false
+    : await canSkipSourceUpdate({
         source,
         prevDataRequest,
         nextMeta: requestMeta,
         extentAware: source.isFilterByMapBounds(),
-      }));
-  if (!doRefresh) {
+      });
+  if (canSkipFetch) {
     return {
       refreshed: false,
       featureCollection: prevDataRequest

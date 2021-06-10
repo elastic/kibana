@@ -13,7 +13,7 @@ jest.mock('./load_index_settings');
 import { getIndexPatternService, getSearchService, getHttp } from '../../../kibana_services';
 import { SearchSource } from 'src/plugins/data/public';
 
-import { loadIndexSettings } from './load_index_settings';
+import { loadIndexSettings } from './util/load_index_settings';
 
 import { ESSearchSource } from './es_search_source';
 import { VectorSourceRequestMeta } from '../../../../common/descriptor_types';

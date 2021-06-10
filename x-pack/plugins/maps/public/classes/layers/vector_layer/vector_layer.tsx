@@ -76,10 +76,6 @@ interface JoinState {
   propertiesMap?: PropertiesMap;
 }
 
-interface EditableData {
-  isEditable: boolean;
-}
-
 export interface VectorLayerArguments {
   source: IVectorSource;
   joins?: InnerJoin[];
@@ -181,11 +177,9 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   }
 
   isEditable(): boolean {
-    const isEditable = this.getDataRequest(IS_EDITABLE_REQUEST_ID);
-    if (!(isEditable && isEditable.getData())) {
-      return false;
-    }
-    return (isEditable.getData() as EditableData).isEditable;
+    const dataRequest = this.getDataRequest(IS_EDITABLE_REQUEST_ID);
+    const data = dataRequest?.getData() as { isEditable: boolean } | undefined;
+    return data ? data.isEditable : false;
   }
 
   hasJoins() {
@@ -717,9 +711,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       const isEditable = await this.getSource().loadIsEditable();
       stopLoading(dataRequestId, requestToken, { isEditable });
     } catch (error) {
-      if (!(error instanceof DataRequestAbortError)) {
-        onLoadError(dataRequestId, requestToken, error.message);
-      }
+      onLoadError(dataRequestId, requestToken, error.message);
       throw error;
     }
   }
@@ -1096,7 +1088,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   }
 
   async addFeature(geometry: Geometry | Position[]) {
-    const layerSource = await this.getSource();
+    const layerSource = this.getSource();
     await layerSource.addFeature(geometry);
   }
 }

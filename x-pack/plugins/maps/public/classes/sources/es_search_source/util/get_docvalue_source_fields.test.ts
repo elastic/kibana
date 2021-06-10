@@ -6,8 +6,8 @@
  */
 
 import { getDocValueAndSourceFields } from './get_docvalue_source_fields';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
-import { IFieldType } from '../../../../../../../src/plugins/data/common/index_patterns/fields';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { IFieldType } from '../../../../../../../../src/plugins/data/common/index_patterns/fields';
 
 function createMockIndexPattern(fields: IFieldType[]): IndexPattern {
   const indexPattern = {

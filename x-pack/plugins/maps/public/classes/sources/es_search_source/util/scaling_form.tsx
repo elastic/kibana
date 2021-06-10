@@ -17,12 +17,16 @@ import {
   EuiToolTip,
   EuiBetaBadge,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { getIndexPatternService } from '../../../kibana_services';
-import { DEFAULT_MAX_RESULT_WINDOW, LAYER_TYPE, SCALING_TYPES } from '../../../../common/constants';
+import { i18n } from '../../../../../../../../../../../.cache/bazel/_bazel_aaron/624b00c49acd21a09431ae49da30ba85/execroot/kibana/bazel-out/k8-fastbuild/bin/packages/kbn-i18n';
+import { FormattedMessage } from '../../../../../../../../../../../.cache/bazel/_bazel_aaron/624b00c49acd21a09431ae49da30ba85/execroot/kibana/bazel-out/k8-fastbuild/bin/packages/kbn-i18n/target_types/react';
+import { getIndexPatternService } from '../../../../kibana_services';
+import {
+  DEFAULT_MAX_RESULT_WINDOW,
+  LAYER_TYPE,
+  SCALING_TYPES,
+} from '../../../../../common/constants';
 import { loadIndexSettings } from './load_index_settings';
-import { OnSourceChangeArgs } from '../source';
+import { OnSourceChangeArgs } from '../../source';
 
 interface Props {
   filterByMapBounds: boolean;

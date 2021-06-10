@@ -36,7 +36,7 @@ import {
 } from '../../../../common/constants';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { getSourceFields } from '../../../index_pattern_util';
-import { loadIndexSettings } from './load_index_settings';
+import { loadIndexSettings } from './util/load_index_settings';
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ESDocField } from '../../fields/es_doc_field';
 import { registerSource } from '../source_registry';
@@ -55,9 +55,9 @@ import { DataRequest } from '../../util/data_request';
 import { SortDirection, SortDirectionNumeric } from '../../../../../../../src/plugins/data/common';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { TopHitsUpdateSourceEditor } from './top_hits';
-import { getDocValueAndSourceFields, ScriptField } from './get_docvalue_source_fields';
+import { getDocValueAndSourceFields, ScriptField } from './util/get_docvalue_source_fields';
 import { ITiledSingleLayerMvtParams } from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
-import { addFeatureToIndex, getMatchingIndexes } from '../../../util';
+import { addFeatureToIndex, getMatchingIndexes } from './util/feature_edit';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esSearchTitle', {
   defaultMessage: 'Documents',
@@ -394,7 +394,13 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       return false;
     }
     await this.getIndexPattern();
-    const { matchingIndexes } = await getMatchingIndexes(this.indexPattern!.title);
+    if (!(this.indexPattern && this.indexPattern.title)) {
+      return false;
+    }
+    const { matchingIndexes } = await getMatchingIndexes(this.indexPattern.title);
+    if (!matchingIndexes) {
+      return false;
+    }
     // For now we only support 1:1 index-pattern:index matches
     return matchingIndexes.length === 1;
   }

@@ -56,11 +56,9 @@ export function closeOnHoverTooltip() {
 }
 
 export function openOnHoverTooltip(tooltipState: TooltipState) {
-  return (dispatch: Dispatch) => {
-    dispatch({
-      type: SET_OPEN_TOOLTIPS,
-      openTooltips: [tooltipState],
-    });
+  return {
+    type: SET_OPEN_TOOLTIPS,
+    openTooltips: [tooltipState],
   };
 }
 

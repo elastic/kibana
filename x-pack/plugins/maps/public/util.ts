@@ -7,14 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { EMSClient, FileLayer, TMSService } from '@elastic/ems-client';
-import { FeatureCollection, Geometry, Position } from 'geojson';
+import { FeatureCollection } from 'geojson';
 import * as topojson from 'topojson-client';
 import { GeometryCollection } from 'topojson-specification';
 import _ from 'lodash';
-import { set } from '@elastic/safer-lodash-set';
 import fetch from 'node-fetch';
-import { GET_MATCHING_INDEXES_PATH, INDEX_FEATURE_PATH } from '../common';
-
 import {
   GIS_API_PATH,
   EMS_FILES_CATALOGUE_PATH,
@@ -158,26 +155,3 @@ export async function fetchGeoJson(
     })
   );
 }
-
-export const addFeatureToIndex = async (
-  indexName: string,
-  geometry: Geometry | Position[],
-  path: string
-) => {
-  const data = set({}, path, geometry);
-  return await getHttp().fetch({
-    path: `${INDEX_FEATURE_PATH}`,
-    method: 'POST',
-    body: JSON.stringify({
-      index: indexName,
-      data,
-    }),
-  });
-};
-
-export const getMatchingIndexes = async (indexPattern: string) => {
-  return await getHttp().fetch({
-    path: `${GET_MATCHING_INDEXES_PATH}/${indexPattern}`,
-    method: 'GET',
-  });
-};

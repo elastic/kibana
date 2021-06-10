@@ -17,7 +17,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { ScalingForm } from './scaling_form';
-import { SCALING_TYPES } from '../../../../common/constants';
+import { SCALING_TYPES } from '../../../../../common/constants';
 
 const defaultProps = {
   filterByMapBounds: true,
