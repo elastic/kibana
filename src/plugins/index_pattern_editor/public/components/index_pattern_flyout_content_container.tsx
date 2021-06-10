@@ -34,18 +34,7 @@ export interface Props {
  * anything about where a field comes from and where it should be persisted.
  */
 
-export const IndexPatternFlyoutContentContainer = ({
-  onSave,
-  onCancel,
-}: /*
-  docLinks,
-  indexPatternService,
-  notifications,
-  http,
-  navigateToApp,
-  canCreateIndexPattern,
-  */
-Props) => {
+export const IndexPatternFlyoutContentContainer = ({ onSave, onCancel }: Props) => {
   const {
     services: { indexPatternService, notifications },
   } = useKibana<IndexPatternEditorContext>();
@@ -63,11 +52,17 @@ Props) => {
   const [existingIndexPatterns, setExistingIndexPatterns] = useState<string[]>([]);
 
   useEffect(() => {
+    let isMounted = true;
     const getTitles = async () => {
       const indexPatternTitles = await indexPatternService.getTitles();
-      setExistingIndexPatterns(indexPatternTitles);
+      if (isMounted) {
+        setExistingIndexPatterns(indexPatternTitles);
+      }
     };
     getTitles();
+    return () => {
+      isMounted = false;
+    };
   }, [indexPatternService]);
 
   return (

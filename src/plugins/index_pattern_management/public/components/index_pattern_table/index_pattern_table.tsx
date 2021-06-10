@@ -28,6 +28,7 @@ import { IndexPatternManagmentContext } from '../../types';
 import { IndexPatternTableItem } from '../types';
 import { getIndexPatterns } from '../utils';
 import { getListBreadcrumbs } from '../breadcrumbs';
+import { IndexPatternEditor } from '../../../../index_pattern_editor/public';
 
 const pagination = {
   initialPageSize: 10,
@@ -60,19 +61,27 @@ const title = i18n.translate('indexPatternManagement.indexPatternTable.title', {
 
 interface Props extends RouteComponentProps {
   canSave: boolean;
+  showCreateDialog?: boolean;
 }
 
-export const IndexPatternTable = ({ history }: Props) => {
+export const IndexPatternTable = ({
+  history,
+  showCreateDialog: showCreateDialogProp = false,
+}: Props) => {
   const {
     setBreadcrumbs,
     uiSettings,
     indexPatternManagementStart,
     chrome,
     data,
-    indexPatternEditor,
+    docLinks,
+    http,
+    notifications,
+    application,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
+  const [showCreateDialog, setShowCreateDialog] = useState<boolean>(showCreateDialogProp);
 
   setBreadcrumbs(getListBreadcrumbs());
   useEffect(() => {
@@ -82,10 +91,10 @@ export const IndexPatternTable = ({ history }: Props) => {
         indexPatternManagementStart,
         data.indexPatterns
       );
-      setIsLoadingIndexPatterns(false);
       setIndexPatterns(gettedIndexPatterns);
+      setIsLoadingIndexPatterns(false);
     })();
-  }, [history.push, indexPatterns.length, indexPatternManagementStart, uiSettings, data]);
+  }, [indexPatternManagementStart, uiSettings, data]);
 
   chrome.docTitle.change(title);
 
@@ -135,6 +144,7 @@ export const IndexPatternTable = ({ history }: Props) => {
   */
 
   const createButton = (
+    /*
     <EuiButton
       fill={true}
       iconType="plusInCircle"
@@ -153,6 +163,8 @@ export const IndexPatternTable = ({ history }: Props) => {
         })
       }
     >
+    */
+    <EuiButton fill={true} iconType="plusInCircle" onClick={() => setShowCreateDialog(true)}>
       <FormattedMessage
         id="indexPatternManagement.indexPatternTable.createBtn"
         defaultMessage="Create index pattern"
@@ -163,6 +175,32 @@ export const IndexPatternTable = ({ history }: Props) => {
   if (isLoadingIndexPatterns) {
     return <></>;
   }
+
+  const displayIndexPatternEditor = showCreateDialog ? (
+    <IndexPatternEditor
+      onSave={async () => {
+        // todo dedup from useEffect code
+        const gettedIndexPatterns: IndexPatternTableItem[] = await getIndexPatterns(
+          uiSettings.get('defaultIndex'),
+          indexPatternManagementStart,
+          data.indexPatterns
+        );
+        setIndexPatterns(gettedIndexPatterns);
+        setShowCreateDialog(false);
+      }}
+      closeEditor={() => setShowCreateDialog(false)}
+      services={{
+        uiSettings,
+        docLinks,
+        http,
+        notifications,
+        application,
+        indexPatternService: data.indexPatterns,
+      }}
+    />
+  ) : (
+    <></>
+  );
 
   return (
     <EuiPageContent data-test-subj="indexPatternTable" role="region" aria-label={ariaRegion}>
@@ -194,6 +232,7 @@ export const IndexPatternTable = ({ history }: Props) => {
         sorting={sorting}
         search={search}
       />
+      {displayIndexPatternEditor}
     </EuiPageContent>
   );
 };

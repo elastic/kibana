@@ -20,7 +20,6 @@ import {
   IndexPatternTableWithRouter,
   EditIndexPatternContainer,
   CreateEditFieldContainer,
-  CreateIndexPatternWizardWithRouter,
 } from '../components';
 import { IndexPatternManagementStartDependencies, IndexPatternManagementStart } from '../plugin';
 import { IndexPatternManagmentContext } from '../types';
@@ -41,7 +40,7 @@ export async function mountManagementSection(
 ) {
   const [
     { chrome, application, uiSettings, notifications, overlays, http, docLinks },
-    { data, indexPatternFieldEditor, indexPatternEditor },
+    { data, indexPatternFieldEditor },
     indexPatternManagementStart,
   ] = await getStartServices();
   const canSave = Boolean(application.capabilities.indexPatterns.save);
@@ -63,7 +62,6 @@ export async function mountManagementSection(
     indexPatternManagementStart: indexPatternManagementStart as IndexPatternManagementStart,
     setBreadcrumbs: params.setBreadcrumbs,
     fieldFormatEditors: indexPatternFieldEditor.fieldFormatEditors,
-    indexPatternEditor,
   };
 
   ReactDOM.render(
@@ -72,7 +70,7 @@ export async function mountManagementSection(
         <Router history={params.history}>
           <Switch>
             <Route path={['/create']}>
-              <CreateIndexPatternWizardWithRouter />
+              <IndexPatternTableWithRouter canSave={canSave} showCreateDialog={true} />
             </Route>
             <Route path={['/patterns/:id/field/:fieldName', '/patterns/:id/create-field/']}>
               <CreateEditFieldContainer />

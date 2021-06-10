@@ -15,3 +15,5 @@ export {
   IndexPatternFlyoutContentContainer,
   Props as IndexPatternEditorFlyoutContentContainerProps,
 } from './index_pattern_flyout_content_container';
+
+export { IndexPatternEditor } from './index_pattern_editor';

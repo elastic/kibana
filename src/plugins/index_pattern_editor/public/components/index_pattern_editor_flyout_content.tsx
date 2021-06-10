@@ -136,23 +136,42 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
   };
 
   useEffect(() => {
+    let isMounted = true;
     getIndices(http, () => [], '*', false).then(async (dataSources) => {
-      setSources(dataSources.filter(removeAliases));
-      setIsLoadingSources(false);
+      if (isMounted) {
+        setSources(dataSources.filter(removeAliases));
+        setIsLoadingSources(false);
+      }
     });
-    getIndices(http, () => [], '*:*', false).then((dataSources) =>
-      setRemoteClustersExist(!!dataSources.filter(removeAliases).length)
-    );
-  }, [http]);
+    getIndices(http, () => [], '*:*', false).then((dataSources) => {
+      if (isMounted) {
+        setRemoteClustersExist(!!dataSources.filter(removeAliases).length);
+      }
+    });
 
+    const getTitles = async () => {
+      const indexPatternTitles = await indexPatternService.getTitles();
+      if (isMounted) {
+        setExistingIndexPatterns(indexPatternTitles);
+        setIsLoadingIndexPatterns(false);
+      }
+    };
+    getTitles();
+    return () => {
+      isMounted = false;
+    };
+  }, [http, indexPatternService]);
+
+  /*
   useEffect(() => {
     const getTitles = async () => {
       const indexPatternTitles = await indexPatternService.getTitles();
       setExistingIndexPatterns(indexPatternTitles);
+      setIsLoadingIndexPatterns(false);
     };
     getTitles();
-    setIsLoadingIndexPatterns(false);
   }, [indexPatternService]);
+  */
 
   useEffect(() => {
     const fetchIndices = async (query: string = '') => {
@@ -269,22 +288,13 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
       return (
         <EmptyState
           onRefresh={loadSources}
-          // docLinks={docLinks}
-          // navigateToApp={navigateToApp}
-          // canSave={canCreateIndexPattern}
           closeFlyout={onCancel}
           createAnyway={() => setGoToForm(true)}
         />
       );
     } else {
       // first time
-      return (
-        <EmptyIndexPatternPrompt
-          // canSave={canCreateIndexPattern}
-          // docLinksIndexPatternIntro={docLinks.links.indexPatterns.introduction}
-          goToCreate={() => setGoToForm(true)}
-        />
-      );
+      return <EmptyIndexPatternPrompt goToCreate={() => setGoToForm(true)} />;
     }
   }
 
@@ -308,7 +318,7 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
                 path="title"
                 // config={nameFieldConfig}
                 component={TextField}
-                data-test-subj="titleField"
+                data-test-subj="createIndexPatternNameInput"
                 componentProps={{
                   euiFieldProps: {
                     'aria-label': i18n.translate('indexPatternEditor.form.titleAriaLabel', {
