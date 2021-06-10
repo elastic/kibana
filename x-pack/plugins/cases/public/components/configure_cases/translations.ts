@@ -94,8 +94,7 @@ export const FIELD_MAPPING_DESC = (thirdPartyName: string): string =>
 export const FIELD_MAPPING_DESC_ERR = (thirdPartyName: string): string =>
   i18n.translate('xpack.cases.configureCases.fieldMappingDescErr', {
     values: { thirdPartyName },
-    defaultMessage:
-      'Field mappings require an established connection to { thirdPartyName }. Please check your connection credentials.',
+    defaultMessage: 'Failed to retrieve mappings for { thirdPartyName }.',
   });
 
 export const FIELD_MAPPING_FIRST_COL = i18n.translate(

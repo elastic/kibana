@@ -27,6 +27,7 @@ import { useConnectors } from '../../containers/configure/use_connectors';
 import { connectorsMock } from '../../containers/configure/mock';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { CaseType, ConnectorTypes } from '../../../common';
+import { useKibana } from '../../common/lib/kibana';
 
 jest.mock('../../containers/use_update_case');
 jest.mock('../../containers/use_get_case_user_actions');
@@ -34,11 +35,13 @@ jest.mock('../../containers/use_get_case');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../user_action_tree/user_action_timestamp');
+jest.mock('../../common/lib/kibana');
 
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
 const useConnectorsMock = useConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 const alertsHit = [
   {
@@ -159,6 +162,10 @@ describe('CaseView ', () => {
       pushCaseToExternalService,
     }));
     useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
+    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
+      actionTypeTitle: '.servicenow',
+      iconClass: 'logoSecurity',
+    });
   });
 
   it('should render CaseComponent', async () => {
