@@ -20,7 +20,7 @@ analyze past performance. You can also modify active alerts.
 image::user/monitoring/images/monitoring-kibana-alerts.png["Kibana alerts in the Stack Monitoring app"]
 
 To review and modify all the available alerts, use
-<<alert-management,*{alerts-ui}*>> in *{stack-manage-app}*.
+<<create-and-manage-rules,*{alerts-ui}*>> in *{stack-manage-app}*.
 
 [discrete]
 [[kibana-alerts-cpu-threshold]]
