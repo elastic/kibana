@@ -56,7 +56,7 @@ export const SearchUI: React.FC = () => {
                       <EuiLink target="_blank" href="https://github.com/elastic/search-ui">
                         <FormattedMessage
                           id="xpack.enterpriseSearch.appSearch.engine.searchUI.repositoryLinkText"
-                          defaultMessage="Learn more"
+                          defaultMessage="View the Github repo"
                         />
                       </EuiLink>
                     ),
@@ -72,7 +72,7 @@ export const SearchUI: React.FC = () => {
                       <EuiLink target="_blank" href={`${DOCS_PREFIX}/reference-ui-guide.html`}>
                         <FormattedMessage
                           id="xpack.enterpriseSearch.appSearch.engine.searchUI.guideLinkText"
-                          defaultMessage="Learn more"
+                          defaultMessage="Learn more about Search UI"
                         />
                       </EuiLink>
                     ),
