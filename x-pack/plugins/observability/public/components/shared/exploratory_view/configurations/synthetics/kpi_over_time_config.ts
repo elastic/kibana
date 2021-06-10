@@ -53,11 +53,13 @@ export function getSyntheticsKPIConfig({ indexPattern }: ConfigProps): DataSerie
             field: SUMMARY_UP,
             id: SUMMARY_UP,
             label: UP_LABEL,
+            columnType: OPERATION_COLUMN,
           },
           {
             field: SUMMARY_DOWN,
             id: SUMMARY_DOWN,
             label: DOWN_LABEL,
+            columnType: OPERATION_COLUMN,
           },
         ],
       },
