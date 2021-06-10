@@ -71,7 +71,8 @@ const HostDetailsLinkComponent: React.FC<{
   const goToHostDetails = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+      navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.hosts,
         path: getHostDetailsUrl(encodeURIComponent(hostName), search),
       });
     },

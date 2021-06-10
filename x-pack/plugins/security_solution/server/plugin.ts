@@ -133,7 +133,6 @@ export interface PluginStart {}
 const securitySubPlugins = [
   APP_ID,
   `${APP_ID}:${SecurityPageName.detections}`,
-  `${APP_ID}:${SecurityPageName.hosts}`,
   `${APP_ID}:${SecurityPageName.network}`,
   `${APP_ID}:${SecurityPageName.timelines}`,
   `${APP_ID}:${SecurityPageName.case}`,

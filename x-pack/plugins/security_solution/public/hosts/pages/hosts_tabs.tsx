@@ -8,7 +8,7 @@
 import React, { memo, useCallback } from 'react';
 import { Route, Switch } from 'react-router-dom';
 
-import { HostsTabsProps } from './types';
+import { hostsPagePath, HostsTabsProps } from './types';
 import { scoreIntervalToDateTime } from '../../common/components/ml/score/score_interval_to_datetime';
 import { Anomaly } from '../../common/components/ml/types';
 import { HostsTableType } from '../store/model';
@@ -79,22 +79,22 @@ export const HostsTabs = memo<HostsTabsProps>(
 
     return (
       <Switch>
-        <Route path={`/:tabName(${HostsTableType.hosts})`}>
+        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.hosts})`}>
           <HostsQueryTabBody docValueFields={docValueFields} {...tabProps} />
         </Route>
-        <Route path={`/:tabName(${HostsTableType.authentications})`}>
+        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.authentications})`}>
           <AuthenticationsQueryTabBody docValueFields={docValueFields} {...tabProps} />
         </Route>
-        <Route path={`/:tabName(${HostsTableType.uncommonProcesses})`}>
+        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.uncommonProcesses})`}>
           <UncommonProcessQueryTabBody {...tabProps} />
         </Route>
-        <Route path={`/:tabName(${HostsTableType.anomalies})`}>
+        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.anomalies})`}>
           <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesHostTable} />
         </Route>
-        <Route path={`/:tabName(${HostsTableType.events})`}>
+        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.events})`}>
           <EventsQueryTabBody {...tabProps} />
         </Route>
-        <Route path={`/:tabName(${HostsTableType.alerts})`}>
+        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.alerts})`}>
           <HostAlertsQueryTabBody {...tabProps} />
         </Route>
       </Switch>

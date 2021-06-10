@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { hostsPagePath } from '../../../hosts/pages/types';
 import { HostsTableType } from '../../../hosts/store/model';
 
 import { appendSearch } from './helpers';
 
-export const getHostsUrl = (search?: string) => `${appendSearch(search)}`;
+export const getHostsUrl = (search?: string) => `${hostsPagePath}${appendSearch(search)}`;
 
 export const getTabsOnHostsUrl = (tabName: HostsTableType, search?: string) =>
   `/${tabName}${appendSearch(search)}`;

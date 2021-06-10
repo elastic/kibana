@@ -15,6 +15,7 @@ import { emptyEntity, multipleEntities, getMultipleEntities } from './entity_hel
 import { HostsTableType } from '../../../../hosts/store/model';
 
 import { url as urlUtils } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { hostsPagePath } from '../../../../hosts/pages/types';
 
 interface QueryStringType {
   '?_g': string;
@@ -91,9 +92,9 @@ export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ 
       }}
     />
     <Route
-      path="/ml-hosts/"
+      path={`${hostsPagePath}/ml-hosts/`}
       render={({ location: { search = '' } }) => (
-        <Redirect from="/ml-hosts/" to={`/ml-hosts${search}`} />
+        <Redirect from={`${hostsPagePath}/ml-hosts/`} to={`${hostsPagePath}/ml-hosts${search}`} />
       )}
     />
   </Switch>

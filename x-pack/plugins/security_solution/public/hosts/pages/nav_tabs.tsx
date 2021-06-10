@@ -10,8 +10,8 @@ import * as i18n from './translations';
 import { HostsTableType } from '../store/model';
 import { HostsNavTab } from './navigation/types';
 import { SecurityPageName } from '../../app/types';
-
-const getTabsOnHostsUrl = (tabName: HostsTableType) => `/${tabName}`;
+import { hostsPagePath } from './types';
+const getTabsOnHostsUrl = (tabName: HostsTableType) => `${hostsPagePath}/${tabName}`;
 
 export const navTabsHosts = (hasMlUserPermissions: boolean): HostsNavTab => {
   const hostsNavTabs = {

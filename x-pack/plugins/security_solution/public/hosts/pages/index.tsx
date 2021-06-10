@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Route, Switch, RouteComponentProps, useHistory } from 'react-router-dom';
+import { Route, Switch, RouteComponentProps, useHistory, Redirect } from 'react-router-dom';
 
 import { HostDetails } from './details';
 import { HostsTableType } from '../store/model';
@@ -16,7 +16,7 @@ import { Hosts } from './hosts';
 import { hostsPagePath, hostDetailsPagePath } from './types';
 
 const getHostsTabPath = () =>
-  `/:tabName(` +
+  `${hostsPagePath}/:tabName(` +
   `${HostsTableType.hosts}|` +
   `${HostsTableType.authentications}|` +
   `${HostsTableType.uncommonProcesses}|` +
@@ -24,7 +24,7 @@ const getHostsTabPath = () =>
   `${HostsTableType.events}|` +
   `${HostsTableType.alerts})`;
 
-const getHostDetailsTabPath = (pagePath: string) =>
+const getHostDetailsTabPath = () =>
   `${hostDetailsPagePath}/:tabName(` +
   `${HostsTableType.authentications}|` +
   `${HostsTableType.uncommonProcesses}|` +
@@ -32,15 +32,22 @@ const getHostDetailsTabPath = (pagePath: string) =>
   `${HostsTableType.events}|` +
   `${HostsTableType.alerts})`;
 
-type Props = Partial<RouteComponentProps<{}>> & { url: string };
+type Props = Partial<RouteComponentProps<{}>>;
 
-export const HostsContainer = React.memo<Props>(({ url }) => {
-  const history = useHistory();
-
+export const HostsContainer = React.memo<Props>(() => {
   return (
     <Switch>
       <Route
-        path="/ml-hosts"
+        exact
+        strict
+        path={hostsPagePath}
+        render={({ location: { search = '' } }) => (
+          <Redirect to={{ pathname: `${hostsPagePath}/${HostsTableType.hosts}`, search }} />
+        )}
+      />
+
+      <Route
+        path={`${hostsPagePath}/ml-hosts`}
         render={({ location, match }) => (
           <MlHostConditionalContainer location={location} url={match.url} />
         )}
@@ -49,7 +56,7 @@ export const HostsContainer = React.memo<Props>(({ url }) => {
         <Hosts />
       </Route>
       <Route
-        path={getHostDetailsTabPath(hostsPagePath)}
+        path={getHostDetailsTabPath()}
         render={({
           match: {
             params: { detailName },
@@ -63,20 +70,14 @@ export const HostsContainer = React.memo<Props>(({ url }) => {
             params: { detailName },
           },
           location: { search = '' },
-        }) => {
-          history.replace(`${detailName}/${HostsTableType.authentications}${search}`);
-          return null;
-        }}
-      />
-
-      <Route
-        exact
-        strict
-        path=""
-        render={({ location: { search = '' } }) => {
-          history.replace(`${HostsTableType.hosts}${search}`);
-          return null;
-        }}
+        }) => (
+          <Redirect
+            to={{
+              pathname: `${hostsPagePath}/${detailName}/${HostsTableType.authentications}`,
+              search,
+            }}
+          />
+        )}
       />
     </Switch>
   );
