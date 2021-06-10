@@ -1,6 +1,6 @@
 [role="xpack"]
 [[testing-connectors]]
-=== Testing Connectors
+=== Test connectors
 
 
 By using Kibana Management UI you can test you newly created Connector by getting to the Test tab of Connector Edit flyout, by clicking "Save & test" button on Create flyout:
