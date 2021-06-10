@@ -31,6 +31,7 @@ import { createRulesBulkRoute } from '../lib/detection_engine/routes/rules/creat
 import { updateRulesBulkRoute } from '../lib/detection_engine/routes/rules/update_rules_bulk_route';
 import { patchRulesBulkRoute } from '../lib/detection_engine/routes/rules/patch_rules_bulk_route';
 import { deleteRulesBulkRoute } from '../lib/detection_engine/routes/rules/delete_rules_bulk_route';
+import { performBulkActionRoute } from '../lib/detection_engine/routes/rules/perform_bulk_action_route';
 import { importRulesRoute } from '../lib/detection_engine/routes/rules/import_rules_route';
 import { exportRulesRoute } from '../lib/detection_engine/routes/rules/export_rules_route';
 import { findRulesStatusesRoute } from '../lib/detection_engine/routes/rules/find_rules_status_route';
@@ -81,6 +82,7 @@ export const initRoutes = (
   updateRulesBulkRoute(router, ml);
   patchRulesBulkRoute(router, ml);
   deleteRulesBulkRoute(router);
+  performBulkActionRoute(router, ml);
 
   createTimelinesRoute(router, config, security);
   patchTimelinesRoute(router, config, security);

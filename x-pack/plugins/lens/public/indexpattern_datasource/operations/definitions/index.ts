@@ -153,6 +153,9 @@ export interface ParamEditorProps<C> {
   updateLayer: (
     setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
   ) => void;
+  toggleFullscreen: () => void;
+  setIsCloseable: (isCloseable: boolean) => void;
+  isFullscreen: boolean;
   columnId: string;
   indexPattern: IndexPattern;
   uiSettings: IUiSettingsClient;
@@ -279,6 +282,11 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * Operations can be used as middleware for other operations, hence not shown in the panel UI
    */
   hidden?: boolean;
+  documentation?: {
+    signature: string;
+    description: string;
+    section: 'elasticsearch' | 'calculation';
+  };
 }
 
 interface BaseBuildColumnArgs {
@@ -290,6 +298,7 @@ interface OperationParam {
   name: string;
   type: string;
   required?: boolean;
+  defaultValue?: string | number;
 }
 
 interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn> {

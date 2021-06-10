@@ -2041,6 +2041,12 @@
                 "description": "The total number of enrolled agents in an unhealthy state"
               }
             },
+            "updating": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents in an updating state"
+              }
+            },
             "offline": {
               "type": "long",
               "_meta": {
@@ -2051,6 +2057,52 @@
               "type": "long",
               "_meta": {
                 "description": "The total number of agents in any state, both enrolled and inactive"
+              }
+            }
+          }
+        },
+        "fleet_server": {
+          "properties": {
+            "total_enrolled": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents, in any state"
+              }
+            },
+            "total_all_statuses": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of Fleet Server agents in any state, both enrolled and inactive."
+              }
+            },
+            "healthy": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents in a healthy state."
+              }
+            },
+            "unhealthy": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents in an unhealthy state"
+              }
+            },
+            "updating": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents in an updating state"
+              }
+            },
+            "offline": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents currently offline"
+              }
+            },
+            "num_host_urls": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of Fleet Server hosts configured in Fleet settings."
               }
             }
           }
@@ -2110,6 +2162,12 @@
                 "description": "Number of times the user opened one of the in-product help popovers."
               }
             },
+            "toggle_fullscreen_formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user toggled fullscreen mode on formula."
+              }
+            },
             "indexpattern_field_info_click": {
               "type": "long"
             },
@@ -2318,6 +2376,12 @@
               "type": "long",
               "_meta": {
                 "description": "Number of times the moving average function was selected"
+              }
+            },
+            "indexpattern_dimension_operation_formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the formula function was selected"
               }
             }
           }
@@ -2333,6 +2397,12 @@
                 "description": "Number of times the user opened one of the in-product help popovers."
               }
             },
+            "toggle_fullscreen_formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user toggled fullscreen mode on formula."
+              }
+            },
             "indexpattern_field_info_click": {
               "type": "long"
             },
@@ -2541,6 +2611,12 @@
               "type": "long",
               "_meta": {
                 "description": "Number of times the moving average function was selected"
+              }
+            },
+            "indexpattern_dimension_operation_formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the formula function was selected"
               }
             }
           }
@@ -2614,6 +2690,12 @@
             },
             "lnsMetric": {
               "type": "long"
+            },
+            "formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of saved lens visualizations which are using at least one formula"
+              }
             }
           }
         },
@@ -2657,6 +2739,12 @@
             },
             "lnsMetric": {
               "type": "long"
+            },
+            "formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of saved lens visualizations which are using at least one formula"
+              }
             }
           }
         },
@@ -2700,6 +2788,12 @@
             },
             "lnsMetric": {
               "type": "long"
+            },
+            "formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of saved lens visualizations which are using at least one formula"
+              }
             }
           }
         }
