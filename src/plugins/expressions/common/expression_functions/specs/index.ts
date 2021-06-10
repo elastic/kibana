@@ -17,3 +17,4 @@ export * from './moving_average';
 export * from './ui_setting';
 export { mapColumn, MapColumnArguments } from './map_column';
 export { math, MathArguments, MathInput } from './math';
+export { mathColumn, MathColumnArguments } from './math_column';

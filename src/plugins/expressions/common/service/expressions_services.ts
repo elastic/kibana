@@ -30,6 +30,7 @@ import {
   movingAverage,
   mapColumn,
   math,
+  mathColumn,
 } from '../expression_functions';
 
 /**
@@ -342,6 +343,7 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
       movingAverage,
       mapColumn,
       math,
+      mathColumn,
     ]) {
       this.registerFunction(fn);
     }

@@ -100,28 +100,11 @@ export const formulaOperation: OperationDefinition<
     return [
       {
         type: 'function',
-        function: 'mapColumn',
+        function: 'mathColumn',
         arguments: {
           id: [columnId],
           name: [label || defaultLabel],
-          exp: [
-            {
-              type: 'expression',
-              chain: currentColumn.references.length
-                ? [
-                    {
-                      type: 'function',
-                      function: 'math',
-                      arguments: {
-                        expression: [
-                          currentColumn.references.length ? `"${currentColumn.references[0]}"` : ``,
-                        ],
-                      },
-                    },
-                  ]
-                : [],
-            },
-          ],
+          expression: [currentColumn.references.length ? `"${currentColumn.references[0]}"` : ``],
         },
       },
     ];
