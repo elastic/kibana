@@ -22,6 +22,7 @@ import {
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 
 import { ENROLLMENT_API_KEYS_INDEX } from '../../../constants';
+import { NewEnrollmentTokenModal } from '../../../components';
 import {
   useBreadcrumbs,
   usePagination,
@@ -35,7 +36,6 @@ import type { EnrollmentAPIKey, GetAgentPoliciesResponseItem } from '../../../ty
 import { SearchBar } from '../../../components/search_bar';
 import { DefaultLayout } from '../../../layouts';
 
-import { NewEnrollmentTokenModal } from './components/new_enrollment_key_modal';
 import { ConfirmEnrollmentTokenDelete } from './components/confirm_delete_modal';
 
 const ApiKeyField: React.FunctionComponent<{ apiKeyId: string }> = ({ apiKeyId }) => {
