@@ -151,10 +151,12 @@ export class SpacesManager {
 
     // We should exclude any child-reference tags because we don't yet support reconciling/merging duplicate tags. In other words: tags can
     // be shared directly, but if a tag is only included as a reference of a requested object, it should not be shared.
-    // To filter accordingly, we allow the first N objects of the response, where N is the number of requested objects, then filter out any
-    // tags after that.
+    const requestedObjectsSet = objects.reduce(
+      (acc, { type, id }) => acc.add(`${type}:${id}`),
+      new Set<string>()
+    );
     const filteredObjects = response.objects.filter(
-      ({ type }, i) => i < objects.length || type !== TAG_TYPE
+      ({ type, id }) => type !== TAG_TYPE || requestedObjectsSet.has(`${type}:${id}`)
     );
     return { objects: filteredObjects };
   }

@@ -20,6 +20,11 @@ interface Props {
   size?: 's' | 'm' | 'l' | 'xl';
   className?: string;
   announceSpaceName?: boolean;
+  /**
+   * This property is passed to the underlying `EuiAvatar` component. If enabled, the SpaceAvatar will have a grayed out appearance. For
+   * example, this can be useful when rendering a list of spaces for a specific feature, if the feature is disabled in one of those spaces.
+   * Default: false.
+   */
   isDisabled?: boolean;
 }
 

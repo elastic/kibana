@@ -262,18 +262,28 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       if (!this._isMounted) {
         return;
       }
-      const fetchedObjectsMap = resp.reduce((acc, obj) => {
-        if (obj.error) {
-          notifications.toasts.addDanger({
-            title: unableFindSavedObjectNotificationMessage,
-            text: `${obj.error}`,
-          });
-        } else {
-          const key = `${obj.type}:${obj.id}`;
-          acc.set(key, obj);
-        }
-        return acc;
-      }, new Map<string, SavedObjectWithMetadata>());
+
+      const [fetchedObjectsMap, objectErrors] = resp.reduce<
+        [Map<string, SavedObjectWithMetadata>, string[]]
+      >(
+        ([map, errors], obj) => {
+          if (obj.error) {
+            errors.push(obj.error.message);
+          } else {
+            const key = `${obj.type}:${obj.id}`;
+            map.set(key, obj);
+          }
+          return [map, errors];
+        },
+        [new Map(), []]
+      );
+
+      if (objectErrors.length) {
+        notifications.toasts.addDanger({
+          title: unableFindSavedObjectNotificationMessage,
+          text: objectErrors.join(', '),
+        });
+      }
 
       this.setState(({ savedObjects, filteredItemCount }) => {
         // modify the existing objects array, replacing any existing objects with the newly fetched ones
@@ -311,7 +321,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     );
     const objectsToFetch = objects.filter(({ type, id }) => currentObjectsSet.has(`${type}:${id}`));
     if (objectsToFetch.length) {
-      await this.fetchSavedObjects(objectsToFetch);
+      this.fetchSavedObjects(objectsToFetch);
     }
   };
 
@@ -490,7 +500,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     });
 
     // Fetching all data
-    await this.fetchAllSavedObjects();
+    this.fetchAllSavedObjects();
     await this.fetchCounts();
 
     // Allow the user to interact with the table once the saved objects have been re-fetched.

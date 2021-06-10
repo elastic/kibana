@@ -299,7 +299,7 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
           [new Set<string>(), new Set<string>(), new Map<string, Set<string>>()]
         );
 
-        const { typeActionMap } = await this.ensureAuthorized(
+        const { typeActionMap } = await this.ensureAuthorizedForSavedObjects(
           Array.from(uniqueTypes),
           ['bulk_update'],
           Array.from(uniqueSpaces),
@@ -346,7 +346,7 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     return this.spacesClient.disableLegacyUrlAliases(aliases);
   }
 
-  private async ensureAuthorized<T extends string>(
+  private async ensureAuthorizedForSavedObjects<T extends string>(
     types: string[],
     actions: T[],
     namespaces: string[],
@@ -398,7 +398,7 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
   }
 }
 
-/** @internal */
+/** @internal This is only exported for testing purposes. */
 export function getAliasId({ targetSpace, targetType, sourceId }: LegacyUrlAliasTarget) {
   return `${targetSpace}:${targetType}:${sourceId}`;
 }

@@ -41,6 +41,11 @@ interface SavedObjectEditionState {
   object?: SavedObjectWithMetadata<any>;
 }
 
+const unableFindSavedObjectNotificationMessage = i18n.translate(
+  'savedObjectsManagement.objectView.unableFindSavedObjectNotificationMessage',
+  { defaultMessage: 'Unable to find saved object' }
+);
+
 export class SavedObjectEdition extends Component<
   SavedObjectEditionProps,
   SavedObjectEditionState
@@ -58,13 +63,26 @@ export class SavedObjectEdition extends Component<
   }
 
   componentDidMount() {
-    const { http, id } = this.props;
+    const { http, id, notifications } = this.props;
     const { type } = this.state;
-    bulkGetObjects(http, [{ type, id }]).then(([object]) => {
-      this.setState({
-        object,
+    bulkGetObjects(http, [{ type, id }])
+      .then(([object]) => {
+        if (object.error) {
+          const { message } = object.error;
+          notifications.toasts.addDanger({
+            title: unableFindSavedObjectNotificationMessage,
+            text: message,
+          });
+        } else {
+          this.setState({ object });
+        }
+      })
+      .catch((err) => {
+        notifications.toasts.addDanger({
+          title: unableFindSavedObjectNotificationMessage,
+          text: err.message,
+        });
       });
-    });
   }
 
   render() {
