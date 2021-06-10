@@ -49,7 +49,6 @@ const statusCheckSchema = schema.object({
     index: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
     query: schema.recordOf(schema.string(), schema.any()),
   }),
-  customStatusCheck: schema.maybe(schema.string()),
 });
 
 const instructionSchema = schema.object({
@@ -154,6 +153,7 @@ export const tutorialSchema = schema.object({
   // saved objects used by data module.
   savedObjects: schema.maybe(schema.arrayOf(schema.any())),
   savedObjectsInstallMsg: schema.maybe(schema.string()),
+  customStatusCheckName: schema.maybe(schema.string()),
 });
 
 export type TutorialSchema = TypeOf<typeof tutorialSchema>;

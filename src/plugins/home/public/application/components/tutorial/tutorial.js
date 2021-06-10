@@ -171,16 +171,18 @@ class TutorialUi extends React.Component {
   checkInstructionSetStatus = async (instructionSetIndex) => {
     const instructionSet = this.getInstructionSets()[instructionSetIndex];
     const esHitsCheckConfig = _.get(instructionSet, `statusCheck.esHitsCheck`);
-    const customStatusCheck = _.get(instructionSet, `statusCheck.customStatusCheck`);
 
-    const [esHitsStatusCheck, apmFleetStatusCheck] = await Promise.all([
+    //Checks if the tutorial registered in the SERVER contains the customStatusCheckName property
+    const { customStatusCheckName } = this.state.tutorial;
+
+    const [esHitsStatusCheck, customStatusCheck] = await Promise.all([
       ...(esHitsCheckConfig ? [this.fetchEsHitsStatus(esHitsCheckConfig)] : []),
-      ...(customStatusCheck === 'apm-fleet-check' ? [this.fetchApmFleetStatus()] : []),
+      ...(customStatusCheckName ? [this.fetchCustomStatusCheck(customStatusCheckName)] : []),
     ]);
 
     const nextStatusCheckState =
       esHitsStatusCheck === StatusCheckStates.HAS_DATA ||
-      apmFleetStatusCheck === StatusCheckStates.HAS_DATA
+      customStatusCheck === StatusCheckStates.HAS_DATA
         ? StatusCheckStates.HAS_DATA
         : StatusCheckStates.NO_DATA;
 
@@ -192,10 +194,20 @@ class TutorialUi extends React.Component {
     }));
   };
 
-  fetchApmFleetStatus = async () => {
-    const { http } = getServices();
-    const response = await http.get('/api/apm/fleet/has_data');
-    return response?.hasData === true ? StatusCheckStates.HAS_DATA : StatusCheckStates.NO_DATA;
+  fetchCustomStatusCheck = async (customStatusCheckName) => {
+    try {
+      //Checks if a custom status check callback  was registered in the CLIENT
+      //that matches the same name registered in the SERVER (customStatusCheckName)
+      const customStatusCheckCallback = getServices().tutorialService.getCustomStatusCheck(
+        customStatusCheckName
+      );
+      if (customStatusCheckCallback) {
+        const response = await customStatusCheckCallback();
+        return response ? StatusCheckStates.HAS_DATA : StatusCheckStates.NO_DATA;
+      }
+    } catch (e) {
+      return StatusCheckStates.ERROR;
+    }
   };
 
   /**

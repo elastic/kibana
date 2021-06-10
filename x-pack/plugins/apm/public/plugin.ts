@@ -44,6 +44,7 @@ import type {
 } from '../../triggers_actions_ui/public';
 import { registerApmAlerts } from './components/alerting/register_apm_alerts';
 import { featureCatalogueEntry } from './featureCatalogueEntry';
+import { createCallApmApi } from './services/rest/createCallApmApi';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 
@@ -140,16 +141,30 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     );
 
     const getApmDataHelper = async () => {
-      const {
-        fetchObservabilityOverviewPageData,
-        getHasData,
-        createCallApmApi,
-      } = await import('./services/rest/apm_observability_overview_fetchers');
+      const { fetchObservabilityOverviewPageData, getHasData } = await import(
+        './services/rest/apm_observability_overview_fetchers'
+      );
+      const { hasFleetApmIntegrations } = await import(
+        './services/rest/tutorial_apm_fleet_check'
+      );
       // have to do this here as well in case app isn't mounted yet
       createCallApmApi(core);
 
-      return { fetchObservabilityOverviewPageData, getHasData };
+      return {
+        fetchObservabilityOverviewPageData,
+        getHasData,
+        hasFleetApmIntegrations,
+      };
     };
+
+    // Registers a status check callback for the tutorial to call and verify if the APM integration is installed on fleet.
+    pluginSetupDeps.home?.tutorials.registerCustomStatusCheck(
+      'apm_fleet_server_status_check',
+      async () => {
+        const { hasFleetApmIntegrations } = await getApmDataHelper();
+        return hasFleetApmIntegrations();
+      }
+    );
     plugins.observability.dashboard.register({
       appName: 'apm',
       hasData: async () => {
@@ -163,11 +178,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     });
 
     const getUxDataHelper = async () => {
-      const {
-        fetchUxOverviewDate,
-        hasRumData,
-        createCallApmApi,
-      } = await import('./components/app/RumDashboard/ux_overview_fetchers');
+      const { fetchUxOverviewDate, hasRumData } = await import(
+        './components/app/RumDashboard/ux_overview_fetchers'
+      );
       // have to do this here as well in case app isn't mounted yet
       createCallApmApi(core);
 

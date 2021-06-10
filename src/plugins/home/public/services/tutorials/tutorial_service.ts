@@ -22,6 +22,9 @@ export type TutorialModuleNoticeComponent = React.FC<{
   moduleName: string;
 }>;
 
+type CustomStatusCheckCallback = () => Promise<boolean>;
+type CustomStatusCheck = Record<string, CustomStatusCheckCallback>;
+
 export class TutorialService {
   private tutorialVariables: TutorialVariables = {};
   private tutorialDirectoryNotices: { [key: string]: TutorialDirectoryNoticeComponent } = {};
@@ -29,6 +32,7 @@ export class TutorialService {
     [key: string]: TutorialDirectoryHeaderLinkComponent;
   } = {};
   private tutorialModuleNotices: { [key: string]: TutorialModuleNoticeComponent } = {};
+  private customStatusCheck: CustomStatusCheck = {};
 
   public setup() {
     return {
@@ -74,6 +78,10 @@ export class TutorialService {
         }
         this.tutorialModuleNotices[id] = component;
       },
+
+      registerCustomStatusCheck: (name: string, fnCallback: CustomStatusCheckCallback) => {
+        this.customStatusCheck[name] = fnCallback;
+      },
     };
   }
 
@@ -91,6 +99,10 @@ export class TutorialService {
 
   public getModuleNotices() {
     return Object.values(this.tutorialModuleNotices);
+  }
+
+  public getCustomStatusCheck(name: string) {
+    return this.customStatusCheck[name];
   }
 }
 
