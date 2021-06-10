@@ -44,7 +44,12 @@ export function SeriesEditor() {
             field: 'defaultFilters',
             width: '15%',
             render: (defaultFilters: string[], series: DataSeries) => (
-              <SeriesFilter defaultFilters={defaultFilters} seriesId={series.id} series={series} />
+              <SeriesFilter
+                defaultFilters={defaultFilters}
+                seriesId={series.id}
+                series={series}
+                filters={series.filters}
+              />
             ),
           },
           {

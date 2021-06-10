@@ -22,6 +22,7 @@ describe('FilterExpanded', function () {
         label={'Browser Family'}
         field={USER_AGENT_NAME}
         goBack={jest.fn()}
+        filters={[]}
       />,
       { initSeries }
     );
@@ -38,6 +39,7 @@ describe('FilterExpanded', function () {
         label={'Browser Family'}
         field={USER_AGENT_NAME}
         goBack={goBack}
+        filters={[]}
       />,
       { initSeries }
     );
@@ -61,6 +63,7 @@ describe('FilterExpanded', function () {
         label={'Browser Family'}
         field={USER_AGENT_NAME}
         goBack={goBack}
+        filters={[]}
       />,
       { initSeries }
     );
@@ -84,6 +87,7 @@ describe('FilterExpanded', function () {
         label={'Browser Family'}
         field={USER_AGENT_NAME}
         goBack={jest.fn()}
+        filters={[]}
       />,
       { initSeries }
     );
