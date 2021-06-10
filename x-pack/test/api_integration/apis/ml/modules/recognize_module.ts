@@ -141,7 +141,6 @@ export default ({ getService }: FtrProviderContext) => {
         responseCode: 200,
         moduleIds: [
           'auditbeat_process_hosts_ecs',
-          'security_auth',
           'security_linux',
           'siem_auditbeat',
         ],
