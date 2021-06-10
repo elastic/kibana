@@ -10,8 +10,6 @@ import { useCallback, useState } from 'react';
 
 import { useIsMounted } from '../use_is_mounted';
 
-// TODO: This is probably better off in another package such as kbn-securitysolution-hook-utils
-
 export interface Async<Args extends unknown[], Result> {
   loading: boolean;
   error: unknown | undefined;

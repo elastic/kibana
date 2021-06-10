@@ -2719,6 +2719,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/securitysolution-hook-utils@link:bazel-bin/packages/kbn-securitysolution-hook-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/securitysolution-io-ts-alerting-types@link:bazel-bin/packages/kbn-securitysolution-io-ts-alerting-types":
   version "0.0.0"
   uid ""
