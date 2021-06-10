@@ -29,7 +29,7 @@ export const MulticlassConfusionMatrixHelpPopover = () => {
       closePopover={() => setIsPopoverOpen(false)}
       isOpen={isPopoverOpen}
       title={i18n.translate('xpack.ml.dataframe.analytics.confusionMatrixPopoverTitle', {
-        defaultMessage: 'Multiclass confusion matrix',
+        defaultMessage: 'Normalized confusion matrix',
       })}
     >
       <p>
