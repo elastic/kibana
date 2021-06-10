@@ -44,6 +44,8 @@ pegjs(
   ],
   output_dir = True,
   args = [
+    "--allowed-start-rules",
+    "expression,argument",
     "-o",
     "$(@D)/index.js",
     "./%s/grammar/grammar.pegjs" % package_name()
