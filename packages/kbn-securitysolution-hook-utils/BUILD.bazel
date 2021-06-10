@@ -1,0 +1,85 @@
+load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
+
+PKG_BASE_NAME = "kbn-securitysolution-hook-utils"
+
+PKG_REQUIRE_NAME = "@kbn/securitysolution-hook-utils"
+
+SOURCE_FILES = glob(
+  [
+    "src/**/*.ts",
+  ],
+  exclude = [
+    "**/*.test.*",
+    "**/*.mock.*",
+  ],
+)
+
+SRCS = SOURCE_FILES
+
+filegroup(
+  name = "srcs",
+  srcs = SRCS,
+)
+
+NPM_MODULE_EXTRA_FILES = [
+  "package.json",
+  "README.md",
+]
+
+SRC_DEPS = [
+  "@npm//react"
+]
+
+TYPES_DEPS = [
+  "@npm//@types/jest",
+  "@npm//@types/node",
+  "@npm//@types/react",
+]
+
+DEPS = SRC_DEPS + TYPES_DEPS
+
+ts_config(
+  name = "tsconfig",
+  src = "tsconfig.json",
+  deps = [
+      "//:tsconfig.base.json",
+  ],
+)
+
+ts_project(
+  name = "tsc",
+  srcs = SRCS,
+  args = ["--pretty"],
+  declaration = True,
+  declaration_map = True,
+  incremental = True,
+  out_dir = "target",
+  root_dir = "src",
+  source_map = True,
+  tsconfig = ":tsconfig",
+  deps = DEPS,
+)
+
+js_library(
+  name = PKG_BASE_NAME,
+  package_name = PKG_REQUIRE_NAME,
+  srcs = NPM_MODULE_EXTRA_FILES,
+  visibility = ["//visibility:public"],
+  deps = DEPS + [":tsc"],
+)
+
+pkg_npm(
+  name = "npm_module",
+  deps = [
+      ":%s" % PKG_BASE_NAME,
+  ],
+)
+
+filegroup(
+  name = "build",
+  srcs = [
+      ":npm_module",
+  ],
+  visibility = ["//visibility:public"],
+)
