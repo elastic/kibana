@@ -142,7 +142,7 @@ Actions are not required on rules. You can run a rule without actions to underst
 [[controlling-rules]]
 === Mute and disable rules
 
-The rule listing allows you to quickly mute/unmute, disable/enable, and delete individual rules by clicking the action button. 
+The rule listing allows you to quickly mute/unmute, disable/enable, and delete individual rules by clicking menu button to open the actions menu. Muting means that the rule checks continue to run on a schedule, but that alert will not trigger any action.
 
 [role="screenshot"]
 image:images/individual-mute-disable.png[The actions button allows an individual rule to be muted, disabled, or deleted]
@@ -163,7 +163,7 @@ image::images/rule-details-alerts-active.png[Rule details page with three alerts
 
 In this example, the rule detects when a site serves more than a threshold number of bytes in a 24 hour period. Three sites are above the threshold. These are called alerts - occurrences of the condition being detected - and the alert name, status, time of detection, and duration of the condition are shown in this view.
 
-Upon detection, each alert can trigger one or more actions. If the condition persists, the same actions will trigger either on the next scheduled rule check, or (if defined) after the re-notify period on the rule has passed. To prevent re-notification, you can suppress future actions by clicking on the eye icon to mute an individual alert. Muting means that the rule checks continue to run on a schedule, but that alert will not trigger any action.
+Upon detection, each alert can trigger one or more actions. If the condition persists, the same actions will trigger either on the next scheduled rule check, or (if defined) after the re-notify period on the rule has passed. To prevent re-notification, you can suppress future actions by clicking on the switch to mute an individual alert.
 
 [role="screenshot"]
 image::images/rule-details-alert-muting.png[Muting an alert,width=50%]
