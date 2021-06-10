@@ -7,20 +7,16 @@
 
 import {
   RegisterConnectorsArgs,
-  ExternalServiceFormatterMapper,
   CommentSchemaType,
   ContextTypeGeneratedAlertType,
   ContextTypeAlertSchemaType,
 } from './types';
 import { getActionType as getCaseConnector } from './case';
-import { serviceNowITSMExternalServiceFormatter } from './servicenow/itsm_formatter';
-import { serviceNowSIRExternalServiceFormatter } from './servicenow/sir_formatter';
-import { jiraExternalServiceFormatter } from './jira/external_service_formatter';
-import { resilientExternalServiceFormatter } from './resilient/external_service_formatter';
-import { CommentRequest, CommentType } from '../../common';
+import { CommentRequest, CommentType } from '../../common/api';
 
 export * from './types';
 export { transformConnectorComment } from './case';
+export { casesConnectors } from './factory';
 
 /**
  * Separator used for creating a json parsable array from the mustache syntax that the alerting framework
@@ -39,13 +35,6 @@ export const registerConnectors = ({
       factory,
     })
   );
-};
-
-export const externalServiceFormatters: ExternalServiceFormatterMapper = {
-  '.servicenow': serviceNowITSMExternalServiceFormatter,
-  '.servicenow-sir': serviceNowSIRExternalServiceFormatter,
-  '.jira': jiraExternalServiceFormatter,
-  '.resilient': resilientExternalServiceFormatter,
 };
 
 export const isCommentGeneratedAlert = (
