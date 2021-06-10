@@ -83,7 +83,7 @@ export function startTrackingEventLoopDelaysUsage(
 ) {
   const eventLoopDelaysCollector = new EventLoopDelaysCollector();
 
-  const resetOnCount = parseInt(`${histogramReset / collectionInterval}`, 10);
+  const resetOnCount = Math.ceil(histogramReset / collectionInterval);
   timer(collectionStartDelay, collectionInterval)
     .pipe(
       map((i) => (i + 1) % resetOnCount === 0),

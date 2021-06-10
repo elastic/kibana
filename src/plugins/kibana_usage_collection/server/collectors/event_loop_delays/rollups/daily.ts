@@ -30,8 +30,9 @@ export async function rollDailyData(
   try {
     const { saved_objects: savedObjects } = await savedObjectsClient.find<EventLoopDelaysDaily>({
       type: SAVED_OBJECTS_DAILY_TYPE,
-      filter: `${SAVED_OBJECTS_DAILY_TYPE}.updated_at < "now-3d/d"`,
+      filter: `${SAVED_OBJECTS_DAILY_TYPE}.attributes.timestamp < "now-3d/d"`,
     });
+
     const settledDeletes = await deleteHistogramSavedObjects(savedObjects, savedObjectsClient);
     const failedDeletes = settledDeletes.filter(({ status }) => status !== 'fulfilled');
     if (failedDeletes.length) {

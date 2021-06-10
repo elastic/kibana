@@ -7,15 +7,9 @@
  */
 
 import { storeHistogram, serializeSavedObjectId } from './saved_objects';
-import type { IntervalHistogram } from './event_loop_delays';
 import { savedObjectsRepositoryMock } from '../../../../../core/server/mocks';
-
-const mockHistogram = {
-  exceeds: 1,
-  max: 10,
-  mean: 5,
-  min: 0,
-} as IntervalHistogram;
+import { mocked } from './event_loop_delays.mocks';
+import moment from 'moment';
 
 describe('serializeSavedObjectId', () => {
   it('returns serialized id', () => {
@@ -25,6 +19,7 @@ describe('serializeSavedObjectId', () => {
 });
 
 describe('storeHistogram', () => {
+  const mockHistogram = mocked.createHistogram();
   const mockInternalRepository = savedObjectsRepositoryMock.create();
 
   jest.useFakeTimers('modern');
@@ -41,7 +36,7 @@ describe('storeHistogram', () => {
 
     expect(mockInternalRepository.create).toBeCalledWith(
       'event_loop_delays_daily',
-      { ...mockHistogram, processId: pid },
+      { ...mockHistogram, processId: pid, timestamp: moment(mockNow).toISOString() },
       { id, overwrite: true }
     );
   });

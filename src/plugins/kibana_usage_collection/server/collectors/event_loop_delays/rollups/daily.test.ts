@@ -29,7 +29,7 @@ describe('rollDailyData', () => {
     await rollDailyData(logger, mockSavedObjectsClient);
     expect(mockSavedObjectsClient.find).toBeCalledWith({
       type: 'event_loop_delays_daily',
-      filter: `event_loop_delays_daily.updated_at < "now-3d/d"`,
+      filter: `event_loop_delays_daily.attributes.timestamp < "now-3d/d"`,
     });
 
     expect(mockSavedObjectsClient.delete).toBeCalledTimes(2);

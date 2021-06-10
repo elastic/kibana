@@ -18,6 +18,7 @@ import type { IntervalHistogram } from './event_loop_delays';
 export const SAVED_OBJECTS_DAILY_TYPE = 'event_loop_delays_daily';
 
 export interface EventLoopDelaysDaily extends SavedObjectAttributes, IntervalHistogram {
+  timestamp: string;
   processId: number;
 }
 
@@ -57,13 +58,13 @@ export async function storeHistogram(
   histogram: IntervalHistogram,
   internalRepository: ISavedObjectsRepository
 ) {
-  const date = moment.now();
+  const date = moment();
   const pid = process.pid;
   const id = serializeSavedObjectId({ date, pid });
 
   return await internalRepository.create<EventLoopDelaysDaily>(
     SAVED_OBJECTS_DAILY_TYPE,
-    { ...histogram, processId: pid },
+    { ...histogram, processId: pid, timestamp: date.toISOString() },
     { id, overwrite: true }
   );
 }

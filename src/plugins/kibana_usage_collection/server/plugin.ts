@@ -56,15 +56,13 @@ export class KibanaUsageCollectionPlugin implements Plugin {
   private uiSettingsClient?: IUiSettingsClient;
   private metric$: Subject<OpsMetrics>;
   private coreUsageData?: CoreUsageDataStart;
-  private stopUsingUiCounterIndicies$: Subject<void>;
-  private stopMonitoringEventLoop$: Subject<void>;
+  private pluginStop$: Subject<void>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.legacyConfig$ = initializerContext.config.legacy.globalConfig$;
     this.metric$ = new Subject<OpsMetrics>();
-    this.stopUsingUiCounterIndicies$ = new Subject();
-    this.stopMonitoringEventLoop$ = new Subject();
+    this.pluginStop$ = new Subject();
   }
 
   public setup(coreSetup: CoreSetup, { usageCollection }: KibanaUsageCollectionPluginsDepsSetup) {
@@ -73,7 +71,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
       usageCollection,
       coreSetup,
       this.metric$,
-      this.stopUsingUiCounterIndicies$,
+      this.pluginStop$,
       coreSetup.savedObjects.registerType.bind(coreSetup.savedObjects)
     );
   }
@@ -85,23 +83,19 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     this.uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
     core.metrics.getOpsMetrics$().subscribe(this.metric$);
     this.coreUsageData = core.coreUsageData;
-    startTrackingEventLoopDelaysUsage(
-      this.savedObjectsClient,
-      this.stopMonitoringEventLoop$.asObservable()
-    );
+    startTrackingEventLoopDelaysUsage(this.savedObjectsClient, this.pluginStop$.asObservable());
   }
 
   public stop() {
     this.metric$.complete();
-    this.stopUsingUiCounterIndicies$.complete();
-    this.stopMonitoringEventLoop$.complete();
+    this.pluginStop$.complete();
   }
 
   private registerUsageCollectors(
     usageCollection: UsageCollectionSetup,
     coreSetup: CoreSetup,
     metric$: Subject<OpsMetrics>,
-    stopUsingUiCounterIndicies$: Subject<void>,
+    pluginStop$: Subject<void>,
     registerType: SavedObjectsRegisterType
   ) {
     const getSavedObjectsClient = () => this.savedObjectsClient;
@@ -109,12 +103,8 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     const getCoreUsageDataService = () => this.coreUsageData!;
 
     registerUiCounterSavedObjectType(coreSetup.savedObjects);
-    registerUiCountersRollups(
-      this.logger.get('ui-counters'),
-      stopUsingUiCounterIndicies$,
-      getSavedObjectsClient
-    );
-    registerUiCountersUsageCollector(usageCollection, stopUsingUiCounterIndicies$);
+    registerUiCountersRollups(this.logger.get('ui-counters'), pluginStop$, getSavedObjectsClient);
+    registerUiCountersUsageCollector(usageCollection, pluginStop$);
 
     registerUsageCountersRollups(this.logger.get('usage-counters-rollup'), getSavedObjectsClient);
     registerUsageCountersUsageCollector(usageCollection);

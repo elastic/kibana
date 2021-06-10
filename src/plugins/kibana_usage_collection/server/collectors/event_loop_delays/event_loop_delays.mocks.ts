@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { IntervalHistogram } from './event_loop_delays';
 
 export const mockMonitorEnable = jest.fn();
 export const mockMonitorPercentile = jest.fn();
@@ -21,8 +22,23 @@ jest.doMock('perf_hooks', () => ({
   monitorEventLoopDelay,
 }));
 
-function createMockedInstance() {}
+function createMockHistogram(overwrites: Partial<IntervalHistogram> = {}): IntervalHistogram {
+  return {
+    min: 9093120,
+    max: 53247999,
+    mean: 11993238.600747818,
+    exceeds: 0,
+    stddev: 1168191.9357543814,
+    percentiles: {
+      '50': 12607487,
+      '75': 12615679,
+      '95': 12648447,
+      '99': 12713983,
+    },
+    ...overwrites,
+  };
+}
 
 export const mocked = {
-  create: createMockedInstance,
+  createHistogram: createMockHistogram,
 };
