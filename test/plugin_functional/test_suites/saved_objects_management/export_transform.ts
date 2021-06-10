@@ -8,6 +8,7 @@
 
 import expect from '@kbn/expect';
 import type { SavedObject } from '../../../../src/core/types';
+import type { SavedObjectsExportResultDetails } from '../../../../src/core/server';
 import { PluginFunctionalProviderContext } from '../../services';
 
 function parseNdJson(input: string): Array<SavedObject<any>> {
@@ -139,7 +140,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       });
     });
 
-    describe('FOO nested export transforms', () => {
+    describe('nested export transforms', () => {
       before(async () => {
         await esArchiver.load(
           '../functional/fixtures/es_archiver/saved_objects_management/nested_export_transform'
@@ -180,6 +181,82 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
 
             expect(objects[0].attributes.enabled).to.eql(false);
             expect(objects[1].attributes.enabled).to.eql(false);
+          });
+      });
+    });
+
+    describe('isExportable API', () => {
+      before(async () => {
+        await esArchiver.load(
+          '../functional/fixtures/es_archiver/saved_objects_management/export_exclusion'
+        );
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          '../functional/fixtures/es_archiver/saved_objects_management/export_exclusion'
+        );
+      });
+
+      it('should only export objects returning `true` for `isExportable`', async () => {
+        await supertest
+          .post('/api/saved_objects/_export')
+          .set('kbn-xsrf', 'true')
+          .send({
+            objects: [
+              {
+                type: 'test-is-exportable',
+                id: '1',
+              },
+            ],
+            includeReferencesDeep: true,
+            excludeExportDetails: true,
+          })
+          .expect(200)
+          .then((resp) => {
+            const objects = parseNdJson(resp.text).sort((obj1, obj2) =>
+              obj1.id.localeCompare(obj2.id)
+            );
+            expect(objects.map((obj) => `${obj.type}:${obj.id}`)).to.eql([
+              'test-is-exportable:1',
+              'test-is-exportable:3',
+              'test-is-exportable:5',
+            ]);
+          });
+      });
+
+      it('lists objects that got filtered', async () => {
+        await supertest
+          .post('/api/saved_objects/_export')
+          .set('kbn-xsrf', 'true')
+          .send({
+            objects: [
+              {
+                type: 'test-is-exportable',
+                id: '1',
+              },
+            ],
+            includeReferencesDeep: true,
+            excludeExportDetails: false,
+          })
+          .expect(200)
+          .then((resp) => {
+            const objects = parseNdJson(resp.text);
+            const exportDetails = (objects[
+              objects.length - 1
+            ] as unknown) as SavedObjectsExportResultDetails;
+
+            expect(exportDetails.excludedObjectsCount).to.eql(2);
+            expect(exportDetails.excludedObjects).to.eql([
+              {
+                type: 'test-is-exportable',
+                id: '2',
+              },
+              {
+                type: 'test-is-exportable',
+                id: '4',
+              },
+            ]);
           });
       });
     });

@@ -172,7 +172,7 @@ export interface SavedObjectsExportTransformContext {
  *
  * @public
  */
-export type SavedObjectsExportTransform = <T = unknown>(
+export type SavedObjectsExportTransform<T = unknown> = (
   context: SavedObjectsExportTransformContext,
   objects: Array<SavedObject<T>>
 ) => SavedObject[] | Promise<SavedObject[]>;

@@ -152,6 +152,27 @@ export class SavedObjectExportTransformsPlugin implements Plugin {
         getTitle: (obj) => obj.attributes.title,
       },
     });
+
+    // example of a SO type implementing the `isExportable` API
+    savedObjects.registerType<{ enabled: boolean; title: string }>({
+      name: 'test-is-exportable',
+      hidden: false,
+      namespaceType: 'single',
+      mappings: {
+        properties: {
+          title: { type: 'text' },
+          enabled: { type: 'boolean' },
+        },
+      },
+      management: {
+        defaultSearchField: 'title',
+        importableAndExportable: true,
+        getTitle: (obj) => obj.attributes.title,
+        isExportable: (obj) => {
+          return obj.attributes.enabled === true;
+        },
+      },
+    });
   }
 
   public start() {}

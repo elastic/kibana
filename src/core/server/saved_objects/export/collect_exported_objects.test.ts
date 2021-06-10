@@ -13,7 +13,7 @@ import { SavedObject, SavedObjectError } from '../../../types';
 import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import type { SavedObjectsExportTransform } from './types';
 import { collectExportedObjects } from './collect_exported_objects';
-import { IsObjectExportablePredicate } from '../types';
+import { SavedObjectsExportablePredicate } from '../types';
 
 const createObject = (parts: Partial<SavedObject>): SavedObject => ({
   id: 'id',
@@ -42,7 +42,7 @@ describe('collectExportedObjects', () => {
     {
       onExport,
       isExportable,
-    }: { onExport?: SavedObjectsExportTransform; isExportable?: IsObjectExportablePredicate } = {}
+    }: { onExport?: SavedObjectsExportTransform; isExportable?: SavedObjectsExportablePredicate } = {}
   ) => {
     typeRegistry.registerType({
       name,
@@ -114,10 +114,10 @@ describe('collectExportedObjects', () => {
         id: '3',
       });
 
-      const fooExportable: IsObjectExportablePredicate = jest.fn().mockReturnValue(true);
+      const fooExportable: SavedObjectsExportablePredicate = jest.fn().mockReturnValue(true);
       registerType('foo', { isExportable: fooExportable });
 
-      const barExportable: IsObjectExportablePredicate = jest.fn().mockReturnValue(true);
+      const barExportable: SavedObjectsExportablePredicate = jest.fn().mockReturnValue(true);
       registerType('bar', { isExportable: barExportable });
 
       await collectExportedObjects({

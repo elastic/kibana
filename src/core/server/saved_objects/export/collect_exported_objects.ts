@@ -8,7 +8,7 @@
 
 import type { SavedObject } from '../../../types';
 import type { KibanaRequest } from '../../http';
-import { SavedObjectsClientContract, IsObjectExportablePredicate } from '../types';
+import { SavedObjectsClientContract, SavedObjectsExportablePredicate } from '../types';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import type { SavedObjectsExportTransform } from './types';
 import { applyExportTransforms } from './apply_export_transforms';
@@ -179,13 +179,13 @@ const buildTransforms = (typeRegistry: ISavedObjectTypeRegistry) =>
 
 const buildIsExportable = (
   typeRegistry: ISavedObjectTypeRegistry
-): IsObjectExportablePredicate<any> => {
+): SavedObjectsExportablePredicate<any> => {
   const exportablePerType = typeRegistry.getAllTypes().reduce((transforms, type) => {
     if (type.management?.isExportable) {
       transforms[type.name] = type.management.isExportable;
     }
     return transforms;
-  }, {} as Record<string, IsObjectExportablePredicate>);
+  }, {} as Record<string, SavedObjectsExportablePredicate>);
 
   return (obj: SavedObject) => {
     const typePredicate = exportablePerType[obj.type];
@@ -195,7 +195,7 @@ const buildIsExportable = (
 
 const splitByExportability = async (
   objects: SavedObject[],
-  isExportable: IsObjectExportablePredicate<any>
+  isExportable: SavedObjectsExportablePredicate<any>
 ) => {
   const exportableObjects: SavedObject[] = [];
   const nonExportableObjects: SavedObject[] = [];

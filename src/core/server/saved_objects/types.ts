@@ -253,7 +253,7 @@ export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolat
  *
  * @public
  */
-export interface SavedObjectsType<Attributes = unknown> {
+export interface SavedObjectsType<Attributes = any> {
   /**
    * The name of the type, which is also used as the internal id.
    */
@@ -345,7 +345,7 @@ export interface SavedObjectsType<Attributes = unknown> {
  *
  * @public
  */
-export interface SavedObjectsTypeManagementDefinition<Attributes = unknown> {
+export interface SavedObjectsTypeManagementDefinition<Attributes = any> {
   /**
    * Is the type importable or exportable. Defaults to `false`.
    */
@@ -363,12 +363,12 @@ export interface SavedObjectsTypeManagementDefinition<Attributes = unknown> {
    * Function returning the title to display in the management table.
    * If not defined, will use the object's type and id to generate a label.
    */
-  getTitle?: (savedObject: SavedObject<any>) => string;
+  getTitle?: (savedObject: SavedObject<Attributes>) => string;
   /**
    * Function returning the url to use to redirect to the editing page of this object.
    * If not defined, editing will not be allowed.
    */
-  getEditUrl?: (savedObject: SavedObject<any>) => string;
+  getEditUrl?: (savedObject: SavedObject<Attributes>) => string;
   /**
    * Function returning the url to use to redirect to this object from the management section.
    * If not defined, redirecting to the object will not be allowed.
@@ -377,7 +377,9 @@ export interface SavedObjectsTypeManagementDefinition<Attributes = unknown> {
    *          the object page, relative to the base path. `uiCapabilitiesPath` is the path to check in the
    *          {@link Capabilities | uiCapabilities} to check if the user has permission to access the object.
    */
-  getInAppUrl?: (savedObject: SavedObject<any>) => { path: string; uiCapabilitiesPath: string };
+  getInAppUrl?: (
+    savedObject: SavedObject<Attributes>
+  ) => { path: string; uiCapabilitiesPath: string };
   /**
    * An optional export transform function that can be used transform the objects of the registered type during
    * the export process.
@@ -388,7 +390,7 @@ export interface SavedObjectsTypeManagementDefinition<Attributes = unknown> {
    *
    * @remarks `importableAndExportable` must be `true` to specify this property.
    */
-  onExport?: SavedObjectsExportTransform;
+  onExport?: SavedObjectsExportTransform<Attributes>;
   /**
    * An optional {@link SavedObjectsImportHook | import hook} to use when importing given type.
    *
@@ -431,7 +433,7 @@ export interface SavedObjectsTypeManagementDefinition<Attributes = unknown> {
    * @remarks messages returned in the warnings are user facing and must be translated.
    * @remarks `importableAndExportable` must be `true` to specify this property.
    */
-  onImport?: SavedObjectsImportHook;
+  onImport?: SavedObjectsImportHook<Attributes>;
 
   /**
    * Allow to specify exportability on the object's granularity level.
@@ -463,12 +465,12 @@ export interface SavedObjectsTypeManagementDefinition<Attributes = unknown> {
    * @remarks an exportable predicate should be deterministic
    * @remarks this is only used when `importableAndExportable` is true
    */
-  isExportable?: IsObjectExportablePredicate;
+  isExportable?: SavedObjectsExportablePredicate<Attributes>;
 }
 
 /**
  * @public
  */
-export type IsObjectExportablePredicate<Attributes = unknown> = (
+export type SavedObjectsExportablePredicate<Attributes = unknown> = (
   obj: SavedObject<Attributes>
 ) => boolean | Promise<boolean>;
