@@ -229,9 +229,9 @@ export default function ({ getService, getPageObject }) {
     before(async () => {
       await Promise.all([
         // start with an empty .kibana index
-        esArchiver.load('empty_kibana'),
+        esArchiver.load('test/functional/fixtures/es_archiver/empty_kibana'),
         // load some basic log data only if the index doesn't exist
-        esArchiver.loadIfNeeded('makelogs')
+        esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/makelogs')
       ]);
       // go to the page described by `apps.visualize` in the config
       await PageObjects.common.navigateTo('visualize');
@@ -243,7 +243,7 @@ export default function ({ getService, getPageObject }) {
       // we unload the empty_kibana archive but not the makelogs
       // archive because we don't make any changes to it, and subsequent
       // suites could use it if they call `.loadIfNeeded()`.
-      await esArchiver.unload('empty_kibana');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/empty_kibana');
     });
 
     // This series of tests illustrate how tests generally verify
@@ -370,9 +370,9 @@ await testSubjects.click(‘containerButton’);
 * Source: {blob}test/common/services/es_archiver.ts[test/common/services/es_archiver.ts]
 * Load/unload archives created with the `esArchiver`
 * Popular methods:
-** `esArchiver.load(name)`
-** `esArchiver.loadIfNeeded(name)`
-** `esArchiver.unload(name)`
+** `esArchiver.load(path)`
+** `esArchiver.loadIfNeeded(path)`
+** `esArchiver.unload(path)`
 
 Full list of services that are used in functional tests can be found here: {blob}test/functional/services[test/functional/services]
 
