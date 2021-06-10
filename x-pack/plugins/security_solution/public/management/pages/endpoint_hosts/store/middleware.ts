@@ -60,6 +60,9 @@ import { ServerReturnedEndpointPackageInfo } from './action';
 
 type EndpointPageStore = ImmutableMiddlewareAPI<EndpointState, AppAction>;
 
+// eslint-disable-next-line no-console
+const logError = console.error;
+
 export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState> = (
   coreStart,
   depsStart
@@ -154,8 +157,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           }
         } catch (error) {
           // Ignore Errors, since this should not hinder the user's ability to use the UI
-          // eslint-disable-next-line no-console
-          console.error(error);
+          logError(error);
         }
       } catch (error) {
         dispatch({
@@ -275,8 +277,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
             }
           } catch (error) {
             // Ignore Errors, since this should not hinder the user's ability to use the UI
-            // eslint-disable-next-line no-console
-            console.error(error);
+            logError(error);
           }
         } catch (error) {
           dispatch({
@@ -321,8 +322,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           }
         } catch (error) {
           // Ignore Errors, since this should not hinder the user's ability to use the UI
-          // eslint-disable-next-line no-console
-          console.error(error);
+          logError(error);
         }
       } catch (error) {
         dispatch({
@@ -456,10 +456,8 @@ const endpointsTotal = async (http: HttpStart): Promise<number> => {
       })
     ).total;
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(`error while trying to check for total endpoints`);
-    // eslint-disable-next-line no-console
-    console.error(error);
+    logError(`error while trying to check for total endpoints`);
+    logError(error);
   }
   return 0;
 };
@@ -468,10 +466,8 @@ const doEndpointsExist = async (http: HttpStart): Promise<boolean> => {
   try {
     return (await endpointsTotal(http)) > 0;
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(`error while trying to check if endpoints exist`);
-    // eslint-disable-next-line no-console
-    console.error(error);
+    logError(`error while trying to check if endpoints exist`);
+    logError(error);
   }
   return false;
 };
@@ -530,7 +526,6 @@ async function getEndpointPackageInfo(
     });
   } catch (error) {
     // Ignore Errors, since this should not hinder the user's ability to use the UI
-    // eslint-disable-next-line no-console
-    console.error(error);
+    logError(error);
   }
 }
