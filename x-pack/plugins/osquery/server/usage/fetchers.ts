@@ -6,9 +6,9 @@
  */
 
 import {
-  SingleBucketAggregate,
-  TopHitsAggregate,
-  ValueAggregate,
+  AggregationsSingleBucketAggregate,
+  AggregationsTopHitsAggregate,
+  AggregationsValueAggregate,
 } from '@elastic/elasticsearch/api/types';
 import { PackagePolicyServiceInterface } from '../../../fleet/server';
 import { getRouteMetric } from '../routes/usage';
@@ -56,7 +56,7 @@ export async function getPolicyLevelUsage(
     },
     index: '.fleet-agents',
   });
-  const policied = agentResponse.body.aggregations?.policied as SingleBucketAggregate;
+  const policied = agentResponse.body.aggregations?.policied as AggregationsSingleBucketAggregate;
   if (policied && typeof policied.doc_count === 'number') {
     result.agent_info = {
       enrolled: policied.doc_count,
@@ -121,7 +121,7 @@ export async function getLiveQueryUsage(
   const result: LiveQueryUsage = {
     session: await getRouteMetric(soClient, 'live_query'),
   };
-  const esQueries = metricResponse.aggregations?.queries as SingleBucketAggregate;
+  const esQueries = metricResponse.aggregations?.queries as AggregationsSingleBucketAggregate;
   if (esQueries && typeof esQueries.doc_count === 'number') {
     // getting error stats out of ES is difficult due to a lack of error info on .fleet-actions
     // and a lack of indexable osquery specific info on .fleet-actions-results
@@ -186,7 +186,7 @@ export async function getBeatUsage(esClient: ElasticsearchClient) {
     },
     index: METRICS_INDICES,
   });
-  const lastDayAggs = metricResponse.aggregations?.lastDay as SingleBucketAggregate;
+  const lastDayAggs = metricResponse.aggregations?.lastDay as AggregationsSingleBucketAggregate;
   const result: BeatMetricsUsage = {
     memory: {
       rss: {},
@@ -195,24 +195,24 @@ export async function getBeatUsage(esClient: ElasticsearchClient) {
   };
 
   if ('max_rss' in lastDayAggs) {
-    result.memory.rss.max = (lastDayAggs.max_rss as ValueAggregate).value;
+    result.memory.rss.max = (lastDayAggs.max_rss as AggregationsValueAggregate).value;
   }
 
   if ('avg_rss' in lastDayAggs) {
-    result.memory.rss.avg = (lastDayAggs.max_rss as ValueAggregate).value;
+    result.memory.rss.avg = (lastDayAggs.max_rss as AggregationsValueAggregate).value;
   }
 
   if ('max_cpu' in lastDayAggs) {
-    result.cpu.max = (lastDayAggs.max_cpu as ValueAggregate).value;
+    result.cpu.max = (lastDayAggs.max_cpu as AggregationsValueAggregate).value;
   }
 
   if ('avg_cpu' in lastDayAggs) {
-    result.cpu.avg = (lastDayAggs.max_cpu as ValueAggregate).value;
+    result.cpu.avg = (lastDayAggs.max_cpu as AggregationsValueAggregate).value;
   }
 
   if ('latest' in lastDayAggs) {
-    const latest = (lastDayAggs.latest as TopHitsAggregate).hits.hits[0]?._source?.monitoring
-      .metrics.beat;
+    const latest = (lastDayAggs.latest as AggregationsTopHitsAggregate).hits.hits[0]?._source
+      ?.monitoring.metrics.beat;
     if (latest) {
       result.cpu.latest = latest.cpu.total.time.ms;
       result.memory.rss.latest = latest.memstats.rss;
