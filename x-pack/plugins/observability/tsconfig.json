@@ -26,7 +26,6 @@
     { "path": "../licensing/tsconfig.json" },
     { "path": "../lens/tsconfig.json" },
     { "path": "../rule_registry/tsconfig.json" },
-    { "path": "../timelines/tsconfig.json" },
     { "path": "../translations/tsconfig.json" }
   ]
 }
