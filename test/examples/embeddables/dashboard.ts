@@ -102,8 +102,10 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
   describe('dashboard container', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/dashboard/current/data');
-      await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/dashboard/current/kibana');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
+      await esArchiver.loadIfNeeded(
+        'test/functional/fixtures/es_archiver/dashboard/current/kibana'
+      );
       await PageObjects.common.navigateToApp('dashboardEmbeddableExamples');
       await testSubjects.click('dashboardEmbeddableByValue');
       await updateInput(JSON.stringify(testDashboardInput, null, 4));

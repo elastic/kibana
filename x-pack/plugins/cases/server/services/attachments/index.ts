@@ -57,10 +57,10 @@ export class AttachmentService {
 
   public async delete({ unsecuredSavedObjectsClient, attachmentId }: GetAttachmentArgs) {
     try {
-      this.log.debug(`Attempting to GET attachment ${attachmentId}`);
+      this.log.debug(`Attempting to DELETE attachment ${attachmentId}`);
       return await unsecuredSavedObjectsClient.delete(CASE_COMMENT_SAVED_OBJECT, attachmentId);
     } catch (error) {
-      this.log.error(`Error on GET attachment ${attachmentId}: ${error}`);
+      this.log.error(`Error on DELETE attachment ${attachmentId}: ${error}`);
       throw error;
     }
   }
