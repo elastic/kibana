@@ -221,7 +221,7 @@ For information about {es} metrics aggregations, refer to {ref}/search-aggregati
 | Percentiles
 ^| X
 ^| X
-| 
+^| X
 ^| X
 
 | Percentiles Rank
@@ -233,7 +233,7 @@ For information about {es} metrics aggregations, refer to {ref}/search-aggregati
 | Top hit 
 ^| X
 ^| X
-| 
+^| X
 ^| X
 
 | Value count 
@@ -266,7 +266,7 @@ For information about {es} pipeline aggregations, refer to {ref}/search-aggregat
 | Derivative  
 ^| X
 ^| X
-| 
+^| X
 ^| X
 
 | Max bucket   
@@ -290,13 +290,13 @@ For information about {es} pipeline aggregations, refer to {ref}/search-aggregat
 | Moving average  
 ^| X
 ^| X
-| 
+^| X
 ^| X
 
 | Cumulative sum 
 ^| X
 ^| X
-| 
+^| X
 ^| X
 
 | Bucket script 
