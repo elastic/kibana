@@ -37,6 +37,7 @@ export function createTableRowDirective($compile: ng.ICompileService) {
       onAddColumn: '=?',
       onRemoveColumn: '=?',
       useNewFieldsApi: '<',
+      showMultiFields: '<',
     },
     link: ($scope: LazyScope, $el: JQuery) => {
       $el.after('<tr data-test-subj="docTableDetailsRow" class="kbnDocTableDetails__row">');

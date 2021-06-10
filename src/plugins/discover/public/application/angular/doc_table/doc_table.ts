@@ -8,7 +8,7 @@
 
 import html from './doc_table.html';
 import { dispatchRenderComplete } from '../../../../../kibana_utils/public';
-import { SAMPLE_SIZE_SETTING } from '../../../../common';
+import { SAMPLE_SIZE_SETTING, SHOW_MULTIFIELDS } from '../../../../common';
 // @ts-expect-error
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
 import { getServices } from '../../../kibana_services';
@@ -40,6 +40,7 @@ export function createDocTableDirective(pagerFactory: any, $filter: any) {
       onRemoveColumn: '=?',
       inspectorAdapters: '=?',
       useNewFieldsApi: '<',
+      showMultiFields: '<',
     },
     link: ($scope: LazyScope, $el: JQuery) => {
       $scope.persist = {
@@ -90,6 +91,8 @@ export function createDocTableDirective(pagerFactory: any, $filter: any) {
         $scope.pager.previousPage();
         calculateItemsOnPage();
       };
+
+      $scope.showMultiFields = getServices().uiSettings.get(SHOW_MULTIFIELDS);
 
       $scope.shouldShowLimitedResultsWarning = () =>
         !$scope.pager.hasNextPage && $scope.pager.totalItems < $scope.totalHitCount;

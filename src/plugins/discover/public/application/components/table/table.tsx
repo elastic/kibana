@@ -22,6 +22,7 @@ export function DocViewTable({
   columns,
   onAddColumn,
   onRemoveColumn,
+  showMultiFields,
 }: DocViewRenderProps) {
   const [fieldRowOpen, setFieldRowOpen] = useState({} as Record<string, boolean>);
   const [multiFields, setMultiFields] = useState({} as Record<string, string[]>);
