@@ -32,7 +32,6 @@ export const navTabs: SiemNavTab = {
     href: APP_DETECTIONS_PATH,
     disabled: false,
     urlKey: 'detections',
-    group: SecurityPageGroupName.detect,
   },
   [SecurityPageName.hosts]: {
     id: SecurityPageName.hosts,
