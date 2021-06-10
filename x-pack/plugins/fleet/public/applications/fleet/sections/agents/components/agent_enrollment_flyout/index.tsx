@@ -29,7 +29,7 @@ import { StandaloneInstructions } from './standalone_instructions';
 import { MissingFleetServerHostCallout } from './missing_fleet_server_host_callout';
 import type { BaseProps } from './types';
 
-interface Props extends BaseProps {
+export interface Props extends BaseProps {
   onClose: () => void;
 }
 
@@ -54,7 +54,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
   }, [modal, lastModal, settings]);
 
   return (
-    <EuiFlyout onClose={onClose} size="m">
+    <EuiFlyout data-test-subj="agentEnrollmentFlyout" onClose={onClose} size="m">
       <EuiFlyoutHeader hasBorder aria-labelledby="FleetAgentEnrollmentFlyoutTitle">
         <EuiTitle size="m">
           <h2 id="FleetAgentEnrollmentFlyoutTitle">
@@ -73,13 +73,21 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
         </EuiText>
         <EuiSpacer size="l" />
         <EuiTabs style={{ marginBottom: '-25px' }}>
-          <EuiTab isSelected={mode === 'managed'} onClick={() => setMode('managed')}>
+          <EuiTab
+            data-test-subj="managedTab"
+            isSelected={mode === 'managed'}
+            onClick={() => setMode('managed')}
+          >
             <FormattedMessage
               id="xpack.fleet.agentEnrollment.enrollFleetTabLabel"
               defaultMessage="Enroll in Fleet"
             />
           </EuiTab>
-          <EuiTab isSelected={mode === 'standalone'} onClick={() => setMode('standalone')}>
+          <EuiTab
+            data-test-subj="standaloneTab"
+            isSelected={mode === 'standalone'}
+            onClick={() => setMode('standalone')}
+          >
             <FormattedMessage
               id="xpack.fleet.agentEnrollment.enrollStandaloneTabLabel"
               defaultMessage="Run standalone"
