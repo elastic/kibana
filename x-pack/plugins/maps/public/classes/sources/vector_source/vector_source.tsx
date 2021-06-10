@@ -66,6 +66,7 @@ export interface IVectorSource extends ISource {
   getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]>;
   isBoundsAware(): boolean;
   getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig;
+  getTimeFieldName(): Promise<string | null>;
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
@@ -151,6 +152,10 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   }
 
   getSyncMeta(): VectorSourceSyncMeta | null {
+    return null;
+  }
+
+  async getTimeFieldName(): Promise<string | null> {
     return null;
   }
 }

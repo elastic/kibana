@@ -65,6 +65,7 @@ export type VectorSourceRequestMeta = MapFilters & {
   applyGlobalTime: boolean;
   fieldNames: string[];
   geogridPrecision?: number;
+  timeField?: string;
   sourceQuery?: MapQuery;
   sourceMeta: VectorSourceSyncMeta;
 };

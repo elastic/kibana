@@ -748,6 +748,11 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     };
   }
 
+  async getTimeFieldName(): Promise<string | null> {
+    const indexPattern = await this.getIndexPattern();
+    return indexPattern.timeFieldName ? indexPattern.timeFieldName : null;
+  }
+
   updateDueToTimeslice(prevMeta: DataMeta, timeslice?: Timeslice): boolean {
     if (this._isTopHits() || this._descriptor.scalingType === SCALING_TYPES.MVT) {
       return true;
