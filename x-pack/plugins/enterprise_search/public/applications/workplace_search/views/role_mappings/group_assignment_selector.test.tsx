@@ -11,15 +11,16 @@ import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
+import { waitFor } from '@testing-library/dom';
 import { shallow } from 'enzyme';
 
-import { AttributeSelector, RoleSelector, RoleMappingFlyout } from '../../../shared/role_mapping';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiRadioGroup } from '@elastic/eui';
+
 import { wsRoleMapping } from '../../../shared/role_mapping/__mocks__/roles';
 
 import { GroupAssignmentSelector } from './group_assignment_selector';
-import { RoleMapping } from './role_mapping';
 
-describe('RoleMapping', () => {
+describe('GroupAssignmentSelector', () => {
   const initializeRoleMappings = jest.fn();
   const initializeRoleMapping = jest.fn();
   const handleSaveMapping = jest.fn();
@@ -76,23 +77,37 @@ describe('RoleMapping', () => {
   });
 
   it('renders', () => {
-    setMockValues({ ...mockValues, roleMapping: wsRoleMapping });
-    const wrapper = shallow(<RoleMapping />);
+    setMockValues({ ...mockValues, GroupAssignmentSelector: wsRoleMapping });
+    const wrapper = shallow(<GroupAssignmentSelector />);
 
-    expect(wrapper.find(AttributeSelector)).toHaveLength(1);
-    expect(wrapper.find(RoleSelector)).toHaveLength(1);
-    expect(wrapper.find(GroupAssignmentSelector)).toHaveLength(1);
+    expect(wrapper.find(EuiRadioGroup)).toHaveLength(1);
+    expect(wrapper.find(EuiComboBox)).toHaveLength(1);
   });
 
-  it('enables flyout when attribute value is valid', () => {
-    setMockValues({
-      ...mockValues,
-      attributeValue: 'foo',
-      attributeName: 'role',
-      includeInAllGroups: true,
-    });
-    const wrapper = shallow(<RoleMapping />);
+  it('sets initial selected state when includeInAllGroups is true', () => {
+    setMockValues({ ...mockValues, includeInAllGroups: true });
+    const wrapper = shallow(<GroupAssignmentSelector />);
 
-    expect(wrapper.find(RoleMappingFlyout).prop('disabled')).toBe(false);
+    expect(wrapper.find(EuiRadioGroup).prop('idSelected')).toBe('all');
+  });
+
+  it('handles all/specific groups radio change', () => {
+    const wrapper = shallow(<GroupAssignmentSelector />);
+    const radio = wrapper.find(EuiRadioGroup);
+    radio.simulate('change', { target: { checked: false } });
+
+    expect(handleAllGroupsSelectionChange).toHaveBeenCalledWith(false);
+  });
+
+  it('handles group checkbox click', async () => {
+    const wrapper = shallow(<GroupAssignmentSelector />);
+    await waitFor(() =>
+      ((wrapper.find(EuiComboBox).props() as unknown) as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }).onChange([{ label: groups[0].name, value: groups[0].name }])
+    );
+    wrapper.update();
+
+    expect(handleGroupSelectionChange).toHaveBeenCalledWith([groups[0].name]);
   });
 });
