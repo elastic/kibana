@@ -7,5 +7,5 @@
 
 export { accountManagementApp } from './account_management_app';
 
-export type { ChangePasswordProps } from './change_password/change_password';
-export type { PersonalInfoProps } from './personal_info/personal_info';
+export type { ChangePasswordProps } from './change_password';
+export type { PersonalInfoProps } from './personal_info';
