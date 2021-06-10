@@ -7,7 +7,7 @@
 
 import type { ReactEventHandler } from 'react';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useRouteMatch, useHistory } from 'react-router-dom';
+import { useRouteMatch, useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -62,6 +62,7 @@ const StepsWithLessPadding = styled(EuiSteps)`
 interface AddToPolicyParams {
   pkgkey: string;
   integration?: string;
+  policyId?: string;
 }
 
 interface AddFromPolicyParams {
@@ -79,6 +80,10 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const handleNavigateTo = useNavigateToCallback();
   const routeState = useIntraAppState<CreatePackagePolicyRouteState>();
   const from: CreatePackagePolicyFrom = 'policyId' in params ? 'policy' : 'package';
+
+  const { search } = useLocation();
+  const queryParams = useMemo(() => new URLSearchParams(search), [search]);
+  const policyId = useMemo(() => queryParams.get('policyId'), [queryParams]);
 
   // Agent policy and package info states
   const [agentPolicy, setAgentPolicy] = useState<AgentPolicy | undefined>();
@@ -285,7 +290,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
                   agentPolicyName: agentPolicy.name,
                 },
               })
-            : routeState?.agentPolicyId && agentPolicy && agentCount === 0
+            : (params as AddToPolicyParams)?.policyId && agentPolicy && agentCount === 0
             ? i18n.translate('xpack.fleet.createPackagePolicy.addAgentNextNotification', {
                 defaultMessage: `The policy has been updated. Add an agent to the '{agentPolicyName}' policy to deploy this policy.`,
                 values: {
@@ -343,13 +348,13 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       <StepSelectAgentPolicy
         pkgkey={(params as AddToPolicyParams).pkgkey}
         updatePackageInfo={updatePackageInfo}
-        defaultAgentPolicyId={(params as AddFromPolicyParams).policyId}
+        defaultAgentPolicyId={policyId}
         agentPolicy={agentPolicy}
         updateAgentPolicy={updateAgentPolicy}
         setIsLoadingSecondStep={setIsLoadingSecondStep}
       />
     ),
-    [params, updatePackageInfo, agentPolicy, updateAgentPolicy]
+    [params, updatePackageInfo, agentPolicy, updateAgentPolicy, policyId]
   );
 
   const ExtensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-create');

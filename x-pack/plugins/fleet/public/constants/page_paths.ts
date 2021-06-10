@@ -48,7 +48,7 @@ export const FLEET_ROUTING_PATHS = {
   policy_details: '/policies/:policyId/:tabId?',
   policy_details_settings: '/policies/:policyId/settings',
   add_integration_from_policy: '/policies/:policyId/add-integration',
-  add_integration_to_policy: '/integrations/:pkgkey/add-integration/:integration?',
+  add_integration_to_policy: '/integrations/:pkgkey/add-integration/:integration?/:policyId?',
   edit_integration: '/policies/:policyId/edit-integration/:packagePolicyId',
   fleet: '/fleet',
   fleet_agent_list: '/fleet/agents',
@@ -111,9 +111,10 @@ export const pagePathGetters: {
     FLEET_BASE_PATH,
     `/policies/${policyId}/add-integration`,
   ],
-  add_integration_to_policy: ({ pkgkey, integration }) => [
+  add_integration_to_policy: ({ pkgkey, integration, agentPolicyId }) => [
     FLEET_BASE_PATH,
-    `/integrations/${pkgkey}/add-integration${integration ? `/${integration}` : ''}`,
+    // prettier-ignore
+    `/integrations/${pkgkey}/add-integration${integration ? `/${integration}` : ''}${agentPolicyId ? `?policyId=${agentPolicyId}` : ''}`,
   ],
   edit_integration: ({ policyId, packagePolicyId }) => [
     FLEET_BASE_PATH,

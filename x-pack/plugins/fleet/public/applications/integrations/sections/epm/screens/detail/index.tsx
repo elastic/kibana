@@ -93,6 +93,7 @@ export function Detail() {
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
   const services = useStartServices();
+  const agentPolicyIdFromContext = getAgentPolicyId();
 
   // Package info state
   const [packageInfo, setPackageInfo] = useState<PackageInfo | null>(null);
@@ -210,8 +211,6 @@ export function Detail() {
     (ev) => {
       ev.preventDefault();
 
-      const agentPolicyId = getAgentPolicyId();
-
       // The object below, given to `createHref` is explicitly accessing keys of `location` in order
       // to ensure that dependencies to this `useCallback` is set correctly (because `location` is mutable)
       const currentPath = history.createHref({
@@ -223,18 +222,19 @@ export function Detail() {
       const path = pagePathGetters.add_integration_to_policy({
         pkgkey,
         ...(integration ? { integration } : {}),
+        ...(agentPolicyIdFromContext ? { agentPolicyId: agentPolicyIdFromContext } : {}),
       })[1];
 
       let redirectToPath: CreatePackagePolicyRouteState['onSaveNavigateTo'] &
         CreatePackagePolicyRouteState['onCancelNavigateTo'];
 
-      if (agentPolicyId) {
+      if (agentPolicyIdFromContext) {
         redirectToPath = [
           PLUGIN_ID,
           {
             path: `#${
               pagePathGetters.policy_details({
-                policyId: agentPolicyId,
+                policyId: agentPolicyIdFromContext,
               })[1]
             }`,
           },
@@ -249,7 +249,6 @@ export function Detail() {
       }
 
       const redirectBackRouteState: CreatePackagePolicyRouteState = {
-        agentPolicyId,
         onSaveNavigateTo: redirectToPath,
         onCancelNavigateTo: redirectToPath,
         onCancelUrl: currentPath,
@@ -262,7 +261,16 @@ export function Detail() {
         state: redirectBackRouteState,
       });
     },
-    [history, hash, pathname, search, pkgkey, integration, services.application, getAgentPolicyId]
+    [
+      history,
+      hash,
+      pathname,
+      search,
+      pkgkey,
+      integration,
+      services.application,
+      agentPolicyIdFromContext,
+    ]
   );
 
   const headerRightContent = useMemo(
@@ -310,6 +318,9 @@ export function Detail() {
                     href={getHref('add_integration_to_policy', {
                       pkgkey,
                       ...(integration ? { integration } : {}),
+                      ...(agentPolicyIdFromContext
+                        ? { agentPolicyId: agentPolicyIdFromContext }
+                        : {}),
                     })}
                     onClick={handleAddIntegrationPolicyClick}
                     data-test-subj="addIntegrationPolicyButton"
@@ -351,6 +362,7 @@ export function Detail() {
       packageInstallStatus,
       pkgkey,
       updateAvailable,
+      agentPolicyIdFromContext,
     ]
   );
 
