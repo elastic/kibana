@@ -16,6 +16,7 @@ import { GrokDebuggerPageObject } from './grok_debugger_page';
 import { WatcherPageObject } from './watcher_page';
 import { ReportingPageObject } from './reporting_page';
 import { AccountSettingsPageObject } from './account_settings_page';
+import { ObservabilityPageProvider } from './observability_page';
 import { InfraHomePageProvider } from './infra_home_page';
 import { InfraLogsPageProvider } from './infra_logs_page';
 import { GisPageObject } from './gis_page';
@@ -84,4 +85,5 @@ export const pageObjects = {
   navigationalSearch: NavigationalSearchPageObject,
   banners: BannersPageObject,
   detections: DetectionsPageObject,
+  observability: ObservabilityPageProvider,
 };
