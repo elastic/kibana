@@ -58,9 +58,14 @@ const StepsWithLessPadding = styled(EuiSteps)`
     padding-bottom: ${(props) => props.theme.eui.paddingSizes.m};
   }
 `;
-interface RouteParameters {
-  policyId: string;
+
+interface AddToPolicyParams {
   pkgkey: string;
+  integration?: string;
+}
+
+interface AddFromPolicyParams {
+  policyId: string;
 }
 
 export const CreatePackagePolicyPage: React.FunctionComponent = () => {
@@ -68,15 +73,12 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
-  const {
-    params: { policyId: routeParamsAgentPolicyId, pkgkey },
-  } = useRouteMatch<RouteParameters>();
+  const { params } = useRouteMatch<AddToPolicyParams | AddFromPolicyParams>();
   const { getHref, getPath } = useLink();
   const history = useHistory();
   const handleNavigateTo = useNavigateToCallback();
   const routeState = useIntraAppState<CreatePackagePolicyRouteState>();
-  const from: CreatePackagePolicyFrom = routeParamsAgentPolicyId ? 'policy' : 'package';
-  const policyId = from === 'policy' ? routeParamsAgentPolicyId : routeState?.agentPolicyId;
+  const from: CreatePackagePolicyFrom = 'policyId' in params ? 'policy' : 'package';
 
   // Agent policy and package info states
   const [agentPolicy, setAgentPolicy] = useState<AgentPolicy | undefined>();
@@ -219,9 +221,11 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       return routeState.onCancelUrl;
     }
     return from === 'policy'
-      ? getHref('policy_details', { policyId: agentPolicyId || policyId! })
-      : getHref('integration_details_overview', { pkgkey });
-  }, [agentPolicyId, policyId, from, getHref, pkgkey, routeState]);
+      ? getHref('policy_details', {
+          policyId: agentPolicyId || (params as AddFromPolicyParams).policyId,
+        })
+      : getHref('integration_details_overview', { pkgkey: (params as AddToPolicyParams).pkgkey });
+  }, [agentPolicyId, params, from, getHref, routeState]);
 
   const cancelClickHandler: ReactEventHandler = useCallback(
     (ev) => {
@@ -234,14 +238,14 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   );
 
   // Save package policy
-  const savePackagePolicy = async () => {
+  const savePackagePolicy = useCallback(async () => {
     setFormState('LOADING');
     const result = await sendCreatePackagePolicy(packagePolicy);
     setFormState('SUBMITTED');
     return result;
-  };
+  }, [packagePolicy]);
 
-  const onSubmit = async () => {
+  const onSubmit = useCallback(async () => {
     if (formState === 'VALID' && hasErrors) {
       setFormState('INVALID');
       return;
@@ -259,8 +263,11 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             : routeState.onSaveNavigateTo
         );
       } else {
-        // Assume agentPolicy has been set if we get this far since the form validity depends on it
-        history.push(getPath('policy_details', { policyId: agentPolicy?.id! || policyId! }));
+        history.push(
+          getPath('policy_details', {
+            policyId: agentPolicy?.id || (params as AddFromPolicyParams).policyId,
+          })
+        );
       }
 
       notifications.toasts.addSuccess({
@@ -294,28 +301,55 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       });
       setFormState('VALID');
     }
-  };
-
-  const layoutProps = {
-    from,
-    cancelUrl,
-    onCancel: cancelClickHandler,
+  }, [
+    agentCount,
     agentPolicy,
-    packageInfo,
-  };
+    formState,
+    getPath,
+    handleNavigateTo,
+    hasErrors,
+    history,
+    notifications.toasts,
+    packagePolicy.name,
+    params,
+    routeState,
+    savePackagePolicy,
+  ]);
+
+  const integrationInfo = useMemo(
+    () =>
+      (params as AddToPolicyParams).integration
+        ? packageInfo?.policy_templates?.find(
+            (policyTemplate) => policyTemplate.name === (params as AddToPolicyParams).integration
+          )
+        : undefined,
+    [packageInfo?.policy_templates, params]
+  );
+
+  const layoutProps = useMemo(
+    () => ({
+      from,
+      cancelUrl,
+      onCancel: cancelClickHandler,
+      agentPolicy,
+      packageInfo,
+      integrationInfo,
+    }),
+    [agentPolicy, cancelClickHandler, cancelUrl, from, integrationInfo, packageInfo]
+  );
 
   const stepSelectAgentPolicy = useMemo(
     () => (
       <StepSelectAgentPolicy
-        pkgkey={pkgkey}
+        pkgkey={(params as AddToPolicyParams).pkgkey}
         updatePackageInfo={updatePackageInfo}
-        defaultAgentPolicyId={policyId}
+        defaultAgentPolicyId={(params as AddFromPolicyParams).policyId}
         agentPolicy={agentPolicy}
         updateAgentPolicy={updateAgentPolicy}
         setIsLoadingSecondStep={setIsLoadingSecondStep}
       />
     ),
-    [pkgkey, updatePackageInfo, agentPolicy, updateAgentPolicy, policyId]
+    [params, updatePackageInfo, agentPolicy, updateAgentPolicy]
   );
 
   const ExtensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-create');
@@ -333,12 +367,14 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             updatePackagePolicy={updatePackagePolicy}
             validationResults={validationResults!}
             submitAttempted={formState === 'INVALID'}
+            integrationToEnable={integrationInfo?.name}
           />
 
           {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
           {!ExtensionView && (
             <StepConfigurePackagePolicy
               packageInfo={packageInfo}
+              showOnlyIntegration={integrationInfo?.name}
               packagePolicy={packagePolicy}
               updatePackagePolicy={updatePackagePolicy}
               validationResults={validationResults!}
@@ -364,6 +400,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       updatePackagePolicy,
       validationResults,
       formState,
+      integrationInfo?.name,
       ExtensionView,
       handleExtensionViewOnChange,
     ]
@@ -399,8 +436,9 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       {from === 'package'
         ? packageInfo && (
             <IntegrationBreadcrumb
-              pkgTitle={packageInfo.title}
+              pkgTitle={integrationInfo?.title || packageInfo.title}
               pkgkey={pkgKeyFromPackageInfo(packageInfo)}
+              integration={integrationInfo?.name}
             />
           )
         : agentPolicy && (
@@ -469,8 +507,13 @@ const PolicyBreadcrumb: React.FunctionComponent<{
 const IntegrationBreadcrumb: React.FunctionComponent<{
   pkgTitle: string;
   pkgkey: string;
-}> = ({ pkgTitle, pkgkey }) => {
-  useBreadcrumbs('add_integration_to_policy', { pkgTitle, pkgkey });
+  integration?: string;
+}> = ({ pkgTitle, pkgkey, integration }) => {
+  useBreadcrumbs('add_integration_to_policy', {
+    pkgTitle,
+    pkgkey,
+    ...(integration ? { integration } : {}),
+  });
   return null;
 };
 

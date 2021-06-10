@@ -408,6 +408,11 @@ describe('Package policy service', () => {
           ],
           policy_templates: [
             {
+              name: 'template_1',
+              inputs: [{ type: 'log', template_path: 'some_template_path.yml' }],
+            },
+            {
+              name: 'template_2',
               inputs: [{ type: 'log', template_path: 'some_template_path.yml' }],
             },
           ],
@@ -416,6 +421,7 @@ describe('Package policy service', () => {
         [
           {
             type: 'log',
+            policy_template: 'template_1',
             enabled: true,
             vars: {
               hosts: {
@@ -433,12 +439,24 @@ describe('Package policy service', () => {
               },
             ],
           },
+          {
+            type: 'log',
+            policy_template: 'template_2',
+            enabled: true,
+            vars: {
+              hosts: {
+                value: ['localhost'],
+              },
+            },
+            streams: [],
+          },
         ]
       );
 
       expect(inputs).toEqual([
         {
           type: 'log',
+          policy_template: 'template_1',
           enabled: true,
           vars: {
             hosts: {
@@ -464,6 +482,20 @@ describe('Package policy service', () => {
               },
             },
           ],
+        },
+        {
+          type: 'log',
+          policy_template: 'template_2',
+          enabled: true,
+          vars: {
+            hosts: {
+              value: ['localhost'],
+            },
+          },
+          compiled_input: {
+            hosts: ['localhost'],
+          },
+          streams: [],
         },
       ]);
     });

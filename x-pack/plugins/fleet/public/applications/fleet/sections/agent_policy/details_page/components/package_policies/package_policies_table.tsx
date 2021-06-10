@@ -12,7 +12,6 @@ import type { EuiInMemoryTableProps } from '@elastic/eui';
 import {
   EuiInMemoryTable,
   EuiBadge,
-  EuiContextMenuItem,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,10 +21,8 @@ import {
 import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../../common';
 import { pagePathGetters } from '../../../../../../../constants';
 import type { AgentPolicy, PackagePolicy } from '../../../../../types';
-import { PackageIcon, ContextMenuActions } from '../../../../../components';
-import { PackagePolicyDeleteProvider, DangerEuiContextMenuItem } from '../../../components';
-import { useCapabilities, useLink, useStartServices } from '../../../../../hooks';
-import { useAgentPolicyRefresh } from '../../hooks';
+import { PackageIcon, PackagePolicyActionsMenu } from '../../../../../components';
+import { useCapabilities, useStartServices } from '../../../../../hooks';
 
 interface InMemoryPackagePolicy extends PackagePolicy {
   packageName?: string;
@@ -54,10 +51,8 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   agentPolicy,
   ...rest
 }) => {
-  const { getHref } = useLink();
   const { application } = useStartServices();
   const hasWriteCapabilities = useCapabilities().write;
-  const refreshAgentPolicy = useAgentPolicyRefresh();
 
   // With the package policies provided on input, generate the list of package policies
   // used in the InMemoryTable (flattens some values for search) as well as
@@ -171,71 +166,15 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         actions: [
           {
             render: (packagePolicy: InMemoryPackagePolicy) => {
-              const menuItems = [
-                // FIXME: implement View package policy action
-                // <EuiContextMenuItem
-                //   disabled
-                //   icon="inspect"
-                //   onClick={() => {}}
-                //   key="packagePolicyView"
-                // >
-                //   <FormattedMessage
-                //     id="xpack.fleet.policyDetails.packagePoliciesTable.viewActionTitle"
-                //     defaultMessage="View integration"
-                //   />
-                // </EuiContextMenuItem>,
-                <EuiContextMenuItem
-                  disabled={!hasWriteCapabilities}
-                  icon="pencil"
-                  href={getHref('edit_integration', {
-                    policyId: agentPolicy.id,
-                    packagePolicyId: packagePolicy.id,
-                  })}
-                  key="packagePolicyEdit"
-                >
-                  <FormattedMessage
-                    id="xpack.fleet.policyDetails.packagePoliciesTable.editActionTitle"
-                    defaultMessage="Edit integration"
-                  />
-                </EuiContextMenuItem>,
-                // FIXME: implement Copy package policy action
-                // <EuiContextMenuItem disabled icon="copy" onClick={() => {}} key="packagePolicyCopy">
-                //   <FormattedMessage
-                //     id="xpack.fleet.policyDetails.packagePoliciesTable.copyActionTitle"
-                //     defaultMessage="Copy integration"
-                //   />
-                // </EuiContextMenuItem>,
-              ];
-
-              if (!agentPolicy.is_managed) {
-                menuItems.push(
-                  <PackagePolicyDeleteProvider agentPolicy={agentPolicy} key="packagePolicyDelete">
-                    {(deletePackagePoliciesPrompt) => {
-                      return (
-                        <DangerEuiContextMenuItem
-                          disabled={!hasWriteCapabilities}
-                          icon="trash"
-                          onClick={() => {
-                            deletePackagePoliciesPrompt([packagePolicy.id], refreshAgentPolicy);
-                          }}
-                        >
-                          <FormattedMessage
-                            id="xpack.fleet.policyDetails.packagePoliciesTable.deleteActionTitle"
-                            defaultMessage="Delete integration"
-                          />
-                        </DangerEuiContextMenuItem>
-                      );
-                    }}
-                  </PackagePolicyDeleteProvider>
-                );
-              }
-              return <ContextMenuActions items={menuItems} />;
+              return (
+                <PackagePolicyActionsMenu agentPolicy={agentPolicy} packagePolicy={packagePolicy} />
+              );
             },
           },
         ],
       },
     ],
-    [agentPolicy, getHref, hasWriteCapabilities, refreshAgentPolicy]
+    [agentPolicy]
   );
 
   return (
