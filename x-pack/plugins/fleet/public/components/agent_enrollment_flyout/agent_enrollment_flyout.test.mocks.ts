@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-jest.mock('../../../../../../hooks/use_request', () => {
-  const module = jest.requireActual('../../../../../../hooks/use_request');
+jest.mock('../../hooks/use_request', () => {
+  const module = jest.requireActual('../../hooks/use_request');
   return {
     ...module,
     useGetSettings: jest.fn(),
@@ -14,16 +14,19 @@ jest.mock('../../../../../../hooks/use_request', () => {
   };
 });
 
-jest.mock('../../applications/fleet/sections/agents/agent_requirements_page', () => {
-  const module = jest.requireActual(
-    '../../applications/fleet/sections/agents/agent_requirements_page'
-  );
-  return {
-    ...module,
-    FleetServerRequirementPage: jest.fn(),
-    useFleetServerInstructions: jest.fn(),
-  };
-});
+jest.mock(
+  '../../applications/fleet/sections/agents/agent_requirements_page/fleet_server_requirement_page',
+  () => {
+    const module = jest.requireActual(
+      '../../applications/fleet/sections/agents/agent_requirements_page/fleet_server_requirement_page'
+    );
+    return {
+      ...module,
+      FleetServerRequirementPage: jest.fn(),
+      useFleetServerInstructions: jest.fn(),
+    };
+  }
+);
 
 /**
  * These steps functions use hooks inside useMemo which is not compatible with jest currently

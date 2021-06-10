@@ -10,9 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut, EuiLink, EuiButton, EuiSpacer } from '@elastic/eui';
 
-import { useUrlModal } from '../../../../hooks';
+import { useUrlModal } from '../../hooks';
 
-const MissingFleetServerHostCallout: React.FunctionComponent = () => {
+export const MissingFleetServerHostCallout: React.FunctionComponent = () => {
   const { setModal } = useUrlModal();
   return (
     <EuiCallOut
