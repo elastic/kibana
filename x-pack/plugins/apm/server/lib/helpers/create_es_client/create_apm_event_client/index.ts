@@ -106,9 +106,8 @@ export function createApmEventClient({
 
       return callAsyncWithDebug({
         cb: () => {
-          const searchPromise = withApmSpan(
-            { name: operationName, intercept: true },
-            () => cancelEsRequestOnAbort(esClient.search(searchParams), request)
+          const searchPromise = withApmSpan(operationName, () =>
+            cancelEsRequestOnAbort(esClient.search(searchParams), request)
           );
 
           return unwrapEsResponse(searchPromise);
