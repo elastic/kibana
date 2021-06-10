@@ -38,6 +38,7 @@ export const actionsLogRequestHandler = (
       headers: {
         'X-elastic-product-origin': 'fleet',
       },
+      ignore: [404],
     };
     const esClient = context.core.elasticsearch.client.asCurrentUser;
     let result;
