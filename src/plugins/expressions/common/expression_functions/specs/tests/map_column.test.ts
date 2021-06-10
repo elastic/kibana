@@ -29,7 +29,11 @@ describe('mapColumn', () => {
     expect(result.type).toBe('datatable');
     expect(result.columns).toEqual([
       ...testTable.columns,
-      { id: 'pricePlusTwo', name: 'pricePlusTwo', meta: { type: 'number' } },
+      {
+        id: 'pricePlusTwo',
+        name: 'pricePlusTwo',
+        meta: { type: 'number', params: { id: 'number' } },
+      },
     ]);
     expect(result.columns[result.columns.length - 1]).toHaveProperty('name', 'pricePlusTwo');
     expect(result.rows[arbitraryRowIndex]).toHaveProperty('pricePlusTwo');
