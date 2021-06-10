@@ -88,6 +88,25 @@ describe('event filters reducer', () => {
       });
     });
 
+    it('clean form after change form status', () => {
+      const entry = getInitialExceptionFromEvent(ecsEventMock());
+      const nameChanged = 'name changed';
+      const newComment = 'new comment';
+      const result = eventFiltersPageReducer(initialState, {
+        type: 'eventFiltersChangeForm',
+        payload: { entry: { ...entry, name: nameChanged }, newComment },
+      });
+      const cleanState = eventFiltersPageReducer(result, {
+        type: 'eventFiltersInitForm',
+        payload: { entry },
+      });
+
+      expect(cleanState).toStrictEqual({
+        ...initialState,
+        form: { ...initialState.form, entry, hasNameError: true, newComment: '' },
+      });
+    });
+
     it('create is success and force list refresh', () => {
       const initialStateWithListPageActive = {
         ...initialState,
