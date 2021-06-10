@@ -207,7 +207,7 @@ export class SecurityPageObject extends FtrService {
     }
 
     if (expectedResult === 'chrome') {
-      await this.find.byCssSelector('body.euiBody--headerIsFixed', 20000);
+      await this.find.byCssSelector('[data-test-subj="userMenuButton"]', 20000);
       this.log.debug(`Finished login process currentUrl = ${await this.browser.getCurrentUrl()}`);
     }
   }
