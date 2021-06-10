@@ -38,7 +38,13 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: adjustTimeScaleLabelSuffix(field.displayName, undefined, oldColumn.timeScale),
+      label: adjustTimeScaleLabelSuffix(
+        field.displayName,
+        undefined,
+        oldColumn.timeScale,
+        undefined,
+        oldColumn.timeShift
+      ),
       sourceField: field.name,
     };
   },
@@ -51,10 +57,23 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       };
     }
   },
-  getDefaultLabel: (column) => adjustTimeScaleLabelSuffix(countLabel, undefined, column.timeScale),
+  getDefaultLabel: (column) =>
+    adjustTimeScaleLabelSuffix(
+      countLabel,
+      undefined,
+      column.timeScale,
+      undefined,
+      column.timeShift
+    ),
   buildColumn({ field, previousColumn }, columnParams) {
     return {
-      label: adjustTimeScaleLabelSuffix(countLabel, undefined, previousColumn?.timeScale),
+      label: adjustTimeScaleLabelSuffix(
+        countLabel,
+        undefined,
+        previousColumn?.timeScale,
+        undefined,
+        previousColumn?.timeShift
+      ),
       dataType: 'number',
       operationType: 'count',
       isBucketed: false,
@@ -62,6 +81,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       sourceField: field.name,
       timeScale: previousColumn?.timeScale,
       filter: getFilter(previousColumn, columnParams),
+      timeShift: previousColumn?.timeShift,
       params:
         previousColumn?.dataType === 'number' &&
         previousColumn.params &&
@@ -82,6 +102,8 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       id: columnId,
       enabled: true,
       schema: 'metric',
+      // time shift is added to wrapping aggFilteredMetric if filter is set
+      timeShift: column.filter ? undefined : column.timeShift,
     }).toAst();
   },
   isTransferable: () => {
@@ -89,4 +111,20 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   },
   timeScalingMode: 'optional',
   filterable: true,
+  documentation: {
+    section: 'elasticsearch',
+    signature: '',
+    description: i18n.translate('xpack.lens.indexPattern.count.documentation', {
+      defaultMessage: `
+Calculates the number of documents.
+
+Example: Calculate the number of documents: 
+\`count()\`
+
+Example: Calculate the number of documents matching a certain filter:
+\`count(kql='price > 500')\`
+      `,
+    }),
+  },
+  shiftable: true,
 };

@@ -6,11 +6,7 @@
  */
 
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
-import {
-  CreateIndexRequest,
-  DeleteRequest,
-  IndexRequest,
-} from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { unwrapEsResponse } from '../../../../../../observability/server';
 import { APMRouteHandlerResources } from '../../../../routes/typings';
 import {
@@ -24,7 +20,7 @@ import {
 } from '../call_async_with_debug';
 import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
 
-export type APMIndexDocumentParams<T> = IndexRequest<T>;
+export type APMIndexDocumentParams<T> = estypes.IndexRequest<T>;
 
 export type APMInternalClient = ReturnType<typeof createInternalESClient>;
 
@@ -78,14 +74,14 @@ export function createInternalESClient({
         params,
       });
     },
-    delete: (params: DeleteRequest): Promise<{ result: string }> => {
+    delete: (params: estypes.DeleteRequest): Promise<{ result: string }> => {
       return callEs({
         requestType: 'delete',
         cb: () => asInternalUser.delete(params),
         params,
       });
     },
-    indicesCreate: (params: CreateIndexRequest) => {
+    indicesCreate: (params: estypes.IndicesCreateRequest) => {
       return callEs({
         requestType: 'indices.create',
         cb: () => asInternalUser.indices.create(params),

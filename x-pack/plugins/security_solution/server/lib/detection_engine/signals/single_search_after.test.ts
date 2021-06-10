@@ -41,7 +41,7 @@ describe('singleSearchAfter', () => {
       services: mockService,
       logger: mockLogger,
       pageSize: 1,
-      filter: undefined,
+      filter: {},
       timestampOverride: undefined,
       buildRuleMessage,
     });
@@ -59,7 +59,7 @@ describe('singleSearchAfter', () => {
       services: mockService,
       logger: mockLogger,
       pageSize: 1,
-      filter: undefined,
+      filter: {},
       timestampOverride: undefined,
       buildRuleMessage,
     });
@@ -109,7 +109,7 @@ describe('singleSearchAfter', () => {
       services: mockService,
       logger: mockLogger,
       pageSize: 1,
-      filter: undefined,
+      filter: {},
       timestampOverride: undefined,
       buildRuleMessage,
     });
@@ -132,7 +132,7 @@ describe('singleSearchAfter', () => {
       services: mockService,
       logger: mockLogger,
       pageSize: 1,
-      filter: undefined,
+      filter: {},
       timestampOverride: undefined,
       buildRuleMessage,
     });
@@ -152,7 +152,7 @@ describe('singleSearchAfter', () => {
         services: mockService,
         logger: mockLogger,
         pageSize: 1,
-        filter: undefined,
+        filter: {},
         timestampOverride: undefined,
         buildRuleMessage,
       })

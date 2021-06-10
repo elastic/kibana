@@ -648,4 +648,14 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'windows.advanced.ransomware.canary',
+    first_supported_version: '7.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.ransomware.canary',
+      {
+        defaultMessage: "A value of 'false' disables Ransomware canary protection. Default: true.",
+      }
+    ),
+  },
 ];

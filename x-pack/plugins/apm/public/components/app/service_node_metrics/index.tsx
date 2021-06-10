@@ -10,17 +10,14 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPage,
   EuiPanel,
   EuiSpacer,
   EuiStat,
-  EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { RouteComponentProps } from 'react-router-dom';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
@@ -29,10 +26,8 @@ import { useServiceMetricChartsFetcher } from '../../../hooks/use_service_metric
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { px, truncate, unit } from '../../../style/variables';
-import { ApmHeader } from '../../shared/ApmHeader';
 import { MetricsChart } from '../../shared/charts/metrics_chart';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
-import { SearchBar } from '../../shared/search_bar';
 
 const INITIAL_DATA = {
   host: '',
@@ -44,23 +39,18 @@ const Truncate = euiStyled.span`
   ${truncate(px(unit * 12))}
 `;
 
-const MetadataFlexGroup = euiStyled(EuiFlexGroup)`
-  border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
-  margin-bottom: ${({ theme }) => theme.eui.paddingSizes.m};
-  padding: ${({ theme }) =>
-    `${theme.eui.paddingSizes.m} 0 0 ${theme.eui.paddingSizes.m}`};
-`;
-
-type ServiceNodeMetricsProps = RouteComponentProps<{
+interface ServiceNodeMetricsProps {
   serviceName: string;
   serviceNodeName: string;
-}>;
+}
 
-export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
+export function ServiceNodeMetrics({
+  serviceName,
+  serviceNodeName,
+}: ServiceNodeMetricsProps) {
   const {
     urlParams: { kuery, start, end },
   } = useUrlParams();
-  const { serviceName, serviceNodeName } = match.params;
   const { agentName } = useApmServiceContext();
   const { data } = useServiceMetricChartsFetcher({ serviceNodeName });
 
@@ -89,15 +79,6 @@ export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
 
   return (
     <>
-      <ApmHeader>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiTitle>
-              <h1>{serviceName}</h1>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </ApmHeader>
       {isAggregatedData ? (
         <EuiCallOut
           title={i18n.translate(
@@ -129,78 +110,81 @@ export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
           />
         </EuiCallOut>
       ) : (
-        <MetadataFlexGroup gutterSize="xl">
-          <EuiFlexItem grow={false}>
-            <EuiStat
-              titleSize="s"
-              description={i18n.translate(
-                'xpack.apm.serviceNodeMetrics.serviceName',
-                {
-                  defaultMessage: 'Service name',
+        <EuiPanel hasShadow={false}>
+          <EuiFlexGroup gutterSize="xl">
+            <EuiFlexItem grow={false}>
+              <EuiStat
+                titleSize="s"
+                description={i18n.translate(
+                  'xpack.apm.serviceNodeMetrics.serviceName',
+                  {
+                    defaultMessage: 'Service name',
+                  }
+                )}
+                title={
+                  <EuiToolTip content={serviceName}>
+                    <Truncate>{serviceName}</Truncate>
+                  </EuiToolTip>
                 }
-              )}
-              title={
-                <EuiToolTip content={serviceName}>
-                  <Truncate>{serviceName}</Truncate>
-                </EuiToolTip>
-              }
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiStat
-              titleSize="s"
-              isLoading={isLoading}
-              description={i18n.translate('xpack.apm.serviceNodeMetrics.host', {
-                defaultMessage: 'Host',
-              })}
-              title={
-                <EuiToolTip content={host}>
-                  <Truncate>{host}</Truncate>
-                </EuiToolTip>
-              }
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiStat
-              titleSize="s"
-              isLoading={isLoading}
-              description={i18n.translate(
-                'xpack.apm.serviceNodeMetrics.containerId',
-                {
-                  defaultMessage: 'Container ID',
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiStat
+                titleSize="s"
+                isLoading={isLoading}
+                description={i18n.translate(
+                  'xpack.apm.serviceNodeMetrics.host',
+                  {
+                    defaultMessage: 'Host',
+                  }
+                )}
+                title={
+                  <EuiToolTip content={host}>
+                    <Truncate>{host}</Truncate>
+                  </EuiToolTip>
                 }
-              )}
-              title={
-                <EuiToolTip content={containerId}>
-                  <Truncate>{containerId}</Truncate>
-                </EuiToolTip>
-              }
-            />
-          </EuiFlexItem>
-        </MetadataFlexGroup>
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiStat
+                titleSize="s"
+                isLoading={isLoading}
+                description={i18n.translate(
+                  'xpack.apm.serviceNodeMetrics.containerId',
+                  {
+                    defaultMessage: 'Container ID',
+                  }
+                )}
+                title={
+                  <EuiToolTip content={containerId}>
+                    <Truncate>{containerId}</Truncate>
+                  </EuiToolTip>
+                }
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
       )}
-      <SearchBar />
-      <EuiPage>
-        {agentName && (
-          <ChartPointerEventContextProvider>
-            <EuiFlexGrid columns={2} gutterSize="s">
-              {data.charts.map((chart) => (
-                <EuiFlexItem key={chart.key}>
-                  <EuiPanel>
-                    <MetricsChart
-                      start={start}
-                      end={end}
-                      chart={chart}
-                      fetchStatus={status}
-                    />
-                  </EuiPanel>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGrid>
-            <EuiSpacer size="xxl" />
-          </ChartPointerEventContextProvider>
-        )}
-      </EuiPage>
+
+      {agentName && (
+        <ChartPointerEventContextProvider>
+          <EuiFlexGrid columns={2} gutterSize="s">
+            {data.charts.map((chart) => (
+              <EuiFlexItem key={chart.key}>
+                <EuiPanel>
+                  <MetricsChart
+                    start={start}
+                    end={end}
+                    chart={chart}
+                    fetchStatus={status}
+                  />
+                </EuiPanel>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGrid>
+          <EuiSpacer size="xxl" />
+        </ChartPointerEventContextProvider>
+      )}
     </>
   );
 }

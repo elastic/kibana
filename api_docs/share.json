@@ -124,7 +124,7 @@
         ],
         "source": {
           "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-          "lineNumber": 25
+          "lineNumber": 35
         },
         "deprecated": false,
         "children": [
@@ -140,7 +140,7 @@
             ],
             "source": {
               "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-              "lineNumber": 30
+              "lineNumber": 40
             },
             "deprecated": false,
             "children": [],
@@ -167,7 +167,7 @@
             ],
             "source": {
               "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-              "lineNumber": 32
+              "lineNumber": 42
             },
             "deprecated": false,
             "children": [
@@ -190,7 +190,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-                  "lineNumber": 32
+                  "lineNumber": 42
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -219,7 +219,7 @@
             ],
             "source": {
               "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-              "lineNumber": 45
+              "lineNumber": 55
             },
             "deprecated": false,
             "children": [
@@ -241,7 +241,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-                  "lineNumber": 45
+                  "lineNumber": 55
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -261,7 +261,7 @@
             ],
             "source": {
               "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-              "lineNumber": 52
+              "lineNumber": 62
             },
             "deprecated": false,
             "children": [],
@@ -1316,11 +1316,13 @@
         },
         ") => void; } & { urlGenerators: ",
         "UrlGeneratorsSetup",
+        "; url: ",
+        "UrlService",
         "; }"
       ],
       "source": {
         "path": "src/plugins/share/public/plugin.ts",
-        "lineNumber": 56
+        "lineNumber": 32
       },
       "deprecated": false,
       "lifecycle": "setup",
@@ -1344,11 +1346,13 @@
         },
         ") => void; } & { urlGenerators: ",
         "UrlGeneratorsStart",
+        "; url: ",
+        "UrlService",
         "; }"
       ],
       "source": {
         "path": "src/plugins/share/public/plugin.ts",
-        "lineNumber": 61
+        "lineNumber": 47
       },
       "deprecated": false,
       "lifecycle": "start",
