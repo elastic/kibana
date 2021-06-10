@@ -67,9 +67,17 @@ export const usePushToService = ({
 
   const errorsMsg = useMemo(() => {
     let errors: ErrorMessage[] = [];
+
+    // these message require that the user do some sort of write action as a result of the message, readonly users won't
+    // be able to perform such an action so let's not display the error to the user in that situation
+    if (!userCanCrud) {
+      return errors;
+    }
+
     if (actionLicense != null && !actionLicense.enabledInLicense) {
       errors = [...errors, getLicenseError()];
     }
+
     if (connectors.length === 0 && connector.id === 'none' && !loadingLicense) {
       errors = [
         ...errors,
@@ -136,12 +144,13 @@ export const usePushToService = ({
         },
       ];
     }
+
     if (actionLicense != null && !actionLicense.enabledInConfig) {
       errors = [...errors, getKibanaConfigError()];
     }
     return errors;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionLicense, caseStatus, connectors.length, connector, loadingLicense]);
+  }, [actionLicense, caseStatus, connectors.length, connector, loadingLicense, userCanCrud]);
 
   const pushToServiceButton = useMemo(() => {
     return (

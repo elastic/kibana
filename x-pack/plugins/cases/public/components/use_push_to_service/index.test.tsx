@@ -268,4 +268,157 @@ describe('usePushToService', () => {
       expect(errorsMsg[0].id).toEqual('closed-case-push-error');
     });
   });
+
+  describe('user does not have write permissions', () => {
+    const noWriteProps = { ...defaultArgs, userCanCrud: false };
+
+    it('does not display a message when user does not have a premium license', async () => {
+      (useGetActionLicense as jest.Mock).mockImplementation(() => ({
+        isLoading: false,
+        actionLicense: {
+          ...actionLicense,
+          enabledInLicense: false,
+        },
+      }));
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
+          () => usePushToService(noWriteProps),
+          {
+            wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+          }
+        );
+        await waitForNextUpdate();
+        expect(result.current.pushCallouts).toBeNull();
+      });
+    });
+
+    it('does not display a message when user does not have case enabled in config', async () => {
+      (useGetActionLicense as jest.Mock).mockImplementation(() => ({
+        isLoading: false,
+        actionLicense: {
+          ...actionLicense,
+          enabledInConfig: false,
+        },
+      }));
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
+          () => usePushToService(noWriteProps),
+          {
+            wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+          }
+        );
+        await waitForNextUpdate();
+        expect(result.current.pushCallouts).toBeNull();
+      });
+    });
+
+    it('does not display a message when user does not have any connector configured', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
+          () =>
+            usePushToService({
+              ...noWriteProps,
+              connectors: [],
+              connector: {
+                id: 'none',
+                name: 'none',
+                type: ConnectorTypes.none,
+                fields: null,
+              },
+            }),
+          {
+            wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+          }
+        );
+        await waitForNextUpdate();
+        expect(result.current.pushCallouts).toBeNull();
+      });
+    });
+
+    it('does not display a message when user does have a connector but is configured to none', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
+          () =>
+            usePushToService({
+              ...noWriteProps,
+              connector: {
+                id: 'none',
+                name: 'none',
+                type: ConnectorTypes.none,
+                fields: null,
+              },
+            }),
+          {
+            wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+          }
+        );
+        await waitForNextUpdate();
+        expect(result.current.pushCallouts).toBeNull();
+      });
+    });
+
+    it('does not display a message when connector is deleted', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
+          () =>
+            usePushToService({
+              ...noWriteProps,
+              connector: {
+                id: 'not-exist',
+                name: 'not-exist',
+                type: ConnectorTypes.none,
+                fields: null,
+              },
+              isValidConnector: false,
+            }),
+          {
+            wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+          }
+        );
+        await waitForNextUpdate();
+        expect(result.current.pushCallouts).toBeNull();
+      });
+    });
+
+    it('does not display a message when connector is deleted with empty connectors', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
+          () =>
+            usePushToService({
+              ...noWriteProps,
+              connectors: [],
+              connector: {
+                id: 'not-exist',
+                name: 'not-exist',
+                type: ConnectorTypes.none,
+                fields: null,
+              },
+              isValidConnector: false,
+            }),
+          {
+            wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+          }
+        );
+        await waitForNextUpdate();
+        expect(result.current.pushCallouts).toBeNull();
+      });
+    });
+
+    it('does not display a message when case is closed', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
+          () =>
+            usePushToService({
+              ...noWriteProps,
+              caseStatus: CaseStatuses.closed,
+            }),
+          {
+            wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+          }
+        );
+        await waitForNextUpdate();
+        expect(result.current.pushCallouts).toBeNull();
+      });
+    });
+  });
 });
