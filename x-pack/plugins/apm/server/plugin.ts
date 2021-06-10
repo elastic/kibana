@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { combineLatest } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import {
@@ -25,6 +24,7 @@ import { mergeConfigs } from './index';
 import { UI_SETTINGS } from '../../../../src/plugins/data/common';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
 import { registerApmAlerts } from './lib/alerts/register_apm_alerts';
+import { registerFleetPolicyCallbacks } from './lib/fleet/register_fleet_policy_callbacks';
 import { createApmTelemetry } from './lib/apm_telemetry';
 import { createApmEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
 import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
@@ -32,7 +32,6 @@ import { createApmAgentConfigurationIndex } from './lib/settings/agent_configura
 import { getApmIndices } from './lib/settings/apm_indices/get_apm_indices';
 import { createApmCustomLinkIndex } from './lib/settings/custom_link/create_custom_link_index';
 import { apmIndices, apmTelemetry } from './saved_objects';
-import { createElasticCloudInstructions } from './tutorial/elastic_cloud';
 import { uiSettings } from './ui_settings';
 import type {
   ApmPluginRequestHandlerContext,
@@ -51,6 +50,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../common/elasticsearch_fieldnames';
+import { tutorialProvider } from './tutorial';
 
 export class APMPlugin
   implements
@@ -103,28 +103,20 @@ export class APMPlugin
       });
     }
 
-    const ossTutorialProvider = plugins.apmOss.getRegisteredTutorialProvider();
-    plugins.home?.tutorials.unregisterTutorial(ossTutorialProvider);
-    plugins.home?.tutorials.registerTutorial(() => {
-      const ossPart = ossTutorialProvider({});
-      if (this.currentConfig!['xpack.apm.ui.enabled'] && ossPart.artifacts) {
-        // @ts-expect-error ossPart.artifacts.application is readonly
-        ossPart.artifacts.application = {
-          path: '/app/apm',
-          label: i18n.translate(
-            'xpack.apm.tutorial.specProvider.artifacts.application.label',
-            {
-              defaultMessage: 'Launch APM',
-            }
-          ),
-        };
-      }
-
-      return {
-        ...ossPart,
-        elasticCloud: createElasticCloudInstructions(plugins.cloud),
-      };
-    });
+    plugins.home?.tutorials.registerTutorial(
+      tutorialProvider({
+        isEnabled: this.currentConfig['xpack.apm.ui.enabled'],
+        indexPatternTitle: this.currentConfig['apm_oss.indexPattern'],
+        cloud: plugins.cloud,
+        indices: {
+          errorIndices: this.currentConfig['apm_oss.errorIndices'],
+          metricsIndices: this.currentConfig['apm_oss.metricsIndices'],
+          onboardingIndices: this.currentConfig['apm_oss.onboardingIndices'],
+          sourcemapIndices: this.currentConfig['apm_oss.sourcemapIndices'],
+          transactionIndices: this.currentConfig['apm_oss.transactionIndices'],
+        },
+      })
+    );
 
     plugins.features.registerKibanaFeature(APM_FEATURE);
 
@@ -195,6 +187,19 @@ export class APMPlugin
       ready,
     });
 
+    const resourcePlugins = mapValues(plugins, (value, key) => {
+      return {
+        setup: value,
+        start: () =>
+          core.getStartServices().then((services) => {
+            const [, pluginsStartContracts] = services;
+            return pluginsStartContracts[
+              key as keyof APMPluginStartDependencies
+            ];
+          }),
+      };
+    }) as APMRouteHandlerResources['plugins'];
+
     registerRoutes({
       core: {
         setup: core,
@@ -204,18 +209,7 @@ export class APMPlugin
       config: currentConfig,
       repository: getGlobalApmServerRouteRepository(),
       ruleDataClient,
-      plugins: mapValues(plugins, (value, key) => {
-        return {
-          setup: value,
-          start: () =>
-            core.getStartServices().then((services) => {
-              const [, pluginsStartContracts] = services;
-              return pluginsStartContracts[
-                key as keyof APMPluginStartDependencies
-              ];
-            }),
-        };
-      }) as APMRouteHandlerResources['plugins'],
+      plugins: resourcePlugins,
     });
 
     const boundGetApmIndices = async () =>
@@ -233,6 +227,13 @@ export class APMPlugin
         logger: this.logger!.get('rule'),
       });
     }
+
+    registerFleetPolicyCallbacks({
+      plugins: resourcePlugins,
+      ruleDataClient,
+      config: this.currentConfig,
+      logger: this.logger,
+    });
 
     return {
       config$: mergedConfig$,

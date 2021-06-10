@@ -17,14 +17,14 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
 
     before(async function () {
       await browser.setWindowSize(1200, 800);
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('visualize');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.load('test/functional/fixtures/es_archiver/visualize');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await PageObjects.common.navigateToApp('discover');
     });
 
     after(function unloadMakelogs() {
-      return esArchiver.unload('logstash_functional');
+      return esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
     loadTestFile(require.resolve('./_context_navigation'));

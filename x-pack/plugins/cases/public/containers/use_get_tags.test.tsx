@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useGetTags, UseGetTags } from './use_get_tags';
 import { tags } from './mock';
 import * as api from './api';
+import { TestProviders } from '../common/mock';
+import { SECURITY_SOLUTION_OWNER } from '../../common';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
@@ -22,7 +25,9 @@ describe('useGetTags', () => {
 
   it('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetTags>(() => useGetTags());
+      const { result, waitForNextUpdate } = renderHook<string, UseGetTags>(() => useGetTags(), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
       await waitForNextUpdate();
       expect(result.current).toEqual({
         tags: [],
@@ -36,16 +41,20 @@ describe('useGetTags', () => {
   it('calls getTags api', async () => {
     const spyOnGetTags = jest.spyOn(api, 'getTags');
     await act(async () => {
-      const { waitForNextUpdate } = renderHook<string, UseGetTags>(() => useGetTags());
+      const { waitForNextUpdate } = renderHook<string, UseGetTags>(() => useGetTags(), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
       await waitForNextUpdate();
       await waitForNextUpdate();
-      expect(spyOnGetTags).toBeCalledWith(abortCtrl.signal);
+      expect(spyOnGetTags).toBeCalledWith(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
     });
   });
 
   it('fetch tags', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetTags>(() => useGetTags());
+      const { result, waitForNextUpdate } = renderHook<string, UseGetTags>(() => useGetTags(), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
       await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual({
@@ -60,7 +69,9 @@ describe('useGetTags', () => {
   it('refetch tags', async () => {
     const spyOnGetTags = jest.spyOn(api, 'getTags');
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetTags>(() => useGetTags());
+      const { result, waitForNextUpdate } = renderHook<string, UseGetTags>(() => useGetTags(), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
       await waitForNextUpdate();
       await waitForNextUpdate();
       result.current.fetchTags();
@@ -75,7 +86,9 @@ describe('useGetTags', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetTags>(() => useGetTags());
+      const { result, waitForNextUpdate } = renderHook<string, UseGetTags>(() => useGetTags(), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
       await waitForNextUpdate();
       await waitForNextUpdate();
 

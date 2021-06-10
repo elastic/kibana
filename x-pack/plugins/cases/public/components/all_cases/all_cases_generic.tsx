@@ -40,6 +40,7 @@ import { CasesTableFilters } from './table_filters';
 import { EuiBasicTableOnChange } from './types';
 
 import { CasesTable } from './table';
+
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>
     $isShow
@@ -61,9 +62,11 @@ interface AllCasesGenericProps {
   caseDetailsNavigation?: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>; // if not passed, case name is not displayed as a link (Formerly dependant on isSelectorView)
   configureCasesNavigation?: CasesNavigation; // if not passed, header with nav is not displayed (Formerly dependant on isSelectorView)
   createCaseNavigation: CasesNavigation;
+  disableAlerts?: boolean;
   hiddenStatuses?: CaseStatusWithAllStatus[];
   isSelectorView?: boolean;
   onRowClick?: (theCase?: Case | SubCase) => void;
+  showTitle?: boolean;
   updateCase?: (newCase: Case) => void;
   userCanCrud: boolean;
 }
@@ -74,13 +77,16 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
     caseDetailsNavigation,
     configureCasesNavigation,
     createCaseNavigation,
+    disableAlerts,
     hiddenStatuses = [],
     isSelectorView,
     onRowClick,
+    showTitle,
     updateCase,
     userCanCrud,
   }) => {
     const { actionLicense } = useGetActionLicense();
+
     const firstAvailableStatus = head(difference(caseStatuses, hiddenStatuses));
     const initialFilterOptions =
       !isEmpty(hiddenStatuses) && firstAvailableStatus ? { status: firstAvailableStatus } : {};
@@ -96,7 +102,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
       setFilters,
       setQueryParams,
       setSelectedCases,
-    } = useGetCases({}, initialFilterOptions);
+    } = useGetCases({ initialFilterOptions });
 
     // Post Comment to Case
     const { postComment, isLoading: isCommentUpdating } = usePostComment();
@@ -188,6 +194,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
 
     const columns = useCasesColumns({
       caseDetailsNavigation,
+      disableAlerts,
       dispatchUpdateCaseProperty,
       filterStatus: filterOptions.status,
       handleIsLoading,
@@ -269,6 +276,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
             createCaseNavigation={createCaseNavigation}
             configureCasesNavigation={configureCasesNavigation}
             refresh={refresh}
+            showTitle={showTitle}
             userCanCrud={userCanCrud}
           />
         )}

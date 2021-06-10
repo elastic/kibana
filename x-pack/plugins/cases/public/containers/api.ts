@@ -111,26 +111,32 @@ export const getSubCase = async (
   return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
 };
 
-export const getCasesStatus = async (signal: AbortSignal): Promise<CasesStatus> => {
+export const getCasesStatus = async (
+  signal: AbortSignal,
+  owner: string[]
+): Promise<CasesStatus> => {
   const response = await KibanaServices.get().http.fetch<CasesStatusResponse>(CASE_STATUS_URL, {
     method: 'GET',
     signal,
+    query: { ...(owner.length > 0 ? { owner } : {}) },
   });
   return convertToCamelCase<CasesStatusResponse, CasesStatus>(decodeCasesStatusResponse(response));
 };
 
-export const getTags = async (signal: AbortSignal): Promise<string[]> => {
+export const getTags = async (signal: AbortSignal, owner: string[]): Promise<string[]> => {
   const response = await KibanaServices.get().http.fetch<string[]>(CASE_TAGS_URL, {
     method: 'GET',
     signal,
+    query: { ...(owner.length > 0 ? { owner } : {}) },
   });
   return response ?? [];
 };
 
-export const getReporters = async (signal: AbortSignal): Promise<User[]> => {
+export const getReporters = async (signal: AbortSignal, owner: string[]): Promise<User[]> => {
   const response = await KibanaServices.get().http.fetch<User[]>(CASE_REPORTERS_URL, {
     method: 'GET',
     signal,
+    query: { ...(owner.length > 0 ? { owner } : {}) },
   });
   return response ?? [];
 };
@@ -171,6 +177,7 @@ export const getCases = async ({
     reporters: [],
     status: StatusAll,
     tags: [],
+    owner: [],
   },
   queryParams = {
     page: 1,
@@ -182,10 +189,11 @@ export const getCases = async ({
 }: FetchCasesProps): Promise<AllCases> => {
   const query = {
     reporters: filterOptions.reporters.map((r) => r.username ?? '').filter((r) => r !== ''),
-    tags: filterOptions.tags.map((t) => `"${t.replace(/"/g, '\\"')}"`),
+    tags: filterOptions.tags,
     status: filterOptions.status,
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
     ...(filterOptions.onlyCollectionType ? { type: CaseType.collection } : {}),
+    ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
     ...queryParams,
   };
   const response = await KibanaServices.get().http.fetch<CasesFindResponse>(`${CASES_URL}/_find`, {

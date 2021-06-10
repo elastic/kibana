@@ -22,6 +22,7 @@ export interface UsageStats {
   /**
    * non-sensitive settings
    */
+  'bfetch:disableCompression': boolean;
   'autocomplete:useTimeRange': boolean;
   'search:timeout': number;
   'visualization:visualize:legacyChartsLibrary': boolean;

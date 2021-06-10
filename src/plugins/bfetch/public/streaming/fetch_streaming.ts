@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { Observable, of } from 'rxjs';
+import { map, share, switchMap } from 'rxjs/operators';
+import { inflateResponse } from '.';
 import { fromStreamingXhr } from './from_streaming_xhr';
+import { split } from './split';
 
 export interface FetchStreamingParams {
   url: string;
@@ -14,6 +18,7 @@ export interface FetchStreamingParams {
   method?: 'GET' | 'POST';
   body?: string;
   signal?: AbortSignal;
+  compressionDisabled$?: Observable<boolean>;
 }
 
 /**
@@ -26,23 +31,49 @@ export function fetchStreaming({
   method = 'POST',
   body = '',
   signal,
+  compressionDisabled$ = of(false),
 }: FetchStreamingParams) {
   const xhr = new window.XMLHttpRequest();
 
-  // Begin the request
-  xhr.open(method, url);
-  xhr.withCredentials = true;
+  const msgStream = compressionDisabled$.pipe(
+    switchMap((compressionDisabled) => {
+      // Begin the request
+      xhr.open(method, url);
+      xhr.withCredentials = true;
 
-  // Set the HTTP headers
-  Object.entries(headers).forEach(([k, v]) => xhr.setRequestHeader(k, v));
+      if (!compressionDisabled) {
+        headers['X-Chunk-Encoding'] = 'deflate';
+      }
 
-  const stream = fromStreamingXhr(xhr, signal);
+      // Set the HTTP headers
+      Object.entries(headers).forEach(([k, v]) => xhr.setRequestHeader(k, v));
 
-  // Send the payload to the server
-  xhr.send(body);
+      const stream = fromStreamingXhr(xhr, signal);
+
+      // Send the payload to the server
+      xhr.send(body);
+
+      // Return a stream of chunked decompressed messages
+      return stream.pipe(
+        split('\n'),
+        map((msg) => {
+          return compressionDisabled ? msg : inflateResponse(msg);
+        })
+      );
+    }),
+    share()
+  );
+
+  // start execution
+  const msgStreamSub = msgStream.subscribe({
+    error: (e) => {},
+    complete: () => {
+      msgStreamSub.unsubscribe();
+    },
+  });
 
   return {
     xhr,
-    stream,
+    stream: msgStream,
   };
 }
