@@ -119,7 +119,7 @@ export const EndpointDetailsFlyout = memo(() => {
     },
     {
       id: EndpointDetailsTabsTypes.activityLog,
-      name: i18.ACTIVITY_LOG,
+      name: i18.ACTIVITY_LOG.tabTitle,
       content: <EndpointActivityLog activityLog={activityLog} />,
     },
   ];

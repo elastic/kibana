@@ -12,6 +12,7 @@ import { EuiAvatar, EuiAvatarProps, EuiCommentProps, EuiComment, EuiText } from 
 import { Immutable, ActivityLogEntry } from '../../../../../../../common/endpoint/types';
 import { FormattedDateAndTime } from '../../../../../../common/components/endpoint/formatted_date_time';
 import { useEuiTheme } from '../../../../../../common/lib/theme/use_eui_theme';
+import * as i18 from '../../translations';
 
 const StyledEuiComment = styled(EuiComment)`
   .euiCommentEvent__headerTimestamp {
@@ -82,9 +83,19 @@ export const LogEntry = memo(({ logEntry }: { logEntry: Immutable<ActivityLogEnt
       iconType={iconType}
     />
   );
-  const actionEvent = `${isIsolateAction ? 'isolated' : 'unisolated'} host`;
-  const responseEvent = `host ${isIsolateAction ? 'isolation' : 'unisolation'} ${
-    isSuccessful ? 'successful' : 'failed'
+  const actionEventTitle = `${
+    isIsolateAction
+      ? i18.ACTIVITY_LOG.LogEntry.action.isolated
+      : i18.ACTIVITY_LOG.LogEntry.action.unisolated
+  } ${i18.ACTIVITY_LOG.LogEntry.host}`;
+  const responseEventTitle = `${i18.ACTIVITY_LOG.LogEntry.host}  ${
+    isIsolateAction
+      ? i18.ACTIVITY_LOG.LogEntry.response.isolation
+      : i18.ACTIVITY_LOG.LogEntry.response.unisolation
+  } ${
+    isSuccessful
+      ? i18.ACTIVITY_LOG.LogEntry.response.successful
+      : i18.ACTIVITY_LOG.LogEntry.response.failed
   }`;
 
   return (
@@ -95,7 +106,7 @@ export const LogEntry = memo(({ logEntry }: { logEntry: Immutable<ActivityLogEnt
         date: new Date(logEntry.item.data['@timestamp']),
         showRelativeTime: true,
       })}
-      event={<b>{displayResponseEvent ? responseEvent : actionEvent}</b>}
+      event={<b>{displayResponseEvent ? responseEventTitle : actionEventTitle}</b>}
       timelineIcon={timelineIcon}
       data-test-subj="timelineEntry"
     >
