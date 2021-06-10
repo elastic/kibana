@@ -87,12 +87,11 @@ export const JobItem: FC<JobItemProps> = memo(
           </EuiText>
 
           <EuiFlexGroup wrap responsive={false} gutterSize="xs">
-            {jobGroups ??
-              [].map((group) => (
-                <EuiFlexItem grow={false} key={group}>
-                  <EuiBadge color={tabColor(group)}>{group}</EuiBadge>
-                </EuiFlexItem>
-              ))}
+            {(jobGroups ?? []).map((group) => (
+              <EuiFlexItem grow={false} key={group}>
+                <EuiBadge color={tabColor(group)}>{group}</EuiBadge>
+              </EuiFlexItem>
+            ))}
           </EuiFlexGroup>
 
           {setupResult && setupResult.error && (
