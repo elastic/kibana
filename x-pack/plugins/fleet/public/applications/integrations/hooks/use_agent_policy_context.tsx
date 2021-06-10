@@ -15,7 +15,7 @@ interface AgentPolicyContextValue {
   getId(): string | undefined;
 }
 
-const AgentPolicyContext = createContext<AgentPolicyContextValue>({});
+const AgentPolicyContext = createContext<AgentPolicyContextValue>({ getId: () => undefined });
 
 export const AgentPolicyContextProvider: FunctionComponent = ({ children }) => {
   const maybeState = useIntraAppState<undefined | IntegrationsAppBrowseRouteState>();
