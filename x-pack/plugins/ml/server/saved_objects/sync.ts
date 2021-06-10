@@ -47,10 +47,10 @@ export function syncSavedObjectsFactory(
 
     const status = await checkStatus();
 
-    const adJobsById: Record<string, JobStatus> = {};
-    status.jobs['anomaly-detector'].map((j) => {
-      adJobsById[j.jobId] = j;
-    });
+    const adJobsById = status.jobs['anomaly-detector'].reduce((acc, j) => {
+      acc[j.jobId] = j;
+      return acc;
+    }, {} as Record<string, JobStatus>);
 
     for (const job of status.jobs['anomaly-detector']) {
       if (job.checks.savedObjectExits === false) {
