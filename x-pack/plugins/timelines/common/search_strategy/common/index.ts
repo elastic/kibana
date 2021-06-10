@@ -5,7 +5,6 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
-import { Hit } from '@elastic/elasticsearch/api/types';
 import { IEsSearchResponse } from '../../../../../../src/plugins/data/common';
 
 export type Maybe<T> = T | null;
@@ -71,7 +70,7 @@ export interface PaginationInputPaginated {
   querySize: number;
 }
 
-export type DocValueFields = estypes.DocValueField;
+export type DocValueFields = Array<{ field: string; format: string }>;
 
 export interface Explanation {
   value: number;
@@ -101,7 +100,7 @@ export interface EventSource {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface EventHit extends Hit<Record<string, any>> {
+export interface EventHit extends estypes.SearchHit<Record<string, any>> {
   sort: string[];
   fields: Fields;
 }

@@ -13,3 +13,4 @@ export * from './mock_data_providers';
 export * from './mock_timeline_control_columns';
 export * from './mock_timeline_data';
 export * from './test_providers';
+export * from './plugin_mock';

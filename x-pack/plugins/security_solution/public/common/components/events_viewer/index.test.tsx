@@ -62,7 +62,7 @@ describe('StatefulEventsViewer', () => {
     await waitFor(() => {
       wrapper.update();
 
-      expect(wrapper.find('[data-test-subj="events-viewer-panel"]').first().exists()).toBe(true);
+      expect(wrapper.text()).toBe('hello grid');
     });
   });
 

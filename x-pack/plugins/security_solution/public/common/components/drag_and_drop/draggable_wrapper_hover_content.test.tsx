@@ -21,7 +21,6 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 
 jest.mock('../link_to');
-
 jest.mock('../../lib/kibana');
 jest.mock('../../containers/sourcerer', () => {
   const original = jest.requireActual('../../containers/sourcerer');
@@ -47,46 +46,10 @@ jest.mock('../../../../../timelines/public/hooks/use_add_to_timeline', () => {
   };
 });
 const mockAddFilters = jest.fn();
-const mockGetTimelineFilterManager = jest.fn().mockReturnValue({
-  addFilters: mockAddFilters,
-});
-
-jest.mock('../../../common/hooks/use_selector', () => {
-  const original = jest.requireActual('../../../common/hooks/use_selector');
-
-  return {
-    ...original,
-    useDeepEqualSelector: jest.fn().mockReturnValue(mockGetTimelineFilterManager),
-  };
-});
-
-// jest.mock('../../../timelines/store/timeline', () => ({
-//   const original = jest.requireActual('../../../timelines/components/manage_timeline');
-
-//   getManageTimelineById: jest.fn().mockReturnValue({ indexToAdd: [] }),
-// }));
-
-jest.mock('../../../timelines/store/timeline', () => {
-  const original = jest.requireActual('../../../timelines/store/timeline');
-
-  return {
-    ...original,
-    getManageTimelineById: jest.fn().mockReturnValue({ indexToAdd: [] }),
-  };
-});
-
-// jest.mock('../../../timelines/components/manage_timeline', () => {
-//   const original = jest.requireActual('../../../timelines/components/manage_timeline');
-
-//   return {
-//     ...original,
-//     useManageTimeline: () => ({
-//       getManageTimelineById: jest.fn().mockReturnValue({ indexToAdd: [] }),
-//       getTimelineFilterManager: mockGetTimelineFilterManager,
-//       isManagedTimeline: jest.fn().mockReturnValue(false),
-//     }),
-//   };
-// });
+jest.mock('../../../common/hooks/use_selector', () => ({
+  useShallowEqualSelector: jest.fn(),
+  useDeepEqualSelector: jest.fn(),
+}));
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 const timelineId = TimelineId.active;
@@ -107,6 +70,9 @@ const defaultProps = {
 describe('DraggableWrapperHoverContent', () => {
   beforeAll(() => {
     mockStartDragToTimeline.mockReset();
+    (useDeepEqualSelector as jest.Mock).mockReturnValue({
+      filterManager: { addFilters: mockAddFilters },
+    });
     (useSourcererScope as jest.Mock).mockReturnValue({
       browserFields: mockBrowserFields,
       selectedPatterns: [],
@@ -178,7 +144,7 @@ describe('DraggableWrapperHoverContent', () => {
           wrapper.find(`[data-test-subj="filter-${hoverAction}-value"]`).first().simulate('click');
           wrapper.update();
 
-          expect(useDeepEqualSelector(jest.fn())().addFilters).toBeCalledWith({
+          expect(mockAddFilters).toBeCalledWith({
             meta: {
               alias: null,
               disabled: false,
@@ -360,7 +326,7 @@ describe('DraggableWrapperHoverContent', () => {
     const aggregatableStringField = 'cloud.account.id';
     const draggableId = 'draggable.id';
 
-    [false, true].forEach((showTopN) => {
+    [/* false,*/ true].forEach((showTopN) => {
       [value, null].forEach((maybeValue) => {
         [draggableId, undefined].forEach((maybeDraggableId) => {
           const shouldRender = !showTopN && maybeValue != null && maybeDraggableId != null;
@@ -592,41 +558,6 @@ describe('DraggableWrapperHoverContent', () => {
       );
 
       expect(wrapper.find(`[data-test-subj="copy-to-clipboard"]`).first().exists()).toBe(false);
-    });
-  });
-
-  describe('Filter Manager', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-    test('filter manager, not active timeline', () => {
-      mount(
-        <TestProviders>
-          <DraggableWrapperHoverContent {...{ ...defaultProps, timelineId: TimelineId.test }} />
-        </TestProviders>
-      );
-
-      expect(mockGetTimelineFilterManager).not.toBeCalled();
-    });
-    test('filter manager, active timeline', () => {
-      mount(
-        <TestProviders>
-          <DraggableWrapperHoverContent {...defaultProps} />
-        </TestProviders>
-      );
-
-      expect(mockGetTimelineFilterManager).toBeCalled();
-    });
-    test('filter manager, active timeline in draggableId', () => {
-      mount(
-        <TestProviders>
-          <DraggableWrapperHoverContent
-            {...{ ...defaultProps, draggableId: `blahblah-${TimelineId.active}-lala` }}
-          />
-        </TestProviders>
-      );
-
-      expect(mockGetTimelineFilterManager).toBeCalled();
     });
   });
 });
