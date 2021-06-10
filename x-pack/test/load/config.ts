@@ -34,7 +34,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     esTestCluster: {
       ...xpackFunctionalTestsConfig.get('esTestCluster'),
       serverArgs: [...xpackFunctionalTestsConfig.get('esTestCluster.serverArgs')],
-      esJavaOpts: '-Xms2g -Xmx2g',
+      esJavaOpts: '-Xms4g -Xmx4g',
     },
 
     kbnTestServer: {
