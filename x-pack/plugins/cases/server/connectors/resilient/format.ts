@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { ResilientFieldsType, ConnectorResillientTypeFields } from '../../../common';
-import { ExternalServiceFormatter } from '../types';
+import { ConnectorResillientTypeFields } from '../../../common/api';
+import { Format } from './types';
 
-const format: ExternalServiceFormatter<ResilientFieldsType>['format'] = (theCase) => {
+export const format: Format = (theCase, alerts) => {
   const { incidentTypes = null, severityCode = null } =
     (theCase.connector.fields as ConnectorResillientTypeFields['fields']) ?? {};
   return { incidentTypes, severityCode };
-};
-
-export const resilientExternalServiceFormatter: ExternalServiceFormatter<ResilientFieldsType> = {
-  format,
 };
