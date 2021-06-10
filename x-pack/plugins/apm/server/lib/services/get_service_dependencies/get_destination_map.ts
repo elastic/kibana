@@ -38,57 +38,54 @@ export const getDestinationMap = ({
   return withApmSpan('get_service_destination_map', async () => {
     const { start, end, apmEventClient } = setup;
 
-    const response = await apmEventClient.search(
-      {
-        apm: {
-          events: [ProcessorEvent.span],
-        },
-        body: {
-          size: 0,
-          query: {
-            bool: {
-              filter: [
-                { term: { [SERVICE_NAME]: serviceName } },
-                { exists: { field: SPAN_DESTINATION_SERVICE_RESOURCE } },
-                ...rangeQuery(start, end),
-                ...environmentQuery(environment),
-              ],
-            },
+    const response = await apmEventClient.search('get_exit_span_samples', {
+      apm: {
+        events: [ProcessorEvent.span],
+      },
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              { term: { [SERVICE_NAME]: serviceName } },
+              { exists: { field: SPAN_DESTINATION_SERVICE_RESOURCE } },
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
+            ],
           },
-          aggs: {
-            connections: {
-              composite: {
-                size: 1000,
-                sources: asMutableArray([
-                  {
-                    [SPAN_DESTINATION_SERVICE_RESOURCE]: {
-                      terms: { field: SPAN_DESTINATION_SERVICE_RESOURCE },
+        },
+        aggs: {
+          connections: {
+            composite: {
+              size: 1000,
+              sources: asMutableArray([
+                {
+                  [SPAN_DESTINATION_SERVICE_RESOURCE]: {
+                    terms: { field: SPAN_DESTINATION_SERVICE_RESOURCE },
+                  },
+                },
+                // make sure we get samples for both successful
+                // and failed calls
+                { [EVENT_OUTCOME]: { terms: { field: EVENT_OUTCOME } } },
+              ] as const),
+            },
+            aggs: {
+              sample: {
+                top_hits: {
+                  size: 1,
+                  _source: [SPAN_TYPE, SPAN_SUBTYPE, SPAN_ID],
+                  sort: [
+                    {
+                      '@timestamp': 'desc' as const,
                     },
-                  },
-                  // make sure we get samples for both successful
-                  // and failed calls
-                  { [EVENT_OUTCOME]: { terms: { field: EVENT_OUTCOME } } },
-                ] as const),
-              },
-              aggs: {
-                sample: {
-                  top_hits: {
-                    size: 1,
-                    _source: [SPAN_TYPE, SPAN_SUBTYPE, SPAN_ID],
-                    sort: [
-                      {
-                        '@timestamp': 'desc' as const,
-                      },
-                    ],
-                  },
+                  ],
                 },
               },
             },
           },
         },
       },
-      'get_exit_span_samples'
-    );
+    });
 
     const outgoingConnections =
       response.aggregations?.connections.buckets.map((bucket) => {
@@ -105,6 +102,7 @@ export const getDestinationMap = ({
       }) ?? [];
 
     const transactionResponse = await apmEventClient.search(
+      'get_transactions_for_exit_spans',
       {
         apm: {
           events: [ProcessorEvent.transaction],
@@ -133,8 +131,7 @@ export const getDestinationMap = ({
           ] as const),
           _source: false,
         },
-      },
-      'get_transactions_for_exit_spans'
+      }
     );
 
     const incomingConnections = transactionResponse.hits.hits.map((hit) => ({

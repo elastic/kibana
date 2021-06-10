@@ -25,6 +25,7 @@ export async function getHasAggregatedTransactions({
   apmEventClient: APMEventClient;
 }) {
   const response = await apmEventClient.search(
+    'get_has_aggregated_transactions',
     {
       apm: {
         events: [ProcessorEvent.metric],
@@ -40,8 +41,7 @@ export async function getHasAggregatedTransactions({
         },
       },
       terminateAfter: 1,
-    },
-    'get_has_aggregated_transactions'
+    }
   );
 
   if (response.hits.total.value > 0) {

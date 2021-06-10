@@ -52,7 +52,7 @@ export async function getMaxLatency({
     },
   };
 
-  const response = await apmEventClient.search(params, 'get_max_latency');
+  const response = await apmEventClient.search('get_max_latency', params);
   // return response.aggregations?.max_latency.value;
   return Object.values(response.aggregations?.max_latency.values ?? {})[0];
 }

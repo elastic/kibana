@@ -32,8 +32,8 @@ export async function getOverallErrorTimeseries(options: CorrelationsOptions) {
   };
 
   const response = await apmEventClient.search(
-    params,
-    'get_error_rate_timeseries'
+    'get_error_rate_timeseries',
+    params
   );
   const { aggregations } = response;
 

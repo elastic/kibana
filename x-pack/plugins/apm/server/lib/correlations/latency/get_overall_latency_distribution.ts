@@ -72,8 +72,8 @@ export async function getOverallLatencyDistribution(
     };
 
     const response = await apmEventClient.search(
-      params,
-      'get_terms_distribution'
+      'get_terms_distribution',
+      params
     );
 
     if (!response.aggregations) {

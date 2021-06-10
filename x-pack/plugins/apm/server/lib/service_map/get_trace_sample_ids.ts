@@ -126,8 +126,8 @@ export async function getTraceSampleIds({
 
   try {
     const tracesSampleResponse = await apmEventClient.search(
-      params,
-      'get_trace_sample_ids'
+      'get_trace_sample_ids',
+      params
     );
     // make sure at least one trace per composite/connection bucket
     // is queried

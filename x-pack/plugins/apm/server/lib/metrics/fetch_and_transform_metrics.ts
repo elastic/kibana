@@ -100,7 +100,7 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
     },
   });
 
-  const response = await apmEventClient.search(params, operationName);
+  const response = await apmEventClient.search(operationName, params);
 
   return transformDataToMetricsChart(response, chartBase);
 }

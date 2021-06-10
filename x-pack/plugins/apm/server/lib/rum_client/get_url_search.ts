@@ -56,7 +56,7 @@ export async function getUrlSearch({
 
   const { apmEventClient } = setup;
 
-  const response = await apmEventClient.search(params, 'get_url_search');
+  const response = await apmEventClient.search('get_url_search', params);
   const { urls, totalUrls } = response.aggregations ?? {};
 
   const pkey = percentile.toFixed(1);

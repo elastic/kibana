@@ -65,7 +65,7 @@ const getServiceNodes = async ({
     },
   });
 
-  const response = await apmEventClient.search(params, 'get_service_nodes');
+  const response = await apmEventClient.search('get_service_nodes', params);
 
   if (!response.aggregations) {
     return [];

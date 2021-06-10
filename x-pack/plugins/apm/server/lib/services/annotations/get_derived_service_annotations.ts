@@ -42,33 +42,30 @@ export async function getDerivedServiceAnnotations({
 
   const versions =
     (
-      await apmEventClient.search(
-        {
-          apm: {
-            events: [
-              getProcessorEventForAggregatedTransactions(
-                searchAggregatedTransactions
-              ),
-            ],
-          },
-          body: {
-            size: 0,
-            query: {
-              bool: {
-                filter: [...filter, ...rangeQuery(start, end)],
-              },
+      await apmEventClient.search('get_derived_service_annotations', {
+        apm: {
+          events: [
+            getProcessorEventForAggregatedTransactions(
+              searchAggregatedTransactions
+            ),
+          ],
+        },
+        body: {
+          size: 0,
+          query: {
+            bool: {
+              filter: [...filter, ...rangeQuery(start, end)],
             },
-            aggs: {
-              versions: {
-                terms: {
-                  field: SERVICE_VERSION,
-                },
+          },
+          aggs: {
+            versions: {
+              terms: {
+                field: SERVICE_VERSION,
               },
             },
           },
         },
-        'get_derived_service_annotations'
-      )
+      })
     ).aggregations?.versions.buckets.map((bucket) => bucket.key) ?? [];
 
   if (versions.length <= 1) {
@@ -77,6 +74,7 @@ export async function getDerivedServiceAnnotations({
   const annotations = await Promise.all(
     versions.map(async (version) => {
       const response = await apmEventClient.search(
+        'get_first_seen_of_version',
         {
           apm: {
             events: [
@@ -96,8 +94,7 @@ export async function getDerivedServiceAnnotations({
               '@timestamp': 'desc',
             },
           },
-        },
-        'get_first_seen_of_version'
+        }
       );
 
       const firstSeen = new Date(

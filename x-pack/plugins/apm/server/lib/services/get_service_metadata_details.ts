@@ -114,8 +114,8 @@ export async function getServiceMetadataDetails({
   };
 
   const response = await apmEventClient.search(
-    params,
-    'get_service_metadata_details'
+    'get_service_metadata_details',
+    params
   );
 
   if (response.hits.total.value === 0) {

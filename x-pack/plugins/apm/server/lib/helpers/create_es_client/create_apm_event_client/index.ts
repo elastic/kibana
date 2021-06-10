@@ -35,6 +35,7 @@ import { unpackProcessorEvents } from './unpack_processor_events';
 export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   apm: {
     events: ProcessorEvent[];
+    includeLegacyData?: boolean;
   };
 };
 
@@ -79,17 +80,12 @@ export function createApmEventClient({
 }) {
   return {
     async search<TParams extends APMEventESSearchRequest>(
-      params: TParams,
-      optionsOrOperationName:
-        | string
-        | { includeLegacyData?: boolean; operationName: string }
+      operationName: string,
+      params: TParams
     ): Promise<TypedSearchResponse<TParams>> {
       const withProcessorEventFilter = unpackProcessorEvents(params, indices);
 
-      const { includeLegacyData = false, operationName } =
-        typeof optionsOrOperationName === 'string'
-          ? { operationName: optionsOrOperationName }
-          : optionsOrOperationName ?? {};
+      const { includeLegacyData = false } = params.apm;
 
       const withPossibleLegacyDataFilter = !includeLegacyData
         ? addFilterToExcludeLegacyData(withProcessorEventFilter)
@@ -113,7 +109,11 @@ export function createApmEventClient({
           return unwrapEsResponse(searchPromise);
         },
         getDebugMessage: () => ({
-          body: getDebugBody(searchParams, requestType),
+          body: getDebugBody({
+            params: searchParams,
+            requestType,
+            operationName,
+          }),
           title: getDebugTitle(request),
         }),
         isCalledWithInternalUser: false,

@@ -131,7 +131,7 @@ export async function getTransactionBreakdown({
     },
   };
 
-  const resp = await apmEventClient.search(params, 'get_transaction_breakdown');
+  const resp = await apmEventClient.search('get_transaction_breakdown', params);
 
   const formatBucket = (
     aggs:

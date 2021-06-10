@@ -26,8 +26,8 @@ export async function getHasData({ setup }: { setup: Setup }) {
     };
 
     const response = await apmEventClient.search(
-      params,
-      'observability_overview_has_apm_data'
+      'observability_overview_has_apm_data',
+      params
     );
     return response.hits.total.value > 0;
   } catch (e) {

@@ -68,8 +68,8 @@ export async function getLatencyDistribution({
   };
 
   const response = await apmEventClient.search(
-    params,
-    'get_latency_distribution'
+    'get_latency_distribution',
+    params
   );
 
   type Agg = NonNullable<typeof response.aggregations>;

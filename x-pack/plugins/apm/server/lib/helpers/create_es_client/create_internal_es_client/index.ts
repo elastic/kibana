@@ -35,16 +35,18 @@ export function createInternalESClient({
     cb,
     requestType,
     params,
+    operationName,
   }: {
     requestType: string;
     cb: () => TransportRequestPromise<T>;
     params: Record<string, any>;
+    operationName?: string;
   }) {
     return callAsyncWithDebug({
       cb: () => unwrapEsResponse(cancelEsRequestOnAbort(cb(), request)),
       getDebugMessage: () => ({
         title: getDebugTitle(request),
-        body: getDebugBody(params, requestType),
+        body: getDebugBody({ params, requestType, operationName }),
       }),
       debug,
       isCalledWithInternalUser: true,
@@ -59,12 +61,14 @@ export function createInternalESClient({
       TDocument = unknown,
       TSearchRequest extends ESSearchRequest = ESSearchRequest
     >(
+      operationName: string,
       params: TSearchRequest
     ): Promise<ESSearchResponse<TDocument, TSearchRequest>> => {
       return callEs({
         requestType: 'search',
         cb: () => asInternalUser.search(params),
         params,
+        operationName,
       });
     },
     index: <T>(params: APMIndexDocumentParams<T>) => {

@@ -46,8 +46,8 @@ export function getLocalUIFilters({
         });
 
         const response = await apmEventClient.search(
-          query,
-          'get_ui_filter_options_for_field'
+          'get_ui_filter_options_for_field',
+          query
         );
 
         const filter = localUIFilters[name];

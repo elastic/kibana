@@ -75,8 +75,8 @@ export async function getDistributionMax({
   };
 
   const resp = await apmEventClient.search(
-    params,
-    'get_latency_distribution_max'
+    'get_latency_distribution_max',
+    params
   );
   return resp.aggregations?.stats.value ?? null;
 }

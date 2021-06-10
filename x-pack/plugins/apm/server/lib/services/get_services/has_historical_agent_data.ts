@@ -26,6 +26,6 @@ export async function hasHistoricalAgentData(setup: Setup) {
     },
   };
 
-  const resp = await apmEventClient.search(params, 'has_historical_agent_data');
+  const resp = await apmEventClient.search('has_historical_agent_data', params);
   return resp.hits.total.value > 0;
 }

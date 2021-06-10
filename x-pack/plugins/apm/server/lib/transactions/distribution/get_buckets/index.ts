@@ -90,6 +90,7 @@ export async function getBuckets({
 
       async function getSamplesForDistributionBuckets() {
         const response = await apmEventClient.search(
+          'get_samples_for_latency_distribution_buckets',
           {
             apm: {
               events: [ProcessorEvent.transaction],
@@ -128,8 +129,7 @@ export async function getBuckets({
                 },
               },
             },
-          },
-          'get_samples_for_latency_distribution_buckets'
+          }
         );
 
         return (
@@ -148,6 +148,7 @@ export async function getBuckets({
 
       async function getDistributionBuckets() {
         const response = await apmEventClient.search(
+          'get_latency_distribution_buckets',
           {
             apm: {
               events: [
@@ -179,8 +180,7 @@ export async function getBuckets({
                 },
               },
             },
-          },
-          'get_latency_distribution_buckets'
+          }
         );
 
         return (

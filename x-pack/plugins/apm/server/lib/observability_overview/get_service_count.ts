@@ -42,8 +42,8 @@ export async function getServiceCount({
   };
 
   const { aggregations } = await apmEventClient.search(
-    params,
-    'observability_overview_get_service_count'
+    'observability_overview_get_service_count',
+    params
   );
   return aggregations?.serviceCount.value || 0;
 }

@@ -65,6 +65,7 @@ export async function getServiceTransactionStats({
   };
 
   const response = await apmEventClient.search(
+    'get_service_transaction_stats',
     {
       apm: {
         events: [
@@ -132,8 +133,7 @@ export async function getServiceTransactionStats({
           },
         },
       },
-    },
-    { operationName: 'get_service_transaction_stats' }
+    }
   );
 
   return (

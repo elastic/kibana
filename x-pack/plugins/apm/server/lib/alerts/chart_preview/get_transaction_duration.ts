@@ -73,8 +73,8 @@ export async function getTransactionDurationChartPreview({
     body: { size: 0, query, aggs },
   };
   const resp = await apmEventClient.search(
-    params,
-    'get_transaction_duration_chart_preview'
+    'get_transaction_duration_chart_preview',
+    params
   );
 
   if (!resp.aggregations) {

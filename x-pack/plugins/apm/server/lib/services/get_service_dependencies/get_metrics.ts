@@ -33,6 +33,7 @@ export const getMetrics = async ({
   const { start, end, apmEventClient } = setup;
 
   const response = await apmEventClient.search(
+    'get_service_destination_metrics',
     {
       apm: {
         events: [ProcessorEvent.metric],
@@ -100,8 +101,7 @@ export const getMetrics = async ({
           },
         },
       },
-    },
-    'get_service_destination_metrics'
+    }
   );
 
   return (

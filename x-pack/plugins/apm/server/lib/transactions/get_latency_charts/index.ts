@@ -111,7 +111,7 @@ function searchLatency({
     },
   };
 
-  return apmEventClient.search(params, 'get_latency_charts');
+  return apmEventClient.search('get_latency_charts', params);
 }
 
 export async function getLatencyTimeseries({

@@ -40,6 +40,7 @@ export async function getServiceProfilingTimeline({
   const { apmEventClient, start, end } = setup;
 
   const response = await apmEventClient.search(
+    'get_service_profiling_timeline',
     {
       apm: {
         events: [ProcessorEvent.profile],
@@ -95,8 +96,7 @@ export async function getServiceProfilingTimeline({
           },
         },
       },
-    },
-    'get_service_profiling_timeline'
+    }
   );
 
   const { aggregations } = response;

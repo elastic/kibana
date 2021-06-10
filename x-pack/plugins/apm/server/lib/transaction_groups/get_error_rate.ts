@@ -114,8 +114,8 @@ export async function getErrorRate({
   };
 
   const resp = await apmEventClient.search(
-    params,
-    'get_transaction_group_error_rate'
+    'get_transaction_group_error_rate',
+    params
   );
 
   const noHits = resp.hits.total.value === 0;

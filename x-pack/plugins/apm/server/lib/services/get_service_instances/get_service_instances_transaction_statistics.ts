@@ -139,6 +139,7 @@ export async function getServiceInstancesTransactionStatistics<
   };
 
   const response = await apmEventClient.search(
+    'get_service_instances_transaction_statistics',
     {
       apm: {
         events: [
@@ -148,8 +149,7 @@ export async function getServiceInstancesTransactionStatistics<
         ],
       },
       body: { size: 0, query, aggs },
-    },
-    'get_service_instances_transaction_statistics'
+    }
   );
 
   const bucketSizeInMinutes = bucketSize / 60;

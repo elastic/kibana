@@ -73,7 +73,7 @@ export async function getEnvironments({
     },
   };
 
-  const resp = await apmEventClient.search(params, operationName);
+  const resp = await apmEventClient.search(operationName, params);
   const aggs = resp.aggregations;
   const environmentsBuckets = aggs?.environments.buckets || [];
 

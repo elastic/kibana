@@ -92,7 +92,7 @@ export async function getErrorGroups({
     },
   });
 
-  const resp = await apmEventClient.search(params, 'get_error_groups');
+  const resp = await apmEventClient.search('get_error_groups', params);
 
   // aggregations can be undefined when no matching indices are found.
   // this is an exception rather than the rule so the ES type does not account for this.

@@ -54,8 +54,8 @@ export async function getAverages({
   });
 
   const response = await setup.apmEventClient.search(
-    params,
-    'get_avg_transaction_group_duration'
+    'get_avg_transaction_group_duration',
+    params
   );
 
   return arrayUnionToCallable(
@@ -85,8 +85,8 @@ export async function getCounts({ request, setup }: MetricParams) {
   });
 
   const response = await setup.apmEventClient.search(
-    params,
-    'get_transaction_group_transaction_count'
+    'get_transaction_group_transaction_count',
+    params
   );
 
   return arrayUnionToCallable(
@@ -118,8 +118,8 @@ export async function getSums({
   });
 
   const response = await setup.apmEventClient.search(
-    params,
-    'get_transaction_group_latency_sums'
+    'get_transaction_group_latency_sums',
+    params
   );
 
   return arrayUnionToCallable(
@@ -150,8 +150,8 @@ export async function getPercentiles({
   });
 
   const response = await setup.apmEventClient.search(
-    params,
-    'get_transaction_group_latency_percentiles'
+    'get_transaction_group_latency_percentiles',
+    params
   );
 
   return arrayUnionToCallable(

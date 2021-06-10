@@ -47,14 +47,11 @@ describe('createApmEventClient', () => {
           },
         });
 
-        await eventClient.search(
-          {
-            apm: {
-              events: [],
-            },
+        await eventClient.search('foo', {
+          apm: {
+            events: [],
           },
-          'foo'
-        );
+        });
 
         return res.ok({ body: 'ok' });
       }

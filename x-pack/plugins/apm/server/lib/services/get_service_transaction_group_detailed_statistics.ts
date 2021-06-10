@@ -75,6 +75,7 @@ export async function getServiceTransactionGroupDetailedStatistics({
   );
 
   const response = await apmEventClient.search(
+    'get_service_transaction_group_detailed_statistics',
     {
       apm: {
         events: [
@@ -140,8 +141,7 @@ export async function getServiceTransactionGroupDetailedStatistics({
           },
         },
       },
-    },
-    'get_service_transaction_group_detailed_statistics'
+    }
   );
 
   const buckets = response.aggregations?.transaction_groups.buckets ?? [];

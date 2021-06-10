@@ -110,7 +110,7 @@ export async function fetchAndTransformGcMetrics({
     },
   });
 
-  const response = await apmEventClient.search(params, operationName);
+  const response = await apmEventClient.search(operationName, params);
 
   const { aggregations } = response;
 

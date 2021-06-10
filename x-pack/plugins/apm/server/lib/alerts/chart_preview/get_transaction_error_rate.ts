@@ -65,8 +65,8 @@ export async function getTransactionErrorRateChartPreview({
   };
 
   const resp = await apmEventClient.search(
-    params,
-    'get_transaction_error_rate_chart_preview'
+    'get_transaction_error_rate_chart_preview',
+    params
   );
 
   if (!resp.aggregations) {

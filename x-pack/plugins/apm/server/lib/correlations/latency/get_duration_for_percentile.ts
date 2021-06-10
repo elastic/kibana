@@ -20,28 +20,25 @@ export async function getDurationForPercentile({
   setup: Setup & SetupTimeRange;
 }) {
   const { apmEventClient } = setup;
-  const res = await apmEventClient.search(
-    {
-      apm: {
-        events: [ProcessorEvent.transaction],
+  const res = await apmEventClient.search('get_duration_for_percentiles', {
+    apm: {
+      events: [ProcessorEvent.transaction],
+    },
+    body: {
+      size: 0,
+      query: {
+        bool: { filter: filters },
       },
-      body: {
-        size: 0,
-        query: {
-          bool: { filter: filters },
-        },
-        aggs: {
-          percentile: {
-            percentiles: {
-              field: TRANSACTION_DURATION,
-              percents: [durationPercentile],
-            },
+      aggs: {
+        percentile: {
+          percentiles: {
+            field: TRANSACTION_DURATION,
+            percents: [durationPercentile],
           },
         },
       },
     },
-    'get_duration_for_percentiles'
-  );
+  });
 
   const duration = Object.values(res.aggregations?.percentile.values || {})[0];
   return duration || 0;

@@ -50,40 +50,37 @@ async function getProfilingStats({
   filter: ESFilter[];
   valueTypeField: string;
 }) {
-  const response = await apmEventClient.search(
-    {
-      apm: {
-        events: [ProcessorEvent.profile],
-      },
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter,
-          },
+  const response = await apmEventClient.search('get_profiling_stats', {
+    apm: {
+      events: [ProcessorEvent.profile],
+    },
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter,
         },
-        aggs: {
-          stacks: {
-            terms: {
-              field: PROFILE_TOP_ID,
-              size: MAX_STACK_IDS,
-              order: {
-                value: 'desc',
-              },
+      },
+      aggs: {
+        stacks: {
+          terms: {
+            field: PROFILE_TOP_ID,
+            size: MAX_STACK_IDS,
+            order: {
+              value: 'desc',
             },
-            aggs: {
-              value: {
-                sum: {
-                  field: valueTypeField,
-                },
+          },
+          aggs: {
+            value: {
+              sum: {
+                field: valueTypeField,
               },
             },
           },
         },
       },
     },
-    'get_profiling_stats'
-  );
+  });
 
   const stacks =
     response.aggregations?.stacks.buckets.map((stack) => {
@@ -105,6 +102,7 @@ function getProfilesWithStacks({
 }) {
   return withApmSpan('get_profiles_with_stacks', async () => {
     const cardinalityResponse = await apmEventClient.search(
+      'get_top_cardinality',
       {
         apm: {
           events: [ProcessorEvent.profile],
@@ -122,8 +120,7 @@ function getProfilesWithStacks({
             },
           },
         },
-      },
-      'get_top_cardinality'
+      }
     );
 
     const cardinality = cardinalityResponse.aggregations?.top.value ?? 0;
@@ -142,40 +139,37 @@ function getProfilesWithStacks({
     const allResponses = await withApmSpan('get_all_stacks', async () => {
       return Promise.all(
         [...new Array(partitions)].map(async (_, num) => {
-          const response = await apmEventClient.search(
-            {
-              apm: {
-                events: [ProcessorEvent.profile],
-              },
-              body: {
-                query: {
-                  bool: {
-                    filter,
-                  },
+          const response = await apmEventClient.search('get_partition', {
+            apm: {
+              events: [ProcessorEvent.profile],
+            },
+            body: {
+              query: {
+                bool: {
+                  filter,
                 },
-                aggs: {
-                  top: {
-                    terms: {
-                      field: PROFILE_TOP_ID,
-                      size: Math.max(MAX_STACKS_PER_REQUEST),
-                      include: {
-                        num_partitions: partitions,
-                        partition: num,
-                      },
+              },
+              aggs: {
+                top: {
+                  terms: {
+                    field: PROFILE_TOP_ID,
+                    size: Math.max(MAX_STACKS_PER_REQUEST),
+                    include: {
+                      num_partitions: partitions,
+                      partition: num,
                     },
-                    aggs: {
-                      latest: {
-                        top_hits: {
-                          _source: [PROFILE_TOP_ID, PROFILE_STACK],
-                        },
+                  },
+                  aggs: {
+                    latest: {
+                      top_hits: {
+                        _source: [PROFILE_TOP_ID, PROFILE_STACK],
                       },
                     },
                   },
                 },
               },
             },
-            'get_partition'
-          );
+          });
 
           return (
             response.aggregations?.top.buckets.flatMap((bucket) => {

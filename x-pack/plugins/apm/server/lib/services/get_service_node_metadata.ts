@@ -56,8 +56,8 @@ export async function getServiceNodeMetadata({
   );
 
   const response = await apmEventClient.search(
-    query,
-    'get_service_node_metadata'
+    'get_service_node_metadata',
+    query
   );
 
   return {

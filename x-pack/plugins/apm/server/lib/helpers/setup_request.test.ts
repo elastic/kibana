@@ -109,13 +109,10 @@ describe('setupRequest', () => {
     it('calls callWithRequest', async () => {
       const mockResources = getMockResources();
       const { apmEventClient } = await setupRequest(mockResources);
-      await apmEventClient.search(
-        {
-          apm: { events: [ProcessorEvent.transaction] },
-          body: { foo: 'bar' },
-        },
-        'foo'
-      );
+      await apmEventClient.search('foo', {
+        apm: { events: [ProcessorEvent.transaction] },
+        body: { foo: 'bar' },
+      });
 
       expect(
         mockResources.context.core.elasticsearch.client.asCurrentUser.search
@@ -140,7 +137,7 @@ describe('setupRequest', () => {
     it('calls callWithInternalUser', async () => {
       const mockResources = getMockResources();
       const { internalClient } = await setupRequest(mockResources);
-      await internalClient.search({
+      await internalClient.search('foo', {
         index: ['apm-*'],
         body: { foo: 'bar' },
       } as any);
@@ -159,17 +156,14 @@ describe('setupRequest', () => {
     it('adds a range filter for `observer.version_major` to the existing filter', async () => {
       const mockResources = getMockResources();
       const { apmEventClient } = await setupRequest(mockResources);
-      await apmEventClient.search(
-        {
-          apm: {
-            events: [ProcessorEvent.transaction],
-          },
-          body: {
-            query: { bool: { filter: [{ term: { field: 'someTerm' } }] } },
-          },
+      await apmEventClient.search('foo', {
+        apm: {
+          events: [ProcessorEvent.transaction],
         },
-        'foo'
-      );
+        body: {
+          query: { bool: { filter: [{ term: { field: 'someTerm' } }] } },
+        },
+      });
       const params =
         mockResources.context.core.elasticsearch.client.asCurrentUser.search
           .mock.calls[0][0];
@@ -189,20 +183,15 @@ describe('setupRequest', () => {
     it('does not add a range filter for `observer.version_major` if includeLegacyData=true', async () => {
       const mockResources = getMockResources();
       const { apmEventClient } = await setupRequest(mockResources);
-      await apmEventClient.search(
-        {
-          apm: {
-            events: [ProcessorEvent.error],
-          },
-          body: {
-            query: { bool: { filter: [{ term: { field: 'someTerm' } }] } },
-          },
-        },
-        {
-          operationName: 'foo',
+      await apmEventClient.search('foo', {
+        apm: {
+          events: [ProcessorEvent.error],
           includeLegacyData: true,
-        }
-      );
+        },
+        body: {
+          query: { bool: { filter: [{ term: { field: 'someTerm' } }] } },
+        },
+      });
       const params =
         mockResources.context.core.elasticsearch.client.asCurrentUser.search
           .mock.calls[0][0];
@@ -228,14 +217,11 @@ describe('without a bool filter', () => {
   it('adds a range filter for `observer.version_major`', async () => {
     const mockResources = getMockResources();
     const { apmEventClient } = await setupRequest(mockResources);
-    await apmEventClient.search(
-      {
-        apm: {
-          events: [ProcessorEvent.error],
-        },
+    await apmEventClient.search('foo', {
+      apm: {
+        events: [ProcessorEvent.error],
       },
-      'foo'
-    );
+    });
     const params =
       mockResources.context.core.elasticsearch.client.asCurrentUser.search.mock
         .calls[0][0];
@@ -261,14 +247,11 @@ describe('with includeFrozen=false', () => {
 
     const { apmEventClient } = await setupRequest(mockResources);
 
-    await apmEventClient.search(
-      {
-        apm: {
-          events: [],
-        },
+    await apmEventClient.search('foo', {
+      apm: {
+        events: [],
       },
-      'foo'
-    );
+    });
 
     const params =
       mockResources.context.core.elasticsearch.client.asCurrentUser.search.mock
@@ -286,12 +269,9 @@ describe('with includeFrozen=true', () => {
 
     const { apmEventClient } = await setupRequest(mockResources);
 
-    await apmEventClient.search(
-      {
-        apm: { events: [] },
-      },
-      'foo'
-    );
+    await apmEventClient.search('foo', {
+      apm: { events: [] },
+    });
 
     const params =
       mockResources.context.core.elasticsearch.client.asCurrentUser.search.mock

@@ -55,7 +55,10 @@ export function listCustomLinks({
         ],
       },
     };
-    const resp = await internalClient.search<CustomLinkES>(params);
+    const resp = await internalClient.search<CustomLinkES>(
+      'list_custom_links',
+      params
+    );
     const customLinks = resp.hits.hits.map((item) =>
       fromESFormat({
         id: item._id,

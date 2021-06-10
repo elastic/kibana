@@ -62,6 +62,7 @@ export async function getServiceTransactionGroups({
   );
 
   const response = await apmEventClient.search(
+    'get_service_transaction_groups',
     {
       apm: {
         events: [
@@ -109,8 +110,7 @@ export async function getServiceTransactionGroups({
           },
         },
       },
-    },
-    'get_service_transaction_groups'
+    }
   );
 
   const totalDuration = response.aggregations?.total_duration.value;

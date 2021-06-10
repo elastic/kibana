@@ -125,6 +125,7 @@ export async function getServiceInstancesSystemMetricStatistics<
   };
 
   const response = await apmEventClient.search(
+    'get_service_instances_system_metric_statistics',
     {
       apm: {
         events: [ProcessorEvent.metric],
@@ -158,8 +159,7 @@ export async function getServiceInstancesSystemMetricStatistics<
           },
         },
       },
-    },
-    'get_service_instances_system_metric_statistics'
+    }
   );
 
   return (

@@ -69,8 +69,8 @@ export async function getCorrelationsForFailedTransactions(options: Options) {
   };
 
   const response = await apmEventClient.search(
-    params,
-    'get_correlations_for_failed_transactions'
+    'get_correlations_for_failed_transactions',
+    params
   );
   if (!response.aggregations) {
     return { significantTerms: [] };
@@ -130,8 +130,8 @@ export async function getErrorRateTimeSeries({
   };
 
   const response = await apmEventClient.search(
-    params,
-    'get_error_rate_timeseries'
+    'get_error_rate_timeseries',
+    params
   );
   const { aggregations } = response;
 

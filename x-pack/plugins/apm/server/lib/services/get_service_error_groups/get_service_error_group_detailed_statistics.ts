@@ -47,6 +47,7 @@ export async function getServiceErrorGroupDetailedStatistics({
   const { intervalString } = getBucketSize({ start, end, numBuckets });
 
   const timeseriesResponse = await apmEventClient.search(
+    'get_service_error_group_detailed_statistics',
     {
       apm: {
         events: [ProcessorEvent.error],
@@ -87,8 +88,7 @@ export async function getServiceErrorGroupDetailedStatistics({
           },
         },
       },
-    },
-    'get_service_error_group_detailed_statistics'
+    }
   );
 
   if (!timeseriesResponse.aggregations) {

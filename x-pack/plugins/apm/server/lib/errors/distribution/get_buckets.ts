@@ -73,8 +73,8 @@ export async function getBuckets({
   };
 
   const resp = await apmEventClient.search(
-    params,
-    'get_error_distribution_buckets'
+    'get_error_distribution_buckets',
+    params
   );
 
   const buckets = (resp.aggregations?.distribution.buckets || []).map(

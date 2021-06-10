@@ -87,7 +87,7 @@ function fetcher({
     },
   };
 
-  return apmEventClient.search(params, 'get_throughput_for_service');
+  return apmEventClient.search('get_throughput_for_service', params);
 }
 
 export async function getThroughput(options: Options) {

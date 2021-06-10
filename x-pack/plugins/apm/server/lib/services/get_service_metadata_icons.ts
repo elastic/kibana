@@ -74,8 +74,8 @@ export async function getServiceMetadataIcons({
   };
 
   const response = await apmEventClient.search(
-    params,
-    'get_service_metadata_icons'
+    'get_service_metadata_icons',
+    params
   );
 
   if (response.hits.total.value === 0) {

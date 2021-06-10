@@ -47,6 +47,7 @@ export async function getServiceInstanceMetadataDetails({
   ];
 
   const response = await apmEventClient.search(
+    'get_service_instance_metadata_details',
     {
       apm: {
         events: [
@@ -60,8 +61,7 @@ export async function getServiceInstanceMetadataDetails({
         size: 1,
         query: { bool: { filter } },
       },
-    },
-    'get_service_instance_metadata_details'
+    }
   );
 
   const sample = response.hits.hits[0]?._source;

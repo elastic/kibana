@@ -38,6 +38,7 @@ export async function getServiceErrorGroupMainStatistics({
   const { apmEventClient, start, end } = setup;
 
   const response = await apmEventClient.search(
+    'get_service_error_group_main_statistics',
     {
       apm: {
         events: [ProcessorEvent.error],
@@ -78,8 +79,7 @@ export async function getServiceErrorGroupMainStatistics({
           },
         },
       },
-    },
-    'get_service_error_group_main_statistics'
+    }
   );
 
   const errorGroups =

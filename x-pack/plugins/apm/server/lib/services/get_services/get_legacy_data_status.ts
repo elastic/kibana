@@ -18,6 +18,7 @@ export async function getLegacyDataStatus(setup: Setup & SetupTimeRange) {
     terminateAfter: 1,
     apm: {
       events: [ProcessorEvent.transaction],
+      includeLegacyData: true,
     },
     body: {
       size: 0,
@@ -32,10 +33,7 @@ export async function getLegacyDataStatus(setup: Setup & SetupTimeRange) {
     },
   };
 
-  const resp = await apmEventClient.search(params, {
-    includeLegacyData: true,
-    operationName: 'get_legacy_data_status',
-  });
+  const resp = await apmEventClient.search('get_legacy_data_status', params);
   const hasLegacyData = resp.hits.total.value > 0;
   return hasLegacyData;
 }

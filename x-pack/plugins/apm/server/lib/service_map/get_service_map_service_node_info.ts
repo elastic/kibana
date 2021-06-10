@@ -172,8 +172,8 @@ async function getTransactionStats({
     },
   };
   const response = await apmEventClient.search(
-    params,
-    'get_transaction_stats_for_service_map_node'
+    'get_transaction_stats_for_service_map_node',
+    params
   );
 
   const totalRequests = response.hits.total.value;
@@ -191,6 +191,7 @@ async function getCpuStats({
   const { apmEventClient } = setup;
 
   const response = await apmEventClient.search(
+    'get_avg_cpu_usage_for_service_map_node',
     {
       apm: {
         events: [ProcessorEvent.metric],
@@ -207,8 +208,7 @@ async function getCpuStats({
         },
         aggs: { avgCpuUsage: { avg: { field: METRIC_SYSTEM_CPU_PERCENT } } },
       },
-    },
-    'get_avg_cpu_usage_for_service_map_node'
+    }
   );
 
   return { avgCpuUsage: response.aggregations?.avgCpuUsage.value ?? null };
@@ -231,6 +231,7 @@ function getMemoryStats({
         | typeof percentSystemMemoryUsedScript;
     }) => {
       const response = await apmEventClient.search(
+        'get_avg_memory_for_service_map_node',
         {
           apm: {
             events: [ProcessorEvent.metric],
@@ -246,8 +247,7 @@ function getMemoryStats({
               avgMemoryUsage: { avg: { script } },
             },
           },
-        },
-        'get_avg_memory_for_service_map_node'
+        }
       );
       return response.aggregations?.avgMemoryUsage.value ?? null;
     };

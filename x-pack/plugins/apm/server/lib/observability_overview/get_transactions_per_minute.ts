@@ -27,6 +27,7 @@ export async function getTransactionsPerMinute({
   const { apmEventClient, start, end } = setup;
 
   const { aggregations } = await apmEventClient.search(
+    'observability_overview_get_transactions_per_minute',
     {
       apm: {
         events: [
@@ -62,8 +63,7 @@ export async function getTransactionsPerMinute({
           },
         },
       },
-    },
-    'observability_overview_get_transactions_per_minute'
+    }
   );
 
   if (!aggregations || !aggregations.transactionType.buckets) {

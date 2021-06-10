@@ -95,7 +95,7 @@ function searchThroughput({
     },
   };
 
-  return apmEventClient.search(params, 'get_transaction_throughput_series');
+  return apmEventClient.search('get_transaction_throughput_series', params);
 }
 
 export async function getThroughputCharts({

@@ -137,8 +137,8 @@ async function getServicesData(options: IEnvOptions) {
   const { apmEventClient } = setup;
 
   const response = await apmEventClient.search(
-    params,
-    'get_service_stats_for_service_map'
+    'get_service_stats_for_service_map',
+    params
   );
 
   return (

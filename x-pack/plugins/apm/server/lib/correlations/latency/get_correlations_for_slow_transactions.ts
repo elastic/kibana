@@ -94,8 +94,8 @@ export async function getCorrelationsForSlowTransactions(options: Options) {
     };
 
     const response = await apmEventClient.search(
-      params,
-      'get_significant_terms'
+      'get_significant_terms',
+      params
     );
 
     if (!response.aggregations) {

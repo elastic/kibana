@@ -49,8 +49,8 @@ export async function getTransactionErrorCountChartPreview({
   };
 
   const resp = await apmEventClient.search(
-    params,
-    'get_transaction_error_count_chart_preview'
+    'get_transaction_error_count_chart_preview',
+    params
   );
 
   if (!resp.aggregations) {

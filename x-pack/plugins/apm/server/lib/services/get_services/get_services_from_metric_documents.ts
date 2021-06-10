@@ -29,6 +29,7 @@ export async function getServicesFromMetricDocuments({
   const { apmEventClient, start, end } = setup;
 
   const response = await apmEventClient.search(
+    'get_services_from_metric_documents',
     {
       apm: {
         events: [ProcessorEvent.metric],
@@ -66,8 +67,7 @@ export async function getServicesFromMetricDocuments({
           },
         },
       },
-    },
-    'get_services_from_metric_documents'
+    }
   );
 
   return (

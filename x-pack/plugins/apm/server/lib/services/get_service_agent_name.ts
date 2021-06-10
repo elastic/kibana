@@ -55,8 +55,8 @@ export async function getServiceAgentName({
   };
 
   const { aggregations } = await apmEventClient.search(
-    params,
-    'get_service_agent_name'
+    'get_service_agent_name',
+    params
   );
   const agentName = aggregations?.agents.buckets[0]?.key as string | undefined;
   return { agentName };

@@ -25,26 +25,23 @@ export async function getTransaction({
 }) {
   const { apmEventClient } = setup;
 
-  const resp = await apmEventClient.search(
-    {
-      apm: {
-        events: [ProcessorEvent.transaction],
-      },
-      body: {
-        size: 1,
-        query: {
-          bool: {
-            filter: asMutableArray([
-              { term: { [TRANSACTION_ID]: transactionId } },
-              ...(traceId ? [{ term: { [TRACE_ID]: traceId } }] : []),
-              ...('start' in setup ? rangeQuery(setup.start, setup.end) : []),
-            ]),
-          },
+  const resp = await apmEventClient.search('get_transaction', {
+    apm: {
+      events: [ProcessorEvent.transaction],
+    },
+    body: {
+      size: 1,
+      query: {
+        bool: {
+          filter: asMutableArray([
+            { term: { [TRANSACTION_ID]: transactionId } },
+            ...(traceId ? [{ term: { [TRACE_ID]: traceId } }] : []),
+            ...('start' in setup ? rangeQuery(setup.start, setup.end) : []),
+          ]),
         },
       },
     },
-    'get_transaction'
-  );
+  });
 
   return resp.hits.hits[0]?._source;
 }

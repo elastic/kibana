@@ -46,8 +46,8 @@ export async function getTransaction({
     },
   };
   const resp = await apmEventClient.search(
-    params,
-    'get_transaction_for_custom_link'
+    'get_transaction_for_custom_link',
+    params
   );
   return resp.hits.hits[0]?._source;
 }
