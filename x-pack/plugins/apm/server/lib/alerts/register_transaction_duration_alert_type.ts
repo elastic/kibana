@@ -13,7 +13,10 @@ import {
   ALERT_EVALUATION_VALUE,
 } from '@kbn/rule-data-utils/target/technical_field_names';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
-import { parseEnvironmentUrlParam } from '../../../common/environment_filter_values';
+import {
+  getEnvironmentLabel,
+  parseEnvironmentUrlParam,
+} from '../../../common/environment_filter_values';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
   PROCESSOR_EVENT,
@@ -150,19 +153,19 @@ export function registerTransactionDurationAlertType({
           transactionDuration
         ).formatted;
 
-        const environmentParsed = parseEnvironmentUrlParam(
+        const parsedEnvironment = parseEnvironmentUrlParam(
           alertParams.environment
         );
 
         services
           .alertWithLifecycle({
-            id: `${AlertType.TransactionDuration}_${environmentParsed.text}`,
+            id: `${AlertType.TransactionDuration}_${getEnvironmentLabel(
+              alertParams.environment
+            )}`,
             fields: {
               [SERVICE_NAME]: alertParams.serviceName,
-              ...(environmentParsed.esFieldValue
-                ? {
-                    [SERVICE_ENVIRONMENT]: environmentParsed.esFieldValue,
-                  }
+              ...(parsedEnvironment
+                ? { [SERVICE_ENVIRONMENT]: parsedEnvironment }
                 : {}),
               [TRANSACTION_TYPE]: alertParams.transactionType,
               [PROCESSOR_EVENT]: ProcessorEvent.transaction,
@@ -173,7 +176,7 @@ export function registerTransactionDurationAlertType({
           .scheduleActions(alertTypeConfig.defaultActionGroupId, {
             transactionType: alertParams.transactionType,
             serviceName: alertParams.serviceName,
-            environment: environmentParsed.text,
+            environment: getEnvironmentLabel(alertParams.environment),
             threshold,
             triggerValue: transactionDurationFormatted,
             interval: `${alertParams.windowSize}${alertParams.windowUnit}`,

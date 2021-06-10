@@ -222,9 +222,7 @@ export function registerTransactionDurationAnomalyAlertType({
 
         compact(anomalies).forEach((anomaly) => {
           const { serviceName, environment, transactionType, score } = anomaly;
-
           const parsedEnvironment = parseEnvironmentUrlParam(environment);
-
           const severityLevel = getSeverity(score);
 
           services
@@ -239,8 +237,8 @@ export function registerTransactionDurationAnomalyAlertType({
                 .join('_'),
               fields: {
                 [SERVICE_NAME]: serviceName,
-                ...(parsedEnvironment.esFieldValue
-                  ? { [SERVICE_ENVIRONMENT]: environment }
+                ...(parsedEnvironment
+                  ? { [SERVICE_ENVIRONMENT]: parsedEnvironment }
                   : {}),
                 [TRANSACTION_TYPE]: transactionType,
                 [PROCESSOR_EVENT]: ProcessorEvent.transaction,
