@@ -40,7 +40,7 @@ interface Props<T> {
   percentageColumnName: string;
   setSelectedSignificantTerm: (term: SelectedSignificantTerm | null) => void;
   onFilter: () => void;
-  columns: Array<EuiBasicTableColumn<T>>;
+  columns?: Array<EuiBasicTableColumn<T>>;
 }
 
 export function CorrelationsTable<T extends SignificantTerm>({
