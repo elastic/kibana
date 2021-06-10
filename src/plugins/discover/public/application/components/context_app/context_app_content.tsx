@@ -51,7 +51,11 @@ export interface ContextAppContentProps {
   ) => Promise<void>;
 }
 
+const controlColumnIds = ['openDetails'];
+
 const DataGridMemoized = React.memo(DiscoverGrid);
+const DocTableLegacyMemoized = React.memo(DocTableLegacy);
+const ActionBarMemoized = React.memo(ActionBar);
 
 export function ContextAppContent({
   columns,
@@ -78,7 +82,8 @@ export function ContextAppContent({
 
   const [expandedDoc, setExpandedDoc] = useState<EsHitRecord | undefined>(undefined);
   const isAnchorLoaded = anchorStatus === LoadingStatus.LOADED;
-  const isAnchorLoading = anchorStatus === LoadingStatus.LOADING;
+  const isAnchorLoading =
+    anchorStatus === LoadingStatus.LOADING || anchorStatus === LoadingStatus.UNINITIALIZED;
   const arePredecessorsLoading =
     predecessorsStatus === LoadingStatus.LOADING ||
     predecessorsStatus === LoadingStatus.UNINITIALIZED;
@@ -106,7 +111,7 @@ export function ContextAppContent({
       services,
       useNewFieldsApi,
       isPaginationEnabled: false,
-      controlColumnIds: ['openDetails'],
+      controlColumnIds,
       setExpandedDoc,
       onFilter: addFilter,
       onAddColumn,
@@ -125,7 +130,7 @@ export function ContextAppContent({
       onFilter: addFilter,
       onAddColumn,
       onRemoveColumn,
-      sort: sort.map((el) => [el]),
+      sort,
       useNewFieldsApi,
     } as DocTableLegacyProps;
   };
@@ -154,7 +159,7 @@ export function ContextAppContent({
 
   return (
     <Fragment>
-      <ActionBar
+      <ActionBarMemoized
         type="predecessors"
         defaultStepSize={defaultStepSize}
         docCount={predecessorCount}
@@ -167,7 +172,7 @@ export function ContextAppContent({
       <EuiHorizontalRule margin="xs" />
       {isLegacy && isAnchorLoaded && (
         <div className="discover-table">
-          <DocTableLegacy {...legacyDocTableProps()} />
+          <DocTableLegacyMemoized {...legacyDocTableProps()} />
         </div>
       )}
       {!isLegacy && (
@@ -176,7 +181,7 @@ export function ContextAppContent({
         </div>
       )}
       <EuiHorizontalRule margin="xs" />
-      <ActionBar
+      <ActionBarMemoized
         type="successors"
         defaultStepSize={defaultStepSize}
         docCount={successorCount}

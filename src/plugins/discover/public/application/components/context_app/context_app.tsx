@@ -44,7 +44,7 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
    * Context app state
    */
   const { appState, setAppState } = useContextAppState({ indexPattern, services });
-  const prevState = useRef<AppState>();
+  const prevAppState = useRef<AppState>();
 
   /**
    * Context fetched state
@@ -64,17 +64,17 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
    * Fetch docs on ui changes
    */
   useEffect(() => {
-    if (!prevState.current) {
+    if (!prevAppState.current) {
       fetchAllRows();
-    } else if (prevState.current.predecessorCount !== appState.predecessorCount) {
+    } else if (prevAppState.current.predecessorCount !== appState.predecessorCount) {
       fetchSurroundingRows('predecessors');
-    } else if (prevState.current.successorCount !== appState.successorCount) {
+    } else if (prevAppState.current.successorCount !== appState.successorCount) {
       fetchSurroundingRows('successors');
-    } else if (!isEqualFilters(prevState.current.filters, appState.filters)) {
+    } else if (!isEqualFilters(prevAppState.current.filters, appState.filters)) {
       fetchContextRows();
     }
 
-    prevState.current = cloneDeep(appState);
+    prevAppState.current = cloneDeep(appState);
   }, [appState, indexPatternId, anchorId, fetchContextRows, fetchAllRows, fetchSurroundingRows]);
 
   const { columns, onAddColumn, onRemoveColumn, onSetColumns } = useDataGridColumns({
@@ -92,7 +92,7 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
       ...(fetchedState.anchor._id ? [fetchedState.anchor] : []),
       ...(fetchedState.successors || []),
     ],
-    [fetchedState]
+    [fetchedState.predecessors, fetchedState.anchor, fetchedState.successors]
   );
 
   const addFilter = useCallback(
