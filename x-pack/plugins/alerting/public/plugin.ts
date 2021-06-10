@@ -37,7 +37,7 @@ export interface PluginSetupContract {
    * Register a customized view for all rule types with this application id. Stack Management provides a generic overview, but a developer can register a
    * custom navigation to provide the user an extra link to a more curated view. The alerting plugin doesn't actually do
    * anything with this information, but it can be used by other plugins via the `getNavigation` functionality. Currently
-   * the trigger_actions_ui plugin uses it to expose the link from the generic rule view in Stack Management.
+   * the trigger_actions_ui plugin uses it to expose the link from the generic rule details view in Stack Management.
    *
    * @param applicationId The application id that the user should be navigated to, to view a particular alert in a custom way.
    * @param handler The navigation handler should return either a relative URL, or a state object. This information can be used,
