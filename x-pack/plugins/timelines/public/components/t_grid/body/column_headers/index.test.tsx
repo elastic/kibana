@@ -83,7 +83,8 @@ describe('ColumnHeaders', () => {
       expect(wrapper.find('ColumnHeadersComponent')).toMatchSnapshot();
     });
 
-    test('it renders the field browser', () => {
+    // TODO BrowserField When we bring back browser fields unskip
+    test.skip('it renders the field browser', () => {
       const wrapper = mount(
         <TestProviders>
           <ColumnHeadersComponent

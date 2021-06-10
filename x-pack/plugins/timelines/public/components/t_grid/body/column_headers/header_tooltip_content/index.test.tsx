@@ -10,8 +10,8 @@ import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
 import { ColumnHeaderOptions } from '../../../../../../common/types/timeline';
-import { defaultHeaders } from '../default_headers';
 import { HeaderToolTipContent } from '.';
+import { defaultHeaders } from '../../../../../mock/header';
 
 describe('HeaderToolTipContent', () => {
   let header: ColumnHeaderOptions;

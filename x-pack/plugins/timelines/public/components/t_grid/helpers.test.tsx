@@ -253,7 +253,7 @@ describe('Combined Queries', () => {
         isEventViewer,
       })
     ).toEqual({
-      filterQuery: '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
+      filterQuery: '{"bool":{"must":[],"filter":[],"should":[],"must_not":[]}}',
     });
   });
 
@@ -297,7 +297,7 @@ describe('Combined Queries', () => {
       })
     ).toEqual({
       filterQuery:
-        '{"bool":{"must":[],"filter":[{"match_all":{}},{"exists":{"field":"host.name"}}],"should":[],"must_not":[]}}',
+        '{"bool":{"must":[],"filter":[{"exists":{"field":"host.name"}}],"should":[],"must_not":[]}}',
     });
   });
 

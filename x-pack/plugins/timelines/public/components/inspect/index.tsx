@@ -74,7 +74,7 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
     if (onCloseInspect != null) {
       onCloseInspect();
     }
-    setIsInspected(true);
+    setIsInspected(false);
   }, [onCloseInspect, setIsInspected]);
 
   let request: string | null = null;

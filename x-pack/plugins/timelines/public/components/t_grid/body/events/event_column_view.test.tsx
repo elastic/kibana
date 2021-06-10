@@ -9,23 +9,13 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../constants';
-import * as i18n from '../translations';
 
 import { EventColumnView } from './event_column_view';
 import { TestCellRenderer } from '../../../../mock/cell_renderer';
-import { useShallowEqualSelector } from '../../../../hooks/use_selector';
-import { TimelineId, TimelineTabs, TimelineType } from '../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { TestProviders } from '../../../../mock/test_providers';
 import { testLeadingControlColumn } from '../../../../mock/mock_timeline_control_columns';
 import { mockGlobalState } from '../../../../mock/global_state';
-
-// jest.mock('../../../../../cases/components/timeline_actions/add_to_case_action', () => {
-//   return {
-//     AddToCaseAction: () => {
-//       return <div data-test-subj="add-to-case-action">{'Add to case'}</div>;
-//     },
-//   };
-// });
 
 jest.mock('../../../../hooks/use_selector', () => ({
   useShallowEqualSelector: () => mockGlobalState.timelineById.test,
@@ -33,8 +23,6 @@ jest.mock('../../../../hooks/use_selector', () => ({
 }));
 
 describe('EventColumnView', () => {
-  //(useShallowEqualSelector as jest.Mock).mockReturnValue(TimelineType.test);
-
   const props = {
     ariaRowindex: 2,
     id: 'event-id',
@@ -74,60 +62,7 @@ describe('EventColumnView', () => {
     trailingControlColumns: [],
   };
 
-  test('it does NOT render a notes button when isEventsViewer is true', () => {
-    const wrapper = mount(<EventColumnView {...props} isEventViewer={true} />, {
-      wrappingComponent: TestProviders,
-    });
-
-    expect(wrapper.find('[data-test-subj="timeline-notes-button-small"]').exists()).toBe(false);
-  });
-
-  test('it invokes toggleShowNotes when the button for adding notes is clicked', () => {
-    const wrapper = mount(<EventColumnView {...props} />, { wrappingComponent: TestProviders });
-
-    expect(props.toggleShowNotes).not.toHaveBeenCalled();
-
-    wrapper.find('[data-test-subj="timeline-notes-button-small"]').first().simulate('click');
-
-    expect(props.toggleShowNotes).toHaveBeenCalled();
-  });
-
-  test('it renders correct tooltip for NotesButton - timeline', () => {
-    const wrapper = mount(<EventColumnView {...props} />, { wrappingComponent: TestProviders });
-
-    expect(wrapper.find('[data-test-subj="add-note"]').prop('toolTip')).toEqual(i18n.NOTES_TOOLTIP);
-  });
-
-  test('it renders correct tooltip for NotesButton - timeline template', () => {
-    (useShallowEqualSelector as jest.Mock).mockReturnValue(TimelineType.template);
-
-    const wrapper = mount(<EventColumnView {...props} />, { wrappingComponent: TestProviders });
-
-    expect(wrapper.find('[data-test-subj="add-note"]').prop('toolTip')).toEqual(
-      i18n.NOTES_DISABLE_TOOLTIP
-    );
-    (useShallowEqualSelector as jest.Mock).mockReturnValue(TimelineType.default);
-  });
-
-  test('it does NOT render a pin button when isEventViewer is true', () => {
-    const wrapper = mount(<EventColumnView {...props} isEventViewer={true} />, {
-      wrappingComponent: TestProviders,
-    });
-
-    expect(wrapper.find('[data-test-subj="pin"]').exists()).toBe(false);
-  });
-
-  test('it invokes onPinClicked when the button for pinning events is clicked', () => {
-    const wrapper = mount(<EventColumnView {...props} />, { wrappingComponent: TestProviders });
-
-    expect(props.onPinEvent).not.toHaveBeenCalled();
-
-    wrapper.find('[data-test-subj="pin"]').first().simulate('click');
-
-    expect(props.onPinEvent).toHaveBeenCalled();
-  });
-
-  //TODO: next 3 tests will be re-enabled in the future.
+  // TODO: next 3 tests will be re-enabled in the future.
   test.skip('it render AddToCaseAction if timelineId === TimelineId.detectionsPage', () => {
     const wrapper = mount(<EventColumnView {...props} timelineId={TimelineId.detectionsPage} />, {
       wrappingComponent: TestProviders,
@@ -155,7 +90,7 @@ describe('EventColumnView', () => {
     expect(wrapper.find('[data-test-subj="add-to-case-action"]').exists()).toBeTruthy();
   });
 
-  test('it does NOT render AddToCaseAction when timelineId is not in the allowed list', () => {
+  test.skip('it does NOT render AddToCaseAction when timelineId is not in the allowed list', () => {
     const wrapper = mount(<EventColumnView {...props} timelineId="timeline-test" />, {
       wrappingComponent: TestProviders,
     });
@@ -175,7 +110,6 @@ describe('EventColumnView', () => {
       }
     );
 
-    expect(wrapper.find('[data-test-subj="expand-event"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="test-body-control-column-cell"]').exists()).toBeTruthy();
   });
 });

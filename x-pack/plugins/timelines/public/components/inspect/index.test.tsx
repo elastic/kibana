@@ -7,9 +7,9 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
+import { cloneDeep } from 'lodash/fp';
 
 import { InspectButton, InspectButtonContainer, BUTTON_CLASS, InspectButtonProps } from '.';
-import { cloneDeep } from 'lodash/fp';
 
 describe('Inspect Button', () => {
   const newQuery: InspectButtonProps = {
@@ -68,10 +68,9 @@ describe('Inspect Button', () => {
     });
     test('Open Inspect Modal', () => {
       const wrapper = mount(<InspectButton {...myQuery} />);
+
       wrapper.find('button[data-test-subj="inspect-icon-button"]').first().simulate('click');
-
       wrapper.update();
-
       expect(wrapper.find('button[data-test-subj="modal-inspect-close"]').first().exists()).toBe(
         true
       );
@@ -82,11 +81,9 @@ describe('Inspect Button', () => {
       wrapper.find('button[data-test-subj="inspect-icon-button"]').first().simulate('click');
 
       wrapper.update();
-
       wrapper.find('button[data-test-subj="modal-inspect-close"]').first().simulate('click');
 
       wrapper.update();
-
       expect(wrapper.find('button[data-test-subj="modal-inspect-close"]').first().exists()).toBe(
         false
       );

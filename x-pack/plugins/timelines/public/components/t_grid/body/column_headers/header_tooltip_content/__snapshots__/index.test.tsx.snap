@@ -4,6 +4,19 @@ exports[`HeaderToolTipContent it renders the expected table content 1`] = `
 <Fragment>
   <P>
     <ToolTipTableMetadata
+      data-test-subj="category"
+    >
+      Category
+      :
+    </ToolTipTableMetadata>
+    <ToolTipTableValue
+      data-test-subj="category-value"
+    >
+      base
+    </ToolTipTableValue>
+  </P>
+  <P>
+    <ToolTipTableMetadata
       data-test-subj="field"
     >
       Field
@@ -25,13 +38,28 @@ exports[`HeaderToolTipContent it renders the expected table content 1`] = `
     <ToolTipTableValue>
       <IconType
         data-test-subj="type-icon"
-        type="number"
+        type="clock"
       />
       <span
         data-test-subj="type-value"
       >
-        number
+        date
       </span>
+    </ToolTipTableValue>
+  </P>
+  <P>
+    <ToolTipTableMetadata
+      data-test-subj="description"
+    >
+      Description
+      :
+    </ToolTipTableMetadata>
+    <ToolTipTableValue
+      data-test-subj="description-value"
+    >
+      Date/time when the event originated.
+For log events this is the date/time when the event was generated, and not when it was read.
+Required field for all events.
     </ToolTipTableValue>
   </P>
 </Fragment>

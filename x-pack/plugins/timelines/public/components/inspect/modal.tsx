@@ -27,7 +27,8 @@ import * as i18n from './translations';
 export const NO_ALERT_INDEX = 'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C51';
 
 const DescriptionListStyled = styled(EuiDescriptionList)`
-  @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.s}) {
+  @media only screen and (min-width: ${(props) =>
+      props?.theme?.eui?.euiBreakpoints?.s ?? '600px'}) {
     .euiDescriptionList__title {
       width: 30% !important;
     }

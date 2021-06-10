@@ -16,6 +16,7 @@ import type {
   ControlColumnProps,
   RowCellRender,
 } from '../../../../../common/types/timeline';
+// eslint-disable-next-line no-duplicate-imports
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import type { Ecs } from '../../../../../common/ecs';
