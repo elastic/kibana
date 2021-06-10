@@ -8,11 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiPageHeader,
-  EuiButtonEmpty,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiPageHeader, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
 import { getListPath } from '../../services/navigation';
 import { Pipeline } from '../../../../common/types';
@@ -63,14 +59,14 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
     <>
       <EuiPageHeader
         bottomBorder
-        pageTitle={(
+        pageTitle={
           <span data-test-subj="pageTitle">
             <FormattedMessage
               id="xpack.ingestPipelines.create.pageTitle"
               defaultMessage="Create pipeline"
             />
           </span>
-        )}
+        }
         rightSideItems={[
           <EuiButtonEmpty
             size="s"
@@ -84,7 +80,7 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
               id="xpack.ingestPipelines.create.docsButtonLabel"
               defaultMessage="Create pipeline docs"
             />
-          </EuiButtonEmpty>
+          </EuiButtonEmpty>,
         ]}
       />
 

@@ -46,11 +46,7 @@ export const PipelinesClone: FunctionComponent<RouteComponentProps<ParamProps>> 
 
   if (isLoading && isInitialRequest) {
     return (
-      <EuiPageContent
-        verticalPosition="center"
-        horizontalPosition="center"
-        color="subdued"
-      >
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
         <SectionLoading>
           <FormattedMessage
             id="xpack.ingestPipelines.clone.loadingPipelinesDescription"

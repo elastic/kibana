@@ -79,38 +79,25 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
 
   if (error) {
     return (
-      <EuiPageContent
-        verticalPosition="center"
-        horizontalPosition="center"
-        color="danger"
-        data-test-subj="pipelineLoadError"
-      >
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
         <EuiEmptyPrompt
           iconType="alert"
           title={
-            <h2>
+            <h2 data-test-subj="pipelineLoadError">
               <FormattedMessage
                 id="xpack.ingestPipelines.list.loadErrorTitle"
-                defaultMessage="Could not retrieve Ingest Node Pipelines."
+                defaultMessage="Unable to load pipelines."
               />
             </h2>
           }
           body={
             <p>
-              <FormattedMessage
-                id="xpack.ingestPipelines.list.loadErrorBody"
-                defaultMessage="Please {reloadLink}"
-                values={{
-                  reloadLink: (
-                    <EuiLink onClick={resendRequest}>
-                      <FormattedMessage
-                        id="xpack.ingestPipelines.list.loadErrorReloadLinkLabel"
-                        defaultMessage="Try again."
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
+              <EuiLink onClick={resendRequest}>
+                <FormattedMessage
+                  id="xpack.ingestPipelines.list.loadErrorReloadLinkLabel"
+                  defaultMessage="Try again."
+                />
+              </EuiLink>
             </p>
           }
         />
@@ -120,11 +107,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
 
   if (isLoading) {
     return (
-      <EuiPageContent
-        verticalPosition="center"
-        horizontalPosition="center"
-        color="subdued"
-      >
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
         <SectionLoading data-test-subj="sectionLoading">
           <FormattedMessage
             id="xpack.ingestPipelines.list.loadingMessage"
@@ -135,7 +118,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
     );
   }
 
-  if (isLoading) {
+  if (data && data.length === 0) {
     return <EmptyList />;
   }
 
@@ -167,20 +150,20 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
     <>
       <EuiPageHeader
         bottomBorder
-        pageTitle={(
+        pageTitle={
           <span data-test-subj="appTitle">
             <FormattedMessage
               id="xpack.ingestPipelines.list.listTitle"
               defaultMessage="Ingest Node Pipelines"
             />
           </span>
-        )}
-        description={(
+        }
+        description={
           <FormattedMessage
             id="xpack.ingestPipelines.list.pipelinesDescription"
             defaultMessage="Define a pipeline for preprocessing documents before indexing."
           />
-        )}
+        }
         rightSideItems={[
           <EuiButtonEmpty
             href={services.documentation.getIngestNodeUrl()}
@@ -192,7 +175,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
               id="xpack.ingestPipelines.list.pipelinesDocsLinkText"
               defaultMessage="Ingest Node Pipelines docs"
             />
-          </EuiButtonEmpty>
+          </EuiButtonEmpty>,
         ]}
       />
 

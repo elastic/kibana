@@ -67,11 +67,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
 
   if (isLoading) {
     return (
-      <EuiPageContent
-        verticalPosition="center"
-        horizontalPosition="center"
-        color="subdued"
-      >
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
         <SectionLoading>
           <FormattedMessage
             id="xpack.ingestPipelines.edit.loadingPipelinesDescription"
@@ -110,7 +106,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
     <>
       <EuiPageHeader
         bottomBorder
-        pageTitle={(
+        pageTitle={
           <span data-test-subj="pageTitle">
             <FormattedMessage
               id="xpack.ingestPipelines.edit.pageTitle"
@@ -118,7 +114,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
               values={{ name: decodedPipelineName }}
             />
           </span>
-        )}
+        }
         rightSideItems={[
           <EuiButtonEmpty
             size="s"
@@ -132,7 +128,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
               id="xpack.ingestPipelines.edit.docsButtonLabel"
               defaultMessage="Edit pipeline docs"
             />
-          </EuiButtonEmpty>
+          </EuiButtonEmpty>,
         ]}
       />
 
