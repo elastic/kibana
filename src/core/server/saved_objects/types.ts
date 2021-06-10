@@ -436,7 +436,16 @@ export interface SavedObjectsTypeManagementDefinition<Attributes = any> {
   onImport?: SavedObjectsImportHook<Attributes>;
 
   /**
-   * Allow to specify exportability on the object's granularity level.
+   * Allow to specify exportability with an object granularity.
+   *
+   * If specified, `isExportable` will be called during export for each
+   * of this type's objects, and the ones not matching the predicate will
+   * be evicted from the export.
+   *
+   * When implementing both `isExportable` and `onExport`, it is mandatory that
+   * `isExportable` returns the same value for an object before and after going
+   * though the export transform.
+   * E.g `isExportable(objectBeforeTransform) === isExportable(objectAfterTransform)`
    *
    * @example
    * Registering a type with per-object exportability
@@ -462,7 +471,6 @@ export interface SavedObjectsTypeManagementDefinition<Attributes = any> {
    * }
    * ```
    *
-   * @remarks an exportable predicate should be deterministic
    * @remarks this is only used when `importableAndExportable` is true
    */
   isExportable?: SavedObjectsExportablePredicate<Attributes>;
