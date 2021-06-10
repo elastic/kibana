@@ -13,6 +13,7 @@ import { formatHumanReadableDateTimeSeconds } from '../../../common/util/date_ut
 import { AnnotationsTable } from '../../../common/types/annotations';
 import { ChartTooltipService } from '../components/chart_tooltip';
 
+export const X_AXIS_RIGHT_OVERFLOW = 50;
 export const Y_AXIS_LABEL_WIDTH = 170;
 export const Y_AXIS_LABEL_PADDING = 8;
 export const Y_AXIS_LABEL_FONT_COLOR = '#6a717d';
@@ -45,7 +46,7 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
       const dimensions = canvasRef.current.getBoundingClientRect();
 
       const startingXPos = Y_AXIS_LABEL_WIDTH + 2 * Y_AXIS_LABEL_PADDING;
-      const endingXPos = dimensions.width - 2 * Y_AXIS_LABEL_PADDING - 4;
+      const endingXPos = dimensions.width - X_AXIS_RIGHT_OVERFLOW;
 
       const svg = chartElement
         .append('svg')
