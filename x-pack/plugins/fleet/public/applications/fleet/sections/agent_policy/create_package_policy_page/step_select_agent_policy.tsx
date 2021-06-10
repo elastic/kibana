@@ -14,7 +14,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiComboBox,
-  EuiTextColor,
   EuiPortal,
   EuiFormRow,
   EuiDescribedFormGroup,
@@ -39,20 +38,6 @@ const AgentPolicyFormRow = styled(EuiFormRow)`
   .euiFormRow__label {
     width: 100%;
   }
-`;
-
-// Custom styling for drop down list items due to:
-//  1) the max-width and overflow properties is added to prevent long agent policy
-//     names/descriptions from overflowing the flex items
-//  2) max-width is built from the grow property on the flex items because the value
-//     changes based on if Fleet is enabled/setup or not
-const AgentPolicyNameColumn = styled(EuiFlexItem)`
-  max-width: ${(props) => `${((props.grow as number) / 9) * 100}%`};
-  overflow: hidden;
-`;
-const AgentPolicyDescriptionColumn = styled(EuiFlexItem)`
-  max-width: ${(props) => `${((props.grow as number) / 9) * 100}%`};
-  overflow: hidden;
 `;
 
 export const StepSelectAgentPolicy: React.FunctionComponent<{
@@ -285,7 +270,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                 isFleetReady && selectedPolicyId ? (
                   <FormattedMessage
                     id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyAgentsDescriptionText"
-                    defaultMessage="{count, plural, one {# agent} other {# agents}} are enrolled with the selected agent policy."
+                    defaultMessage="{count, plural, one {# agent is} other {# agents are}} enrolled with the selected agent policy."
                     values={{
                       count: agentPoliciesById[selectedPolicyId]?.agents ?? 0,
                     }}
@@ -305,33 +290,6 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                 fullWidth={true}
                 isLoading={isAgentPoliciesLoading || isPackageInfoLoading}
                 options={agentPolicyOptions}
-                renderOption={(option: EuiComboBoxOptionOption<string>) => {
-                  return (
-                    <EuiFlexGroup>
-                      <AgentPolicyNameColumn grow={2}>
-                        <span className="eui-textTruncate">{option.label}</span>
-                      </AgentPolicyNameColumn>
-                      <AgentPolicyDescriptionColumn grow={isFleetReady ? 5 : 7}>
-                        <EuiTextColor className="eui-textTruncate" color="subdued">
-                          {agentPoliciesById[option.value!].description}
-                        </EuiTextColor>
-                      </AgentPolicyDescriptionColumn>
-                      {isFleetReady ? (
-                        <EuiFlexItem grow={2} className="eui-textRight">
-                          <EuiTextColor color="subdued">
-                            <FormattedMessage
-                              id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyAgentsCountText"
-                              defaultMessage="{count, plural, one {# agent} other {# agents}} enrolled"
-                              values={{
-                                count: agentPoliciesById[option.value!]?.agents ?? 0,
-                              }}
-                            />
-                          </EuiTextColor>
-                        </EuiFlexItem>
-                      ) : null}
-                    </EuiFlexGroup>
-                  );
-                }}
                 selectedOptions={selectedAgentPolicyOption ? [selectedAgentPolicyOption] : []}
                 onChange={(options) => {
                   const selectedOption = options[0] || undefined;

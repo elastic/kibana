@@ -451,7 +451,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
           )}
       <StepsWithLessPadding steps={steps} />
       <EuiSpacer size="l" />
-      <EuiBottomBar>
+      <EuiBottomBar style={{ zIndex: 50 }}>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
             {!isLoadingSecondStep && agentPolicy && packageInfo && formState === 'INVALID' ? (
