@@ -26,6 +26,8 @@ and display a notification in the UI.
 [role="screenshot"]
 image::user/monitoring/images/monitoring-kibana-alerting-notification.png["{kib} alerting notifications in {stack-monitor-app}"]
 
+NOTE: To review and modify all available rules, use *Enter setup mode* on the 
+*Cluster overview* page in *{stack-monitor-app}*:
 
 [role="screenshot"]
 image::user/monitoring/images/monitoring-kibana-alerting-setup-mode.png["Modify {kib} alerting rules in {stack-monitor-app}"]
