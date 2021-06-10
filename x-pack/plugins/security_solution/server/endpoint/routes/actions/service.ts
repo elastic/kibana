@@ -89,7 +89,9 @@ export const getAuditLogResponse = async ({
       typeof result.body.hits.total === 'number'
         ? result.body.hits.total
         : result.body.hits.total.value,
-    items: result.body.hits.hits.map((e) => ({
+    page,
+    pageSize,
+    data: result.body.hits.hits.map((e) => ({
       type: e._index.startsWith('.fleet-actions') ? 'action' : 'response',
       item: { id: e._id, data: e._source },
     })),

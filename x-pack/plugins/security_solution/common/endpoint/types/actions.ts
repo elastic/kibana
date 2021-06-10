@@ -59,7 +59,9 @@ export interface ActivityLogActionResponse {
 export type ActivityLogEntry = ActivityLogAction | ActivityLogActionResponse;
 export interface ActivityLog {
   total: number;
-  items: ActivityLogEntry[];
+  page: number;
+  pageSize: number;
+  data: ActivityLogEntry[];
 }
 
 export type HostIsolationRequestBody = TypeOf<typeof HostIsolationRequestSchema.body>;

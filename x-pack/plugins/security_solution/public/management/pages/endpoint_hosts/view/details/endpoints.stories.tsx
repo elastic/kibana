@@ -21,7 +21,9 @@ export const dummyEndpointActivityLog = (
   type: 'LoadedResourceState',
   data: {
     total: 20,
-    items: [
+    page: 1,
+    pageSize: 50,
+    data: [
       {
         type: 'action',
         item: {

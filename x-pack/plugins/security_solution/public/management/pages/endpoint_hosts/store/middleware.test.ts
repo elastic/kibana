@@ -238,7 +238,9 @@ describe('endpoint list middleware', () => {
     const getMockEndpointActivityLog = () =>
       ({
         total: 2,
-        items: [
+        page: 1,
+        pageSize: 50,
+        data: [
           {
             type: 'response',
             item: {

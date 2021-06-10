@@ -407,12 +407,14 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
         const lastLoadedLogData = getLastLoadedActivityLogData(getState());
         if (lastLoadedLogData !== undefined) {
           const updatedLogDataItems = [
-            ...new Set([...lastLoadedLogData.items, ...activityLog.items]),
-          ] as ActivityLog['items'];
+            ...new Set([...lastLoadedLogData.data, ...activityLog.data]),
+          ] as ActivityLog['data'];
 
           const updatedLogData = {
             total: activityLog.total,
-            items: updatedLogDataItems,
+            page: activityLog.page,
+            pageSize: activityLog.pageSize,
+            data: updatedLogDataItems,
           };
           dispatch({
             type: 'endpointDetailsActivityLogChanged',

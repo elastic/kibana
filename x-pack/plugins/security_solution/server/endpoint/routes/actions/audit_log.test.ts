@@ -152,7 +152,7 @@ describe('Action Log API', () => {
       havingActionsAndResponses([], []);
       const response = await getActivityLog();
       expect(response.ok).toBeCalled();
-      expect((response.ok.mock.calls[0][0]?.body as ActivityLog).items).toHaveLength(0);
+      expect((response.ok.mock.calls[0][0]?.body as ActivityLog).data).toHaveLength(0);
     });
 
     it('should have actions and action responses', async () => {
@@ -168,9 +168,9 @@ describe('Action Log API', () => {
       const responseBody = response.ok.mock.calls[0][0]?.body as ActivityLog;
 
       expect(response.ok).toBeCalled();
-      expect(responseBody.items).toHaveLength(5);
-      expect(responseBody.items.filter((x: any) => x.type === 'response')).toHaveLength(2);
-      expect(responseBody.items.filter((x: any) => x.type === 'action')).toHaveLength(3);
+      expect(responseBody.data).toHaveLength(5);
+      expect(responseBody.data.filter((x: any) => x.type === 'response')).toHaveLength(2);
+      expect(responseBody.data.filter((x: any) => x.type === 'action')).toHaveLength(3);
     });
 
     it('should throw errors when no results for some agentID', async () => {

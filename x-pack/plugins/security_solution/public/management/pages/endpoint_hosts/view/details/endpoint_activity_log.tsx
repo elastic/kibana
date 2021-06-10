@@ -28,7 +28,6 @@ export const EndpointActivityLog = memo(
     const activityError = useEndpointSelector(getActivityLogError);
     const dispatch = useDispatch<(a: EndpointAction) => void>();
     const { page, pageSize } = useEndpointSelector(getActivityLogDataPaging);
-
     // TODO
     const onSearch = useCallback(() => {}, []);
 
@@ -45,7 +44,7 @@ export const EndpointActivityLog = memo(
     return (
       <>
         <EuiSpacer size="l" />
-        {(activityLog.type === 'LoadedResourceState' && !activityLog.data.items.length) ||
+        {(activityLog.type === 'LoadedResourceState' && !activityLog.data.data.length) ||
         activityError ? (
           <EuiEmptyPrompt
             iconType="editorUnorderedList"
@@ -61,7 +60,7 @@ export const EndpointActivityLog = memo(
               <EuiLoadingContent lines={3} />
             ) : (
               activityLog.type === 'LoadedResourceState' &&
-              activityLog.data.items.map((logEntry) => (
+              activityLog.data.data.map((logEntry) => (
                 <LogEntry key={`${logEntry.item.id}`} logEntry={logEntry} />
               ))
             )}
