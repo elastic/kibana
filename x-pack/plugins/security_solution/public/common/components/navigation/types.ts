@@ -6,7 +6,7 @@
  */
 
 import { UrlStateType } from '../url_state/constants';
-import { SecurityPageName } from '../../../app/types';
+import { SecurityPageName, SecurityPageGroupName } from '../../../app/types';
 import { UrlState } from '../url_state/types';
 import { SiemRouteType } from '../../utils/route/types';
 
@@ -22,6 +22,19 @@ export interface TabNavigationComponentProps {
 }
 
 export type SearchNavTab = NavTab | { urlKey: UrlStateType; isDetailPage: boolean };
+
+export interface NavGroupTab {
+  id: string;
+  name: string;
+}
+
+export type SecurityNavTabGroupKey =
+  | SecurityPageGroupName.detect
+  | SecurityPageGroupName.explore
+  | SecurityPageGroupName.investigate
+  | SecurityPageGroupName.manage;
+
+export type NavTabGroups = Record<SecurityNavTabGroupKey, NavGroupTab>;
 
 export interface NavTab {
   id: string;

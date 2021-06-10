@@ -43,7 +43,7 @@ import { Immutable } from '../../common/endpoint/types';
 import { AppAction } from '../common/store/actions';
 import { TimelineState } from '../timelines/store/timeline/types';
 import { SecurityPageName } from '../../common/constants';
-export { SecurityPageName } from '../../common/constants';
+export { SecurityPageName, SecurityPageGroupName } from '../../common/constants';
 
 export interface SecuritySubPluginStore<K extends SecuritySubPluginKeyStore, T> {
   initialState: Record<K, T | undefined>;

@@ -46,6 +46,7 @@ import {
   DEFAULT_INDEX_KEY,
   DETECTION_ENGINE_INDEX_URL,
   DEFAULT_ALERTS_INDEX,
+  OVERVIEW_PATH,
 } from '../common/constants';
 
 import { SecurityPageName } from './app/types';
@@ -293,7 +294,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         {
           id: SecurityPageName.overview,
           title: OVERVIEW,
-          path: '/overview',
+          path: OVERVIEW_PATH,
           navLinkStatus: AppNavLinkStatus.visible,
           order: 9000,
           euiIconType: APP_ICON_SOLUTION,
