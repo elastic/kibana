@@ -177,7 +177,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'apm',
       fetchData: fetchApmData,
-      hasData: async () => false,
+      hasData: async () => ({ hasData: false, indices: 'apm-*' }),
     });
     registerDataHandler({
       appName: 'infra_logs',
@@ -272,7 +272,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'apm',
         fetchData: fetchApmData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'apm-*' }),
       });
 
       return (
@@ -289,7 +289,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'apm',
       fetchData: fetchApmData,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'apm-*' }),
     });
     registerDataHandler({
       appName: 'infra_logs',
@@ -321,7 +321,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'apm',
         fetchData: fetchApmData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'apm-*' }),
       });
       registerDataHandler({
         appName: 'infra_logs',
@@ -355,7 +355,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'apm',
         fetchData: fetchApmData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'apm-*' }),
       });
       registerDataHandler({
         appName: 'infra_logs',
@@ -386,7 +386,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'apm',
       fetchData: async () => emptyAPMResponse,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'apm-*' }),
     });
     registerDataHandler({
       appName: 'infra_logs',
@@ -420,7 +420,7 @@ storiesOf('app/Overview', module)
         fetchData: async () => {
           throw new Error('Error fetching APM data');
         },
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'apm-*' }),
       });
       registerDataHandler({
         appName: 'infra_logs',

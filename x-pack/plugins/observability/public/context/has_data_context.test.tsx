@@ -279,7 +279,9 @@ describe('HasDataContextProvider', () => {
     describe('only apm is registered', () => {
       describe('when apm returns true', () => {
         beforeAll(() => {
-          registerApps([{ appName: 'apm', hasData: async () => true }]);
+          registerApps([
+            { appName: 'apm', hasData: async () => ({ hasData: true, indices: 'apm-*' }) },
+          ]);
         });
 
         afterAll(unregisterAll);
@@ -317,7 +319,9 @@ describe('HasDataContextProvider', () => {
 
       describe('when apm returns false', () => {
         beforeAll(() => {
-          registerApps([{ appName: 'apm', hasData: async () => false }]);
+          registerApps([
+            { appName: 'apm', hasData: async () => ({ indices: 'apm-*', hasData: false }) },
+          ]);
         });
 
         afterAll(unregisterAll);
