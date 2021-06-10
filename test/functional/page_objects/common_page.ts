@@ -256,7 +256,7 @@ export class CommonPageObject extends FtrService {
         return currentUrl;
       });
 
-      await this.retry.try(async () => {
+      await this.retry.tryForTime(this.defaultFindTimeout, async () => {
         await this.sleep(501);
         const currentUrl = await this.browser.getCurrentUrl();
         this.log.debug('in navigateTo url = ' + currentUrl);
@@ -265,10 +265,6 @@ export class CommonPageObject extends FtrService {
           throw new Error('URL changed, waiting for it to settle');
         }
       });
-      if (appName === 'status_page') return;
-      if (await this.testSubjects.exists('statusPageContainer')) {
-        throw new Error('Navigation ended up at the status page.');
-      }
     });
   }
 
