@@ -512,9 +512,13 @@ describe('ManifestManager', () => {
       const context = buildManifestManagerContextMock({});
       const artifactClient = context.artifactClient as jest.Mocked<EndpointArtifactClientInterface>;
       const manifestManager = new ManifestManager(context);
+      const newManifest = ManifestManager.createDefaultManifest();
 
       await expect(
-        manifestManager.pushArtifacts([ARTIFACT_EXCEPTIONS_MACOS, ARTIFACT_EXCEPTIONS_WINDOWS])
+        manifestManager.pushArtifacts(
+          [ARTIFACT_EXCEPTIONS_MACOS, ARTIFACT_EXCEPTIONS_WINDOWS],
+          newManifest
+        )
       ).resolves.toStrictEqual([]);
 
       expect(artifactClient.createArtifact).toHaveBeenCalledTimes(2);
@@ -536,6 +540,7 @@ describe('ManifestManager', () => {
       const context = buildManifestManagerContextMock({});
       const artifactClient = context.artifactClient as jest.Mocked<EndpointArtifactClientInterface>;
       const manifestManager = new ManifestManager(context);
+      const newManifest = ManifestManager.createDefaultManifest();
       const error = new Error();
       const { body, ...incompleteArtifact } = ARTIFACT_TRUSTED_APPS_MACOS;
 
@@ -550,11 +555,14 @@ describe('ManifestManager', () => {
       );
 
       await expect(
-        manifestManager.pushArtifacts([
-          ARTIFACT_EXCEPTIONS_MACOS,
-          ARTIFACT_EXCEPTIONS_WINDOWS,
-          incompleteArtifact as InternalArtifactCompleteSchema,
-        ])
+        manifestManager.pushArtifacts(
+          [
+            ARTIFACT_EXCEPTIONS_MACOS,
+            ARTIFACT_EXCEPTIONS_WINDOWS,
+            incompleteArtifact as InternalArtifactCompleteSchema,
+          ],
+          newManifest
+        )
       ).resolves.toStrictEqual([
         error,
         new Error(`Incomplete artifact: ${ARTIFACT_ID_TRUSTED_APPS_MACOS}`),
