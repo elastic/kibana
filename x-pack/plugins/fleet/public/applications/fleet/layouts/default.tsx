@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -23,16 +24,19 @@ import { useLink, useConfig, useUrlModal } from '../hooks';
 import { WithHeaderLayout } from '../../../layouts';
 
 interface Props {
-  showNav?: boolean;
   showSettings?: boolean;
   section?: Section;
   children?: React.ReactNode;
 }
 
-export const DefaultLayout: React.FunctionComponent<Props> = ({ section, children }) => {
+export const DefaultLayout: React.FunctionComponent<Props> = ({
+  section,
+  children,
+  showSettings = true,
+}) => {
   const { getHref } = useLink();
   const { agents } = useConfig();
-  const { modal, setModal } = useUrlModal();
+  const { modal, setModal, getModalHref } = useUrlModal();
 
   return (
     <>
@@ -82,6 +86,32 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({ section, childre
                 </p>
               </EuiText>
             </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+        rightColumn={
+          <EuiFlexGroup gutterSize="s" direction="row" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconType="popout"
+                href="https://ela.st/fleet-feedback"
+                target="_blank"
+              >
+                <FormattedMessage
+                  id="xpack.fleet.appNavigation.sendFeedbackButton"
+                  defaultMessage="Send feedback"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            {showSettings ? (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty iconType="gear" href={getModalHref('settings')}>
+                  <FormattedMessage
+                    id="xpack.fleet.appNavigation.settingsButton"
+                    defaultMessage="Fleet settings"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
         }
         tabs={[
