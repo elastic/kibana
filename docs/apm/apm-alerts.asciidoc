@@ -126,4 +126,4 @@ See {kibana-ref}/alerting-getting-started.html[alerting and actions] for more in
 
 NOTE: If you are using an **on-premise** Elastic Stack deployment with security,
 communication between Elasticsearch and Kibana must have TLS configured.
-More information is in the alerting {kibana-ref}/alerting-getting-started.html#alerting-setup-prerequisites[prerequisites].
+More information is in the alerting {kibana-ref}/alerting-setup.html#alerting-prerequisites[prerequisites].
