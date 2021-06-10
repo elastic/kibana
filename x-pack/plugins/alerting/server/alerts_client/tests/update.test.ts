@@ -419,7 +419,7 @@ describe('update()', () => {
       references: [
         {
           name: 'soRef_0',
-          type: 'someSavedObjecType',
+          type: 'someSavedObjectType',
           id: '9',
         },
       ],
@@ -475,7 +475,7 @@ describe('update()', () => {
         },
         {
           name: 'soRef_0',
-          type: 'someSavedObjecType',
+          type: 'someSavedObjectType',
           id: '9',
         },
       ],
@@ -529,7 +529,7 @@ describe('update()', () => {
         overwrite: true,
         references: [
           { id: '1', name: 'action_0', type: 'action' },
-          { id: '9', name: 'soRef_0', type: 'someSavedObjecType' },
+          { id: '9', name: 'soRef_0', type: 'someSavedObjectType' },
         ],
         version: '123',
       }
@@ -542,7 +542,7 @@ describe('update()', () => {
       },
       [
         { id: '1', name: 'action_0', type: 'action' },
-        { id: '9', name: 'soRef_0', type: 'someSavedObjecType' },
+        { id: '9', name: 'soRef_0', type: 'someSavedObjectType' },
       ]
     );
     expect(result).toMatchInlineSnapshot(`
@@ -1269,7 +1269,7 @@ describe('update()', () => {
       references: [
         {
           name: 'action_0',
-          type: 'someSavedObjecType',
+          type: 'someSavedObjectType',
           id: '9',
         },
       ],

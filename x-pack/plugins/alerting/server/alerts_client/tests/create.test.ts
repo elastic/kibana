@@ -814,7 +814,7 @@ describe('create()', () => {
       references: [
         {
           name: 'soRef_0',
-          type: 'someSavedObjecType',
+          type: 'someSavedObjectType',
           id: '9',
         },
       ],
@@ -872,7 +872,7 @@ describe('create()', () => {
         },
         {
           name: 'soRef_0',
-          type: 'someSavedObjecType',
+          type: 'someSavedObjectType',
           id: '9',
         },
       ],
@@ -936,7 +936,7 @@ describe('create()', () => {
         id: 'mock-saved-object-id',
         references: [
           { id: '1', name: 'action_0', type: 'action' },
-          { id: '9', name: 'soRef_0', type: 'someSavedObjecType' },
+          { id: '9', name: 'soRef_0', type: 'someSavedObjectType' },
         ],
       }
     );
@@ -948,7 +948,7 @@ describe('create()', () => {
       },
       [
         { id: '1', name: 'action_0', type: 'action' },
-        { id: '9', name: 'soRef_0', type: 'someSavedObjecType' },
+        { id: '9', name: 'soRef_0', type: 'someSavedObjectType' },
       ]
     );
     expect(result).toMatchInlineSnapshot(`
@@ -1493,7 +1493,7 @@ describe('create()', () => {
       references: [
         {
           name: 'action_0',
-          type: 'someSavedObjecType',
+          type: 'someSavedObjectType',
           id: '9',
         },
       ],

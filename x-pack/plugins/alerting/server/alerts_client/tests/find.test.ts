@@ -255,6 +255,7 @@ describe('find()', () => {
               "actions": Array [],
               "id": "1",
               "notifyWhen": undefined,
+              "params": undefined,
               "schedule": undefined,
               "tags": Array [
                 "myTag",

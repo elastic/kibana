@@ -17,6 +17,7 @@ import { ActionsAuthorization } from '../../../../actions/server';
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { auditServiceMock } from '../../../../security/server/audit/index.mock';
 import { getBeforeSetup, setGlobalDate } from './lib';
+import { RecoveredActionGroup } from '../../../common';
 
 const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -118,6 +119,101 @@ describe('get()', () => {
                                                                             `);
   });
 
+  test('should call useSavedObjectReferences.injectReferences if defined for rule type', async () => {
+    const injectReferencesFn = jest.fn().mockReturnValue({
+      bar: true,
+      parameterThatIsSavedObjectId: '9',
+    });
+    alertTypeRegistry.get.mockImplementation(() => ({
+      id: '123',
+      name: 'Test',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      async executor() {},
+      producer: 'alerts',
+      useSavedObjectReferences: {
+        extractReferences: jest.fn(),
+        injectReferences: injectReferencesFn,
+      },
+    }));
+    const alertsClient = new AlertsClient(alertsClientParams);
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: {
+          bar: true,
+          parameterThatIsSavedObjectRef: 'soRef_0',
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        notifyWhen: 'onActiveAlert',
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'soRef_0',
+          type: 'someSavedObjectType',
+          id: '9',
+        },
+      ],
+    });
+    const result = await alertsClient.get({ id: '1' });
+
+    expect(injectReferencesFn).toHaveBeenCalledWith(
+      {
+        bar: true,
+        parameterThatIsSavedObjectRef: 'soRef_0',
+      },
+      [
+        { id: '1', name: 'action_0', type: 'action' },
+        { id: '9', name: 'soRef_0', type: 'someSavedObjectType' },
+      ]
+    );
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "alertTypeId": "123",
+        "createdAt": 2019-02-12T21:01:22.479Z,
+        "id": "1",
+        "notifyWhen": "onActiveAlert",
+        "params": Object {
+          "bar": true,
+          "parameterThatIsSavedObjectId": "9",
+        },
+        "schedule": Object {
+          "interval": "10s",
+        },
+        "updatedAt": 2019-02-12T21:01:22.479Z,
+      }
+    `);
+  });
+
   test(`throws an error when references aren't found`, async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
@@ -143,6 +239,66 @@ describe('get()', () => {
     });
     await expect(alertsClient.get({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Action reference \\"action_0\\" not found in alert id: 1"`
+    );
+  });
+
+  test('throws an error if useSavedObjectReferences.injectReferences throws an error', async () => {
+    const injectReferencesFn = jest.fn().mockImplementation(() => {
+      throw new Error('something went wrong!');
+    });
+    alertTypeRegistry.get.mockImplementation(() => ({
+      id: '123',
+      name: 'Test',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      async executor() {},
+      producer: 'alerts',
+      useSavedObjectReferences: {
+        extractReferences: jest.fn(),
+        injectReferences: injectReferencesFn,
+      },
+    }));
+    const alertsClient = new AlertsClient(alertsClientParams);
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: {
+          bar: true,
+          parameterThatIsSavedObjectRef: 'soRef_0',
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        notifyWhen: 'onActiveAlert',
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'soRef_0',
+          type: 'someSavedObjectType',
+          id: '9',
+        },
+      ],
+    });
+    await expect(alertsClient.get({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Error injecting reference into rule params for rule id 1 - something went wrong!"`
     );
   });
 
