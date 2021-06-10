@@ -18,7 +18,7 @@ export const CURATIONS_OVERVIEW_TITLE = i18n.translate(
 );
 export const CREATE_NEW_CURATION_TITLE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.curations.create.title',
-  { defaultMessage: 'Create new curation' }
+  { defaultMessage: 'Create a new curation' }
 );
 export const MANAGE_CURATION_TITLE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.curations.manage.title',
