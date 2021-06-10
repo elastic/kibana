@@ -196,7 +196,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
               <EuiButton
                 key="addPackagePolicyButton"
                 isDisabled={!hasWriteCapabilities}
-                iconType="plusInCircle"
+                iconType="refresh"
                 onClick={() => {
                   application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
                     path: `#${pagePathGetters.integrations_all()[1]}`,
