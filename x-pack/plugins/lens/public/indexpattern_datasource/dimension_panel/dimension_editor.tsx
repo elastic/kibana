@@ -344,25 +344,26 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const quickFunctions = (
     <>
-      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded lnsIndexPatternDimensionEditor__section--shaded">
-        {temporaryQuickFunction && selectedColumn?.operationType === 'formula' && (
-          <>
-            <EuiCallOut
-              size="s"
-              title={i18n.translate('xpack.lens.indexPattern.formulaWarning', {
-                defaultMessage: 'Staged formula',
+      {temporaryQuickFunction && selectedColumn?.operationType === 'formula' && (
+        <>
+          <EuiCallOut
+            className="lnsIndexPatternDimensionEditor__warning"
+            size="s"
+            title={i18n.translate('xpack.lens.indexPattern.formulaWarning', {
+              defaultMessage: 'Formula currently applied',
+            })}
+            iconType="alert"
+            color="warning"
+          >
+            <p>
+              {i18n.translate('xpack.lens.indexPattern.formulaWarningText', {
+                defaultMessage: 'To overwrite your formula, select a quick function',
               })}
-              color="warning"
-            >
-              <p>
-                {i18n.translate('xpack.lens.indexPattern.formulaWarningText', {
-                  defaultMessage: 'Picking a quick function will erase your formula.',
-                })}
-              </p>
-            </EuiCallOut>
-            <EuiSpacer size="s" />
-          </>
-        )}
+            </p>
+          </EuiCallOut>
+        </>
+      )}
+      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded lnsIndexPatternDimensionEditor__section--shaded">
         <EuiFormLabel>
           {i18n.translate('xpack.lens.indexPattern.functionsLabel', {
             defaultMessage: 'Select a function',
@@ -642,7 +643,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
   return (
     <div id={columnId}>
       {!isFullscreen && operationSupportMatrix.operationWithoutField.has('formula') ? (
-        <EuiTabs size="s">
+        <EuiTabs size="s" className="lnsIndexPatternDimensionEditor__header">
           <EuiTab
             isSelected={temporaryQuickFunction || selectedColumn?.operationType !== 'formula'}
             data-test-subj="lens-dimensionTabs-quickFunctions"

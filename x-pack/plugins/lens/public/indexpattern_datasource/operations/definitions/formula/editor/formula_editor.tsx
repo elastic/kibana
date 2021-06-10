@@ -731,12 +731,18 @@ export function FormulaEditor({
                         closePopover={() => setIsHelpOpen(false)}
                         ownFocus={false}
                         button={
-                          <EuiButtonEmpty
+                          <EuiButtonIcon
                             className="lnsFormula__editorHelp lnsFormula__editorHelp--overlay"
                             onClick={() => setIsHelpOpen(!isHelpOpen)}
                             iconType="help"
                             color="text"
                             size="s"
+                            aria-label={i18n.translate(
+                              'xpack.lens.formula.editorHelpInlineShowToolTip',
+                              {
+                                defaultMessage: 'Show function reference',
+                              }
+                            )}
                           />
                         }
                       >
@@ -760,36 +766,40 @@ export function FormulaEditor({
                         <EuiButtonEmpty
                           color={errorCount ? 'danger' : 'warning'}
                           className="lnsFormula__editorError"
+                          iconType="alert"
+                          size="xs"
+                          flush="right"
                           onClick={() => {
                             setIsWarningOpen(!isWarningOpen);
                           }}
                         >
-                          {errorCount ? (
-                            <EuiText size="xs">
-                              <EuiIcon type="alert" />{' '}
-                              {i18n.translate('xpack.lens.formulaErrorCount', {
+                          {errorCount
+                            ? i18n.translate('xpack.lens.formulaErrorCount', {
                                 defaultMessage:
                                   '{count} {count, plural, one {error} other {errors}}',
                                 values: { count: errorCount },
-                              })}
-                            </EuiText>
-                          ) : null}
-                          {warningCount ? (
-                            <EuiText size="xs">
-                              <EuiIcon type="alert" />{' '}
-                              {i18n.translate('xpack.lens.formulaWarningCount', {
+                              })
+                            : null}
+                          {warningCount
+                            ? i18n.translate('xpack.lens.formulaWarningCount', {
                                 defaultMessage:
                                   '{count} {count, plural, one {warning} other {warnings}}',
                                 values: { count: warningCount },
-                              })}
-                            </EuiText>
-                          ) : null}
+                              })
+                            : null}
                         </EuiButtonEmpty>
                       }
                     >
-                      {warnings.map(({ message }, index) => (
+                      {warnings.map(({ message, severity }, index) => (
                         <div key={index} className="lnsFormula__warningText">
-                          <EuiText>{message}</EuiText>
+                          <EuiText
+                            size="s"
+                            color={
+                              severity === monaco.MarkerSeverity.Warning ? 'warning' : 'danger'
+                            }
+                          >
+                            {message}
+                          </EuiText>
                         </div>
                       ))}
                     </EuiPopover>
