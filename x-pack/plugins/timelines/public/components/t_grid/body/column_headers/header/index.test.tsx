@@ -47,7 +47,7 @@ describe('Header', () => {
       sortDirection: Direction.desc,
     },
   ];
-  const timelineId = 'fakeId';
+  const timelineId = 'test';
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
@@ -140,23 +140,6 @@ describe('Header', () => {
 
       expect(wrapper.find('[data-test-subj="header-sort-indicator"]').first().exists()).toEqual(
         true
-      );
-    });
-
-    test('it renders a filter', () => {
-      const columnWithFilter = {
-        ...columnHeader,
-        columnHeaderType: filteredColumnHeader,
-      };
-
-      const wrapper = mount(
-        <TestProviders>
-          <HeaderComponent header={columnWithFilter} sort={sort} timelineId={timelineId} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="textFilter"]').first().props()).toHaveProperty(
-        'placeholder'
       );
     });
   });

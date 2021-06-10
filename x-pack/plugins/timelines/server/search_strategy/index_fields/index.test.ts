@@ -126,7 +126,7 @@ describe('Index Fields', () => {
           },
           {
             description:
-              'Type of the agent. The agent type always stays the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
+              'Type of the agent. The agent type stays always the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
             example: 'filebeat',
             name: 'agent.type',
             type: 'string',
@@ -252,7 +252,7 @@ describe('Index Fields', () => {
         {
           category: 'agent',
           description:
-            'Type of the agent. The agent type always stays the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
+            'Type of the agent. The agent type stays always the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
           example: 'filebeat',
           name: 'agent.type',
           type: 'string',
@@ -426,7 +426,7 @@ describe('Index Fields', () => {
         {
           category: 'agent',
           description:
-            'Type of the agent. The agent type always stays the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
+            'Type of the agent. The agent type stays always the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
           example: 'filebeat',
           name: 'agent.type',
           type: 'string',

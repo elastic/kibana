@@ -111,7 +111,7 @@ describe('Body', () => {
       expect(wrapper.find('[data-test-subj="events"]').first().exists()).toEqual(true);
     });
 
-    test('it renders a tooltip for timestamp', async () => {
+    test('it renders a tooltip for timestamp', () => {
       const headersJustTimestamp = defaultHeaders.filter((h) => h.id === '@timestamp');
       const testProps = { ...props, columnHeaders: headersJustTimestamp };
       const wrapper = mount(
@@ -120,18 +120,14 @@ describe('Body', () => {
         </TestProviders>
       );
       wrapper.update();
-      await waitFor(() => {
-        wrapper.update();
-        headersJustTimestamp.forEach(() => {
-          expect(
-            wrapper
-              .find('[data-test-subj="data-driven-columns"]')
-              .first()
-              .find('[data-test-subj="localized-date-tool-tip"]')
-              .exists()
-          ).toEqual(true);
-        });
-      });
-    }, 20000);
+      expect(
+        wrapper
+          .find('[data-test-subj="data-driven-columns"]')
+          .first()
+          .find('[data-test-subj="statefulCell"]')
+          .last()
+          .text()
+      ).toEqual(mockTimelineData[0].ecs.timestamp);
+    });
   });
 });
