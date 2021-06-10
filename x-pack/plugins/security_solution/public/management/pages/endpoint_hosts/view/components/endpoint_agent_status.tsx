@@ -11,7 +11,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { HostInfo, HostMetadata } from '../../../../../../common/endpoint/types';
 import { HOST_STATUS_TO_BADGE_COLOR } from '../host_constants';
 import { EndpointHostIsolationStatus } from '../../../../../common/components/endpoint/host_isolation';
-import { isEndpointHostIsolated } from '../../../../../common/utils/validators';
+import { useEndpointSelector } from '../hooks';
+import { getEndpointHostIsolationStatusPropsCallback } from '../../store/selectors';
 
 export interface EndpointAgentStatusProps {
   hostStatus: HostInfo['host_status'];
@@ -19,6 +20,10 @@ export interface EndpointAgentStatusProps {
 }
 export const EndpointAgentStatus = memo<EndpointAgentStatusProps>(
   ({ endpointMetadata, hostStatus }) => {
+    const getEndpointIsolationStatusProps = useEndpointSelector(
+      getEndpointHostIsolationStatusPropsCallback
+    );
+
     return (
       <>
         <EuiBadge
@@ -32,11 +37,7 @@ export const EndpointAgentStatus = memo<EndpointAgentStatusProps>(
             values={{ hostStatus }}
           />
         </EuiBadge>
-        <EndpointHostIsolationStatus
-          isIsolated={isEndpointHostIsolated(endpointMetadata)}
-          pendingIsolate={Math.random() < 0.5 ? 1 : 0}
-          pendingUnIsolate={Math.random() < 0.5 ? 1 : 0}
-        />
+        <EndpointHostIsolationStatus {...getEndpointIsolationStatusProps(endpointMetadata)} />
       </>
     );
   }

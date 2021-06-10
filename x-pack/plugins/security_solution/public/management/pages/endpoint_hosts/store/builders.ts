@@ -7,7 +7,7 @@
 
 import { Immutable } from '../../../../../common/endpoint/types';
 import { DEFAULT_POLL_INTERVAL } from '../../../common/constants';
-import { createUninitialisedResourceState } from '../../../state';
+import { createLoadedResourceState, createUninitialisedResourceState } from '../../../state';
 import { EndpointState } from '../types';
 
 export const initialEndpointPageState = (): Immutable<EndpointState> => {
@@ -49,5 +49,10 @@ export const initialEndpointPageState = (): Immutable<EndpointState> => {
     policyVersionInfo: undefined,
     hostStatus: undefined,
     isolationRequestState: createUninitialisedResourceState(),
+    /**
+     * Getting pending endpoint actions is "supplemental" data, so there is no need to show other Async
+     * states other than Loaded
+     */
+    endpointPendingActions: createLoadedResourceState(new Map()),
   };
 };

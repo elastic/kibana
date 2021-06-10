@@ -16,6 +16,7 @@ import {
   HostStatus,
   EndpointAction,
   HostIsolationResponse,
+  EndpointPendingActions,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
 import { GetPackagesResponse } from '../../../../../fleet/common';
@@ -90,8 +91,10 @@ export interface EndpointState {
   policyVersionInfo?: HostInfo['policy_info'];
   /** The status of the host, which is mapped to the Elastic Agent status in Fleet */
   hostStatus?: HostStatus;
-  /* Host isolation state */
+  /** Host isolation request state for a single endpoint */
   isolationRequestState: AsyncResourceState<HostIsolationResponse>;
+  /** Holds a map of `agentId` to `EndpointPendingActions` that is used by both the list and details view. */
+  endpointPendingActions: AsyncResourceState<Map<string, EndpointPendingActions>>;
 }
 
 /**
