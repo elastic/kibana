@@ -568,7 +568,7 @@ Evaluating the health stats in this hypothetical scenario, you see the following
 You can infer from these stats that the high drift the Task Manager is experiencing is most likely due to Elasticsearch query alerts that are running for a long time.
 
 Resolving this issue is context dependent and changes from case to case.
-In the preceding example above, this would be resolved by modifying the queries in these alerts to make them faster, or improving the {es} throughput to speed up the exiting query.
+In the preceding example, this would be resolved by modifying the queries in these alerts to make them faster, or improving the {es} throughput to speed up the exiting query.
 
 [[task-manager-theory-high-fail-rate]]
 *Theory*:
@@ -693,7 +693,7 @@ Predicting the required throughput a deplyment might need to support Task Manage
 <<task-manager-health-monitoring>> provides statistics that make it easier to monitor the adequacy of the existing throughput.
 By evaluating the workload, the required throughput can be estimated, which is used when following the Task Manager <<task-manager-scaling-guidance>>.
 
-Evaluating the preceding health stats above, you see the following output under `stats.workload.value`:
+Evaluating the preceding health stats in the previous example, you see the following output under `stats.workload.value`:
 
 [source,json]
 --------------------------------------------------
@@ -856,7 +856,7 @@ As the name suggests, these are estimates based on historical data and should no
 
 We recommend using these estimations when following the Task Manager <<task-manager-scaling-guidance>>.
 
-Evaluating the health stats above you can see the following output under `stats.capacity_estimation.value`:
+Evaluating the health stats in the previous example, you can see the following output under `stats.capacity_estimation.value`:
 
 [source,json]
 --------------------------------------------------
