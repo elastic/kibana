@@ -1,0 +1,51 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+import React, { lazy } from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
+import { I18nProvider } from '@kbn/i18n/react';
+import { elasticOutline } from '../../common/lib/elastic_outline';
+import { isValidUrl } from '../../common/lib/url';
+import { getRendererStrings } from '../../common/i18n';
+import { RendererFactory } from '../../common/types';
+import { Output as Arguments } from '../expression_functions';
+import { RevealImageRendererConfig, NodeDimensions } from './types';
+
+const { revealImage: revealImageStrings } = getRendererStrings();
+
+const RevealImageComponent = lazy(() => import('../components/reveal_image_component'));
+
+export const revealImageRenderer: RendererFactory<Arguments> = () => ({
+  name: 'revealImageExpr',
+  displayName: revealImageStrings.getDisplayName(),
+  help: revealImageStrings.getHelpDescription(),
+  reuseDomNode: true,
+  render: async (domNode: HTMLElement, config: RevealImageRendererConfig, handlers) => {
+    handlers.onDestroy(() => {
+      unmountComponentAtNode(domNode);
+    });
+
+    // modify the top-level container class
+    domNode.className = 'revealImage';
+
+    const parentNodeDimensions: NodeDimensions = {
+      width: domNode.clientWidth,
+      height: domNode.clientHeight,
+    };
+
+    render(
+      <I18nProvider>
+        <RevealImageComponent
+          handlers={handlers}
+          {...config}
+          parentNodeDimensions={parentNodeDimensions}
+        />
+      </I18nProvider>,
+      domNode
+    );
+  },
+});

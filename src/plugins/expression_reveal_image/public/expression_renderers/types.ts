@@ -6,4 +6,14 @@
  * Side Public License, v 1.
  */
 
-export * from './reveal_image_component';
+export interface RevealImageRendererConfig {
+  percent: number;
+  origin?: 'bottom' | 'left' | 'top' | 'right';
+  image?: string;
+  emptyImage?: string;
+}
+
+export interface NodeDimensions {
+  width: number;
+  height: number;
+}

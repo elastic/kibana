@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './reveal_image_renderer';
+export * from './reveal_image_renderer.tsx';
