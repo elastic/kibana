@@ -3,6 +3,7 @@
 === Event log index
 
 Use the event log index to determine:
+
 * Whether a rule successfully ran but its associated actions did not
 * Whether a rule was ever activated
 * Additional information about rule execution errors
@@ -142,7 +143,7 @@ You should see an `error.message` property in that event, with a message from th
 }
 --------------------------------------------------
 
-And for the rules:
+And see the errors for the rules you might provide the next search query:
 [source, txt]
 --------------------------------------------------
 {
@@ -165,9 +166,8 @@ And for the rules:
 }
 --------------------------------------------------
 
-You can also query the event log for failures, which should return more specific details about alerts which failed by targeting the event.outcome. 
+You can also query the event log for failures, which should return more specific details about alerts which failed by targeting the event.outcome:
 
-Example:
 [source, txt]
 --------------------------------------------------
 GET .kibana-event-log-*/_search

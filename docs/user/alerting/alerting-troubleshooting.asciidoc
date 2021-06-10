@@ -51,11 +51,7 @@ Diagnosing these may be difficult - but there may be log messages for error cond
 [[alerting-rest-api]]
 === Use the REST APIs
 
-There is a rich set of HTTP endpoints to introspect and manage rules and connectors.  
-In addition, there is a command-line client that uses legacy Rules and Connectors APIs, which can be easier to use, but must be updated for the new APIs.
-
-https://github.com/pmuellr/kbn-action
-executing an action ad-hoc
+There is a rich set of HTTP endpoints to introspect and manage rules and connectors.
 One of the http endpoints available for actions is the POST _execute API (reference).  You can use this to “test” an action.  For instance, if you have a server log action created, you can execute it via curling the endpoint:
 [source, txt]
 --------------------------------------------------
@@ -66,13 +62,14 @@ curl -X POST -k \
  -d '{"params":{"subject":"hallo","message":"hallo!","to":["me@example.com"]}}'
 --------------------------------------------------
 
+In addition, there is a command-line client that uses legacy Rules and Connectors APIs, which can be easier to use, but must be updated for the new APIs.
 CLI tools to list create, edit, and delete alerts and actions are available in https://github.com/pmuellr/kbn-action[kbn-action], which you can install as follows:
 [source, txt]
 --------------------------------------------------
-    npm install -g pmuellr/kbn-action  
+npm install -g pmuellr/kbn-action  
 --------------------------------------------------
 
-The same REST execute command will be:
+The same REST POST _execute API command will be:
 [source, txt]
 --------------------------------------------------
 kbn-action execute a692dc89-15b9-4a3c-9e47-9fb6872e49ce ‘{"params":{"subject":"hallo","message":"hallo!","to":["me@example.com"]}}’
@@ -81,8 +78,8 @@ kbn-action execute a692dc89-15b9-4a3c-9e47-9fb6872e49ce ‘{"params":{"subject":
 The result of this http request (and printed to stdout by https://github.com/pmuellr/kbn-action[kbn-action]) will be data returned by the action execution, along with error messages if errors were encountered.
 
 [float]
-[[alerting-framework-health-ui]]
-=== Alerting Framework Health
+[[alerting-error-banners]]
+=== Look for error banners
 
 The Rule Management and Rule Details pages contain an error banner, which helps to identify the errors for the rules:
 [role="screenshot"]
@@ -98,7 +95,7 @@ image::images/rules-details-health.png[Rule details page with the errors banner]
 Under the hood, Rules and Connectors uses a plugin called Task Manager, which handles the scheduling, execution, and error handling of the tasks.
 This means that failure cases in Rules or Connectors will, at times, be revealed by the Task Manager mechanism, rather than the Rules mechanism.
 
-Task Manager provides a visible status which can be used to diagnose issues and is very well documented health monitoring and troubleshooting. 
+Task Manager provides a visible status which can be used to diagnose issues and is very well documented <<task-manager-health-monitoring,health monitoring>> and <<task-manager-troubleshooting,troubleshooting>>. 
 Task Manager uses the `.kibana_task_manager index`, an internal index that contains all the saved objects that represent the tasks in the system.
 
 [float]
@@ -140,15 +137,9 @@ If you use the <<alerting-apis,Alerting REST APIs>> to fetch the underlying rule
 --------------------------------------------------
 
 The field you’re looking for is the one called `scheduled_task_id` which includes the _id of the Task Manager task, so if you then go to the Console and run the following query, you’ll get the underlying task.
-GET .kibana_task_manager/_doc/task:31563950-b14b-11eb-9a7c-9df284da9f99
-
-[NOTE]
-==============================================
-The task: in the ID of the doc. We have to add that to the UUID.
-==============================================
-
 [source, txt]
 --------------------------------------------------
+GET .kibana_task_manager/_doc/task:31563950-b14b-11eb-9a7c-9df284da9f99
 {
   "_index" : ".kibana_task_manager_8.0.0_001",
   "_id" : "task:31563950-b14b-11eb-9a7c-9df284da9f99",
