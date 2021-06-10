@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { InfraFieldsDomain } from './domains/fields_domain';
-import { InfraLogEntriesDomain } from './domains/log_entries_domain';
-import { InfraMetricsDomain } from './domains/metrics_domain';
-import { InfraSources } from './sources';
-import { InfraSourceStatus } from './source_status';
-import { InfraConfig } from '../plugin';
-import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
-import { GetLogQueryFields } from '../services/log_queries/get_log_query_fields';
-import { handleEsError } from '../../../../../src/plugins/es_ui_shared/server';
-import { createLifecycleRuleTypeFactory, IRuleDataClient } from '../../../rule_registry/server';
+import type { handleEsError } from '../../../../../src/plugins/es_ui_shared/server';
+import type { InfraConfig } from '../plugin';
+import type { GetLogQueryFields } from '../services/log_queries/get_log_query_fields';
+import type { RulesServiceSetup } from '../services/rules/types';
+import type { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
+import type { InfraFieldsDomain } from './domains/fields_domain';
+import type { InfraLogEntriesDomain } from './domains/log_entries_domain';
+import type { InfraMetricsDomain } from './domains/metrics_domain';
+import type { InfraSources } from './sources';
+import type { InfraSourceStatus } from './source_status';
 
 export interface InfraDomainLibs {
   fields: InfraFieldsDomain;
@@ -29,8 +29,6 @@ export interface InfraBackendLibs extends InfraDomainLibs {
   sourceStatus: InfraSourceStatus;
   getLogQueryFields: GetLogQueryFields;
   handleEsError: typeof handleEsError;
-  logsAlertClient: IRuleDataClient;
-  createLogsLifecycleRuleType: ReturnType<typeof createLifecycleRuleTypeFactory>;
-  metricsAlertClient: IRuleDataClient;
-  createMetricsLifecycleRuleType: ReturnType<typeof createLifecycleRuleTypeFactory>;
+  logsRules: RulesServiceSetup;
+  metricsRules: RulesServiceSetup;
 }

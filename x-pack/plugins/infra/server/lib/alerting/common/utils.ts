@@ -6,13 +6,12 @@
  */
 
 import { isEmpty } from 'lodash';
-import { schema } from '@kbn/config-schema';
+import { schema, Type } from '@kbn/config-schema';
 
-export const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
-  schema.string({
-    validate: (value) =>
-      arrayOfLiterals.includes(value) ? undefined : `must be one of ${arrayOfLiterals.join(' | ')}`,
-  });
+export const oneOfLiterals = <Literals extends Readonly<Array<string | number | boolean | null>>>(
+  literals: Literals
+): Type<Literals[number]> =>
+  schema.oneOf((literals as any).map((literal: Literals[number]) => schema.literal(literal)));
 
 export const validateIsStringElasticsearchJSONFilter = (value: string) => {
   if (value === '') {

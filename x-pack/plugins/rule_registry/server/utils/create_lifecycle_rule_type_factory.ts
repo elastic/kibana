@@ -37,6 +37,10 @@ type LifecycleAlertService<TAlertInstanceContext extends Record<string, unknown>
   fields: Record<string, unknown>;
 }) => AlertInstance<AlertInstanceState, TAlertInstanceContext, string>;
 
+export interface LifecycleAlertServices<TAlertInstanceContext extends Record<string, unknown>> {
+  alertWithLifecycle: LifecycleAlertService<TAlertInstanceContext>;
+}
+
 const trackedAlertStateRt = t.type({
   alertId: t.string,
   alertUuid: t.string,
@@ -54,7 +58,7 @@ type CreateLifecycleRuleTypeFactory = (options: {
 }) => <
   TParams extends AlertTypeParams,
   TAlertInstanceContext extends AlertInstanceContext,
-  TServices extends { alertWithLifecycle: LifecycleAlertService<TAlertInstanceContext> }
+  TServices extends LifecycleAlertServices<TAlertInstanceContext>
 >(
   type: AlertTypeWithExecutor<TParams, TAlertInstanceContext, TServices>
 ) => AlertTypeWithExecutor<TParams, TAlertInstanceContext, any>;

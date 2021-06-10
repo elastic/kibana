@@ -8,10 +8,11 @@
 import { Server } from '@hapi/hapi';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Logger, PluginInitializerContext, Plugin } from 'src/core/server';
-import { InfraStaticSourceConfiguration } from '../common/source_configuration/source_configuration';
+import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
+import { handleEsError } from '../../../../src/plugins/es_ui_shared/server';
 import { inventoryViewSavedObjectType } from '../common/saved_objects/inventory_view';
 import { metricsExplorerViewSavedObjectType } from '../common/saved_objects/metrics_explorer_view';
+import { InfraStaticSourceConfiguration } from '../common/source_configuration/source_configuration';
 import { LOGS_FEATURE, METRICS_FEATURE } from './features';
 import { initInfraServer } from './infra_server';
 import { FrameworkFieldsAdapter } from './lib/adapters/fields/framework_fields_adapter';
@@ -28,12 +29,10 @@ import { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
 import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
 import { InfraSourceStatus } from './lib/source_status';
 import { LogEntriesService } from './services/log_entries';
+import { createGetLogQueryFields } from './services/log_queries/get_log_query_fields';
+import { RulesService } from './services/rules/rules_service';
 import { InfraPluginRequestHandlerContext } from './types';
 import { UsageCollector } from './usage/usage_collector';
-import { createGetLogQueryFields } from './services/log_queries/get_log_query_fields';
-import { handleEsError } from '../../../../src/plugins/es_ui_shared/server';
-import { initializeAlertClient } from './initialize_alert_client';
-import { createLifecycleRuleTypeFactory } from '../../rule_registry/server';
 
 export const config = {
   schema: schema.object({
@@ -86,9 +85,15 @@ export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
   public libs: InfraBackendLibs | undefined;
   public logger: Logger;
 
+  private logsRules: RulesService;
+  private metricsRules: RulesService;
+
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
     this.config = context.config.get<InfraConfig>();
+
+    this.logsRules = new RulesService('observability.logs', this.logger.get('logsRules'));
+    this.metricsRules = new RulesService('observability.logs', this.logger.get('logsRules'));
   }
 
   setup(core: CoreSetup<InfraServerPluginStartDeps>, plugins: InfraServerPluginSetupDeps) {
@@ -122,20 +127,6 @@ export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
       metrics: new InfraMetricsDomain(new KibanaMetricsAdapter(framework)),
     };
 
-    const logsAlertClient = initializeAlertClient({
-      name: 'logs',
-      getStartServices: core.getStartServices,
-      plugins,
-      logger: this.logger,
-    });
-
-    const metricsAlertClient = initializeAlertClient({
-      name: 'metrics',
-      getStartServices: core.getStartServices,
-      plugins,
-      logger: this.logger,
-    });
-
     this.libs = {
       configuration: this.config,
       framework,
@@ -144,16 +135,8 @@ export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
       ...domainLibs,
       getLogQueryFields: createGetLogQueryFields(sources, framework),
       handleEsError,
-      logsAlertClient,
-      createLogsLifecycleRuleType: createLifecycleRuleTypeFactory({
-        ruleDataClient: logsAlertClient,
-        logger: this.logger,
-      }),
-      metricsAlertClient,
-      createMetricsLifecycleRuleType: createLifecycleRuleTypeFactory({
-        ruleDataClient: metricsAlertClient,
-        logger: this.logger,
-      }),
+      logsRules: this.logsRules.setup(core, plugins),
+      metricsRules: this.metricsRules.setup(core, plugins),
     };
 
     plugins.features.registerKibanaFeature(METRICS_FEATURE);

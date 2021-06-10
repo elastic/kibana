@@ -39,8 +39,8 @@ interface CompositeAggregationsResponse {
 
 export interface EvaluatedAlertParams {
   criteria: MetricExpressionParams[];
-  groupBy: string | undefined | string[];
-  filterQuery: string | undefined;
+  groupBy?: string | string[];
+  filterQuery?: string;
 }
 
 export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAlertParams>(

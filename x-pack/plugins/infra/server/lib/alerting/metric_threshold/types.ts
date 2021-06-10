@@ -6,7 +6,7 @@
  */
 
 import { Unit } from '@elastic/datemath';
-import { Comparator, AlertStates } from '../common/types';
+import { AlertStates, Comparator } from '../common/types';
 
 export { Comparator, AlertStates };
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
@@ -43,4 +43,10 @@ interface CountMetricExpressionParams extends BaseMetricExpressionParams {
   metric: never;
 }
 
-export type MetricExpressionParams = NonCountMetricExpressionParams | CountMetricExpressionParams;
+export type MetricExpressionParams = CountMetricExpressionParams | NonCountMetricExpressionParams;
+
+export type AlertTypeParamsFromValidator<Validator> = Validator extends {
+  validate: (object: unknown) => infer Params;
+}
+  ? Params
+  : never;
