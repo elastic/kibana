@@ -159,7 +159,6 @@ export const applicationUsageSchema = {
   security_overwritten_session: commonSchema,
   securitySolution: commonSchema, // It's a forward app so we'll likely never report it
   'securitySolution:overview': commonSchema,
-  'securitySolution:detections': commonSchema,
   'securitySolution:hosts': commonSchema,
   'securitySolution:network': commonSchema,
   'securitySolution:timelines': commonSchema,

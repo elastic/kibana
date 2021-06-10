@@ -51,7 +51,7 @@ export const usePrimaryNavigationItems = ({
       ev.preventDefault();
       if (id in SecurityPageName && pageId == null) {
         // TODO: remove condition and use deepLinkId for all sections when all migrated
-        if (id === 'overview') {
+        if (id === 'overview' || id === 'detections' || id === 'rules') {
           navigateToApp(APP_ID, { deepLinkId: id, path: urlSearch });
         } else {
           navigateToApp(`${APP_ID}:${id}`, { path: urlSearch });

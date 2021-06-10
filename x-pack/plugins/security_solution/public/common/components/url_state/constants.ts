@@ -28,6 +28,7 @@ export enum CONSTANTS {
 export type UrlStateType =
   | 'case'
   | 'detections'
+  | 'rules'
   | 'host'
   | 'network'
   | 'overview'

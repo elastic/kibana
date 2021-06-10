@@ -6,18 +6,24 @@
  */
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
 
 import { DetectionEngineContainer } from './pages/detection_engine';
-import { NotFoundPage } from '../app/404';
+import { DetectionEnginePage } from './pages/detection_engine/detection_engine';
 
 export const AlertsRoutes: React.FC = () => (
   <Switch>
-    <Route path="/">
+    <Route path="/alerts">
+      <DetectionEnginePage />
+    </Route>
+    <Route path="/rules">
       <DetectionEngineContainer />
     </Route>
-    <Route>
-      <NotFoundPage />
+    <Route exact path="/detections">
+      <Redirect to="/alerts" />
+    </Route>
+    <Route exact path="/detections/rules">
+      <Redirect to="/rules" />
     </Route>
   </Switch>
 );

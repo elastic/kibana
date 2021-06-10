@@ -35,7 +35,6 @@ import { KibanaServices } from './common/lib/kibana/services';
 import {
   APP_ID,
   APP_ICON_SOLUTION,
-  APP_DETECTIONS_PATH,
   APP_HOSTS_PATH,
   APP_OVERVIEW_PATH,
   APP_NETWORK_PATH,
@@ -56,9 +55,10 @@ import {
   HOSTS,
   NETWORK,
   TIMELINES,
-  DETECTION_ENGINE,
   CASE,
   ADMINISTRATION,
+  RULES,
+  ALERTS,
 } from './app/translations';
 import {
   IndexFieldsStrategyRequest,
@@ -154,28 +154,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       };
       return services;
     })();
-
-    // core.application.register({
-    //   id: `${APP_ID}:${SecurityPageName.detections}`,
-    //   title: DETECTION_ENGINE,
-    //   order: 9001,
-    //   euiIconType: APP_ICON_SOLUTION,
-    //   category: DEFAULT_APP_CATEGORIES.security,
-    //   appRoute: APP_DETECTIONS_PATH,
-    //   updater$: this.detectionsUpdater$,
-    //   mount: async (params: AppMountParameters) => {
-    //     const [coreStart, startPlugins] = await core.getStartServices();
-    //     const { detections: subPlugin } = await this.subPlugins();
-    //     const { renderAppOld } = await this.lazyApplicationDependencies();
-
-    //     return renderAppOld({
-    //       ...params,
-    //       services: await startServices,
-    //       store: await this.store(coreStart, startPlugins),
-    //       SubPluginRoutes: subPlugin.start(this.storage).SubPluginRoutes,
-    //     });
-    //   },
-    // });
 
     core.application.register({
       id: `${APP_ID}:${SecurityPageName.hosts}`,
@@ -300,18 +278,26 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         },
         {
           id: SecurityPageName.detections,
-          title: DETECTION_ENGINE,
-          path:'/detections',
+          title: ALERTS,
+          path: '/alerts',
           navLinkStatus: AppNavLinkStatus.visible,
-          order: 9000,
+          order: 9001,
           euiIconType: APP_ICON_SOLUTION,
-        }
+        },
+        {
+          id: SecurityPageName.rules,
+          title: RULES,
+          path: '/rules',
+          navLinkStatus: AppNavLinkStatus.hidden,
+          searchable: true,
+          order: 9001,
+          euiIconType: APP_ICON_SOLUTION,
+        },
       ],
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
         const { renderApp } = await this.lazyApplicationDependencies();
-console.log(subPlugins)
         return renderApp({
           ...params,
           services: await startServices,

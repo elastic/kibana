@@ -96,6 +96,8 @@ export const getUrlType = (pageName: string): UrlStateType => {
     return 'network';
   } else if (pageName === SecurityPageName.detections) {
     return 'detections';
+  } else if (pageName === SecurityPageName.rules) {
+    return 'rules';
   } else if (pageName === SecurityPageName.timelines) {
     return 'timeline';
   } else if (pageName === SecurityPageName.case) {

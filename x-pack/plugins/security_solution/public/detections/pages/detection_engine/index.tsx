@@ -9,29 +9,33 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
 import { CreateRulePage } from './rules/create';
-import { DetectionEnginePage } from './detection_engine';
 import { EditRulePage } from './rules/edit';
 import { RuleDetailsPage } from './rules/details';
 import { RulesPage } from './rules';
+import { SpyRoute } from '../../../common/utils/route/spy_routes';
+import { SecurityPageName } from '../../../../common/constants';
 
 const DetectionEngineContainerComponent: React.FC = () => (
-  <Switch>
-    <Route path="/rules/id/:detailName/edit">
-      <EditRulePage />
-    </Route>
-    <Route path="/rules/id/:detailName">
-      <RuleDetailsPage />
-    </Route>
-    <Route path="/rules/create">
-      <CreateRulePage />
-    </Route>
-    <Route path="/rules">
-      <RulesPage />
-    </Route>
-    <Route exact path="" strict>
-      <DetectionEnginePage />
-    </Route>
-  </Switch>
+  <>
+    <Switch>
+      <Route path="/rules/id/:detailName/edit">
+        <EditRulePage />
+      </Route>
+      <Route path="/rules/id/:detailName">
+        <RuleDetailsPage />
+      </Route>
+      <Route path="/rules/create">
+        <CreateRulePage />
+      </Route>
+      <Route path="/rules">
+        <RulesPage />
+      </Route>
+      <Route exact path="" strict>
+        <RulesPage />
+      </Route>
+      <SpyRoute pageName={SecurityPageName.rules} />
+    </Switch>
+  </>
 );
 
 export const DetectionEngineContainer = React.memo(DetectionEngineContainerComponent);

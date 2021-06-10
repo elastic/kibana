@@ -10,12 +10,13 @@ import { SecurityPageName } from '../types';
 import { SiemNavTab } from '../../common/components/navigation/types';
 import {
   APP_OVERVIEW_PATH,
-  APP_DETECTIONS_PATH,
   APP_HOSTS_PATH,
   APP_NETWORK_PATH,
   APP_TIMELINES_PATH,
   APP_CASES_PATH,
   APP_MANAGEMENT_PATH,
+  APP_RULES_PATH,
+  APP_ALERTS_PATH,
 } from '../../../common/constants';
 
 export const navTabs: SiemNavTab = {
@@ -28,10 +29,17 @@ export const navTabs: SiemNavTab = {
   },
   [SecurityPageName.detections]: {
     id: SecurityPageName.detections,
-    name: i18n.DETECTION_ENGINE,
-    href: APP_DETECTIONS_PATH,
+    name: i18n.ALERTS,
+    href: APP_ALERTS_PATH,
     disabled: false,
-    urlKey: 'detections',
+    urlKey: SecurityPageName.detections,
+  },
+  [SecurityPageName.rules]: {
+    id: SecurityPageName.rules,
+    name: i18n.RULES,
+    href: APP_RULES_PATH,
+    disabled: false,
+    urlKey: SecurityPageName.rules,
   },
   [SecurityPageName.hosts]: {
     id: SecurityPageName.hosts,

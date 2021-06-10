@@ -260,7 +260,7 @@ const RulesPageComponent: React.FC = () => {
         />
       </SecuritySolutionPageWrapper>
 
-      <SpyRoute pageName={SecurityPageName.detections} />
+      <SpyRoute pageName={SecurityPageName.rules} />
     </>
   );
 };
