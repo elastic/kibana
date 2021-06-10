@@ -117,5 +117,21 @@ export const cumulativeSumOperation: OperationDefinition<
     )?.join(', ');
   },
   filterable: true,
+  documentation: {
+    section: 'calculation',
+    signature: i18n.translate('xpack.lens.indexPattern.cumulative_sum.signature', {
+      defaultMessage: 'metric: number',
+    }),
+    description: i18n.translate('xpack.lens.indexPattern.cumulativeSum.documentation', {
+      defaultMessage: `
+Calculates the cumulative sum of a metric over time, adding all previous values of a series to each value. To use this function, you need to configure a date histogram dimension as well.
+
+This calculation will be done separately for separate series defined by filters or top values dimensions.
+
+Example: Visualize the received bytes accumulated over time:
+\`cumulative_sum(sum(bytes))\`
+      `,
+    }),
+  },
   shiftable: true,
 };
