@@ -20,14 +20,14 @@ export const mockHistory = {
   length: 2,
   location,
   action: pop,
-  push: () => {},
-  replace: () => {},
-  go: () => {},
-  goBack: () => {},
-  goForward: () => {},
-  block: () => {},
-  createHref: () => {},
-  listen: () => {},
+  push: jest.fn(),
+  replace: jest.fn(),
+  go: jest.fn(),
+  goBack: jest.fn(),
+  goForward: jest.fn(),
+  block: jest.fn(),
+  createHref: jest.fn(),
+  listen: jest.fn(),
 };
 
 export const mockLocation = {
