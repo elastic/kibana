@@ -4,13 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import pMap from 'p-map';
 import Boom from '@hapi/boom';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { SavedObjectsFindResponse, SavedObjectsUtils } from '../../../../../../src/core/server';
-import { SUPPORTED_CONNECTORS } from '../../../common/constants';
+import {
+  SavedObject,
+  SavedObjectsFindResponse,
+  SavedObjectsUtils,
+} from '../../../../../../src/core/server';
+import { MAX_CONCURRENT_SEARCHES, SUPPORTED_CONNECTORS } from '../../../common/constants';
 import {
   CaseConfigureResponseRt,
   CasesConfigurePatch,
@@ -20,12 +26,12 @@ import {
   excess,
   GetConfigureFindRequest,
   GetConfigureFindRequestRt,
-  GetFieldsResponse,
   throwErrors,
   CasesConfigurationsResponse,
   CaseConfigurationsResponseRt,
   CasesConfigurePatchRt,
   ConnectorMappings,
+  ESCasesConfigureAttributes,
 } from '../../../common/api';
 import { createCaseError } from '../../common/error';
 import {
@@ -34,7 +40,6 @@ import {
 } from '../../common';
 import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '../types';
-import { getFields } from './get_fields';
 import { getMappings } from './get_mappings';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -42,12 +47,7 @@ import { FindActionResult } from '../../../../actions/server/types';
 import { ActionType } from '../../../../actions/common';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
-import {
-  ConfigurationGetFields,
-  MappingsArgs,
-  CreateMappingsArgs,
-  UpdateMappingsArgs,
-} from './types';
+import { MappingsArgs, CreateMappingsArgs, UpdateMappingsArgs } from './types';
 import { createMappings } from './create_mappings';
 import { updateMappings } from './update_mappings';
 import {
@@ -62,7 +62,6 @@ import {
  * @ignore
  */
 export interface InternalConfigureSubClient {
-  getFields(params: ConfigurationGetFields): Promise<GetFieldsResponse>;
   getMappings(
     params: MappingsArgs
   ): Promise<SavedObjectsFindResponse<ConnectorMappings>['saved_objects']>;
@@ -109,12 +108,9 @@ export const createInternalConfigurationSubClient = (
   casesClientInternal: CasesClientInternal
 ): InternalConfigureSubClient => {
   const configureSubClient: InternalConfigureSubClient = {
-    getFields: (params: ConfigurationGetFields) => getFields(params, clientArgs),
     getMappings: (params: MappingsArgs) => getMappings(params, clientArgs),
-    createMappings: (params: CreateMappingsArgs) =>
-      createMappings(params, clientArgs, casesClientInternal),
-    updateMappings: (params: UpdateMappingsArgs) =>
-      updateMappings(params, clientArgs, casesClientInternal),
+    createMappings: (params: CreateMappingsArgs) => createMappings(params, clientArgs),
+    updateMappings: (params: UpdateMappingsArgs) => updateMappings(params, clientArgs),
   };
 
   return Object.freeze(configureSubClient);
@@ -175,8 +171,9 @@ async function get(
       }))
     );
 
-    const configurations = await Promise.all(
-      myCaseConfigure.saved_objects.map(async (configuration) => {
+    const configurations = await pMap(
+      myCaseConfigure.saved_objects,
+      async (configuration: SavedObject<ESCasesConfigureAttributes>) => {
         const { connector, ...caseConfigureWithoutConnector } = configuration?.attributes ?? {
           connector: null,
         };
@@ -186,8 +183,7 @@ async function get(
         if (connector != null) {
           try {
             mappings = await casesClientInternal.configuration.getMappings({
-              connectorId: connector.id,
-              connectorType: connector.type,
+              connector: transformESConnectorToCaseConnector(connector),
             });
           } catch (e) {
             error = e.isBoom
@@ -204,7 +200,7 @@ async function get(
           error,
           id: configuration.id,
         };
-      })
+      }
     );
 
     return CaseConfigurationsResponseRt.encode(configurations);
@@ -295,22 +291,22 @@ async function update(
 
     try {
       const resMappings = await casesClientInternal.configuration.getMappings({
-        connectorId: connector != null ? connector.id : configuration.attributes.connector.id,
-        connectorType: connector != null ? connector.type : configuration.attributes.connector.type,
+        connector:
+          connector != null
+            ? connector
+            : transformESConnectorToCaseConnector(configuration.attributes.connector),
       });
       mappings = resMappings.length > 0 ? resMappings[0].attributes.mappings : [];
 
       if (connector != null) {
         if (resMappings.length !== 0) {
           mappings = await casesClientInternal.configuration.updateMappings({
-            connectorId: connector.id,
-            connectorType: connector.type,
+            connector,
             mappingId: resMappings[0].id,
           });
         } else {
           mappings = await casesClientInternal.configuration.createMappings({
-            connectorId: connector.id,
-            connectorType: connector.type,
+            connector,
             owner: configuration.attributes.owner,
           });
         }
@@ -318,9 +314,9 @@ async function update(
     } catch (e) {
       error = e.isBoom
         ? e.output.payload.message
-        : `Error connecting to ${
+        : `Error creating mapping for ${
             connector != null ? connector.name : configuration.attributes.connector.name
-          } instance`;
+          }`;
     }
 
     const patch = await caseConfigureService.patch({
@@ -400,11 +396,13 @@ async function create(
     );
 
     if (myCaseConfigure.saved_objects.length > 0) {
-      await Promise.all(
-        myCaseConfigure.saved_objects.map((cc) =>
-          caseConfigureService.delete({ unsecuredSavedObjectsClient, configurationId: cc.id })
-        )
-      );
+      const deleteConfigurationMapper = async (c: SavedObject<ESCasesConfigureAttributes>) =>
+        caseConfigureService.delete({ unsecuredSavedObjectsClient, configurationId: c.id });
+
+      // Ensuring we don't too many concurrent deletions running.
+      await pMap(myCaseConfigure.saved_objects, deleteConfigurationMapper, {
+        concurrency: MAX_CONCURRENT_SEARCHES,
+      });
     }
 
     const savedObjectID = SavedObjectsUtils.generateId();
@@ -419,14 +417,13 @@ async function create(
 
     try {
       mappings = await casesClientInternal.configuration.createMappings({
-        connectorId: configuration.connector.id,
-        connectorType: configuration.connector.type,
+        connector: configuration.connector,
         owner: configuration.owner,
       });
     } catch (e) {
       error = e.isBoom
         ? e.output.payload.message
-        : `Error connecting to ${configuration.connector.name} instance`;
+        : `Error creating mapping for ${configuration.connector.name}`;
     }
 
     const post = await caseConfigureService.post({

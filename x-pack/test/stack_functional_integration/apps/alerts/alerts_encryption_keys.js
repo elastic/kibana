@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-const ARCHIVE = 'email_connectors_with_encryption_rotation';
+const ARCHIVE = '../integration-test/test/es_archives/email_connectors_with_encryption_rotation';
 
 export default ({ getPageObjects, getService }) => {
   const esArchiver = getService('esArchiver');

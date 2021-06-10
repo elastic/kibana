@@ -71,7 +71,7 @@ export const createMockedIndexPatternWithoutType = (
       searchable: true,
       aggregatable: true,
       scripted: true,
-      lang: 'painless',
+      lang: 'painless' as const,
       script: '1234',
     },
   ].filter(({ type }) => type !== typeToFilter);
@@ -145,7 +145,7 @@ export const createMockedIndexPattern = (): IndexPattern => {
       searchable: true,
       aggregatable: true,
       scripted: true,
-      lang: 'painless',
+      lang: 'painless' as const,
       script: '1234',
     },
   ];
@@ -183,7 +183,7 @@ export const createMockedRestrictedIndexPattern = () => {
       searchable: true,
       scripted: true,
       esTypes: ['keyword'],
-      lang: 'painless',
+      lang: 'painless' as const,
       script: '1234',
     },
   ];

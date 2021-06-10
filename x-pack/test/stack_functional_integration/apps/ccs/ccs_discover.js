@@ -227,14 +227,12 @@ export default ({ getService, getPageObjects }) => {
         url: process.env.TEST_KIBANA_URLDATA,
         certificateAuthorities: config.get('servers.kibana.certificateAuthorities'),
         uiSettingDefaults: kibanaServer.uiSettings,
-        importExportDir: config.get('kbnArchiver.directory'),
       });
 
       const esArchiver = new EsArchiver({
         log,
         client: esClient,
         kbnClient,
-        dataDir: config.get('esArchiver.directory'),
       });
 
       let signalsId;
@@ -263,7 +261,7 @@ export default ({ getService, getPageObjects }) => {
 
       before('Prepare data:metricbeat-*', async function () {
         log.info('Create index');
-        await esArchiver.load('metricbeat');
+        await esArchiver.load('../integration-test/test/es_archives/metricbeat');
 
         log.info('Create index pattern');
         dataId = await supertest
@@ -323,7 +321,7 @@ export default ({ getService, getPageObjects }) => {
         }
 
         log.info('Delete index');
-        await esArchiver.unload('metricbeat');
+        await esArchiver.unload('../integration-test/test/es_archives/metricbeat');
       });
 
       after('Clean up .siem-signal-*', async function () {
