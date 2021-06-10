@@ -14230,7 +14230,6 @@
     "xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixLabel": "分类混淆矩阵",
     "xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixPredictedLabel": "预测类",
     "xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixTestingHelpText": "用于测试数据集的标准化混淆矩阵",
-    "xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixTooltip": "多类混淆矩阵包含分析使用数据点的实际类正确分类数据点的次数以及分析使用其他类错误分类这些数据点的次数",
     "xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixTrainingHelpText": "用于训练数据集的标准化混淆矩阵",
     "xpack.ml.dataframe.analytics.classificationExploration.evaluateJobStatusLabel": "作业状态",
     "xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionAvgRecallTooltip": "平均召回率显示作为实际类成员的数据点有多少个已被正确标识为类成员。",
