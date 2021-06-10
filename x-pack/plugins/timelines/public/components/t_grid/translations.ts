@@ -14,7 +14,7 @@ export const EVENTS_TABLE_ARIA_LABEL = ({
   activePage: number;
   totalPages: number;
 }) =>
-  i18n.translate('xpack.securitySolution.timeline.eventsTableAriaLabel', {
+  i18n.translate('xpack.timelines.timeline.eventsTableAriaLabel', {
     values: { activePage, totalPages },
     defaultMessage: 'events; Page {activePage} of {totalPages}',
   });

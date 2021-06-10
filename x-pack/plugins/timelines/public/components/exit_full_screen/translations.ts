@@ -7,6 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const EXIT_FULL_SCREEN = i18n.translate('xpack.securitySolution.exitFullScreenButton', {
+export const EXIT_FULL_SCREEN = i18n.translate('xpack.timelines.exitFullScreenButton', {
   defaultMessage: 'Exit full screen',
 });

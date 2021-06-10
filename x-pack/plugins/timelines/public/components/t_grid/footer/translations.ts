@@ -14,19 +14,19 @@ export const LOADING_TIMELINE_DATA = i18n.translate(
   }
 );
 
-export const EVENTS = i18n.translate('xpack.securitySolution.footer.events', {
+export const EVENTS = i18n.translate('xpack.timelines.footer.events', {
   defaultMessage: 'Events',
 });
 
-export const OF = i18n.translate('xpack.securitySolution.footer.of', {
+export const OF = i18n.translate('xpack.timelines.footer.of', {
   defaultMessage: 'of',
 });
 
-export const ROWS = i18n.translate('xpack.securitySolution.footer.rows', {
+export const ROWS = i18n.translate('xpack.timelines.footer.rows', {
   defaultMessage: 'rows',
 });
 
-export const LOADING = i18n.translate('xpack.securitySolution.footer.loadingLabel', {
+export const LOADING = i18n.translate('xpack.timelines.footer.loadingLabel', {
   defaultMessage: 'Loading',
 });
 

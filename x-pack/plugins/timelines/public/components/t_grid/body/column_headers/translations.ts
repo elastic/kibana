@@ -7,39 +7,39 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const CATEGORY = i18n.translate('xpack.securitySolution.timeline.categoryTooltip', {
+export const CATEGORY = i18n.translate('xpack.timelines.timeline.categoryTooltip', {
   defaultMessage: 'Category',
 });
 
-export const DESCRIPTION = i18n.translate('xpack.securitySolution.timeline.descriptionTooltip', {
+export const DESCRIPTION = i18n.translate('xpack.timelines.timeline.descriptionTooltip', {
   defaultMessage: 'Description',
 });
 
-export const FIELD = i18n.translate('xpack.securitySolution.timeline.fieldTooltip', {
+export const FIELD = i18n.translate('xpack.timelines.timeline.fieldTooltip', {
   defaultMessage: 'Field',
 });
 
-export const FULL_SCREEN = i18n.translate('xpack.securitySolution.timeline.fullScreenButton', {
+export const FULL_SCREEN = i18n.translate('xpack.timelines.timeline.fullScreenButton', {
   defaultMessage: 'Full screen',
 });
 
-export const HIDE_COLUMN = i18n.translate('xpack.securitySolution.timeline.hideColumnLabel', {
+export const HIDE_COLUMN = i18n.translate('xpack.timelines.timeline.hideColumnLabel', {
   defaultMessage: 'Hide column',
 });
 
-export const SORT_AZ = i18n.translate('xpack.securitySolution.timeline.sortAZLabel', {
+export const SORT_AZ = i18n.translate('xpack.timelines.timeline.sortAZLabel', {
   defaultMessage: 'Sort A-Z',
 });
 
-export const SORT_FIELDS = i18n.translate('xpack.securitySolution.timeline.sortFieldsButton', {
+export const SORT_FIELDS = i18n.translate('xpack.timelines.timeline.sortFieldsButton', {
   defaultMessage: 'Sort fields',
 });
 
-export const SORT_ZA = i18n.translate('xpack.securitySolution.timeline.sortZALabel', {
+export const SORT_ZA = i18n.translate('xpack.timelines.timeline.sortZALabel', {
   defaultMessage: 'Sort Z-A',
 });
 
-export const TYPE = i18n.translate('xpack.securitySolution.timeline.typeTooltip', {
+export const TYPE = i18n.translate('xpack.timelines.timeline.typeTooltip', {
   defaultMessage: 'Type',
 });
 

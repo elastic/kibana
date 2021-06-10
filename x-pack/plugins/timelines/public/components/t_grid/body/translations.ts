@@ -42,7 +42,7 @@ export const UNPINNED = i18n.translate(
   }
 );
 
-export const PINNED = i18n.translate('xpack.securitySolution.timeline.body.pinning.pinnedTooltip', {
+export const PINNED = i18n.translate('xpack.timelines.timeline.body.pinning.pinnedTooltip', {
   defaultMessage: 'Pinned event',
 });
 
@@ -95,7 +95,7 @@ export const VIEW_DETAILS_FOR_ROW = ({
   ariaRowindex: number;
   columnValues: string;
 }) =>
-  i18n.translate('xpack.securitySolution.timeline.body.actions.viewDetailsForRowAriaLabel', {
+  i18n.translate('xpack.timelines.timeline.body.actions.viewDetailsForRowAriaLabel', {
     values: { ariaRowindex, columnValues },
     defaultMessage:
       'View details for the alert or event in row {ariaRowindex}, with columns {columnValues}',
@@ -131,7 +131,7 @@ export const CHECKBOX_FOR_ROW = ({
   columnValues: string;
   checked: boolean;
 }) =>
-  i18n.translate('xpack.securitySolution.timeline.body.actions.checkboxForRowAriaLabel', {
+  i18n.translate('xpack.timelines.timeline.body.actions.checkboxForRowAriaLabel', {
     values: { ariaRowindex, checked, columnValues },
     defaultMessage:
       '{checked, select, false {unchecked} true {checked}} checkbox for the alert or event in row {ariaRowindex}, with columns {columnValues}',
@@ -176,7 +176,7 @@ export const ADD_NOTES_FOR_ROW = ({
   ariaRowindex: number;
   columnValues: string;
 }) =>
-  i18n.translate('xpack.securitySolution.timeline.body.actions.addNotesForRowAriaLabel', {
+  i18n.translate('xpack.timelines.timeline.body.actions.addNotesForRowAriaLabel', {
     values: { ariaRowindex, columnValues },
     defaultMessage:
       'Add notes for the event in row {ariaRowindex} to timeline, with columns {columnValues}',
@@ -191,7 +191,7 @@ export const PIN_EVENT_FOR_ROW = ({
   columnValues: string;
   isEventPinned: boolean;
 }) =>
-  i18n.translate('xpack.securitySolution.timeline.body.actions.pinEventForRowAriaLabel', {
+  i18n.translate('xpack.timelines.timeline.body.actions.pinEventForRowAriaLabel', {
     values: { ariaRowindex, columnValues, isEventPinned },
     defaultMessage:
       '{isEventPinned, select, false {Pin} true {Unpin}} the event in row {ariaRowindex} to timeline, with columns {columnValues}',
@@ -204,7 +204,7 @@ export const TIMELINE_TOGGLE_BUTTON_ARIA_LABEL = ({
   isOpen: boolean;
   title: string;
 }) =>
-  i18n.translate('xpack.securitySolution.timeline.properties.timelineToggleButtonAriaLabel', {
+  i18n.translate('xpack.timelines.timeline.properties.timelineToggleButtonAriaLabel', {
     values: { isOpen, title },
     defaultMessage: '{isOpen, select, false {Open} true {Close} other {Toggle}} timeline {title}',
   });
@@ -216,7 +216,7 @@ export const ATTACH_ALERT_TO_CASE_FOR_ROW = ({
   ariaRowindex: number;
   columnValues: string;
 }) =>
-  i18n.translate('xpack.securitySolution.timeline.body.actions.attachAlertToCaseForRowAriaLabel', {
+  i18n.translate('xpack.timelines.timeline.body.actions.attachAlertToCaseForRowAriaLabel', {
     values: { ariaRowindex, columnValues },
     defaultMessage:
       'Attach the alert or event in row {ariaRowindex} to a case, with columns {columnValues}',
@@ -229,7 +229,7 @@ export const MORE_ACTIONS_FOR_ROW = ({
   ariaRowindex: number;
   columnValues: string;
 }) =>
-  i18n.translate('xpack.securitySolution.timeline.body.actions.moreActionsForRowAriaLabel', {
+  i18n.translate('xpack.timelines.timeline.body.actions.moreActionsForRowAriaLabel', {
     values: { ariaRowindex, columnValues },
     defaultMessage:
       'Select more actions for the alert or event in row {ariaRowindex}, with columns {columnValues}',
