@@ -5,12 +5,12 @@
   "requiredPlugins": ["features", "licensing", "charts"],
   "configPath": ["enterpriseSearch"],
   "optionalPlugins": ["usageCollection", "security", "home", "spaces", "cloud"],
+  "server": true,
+  "ui": true,
+  "requiredBundles": ["home"],
   "owner": {
     "name": "Enterprise Search",
     "githubTeam": "enterprise-search-frontend"
   },
-  "description": "This plugin adds the admin dashboards for the Enterprise Search products",
-  "server": true,
-  "ui": true,
-  "requiredBundles": ["home"]
+  "description": "Adds the admin dashboards for the Enterprise Search products"
 }
