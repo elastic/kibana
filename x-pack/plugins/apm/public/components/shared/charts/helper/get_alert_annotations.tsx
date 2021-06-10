@@ -10,7 +10,7 @@ import {
   Position,
   RectAnnotation,
 } from '@elastic/charts';
-import { EuiIcon } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   ALERT_DURATION,
@@ -130,7 +130,12 @@ export function getAlertAnnotations({
         id={`alert_${uuid}_line`}
         key={`alert_${uuid}_line`}
         marker={
-          <EuiIcon
+          <EuiButtonIcon
+            aria-label={i18n.translate(
+              'xpack.apm.alertAnnotationButtonAriaLabel',
+              { defaultMessage: 'View alert details' }
+            )}
+            color={severityLevel === 'warning' ? 'warning' : 'danger'}
             onClick={() => {
               if (selectedAlertId === uuid) {
                 setSelectedAlertId(undefined);
@@ -138,9 +143,9 @@ export function getAlertAnnotations({
                 setSelectedAlertId(uuid);
               }
             }}
-            size={isSelected ? 'xl' : 'm'}
-            style={{ cursor: 'pointer' }}
-            type="alert"
+            iconSize={isSelected ? 'l' : 'm'}
+            iconType="alert"
+            size="xs"
           />
         }
         markerPosition={Position.Top}
