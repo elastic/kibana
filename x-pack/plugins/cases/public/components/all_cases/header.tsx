@@ -20,6 +20,7 @@ interface OwnProps {
   configureCasesNavigation: CasesNavigation;
   createCaseNavigation: CasesNavigation;
   refresh: number;
+  showTitle?: boolean;
   userCanCrud: boolean;
 }
 
@@ -40,9 +41,10 @@ export const CasesTableHeader: FunctionComponent<Props> = ({
   configureCasesNavigation,
   createCaseNavigation,
   refresh,
+  showTitle = true,
   userCanCrud,
 }) => (
-  <CaseHeaderPage title={i18n.PAGE_TITLE}>
+  <CaseHeaderPage title={showTitle ? i18n.PAGE_TITLE : ''}>
     <EuiFlexGroup
       alignItems="center"
       gutterSize="m"
