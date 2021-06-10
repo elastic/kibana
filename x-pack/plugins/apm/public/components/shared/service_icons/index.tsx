@@ -18,7 +18,6 @@ import { CloudDetails } from './cloud_details';
 import { ContainerDetails } from './container_details';
 import { IconPopover } from './icon_popover';
 import { ServiceDetails } from './service_details';
-import { AlertDetails } from './alert_details';
 
 interface Props {
   serviceName: string;
@@ -145,19 +144,6 @@ export function ServiceIcons({ serviceName }: Props) {
         defaultMessage: 'Cloud',
       }),
       component: <CloudDetails cloud={details?.cloud} />,
-    },
-    {
-      key: 'alerts',
-      icon: {
-        type: 'bell',
-        color: theme.eui.euiColorDanger,
-        size: 'm',
-      },
-      isVisible: alerts.length > 0,
-      title: i18n.translate('xpack.apm.serviceIcons.alerts', {
-        defaultMessage: 'Alerts',
-      }),
-      component: <AlertDetails alerts={alerts} />,
     },
   ];
 
