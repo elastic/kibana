@@ -12,17 +12,15 @@ import {
   CaseFullExternalService,
   CaseResponse,
   CaseUserActionsResponse,
-  CommentAttributes,
-  CommentRequestAlertType,
-  CommentRequestUserType,
   CommentResponse,
   CommentResponseAlertsType,
   CommentType,
   ConnectorMappingsAttributes,
-  ConnectorTypes,
+  CommentAttributes,
+  CommentRequestUserType,
+  CommentRequestAlertType,
 } from '../../../common';
 import { ActionsClient } from '../../../../actions/server';
-import { externalServiceFormatters, FormatterConnectorTypes } from '../../connectors';
 import { CasesClientGetAlertsResponse } from '../../client/alerts/types';
 import {
   BasicParams,
@@ -39,6 +37,7 @@ import {
   TransformFieldsArgs,
 } from './types';
 import { getAlertIds } from '../utils';
+import { CasesConnectorsMap } from '../../connectors';
 
 interface CreateIncidentArgs {
   actionsClient: ActionsClient;
@@ -47,6 +46,7 @@ interface CreateIncidentArgs {
   connector: ActionConnector;
   mappings: ConnectorMappingsAttributes[];
   alerts: CasesClientGetAlertsResponse;
+  casesConnectors: CasesConnectorsMap;
 }
 
 export const getLatestPushInfo = (
@@ -69,9 +69,6 @@ export const getLatestPushInfo = (
 
   return null;
 };
-
-const isConnectorSupported = (connectorId: string): connectorId is FormatterConnectorTypes =>
-  Object.values(ConnectorTypes).includes(connectorId as ConnectorTypes);
 
 const getCommentContent = (comment: CommentResponse): string => {
   if (comment.type === CommentType.user) {
@@ -99,6 +96,7 @@ export const createIncident = async ({
   connector,
   mappings,
   alerts,
+  casesConnectors,
 }: CreateIncidentArgs): Promise<MapIncident> => {
   const {
     comments: caseComments,
@@ -110,20 +108,15 @@ export const createIncident = async ({
     updated_by: updatedBy,
   } = theCase;
 
-  if (!isConnectorSupported(connector.actionTypeId)) {
-    throw new Error('Invalid external service');
-  }
-
   const params = { title, description, createdAt, createdBy, updatedAt, updatedBy };
   const latestPushInfo = getLatestPushInfo(connector.id, userActions);
   const externalId = latestPushInfo?.pushedInfo?.external_id ?? null;
   const defaultPipes = externalId ? ['informationUpdated'] : ['informationCreated'];
   let currentIncident: ExternalServiceParams | undefined;
 
-  const externalServiceFields = externalServiceFormatters[connector.actionTypeId].format(
-    theCase,
-    alerts
-  );
+  const externalServiceFields =
+    casesConnectors.get(connector.actionTypeId)?.format(theCase, alerts) ?? {};
+
   let incident: Partial<PushToServiceApiParams['incident']> = { ...externalServiceFields };
 
   if (externalId) {
