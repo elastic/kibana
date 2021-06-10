@@ -15,7 +15,7 @@ import {
   documentationService,
   GlobalFlyout,
   RuntimeField,
-  RuntimeFieldEditorFlyoutContent,
+  getRuntimeFieldEditorFlyoutContent,
   RuntimeFieldEditorFlyoutContentProps,
 } from '../../shared_imports';
 import { useConfig } from '../../config_context';
@@ -69,34 +69,38 @@ export const RuntimeFieldsList = () => {
   );
 
   useEffect(() => {
-    if (status === 'creatingField' || status === 'editingField') {
-      addContentToGlobalFlyout<RuntimeFieldEditorFlyoutContentProps>({
-        id: 'runtimeFieldEditor',
-        Component: RuntimeFieldEditorFlyoutContent,
-        props: {
-          onSave: saveRuntimeField,
-          onCancel: exitEdit,
-          defaultValue: fieldToEdit ? runtimeFields[fieldToEdit]?.source : undefined,
-          docLinks: docLinks!,
-          ctx: {
-            namesNotAllowed: Object.values(runtimeFields).map((field) => field.source.name),
-            existingConcreteFields: Object.values(fields.byId).map((field) => ({
-              name: field.source.name,
-              type: field.source.type,
-            })),
+    const loadContent = async () => {
+      if (status === 'creatingField' || status === 'editingField') {
+        const Component = await getRuntimeFieldEditorFlyoutContent();
+        addContentToGlobalFlyout<RuntimeFieldEditorFlyoutContentProps>({
+          id: 'runtimeFieldEditor',
+          Component,
+          props: {
+            onSave: saveRuntimeField,
+            onCancel: exitEdit,
+            defaultValue: fieldToEdit ? runtimeFields[fieldToEdit]?.source : undefined,
+            docLinks: docLinks!,
+            ctx: {
+              namesNotAllowed: Object.values(runtimeFields).map((field) => field.source.name),
+              existingConcreteFields: Object.values(fields.byId).map((field) => ({
+                name: field.source.name,
+                type: field.source.type,
+              })),
+            },
           },
-        },
-        flyoutProps: {
-          'data-test-subj': 'runtimeFieldEditor',
-          'aria-labelledby': 'runtimeFieldEditorEditTitle',
-          maxWidth: 720,
-          onClose: exitEdit,
-        },
-        cleanUpFunc: exitEdit,
-      });
-    } else if (status === 'idle') {
-      removeContentFromGlobalFlyout('runtimeFieldEditor');
-    }
+          flyoutProps: {
+            'data-test-subj': 'runtimeFieldEditor',
+            'aria-labelledby': 'runtimeFieldEditorEditTitle',
+            maxWidth: 720,
+            onClose: exitEdit,
+          },
+          cleanUpFunc: exitEdit,
+        });
+      } else if (status === 'idle') {
+        removeContentFromGlobalFlyout('runtimeFieldEditor');
+      }
+    };
+    loadContent();
   }, [
     status,
     fieldToEdit,

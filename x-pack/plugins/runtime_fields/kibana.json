@@ -2,7 +2,7 @@
   "id": "runtimeFields",
   "version": "kibana",
   "server": false,
-  "ui": false,
+  "ui": true,
   "requiredPlugins": [],
   "optionalPlugins": [],
   "configPath": ["xpack", "runtime_fields"],

@@ -9,6 +9,8 @@ export { RuntimeFieldForm, FormState as RuntimeFieldFormState } from './runtime_
 
 export { RuntimeFieldEditor } from './runtime_field_editor';
 
+export type { RuntimeFieldEditorProps } from './runtime_field_editor';
+
 export {
   RuntimeFieldEditorFlyoutContent,
   RuntimeFieldEditorFlyoutContentProps,

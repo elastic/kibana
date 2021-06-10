@@ -6,3 +6,4 @@
  */
 
 export { RuntimeFieldEditor } from './runtime_field_editor';
+export type { Props as RuntimeFieldEditorProps } from './runtime_field_editor';

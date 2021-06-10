@@ -57,7 +57,7 @@ export { documentationService } from '../../services/documentation';
 
 export {
   RuntimeField,
-  RuntimeFieldEditorFlyoutContent,
+  getRuntimeFieldEditorFlyoutContent,
   RuntimeFieldEditorFlyoutContentProps,
 } from '../../../../../runtime_fields/public';
 
