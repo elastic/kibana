@@ -241,7 +241,7 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
     const activityLog = {
       logData: createUninitialisedResourceState(),
       page: 1,
-      pageSize: 10,
+      pageSize: 50,
     };
 
     // Reset `isolationRequestState` if needed
