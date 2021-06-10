@@ -42,6 +42,22 @@ export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
     CONSTANTS.timerange,
     CONSTANTS.timeline,
   ],
+  rules: [
+    CONSTANTS.appQuery,
+    CONSTANTS.filters,
+    CONSTANTS.savedQuery,
+    CONSTANTS.sourcerer,
+    CONSTANTS.timerange,
+    CONSTANTS.timeline,
+  ],
+  exceptions: [
+    CONSTANTS.appQuery,
+    CONSTANTS.filters,
+    CONSTANTS.savedQuery,
+    CONSTANTS.sourcerer,
+    CONSTANTS.timerange,
+    CONSTANTS.timeline,
+  ],
   host: [
     CONSTANTS.appQuery,
     CONSTANTS.filters,

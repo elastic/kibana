@@ -107,6 +107,13 @@ export const manageOldSiemRoutes = async (coreStart: CoreStart) => {
         path,
       });
       break;
+    case SecurityPageName.exceptions:
+      application.navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.exceptions,
+        replace: true,
+        path,
+      });
+      break;
     default:
       application.navigateToApp(APP_ID, {
         deepLinkId: SecurityPageName.overview,

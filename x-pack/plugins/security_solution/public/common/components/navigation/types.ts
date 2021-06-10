@@ -39,6 +39,7 @@ export type SiemNavTabKey =
   | SecurityPageName.network
   | SecurityPageName.detections
   | SecurityPageName.rules
+  | SecurityPageName.exceptions
   | SecurityPageName.timelines
   | SecurityPageName.case
   | SecurityPageName.administration;

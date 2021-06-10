@@ -59,6 +59,7 @@ import {
   ADMINISTRATION,
   RULES,
   ALERTS,
+  EXCEPTIONS,
 } from './app/translations';
 import {
   IndexFieldsStrategyRequest,
@@ -288,6 +289,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           id: SecurityPageName.rules,
           title: RULES,
           path: '/rules',
+          navLinkStatus: AppNavLinkStatus.hidden,
+          searchable: true,
+          order: 9001,
+          euiIconType: APP_ICON_SOLUTION,
+        },
+        {
+          id: SecurityPageName.exceptions,
+          title: EXCEPTIONS,
+          path: '/exceptions',
           navLinkStatus: AppNavLinkStatus.hidden,
           searchable: true,
           order: 9001,

@@ -17,6 +17,7 @@ import {
   APP_MANAGEMENT_PATH,
   APP_RULES_PATH,
   APP_ALERTS_PATH,
+  APP_EXCEPTIONS_PATH,
 } from '../../../common/constants';
 
 export const navTabs: SiemNavTab = {
@@ -40,6 +41,13 @@ export const navTabs: SiemNavTab = {
     href: APP_RULES_PATH,
     disabled: false,
     urlKey: SecurityPageName.rules,
+  },
+  [SecurityPageName.exceptions]: {
+    id: SecurityPageName.exceptions,
+    name: i18n.EXCEPTIONS,
+    href: APP_EXCEPTIONS_PATH,
+    disabled: false,
+    urlKey: SecurityPageName.exceptions,
   },
   [SecurityPageName.hosts]: {
     id: SecurityPageName.hosts,

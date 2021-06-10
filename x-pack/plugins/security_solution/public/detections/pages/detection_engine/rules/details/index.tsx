@@ -738,7 +738,7 @@ const RuleDetailsPageComponent = () => {
         </SecuritySolutionPageWrapper>
       )}
 
-      <SpyRoute pageName={SecurityPageName.detections} state={{ ruleName: rule?.name }} />
+      <SpyRoute pageName={SecurityPageName.rules} state={{ ruleName: rule?.name }} />
     </>
   );
 };

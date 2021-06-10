@@ -23,7 +23,7 @@ export const AlertsRoutes: React.FC = () => (
       <Redirect to="/alerts" />
     </Route>
     <Route exact path="/detections/rules">
-      <Redirect to="/rules" />
+      <Redirect to="/rules/all" />
     </Route>
   </Switch>
 );

@@ -29,6 +29,7 @@ export type UrlStateType =
   | 'case'
   | 'detections'
   | 'rules'
+  | 'exceptions'
   | 'host'
   | 'network'
   | 'overview'

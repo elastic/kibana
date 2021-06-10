@@ -98,6 +98,8 @@ export const getUrlType = (pageName: string): UrlStateType => {
     return 'detections';
   } else if (pageName === SecurityPageName.rules) {
     return 'rules';
+  } else if (pageName === SecurityPageName.exceptions) {
+    return 'exceptions';
   } else if (pageName === SecurityPageName.timelines) {
     return 'timeline';
   } else if (pageName === SecurityPageName.case) {

@@ -76,6 +76,7 @@ export enum SecurityPageName {
 export const APP_OVERVIEW_PATH = `${APP_PATH}/overview`;
 export const APP_ALERTS_PATH = `${APP_PATH}/alerts`;
 export const APP_RULES_PATH = `${APP_PATH}/rules`;
+export const APP_EXCEPTIONS_PATH = `${APP_PATH}/exceptions`;
 export const APP_HOSTS_PATH = `${APP_PATH}/hosts`;
 export const APP_NETWORK_PATH = `${APP_PATH}/network`;
 export const APP_TIMELINES_PATH = `${APP_PATH}/timelines`;
