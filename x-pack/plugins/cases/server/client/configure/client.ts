@@ -110,8 +110,7 @@ export const createInternalConfigurationSubClient = (
   const configureSubClient: InternalConfigureSubClient = {
     getMappings: (params: MappingsArgs) => getMappings(params, clientArgs),
     createMappings: (params: CreateMappingsArgs) => createMappings(params, clientArgs),
-    updateMappings: (params: UpdateMappingsArgs) =>
-      updateMappings(params, clientArgs, casesClientInternal),
+    updateMappings: (params: UpdateMappingsArgs) => updateMappings(params, clientArgs),
   };
 
   return Object.freeze(configureSubClient);
@@ -184,8 +183,7 @@ async function get(
         if (connector != null) {
           try {
             mappings = await casesClientInternal.configuration.getMappings({
-              connectorId: connector.id,
-              connectorType: connector.type,
+              connector: transformESConnectorToCaseConnector(connector),
             });
           } catch (e) {
             error = e.isBoom
@@ -293,22 +291,22 @@ async function update(
 
     try {
       const resMappings = await casesClientInternal.configuration.getMappings({
-        connectorId: connector != null ? connector.id : configuration.attributes.connector.id,
-        connectorType: connector != null ? connector.type : configuration.attributes.connector.type,
+        connector:
+          connector != null
+            ? connector
+            : transformESConnectorToCaseConnector(configuration.attributes.connector),
       });
       mappings = resMappings.length > 0 ? resMappings[0].attributes.mappings : [];
 
       if (connector != null) {
         if (resMappings.length !== 0) {
           mappings = await casesClientInternal.configuration.updateMappings({
-            connectorId: connector.id,
-            connectorType: connector.type,
+            connector,
             mappingId: resMappings[0].id,
           });
         } else {
           mappings = await casesClientInternal.configuration.createMappings({
-            connectorId: connector.id,
-            connectorType: connector.type,
+            connector,
             owner: configuration.attributes.owner,
           });
         }
@@ -316,9 +314,9 @@ async function update(
     } catch (e) {
       error = e.isBoom
         ? e.output.payload.message
-        : `Error connecting to ${
+        : `Error creating mapping for ${
             connector != null ? connector.name : configuration.attributes.connector.name
-          } instance`;
+          }`;
     }
 
     const patch = await caseConfigureService.patch({
@@ -419,14 +417,13 @@ async function create(
 
     try {
       mappings = await casesClientInternal.configuration.createMappings({
-        connectorId: configuration.connector.id,
-        connectorType: configuration.connector.type,
+        connector: configuration.connector,
         owner: configuration.owner,
       });
     } catch (e) {
       error = e.isBoom
         ? e.output.payload.message
-        : `Error connecting to ${configuration.connector.name} instance`;
+        : `Error creating mapping for ${configuration.connector.name}`;
     }
 
     const post = await caseConfigureService.post({

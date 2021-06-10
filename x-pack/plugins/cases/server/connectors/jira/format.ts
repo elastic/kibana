@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { JiraFieldsType, ConnectorJiraTypeFields } from '../../../common';
-import { ExternalServiceFormatter } from '../types';
+import { ConnectorJiraTypeFields } from '../../../common/api';
+import { Format } from './types';
 
-interface ExternalServiceParams extends JiraFieldsType {
-  labels: string[];
-}
-
-const format: ExternalServiceFormatter<ExternalServiceParams>['format'] = (theCase) => {
+export const format: Format = (theCase, alerts) => {
   const { priority = null, issueType = null, parent = null } =
     (theCase.connector.fields as ConnectorJiraTypeFields['fields']) ?? {};
   return {
@@ -22,8 +18,4 @@ const format: ExternalServiceFormatter<ExternalServiceParams>['format'] = (theCa
     issueType,
     parent,
   };
-};
-
-export const jiraExternalServiceFormatter: ExternalServiceFormatter<ExternalServiceParams> = {
-  format,
 };

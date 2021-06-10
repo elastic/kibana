@@ -41,6 +41,8 @@ export enum ConnectorTypes {
   swimlane = '.swimlane',
 }
 
+export const connectorTypes = Object.values(ConnectorTypes);
+
 const ConnectorJiraTypeFieldsRt = rt.type({
   type: rt.literal(ConnectorTypes.jira),
   fields: rt.union([JiraFieldsRT, rt.null]),

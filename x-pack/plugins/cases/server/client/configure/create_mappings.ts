@@ -5,25 +5,21 @@
  * 2.0.
  */
 
-import { ConnectorMappingsAttributes, ConnectorTypes } from '../../../common/api';
+import { ConnectorMappingsAttributes } from '../../../common/api';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { createCaseError } from '../../common/error';
 import { CasesClientArgs } from '..';
 import { CreateMappingsArgs } from './types';
-import { createDefaultMapping } from './utils';
+import { casesConnectors } from '../../connectors';
 
 export const createMappings = async (
-  { connectorType, connectorId, owner }: CreateMappingsArgs,
+  { connector, owner }: CreateMappingsArgs,
   clientArgs: CasesClientArgs
 ): Promise<ConnectorMappingsAttributes[]> => {
   const { unsecuredSavedObjectsClient, connectorMappingsService, logger } = clientArgs;
 
   try {
-    if (connectorType === ConnectorTypes.none) {
-      return [];
-    }
-
-    const mappings = createDefaultMapping(connectorType);
+    const mappings = casesConnectors.get(connector.type)?.getMapping() ?? [];
 
     const theMapping = await connectorMappingsService.post({
       unsecuredSavedObjectsClient,
@@ -35,7 +31,7 @@ export const createMappings = async (
         {
           type: ACTION_SAVED_OBJECT_TYPE,
           name: `associated-${ACTION_SAVED_OBJECT_TYPE}`,
-          id: connectorId,
+          id: connector.id,
         },
       ],
     });
@@ -43,7 +39,7 @@ export const createMappings = async (
     return theMapping.attributes.mappings;
   } catch (error) {
     throw createCaseError({
-      message: `Failed to create mapping connector id: ${connectorId} type: ${connectorType}: ${error}`,
+      message: `Failed to create mapping connector id: ${connector.id} type: ${connector.type}: ${error}`,
       error,
       logger,
     });
