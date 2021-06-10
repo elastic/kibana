@@ -7,17 +7,21 @@
 
 You can configure `xpack.reporting` settings in your `kibana.yml` to:
 
+* <<general-reporting-settings,Enable the {report-features}>>
+* <<encryption-keys,Configure the encryption key>>
+* <<report-indices,Configure the reporting index>>
 * <<reporting-kibana-server-settings,Control how the {report-features} communicate with the {kib} server>>
 * <<reporting-job-queue-settings,Manage background jobs>>
 * <<reporting-capture-settings,Capture screenshots>>
+* <<reporting-network-policy,Restrict requests with a Reporting network policy>>
 * <<reporting-csv-settings,Increase the byte limit for CSV exports>>
 
 [float]
 [[general-reporting-settings]]
-==== Enable the reporting settings
+==== Enable reporting
 
 [[xpack-enable-reporting]]`xpack.reporting.enabled` {ess-icon}::
-When `true`, enables the {report-features}.
+When `true`, enables the {report-features}. The {report-features} are automatically enabled in {kib}.
 
 [float]
 [[encryption-keys]]
@@ -43,7 +47,7 @@ xpack.reporting.encryptionKey: "something_secret"
 
 [float]
 [[report-indices]]
-==== Report index settings
+==== Reporting index setting
 
 If you divide workspaces in an Elastic cluster using multiple {kib} instances with a different `kibana.index` setting per instance, you must set a unique `xpack.reporting.index` setting per `kibana.index`. Otherwise, report generation periodically fails if a report is queued through an instance with one `kibana.index` setting, and an instance with a different `kibana.index` attempts to claim the job.
 
@@ -178,7 +182,7 @@ The uri for the proxy server. Providing the username and password for the proxy 
 `xpack.reporting.capture.browser.chromium.proxy.bypass`::
 An array of hosts that should not go through the proxy server and should use a direct connection instead. Examples of valid entries are "elastic.co", "*.elastic.co", ".elastic.co", ".elastic.co:5601".
 
-[role="xpack"]
+[float]
 [[reporting-network-policy]]
 === Network policy settings
 

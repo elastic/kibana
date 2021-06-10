@@ -1,17 +1,16 @@
 [role="xpack"]
 [[configuring-reporting]]
-= Configure reporting in {kib}
+== Configure reporting in {kib}
 
 ++++
 <titleabbrev>Configure reporting</titleabbrev>
 ++++
 
-The {report-features} are automatically enabled in {kib}. Reporting operates by creating and updating documents in {es} in response to
-user actions in {kib}.
+To enable users to manually and automatically generate reports, you must grant users access to the {report-features} and secure the reporting endpoints.
 
 [float]
 [[reporting-roles-management-ui]]
-== Grant users access to reporting
+=== Grant users access to reporting
 
 When security is enabled, access to the {report-features} is controlled by roles and privileges. 
 
@@ -65,7 +64,7 @@ image::user/security/images/reporting-custom-role.png["Reporting custom role"]
 
 [float]
 [[reporting-roles-user-api]]
-=== Grant access with the user API
+==== Grant access with the user API
 You can also use the {ref}/security-api-put-role.html[role API] to grant access to the reporting features. Grant the reporting role to users in combination with other roles that grant read access to the data in {es}, and at least read access in the applications where users can generate reports.
 
 [source, sh]
@@ -100,7 +99,7 @@ POST /_security/role/custom_reporting_user
 <5> Grants access to generate PNG and PDF reports in *Visualize Library*.
 
 [float]
-=== Grant access using an external provider
+==== Grant access using an external provider
 
 If you are using an external identity provider, such as LDAP or Active Directory, you can assign roles to individual users or groups of users. Role mappings are configured in {ref}/mapping-roles.html[`config/role_mapping.yml`].
 
@@ -115,7 +114,7 @@ reporting_user:
 --------------------------------------------------------------------------------
 
 [float]
-=== Grant access with a custom index
+==== Grant access with a custom index
 
 If you are using a custom index, the `xpack.reporting.index` setting must begin with `.reporting-*`. The default {kib} system user has `all` privileges against the `.reporting-*` pattern of indices.
 
@@ -163,3 +162,39 @@ NOTE: In the next major version of Kibana, granting access with a custom index i
 --------------------------------------------------------------------------------
 elasticsearch.username: 'custom_kibana_system'
 --------------------------------------------------------------------------------
+
+[float]
+[[securing-reporting]]
+=== Secure the reporting endpoints
+
+Configure {watcher} to trust the {kib} server certificate.
+
+. Enable {stack-security-features} on your {es} cluster. For more information, see {ref}/security-getting-started.html[Getting started with security].
+
+. Configure TLS/SSL encryption for the {kib} server. For more information, see <<configuring-tls>>.
+
+. Specify the {kib} server CA certificate chain in `elasticsearch.yml`:
++
+--
+If you are using your own CA to sign the {kib} server certificate, then you need to specify the CA certificate chain in {es} to properly establish trust in TLS connections between {watcher} and {kib}. If your CA certificate chain is contained in a PKCS #12 trust store, specify it like so:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.http.ssl.truststore.path: "/path/to/your/truststore.p12"
+xpack.http.ssl.truststore.type: "PKCS12"
+xpack.http.ssl.truststore.password: "optional decryption password"
+--------------------------------------------------------------------------------
+
+Otherwise, if your CA certificate chain is in PEM format, specify it like so:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.http.ssl.certificate_authorities: ["/path/to/your/cacert1.pem", "/path/to/your/cacert2.pem"]
+--------------------------------------------------------------------------------
+
+For more information, see {ref}/notification-settings.html#ssl-notification-settings[the {watcher} HTTP TLS/SSL Settings].
+--
+
+. Add one or more users who have the permissions necessary to use {kib} and {report-features}. For more information, see <<reporting-roles-management-ui>>.
++
+Once you've enabled SSL for {kib}, all requests to the reporting endpoints must include valid credentials.

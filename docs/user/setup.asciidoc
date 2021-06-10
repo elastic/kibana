@@ -60,8 +60,6 @@ include::{kib-repo-dir}/setup/connect-to-elasticsearch.asciidoc[]
 
 include::{kib-repo-dir}/setup/upgrade.asciidoc[]
 
-include::{kib-repo-dir}/setup/embedding.asciidoc[]
-
 include::security/securing-kibana.asciidoc[]
 
 include::{kib-repo-dir}/setup/configuring-reporting.asciidoc[]

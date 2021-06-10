@@ -194,13 +194,25 @@ Organize and separate your ideas by adding more pages.
 [role="screenshot"]
 image::images/canvas-add-pages.gif[Add pages]
 
+[float]
+[[workpad-share-options]]
+== Share your workpad
+
+When you've finished your workpad, you can share it outside of {kib}.
+
+For information on the sharing options, refer to <<reporting-getting-started, Reporting from {kib}>>.
+
+[float]
+[[export-single-workpad]]
+== Export workpads
+
+Want to export multiple workpads? Go to the *Canvas* home page, select the workpads you want to export, then click *Export*.
+
 --
 
 include::{kib-repo-dir}/canvas/canvas-edit-workpads.asciidoc[]
 
 include::{kib-repo-dir}/canvas/canvas-present-workpad.asciidoc[]
-
-include::{kib-repo-dir}/canvas/canvas-share-workpad.asciidoc[]
 
 include::{kib-repo-dir}/canvas/canvas-tutorial.asciidoc[]
 

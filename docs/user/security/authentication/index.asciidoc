@@ -395,16 +395,40 @@ xpack.security.authc.providers:
 One of the most popular use cases for anonymous access is when you embed {kib} into other applications and don't want to force your users to log in to view it.
 If you configured {kib} to use anonymous access as the sole authentication mechanism, you don't need to do anything special while embedding {kib}.
 
-If you have multiple authentication providers enabled, and you want to automatically log in anonymous users when embedding dashboards and visualizations:
+[[embedding-cookies]]
+To minimize security risk, embedding with iframes requires careful consideration. By default, modern web browsers enforce the
+https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy[same-origin policy] to restrict the behavior of framed pages. When
+{stack-security-features} are enabled on your cluster, make sure that the browsers can transmit session cookies to a {kib} server. The setting you need to be aware of is <<xpack-security-sameSiteCookies, `xpack.security.sameSiteCookies`>>. To support modern browsers, you must set it to `None`:
 
-. Open the main menu, then click *Dashboard* or *Visualize Library*.
-. Open then dashboard or visualization you want to embed.
-. Open the *Share* menu, then click *Embed code > Public URL*.
-+
-You can also use *Public URL* when you're generating permanent links to dashboards, visualizations, and saved searches.
-+
-NOTE: *Public URL* is available only when anonymous access is configured and your anonymous service account has privileges to access what you want to embed or share.
-+
+[source,yaml]
+--
+xpack.security.sameSiteCookies: "None"
+--
+
+For more information about possible values and implications, refer to <<xpack-security-sameSiteCookies, xpack.security.sameSiteCookies>>.
+For more information about iframe and cookies, refer to https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe[iframe] and
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite[SameSite cookies].
+
+If you're embedding {kib} in a website that supports Single Sign-On with SAML, OpenID Connect, Kerberos, or PKI, it's highly advisable to configure {kib} as a part of the Single Sign-On setup. Operating in a single and properly configured security domain provides you with the most secure and seamless user experience.
+
+If you want users to access embedded {kib} by skipping the login step, and Single Sign-On isn't an option for you, consider configuring <<anonymous-authentication, anonymous access>>. It is already natively integrated into the workflow for embedding dashboards and visualizations.
+
+If you have multiple authentication providers enabled, and you want to automatically log in anonymous users when embedding anything other than dashboards and visualizations, then you will need to add the `auth_provider_hint=<anonymous-provider-name>` query string parameter to the {kib} URL that you're embedding.
+
+For example, if you craft the iframe code to embed {kib}, it might look like this:
+
+```html
+<iframe src="https://localhost:5601/app/monitoring#/elasticsearch/nodes?embed=true&_g=(....)" height="600" width="800"></iframe>
+```
+
+To make this iframe leverage anonymous access automatically, you will need to modify a link to {kib} in the `src` iframe attribute to look like this:
+
+```html
+<iframe src="https://localhost:5601/app/monitoring?auth_provider_hint=anonymous1#/elasticsearch/nodes?embed=true&_g=(....)" height="600" width="800"></iframe>
+```
+
+NOTE: `auth_provider_hint` query string parameter goes *before* the hash URL fragment.
+
 For more information, refer to <<embedding, Embed {kib} content in a web page>>.
 
 [float]
