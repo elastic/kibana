@@ -234,8 +234,14 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
         isSubmitted: false,
         isValid: isValidResult, // todo show error when index pattern already exists
       });
-      setExactMatchedIndices(exactMatched);
-      setPartialMatchedIndices(partialMatched);
+      const matchedIndices = getMatchedIndices(
+        [], // allIndices,
+        partialMatched,
+        exactMatched,
+        allowHidden
+      );
+      setExactMatchedIndices(matchedIndices.exactMatchedIndices);
+      setPartialMatchedIndices(matchedIndices.partialMatchedIndices);
 
       if (isValidResult) {
         const fields = await ensureMinimumTime(
@@ -269,12 +275,6 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
   };
 
   // todo
-  const matchedIndices = getMatchedIndices(
-    [], // allIndices,
-    partialMatchedIndices,
-    exactMatchedIndices,
-    allowHidden
-  );
 
   if (isLoadingSources || isLoadingIndexPatterns) {
     return <>loading</>;
@@ -421,7 +421,7 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
               onClick={onClickSave}
               data-test-subj="fieldSaveButton"
               fill
-              disabled={!isValid}
+              disabled={!isValid || !exactMatchedIndices.length}
               // isLoading={isSavingField || isValidating}
             >
               {i18nTexts.saveButtonLabel}
