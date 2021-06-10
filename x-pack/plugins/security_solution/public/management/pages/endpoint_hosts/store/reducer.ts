@@ -124,7 +124,7 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
         },
       },
     };
-  } else if (action.type === 'appRequestedActivityLog') {
+  } else if (action.type === 'appRequestedEndpointActivityLog') {
     const pageData = {
       page: action.payload.page,
       pageSize: action.payload.pageSize,

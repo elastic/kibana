@@ -34,7 +34,7 @@ export const EndpointActivityLog = memo(
 
     const getActivityLog = useCallback(() => {
       dispatch({
-        type: 'appRequestedActivityLog',
+        type: 'appRequestedEndpointActivityLog',
         payload: {
           page: page + 1,
           pageSize,
