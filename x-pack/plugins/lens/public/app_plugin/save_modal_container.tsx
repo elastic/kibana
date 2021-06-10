@@ -27,9 +27,7 @@ import { checkForDuplicateTitle } from '../../../../../src/plugins/saved_objects
 import { LensAppState } from '../state_management';
 
 type ExtraProps = Pick<LensAppProps, 'initialInput'> &
-  Partial<
-    Pick<LensAppProps, 'redirectToOrigin' | 'redirectTo' | 'redirectToDashboard' | 'onAppLeave'>
-  >;
+  Partial<Pick<LensAppProps, 'redirectToOrigin' | 'redirectTo' | 'onAppLeave'>>;
 
 export type SaveModalContainerProps = {
   isVisible: boolean;
@@ -55,7 +53,6 @@ export function SaveModalContainer({
   originatingApp,
   initialInput,
   redirectTo,
-  redirectToDashboard,
   redirectToOrigin,
   getAppNameFromId = () => undefined,
   isSaveable = true,
@@ -114,7 +111,6 @@ export function SaveModalContainer({
             initialInput,
             attributeService,
             redirectTo,
-            redirectToDashboard,
             redirectToOrigin,
             getIsByValueMode: () => false,
             onAppLeave: () => {},
@@ -150,6 +146,33 @@ export function SaveModalContainer({
   );
 }
 
+const redirectToDashboard = ({
+  embeddableInput,
+  dashboardFeatureFlag,
+  dashboardId,
+  stateTransfer,
+}: {
+  embeddableInput: LensEmbeddableInput;
+  dashboardId: string;
+  dashboardFeatureFlag: LensAppServices['dashboardFeatureFlag'];
+  stateTransfer: LensAppServices['stateTransfer'];
+}) => {
+  if (!dashboardFeatureFlag.allowByValueEmbeddables) {
+    throw new Error('redirectToDashboard called with by-value embeddables disabled');
+  }
+
+  const state = {
+    input: embeddableInput,
+    type: LENS_EMBEDDABLE_TYPE,
+  };
+
+  const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
+  stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
+    state,
+    path,
+  });
+};
+
 export const runSaveLensVisualization = async (
   props: {
     lastKnownDoc?: Document;
@@ -175,11 +198,11 @@ export const runSaveLensVisualization = async (
     stateTransfer,
     attributeService,
     savedObjectsTagging,
-    redirectToDashboard,
     getIsByValueMode,
     redirectToOrigin,
     onAppLeave,
     redirectTo,
+    dashboardFeatureFlag,
   } = props;
 
   const tagsIds =
@@ -254,12 +277,17 @@ export const runSaveLensVisualization = async (
       });
       redirectToOrigin({ input: newInput, isCopied: saveProps.newCopyOnSave });
       return;
-    } else if (saveProps.dashboardId && redirectToDashboard) {
+    } else if (saveProps.dashboardId) {
       // disabling the validation on app leave because the document has been saved.
       onAppLeave?.((actions) => {
         return actions.default();
       });
-      redirectToDashboard(newInput, saveProps.dashboardId);
+      redirectToDashboard({
+        embeddableInput: newInput,
+        dashboardId: saveProps.dashboardId,
+        stateTransfer,
+        dashboardFeatureFlag,
+      });
       return;
     }
 

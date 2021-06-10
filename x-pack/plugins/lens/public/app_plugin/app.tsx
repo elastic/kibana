@@ -53,7 +53,6 @@ export function App({
   initialInput,
   incomingState,
   redirectToOrigin,
-  redirectToDashboard,
   setHeaderActionMenu,
   initialContext,
 }: LensAppProps) {
@@ -219,7 +218,6 @@ export function App({
         getIsByValueMode,
         savedObjectsTagging,
         initialInput,
-        redirectToDashboard,
         redirectToOrigin,
         persistedDoc: appState.persistedDoc,
         onAppLeave,
@@ -281,7 +279,6 @@ export function App({
         persistedDoc={appState.persistedDoc}
         initialInput={initialInput}
         redirectTo={redirectTo}
-        redirectToDashboard={redirectToDashboard}
         redirectToOrigin={redirectToOrigin}
         returnToOriginSwitchLabel={
           getIsByValueMode() && initialInput
