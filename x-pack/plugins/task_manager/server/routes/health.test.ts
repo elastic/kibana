@@ -43,7 +43,7 @@ describe('healthRoute', () => {
     await sleep(10);
     const skippedMockStat = mockHealthStats();
     await sleep(10);
-    const nextMockStat = mockHealthStats({ status: HealthStatus.Error });
+    const nextMockStat = mockHealthStats();
 
     const stats$ = new Subject<MonitoringStats>();
 
