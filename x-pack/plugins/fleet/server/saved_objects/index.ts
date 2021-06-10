@@ -43,6 +43,7 @@ import {
   migrateOutputToV7130,
 } from './migrations/to_v7_13_0';
 import { migratePackagePolicyToV7140 } from './migrations/to_v7_14_0';
+import { migratePackagePolicyToV7150 } from './migrations/to_v7_15_0';
 
 /*
  * Saved object types and mappings
@@ -270,6 +271,7 @@ const getSavedObjectTypes = (
       '7.12.0': migratePackagePolicyToV7120,
       '7.13.0': migratePackagePolicyToV7130,
       '7.14.0': migratePackagePolicyToV7140,
+      '7.15.0': migratePackagePolicyToV7150,
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {
