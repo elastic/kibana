@@ -37,7 +37,7 @@ import { Events } from './events';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 import { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import { OnRowSelected, OnSelectAll } from '../types';
-import { tGridActions } from '../../../types';
+import { tGridActions } from '../../../';
 import { TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { plainRowRenderer } from './renderers/plain_row_renderer';
