@@ -19,7 +19,7 @@ import { MlPopover } from '../ml_popover/ml_popover';
 import { SiemNavigation } from '../navigation';
 import * as i18n from './translations';
 import { useGetUrlSearch } from '../navigation/use_get_url_search';
-import { useKibana } from '../../lib/kibana';
+import { useGetUserCasesPermissions, useKibana } from '../../lib/kibana';
 import { APP_ID, ADD_DATA_PATH, APP_DETECTIONS_PATH } from '../../../../common/constants';
 import { useGlobalHeaderPortal } from '../../hooks/use_global_header_portal';
 import { LinkAnchor } from '../links';
@@ -91,6 +91,18 @@ export const HeaderGlobal = React.memo(
         },
         [navigateToApp, search]
       );
+
+      const hasCasesReadPermissions = useGetUserCasesPermissions()?.read;
+
+      // build a list of tabs to exclude
+      const tabsToExclude = new Set<string>([
+        ...(hideDetectionEngine ? [SecurityPageName.detections] : []),
+        ...(!hasCasesReadPermissions ? [SecurityPageName.case] : []),
+      ]);
+
+      // include the tab if it is not in the set of excluded ones
+      const tabsToDisplay = pickBy((_, key) => !tabsToExclude.has(key), navTabs);
+
       return (
         <Wrapper ref={ref} $isFixed={isFixed}>
           <WrapperContent $globalFullScreen={globalFullScreen ?? timelineFullScreen}>
@@ -109,14 +121,7 @@ export const HeaderGlobal = React.memo(
                   </FlexItem>
 
                   <FlexItem component="nav">
-                    <SiemNavigation
-                      display="condensed"
-                      navTabs={
-                        hideDetectionEngine
-                          ? pickBy((_, key) => key !== SecurityPageName.detections, navTabs)
-                          : navTabs
-                      }
-                    />
+                    <SiemNavigation display="condensed" navTabs={tabsToDisplay} />
                   </FlexItem>
                 </EuiFlexGroup>
               </FlexItem>
