@@ -34,50 +34,13 @@
             "label": "mount",
             "description": [],
             "signature": [
-              "(params: ",
-              {
-                "pluginId": "management",
-                "scope": "public",
-                "docId": "kibManagementPluginApi",
-                "section": "def-public.ManagementAppMountParams",
-                "text": "ManagementAppMountParams"
-              },
-              ") => ",
-              "Unmount",
-              " | Promise<",
-              "Unmount",
-              ">"
+              "Mount"
             ],
             "source": {
               "path": "src/plugins/management/public/utils/management_app.ts",
               "lineNumber": 19
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "management",
-                "id": "def-public.params",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "management",
-                    "scope": "public",
-                    "docId": "kibManagementPluginApi",
-                    "section": "def-public.ManagementAppMountParams",
-                    "text": "ManagementAppMountParams"
-                  }
-                ],
-                "source": {
-                  "path": "src/plugins/management/public/types.ts",
-                  "lineNumber": 56
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           },
           {
             "parentPluginId": "management",
@@ -579,27 +542,7 @@
               "path": "src/plugins/management/public/types.ts",
               "lineNumber": 61
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "management",
-                "id": "def-public.crumbs",
-                "type": "Array",
-                "tags": [],
-                "label": "crumbs",
-                "description": [],
-                "signature": [
-                  "EuiBreadcrumb",
-                  "[]"
-                ],
-                "source": {
-                  "path": "src/plugins/management/public/types.ts",
-                  "lineNumber": 61
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           },
           {
             "parentPluginId": "management",
@@ -659,50 +602,13 @@
             "label": "mount",
             "description": [],
             "signature": [
-              "(params: ",
-              {
-                "pluginId": "management",
-                "scope": "public",
-                "docId": "kibManagementPluginApi",
-                "section": "def-public.ManagementAppMountParams",
-                "text": "ManagementAppMountParams"
-              },
-              ") => ",
-              "Unmount",
-              " | Promise<",
-              "Unmount",
-              ">"
+              "Mount"
             ],
             "source": {
               "path": "src/plugins/management/public/utils/management_app.ts",
               "lineNumber": 13
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "management",
-                "id": "def-public.params",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "management",
-                    "scope": "public",
-                    "docId": "kibManagementPluginApi",
-                    "section": "def-public.ManagementAppMountParams",
-                    "text": "ManagementAppMountParams"
-                  }
-                ],
-                "source": {
-                  "path": "src/plugins/management/public/types.ts",
-                  "lineNumber": 56
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           },
           {
             "parentPluginId": "management",

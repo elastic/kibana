@@ -36,51 +36,13 @@
           "label": "getMetricsEntitiesClient",
           "description": [],
           "signature": [
-            "(esClient: ",
-            {
-              "pluginId": "core",
-              "scope": "server",
-              "docId": "kibCorePluginApi",
-              "section": "def-server.ElasticsearchClient",
-              "text": "ElasticsearchClient"
-            },
-            ") => ",
-            "MetricsEntitiesClient"
+            "GetMetricsEntitiesClientType"
           ],
           "source": {
             "path": "x-pack/plugins/metrics_entities/server/types.ts",
             "lineNumber": 15
           },
-          "deprecated": false,
-          "returnComment": [],
-          "children": [
-            {
-              "parentPluginId": "metricsEntities",
-              "id": "def-server.esClient",
-              "type": "CompoundType",
-              "tags": [],
-              "label": "esClient",
-              "description": [],
-              "signature": [
-                "Pick<",
-                "KibanaClient",
-                ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"helpers\" | \"count\" | \"search\" | \"security\" | \"eql\" | \"on\" | \"off\" | \"transform\" | \"emit\" | \"once\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
-                "TransportRequestParams",
-                ", options?: ",
-                "TransportRequestOptions",
-                " | undefined): ",
-                "TransportRequestPromise",
-                "<",
-                "ApiResponse",
-                "<Record<string, any>, unknown>>; }; }"
-              ],
-              "source": {
-                "path": "x-pack/plugins/metrics_entities/server/types.ts",
-                "lineNumber": 12
-              },
-              "deprecated": false
-            }
-          ]
+          "deprecated": false
         }
       ],
       "lifecycle": "setup",

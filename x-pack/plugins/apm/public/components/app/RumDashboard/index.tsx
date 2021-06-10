@@ -25,19 +25,16 @@ export function RumOverview() {
   }, []);
 
   return (
-    <>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup>
-        <EuiFlexItem grow={1}>
-          <LocalUIFilters {...localUIFiltersConfig} showCount={true}>
-            <URLFilter />
-            <EuiSpacer size="s" />
-          </LocalUIFilters>
-        </EuiFlexItem>
-        <EuiFlexItem grow={7}>
-          <RumDashboard />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+    <EuiFlexGroup>
+      <EuiFlexItem grow={1}>
+        <LocalUIFilters {...localUIFiltersConfig} showCount={true}>
+          <URLFilter />
+          <EuiSpacer size="s" />
+        </LocalUIFilters>
+      </EuiFlexItem>
+      <EuiFlexItem grow={7}>
+        <RumDashboard />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
