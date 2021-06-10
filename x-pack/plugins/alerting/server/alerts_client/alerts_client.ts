@@ -16,6 +16,7 @@ import {
   SavedObject,
   PluginInitializerContext,
   SavedObjectsUtils,
+  SavedObjectAttributes,
 } from '../../../../../src/core/server';
 import { esKuery } from '../../../../../src/plugins/data/server';
 import { ActionsClient, ActionsAuthorization } from '../../../actions/server';
@@ -821,7 +822,12 @@ export class AlertsClient {
       throw e;
     }
 
-    return this.getPartialAlertFromRaw(id, updatedObject.attributes, updatedObject.references);
+    return this.getPartialAlertFromRaw(
+      id,
+      alertType,
+      updatedObject.attributes,
+      updatedObject.references
+    );
   }
 
   private apiKeyAsAlertAttributes(
@@ -1453,15 +1459,25 @@ export class AlertsClient {
     rawAlert: RawAlert,
     references: SavedObjectReference[] | undefined
   ): Alert {
+    const ruleType = this.alertTypeRegistry.get(rawAlert.alertTypeId);
     // In order to support the partial update API of Saved Objects we have to support
     // partial updates of an Alert, but when we receive an actual RawAlert, it is safe
     // to cast the result to an Alert
-    return this.getPartialAlertFromRaw<Params>(id, rawAlert, references) as Alert;
+    return this.getPartialAlertFromRaw<Params>(id, ruleType, rawAlert, references) as Alert;
   }
 
   private getPartialAlertFromRaw<Params extends AlertTypeParams>(
     id: string,
-    { createdAt, updatedAt, meta, notifyWhen, scheduledTaskId, ...rawAlert }: Partial<RawAlert>,
+    ruleType: UntypedNormalizedAlertType,
+    {
+      createdAt,
+      updatedAt,
+      meta,
+      notifyWhen,
+      scheduledTaskId,
+      params,
+      ...rawAlert
+    }: Partial<RawAlert>,
     references: SavedObjectReference[] | undefined
   ): PartialAlert<Params> {
     // Not the prettiest code here, but if we want to use most of the
@@ -1474,6 +1490,7 @@ export class AlertsClient {
     };
     delete rawAlertWithoutExecutionStatus.executionStatus;
     const executionStatus = alertExecutionStatusFromRaw(this.logger, id, rawAlert.executionStatus);
+
     return {
       id,
       notifyWhen,
@@ -1484,6 +1501,7 @@ export class AlertsClient {
       actions: rawAlert.actions
         ? this.injectReferencesIntoActions(id, rawAlert.actions, references || [])
         : [],
+      params: this.injectReferencesIntoParams(id, ruleType, params, references || []) as Params,
       ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
       ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
       ...(scheduledTaskId ? { scheduledTaskId } : {}),
@@ -1573,6 +1591,7 @@ export class AlertsClient {
     }
 
     const references = [...actionReferences, ...extractedReferences];
+
     return {
       actions,
       params,
@@ -1580,26 +1599,22 @@ export class AlertsClient {
     };
   }
 
-  // private injectReferences<Params extends AlertTypeParams>(
-  //   ruleId: string,
-  //   ruleType: UntypedNormalizedAlertType,
-  //   ruleActions: RawAlert['actions'],
-  //   ruleParams: Params,
-  //   references: SavedObjectReference[]
-  // ): {
-  //   actions: Alert['actions'];
-  //   params: Params;
-  // } {
-  //   const actions = this.injectReferencesIntoActions(ruleId, ruleActions, references);
-  //   const params = ruleType?.useSavedObjectReferences?.injectReferences
-  //     ? (ruleType.useSavedObjectReferences.injectReferences(ruleParams, references) as Params)
-  //     : ruleParams;
-
-  //   return {
-  //     actions,
-  //     params,
-  //   };
-  // }
+  private injectReferencesIntoParams<Params extends AlertTypeParams>(
+    ruleId: string,
+    ruleType: UntypedNormalizedAlertType,
+    ruleParams: SavedObjectAttributes | undefined,
+    references: SavedObjectReference[]
+  ): Params {
+    try {
+      return ruleParams && ruleType?.useSavedObjectReferences?.injectReferences
+        ? (ruleType.useSavedObjectReferences.injectReferences(ruleParams, references) as Params)
+        : (ruleParams as Params);
+    } catch (err) {
+      throw new Error(
+        `Error injecting reference into rule params for rule id ${ruleId} - ${err.message}`
+      );
+    }
+  }
 
   private async denormalizeActions(
     alertActions: NormalizedAlertAction[]

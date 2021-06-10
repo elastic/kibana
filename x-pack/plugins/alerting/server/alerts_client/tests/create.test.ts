@@ -819,7 +819,10 @@ describe('create()', () => {
         },
       ],
     });
-    const injectReferencesFn = jest.fn();
+    const injectReferencesFn = jest.fn().mockReturnValue({
+      bar: true,
+      parameterThatIsSavedObjectId: '9',
+    });
     alertTypeRegistry.get.mockImplementation(() => ({
       id: '123',
       name: 'Test',
@@ -836,6 +839,43 @@ describe('create()', () => {
     }));
     const data = getMockData({
       params: ruleParams,
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: {
+          bar: true,
+          parameterThatIsSavedObjectRef: 'soRef_0',
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        notifyWhen: null,
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'soRef_0',
+          type: 'someSavedObjecType',
+          id: '9',
+        },
+      ],
     });
     taskManager.schedule.mockResolvedValueOnce({
       id: 'task-123',
@@ -859,7 +899,7 @@ describe('create()', () => {
       },
       references: [],
     });
-    /* const result = */ await alertsClient.create({ data });
+    const result = await alertsClient.create({ data });
 
     expect(extractReferencesFn).toHaveBeenCalledWith(ruleParams);
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
@@ -901,9 +941,43 @@ describe('create()', () => {
       }
     );
 
-    // TODO
-    // expect(injectReferencesFn).toHaveBeenCalledWith();
-    // expect(result).toEqual();
+    expect(injectReferencesFn).toHaveBeenCalledWith(
+      {
+        bar: true,
+        parameterThatIsSavedObjectRef: 'soRef_0',
+      },
+      [
+        { id: '1', name: 'action_0', type: 'action' },
+        { id: '9', name: 'soRef_0', type: 'someSavedObjecType' },
+      ]
+    );
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionTypeId": "test",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "alertTypeId": "123",
+        "createdAt": 2019-02-12T21:01:22.479Z,
+        "id": "1",
+        "notifyWhen": null,
+        "params": Object {
+          "bar": true,
+          "parameterThatIsSavedObjectId": "9",
+        },
+        "schedule": Object {
+          "interval": "10s",
+        },
+        "scheduledTaskId": "task-123",
+        "updatedAt": 2019-02-12T21:01:22.479Z,
+      }
+    `);
   });
 
   test('should trim alert name when creating API key', async () => {

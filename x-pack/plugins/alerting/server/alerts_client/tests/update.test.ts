@@ -424,7 +424,10 @@ describe('update()', () => {
         },
       ],
     });
-    const injectReferencesFn = jest.fn();
+    const injectReferencesFn = jest.fn().mockReturnValue({
+      bar: true,
+      parameterThatIsSavedObjectId: '9',
+    });
     alertTypeRegistry.get.mockImplementation(() => ({
       id: 'myType',
       name: 'Test',
@@ -477,7 +480,7 @@ describe('update()', () => {
         },
       ],
     });
-    /* const result =*/ await alertsClient.update({
+    const result = await alertsClient.update({
       id: '1',
       data: {
         schedule: { interval: '10s' },
@@ -532,9 +535,43 @@ describe('update()', () => {
       }
     );
 
-    // TODO
-    // expect(injectReferencesFn).toHaveBeenCalledWith();
-    // expect(result).toEqual();
+    expect(injectReferencesFn).toHaveBeenCalledWith(
+      {
+        bar: true,
+        parameterThatIsSavedObjectRef: 'soRef_0',
+      },
+      [
+        { id: '1', name: 'action_0', type: 'action' },
+        { id: '9', name: 'soRef_0', type: 'someSavedObjecType' },
+      ]
+    );
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionTypeId": "test",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "createdAt": 2019-02-12T21:01:22.479Z,
+        "enabled": true,
+        "id": "1",
+        "notifyWhen": "onActiveAlert",
+        "params": Object {
+          "bar": true,
+          "parameterThatIsSavedObjectId": "9",
+        },
+        "schedule": Object {
+          "interval": "10s",
+        },
+        "scheduledTaskId": "task-123",
+        "updatedAt": 2019-02-12T21:01:22.479Z,
+      }
+    `);
   });
 
   it('calls the createApiKey function', async () => {

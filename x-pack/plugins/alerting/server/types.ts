@@ -154,7 +154,7 @@ export interface AlertType<
   minimumLicenseRequired: LicenseType;
   useSavedObjectReferences?: {
     extractReferences: (params: Params) => RuleParamsAndRefs<ExtractedParams>;
-    injectReferences: (params: ExtractedParams, references: SavedObjectReference[]) => Params;
+    injectReferences: (params: SavedObjectAttributes, references: SavedObjectReference[]) => Params;
   };
 }
 
