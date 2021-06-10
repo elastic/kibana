@@ -42,5 +42,6 @@ export * from './cumulative_sum';
 export * from './overall_metric';
 export * from './derivative';
 export * from './moving_average';
+export * from './ui_setting';
 export { mapColumn, MapColumnArguments } from './map_column';
 export { math, MathArguments, MathInput } from './math';
