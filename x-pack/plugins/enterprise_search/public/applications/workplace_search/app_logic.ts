@@ -7,7 +7,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { InitialAppData } from '../../../common/types';
+import { InitialAppData, SearchOAuth } from '../../../common/types';
+
 import {
   Organization,
   WorkplaceSearchInitialData,
@@ -18,6 +19,7 @@ interface AppValues extends WorkplaceSearchInitialData {
   hasInitialized: boolean;
   isFederatedAuth: boolean;
   isOrganization: boolean;
+  searchOAuth: SearchOAuth;
 }
 interface AppActions {
   initializeAppData(props: InitialAppData): InitialAppData;
@@ -28,13 +30,15 @@ interface AppActions {
 
 const emptyOrg = {} as Organization;
 const emptyAccount = {} as Account;
+const emptySearchOAuth = {} as SearchOAuth;
 
 export const AppLogic = kea<MakeLogicType<AppValues, AppActions>>({
   path: ['enterprise_search', 'workplace_search', 'app_logic'],
   actions: {
-    initializeAppData: ({ workplaceSearch, isFederatedAuth }) => ({
+    initializeAppData: ({ workplaceSearch, isFederatedAuth, searchOAuth }) => ({
       workplaceSearch,
       isFederatedAuth,
+      searchOAuth,
     }),
     setContext: (isOrganization) => isOrganization,
     setOrgName: (name: string) => name,
@@ -77,6 +81,12 @@ export const AppLogic = kea<MakeLogicType<AppValues, AppActions>>({
           ...state,
           canCreatePersonalSources,
         }),
+      },
+    ],
+    searchOAuth: [
+      emptySearchOAuth,
+      {
+        initializeAppData: (_, { searchOAuth }) => searchOAuth || emptySearchOAuth,
       },
     ],
   },

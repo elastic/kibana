@@ -18,6 +18,7 @@ export interface InitialAppData {
   readOnlyMode?: boolean;
   ilmEnabled?: boolean;
   isFederatedAuth?: boolean;
+  searchOAuth?: SearchOAuth;
   configuredLimits?: ConfiguredLimits;
   access?: ProductAccess;
   appSearch?: AppSearchAccount;
@@ -32,6 +33,11 @@ export interface ConfiguredLimits {
 export interface ProductAccess {
   hasAppSearchAccess: boolean;
   hasWorkplaceSearchAccess: boolean;
+}
+
+export interface SearchOAuth {
+  clientId: string;
+  redirectUrl: string;
 }
 
 export interface MetaPage {

@@ -49,6 +49,7 @@ export const ENT_SEARCH_LICENSE_MANAGEMENT = `${docLinks.enterpriseSearchBase}/l
 export const PERSONAL_PATH = '/p';
 
 export const OAUTH_AUTHORIZE_PATH = `${PERSONAL_PATH}/oauth/authorize`;
+export const SEARCH_AUTHORIZE_PATH = `${PERSONAL_PATH}/authorize_search`;
 
 export const ROLE_MAPPINGS_PATH = '/role_mappings';
 

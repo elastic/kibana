@@ -76,6 +76,10 @@ export const callEnterpriseSearchConfigAPI = async ({
       readOnlyMode: !!data?.settings?.read_only_mode,
       ilmEnabled: !!data?.settings?.ilm_enabled,
       isFederatedAuth: !!data?.settings?.is_federated_auth, // i.e., not standard auth
+      searchOAuth: {
+        clientId: data?.settings?.search_oauth?.client_id,
+        redirectUrl: data?.settings?.search_oauth?.redirect_url,
+      },
       configuredLimits: {
         appSearch: {
           engine: {

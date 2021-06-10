@@ -8,60 +8,43 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { JSON_HEADER as headers } from '../../../../../common/constants';
+import { SearchOAuth } from '../../../../../common/types';
 import { clearFlashMessages, flashAPIErrors } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
-import { parseQueryParams } from '../../../shared/query_params';
 
-export interface OAuthPreAuthServerProps {
-  client_id: string;
-  client_name: string;
-  redirect_uri: string;
-  response_type: string;
-  scope: string;
-  state: string;
-  status: string;
-}
+import {
+  OAuthPreAuthServerProps,
+  OAuthPreAuthorization,
+  oauthAuthorizeRoute,
+} from '../oauth_authorize/oauth_authorize_logic';
 
-export interface OAuthPreAuthorization {
-  clientId: string;
-  clientName: string;
-  redirectUri: string;
-  responseType: string;
-  rawScopes: string;
-  scopes: string[];
-  state: string;
-}
-
-interface OAuthAuthorizeValues {
-  dataLoading: boolean;
-  buttonLoading: boolean;
+interface SearchAuthorizeValues {
+  redirectPending: boolean;
   cachedPreAuth: OAuthPreAuthorization;
 }
 
-interface OAuthAuthorizeActions {
+interface SearchAuthorizeActions {
   setServerProps(serverProps: OAuthPreAuthServerProps): OAuthPreAuthServerProps;
-  initializeOAuthPreAuth(queryString: string): string;
-  allowOAuthAuthorization(): void;
-  denyOAuthAuthorization(): void;
-  setButtonNotLoading(): void;
+  initializeSearchAuth(searchOAuth: SearchOAuth): SearchOAuth;
+  authorizeSearch(): void;
+  setRedirectNotPending(): void;
 }
 
-export const oauthAuthorizeRoute = '/api/workplace_search/oauth/authorize';
-
-export const OAuthAuthorizeLogic = kea<MakeLogicType<OAuthAuthorizeValues, OAuthAuthorizeActions>>({
-  path: ['enterprise_search', 'workplace_search', 'oauth_authorize_logic'],
+export const SearchAuthorizeLogic = kea<
+  MakeLogicType<SearchAuthorizeValues, SearchAuthorizeActions>
+>({
+  path: ['enterprise_search', 'workplace_search', 'search_authorize_logic'],
   actions: {
     setServerProps: (serverProps: OAuthPreAuthServerProps) => serverProps,
-    initializeOAuthPreAuth: (queryString: string) => queryString,
-    allowOAuthAuthorization: () => null,
-    denyOAuthAuthorization: () => null,
-    setButtonNotLoading: () => null,
+    initializeSearchAuth: (searchOAuth: SearchOAuth) => searchOAuth,
+    authorizeSearch: () => null,
+    setRedirectNotPending: () => null,
   },
   reducers: {
-    dataLoading: [
+    redirectPending: [
       true,
       {
-        setServerProps: () => false,
+        setRedirectNotPending: () => false,
       },
     ],
     cachedPreAuth: [
@@ -70,20 +53,18 @@ export const OAuthAuthorizeLogic = kea<MakeLogicType<OAuthAuthorizeValues, OAuth
         setServerProps: (_, serverProps) => transformServerPreAuth(serverProps),
       },
     ],
-    buttonLoading: [
-      false,
-      {
-        setButtonNotLoading: () => false,
-        allowOAuthAuthorization: () => true,
-        denyOAuthAuthorization: () => true,
-      },
-    ],
   },
   listeners: ({ actions, values }) => ({
-    initializeOAuthPreAuth: async (queryString: string) => {
+    initializeSearchAuth: async (searchOAuth) => {
       clearFlashMessages();
       const { http } = HttpLogic.values;
-      const query = parseQueryParams(queryString);
+
+      const query = {
+        client_id: searchOAuth.clientId,
+        response_type: 'code',
+        redirect_uri: searchOAuth.redirectUrl,
+        scope: 'search',
+      };
 
       try {
         const response = await http.get(oauthAuthorizeRoute, { query });
@@ -95,31 +76,13 @@ export const OAuthAuthorizeLogic = kea<MakeLogicType<OAuthAuthorizeValues, OAuth
         }
       } catch (e) {
         flashAPIErrors(e);
+        actions.setRedirectNotPending();
       }
     },
-    denyOAuthAuthorization: async () => {
-      const { http } = HttpLogic.values;
-      const { cachedPreAuth } = values;
-
-      try {
-        const response = await http.delete(oauthAuthorizeRoute, {
-          body: JSON.stringify({
-            client_id: cachedPreAuth.clientId,
-            response_type: cachedPreAuth.responseType,
-            redirect_uri: cachedPreAuth.redirectUri,
-            scope: cachedPreAuth.rawScopes,
-            state: cachedPreAuth.state,
-          }),
-          headers,
-        });
-
-        window.location.replace(response.redirect_uri);
-      } catch (e) {
-        flashAPIErrors(e);
-        actions.setButtonNotLoading();
-      }
+    setServerProps: () => {
+      actions.authorizeSearch();
     },
-    allowOAuthAuthorization: async () => {
+    authorizeSearch: async () => {
       const { http } = HttpLogic.values;
       const { cachedPreAuth } = values;
 
@@ -130,7 +93,6 @@ export const OAuthAuthorizeLogic = kea<MakeLogicType<OAuthAuthorizeValues, OAuth
             response_type: cachedPreAuth.responseType,
             redirect_uri: cachedPreAuth.redirectUri,
             scope: cachedPreAuth.rawScopes,
-            state: cachedPreAuth.state,
           }),
           headers,
         });
@@ -138,7 +100,7 @@ export const OAuthAuthorizeLogic = kea<MakeLogicType<OAuthAuthorizeValues, OAuth
         window.location.replace(response.redirect_uri);
       } catch (e) {
         flashAPIErrors(e);
-        actions.setButtonNotLoading();
+        actions.setRedirectNotPending();
       }
     },
   }),
