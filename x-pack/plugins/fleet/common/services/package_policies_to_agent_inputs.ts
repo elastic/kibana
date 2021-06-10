@@ -53,6 +53,7 @@ export const storedPackagePoliciesToAgentInputs = (
           : {}),
       };
 
+      // deeply merge the input.config values with the full policy input
       merge(
         fullInput,
         Object.entries(input.config || {}).reduce(
