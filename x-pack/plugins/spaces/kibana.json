@@ -1,7 +1,7 @@
 {
   "id": "spaces",
   "owner": {
-    "name": "Kibana Platform Security",
+    "name": "Platform Security",
     "githubTeam": "kibana-security"
   },
   "description": "This plugin provides the Spaces feature, which allows saved objects to be organized into meaningful categories.",

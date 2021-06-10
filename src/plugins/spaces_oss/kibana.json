@@ -1,7 +1,7 @@
 {
   "id": "spacesOss",
   "owner": {
-    "name": "Kibana Platform Security",
+    "name": "Platform Security",
     "githubTeam": "kibana-security"
   },
   "description": "This plugin exposes a limited set of spaces functionality to OSS plugins.",

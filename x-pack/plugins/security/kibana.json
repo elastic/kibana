@@ -1,7 +1,7 @@
 {
   "id": "security",
   "owner": {
-    "name": "Kibana Platform Security",
+    "name": "Platform Security",
     "githubTeam": "kibana-security"
   },
   "description": "This plugin provides authentication and authorization features, and exposes functionality to understand the capabilities of the currently authenticated user.",
