@@ -42,7 +42,10 @@ describe('collectExportedObjects', () => {
     {
       onExport,
       isExportable,
-    }: { onExport?: SavedObjectsExportTransform; isExportable?: SavedObjectsExportablePredicate } = {}
+    }: {
+      onExport?: SavedObjectsExportTransform;
+      isExportable?: SavedObjectsExportablePredicate;
+    } = {}
   ) => {
     typeRegistry.registerType({
       name,
