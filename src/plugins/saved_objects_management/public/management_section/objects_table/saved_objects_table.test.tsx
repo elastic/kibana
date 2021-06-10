@@ -258,7 +258,7 @@ describe('SavedObjectsTable', () => {
       });
     });
 
-    it('should display a warning is export contains missing references', async () => {
+    it('should display a warning if the export contains missing references', async () => {
       const mockSelectedSavedObjects = [
         { id: '1', type: 'index-pattern' },
         { id: '3', type: 'dashboard' },
@@ -280,6 +280,8 @@ describe('SavedObjectsTable', () => {
         exportedCount: 2,
         missingRefCount: 1,
         missingReferences: [{ id: '7', type: 'visualisation' }],
+        excludedObjectsCount: 0,
+        excludedObjects: [],
       }));
 
       const component = shallowRender({ savedObjectsClient: mockSavedObjectsClient });
@@ -300,6 +302,53 @@ describe('SavedObjectsTable', () => {
           'Your file is downloading in the background. ' +
           'Some related objects could not be found. ' +
           'Please see the last line in the exported file for a list of missing objects.',
+      });
+    });
+
+    it('should display a warning if the export contains excluded objects', async () => {
+      const mockSelectedSavedObjects = [
+        { id: '1', type: 'index-pattern' },
+        { id: '3', type: 'dashboard' },
+      ] as SavedObjectWithMetadata[];
+
+      const mockSavedObjects = mockSelectedSavedObjects.map((obj) => ({
+        _id: obj.id,
+        _source: {},
+      }));
+
+      const mockSavedObjectsClient = {
+        ...defaultProps.savedObjectsClient,
+        bulkGet: jest.fn().mockImplementation(() => ({
+          savedObjects: mockSavedObjects,
+        })),
+      };
+
+      extractExportDetailsMock.mockImplementation(() => ({
+        exportedCount: 2,
+        missingRefCount: 0,
+        missingReferences: [],
+        excludedObjectsCount: 1,
+        excludedObjects: [{ id: '7', type: 'visualisation' }],
+      }));
+
+      const component = shallowRender({ savedObjectsClient: mockSavedObjectsClient });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      // Set some as selected
+      component.instance().onSelectionChanged(mockSelectedSavedObjects);
+
+      await component.instance().onExport(true);
+
+      expect(fetchExportObjectsMock).toHaveBeenCalledWith(http, mockSelectedSavedObjects, true);
+      expect(notifications.toasts.addWarning).toHaveBeenCalledWith({
+        title:
+          'Your file is downloading in the background. ' +
+          'Some objects were excluded from the export. ' +
+          'Please see the last line in the exported file for a list of excluded objects.',
       });
     });
 
