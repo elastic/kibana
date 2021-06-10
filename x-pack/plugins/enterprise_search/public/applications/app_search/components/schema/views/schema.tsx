@@ -53,13 +53,14 @@ export const Schema: React.FC = () => {
           >
             {i18n.translate(
               'xpack.enterpriseSearch.appSearch.engine.schema.updateSchemaButtonLabel',
-              { defaultMessage: 'Update types' }
+              { defaultMessage: 'Save changes' }
             )}
           </EuiButton>,
           <EuiButton
             color="secondary"
             disabled={isUpdating}
             onClick={openModal}
+            iconType="plusInCircleFilled"
             data-test-subj="addSchemaFieldModalButton"
           >
             {i18n.translate(
