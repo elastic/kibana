@@ -1,6 +1,6 @@
 {
   "job_type": "anomaly_detector",
-  "description": "",
+  "description": "Security: Authentication - looks for an unusually large spike in successful authentication events events from a particular source IP address. This can be due to password spraying, user enumeration or brute force activity.",
   "groups": [
     "security",
     "authentication"
