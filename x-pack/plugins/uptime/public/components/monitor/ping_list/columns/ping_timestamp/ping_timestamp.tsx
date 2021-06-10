@@ -62,7 +62,10 @@ export const PingTimestamp = ({ label, ping, initialStepNo = 1 }: Props) => {
 
   const { data, status } = useFetcher(() => {
     if (intersection && intersection.intersectionRatio === 1 && !stepImages[stepNumber - 1])
-      return getJourneyScreenshot(imgPath);
+      console.log(
+        `ping timestamp getting image data for CG ${ping.monitor.check_group} and step index ${stepNumber}`
+      );
+    return getJourneyScreenshot(imgPath);
   }, [intersection?.intersectionRatio, stepNumber]);
 
   const [screenshotRef, setScreenshotRef] = useState<ScreenshotRefImageData | undefined>(undefined);

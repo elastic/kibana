@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ScreenshotRefImageData } from '../../../common/runtime_types';
+import { ScreenshotBlockBlob, ScreenshotRefImageData } from '../../../common/runtime_types';
 
 /**
  * Draws image fragments on a canvas.
@@ -15,10 +15,11 @@ import { ScreenshotRefImageData } from '../../../common/runtime_types';
  */
 export const composeScreenshotRef = async (
   data: ScreenshotRefImageData,
-  canvas: HTMLCanvasElement
+  canvas: HTMLCanvasElement,
+  blocks: { [key: string]: ScreenshotBlockBlob }
 ) => {
   const {
-    ref: { screenshotRef, blocks },
+    ref: { screenshotRef },
   } = data;
 
   const ctx = canvas.getContext('2d', { alpha: false });
@@ -36,7 +37,7 @@ export const composeScreenshotRef = async (
       new Promise<void>((r) => {
         const img = new Image();
         const { top, left, width, height, hash } = block;
-        const blob = blocks.find((b) => b.id === hash);
+        const blob = blocks[hash];
         if (!blob)
           throw Error(`Error processing image. Expected image data with hash ${hash} is missing`);
         img.onload = () => {

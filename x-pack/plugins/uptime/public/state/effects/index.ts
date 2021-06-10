@@ -20,6 +20,7 @@ import { fetchCertificatesEffect } from '../certificates/certificates';
 import { fetchAlertsEffect } from '../alerts/alerts';
 import { fetchJourneyStepsEffect } from './journey';
 import { fetchNetworkEventsEffect } from './network_events';
+import { fetchScreenshotBlocks } from './synthetic_journey_blocks';
 
 export function* rootEffect() {
   yield fork(fetchMonitorDetailsEffect);
@@ -38,4 +39,5 @@ export function* rootEffect() {
   yield fork(fetchAlertsEffect);
   yield fork(fetchJourneyStepsEffect);
   yield fork(fetchNetworkEventsEffect);
+  yield fork(fetchScreenshotBlocks);
 }

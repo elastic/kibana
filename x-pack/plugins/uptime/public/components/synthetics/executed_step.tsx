@@ -51,7 +51,7 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({
   return (
     <ExpandedRow>
       {loading ? (
-        <EuiLoadingSpinner size="l" />
+        <EuiLoadingSpinner />
       ) : (
         <>
           <EuiSpacer size="s" />

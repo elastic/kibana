@@ -61,6 +61,7 @@ const RecomposedScreenshotImage: React.FC<
 > = (props) => {
   const { imgRef, setUrl, url } = props;
 
+  console.log('hi');
   useCompositeImage(imgRef, setUrl, url);
 
   return <DefaultImage {...props} url={props.url} />;
@@ -80,6 +81,7 @@ const StepImageComponent: React.FC<
     url: string | undefined;
   }
 > = (props) => {
+  console.log('ref', props.imgRef);
   if (props.imgSrc) {
     props.setUrl(props.imgSrc);
     return <DefaultImage {...props} url={props.url} />;

@@ -64,15 +64,15 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
         checkGroup,
         stepIndex,
       });
-      const blockIds = ref.screenshot_ref.blocks.map(({ hash }) => hash);
-      const blocks: ScreenshotBlock[] = await libs.requests.getJourneyScreenshotBlocks({
-        uptimeEsClient,
-        blockIds,
-      });
+      // const blockIds = ref.screenshot_ref.blocks.map(({ hash }) => hash);
+      // const blocks: ScreenshotBlock[] = await libs.requests.getJourneyScreenshotBlocks({
+      //   uptimeEsClient,
+      //   blockIds,
+      // });
       return response.ok({
         body: {
           screenshotRef: ref,
-          blocks,
+          // blocks,
         },
         headers: {
           'content-type': 'application/json',

@@ -39,6 +39,8 @@ export const ScreenshotBlockType = t.type({
   width: t.number,
 });
 
+export type ScreenshotBlock = t.TypeOf<typeof ScreenshotBlockType>;
+
 export const KeyRefFields = t.type({
   width: t.number,
   height: t.number,
@@ -74,7 +76,7 @@ export const ScreenshotRefType = t.type({
     name: t.string,
     index: t.number,
   }),
-  blocks: t.array(ScreenshotBlockType),
+  // blocks: t.array(ScreenshotBlockType),
 });
 
 export type ScreenshotRef = Omit<t.TypeOf<typeof RefResultType>, '@timestamp'> & {
@@ -91,12 +93,14 @@ const ScreenshotBlockBlob = t.type({
   synthetics: BlockType,
 });
 
+export type ScreenshotBlockBlob = t.TypeOf<typeof ScreenshotBlockBlob>;
+
 export const ScreenshotRefImageDataType = t.type({
   stepName: t.union([t.null, t.string]),
   maxSteps: t.number,
   ref: t.type({
     screenshotRef: RefResultType,
-    blocks: t.array(ScreenshotBlockBlob),
+    // blocks: t.array(ScreenshotBlockBlob),
   }),
 });
 

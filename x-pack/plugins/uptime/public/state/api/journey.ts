@@ -15,6 +15,15 @@ import {
   SyntheticsJourneyApiResponse,
   SyntheticsJourneyApiResponseType,
 } from '../../../common/runtime_types';
+import { ScreenshotBlock } from '../../../common/runtime_types';
+
+export async function fetchScreenshotBlockSet(params: string[]): Promise<ScreenshotBlock[]> {
+  return apiService.post('/api/uptime/journey/screenshot/block', { hashes: params });
+}
+
+export async function fetchScreenshotBlock(params: string): Promise<ScreenshotBlock[]> {
+  return apiService.get(`/api/uptime/journey/screenshot/block/${params}`);
+}
 
 export async function fetchJourneySteps(
   params: FetchJourneyStepsParams

@@ -108,7 +108,7 @@ export const StepDetailContainer: React.FC<Props> = ({ checkGroup, stepIndex }) 
         {(!journey || journey.loading) && (
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="xl" />
+              <EuiLoadingSpinner />
             </EuiFlexItem>
           </EuiFlexGroup>
         )}

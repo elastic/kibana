@@ -7,6 +7,7 @@
 
 import { createSelector } from 'reselect';
 import { AppState } from '../../state';
+import { ScreenshotBlockCache } from '../reducers/synthetics';
 
 // UI Selectors
 export const getBasePath = ({ ui: { basePath } }: AppState) => basePath;
@@ -97,3 +98,7 @@ export const monitorIdSelector = ({ ui: { monitorId } }: AppState) => monitorId;
 export const journeySelector = ({ journeys }: AppState) => journeys;
 
 export const networkEventsSelector = ({ networkEvents }: AppState) => networkEvents;
+
+export const journeyScreenshotBlockSelector = ({
+  synthetics: { blocks },
+}: AppState): ScreenshotBlockCache => blocks;
