@@ -83,7 +83,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
 
   const { search } = useLocation();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
-  const policyId = useMemo(() => queryParams.get('policyId'), [queryParams]);
+  const policyId = useMemo(() => queryParams.get('policyId') ?? undefined, [queryParams]);
 
   // Agent policy and package info states
   const [agentPolicy, setAgentPolicy] = useState<AgentPolicy | undefined>();
