@@ -30,7 +30,7 @@ export const {
   clearEventsDeleted,
   clearEventsLoading,
   clearSelected,
-  initializeTGrid,
+  initializeTGridSettings,
   removeColumn,
   setEventsDeleted,
   setEventsLoading,

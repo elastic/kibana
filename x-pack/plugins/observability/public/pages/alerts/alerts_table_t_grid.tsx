@@ -8,6 +8,13 @@
 import { EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import {
+  ALERT_DURATION,
+  ALERT_SEVERITY_LEVEL,
+  ALERT_STATUS,
+  ALERT_START,
+  RULE_NAME,
+} from '@kbn/rule-data-utils/target/technical_field_names';
 
 import type { TimelinesUIStart } from '../../../../timelines/public';
 import type { TopAlert } from './';
@@ -33,43 +40,43 @@ export const columns: Array<
 > = [
   {
     columnHeaderType: 'not-filtered',
-    displayAsText: i18n.translate('xpack.observability.alertsTable.statusColumnDescription', {
+    displayAsText: i18n.translate('xpack.observability.alertsTGrid.statusColumnDescription', {
       defaultMessage: 'Status',
     }),
-    id: 'kibana.rac.alert.status',
+    id: ALERT_STATUS,
     initialWidth: 74,
   },
   {
     columnHeaderType: 'not-filtered',
-    displayAsText: i18n.translate('xpack.observability.alertsTable.triggeredColumnDescription', {
+    displayAsText: i18n.translate('xpack.observability.alertsTGrid.triggeredColumnDescription', {
       defaultMessage: 'Triggered',
     }),
-    id: 'kibana.rac.alert.start',
+    id: ALERT_START,
     initialWidth: 116,
   },
   {
     columnHeaderType: 'not-filtered',
-    displayAsText: i18n.translate('xpack.observability.alertsTable.durationColumnDescription', {
+    displayAsText: i18n.translate('xpack.observability.alertsTGrid.durationColumnDescription', {
       defaultMessage: 'Duration',
     }),
-    id: 'kibana.rac.alert.duration.us',
+    id: ALERT_DURATION,
     initialWidth: 116,
   },
   {
     columnHeaderType: 'not-filtered',
-    displayAsText: i18n.translate('xpack.observability.alertsTable.severityColumnDescription', {
+    displayAsText: i18n.translate('xpack.observability.alertsTGrid.severityColumnDescription', {
       defaultMessage: 'Severity',
     }),
-    id: 'kibana.rac.alert.severity.level',
+    id: ALERT_SEVERITY_LEVEL,
     initialWidth: 102,
   },
   {
     columnHeaderType: 'not-filtered',
-    displayAsText: i18n.translate('xpack.observability.alertsTable.reasonColumnDescription', {
+    displayAsText: i18n.translate('xpack.observability.alertsTGrid.reasonColumnDescription', {
       defaultMessage: 'Reason',
     }),
     linkField: '*',
-    id: 'rule.name',
+    id: RULE_NAME,
     initialWidth: 400,
   },
 ];

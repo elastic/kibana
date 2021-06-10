@@ -17,13 +17,14 @@ import {
 
 import { createEpicMiddleware } from 'redux-observable';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
+import { TimelineState, tGridSelectors, TGridEpicDependencies } from '../../types';
+import { tGridReducer } from './reducer';
 
 export * from './model';
 export * as tGridActions from './actions';
 export * as tGridSelectors from './selectors';
 export * from './types';
-import { TimelineState, tGridSelectors, TGridEpicDependencies } from '../../types';
-import { tGridReducer } from './reducer';
+export { tGridReducer };
 
 export type State = CombinedState<TimelineState>;
 type ComposeType = typeof compose;

@@ -97,49 +97,17 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: addTimelineToStore({ id, timeline, timelineById: state.timelineById }),
   }))
-  .case(
-    createTimeline,
-    (
-      state,
-      {
+  .case(createTimeline, (state, { id, timelineType = TimelineType.default, ...timelineProps }) => {
+    return {
+      ...state,
+      timelineById: addNewTimeline({
         id,
-        dataProviders,
-        dateRange,
-        excludedRowRendererIds,
-        expandedDetail = {},
-        show,
-        columns,
-        itemsPerPage,
-        indexNames,
-        kqlQuery,
-        sort,
-        showCheckboxes,
-        timelineType = TimelineType.default,
-        filters,
-      }
-    ) => {
-      return {
-        ...state,
-        timelineById: addNewTimeline({
-          columns,
-          dataProviders,
-          dateRange,
-          excludedRowRendererIds,
-          expandedDetail,
-          filters,
-          id,
-          itemsPerPage,
-          indexNames,
-          kqlQuery,
-          sort,
-          show,
-          showCheckboxes,
-          timelineById: state.timelineById,
-          timelineType,
-        }),
-      };
-    }
-  )
+        timelineById: state.timelineById,
+        timelineType,
+        ...timelineProps,
+      }),
+    };
+  })
   .case(addHistory, (state, { id, historyId }) => ({
     ...state,
     timelineById: addTimelineHistory({ id, historyId, timelineById: state.timelineById }),

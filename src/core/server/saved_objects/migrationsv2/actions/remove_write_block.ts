@@ -39,7 +39,7 @@ export const removeWriteBlock = ({
         // Don't change any existing settings
         preserve_existing: true,
         body: {
-          index: {
+          settings: {
             blocks: {
               write: false,
             },

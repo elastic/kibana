@@ -136,7 +136,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('renders the alert details', async () => {
         const headingText = await pageObjects.alertDetailsUI.getHeadingText();
-        expect(headingText).to.be(`test-alert-${testRunUuid}`);
+        expect(headingText.includes(`test-alert-${testRunUuid}`)).to.be(true);
 
         const alertType = await pageObjects.alertDetailsUI.getAlertType();
         expect(alertType).to.be(`Always Firing`);
@@ -279,7 +279,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(toastTitle).to.eql(`Updated '${updatedAlertName}'`);
 
         const headingText = await pageObjects.alertDetailsUI.getHeadingText();
-        expect(headingText).to.be(updatedAlertName);
+        expect(headingText.includes(updatedAlertName)).to.be(true);
       });
 
       it('should reset alert when canceling an edit', async () => {

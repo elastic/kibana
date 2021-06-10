@@ -8,6 +8,8 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle, EuiTitleSize } from '@elastic/eui';
 import React from 'react';
 import styled, { css } from 'styled-components';
+import { InspectQuery } from '../../../store/t_grid/inputs';
+import { InspectButton } from '../../inspect';
 
 import { Subtitle } from '../subtitle';
 
@@ -40,6 +42,8 @@ export interface HeaderSectionProps extends HeaderProps {
   children?: React.ReactNode;
   height?: number;
   id?: string;
+  inspect: InspectQuery | null;
+  loading: boolean;
   split?: boolean;
   subtitle?: string | React.ReactNode;
   title: string | React.ReactNode;
@@ -53,6 +57,8 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   children,
   height,
   id,
+  inspect,
+  loading,
   split,
   subtitle,
   title,
@@ -80,7 +86,11 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
             <Subtitle data-test-subj="header-section-subtitle" items={subtitle} />
           </EuiFlexItem>
 
-          {id && <EuiFlexItem grow={false}>{'INSPECT'}</EuiFlexItem>}
+          {id && (
+            <EuiFlexItem grow={false}>
+              <InspectButton title={title} inspect={inspect} loading={loading} />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
 

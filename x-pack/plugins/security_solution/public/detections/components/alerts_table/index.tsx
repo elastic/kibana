@@ -335,7 +335,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   useEffect(() => {
     dispatch(
-      timelineActions.initializeTGrid({
+      timelineActions.initializeTGridSettings({
         // defaultModel: {
         //   ...defaultTimelineModel,
         //   columns,

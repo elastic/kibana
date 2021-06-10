@@ -8,7 +8,14 @@
 import { EuiIconTip, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { RULE_ID, RULE_NAME } from '@kbn/rule-data-utils/target/technical_field_names';
+import {
+  ALERT_DURATION,
+  ALERT_SEVERITY_LEVEL,
+  ALERT_STATUS,
+  ALERT_START,
+  RULE_ID,
+  RULE_NAME,
+} from '@kbn/rule-data-utils/target/technical_field_names';
 
 import type { CellValueElementProps, TimelineNonEcsData } from '../../../../timelines/common';
 import { TimestampTooltip } from '../../components/shared/timestamp_tooltip';
@@ -49,10 +56,10 @@ export function RenderCellValue({
   })?.reduce((x) => x[0]);
 
   switch (columnId) {
-    case 'kibana.rac.alert.status':
+    case ALERT_STATUS:
       return value !== 'closed' ? (
         <EuiIconTip
-          content={i18n.translate('xpack.observability.alertsTable.statusOpenDescription', {
+          content={i18n.translate('xpack.observability.alertsTGrid.statusOpenDescription', {
             defaultMessage: 'Open',
           })}
           color="danger"
@@ -60,18 +67,18 @@ export function RenderCellValue({
         />
       ) : (
         <EuiIconTip
-          content={i18n.translate('xpack.observability.alertsTable.statusClosedDescription', {
+          content={i18n.translate('xpack.observability.alertsTGrid.statusClosedDescription', {
             defaultMessage: 'Closed',
           })}
           type="check"
         />
       );
-    case 'kibana.rac.alert.start':
+    case ALERT_START:
       return <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />;
-    case 'kibana.rac.alert.duration.us':
+    case ALERT_DURATION:
       return asDuration(Number(value), { extended: true });
-    case 'kibana.rac.alert.severity.level':
-      return <SeverityBadge severityLevel={value} />;
+    case ALERT_SEVERITY_LEVEL:
+      return <SeverityBadge severityLevel={value ?? undefined} />;
     case RULE_NAME:
       const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
       const parsedFields = parseTechnicalFields(dataFieldEs);

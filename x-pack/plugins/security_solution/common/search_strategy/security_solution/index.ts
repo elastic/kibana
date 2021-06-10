@@ -83,7 +83,7 @@ export interface RequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
   filterQuery: ESQuery | string | undefined;
   defaultIndex: string[];
-  docValueFields?: estypes.DocValueField[];
+  docValueFields?: estypes.SearchDocValueField[];
   factoryQueryType?: FactoryQueryTypes;
 }
 

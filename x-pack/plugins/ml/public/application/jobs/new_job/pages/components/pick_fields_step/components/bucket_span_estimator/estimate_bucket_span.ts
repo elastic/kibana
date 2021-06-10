@@ -42,7 +42,6 @@ export function useEstimateBucketSpan() {
     splitField: undefined,
     timeField: mlContext.currentIndexPattern.timeFieldName,
     runtimeMappings: jobCreator.runtimeMappings ?? undefined,
-    // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
     indicesOptions: jobCreator.datafeedConfig.indices_options,
   };
 

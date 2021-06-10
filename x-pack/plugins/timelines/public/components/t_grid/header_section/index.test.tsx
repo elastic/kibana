@@ -14,7 +14,7 @@ import { HeaderSection } from './index';
 
 describe('HeaderSection', () => {
   test('it renders', () => {
-    const wrapper = shallow(<HeaderSection title="Test title" />);
+    const wrapper = shallow(<HeaderSection title="Test title" inspect={null} loading={false} />);
 
     expect(wrapper).toMatchSnapshot();
   });
@@ -22,7 +22,7 @@ describe('HeaderSection', () => {
   test('it renders the title', () => {
     const wrapper = mount(
       <TestProviders>
-        <HeaderSection title="Test title" />
+        <HeaderSection title="Test title" inspect={null} loading={false} />
       </TestProviders>
     );
 
@@ -32,7 +32,7 @@ describe('HeaderSection', () => {
   test('it renders the subtitle when provided', () => {
     const wrapper = mount(
       <TestProviders>
-        <HeaderSection subtitle="Test subtitle" title="Test title" />
+        <HeaderSection subtitle="Test subtitle" title="Test title" inspect={null} loading={false} />
       </TestProviders>
     );
 
@@ -42,7 +42,7 @@ describe('HeaderSection', () => {
   test('renders the subtitle when not provided (to prevent layout thrash)', () => {
     const wrapper = mount(
       <TestProviders>
-        <HeaderSection title="Test title" />
+        <HeaderSection title="Test title" inspect={null} loading={false} />
       </TestProviders>
     );
 
@@ -52,7 +52,7 @@ describe('HeaderSection', () => {
   test('it renders supplements when children provided', () => {
     const wrapper = mount(
       <TestProviders>
-        <HeaderSection title="Test title">
+        <HeaderSection title="Test title" inspect={null} loading={false}>
           <p>{'Test children'}</p>
         </HeaderSection>
       </TestProviders>
@@ -66,7 +66,7 @@ describe('HeaderSection', () => {
   test('it DOES NOT render supplements when children not provided', () => {
     const wrapper = mount(
       <TestProviders>
-        <HeaderSection title="Test title" />
+        <HeaderSection title="Test title" inspect={null} loading={false} />
       </TestProviders>
     );
 
@@ -78,7 +78,7 @@ describe('HeaderSection', () => {
   test('it applies border styles when border is true', () => {
     const wrapper = mount(
       <TestProviders>
-        <HeaderSection border title="Test title" />
+        <HeaderSection border title="Test title" inspect={null} loading={false} />
       </TestProviders>
     );
     const siemHeaderSection = wrapper.find('.siemHeaderSection').first();
@@ -90,7 +90,7 @@ describe('HeaderSection', () => {
   test('it DOES NOT apply border styles when border is false', () => {
     const wrapper = mount(
       <TestProviders>
-        <HeaderSection title="Test title" />
+        <HeaderSection title="Test title" inspect={null} loading={false} />
       </TestProviders>
     );
     const siemHeaderSection = wrapper.find('.siemHeaderSection').first();
@@ -102,7 +102,7 @@ describe('HeaderSection', () => {
   test('it splits the title and supplement areas evenly when split is true', () => {
     const wrapper = mount(
       <TestProviders>
-        <HeaderSection split title="Test title">
+        <HeaderSection split title="Test title" inspect={null} loading={false}>
           <p>{'Test children'}</p>
         </HeaderSection>
       </TestProviders>
@@ -119,7 +119,7 @@ describe('HeaderSection', () => {
   test('it DOES NOT split the title and supplement areas evenly when split is false', () => {
     const wrapper = mount(
       <TestProviders>
-        <HeaderSection title="Test title">
+        <HeaderSection title="Test title" inspect={null} loading={false}>
           <p>{'Test children'}</p>
         </HeaderSection>
       </TestProviders>
@@ -136,7 +136,7 @@ describe('HeaderSection', () => {
   test('it renders an inspect button when an `id` is provided', () => {
     const wrapper = mount(
       <TestProviders>
-        <HeaderSection id="an id" title="Test title">
+        <HeaderSection id="an id" title="Test title" inspect={null} loading={false}>
           <p>{'Test children'}</p>
         </HeaderSection>
       </TestProviders>
@@ -148,7 +148,7 @@ describe('HeaderSection', () => {
   test('it does NOT an inspect button when an `id` is NOT provided', () => {
     const wrapper = mount(
       <TestProviders>
-        <HeaderSection title="Test title">
+        <HeaderSection title="Test title" inspect={null} loading={false}>
           <p>{'Test children'}</p>
         </HeaderSection>
       </TestProviders>

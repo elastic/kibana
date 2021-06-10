@@ -234,7 +234,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
 
   useEffect(() => {
     dispatch(
-      timelineActions.initializeTGrid({
+      timelineActions.initializeTGridSettings({
         filterManager,
         id: timelineId,
       })

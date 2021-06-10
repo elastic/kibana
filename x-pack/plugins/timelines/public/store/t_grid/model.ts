@@ -16,7 +16,24 @@ import type {
 } from '../../../common/types/timeline';
 import { RowRendererId } from '../../../common/types/timeline';
 
-export interface TGridModel {
+export interface TGridModelSettings {
+  documentType: string;
+  defaultColumns: Array<
+    Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> &
+      ColumnHeaderOptions
+  >;
+  /** A list of Ids of excluded Row Renderers */
+  excludedRowRendererIds: RowRendererId[];
+  filterManager?: FilterManager;
+  footerText: string;
+  loadingText: string;
+  isTGridLoading: boolean;
+  queryFields: string[];
+  selectAll: boolean;
+  title: string;
+  unit?: (n: number) => string;
+}
+export interface TGridModel extends TGridModelSettings {
   /** The columns displayed in the timeline */
   columns: Array<
     Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> &
@@ -29,8 +46,6 @@ export interface TGridModel {
   };
   /** Events to not be rendered **/
   deletedEventIds: string[];
-  /** A list of Ids of excluded Row Renderers */
-  excludedRowRendererIds: RowRendererId[];
   /** This holds the view information for the flyout when viewing timeline in a consuming view (i.e. hosts page) or the side panel in the primary timeline view */
   expandedDetail: TimelineExpandedDetail;
   filters?: Filter[];
@@ -62,21 +77,6 @@ export interface TGridModel {
   selectedEventIds: Record<string, TimelineNonEcsData[]>;
   savedObjectId: string | null;
   version: string | null;
-  // TODO clean up old manage timeline context to see if we need to move it to its own store
-  documentType: string;
-  defaultColumns: Array<
-    Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> &
-      ColumnHeaderOptions
-  >;
-  filterManager?: FilterManager;
-  footerText: string;
-  loadingText: string;
-  isTGridLoading: boolean;
-  queryFields: string[];
-  selectAll: boolean;
-  title: string;
-  unit?: (n: number) => string;
-  // END
 }
 
 export type TGridModelForTimeline = Pick<

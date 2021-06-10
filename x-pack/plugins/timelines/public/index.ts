@@ -12,6 +12,7 @@ import { TimelinesPlugin } from './plugin';
 export {
   tGridActions,
   tGridSelectors,
+  tGridReducer,
   TGridModelForTimeline,
   TimelineState,
   TimelinesUIStart,

@@ -38,25 +38,6 @@ export interface SortColumnTimeline {
   sortDirection: SortDirection;
 }
 
-export interface TGridPersistInput {
-  id: string;
-  dateRange: {
-    start: string;
-    end: string;
-  };
-  excludedRowRendererIds?: RowRendererId[];
-  expandedDetail?: TimelineExpandedDetail;
-  filters?: Filter[];
-  columns: ColumnHeaderOptions[];
-  itemsPerPage?: number;
-  itemsPerPageOptions?: number[];
-  indexNames: string[];
-  kqlQuery?: {
-    filterQuery: SerializedFilterQuery | null;
-  };
-  sort?: SortColumnTimeline[];
-  showCheckboxes?: boolean;
-}
 export interface TimelinePersistInput {
   id: string;
   dataProviders?: DataProvider[];

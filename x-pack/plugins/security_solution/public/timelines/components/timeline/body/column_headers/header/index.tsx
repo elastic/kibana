@@ -83,7 +83,9 @@ export const HeaderComponent: React.FC<Props> = ({
   );
 
   const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
-  const { isLoading } = useDeepEqualSelector((state) => getManageTimeline(state, timelineId));
+  const { isLoading } = useDeepEqualSelector(
+    (state) => getManageTimeline(state, timelineId) || { isLoading: false }
+  );
   const showSortingCapability = !isEqlOn && !(header.subType && header.subType.nested);
 
   return (

@@ -12,7 +12,7 @@ import {
   clearEventsLoading,
   clearSelected,
   createTGrid,
-  initializeTGrid,
+  initializeTGridSettings,
   removeColumn,
   setEventsDeleted,
   setEventsLoading,
@@ -31,7 +31,7 @@ import {
 import {
   applyDeltaToTimelineColumnWidth,
   createInitTGrid,
-  getInitializeTgrid,
+  setInitializeTgridSettings,
   removeTimelineColumn,
   setDeletedTimelineEvents,
   setLoadingTimelineEvents,
@@ -56,45 +56,15 @@ export const tGridReducer = reducerWithInitialState(initialTGridState)
     ...state,
     timelineById: upsertTimelineColumn({ column, id, index, timelineById: state.timelineById }),
   }))
-  .case(
-    createTGrid,
-    (
-      state,
-      {
-        id,
-        dateRange,
-        excludedRowRendererIds,
-        expandedDetail = {},
-        columns,
-        itemsPerPage,
-        itemsPerPageOptions,
-        indexNames,
-        kqlQuery,
-        sort,
-        showCheckboxes,
-        filters,
-      }
-    ) => {
-      return {
-        ...state,
-        timelineById: createInitTGrid({
-          columns,
-          dateRange,
-          excludedRowRendererIds,
-          expandedDetail,
-          filters,
-          id,
-          itemsPerPage,
-          itemsPerPageOptions,
-          indexNames,
-          kqlQuery,
-          sort,
-          showCheckboxes,
-          timelineById: state.timelineById,
-        }),
-      };
-    }
-  )
+  .case(createTGrid, (state, timelineProps) => {
+    return {
+      ...state,
+      timelineById: createInitTGrid({
+        ...timelineProps,
+        timelineById: state.timelineById,
+      }),
+    };
+  })
   .case(toggleDetailPanel, (state, action) => ({
     ...state,
     timelineById: {
@@ -222,12 +192,12 @@ export const tGridReducer = reducerWithInitialState(initialTGridState)
       timelineById: state.timelineById,
     }),
   }))
-  .case(initializeTGrid, (state, { id, ...timelineProps }) => ({
+  .case(initializeTGridSettings, (state, { id, ...tGridSettingsProps }) => ({
     ...state,
-    timelineById: getInitializeTgrid({
+    timelineById: setInitializeTgridSettings({
       id,
       timelineById: state.timelineById,
-      ...timelineProps,
+      tGridSettingsProps,
     }),
   }))
   .case(setTGridIsLoading, (state, { id, isTGridLoading }) => ({
