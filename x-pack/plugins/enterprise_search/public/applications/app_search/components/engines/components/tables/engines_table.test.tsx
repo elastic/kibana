@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mountWithIntl, setMockValues } from '../../../../../__mocks__';
+import { setMockValues } from '../../../../../__mocks__/kea_logic';
 import '../../../../../__mocks__/enterprise_search_url.mock';
 import './__mocks__/engines_logic.mock';
 
@@ -14,6 +14,8 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { EuiBasicTable } from '@elastic/eui';
+
+import { mountWithIntl } from '../../../../../test_helpers';
 
 import { EngineDetails } from '../../../engine/types';
 

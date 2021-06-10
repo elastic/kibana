@@ -39,6 +39,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ApplicationSetup](./kibana-plugin-core-public.applicationsetup.md) |  |
 |  [ApplicationStart](./kibana-plugin-core-public.applicationstart.md) |  |
 |  [AppMountParameters](./kibana-plugin-core-public.appmountparameters.md) |  |
+|  [AppNavOptions](./kibana-plugin-core-public.appnavoptions.md) | App navigation menu options |
 |  [AsyncPlugin](./kibana-plugin-core-public.asyncplugin.md) | A plugin with asynchronous lifecycle methods. |
 |  [Capabilities](./kibana-plugin-core-public.capabilities.md) | The read-only set of capabilities available for the current UI session. Capabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID, and the boolean is a flag indicating if the capability is enabled or disabled. |
 |  [ChromeBadge](./kibana-plugin-core-public.chromebadge.md) |  |

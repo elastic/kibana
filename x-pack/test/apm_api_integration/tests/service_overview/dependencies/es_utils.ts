@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MappingTypeMapping } from '@elastic/elasticsearch/api/types';
 import uuid from 'uuid';
 
 export function createServiceDependencyDocs({
@@ -125,7 +126,7 @@ export function createServiceDependencyDocs({
   ];
 }
 
-export const apmDependenciesMapping = {
+export const apmDependenciesMapping: MappingTypeMapping = {
   properties: {
     '@timestamp': {
       type: 'date',

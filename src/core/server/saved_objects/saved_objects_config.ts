@@ -29,6 +29,9 @@ const migrationDeprecations: ConfigDeprecationProvider = () => [
         message:
           '"migrations.enableV2" is deprecated and will be removed in an upcoming release without any further notice.',
         documentationUrl: 'https://ela.st/kbn-so-migration-v2',
+        correctiveActions: {
+          manualSteps: [`Remove "migrations.enableV2" from your kibana configs.`],
+        },
       });
     }
     return settings;

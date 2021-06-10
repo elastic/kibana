@@ -13,7 +13,6 @@ import type { estypes } from '@elastic/elasticsearch';
 import { chunk, isEmpty, partition } from 'lodash';
 import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
 
-import { SortResults } from '@elastic/elasticsearch/api/types';
 import type { ListArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { MAX_EXCEPTION_LIST_SIZE } from '@kbn/securitysolution-list-constants';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
@@ -38,6 +37,7 @@ import {
   Signal,
   WrappedSignalHit,
   RuleRangeTuple,
+  BaseSignalHit,
 } from './types';
 import { BuildRuleMessage } from './rule_messages';
 import { ShardError } from '../../types';
@@ -577,30 +577,49 @@ export const lastValidDate = ({
   searchResult,
   timestampOverride,
 }: {
-  searchResult: estypes.SearchResponse;
+  searchResult: SignalSearchResponse;
   timestampOverride: TimestampOverrideOrUndefined;
 }): Date | undefined => {
   if (searchResult.hits.hits.length === 0) {
     return undefined;
   } else {
     const lastRecord = searchResult.hits.hits[searchResult.hits.hits.length - 1];
-    const timestamp = timestampOverride ?? '@timestamp';
-    const timestampValue =
-      lastRecord.fields != null && lastRecord.fields[timestamp] != null
-        ? lastRecord.fields[timestamp][0]
-        : // @ts-expect-error @elastic/elasticsearch _source is optional
-          lastRecord._source[timestamp];
-    const lastTimestamp =
-      typeof timestampValue === 'string' || typeof timestampValue === 'number'
-        ? timestampValue
-        : undefined;
-    if (lastTimestamp != null) {
-      const tempMoment = moment(lastTimestamp);
-      if (tempMoment.isValid()) {
-        return tempMoment.toDate();
-      } else {
-        return undefined;
-      }
+    return getValidDateFromDoc({ doc: lastRecord, timestampOverride });
+  }
+};
+
+/**
+ * Given a search hit this will return a valid last date if it can find one, otherwise it
+ * will return undefined. This tries the "fields" first to get a formatted date time if it can, but if
+ * it cannot it will resort to using the "_source" fields second which can be problematic if the date time
+ * is not correctly ISO8601 or epoch milliseconds formatted.
+ * @param searchResult The result to try and parse out the timestamp.
+ * @param timestampOverride The timestamp override to use its values if we have it.
+ */
+export const getValidDateFromDoc = ({
+  doc,
+  timestampOverride,
+}: {
+  doc: BaseSignalHit;
+  timestampOverride: TimestampOverrideOrUndefined;
+}): Date | undefined => {
+  const timestamp = timestampOverride ?? '@timestamp';
+  const timestampValue =
+    doc.fields != null && doc.fields[timestamp] != null
+      ? doc.fields[timestamp][0]
+      : doc._source != null
+      ? doc._source[timestamp]
+      : undefined;
+  const lastTimestamp =
+    typeof timestampValue === 'string' || typeof timestampValue === 'number'
+      ? timestampValue
+      : undefined;
+  if (lastTimestamp != null) {
+    const tempMoment = moment(lastTimestamp);
+    if (tempMoment.isValid()) {
+      return tempMoment.toDate();
+    } else {
+      return undefined;
     }
   }
 };
@@ -609,7 +628,7 @@ export const createSearchAfterReturnTypeFromResponse = ({
   searchResult,
   timestampOverride,
 }: {
-  searchResult: estypes.SearchResponse;
+  searchResult: SignalSearchResponse;
   timestampOverride: TimestampOverrideOrUndefined;
 }): SearchAfterAndBulkCreateReturnType => {
   return createSearchAfterReturnType({
@@ -855,10 +874,10 @@ export const isMachineLearningParams = (params: RuleParams): params is MachineLe
  * Ref: https://github.com/elastic/elasticsearch/issues/28806#issuecomment-369303620
  *
  * return stringified Long.MAX_VALUE if we receive Number.MAX_SAFE_INTEGER
- * @param sortIds SortResults | undefined
+ * @param sortIds estypes.SearchSortResults | undefined
  * @returns SortResults
  */
-export const getSafeSortIds = (sortIds: SortResults | undefined) => {
+export const getSafeSortIds = (sortIds: estypes.SearchSortResults | undefined) => {
   return sortIds?.map((sortId) => {
     // haven't determined when we would receive a null value for a sort id
     // but in case we do, default to sending the stringified Java max_int

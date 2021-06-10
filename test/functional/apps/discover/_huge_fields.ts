@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe.skip('test large number of fields in sidebar', function () {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_testhuge_reader'], false);
-      await esArchiver.loadIfNeeded('large_fields');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/large_fields');
       await PageObjects.settings.navigateTo();
       await kibanaServer.uiSettings.update({
         'timepicker:timeDefaults': `{ "from": "2016-10-05T00:00:00", "to": "2016-10-06T00:00:00"}`,
@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await security.testUser.restoreDefaults();
-      await esArchiver.unload('large_fields');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/large_fields');
       await kibanaServer.uiSettings.replace({});
     });
   });

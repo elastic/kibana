@@ -323,6 +323,12 @@ export class TaskRunner<
       alertLabel,
     });
 
+    trackAlertDurations({
+      originalAlerts: originalAlertInstances,
+      currentAlerts: instancesWithScheduledActions,
+      recoveredAlerts: recoveredAlertInstances,
+    });
+
     generateNewAndRecoveredInstanceEvents({
       eventLogger,
       originalAlertInstances,
@@ -331,6 +337,7 @@ export class TaskRunner<
       alertId,
       alertLabel,
       namespace,
+      ruleTypeId: alert.alertTypeId,
     });
 
     if (!muteAll) {
@@ -493,6 +500,7 @@ export class TaskRunner<
             rel: SAVED_OBJECT_REL_PRIMARY,
             type: 'alert',
             id: alertId,
+            type_id: this.alertType.id,
             namespace,
           },
         ],
@@ -579,11 +587,70 @@ export class TaskRunner<
       ),
       schedule: resolveErr<IntervalSchedule | undefined, Error>(schedule, (error) => {
         if (isAlertSavedObjectNotFoundError(error, alertId)) {
+          const spaceMessage = spaceId ? `in the "${spaceId}" space ` : '';
+          this.logger.warn(
+            `Unable to execute rule "${alertId}" ${spaceMessage}because ${error.message} - this rule will not be rescheduled. To restart rule execution, try disabling and re-enabling this rule.`
+          );
           throwUnrecoverableError(error);
         }
         return { interval: taskSchedule?.interval ?? FALLBACK_RETRY_INTERVAL };
       }),
     };
+  }
+}
+
+interface TrackAlertDurationsParams<
+  InstanceState extends AlertInstanceState,
+  InstanceContext extends AlertInstanceContext
+> {
+  originalAlerts: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
+  currentAlerts: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
+  recoveredAlerts: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
+}
+
+function trackAlertDurations<
+  InstanceState extends AlertInstanceState,
+  InstanceContext extends AlertInstanceContext
+>(params: TrackAlertDurationsParams<InstanceState, InstanceContext>) {
+  const currentTime = new Date().toISOString();
+  const { currentAlerts, originalAlerts, recoveredAlerts } = params;
+  const originalAlertIds = Object.keys(originalAlerts);
+  const currentAlertIds = Object.keys(currentAlerts);
+  const recoveredAlertIds = Object.keys(recoveredAlerts);
+  const newAlertIds = without(currentAlertIds, ...originalAlertIds);
+
+  // Inject start time into instance state of new instances
+  for (const id of newAlertIds) {
+    const state = currentAlerts[id].getState();
+    currentAlerts[id].replaceState({ ...state, start: currentTime });
+  }
+
+  // Calculate duration to date for active instances
+  for (const id of currentAlertIds) {
+    const state = originalAlertIds.includes(id)
+      ? originalAlerts[id].getState()
+      : currentAlerts[id].getState();
+    const duration = state.start
+      ? (new Date(currentTime).valueOf() - new Date(state.start as string).valueOf()) * 1000 * 1000 // nanoseconds
+      : undefined;
+    currentAlerts[id].replaceState({
+      ...state,
+      ...(state.start ? { start: state.start } : {}),
+      ...(duration !== undefined ? { duration } : {}),
+    });
+  }
+
+  // Inject end time into instance state of recovered instances
+  for (const id of recoveredAlertIds) {
+    const state = recoveredAlerts[id].getState();
+    const duration = state.start
+      ? (new Date(currentTime).valueOf() - new Date(state.start as string).valueOf()) * 1000 * 1000 // nanoseconds
+      : undefined;
+    recoveredAlerts[id].replaceState({
+      ...state,
+      ...(duration ? { duration } : {}),
+      ...(state.start ? { end: currentTime } : {}),
+    });
   }
 }
 
@@ -598,6 +665,7 @@ interface GenerateNewAndRecoveredInstanceEventsParams<
   alertId: string;
   alertLabel: string;
   namespace: string | undefined;
+  ruleTypeId: string;
 }
 
 function generateNewAndRecoveredInstanceEvents<
@@ -611,6 +679,7 @@ function generateNewAndRecoveredInstanceEvents<
     currentAlertInstances,
     originalAlertInstances,
     recoveredAlertInstances,
+    ruleTypeId,
   } = params;
   const originalAlertInstanceIds = Object.keys(originalAlertInstances);
   const currentAlertInstanceIds = Object.keys(currentAlertInstances);
@@ -620,38 +689,66 @@ function generateNewAndRecoveredInstanceEvents<
   for (const id of recoveredAlertInstanceIds) {
     const { group: actionGroup, subgroup: actionSubgroup } =
       recoveredAlertInstances[id].getLastScheduledActions() ?? {};
+    const state = recoveredAlertInstances[id].getState();
     const message = `${params.alertLabel} instance '${id}' has recovered`;
-    logInstanceEvent(id, EVENT_LOG_ACTIONS.recoveredInstance, message, actionGroup, actionSubgroup);
+    logInstanceEvent(
+      id,
+      EVENT_LOG_ACTIONS.recoveredInstance,
+      message,
+      state,
+      actionGroup,
+      actionSubgroup
+    );
   }
 
   for (const id of newIds) {
     const { actionGroup, subgroup: actionSubgroup } =
       currentAlertInstances[id].getScheduledActionOptions() ?? {};
+    const state = currentAlertInstances[id].getState();
     const message = `${params.alertLabel} created new instance: '${id}'`;
-    logInstanceEvent(id, EVENT_LOG_ACTIONS.newInstance, message, actionGroup, actionSubgroup);
+    logInstanceEvent(
+      id,
+      EVENT_LOG_ACTIONS.newInstance,
+      message,
+      state,
+      actionGroup,
+      actionSubgroup
+    );
   }
 
   for (const id of currentAlertInstanceIds) {
     const { actionGroup, subgroup: actionSubgroup } =
       currentAlertInstances[id].getScheduledActionOptions() ?? {};
+    const state = currentAlertInstances[id].getState();
     const message = `${params.alertLabel} active instance: '${id}' in ${
       actionSubgroup
         ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
         : `actionGroup: '${actionGroup}'`
     }`;
-    logInstanceEvent(id, EVENT_LOG_ACTIONS.activeInstance, message, actionGroup, actionSubgroup);
+    logInstanceEvent(
+      id,
+      EVENT_LOG_ACTIONS.activeInstance,
+      message,
+      state,
+      actionGroup,
+      actionSubgroup
+    );
   }
 
   function logInstanceEvent(
     instanceId: string,
     action: string,
     message: string,
+    state: InstanceState,
     group?: string,
     subgroup?: string
   ) {
     const event: IEvent = {
       event: {
         action,
+        ...(state?.start ? { start: state.start as string } : {}),
+        ...(state?.end ? { end: state.end as string } : {}),
+        ...(state?.duration !== undefined ? { duration: state.duration as number } : {}),
       },
       kibana: {
         alerting: {
@@ -664,6 +761,7 @@ function generateNewAndRecoveredInstanceEvents<
             rel: SAVED_OBJECT_REL_PRIMARY,
             type: 'alert',
             id: alertId,
+            type_id: ruleTypeId,
             namespace,
           },
         ],
