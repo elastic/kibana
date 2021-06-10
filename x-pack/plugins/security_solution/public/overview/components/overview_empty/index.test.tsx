@@ -9,11 +9,15 @@ import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 import { OverviewEmpty } from '.';
 import { useIngestEnabledCheck } from '../../../common/hooks/endpoint/ingest_enabled';
+
+const endpointPackageVersion = '0.19.1';
+
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../management/pages/endpoint_hosts/view/hooks', () => ({
   useIngestUrl: jest
     .fn()
     .mockReturnValue({ appId: 'ingestAppId', appPath: 'ingestPath', url: 'ingestUrl' }),
+  useEndpointSelector: jest.fn().mockReturnValue({ endpointPackageVersion }),
 }));
 
 jest.mock('../../../common/hooks/endpoint/ingest_enabled', () => ({
@@ -57,7 +61,7 @@ describe('OverviewEmpty', () => {
           fill: false,
           label: 'Add Endpoint Security',
           onClick: undefined,
-          url: '/app/home#/tutorial_directory/security',
+          url: `#/integrations/endpoint-${endpointPackageVersion}/add-integration`,
         },
       });
     });
