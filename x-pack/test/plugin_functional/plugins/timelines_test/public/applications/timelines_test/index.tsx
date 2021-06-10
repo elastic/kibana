@@ -50,7 +50,26 @@ const AppRoot = React.memo(
         <Router history={parameters.history}>
           <KibanaContextProvider services={coreStart}>
             {(timelinesPluginSetup.getTGrid &&
-              timelinesPluginSetup.getTGrid<'standalone'>({ type: 'standalone' })) ??
+              timelinesPluginSetup.getTGrid<'standalone'>({
+                type: 'standalone',
+                columns: [],
+                indexNames: [],
+                deletedEventIds: [],
+                filters: [],
+                itemsPerPage: 50,
+                itemsPerPageOptions: [1, 2, 3],
+                end: '',
+                renderCellValue: () => <div />,
+                sort: [],
+                leadingControlColumns: [],
+                trailingControlColumns: [],
+                query: {
+                  query: '',
+                  language: '',
+                },
+                start: '',
+                rowRenderers: [],
+              })) ??
               null}
           </KibanaContextProvider>
         </Router>
