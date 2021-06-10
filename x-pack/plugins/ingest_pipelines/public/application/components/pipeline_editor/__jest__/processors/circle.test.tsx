@@ -96,7 +96,7 @@ describe('Processor: Circle', () => {
     // Add "target_field" value
     form.setInputValue('targetField.input', 'target_field');
 
-    form.setInputValue('errorDistanceField.input', 10);
+    form.setInputValue('errorDistanceField.input', '10');
 
     // Save the field with new changes
     await saveNewProcessor();
