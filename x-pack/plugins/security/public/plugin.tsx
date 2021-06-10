@@ -30,6 +30,7 @@ import type { SecurityNavControlServiceStart } from './nav_control';
 import { SecurityNavControlService } from './nav_control';
 import { SecurityCheckupService } from './security_checkup';
 import { SessionExpired, SessionTimeout, UnauthorizedResponseHttpInterceptor } from './session';
+import type { UiApi } from './ui_api';
 import { getUiApi } from './ui_api';
 
 export interface PluginSetupDependencies {
@@ -186,4 +187,8 @@ export interface SecurityPluginStart {
    * Exposes authentication information about the currently logged in user.
    */
   authc: AuthenticationServiceStart;
+  /**
+   * Exposes UI components that will be loaded asynchronously.
+   */
+  uiApi: UiApi;
 }
