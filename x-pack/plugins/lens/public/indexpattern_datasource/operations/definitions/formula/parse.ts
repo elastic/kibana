@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { isObject } from 'lodash';
 import type { TinymathAST, TinymathVariable, TinymathLocation } from '@kbn/tinymath';
 import { OperationDefinition, GenericOperationDefinition, IndexPatternColumn } from '../index';
@@ -12,7 +13,12 @@ import { IndexPattern, IndexPatternLayer } from '../../../types';
 import { mathOperation } from './math';
 import { documentField } from '../../../document_field';
 import { runASTValidation, shouldHaveFieldArgument, tryToParse } from './validation';
-import { findVariables, getOperationParams, groupArgsByType } from './util';
+import {
+  filterByVisibleOperation,
+  findVariables,
+  getOperationParams,
+  groupArgsByType,
+} from './util';
 import { FormulaIndexPatternColumn } from './formula';
 import { getColumnOrder } from '../../layer_helpers';
 
@@ -27,7 +33,7 @@ function parseAndExtract(
   indexPattern: IndexPattern,
   operationDefinitionMap: Record<string, GenericOperationDefinition>
 ) {
-  const { root, error } = tryToParse(text);
+  const { root, error } = tryToParse(text, operationDefinitionMap);
   if (error || !root) {
     return { extracted: [], isValid: false };
   }
@@ -61,9 +67,9 @@ function extractColumns(
     const nodeOperation = operations[node.name];
     if (!nodeOperation) {
       // it's a regular math node
-      const consumedArgs = node.args.map(parseNode).filter(Boolean) as Array<
-        number | TinymathVariable
-      >;
+      const consumedArgs = node.args
+        .map(parseNode)
+        .filter((n) => typeof n !== 'undefined' && n !== null) as Array<number | TinymathVariable>;
       return {
         ...node,
         args: consumedArgs,
@@ -168,7 +174,7 @@ export function regenerateLayerFromAst(
     layer,
     columnId,
     indexPattern,
-    operationDefinitionMap
+    filterByVisibleOperation(operationDefinitionMap)
   );
 
   const columns = { ...layer.columns };
@@ -188,6 +194,12 @@ export function regenerateLayerFromAst(
 
   columns[columnId] = {
     ...currentColumn,
+    label: !currentColumn.customLabel
+      ? text ??
+        i18n.translate('xpack.lens.indexPattern.formulaLabel', {
+          defaultMessage: 'Formula',
+        })
+      : currentColumn.label,
     params: {
       ...currentColumn.params,
       formula: text,

@@ -16,7 +16,10 @@ import {
 } from '../../../../../../../../../fleet/public';
 import { useKibana } from '../../../../../../../../../../../src/plugins/kibana_react/public';
 import { getEventFiltersListPath } from '../../../../../../common/routing';
-import { GetExceptionSummaryResponse } from '../../../../../../../../common/endpoint/types';
+import {
+  GetExceptionSummaryResponse,
+  ListPageRouteState,
+} from '../../../../../../../../common/endpoint/types';
 import { PLUGIN_ID as FLEET_PLUGIN_ID } from '../../../../../../../../../fleet/common';
 import { MANAGEMENT_APP_ID } from '../../../../../../common/constants';
 import { useToasts } from '../../../../../../../common/lib/kibana';
@@ -64,7 +67,7 @@ export const FleetEventFiltersCard = memo<PackageCustomExtensionComponentProps>(
     };
   }, [eventFiltersApi, toasts]);
 
-  const eventFiltersRouteState = useMemo(() => {
+  const eventFiltersRouteState = useMemo<ListPageRouteState>(() => {
     const fleetPackageCustomUrlPath = `#${pagePathGetters.integration_details_custom({ pkgkey })}`;
     return {
       backButtonLabel: i18n.translate(
