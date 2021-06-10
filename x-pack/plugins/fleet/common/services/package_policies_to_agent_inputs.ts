@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { merge } from 'lodash';
+
 import type { PackagePolicy, FullAgentPolicyInput, FullAgentPolicyInputStream } from '../types';
 import { DEFAULT_OUTPUT } from '../constants';
-import { merge } from 'lodash';
 
 export const storedPackagePoliciesToAgentInputs = (
   packagePolicies: PackagePolicy[]
