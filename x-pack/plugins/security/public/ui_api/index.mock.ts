@@ -5,6 +5,13 @@
  * 2.0.
  */
 
-export { ChangePassword } from './change_password';
+import type { UiApi } from './';
 
-export type { ChangePasswordProps } from './change_password';
+export const getUiApiMock = {
+  createStart: (): jest.Mocked<UiApi> => ({
+    components: {
+      getPersonalInfo: jest.fn(),
+      getChangePassword: jest.fn(),
+    },
+  }),
+};
