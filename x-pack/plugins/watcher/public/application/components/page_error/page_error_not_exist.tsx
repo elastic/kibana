@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export function PageErrorNotExist({ id }: { id: any }) {
+export function PageErrorNotExist({ id }: { id?: string }) {
   return (
     <EuiEmptyPrompt
       iconType="search"
@@ -25,11 +25,18 @@ export function PageErrorNotExist({ id }: { id: any }) {
       }
       body={
         <p>
-          <FormattedMessage
-            id="xpack.watcher.pageErrorNotExist.description"
-            defaultMessage="A watch with ID '{id}' could not be found."
-            values={{ id }}
-          />
+          {id ? (
+            <FormattedMessage
+              id="xpack.watcher.pageErrorNotExist.description"
+              defaultMessage="A watch with ID '{id}' could not be found."
+              values={{ id }}
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.watcher.pageErrorNotExist.noWatchIdDescription"
+              defaultMessage="A watch could not be found."
+            />
+          )}
         </p>
       }
     />

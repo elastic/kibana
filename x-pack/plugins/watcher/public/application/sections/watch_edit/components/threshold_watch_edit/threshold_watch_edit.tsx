@@ -18,13 +18,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiPageContent,
   EuiPopover,
   EuiPopoverTitle,
   EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiPageHeader,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -236,19 +236,15 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
   };
 
   return (
-    <EuiPageContent>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="m">
-            <h1 data-test-subj="pageTitle">{pageTitle}</h1>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued">
-            {watch.titleDescription}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
+    <>
+      <EuiPageHeader
+        pageTitle={<span data-test-subj="pageTitle">{pageTitle}</span>}
+        description={watch.titleDescription}
+        bottomBorder
+      />
+
+      <EuiSpacer size="l" />
+
       <EuiForm data-test-subj="thresholdWatchForm">
         {serverError && (
           <Fragment>
@@ -957,6 +953,6 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
           close={() => setIsRequestVisible(false)}
         />
       ) : null}
-    </EuiPageContent>
+    </>
   );
 };

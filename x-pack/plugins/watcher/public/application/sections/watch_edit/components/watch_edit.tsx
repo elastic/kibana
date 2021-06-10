@@ -135,13 +135,14 @@ export const WatchEdit = ({
   const errorCode = getPageErrorCode(loadError);
   if (errorCode) {
     return (
-      <EuiPageContent>
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
         <PageError errorCode={errorCode} id={id} />
       </EuiPageContent>
     );
   }
 
   if (loadError) {
+    // TODO Use pageError here
     return (
       <EuiPageContent>
         <SectionError
@@ -159,12 +160,14 @@ export const WatchEdit = ({
 
   if (!watch) {
     return (
-      <SectionLoading>
-        <FormattedMessage
-          id="xpack.watcher.sections.watchEdit.loadingWatchDescription"
-          defaultMessage="Loading watch…"
-        />
-      </SectionLoading>
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+        <SectionLoading>
+          <FormattedMessage
+            id="xpack.watcher.sections.watchEdit.loadingWatchDescription"
+            defaultMessage="Loading watch…"
+          />
+        </SectionLoading>
+      </EuiPageContent>
     );
   }
 

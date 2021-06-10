@@ -11,20 +11,18 @@ import {
   CriteriaWithPagination,
   EuiButton,
   EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
   EuiPageContent,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   EuiToolTip,
   EuiEmptyPrompt,
   EuiButtonIcon,
   EuiPopover,
   EuiContextMenuPanel,
   EuiContextMenuItem,
+  EuiPageHeader,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -173,19 +171,22 @@ export const WatchList = () => {
 
   if (isWatchesLoading) {
     return (
-      <SectionLoading>
-        <FormattedMessage
-          id="xpack.watcher.sections.watchList.loadingWatchesDescription"
-          defaultMessage="Loading watches…"
-        />
-      </SectionLoading>
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+        <SectionLoading>
+          <FormattedMessage
+            id="xpack.watcher.sections.watchList.loadingWatchesDescription"
+            defaultMessage="Loading watches…"
+          />
+        </SectionLoading>
+      </EuiPageContent>
     );
   }
 
-  if (getPageErrorCode(error)) {
+  const errorCode = getPageErrorCode(error);
+  if (errorCode) {
     return (
-      <EuiPageContent>
-        <PageError />
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+        <PageError errorCode={errorCode} />
       </EuiPageContent>
     );
   }
@@ -206,7 +207,7 @@ export const WatchList = () => {
     );
 
     return (
-      <EuiPageContent>
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
         <EuiEmptyPrompt
           iconType="managementApp"
           title={
@@ -228,6 +229,7 @@ export const WatchList = () => {
   let content;
 
   if (error) {
+    // TODO use PageError here
     content = (
       <SectionError
         title={
@@ -465,7 +467,32 @@ export const WatchList = () => {
 
   if (content) {
     return (
-      <EuiPageContent>
+      <>
+        <EuiPageHeader
+          pageTitle={
+            <span data-test-subj="appTitle">
+              <FormattedMessage
+                id="xpack.watcher.sections.watchList.header"
+                defaultMessage="Watcher"
+              />
+            </span>
+          }
+          bottomBorder
+          rightSideItems={[
+            <EuiButtonEmpty
+              href={watcherGettingStartedUrl}
+              target="_blank"
+              iconType="help"
+              data-test-subj="documentationLink"
+            >
+              <FormattedMessage
+                id="xpack.watcher.sections.watchList.watcherGettingStartedDocsLinkText"
+                defaultMessage="Watcher docs"
+              />
+            </EuiButtonEmpty>,
+          ]}
+          description={watcherDescriptionText}
+        />
         <DeleteWatchesModal
           callback={(deleted?: string[]) => {
             if (deleted) {
@@ -476,42 +503,10 @@ export const WatchList = () => {
           watchesToDelete={watchesToDelete}
         />
 
-        <EuiTitle size="l">
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={true}>
-              <h1 data-test-subj="appTitle">
-                <FormattedMessage
-                  id="xpack.watcher.sections.watchList.header"
-                  defaultMessage="Watcher"
-                />
-              </h1>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                href={watcherGettingStartedUrl}
-                target="_blank"
-                iconType="help"
-                data-test-subj="documentationLink"
-              >
-                <FormattedMessage
-                  id="xpack.watcher.sections.watchList.watcherGettingStartedDocsLinkText"
-                  defaultMessage="Watcher docs"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiTitle>
-
-        <EuiSpacer size="s" />
-
-        <EuiText color="subdued">
-          <p>{watcherDescriptionText}</p>
-        </EuiText>
-
-        <EuiSpacer size="xl" />
+        <EuiSpacer size="l" />
 
         {content}
-      </EuiPageContent>
+      </>
     );
   }
   return null;
