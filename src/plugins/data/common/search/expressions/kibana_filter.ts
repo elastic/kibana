@@ -49,7 +49,7 @@ export const kibanaFilterFunction: ExpressionFunctionKibanaFilter = {
     disabled: {
       types: ['boolean'],
       default: false,
-      help: i18n.translate('data.search.functions.kibanaFilter.negate.help', {
+      help: i18n.translate('data.search.functions.kibanaFilter.disabled.help', {
         defaultMessage: 'Should the filter be disabled',
       }),
     },
