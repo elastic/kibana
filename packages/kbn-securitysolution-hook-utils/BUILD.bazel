@@ -29,6 +29,7 @@ NPM_MODULE_EXTRA_FILES = [
 
 SRC_DEPS = [
   "@npm//react",
+  "@npm//rxjs",
   "@npm//tslib",
 ]
 

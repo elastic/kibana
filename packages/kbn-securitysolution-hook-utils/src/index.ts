@@ -8,4 +8,5 @@
 
 export * from './use_async';
 export * from './use_is_mounted';
+export * from './use_observable';
 export * from './with_optional_signal';

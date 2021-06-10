@@ -6,44 +6,57 @@
  * Side Public License, v 1.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Observable, Subscription } from 'rxjs';
 
-import { Task } from '../types';
 import { useIsMounted } from '../use_is_mounted';
+import { Task } from '../types';
 
 /**
  *
- * This hook wraps a promise-returning thunk (task) in order to conditionally
- * initiate the work, and automatically provide state corresponding to the
- * task's status.
+ * @param fn function returning an observable
  *
- * In order to function properly and not rerender unnecessarily, ensure that
- * your task is a stable function reference.
- *
- * @param fn a function returning a promise.
- *
- * @returns An {@link Task} containing the task's current state along with a
- * start callback
+ * @returns An {@link Async} containing the underlying task's state along with a start callback
  */
-export const useAsync = <Args extends unknown[], Result>(
-  fn: (...args: Args) => Promise<Result>
+export const useObservable = <Args extends unknown[], Result>(
+  fn: (...args: Args) => Observable<Result>
 ): Task<Args, Result> => {
   const isMounted = useIsMounted();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<unknown | undefined>();
   const [result, setResult] = useState<Result | undefined>();
+  const subRef = useRef<Subscription | undefined>();
 
   const start = useCallback(
     (...args: Args) => {
+      subRef.current?.unsubscribe();
       setLoading(true);
       setResult(undefined);
       setError(undefined);
-      fn(...args)
-        .then((r) => isMounted() && setResult(r))
-        .catch((e) => isMounted() && setError(e))
-        .finally(() => isMounted() && setLoading(false));
+
+      subRef.current = fn(...args).subscribe(
+        (r) => {
+          if (isMounted()) {
+            setResult(r);
+            setLoading(false);
+          }
+        },
+        (e) => {
+          if (isMounted()) {
+            setError(e);
+            setLoading(false);
+          }
+        }
+      );
     },
     [fn, isMounted]
+  );
+
+  useEffect(
+    () => () => {
+      subRef.current?.unsubscribe();
+    },
+    []
   );
 
   return {
