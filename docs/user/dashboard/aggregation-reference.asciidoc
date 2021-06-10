@@ -188,6 +188,12 @@ For information about {es} metrics aggregations, refer to {ref}/search-aggregati
 
 | Type | Agg-based | Markdown | Lens | TSVB
 
+| Metrics with filters
+|
+^| X
+|
+|
+
 | Average
 ^| X
 ^| X
@@ -230,7 +236,7 @@ For information about {es} metrics aggregations, refer to {ref}/search-aggregati
 | 
 ^| X
 
-| Top hit 
+| Top hit (Last value)
 ^| X
 ^| X
 ^| X
