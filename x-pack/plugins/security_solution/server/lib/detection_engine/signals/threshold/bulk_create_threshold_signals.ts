@@ -18,7 +18,7 @@ import {
   AlertServices,
 } from '../../../../../../alerting/server';
 import { BaseHit } from '../../../../../common/detection_engine/types';
-import { Hit, TermAggregationBucket } from '../../../types';
+import { TermAggregationBucket } from '../../../types';
 import { GenericBulkCreateResponse } from '../bulk_create_factory';
 import {
   calculateThresholdSignalUuid,
@@ -249,5 +249,5 @@ export const bulkCreateThresholdSignals = async (
     params.thresholdSignalHistory
   );
 
-  return params.bulkCreate(params.wrapHits(ecsResults.hits.hits as Hit[]));
+  return params.bulkCreate(params.wrapHits(ecsResults.hits.hits));
 };

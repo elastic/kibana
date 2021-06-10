@@ -20,7 +20,6 @@ import {
   getSafeSortIds,
 } from './utils';
 import { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
-import { Hit } from '../../types';
 
 // search_after through documents and re-index using bulk endpoint.
 export const searchAfterAndBulkCreate = async ({
@@ -148,7 +147,7 @@ export const searchAfterAndBulkCreate = async ({
             );
           }
           const enrichedEvents = await enrichment(filteredEvents);
-          const wrappedDocs = wrapHits(enrichedEvents.hits.hits as Hit[]);
+          const wrappedDocs = wrapHits(enrichedEvents.hits.hits);
 
           const {
             bulkCreateDuration: bulkDuration,

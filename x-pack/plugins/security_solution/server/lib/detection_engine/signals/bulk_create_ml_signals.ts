@@ -19,7 +19,6 @@ import { AnomalyResults, Anomaly } from '../../machine_learning';
 import { BuildRuleMessage } from './rule_messages';
 import { AlertAttributes, BulkCreate, WrapHits } from './types';
 import { MachineLearningRuleParams } from '../schemas/rule_schemas';
-import { Hit } from '../../types';
 
 interface BulkCreateMlSignalsParams {
   someResult: AnomalyResults;
@@ -90,6 +89,6 @@ export const bulkCreateMlSignals = async (
   const anomalyResults = params.someResult;
   const ecsResults = transformAnomalyResultsToEcs(anomalyResults);
 
-  const wrappedDocs = params.wrapHits(ecsResults.hits.hits as Hit[]);
+  const wrappedDocs = params.wrapHits(ecsResults.hits.hits);
   return params.bulkCreate(wrappedDocs);
 };

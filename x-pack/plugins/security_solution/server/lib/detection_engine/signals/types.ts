@@ -19,7 +19,7 @@ import {
   AlertExecutorOptions,
   AlertServices,
 } from '../../../../../alerting/server';
-import { BaseSearchResponse, Hit, SearchHit, TermAggregationBucket } from '../../types';
+import { BaseSearchResponse, SearchHit, TermAggregationBucket } from '../../types';
 import {
   EqlSearchResponse,
   BaseHit,
@@ -257,7 +257,9 @@ export type SignalsEnrichment = (signals: SignalSearchResponse) => Promise<Signa
 
 export type BulkCreate = <T>(docs: Array<BaseHit<T>>) => Promise<GenericBulkCreateResponse<T>>;
 
-export type WrapHits = (hits: Hit[]) => Array<BaseHit<{ '@timestamp': string }>>;
+export type WrapHits = (
+  hits: Array<estypes.SearchHit<unknown>>
+) => Array<BaseHit<{ '@timestamp': string }>>;
 
 export interface SearchAfterAndBulkCreateParams {
   tuples: Array<{
