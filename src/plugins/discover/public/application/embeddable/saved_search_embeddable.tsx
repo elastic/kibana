@@ -347,12 +347,12 @@ export class SavedSearchEmbeddable
       this.prevSearchSessionId = this.input.searchSessionId;
       this.searchProps = searchProps;
       await this.fetch();
-      if (this.node) {
-        await this.rerenderComponent(this.node);
-      }
     } else if (this.searchProps && this.node) {
       this.searchProps = searchProps;
-      this.renderReactComponent(this.node, this.searchProps);
+    }
+
+    if (this.node) {
+      this.renderReactComponent(this.node, this.searchProps!);
     }
   }
 
@@ -370,15 +370,10 @@ export class SavedSearchEmbeddable
     this.node = domNode;
   }
 
-  private async rerenderComponent(domNode: HTMLElement) {
+  private renderReactComponent(domNode: HTMLElement, searchProps: SearchProps) {
     if (!this.searchProps) {
       return;
     }
-    await this.pushContainerStateParamsToProps(this.searchProps);
-    this.renderReactComponent(domNode, this.searchProps);
-  }
-
-  private renderReactComponent(domNode: HTMLElement, searchProps: SearchProps) {
     const useLegacyTable = this.services.uiSettings.get(DOC_TABLE_LEGACY);
     const props = {
       searchProps,
