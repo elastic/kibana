@@ -422,7 +422,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     },
     {
       title: i18n.translate('xpack.fleet.createPackagePolicy.stepSelectAgentPolicyTitle', {
-        defaultMessage: 'Select an agent policy',
+        defaultMessage: 'Apply to agent policy',
       }),
       children: stepSelectAgentPolicy,
     },
