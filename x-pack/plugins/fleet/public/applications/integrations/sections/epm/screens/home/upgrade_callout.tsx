@@ -16,7 +16,7 @@ import type { PackageListItem } from '../../../../types';
 
 interface Props {
   updatablePackages: PackageListItem[];
-  updatableIntegrations: Record<string, any[]>;
+  updatableIntegrations: Map<string, any[]>;
   onLinkToPackages: () => void;
 }
 
@@ -29,16 +29,15 @@ export const UpgradeCallout: React.FC<Props> = memo(
       window.location.href = getHref('integrations_installed');
     }, [onLinkToPackages, getHref]);
 
-    const integrationsCount = Object.keys(updatableIntegrations).length;
-    if (!updatablePackages.length && !integrationsCount) return null;
+    if (!updatablePackages.length && !updatableIntegrations.size) return null;
 
-    const integrationsMessage = integrationsCount ? (
+    const integrationsMessage = updatableIntegrations.size ? (
       <li>
         {i18n.translate('xpack.fleet.epm.integrationUpgradesAvailable', {
           defaultMessage:
             '{count, plural, one {# integration has} other {# integrations have}} been upgraded, click here to upgrade your policies.',
           values: {
-            count: integrationsCount,
+            count: updatableIntegrations.size,
           },
         })}
       </li>

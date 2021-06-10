@@ -28,7 +28,8 @@ export type DynamicPage =
   | 'add_integration_to_policy'
   | 'edit_integration'
   | 'fleet_agent_list'
-  | 'fleet_agent_details';
+  | 'fleet_agent_details'
+  | 'upgrade_policies';
 
 export type Page = StaticPage | DynamicPage;
 
@@ -56,6 +57,7 @@ export const FLEET_ROUTING_PATHS = {
   fleet_agent_details_logs: '/fleet/agents/:agentId/logs',
   fleet_enrollment_tokens: '/fleet/enrollment-tokens',
   data_streams: '/data-streams',
+  upgrade_policies: '/policies/upgrade',
 };
 
 export const INTEGRATIONS_ROUTING_PATHS = {
@@ -130,4 +132,5 @@ export const pagePathGetters: {
   ],
   fleet_enrollment_tokens: () => [FLEET_BASE_PATH, '/fleet/enrollment-tokens'],
   data_streams: () => [FLEET_BASE_PATH, '/data-streams'],
+  upgrade_policies: () => [FLEET_BASE_PATH, '/policies/upgrade'],
 };

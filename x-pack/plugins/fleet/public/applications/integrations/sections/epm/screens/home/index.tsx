@@ -7,25 +7,18 @@
 
 import React, { memo, useState, useMemo, useEffect } from 'react';
 import { Switch, Route, useLocation, useHistory } from 'react-router-dom';
-import semverLt from 'semver/functions/lt';
 import { i18n } from '@kbn/i18n';
 
-import { installationStatuses } from '../../../../../../../common/constants';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import {
   useGetCategories,
   useGetPackages,
   useBreadcrumbs,
-  useGetAgentPolicies,
+  usePackageInstallations,
 } from '../../../../hooks';
 import { doesPackageHaveIntegrations } from '../../../../services';
 import { DefaultLayout } from '../../../../layouts';
-import type {
-  CategorySummaryItem,
-  PackageList,
-  PackageListItem,
-  PackagePolicy,
-} from '../../../../types';
+import type { CategorySummaryItem, PackageList, PackageListItem } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
 
 import { CategoryFacets } from './category_facets';
@@ -38,7 +31,7 @@ export const EPMHomePage: React.FC = memo(() => {
     updatablePackages,
     updatableIntegrations,
     isLoadingPackages,
-  } = usePackages();
+  } = usePackageInstallations();
 
   const [showUpdatesCategory, setShowUpdatesCategory] = useState(false);
   return (
@@ -94,64 +87,6 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
         : []),
     ];
   }, []);
-};
-
-const usePackages = () => {
-  const { data: allPackages, isLoading: isLoadingPackages } = useGetPackages({
-    experimental: true,
-  });
-
-  const { data: agentPolicyData } = useGetAgentPolicies({
-    full: true,
-  });
-
-  const allInstalledPackages = useMemo(
-    () =>
-      (allPackages?.response || []).filter((pkg) => pkg.status === installationStatuses.Installed),
-    [allPackages?.response]
-  );
-
-  const updatablePackages = useMemo(
-    () =>
-      allInstalledPackages.filter(
-        (item) =>
-          'savedObject' in item && semverLt(item.savedObject.attributes.version, item.version)
-      ),
-    [allInstalledPackages]
-  );
-
-  const updatableIntegrations = useMemo(
-    () =>
-      (agentPolicyData?.items || []).reduce((result, policy) => {
-        policy.package_policies.forEach((pkgPolicy: PackagePolicy | string) => {
-          if (typeof pkgPolicy === 'string' || !pkgPolicy.package) return false;
-          const { name, version } = pkgPolicy.package;
-          const installedPackage = allInstalledPackages.find(
-            (installedPkg) =>
-              'savedObject' in installedPkg && installedPkg.savedObject.attributes.name === name
-          );
-          if (
-            installedPackage &&
-            'savedObject' in installedPackage &&
-            semverLt(version, installedPackage.savedObject.attributes.version)
-          ) {
-            const policiesList = Reflect.get(result, name) || [];
-            policiesList.push(pkgPolicy.id);
-            Reflect.set(result, name, policiesList);
-          }
-        });
-        return result;
-      }, {}),
-    [allInstalledPackages, agentPolicyData]
-  );
-
-  return {
-    allPackages,
-    allInstalledPackages,
-    updatablePackages,
-    updatableIntegrations,
-    isLoadingPackages,
-  };
 };
 
 interface InstalledPackagesProps {
