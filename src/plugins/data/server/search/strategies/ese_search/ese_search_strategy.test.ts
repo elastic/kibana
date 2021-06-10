@@ -293,7 +293,7 @@ describe('ES search strategy', () => {
 
       expect(mockGetCaller).toBeCalled();
       const request = mockGetCaller.mock.calls[0][0];
-      expect(request).toEqual({ id, body: { keep_alive: keepAlive } });
+      expect(request).toEqual({ id, keep_alive: keepAlive });
     });
 
     it('throws normalized error on ElasticsearchClientError', async () => {

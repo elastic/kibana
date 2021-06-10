@@ -211,7 +211,7 @@ export async function fetchServicePathsFromTraceIds(
               },
             },
           },
-        },
+        } as const,
       },
     };
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
@@ -127,17 +127,15 @@ export function ServiceInventory() {
           </EuiFlexItem>
         )}
         <EuiFlexItem>
-          <EuiPanel hasShadow={false}>
-            <ServiceList
-              items={servicesData.items}
-              noItemsMessage={
-                <NoServicesMessage
-                  historicalDataFound={servicesData.hasHistoricalData}
-                  status={servicesStatus}
-                />
-              }
-            />
-          </EuiPanel>
+          <ServiceList
+            items={servicesData.items}
+            noItemsMessage={
+              <NoServicesMessage
+                historicalDataFound={servicesData.hasHistoricalData}
+                status={servicesStatus}
+              />
+            }
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

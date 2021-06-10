@@ -29,6 +29,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     after(async () => {
       await spaces.delete('nondefaultspace');
       await esArchiver.unload('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+    });
+
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     describe('global all base privilege', () => {
