@@ -587,6 +587,10 @@ export class TaskRunner<
       ),
       schedule: resolveErr<IntervalSchedule | undefined, Error>(schedule, (error) => {
         if (isAlertSavedObjectNotFoundError(error, alertId)) {
+          const spaceMessage = spaceId ? `in the "${spaceId}" space ` : '';
+          this.logger.warn(
+            `Unable to execute rule "${alertId}" ${spaceMessage}because ${error.message} - this rule will not be rescheduled. To restart rule execution, try disabling and re-enabling this rule.`
+          );
           throwUnrecoverableError(error);
         }
         return { interval: taskSchedule?.interval ?? FALLBACK_RETRY_INTERVAL };

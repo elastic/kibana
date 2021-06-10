@@ -263,7 +263,7 @@ export class DurationFormat extends FieldFormat {
     const precise = human || humanPrecise ? formatted : formatted.toFixed(outputPrecision);
     const type = outputFormats.find(({ method }) => method === outputFormat);
 
-    const unitText = useShortSuffix ? type?.shortText : type?.text;
+    const unitText = useShortSuffix ? type?.shortText : type?.text.toLowerCase();
 
     const suffix = showSuffix && unitText && !human ? `${includeSpace}${unitText}` : '';
 
@@ -294,7 +294,7 @@ function formatDuration(
 
   const getUnitText = (method: string) => {
     const type = outputFormats.find(({ method: methodT }) => method === methodT);
-    return useShortSuffix ? type?.shortText : type?.text;
+    return useShortSuffix ? type?.shortText : type?.text.toLowerCase();
   };
 
   for (let i = 0; i < units.length; i++) {
