@@ -8040,7 +8040,7 @@
     "xpack.enterpriseSearch.roleMapping.filterRoleMappingsPlaceholder": "筛选角色......",
     "xpack.enterpriseSearch.roleMapping.individualAuthProviderLabel": "选择单个身份验证提供程序",
     "xpack.enterpriseSearch.roleMapping.manageRoleMappingTitle": "管理角色映射",
-    "xpack.enterpriseSearch.roleMapping.moResults.message": "找不到“{filterValue}”的结果",
+    "xpack.enterpriseSearch.roleMapping.noResults.message": "找不到的结果",
     "xpack.enterpriseSearch.roleMapping.newRoleMappingTitle": "添加角色映射",
     "xpack.enterpriseSearch.roleMapping.roleLabel": "角色",
     "xpack.enterpriseSearch.roleMapping.roleMappingsTitle": "用户和角色",
