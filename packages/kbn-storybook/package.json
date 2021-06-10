@@ -11,6 +11,6 @@
   "scripts": {
     "build": "../../node_modules/.bin/tsc",
     "kbn:bootstrap": "yarn build",
-    "watch": "yarn build --watch"
+    "kbn:watch": "yarn build --watch"
   }
 }
