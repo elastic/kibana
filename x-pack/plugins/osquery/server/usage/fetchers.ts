@@ -213,8 +213,10 @@ export async function getBeatUsage(esClient: ElasticsearchClient) {
   if ('latest' in lastDayAggs) {
     const latest = (lastDayAggs.latest as TopHitsAggregate).hits.hits[0]?._source?.monitoring
       .metrics.beat;
-    result.cpu.latest = latest.cpu.total.time.ms;
-    result.memory.rss.latest = latest.memstats.rss;
+    if (latest) {
+      result.cpu.latest = latest.cpu.total.time.ms;
+      result.memory.rss.latest = latest.memstats.rss;
+    }
   }
 
   return result;

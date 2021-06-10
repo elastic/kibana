@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, SavedObjectsClientContract } from '../../../../../src/core/server';
+import { CoreSetup, SavedObjectsClient } from '../../../../../src/core/server';
 import { CollectorFetchContext } from '../../../../../src/plugins/usage_collection/server';
 import { createMetricObjects } from '../routes/usage';
 import { getBeatUsage, getLiveQueryUsage, getPolicyLevelUsage } from './fetchers';
@@ -26,13 +26,11 @@ export const registerCollector: RegisterCollector = ({ core, osqueryContext, usa
     type: 'osquery',
     schema: usageSchema,
     isReady: async () => {
-      const internalSavedObjectsClient = await getInternalSavedObjectsClient(core);
-      const savedObjectsClient = (internalSavedObjectsClient as unknown) as SavedObjectsClientContract;
+      const savedObjectsClient = new SavedObjectsClient(await getInternalSavedObjectsClient(core));
       return await createMetricObjects(savedObjectsClient);
     },
     fetch: async ({ esClient }: CollectorFetchContext): Promise<UsageData> => {
-      const internalSavedObjectsClient = await getInternalSavedObjectsClient(core);
-      const savedObjectsClient = (internalSavedObjectsClient as unknown) as SavedObjectsClientContract;
+      const savedObjectsClient = new SavedObjectsClient(await getInternalSavedObjectsClient(core));
       return {
         beat_metrics: {
           usage: await getBeatUsage(esClient),
