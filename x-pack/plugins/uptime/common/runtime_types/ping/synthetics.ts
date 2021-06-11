@@ -45,6 +45,24 @@ export const KeyRefFields = t.type({
   blocks: t.array(ScreenshotBlockType),
 });
 
+export const ScreenshotResultType = t.type({
+  synthetics: t.intersection([
+    t.partial({
+      blob: t.string,
+    }),
+    t.type({
+      blob: t.string,
+      blob_mime: t.string,
+      step: t.type({
+        name: t.string,
+      }),
+      type: t.string,
+    }),
+  ]),
+});
+
+export type ScreenshotResult = t.TypeOf<typeof ScreenshotResultType>;
+
 export const RefResultType = t.type({
   '@timestamp': t.string,
   monitor: t.type({
@@ -61,11 +79,11 @@ export const RefResultType = t.type({
   }),
 });
 
+export type RefResult = t.TypeOf<typeof RefResultType>;
+
 export const RawRefResultType = t.type({
   _source: RefResultType,
 });
-
-export type RefResult = t.TypeOf<typeof RefResultType>;
 
 export const ScreenshotRefType = t.type({
   blob_mime: t.string,
