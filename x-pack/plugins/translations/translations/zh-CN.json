@@ -12170,7 +12170,6 @@
     "xpack.ingestPipelines.form.versionFieldLabel": "版本 (可选) ",
     "xpack.ingestPipelines.form.versionToggleDescription": "添加版本号",
     "xpack.ingestPipelines.list.listTitle": "采集节点管道",
-    "xpack.ingestPipelines.list.loadErrorReloadLinkLabel": "请重试。",
     "xpack.ingestPipelines.list.loadingMessage": "正在加载管道……",
     "xpack.ingestPipelines.list.notFoundFlyoutMessage": "未找到管道",
     "xpack.ingestPipelines.list.pipelineDetails.cloneActionLabel": "克隆",
