@@ -23,8 +23,6 @@ import { progress } from './progress';
 // @ts-expect-error untyped local
 import { repeatImage } from './repeatImage';
 // @ts-expect-error untyped local
-import { revealImage } from './revealImage';
-// @ts-expect-error untyped local
 import { render } from './render';
 // @ts-expect-error untyped local
 import { shape } from './shape';
@@ -44,7 +42,6 @@ export const viewSpecs = [
   plot,
   progress,
   repeatImage,
-  revealImage,
   render,
   shape,
   table,

@@ -11,11 +11,12 @@ import { isValidUrl } from '../../common/lib/url';
 import { getRendererStrings } from '../../common/i18n';
 import { RendererFactory } from '../../common/types';
 import { Output as Arguments } from '../expression_functions';
+import './reveal_image.scss';
 
 const { revealImage: strings } = getRendererStrings();
 
 export const revealImage: RendererFactory<Arguments> = () => ({
-  name: 'revealImageExpr',
+  name: 'revealImage',
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
   reuseDomNode: true,

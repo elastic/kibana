@@ -20,7 +20,7 @@ describe('revealImageFunction', () => {
   it('returns a render as revealImage', () => {
     const result = fn(0.5);
     expect(result).toHaveProperty('type', 'render');
-    expect(result).toHaveProperty('as', 'revealImageExpr');
+    expect(result).toHaveProperty('as', 'revealImage');
   });
 
   describe('context', () => {
