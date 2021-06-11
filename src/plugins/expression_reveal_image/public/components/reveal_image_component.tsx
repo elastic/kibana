@@ -40,8 +40,8 @@ function RevealImageComponent({
 
   // set up the overlay image
   const onLoad = useCallback(() => {
-    setLoaded(true);
     if (imgRef.current) {
+      setLoaded(true);
       setDimensions({
         height: imgRef.current.naturalHeight,
         width: imgRef.current.naturalWidth,
