@@ -522,6 +522,18 @@ export class TaskRunner<
         namespace,
       },
     };
+
+    const startEvent = {
+      ...event,
+      event: {
+        ...event.event,
+        action: EVENT_LOG_ACTIONS.executeStart,
+      },
+    };
+    eventLogger.startTiming(startEvent);
+    eventLogger.stopTiming(startEvent);
+    eventLogger.logEvent(startEvent);
+
     eventLogger.startTiming(event);
 
     const { state, schedule } = await errorAsAlertTaskRunResult(

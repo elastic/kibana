@@ -73,6 +73,7 @@ import { AlertingAuthorization } from './authorization';
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
   execute: 'execute',
+  executeStart: 'execute-start',
   executeAction: 'execute-action',
   newInstance: 'new-instance',
   recoveredInstance: 'recovered-instance',
