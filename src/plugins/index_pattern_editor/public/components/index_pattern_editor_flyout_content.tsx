@@ -419,7 +419,7 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
             <EuiButton
               color="primary"
               onClick={onClickSave}
-              data-test-subj="fieldSaveButton"
+              data-test-subj="saveIndexPatternButton"
               fill
               disabled={!isValid || !exactMatchedIndices.length}
               // isLoading={isSavingField || isValidating}

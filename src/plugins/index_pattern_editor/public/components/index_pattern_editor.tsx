@@ -10,10 +10,10 @@ import React from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import { IndexPatternFlyoutContentContainer } from './index_pattern_flyout_content_container';
 import { IndexPatternEditorContext } from '../types';
-import { createKibanaReactContext } from '../shared_imports';
+import { createKibanaReactContext, IndexPattern } from '../shared_imports';
 
 export interface IndexPatternEditorProps {
-  onSave: () => void;
+  onSave: (indexPattern: IndexPattern) => void;
   closeEditor: () => void;
   services: IndexPatternEditorContext;
 }

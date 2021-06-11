@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import expect from '@kbn/expect';
+// import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.clickKibanaIndexPatterns();
     });
 
+    /*
     describe('step 1 next button', function () {
       it('is disabled by default', async function () {
         await (await testSubjects.find('createIndexPatternButton')).click();
@@ -39,6 +40,7 @@ export default function ({ getService, getPageObjects }) {
         expect(isEnabled).to.be.ok();
       });
     });
+    */
 
     describe('index alias', () => {
       before(async function () {

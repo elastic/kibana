@@ -93,6 +93,9 @@ export const IndexPatternTable = ({
       );
       setIndexPatterns(gettedIndexPatterns);
       setIsLoadingIndexPatterns(false);
+      if (gettedIndexPatterns.length === 0) {
+        setShowCreateDialog(true);
+      }
     })();
   }, [indexPatternManagementStart, uiSettings, data]);
 
@@ -164,7 +167,12 @@ export const IndexPatternTable = ({
       }
     >
     */
-    <EuiButton fill={true} iconType="plusInCircle" onClick={() => setShowCreateDialog(true)}>
+    <EuiButton
+      fill={true}
+      iconType="plusInCircle"
+      onClick={() => setShowCreateDialog(true)}
+      data-test-subj="createIndexPatternButton"
+    >
       <FormattedMessage
         id="indexPatternManagement.indexPatternTable.createBtn"
         defaultMessage="Create index pattern"
@@ -178,15 +186,8 @@ export const IndexPatternTable = ({
 
   const displayIndexPatternEditor = showCreateDialog ? (
     <IndexPatternEditor
-      onSave={async () => {
-        // todo dedup from useEffect code
-        const gettedIndexPatterns: IndexPatternTableItem[] = await getIndexPatterns(
-          uiSettings.get('defaultIndex'),
-          indexPatternManagementStart,
-          data.indexPatterns
-        );
-        setIndexPatterns(gettedIndexPatterns);
-        setShowCreateDialog(false);
+      onSave={(indexPattern) => {
+        history.push(`patterns/${indexPattern.id}`);
       }}
       closeEditor={() => setShowCreateDialog(false)}
       services={{

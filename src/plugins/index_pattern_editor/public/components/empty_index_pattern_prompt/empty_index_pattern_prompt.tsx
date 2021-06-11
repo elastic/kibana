@@ -8,14 +8,13 @@
 
 import './empty_index_pattern_prompt.scss';
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiPageContent, EuiSpacer, EuiText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { EuiDescriptionListTitle } from '@elastic/eui';
 import { EuiDescriptionListDescription, EuiDescriptionList } from '@elastic/eui';
 import { EuiLink, EuiButton } from '@elastic/eui';
-import { Illustration } from './assets/index_pattern_illustration';
 import { useKibana } from '../../shared_imports';
 import { IndexPatternEditorContext } from '../../types';
 
@@ -27,6 +26,9 @@ export const EmptyIndexPatternPrompt = ({ goToCreate }: Props) => {
   const {
     services: { docLinks, application },
   } = useKibana<IndexPatternEditorContext>();
+
+  const Illustration = lazy(() => import('./assets/index_pattern_illustration'));
+
   return (
     <EuiPageContent
       data-test-subj="emptyIndexPatternPrompt"
@@ -36,7 +38,9 @@ export const EmptyIndexPatternPrompt = ({ goToCreate }: Props) => {
     >
       <EuiFlexGroup gutterSize="xl" alignItems="center" direction="rowReverse" wrap>
         <EuiFlexItem grow={1} className="inpEmptyIndexPatternPrompt__illustration">
-          <Illustration />
+          <Suspense fallback={<div>...loading...</div>}>
+            <Illustration />
+          </Suspense>
         </EuiFlexItem>
         <EuiFlexItem grow={2} className="inpEmptyIndexPatternPrompt__text">
           <EuiText grow={false}>
@@ -60,7 +64,12 @@ export const EmptyIndexPatternPrompt = ({ goToCreate }: Props) => {
               />
             </p>
             {application.capabilities.management.kibana.indexPatterns && (
-              <EuiButton onClick={goToCreate} iconType="plusInCircle" fill={true}>
+              <EuiButton
+                onClick={goToCreate}
+                iconType="plusInCircle"
+                fill={true}
+                data-test-subj="createIndexPatternButton"
+              >
                 <FormattedMessage
                   id="indexPatternManagement.indexPatternTable.createBtn"
                   defaultMessage="Create index pattern"

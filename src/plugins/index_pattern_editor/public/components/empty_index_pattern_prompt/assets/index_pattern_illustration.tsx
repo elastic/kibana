@@ -537,4 +537,5 @@ const IndexPatternIllustration = () => (
   </svg>
 );
 
-export const Illustration = IndexPatternIllustration;
+/* eslint-disable import/no-default-export */
+export default IndexPatternIllustration;
