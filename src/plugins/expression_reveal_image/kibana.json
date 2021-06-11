@@ -2,9 +2,9 @@
   "id": "expressionRevealImage",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
-  "server": false,
+  "server": true,
   "ui": true,
-  "requiredPlugins": ["expressions"],
+  "requiredPlugins": ["expressions", "presentationUtil"],
   "optionalPlugins": [],
   "requiredBundles": []
 }

@@ -6,4 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * from './constants';
+import { ExpressionRevealImageServerPlugin } from './plugin';
+
+export const plugin = () => new ExpressionRevealImageServerPlugin();

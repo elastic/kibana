@@ -51,9 +51,8 @@ function RevealImageComponent({
   }, [imgRef, handlers]);
 
   useEffect(() => {
-    const cleanupResizeHandler = handlers.onResize(onLoad);
+    handlers.onResize(onLoad);
     return () => {
-      cleanupResizeHandler();
       handlers.destroy();
     };
   }, [onLoad, handlers]);
