@@ -37,6 +37,7 @@ describe('workspace_panel_wrapper', () => {
         visualizationMap={{ myVis: mockVisualization }}
         datasourceMap={{}}
         datasourceStates={{}}
+        isFullscreen={false}
       >
         <MyChild />
       </WorkspacePanelWrapper>
@@ -58,6 +59,7 @@ describe('workspace_panel_wrapper', () => {
         visualizationMap={{ myVis: { ...mockVisualization, renderToolbar: renderToolbarMock } }}
         datasourceMap={{}}
         datasourceStates={{}}
+        isFullscreen={false}
       />
     );
 
