@@ -362,7 +362,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             <EuiBadge color="secondary" style={{ marginLeft: '1em' }}>
               <FormattedMessage
                 id="xpack.fleet.agentList.hostAgentType"
-                defaultMessage="Ephmeral"
+                defaultMessage="Ephemeral"
               />
             </EuiBadge>
           )}
