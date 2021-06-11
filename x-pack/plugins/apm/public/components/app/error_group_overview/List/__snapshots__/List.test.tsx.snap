@@ -37,8 +37,9 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                   >
                     <span
                       className="euiButtonContent__icon"
+                      color="inherit"
                       data-euiicon-type="arrowDown"
-                      size="m"
+                      size="s"
                     />
                     <span
                       className="euiButtonEmpty__text"
@@ -74,7 +75,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
               }
             }
           >
-            <div
+            <span
               className="euiTableCellContent"
             >
               <span
@@ -101,7 +102,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                   />
                 </span>
               </span>
-            </div>
+            </span>
           </th>
           <th
             className="euiTableHeaderCell"
@@ -114,7 +115,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
               }
             }
           >
-            <div
+            <span
               className="euiTableCellContent"
             >
               <span
@@ -123,7 +124,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
               >
                 Type
               </span>
-            </div>
+            </span>
           </th>
           <th
             className="euiTableHeaderCell"
@@ -136,7 +137,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
               }
             }
           >
-            <div
+            <span
               className="euiTableCellContent"
             >
               <span
@@ -145,7 +146,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
               >
                 Error message and culprit
               </span>
-            </div>
+            </span>
           </th>
           <td
             className="euiTableHeaderCell"
@@ -158,13 +159,13 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
               }
             }
           >
-            <div
+            <span
               className="euiTableCellContent euiTableCellContent--alignRight"
             >
               <span
                 className="euiTableCellContent__text"
               />
-            </div>
+            </span>
           </td>
           <th
             aria-live="polite"
@@ -190,7 +191,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
               >
                 <span
                   className="euiTableCellContent__text"
-                  title="Occurrences; Sorted in descending order"
+                  title="Occurrences"
                 >
                   Occurrences
                 </span>
@@ -199,11 +200,6 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                   data-euiicon-type="sortDown"
                   size="m"
                 />
-              </span>
-              <span
-                className="euiScreenReaderOnly"
-              >
-                Click to sort in ascending order
               </span>
             </button>
           </th>
@@ -235,11 +231,6 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                 >
                   Latest occurrence
                 </span>
-              </span>
-              <span
-                className="euiScreenReaderOnly"
-              >
-                Click to sort in ascending order
               </span>
             </button>
           </th>
@@ -343,8 +334,9 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   >
                     <span
                       className="euiButtonContent__icon"
+                      color="inherit"
                       data-euiicon-type="arrowDown"
-                      size="m"
+                      size="s"
                     />
                     <span
                       className="euiButtonEmpty__text"
@@ -380,7 +372,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               }
             }
           >
-            <div
+            <span
               className="euiTableCellContent"
             >
               <span
@@ -407,7 +399,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   />
                 </span>
               </span>
-            </div>
+            </span>
           </th>
           <th
             className="euiTableHeaderCell"
@@ -420,7 +412,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               }
             }
           >
-            <div
+            <span
               className="euiTableCellContent"
             >
               <span
@@ -429,7 +421,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               >
                 Type
               </span>
-            </div>
+            </span>
           </th>
           <th
             className="euiTableHeaderCell"
@@ -442,7 +434,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               }
             }
           >
-            <div
+            <span
               className="euiTableCellContent"
             >
               <span
@@ -451,7 +443,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               >
                 Error message and culprit
               </span>
-            </div>
+            </span>
           </th>
           <td
             className="euiTableHeaderCell"
@@ -464,13 +456,13 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               }
             }
           >
-            <div
+            <span
               className="euiTableCellContent euiTableCellContent--alignRight"
             >
               <span
                 className="euiTableCellContent__text"
               />
-            </div>
+            </span>
           </td>
           <th
             aria-live="polite"
@@ -496,7 +488,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               >
                 <span
                   className="euiTableCellContent__text"
-                  title="Occurrences; Sorted in descending order"
+                  title="Occurrences"
                 >
                   Occurrences
                 </span>
@@ -505,11 +497,6 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   data-euiicon-type="sortDown"
                   size="m"
                 />
-              </span>
-              <span
-                className="euiScreenReaderOnly"
-              >
-                Click to sort in ascending order
               </span>
             </button>
           </th>
@@ -541,11 +528,6 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 >
                   Latest occurrence
                 </span>
-              </span>
-              <span
-                className="euiScreenReaderOnly"
-              >
-                Click to sort in ascending order
               </span>
             </button>
           </th>
@@ -1314,6 +1296,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             <span
               aria-hidden="true"
               className="euiButtonIcon__icon"
+              color="inherit"
               data-euiicon-type="arrowLeft"
               size="m"
             />
@@ -1357,6 +1340,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             <span
               aria-hidden="true"
               className="euiButtonIcon__icon"
+              color="inherit"
               data-euiicon-type="arrowRight"
               size="m"
             />

@@ -9,7 +9,6 @@
 import { delay } from 'bluebird';
 import { WebElement, WebDriver, By, Key } from 'selenium-webdriver';
 import { PNG } from 'pngjs';
-// @ts-ignore not supported yet
 import cheerio from 'cheerio';
 import testSubjSelector from '@kbn/test-subj-selector';
 import { ToolingLog } from '@kbn/dev-utils';

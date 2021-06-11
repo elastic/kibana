@@ -58,6 +58,7 @@ const RecentCasesComponent = () => {
       },
     },
     maxCasesToShow: MAX_CASES_TO_SHOW,
+    owner: [APP_ID],
   });
 };
 

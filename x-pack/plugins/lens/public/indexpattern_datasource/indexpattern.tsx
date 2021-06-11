@@ -55,6 +55,7 @@ import { deleteColumn, isReferenced } from './operations';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { GeoFieldWorkspacePanel } from '../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
 import { DraggingIdentifier } from '../drag_drop';
+import { getTimeShiftWarningMessages } from './dimension_panel/time_shift';
 
 export { OperationType, IndexPatternColumn, deleteColumn } from './operations';
 
@@ -322,6 +323,11 @@ export function getIndexPatternDatasource({
         domElement
       );
     },
+
+    canCloseDimensionEditor: (state) => {
+      return !state.isDimensionClosePrevented;
+    },
+
     getDropProps,
     onDrop,
 
@@ -407,13 +413,20 @@ export function getIndexPatternDatasource({
       }
 
       // Forward the indexpattern as well, as it is required by some operationType checks
-      const layerErrors = Object.values(state.layers).map((layer) =>
-        (getErrorMessages(layer, state.indexPatterns[layer.indexPatternId]) ?? []).map(
-          (message) => ({
-            shortMessage: '', // Not displayed currently
-            longMessage: message,
-          })
-        )
+      const layerErrors = Object.entries(state.layers).map(([layerId, layer]) =>
+        (
+          getErrorMessages(
+            layer,
+            state.indexPatterns[layer.indexPatternId],
+            state,
+            layerId,
+            core
+          ) ?? []
+        ).map((message) => ({
+          shortMessage: '', // Not displayed currently
+          longMessage: typeof message === 'string' ? message : message.message,
+          fixAction: typeof message === 'object' ? message.fixAction : undefined,
+        }))
       );
 
       // Single layer case, no need to explain more
@@ -449,6 +462,7 @@ export function getIndexPatternDatasource({
       });
       return messages.length ? messages : undefined;
     },
+    getWarningMessages: getTimeShiftWarningMessages,
     checkIntegrity: (state) => {
       const ids = Object.values(state.layers || {}).map(({ indexPatternId }) => indexPatternId);
       return ids.filter((id) => !state.indexPatterns[id]);

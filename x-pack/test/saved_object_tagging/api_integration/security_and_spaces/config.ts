@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import path from 'path';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 
@@ -22,9 +21,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     junit: {
       reportName:
         'X-Pack Saved Object Tagging API Integration Tests - Security and Spaces integration',
-    },
-    esArchiver: {
-      directory: path.resolve(__dirname, '..', '..', 'common', 'fixtures', 'es_archiver'),
     },
     esTestCluster: {
       ...apiIntegrationConfig.get('esTestCluster'),

@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }) {
     const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
     before(async () => {
-      await setup('monitoring/logstash_pipelines_mb', {
+      await setup('x-pack/test/functional/es_archives/monitoring/logstash_pipelines_mb', {
         from: 'Jan 22, 2018 @ 09:10:00.000',
         to: 'Jan 22, 2018 @ 09:41:00.000',
       });
