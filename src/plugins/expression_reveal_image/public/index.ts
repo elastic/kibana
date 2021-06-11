@@ -8,6 +8,8 @@
 
 import { ExpressionRevealImagePlugin } from './plugin';
 
+export * from './expression_renderers';
+
 // This exports static code and TypeScript types,
 // as well as, Kibana Platform `plugin()` initializer.
 export function plugin() {

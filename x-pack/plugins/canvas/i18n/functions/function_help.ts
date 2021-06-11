@@ -57,7 +57,6 @@ import { help as progress } from './dict/progress';
 import { help as render } from './dict/render';
 import { help as repeatImage } from './dict/repeat_image';
 import { help as replace } from './dict/replace';
-import { help as revealImage } from './dict/reveal_image';
 import { help as rounddate } from './dict/rounddate';
 import { help as rowCount } from './dict/row_count';
 import { help as savedLens } from './dict/saved_lens';
@@ -218,7 +217,6 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   render,
   repeatImage,
   replace,
-  revealImage,
   rounddate,
   rowCount,
   savedLens,

@@ -36,7 +36,7 @@ export function revealImageFunction(): ExpressionRevealImageFunction {
   const errors = getFunctionErrors().revealImage;
 
   return {
-    name: 'revealImageExpr',
+    name: 'revealImage',
     aliases: [],
     type: 'render',
     inputTypes: ['number'],
@@ -66,7 +66,7 @@ export function revealImageFunction(): ExpressionRevealImageFunction {
 
       return {
         type: 'render',
-        as: 'revealImageExpr',
+        as: 'revealImage',
         value: {
           percent,
           ...args,

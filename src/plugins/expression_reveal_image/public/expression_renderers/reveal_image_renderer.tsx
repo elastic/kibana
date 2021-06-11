@@ -15,13 +15,14 @@ import { RendererFactory } from '../../common/types';
 import { Output as Arguments } from '../expression_functions';
 import { RevealImageRendererConfig } from './types';
 import { RendererWrapper } from '../components/renderer_wrapper';
+import './reveal_image.scss';
 
 const { revealImage: revealImageStrings } = getRendererStrings();
 
 const RevealImageComponent = lazy(() => import('../components/reveal_image_component'));
 
 export const revealImageRenderer: RendererFactory<Arguments> = () => ({
-  name: 'revealImageExpr',
+  name: 'revealImage',
   displayName: revealImageStrings.getDisplayName(),
   help: revealImageStrings.getHelpDescription(),
   reuseDomNode: true,

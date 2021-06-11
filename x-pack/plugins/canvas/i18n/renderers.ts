@@ -139,16 +139,6 @@ export const RendererStrings = {
         defaultMessage: 'Repeat an image a given number of times',
       }),
   },
-  revealImage: {
-    getDisplayName: () =>
-      i18n.translate('xpack.canvas.renderer.revealImage.displayName', {
-        defaultMessage: 'Image reveal',
-      }),
-    getHelpDescription: () =>
-      i18n.translate('xpack.canvas.renderer.revealImage.helpDescription', {
-        defaultMessage: 'Reveal a percentage of an image to make a custom gauge-style chart',
-      }),
-  },
   shape: {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.renderer.shape.displayName', {
