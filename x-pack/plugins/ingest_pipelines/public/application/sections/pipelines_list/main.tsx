@@ -16,7 +16,7 @@ import {
   EuiButtonEmpty,
   EuiPageContent,
   EuiEmptyPrompt,
-  EuiLink,
+  EuiButton,
   EuiSpacer,
 } from '@elastic/eui';
 
@@ -90,15 +90,14 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
               />
             </h2>
           }
-          body={
-            <p>
-              <EuiLink onClick={resendRequest}>
-                <FormattedMessage
-                  id="xpack.ingestPipelines.list.loadErrorReloadLinkLabel"
-                  defaultMessage="Try again."
-                />
-              </EuiLink>
-            </p>
+          body={<p>{error.message}</p>}
+          actions={
+            <EuiButton onClick={resendRequest} iconType="refresh" color="danger">
+              <FormattedMessage
+                id="xpack.ingestPipelines.list.loadPipelineReloadButton"
+                defaultMessage="Try again"
+              />
+            </EuiButton>
           }
         />
       </EuiPageContent>

@@ -13,6 +13,7 @@ import {
   EuiEmptyPrompt,
   EuiPageContent,
   EuiSpacer,
+  EuiButton,
   EuiButtonEmpty,
 } from '@elastic/eui';
 
@@ -39,7 +40,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
 
   const decodedPipelineName = attemptToURIDecode(name)!;
 
-  const { error, data: pipeline, isLoading } = services.api.useLoadPipeline(decodedPipelineName);
+  const { error, data: pipeline, isLoading, resendRequest } = services.api.useLoadPipeline(decodedPipelineName);
 
   const onSave = async (updatedPipeline: Pipeline) => {
     setIsSaving(true);
@@ -92,11 +93,19 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
             <h2>
               <FormattedMessage
                 id="xpack.ingestPipelines.edit.fetchPipelineError"
-                defaultMessage="Error loading pipeline"
+                defaultMessage="Unable to load existing pipeline"
               />
             </h2>
           }
           body={<p>{error.message}</p>}
+          actions={
+            <EuiButton onClick={resendRequest} iconType="refresh" color="danger">
+              <FormattedMessage
+                id="xpack.ingestPipelines.edit.fetchPipelineReloadButton"
+                defaultMessage="Try again"
+              />
+            </EuiButton>
+          }
         />
       </EuiPageContent>
     );
