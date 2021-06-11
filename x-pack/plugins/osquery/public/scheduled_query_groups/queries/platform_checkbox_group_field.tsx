@@ -17,7 +17,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../shared_imports';
-import { PlatformIcon } from '../platforms/platform_icon';
+import { PlatformIcon } from './platforms/platform_icon';
 
 interface Props {
   field: FieldHook<string>;

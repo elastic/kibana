@@ -25,7 +25,7 @@ import {
 import { PackagePolicy, PackagePolicyInputStream } from '../../../fleet/common';
 import { FilterStateStore } from '../../../../../src/plugins/data/common';
 import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
-import { PlatformIcons } from './platforms';
+import { PlatformIcons } from './queries/platforms';
 
 export enum ViewResultsActionButtonType {
   icon = 'icon',

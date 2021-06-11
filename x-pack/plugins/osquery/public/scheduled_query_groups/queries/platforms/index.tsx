@@ -11,26 +11,28 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { PlatformIcon } from './platform_icon';
 import { PlatformType } from './types';
 
+const DEFAULT_STATE = [PlatformType.darwin, PlatformType.linux, PlatformType.windows];
+
 interface PlatformIconsProps {
   platform: string;
 }
 
 const PlatformIconsComponent: React.FC<PlatformIconsProps> = ({ platform }) => {
-  const [platforms, setPlatforms] = useState<string[]>([
-    PlatformType.darwin,
-    PlatformType.linux,
-    PlatformType.windows,
-  ]);
+  const [platforms, setPlatforms] = useState<string[]>(DEFAULT_STATE);
 
   useEffect(() => {
     setPlatforms((prevValue) => {
-      let platformArray: string[];
-      try {
-        platformArray = platform?.split(',').map((platformString) => platformString.trim());
-      } catch (e) {
-        return prevValue;
+      if (platform) {
+        let platformArray: string[];
+        try {
+          platformArray = platform?.split(',').map((platformString) => platformString.trim());
+        } catch (e) {
+          return prevValue;
+        }
+        return platformArray;
+      } else {
+        return DEFAULT_STATE;
       }
-      return platformArray;
     });
   }, [platform]);
 

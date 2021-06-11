@@ -17,6 +17,8 @@ import {
   agentPolicyRouteService,
   PackagePolicy,
   AgentPolicy,
+  PLUGIN_ID,
+  INTEGRATIONS_PLUGIN_ID,
 } from '../../../fleet/common';
 import {
   pagePathGetters,
@@ -51,7 +53,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
   const agentsLinkHref = useMemo(() => {
     if (!policy?.policy_id) return '#';
 
-    return getUrlForApp('fleet', {
+    return getUrlForApp(PLUGIN_ID, {
       path:
         `#` +
         pagePathGetters.policy_details({ policyId: policy?.policy_id }) +
@@ -128,13 +130,13 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
       replace({
         state: {
           onSaveNavigateTo: (newPackagePolicy) => [
-            'fleet',
+            INTEGRATIONS_PLUGIN_ID,
             {
               path:
                 '#' +
                 pagePathGetters.integration_policy_edit({
                   packagePolicyId: newPackagePolicy.id,
-                }),
+                })[1],
               state: {
                 forceRefresh: true,
               },

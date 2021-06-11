@@ -20,56 +20,32 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 
 import { CodeEditorField } from '../../queries/form/code_editor_field';
-import { idFieldValidations, intervalFieldValidation, queryFieldValidation } from './validations';
-import { Form, useForm, FormData, getUseField, Field, FIELD_TYPES } from '../../shared_imports';
-
-const FORM_ID = 'addQueryFlyoutForm';
+import { Form, FormData, getUseField, Field } from '../../shared_imports';
+import { PlatformCheckBoxGroupField } from './platform_checkbox_group_field';
+import { ALL_OSQUERY_VERSIONS_OPTIONS } from './constants';
+import { useScheduledQueryGroupQueryForm } from './use_scheduled_query_group_query_form';
 
 const CommonUseField = getUseField({ component: Field });
 
-interface AddQueryFlyoutProps {
+interface QueryFlyoutProps {
+  defaultValue?: any;
   onSave: (payload: FormData) => Promise<void>;
   onClose: () => void;
 }
 
-const AddQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ onSave, onClose }) => {
-  const { form } = useForm({
-    id: FORM_ID,
-    // @ts-expect-error update types
-    onSubmit: (payload, isValid) => {
+const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
+  defaultValue,
+  onSave,
+  onClose,
+}) => {
+  const { form } = useScheduledQueryGroupQueryForm({
+    handleSubmit: (payload, isValid) => {
       if (isValid) {
         onSave(payload);
         onClose();
       }
-    },
-    schema: {
-      id: {
-        type: FIELD_TYPES.TEXT,
-        label: i18n.translate('xpack.osquery.scheduledQueryGroup.queryFlyoutForm.idFieldLabel', {
-          defaultMessage: 'ID',
-        }),
-        validations: idFieldValidations.map((validator) => ({ validator })),
-      },
-      query: {
-        type: FIELD_TYPES.TEXT,
-        label: i18n.translate('xpack.osquery.scheduledQueryGroup.queryFlyoutForm.queryFieldLabel', {
-          defaultMessage: 'Query',
-        }),
-        validations: [{ validator: queryFieldValidation }],
-      },
-      interval: {
-        type: FIELD_TYPES.NUMBER,
-        label: i18n.translate(
-          'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.intervalFieldLabel',
-          {
-            defaultMessage: 'Interval (s)',
-          }
-        ),
-        validations: [{ validator: intervalFieldValidation }],
-      },
     },
   });
 
@@ -81,10 +57,17 @@ const AddQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ onSave, onClos
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
             <h2 id="flyoutTitle">
-              <FormattedMessage
-                id="xpack.osquery.scheduleQueryGroup.queryFlyoutForm.addFormTitle"
-                defaultMessage="Attach next query"
-              />
+              {defaultValue ? (
+                <FormattedMessage
+                  id="xpack.osquery.scheduleQueryGroup.queryFlyoutForm.editFormTitle"
+                  defaultMessage="Edit query"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.osquery.scheduleQueryGroup.queryFlyoutForm.addFormTitle"
+                  defaultMessage="Attach next query"
+                />
+              )}
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
@@ -94,10 +77,30 @@ const AddQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ onSave, onClos
             <EuiSpacer />
             <CommonUseField path="query" component={CodeEditorField} />
             <EuiSpacer />
-            {
-              // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-              <CommonUseField path="interval" euiFieldProps={{ append: 's' }} />
-            }
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <CommonUseField
+                  path="interval"
+                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                  euiFieldProps={{ append: 's' }}
+                />
+                <EuiSpacer />
+                <CommonUseField
+                  path="version"
+                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                  euiFieldProps={{
+                    noSuggestions: false,
+                    singleSelection: { asPlainText: true },
+                    placeholder: ALL_OSQUERY_VERSIONS_OPTIONS[0].label,
+                    options: ALL_OSQUERY_VERSIONS_OPTIONS,
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <CommonUseField path="platform" component={PlatformCheckBoxGroupField} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer />
           </Form>
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
@@ -125,4 +128,4 @@ const AddQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ onSave, onClos
   );
 };
 
-export const AddQueryFlyout = React.memo(AddQueryFlyoutComponent);
+export const QueryFlyout = React.memo(QueryFlyoutComponent);
