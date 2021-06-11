@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { i18n } from '@kbn/i18n';
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { ExpressionsStart, ExpressionsSetup } from '../../../src/plugins/expressions/public';
-import { LEGACY_RENDERER_LIBRARY, PLUGIN_NAME } from '../common';
+
+import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
+import { ExpressionsStart, ExpressionsSetup } from '../../expressions/public';
+import { LEGACY_RENDERER_LIBRARY } from '../common';
 import { revealImageFunction } from './expression_functions';
 import { revealImageRenderer } from './expression_renderers';
 import { revealImage as revealImageRendererLegacy } from './expression_renderers_legacy';
@@ -22,7 +22,7 @@ interface StartDeps {
 }
 
 export class ExpressionRevealImagePlugin implements Plugin<void, void, SetupDeps, StartDeps> {
-  public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionRevealImagePluginSetup {
+  public setup(core: CoreSetup, { expressions }: SetupDeps) {
     expressions.registerFunction(revealImageFunction);
 
     if (!core.uiSettings.get(LEGACY_RENDERER_LIBRARY, false)) {
@@ -32,7 +32,7 @@ export class ExpressionRevealImagePlugin implements Plugin<void, void, SetupDeps
     }
   }
 
-  public start(core: CoreStart): ExpressionRevealImagePluginStart {
+  public start(core: CoreStart) {
     return {};
   }
 

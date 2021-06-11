@@ -16,6 +16,7 @@
     "esUi": "src/plugins/es_ui_shared",
     "devTools": "src/plugins/dev_tools",
     "expressions": "src/plugins/expressions",
+    "expressionRevealImage": "src/plugins/expression_reveal_image",
     "inputControl": "src/plugins/input_control_vis",
     "inspector": "src/plugins/inspector",
     "inspectorViews": "src/legacy/core_plugins/inspector_views",

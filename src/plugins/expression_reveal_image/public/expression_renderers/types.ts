@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
+export type Origin = 'bottom' | 'left' | 'top' | 'right';
 export interface RevealImageRendererConfig {
   percent: number;
-  origin?: 'bottom' | 'left' | 'top' | 'right';
+  origin?: Origin;
   image?: string;
   emptyImage?: string;
 }

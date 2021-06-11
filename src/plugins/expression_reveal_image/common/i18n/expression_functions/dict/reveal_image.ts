@@ -7,11 +7,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FunctionHelp } from '../function_help';
-import { ExpressionRevealImageFunction, FunctionFactory, Position } from '../../../types';
+import { Position } from '../../../types';
 import { BASE64, URL } from '../../constants';
 
-export const help: FunctionHelp<FunctionFactory<ExpressionRevealImageFunction>> = {
+export const help = {
   help: i18n.translate('xpack.canvas.functions.revealImageHelpText', {
     defaultMessage: 'Configures an image reveal element.',
   }),

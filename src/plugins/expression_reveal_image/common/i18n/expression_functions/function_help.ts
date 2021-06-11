@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
-import { UnionToIntersection } from '@kbn/utility-types';
-
 import { help as revealImage } from './dict/reveal_image';
 
 /**
@@ -19,6 +16,6 @@ import { help as revealImage } from './dict/reveal_image';
  * This a function, rather than an object, to future-proof string initialization,
  * if ever necessary.
  */
-export const getFunctionHelp = (): FunctionHelpDict => ({
+export const getFunctionHelp = () => ({
   revealImage,
 });

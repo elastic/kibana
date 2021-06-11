@@ -12,23 +12,23 @@ type GenericRendererCallback = (callback: () => void) => void;
 
 export interface RendererHandlers extends IInterpreterRenderHandlers {
   /** Handler to invoke when an element should be destroyed. */
-  destroy: () => void;
+  destroy?: () => void;
   /** Get the id of the element being rendered.  Can be used as a unique ID in a render function */
-  getElementId: () => string;
+  getElementId?: () => string;
   /** Retrieves the value of the filter property on the element object persisted on the workpad */
-  getFilter: () => string;
+  getFilter?: () => string;
   /** Handler to invoke when a renderer is considered complete */
-  onComplete: (fn: () => void) => void;
+  onComplete?: (fn: () => void) => void;
   /** Handler to invoke when a rendered embeddable is destroyed */
-  onEmbeddableDestroyed: () => void;
+  onEmbeddableDestroyed?: () => void;
   /** Handler to invoke when the input to a function has changed internally */
-  onEmbeddableInputChange: (expression: string) => void;
+  onEmbeddableInputChange?: (expression: string) => void;
   /** Handler to invoke when an element's dimensions have changed*/
-  onResize: GenericRendererCallback;
+  onResize?: GenericRendererCallback;
   /** Handler to invoke when an element should be resized. */
-  resize: (size: { height: number; width: number }) => void;
+  resize?: (size: { height: number; width: number }) => void;
   /** Sets the value of the filter property on the element object persisted on the workpad */
-  setFilter: (filter: string) => void;
+  setFilter?: (filter: string) => void;
 }
 
 export interface RendererSpec<RendererConfig = {}> {
@@ -49,6 +49,3 @@ export interface RendererSpec<RendererConfig = {}> {
 }
 
 export type RendererFactory<RendererConfig = {}> = () => RendererSpec<RendererConfig>;
-
-export type AnyRendererFactory = RendererFactory<any>;
-export type AnyRendererSpec = RendererSpec<any>;

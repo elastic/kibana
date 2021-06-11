@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { CoreSetup, Plugin, UiSettingsParams } from 'kibana/server';
+import { CoreSetup, Plugin } from 'kibana/server';
 import { getUiSettingsConfig } from './ui_settings';
 
 export class ExpressionRevealImageServerPlugin implements Plugin<object, object> {

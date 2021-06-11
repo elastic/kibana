@@ -8,11 +8,8 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
-import { elasticOutline } from '../../common/lib/elastic_outline';
-import { isValidUrl } from '../../common/lib/url';
 import { getRendererStrings } from '../../common/i18n';
-import { RendererFactory } from '../../common/types';
-import { Output as Arguments } from '../expression_functions';
+import { RendererHandlers, RendererSpec } from '../../common/types';
 import { RevealImageRendererConfig } from './types';
 import { RendererWrapper } from '../components/renderer_wrapper';
 import './reveal_image.scss';
@@ -21,12 +18,16 @@ const { revealImage: revealImageStrings } = getRendererStrings();
 
 const RevealImageComponent = lazy(() => import('../components/reveal_image_component'));
 
-export const revealImageRenderer: RendererFactory<Arguments> = () => ({
+export const revealImageRenderer = (): RendererSpec<RevealImageRendererConfig> => ({
   name: 'revealImage',
   displayName: revealImageStrings.getDisplayName(),
   help: revealImageStrings.getHelpDescription(),
   reuseDomNode: true,
-  render: async (domNode: HTMLElement, config: RevealImageRendererConfig, handlers) => {
+  render: async (
+    domNode: HTMLElement,
+    config: RevealImageRendererConfig,
+    handlers: RendererHandlers
+  ) => {
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });

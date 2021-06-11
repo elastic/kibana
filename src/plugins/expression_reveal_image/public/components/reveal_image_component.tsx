@@ -7,16 +7,24 @@
  */
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { EuiDelayRender, EuiLoadingContent } from '@elastic/eui';
-import { debounce } from 'lodash';
-import { RevealImageRendererConfig, NodeDimensions } from '../expression_renderers/types';
+import { NodeDimensions, RevealImageRendererConfig, Origin } from '../expression_renderers/types';
 import { RendererHandlers } from '../../common/types';
 import { isValidUrl } from '../../common/lib/url';
+import { elasticOutline } from '../../common/lib/elastic_outline';
 
-interface RevealImageComponentProps {
+interface RevealImageComponentProps extends RevealImageRendererConfig {
   handlers: RendererHandlers;
-  [property in RevealImageRendererConfig]: RevealImageRendererConfig[property];
   parentNode: HTMLElement;
+}
+
+interface ImageStyles {
+  width?: string;
+  height?: string;
+  clipPath?: string;
+}
+
+interface AlignerStyles {
+  backgroundImage?: string;
 }
 
 function RevealImageComponent({
@@ -33,7 +41,7 @@ function RevealImageComponent({
     height: 1,
   });
 
-  const imgRef = useRef(null);
+  const imgRef = useRef<HTMLImageElement>(null);
 
   // modify the top-level container class
   parentNode.className = 'revealImage';
@@ -41,31 +49,32 @@ function RevealImageComponent({
   // set up the overlay image
   const onLoad = useCallback(() => {
     if (imgRef.current) {
-      setLoaded(true);
       setDimensions({
         height: imgRef.current.naturalHeight,
         width: imgRef.current.naturalWidth,
       });
+
+      setLoaded(true);
       return handlers.done();
     }
   }, [imgRef, handlers]);
 
   useEffect(() => {
-    handlers.onResize(onLoad);
+    handlers.onResize?.(onLoad);
     return () => {
-      handlers.destroy();
+      handlers.destroy?.();
     };
   }, [onLoad, handlers]);
 
-  function getClipPath(percentParam: number, originParam = 'bottom') {
-    const directions: Record<typeof origin, number> = { bottom: 0, left: 1, top: 2, right: 3 };
+  function getClipPath(percentParam: number, originParam: Origin = 'bottom') {
+    const directions: Record<Origin, number> = { bottom: 0, left: 1, top: 2, right: 3 };
     const values: Array<number | string> = [0, 0, 0, 0];
     values[directions[originParam]] = `${100 - percentParam * 100}%`;
     return `inset(${values.join(' ')})`;
   }
 
   function getImageSizeStyle() {
-    const imgStyles = {};
+    const imgStyles: ImageStyles = {};
 
     const imgDimensions = {
       height: dimensions.height,
@@ -90,15 +99,16 @@ function RevealImageComponent({
     return imgStyles;
   }
 
-  const imgSrc = isValidUrl(image) ? image : elasticOutline;
+  const imgSrc = isValidUrl(image ?? '') ? image : elasticOutline;
 
-  const alignerStyles = {};
-  if (isValidUrl(emptyImage)) {
+  const alignerStyles: AlignerStyles = {};
+
+  if (isValidUrl(emptyImage ?? '')) {
     // only use empty image if one is provided
     alignerStyles.backgroundImage = `url(${emptyImage})`;
   }
 
-  let imgStyles = {};
+  let imgStyles: ImageStyles = {};
   if (imgRef.current && loaded) imgStyles = getImageSizeStyle();
 
   imgStyles.clipPath = getClipPath(percent, origin);
@@ -112,7 +122,7 @@ function RevealImageComponent({
         ref={imgRef}
         onLoad={onLoad}
         className="revealImage__image"
-        src={imgSrc}
+        src={imgSrc ?? ''}
         alt=""
         role="presentation"
         style={imgStyles}
