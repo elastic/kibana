@@ -46,18 +46,18 @@ export const EmptyIndexPatternPrompt = ({ goToCreate }: Props) => {
           <EuiText grow={false}>
             <h2>
               <FormattedMessage
-                id="indexPatternManagement.emptyIndexPatternPrompt.youHaveData"
+                id="indexPatternEditor.emptyIndexPatternPrompt.youHaveData"
                 defaultMessage="You have data in Elasticsearch."
               />
               <br />
               <FormattedMessage
-                id="indexPatternManagement.emptyIndexPatternPrompt.nowCreate"
+                id="indexPatternEditor.emptyIndexPatternPrompt.nowCreate"
                 defaultMessage="Now, create an index pattern."
               />
             </h2>
             <p>
               <FormattedMessage
-                id="indexPatternManagement.emptyIndexPatternPrompt.indexPatternExplanation"
+                id="indexPatternEditor.emptyIndexPatternPrompt.indexPatternExplanation"
                 defaultMessage="Kibana requires an index pattern to identify which indices you want to explore. An
                 index pattern can point to a specific index, for example, your log data from
                 yesterday, or all indices that contain your log data."
@@ -71,7 +71,7 @@ export const EmptyIndexPatternPrompt = ({ goToCreate }: Props) => {
                 data-test-subj="createIndexPatternButton"
               >
                 <FormattedMessage
-                  id="indexPatternManagement.indexPatternTable.createBtn"
+                  id="indexPatternEditor.indexPatternTable.createBtn"
                   defaultMessage="Create index pattern"
                 />
               </EuiButton>
@@ -83,14 +83,14 @@ export const EmptyIndexPatternPrompt = ({ goToCreate }: Props) => {
       <EuiDescriptionList className="inpEmptyIndexPatternPrompt__footer" type="responsiveColumn">
         <EuiDescriptionListTitle className="inpEmptyIndexPatternPrompt__title">
           <FormattedMessage
-            id="indexPatternManagement.emptyIndexPatternPrompt.learnMore"
+            id="indexPatternEditor.emptyIndexPatternPrompt.learnMore"
             defaultMessage="Want to learn more?"
           />
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
           <EuiLink href={docLinks.links.indexPatterns.introduction} target="_blank" external>
             <FormattedMessage
-              id="indexPatternManagement.emptyIndexPatternPrompt.documentation"
+              id="indexPatternEditor.emptyIndexPatternPrompt.documentation"
               defaultMessage="Read documentation"
             />
           </EuiLink>

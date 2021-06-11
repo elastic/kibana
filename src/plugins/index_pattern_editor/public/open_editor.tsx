@@ -45,7 +45,6 @@ export const getEditorOpener = ({ core, indexPatternService }: Dependencies) => 
   });
 
   let overlayRef: OverlayRef | null = null;
-  // capabilities.management.kibana.indexPatterns
 
   const openEditor = ({ onSave }: OpenEditorOptions): CloseEditor => {
     const closeEditor = () => {
@@ -70,7 +69,10 @@ export const getEditorOpener = ({ core, indexPatternService }: Dependencies) => 
             <IndexPatternFlyoutContentContainer onSave={onSaveField} onCancel={closeEditor} />
           </I18nProvider>
         </KibanaReactContextProvider>
-      )
+      ),
+      {
+        // hideCloseButton: true,
+      }
     );
 
     return closeEditor;

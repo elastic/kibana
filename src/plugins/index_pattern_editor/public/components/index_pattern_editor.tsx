@@ -25,7 +25,7 @@ export const IndexPatternEditor = ({ onSave, closeEditor, services }: IndexPatte
 
   return (
     <KibanaReactContextProvider>
-      <EuiFlyout onClose={closeEditor}>
+      <EuiFlyout onClose={closeEditor} hideCloseButton={false}>
         <IndexPatternFlyoutContentContainer onSave={onSave} onCancel={closeEditor} />
       </EuiFlyout>
     </KibanaReactContextProvider>

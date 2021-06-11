@@ -26,10 +26,10 @@ export const AdvancedParametersSection = ({ children }: Props) => {
     <>
       <EuiButtonEmpty onClick={toggleIsVisible} flush="left" data-test-subj="toggleAdvancedSetting">
         {isVisible
-          ? i18n.translate('indexPatternFieldEditor.editor.form.advancedSettings.hideButtonLabel', {
+          ? i18n.translate('indexPatternEditor.editor.form.advancedSettings.hideButtonLabel', {
               defaultMessage: 'Hide advanced settings',
             })
-          : i18n.translate('indexPatternFieldEditor.editor.form.advancedSettings.showButtonLabel', {
+          : i18n.translate('indexPatternEditor.editor.form.advancedSettings.showButtonLabel', {
               defaultMessage: 'Show advanced settings',
             })}
       </EuiButtonEmpty>

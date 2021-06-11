@@ -84,6 +84,7 @@ export interface OverlayFlyoutOpenOptions {
   'data-test-subj'?: string;
   size?: EuiFlyoutSize;
   maxWidth?: boolean | number | string;
+  hideCloseButton?: boolean;
 }
 
 interface StartDeps {

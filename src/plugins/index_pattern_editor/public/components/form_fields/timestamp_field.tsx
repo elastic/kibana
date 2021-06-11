@@ -37,7 +37,7 @@ export const TimestampField = ({ isDisabled = false, options = [] }: Props) => {
             <EuiFormRow label={label} fullWidth>
               <EuiComboBox<string>
                 placeholder={i18n.translate(
-                  'indexPatternFieldEditor.editor.form.runtimeType.placeholderLabel',
+                  'indexPatternEditor.editor.form.runtimeType.placeholderLabel',
                   {
                     defaultMessage: 'Select a timestamp field',
                   }
@@ -56,12 +56,9 @@ export const TimestampField = ({ isDisabled = false, options = [] }: Props) => {
                 isClearable={false}
                 isDisabled={isDisabled}
                 data-test-subj="timestampField"
-                aria-label={i18n.translate(
-                  'indexPatternFieldEditor.editor.form.typeSelectAriaLabel',
-                  {
-                    defaultMessage: 'Timestamp field',
-                  }
-                )}
+                aria-label={i18n.translate('indexPatternEditor.editor.form.typeSelectAriaLabel', {
+                  defaultMessage: 'Timestamp field',
+                })}
                 fullWidth
               />
             </EuiFormRow>

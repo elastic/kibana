@@ -48,13 +48,13 @@ export const EmptyState = ({
   const createAnywayLink = (
     <EuiText color="subdued" textAlign="center" size="xs">
       <FormattedMessage
-        id="indexPatternManagement.createIndexPattern.emptyState.createAnyway"
+        id="indexPatternEditor.createIndexPattern.emptyState.createAnyway"
         defaultMessage="Some indices may be hidden. Try to {link} anyway."
         values={{
           link: (
             <EuiLink onClick={() => createAnyway()} data-test-subj="createAnyway">
               <FormattedMessage
-                id="indexPatternManagement.createIndexPattern.emptyState.createAnywayLink"
+                id="indexPatternEditor.createIndexPattern.emptyState.createAnywayLink"
                 defaultMessage="create an index pattern"
               />
             </EuiLink>
@@ -77,7 +77,7 @@ export const EmptyState = ({
             <EuiTitle>
               <h2>
                 <FormattedMessage
-                  id="indexPatternManagement.createIndexPattern.emptyState.noDataTitle"
+                  id="indexPatternEditor.createIndexPattern.emptyState.noDataTitle"
                   defaultMessage="Ready to try Kibana? First, you need data."
                 />
               </h2>
@@ -97,13 +97,13 @@ export const EmptyState = ({
                 icon={<EuiIcon size="xl" type="database" color="subdued" />}
                 title={
                   <FormattedMessage
-                    id="indexPatternManagement.createIndexPattern.emptyState.integrationCardTitle"
+                    id="indexPatternEditor.createIndexPattern.emptyState.integrationCardTitle"
                     defaultMessage="Add integration"
                   />
                 }
                 description={
                   <FormattedMessage
-                    id="indexPatternManagement.createIndexPattern.emptyState.integrationCardDescription"
+                    id="indexPatternEditor.createIndexPattern.emptyState.integrationCardDescription"
                     defaultMessage="Add data from a variety of sources."
                   />
                 }
@@ -116,13 +116,13 @@ export const EmptyState = ({
                 icon={<EuiIcon size="xl" type="document" color="subdued" />}
                 title={
                   <FormattedMessage
-                    id="indexPatternManagement.createIndexPattern.emptyState.uploadCardTitle"
+                    id="indexPatternEditor.createIndexPattern.emptyState.uploadCardTitle"
                     defaultMessage="Upload a file"
                   />
                 }
                 description={
                   <FormattedMessage
-                    id="indexPatternManagement.createIndexPattern.emptyState.uploadCardDescription"
+                    id="indexPatternEditor.createIndexPattern.emptyState.uploadCardDescription"
                     defaultMessage="Import a CSV, NDJSON, or log file."
                   />
                 }
@@ -138,13 +138,13 @@ export const EmptyState = ({
                 icon={<EuiIcon size="xl" type="heatmap" color="subdued" />}
                 title={
                   <FormattedMessage
-                    id="indexPatternManagement.createIndexPattern.emptyState.sampleDataCardTitle"
+                    id="indexPatternEditor.createIndexPattern.emptyState.sampleDataCardTitle"
                     defaultMessage="Add sample data"
                   />
                 }
                 description={
                   <FormattedMessage
-                    id="indexPatternManagement.createIndexPattern.emptyState.sampleDataCardDescription"
+                    id="indexPatternEditor.createIndexPattern.emptyState.sampleDataCardDescription"
                     defaultMessage="Load a data set and a Kibana dashboard."
                   />
                 }
@@ -160,14 +160,14 @@ export const EmptyState = ({
                     {
                       title: (
                         <FormattedMessage
-                          id="indexPatternManagement.createIndexPattern.emptyState.learnMore"
+                          id="indexPatternEditor.createIndexPattern.emptyState.learnMore"
                           defaultMessage="Want to learn more?"
                         />
                       ),
                       description: (
                         <EuiLink href={docLinks.links.addData} target="_blank" external>
                           <FormattedMessage
-                            id="indexPatternManagement.createIndexPattern.emptyState.readDocs"
+                            id="indexPatternEditor.createIndexPattern.emptyState.readDocs"
                             defaultMessage="Read documentation"
                           />
                         </EuiLink>
@@ -182,14 +182,14 @@ export const EmptyState = ({
                     {
                       title: (
                         <FormattedMessage
-                          id="indexPatternManagement.createIndexPattern.emptyState.haveData"
+                          id="indexPatternEditor.createIndexPattern.emptyState.haveData"
                           defaultMessage="Think you already have data?"
                         />
                       ),
                       description: (
                         <EuiLink onClick={onRefresh} data-test-subj="refreshIndicesButton">
                           <FormattedMessage
-                            id="indexPatternManagement.createIndexPattern.emptyState.checkDataButton"
+                            id="indexPatternEditor.createIndexPattern.emptyState.checkDataButton"
                             defaultMessage="Check for new data"
                           />{' '}
                           <EuiIcon type="refresh" size="s" />

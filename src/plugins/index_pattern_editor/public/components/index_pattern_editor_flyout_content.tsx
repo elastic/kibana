@@ -78,10 +78,10 @@ export interface FormInternal extends Omit<IndexPatternConfig, 'timestampField'>
 
 const geti18nTexts = () => {
   return {
-    closeButtonLabel: i18n.translate('indexPatternFieldEditor.editor.flyoutCloseButtonLabel', {
+    closeButtonLabel: i18n.translate('indexPatternEditor.editor.flyoutCloseButtonLabel', {
       defaultMessage: 'Close',
     }),
-    saveButtonLabel: i18n.translate('indexPatternFieldEditor.editor.flyoutSaveButtonLabel', {
+    saveButtonLabel: i18n.translate('indexPatternEditor.editor.flyoutSaveButtonLabel', {
       defaultMessage: 'Save',
     }),
   };
@@ -371,7 +371,7 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
                   data-test-subj="allowHiddenField"
                   componentProps={{
                     euiFieldProps: {
-                      'aria-label': i18n.translate('indexPatternEditor.form.timestampAriaLabel', {
+                      'aria-label': i18n.translate('indexPatternEditor.form.allowHiddenAriaLabel', {
                         defaultMessage: 'Allow hidden and system indices',
                       }),
                     },

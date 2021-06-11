@@ -13,16 +13,16 @@ import { i18n } from '@kbn/i18n';
 // import { IndexPatternCreationConfig } from '../../../index_pattern_management/public';
 import { MatchedItem, ResolveIndexResponse, ResolveIndexResponseItemIndexAttrs } from '../types';
 
-const aliasLabel = i18n.translate('indexPatternManagement.aliasLabel', { defaultMessage: 'Alias' });
-const dataStreamLabel = i18n.translate('indexPatternManagement.dataStreamLabel', {
+const aliasLabel = i18n.translate('indexPatternEditor.aliasLabel', { defaultMessage: 'Alias' });
+const dataStreamLabel = i18n.translate('indexPatternEditor.dataStreamLabel', {
   defaultMessage: 'Data stream',
 });
 
-const indexLabel = i18n.translate('indexPatternManagement.indexLabel', {
+const indexLabel = i18n.translate('indexPatternEditor.indexLabel', {
   defaultMessage: 'Index',
 });
 
-const frozenLabel = i18n.translate('indexPatternManagement.frozenLabel', {
+const frozenLabel = i18n.translate('indexPatternEditor.frozenLabel', {
   defaultMessage: 'Frozen',
 });
 
