@@ -58,6 +58,8 @@ Review important information about the {kib} 7.13.x releases.
 == {kib} 7.13.1
 
 [[known-issue-7.13.1]]
+[discrete]
+[[known-issue-7.13.1]]
 === Known issue
 
 Kibana instances with dashboard panels that are `by value` and have drilldowns may fail to start after upgrade.  
