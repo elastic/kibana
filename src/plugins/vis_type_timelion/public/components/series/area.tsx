@@ -8,27 +8,34 @@
 
 import React from 'react';
 import { AreaSeries, ScaleType, CurveType } from '@elastic/charts';
+import { Series } from '../../../common/vis_data';
 
-export function AreaSeriesComponent({ data, index }: { data: any; index: number }) {
-  const lines = data.lines || {};
-  const points = data.points || {};
+interface AreaSeriesComponentProps {
+  index: number;
+  visData: Series;
+}
+
+export function AreaSeriesComponent({
+  index,
+  visData: { lines = {}, points = {}, color, label, data, stack },
+}: AreaSeriesComponentProps) {
   const styles = {
     areaSeriesStyle: {
       line: {
-        stroke: data.color,
-        strokeWidth: Number(lines.lineWidth) ?? 3,
+        stroke: color,
+        strokeWidth: lines.lineWidth !== undefined ? Number(lines.lineWidth) : 3,
         visible: lines.show ?? !points.show,
       },
       area: {
-        fill: data.color,
+        fill: color,
         opacity: lines.fill ?? 0,
         visible: lines.show ?? !points.show,
       },
       point: {
         fill: points.fillColor,
-        opacity: points.fill * 10 ?? 10,
+        opacity: points.lineWidth !== undefined ? (points.fill || 1) * 10 : 10,
         radius: points.radius ?? 3,
-        stroke: data.color,
+        stroke: color,
         strokeWidth: points.lineWidth ?? 2,
         visible: points.show ?? false,
         shape: points.symbol === 'cross' ? 'x' : points.symbol,
@@ -39,16 +46,17 @@ export function AreaSeriesComponent({ data, index }: { data: any; index: number 
 
   return (
     <AreaSeries
-      id={index + data.label}
-      name={data.label}
+      id={index + label}
+      groupId={`${index}`}
+      name={label}
       xScaleType={ScaleType.Time}
       yScaleType={ScaleType.Linear}
       xAccessor={0}
       yAccessors={[1]}
-      data={data.data}
+      data={data}
       sortIndex={index}
-      color={data.color}
-      stackAccessors={data.stack ? [0] : undefined}
+      color={color}
+      stackAccessors={stack ? [0] : undefined}
       {...styles}
     />
   );

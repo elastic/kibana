@@ -8,9 +8,17 @@
 
 import React from 'react';
 import { BarSeries, ScaleType } from '@elastic/charts';
+import { Series } from '../../../common/vis_data';
 
-export function BarSeriesComponent({ data, index }: { data: any; index: number }) {
-  const bars = data.bars || {};
+interface BarSeriesComponentProps {
+  index: number;
+  visData: Series;
+}
+
+export function BarSeriesComponent({
+  index,
+  visData: { color, data, label, stack, bars = {} },
+}: BarSeriesComponentProps) {
   let opacity = bars.fill;
 
   if (!bars.fill) {
@@ -24,7 +32,7 @@ export function BarSeriesComponent({ data, index }: { data: any; index: number }
   const styles = {
     barSeriesStyle: {
       rect: {
-        fill: data.color,
+        fill: color,
         opacity,
         widthPixel: bars.lineWidth,
       },
@@ -33,16 +41,17 @@ export function BarSeriesComponent({ data, index }: { data: any; index: number }
 
   return (
     <BarSeries
-      id={index + data.label}
-      name={data.label}
+      id={index + label}
+      groupId={`${index}`}
+      name={label}
       xScaleType={ScaleType.Time}
       yScaleType={ScaleType.Linear}
       xAccessor={0}
       yAccessors={[1]}
-      data={data.data}
+      data={data}
       sortIndex={index}
-      color={data.color}
-      stackAccessors={data.stack ? [0] : undefined}
+      color={color}
+      stackAccessors={stack ? [0] : undefined}
       {...styles}
     />
   );

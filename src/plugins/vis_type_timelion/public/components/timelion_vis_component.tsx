@@ -23,8 +23,7 @@ import {
 
 import { useKibana } from '../../../kibana_react/public';
 
-import { AreaSeriesComponent } from './area_series';
-import { BarSeriesComponent } from './bar_series';
+import { AreaSeriesComponent, BarSeriesComponent } from './series';
 
 import { createTickFormat, colors, IAxis, activeCursor$ } from '../helpers/panel_utils';
 import { tickFormatters } from '../helpers/tick_formatters';
@@ -225,6 +224,7 @@ function TimelionVisComponent({
         {yaxes.length ? (
           yaxes.map((axis: IAxis, index: number) => (
             <Axis
+              groupId={`${index}`}
               key={index}
               id={axis.position + axis.axisLabel}
               title={axis.axisLabel}
@@ -240,7 +240,7 @@ function TimelionVisComponent({
         {chart.map((data, index) => {
           const SeriesComponent = data.bars ? BarSeriesComponent : AreaSeriesComponent;
 
-          return <SeriesComponent key={`${index}-${data.label}`} data={data} index={index} />;
+          return <SeriesComponent key={`${index}-${data.label}`} visData={data} index={index} />;
         })}
       </Chart>
     </div>
