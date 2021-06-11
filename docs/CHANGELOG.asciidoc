@@ -57,10 +57,20 @@ Review important information about the {kib} 7.13.x releases.
 [[release-notes-7.13.1]]
 == {kib} 7.13.1
 
+[[known-issue-7.13.1]]
 === Known issue
 
 Kibana instances with dashboard panels that are `by value` and have drilldowns may fail to start after upgrade.  
 We recommend that users who have been using drilldowns in Kibana wait for 7.13.3 to upgrade.
+
+[%collapsible]
+====
+*Details* +
+For more information, refer to {kibana-issue}101430[#101430].
+
+====
+
+
 
 [float]
 [[fixes-v7.13.1]]
