@@ -21,7 +21,7 @@ import {
   buildOptions,
   SERIES_ID_ATTR,
   colors,
-  Axis,
+  LegacyAxis,
   ACTIVE_CURSOR,
   eventBus,
 } from './panel_utils';
@@ -195,7 +195,7 @@ function TimelionVisComponent({
         const updatedSeries = buildSeriesData(chartValue, options);
 
         if (options.yaxes) {
-          options.yaxes.forEach((yaxis: Axis) => {
+          options.yaxes.forEach((yaxis: LegacyAxis) => {
             if (yaxis && yaxis.units) {
               const formatters = tickFormatters();
               yaxis.tickFormatter = formatters[yaxis.units.type as keyof typeof formatters];
@@ -298,9 +298,9 @@ function TimelionVisComponent({
             legendValueNumbers.eq(i).empty();
           } else {
             let label = y.toFixed(precision);
-            const formatter = ((series.yaxis as unknown) as Axis).tickFormatter;
+            const formatter = ((series.yaxis as unknown) as LegacyAxis).tickFormatter;
             if (formatter) {
-              label = formatter(Number(label), (series.yaxis as unknown) as Axis);
+              label = formatter(Number(label), (series.yaxis as unknown) as LegacyAxis);
             }
             legendValueNumbers.eq(i).text(`(${label})`);
           }

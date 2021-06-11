@@ -16,7 +16,7 @@ import { IUiSettingsClient } from 'kibana/public';
 import { calculateInterval } from '../../common/lib';
 import { xaxisFormatterProvider } from './xaxis_formatter';
 
-export interface Axis {
+export interface IAxis {
   delta?: number;
   max?: number;
   min?: number;
@@ -30,7 +30,7 @@ export interface Axis {
   timezone: string;
   tickDecimals?: number;
   tickFormatter: (val: number) => string;
-  tickGenerator?(axis: Axis): number[];
+  tickGenerator?(axis: IAxis): number[];
   units?: { type: string; prefix: string; suffix: string };
   domain?: {
     fit?: boolean;

@@ -8,9 +8,9 @@
 
 import { get } from 'lodash';
 
-import { Axis } from './panel_utils';
+import { IAxis } from './panel_utils';
 
-function baseTickFormatter(value: number, axis: Axis) {
+function baseTickFormatter(value: number, axis: IAxis) {
   const factor = axis.tickDecimals ? Math.pow(10, axis.tickDecimals) : 1;
   const formatted = '' + Math.round(value * factor) / factor;
 
@@ -45,7 +45,7 @@ function unitFormatter(divisor: number, units: string[]) {
   };
 }
 
-export function tickFormatters(axis: Axis) {
+export function tickFormatters(axis: IAxis) {
   return {
     bits: unitFormatter(1000, ['b', 'kb', 'mb', 'gb', 'tb', 'pb']),
     'bits/s': unitFormatter(1000, ['b/s', 'kb/s', 'mb/s', 'gb/s', 'tb/s', 'pb/s']),

@@ -17,7 +17,7 @@ import { calculateInterval } from '../../common/lib';
 import { xaxisFormatterProvider } from '../helpers/xaxis_formatter';
 import { Series } from '../helpers/timelion_request_handler';
 
-export interface Axis {
+export interface LegacyAxis {
   delta?: number;
   max?: number;
   min?: number;
@@ -30,8 +30,8 @@ export interface Axis {
   tickLength: number;
   timezone: string;
   tickDecimals?: number;
-  tickFormatter: ((val: number) => string) | ((val: number, axis: Axis) => string);
-  tickGenerator?(axis: Axis): number[];
+  tickFormatter: ((val: number) => string) | ((val: number, axis: LegacyAxis) => string);
+  tickGenerator?(axis: LegacyAxis): number[];
   units?: { type: string };
 }
 
@@ -172,7 +172,7 @@ function buildOptions(
         return wrapperSpan.outerHTML;
       },
     },
-  } as jquery.flot.plotOptions & { yaxes?: Axis[] };
+  } as jquery.flot.plotOptions & { yaxes?: LegacyAxis[] };
 
   return options;
 }

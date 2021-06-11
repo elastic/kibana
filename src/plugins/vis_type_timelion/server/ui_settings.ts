@@ -26,13 +26,12 @@ export function getUiSettings(
         defaultMessage: 'Legacy charts library',
       }),
       description: i18n.translate('timelion.uiSettings.legacyChartsLibraryDescription', {
-        defaultMessage: 'Enables legacy charts library for Timeline visualizations',
+        defaultMessage: 'Enables legacy charts library for Timelion visualizations',
       }),
       value: false,
       category: ['timelion'],
       schema: schema.boolean(),
     },
-
     [UI_SETTINGS.ES_TIMEFIELD]: {
       name: i18n.translate('timelion.uiSettings.timeFieldLabel', {
         defaultMessage: 'Time field',

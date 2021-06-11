@@ -21,17 +21,17 @@ import {
   LayoutDirection,
 } from '@elastic/charts';
 
-import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { useKibana } from '../../../kibana_react/public';
 
 import { AreaSeriesComponent } from './area_series';
 import { BarSeriesComponent } from './bar_series';
 
-import { createTickFormat, colors, Axis as IAxis, activeCursor$ } from '../helpers/panel_utils';
+import { createTickFormat, colors, IAxis, activeCursor$ } from '../helpers/panel_utils';
 import { tickFormatters } from '../helpers/tick_formatters';
 
-import { Series, Sheet } from '../helpers/timelion_request_handler';
-import { TimelionVisDependencies } from '../plugin';
+import type { Series, Sheet } from '../helpers/timelion_request_handler';
+import type { IInterpreterRenderHandlers } from '../../../expressions';
+import type { TimelionVisDependencies } from '../plugin';
 
 import './timelion_vis.scss';
 
@@ -46,6 +46,25 @@ const handleCursorUpdate = (cursor: PointerEvent) => {
   activeCursor$.next(cursor);
 };
 
+const updateYAxes = (yaxes: IAxis[]) => {
+  yaxes.forEach((yaxis: IAxis) => {
+    if (yaxis) {
+      if (yaxis.units) {
+        const formatters = tickFormatters(yaxis);
+        yaxis.tickFormatter = formatters[yaxis.units.type as keyof typeof formatters];
+      } else if (yaxis.tickDecimals) {
+        yaxis.tickFormatter = (val: number) => val.toFixed(yaxis.tickDecimals);
+      }
+
+      yaxis.domain = {
+        fit: true,
+        ...(yaxis.max ? { max: yaxis.max } : {}),
+        ...(yaxis.min ? { min: yaxis.min } : {}),
+      };
+    }
+  });
+};
+
 function TimelionVisComponent({
   interval,
   seriesList,
@@ -55,25 +74,6 @@ function TimelionVisComponent({
   const kibana = useKibana<TimelionVisDependencies>();
   const [chart, setChart] = useState(() => cloneDeep(seriesList.list));
   const chartRef = useRef<Chart>();
-
-  const updateYAxes = function (yaxes: IAxis[]) {
-    yaxes.forEach((yaxis: IAxis) => {
-      if (yaxis) {
-        if (yaxis.units) {
-          const formatters = tickFormatters(yaxis);
-          yaxis.tickFormatter = formatters[yaxis.units.type as keyof typeof formatters];
-        } else if (yaxis.tickDecimals) {
-          yaxis.tickFormatter = (val: number) => val.toFixed(yaxis.tickDecimals);
-        }
-
-        yaxis.domain = {
-          fit: true,
-          ...(yaxis.max ? { max: yaxis.max } : {}),
-          ...(yaxis.min ? { min: yaxis.min } : {}),
-        };
-      }
-    });
-  };
 
   useEffect(() => {
     const updateCursor = (cursor: PointerEvent) => {
@@ -106,38 +106,6 @@ function TimelionVisComponent({
 
     setChart(newChart);
   }, [seriesList.list]);
-
-  const getLegendPosition = useCallback(() => {
-    let chartLegendGlobal: Record<any, any> = {};
-    chart.forEach((series) => {
-      if (series._global?.legend) {
-        chartLegendGlobal = {
-          ...chartLegendGlobal,
-          ...series._global.legend,
-        };
-      }
-    });
-
-    const legendPositionConf: LegendPositionConfig = {
-      floating: true,
-      floatingColumns: chartLegendGlobal?.noColumns ?? 1,
-      vAlign: Position.Top,
-      hAlign: Position.Left,
-      direction: LayoutDirection.Vertical,
-    };
-
-    const validatePosition = (position: string) => /^(n|s)(e|w)$/s.test(position);
-
-    // @todo test that
-    if (validatePosition(chartLegendGlobal?.position ?? '')) {
-      const [vAlign, hAlign] = chartLegendGlobal!.position.split('');
-
-      legendPositionConf.vAlign = vAlign === 'n' ? Position.Top : Position.Bottom;
-      legendPositionConf.hAlign = hAlign === 'e' ? Position.Right : Position.Left;
-    }
-
-    return legendPositionConf;
-  }, [chart]);
 
   const brushEndListener = useCallback<BrushEndListener>(
     ({ x }) => {
@@ -187,7 +155,7 @@ function TimelionVisComponent({
     const collectedYAxes: IAxis[] = [];
 
     chart.forEach((chartInst) => {
-      chartInst._global?.yaxes.forEach((yaxis: IAxis) => {
+      chartInst._global?.yaxes?.forEach((yaxis: IAxis) => {
         if (yaxis) {
           collectedYAxes.push(yaxis);
         }
@@ -197,14 +165,50 @@ function TimelionVisComponent({
     return collectedYAxes;
   }, [chart]);
 
+  const legend = useMemo(() => {
+    const validatePosition = (position: string) => /^(n|s)(e|w)$/s.test(position);
+    const legendPosition: LegendPositionConfig = {
+      floating: true,
+      floatingColumns: 1,
+      vAlign: Position.Top,
+      hAlign: Position.Left,
+      direction: LayoutDirection.Vertical,
+    };
+    let showLegend = true;
+
+    chart.forEach((series) => {
+      if (series._global?.legend) {
+        const { show = true, position, noColumns = legendPosition.floatingColumns } =
+          series._global?.legend ?? {};
+
+        if (validatePosition(position)) {
+          const [vAlign, hAlign] = position.split('');
+
+          legendPosition.vAlign = vAlign === 'n' ? Position.Top : Position.Bottom;
+          legendPosition.hAlign = hAlign === 'e' ? Position.Right : Position.Left;
+        }
+
+        if (!show) {
+          showLegend = false;
+        }
+
+        if (noColumns !== undefined) {
+          legendPosition.floatingColumns = noColumns;
+        }
+      }
+    });
+
+    return { legendPosition, showLegend };
+  }, [chart]);
+
   return (
     <div className="timelionChart">
       <div className="timelionChart__topTitle">{title}</div>
       <Chart ref={chartRef as RefObject<Chart>} renderer="canvas" size={{ width: '100%' }}>
         <Settings
           onBrushEnd={brushEndListener}
-          showLegend
-          legendPosition={getLegendPosition()}
+          showLegend={legend.showLegend}
+          legendPosition={legend.legendPosition}
           onRenderChange={onRenderChange}
           onPointerUpdate={handleCursorUpdate}
           theme={kibana.services.chartTheme.useChartsTheme()}
@@ -215,30 +219,28 @@ function TimelionVisComponent({
           }}
           externalPointerEvents={{ tooltip: { visible: false } }}
         />
+
         <Axis id="bottom" position={Position.Bottom} showOverlappingTicks tickFormat={tickFormat} />
+
         {yaxes.length ? (
-          yaxes.map((axis: IAxis, index: number) => {
-            return (
-              <Axis
-                key={index}
-                id={axis.position + axis.axisLabel}
-                title={axis.axisLabel}
-                position={axis.position}
-                tickFormat={axis.tickFormatter}
-                domain={axis.domain as YDomainRange}
-              />
-            );
-          })
+          yaxes.map((axis: IAxis, index: number) => (
+            <Axis
+              key={index}
+              id={axis.position + axis.axisLabel}
+              title={axis.axisLabel}
+              position={axis.position}
+              tickFormat={axis.tickFormatter}
+              domain={axis.domain as YDomainRange}
+            />
+          ))
         ) : (
           <Axis id="left" position={Position.Left} />
         )}
-        {chart.map((data, index) => {
-          const key = `${index}-${data.label}`;
-          if (data.bars) {
-            return <BarSeriesComponent key={key} data={data} index={index} />;
-          }
 
-          return <AreaSeriesComponent key={key} data={data} index={index} />;
+        {chart.map((data, index) => {
+          const SeriesComponent = data.bars ? BarSeriesComponent : AreaSeriesComponent;
+
+          return <SeriesComponent key={`${index}-${data.label}`} data={data} index={index} />;
         })}
       </Chart>
     </div>
