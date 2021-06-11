@@ -57,7 +57,6 @@ Review important information about the {kib} 7.13.x releases.
 [[release-notes-7.13.1]]
 == {kib} 7.13.1
 
-[[known-issue-7.13.1]]
 [discrete]
 [[known-issue-7.13.1]]
 === Known issue
