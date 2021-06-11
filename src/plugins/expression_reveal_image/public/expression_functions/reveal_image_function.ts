@@ -9,29 +9,9 @@
 import { resolveWithMissingImage } from '../../common/lib/resolve_dataurl';
 import { elasticOutline } from '../../common/lib/elastic_outline';
 import { getFunctionHelp, getFunctionErrors } from '../../common/i18n';
-import { ExpressionRevealImageFunction } from '../../common/types';
+import { ExpressionRevealImageFunction, Origin } from '../../common/types';
 
-export enum Origin {
-  TOP = 'top',
-  LEFT = 'left',
-  BOTTOM = 'bottom',
-  RIGHT = 'right',
-}
-
-interface Arguments {
-  image: string | null;
-  emptyImage: string | null;
-  origin: Origin;
-}
-
-export interface Output {
-  image: string;
-  emptyImage: string;
-  origin: Origin;
-  percent: number;
-}
-
-export function revealImageFunction(): ExpressionRevealImageFunction {
+export const revealImageFunction: ExpressionRevealImageFunction = () => {
   const { help, args: argHelp } = getFunctionHelp().revealImage;
   const errors = getFunctionErrors().revealImage;
 
@@ -76,4 +56,4 @@ export function revealImageFunction(): ExpressionRevealImageFunction {
       };
     },
   };
-}
+};

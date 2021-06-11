@@ -15,6 +15,10 @@ const Fallback = () => (
   </EuiDelayRender>
 );
 
-export function RendererWrapper({ children }) {
+interface RendererWrapperProps {
+  children: React.ReactNode;
+}
+
+export function RendererWrapper({ children }: RendererWrapperProps) {
   return <React.Suspense fallback={<Fallback />}>{children}</React.Suspense>;
 }

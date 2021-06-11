@@ -12,7 +12,7 @@ import { revealImage } from '../';
 import { Render } from '../../__stories__';
 import { elasticOutline } from '../../../common/lib/elastic_outline';
 import { elasticLogo } from '../../../common/lib/elastic_logo';
-import { Origin } from '../../expression_functions';
+import { Origin } from '../../../common/types/expression_functions';
 import './reveal_image.scss';
 
 storiesOf('renderers/revealImage_legacy', module).add('default', () => {

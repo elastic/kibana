@@ -10,12 +10,13 @@ import { mapValues } from 'lodash';
 import { ExpressionRevealImageFunction } from '../types';
 
 // It takes a function spec and passes in default args into the spec fn
-export const functionWrapper = (fnSpec: () => ExpressionRevealImageFunction, mockReduxStore) => {
+export const functionWrapper = (
+  fnSpec: ExpressionRevealImageFunction
+): ReturnType<ExpressionRevealImageFunction>['fn'] => {
   const spec = fnSpec();
   const defaultArgs = mapValues(spec.args, (argSpec) => {
     return argSpec.default;
   });
 
-  return (context, args, handlers) =>
-    spec.fn(context, { ...defaultArgs, ...args }, handlers, mockReduxStore);
+  return (context, args, handlers) => spec.fn(context, { ...defaultArgs, ...args }, handlers);
 };
