@@ -43,7 +43,7 @@ export function getRumDistributionConfig({ indexPattern }: ConfigProps): DataSer
   return {
     reportType: 'data-distribution',
     defaultSeriesType: 'line',
-    seriesTypes: ['line', 'bar'],
+    seriesTypes: [],
     xAxisColumn: {
       sourceField: 'performance.metric',
     },

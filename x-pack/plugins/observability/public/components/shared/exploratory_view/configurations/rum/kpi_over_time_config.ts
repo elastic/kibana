@@ -42,8 +42,8 @@ import {
 export function getKPITrendsLensConfig({ indexPattern }: ConfigProps): DataSeries {
   return {
     defaultSeriesType: 'bar_stacked',
+    seriesTypes: [],
     reportType: 'kpi-over-time',
-    seriesTypes: ['bar', 'bar_stacked'],
     xAxisColumn: {
       sourceField: '@timestamp',
     },

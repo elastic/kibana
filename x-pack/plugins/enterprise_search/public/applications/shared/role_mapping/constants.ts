@@ -200,3 +200,8 @@ export const ROLE_MAPPINGS_HEADING_BUTTON = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.roleMappingsHeadingButton',
   { defaultMessage: 'Create a new role mapping' }
 );
+
+export const ROLE_MAPPINGS_NO_RESULTS_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.noResults.message',
+  { defaultMessage: 'Create a new role mapping' }
+);

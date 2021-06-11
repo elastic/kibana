@@ -98,13 +98,14 @@ export type AppDataType = 'synthetics' | 'ux' | 'infra_logs' | 'infra_metrics' |
 
 type FormatType = 'duration' | 'number';
 type InputFormat = 'microseconds' | 'milliseconds' | 'seconds';
-type OutputFormat = 'asSeconds' | 'asMilliseconds' | 'humanize';
+type OutputFormat = 'asSeconds' | 'asMilliseconds' | 'humanize' | 'humanizePrecise';
 
 export interface FieldFormatParams {
   inputFormat: InputFormat;
   outputFormat: OutputFormat;
   outputPrecision?: number;
   showSuffix?: boolean;
+  useShortSuffix?: boolean;
 }
 
 export interface FieldFormat {
