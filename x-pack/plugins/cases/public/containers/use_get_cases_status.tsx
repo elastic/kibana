@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useState, useRef } from 'react';
 
+import { useOwnerContext } from '../components/owner_context/use_owner_context';
 import { getCasesStatus } from './api';
 import * as i18n from './translations';
 import { CasesStatus } from './types';
@@ -30,6 +31,7 @@ export interface UseGetCasesStatus extends CasesStatusState {
 }
 
 export const useGetCasesStatus = (): UseGetCasesStatus => {
+  const owner = useOwnerContext();
   const [casesStatusState, setCasesStatusState] = useState<CasesStatusState>(initialData);
   const toasts = useToasts();
   const isCancelledRef = useRef(false);
@@ -45,7 +47,7 @@ export const useGetCasesStatus = (): UseGetCasesStatus => {
         isLoading: true,
       });
 
-      const response = await getCasesStatus(abortCtrlRef.current.signal);
+      const response = await getCasesStatus(abortCtrlRef.current.signal, owner);
 
       if (!isCancelledRef.current) {
         setCasesStatusState({

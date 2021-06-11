@@ -66,7 +66,7 @@ export const derivativeOperation: OperationDefinition<
     }
   },
   getDefaultLabel: (column, indexPattern, columns) => {
-    return ofName(columns[column.references[0]]?.label, column.timeScale);
+    return ofName(columns[column.references[0]]?.label, column.timeScale, column.timeShift);
   },
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'derivative');
@@ -74,7 +74,7 @@ export const derivativeOperation: OperationDefinition<
   buildColumn: ({ referenceIds, previousColumn, layer }, columnParams) => {
     const ref = layer.columns[referenceIds[0]];
     return {
-      label: ofName(ref?.label, previousColumn?.timeScale),
+      label: ofName(ref?.label, previousColumn?.timeScale, previousColumn?.timeShift),
       dataType: 'number',
       operationType: OPERATION_NAME,
       isBucketed: false,
@@ -82,6 +82,7 @@ export const derivativeOperation: OperationDefinition<
       references: referenceIds,
       timeScale: previousColumn?.timeScale,
       filter: getFilter(previousColumn, columnParams),
+      timeShift: previousColumn?.timeShift,
       params: getFormatFromPreviousColumn(previousColumn),
     };
   },
@@ -108,4 +109,22 @@ export const derivativeOperation: OperationDefinition<
   },
   timeScalingMode: 'optional',
   filterable: true,
+  documentation: {
+    section: 'calculation',
+    signature: i18n.translate('xpack.lens.indexPattern.differences.signature', {
+      defaultMessage: 'metric: number',
+    }),
+    description: i18n.translate('xpack.lens.indexPattern.differences.documentation', {
+      defaultMessage: `
+Calculates the difference to the last value of a metric over time. To use this function, you need to configure a date histogram dimension as well.
+Differences requires the data to be sequential. If your data is empty when using differences, try increasing the date histogram interval.
+
+This calculation will be done separately for separate series defined by filters or top values dimensions.
+
+Example: Visualize the change in bytes received over time:
+\`differences(sum(bytes))\`
+      `,
+    }),
+  },
+  shiftable: true,
 };

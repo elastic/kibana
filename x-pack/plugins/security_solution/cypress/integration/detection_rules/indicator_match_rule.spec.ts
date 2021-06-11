@@ -78,7 +78,7 @@ import {
   scrollJsonViewToBottom,
 } from '../../tasks/alerts_details';
 import {
-  changeRowsPerPageTo300,
+  changeRowsPerPageTo100,
   duplicateFirstRule,
   duplicateSelectedRules,
   duplicateRuleFromMenu,
@@ -424,7 +424,7 @@ describe('indicator match', () => {
 
         cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-        changeRowsPerPageTo300();
+        changeRowsPerPageTo100();
 
         cy.get(RULES_TABLE).then(($table) => {
           cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);

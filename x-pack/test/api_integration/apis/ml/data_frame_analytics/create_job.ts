@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('PUT data_frame/analytics/{analyticsId}', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/bm_classification');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/bm_classification');
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
 
