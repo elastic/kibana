@@ -61,7 +61,7 @@ export interface ISpacesClient {
 
   /**
    * Disables the specified legacy URL aliases.
-   * @param ids the ids of the legacy URL aliases to disable.
+   * @param aliases the aliases to disable.
    */
   disableLegacyUrlAliases(aliases: LegacyUrlAliasTarget[]): Promise<void>;
 }

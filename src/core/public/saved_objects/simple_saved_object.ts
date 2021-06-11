@@ -30,6 +30,10 @@ export class SimpleSavedObject<T = unknown> {
   public coreMigrationVersion: SavedObjectType<T>['coreMigrationVersion'];
   public error: SavedObjectType<T>['error'];
   public references: SavedObjectType<T>['references'];
+  /**
+   * Space(s) that this saved object exists in. This attribute is not used for "global" saved object types which are registered with
+   * `namespaceType: 'agnostic'`.
+   */
   public namespaces: SavedObjectType<T>['namespaces'];
 
   constructor(

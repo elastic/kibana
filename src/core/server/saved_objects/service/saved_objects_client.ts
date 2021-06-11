@@ -303,6 +303,9 @@ export interface SavedObjectsUpdateResponse<T = unknown>
  * @public
  */
 export interface SavedObjectsResolveResponse<T = unknown> {
+  /**
+   * The saved object that was found.
+   */
   saved_object: SavedObject<T>;
   /**
    * The outcome for a successful `resolve` call is one of the following values:
