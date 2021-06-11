@@ -7,7 +7,7 @@
  */
 
 import { BUCKET_TYPES } from '../../../../../common/enums';
-import { createCustomFieldFormatter } from '../../../../lib/vis_data/create_custom_field_formatter';
+import { createFieldFormatAccessor } from '../../../../lib/vis_data/create_field_format_accessor';
 import type { Panel, Series, PanelData } from '../../../../../common/types';
 import type { FieldFormatsRegistry } from '../../../../../../data/common';
 import type { createFieldsFetcher } from '../../../search_strategies/lib/fields_fetcher';
@@ -25,19 +25,19 @@ export function formatLabel(
   return (next: (results: PanelData[]) => unknown) => async (results: PanelData[]) => {
     const termsField = series.terms_field;
 
-    const { indexPattern } = await cachedIndexPatternFetcher({ id: meta.index });
-    const customFieldFormatter = createCustomFieldFormatter(
-      fieldFormatService,
-      indexPattern?.fieldFormatMap
-    );
+    if (termsField) {
+      const { indexPattern } = await cachedIndexPatternFetcher({ id: meta.index });
+      const getFieldFormatByName = createFieldFormatAccessor(
+        fieldFormatService,
+        indexPattern?.fieldFormatMap
+      );
 
-    if (termsField && customFieldFormatter) {
       results
         .filter(
           ({ seriesId }) => series.split_mode === BUCKET_TYPES.TERMS && series.id === seriesId
         )
         .forEach((item) => {
-          item.label = customFieldFormatter(termsField).convert(item.label);
+          item.label = getFieldFormatByName(termsField).convert(item.label);
         });
     }
 

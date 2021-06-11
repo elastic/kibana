@@ -8,7 +8,7 @@
 
 import { getCoreStart } from '../../../../services';
 import { createTickFormatter } from '../../lib/tick_formatter';
-import { createCustomFieldFormatter } from '../../lib/create_custom_field_formatter';
+import { createFieldFormatter } from '../../lib/create_field_formatter';
 import { TopN } from '../../../visualizations/views/top_n';
 import { getLastValue } from '../../../../../common/last_value_utils';
 import { isBackgroundInverted } from '../../../lib/set_is_reversed';
@@ -47,7 +47,7 @@ function TopNVisualization(props) {
     if (seriesConfig) {
       const tickFormatter = seriesConfig.ignore_field_formatting
         ? createTickFormatter(seriesConfig.formatter, seriesConfig.value_template, props.getConfig)
-        : createCustomFieldFormatter(last(seriesConfig.metrics)?.field, fieldFormatMap);
+        : createFieldFormatter(last(seriesConfig.metrics)?.field, fieldFormatMap);
       const value = getLastValue(item.data);
       let color = item.color || seriesConfig.color;
       if (model.bar_color_rules) {

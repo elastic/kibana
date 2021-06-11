@@ -29,7 +29,7 @@ export function processBucket(
   searchStrategy,
   capabilities,
   extractFields,
-  customFieldFormatter
+  getFieldFormatByName
 ) {
   return async (bucket) => {
     const series = await Promise.all(
@@ -64,9 +64,7 @@ export function processBucket(
       })
     );
 
-    const key = customFieldFormatter
-      ? customFieldFormatter(panel.pivot_id).convert(bucket.key)
-      : bucket.key;
+    const key = getFieldFormatByName(panel.pivot_id).convert(bucket.key);
 
     return { key, series };
   };

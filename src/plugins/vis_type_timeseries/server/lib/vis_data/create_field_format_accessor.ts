@@ -8,11 +8,7 @@
 
 import type { FieldFormatMap, FieldFormatsRegistry } from '../../../../data/common';
 
-export const createCustomFieldFormatter = (
+export const createFieldFormatAccessor = (
   fieldFormatsService: FieldFormatsRegistry,
   fieldFormatMap?: FieldFormatMap
-) => {
-  if (fieldFormatMap) {
-    return (fieldName: string) => fieldFormatsService.deserialize(fieldFormatMap[fieldName]);
-  }
-};
+) => (fieldName: string) => fieldFormatsService.deserialize(fieldFormatMap?.[fieldName]);

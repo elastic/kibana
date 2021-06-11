@@ -14,7 +14,7 @@ import { htmlIdGenerator } from '@elastic/eui';
 import { ScaleType } from '@elastic/charts';
 
 import { createTickFormatter } from '../../lib/tick_formatter';
-import { createCustomFieldFormatter } from '../../lib/create_custom_field_formatter';
+import { createFieldFormatter } from '../../lib/create_field_formatter';
 import { TimeSeries } from '../../../visualizations/views/timeseries';
 import { MarkdownSimple } from '../../../../../../../plugins/kibana_react/public';
 import { replaceVars } from '../../lib/replace_vars';
@@ -56,9 +56,9 @@ class TimeseriesVisualization extends Component {
 
     // formatting each doc value with custom field formatter if fieldFormatMap contains that doc field name
     Object.keys(doc).forEach((fieldName) => {
-      if (fieldFormatMap[fieldName]) {
-        const customFieldFormatter = createCustomFieldFormatter(fieldName, fieldFormatMap);
-        doc[fieldName] = customFieldFormatter(doc[fieldName]);
+      if (fieldFormatMap?.[fieldName]) {
+        const valueFieldFormatter = createFieldFormatter(fieldName, fieldFormatMap);
+        doc[fieldName] = valueFieldFormatter(doc[fieldName]);
       }
     });
 
@@ -207,7 +207,7 @@ class TimeseriesVisualization extends Component {
 
       const seriesGroupTickFormatter = seriesGroup.ignore_field_formatting
         ? TimeseriesVisualization.getTickFormatter(seriesGroup, this.props.getConfig)
-        : createCustomFieldFormatter(last(seriesGroup.metrics)?.field, fieldFormatMap);
+        : createFieldFormatter(last(seriesGroup.metrics)?.field, fieldFormatMap);
 
       const palette = {
         ...seriesGroup.palette,

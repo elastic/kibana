@@ -18,7 +18,7 @@ import { handleErrorResponse } from './handle_error_response';
 import { processBucket } from './table/process_bucket';
 
 import { createFieldsFetcher } from '../search_strategies/lib/fields_fetcher';
-import { createCustomFieldFormatter } from './create_custom_field_formatter';
+import { createFieldFormatAccessor } from './create_field_format_accessor';
 import { extractFieldLabel } from '../../../common/fields_utils';
 import type {
   VisTypeTimeseriesRequestHandlerContext,
@@ -103,14 +103,14 @@ export async function getTableData(
       []
     );
 
-    const customFieldFormatter = createCustomFieldFormatter(
+    const getFieldFormatByName = createFieldFormatAccessor(
       fieldFormatService,
       panelIndex.indexPattern?.fieldFormatMap
     );
 
     const series = await Promise.all(
       buckets.map(
-        processBucket(panel, req, searchStrategy, capabilities, extractFields, customFieldFormatter)
+        processBucket(panel, req, searchStrategy, capabilities, extractFields, getFieldFormatByName)
       )
     );
 
