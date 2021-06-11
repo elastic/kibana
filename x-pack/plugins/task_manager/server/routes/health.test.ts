@@ -153,6 +153,7 @@ describe('healthRoute', () => {
       id,
       getTaskManagerConfig({
         monitored_stats_required_freshness: 1000,
+        monitored_stats_warn_drift_in_seconds: 120,
         monitored_aggregated_stats_refresh_rate: 60000,
       })
     );
@@ -241,6 +242,7 @@ describe('healthRoute', () => {
       id,
       getTaskManagerConfig({
         monitored_stats_required_freshness: 1000,
+        monitored_stats_warn_drift_in_seconds: 120,
         monitored_aggregated_stats_refresh_rate: 60000,
       })
     );
@@ -341,7 +343,7 @@ describe('healthRoute', () => {
 
     const warnLog = JSON.parse(
       ((logger as jest.Mocked<Logger>).warn.mock.calls[0][0] as string).replace(
-        'Latest Monitored Stats (warning status): ',
+        'Latest Monitored Stats (Detected drift of 10s): ',
         ''
       )
     );

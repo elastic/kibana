@@ -95,18 +95,29 @@ export function healthRoute(
     .subscribe(([monitoredHealth, serviceStatus]) => {
       serviceStatus$.next(serviceStatus);
 
+      let contextMessage;
+
       let logAsWarn = monitoredHealth.status === HealthStatus.Warning;
       const logAsError = monitoredHealth.status === HealthStatus.Error;
       const driftInSeconds = (monitoredHealth.stats.runtime?.value.drift.p99 ?? 0) / 1000;
 
       if (driftInSeconds >= config.monitored_stats_warn_drift_in_seconds) {
+        contextMessage = `Detected drift of ${driftInSeconds}s`;
         logAsWarn = true;
       }
 
       if (logAsError) {
-        logger.error(`Latest Monitored Stats (error status): ${JSON.stringify(monitoredHealth)}`);
+        logger.error(
+          `Latest Monitored Stats (${contextMessage ?? `error status`}): ${JSON.stringify(
+            monitoredHealth
+          )}`
+        );
       } else if (logAsWarn) {
-        logger.warn(`Latest Monitored Stats (warning status): ${JSON.stringify(monitoredHealth)}`);
+        logger.warn(
+          `Latest Monitored Stats (${contextMessage ?? `warning status`}): ${JSON.stringify(
+            monitoredHealth
+          )}`
+        );
       } else {
         logger.debug(`Latest Monitored Stats: ${JSON.stringify(monitoredHealth)}`);
       }
