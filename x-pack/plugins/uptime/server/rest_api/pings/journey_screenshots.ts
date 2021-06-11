@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { RefResult, ScreenshotResult } from '../../../common/runtime_types';
 import { UMServerLibs } from '../../lib/lib';
 import { ScreenshotBlock } from '../../lib/requests/get_journey_screenshot_blocks';
 import { UMRestApiRouteFactory } from '../types';
@@ -16,6 +17,14 @@ function getSharedHeaders(stepName: string, totalSteps: number) {
     'caption-name': stepName,
     'max-steps': String(totalSteps),
   };
+}
+
+function isRef(data: unknown): data is RefResult {
+  return !!data && (data as RefResult).synthetics?.type === 'step/screenshot_ref';
+}
+
+function isScreenshot(data: unknown): data is ScreenshotResult {
+  return !!data && (data as ScreenshotResult).synthetics?.type === 'step/scerenshot';
 }
 
 export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
@@ -34,50 +43,36 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
   handler: async ({ uptimeEsClient, request, response }) => {
     const { checkGroup, stepIndex } = request.params;
 
-    // TODO: optimization by fetching full doc for ref or ss to skip stage 2 query
-    const screenshotTypeResult = await libs.requests.getJourneyScreenshotType({
+    const result = await libs.requests.getJourneyScreenshot({
       uptimeEsClient,
       checkGroup,
       stepIndex,
     });
 
-    if (screenshotTypeResult === 'step/screenshot') {
-      const result = await libs.requests.getJourneyScreenshot({
-        uptimeEsClient,
-        checkGroup,
-        stepIndex,
-      });
-
-      if (result === null || !result.blob) {
+    if (isScreenshot(result)) {
+      if (!result.synthetics.blob) {
         return response.notFound();
       }
+
       return response.ok({
-        body: Buffer.from(result.blob, 'base64'),
+        body: Buffer.from(result.synthetics.blob, 'base64'),
         headers: {
-          'content-type': result.mimeType || 'image/png', // falls back to 'image/png' for earlier versions of synthetics
-          ...getSharedHeaders(result.stepName, result.totalSteps),
+          'content-type': result.synthetics.blob_mime || 'image/png', // falls back to 'image/png' for earlier versions of synthetics
+          ...getSharedHeaders(result.synthetics.step.name, result.totalSteps),
         },
       });
-    } else if (screenshotTypeResult === 'step/screenshot_ref') {
-      const { ref, totalSteps } = await libs.requests.getJourneyScreenshotRef({
-        uptimeEsClient,
-        checkGroup,
-        stepIndex,
-      });
-      const blockIds = ref.screenshot_ref.blocks.map(({ hash }) => hash);
+    } else if (isRef(result)) {
+      const blockIds = result.screenshot_ref.blocks.map(({ hash }) => hash);
       const blocks: ScreenshotBlock[] = await libs.requests.getJourneyScreenshotBlocks({
         uptimeEsClient,
         blockIds,
       });
       return response.ok({
         body: {
-          screenshotRef: ref,
+          screenshotRef: result,
           blocks,
         },
-        headers: {
-          'content-type': 'application/json',
-          ...getSharedHeaders(ref.synthetics.step.name, totalSteps ?? 0),
-        },
+        headers: getSharedHeaders(result.synthetics.step.name, result.totalSteps ?? 0),
       });
     }
 
