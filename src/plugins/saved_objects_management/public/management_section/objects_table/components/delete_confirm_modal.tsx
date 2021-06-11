@@ -47,8 +47,17 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
     return selectedObjects.filter((obj) => obj.meta.hiddenType);
   }, [selectedObjects]);
   const deletableObjects = useMemo(() => {
-    return selectedObjects.filter((obj) => !obj.meta.hiddenType);
+    return selectedObjects
+      .filter((obj) => !obj.meta.hiddenType)
+      .map(({ type, id, meta, namespaces = [] }) => {
+        const { title = '', icon = 'apps' } = meta;
+        const isShared = namespaces.length > 1 || namespaces.includes('*');
+        return { type, id, icon, title, isShared };
+      });
   }, [selectedObjects]);
+  const sharedObjectsCount = useMemo(() => {
+    return deletableObjects.reduce((acc, { isShared }) => (isShared ? ++acc : acc), 0);
+  }, [deletableObjects]);
 
   if (isDeleting) {
     return (
@@ -93,6 +102,31 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
             <EuiSpacer size="s" />
           </>
         )}
+        {sharedObjectsCount > 0 && (
+          <>
+            <EuiCallOut
+              data-test-subj="sharedObjectsWarning"
+              title={
+                <FormattedMessage
+                  id="savedObjectsManagement.objectsTable.deleteConfirmModal.sharedObjectsCallout.title"
+                  defaultMessage="{sharedObjectsCount, plural, one {# shared object} other {# shared objects}}"
+                  values={{ sharedObjectsCount }}
+                />
+              }
+              iconType="alert"
+              color="warning"
+            >
+              <p>
+                <FormattedMessage
+                  id="savedObjectsManagement.objectsTable.deleteConfirmModal.sharedObjectsCallout.content"
+                  defaultMessage="Deleting {sharedObjectsCount, plural, one {this object} other {these objects}} will affect other spaces"
+                  values={{ sharedObjectsCount }}
+                />
+              </p>
+            </EuiCallOut>
+            <EuiSpacer size="s" />
+          </>
+        )}
         <p>
           <FormattedMessage
             id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
@@ -110,9 +144,9 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
                 { defaultMessage: 'Type' }
               ),
               width: '50px',
-              render: (type, object) => (
+              render: (type, { icon }) => (
                 <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
-                  <EuiIcon type={object.meta.icon || 'apps'} />
+                  <EuiIcon type={icon} />
                 </EuiToolTip>
               ),
             },
@@ -124,7 +158,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
               ),
             },
             {
-              field: 'meta.title',
+              field: 'title',
               name: i18n.translate(
                 'savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.titleColumnName',
                 { defaultMessage: 'Title' }

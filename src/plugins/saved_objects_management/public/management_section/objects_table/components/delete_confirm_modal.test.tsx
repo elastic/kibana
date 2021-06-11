@@ -7,15 +7,21 @@
  */
 
 import React from 'react';
+import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test/jest';
 import { SavedObjectWithMetadata } from '../../../../common';
 import { DeleteConfirmModal } from './delete_confirm_modal';
 
-const createObject = (): SavedObjectWithMetadata => ({
+interface CreateObjectOptions {
+  namespaces?: string[];
+}
+
+const createObject = ({ namespaces }: CreateObjectOptions = {}): SavedObjectWithMetadata => ({
   id: 'foo',
   type: 'bar',
   attributes: {},
   references: [],
+  namespaces,
   meta: {},
 });
 
@@ -82,5 +88,46 @@ describe('DeleteConfirmModal', () => {
 
     expect(onConfirm).toHaveBeenCalledTimes(1);
     expect(onCancel).not.toHaveBeenCalled();
+  });
+
+  describe('shared objects warning', () => {
+    it('does not display a callout when no objects are shared', () => {
+      const objs = [
+        createObject(), // if for some reason an object has no namespaces array, it does not count as shared
+        createObject({ namespaces: [] }), // if for some reason an object has an empty namespaces array, it does not count as shared
+        createObject({ namespaces: ['one-space'] }), // an object in a single space does not count as shared
+      ];
+      const wrapper = mountWithIntl(
+        <DeleteConfirmModal
+          isDeleting={false}
+          onConfirm={onConfirm}
+          onCancel={onCancel}
+          selectedObjects={objs}
+        />
+      );
+      const callout = findTestSubject(wrapper, 'sharedObjectsWarning');
+      expect(callout).toHaveLength(0);
+    });
+
+    it('displays a callout when one or more objects are shared', () => {
+      const objs = [
+        createObject({ namespaces: ['one-space'] }), // an object in a single space does not count as shared
+        createObject({ namespaces: ['one-space', 'another-space'] }), // an object in two spaces counts as shared
+        createObject({ namespaces: ['*'] }), // an object in all spaces counts as shared
+      ];
+      const wrapper = mountWithIntl(
+        <DeleteConfirmModal
+          isDeleting={false}
+          onConfirm={onConfirm}
+          onCancel={onCancel}
+          selectedObjects={objs}
+        />
+      );
+      const callout = findTestSubject(wrapper, 'sharedObjectsWarning');
+      expect(callout).toHaveLength(1);
+      expect(callout.text()).toMatchInlineSnapshot(
+        `"2 shared objectsDeleting these objects will affect other spaces"`
+      );
+    });
   });
 });
