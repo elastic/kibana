@@ -37,7 +37,8 @@ export function formatLabel(
           ({ seriesId }) => series.split_mode === BUCKET_TYPES.TERMS && series.id === seriesId
         )
         .forEach((item) => {
-          item.label = getFieldFormatByName(termsField).convert(item.label);
+          const itemFieldFormat = getFieldFormatByName(termsField);
+          item.label = item.labelFormatted = itemFieldFormat.convert(item.label);
         });
     }
 

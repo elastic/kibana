@@ -39,6 +39,7 @@ interface PanelSeries {
 export interface PanelData {
   id: string;
   label: string;
+  labelFormatted?: string;
   data: Array<[number, number]>;
   seriesId: string;
   splitByLabel: string;
