@@ -13,7 +13,8 @@ import { isValidUrl } from '../../common/lib/url';
 import { getRendererStrings } from '../../common/i18n';
 import { RendererFactory } from '../../common/types';
 import { Output as Arguments } from '../expression_functions';
-import { RevealImageRendererConfig, NodeDimensions } from './types';
+import { RevealImageRendererConfig } from './types';
+import { RendererWrapper } from '../components/renderer_wrapper';
 
 const { revealImage: revealImageStrings } = getRendererStrings();
 
@@ -29,21 +30,11 @@ export const revealImageRenderer: RendererFactory<Arguments> = () => ({
       unmountComponentAtNode(domNode);
     });
 
-    // modify the top-level container class
-    domNode.className = 'revealImage';
-
-    const parentNodeDimensions: NodeDimensions = {
-      width: domNode.clientWidth,
-      height: domNode.clientHeight,
-    };
-
     render(
       <I18nProvider>
-        <RevealImageComponent
-          handlers={handlers}
-          {...config}
-          parentNodeDimensions={parentNodeDimensions}
-        />
+        <RendererWrapper>
+          <RevealImageComponent handlers={handlers} {...config} parentNode={domNode} />
+        </RendererWrapper>
       </I18nProvider>,
       domNode
     );
