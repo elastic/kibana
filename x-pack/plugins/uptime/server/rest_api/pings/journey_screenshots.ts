@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { RefResult, ScreenshotResult } from '../../../common/runtime_types';
 import { UMServerLibs } from '../../lib/lib';
+import { ScreenshotReturnTypesUnion } from '../../lib/requests/get_journey_screenshot';
 import { ScreenshotBlock } from '../../lib/requests/get_journey_screenshot_blocks';
 import { UMRestApiRouteFactory } from '../types';
 
@@ -43,11 +44,16 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
   handler: async ({ uptimeEsClient, request, response }) => {
     const { checkGroup, stepIndex } = request.params;
 
-    const result = await libs.requests.getJourneyScreenshot({
-      uptimeEsClient,
-      checkGroup,
-      stepIndex,
-    });
+    let result: ScreenshotReturnTypesUnion = null;
+    try {
+      result = await libs.requests.getJourneyScreenshot({
+        uptimeEsClient,
+        checkGroup,
+        stepIndex,
+      });
+    } catch (e) {
+      return response.customError({ body: { message: e }, statusCode: 500 });
+    }
 
     if (isScreenshot(result)) {
       if (!result.synthetics.blob) {

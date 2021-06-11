@@ -36,11 +36,13 @@ const ResultWrapperType = t.type({
 
 export type JourneyScreenshotType = 'step/screenshot' | 'step/screenshot_ref';
 
-type ScreenshotReturnTypesUnion = (ScreenshotResult | RefResult) & { totalSteps: number };
+export type ScreenshotReturnTypesUnion =
+  | ((ScreenshotResult | RefResult) & { totalSteps: number })
+  | null;
 
 export const getJourneyScreenshot: UMElasticsearchQueryFn<
   { checkGroup: string; stepIndex: number },
-  ScreenshotReturnTypesUnion | null
+  ScreenshotReturnTypesUnion
 > = async ({ checkGroup, stepIndex, uptimeEsClient }) => {
   const body = {
     track_total_hits: true,
