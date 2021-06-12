@@ -12,8 +12,8 @@ import { UMElasticsearchQueryFn } from '../adapters';
 import {
   RefResult,
   RefResultType,
-  ScreenshotResult,
-  ScreenshotResultType,
+  Screenshot,
+  ScreenshotType,
 } from '../../../common/runtime_types';
 
 const ResultWrapperType = t.type({
@@ -24,7 +24,7 @@ const ResultWrapperType = t.type({
           hits: t.type({
             hits: t.array(
               t.type({
-                _source: t.union([RefResultType, ScreenshotResultType]),
+                _source: t.union([RefResultType, ScreenshotType]),
               })
             ),
           }),
@@ -34,11 +34,7 @@ const ResultWrapperType = t.type({
   }),
 });
 
-export type JourneyScreenshotType = 'step/screenshot' | 'step/screenshot_ref';
-
-export type ScreenshotReturnTypesUnion =
-  | ((ScreenshotResult | RefResult) & { totalSteps: number })
-  | null;
+export type ScreenshotReturnTypesUnion = ((Screenshot | RefResult) & { totalSteps: number }) | null;
 
 export const getJourneyScreenshot: UMElasticsearchQueryFn<
   { checkGroup: string; stepIndex: number },

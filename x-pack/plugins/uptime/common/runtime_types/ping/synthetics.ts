@@ -45,7 +45,7 @@ export const KeyRefFields = t.type({
   blocks: t.array(ScreenshotBlockType),
 });
 
-export const ScreenshotResultType = t.type({
+export const ScreenshotType = t.type({
   synthetics: t.intersection([
     t.partial({
       blob: t.string,
@@ -56,12 +56,16 @@ export const ScreenshotResultType = t.type({
       step: t.type({
         name: t.string,
       }),
-      type: t.string,
+      type: t.literal('step/screenshot'),
     }),
   ]),
 });
 
-export type ScreenshotResult = t.TypeOf<typeof ScreenshotResultType>;
+export type Screenshot = t.TypeOf<typeof ScreenshotType>;
+
+export function isScreenshot(data: unknown): data is Screenshot {
+  return isRight(ScreenshotType.decode(data));
+}
 
 export const RefResultType = t.type({
   '@timestamp': t.string,
@@ -75,11 +79,15 @@ export const RefResultType = t.type({
       name: t.string,
       index: t.number,
     }),
-    type: t.string,
+    type: t.literal('step/screenshot_ref'),
   }),
 });
 
 export type RefResult = t.TypeOf<typeof RefResultType>;
+
+export function isRef(data: unknown): data is RefResult {
+  return isRight(RefResultType.decode(data));
+}
 
 export const RawRefResultType = t.type({
   _source: RefResultType,
@@ -108,6 +116,18 @@ const ScreenshotBlockBlob = t.type({
   id: t.string,
   synthetics: BlockType,
 });
+
+export const ScreenshotImageBlobType = t.type({
+  stepName: t.union([t.null, t.string]),
+  maxSteps: t.number,
+  src: t.string,
+});
+
+export type ScreenshotImageBlob = t.TypeOf<typeof ScreenshotImageBlobType>;
+
+export function isScreenshotImageBlob(data: unknown): data is ScreenshotImageBlob {
+  return isRight(ScreenshotImageBlobType.decode(data));
+}
 
 export const ScreenshotRefImageDataType = t.type({
   stepName: t.union([t.null, t.string]),
