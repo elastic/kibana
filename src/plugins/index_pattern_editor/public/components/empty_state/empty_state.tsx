@@ -64,6 +64,8 @@ export const EmptyState = ({
     </EuiText>
   );
 
+  console.log('HI', capabilities, capabilities.management.kibana.indexPatterns);
+
   return (
     <>
       <EuiPageContent

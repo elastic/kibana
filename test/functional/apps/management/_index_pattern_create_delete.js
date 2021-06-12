@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }) {
         });
     });
 
-    describe('special character handling', () => {
+    describe.skip('special character handling', () => {
       it('should handle special charaters in template input', async () => {
         await PageObjects.settings.clickAddNewIndexPatternButton();
         await PageObjects.header.waitUntilLoadingHasFinished();
