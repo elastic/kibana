@@ -39,12 +39,6 @@ export const ScreenshotBlockType = t.type({
   width: t.number,
 });
 
-export const KeyRefFields = t.type({
-  width: t.number,
-  height: t.number,
-  blocks: t.array(ScreenshotBlockType),
-});
-
 export const ScreenshotType = t.type({
   synthetics: t.intersection([
     t.partial({
@@ -72,7 +66,11 @@ export const RefResultType = t.type({
   monitor: t.type({
     check_group: t.string,
   }),
-  screenshot_ref: KeyRefFields,
+  screenshot_ref: t.type({
+    width: t.number,
+    height: t.number,
+    blocks: t.array(ScreenshotBlockType),
+  }),
   synthetics: t.type({
     package_version: t.string,
     step: t.type({
@@ -88,28 +86,6 @@ export type RefResult = t.TypeOf<typeof RefResultType>;
 export function isRef(data: unknown): data is RefResult {
   return isRight(RefResultType.decode(data));
 }
-
-export const RawRefResultType = t.type({
-  _source: RefResultType,
-});
-
-export const ScreenshotRefType = t.type({
-  blob_mime: t.string,
-  check_group: t.string,
-  step: t.type({
-    name: t.string,
-    index: t.number,
-  }),
-  blocks: t.array(ScreenshotBlockType),
-});
-
-const ScreenshotBlockBlobType = t.type({
-  id: t.string,
-  synthetics: t.type({
-    blob: t.string,
-    blob_mime: t.string,
-  }),
-});
 
 export const ScreenshotImageBlobType = t.type({
   stepName: t.union([t.null, t.string]),
@@ -128,7 +104,15 @@ export const ScreenshotRefImageDataType = t.type({
   maxSteps: t.number,
   ref: t.type({
     screenshotRef: RefResultType,
-    blocks: t.array(ScreenshotBlockBlobType),
+    blocks: t.array(
+      t.type({
+        id: t.string,
+        synthetics: t.type({
+          blob: t.string,
+          blob_mime: t.string,
+        }),
+      })
+    ),
   }),
 });
 
