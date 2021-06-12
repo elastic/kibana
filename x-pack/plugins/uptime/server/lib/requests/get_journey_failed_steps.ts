@@ -62,8 +62,8 @@ export const getJourneyFailedSteps: UMElasticsearchQueryFn<
     }
     const { right: step } = decoded;
     return {
-      timestamp: step['@timestamp'],
       ...step,
+      timestamp: step['@timestamp'],
     };
   });
 };

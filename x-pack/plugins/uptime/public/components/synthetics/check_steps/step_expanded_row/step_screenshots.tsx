@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { StepScreenshotDisplay } from '../../step_screenshot_display';
-import { Ping } from '../../../../../common/runtime_types/ping';
+import { JourneyStep } from '../../../../../common/runtime_types/ping';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { useFetcher } from '../../../../../../observability/public';
 import { fetchLastSuccessfulStep } from '../../../../state/api/journey';
@@ -24,10 +24,7 @@ const Label = euiStyled.div`
 `;
 
 interface Props {
-  // TODO: improve this typing situation
-  step: Ping & {
-    synthetics: { screenshotExists: boolean; isScreenshotRef: boolean; step: { index: number } };
-  };
+  step: JourneyStep;
 }
 
 export const StepScreenshots = ({ step }: Props) => {
@@ -36,12 +33,12 @@ export const StepScreenshots = ({ step }: Props) => {
   const { data: lastSuccessfulStep } = useFetcher(() => {
     if (!isSucceeded) {
       return fetchLastSuccessfulStep({
-        timestamp: step.timestamp,
+        timestamp: step['@timestamp'],
         monitorId: step.monitor.id,
         stepIndex: step.synthetics?.step?.index!,
       });
     }
-  }, [step.docId, step.timestamp]);
+  }, [step._id, step['@timestamp']]);
 
   return (
     <EuiFlexGroup>
@@ -62,22 +59,22 @@ export const StepScreenshots = ({ step }: Props) => {
         </Label>
         <StepScreenshotDisplay
           checkGroup={step.monitor.check_group}
-          isScreenshotRef={step.synthetics?.isScreenshotRef}
-          screenshotExists={step.synthetics?.screenshotExists}
+          isScreenshotRef={!!step.synthetics?.isScreenshotRef}
+          screenshotExists={!!step.synthetics?.screenshotExists}
           stepIndex={step.synthetics?.step?.index}
           stepName={step.synthetics?.step?.name}
           lazyLoad={false}
         />
         <EuiSpacer size="xs" />
-        <Label>{getShortTimeStamp(moment(step.timestamp))}</Label>
+        <Label>{getShortTimeStamp(moment(step['@timestamp']))}</Label>
       </EuiFlexItem>
       {!isSucceeded && lastSuccessfulStep?.monitor && (
         <EuiFlexItem>
           <ScreenshotLink lastSuccessfulStep={lastSuccessfulStep} />
           <StepScreenshotDisplay
             checkGroup={lastSuccessfulStep.monitor.check_group}
-            isScreenshotRef={step.synthetics?.isScreenshotRef}
-            screenshotExists={step.synthetics?.screenshotExists}
+            isScreenshotRef={!!step.synthetics?.isScreenshotRef}
+            screenshotExists={!!step.synthetics?.screenshotExists}
             stepIndex={lastSuccessfulStep.synthetics?.step?.index}
             stepName={lastSuccessfulStep.synthetics?.step?.name}
             lazyLoad={false}

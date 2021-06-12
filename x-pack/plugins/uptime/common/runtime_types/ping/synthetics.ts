@@ -8,19 +8,32 @@
 import { isRight } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
 
-export const JourneyStepType = t.type({
-  '@timestamp': t.string,
-  monitor: t.type({
-    check_group: t.string,
-  }),
-  synthetics: t.type({
-    step: t.type({
-      index: t.number,
-      name: t.string,
+export const JourneyStepType = t.intersection([
+  t.partial({
+    synthetics: t.partial({
+      payload: t.partial({
+        status: t.string,
+      }),
+      isScreenshotRef: t.boolean,
+      screenshotExists: t.boolean,
     }),
-    type: t.string,
   }),
-});
+  t.type({
+    _id: t.string,
+    '@timestamp': t.string,
+    monitor: t.type({
+      id: t.string,
+      check_group: t.string,
+    }),
+    synthetics: t.type({
+      step: t.type({
+        index: t.number,
+        name: t.string,
+      }),
+      type: t.string,
+    }),
+  }),
+]);
 
 export type JourneyStep = t.TypeOf<typeof JourneyStepType>;
 
