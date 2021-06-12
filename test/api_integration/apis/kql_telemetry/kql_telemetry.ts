@@ -13,12 +13,20 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const es = getService('es');
 
   describe('telemetry API', () => {
-    before(() => esArchiver.load('test/api_integration/fixtures/es_archiver/saved_objects/basic'));
-    after(() => esArchiver.unload('test/api_integration/fixtures/es_archiver/saved_objects/basic'));
+    before(() =>
+      kibanaServer.importExport.load(
+        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+      )
+    );
+    after(() =>
+      kibanaServer.importExport.unload(
+        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+      )
+    );
 
     it('should increment the opt *in* counter in the .kibana/kql-telemetry document', async () => {
       await supertest
