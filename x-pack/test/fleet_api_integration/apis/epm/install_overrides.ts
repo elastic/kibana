@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   const dockerServers = getService('dockerServers');
   const log = getService('log');
 
-  const mappingsPackage = 'overrides-0.2.0';
+  const mappingsPackage = 'overrides-0.1.0';
   const server = dockerServers.get('registry');
 
   const deletePackage = async (pkgkey: string) => {
@@ -77,9 +77,9 @@ export default function ({ getService }: FtrProviderContext) {
         }));
 
         // Make sure that the lifecycle name gets set correct in the settings
-        expect(
-          body.component_templates[0].component_template.template.settings.index.lifecycle.name
-        ).to.be('overridden by user');
+        const storedTemplate = body.component_templates[0].component_template.template.settings;
+        const stubTemplate = {};
+        expect(storedTemplate).to.eql(stubTemplate);
       } else {
         warnAndSkipTest(this, log);
       }

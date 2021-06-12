@@ -172,31 +172,45 @@ export async function installTemplateForDataStream({
 }
 
 function putComponentTemplate(
-  body: object | undefined,
-  name: string,
-  esClient: ElasticsearchClient
-): { clusterPromise: Promise<any>; name: string } | undefined {
-  if (body) {
-    const esClientParams = {
-      name,
-      body,
-    };
-
-    return {
-      // @ts-expect-error body expected to be ClusterPutComponentTemplateRequest
-      clusterPromise: esClient.cluster.putComponentTemplate(esClientParams, { ignore: [404] }),
-      name,
-    };
+  esClient: ElasticsearchClient,
+  params: {
+    body: object;
+    name: string;
+    create?: boolean;
   }
+): { clusterPromise: Promise<any>; name: string } {
+  const { name, body, create = false } = params;
+
+  return {
+    // @ts-expect-error body expected to be ClusterPutComponentTemplateRequest
+    clusterPromise: esClient.cluster.putComponentTemplate(
+      { name, body, create },
+      { ignore: [404] }
+    ),
+    name,
+  };
 }
 
-function buildComponentTemplates(registryElasticsearch: RegistryElasticsearch | undefined) {
-  let mappingsTemplate;
-  let settingsTemplate;
-  let userSettingsTemplate;
+const mappingsSuffix = '-mappings';
+const settingsSuffix = '-settings';
+const userSettingsSuffix = '-user_settings';
+type TemplateBaseName = string;
+type UserSettingsTemplateName = `${TemplateBaseName}${typeof userSettingsSuffix}`;
+
+const isUserSettingsTemplate = (name: string): name is UserSettingsTemplateName =>
+  name.endsWith(userSettingsSuffix);
+
+async function buildComponentTemplates(
+  templateName: string,
+  registryElasticsearch: RegistryElasticsearch | undefined
+) {
+  const mappingsTemplateName = `${templateName}${mappingsSuffix}`;
+  const settingsTemplateName = `${templateName}${settingsSuffix}`;
+  const userSettingsTemplateName = `${templateName}${userSettingsSuffix}`;
+  const templatesMap: Record<string, { template: object }> = {};
 
   if (registryElasticsearch && registryElasticsearch['index_template.mappings']) {
-    mappingsTemplate = {
+    templatesMap[mappingsTemplateName] = {
       template: {
         mappings: registryElasticsearch['index_template.mappings'],
       },
@@ -204,22 +218,21 @@ function buildComponentTemplates(registryElasticsearch: RegistryElasticsearch | 
   }
 
   if (registryElasticsearch && registryElasticsearch['index_template.settings']) {
-    settingsTemplate = {
+    templatesMap[settingsTemplateName] = {
       template: {
         settings: registryElasticsearch['index_template.settings'],
       },
     };
-  }
 
-  if (registryElasticsearch && registryElasticsearch['index_template.user_settings']) {
-    userSettingsTemplate = {
+    // return empty/stub template
+    templatesMap[userSettingsTemplateName] = {
       template: {
-        settings: registryElasticsearch['index_template.user_settings'],
+        settings: {},
       },
     };
   }
 
-  return { settingsTemplate, mappingsTemplate, userSettingsTemplate };
+  return templatesMap;
 }
 
 async function installDataStreamComponentTemplates(
@@ -227,47 +240,30 @@ async function installDataStreamComponentTemplates(
   registryElasticsearch: RegistryElasticsearch | undefined,
   esClient: ElasticsearchClient
 ) {
-  const templates: string[] = [];
-  const componentPromises: Array<Promise<any>> = [];
-
-  const compTemplates = buildComponentTemplates(registryElasticsearch);
-
-  const mappings = putComponentTemplate(
-    compTemplates.mappingsTemplate,
-    `${templateName}-mappings`,
-    esClient
-  );
-
-  const settings = putComponentTemplate(
-    compTemplates.settingsTemplate,
-    `${templateName}-settings`,
-    esClient
-  );
-
-  const userSettings = putComponentTemplate(
-    compTemplates.userSettingsTemplate,
-    `${templateName}-user_settings`,
-    esClient
-  );
-
-  if (mappings) {
-    templates.push(mappings.name);
-    componentPromises.push(mappings.clusterPromise);
-  }
-
-  if (settings) {
-    templates.push(settings.name);
-    componentPromises.push(settings.clusterPromise);
-  }
-
-  if (userSettings) {
-    templates.push(userSettings.name);
-    componentPromises.push(userSettings.clusterPromise);
-  }
+  const templates = await buildComponentTemplates(templateName, registryElasticsearch);
+  const templateNames = Object.keys(templates);
+  const templateEntries = Object.entries(templates);
 
   // TODO: Check return values for errors
-  await Promise.all(componentPromises);
-  return templates;
+  await Promise.all(
+    templateEntries.map(async ([name, body]) => {
+      if (isUserSettingsTemplate(name)) {
+        // look for existing user_settings template
+        const result = await esClient.cluster.getComponentTemplate({ name }, { ignore: [404] });
+        const hasUserSettingsTemplate = result.body.component_templates?.length === 1;
+        if (!hasUserSettingsTemplate) {
+          // only add if one isn't already present
+          const { clusterPromise } = putComponentTemplate(esClient, { body, name, create: true });
+          return clusterPromise;
+        }
+      } else {
+        const { clusterPromise } = putComponentTemplate(esClient, { body, name });
+        return clusterPromise;
+      }
+    })
+  );
+
+  return templateNames;
 }
 
 export async function installTemplate({
