@@ -23,6 +23,7 @@ export class PluginsStatusService {
   private readonly pluginStatuses = new Map<PluginName, Observable<ServiceStatus>>();
   private readonly update$ = new BehaviorSubject(true);
   private readonly defaultInheritedStatus$: Observable<ServiceStatus>;
+  private newRegistrationsAllowed = true;
 
   constructor(private readonly deps: Deps) {
     this.defaultInheritedStatus$ = this.deps.core$.pipe(
@@ -35,8 +36,17 @@ export class PluginsStatusService {
   }
 
   public set(plugin: PluginName, status$: Observable<ServiceStatus>) {
+    if (!this.newRegistrationsAllowed) {
+      throw new Error(
+        `Custom statuses cannot be registered after setup, plugin [${plugin}] attempted`
+      );
+    }
     this.pluginStatuses.set(plugin, status$);
     this.update$.next(true); // trigger all existing Observables to update from the new source Observable
+  }
+
+  public blockNewRegistrations() {
+    this.newRegistrationsAllowed = false;
   }
 
   public getAll$(): Observable<Record<PluginName, ServiceStatus>> {
