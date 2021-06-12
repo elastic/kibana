@@ -16,11 +16,13 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import useObservable from 'react-use/lib/useObservable';
 
+import type { TopNavMenuData } from 'src/plugins/navigation/public';
+
 import type { FleetConfigType, FleetStartServices } from '../../plugin';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 
-import { PackageInstallProvider } from '../integrations/hooks';
+import { PackageInstallProvider, useUrlModal } from '../integrations/hooks';
 
 import {
   ConfigContext,
@@ -43,6 +45,8 @@ import { DataStreamApp } from './sections/data_stream';
 import { AgentsApp } from './sections/agents';
 import { CreatePackagePolicyPage } from './sections/agent_policy/create_package_policy_page';
 import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list_page';
+
+const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 
 const ErrorLayout = ({ children }: { children: JSX.Element }) => (
   <EuiErrorBoundary>
@@ -231,30 +235,68 @@ export const FleetAppContext: React.FC<{
   }
 );
 
-export const AppRoutes = memo(() => {
-  return (
-    <Switch>
-      <Route path={FLEET_ROUTING_PATHS.agents}>
-        <AgentsApp />
-      </Route>
-      <Route path={FLEET_ROUTING_PATHS.policies}>
-        <AgentPolicyApp />
-      </Route>
-      <Route path={FLEET_ROUTING_PATHS.enrollment_tokens}>
-        <EnrollmentTokenListPage />
-      </Route>
-      <Route path={FLEET_ROUTING_PATHS.data_streams}>
-        <DataStreamApp />
-      </Route>
+const FleetTopNav = memo(
+  ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => {
+    const { getModalHref } = useUrlModal();
+    const services = useStartServices();
 
-      {/* TODO: Move this route to the Integrations app */}
-      <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>
-        <DefaultLayout>
-          <CreatePackagePolicyPage />
-        </DefaultLayout>
-      </Route>
+    const { TopNavMenu } = services.navigation.ui;
 
-      <Redirect to={FLEET_ROUTING_PATHS.agents} />
-    </Switch>
-  );
-});
+    const topNavConfig: TopNavMenuData[] = [
+      {
+        label: i18n.translate('xpack.fleet.appNavigation.sendFeedbackButton', {
+          defaultMessage: 'Send Feedback',
+        }),
+        iconType: 'popout',
+        run: () => window.open(FEEDBACK_URL),
+      },
+
+      {
+        label: i18n.translate('xpack.fleet.appNavigation.settingsButton', {
+          defaultMessage: 'Fleet settings',
+        }),
+        iconType: 'gear',
+        run: () => (window.location.href = getModalHref('settings')),
+      },
+    ];
+    return (
+      <TopNavMenu
+        appName={i18n.translate('xpack.fleet.appTitle', { defaultMessage: 'Fleet' })}
+        config={topNavConfig}
+        setMenuMountPoint={setHeaderActionMenu}
+      />
+    );
+  }
+);
+
+export const AppRoutes = memo(
+  ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => (
+    <>
+      <FleetTopNav setHeaderActionMenu={setHeaderActionMenu} />
+
+      <Switch>
+        <Route path={FLEET_ROUTING_PATHS.agents}>
+          <AgentsApp />
+        </Route>
+        <Route path={FLEET_ROUTING_PATHS.policies}>
+          <AgentPolicyApp />
+        </Route>
+        <Route path={FLEET_ROUTING_PATHS.enrollment_tokens}>
+          <EnrollmentTokenListPage />
+        </Route>
+        <Route path={FLEET_ROUTING_PATHS.data_streams}>
+          <DataStreamApp />
+        </Route>
+
+        {/* TODO: Move this route to the Integrations app */}
+        <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>
+          <DefaultLayout>
+            <CreatePackagePolicyPage />
+          </DefaultLayout>
+        </Route>
+
+        <Redirect to={FLEET_ROUTING_PATHS.agents} />
+      </Switch>
+    </>
+  )
+);

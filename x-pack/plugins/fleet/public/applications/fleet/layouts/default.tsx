@@ -17,10 +17,13 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { useHistory } from 'react-router-dom';
+
+import type { TopNavMenuData } from 'src/plugins/navigation/public';
 
 import type { Section } from '../sections';
 import { SettingFlyout } from '../components';
-import { useLink, useConfig, useUrlModal } from '../hooks';
+import { useLink, useConfig, useUrlModal, useStartServices } from '../hooks';
 import { WithHeaderLayout } from '../../../layouts';
 
 interface Props {
@@ -28,6 +31,8 @@ interface Props {
   section?: Section;
   children?: React.ReactNode;
 }
+
+const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 
 export const DefaultLayout: React.FunctionComponent<Props> = ({
   section,
@@ -86,32 +91,6 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
                 </p>
               </EuiText>
             </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        rightColumn={
-          <EuiFlexGroup gutterSize="s" direction="row" justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType="popout"
-                href="https://ela.st/fleet-feedback"
-                target="_blank"
-              >
-                <FormattedMessage
-                  id="xpack.fleet.appNavigation.sendFeedbackButton"
-                  defaultMessage="Send feedback"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            {showSettings ? (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty iconType="gear" href={getModalHref('settings')}>
-                  <FormattedMessage
-                    id="xpack.fleet.appNavigation.settingsButton"
-                    defaultMessage="Fleet settings"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            ) : null}
           </EuiFlexGroup>
         }
         tabs={[

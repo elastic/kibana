@@ -19,6 +19,7 @@ import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
+import type { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
@@ -64,6 +65,7 @@ export interface FleetSetupDeps {
 
 export interface FleetStartDeps {
   data: DataPublicPluginStart;
+  navigation: NavigationPublicPluginStart;
 }
 
 export interface FleetStartServices extends CoreStart, FleetStartDeps {
@@ -71,7 +73,7 @@ export interface FleetStartServices extends CoreStart, FleetStartDeps {
   cloud?: CloudSetup;
 }
 
-export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDeps, FleetStartDeps> {
+export class FleetPlugin {
   private config: FleetConfigType;
   private kibanaVersion: string;
   private extensions: UIExtensionsStorage = {};
@@ -82,7 +84,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
-  public setup(core: CoreSetup, deps: FleetSetupDeps) {
+  public setup(core: CoreSetup<FleetStartDeps, FleetStart>, deps: FleetSetupDeps) {
     const config = this.config;
     const kibanaVersion = this.kibanaVersion;
     const extensions = this.extensions;
@@ -136,6 +138,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           FleetStartDeps,
           FleetStart
         ];
+
         const startServices: FleetStartServices = {
           ...coreStartServices,
           ...startDepsServices,
@@ -192,7 +195,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     return {};
   }
 
-  public start(core: CoreStart): FleetStart {
+  public start(core: CoreStart, deps: FleetStartDeps): FleetStart {
     let successPromise: ReturnType<FleetStart['isInitialized']>;
 
     return {
