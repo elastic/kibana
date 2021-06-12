@@ -60,6 +60,8 @@ For details on scaling Task Manager, see <<task-manager-scaling-guidance>>.
 [[task-manager-diagnosing-root-cause]]
 ==== Diagnose a root cause for drift
 
+experimental[]
+
 The following guide helps you identify a root cause for _drift_ by making sense of the output from the <<task-manager-health-monitoring>> endpoint.
 
 By analyzing the different sections of the output, you can evaluate different theories that explain the drift in a deployment.

@@ -25,8 +25,16 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('with kibana index', () => {
-      before(() => kibanaServer.importExport.load('saved_objects/basic'));
-      after(() => kibanaServer.importExport.unload('saved_objects/basic'));
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+        );
+      });
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+        );
+      });
 
       it('should return 200 with individual responses', async () =>
         await supertest
@@ -85,8 +93,16 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       describe('`hasReference` and `hasReferenceOperator` parameters', () => {
-        before(() => kibanaServer.importExport.load('saved_objects/references'));
-        after(() => kibanaServer.importExport.unload('saved_objects/references'));
+        before(async () => {
+          await kibanaServer.importExport.load(
+            'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json'
+          );
+        });
+        after(async () => {
+          await kibanaServer.importExport.unload(
+            'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json'
+          );
+        });
 
         it('search for a reference', async () => {
           await supertest
@@ -145,8 +161,14 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('meta attributes injected properly', () => {
-      before(() => esArchiver.load('management/saved_objects/search'));
-      after(() => esArchiver.unload('management/saved_objects/search'));
+      before(() =>
+        esArchiver.load('test/api_integration/fixtures/es_archiver/management/saved_objects/search')
+      );
+      after(() =>
+        esArchiver.unload(
+          'test/api_integration/fixtures/es_archiver/management/saved_objects/search'
+        )
+      );
 
       it('should inject meta attributes for searches', async () =>
         await supertest

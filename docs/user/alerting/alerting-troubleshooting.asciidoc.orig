@@ -1,0 +1,204 @@
+[role="xpack"]
+[[alerting-troubleshooting]]
+<<<<<<< HEAD
+== Troubleshooting
+=======
+== Alerting Troubleshooting
+++++
+<titleabbrev>Troubleshooting</titleabbrev>
+++++
+>>>>>>> upstream/master
+
+The Alerting framework provides many options for diagnosing problems with Rules and Connectors.
+
+[float]
+[[alerting-kibana-log]]
+=== Check the {kib} log
+
+Rules and connectors  log to the Kibana logger with tags of [alerting] and [actions], respectively.  Generally the messages are warnings and errors. In some cases, the error might be a false positive, for example, when a connector is deleted and a rule is running.
+
+[source, txt]
+--------------------------------------------------
+server    log   [11:39:40.389] [error][alerting][alerting][plugins][plugins] Executing Alert "5b6237b0-c6f6-11eb-b0ff-a1a0cbcf29b6" has resulted in Error: Saved object [action/fdbc8610-c6f5-11eb-b0ff-a1a0cbcf29b6] not found
+--------------------------------------------------
+
+Some of the resources, such as saved objects and API keys, may no longer be available or valid, yielding error messages about those missing resources. If {kib} logs is not clearly describing the problem, best to ask someone from the alerting team to determine whether errors/warnings are of which class.
+
+[float]
+[[alerting-kibana-version]]
+=== Use the debugging tools
+The following debugging tools are available:
+
+* {kib} versions 7.10 and above
+have a <<testing-connectors,Test connector>> UI.
+
+* {kib} versions 7.11 and above
+include improved Webhook error messages,
+better overall debug logging for actions and connectors,
+and Task Manager <<task-manager-diagnosing-root-cause,diagnostics endpoints>>.
+
+[float]
+[[alerting-managment-detail]]
+=== View the list of rules and connectors
+*Rules and Connectors* in *Stack Management* lists the rules and connectors available in the space you’re currently in. When you click a rule name, you are navigated to the <<rule-details,details page>> for the rule, where you can see currently active instances. 
+The start date on this page indicates when a rule is triggered, and for what alert instances. In addition, the duration of the condition indicates how long the instance is active.
+
+[float]
+[[alerting-index-threshold-chart]]
+=== Preview the index threshold rule chart
+
+When creating or editing an index threshold rule, you see a graph of the data the rule will operate against, from some date in the past until now, updated every 5 seconds.  
+[role="screenshot"]
+image::images/rule-details-alerts-inactive.png[Index Threshold chart]
+
+The end date is related to the alert interval (IIRC, 30 “intervals” worth of time). You can use this view to see if the rule is getting the data you expect, and visually compare to the threshold value (a horizontal line in the graph). If the graph does not contain any lines except for the threshold line, then the rule has an issue, for example, no data is available given the specified index and fields or there is a permission error.
+Diagnosing these may be difficult - but there may be log messages for error conditions. 
+
+[float]
+[[alerting-rest-api]]
+=== Use the REST APIs
+
+There is a rich set of HTTP endpoints to introspect and manage rules and connectors.
+One of the http endpoints available for actions is the POST _execute API (reference).  You can use this to “test” an action.  For instance, if you have a server log action created, you can execute it via curling the endpoint:
+[source, txt]
+--------------------------------------------------
+curl -X POST -k \
+ -H 'kbn-xsrf: foo' \
+ -H 'content-type: application/json' \
+ https://elastic:changeme@localhost:5601/api/actions/connector/a692dc89-15b9-4a3c-9e47-9fb6872e49ce/_execute \
+ -d '{"params":{"subject":"hallo","message":"hallo!","to":["me@example.com"]}}'
+--------------------------------------------------
+
+In addition, there is a command-line client that uses legacy Rules and Connectors APIs, which can be easier to use, but must be updated for the new APIs.
+CLI tools to list create, edit, and delete alerts and actions are available in https://github.com/pmuellr/kbn-action[kbn-action], which you can install as follows:
+[source, txt]
+--------------------------------------------------
+npm install -g pmuellr/kbn-action  
+--------------------------------------------------
+
+The same REST POST _execute API command will be:
+[source, txt]
+--------------------------------------------------
+kbn-action execute a692dc89-15b9-4a3c-9e47-9fb6872e49ce ‘{"params":{"subject":"hallo","message":"hallo!","to":["me@example.com"]}}’
+--------------------------------------------------
+
+The result of this http request (and printed to stdout by https://github.com/pmuellr/kbn-action[kbn-action]) will be data returned by the action execution, along with error messages if errors were encountered.
+
+[float]
+[[alerting-error-banners]]
+=== Look for error banners
+
+The Rule Management and Rule Details pages contain an error banner, which helps to identify the errors for the rules:
+[role="screenshot"]
+image::images/rules-management-health.png[Rule management page with the errors banner]
+
+[role="screenshot"]
+image::images/rules-details-health.png[Rule details page with the errors banner]
+
+[float]
+[[task-manager-diagnostics]]
+=== Task Manager diagnostics
+
+Under the hood, Rules and Connectors uses a plugin called Task Manager, which handles the scheduling, execution, and error handling of the tasks.
+This means that failure cases in Rules or Connectors will, at times, be revealed by the Task Manager mechanism, rather than the Rules mechanism.
+
+Task Manager provides a visible status which can be used to diagnose issues and is very well documented <<task-manager-health-monitoring,health monitoring>> and <<task-manager-troubleshooting,troubleshooting>>. 
+Task Manager uses the `.kibana_task_manager index`, an internal index that contains all the saved objects that represent the tasks in the system.
+
+[float]
+==== Getting from a Rule, to its Task
+When a rule is created, a task is created, scheduled to run at the interval specified. For example, when a rule is created and configured to check every 5 minutes, then the underlying task will be expected to run every 5 minutes. In practice, after each time the alert is run, the task is scheduled to run again in 5 minutes, rather than being scheduled to run every 5 minutes indefinitely.
+
+If you use the <<alerting-apis,Alerting REST APIs>> to fetch the underlying rule, you’ll get an object like so:
+[source, txt]
+--------------------------------------------------
+{
+  "id": "0a037d60-6b62-11eb-9e0d-85d233e3ee35",
+  "notify_when": "onActionGroupChange",
+  "params": {
+    "aggType": "avg",
+  },
+  "consumer": "alerts",
+  "rule_type_id": "test.rule.type",
+  "schedule": {
+    "interval": "1m"
+  },
+  "actions": [],
+  "tags": [],
+  "name": "test rule",
+  "enabled": true,
+  "throttle": null,
+  "api_key_owner": "elastic",
+  "created_by": "elastic",
+  "updated_by": "elastic",
+  "mute_all": false,
+  "muted_alert_ids": [],
+  "updated_at": "2021-02-10T05:37:19.086Z",
+  "created_at": "2021-02-10T05:37:19.086Z",
+  "scheduled_task_id": "31563950-b14b-11eb-9a7c-9df284da9f99",
+  "execution_status": {
+    "last_execution_date": "2021-02-10T17:55:14.262Z",
+    "status": "ok"
+  }
+}
+--------------------------------------------------
+
+The field you’re looking for is the one called `scheduled_task_id` which includes the _id of the Task Manager task, so if you then go to the Console and run the following query, you’ll get the underlying task.
+[source, txt]
+--------------------------------------------------
+GET .kibana_task_manager/_doc/task:31563950-b14b-11eb-9a7c-9df284da9f99
+{
+  "_index" : ".kibana_task_manager_8.0.0_001",
+  "_id" : "task:31563950-b14b-11eb-9a7c-9df284da9f99",
+  "_version" : 838,
+  "_seq_no" : 8791,
+  "_primary_term" : 1,
+  "found" : true,
+  "_source" : {
+    "migrationVersion" : {
+      "task" : "7.6.0"
+    },
+    "task" : {
+      "schedule" : {
+        "interval" : "5s"
+      },
+      "taskType" : "alerting:.index-threshold",
+      "retryAt" : null,
+      "runAt" : "2021-05-10T05:18:02.704Z",
+      "scope" : [
+        "alerting"
+      ],
+      "startedAt" : null,
+      "state" : """{"alertInstances":{},"previousStartedAt":"2021-05-10T05:17:45.671Z"}""",
+      "params" : """{"alertId":"30d856c0-b14b-11eb-9a7c-9df284da9f99","spaceId":"default"}""",
+      "ownerId" : null,
+      "scheduledAt" : "2021-05-10T04:50:07.333Z",
+      "attempts" : 0,
+      "status" : "idle"
+    },
+    "references" : [ ],
+    "updated_at" : "2021-05-10T05:17:58.000Z",
+    "coreMigrationVersion" : "8.0.0",
+    "type" : "task"
+  }
+}
+--------------------------------------------------
+
+What you can see above is the task that backs the rule, and for the rule to work, this task must be in a healthy state. This information is available via <<task-manager-api-health, health API>> or via verbose logs if debug logging is enabled.
+When diagnosing the health state of the task, you will most likely be interested in the following fields:
+
+`status`:: This is the current status of the task.  Is Task Manager is currently running? Is Task Manager idle,  and you’re waiting for it to run?  Or has Task Manager has tried to run it and failed?
+`runAt`:: This is when the task is scheduled to run next. If this is in the past and the status is idle, Task Manager has fallen behind or isn’t running. If it’s in the past, but the status is running, then Task Manager has picked it up and is working on it, which is considered healthy.
+`retryAt`:: Another time field, like runAt. If this field is populated, then Task Manager is currently running the task. If the task doesn’t complete (and isn't marked as failed), then Task Manager will give it another attempt at the time specified under retryAt.
+
+Investigating the underlying task can help you gauge whether the problem you’re seeing is rooted in the alert not running at all, whether it’s running and failing, or whether it is running, but exhibiting behavior that is different than what was expected (at which point you should focus on the rule itself, rather than the task).
+
+In addition to the above methods, broadly used the next approaches and common issues:
+
+* <<alerting-common-issues, Alerting common issues>>
+* <<event-log-index, Quering Event log index>>
+* <<testing-connectors, Testing connectors using Connectors UI and `kbn-action` tool>>
+
+include::troubleshooting/event-log-index.asciidoc[]
+include::troubleshooting/testing-connectors.asciidoc[]
+include::troubleshooting/alerting-common-issues.asciidoc[]
