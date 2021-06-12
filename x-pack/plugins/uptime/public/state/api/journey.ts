@@ -11,6 +11,7 @@ import {
   FailedStepsApiResponse,
   FailedStepsApiResponseType,
   Ping,
+  ScreenshotImageBlob,
   ScreenshotRefImageData,
   SyntheticsJourneyApiResponse,
   SyntheticsJourneyApiResponseType,
@@ -19,11 +20,11 @@ import {
 export async function fetchJourneySteps(
   params: FetchJourneyStepsParams
 ): Promise<SyntheticsJourneyApiResponse> {
-  return (await apiService.get(
+  return apiService.get(
     `/api/uptime/journey/${params.checkGroup}`,
     { syntheticEventTypes: params.syntheticEventTypes },
     SyntheticsJourneyApiResponseType
-  )) as SyntheticsJourneyApiResponse;
+  );
 }
 
 export async function fetchJourneysFailedSteps({
@@ -31,7 +32,7 @@ export async function fetchJourneysFailedSteps({
 }: {
   checkGroups: string[];
 }): Promise<FailedStepsApiResponse> {
-  return await apiService.get(
+  return apiService.get(
     `/api/uptime/journeys/failed_steps`,
     { checkGroups },
     FailedStepsApiResponseType
@@ -52,12 +53,6 @@ export async function fetchLastSuccessfulStep({
     timestamp,
     stepIndex,
   })) as Ping;
-}
-
-export interface ScreenshotImageBlob {
-  stepName: string | null;
-  maxSteps: number;
-  src: string;
 }
 
 export async function getJourneyScreenshot(

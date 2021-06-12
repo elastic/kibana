@@ -9,15 +9,15 @@ import React, { useContext, useEffect, useState } from 'react';
 import useIntersection from 'react-use/lib/useIntersection';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import * as t from 'io-ts';
-import { isRight } from 'fp-ts/lib/Either';
 import {
+  isScreenshotImageBlob,
   isScreenshotRef,
   Ping,
+  ScreenshotImageBlob,
   ScreenshotRefImageData,
 } from '../../../../../../common/runtime_types/ping';
 import { useFetcher, FETCH_STATUS } from '../../../../../../../observability/public';
-import { getJourneyScreenshot, ScreenshotImageBlob } from '../../../../../state/api/journey';
+import { getJourneyScreenshot } from '../../../../../state/api/journey';
 import { UptimeSettingsContext } from '../../../../../contexts';
 import { NoImageDisplay } from './no_image_display';
 import { StepImageCaption } from './step_image_caption';
@@ -36,10 +36,6 @@ interface Props {
   label?: string;
   ping: Ping;
   initialStepNo?: number;
-}
-
-function isScreenshot(data: unknown): data is ScreenshotImageBlob {
-  return isRight(t.type({ src: t.string }).decode(data));
 }
 
 export const PingTimestamp = ({ label, ping, initialStepNo = 1 }: Props) => {
@@ -75,7 +71,7 @@ export const PingTimestamp = ({ label, ping, initialStepNo = 1 }: Props) => {
   }, [data]);
 
   let imgSrc;
-  if (isScreenshot(data)) {
+  if (isScreenshotImageBlob(data)) {
     imgSrc = stepImages?.[stepNumber - 1] ?? data?.src;
   }
 

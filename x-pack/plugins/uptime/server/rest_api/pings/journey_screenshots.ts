@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RefResult, ScreenshotResult } from '../../../common/runtime_types';
+import { isRef, isScreenshot } from '../../../common/runtime_types';
 import { UMServerLibs } from '../../lib/lib';
 import { ScreenshotReturnTypesUnion } from '../../lib/requests/get_journey_screenshot';
 import { ScreenshotBlock } from '../../lib/requests/get_journey_screenshot_blocks';
@@ -18,14 +18,6 @@ function getSharedHeaders(stepName: string, totalSteps: number) {
     'caption-name': stepName,
     'max-steps': String(totalSteps),
   };
-}
-
-function isRef(data: unknown): data is RefResult {
-  return !!data && (data as RefResult).synthetics?.type === 'step/screenshot_ref';
-}
-
-function isScreenshot(data: unknown): data is ScreenshotResult {
-  return !!data && (data as ScreenshotResult).synthetics?.type === 'step/scerenshot';
 }
 
 export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
