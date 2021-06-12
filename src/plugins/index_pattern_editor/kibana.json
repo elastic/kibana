@@ -4,5 +4,10 @@
   "server": false,
   "ui": true,
   "requiredPlugins": ["data"],
-  "requiredBundles": ["kibanaReact", "esUiShared"]
+  "requiredBundles": ["kibanaReact", "esUiShared"],
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "This plugin provides the ability to create index patterns via a EuiFlyout from any app"
 }

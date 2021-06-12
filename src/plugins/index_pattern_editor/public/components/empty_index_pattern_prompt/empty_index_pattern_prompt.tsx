@@ -68,7 +68,7 @@ export const EmptyIndexPatternPrompt = ({ goToCreate }: Props) => {
                 onClick={goToCreate}
                 iconType="plusInCircle"
                 fill={true}
-                data-test-subj="createIndexPatternButton"
+                data-test-subj="createIndexPatternButtonFlyout"
               >
                 <FormattedMessage
                   id="indexPatternEditor.indexPatternTable.createBtn"

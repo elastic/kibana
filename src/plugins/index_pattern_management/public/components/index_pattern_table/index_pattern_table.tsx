@@ -66,6 +66,7 @@ interface Props extends RouteComponentProps {
 
 export const IndexPatternTable = ({
   history,
+  canSave,
   showCreateDialog: showCreateDialogProp = false,
 }: Props) => {
   const {
@@ -146,7 +147,7 @@ export const IndexPatternTable = ({
   );
   */
 
-  const createButton = (
+  const createButton = canSave ? (
     /*
     <EuiButton
       fill={true}
@@ -178,6 +179,8 @@ export const IndexPatternTable = ({
         defaultMessage="Create index pattern"
       />
     </EuiButton>
+  ) : (
+    <></>
   );
 
   if (isLoadingIndexPatterns) {

@@ -371,8 +371,9 @@ export class SettingsPageObject extends FtrService {
 
   async clickAddNewIndexPatternButton() {
     await this.common.scrollKibanaBodyTop();
-    const createButtons = await this.testSubjects.findAll('createIndexPatternButton');
-    await createButtons[createButtons.length - 1].click();
+    const createButtonTable = await this.testSubjects.find('createIndexPatternButton');
+    const createButtonFlyout = await this.testSubjects.find('createIndexPatternButtonFlyout');
+    await (createButtonFlyout || createButtonTable).click();
   }
 
   async clickCreateNewRollupButton() {
