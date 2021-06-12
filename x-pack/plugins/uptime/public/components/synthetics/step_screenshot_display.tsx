@@ -28,7 +28,7 @@ import { getJourneyScreenshot } from '../../state/api/journey';
 import { useCompositeImage } from '../../hooks';
 
 interface StepScreenshotDisplayProps {
-  screenshotExists?: boolean;
+  screenshotExists: boolean;
   isScreenshotRef: boolean;
   checkGroup?: string;
   stepIndex?: number;
