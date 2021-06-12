@@ -15,10 +15,10 @@ import { i18n } from '@kbn/i18n';
 import {
   agentRouteService,
   agentPolicyRouteService,
-  PackagePolicy,
   AgentPolicy,
   PLUGIN_ID,
   INTEGRATIONS_PLUGIN_ID,
+  NewPackagePolicy,
 } from '../../../fleet/common';
 import {
   pagePathGetters,
@@ -29,6 +29,7 @@ import {
 import { ScheduledQueryGroupQueriesTable } from '../scheduled_query_groups/scheduled_query_group_queries_table';
 import { useKibana } from '../common/lib/kibana';
 import { NavigationButtons } from './navigation_buttons';
+import { OsqueryManagerPackagePolicy } from '../../common/types';
 
 /**
  * Exports Osquery-specific package policy instructions
@@ -148,7 +149,11 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
   }, [editMode, replace]);
 
   const scheduledQueryGroupTableData = useMemo(() => {
-    const policyWithoutEmptyQueries = produce(newPolicy, (draft) => {
+    const policyWithoutEmptyQueries = produce<
+      NewPackagePolicy,
+      OsqueryManagerPackagePolicy,
+      OsqueryManagerPackagePolicy
+    >(newPolicy, (draft) => {
       draft.inputs[0].streams = filter(['compiled_stream.id', null], draft.inputs[0].streams);
       return draft;
     });
@@ -207,7 +212,9 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
       {editMode && scheduledQueryGroupTableData.inputs[0].streams.length ? (
         <EuiFlexGroup>
           <EuiFlexItem>
-            <ScheduledQueryGroupQueriesTable data={scheduledQueryGroupTableData as PackagePolicy} />
+            <ScheduledQueryGroupQueriesTable
+              data={scheduledQueryGroupTableData.inputs[0].streams}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : null}

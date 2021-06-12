@@ -21,32 +21,34 @@ import {
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { OsqueryManagerPackagePolicyConfigRecord } from '../../../common/types';
 import { CodeEditorField } from '../../queries/form/code_editor_field';
-import { Form, FormData, getUseField, Field } from '../../shared_imports';
+import { Form, getUseField, Field } from '../../shared_imports';
 import { PlatformCheckBoxGroupField } from './platform_checkbox_group_field';
 import { ALL_OSQUERY_VERSIONS_OPTIONS } from './constants';
-import { useScheduledQueryGroupQueryForm } from './use_scheduled_query_group_query_form';
+import {
+  UseScheduledQueryGroupQueryFormProps,
+  useScheduledQueryGroupQueryForm,
+} from './use_scheduled_query_group_query_form';
 
 const CommonUseField = getUseField({ component: Field });
 
 interface QueryFlyoutProps {
-  defaultValue?: any;
-  onSave: (payload: FormData) => Promise<void>;
+  defaultValue?: UseScheduledQueryGroupQueryFormProps['defaultValue'] | undefined;
+  onSave: (payload: OsqueryManagerPackagePolicyConfigRecord) => Promise<void>;
   onClose: () => void;
 }
 
-const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
-  defaultValue,
-  onSave,
-  onClose,
-}) => {
+const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({ defaultValue, onSave, onClose }) => {
   const { form } = useScheduledQueryGroupQueryForm({
-    handleSubmit: (payload, isValid) => {
-      if (isValid) {
-        onSave(payload);
-        onClose();
-      }
-    },
+    handleSubmit: (payload, isValid) =>
+      new Promise((resolve) => {
+        if (isValid) {
+          onSave(payload);
+          onClose();
+        }
+        resolve();
+      }),
   });
 
   const { submit } = form;

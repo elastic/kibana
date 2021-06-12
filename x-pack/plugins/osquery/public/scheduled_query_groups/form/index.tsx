@@ -24,9 +24,9 @@ import { produce } from 'immer';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { OsqueryManagerPackagePolicy } from '../../../common/types';
 import {
   AgentPolicy,
-  PackagePolicy,
   PackagePolicyPackage,
   packagePolicyRouteService,
 } from '../../../../fleet/common';
@@ -44,7 +44,7 @@ const FORM_ID = 'scheduledQueryForm';
 const CommonUseField = getUseField({ component: Field });
 
 interface ScheduledQueryGroupFormProps {
-  defaultValue?: PackagePolicy;
+  defaultValue?: OsqueryManagerPackagePolicy;
   packageInfo?: PackagePolicyPackage;
   editMode?: boolean;
 }

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import linuxSvg from './linux.svg';
-import windowsSvg from './windows.svg';
-import macosSvg from './macos.svg';
+import linuxSvg from './logos/linux.svg';
+import windowsSvg from './logos/windows.svg';
+import macosSvg from './logos/macos.svg';
 
 export const getPlatformIconModule = (platform: string) => {
   switch (platform) {

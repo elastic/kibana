@@ -21,9 +21,9 @@ import { PlatformIcon } from './platforms/platform_icon';
 
 interface Props {
   field: FieldHook<string>;
-  euiFieldProps?: Record<string, any>;
+  euiFieldProps?: Record<string, unknown>;
   idAria?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export const PlatformCheckBoxGroupField = ({

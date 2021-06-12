@@ -22,10 +22,10 @@ import {
   PersistedIndexPatternLayer,
   PieVisualizationState,
 } from '../../../lens/public';
-import { PackagePolicy, PackagePolicyInputStream } from '../../../fleet/common';
 import { FilterStateStore } from '../../../../../src/plugins/data/common';
 import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
 import { PlatformIcons } from './queries/platforms';
+import { OsqueryManagerPackagePolicyInputStream } from '../../common/types';
 
 export enum ViewResultsActionButtonType {
   icon = 'icon',
@@ -304,12 +304,12 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
 export const ViewResultsInDiscoverAction = React.memo(ViewResultsInDiscoverActionComponent);
 
 interface ScheduledQueryGroupQueriesTableProps {
-  data: Pick<PackagePolicy, 'inputs'>;
+  data: OsqueryManagerPackagePolicyInputStream[];
   editMode?: boolean;
-  onDeleteClick?: (item: PackagePolicyInputStream) => void;
-  onEditClick?: (item: PackagePolicyInputStream) => void;
-  selectedItems?: PackagePolicyInputStream[];
-  setSelectedItems?: (selection: PackagePolicyInputStream[]) => void;
+  onDeleteClick?: (item: OsqueryManagerPackagePolicyInputStream) => void;
+  onEditClick?: (item: OsqueryManagerPackagePolicyInputStream) => void;
+  selectedItems?: OsqueryManagerPackagePolicyInputStream[];
+  setSelectedItems?: (selection: OsqueryManagerPackagePolicyInputStream[]) => void;
 }
 
 const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQueriesTableProps> = ({
@@ -321,7 +321,7 @@ const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQuer
   setSelectedItems,
 }) => {
   const renderDeleteAction = useCallback(
-    (item: PackagePolicyInputStream) => (
+    (item: OsqueryManagerPackagePolicyInputStream) => (
       <EuiButtonIcon
         color="danger"
         // @ts-expect-error update types
@@ -343,7 +343,7 @@ const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQuer
   );
 
   const renderEditAction = useCallback(
-    (item: PackagePolicyInputStream) => (
+    (item: OsqueryManagerPackagePolicyInputStream) => (
       <EuiButtonIcon
         color="primary"
         // @ts-expect-error update types
@@ -491,14 +491,17 @@ const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQuer
   const sorting = useMemo(
     () => ({
       sort: {
-        field: 'vars.id.value' as keyof PackagePolicyInputStream,
+        field: 'vars.id.value' as keyof OsqueryManagerPackagePolicyInputStream,
         direction: 'asc' as const,
       },
     }),
     []
   );
 
-  const itemId = useCallback((item: PackagePolicyInputStream) => get('vars.id.value', item), []);
+  const itemId = useCallback(
+    (item: OsqueryManagerPackagePolicyInputStream) => get('vars.id.value', item),
+    []
+  );
 
   const selection = useMemo(
     () => ({
@@ -509,8 +512,8 @@ const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQuer
   );
 
   return (
-    <EuiBasicTable<PackagePolicyInputStream>
-      items={data.inputs[0].streams}
+    <EuiBasicTable<OsqueryManagerPackagePolicyInputStream>
+      items={data}
       itemId={itemId}
       columns={columns}
       sorting={sorting}

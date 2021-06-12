@@ -12,10 +12,9 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  NewPackagePolicyInputStream,
-  PackagePolicyInput,
-  PackagePolicyInputStream,
-} from '../../../../fleet/common';
+  OsqueryManagerPackagePolicyInputStream,
+  OsqueryManagerPackagePolicyInput,
+} from '../../../common/types';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { FieldHook } from '../../shared_imports';
 import { ScheduledQueryGroupQueriesTable } from '../scheduled_query_group_queries_table';
@@ -23,7 +22,7 @@ import { QueryFlyout } from '../queries/query_flyout';
 import { OsqueryPackUploader } from './pack_uploader';
 
 interface QueriesFieldProps {
-  field: FieldHook<PackagePolicyInput[]>;
+  field: FieldHook<OsqueryManagerPackagePolicyInput[]>;
   scheduledQueryGroupId: string;
 }
 
@@ -36,7 +35,7 @@ interface GetNewStreamProps {
   scheduledQueryGroupId?: string;
 }
 
-interface GetNewStreamReturn extends NewPackagePolicyInputStream {
+interface GetNewStreamReturn extends Omit<OsqueryManagerPackagePolicyInputStream, 'id'> {
   id?: string | null;
 }
 
@@ -71,7 +70,9 @@ const getNewStream = (payload: GetNewStreamProps) =>
 const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, scheduledQueryGroupId }) => {
   const [showAddQueryFlyout, setShowAddQueryFlyout] = useState(false);
   const [showEditQueryFlyout, setShowEditQueryFlyout] = useState<number>(-1);
-  const [tableSelectedItems, setTableSelectedItems] = useState<PackagePolicyInputStream[]>([]);
+  const [tableSelectedItems, setTableSelectedItems] = useState<
+    OsqueryManagerPackagePolicyInputStream[]
+  >([]);
 
   const handleShowAddFlyout = useCallback(() => setShowAddQueryFlyout(true), []);
   const handleHideAddFlyout = useCallback(() => setShowAddQueryFlyout(false), []);
@@ -80,7 +81,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, scheduledQu
   const { setValue } = field;
 
   const handleDeleteClick = useCallback(
-    (stream: PackagePolicyInputStream) => {
+    (stream: OsqueryManagerPackagePolicyInputStream) => {
       const streamIndex = findIndex(field.value[0].streams, [
         'vars.id.value',
         stream.vars?.id.value,
@@ -100,7 +101,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, scheduledQu
   );
 
   const handleEditClick = useCallback(
-    (stream: PackagePolicyInputStream) => {
+    (stream: OsqueryManagerPackagePolicyInputStream) => {
       const streamIndex = findIndex(field.value[0].streams, [
         'vars.id.value',
         stream.vars?.id.value,
@@ -112,57 +113,61 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, scheduledQu
   );
 
   const handleEditQuery = useCallback(
-    (updatedQuery) => {
-      if (showEditQueryFlyout >= 0) {
-        setValue(
-          produce((draft) => {
-            draft[0].streams[showEditQueryFlyout].vars.id.value = updatedQuery.id;
-            draft[0].streams[showEditQueryFlyout].vars.interval.value = updatedQuery.interval;
-            draft[0].streams[showEditQueryFlyout].vars.query.value = updatedQuery.query;
+    (updatedQuery) =>
+      new Promise<void>((resolve) => {
+        if (showEditQueryFlyout >= 0) {
+          setValue(
+            produce((draft) => {
+              draft[0].streams[showEditQueryFlyout].vars.id.value = updatedQuery.id;
+              draft[0].streams[showEditQueryFlyout].vars.interval.value = updatedQuery.interval;
+              draft[0].streams[showEditQueryFlyout].vars.query.value = updatedQuery.query;
 
-            if (updatedQuery.platform?.length) {
-              draft[0].streams[showEditQueryFlyout].vars.platform = {
-                type: 'text',
-                value: updatedQuery.platform,
-              };
-            } else {
-              delete draft[0].streams[showEditQueryFlyout].vars.platform;
-            }
+              if (updatedQuery.platform?.length) {
+                draft[0].streams[showEditQueryFlyout].vars.platform = {
+                  type: 'text',
+                  value: updatedQuery.platform,
+                };
+              } else {
+                delete draft[0].streams[showEditQueryFlyout].vars.platform;
+              }
 
-            if (updatedQuery.version?.length) {
-              draft[0].streams[showEditQueryFlyout].vars.version = {
-                type: 'text',
-                value: updatedQuery.version,
-              };
-            } else {
-              delete draft[0].streams[showEditQueryFlyout].vars.version;
-            }
+              if (updatedQuery.version?.length) {
+                draft[0].streams[showEditQueryFlyout].vars.version = {
+                  type: 'text',
+                  value: updatedQuery.version,
+                };
+              } else {
+                delete draft[0].streams[showEditQueryFlyout].vars.version;
+              }
 
-            return draft;
-          })
-        );
-      }
+              return draft;
+            })
+          );
+        }
 
-      handleHideEditFlyout();
-    },
+        handleHideEditFlyout();
+        resolve();
+      }),
     [handleHideEditFlyout, setValue, showEditQueryFlyout]
   );
 
   const handleAddQuery = useCallback(
-    (newQuery) => {
-      setValue(
-        produce((draft) => {
-          draft[0].streams.push(
-            getNewStream({
-              ...newQuery,
-              scheduledQueryGroupId,
-            })
-          );
-          return draft;
-        })
-      );
-      handleHideAddFlyout();
-    },
+    (newQuery) =>
+      new Promise<void>((resolve) => {
+        setValue(
+          produce((draft) => {
+            draft[0].streams.push(
+              getNewStream({
+                ...newQuery,
+                scheduledQueryGroupId,
+              })
+            );
+            return draft;
+          })
+        );
+        handleHideAddFlyout();
+        resolve();
+      }),
     [handleHideAddFlyout, scheduledQueryGroupId, setValue]
   );
 
@@ -201,7 +206,9 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, scheduledQu
     [scheduledQueryGroupId, setValue]
   );
 
-  const tableData = useMemo(() => ({ inputs: field.value }), [field.value]);
+  const tableData = useMemo(() => (field.value.length ? field.value[0].streams : []), [
+    field.value,
+  ]);
 
   return (
     <>
@@ -241,13 +248,10 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, scheduledQu
       ) : null}
       <EuiSpacer />
       {<OsqueryPackUploader onChange={handlePackUpload} />}
-      {showAddQueryFlyout && (
-        // @ts-expect-error update types
-        <QueryFlyout onSave={handleAddQuery} onClose={handleHideAddFlyout} />
-      )}
+      {showAddQueryFlyout && <QueryFlyout onSave={handleAddQuery} onClose={handleHideAddFlyout} />}
       {showEditQueryFlyout != null && showEditQueryFlyout >= 0 && (
         <QueryFlyout
-          defaultValue={field.value[0].streams[showEditQueryFlyout]}
+          defaultValue={field.value[0].streams[showEditQueryFlyout]?.vars}
           onSave={handleEditQuery}
           onClose={handleHideEditFlyout}
         />
