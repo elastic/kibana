@@ -6,7 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { Plugin, CoreSetup, RequestHandlerContext } from 'kibana/server';
+import { schema } from '@kbn/config-schema';
+import { Subject } from 'rxjs';
+import {
+  Plugin,
+  CoreSetup,
+  RequestHandlerContext,
+  ServiceStatus,
+  ServiceStatusLevels,
+} from '../../../../../src/core/server';
 
 export interface PluginAApiRequestContext {
   ping: () => Promise<string>;
@@ -17,7 +25,12 @@ interface PluginARequstHandlerContext extends RequestHandlerContext {
 }
 
 export class CorePluginAPlugin implements Plugin {
+  private status$ = new Subject<ServiceStatus>();
+
   public setup(core: CoreSetup, deps: {}) {
+    // Set a custom status that will not emit immediately to force a timeout
+    core.status.set(this.status$);
+
     core.http.registerRouteHandlerContext<PluginARequstHandlerContext, 'pluginA'>(
       'pluginA',
       (context) => {
@@ -25,6 +38,34 @@ export class CorePluginAPlugin implements Plugin {
           ping: () =>
             context.core.elasticsearch.legacy.client.callAsInternalUser('ping') as Promise<string>,
         };
+      }
+    );
+
+    const router = core.http.createRouter();
+
+    router.post(
+      {
+        path: '/internal/core_plugin_a/status/set',
+        validate: {
+          query: schema.object({
+            level: schema.oneOf([
+              schema.literal('available'),
+              schema.literal('degraded'),
+              schema.literal('unavailable'),
+              schema.literal('critical'),
+            ]),
+          }),
+        },
+      },
+      (context, req, res) => {
+        const { level } = req.query;
+
+        this.status$.next({
+          level: ServiceStatusLevels[level],
+          summary: `corePluginA is ${level}`,
+        });
+
+        return res.ok();
       }
     );
   }
