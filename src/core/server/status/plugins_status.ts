@@ -7,12 +7,21 @@
  */
 
 import { BehaviorSubject, Observable, combineLatest, of } from 'rxjs';
-import { map, distinctUntilChanged, switchMap, debounceTime } from 'rxjs/operators';
+import {
+  map,
+  distinctUntilChanged,
+  switchMap,
+  debounceTime,
+  timeoutWith,
+  startWith,
+} from 'rxjs/operators';
 import { isDeepStrictEqual } from 'util';
 
 import { PluginName } from '../plugins';
-import { ServiceStatus, CoreStatus } from './types';
+import { ServiceStatus, CoreStatus, ServiceStatusLevels } from './types';
 import { getSummaryStatus } from './get_summary_status';
+
+const STATUS_TIMEOUT_MS = 30 * 1000; // 30 seconds
 
 interface Deps {
   core$: Observable<CoreStatus>;
@@ -96,13 +105,22 @@ export class PluginsStatusService {
     return this.update$.pipe(
       switchMap(() => {
         const pluginStatuses = plugins
-          .map(
-            (depName) =>
-              [depName, this.pluginStatuses.get(depName) ?? this.getDerivedStatus$(depName)] as [
-                PluginName,
-                Observable<ServiceStatus>
-              ]
-          )
+          .map((depName) => {
+            const pluginStatus = this.pluginStatuses.get(depName)
+              ? this.pluginStatuses.get(depName)!.pipe(
+                  timeoutWith(
+                    STATUS_TIMEOUT_MS,
+                    this.pluginStatuses.get(depName)!.pipe(
+                      startWith({
+                        level: ServiceStatusLevels.unavailable,
+                        summary: `Status check timed out after ${STATUS_TIMEOUT_MS / 1000}s`,
+                      })
+                    )
+                  )
+                )
+              : this.getDerivedStatus$(depName);
+            return [depName, pluginStatus] as [PluginName, Observable<ServiceStatus>];
+          })
           .map(([pName, status$]) =>
             status$.pipe(map((status) => [pName, status] as [PluginName, ServiceStatus]))
           );
