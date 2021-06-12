@@ -19,7 +19,7 @@ export const useCompositeImage = (
 
     async function compose() {
       await composeScreenshotRef(imgRef, canvas);
-      const imgData = canvas.toDataURL('image/jpg', 1.0);
+      const imgData = canvas.toDataURL('image/png', 1.0);
       callback(imgData);
     }
 
