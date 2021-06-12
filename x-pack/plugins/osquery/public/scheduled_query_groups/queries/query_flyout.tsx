@@ -41,6 +41,7 @@ interface QueryFlyoutProps {
 
 const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({ defaultValue, onSave, onClose }) => {
   const { form } = useScheduledQueryGroupQueryForm({
+    defaultValue,
     handleSubmit: (payload, isValid) =>
       new Promise((resolve) => {
         if (isValid) {

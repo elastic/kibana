@@ -8,17 +8,15 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useEffect, useState, useMemo } from 'react';
 
+import { SUPPORTED_PLATFORMS } from './constants';
 import { PlatformIcon } from './platform_icon';
-import { PlatformType } from './types';
-
-const DEFAULT_STATE = [PlatformType.darwin, PlatformType.linux, PlatformType.windows];
 
 interface PlatformIconsProps {
   platform: string;
 }
 
 const PlatformIconsComponent: React.FC<PlatformIconsProps> = ({ platform }) => {
-  const [platforms, setPlatforms] = useState<string[]>(DEFAULT_STATE);
+  const [platforms, setPlatforms] = useState<string[]>(SUPPORTED_PLATFORMS);
 
   useEffect(() => {
     setPlatforms((prevValue) => {
@@ -31,7 +29,7 @@ const PlatformIconsComponent: React.FC<PlatformIconsProps> = ({ platform }) => {
         }
         return platformArray;
       } else {
-        return DEFAULT_STATE;
+        return SUPPORTED_PLATFORMS;
       }
     });
   }, [platform]);

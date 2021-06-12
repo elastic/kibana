@@ -20,6 +20,7 @@ import { FieldHook } from '../../shared_imports';
 import { ScheduledQueryGroupQueriesTable } from '../scheduled_query_group_queries_table';
 import { QueryFlyout } from '../queries/query_flyout';
 import { OsqueryPackUploader } from './pack_uploader';
+import { getSupportedPlatforms } from '../queries/platforms/helpers';
 
 interface QueriesFieldProps {
   field: FieldHook<OsqueryManagerPackagePolicyInput[]>;
@@ -30,8 +31,8 @@ interface GetNewStreamProps {
   id: string;
   interval: string;
   query: string;
-  platform?: string;
-  version?: string;
+  platform?: string | undefined;
+  version?: string | undefined;
   scheduledQueryGroupId?: string;
 }
 
@@ -193,7 +194,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, scheduledQu
                 interval: newQuery.interval,
                 query: newQuery.query,
                 version: newQuery.version,
-                platform: newQuery.platform,
+                platform: getSupportedPlatforms(newQuery.platform),
                 scheduledQueryGroupId,
               })
             );

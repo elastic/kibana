@@ -16,7 +16,7 @@ import { formSchema } from './schema';
 const FORM_ID = 'editQueryFlyoutForm';
 
 export interface UseScheduledQueryGroupQueryFormProps {
-  defaultValue?: OsqueryManagerPackagePolicyConfigRecord;
+  defaultValue?: OsqueryManagerPackagePolicyConfigRecord | undefined;
   handleSubmit: FormConfig<
     OsqueryManagerPackagePolicyConfigRecord,
     ScheduledQueryGroupFormData
@@ -59,12 +59,16 @@ export const useScheduledQueryGroupQueryForm = ({
         }
         return draft;
       }),
-    deserializer: (payload) => ({
-      id: payload.id.value,
-      query: payload.query.value,
-      interval: parseInt(payload.interval.value, 10),
-      platform: payload.platform?.value,
-      version: payload.version?.value ? [payload.version?.value] : [],
-    }),
+    deserializer: (payload) => {
+      if (!payload) return {} as ScheduledQueryGroupFormData;
+
+      return {
+        id: payload.id.value,
+        query: payload.query.value,
+        interval: parseInt(payload.interval.value, 10),
+        platform: payload.platform?.value,
+        version: payload.version?.value ? [payload.version?.value] : [],
+      };
+    },
     schema: formSchema,
   });
