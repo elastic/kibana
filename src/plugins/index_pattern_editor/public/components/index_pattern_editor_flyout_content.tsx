@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ChangeEvent } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlyoutHeader,
@@ -19,7 +19,13 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
-import { ensureMinimumTime, getIndices, extractTimeFields, getMatchedIndices } from '../lib';
+import {
+  ensureMinimumTime,
+  getIndices,
+  extractTimeFields,
+  getMatchedIndices,
+  canAppendWildcard,
+} from '../lib';
 import { AdvancedParametersSection } from './field_editor/advanced_parameters_section';
 
 import {
@@ -119,6 +125,7 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
   const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
   const [goToForm, setGoToForm] = useState<boolean>(false);
+  const [appendedWildcard, setAppendedWildcard] = useState<boolean>(false);
   // const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
 
   const [existingIndexPatterns, setExistingIndexPatterns] = useState<string[]>([]);
@@ -208,10 +215,14 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
           `${query}*`,
           allowHidden
         );
+
         indexRequests.push(exactMatchQuery);
         indexRequests.push(partialMatchQuery);
       }
 
+      if (query !== lastTitle) {
+        return;
+      }
       const [exactMatched, partialMatched] = (await ensureMinimumTime(
         indexRequests
       )) as MatchedItem[][];
@@ -262,7 +273,7 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
     setLastTitle(title);
 
     fetchIndices(title);
-  }, [title, existingIndexPatterns, http, indexPatternService, allowHidden]);
+  }, [title, existingIndexPatterns, http, indexPatternService, allowHidden, lastTitle]);
 
   const { isValid } = formState;
   const onClickSave = async () => {
@@ -320,6 +331,28 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
                 component={TextField}
                 data-test-subj="createIndexPatternNameInput"
                 componentProps={{
+                  onChange: (e: ChangeEvent<HTMLInputElement>) => {
+                    e.persist();
+                    let query = e.target.value;
+                    if (query.length === 1 && !appendedWildcard && canAppendWildcard(query)) {
+                      query += '*';
+                      setAppendedWildcard(true);
+                      form.setFieldValue('title', query);
+                      setTimeout(() => e.target.setSelectionRange(1, 1));
+                    } else {
+                      if (['', '*'].includes(query) && appendedWildcard) {
+                        query = '';
+                        // this.setState({ appendedWildcard: false });
+                        setAppendedWildcard(false);
+                        form.setFieldValue('title', query);
+                      }
+                    }
+                    setLastTitle(query);
+                    /*
+                    console.log('changed', e.target.value);
+                    form.setFieldValue('title', e.target.value + '*');
+                    */
+                  },
                   euiFieldProps: {
                     'aria-label': i18n.translate('indexPatternEditor.form.titleAriaLabel', {
                       defaultMessage: 'Title field',
