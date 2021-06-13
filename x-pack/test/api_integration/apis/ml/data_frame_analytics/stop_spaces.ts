@@ -44,7 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('POST data_frame/analytics/{analyticsId}/_stop with spaces', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/bm_classification');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/bm_classification');
       await spacesService.create({ id: idSpace3, name: 'space_three', disabledFeatures: [] });
       await spacesService.create({ id: idSpace4, name: 'space_four', disabledFeatures: [] });
       // job config with high training percent so it takes longer to run

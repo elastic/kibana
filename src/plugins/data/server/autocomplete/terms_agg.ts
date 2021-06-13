@@ -21,7 +21,7 @@ export async function termsAggSuggestions(
   index: string,
   fieldName: string,
   query: string,
-  filters?: estypes.QueryContainer[],
+  filters?: estypes.QueryDslQueryContainer[],
   field?: IFieldType,
   abortSignal?: AbortSignal
 ) {

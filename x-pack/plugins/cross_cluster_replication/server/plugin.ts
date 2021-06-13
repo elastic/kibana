@@ -10,7 +10,6 @@ import { first } from 'rxjs/operators';
 import {
   CoreSetup,
   CoreStart,
-  ILegacyCustomClusterClient,
   Plugin,
   Logger,
   PluginInitializerContext,
@@ -19,20 +18,12 @@ import {
 
 import { Index } from '../../index_management/server';
 import { PLUGIN } from '../common/constants';
-import { SetupDependencies, StartDependencies, CcrRequestHandlerContext } from './types';
+import { SetupDependencies, StartDependencies } from './types';
 import { registerApiRoutes } from './routes';
-import { elasticsearchJsPlugin } from './client/elasticsearch_ccr';
 import { CrossClusterReplicationConfig } from './config';
-import { License, isEsError } from './shared_imports';
-import { formatEsError } from './lib/format_es_error';
+import { License, handleEsError } from './shared_imports';
 
-async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
-  const [core] = await getStartServices();
-  // Extend the elasticsearchJs client with additional endpoints.
-  const esClientConfig = { plugins: [elasticsearchJsPlugin] };
-  return core.elasticsearch.legacy.createClient('crossClusterReplication', esClientConfig);
-}
-
+// TODO replace deprecated ES client after Index Management is updated
 const ccrDataEnricher = async (indicesList: Index[], callWithRequest: LegacyAPICaller) => {
   if (!indicesList?.length) {
     return indicesList;
@@ -66,7 +57,6 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
   private readonly config$: Observable<CrossClusterReplicationConfig>;
   private readonly license: License;
   private readonly logger: Logger;
-  private ccrEsClient?: ILegacyCustomClusterClient;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -114,22 +104,11 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
       ],
     });
 
-    http.registerRouteHandlerContext<CcrRequestHandlerContext, 'crossClusterReplication'>(
-      'crossClusterReplication',
-      async (ctx, request) => {
-        this.ccrEsClient = this.ccrEsClient ?? (await getCustomEsClient(getStartServices));
-        return {
-          client: this.ccrEsClient.asScoped(request),
-        };
-      }
-    );
-
     registerApiRoutes({
       router: http.createRouter(),
       license: this.license,
       lib: {
-        isEsError,
-        formatEsError,
+        handleEsError,
       },
     });
   }
@@ -142,9 +121,5 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
     });
   }
 
-  stop() {
-    if (this.ccrEsClient) {
-      this.ccrEsClient.close();
-    }
-  }
+  stop() {}
 }

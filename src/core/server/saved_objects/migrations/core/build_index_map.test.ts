@@ -36,7 +36,7 @@ test('mappings without index pattern goes to default index', () => {
       type1: {
         properties: {
           field1: {
-            type: 'string',
+            type: 'text',
           },
         },
       },
@@ -48,7 +48,7 @@ test('mappings without index pattern goes to default index', () => {
         type1: {
           properties: {
             field1: {
-              type: 'string',
+              type: 'text',
             },
           },
         },
@@ -69,7 +69,7 @@ test(`mappings with custom index pattern doesn't go to default index`, () => {
       type1: {
         properties: {
           field1: {
-            type: 'string',
+            type: 'text',
           },
         },
       },
@@ -81,7 +81,7 @@ test(`mappings with custom index pattern doesn't go to default index`, () => {
         type1: {
           properties: {
             field1: {
-              type: 'string',
+              type: 'text',
             },
           },
         },
@@ -103,7 +103,7 @@ test('creating a script gets added to the index pattern', () => {
       type1: {
         properties: {
           field1: {
-            type: 'string',
+            type: 'text',
           },
         },
       },
@@ -116,7 +116,7 @@ test('creating a script gets added to the index pattern', () => {
         type1: {
           properties: {
             field1: {
-              type: 'string',
+              type: 'text',
             },
           },
         },
@@ -144,18 +144,18 @@ test('throws when two scripts are defined for an index pattern', () => {
     type1: {
       properties: {
         field1: {
-          type: 'string',
+          type: 'text',
         },
       },
     },
     type2: {
       properties: {
         field1: {
-          type: 'string',
+          type: 'text',
         },
       },
     },
-  };
+  } as const;
   expect(() =>
     createIndexMap({
       kibanaIndexName: defaultIndex,

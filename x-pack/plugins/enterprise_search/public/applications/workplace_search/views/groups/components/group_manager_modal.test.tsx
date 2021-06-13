@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues } from '../../../../__mocks__';
+import { setMockValues } from '../../../../__mocks__/kea_logic';
 import { contentSources } from '../../../__mocks__/content_sources.mock';
 import { groups } from '../../../__mocks__/groups.mock';
 

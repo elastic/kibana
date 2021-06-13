@@ -10,8 +10,8 @@ src="https://play.vidyard.com/embed/v4.js"></script>
 <img
 style="width: 100%; margin: auto; display: block;"
 class="vidyard-player-embed"
-src="https://play.vidyard.com/G6RNjq6U9odYRCYUxY2vfq.jpg"
-data-uuid="G6RNjq6U9odYRCYUxY2vfq"
+src="https://play.vidyard.com/vVJ69WCgUwGNJSDqjPZbaV.jpg"
+data-uuid="vVJ69WCgUwGNJSDqjPZbaV"
 data-v="4"
 data-type="inline"
 />
@@ -147,13 +147,23 @@ For the answers to common *Lens* questions, review the following.
 
 [float]
 [[kql-]]
-===== When should I use the Filter function instead of KQL filters?
+===== When should I use the top filter bar, filters function, or "Filter by"?
 
-The easiest way to apply KQL filters is to use <<semi-structured-search>>, but you can also use the *Filters* function in the following scenarios:
+Using the top <<semi-structured-search>> bar is best when you want to focus on a known set of
+data for all the visualization results. These top level filters are combined with other filters
+using AND logic.
+
+Use the *Filters* function in the following scenarios:
 
 * When you want to apply more than one KQL filter to the visualization.
 
 * When you want to apply the KQL filter to a single layer, which allows you to visualize filtered and unfiltered data.
+
+Use the *Filter by* advanced option in the following scenarios:
+
+* When you want to assign a custom color to each filter in a bar, line or area chart.
+
+* When you want to build a complex table, such as showing both failure rate and overall.
 
 [float]
 [[when-should-i-normalize-the-data-by-unit-or-use-a-custom-interval]]

@@ -28,7 +28,7 @@ import { ErrorConnecting } from './components/error_connecting';
 import { KibanaHeaderActions } from './components/layout/kibana_header_actions';
 import { Library } from './components/library';
 import { MetaEngineCreation } from './components/meta_engine_creation';
-import { RoleMappingsRouter } from './components/role_mappings';
+import { RoleMappings } from './components/role_mappings';
 import { Settings, SETTINGS_TITLE } from './components/settings';
 import { SetupGuide } from './components/setup_guide';
 import {
@@ -112,7 +112,7 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
             </Route>
             {canViewRoleMappings && (
               <Route path={ROLE_MAPPINGS_PATH}>
-                <RoleMappingsRouter />
+                <RoleMappings />
               </Route>
             )}
             {canManageEngines && (
