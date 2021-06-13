@@ -128,3 +128,20 @@ export const CHANGED_CONNECTOR_FIELD = i18n.translate('xpack.cases.caseView.fiel
 export const SYNC_ALERTS = i18n.translate('xpack.cases.caseView.syncAlertsLabel', {
   defaultMessage: `Sync alerts`,
 });
+
+export const DOES_NOT_EXIST_TITLE = i18n.translate('xpack.cases.caseView.doesNotExist.title', {
+  defaultMessage: 'This case does not exist',
+});
+
+export const DOES_NOT_EXIST_DESCRIPTION = (caseId: string) =>
+  i18n.translate('xpack.cases.caseView.doesNotExist.description', {
+    values: {
+      caseId,
+    },
+    defaultMessage:
+      'A case with id {caseId} could not be found. This likely means the case has been deleted, or the id is incorrect.',
+  });
+
+export const DOES_NOT_EXIST_BUTTON = i18n.translate('xpack.cases.caseView.doesNotExist.button', {
+  defaultMessage: 'Back to Cases',
+});

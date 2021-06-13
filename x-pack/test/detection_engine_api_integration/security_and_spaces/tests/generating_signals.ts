@@ -853,7 +853,7 @@ export default ({ getService }: FtrProviderContext) => {
             'host.id': '8cc95778cce5407c809480e8e32ad76b',
             event: { kind: 'signal' },
             signal: {
-              _meta: { version: 35 },
+              _meta: { version: SIGNALS_TEMPLATE_VERSION },
               parents: [
                 {
                   depth: 0,
@@ -1011,7 +1011,7 @@ export default ({ getService }: FtrProviderContext) => {
             'host.id': '8cc95778cce5407c809480e8e32ad76b',
             event: { kind: 'signal' },
             signal: {
-              _meta: { version: 35 },
+              _meta: { version: SIGNALS_TEMPLATE_VERSION },
               parents: [
                 {
                   depth: 0,
@@ -1101,7 +1101,7 @@ export default ({ getService }: FtrProviderContext) => {
             'process.name': 'sshd',
             event: { kind: 'signal' },
             signal: {
-              _meta: { version: 35 },
+              _meta: { version: SIGNALS_TEMPLATE_VERSION },
               parents: [
                 {
                   depth: 0,
