@@ -39,11 +39,11 @@ export default function ({ getService }: FtrProviderContext) {
       );
     });
 
-    after(() =>
-      kibanaServer.importExport.unload(
+    after(async () => {
+      await kibanaServer.importExport.unload(
         'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
-      )
-    );
+      );
+    });
 
     it('should return 200 with individual responses', async () =>
       await supertest
