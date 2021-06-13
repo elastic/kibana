@@ -166,6 +166,9 @@ export function mockDataPlugin(sessionIdSubject = new Subject<string>()) {
     nowProvider: {
       get: jest.fn(),
     },
+    fieldFormats: {
+      deserialize: jest.fn(),
+    },
   } as unknown) as DataPublicPluginStart;
 }
 
