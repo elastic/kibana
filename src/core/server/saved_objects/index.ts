@@ -73,8 +73,6 @@ export type {
 } from './service/lib/repository';
 
 export type {
-  SavedObjectsCoreFieldMapping,
-  SavedObjectsComplexFieldMapping,
   SavedObjectsFieldMapping,
   SavedObjectsMappingProperties,
   SavedObjectsTypeMappingDefinition,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Datafeed } from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATAFEED_STATE } from '../../../../plugins/ml/common/constants/states';
 
@@ -56,7 +56,7 @@ function createTestJobAndDatafeed() {
       },
       query_delay: '120s',
       indices: ['ft_ecommerce'],
-    } as unknown) as Datafeed,
+    } as unknown) as estypes.MlDatafeed,
   };
 }
 
@@ -67,11 +67,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   let testJobId = '';
 
-  describe('anomaly detection alert', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/102012
+  describe.skip('anomaly detection alert', function () {
     this.tags('ciGroup13');
 
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
       await ml.testResources.setKibanaTimeZoneToUTC();
 

@@ -80,7 +80,7 @@ export interface SavedObjectsFindOptions {
   page?: number;
   perPage?: number;
   sortField?: string;
-  sortOrder?: estypes.SortOrder;
+  sortOrder?: estypes.SearchSortOrder;
   /**
    * An array of fields to include in the results
    * @example
@@ -137,7 +137,7 @@ export interface SavedObjectsFindOptions {
    *
    * @alpha
    */
-  aggs?: Record<string, estypes.AggregationContainer>;
+  aggs?: Record<string, estypes.AggregationsAggregationContainer>;
   namespaces?: string[];
   /**
    * This map defines each type to search for, and the namespace(s) to search for the type in; this is only intended to be used by a saved

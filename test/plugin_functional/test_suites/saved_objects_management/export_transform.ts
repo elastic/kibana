@@ -23,13 +23,13 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     describe('root objects export transforms', () => {
       before(async () => {
         await esArchiver.load(
-          '../functional/fixtures/es_archiver/saved_objects_management/export_transform'
+          'test/functional/fixtures/es_archiver/saved_objects_management/export_transform'
         );
       });
 
       after(async () => {
         await esArchiver.unload(
-          '../functional/fixtures/es_archiver/saved_objects_management/export_transform'
+          'test/functional/fixtures/es_archiver/saved_objects_management/export_transform'
         );
       });
 
@@ -143,13 +143,13 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     describe('nested export transforms', () => {
       before(async () => {
         await esArchiver.load(
-          '../functional/fixtures/es_archiver/saved_objects_management/nested_export_transform'
+          'test/functional/fixtures/es_archiver/saved_objects_management/nested_export_transform'
         );
       });
 
       after(async () => {
         await esArchiver.unload(
-          '../functional/fixtures/es_archiver/saved_objects_management/nested_export_transform'
+          'test/functional/fixtures/es_archiver/saved_objects_management/nested_export_transform'
         );
       });
 
