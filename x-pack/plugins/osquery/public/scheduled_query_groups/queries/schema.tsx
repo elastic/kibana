@@ -5,7 +5,11 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import { FIELD_TYPES } from '../../shared_imports';
 
 import { idFieldValidations, intervalFieldValidation, queryFieldValidation } from './validations';
@@ -43,9 +47,24 @@ export const formSchema = {
   version: {
     defaultValue: [],
     type: FIELD_TYPES.COMBO_BOX,
-    label: i18n.translate('xpack.osquery.scheduledQueryGroup.queryFlyoutForm.versionFieldLabel', {
-      defaultMessage: 'Minimum Osquery version',
-    }),
+    label: (
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <FormattedMessage
+            id="xpack.osquery.scheduledQueryGroup.queryFlyoutForm.versionFieldLabel"
+            defaultMessage="Minimum Osquery version"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            <FormattedMessage
+              id="xpack.osquery.scheduledQueryGroup.queryFlyoutForm.versionFieldOptionalLabel"
+              defaultMessage="(optional)"
+            />
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
     validations: [],
   },
 };

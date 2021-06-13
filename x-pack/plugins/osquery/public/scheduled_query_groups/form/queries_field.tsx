@@ -24,6 +24,7 @@ import { getSupportedPlatforms } from '../queries/platforms/helpers';
 
 interface QueriesFieldProps {
   field: FieldHook<OsqueryManagerPackagePolicyInput[]>;
+  integrationPackageVersion?: string | undefined;
   scheduledQueryGroupId: string;
 }
 
@@ -68,7 +69,11 @@ const getNewStream = (payload: GetNewStreamProps) =>
     }
   );
 
-const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, scheduledQueryGroupId }) => {
+const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
+  field,
+  integrationPackageVersion,
+  scheduledQueryGroupId,
+}) => {
   const [showAddQueryFlyout, setShowAddQueryFlyout] = useState(false);
   const [showEditQueryFlyout, setShowEditQueryFlyout] = useState<number>(-1);
   const [tableSelectedItems, setTableSelectedItems] = useState<
@@ -249,10 +254,17 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, scheduledQu
       ) : null}
       <EuiSpacer />
       {<OsqueryPackUploader onChange={handlePackUpload} />}
-      {showAddQueryFlyout && <QueryFlyout onSave={handleAddQuery} onClose={handleHideAddFlyout} />}
+      {showAddQueryFlyout && (
+        <QueryFlyout
+          integrationPackageVersion={integrationPackageVersion}
+          onSave={handleAddQuery}
+          onClose={handleHideAddFlyout}
+        />
+      )}
       {showEditQueryFlyout != null && showEditQueryFlyout >= 0 && (
         <QueryFlyout
           defaultValue={field.value[0].streams[showEditQueryFlyout]?.vars}
+          integrationPackageVersion={integrationPackageVersion}
           onSave={handleEditQuery}
           onClose={handleHideEditFlyout}
         />

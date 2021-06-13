@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiCallOut,
   EuiFlyout,
   EuiTitle,
   EuiSpacer,
@@ -18,7 +19,7 @@ import {
   EuiButtonEmpty,
   EuiButton,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { OsqueryManagerPackagePolicyConfigRecord } from '../../../common/types';
@@ -30,16 +31,23 @@ import {
   UseScheduledQueryGroupQueryFormProps,
   useScheduledQueryGroupQueryForm,
 } from './use_scheduled_query_group_query_form';
+import { ManageIntegrationLink } from '../../components/manage_integration_link';
 
 const CommonUseField = getUseField({ component: Field });
 
 interface QueryFlyoutProps {
   defaultValue?: UseScheduledQueryGroupQueryFormProps['defaultValue'] | undefined;
+  integrationPackageVersion?: string | undefined;
   onSave: (payload: OsqueryManagerPackagePolicyConfigRecord) => Promise<void>;
   onClose: () => void;
 }
 
-const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({ defaultValue, onSave, onClose }) => {
+const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
+  defaultValue,
+  integrationPackageVersion,
+  onSave,
+  onClose,
+}) => {
   const { form } = useScheduledQueryGroupQueryForm({
     defaultValue,
     handleSubmit: (payload, isValid) =>
@@ -51,6 +59,17 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({ defaultValue, onSave
         resolve();
       }),
   });
+
+  /* Platform and version fields are supported since osquer_manger@0.3.0 */
+  const isFieldSupported = useMemo(() => {
+    if (!integrationPackageVersion) return false;
+
+    try {
+      return parseInt(integrationPackageVersion.split('.')[0], 10) >= 3;
+    } catch (e) {
+      return false;
+    }
+  }, [integrationPackageVersion]);
 
   const { submit } = form;
 
@@ -92,6 +111,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({ defaultValue, onSave
                   path="version"
                   // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
                   euiFieldProps={{
+                    isDisabled: !isFieldSupported,
                     noSuggestions: false,
                     singleSelection: { asPlainText: true },
                     placeholder: ALL_OSQUERY_VERSIONS_OPTIONS[0].label,
@@ -100,11 +120,36 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({ defaultValue, onSave
                 />
               </EuiFlexItem>
               <EuiFlexItem>
-                <CommonUseField path="platform" component={PlatformCheckBoxGroupField} />
+                <CommonUseField
+                  path="platform"
+                  component={PlatformCheckBoxGroupField}
+                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                  euiFieldProps={{ disabled: !isFieldSupported }}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer />
           </Form>
+          {!isFieldSupported ? (
+            <EuiCallOut
+              size="s"
+              title={
+                <FormattedMessage
+                  id="xpack.osquery.scheduleQueryGroup.queryFlyoutForm.unsupportedPlatformAndVersionFieldsCalloutTitle"
+                  defaultMessage="Platform and version fields are available from {version}"
+                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                  values={{ version: `osquery_manager@0.3.0` }}
+                />
+              }
+              iconType="pin"
+            >
+              <EuiFlexGroup gutterSize="none">
+                <EuiFlexItem grow={false}>
+                  <ManageIntegrationLink />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiCallOut>
+          ) : null}
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">

@@ -248,7 +248,15 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
     [defaultValue, agentPolicyOptions]
   );
 
-  const [{ policy_id: policyId }] = useFormData({ form, watch: ['policy_id'] });
+  const [
+    {
+      package: { version: integrationPackageVersion } = { version: undefined },
+      policy_id: policyId,
+    },
+  ] = useFormData({
+    form,
+    watch: ['package', 'policy_id'],
+  });
 
   const currentPolicy = useMemo(() => {
     if (!policyId) {
@@ -331,6 +339,7 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
           path="inputs"
           component={QueriesField}
           scheduledQueryGroupId={defaultValue?.id ?? null}
+          integrationPackageVersion={integrationPackageVersion}
         />
 
         <CommonUseField path="enabled" component={GhostFormField} />
