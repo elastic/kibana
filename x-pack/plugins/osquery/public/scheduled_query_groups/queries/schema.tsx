@@ -47,7 +47,7 @@ export const formSchema = {
   version: {
     defaultValue: [],
     type: FIELD_TYPES.COMBO_BOX,
-    label: (
+    label: ((
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
           <FormattedMessage
@@ -64,7 +64,7 @@ export const formSchema = {
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-    ),
+    ) as unknown) as string,
     validations: [],
   },
 };
