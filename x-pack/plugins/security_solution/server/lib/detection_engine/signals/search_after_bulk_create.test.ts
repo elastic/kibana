@@ -569,11 +569,6 @@ describe('searchAfterAndBulkCreate', () => {
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
     expect(createdSignalsCount).toEqual(0); // should not create any signals because all events were in the allowlist
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
-    // I don't like testing log statements since logs change but this is the best
-    // way I can think of to ensure this section is getting hit with this test case.
-    expect(((mockLogger.debug as unknown) as jest.Mock).mock.calls[7][0]).toContain(
-      'ran out of sort ids to sort on name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
-    );
   });
 
   test('should return success when no sortId present but search results are in the allowlist', async () => {
