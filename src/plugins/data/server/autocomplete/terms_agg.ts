@@ -53,7 +53,7 @@ async function getBody(
   { timeout, terminate_after }: Record<string, any>,
   field: IFieldType | string,
   query: string,
-  filters: estypes.QueryContainer[] = []
+  filters: estypes.QueryDslQueryContainer[] = []
 ) {
   const isFieldObject = (f: any): f is IFieldType => Boolean(f && f.name);
 
