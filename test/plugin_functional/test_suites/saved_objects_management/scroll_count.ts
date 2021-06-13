@@ -16,15 +16,17 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
 
   describe('scroll_count', () => {
     describe('saved objects with hidden type', () => {
-      before(() =>
-        esArchiver.load(
-          'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
-        )
+      before(
+        async () =>
+          await esArchiver.load(
+            'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
+          )
       );
-      after(() =>
-        esArchiver.unload(
-          'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
-        )
+      after(
+        async () =>
+          await esArchiver.unload(
+            'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
+          )
       );
 
       it('only counts hidden types that are importableAndExportable', async () => {

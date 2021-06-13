@@ -13,11 +13,17 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('query params', () => {
-    before(() =>
-      esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/daily_index')
+    before(
+      async () =>
+        await esArchiver.load(
+          'test/api_integration/fixtures/es_archiver/index_patterns/daily_index'
+        )
     );
-    after(() =>
-      esArchiver.unload('test/api_integration/fixtures/es_archiver/index_patterns/daily_index')
+    after(
+      async () =>
+        await esArchiver.unload(
+          'test/api_integration/fixtures/es_archiver/index_patterns/daily_index'
+        )
     );
 
     it('requires `pattern` query param', () =>

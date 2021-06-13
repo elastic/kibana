@@ -15,15 +15,17 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
 
   describe('get', () => {
     describe('saved objects with hidden type', () => {
-      before(() =>
-        esArchiver.load(
-          'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
-        )
+      before(
+        async () =>
+          await esArchiver.load(
+            'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
+          )
       );
-      after(() =>
-        esArchiver.unload(
-          'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
-        )
+      after(
+        async () =>
+          await esArchiver.unload(
+            'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
+          )
       );
       const hiddenTypeExportableImportable =
         'test-hidden-importable-exportable/ff3733a0-9fty-11e7-ahb3-3dcb94193fab';

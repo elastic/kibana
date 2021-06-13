@@ -80,11 +80,13 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('8.0.0', () => {
       const { min, max } = DATES['8.0.0'].logs_and_metrics;
-      before(() =>
-        esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics')
+      before(
+        async () =>
+          await esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics')
       );
-      after(() =>
-        esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics')
+      after(
+        async () =>
+          await esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics')
       );
 
       it("should use the id for the label when the name doesn't exist", async () => {

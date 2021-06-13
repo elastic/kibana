@@ -763,15 +763,17 @@ export function copyToSpaceTestSuiteFactory(
         const spaces = ['space_2'];
         const includeReferences = false;
         describe(`multi-namespace types with overwrite=${overwrite} and createNewCopies=${createNewCopies}`, () => {
-          before(() =>
-            esArchiver.load(
-              'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-            )
+          before(
+            async () =>
+              await esArchiver.load(
+                'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+              )
           );
-          after(() =>
-            esArchiver.unload(
-              'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-            )
+          after(
+            async () =>
+              await esArchiver.unload(
+                'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+              )
           );
 
           const testCases = tests.multiNamespaceTestCases(overwrite, createNewCopies);

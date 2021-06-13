@@ -12,11 +12,17 @@ export default function ({ getService }) {
   const randomness = getService('randomness');
 
   describe('params', () => {
-    before(() =>
-      esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index')
+    before(
+      async () =>
+        await esArchiver.load(
+          'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+        )
     );
-    after(() =>
-      esArchiver.unload('test/api_integration/fixtures/es_archiver/index_patterns/basic_index')
+    after(
+      async () =>
+        await esArchiver.unload(
+          'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+        )
     );
 
     it('requires a pattern query param', () =>
