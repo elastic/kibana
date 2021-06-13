@@ -115,6 +115,7 @@ export function getPackagePolicyWithAgentConfigurations(
       {
         ...firstInput,
         config: {
+          ...firstInput.config,
           [APM_SERVER]: {
             value: {
               ...apmServerValue,
