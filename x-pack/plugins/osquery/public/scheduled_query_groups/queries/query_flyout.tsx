@@ -65,7 +65,10 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
     if (!integrationPackageVersion) return false;
 
     try {
-      return parseInt(integrationPackageVersion.split('.')[0], 10) >= 3;
+      return (
+        parseInt(integrationPackageVersion.split('.')[0], 10) >= 0 &&
+        parseInt(integrationPackageVersion.split('.')[1], 10) >= 3
+      );
     } catch (e) {
       return false;
     }
@@ -116,6 +119,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
                     singleSelection: { asPlainText: true },
                     placeholder: ALL_OSQUERY_VERSIONS_OPTIONS[0].label,
                     options: ALL_OSQUERY_VERSIONS_OPTIONS,
+                    onCreateOption: undefined,
                   }}
                 />
               </EuiFlexItem>

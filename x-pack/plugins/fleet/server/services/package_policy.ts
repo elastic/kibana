@@ -657,7 +657,7 @@ function _enforceFrozenVars(
     }
   }
   for (const [key, val] of Object.entries(oldVars)) {
-    if (!newVars[key] && oldVars[key]?.frozen) {
+    if (!newVars[key] && val.frozen) {
       resultVars[key] = val;
     }
   }
