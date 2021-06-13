@@ -63,7 +63,7 @@ export const EmptyIndexPatternPrompt = ({ goToCreate }: Props) => {
                 yesterday, or all indices that contain your log data."
               />
             </p>
-            {application.capabilities.management.kibana.indexPatterns && (
+            {application.capabilities.indexPatterns.save && (
               <EuiButton
                 onClick={goToCreate}
                 iconType="plusInCircle"

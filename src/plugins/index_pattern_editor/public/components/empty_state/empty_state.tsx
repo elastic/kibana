@@ -64,8 +64,6 @@ export const EmptyState = ({
     </EuiText>
   );
 
-  console.log('HI', capabilities, capabilities.management.kibana.indexPatterns);
-
   return (
     <>
       <EuiPageContent
@@ -206,7 +204,7 @@ export const EmptyState = ({
         </EuiPageContentBody>
       </EuiPageContent>
       <EuiSpacer />
-      {capabilities.management.kibana.indexPatterns && createAnywayLink}
+      {capabilities.indexPatterns.save && createAnywayLink}
     </>
   );
 };
