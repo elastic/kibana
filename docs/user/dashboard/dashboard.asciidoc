@@ -297,6 +297,8 @@ Download the data for non-*Lens* panels.
 [role="screenshot"]
 image:images/Dashboard_inspect.png[Inspect in dashboard]
 
+NOTE: Lens panels do not support *Inspect*.
+
 [float]
 [[share-the-dashboard]]
 == Share dashboards
