@@ -19,8 +19,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiRadioGroup,
+  htmlIdGenerator,
+  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import { Legacy } from '../legacy_shims';
 
@@ -33,6 +37,27 @@ export const EnableAlertsModal: React.FC<{}> = () => {
     setIsModalVisible(false);
     alertsEnableModalProvider.hideModalForSession();
   };
+  // const idPrefix = htmlIdGenerator()();
+  const radios = [
+    {
+      id: 'create-alerts',
+      label: i18n.translate('xpack.monitoring.alerts.modal.yesOption', {
+        defaultMessage: 'Yes (Recommended - create default rules in this kibana spaces)',
+      }),
+    },
+    {
+      id: 'not-create-alerts',
+      label: i18n.translate('xpack.monitoring.alerts.modal.noOption', {
+        defaultMessage: 'No',
+      }),
+    },
+  ];
+
+  const [radioIdSelected, setRadioIdSelected] = useState('create-alerts');
+
+  const onChange = (optionId: string) => {
+    setRadioIdSelected(optionId);
+  };
 
   useEffect(() => {
     if (alertsEnableModalProvider.shouldShowAlertsModal()) {
@@ -40,13 +65,13 @@ export const EnableAlertsModal: React.FC<{}> = () => {
     }
   }, [alertsEnableModalProvider]);
 
-  const cancelButtonClick = () => {
-    alertsEnableModalProvider.notAskAgain();
-    closeModal();
-  };
-
   const confirmButtonClick = () => {
-    alertsEnableModalProvider.enableAlerts();
+    if (radioIdSelected === 'create-alerts') {
+      alertsEnableModalProvider.enableAlerts();
+    } else {
+      alertsEnableModalProvider.notAskAgain();
+    }
+
     closeModal();
   };
 
@@ -85,36 +110,35 @@ export const EnableAlertsModal: React.FC<{}> = () => {
               }}
             />
           </p>
-          <p>
+          <div>
             <FormattedMessage
               id="xpack.monitoring.alerts.modal.createDescription"
               defaultMessage="Create these out-of-the box rules?"
             />
-          </p>
+
+            <EuiSpacer size="xs" />
+
+            <EuiRadioGroup
+              options={radios}
+              idSelected={radioIdSelected}
+              onChange={(id) => onChange(id)}
+              name="radio group"
+            />
+          </div>
         </EuiText>
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={closeModal}>
-              <FormattedMessage
-                id="xpack.monitoring.alerts.modal.remindLater"
-                defaultMessage="Remind me later"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+        <EuiButtonEmpty onClick={closeModal}>
+          <FormattedMessage
+            id="xpack.monitoring.alerts.modal.remindLater"
+            defaultMessage="Remind me later"
+          />
+        </EuiButtonEmpty>
 
-          <EuiFlexItem grow={false}>
-            <div>
-              <EuiButtonEmpty onClick={cancelButtonClick}>No</EuiButtonEmpty>
-
-              <EuiButton onClick={confirmButtonClick} fill>
-                Yes
-              </EuiButton>
-            </div>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiButton onClick={confirmButtonClick} fill>
+          Ok
+        </EuiButton>
       </EuiModalFooter>
     </EuiModal>
   ) : null;
