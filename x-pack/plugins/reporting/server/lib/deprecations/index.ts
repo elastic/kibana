@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import { PutLifecycleRequest } from '@elastic/elasticsearch/api/types';
+import { shouldMigrateIndices } from './should_migrate_indices';
 
-export const reportingIlmPolicy: PutLifecycleRequest['body'] = {
-  policy: {
-    phases: {
-      hot: {
-        actions: {},
-      },
-    },
-  },
+export const deprecations = {
+  shouldMigrateIndices,
 };
