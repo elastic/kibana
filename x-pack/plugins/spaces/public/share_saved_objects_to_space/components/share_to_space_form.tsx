@@ -61,7 +61,7 @@ export const ShareToSpaceForm = (props: Props) => {
           defaultMessage="Your changes appear in each space you select. {makeACopyLink} if you don't want to synchronize your changes."
           values={{
             makeACopyLink: (
-              <EuiLink data-test-subj="sts-copy-link" onClick={() => makeCopy()}>
+              <EuiLink data-test-subj="sts-copy-button" onClick={() => makeCopy()}>
                 <FormattedMessage
                   id="xpack.spaces.shareToSpace.shareWarningLink"
                   defaultMessage="Make a copy"

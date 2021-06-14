@@ -156,7 +156,7 @@ describe('SpacesManager', () => {
   });
 
   describe('#getShareableReferences', () => {
-    it('retrieves the shareable references, filters out references that are tags, adn returns the result', async () => {
+    it('retrieves the shareable references, filters out references that are tags, and returns the result', async () => {
       const obj1 = { type: 'not-a-tag', id: '1' }; // requested object
       const obj2 = { type: 'tag', id: '2' }; // requested object
       const obj3 = { type: 'tag', id: '3' }; // referenced object

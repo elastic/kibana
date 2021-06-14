@@ -15,7 +15,7 @@ import type {
 } from 'src/core/public';
 import type { Space } from 'src/plugins/spaces_oss/common';
 
-import type { GetAllSpacesOptions, GetSpaceResult } from '../../common';
+import type { GetAllSpacesOptions, GetSpaceResult, LegacyUrlAliasTarget } from '../../common';
 import type { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
 
 interface SavedObjectTarget {
@@ -90,6 +90,12 @@ export class SpacesManager {
 
   public async deleteSpace(space: Space) {
     await this.http.delete(`/api/spaces/space/${encodeURIComponent(space.id)}`);
+  }
+
+  public async disableLegacyUrlAliases(aliases: LegacyUrlAliasTarget[]) {
+    await this.http.post('/api/spaces/_disable_legacy_url_aliases', {
+      body: JSON.stringify({ aliases }),
+    });
   }
 
   public async copySavedObjects(

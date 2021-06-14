@@ -20,6 +20,7 @@ import { ALL_SPACES_ID } from '../../../common/constants';
 import { CopyToSpaceFlyoutInternal } from '../../copy_saved_objects_to_space/components/copy_to_space_flyout_internal';
 import { getSpacesContextProviderWrapper } from '../../spaces_context';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
+import { AliasTable } from './alias_table';
 import { NoSpacesAvailable } from './no_spaces_available';
 import { RelativesControl } from './relatives_control';
 import { SelectableSpacesControl } from './selectable_spaces_control';
@@ -147,6 +148,25 @@ const setup = async (opts: SetupOpts = {}) => {
   return { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToShare };
 };
 
+function changeSpaceSelection(wrapper: ReactWrapper, selectedSpaces: string[]) {
+  // Using props callback instead of simulating clicks, because EuiSelectable uses a virtualized list, which isn't easily testable via test
+  // subjects
+  const spaceSelector = wrapper.find(SelectableSpacesControl);
+  act(() => {
+    spaceSelector.props().onChange(selectedSpaces);
+  });
+  wrapper.update();
+}
+
+async function clickButton(wrapper: ReactWrapper, button: 'continue' | 'save' | 'copy') {
+  const buttonNode = findTestSubject(wrapper, `sts-${button}-button`);
+  await act(async () => {
+    buttonNode.simulate('click');
+    await nextTick();
+    wrapper.update();
+  });
+}
+
 describe('ShareToSpaceFlyout', () => {
   it('waits for spaces to load', async () => {
     const { wrapper } = await setup({ returnBeforeSpacesLoad: true });
@@ -221,12 +241,7 @@ describe('ShareToSpaceFlyout', () => {
       expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
       expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
 
-      const copyButton = findTestSubject(wrapper, 'sts-copy-link'); // this link is only present in the warning callout
-
-      await act(async () => {
-        copyButton.simulate('click');
-        await nextTick();
-      });
+      await clickButton(wrapper, 'copy'); // this link is only present in the warning callout
       wrapper.update();
 
       expect(wrapper.find(CopyToSpaceFlyoutInternal)).toHaveLength(1);
@@ -297,20 +312,8 @@ describe('ShareToSpaceFlyout', () => {
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
     expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
 
-    // Using props callback instead of simulating clicks,
-    // because EuiSelectable uses a virtualized list, which isn't easily testable via test subjects
-    const spaceSelector = wrapper.find(SelectableSpacesControl);
-    act(() => {
-      spaceSelector.props().onChange(['space-2', 'space-3']);
-    });
-
-    const startButton = findTestSubject(wrapper, 'sts-initiate-button');
-
-    await act(async () => {
-      startButton.simulate('click');
-      await nextTick();
-      wrapper.update();
-    });
+    changeSpaceSelection(wrapper, ['space-2', 'space-3']);
+    await clickButton(wrapper, 'save');
 
     expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenCalled();
     expect(mockToastNotifications.addError).toHaveBeenCalled();
@@ -329,21 +332,8 @@ describe('ShareToSpaceFlyout', () => {
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
     expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
 
-    // Using props callback instead of simulating clicks,
-    // because EuiSelectable uses a virtualized list, which isn't easily testable via test subjects
-    const spaceSelector = wrapper.find(SelectableSpacesControl);
-
-    act(() => {
-      spaceSelector.props().onChange(['space-1', 'space-2', 'space-3']);
-    });
-
-    const startButton = findTestSubject(wrapper, 'sts-initiate-button');
-
-    await act(async () => {
-      startButton.simulate('click');
-      await nextTick();
-      wrapper.update();
-    });
+    changeSpaceSelection(wrapper, ['space-1', 'space-2', 'space-3']);
+    await clickButton(wrapper, 'save');
 
     const { type, id } = savedObjectToShare;
     expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenCalledWith(
@@ -370,21 +360,8 @@ describe('ShareToSpaceFlyout', () => {
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
     expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
 
-    // Using props callback instead of simulating clicks,
-    // because EuiSelectable uses a virtualized list, which isn't easily testable via test subjects
-    const spaceSelector = wrapper.find(SelectableSpacesControl);
-
-    act(() => {
-      spaceSelector.props().onChange([]);
-    });
-
-    const startButton = findTestSubject(wrapper, 'sts-initiate-button');
-
-    await act(async () => {
-      startButton.simulate('click');
-      await nextTick();
-      wrapper.update();
-    });
+    changeSpaceSelection(wrapper, []);
+    await clickButton(wrapper, 'save');
 
     const { type, id } = savedObjectToShare;
     expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenCalledWith(
@@ -411,21 +388,8 @@ describe('ShareToSpaceFlyout', () => {
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
     expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
 
-    // Using props callback instead of simulating clicks,
-    // because EuiSelectable uses a virtualized list, which isn't easily testable via test subjects
-    const spaceSelector = wrapper.find(SelectableSpacesControl);
-
-    act(() => {
-      spaceSelector.props().onChange(['space-2', 'space-3']);
-    });
-
-    const startButton = findTestSubject(wrapper, 'sts-initiate-button');
-
-    await act(async () => {
-      startButton.simulate('click');
-      await nextTick();
-      wrapper.update();
-    });
+    changeSpaceSelection(wrapper, ['space-2', 'space-3']);
+    await clickButton(wrapper, 'save');
 
     const { type, id } = savedObjectToShare;
     expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenCalledWith(
@@ -696,6 +660,72 @@ describe('ShareToSpaceFlyout', () => {
     });
   });
 
+  describe('alias list', () => {
+    it('shows only aliases for spaces that exist', async () => {
+      const namespaces = ['my-active-space']; // the saved object's current namespaces
+      const { wrapper } = await setup({
+        namespaces,
+        additionalShareableReferences: [
+          // it doesn't matter if aliases are for the saved object target or for references; this is easier to mock
+          {
+            type: 'foo',
+            id: '1',
+            spaces: namespaces,
+            inboundReferences: [],
+            spacesWithMatchingAliases: ['space-1', 'some-space-that-does-not-exist'], // space-1 exists, it is mocked at the top
+          },
+        ],
+      });
+
+      changeSpaceSelection(wrapper, ['*']);
+      await clickButton(wrapper, 'continue');
+
+      const aliasTable = wrapper.find(AliasTable);
+      expect(aliasTable.prop('aliasesToDisable')).toEqual([
+        { targetType: 'foo', sourceId: '1', targetSpace: 'space-1', spaceExists: true },
+        {
+          // this alias is present, and it will be disabled, but it is not displayed in the table below due to the 'spaceExists' field
+          targetType: 'foo',
+          sourceId: '1',
+          targetSpace: 'some-space-that-does-not-exist',
+          spaceExists: false,
+        },
+      ]);
+      expect(aliasTable.find(EuiCallOut).text()).toMatchInlineSnapshot(
+        `"Legacy URL conflict1 legacy URL will be disabled."`
+      );
+    });
+
+    it('shows only aliases for selected spaces', async () => {
+      const namespaces = ['my-active-space']; // the saved object's current namespaces
+      const { wrapper } = await setup({
+        namespaces,
+        additionalShareableReferences: [
+          // it doesn't matter if aliases are for the saved object target or for references; this is easier to mock
+          {
+            type: 'foo',
+            id: '1',
+            spaces: namespaces,
+            inboundReferences: [],
+            spacesWithMatchingAliases: ['space-1', 'space-2'], // space-1 and space-2 both exist, they are mocked at the top
+          },
+        ],
+      });
+
+      changeSpaceSelection(wrapper, ['space-1']);
+      await clickButton(wrapper, 'continue');
+
+      const aliasTable = wrapper.find(AliasTable);
+      expect(aliasTable.prop('aliasesToDisable')).toEqual([
+        { targetType: 'foo', sourceId: '1', targetSpace: 'space-1', spaceExists: true },
+        // even though an alias exists for space-2, it will not be disabled, because we aren't sharing to that space
+      ]);
+      expect(aliasTable.find(EuiCallOut).text()).toMatchInlineSnapshot(
+        `"Legacy URL conflict1 legacy URL will be disabled."`
+      );
+    });
+  });
+
   describe('footer', () => {
     it('does not show a description of relatives (references) if there are none', async () => {
       const namespaces = ['my-active-space']; // the saved object's current namespaces
@@ -720,6 +750,61 @@ describe('ShareToSpaceFlyout', () => {
       const relativesControl = wrapper.find(RelativesControl);
       expect(relativesControl.isEmptyRender()).toBe(false);
       expect(relativesControl.text()).toMatchInlineSnapshot(`"1 related object will also change."`);
+    });
+
+    function expectButton(wrapper: ReactWrapper, button: 'save' | 'continue') {
+      const saveButton = findTestSubject(wrapper, 'sts-save-button');
+      const continueButton = findTestSubject(wrapper, 'sts-continue-button');
+      expect(saveButton).toHaveLength(button === 'save' ? 1 : 0);
+      expect(continueButton).toHaveLength(button === 'continue' ? 1 : 0);
+    }
+
+    it('shows a save button if there are no legacy URL aliases to disable', async () => {
+      const namespaces = ['my-active-space']; // the saved object's current namespaces
+      const { wrapper } = await setup({ namespaces });
+
+      changeSpaceSelection(wrapper, ['*']);
+      expectButton(wrapper, 'save');
+    });
+
+    it('shows a save button if there are legacy URL aliases to disable, but none for existing spaces', async () => {
+      const namespaces = ['my-active-space']; // the saved object's current namespaces
+      const { wrapper } = await setup({
+        namespaces,
+        additionalShareableReferences: [
+          // it doesn't matter if aliases are for the saved object target or for references; this is easier to mock
+          {
+            type: 'foo',
+            id: '1',
+            spaces: namespaces,
+            inboundReferences: [],
+            spacesWithMatchingAliases: ['some-space-that-does-not-exist'],
+          },
+        ],
+      });
+
+      changeSpaceSelection(wrapper, ['*']);
+      expectButton(wrapper, 'save');
+    });
+
+    it('shows a continue button if there are legacy URL aliases to disable for existing spaces', async () => {
+      const namespaces = ['my-active-space']; // the saved object's current namespaces
+      const { wrapper } = await setup({
+        namespaces,
+        additionalShareableReferences: [
+          // it doesn't matter if aliases are for the saved object target or for references; this is easier to mock
+          {
+            type: 'foo',
+            id: '1',
+            spaces: namespaces,
+            inboundReferences: [],
+            spacesWithMatchingAliases: ['space-1', 'some-space-that-does-not-exist'], // space-1 exists, it is mocked at the top
+          },
+        ],
+      });
+
+      changeSpaceSelection(wrapper, ['*']);
+      expectButton(wrapper, 'continue');
     });
   });
 });

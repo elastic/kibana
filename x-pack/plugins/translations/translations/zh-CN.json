@@ -22676,7 +22676,6 @@
     "xpack.spaces.shareToSpace.shareModeControl.shareToAllSpaces.text": "使 {objectNoun} 在当前和将来的所有工作区中都可用。",
     "xpack.spaces.shareToSpace.shareModeControl.shareToExplicitSpaces.text": "仅使 {objectNoun} 在选定工作区中可用。",
     "xpack.spaces.shareToSpace.shareSuccessTitle": "已更新 {objectNoun}",
-    "xpack.spaces.shareToSpace.shareToSpacesButton": "保存并关闭",
     "xpack.spaces.shareToSpace.shareWarningBody": "您的更改显示在您选择的每个工作区中。如果不想同步您的更改，{makeACopyLink}。",
     "xpack.spaces.shareToSpace.shareWarningLink": "创建副本",
     "xpack.spaces.shareToSpace.shareWarningTitle": "更改已在工作区之间同步",

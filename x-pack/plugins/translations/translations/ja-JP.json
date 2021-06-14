@@ -22319,7 +22319,6 @@
     "xpack.spaces.shareToSpace.shareModeControl.selectedCountLabel": "{selectedCount}個が選択済み",
     "xpack.spaces.shareToSpace.shareModeControl.selectSpacesLabel": "スペースを選択",
     "xpack.spaces.shareToSpace.shareSuccessTitle": "{objectNoun}を更新しました",
-    "xpack.spaces.shareToSpace.shareToSpacesButton": "保存して閉じる",
     "xpack.spaces.shareToSpace.shareWarningBody": "変更は選択した各スペースに表示されます。変更を同期しない場合は、{makeACopyLink}。",
     "xpack.spaces.shareToSpace.shareWarningLink": "コピーを作成",
     "xpack.spaces.shareToSpace.shareWarningTitle": "変更はスペース全体で同期されます",

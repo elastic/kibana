@@ -11,7 +11,12 @@ import { omit } from 'lodash';
 import type { ISavedObjectsRepository, SavedObject } from 'src/core/server';
 import type { Space } from 'src/plugins/spaces_oss/common';
 
-import type { GetAllSpacesOptions, GetAllSpacesPurpose, GetSpaceResult } from '../../common';
+import type {
+  GetAllSpacesOptions,
+  GetAllSpacesPurpose,
+  GetSpaceResult,
+  LegacyUrlAliasTarget,
+} from '../../common';
 import { isReservedSpace } from '../../common';
 import type { ConfigType } from '../config';
 
@@ -64,24 +69,6 @@ export interface ISpacesClient {
    * @param aliases the aliases to disable.
    */
   disableLegacyUrlAliases(aliases: LegacyUrlAliasTarget[]): Promise<void>;
-}
-
-/**
- * Client interface for interacting with legacy URL aliases.
- */
-export interface LegacyUrlAliasTarget {
-  /**
-   * The namespace that the object existed in when it was converted.
-   */
-  targetSpace: string;
-  /**
-   * The type of the object when it was converted.
-   */
-  targetType: string;
-  /**
-   * The original ID of the object, before it was converted.
-   */
-  sourceId: string;
 }
 
 /**
