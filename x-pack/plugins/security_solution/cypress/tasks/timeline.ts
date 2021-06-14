@@ -8,6 +8,7 @@
 import { Timeline, TimelineFilter } from '../objects/timeline';
 
 import { ALL_CASES_CREATE_NEW_CASE_TABLE_BTN } from '../screens/all_cases';
+import { LOADING_INDICATOR } from '../screens/security_header';
 
 import {
   ADD_FILTER,
@@ -236,6 +237,8 @@ export const markAsFavorite = () => {
   cy.root().pipe(($el) => {
     return $el.find(STAR_ICON).trigger('click');
   });
+  cy.get(LOADING_INDICATOR).should('exist');
+  cy.get(LOADING_INDICATOR).should('not.exist');
 };
 
 export const openTimelineFieldsBrowser = () => {
