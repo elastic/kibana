@@ -208,8 +208,7 @@ export const asyncSearchServiceProvider = (
           values.push(item);
         }
         loadedHistograms++;
-        progress.loadedHistograms =
-          loadedHistograms / (fieldValuePairs.length - 1);
+        progress.loadedHistograms = loadedHistograms / fieldValuePairs.length;
       }
 
       isRunning = false;
