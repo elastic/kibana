@@ -235,6 +235,12 @@ describe('endpoint list middleware', () => {
     };
 
     const fleetActionGenerator = new FleetActionGenerator(Math.random().toString());
+    const actionData = fleetActionGenerator.generate({
+      agents: [endpointList.hosts[0].metadata.agent.id],
+    });
+    const responseData = fleetActionGenerator.generateResponse({
+      agent_id: endpointList.hosts[0].metadata.agent.id,
+    });
     const getMockEndpointActivityLog = () =>
       ({
         total: 2,
@@ -245,18 +251,14 @@ describe('endpoint list middleware', () => {
             type: 'response',
             item: {
               id: '',
-              data: fleetActionGenerator.generateResponse({
-                agent_id: endpointList.hosts[0].metadata.agent.id,
-              }),
+              data: responseData,
             },
           },
           {
             type: 'action',
             item: {
               id: '',
-              data: fleetActionGenerator.generate({
-                agents: [endpointList.hosts[0].metadata.agent.id],
-              }),
+              data: actionData,
             },
           },
         ],
