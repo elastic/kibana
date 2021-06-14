@@ -59,6 +59,11 @@ const StepsWithLessPadding = styled(EuiSteps)`
   }
 `;
 
+const CustomEuiBottomBar = styled(EuiBottomBar)`
+  // Set a relatively _low_ z-index value here to account for EuiComboBox popover that might appear under the bottom bar
+  z-index: 50;
+`;
+
 interface AddToPolicyParams {
   pkgkey: string;
   integration?: string;
@@ -451,8 +456,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
           )}
       <StepsWithLessPadding steps={steps} />
       <EuiSpacer size="l" />
-      {/* Note: we set a relatively _low_ zIndex value here to account for EuiComboBox popover that might appear under the bottom bar */}
-      <EuiBottomBar style={{ zIndex: 50 }}>
+      <CustomEuiBottomBar>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
             {!isLoadingSecondStep && agentPolicy && packageInfo && formState === 'INVALID' ? (
@@ -497,7 +501,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiBottomBar>
+      </CustomEuiBottomBar>
     </CreatePackagePolicyPageLayout>
   );
 };
