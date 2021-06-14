@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
-import { SharePluginSetup, SharePluginStart } from 'src/plugins/share/public';
+import type { SharePluginSetup, SharePluginStart } from 'src/plugins/share/public';
 import { ManagementSetup, ManagementStart } from './types';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
 import {

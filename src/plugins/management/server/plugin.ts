@@ -8,7 +8,7 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from 'kibana/server';
 import { LocatorPublic } from 'src/plugins/share/common';
-import { SharePluginSetup } from 'src/plugins/share/server';
+import type { SharePluginSetup } from 'src/plugins/share/server';
 import { ManagementAppLocator, ManagementAppLocatorParams } from '../common/locator';
 import { capabilitiesProvider } from './capabilities_provider';
 
