@@ -123,6 +123,7 @@ export class MBMap extends Component<Props, State> {
         this._prevLayerList = this.props.layerList;
         this._prevTimeslice = this.props.timeslice;
         this._syncMbMapWithLayerList();
+        this._syncMbMapWithInspector();
       }
       this.props.spatialFiltersLayer.syncLayerWithMB(this.state.mbMap);
       this._syncSettings();
