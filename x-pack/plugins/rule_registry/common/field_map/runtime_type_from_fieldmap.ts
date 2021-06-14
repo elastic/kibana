@@ -6,56 +6,22 @@
  */
 import { Optional } from 'utility-types';
 import { mapValues, pickBy } from 'lodash';
-import { either } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
 import { FieldMap } from './types';
-
-const NumberFromString = new t.Type(
-  'NumberFromString',
-  (u): u is number => typeof u === 'number',
-  (u, c) =>
-    either.chain(t.string.validate(u, c), (s) => {
-      const d = Number(s);
-      return isNaN(d) ? t.failure(u, c) : t.success(d);
-    }),
-  (a) => a
-);
-
-const BooleanFromString = new t.Type(
-  'BooleanFromString',
-  (u): u is boolean => typeof u === 'boolean',
-  (u, c) =>
-    either.chain(t.string.validate(u, c), (s) => {
-      switch (s.toLowerCase().trim()) {
-        case '1':
-        case 'true':
-        case 'yes':
-          return t.success(true);
-        case '0':
-        case 'false':
-        case 'no':
-        case null:
-          return t.success(false);
-        default:
-          return t.failure(u, c);
-      }
-    }),
-  (a) => a
-);
 
 const esFieldTypeMap = {
   keyword: t.string,
   text: t.string,
   date: t.string,
-  boolean: t.union([t.number, BooleanFromString]),
-  byte: t.union([t.number, NumberFromString]),
-  long: t.union([t.number, NumberFromString]),
-  integer: t.union([t.number, NumberFromString]),
-  short: t.union([t.number, NumberFromString]),
-  double: t.union([t.number, NumberFromString]),
-  float: t.union([t.number, NumberFromString]),
-  scaled_float: t.union([t.number, NumberFromString]),
-  unsigned_long: t.union([t.number, NumberFromString]),
+  boolean: t.boolean,
+  byte: t.number,
+  long: t.number,
+  integer: t.number,
+  short: t.number,
+  double: t.number,
+  float: t.number,
+  scaled_float: t.number,
+  unsigned_long: t.number,
   flattened: t.record(t.string, t.array(t.string)),
 };
 

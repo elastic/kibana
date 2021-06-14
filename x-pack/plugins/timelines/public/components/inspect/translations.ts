@@ -7,11 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const INSPECT = i18n.translate('xpack.securitySolution.inspectDescription', {
+export const INSPECT = i18n.translate('xpack.timelines.inspectDescription', {
   defaultMessage: 'Inspect',
 });
 
-export const CLOSE = i18n.translate('xpack.securitySolution.inspect.modal.closeTitle', {
+export const CLOSE = i18n.translate('xpack.timelines.inspect.modal.closeTitle', {
   defaultMessage: 'Close',
 });
 
@@ -36,7 +36,7 @@ export const INDEX_PATTERN_DESC = i18n.translate(
   }
 );
 
-export const QUERY_TIME = i18n.translate('xpack.securitySolution.inspect.modal.queryTimeLabel', {
+export const QUERY_TIME = i18n.translate('xpack.timelines.inspect.modal.queryTimeLabel', {
   defaultMessage: 'Query time',
 });
 
