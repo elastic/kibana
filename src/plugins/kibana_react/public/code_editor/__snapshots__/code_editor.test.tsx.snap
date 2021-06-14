@@ -11,6 +11,7 @@ exports[`is rendered 1`] = `
     onChange={[Function]}
     options={
       Object {
+        "matchBrackets": "never",
         "minimap": Object {
           "enabled": false,
         },
@@ -39,6 +40,7 @@ exports[`is rendered 1`] = `
     nodeType="div"
     onResize={[Function]}
     querySelector={null}
+    refreshMode="debounce"
     refreshRate={1000}
     skipOnMount={false}
     targetDomEl={null}
