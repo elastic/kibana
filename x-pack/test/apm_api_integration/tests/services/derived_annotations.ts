@@ -87,7 +87,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
           });
 
           const docs = dates.flatMap((date, index) => {
-            const defaults = {
+            const baseAnnotation = {
               transaction: {
                 type: 'request',
                 duration: 1000000,
@@ -107,15 +107,15 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
             };
             return [
               {
-                ...defaults,
+                ...baseAnnotation,
                 '@timestamp': date.toISOString(),
               },
               {
-                ...defaults,
+                ...baseAnnotation,
                 '@timestamp': new Date(date.getTime() + 30000),
               },
               {
-                ...defaults,
+                ...baseAnnotation,
                 '@timestamp': new Date(date.getTime() + 60000),
               },
             ];
