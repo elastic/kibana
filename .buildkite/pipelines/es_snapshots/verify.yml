@@ -29,6 +29,10 @@ steps:
     artifact_paths: target/junit/**/*.xml
     depends_on: build
     key: default-cigroup
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
 
   - command: CI_GROUP=Docker .buildkite/scripts/steps/functional/xpack-cigroup.sh
     label: 'Docker CI Group'
@@ -37,6 +41,10 @@ steps:
     artifact_paths: target/junit/**/*.xml
     depends_on: build
     key: default-cigroup-docker
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
 
   - command: .buildkite/scripts/steps/functional/oss-cigroup.sh
     label: 'OSS CI Group'
@@ -46,6 +54,10 @@ steps:
     artifact_paths: target/junit/**/*.xml
     depends_on: build
     key: oss-cigroup
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
 
   - command: .buildkite/scripts/steps/test/jest_integration.sh
     label: 'Jest Integration Tests'
