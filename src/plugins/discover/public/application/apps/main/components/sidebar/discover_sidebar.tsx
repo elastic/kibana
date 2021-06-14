@@ -81,7 +81,6 @@ export function DiscoverSidebar({
   trackUiMetric,
   useNewFieldsApi = false,
   useFlyout = false,
-  unmappedFieldsConfig,
   onEditRuntimeField,
   onChangeIndexPattern,
   setFieldEditorRef,
