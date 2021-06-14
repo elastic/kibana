@@ -85,7 +85,7 @@ export function SyntheticsIntegrationPageProvider({
      */
     async fillTextInputByTestSubj(testSubj: string, value: string) {
       const field = await testSubjects.find(testSubj, 5000);
-      await field.scrollIntoViewIfNecessary();
+      await field.scrollIntoViewIfNecessary({ bottomOffset: 56 });
       await field.click();
       await field.clearValue();
       await field.type(value);
@@ -97,6 +97,7 @@ export function SyntheticsIntegrationPageProvider({
      * @params {value} the value of the input
      */
     async fillTextInput(field: WebElementWrapper, value: string) {
+      await field.scrollIntoViewIfNecessary({ bottomOffset: 56 });
       await field.click();
       await field.clearValue();
       await field.type(value);
