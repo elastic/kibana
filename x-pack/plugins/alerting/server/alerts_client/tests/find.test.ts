@@ -511,7 +511,7 @@ describe('find()', () => {
     });
     const alertsClient = new AlertsClient(alertsClientParams);
     await expect(alertsClient.find({ options: {} })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Error injecting reference into rule params for rule id 1 - something went wrong!"`
+      `"Error injecting reference into rule params for rule id 2 - something went wrong!"`
     );
   });
 

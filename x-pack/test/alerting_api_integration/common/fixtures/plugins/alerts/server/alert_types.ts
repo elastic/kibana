@@ -536,7 +536,14 @@ export function defineAlertTypes(
       await new Promise((resolve) => setTimeout(resolve, 5000));
     },
   };
-  const exampleAlwaysFiringAlertType: AlertType<{}, {}, {}, {}, {}, 'default'> = {
+  const exampleAlwaysFiringAlertType: AlertType<
+    {},
+    {},
+    {},
+    {},
+    {},
+    'small' | 'medium' | 'large'
+  > = {
     id: 'example.always-firing',
     name: 'Always firing',
     actionGroups: [
@@ -544,7 +551,7 @@ export function defineAlertTypes(
       { id: 'medium', name: 'Medium t-shirt' },
       { id: 'large', name: 'Large t-shirt' },
     ],
-    defaultActionGroupId: 'default',
+    defaultActionGroupId: 'small',
     minimumLicenseRequired: 'basic',
     async executor() {},
     producer: 'alertsFixture',
