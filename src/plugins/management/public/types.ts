@@ -7,7 +7,7 @@
  */
 
 import { ScopedHistory, Capabilities } from 'kibana/public';
-import { LocatorPublic } from 'src/plugins/share/common';
+import type { LocatorPublic } from 'src/plugins/share/common';
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
 import { ChromeBreadcrumb } from '../../../core/public/';
 import type { ManagementAppLocatorParams } from '../common/locator';
