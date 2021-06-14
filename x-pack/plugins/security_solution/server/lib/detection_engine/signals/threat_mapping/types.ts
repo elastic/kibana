@@ -32,6 +32,7 @@ import {
   BulkCreate,
   RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
+  SearchAfterAndBulkCreateState,
   SignalsEnrichment,
   WrapHits,
 } from '../types';
@@ -93,6 +94,7 @@ export interface CreateThreatSignalOptions {
   currentResult: SearchAfterAndBulkCreateReturnType;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
+  signalState: SearchAfterAndBulkCreateState;
 }
 
 export interface BuildThreatMappingFilterOptions {

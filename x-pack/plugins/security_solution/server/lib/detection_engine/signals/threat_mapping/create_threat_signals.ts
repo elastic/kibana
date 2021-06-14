@@ -101,6 +101,10 @@ export const createThreatSignals = async ({
   while (threatList.hits.hits.length !== 0) {
     const chunks = chunk(itemsPerSearch, threatList.hits.hits);
     logger.debug(buildRuleMessage(`${chunks.length} concurrent indicator searches are starting.`));
+    const signalState = {
+      isLocked: false,
+      signalsCreated: 0,
+    };
     const concurrentSearchesPerformed = chunks.map<Promise<SearchAfterAndBulkCreateReturnType>>(
       (slicedChunk) =>
         createThreatSignal({
@@ -127,6 +131,7 @@ export const createThreatSignals = async ({
           currentResult: results,
           bulkCreate,
           wrapHits,
+          signalState,
         })
     );
     const searchesPerformed = await Promise.all(concurrentSearchesPerformed);

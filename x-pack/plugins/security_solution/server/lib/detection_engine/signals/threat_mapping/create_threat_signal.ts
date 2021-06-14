@@ -36,6 +36,7 @@ export const createThreatSignal = async ({
   currentResult,
   bulkCreate,
   wrapHits,
+  signalState,
 }: CreateThreatSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
@@ -86,6 +87,7 @@ export const createThreatSignal = async ({
       enrichment: threatEnrichment,
       bulkCreate,
       wrapHits,
+      state: signalState,
     });
     logger.debug(
       buildRuleMessage(

@@ -914,3 +914,23 @@ export const buildChunkedOrFilter = (field: string, values: string[], chunkSize:
     })
     .join(' OR ');
 };
+
+const LOCK_INTERVAL_MS = 250;
+const LOCK_MAX_TRIES = 100;
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export const getLock = async (signalState: { isLocked: boolean }): Promise<string | undefined> => {
+  let tries = 0;
+  while (signalState.isLocked && tries < LOCK_MAX_TRIES) {
+    await sleep(LOCK_INTERVAL_MS);
+    tries++;
+  }
+  if (!signalState.isLocked) {
+    signalState.isLocked = true;
+  }
+  return `Error retrieving lock after {tries} tries.`;
+};
+
+export const releaseLock = (signalState: { isLocked: boolean }) => {
+  signalState.isLocked = false;
+};

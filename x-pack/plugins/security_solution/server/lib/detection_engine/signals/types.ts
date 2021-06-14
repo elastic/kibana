@@ -261,6 +261,10 @@ export type WrapHits = (
   hits: Array<estypes.SearchHit<unknown>>
 ) => Array<BaseHit<{ '@timestamp': string }>>;
 
+export interface SearchAfterAndBulkCreateState {
+  isLocked: boolean;
+  signalsCreated: number;
+}
 export interface SearchAfterAndBulkCreateParams {
   tuple: {
     to: moment.Moment;
@@ -282,6 +286,7 @@ export interface SearchAfterAndBulkCreateParams {
   enrichment?: SignalsEnrichment;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
+  state?: SearchAfterAndBulkCreateState | undefined;
 }
 
 export interface SearchAfterAndBulkCreateReturnType {
