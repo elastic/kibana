@@ -1069,5 +1069,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await input.clearValueWithKeyboard();
       await input.type(formula);
     },
+
+    async filterLegend(value: string) {
+      await testSubjects.click(`legend-${value}`);
+      const filterIn = await testSubjects.find(`legend-${value}-filterIn`);
+      await filterIn.click();
+    },
   });
 }

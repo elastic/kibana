@@ -13,6 +13,7 @@ import { ComponentType, ReactWrapper } from 'enzyme';
 import type { LayerArgs } from './types';
 import type { LensMultiTable } from '../types';
 import { getLegendAction } from './get_legend_action';
+import { LegendActionPopover } from '../shared_components';
 
 const sampleLayer = {
   layerId: 'first',
@@ -215,5 +216,15 @@ describe('getLegendAction', function () {
     wrapper = mountWithIntl(<Component {...newProps} />);
     expect(wrapper.find(EuiPopover).length).toBe(1);
     expect(wrapper.find(EuiPopover).prop('title')).toEqual("Women's Accessories, filter options");
+    expect(wrapper.find(LegendActionPopover).prop('context')).toEqual({
+      data: [
+        {
+          column: 1,
+          row: 1,
+          table: tables.first,
+          value: "Women's Accessories",
+        },
+      ],
+    });
   });
 });

@@ -12,6 +12,7 @@ import { mountWithIntl } from '@kbn/test/jest';
 import { ComponentType, ReactWrapper } from 'enzyme';
 import type { Datatable } from 'src/plugins/expressions/public';
 import { getLegendAction } from './get_legend_action';
+import { LegendActionPopover } from '../shared_components';
 
 const table: Datatable = {
   type: 'datatable',
@@ -64,5 +65,15 @@ describe('getLegendAction', function () {
     wrapper = mountWithIntl(<Component {...newProps} />);
     expect(wrapper.find(EuiPopover).length).toBe(1);
     expect(wrapper.find(EuiPopover).prop('title')).toEqual('Hi, filter options');
+    expect(wrapper.find(LegendActionPopover).prop('context')).toEqual({
+      data: [
+        {
+          column: 0,
+          row: 0,
+          table,
+          value: 'Hi',
+        },
+      ],
+    });
   });
 });
