@@ -7,6 +7,7 @@
  */
 
 export interface Series {
+  yaxis?: number;
   label: string;
   lines?: {
     show?: boolean;

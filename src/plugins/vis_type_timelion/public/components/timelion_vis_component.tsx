@@ -15,7 +15,6 @@ import {
   Axis,
   TooltipType,
   YDomainRange,
-  BrushEndListener,
   PointerEvent,
   LegendPositionConfig,
   LayoutDirection,
@@ -25,26 +24,27 @@ import { useKibana } from '../../../kibana_react/public';
 
 import { AreaSeriesComponent, BarSeriesComponent } from './series';
 
-import { createTickFormat, colors, IAxis, activeCursor$ } from '../helpers/panel_utils';
+import { createTickFormat, IAxis, validateLegendPositionValue } from '../helpers/panel_utils';
+import { colors } from '../helpers/chart_constants';
 import { tickFormatters } from '../helpers/tick_formatters';
+import { activeCursor$ } from '../helpers/active_cursor';
 
 import type { Series, Sheet } from '../helpers/timelion_request_handler';
+
 import type { IInterpreterRenderHandlers } from '../../../expressions';
 import type { TimelionVisDependencies } from '../plugin';
+import type { RangeFilterParams } from '../../../data/public';
 
 import './timelion_vis.scss';
 
 interface TimelionVisComponentProps {
-  fireEvent: IInterpreterRenderHandlers['event'];
   interval: string;
   seriesList: Sheet;
+  onBrushEvent: (rangeFilterParams: RangeFilterParams) => void;
   renderComplete: IInterpreterRenderHandlers['done'];
 }
 
-const handleCursorUpdate = (cursor: PointerEvent) => {
-  activeCursor$.next(cursor);
-};
-
+// @todo: remove this method, we should not modify global object
 const updateYAxes = (yaxes: IAxis[]) => {
   yaxes.forEach((yaxis: IAxis) => {
     if (yaxis) {
@@ -55,21 +55,28 @@ const updateYAxes = (yaxes: IAxis[]) => {
         yaxis.tickFormatter = (val: number) => val.toFixed(yaxis.tickDecimals);
       }
 
+      const max = yaxis.max ? yaxis.max : undefined;
+      const min = yaxis.min ? yaxis.min : undefined;
+
       yaxis.domain = {
-        fit: true,
-        ...(yaxis.max ? { max: yaxis.max } : {}),
-        ...(yaxis.min ? { min: yaxis.min } : {}),
+        fit: min === undefined && max === undefined,
+        max,
+        min,
       };
     }
   });
 };
 
-function TimelionVisComponent({
+const MAIN_GROUP_ID = 1;
+
+const DefaultYAxis = () => <Axis id="left" position={Position.Left} groupId={`${MAIN_GROUP_ID}`} />;
+
+const TimelionVisComponent = ({
   interval,
   seriesList,
   renderComplete,
-  fireEvent,
-}: TimelionVisComponentProps) {
+  onBrushEvent,
+}: TimelionVisComponentProps) => {
   const kibana = useKibana<TimelionVisDependencies>();
   const [chart, setChart] = useState(() => cloneDeep(seriesList.list));
   const chartRef = useRef<Chart>();
@@ -106,30 +113,22 @@ function TimelionVisComponent({
     setChart(newChart);
   }, [seriesList.list]);
 
-  const brushEndListener = useCallback<BrushEndListener>(
+  const handleCursorUpdate = useCallback((cursor: PointerEvent) => {
+    activeCursor$.next(cursor);
+  }, []);
+
+  const brushEndListener = useCallback(
     ({ x }) => {
       if (!x) {
         return;
       }
 
-      fireEvent({
-        name: 'applyFilter',
-        data: {
-          timeFieldName: '*',
-          filters: [
-            {
-              range: {
-                '*': {
-                  gte: x[0],
-                  lte: x[1],
-                },
-              },
-            },
-          ],
-        },
+      onBrushEvent({
+        gte: x[0],
+        lte: x[1],
       });
     },
-    [fireEvent]
+    [onBrushEvent]
   );
 
   const onRenderChange = useCallback(
@@ -150,22 +149,7 @@ function TimelionVisComponent({
     [interval, kibana.services.timefilter, kibana.services.uiSettings]
   );
 
-  const yaxes = useMemo(() => {
-    const collectedYAxes: IAxis[] = [];
-
-    chart.forEach((chartInst) => {
-      chartInst._global?.yaxes?.forEach((yaxis: IAxis) => {
-        if (yaxis) {
-          collectedYAxes.push(yaxis);
-        }
-      });
-    });
-
-    return collectedYAxes;
-  }, [chart]);
-
   const legend = useMemo(() => {
-    const validatePosition = (position: string) => /^(n|s)(e|w)$/s.test(position);
     const legendPosition: LegendPositionConfig = {
       floating: true,
       floatingColumns: 1,
@@ -180,7 +164,7 @@ function TimelionVisComponent({
         const { show = true, position, noColumns = legendPosition.floatingColumns } =
           series._global?.legend ?? {};
 
-        if (validatePosition(position)) {
+        if (validateLegendPositionValue(position)) {
           const [vAlign, hAlign] = position.split('');
 
           legendPosition.vAlign = vAlign === 'n' ? Position.Top : Position.Bottom;
@@ -221,31 +205,45 @@ function TimelionVisComponent({
 
         <Axis id="bottom" position={Position.Bottom} showOverlappingTicks tickFormat={tickFormat} />
 
-        {yaxes.length ? (
-          yaxes.map((axis: IAxis, index: number) => (
-            <Axis
-              groupId={`${index}`}
-              key={index}
-              id={axis.position + axis.axisLabel}
-              title={axis.axisLabel}
-              position={axis.position}
-              tickFormat={axis.tickFormatter}
-              domain={axis.domain as YDomainRange}
-            />
-          ))
+        {chart.length ? (
+          chart.map((data, index) => {
+            const { yaxis: y, _global } = data;
+            const yaxis = (_global?.yaxes ?? [])[y ? y - 1 : 0];
+
+            return yaxis ? (
+              <Axis
+                groupId={`${y ? y : 1}`}
+                key={index}
+                id={yaxis.position + yaxis.axisLabel}
+                title={yaxis.axisLabel}
+                position={yaxis.position}
+                tickFormat={yaxis.tickFormatter}
+                domain={yaxis.domain as YDomainRange}
+              />
+            ) : (
+              <DefaultYAxis />
+            );
+          })
         ) : (
-          <Axis id="left" position={Position.Left} />
+          <DefaultYAxis />
         )}
 
         {chart.map((data, index) => {
           const SeriesComponent = data.bars ? BarSeriesComponent : AreaSeriesComponent;
 
-          return <SeriesComponent key={`${index}-${data.label}`} visData={data} index={index} />;
+          return (
+            <SeriesComponent
+              key={`${index}-${data.label}`}
+              visData={data}
+              index={chart.length - index}
+              groupId={data.yaxis ? `${data.yaxis}` : `${MAIN_GROUP_ID}`}
+            />
+          );
         })}
       </Chart>
     </div>
   );
-}
+};
 
 // default export required for React.Lazy
 // eslint-disable-next-line import/no-default-export

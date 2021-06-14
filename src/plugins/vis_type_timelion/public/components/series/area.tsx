@@ -7,57 +7,53 @@
  */
 
 import React from 'react';
-import { AreaSeries, ScaleType, CurveType } from '@elastic/charts';
-import { Series } from '../../../common/vis_data';
+import { AreaSeries, ScaleType, CurveType, AreaSeriesStyle, PointShape } from '@elastic/charts';
+import type { Series } from '../../../common/vis_data';
 
 interface AreaSeriesComponentProps {
   index: number;
   visData: Series;
+  groupId: string;
 }
 
-export function AreaSeriesComponent({
-  index,
-  visData: { lines = {}, points = {}, color, label, data, stack },
-}: AreaSeriesComponentProps) {
-  const styles = {
-    areaSeriesStyle: {
-      line: {
-        stroke: color,
-        strokeWidth: lines.lineWidth !== undefined ? Number(lines.lineWidth) : 3,
-        visible: lines.show ?? !points.show,
-      },
-      area: {
-        fill: color,
-        opacity: lines.fill ?? 0,
-        visible: lines.show ?? !points.show,
-      },
-      point: {
-        fill: points.fillColor,
-        opacity: points.lineWidth !== undefined ? (points.fill || 1) * 10 : 10,
-        radius: points.radius ?? 3,
-        stroke: color,
-        strokeWidth: points.lineWidth ?? 2,
-        visible: points.show ?? false,
-        shape: points.symbol === 'cross' ? 'x' : points.symbol,
-      },
+const getAreaSeriesStyle = ({ color, lines, points }: AreaSeriesComponentProps['visData']) =>
+  ({
+    line: {
+      opacity: 1,
+      stroke: color,
+      strokeWidth: lines?.lineWidth !== undefined ? Number(lines.lineWidth) : 3,
+      visible: lines?.show ?? points?.show ?? true,
     },
-    curve: lines.steps ? CurveType.CURVE_STEP : CurveType.LINEAR,
-  };
+    area: {
+      fill: color,
+      opacity: lines?.fill ?? 0,
+      visible: lines?.show ?? points?.show ?? true,
+    },
+    point: {
+      fill: points?.fillColor ?? color,
+      opacity: points?.lineWidth !== undefined ? (points.fill || 1) * 10 : 10,
+      radius: points?.radius ?? 3,
+      stroke: color,
+      strokeWidth: points?.lineWidth ?? 2,
+      visible: points?.show ?? false,
+      shape: points?.symbol === 'cross' ? PointShape.X : points?.symbol,
+    },
+    curve: lines?.steps ? CurveType.CURVE_STEP : CurveType.LINEAR,
+  } as AreaSeriesStyle);
 
-  return (
-    <AreaSeries
-      id={index + label}
-      groupId={`${index}`}
-      name={label}
-      xScaleType={ScaleType.Time}
-      yScaleType={ScaleType.Linear}
-      xAccessor={0}
-      yAccessors={[1]}
-      data={data}
-      sortIndex={index}
-      color={color}
-      stackAccessors={stack ? [0] : undefined}
-      {...styles}
-    />
-  );
-}
+export const AreaSeriesComponent = ({ index, groupId, visData }: AreaSeriesComponentProps) => (
+  <AreaSeries
+    id={index + visData.label}
+    groupId={groupId}
+    name={visData.label}
+    xScaleType={ScaleType.Time}
+    yScaleType={ScaleType.Linear}
+    xAccessor={0}
+    yAccessors={[1]}
+    data={visData.data}
+    sortIndex={index}
+    color={visData.color}
+    stackAccessors={visData.stack ? [0] : undefined}
+    areaSeriesStyle={getAreaSeriesStyle(visData)}
+  />
+);

@@ -16,6 +16,7 @@ import { IUiSettingsClient } from 'kibana/public';
 import { calculateInterval } from '../../common/lib';
 import { xaxisFormatterProvider } from '../helpers/xaxis_formatter';
 import { Series } from '../helpers/timelion_request_handler';
+import { colors } from '../helpers/chart_constants';
 
 export interface LegacyAxis {
   delta?: number;
@@ -42,19 +43,6 @@ interface TimeRangeBounds {
 
 export const ACTIVE_CURSOR = 'ACTIVE_CURSOR_TIMELION';
 export const eventBus = $({});
-
-const colors = [
-  '#01A4A4',
-  '#C66',
-  '#D0D102',
-  '#616161',
-  '#00A1CB',
-  '#32742C',
-  '#F18D05',
-  '#113F8C',
-  '#61AE24',
-  '#D70060',
-];
 
 const SERIES_ID_ATTR = 'data-series-id';
 
@@ -177,4 +165,4 @@ function buildOptions(
   return options;
 }
 
-export { buildSeriesData, buildOptions, SERIES_ID_ATTR, colors };
+export { buildSeriesData, buildOptions, SERIES_ID_ATTR };

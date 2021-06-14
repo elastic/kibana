@@ -20,16 +20,18 @@ import {
   buildSeriesData,
   buildOptions,
   SERIES_ID_ATTR,
-  colors,
   LegacyAxis,
   ACTIVE_CURSOR,
   eventBus,
 } from './panel_utils';
 
 import { Series, Sheet } from '../helpers/timelion_request_handler';
+import { colors } from '../helpers/chart_constants';
 import { tickFormatters } from './tick_formatters';
 import { generateTicksProvider } from '../helpers/tick_generator';
-import { TimelionVisDependencies } from '../plugin';
+
+import type { TimelionVisDependencies } from '../plugin';
+import type { RangeFilterParams } from '../../../data/common';
 
 import './timelion_vis.scss';
 
@@ -39,7 +41,7 @@ interface CrosshairPlot extends jquery.flot.plot {
 }
 
 interface TimelionVisComponentProps {
-  fireEvent: IInterpreterRenderHandlers['event'];
+  onBrushEvent: (rangeFilterParams: RangeFilterParams) => void;
   interval: string;
   seriesList: Sheet;
   renderComplete: IInterpreterRenderHandlers['done'];
@@ -72,7 +74,7 @@ function TimelionVisComponent({
   interval,
   seriesList,
   renderComplete,
-  fireEvent,
+  onBrushEvent,
 }: TimelionVisComponentProps) {
   const kibana = useKibana<TimelionVisDependencies>();
   const [chart, setChart] = useState(() => cloneDeep(seriesList.list));
@@ -373,24 +375,12 @@ function TimelionVisComponent({
 
   const plotSelectedHandler = useCallback(
     (event: JQuery.TriggeredEvent, ranges: Ranges) => {
-      fireEvent({
-        name: 'applyFilter',
-        data: {
-          timeFieldName: '*',
-          filters: [
-            {
-              range: {
-                '*': {
-                  gte: ranges.xaxis.from,
-                  lte: ranges.xaxis.to,
-                },
-              },
-            },
-          ],
-        },
+      onBrushEvent({
+        gte: ranges.xaxis.from,
+        lte: ranges.xaxis.to,
       });
     },
-    [fireEvent]
+    [onBrushEvent]
   );
 
   useEffect(() => {

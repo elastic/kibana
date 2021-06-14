@@ -7,52 +7,51 @@
  */
 
 import React from 'react';
-import { BarSeries, ScaleType } from '@elastic/charts';
-import { Series } from '../../../common/vis_data';
+import { BarSeries, ScaleType, BarSeriesStyle } from '@elastic/charts';
+import type { Series } from '../../../common/vis_data';
 
 interface BarSeriesComponentProps {
   index: number;
   visData: Series;
+  groupId: string;
 }
 
-export function BarSeriesComponent({
-  index,
-  visData: { color, data, label, stack, bars = {} },
-}: BarSeriesComponentProps) {
-  let opacity = bars.fill;
+const getBarSeriesStyle = ({ color, bars }: BarSeriesComponentProps['visData']) => {
+  let opacity = bars.fill ?? 1;
 
-  if (!bars.fill) {
-    opacity = 1;
-  } else if (bars.fill < 0) {
+  if (opacity < 0) {
     opacity = 0;
-  } else if (bars.fill > 1) {
+  } else if (opacity > 1) {
     opacity = 1;
   }
 
-  const styles = {
-    barSeriesStyle: {
-      rect: {
-        fill: color,
-        opacity,
-        widthPixel: bars.lineWidth,
-      },
+  return {
+    rectBorder: {
+      stroke: color,
+      strokeWidth: Math.max(1, bars.lineWidth ? Math.ceil(bars.lineWidth / 2) : 1),
+      visible: true,
     },
-  };
+    rect: {
+      fill: color,
+      opacity,
+      widthRatio: 1,
+    },
+  } as BarSeriesStyle;
+};
 
-  return (
-    <BarSeries
-      id={index + label}
-      groupId={`${index}`}
-      name={label}
-      xScaleType={ScaleType.Time}
-      yScaleType={ScaleType.Linear}
-      xAccessor={0}
-      yAccessors={[1]}
-      data={data}
-      sortIndex={index}
-      color={color}
-      stackAccessors={stack ? [0] : undefined}
-      {...styles}
-    />
-  );
-}
+export const BarSeriesComponent = ({ index, groupId, visData }: BarSeriesComponentProps) => (
+  <BarSeries
+    id={index + visData.label}
+    groupId={groupId}
+    name={visData.label}
+    xScaleType={ScaleType.Time}
+    yScaleType={ScaleType.Linear}
+    xAccessor={0}
+    yAccessors={[1]}
+    data={visData.data}
+    sortIndex={index}
+    color={visData.color}
+    stackAccessors={visData.stack ? [0] : undefined}
+    barSeriesStyle={getBarSeriesStyle(visData)}
+  />
+);

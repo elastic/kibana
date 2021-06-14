@@ -15,6 +15,7 @@ import { VisualizationContainer } from '../../visualizations/public';
 import { TimelionVisDependencies } from './plugin';
 import { TimelionRenderValue } from './timelion_vis_fn';
 import { UI_SETTINGS } from '../common/constants';
+import { RangeFilterParams } from '../../data/public';
 
 const TimelionVisComponent = lazy(() => import('./components/timelion_vis_component'));
 const TimelionVisLegacyComponent = lazy(() => import('./legacy/timelion_vis_component'));
@@ -37,6 +38,22 @@ export const getTimelionVisRenderer: (
       ? TimelionVisLegacyComponent
       : TimelionVisComponent;
 
+    const onBrushEvent = (rangeFilterParams: RangeFilterParams) => {
+      handlers.event({
+        name: 'applyFilter',
+        data: {
+          timeFieldName: '*',
+          filters: [
+            {
+              range: {
+                '*': rangeFilterParams,
+              },
+            },
+          ],
+        },
+      });
+    };
+
     render(
       <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
         <KibanaContextProvider services={{ ...deps }}>
@@ -44,7 +61,7 @@ export const getTimelionVisRenderer: (
             interval={visParams.interval}
             seriesList={seriesList}
             renderComplete={handlers.done}
-            fireEvent={handlers.event}
+            onBrushEvent={onBrushEvent}
           />
         </KibanaContextProvider>
       </VisualizationContainer>,

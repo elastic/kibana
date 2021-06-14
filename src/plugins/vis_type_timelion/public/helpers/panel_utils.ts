@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Subject } from 'rxjs';
-import moment, { Moment } from 'moment-timezone';
-import { Position, PointerEvent } from '@elastic/charts';
+import moment from 'moment-timezone';
+import { Position } from '@elastic/charts';
 
 import { TimefilterContract } from 'src/plugins/data/public';
 import { IUiSettingsClient } from 'kibana/public';
@@ -41,33 +40,15 @@ export interface IAxis {
   axisLabel: string;
 }
 
-interface TimeRangeBounds {
-  min: Moment | undefined;
-  max: Moment | undefined;
-}
+export const validateLegendPositionValue = (position: string) => /^(n|s)(e|w)$/s.test(position);
 
-const activeCursor$ = new Subject<PointerEvent>();
-
-const colors = [
-  '#01A4A4',
-  '#C66',
-  '#D0D102',
-  '#616161',
-  '#00A1CB',
-  '#32742C',
-  '#F18D05',
-  '#113F8C',
-  '#61AE24',
-  '#D70060',
-];
-
-function createTickFormat(
+export const createTickFormat = (
   intervalValue: string,
   timefilter: TimefilterContract,
   uiSettings: IUiSettingsClient
-) {
+) => {
   // Get the X-axis tick format
-  const time: TimeRangeBounds = timefilter.getBounds();
+  const time = timefilter.getBounds();
   const interval = calculateInterval(
     (time.min && time.min.valueOf()) || 0,
     (time.max && time.max.valueOf()) || 0,
@@ -78,6 +59,4 @@ function createTickFormat(
   const format = xaxisFormatterProvider(uiSettings)(interval);
 
   return (val: number) => moment(val).format(format);
-}
-
-export { createTickFormat, colors, activeCursor$ };
+};
