@@ -36,7 +36,7 @@ export interface OwnProps {
 type Props = ReduxStateProps & ReduxDispatchProps & OwnProps;
 
 export class DrawFeatureControl extends Component<Props, {}> {
-  _onDraw = (mbDrawControl: MapboxDraw) => async (e: { features: Feature[] }) => {
+  _onDraw = async (e: { features: Feature[] }, mbDrawControl: MapboxDraw) => {
     try {
       e.features.forEach((feature: Feature) => {
         const { geometry } = geoJSONReader.read(feature);
