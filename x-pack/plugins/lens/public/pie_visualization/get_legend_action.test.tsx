@@ -50,7 +50,7 @@ describe('getLegendAction', function () {
     expect(wrapper.find(EuiPopover).length).toBe(0);
   });
 
-  it('is rendered if layer is detected', () => {
+  it('is rendered if row is detected', () => {
     const newProps = {
       ...wrapperProps,
       label: 'Hi',
