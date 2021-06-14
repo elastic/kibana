@@ -111,7 +111,7 @@ export class UptimePlugin
             return [
               {
                 label: 'Uptime',
-                sortKey: 600,
+                sortKey: 500,
                 entries: [
                   {
                     label: i18n.translate('xpack.uptime.overview.heading', {
