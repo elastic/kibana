@@ -90,7 +90,7 @@ export class RemoteClusterEdit extends Component {
     if (isLoading) {
       return (
         <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
-          <SectionLoading data-test-subj="remoteClustersTableLoading">
+          <SectionLoading>
             <FormattedMessage
               id="xpack.remoteClusters.edit.loadingLabel"
               defaultMessage="Loading remote cluster..."
@@ -124,10 +124,10 @@ export class RemoteClusterEdit extends Component {
             }
             actions={
               <EuiButton
+                {...reactRouterNavigate(this.props.history, '/list')}
                 color="danger"
                 iconType="arrowLeft"
                 flush="left"
-                {...reactRouterNavigate(this.props.history, '/list')}
               >
                 <FormattedMessage
                   id="xpack.remoteClusters.edit.viewRemoteClustersButtonLabel"
@@ -151,7 +151,7 @@ export class RemoteClusterEdit extends Component {
               <h2>
                 <FormattedMessage
                   id="xpack.remoteClusters.edit.configuredByNodeWarningTitle"
-                  defaultMessage="Configured by node"
+                  defaultMessage="Defined in configuration"
                 />
               </h2>
             }

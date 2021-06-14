@@ -9,8 +9,6 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiPageContentBody } from '@elastic/eui';
-
 import { extractQueryParams } from '../../../shared_imports';
 import { getRouter, redirect } from '../../services';
 import { setBreadcrumbs } from '../../services/breadcrumb';
@@ -58,7 +56,7 @@ export class RemoteClusterAdd extends PureComponent {
     const { isAddingCluster, addClusterError } = this.props;
 
     return (
-      <EuiPageContentBody data-test-subj="remoteClusterAddPage">
+      <>
         <RemoteClusterPageTitle
           title={
             <FormattedMessage
@@ -80,7 +78,7 @@ export class RemoteClusterAdd extends PureComponent {
           save={this.save}
           cancel={this.cancel}
         />
-      </EuiPageContentBody>
+      </>
     );
   }
 }
