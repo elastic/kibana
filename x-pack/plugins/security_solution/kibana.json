@@ -22,6 +22,7 @@
   ],
   "optionalPlugins": [
     "encryptedSavedObjects",
+    "lens",
     "fleet",
     "ml",
     "newsfeed",
