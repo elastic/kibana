@@ -20,13 +20,13 @@ import {
   sendUpdateAgentPolicy,
   useConfig,
   sendGetAgentStatus,
+  useAgentPolicyRefresh,
 } from '../../../../../hooks';
 import {
   AgentPolicyForm,
   agentPolicyFormValidation,
   ConfirmDeployAgentPolicyModal,
 } from '../../../components';
-import { useAgentPolicyRefresh } from '../../hooks';
 
 const FormWrapper = styled.div`
   max-width: 800px;

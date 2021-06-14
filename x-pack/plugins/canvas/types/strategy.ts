@@ -6,7 +6,7 @@
  */
 
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
-import { QuerySqlResponse } from '@elastic/elasticsearch/api/types';
+import { estypes } from '@elastic/elasticsearch';
 import { IKibanaSearchRequest } from 'src/plugins/data/common';
 import { ExpressionValueFilter } from '.';
 export interface EssqlSearchStrategyRequest extends IKibanaSearchRequest {
@@ -27,5 +27,5 @@ export interface EssqlSearchStrategyResponse {
   }>;
   rows: any[];
 
-  rawResponse: ApiResponse<QuerySqlResponse>;
+  rawResponse: ApiResponse<estypes.SqlQueryResponse>;
 }
