@@ -26,19 +26,33 @@ export function extractJobDetails(job, basePath, refreshJobList) {
     items: filterObjects(job, true).map(formatValues),
   };
 
+  const { job_tags: tags, custom_urls: urls, ...settings } = job.custom_settings ?? {};
   const customUrl = {
     id: 'customUrl',
     title: i18n.translate('xpack.ml.jobsList.jobDetails.customUrlsTitle', {
       defaultMessage: 'Custom URLs',
     }),
     position: 'right',
-    items: [],
+    items: urls ? urls.map((cu) => [cu.url_name, cu.url_value, cu.time_range]) : [],
   };
-  if (job.custom_settings && job.custom_settings.custom_urls) {
-    customUrl.items.push(
-      ...job.custom_settings.custom_urls.map((cu) => [cu.url_name, cu.url_value, cu.time_range])
-    );
-  }
+
+  const customSettings = {
+    id: 'analysisConfig',
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.customSettingsTitle', {
+      defaultMessage: 'Custom settings',
+    }),
+    position: 'right',
+    items: settings ? filterObjects(settings, true, true) : [],
+  };
+
+  const jobTags = {
+    id: 'analysisConfig',
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.customSettingsTitle', {
+      defaultMessage: 'Job tags',
+    }),
+    position: 'right',
+    items: tags ? filterObjects(tags) : [],
+  };
 
   const node = {
     id: 'node',
@@ -213,6 +227,8 @@ export function extractJobDetails(job, basePath, refreshJobList) {
     analysisConfig,
     analysisLimits,
     dataDescription,
+    customSettings,
+    jobTags,
     datafeed,
     counts,
     modelSizeStats,

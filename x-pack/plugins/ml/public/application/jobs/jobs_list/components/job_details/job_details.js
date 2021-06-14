@@ -67,6 +67,8 @@ export class JobDetailsUI extends Component {
         analysisConfig,
         analysisLimits,
         dataDescription,
+        customSettings,
+        jobTags,
         datafeed,
         counts,
         modelSizeStats,
@@ -85,7 +87,7 @@ export class JobDetailsUI extends Component {
           content: (
             <JobDetailsPane
               data-test-subj="mlJobDetails-job-settings"
-              sections={[general, customUrl, node, calendars, alertRules]}
+              sections={[general, customSettings, customUrl, jobTags, node, calendars, alertRules]}
             />
           ),
           time: job.open_time,
