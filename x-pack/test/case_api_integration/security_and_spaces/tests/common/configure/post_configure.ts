@@ -60,18 +60,133 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(configuration.length).to.be(1);
     });
 
-    it('should return an error when failing to get mapping', async () => {
+    it('should return an empty mapping when they type is none', async () => {
       const postRes = await createConfiguration(
         supertest,
         getConfigurationRequest({
           id: 'not-exists',
           name: 'not-exists',
+          type: ConnectorTypes.none,
+        })
+      );
+
+      expect(postRes.mappings).to.eql([]);
+    });
+
+    it('should return the correct mapping for Jira', async () => {
+      const postRes = await createConfiguration(
+        supertest,
+        getConfigurationRequest({
+          id: 'jira',
+          name: 'Jira',
           type: ConnectorTypes.jira,
         })
       );
 
-      expect(postRes.error).to.not.be(null);
-      expect(postRes.mappings).to.eql([]);
+      expect(postRes.mappings).to.eql([
+        {
+          action_type: 'overwrite',
+          source: 'title',
+          target: 'summary',
+        },
+        {
+          action_type: 'overwrite',
+          source: 'description',
+          target: 'description',
+        },
+        {
+          action_type: 'append',
+          source: 'comments',
+          target: 'comments',
+        },
+      ]);
+    });
+
+    it('should return the correct mapping for IBM Resilient', async () => {
+      const postRes = await createConfiguration(
+        supertest,
+        getConfigurationRequest({
+          id: 'resilient',
+          name: 'Resilient',
+          type: ConnectorTypes.resilient,
+        })
+      );
+
+      expect(postRes.mappings).to.eql([
+        {
+          action_type: 'overwrite',
+          source: 'title',
+          target: 'name',
+        },
+        {
+          action_type: 'overwrite',
+          source: 'description',
+          target: 'description',
+        },
+        {
+          action_type: 'append',
+          source: 'comments',
+          target: 'comments',
+        },
+      ]);
+    });
+
+    it('should return the correct mapping for ServiceNow ITSM', async () => {
+      const postRes = await createConfiguration(
+        supertest,
+        getConfigurationRequest({
+          id: 'serviceNowITSM',
+          name: 'ServiceNow ITSM',
+          type: ConnectorTypes.serviceNowITSM,
+        })
+      );
+
+      expect(postRes.mappings).to.eql([
+        {
+          action_type: 'overwrite',
+          source: 'title',
+          target: 'short_description',
+        },
+        {
+          action_type: 'overwrite',
+          source: 'description',
+          target: 'description',
+        },
+        {
+          action_type: 'append',
+          source: 'comments',
+          target: 'work_notes',
+        },
+      ]);
+    });
+
+    it('should return the correct mapping for ServiceNow SecOps', async () => {
+      const postRes = await createConfiguration(
+        supertest,
+        getConfigurationRequest({
+          id: 'serviceNowSIR',
+          name: 'ServiceNow SecOps',
+          type: ConnectorTypes.serviceNowSIR,
+        })
+      );
+
+      expect(postRes.mappings).to.eql([
+        {
+          action_type: 'overwrite',
+          source: 'title',
+          target: 'short_description',
+        },
+        {
+          action_type: 'overwrite',
+          source: 'description',
+          target: 'description',
+        },
+        {
+          action_type: 'append',
+          source: 'comments',
+          target: 'work_notes',
+        },
+      ]);
     });
 
     it('should not create a configuration when missing connector.id', async () => {
