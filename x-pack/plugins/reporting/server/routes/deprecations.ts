@@ -11,13 +11,10 @@ import {
   API_CREATE_ILM_POLICY_URL,
   ILM_POLICY_NAME,
 } from '../../common/constants';
+import { IlmPolicyStatusResponse } from '../../common/types';
 import { deprecations } from '../lib/deprecations';
 import { ReportingCore } from '../core';
 import { ReportingIlmPolicyManager, LevelLogger as Logger } from '../lib';
-
-interface IlmPolicyStatusResponse {
-  status: 'ok' | 'indices-migration-needed' | 'reporting-policy-not-found';
-}
 
 export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Logger) => {
   const { router } = reporting.getPluginSetupDeps();

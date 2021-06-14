@@ -8,6 +8,7 @@ import type {
   IndicesIndexStatePrefixedSettings,
   IndicesIndexSettings,
 } from '@elastic/elasticsearch/api/types';
+import { ILM_POLICY_NAME } from '../../../common/constants';
 import type { DeprecationsDependencies } from './types';
 
 export const shouldMigrateIndices = async ({
@@ -15,7 +16,6 @@ export const shouldMigrateIndices = async ({
   elasticsearchClient,
 }: DeprecationsDependencies) => {
   const store = await reportingCore.getStore();
-  const reportingIlmPolicy = store.getIlmPolicyName();
   const indexPattern = store.getReportingIndexPattern();
 
   const { body: reportingIndicesSettings } = await elasticsearchClient.indices.getSettings({
@@ -25,8 +25,8 @@ export const shouldMigrateIndices = async ({
   const hasUnmanagedIndices = Object.values(reportingIndicesSettings).some(
     (settings) =>
       (settings?.settings as IndicesIndexStatePrefixedSettings)?.index?.lifecycle?.name !==
-        reportingIlmPolicy ||
-      (settings?.settings as IndicesIndexSettings)?.['index.lifecycle']?.name !== reportingIlmPolicy
+        ILM_POLICY_NAME ||
+      (settings?.settings as IndicesIndexSettings)?.['index.lifecycle']?.name !== ILM_POLICY_NAME
   );
 
   return hasUnmanagedIndices;
