@@ -14,7 +14,13 @@
           "\nRepresents the currently authenticated user."
         ],
         "signature": [
-          "AuthenticatedUser",
+          {
+            "pluginId": "security",
+            "scope": "common",
+            "docId": "kibSecurityPluginApi",
+            "section": "def-common.AuthenticatedUser",
+            "text": "AuthenticatedUser"
+          },
           " extends ",
           "User"
         ],
@@ -120,7 +126,13 @@
             ],
             "signature": [
               "() => Promise<",
-              "AuthenticatedUser",
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.AuthenticatedUser",
+                "text": "AuthenticatedUser"
+              },
               ">"
             ],
             "source": {
@@ -945,6 +957,121 @@
       },
       {
         "parentPluginId": "security",
+        "id": "def-server.AuditServiceSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "AuditServiceSetup",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+          "lineNumber": 40
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-server.AuditServiceSetup.asScoped",
+            "type": "Function",
+            "tags": [],
+            "label": "asScoped",
+            "description": [],
+            "signature": [
+              "(request: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>) => ",
+              {
+                "pluginId": "security",
+                "scope": "server",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-server.AuditLogger",
+                "text": "AuditLogger"
+              }
+            ],
+            "source": {
+              "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+              "lineNumber": 41
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "security",
+                "id": "def-server.request",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-server.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+                  "lineNumber": 41
+                },
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.AuditServiceSetup.getLogger",
+            "type": "Function",
+            "tags": [],
+            "label": "getLogger",
+            "description": [],
+            "signature": [
+              "(id?: string | undefined) => ",
+              {
+                "pluginId": "security",
+                "scope": "server",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-server.LegacyAuditLogger",
+                "text": "LegacyAuditLogger"
+              }
+            ],
+            "source": {
+              "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+              "lineNumber": 42
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "security",
+                "id": "def-server.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+                  "lineNumber": 42
+                },
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
         "id": "def-server.AuthenticatedUser",
         "type": "Interface",
         "tags": [],
@@ -953,7 +1080,13 @@
           "\nRepresents the currently authenticated user."
         ],
         "signature": [
-          "AuthenticatedUser",
+          {
+            "pluginId": "security",
+            "scope": "common",
+            "docId": "kibSecurityPluginApi",
+            "section": "def-common.AuthenticatedUser",
+            "text": "AuthenticatedUser"
+          },
           " extends ",
           "User"
         ],
@@ -1031,6 +1164,174 @@
               "lineNumber": 42
             },
             "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-server.AuthenticationServiceStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "AuthenticationServiceStart",
+        "description": [
+          "\nAuthentication services available on the security plugin's start contract."
+        ],
+        "source": {
+          "path": "x-pack/plugins/security/server/authentication/authentication_service.ts",
+          "lineNumber": 72
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-server.AuthenticationServiceStart.apiKeys",
+            "type": "Object",
+            "tags": [],
+            "label": "apiKeys",
+            "description": [],
+            "signature": [
+              "{ create: (request: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>, params: ",
+              "CreateAPIKeyParams",
+              ") => Promise<",
+              {
+                "pluginId": "security",
+                "scope": "server",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-server.CreateAPIKeyResult",
+                "text": "CreateAPIKeyResult"
+              },
+              " | null>; areAPIKeysEnabled: () => Promise<boolean>; invalidate: (request: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>, params: ",
+              {
+                "pluginId": "security",
+                "scope": "server",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-server.InvalidateAPIKeysParams",
+                "text": "InvalidateAPIKeysParams"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "security",
+                "scope": "server",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-server.InvalidateAPIKeyResult",
+                "text": "InvalidateAPIKeyResult"
+              },
+              " | null>; grantAsInternalUser: (request: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>, createParams: ",
+              "CreateAPIKeyParams",
+              ") => Promise<",
+              {
+                "pluginId": "security",
+                "scope": "server",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-server.GrantAPIKeyResult",
+                "text": "GrantAPIKeyResult"
+              },
+              " | null>; invalidateAsInternalUser: (params: ",
+              {
+                "pluginId": "security",
+                "scope": "server",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-server.InvalidateAPIKeysParams",
+                "text": "InvalidateAPIKeysParams"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "security",
+                "scope": "server",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-server.InvalidateAPIKeyResult",
+                "text": "InvalidateAPIKeyResult"
+              },
+              " | null>; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security/server/authentication/authentication_service.ts",
+              "lineNumber": 73
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.AuthenticationServiceStart.getCurrentUser",
+            "type": "Function",
+            "tags": [],
+            "label": "getCurrentUser",
+            "description": [],
+            "signature": [
+              "(request: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>) => ",
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.AuthenticatedUser",
+                "text": "AuthenticatedUser"
+              },
+              " | null"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security/server/authentication/authentication_service.ts",
+              "lineNumber": 81
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "security",
+                "id": "def-server.request",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-server.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/security/server/authentication/authentication_service.ts",
+                  "lineNumber": 81
+                },
+                "deprecated": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -1496,330 +1797,6 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "security",
-        "id": "def-server.SecurityPluginSetup",
-        "type": "Interface",
-        "tags": [],
-        "label": "SecurityPluginSetup",
-        "description": [
-          "\nDescribes public Security plugin contract returned at the `setup` stage."
-        ],
-        "source": {
-          "path": "x-pack/plugins/security/server/plugin.ts",
-          "lineNumber": 69
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "security",
-            "id": "def-server.SecurityPluginSetup.authc",
-            "type": "Object",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "authc",
-            "description": [],
-            "signature": [
-              "{ getCurrentUser: (request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
-              "<unknown, unknown, unknown, any>) => ",
-              "AuthenticatedUser",
-              " | null; }"
-            ],
-            "source": {
-              "path": "x-pack/plugins/security/server/plugin.ts",
-              "lineNumber": 73
-            },
-            "deprecated": true,
-            "references": [
-              {
-                "plugin": "reporting",
-                "link": {
-                  "path": "x-pack/plugins/reporting/server/routes/lib/get_user.ts",
-                  "lineNumber": 13
-                }
-              },
-              {
-                "plugin": "encryptedSavedObjects",
-                "link": {
-                  "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_key_rotation_service.ts",
-                  "lineNumber": 107
-                }
-              },
-              {
-                "plugin": "encryptedSavedObjects",
-                "link": {
-                  "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
-                  "lineNumber": 67
-                }
-              },
-              {
-                "plugin": "actions",
-                "link": {
-                  "path": "x-pack/plugins/actions/server/plugin.ts",
-                  "lineNumber": 444
-                }
-              },
-              {
-                "plugin": "ml",
-                "link": {
-                  "path": "x-pack/plugins/ml/server/routes/annotations.ts",
-                  "lineNumber": 105
-                }
-              },
-              {
-                "plugin": "dashboardMode",
-                "link": {
-                  "path": "x-pack/plugins/dashboard_mode/server/interceptors/dashboard_mode_request_interceptor.ts",
-                  "lineNumber": 33
-                }
-              },
-              {
-                "plugin": "dataEnhanced",
-                "link": {
-                  "path": "x-pack/plugins/data_enhanced/server/search/session/session_service.ts",
-                  "lineNumber": 448
-                }
-              },
-              {
-                "plugin": "logstash",
-                "link": {
-                  "path": "x-pack/plugins/logstash/server/routes/pipeline/save.ts",
-                  "lineNumber": 41
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/create_signals_migration_route.ts",
-                  "lineNumber": 48
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/delete_signals_migration_route.ts",
-                  "lineNumber": 45
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/finalize_signals_migration_route.ts",
-                  "lineNumber": 45
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/timeline/utils/common.ts",
-                  "lineNumber": 28
-                }
-              }
-            ]
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-server.SecurityPluginSetup.authz",
-            "type": "Object",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "authz",
-            "description": [],
-            "signature": [
-              "{ mode: ",
-              "AuthorizationMode",
-              "; actions: ",
-              "Actions",
-              "; checkPrivilegesDynamicallyWithRequest: ",
-              "CheckPrivilegesDynamicallyWithRequest",
-              "; checkPrivilegesWithRequest: ",
-              "CheckPrivilegesWithRequest",
-              "; }"
-            ],
-            "source": {
-              "path": "x-pack/plugins/security/server/plugin.ts",
-              "lineNumber": 77
-            },
-            "deprecated": true,
-            "references": [
-              {
-                "plugin": "actions",
-                "link": {
-                  "path": "x-pack/plugins/actions/server/plugin.ts",
-                  "lineNumber": 443
-                }
-              },
-              {
-                "plugin": "ml",
-                "link": {
-                  "path": "x-pack/plugins/ml/server/saved_objects/initialization/initialization.ts",
-                  "lineNumber": 54
-                }
-              },
-              {
-                "plugin": "ml",
-                "link": {
-                  "path": "x-pack/plugins/ml/server/plugin.ts",
-                  "lineNumber": 153
-                }
-              },
-              {
-                "plugin": "ml",
-                "link": {
-                  "path": "x-pack/plugins/ml/server/plugin.ts",
-                  "lineNumber": 203
-                }
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "link": {
-                  "path": "x-pack/plugins/enterprise_search/server/lib/check_access.ts",
-                  "lineNumber": 46
-                }
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "link": {
-                  "path": "x-pack/plugins/enterprise_search/server/lib/check_access.ts",
-                  "lineNumber": 86
-                }
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "link": {
-                  "path": "x-pack/plugins/enterprise_search/server/lib/check_access.ts",
-                  "lineNumber": 88
-                }
-              },
-              {
-                "plugin": "savedObjectsTagging",
-                "link": {
-                  "path": "x-pack/plugins/saved_objects_tagging/server/request_handler_context.ts",
-                  "lineNumber": 37
-                }
-              }
-            ]
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-server.SecurityPluginSetup.license",
-            "type": "Object",
-            "tags": [],
-            "label": "license",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.SecurityLicense",
-                "text": "SecurityLicense"
-              }
-            ],
-            "source": {
-              "path": "x-pack/plugins/security/server/plugin.ts",
-              "lineNumber": 81
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-server.SecurityPluginSetup.audit",
-            "type": "Object",
-            "tags": [],
-            "label": "audit",
-            "description": [],
-            "signature": [
-              "AuditServiceSetup"
-            ],
-            "source": {
-              "path": "x-pack/plugins/security/server/plugin.ts",
-              "lineNumber": 82
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "security",
-        "id": "def-server.SecurityPluginStart",
-        "type": "Interface",
-        "tags": [],
-        "label": "SecurityPluginStart",
-        "description": [
-          "\nDescribes public Security plugin contract returned at the `start` stage."
-        ],
-        "source": {
-          "path": "x-pack/plugins/security/server/plugin.ts",
-          "lineNumber": 88
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "security",
-            "id": "def-server.SecurityPluginStart.authc",
-            "type": "Object",
-            "tags": [],
-            "label": "authc",
-            "description": [],
-            "signature": [
-              "{ getCurrentUser: (request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
-              "<unknown, unknown, unknown, any>) => ",
-              "AuthenticatedUser",
-              " | null; apiKeys: Pick<",
-              "APIKeys",
-              ", \"create\" | \"areAPIKeysEnabled\" | \"invalidate\" | \"grantAsInternalUser\" | \"invalidateAsInternalUser\">; }"
-            ],
-            "source": {
-              "path": "x-pack/plugins/security/server/plugin.ts",
-              "lineNumber": 89
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-server.SecurityPluginStart.authz",
-            "type": "Object",
-            "tags": [],
-            "label": "authz",
-            "description": [],
-            "signature": [
-              "{ mode: ",
-              "AuthorizationMode",
-              "; actions: ",
-              "Actions",
-              "; checkPrivilegesDynamicallyWithRequest: ",
-              "CheckPrivilegesDynamicallyWithRequest",
-              "; checkPrivilegesWithRequest: ",
-              "CheckPrivilegesWithRequest",
-              "; }"
-            ],
-            "source": {
-              "path": "x-pack/plugins/security/server/plugin.ts",
-              "lineNumber": 90
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -1831,20 +1808,9 @@
         "tags": [],
         "label": "AuthorizationServiceSetup",
         "description": [],
-        "signature": [
-          "{ mode: ",
-          "AuthorizationMode",
-          "; actions: ",
-          "Actions",
-          "; checkPrivilegesDynamicallyWithRequest: ",
-          "CheckPrivilegesDynamicallyWithRequest",
-          "; checkPrivilegesWithRequest: ",
-          "CheckPrivilegesWithRequest",
-          "; }"
-        ],
         "source": {
           "path": "x-pack/plugins/security/server/index.ts",
-          "lineNumber": 30
+          "lineNumber": 31
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1869,12 +1835,446 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [],
+    "setup": {
+      "parentPluginId": "security",
+      "id": "def-server.SecurityPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "SecurityPluginSetup",
+      "description": [
+        "\nDescribes public Security plugin contract returned at the `setup` stage."
+      ],
+      "source": {
+        "path": "x-pack/plugins/security/server/plugin.ts",
+        "lineNumber": 72
+      },
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "security",
+          "id": "def-server.SecurityPluginSetup.authc",
+          "type": "Object",
+          "tags": [
+            "deprecated"
+          ],
+          "label": "authc",
+          "description": [],
+          "signature": [
+            "{ getCurrentUser: (request: ",
+            {
+              "pluginId": "core",
+              "scope": "server",
+              "docId": "kibCoreHttpPluginApi",
+              "section": "def-server.KibanaRequest",
+              "text": "KibanaRequest"
+            },
+            "<unknown, unknown, unknown, any>) => ",
+            {
+              "pluginId": "security",
+              "scope": "common",
+              "docId": "kibSecurityPluginApi",
+              "section": "def-common.AuthenticatedUser",
+              "text": "AuthenticatedUser"
+            },
+            " | null; }"
+          ],
+          "source": {
+            "path": "x-pack/plugins/security/server/plugin.ts",
+            "lineNumber": 76
+          },
+          "deprecated": true,
+          "references": [
+            {
+              "plugin": "reporting",
+              "link": {
+                "path": "x-pack/plugins/reporting/server/routes/lib/get_user.ts",
+                "lineNumber": 13
+              }
+            },
+            {
+              "plugin": "encryptedSavedObjects",
+              "link": {
+                "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_key_rotation_service.ts",
+                "lineNumber": 107
+              }
+            },
+            {
+              "plugin": "encryptedSavedObjects",
+              "link": {
+                "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
+                "lineNumber": 67
+              }
+            },
+            {
+              "plugin": "actions",
+              "link": {
+                "path": "x-pack/plugins/actions/server/plugin.ts",
+                "lineNumber": 444
+              }
+            },
+            {
+              "plugin": "ml",
+              "link": {
+                "path": "x-pack/plugins/ml/server/routes/annotations.ts",
+                "lineNumber": 105
+              }
+            },
+            {
+              "plugin": "dashboardMode",
+              "link": {
+                "path": "x-pack/plugins/dashboard_mode/server/interceptors/dashboard_mode_request_interceptor.ts",
+                "lineNumber": 33
+              }
+            },
+            {
+              "plugin": "dataEnhanced",
+              "link": {
+                "path": "x-pack/plugins/data_enhanced/server/search/session/session_service.ts",
+                "lineNumber": 448
+              }
+            },
+            {
+              "plugin": "logstash",
+              "link": {
+                "path": "x-pack/plugins/logstash/server/routes/pipeline/save.ts",
+                "lineNumber": 41
+              }
+            },
+            {
+              "plugin": "securitySolution",
+              "link": {
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/create_signals_migration_route.ts",
+                "lineNumber": 48
+              }
+            },
+            {
+              "plugin": "securitySolution",
+              "link": {
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/delete_signals_migration_route.ts",
+                "lineNumber": 45
+              }
+            },
+            {
+              "plugin": "securitySolution",
+              "link": {
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/finalize_signals_migration_route.ts",
+                "lineNumber": 45
+              }
+            },
+            {
+              "plugin": "securitySolution",
+              "link": {
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/utils/common.ts",
+                "lineNumber": 28
+              }
+            }
+          ]
+        },
+        {
+          "parentPluginId": "security",
+          "id": "def-server.SecurityPluginSetup.authz",
+          "type": "Object",
+          "tags": [
+            "deprecated"
+          ],
+          "label": "authz",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "security",
+              "scope": "server",
+              "docId": "kibSecurityPluginApi",
+              "section": "def-server.AuthorizationServiceSetup",
+              "text": "AuthorizationServiceSetup"
+            }
+          ],
+          "source": {
+            "path": "x-pack/plugins/security/server/plugin.ts",
+            "lineNumber": 80
+          },
+          "deprecated": true,
+          "references": [
+            {
+              "plugin": "actions",
+              "link": {
+                "path": "x-pack/plugins/actions/server/plugin.ts",
+                "lineNumber": 443
+              }
+            },
+            {
+              "plugin": "ml",
+              "link": {
+                "path": "x-pack/plugins/ml/server/saved_objects/initialization/initialization.ts",
+                "lineNumber": 54
+              }
+            },
+            {
+              "plugin": "ml",
+              "link": {
+                "path": "x-pack/plugins/ml/server/plugin.ts",
+                "lineNumber": 153
+              }
+            },
+            {
+              "plugin": "ml",
+              "link": {
+                "path": "x-pack/plugins/ml/server/plugin.ts",
+                "lineNumber": 203
+              }
+            },
+            {
+              "plugin": "enterpriseSearch",
+              "link": {
+                "path": "x-pack/plugins/enterprise_search/server/lib/check_access.ts",
+                "lineNumber": 46
+              }
+            },
+            {
+              "plugin": "enterpriseSearch",
+              "link": {
+                "path": "x-pack/plugins/enterprise_search/server/lib/check_access.ts",
+                "lineNumber": 86
+              }
+            },
+            {
+              "plugin": "enterpriseSearch",
+              "link": {
+                "path": "x-pack/plugins/enterprise_search/server/lib/check_access.ts",
+                "lineNumber": 88
+              }
+            },
+            {
+              "plugin": "savedObjectsTagging",
+              "link": {
+                "path": "x-pack/plugins/saved_objects_tagging/server/request_handler_context.ts",
+                "lineNumber": 37
+              }
+            }
+          ]
+        },
+        {
+          "parentPluginId": "security",
+          "id": "def-server.SecurityPluginSetup.license",
+          "type": "Object",
+          "tags": [],
+          "label": "license",
+          "description": [
+            "\nExposes information about the available security features under the current license."
+          ],
+          "signature": [
+            {
+              "pluginId": "security",
+              "scope": "common",
+              "docId": "kibSecurityPluginApi",
+              "section": "def-common.SecurityLicense",
+              "text": "SecurityLicense"
+            }
+          ],
+          "source": {
+            "path": "x-pack/plugins/security/server/plugin.ts",
+            "lineNumber": 84
+          },
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "security",
+          "id": "def-server.SecurityPluginSetup.audit",
+          "type": "Object",
+          "tags": [],
+          "label": "audit",
+          "description": [
+            "\nExposes services for audit logging."
+          ],
+          "signature": [
+            {
+              "pluginId": "security",
+              "scope": "server",
+              "docId": "kibSecurityPluginApi",
+              "section": "def-server.AuditServiceSetup",
+              "text": "AuditServiceSetup"
+            }
+          ],
+          "source": {
+            "path": "x-pack/plugins/security/server/plugin.ts",
+            "lineNumber": 88
+          },
+          "deprecated": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "security",
+      "id": "def-server.SecurityPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "SecurityPluginStart",
+      "description": [
+        "\nDescribes public Security plugin contract returned at the `start` stage."
+      ],
+      "source": {
+        "path": "x-pack/plugins/security/server/plugin.ts",
+        "lineNumber": 94
+      },
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "security",
+          "id": "def-server.SecurityPluginStart.authc",
+          "type": "Object",
+          "tags": [],
+          "label": "authc",
+          "description": [
+            "\nAuthentication services to confirm the user is who they say they are."
+          ],
+          "signature": [
+            {
+              "pluginId": "security",
+              "scope": "server",
+              "docId": "kibSecurityPluginApi",
+              "section": "def-server.AuthenticationServiceStart",
+              "text": "AuthenticationServiceStart"
+            }
+          ],
+          "source": {
+            "path": "x-pack/plugins/security/server/plugin.ts",
+            "lineNumber": 98
+          },
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "security",
+          "id": "def-server.SecurityPluginStart.authz",
+          "type": "Object",
+          "tags": [],
+          "label": "authz",
+          "description": [
+            "\nAuthorization services to manage and access the permissions a particular user has."
+          ],
+          "signature": [
+            {
+              "pluginId": "security",
+              "scope": "server",
+              "docId": "kibSecurityPluginApi",
+              "section": "def-server.AuthorizationServiceSetup",
+              "text": "AuthorizationServiceSetup"
+            }
+          ],
+          "source": {
+            "path": "x-pack/plugins/security/server/plugin.ts",
+            "lineNumber": 102
+          },
+          "deprecated": false
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "common": {
     "classes": [],
     "functions": [],
     "interfaces": [
+      {
+        "parentPluginId": "security",
+        "id": "def-common.AuthenticatedUser",
+        "type": "Interface",
+        "tags": [],
+        "label": "AuthenticatedUser",
+        "description": [
+          "\nRepresents the currently authenticated user."
+        ],
+        "signature": [
+          {
+            "pluginId": "security",
+            "scope": "common",
+            "docId": "kibSecurityPluginApi",
+            "section": "def-common.AuthenticatedUser",
+            "text": "AuthenticatedUser"
+          },
+          " extends ",
+          "User"
+        ],
+        "source": {
+          "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+          "lineNumber": 21
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.AuthenticatedUser.authentication_realm",
+            "type": "Object",
+            "tags": [],
+            "label": "authentication_realm",
+            "description": [
+              "\nThe name and type of the Realm that has authenticated the user."
+            ],
+            "signature": [
+              "UserRealm"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+              "lineNumber": 25
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.AuthenticatedUser.lookup_realm",
+            "type": "Object",
+            "tags": [],
+            "label": "lookup_realm",
+            "description": [
+              "\nThe name and type of the Realm where the user information were retrieved from."
+            ],
+            "signature": [
+              "UserRealm"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+              "lineNumber": 30
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.AuthenticatedUser.authentication_provider",
+            "type": "Object",
+            "tags": [],
+            "label": "authentication_provider",
+            "description": [
+              "\nThe authentication provider that used to authenticate user."
+            ],
+            "signature": [
+              "AuthenticationProvider"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+              "lineNumber": 35
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.AuthenticatedUser.authentication_type",
+            "type": "string",
+            "tags": [],
+            "label": "authentication_type",
+            "description": [
+              "\nThe AuthenticationType used by ES to authenticate the user.\n"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+              "lineNumber": 42
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "security",
         "id": "def-common.SecurityLicense",
