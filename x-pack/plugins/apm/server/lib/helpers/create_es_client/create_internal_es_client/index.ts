@@ -31,17 +31,18 @@ export function createInternalESClient({
 }: Pick<APMRouteHandlerResources, 'context' | 'request'> & { debug: boolean }) {
   const { asInternalUser } = context.core.elasticsearch.client;
 
-  function callEs<T extends { body: any }>({
-    cb,
-    requestType,
-    params,
-    operationName,
-  }: {
-    requestType: string;
-    cb: () => TransportRequestPromise<T>;
-    params: Record<string, any>;
-    operationName?: string;
-  }) {
+  function callEs<T extends { body: any }>(
+    operationName: string,
+    {
+      cb,
+      requestType,
+      params,
+    }: {
+      requestType: string;
+      cb: () => TransportRequestPromise<T>;
+      params: Record<string, any>;
+    }
+  ) {
     return callAsyncWithDebug({
       cb: () => unwrapEsResponse(cancelEsRequestOnAbort(cb(), request)),
       getDebugMessage: () => ({
@@ -64,29 +65,34 @@ export function createInternalESClient({
       operationName: string,
       params: TSearchRequest
     ): Promise<ESSearchResponse<TDocument, TSearchRequest>> => {
-      return callEs({
+      return callEs(operationName, {
         requestType: 'search',
         cb: () => asInternalUser.search(params),
         params,
-        operationName,
       });
     },
-    index: <T>(params: APMIndexDocumentParams<T>) => {
-      return callEs({
+    index: <T>(operationName: string, params: APMIndexDocumentParams<T>) => {
+      return callEs(operationName, {
         requestType: 'index',
         cb: () => asInternalUser.index(params),
         params,
       });
     },
-    delete: (params: estypes.DeleteRequest): Promise<{ result: string }> => {
-      return callEs({
+    delete: (
+      operationName: string,
+      params: estypes.DeleteRequest
+    ): Promise<{ result: string }> => {
+      return callEs(operationName, {
         requestType: 'delete',
         cb: () => asInternalUser.delete(params),
         params,
       });
     },
-    indicesCreate: (params: estypes.IndicesCreateRequest) => {
-      return callEs({
+    indicesCreate: (
+      operationName: string,
+      params: estypes.IndicesCreateRequest
+    ) => {
+      return callEs(operationName, {
         requestType: 'indices.create',
         cb: () => asInternalUser.indices.create(params),
         params,

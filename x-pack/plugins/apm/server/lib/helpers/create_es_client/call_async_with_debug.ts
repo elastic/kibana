@@ -88,9 +88,9 @@ export const getDebugBody = ({
 }: {
   params: Record<string, any>;
   requestType: string;
-  operationName?: string;
+  operationName: string;
 }) => {
-  const operationLine = operationName ? `${operationName}\n` : '';
+  const operationLine = `${operationName}\n`;
 
   if (requestType === 'search') {
     return `${operationLine}GET ${params.index}/_search\n${formatObj(
