@@ -529,9 +529,11 @@ export class TaskRunner<
         ...event.event,
         action: EVENT_LOG_ACTIONS.executeStart,
       },
+      rule: {
+        ...event.rule,
+        id: alertId,
+      },
     };
-    eventLogger.startTiming(startEvent);
-    eventLogger.stopTiming(startEvent);
     eventLogger.logEvent(startEvent);
 
     eventLogger.startTiming(event);
