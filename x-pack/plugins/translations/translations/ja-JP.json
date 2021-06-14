@@ -6558,8 +6558,6 @@
     "xpack.canvas.renderer.progress.helpDescription": "エレメントのパーセンテージを示す進捗インジケーターをレンダリングします",
     "xpack.canvas.renderer.repeatImage.displayName": "画像の繰り返し",
     "xpack.canvas.renderer.repeatImage.helpDescription": "画像を指定回数繰り返し表示します",
-    "xpack.canvas.renderer.revealImage.displayName": "画像の部分表示",
-    "xpack.canvas.renderer.revealImage.helpDescription": "カスタムゲージスタイルチャートを作成するため、画像のパーセンテージを表示します",
     "xpack.canvas.renderer.shape.displayName": "形状",
     "xpack.canvas.renderer.shape.helpDescription": "基本的な図形をレンダリングします",
     "xpack.canvas.renderer.table.displayName": "データテーブル",

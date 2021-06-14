@@ -6597,8 +6597,6 @@
     "xpack.canvas.renderer.progress.helpDescription": "呈现显示元素百分比的进度指示",
     "xpack.canvas.renderer.repeatImage.displayName": "图像重复",
     "xpack.canvas.renderer.repeatImage.helpDescription": "重复图像给定次数",
-    "xpack.canvas.renderer.revealImage.displayName": "图像显示",
-    "xpack.canvas.renderer.revealImage.helpDescription": "显示一定百分比的图像，以制作定制的仪表样式图表",
     "xpack.canvas.renderer.shape.displayName": "形状",
     "xpack.canvas.renderer.shape.helpDescription": "呈现基本形状",
     "xpack.canvas.renderer.table.displayName": "数据表",
