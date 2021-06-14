@@ -22,6 +22,7 @@ export const apmFieldFormats: FieldFormat[] = [
         outputFormat: 'asMilliseconds',
         outputPrecision: 0,
         showSuffix: true,
+        useShortSuffix: true,
       },
     },
   },

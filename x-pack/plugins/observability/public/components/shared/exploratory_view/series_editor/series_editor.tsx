@@ -53,7 +53,7 @@ export function SeriesEditor() {
                 defaultFilters={defaultFilters}
                 seriesId={id}
                 series={seriesConfig}
-                filters={series.filters}
+                filters={seriesConfig.filters}
               />
             ),
           },

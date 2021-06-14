@@ -7,7 +7,7 @@
 
 import { ConfigProps, DataSeries } from '../../types';
 import { FieldLabels, OPERATION_COLUMN } from '../constants';
-import { buildPhraseFilter } from '../utils';
+import { buildPhrasesFilter } from '../utils';
 import {
   METRIC_SYSTEM_CPU_USAGE,
   METRIC_SYSTEM_MEMORY_USAGE,
@@ -15,10 +15,9 @@ import {
   TRANSACTION_DURATION,
 } from '../constants/elasticsearch_fieldnames';
 
-export function getMobileKPIConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
+export function getMobileKPIConfig({ indexPattern }: ConfigProps): DataSeries {
   return {
-    id: seriesId,
-    reportType: 'service-latency',
+    reportType: 'kpi-over-time',
     defaultSeriesType: 'line',
     seriesTypes: ['line', 'bar'],
     xAxisColumn: {
@@ -48,7 +47,9 @@ export function getMobileKPIConfig({ seriesId, indexPattern }: ConfigProps): Dat
       'service.version',
       'labels.net_connection_carrier_isoCountryCode',
     ],
-    filters: [...buildPhraseFilter('agent.name', 'iOS/swift', indexPattern)],
+    filters: [
+      ...buildPhrasesFilter('agent.name', ['iOS/swift', 'open-telemetry/swift'], indexPattern),
+    ],
     labels: {
       ...FieldLabels,
       [TRANSACTION_DURATION]: 'Response latency',

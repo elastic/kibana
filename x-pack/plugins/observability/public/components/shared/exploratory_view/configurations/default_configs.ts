@@ -35,10 +35,7 @@ export const getDefaultConfigs = ({ reportType, dataType, indexPattern }: Props)
         return getSyntheticsDistributionConfig({ indexPattern });
       }
       return getSyntheticsKPIConfig({ indexPattern });
-    case 'synthetics':
-      if (reportType === 'dist') {
-        return getMobileKPIConfig({ indexPattern });
-      }
+    case 'mobile':
       return getMobileKPIConfig({ indexPattern });
 
     default:
