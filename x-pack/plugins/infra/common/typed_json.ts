@@ -11,6 +11,7 @@ import { JsonArray, JsonObject, JsonValue } from '../../../../src/plugins/kibana
 export { JsonArray, JsonObject, JsonValue };
 
 export const jsonScalarRT = rt.union([rt.null, rt.boolean, rt.number, rt.string]);
+export type JsonScalar = rt.TypeOf<typeof jsonScalarRT>;
 
 export const jsonValueRT: rt.Type<JsonValue> = rt.recursion('JsonValue', () =>
   rt.union([jsonScalarRT, jsonArrayRT, jsonObjectRT])

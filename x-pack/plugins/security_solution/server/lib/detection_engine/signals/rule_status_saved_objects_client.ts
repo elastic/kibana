@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { get } from 'lodash';
 import {
   SavedObjectsClientContract,
   SavedObject,
@@ -14,17 +15,23 @@ import {
 } from '../../../../../../../src/core/server';
 import { ruleStatusSavedObjectType } from '../rules/saved_object_mappings';
 import { IRuleStatusSOAttributes } from '../rules/types';
+import { buildChunkedOrFilter } from './utils';
 
 export interface RuleStatusSavedObjectsClient {
   find: (
     options?: Omit<SavedObjectsFindOptions, 'type'>
   ) => Promise<SavedObjectsFindResponse<IRuleStatusSOAttributes>>;
+  findBulk: (ids: string[], statusesPerId: number) => Promise<FindBulkResponse>;
   create: (attributes: IRuleStatusSOAttributes) => Promise<SavedObject<IRuleStatusSOAttributes>>;
   update: (
     id: string,
     attributes: Partial<IRuleStatusSOAttributes>
   ) => Promise<SavedObjectsUpdateResponse<IRuleStatusSOAttributes>>;
   delete: (id: string) => Promise<{}>;
+}
+
+interface FindBulkResponse {
+  [key: string]: IRuleStatusSOAttributes[] | undefined;
 }
 
 export const ruleStatusSavedObjectsClientFactory = (
@@ -35,6 +42,50 @@ export const ruleStatusSavedObjectsClientFactory = (
       ...options,
       type: ruleStatusSavedObjectType,
     }),
+  findBulk: async (ids, statusesPerId) => {
+    if (ids.length === 0) {
+      return {};
+    }
+    const filter = buildChunkedOrFilter(`${ruleStatusSavedObjectType}.attributes.alertId`, ids);
+    const order: 'desc' = 'desc';
+    const aggs = {
+      alertIds: {
+        terms: {
+          field: `${ruleStatusSavedObjectType}.attributes.alertId`,
+          size: ids.length,
+        },
+        aggs: {
+          most_recent_statuses: {
+            top_hits: {
+              sort: [
+                {
+                  [`${ruleStatusSavedObjectType}.statusDate`]: {
+                    order,
+                  },
+                },
+              ],
+              size: statusesPerId,
+            },
+          },
+        },
+      },
+    };
+    const results = await savedObjectsClient.find({
+      filter,
+      aggs,
+      type: ruleStatusSavedObjectType,
+      perPage: 0,
+    });
+    const buckets = get(results, 'aggregations.alertIds.buckets');
+    return buckets.reduce((acc: Record<string, unknown>, bucket: unknown) => {
+      const key = get(bucket, 'key');
+      const hits = get(bucket, 'most_recent_statuses.hits.hits');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const statuses = hits.map((hit: any) => hit._source['siem-detection-engine-rule-status']);
+      acc[key] = statuses;
+      return acc;
+    }, {});
+  },
   create: (attributes) => savedObjectsClient.create(ruleStatusSavedObjectType, attributes),
   update: (id, attributes) => savedObjectsClient.update(ruleStatusSavedObjectType, id, attributes),
   delete: (id) => savedObjectsClient.delete(ruleStatusSavedObjectType, id),

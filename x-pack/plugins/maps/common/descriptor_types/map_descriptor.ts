@@ -11,7 +11,7 @@ import { ReactNode } from 'react';
 import { GeoJsonProperties } from 'geojson';
 import { Geometry } from 'geojson';
 import { Query } from '../../../../../src/plugins/data/common';
-import { DRAW_TYPE, ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../constants';
+import { DRAW_TYPE, ES_SPATIAL_RELATIONS } from '../constants';
 
 export type MapExtent = {
   minLon: number;
@@ -22,11 +22,6 @@ export type MapExtent = {
 
 export type MapQuery = Query & {
   queryLastTriggeredAt?: string;
-};
-
-export type MapRefreshConfig = {
-  isPaused: boolean;
-  interval: number;
 };
 
 export type MapCenter = {
@@ -70,9 +65,6 @@ export type DrawState = {
   actionId: string;
   drawType: DRAW_TYPE;
   filterLabel?: string; // point radius filter alias
-  geoFieldName?: string;
-  geoFieldType?: ES_GEO_FIELD_TYPE;
   geometryLabel?: string;
-  indexPatternId?: string;
   relation?: ES_SPATIAL_RELATIONS;
 };

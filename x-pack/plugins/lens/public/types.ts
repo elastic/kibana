@@ -9,6 +9,7 @@ import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'kibana/public';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { SavedObjectReference } from 'kibana/public';
+import { MutableRefObject } from 'react';
 import { RowClickContext } from '../../../../src/plugins/ui_actions/public';
 import {
   ExpressionAstExpression,
@@ -197,6 +198,11 @@ export interface Datasource<T = unknown, P = unknown> {
     }
   ) => { dropTypes: DropType[]; nextLabel?: string } | undefined;
   onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
+  /**
+   * The datasource is allowed to cancel a close event on the dimension editor,
+   * mainly used for formulas
+   */
+  canCloseDimensionEditor?: (state: T) => boolean;
   getCustomWorkspaceRenderer?: (
     state: T,
     dragging: DraggingIdentifier
@@ -223,8 +229,18 @@ export interface Datasource<T = unknown, P = unknown> {
   getPublicAPI: (props: PublicAPIProps<T>) => DatasourcePublicAPI;
   getErrorMessages: (
     state: T,
-    layersGroups?: Record<string, VisualizationDimensionGroupConfig[]>
-  ) => Array<{ shortMessage: string; longMessage: string }> | undefined;
+    layersGroups?: Record<string, VisualizationDimensionGroupConfig[]>,
+    dateRange?: {
+      fromDate: string;
+      toDate: string;
+    }
+  ) =>
+    | Array<{
+        shortMessage: string;
+        longMessage: string;
+        fixAction?: { label: string; newState: () => Promise<T> };
+      }>
+    | undefined;
   /**
    * uniqueLabels of dimensions exposed for aria-labels of dragged dimensions
    */
@@ -233,6 +249,10 @@ export interface Datasource<T = unknown, P = unknown> {
    * Check the internal state integrity and returns a list of missing references
    */
   checkIntegrity: (state: T) => string[];
+  /**
+   * The frame calls this function to display warnings about visualization
+   */
+  getWarningMessages?: (state: T, frame: FramePublicAPI) => React.ReactNode[] | undefined;
 }
 
 /**
@@ -285,11 +305,15 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   // Not a StateSetter because we have this unique use case of determining valid columns
   setState: (
     newState: Parameters<StateSetter<T>>[0],
-    publishToVisualization?: { shouldReplaceDimension?: boolean; shouldRemoveDimension?: boolean }
+    publishToVisualization?: {
+      isDimensionComplete?: boolean;
+    }
   ) => void;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   dateRange: DateRange;
   dimensionGroups: VisualizationDimensionGroupConfig[];
+  toggleFullscreen: () => void;
+  isFullscreen: boolean;
 };
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T>;
@@ -391,13 +415,14 @@ export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfig
   groupId: string;
   accessor: string;
   setState: (newState: T) => void;
+  panelRef: MutableRefObject<HTMLDivElement | null>;
 };
 
 export interface AccessorConfig {
   columnId: string;
   triggerIcon?: 'color' | 'disabled' | 'colorBy' | 'none' | 'invisible';
   color?: string;
-  palette?: string[];
+  palette?: string[] | Array<{ color: string; stop: number }>;
 }
 
 export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
@@ -544,6 +569,10 @@ export interface VisualizationType {
    * Higher number means higher priority. When omitted defaults to 0
    */
   sortPriority?: number;
+  /**
+   * Indicates if visualization is in the beta stage.
+   */
+  showBetaBadge?: boolean;
 }
 
 export interface Visualization<T = unknown> {
@@ -671,7 +700,12 @@ export interface Visualization<T = unknown> {
   getErrorMessages: (
     state: T,
     datasourceLayers?: Record<string, DatasourcePublicAPI>
-  ) => Array<{ shortMessage: string; longMessage: string }> | undefined;
+  ) =>
+    | Array<{
+        shortMessage: string;
+        longMessage: string;
+      }>
+    | undefined;
 
   /**
    * The frame calls this function to display warnings about visualization

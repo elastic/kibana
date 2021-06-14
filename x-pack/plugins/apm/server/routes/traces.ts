@@ -14,6 +14,7 @@ import { environmentRt, kueryRt, rangeRt } from './default_api_types';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { getRootTransactionByTraceId } from '../lib/transactions/get_transaction_by_trace';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
+import { getTransaction } from '../lib/transactions/get_transaction';
 
 const tracesRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/traces',
@@ -70,7 +71,24 @@ const rootTransactionByTraceIdRoute = createApmServerRoute({
   },
 });
 
+const transactionByIdRoute = createApmServerRoute({
+  endpoint: 'GET /api/apm/transactions/{transactionId}',
+  params: t.type({
+    path: t.type({
+      transactionId: t.string,
+    }),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (resources) => {
+    const { params } = resources;
+    const { transactionId } = params.path;
+    const setup = await setupRequest(resources);
+    return { transaction: await getTransaction({ transactionId, setup }) };
+  },
+});
+
 export const traceRouteRepository = createApmServerRouteRepository()
   .add(tracesByIdRoute)
   .add(tracesRoute)
-  .add(rootTransactionByTraceIdRoute);
+  .add(rootTransactionByTraceIdRoute)
+  .add(transactionByIdRoute);

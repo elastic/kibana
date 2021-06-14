@@ -7,18 +7,12 @@
 
 import React from 'react';
 import { ReactWrapper, mount } from 'enzyme';
+import { waitFor } from '@testing-library/react';
 
 import { ConfigureCases } from '.';
 import { TestProviders } from '../../common/mock';
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
-import {
-  ActionConnector,
-  ConnectorAddFlyout,
-  ConnectorEditFlyout,
-  TriggersAndActionsUIPublicPluginStart,
-} from '../../../../triggers_actions_ui/public';
-import { actionTypeRegistryMock } from '../../../../triggers_actions_ui/public/application/action_type_registry.mock';
 
 import { useKibana } from '../../common/lib/kibana';
 import { useConnectors } from '../../containers/configure/use_connectors';
@@ -32,7 +26,8 @@ import {
   useConnectorsResponse,
   useActionTypesResponse,
 } from './__mock__';
-import { ConnectorTypes } from '../../../common';
+import { ConnectorTypes, SECURITY_SOLUTION_OWNER } from '../../../common';
+import { actionTypeRegistryMock } from '../../../../triggers_actions_ui/public/application/action_type_registry.mock';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/configure/use_connectors');
@@ -46,52 +41,13 @@ const useGetUrlSearchMock = jest.fn();
 const useActionTypesMock = useActionTypes as jest.Mock;
 
 describe('ConfigureCases', () => {
+  beforeAll(() => {
+    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
+      actionTypeTitle: '.servicenow',
+      iconClass: 'logoSecurity',
+    });
+  });
   beforeEach(() => {
-    useKibanaMock().services.triggersActionsUi = ({
-      actionTypeRegistry: actionTypeRegistryMock.create(),
-      getAddConnectorFlyout: jest.fn().mockImplementation(() => (
-        <ConnectorAddFlyout
-          onClose={() => {}}
-          actionTypeRegistry={actionTypeRegistryMock.create()}
-          actionTypes={[
-            {
-              id: '.servicenow',
-              name: 'servicenow',
-              enabled: true,
-              enabledInConfig: true,
-              enabledInLicense: true,
-              minimumLicenseRequired: 'gold',
-            },
-            {
-              id: '.jira',
-              name: 'jira',
-              enabled: true,
-              enabledInConfig: true,
-              enabledInLicense: true,
-              minimumLicenseRequired: 'gold',
-            },
-            {
-              id: '.resilient',
-              name: 'resilient',
-              enabled: true,
-              enabledInConfig: true,
-              enabledInLicense: true,
-              minimumLicenseRequired: 'gold',
-            },
-          ]}
-        />
-      )),
-      getEditConnectorFlyout: jest
-        .fn()
-        .mockImplementation(() => (
-          <ConnectorEditFlyout
-            onClose={() => {}}
-            actionTypeRegistry={actionTypeRegistryMock.create()}
-            initialConnector={connectors[1] as ActionConnector}
-          />
-        )),
-    } as unknown) as TriggersAndActionsUIPublicPluginStart;
-
     useActionTypesMock.mockImplementation(() => useActionTypesResponse);
   });
 
@@ -102,7 +58,9 @@ describe('ConfigureCases', () => {
       useConnectorsMock.mockImplementation(() => ({ ...useConnectorsResponse, connectors: [] }));
       useGetUrlSearchMock.mockImplementation(() => searchURL);
 
-      wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+      wrapper = mount(<ConfigureCases userCanCrud owner={[SECURITY_SOLUTION_OWNER]} />, {
+        wrappingComponent: TestProviders,
+      });
     });
 
     test('it renders the Connectors', () => {
@@ -114,13 +72,11 @@ describe('ConfigureCases', () => {
     });
 
     test('it does NOT render the ConnectorAddFlyout', () => {
-      // Components from triggersActionsUi  do not have a data-test-subj
-      expect(wrapper.find(ConnectorAddFlyout).exists()).toBeFalsy();
+      expect(wrapper.find('ConnectorAddFlyout').exists()).toBeFalsy();
     });
 
     test('it does NOT render the ConnectorEditFlyout', () => {
-      // Components from triggersActionsUi  do not have a data-test-subj
-      expect(wrapper.find(ConnectorEditFlyout).exists()).toBeFalsy();
+      expect(wrapper.find('ConnectorEditFlyout').exists()).toBeFalsy();
     });
 
     test('it does NOT render the EuiCallOut', () => {
@@ -155,7 +111,9 @@ describe('ConfigureCases', () => {
       }));
       useConnectorsMock.mockImplementation(() => ({ ...useConnectorsResponse, connectors: [] }));
       useGetUrlSearchMock.mockImplementation(() => searchURL);
-      wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+      wrapper = mount(<ConfigureCases userCanCrud owner={[SECURITY_SOLUTION_OWNER]} />, {
+        wrappingComponent: TestProviders,
+      });
     });
 
     test('it shows the warning callout when configuration is invalid', () => {
@@ -200,7 +158,9 @@ describe('ConfigureCases', () => {
       useConnectorsMock.mockImplementation(() => useConnectorsResponse);
       useGetUrlSearchMock.mockImplementation(() => searchURL);
 
-      wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+      wrapper = mount(<ConfigureCases userCanCrud owner={[SECURITY_SOLUTION_OWNER]} />, {
+        wrappingComponent: TestProviders,
+      });
     });
 
     test('it renders with correct props', () => {
@@ -215,14 +175,17 @@ describe('ConfigureCases', () => {
       expect(wrapper.find(ClosureOptions).prop('closureTypeSelected')).toBe('close-by-user');
 
       // Flyouts
-      expect(wrapper.find(ConnectorAddFlyout).exists()).toBe(false);
-      expect(wrapper.find(ConnectorEditFlyout).exists()).toBe(false);
+      expect(wrapper.find('ConnectorAddFlyout').exists()).toBe(false);
+      expect(wrapper.find('ConnectorEditFlyout').exists()).toBe(false);
     });
 
     test('it disables correctly when the user cannot crud', () => {
-      const newWrapper = mount(<ConfigureCases userCanCrud={false} />, {
-        wrappingComponent: TestProviders,
-      });
+      const newWrapper = mount(
+        <ConfigureCases userCanCrud={false} owner={[SECURITY_SOLUTION_OWNER]} />,
+        {
+          wrappingComponent: TestProviders,
+        }
+      );
 
       expect(newWrapper.find('button[data-test-subj="dropdown-connectors"]').prop('disabled')).toBe(
         true
@@ -282,7 +245,9 @@ describe('ConfigureCases', () => {
       }));
 
       useGetUrlSearchMock.mockImplementation(() => searchURL);
-      wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+      wrapper = mount(<ConfigureCases userCanCrud owner={[SECURITY_SOLUTION_OWNER]} />, {
+        wrappingComponent: TestProviders,
+      });
     });
 
     test('it disables correctly Connector when loading connectors', () => {
@@ -315,7 +280,9 @@ describe('ConfigureCases', () => {
 
       useActionTypesMock.mockImplementation(() => ({ ...useActionTypesResponse, loading: true }));
 
-      wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+      wrapper = mount(<ConfigureCases userCanCrud owner={[SECURITY_SOLUTION_OWNER]} />, {
+        wrappingComponent: TestProviders,
+      });
       expect(wrapper.find(Connectors).prop('isLoading')).toBe(true);
     });
   });
@@ -337,7 +304,9 @@ describe('ConfigureCases', () => {
 
       useConnectorsMock.mockImplementation(() => useConnectorsResponse);
       useGetUrlSearchMock.mockImplementation(() => searchURL);
-      wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+      wrapper = mount(<ConfigureCases userCanCrud owner={[SECURITY_SOLUTION_OWNER]} />, {
+        wrappingComponent: TestProviders,
+      });
     });
 
     test('it disables correctly Connector when saving configuration', () => {
@@ -378,7 +347,9 @@ describe('ConfigureCases', () => {
         ...useConnectorsResponse,
       }));
       useGetUrlSearchMock.mockImplementation(() => searchURL);
-      wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+      wrapper = mount(<ConfigureCases userCanCrud owner={[SECURITY_SOLUTION_OWNER]} />, {
+        wrappingComponent: TestProviders,
+      });
     });
 
     test('it hides the update connector button when loading the configuration', () => {
@@ -420,7 +391,9 @@ describe('ConfigureCases', () => {
       useConnectorsMock.mockImplementation(() => useConnectorsResponse);
       useGetUrlSearchMock.mockImplementation(() => searchURL);
 
-      wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+      wrapper = mount(<ConfigureCases userCanCrud owner={[SECURITY_SOLUTION_OWNER]} />, {
+        wrappingComponent: TestProviders,
+      });
     });
 
     test('it submits the configuration correctly when changing connector', () => {
@@ -462,7 +435,9 @@ describe('ConfigureCases', () => {
           },
         }));
 
-      wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+      wrapper = mount(<ConfigureCases userCanCrud owner={[SECURITY_SOLUTION_OWNER]} />, {
+        wrappingComponent: TestProviders,
+      });
 
       wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
       wrapper.update();
@@ -508,7 +483,9 @@ describe('closure options', () => {
     useConnectorsMock.mockImplementation(() => useConnectorsResponse);
     useGetUrlSearchMock.mockImplementation(() => searchURL);
 
-    wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+    wrapper = mount(<ConfigureCases userCanCrud owner={[SECURITY_SOLUTION_OWNER]} />, {
+      wrappingComponent: TestProviders,
+    });
   });
 
   test('it submits the configuration correctly when changing closure type', () => {
@@ -554,36 +531,67 @@ describe('user interactions', () => {
     useGetUrlSearchMock.mockImplementation(() => searchURL);
   });
 
-  test('it show the add flyout when pressing the add connector button', () => {
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-    wrapper.update();
-    wrapper.find('button[data-test-subj="dropdown-connector-add-connector"]').simulate('click');
-    wrapper.update();
+  test('it show the add flyout when pressing the add connector button', async () => {
+    const wrapper = mount(<ConfigureCases userCanCrud owner={[SECURITY_SOLUTION_OWNER]} />, {
+      wrappingComponent: TestProviders,
+    });
 
-    expect(wrapper.find(ConnectorAddFlyout).exists()).toBe(true);
-    expect(wrapper.find(ConnectorAddFlyout).prop('actionTypes')).toEqual([
-      expect.objectContaining({
-        id: '.servicenow',
-      }),
-      expect.objectContaining({
-        id: '.jira',
-      }),
-      expect.objectContaining({
-        id: '.resilient',
-      }),
-    ]);
+    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+    wrapper.find('button[data-test-subj="dropdown-connector-add-connector"]').simulate('click');
+
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find('ConnectorAddFlyout').exists()).toBe(true);
+      expect(wrapper.find('ConnectorAddFlyout').prop('actionTypes')).toEqual([
+        expect.objectContaining({
+          id: '.servicenow',
+        }),
+        expect.objectContaining({
+          id: '.jira',
+        }),
+        expect.objectContaining({
+          id: '.resilient',
+        }),
+        expect.objectContaining({
+          id: '.servicenow-sir',
+        }),
+      ]);
+    });
   });
 
-  test('it show the edit flyout when pressing the update connector button', () => {
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+  test('it show the edit flyout when pressing the update connector button', async () => {
+    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
+      id: '.resilient',
+      validateConnector: () => {
+        return Promise.resolve({});
+      },
+      validateParams: () => {
+        const validationResult = { errors: {} };
+        return Promise.resolve(validationResult);
+      },
+      actionConnectorFields: null,
+    });
+
+    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest
+      .fn()
+      .mockReturnValue(actionType);
+    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.has = jest
+      .fn()
+      .mockReturnValue(true);
+
+    const wrapper = mount(<ConfigureCases userCanCrud owner={[SECURITY_SOLUTION_OWNER]} />, {
+      wrappingComponent: TestProviders,
+    });
     wrapper
       .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
       .simulate('click');
-    wrapper.update();
 
-    expect(wrapper.find(ConnectorEditFlyout).exists()).toBe(true);
-    expect(wrapper.find(ConnectorEditFlyout).prop('initialConnector')).toEqual(connectors[1]);
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find('ConnectorEditFlyout').exists()).toBe(true);
+      expect(wrapper.find('ConnectorEditFlyout').prop('initialConnector')).toEqual(connectors[1]);
+    });
+
     expect(
       wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
     ).toBeFalsy();
