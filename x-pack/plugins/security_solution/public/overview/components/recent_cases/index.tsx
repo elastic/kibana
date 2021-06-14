@@ -29,8 +29,10 @@ const RecentCasesComponent = () => {
   return casesUi.getRecentCases({
     allCasesNavigation: {
       href: formatUrl(getCaseUrl()),
-      onClick: async (ev) => {
-        ev.preventDefault();
+      onClick: async (e) => {
+        if (e) {
+          e.preventDefault();
+        }
         return navigateToApp(`${APP_ID}:${SecurityPageName.case}`);
       },
     },
@@ -39,7 +41,9 @@ const RecentCasesComponent = () => {
         return formatUrl(getCaseDetailsUrl({ id: detailName, subCaseId }));
       },
       onClick: async ({ detailName, subCaseId, search }, e) => {
-        e.preventDefault();
+        if (e) {
+          e.preventDefault();
+        }
         return navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
           path: getCaseDetailsUrl({ id: detailName, search, subCaseId }),
         });
@@ -48,7 +52,9 @@ const RecentCasesComponent = () => {
     createCaseNavigation: {
       href: formatUrl(getCreateCaseUrl()),
       onClick: async (e) => {
-        e.preventDefault();
+        if (e) {
+          e.preventDefault();
+        }
         return navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
           path: getCreateCaseUrl(),
         });

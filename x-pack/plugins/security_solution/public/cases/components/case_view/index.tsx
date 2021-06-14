@@ -178,7 +178,9 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
         allCasesNavigation: {
           href: formattedAllCasesLink,
           onClick: async (e) => {
-            e.preventDefault();
+            if (e) {
+              e.preventDefault();
+            }
             return navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
               path: allCasesLink,
             });
@@ -187,7 +189,9 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
         caseDetailsNavigation: {
           href: caseDetailsLink,
           onClick: async (e) => {
-            e.preventDefault();
+            if (e) {
+              e.preventDefault();
+            }
             return navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
               path: getCaseDetailsUrl({ id: caseId }),
             });
@@ -197,7 +201,9 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
         configureCasesNavigation: {
           href: configureCasesHref,
           onClick: async (e) => {
-            e.preventDefault();
+            if (e) {
+              e.preventDefault();
+            }
             return navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
               path: getConfigureCasesUrl(search),
             });
@@ -209,7 +215,9 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
         ruleDetailsNavigation: {
           href: getDetectionsRuleDetailsHref,
           onClick: async (ruleId: string | null | undefined, e) => {
-            e.preventDefault();
+            if (e) {
+              e.preventDefault();
+            }
             return navigateToApp(`${APP_ID}:${SecurityPageName.detections}`, {
               path: getRuleDetailsUrl(ruleId ?? ''),
             });
