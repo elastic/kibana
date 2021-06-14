@@ -69,7 +69,7 @@ export const CrawlerOverviewLogic = kea<
 
       try {
         const response = await http.get(`/api/app_search/engines/${engineName}/crawler`);
-        const crawlerData = crawlerDataServerToClient(response as CrawlerDataFromServer);
+        const crawlerData = crawlerDataServerToClient(response);
         actions.onReceiveCrawlerData(crawlerData);
       } catch (e) {
         flashAPIErrors(e);
