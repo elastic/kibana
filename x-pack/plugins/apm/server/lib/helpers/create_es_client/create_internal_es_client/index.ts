@@ -6,11 +6,7 @@
  */
 
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
-import {
-  CreateIndexRequest,
-  DeleteRequest,
-  IndexRequest,
-} from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { unwrapEsResponse } from '../../../../../../observability/server';
 import { APMRouteHandlerResources } from '../../../../routes/typings';
 import {
@@ -24,7 +20,7 @@ import {
 } from '../call_async_with_debug';
 import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
 
-export type APMIndexDocumentParams<T> = IndexRequest<T>;
+export type APMIndexDocumentParams<T> = estypes.IndexRequest<T>;
 
 export type APMInternalClient = ReturnType<typeof createInternalESClient>;
 
@@ -35,20 +31,23 @@ export function createInternalESClient({
 }: Pick<APMRouteHandlerResources, 'context' | 'request'> & { debug: boolean }) {
   const { asInternalUser } = context.core.elasticsearch.client;
 
-  function callEs<T extends { body: any }>({
-    cb,
-    requestType,
-    params,
-  }: {
-    requestType: string;
-    cb: () => TransportRequestPromise<T>;
-    params: Record<string, any>;
-  }) {
+  function callEs<T extends { body: any }>(
+    operationName: string,
+    {
+      cb,
+      requestType,
+      params,
+    }: {
+      requestType: string;
+      cb: () => TransportRequestPromise<T>;
+      params: Record<string, any>;
+    }
+  ) {
     return callAsyncWithDebug({
       cb: () => unwrapEsResponse(cancelEsRequestOnAbort(cb(), request)),
       getDebugMessage: () => ({
         title: getDebugTitle(request),
-        body: getDebugBody(params, requestType),
+        body: getDebugBody({ params, requestType, operationName }),
       }),
       debug,
       isCalledWithInternalUser: true,
@@ -63,30 +62,37 @@ export function createInternalESClient({
       TDocument = unknown,
       TSearchRequest extends ESSearchRequest = ESSearchRequest
     >(
+      operationName: string,
       params: TSearchRequest
     ): Promise<ESSearchResponse<TDocument, TSearchRequest>> => {
-      return callEs({
+      return callEs(operationName, {
         requestType: 'search',
         cb: () => asInternalUser.search(params),
         params,
       });
     },
-    index: <T>(params: APMIndexDocumentParams<T>) => {
-      return callEs({
+    index: <T>(operationName: string, params: APMIndexDocumentParams<T>) => {
+      return callEs(operationName, {
         requestType: 'index',
         cb: () => asInternalUser.index(params),
         params,
       });
     },
-    delete: (params: DeleteRequest): Promise<{ result: string }> => {
-      return callEs({
+    delete: (
+      operationName: string,
+      params: estypes.DeleteRequest
+    ): Promise<{ result: string }> => {
+      return callEs(operationName, {
         requestType: 'delete',
         cb: () => asInternalUser.delete(params),
         params,
       });
     },
-    indicesCreate: (params: CreateIndexRequest) => {
-      return callEs({
+    indicesCreate: (
+      operationName: string,
+      params: estypes.IndicesCreateRequest
+    ) => {
+      return callEs(operationName, {
         requestType: 'indices.create',
         cb: () => asInternalUser.indices.create(params),
         params,

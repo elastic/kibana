@@ -34,11 +34,12 @@ export function createInfiniteScrollDirective() {
         const isMobileView = document.getElementsByClassName('dscSidebar__mobile').length > 0;
         const usedScrollDiv = isMobileView ? scrollDivMobile : scrollDiv;
         const scrollTop = usedScrollDiv.scrollTop();
+        const scrollOffset = usedScrollDiv.prop('offsetTop') || 0;
 
         const winHeight = Number(usedScrollDiv.height());
         const winBottom = Number(winHeight) + Number(scrollTop);
         const elTop = $element.get(0).offsetTop || 0;
-        const remaining = elTop - winBottom;
+        const remaining = elTop - scrollOffset - winBottom;
 
         if (remaining <= winHeight) {
           $scope[$scope.$$phase ? '$eval' : '$apply'](function () {

@@ -20,8 +20,8 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     this.tags(['skipFirefox']);
 
     before(async () => {
-      await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.load('../functional/fixtures/es_archiver/visualize_embedding');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.load('test/functional/fixtures/es_archiver/visualize_embedding');
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'Australia/North',
         defaultIndex: 'logstash-*',
@@ -36,5 +36,6 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     loadTestFile(require.resolve('./tag_cloud'));
     loadTestFile(require.resolve('./metric'));
     loadTestFile(require.resolve('./esaggs'));
+    loadTestFile(require.resolve('./esaggs_timeshift'));
   });
 }

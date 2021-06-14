@@ -29,35 +29,33 @@ export function DimensionContainer({
   groupLabel,
   handleClose,
   panel,
+  isFullscreen,
   panelRef,
 }: {
   isOpen: boolean;
-  handleClose: () => void;
-  panel: React.ReactElement;
+  handleClose: () => boolean;
+  panel: React.ReactElement | null;
   groupLabel: string;
+  isFullscreen: boolean;
   panelRef: (el: HTMLDivElement) => void;
 }) {
   const [focusTrapIsEnabled, setFocusTrapIsEnabled] = useState(false);
 
   const closeFlyout = useCallback(() => {
-    handleClose();
-    setFocusTrapIsEnabled(false);
-  }, [handleClose]);
-
-  useEffect(() => {
-    if (isOpen) {
-      // without setTimeout here the flyout pushes content when animating
-      setTimeout(() => {
-        setFocusTrapIsEnabled(true);
-      }, 255);
+    const canClose = handleClose();
+    if (canClose) {
+      setFocusTrapIsEnabled(false);
     }
-  }, [isOpen]);
+    return canClose;
+  }, [handleClose]);
 
   const closeOnEscape = useCallback(
     (event: KeyboardEvent) => {
       if (event.key === keys.ESCAPE) {
-        event.preventDefault();
-        closeFlyout();
+        const canClose = closeFlyout();
+        if (canClose) {
+          event.preventDefault();
+        }
       }
     },
     [closeFlyout]
@@ -78,11 +76,26 @@ export function DimensionContainer({
     <div ref={panelRef}>
       <EuiFocusTrap disabled={!focusTrapIsEnabled} clickOutsideDisables={true}>
         <EuiWindowEvent event="keydown" handler={closeOnEscape} />
-        <EuiOutsideClickDetector onOutsideClick={closeFlyout} isDisabled={!isOpen}>
+        <EuiOutsideClickDetector
+          onOutsideClick={() => {
+            if (isFullscreen) {
+              return;
+            }
+            closeFlyout();
+          }}
+          isDisabled={!isOpen}
+        >
           <div
             role="dialog"
             aria-labelledby="lnsDimensionContainerTitle"
             className="lnsDimensionContainer euiFlyout"
+            onAnimationEnd={() => {
+              if (isOpen) {
+                // EuiFocusTrap interferes with animating elements with absolute position:
+                // running this onAnimationEnd, otherwise the flyout pushes content when animating
+                setFocusTrapIsEnabled(true);
+              }
+            }}
           >
             <EuiFlyoutHeader hasBorder className="lnsDimensionContainer__header">
               <EuiFlexGroup

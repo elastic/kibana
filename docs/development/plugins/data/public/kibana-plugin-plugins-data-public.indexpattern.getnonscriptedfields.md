@@ -4,6 +4,11 @@
 
 ## IndexPattern.getNonScriptedFields() method
 
+> Warning: This API is now obsolete.
+> 
+> use runtime field instead
+> 
+
 <b>Signature:</b>
 
 ```typescript

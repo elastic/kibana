@@ -348,6 +348,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                     <span
                                       aria-hidden="true"
                                       class="euiButtonIcon__icon"
+                                      color="inherit"
                                       data-euiicon-type="cross"
                                     />
                                   </button>
@@ -463,12 +464,14 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                       <EuiIcon
                                         aria-hidden="true"
                                         className="euiButtonIcon__icon"
+                                        color="inherit"
                                         size="m"
                                         type="cross"
                                       >
                                         <span
                                           aria-hidden="true"
                                           className="euiButtonIcon__icon"
+                                          color="inherit"
                                           data-euiicon-type="cross"
                                           size="m"
                                         />
@@ -561,6 +564,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                           <EuiButtonContent
                                             className="euiButtonEmpty__content"
                                             iconSide="left"
+                                            iconSize="m"
                                             textProps={
                                               Object {
                                                 "className": "euiButtonEmpty__text",
@@ -836,6 +840,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                   <EuiButtonContent
                                     className="euiButtonEmpty__content"
                                     iconSide="left"
+                                    iconSize="m"
                                     textProps={
                                       Object {
                                         "className": "euiButtonEmpty__text",
@@ -1565,6 +1570,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                                   <EuiButtonContent
                                     className="euiButtonEmpty__content"
                                     iconSide="left"
+                                    iconSize="m"
                                     textProps={
                                       Object {
                                         "className": "euiButtonEmpty__text",
@@ -2294,6 +2300,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                                   <EuiButtonContent
                                     className="euiButtonEmpty__content"
                                     iconSide="left"
+                                    iconSize="m"
                                     textProps={
                                       Object {
                                         "className": "euiButtonEmpty__text",
@@ -3023,6 +3030,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                                   <EuiButtonContent
                                     className="euiButtonEmpty__content"
                                     iconSide="left"
+                                    iconSize="m"
                                     textProps={
                                       Object {
                                         "className": "euiButtonEmpty__text",
@@ -3752,6 +3760,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                                   <EuiButtonContent
                                     className="euiButtonEmpty__content"
                                     iconSide="left"
+                                    iconSize="m"
                                     textProps={
                                       Object {
                                         "className": "euiButtonEmpty__text",

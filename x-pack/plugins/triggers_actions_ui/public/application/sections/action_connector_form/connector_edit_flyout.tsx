@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useReducer, useState } from 'react';
+import React, { useCallback, useReducer, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
@@ -23,6 +23,7 @@ import {
   EuiLink,
   EuiTabs,
   EuiTab,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Option, none, some } from 'fp-ts/lib/Option';
@@ -31,6 +32,7 @@ import { TestConnectorForm } from './test_connector_form';
 import {
   ActionConnector,
   ConnectorEditFlyoutProps,
+  IErrorObject,
   EditConectorTabs,
   UserConfiguredActionConnector,
 } from '../../../types';
@@ -44,6 +46,7 @@ import {
 import './connector_edit_flyout.scss';
 import { useKibana } from '../../../common/lib/kibana';
 import { getConnectorWithInvalidatedFields } from '../../lib/value_validators';
+import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 
 const ConnectorEditFlyout = ({
   initialConnector,
@@ -53,12 +56,14 @@ const ConnectorEditFlyout = ({
   consumer,
   actionTypeRegistry,
 }: ConnectorEditFlyoutProps) => {
+  const [hasErrors, setHasErrors] = useState<boolean>(true);
   const {
     http,
     notifications: { toasts },
     docLinks,
     application: { capabilities },
   } = useKibana().services;
+
   const getConnectorWithoutSecrets = () => ({
     ...(initialConnector as UserConfiguredActionConnector<
       Record<string, unknown>,
@@ -75,6 +80,35 @@ const ConnectorEditFlyout = ({
   const [{ connector }, dispatch] = useReducer(reducer, {
     connector: getConnectorWithoutSecrets(),
   });
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [errors, setErrors] = useState<{
+    configErrors: IErrorObject;
+    connectorBaseErrors: IErrorObject;
+    connectorErrors: IErrorObject;
+    secretsErrors: IErrorObject;
+  }>({
+    configErrors: {},
+    connectorBaseErrors: {},
+    connectorErrors: {},
+    secretsErrors: {},
+  });
+
+  const actionTypeModel = actionTypeRegistry.get(connector.actionTypeId);
+
+  useEffect(() => {
+    (async () => {
+      setIsLoading(true);
+      const res = await getConnectorErrors(connector, actionTypeModel);
+      setHasErrors(
+        !!Object.keys(res.connectorErrors).find(
+          (errorKey) => (res.connectorErrors as IErrorObject)[errorKey].length >= 1
+        )
+      );
+      setIsLoading(false);
+      setErrors({ ...res });
+    })();
+  }, [connector, actionTypeModel]);
+
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [selectedTab, setTab] = useState<EditConectorTabs>(tab);
 
@@ -112,25 +146,6 @@ const ConnectorEditFlyout = ({
     onClose();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onClose]);
-
-  const actionTypeModel = actionTypeRegistry.get(connector.actionTypeId);
-  const {
-    configErrors,
-    connectorBaseErrors,
-    connectorErrors,
-    secretsErrors,
-  } = !connector.isPreconfigured
-    ? getConnectorErrors(connector, actionTypeModel)
-    : {
-        configErrors: {},
-        connectorBaseErrors: {},
-        connectorErrors: {},
-        secretsErrors: {},
-      };
-
-  const hasErrors = !!Object.keys(connectorErrors).find(
-    (errorKey) => connectorErrors[errorKey].length >= 1
-  );
 
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await updateActionConnector({ http, connector, id: connector.id })
@@ -227,9 +242,9 @@ const ConnectorEditFlyout = ({
       setConnector(
         getConnectorWithInvalidatedFields(
           connector,
-          configErrors,
-          secretsErrors,
-          connectorBaseErrors
+          errors.configErrors,
+          errors.secretsErrors,
+          errors.connectorBaseErrors
         )
       );
       return;
@@ -286,19 +301,29 @@ const ConnectorEditFlyout = ({
       <EuiFlyoutBody>
         {selectedTab === EditConectorTabs.Configuration ? (
           !connector.isPreconfigured ? (
-            <ActionConnectorForm
-              connector={connector}
-              errors={connectorErrors}
-              dispatch={(changes) => {
-                setHasChanges(true);
-                // if the user changes the connector, "forget" the last execution
-                // so the user comes back to a clean form ready to run a fresh test
-                setTestExecutionResult(none);
-                dispatch(changes);
-              }}
-              actionTypeRegistry={actionTypeRegistry}
-              consumer={consumer}
-            />
+            <>
+              <ActionConnectorForm
+                connector={connector}
+                errors={errors.connectorErrors}
+                dispatch={(changes) => {
+                  setHasChanges(true);
+                  // if the user changes the connector, "forget" the last execution
+                  // so the user comes back to a clean form ready to run a fresh test
+                  setTestExecutionResult(none);
+                  dispatch(changes);
+                }}
+                actionTypeRegistry={actionTypeRegistry}
+                consumer={consumer}
+              />
+              {isLoading ? (
+                <>
+                  <EuiSpacer size="m" />
+                  <CenterJustifiedSpinner size="l" />{' '}
+                </>
+              ) : (
+                <></>
+              )}
+            </>
           ) : (
             <>
               <EuiText>
