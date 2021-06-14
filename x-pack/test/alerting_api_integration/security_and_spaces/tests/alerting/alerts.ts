@@ -214,8 +214,10 @@ instanceStateValue: true
               await validateEventLog({
                 spaceId: space.id,
                 alertId,
+                ruleTypeId: 'test.always-firing',
                 outcome: 'success',
                 message: `alert executed: test.always-firing:${alertId}: 'abc'`,
+                ruleObject: alertSearchResultWithoutDates,
               });
               break;
             default:
@@ -1244,13 +1246,15 @@ instanceStateValue: true
   interface ValidateEventLogParams {
     spaceId: string;
     alertId: string;
+    ruleTypeId: string;
     outcome: string;
     message: string;
     errorMessage?: string;
+    ruleObject: any;
   }
 
   async function validateEventLog(params: ValidateEventLogParams): Promise<void> {
-    const { spaceId, alertId, outcome, message, errorMessage } = params;
+    const { spaceId, alertId, outcome, message, errorMessage, ruleObject } = params;
 
     const events: IValidatedEvent[] = await retry.try(async () => {
       return await getEventLog({
@@ -1291,8 +1295,18 @@ instanceStateValue: true
         type: 'alert',
         id: alertId,
         namespace: spaceId,
+        type_id: ruleObject.alertInfo.ruleTypeId,
       },
     ]);
+
+    expect(event?.rule).to.eql({
+      id: alertId,
+      license: 'basic',
+      category: ruleObject.alertInfo.ruleTypeId,
+      ruleset: ruleObject.alertInfo.producer,
+      namespace: spaceId,
+      name: ruleObject.alertInfo.name,
+    });
 
     expect(event?.message).to.eql(message);
 

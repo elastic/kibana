@@ -8,7 +8,6 @@
 import { httpServerMock, httpServiceMock } from 'src/core/server/mocks';
 import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
 
-import { License } from '../../../services/license';
 import { IndexDataEnricher } from '../../../services/index_data_enricher';
 
 import { registerPrivilegesRoute } from './privileges';
@@ -47,9 +46,6 @@ describe('GET privileges', () => {
 
     registerPrivilegesRoute({
       router,
-      license: {
-        guardApiRoute: (route: any) => route,
-      } as License,
       config: {
         isSecurityEnabled: () => true,
       },
@@ -118,9 +114,6 @@ describe('GET privileges', () => {
 
       registerPrivilegesRoute({
         router,
-        license: {
-          guardApiRoute: (route: any) => route,
-        } as License,
         config: {
           isSecurityEnabled: () => false,
         },

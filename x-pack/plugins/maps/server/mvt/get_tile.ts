@@ -296,7 +296,7 @@ export async function getTile({
 
       // Todo: pass in epochMillies-fields
       const featureCollection = hitsToGeoJson(
-        // @ts-expect-error hitsToGeoJson should be refactored to accept estypes.Hit
+        // @ts-expect-error hitsToGeoJson should be refactored to accept estypes.SearchHit
         documentsResponse.rawResponse.hits.hits,
         (hit: Record<string, unknown>) => {
           return flattenHit(geometryFieldName, hit);

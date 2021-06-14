@@ -7,26 +7,27 @@
 
 import { isEmpty } from 'lodash/fp';
 import React, { useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
 import * as i18n from '../case_view/translations';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { PropertyActions } from '../property_actions';
-import { Case } from '../../containers/types';
+import { Case } from '../../../common';
 import { CaseService } from '../../containers/use_get_case_user_actions';
+import { CasesNavigation } from '../links';
 
 interface CaseViewActions {
+  allCasesNavigation: CasesNavigation;
   caseData: Case;
   currentExternalIncident: CaseService | null;
   disabled?: boolean;
 }
 
 const ActionsComponent: React.FC<CaseViewActions> = ({
+  allCasesNavigation,
   caseData,
   currentExternalIncident,
   disabled = false,
 }) => {
-  const history = useHistory();
   // Delete case
   const {
     handleToggleModal,
@@ -57,7 +58,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({
   );
 
   if (isDeleted) {
-    history.push('/');
+    allCasesNavigation.onClick(null);
     return null;
   }
   return (

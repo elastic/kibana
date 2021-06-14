@@ -35,7 +35,7 @@ export async function deleteKibanaIndices({
   await client.indices.putSettings(
     {
       index: indexNames,
-      body: { index: { blocks: { read_only: false } } },
+      body: { settings: { blocks: { read_only: false } } },
     },
     {
       headers: ES_CLIENT_HEADERS,
