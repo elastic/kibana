@@ -7,7 +7,7 @@
 
 import './table_basic.scss';
 
-import React, { useCallback, useMemo, useRef, useState, useContext, useEffect } from 'react';
+import React, { useCallback, useMemo, useRef, useState, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 import {
