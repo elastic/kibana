@@ -8,6 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useTestIdGenerator } from '../../../../management/components/hooks/use_test_id_generator';
 
 export interface EndpointHostIsolationStatusProps {
   isIsolated: boolean;
@@ -15,6 +16,7 @@ export interface EndpointHostIsolationStatusProps {
   pendingIsolate?: number;
   /** the count of pending unisoalte actions */
   pendingUnIsolate?: number;
+  'data-test-subj'?: string;
 }
 
 /**
@@ -23,7 +25,9 @@ export interface EndpointHostIsolationStatusProps {
  * (`null` is returned)
  */
 export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps>(
-  ({ isIsolated, pendingIsolate = 0, pendingUnIsolate = 0 }) => {
+  ({ isIsolated, pendingIsolate = 0, pendingUnIsolate = 0, 'data-test-subj': dataTestSubj }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
+
     return useMemo(() => {
       // If nothing is pending and host is not currently isolated, then render nothing
       if (!isIsolated && !pendingIsolate && !pendingUnIsolate) {
@@ -33,7 +37,7 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
       // If nothing is pending, but host is isolated, then show isolation badge
       if (!pendingIsolate && !pendingUnIsolate) {
         return (
-          <EuiBadge color="hollow">
+          <EuiBadge color="hollow" data-test-subj={dataTestSubj}>
             <FormattedMessage
               id="xpack.securitySolution.endpoint.hostIsolationStatus.isolated"
               defaultMessage="Isolated"
@@ -45,10 +49,12 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
       // If there are multiple types of pending isolation actions, then show count of actions with tooltip that displays breakdown
       if (pendingIsolate && pendingUnIsolate) {
         return (
-          <EuiBadge color="hollow">
+          <EuiBadge color="hollow" data-test-subj={dataTestSubj}>
             <EuiToolTip
+              display="block"
+              anchorClassName="eui-textTruncate"
               content={
-                <>
+                <div data-test-subj={getTestId('tooltipContent')}>
                   <div>
                     <FormattedMessage
                       id="xpack.securitySolution.endpoint.hostIsolationStatus.tooltipPendingActions"
@@ -73,14 +79,16 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>{pendingUnIsolate}</EuiFlexItem>
                   </EuiFlexGroup>
-                </>
+                </div>
               }
             >
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.hostIsolationStatus.multiplePendingActions"
-                defaultMessage="{count} actions pending"
-                values={{ count: pendingIsolate + pendingUnIsolate }}
-              />
+              <EuiTextColor color="subdued">
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.hostIsolationStatus.multiplePendingActions"
+                  defaultMessage="{count} actions pending"
+                  values={{ count: pendingIsolate + pendingUnIsolate }}
+                />
+              </EuiTextColor>
             </EuiToolTip>
           </EuiBadge>
         );
@@ -88,7 +96,7 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
 
       // Show 'pending [un]isolate' depending on what's pending
       return (
-        <EuiBadge color="hollow">
+        <EuiBadge color="hollow" data-test-subj={dataTestSubj}>
           <EuiTextColor color="subdued">
             {pendingIsolate ? (
               <FormattedMessage
@@ -104,7 +112,7 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
           </EuiTextColor>
         </EuiBadge>
       );
-    }, [isIsolated, pendingIsolate, pendingUnIsolate]);
+    }, [dataTestSubj, getTestId, isIsolated, pendingIsolate, pendingUnIsolate]);
   }
 );
 
