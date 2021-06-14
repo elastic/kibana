@@ -43,7 +43,6 @@ import type {
 } from '../../triggers_actions_ui/public';
 import { registerApmAlerts } from './components/alerting/register_apm_alerts';
 import { featureCatalogueEntry } from './featureCatalogueEntry';
-import { createCallApmApi } from './services/rest/createCallApmApi';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 
@@ -146,6 +145,11 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       const { hasFleetApmIntegrations } = await import(
         './services/rest/tutorial_apm_fleet_check'
       );
+
+      const { createCallApmApi } = await import(
+        './services/rest/createCallApmApi'
+      );
+
       // have to do this here as well in case app isn't mounted yet
       createCallApmApi(core);
 
@@ -186,6 +190,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     const getUxDataHelper = async () => {
       const { fetchUxOverviewDate, hasRumData } = await import(
         './components/app/RumDashboard/ux_overview_fetchers'
+      );
+      const { createCallApmApi } = await import(
+        './services/rest/createCallApmApi'
       );
       // have to do this here as well in case app isn't mounted yet
       createCallApmApi(core);
