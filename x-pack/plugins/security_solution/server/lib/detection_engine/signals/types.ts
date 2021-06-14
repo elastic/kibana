@@ -26,12 +26,12 @@ import {
   RuleAlertAction,
   SearchTypes,
 } from '../../../../common/detection_engine/types';
-import { RefreshTypes } from '../types';
 import { ListClient } from '../../../../../lists/server';
 import { Logger, SavedObject } from '../../../../../../../src/core/server';
 import { BuildRuleMessage } from './rule_messages';
 import { TelemetryEventsSender } from '../../telemetry/sender';
 import { RuleParams } from '../schemas/rule_schemas';
+import { GenericBulkCreateResponse } from './bulk_create_factory';
 
 // used for gap detection code
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -257,6 +257,12 @@ export interface QueryFilter {
 
 export type SignalsEnrichment = (signals: SignalSearchResponse) => Promise<SignalSearchResponse>;
 
+export type BulkCreate = <T>(docs: Array<BaseHit<T>>) => Promise<GenericBulkCreateResponse<T>>;
+
+export type WrapHits = (
+  hits: Array<estypes.SearchHit<unknown>>
+) => Array<BaseHit<{ '@timestamp': string }>>;
+
 export interface SearchAfterAndBulkCreateParams {
   tuples: Array<{
     to: moment.Moment;
@@ -274,9 +280,10 @@ export interface SearchAfterAndBulkCreateParams {
   signalsIndex: string;
   pageSize: number;
   filter: unknown;
-  refresh: RefreshTypes;
   buildRuleMessage: BuildRuleMessage;
   enrichment?: SignalsEnrichment;
+  bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
 }
 
 export interface SearchAfterAndBulkCreateReturnType {
@@ -286,8 +293,9 @@ export interface SearchAfterAndBulkCreateReturnType {
   bulkCreateTimes: string[];
   lastLookBackDate: Date | null | undefined;
   createdSignalsCount: number;
-  createdSignals: SignalHit[];
+  createdSignals: unknown[];
   errors: string[];
+  warningMessages: string[];
   totalToFromTuples?: Array<{
     to: Moment | undefined;
     from: Moment | undefined;
