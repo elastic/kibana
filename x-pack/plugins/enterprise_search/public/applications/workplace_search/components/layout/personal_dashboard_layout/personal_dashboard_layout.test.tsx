@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import '../../../__mocks__/shallow_useeffect.mock';
+import '../../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockValues } from '../../../__mocks__/kea_logic';
+import { setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -15,17 +15,18 @@ import { shallow } from 'enzyme';
 
 import { EuiCallOut } from '@elastic/eui';
 
-import { AccountHeader } from '../../components/layout';
-import { ViewContentHeader } from '../../components/shared/view_content_header';
+import { AccountHeader } from '..';
 
-import { SourceSubNav } from './components/source_sub_nav';
+import { SourceSubNav } from '../../../views/content_sources/components/source_sub_nav';
 
 import {
   PRIVATE_CAN_CREATE_PAGE_TITLE,
   PRIVATE_VIEW_ONLY_PAGE_TITLE,
   PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION,
   PRIVATE_CAN_CREATE_PAGE_DESCRIPTION,
-} from './constants';
+} from '../../../views/content_sources/constants';
+import { ViewContentHeader } from '../../shared/view_content_header';
+
 import { PersonalDashboardLayout } from './personal_dashboard_layout';
 
 describe('PersonalDashboardLayout', () => {

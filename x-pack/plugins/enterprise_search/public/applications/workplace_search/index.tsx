@@ -19,6 +19,7 @@ import { NotFound } from '../shared/not_found';
 
 import { AppLogic } from './app_logic';
 import { WorkplaceSearchNav, WorkplaceSearchHeaderActions } from './components/layout';
+import { PersonalDashboardLayout } from './components/layout';
 import {
   GROUPS_PATH,
   SETUP_GUIDE_PATH,
@@ -34,7 +35,6 @@ import { AccountSettings } from './views/account_settings';
 import { SourcesRouter } from './views/content_sources';
 import { SourceAdded } from './views/content_sources/components/source_added';
 import { SourceSubNav } from './views/content_sources/components/source_sub_nav';
-import { PersonalDashboardLayout } from './views/content_sources/personal_dashboard_layout';
 import { ErrorState } from './views/error_state';
 import { GroupsRouter } from './views/groups';
 import { GroupSubNav } from './views/groups/components/group_sub_nav';

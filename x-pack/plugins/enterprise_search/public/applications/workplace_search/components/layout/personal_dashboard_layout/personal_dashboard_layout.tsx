@@ -11,11 +11,10 @@ import { useValues } from 'kea';
 
 import { EuiPage, EuiPageSideBar, EuiPageBody, EuiCallOut } from '@elastic/eui';
 
-import { AppLogic } from '../../app_logic';
-import { AccountHeader } from '../../components/layout';
-import { ViewContentHeader } from '../../components/shared/view_content_header';
+import { AccountHeader } from '..';
+import { AppLogic } from '../../../app_logic';
 
-import { SourceSubNav } from './components/source_sub_nav';
+import { SourceSubNav } from '../../../views/content_sources/components/source_sub_nav';
 
 import {
   PRIVATE_DASHBOARD_READ_ONLY_MODE_WARNING,
@@ -23,7 +22,8 @@ import {
   PRIVATE_VIEW_ONLY_PAGE_TITLE,
   PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION,
   PRIVATE_CAN_CREATE_PAGE_DESCRIPTION,
-} from './constants';
+} from '../../../views/content_sources/constants';
+import { ViewContentHeader } from '../../shared/view_content_header';
 
 import './sources.scss';
 
