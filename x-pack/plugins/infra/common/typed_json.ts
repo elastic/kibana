@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { JsonArray, JsonObject, JsonValue } from '../../../../src/plugins/kibana_utils/common';
+import { JsonArray, JsonObject, JsonValue } from '@kbn/utils';
 
 export { JsonArray, JsonObject, JsonValue };
 

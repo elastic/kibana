@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { JsonObject } from '../../../../../src/plugins/kibana_utils/common';
+import { JsonObject } from '@kbn/utils';
 import { SanitizedAlert } from '../../common';
 
 /**

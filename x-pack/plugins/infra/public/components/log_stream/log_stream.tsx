@@ -7,6 +7,7 @@
 
 import React, { useMemo, useCallback, useEffect } from 'react';
 import { noop } from 'lodash';
+import { JsonValue } from '@kbn/utils';
 import { DataPublicPluginStart, esQuery, Filter } from '../../../../../../src/plugins/data/public';
 import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 import { LogEntryCursor } from '../../../common/log_entry';
@@ -17,7 +18,6 @@ import { BuiltEsQuery, useLogStream } from '../../containers/logs/log_stream';
 
 import { ScrollableLogTextStreamView } from '../logging/log_text_stream';
 import { LogColumnRenderConfiguration } from '../../utils/log_column_render_configuration';
-import { JsonValue } from '../../../../../../src/plugins/kibana_utils/common';
 import { Query } from '../../../../../../src/plugins/data/common';
 import { LogStreamErrorBoundary } from './log_stream_error_boundary';
 

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { JsonValue } from '../../../../../../src/plugins/kibana_utils/common';
+import { JsonValue } from '@kbn/utils';
 
 type RenameAlertToRule<K extends string> = K extends `alertTypeId`
   ? `ruleTypeId`

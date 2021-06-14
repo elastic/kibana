@@ -6,7 +6,7 @@
  */
 
 import { ReactNode } from 'react';
-import { JsonValue } from '../../../../../src/plugins/kibana_utils/common';
+import { JsonValue } from '@kbn/utils';
 
 /**
  * Interface for common configuration properties, regardless of the column type.

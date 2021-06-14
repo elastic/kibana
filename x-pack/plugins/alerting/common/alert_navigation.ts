@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { JsonObject } from '../../../../src/plugins/kibana_utils/common';
-
+import { JsonObject } from '@kbn/utils';
 export interface AlertUrlNavigation {
   path: string;
 }

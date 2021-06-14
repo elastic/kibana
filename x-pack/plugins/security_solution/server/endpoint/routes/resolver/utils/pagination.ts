@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { JsonObject } from '@kbn/utils';
 import { SafeResolverEvent } from '../../../../../common/endpoint/types';
 import {
   eventIDSafeVersion,
   timestampSafeVersion,
 } from '../../../../../common/endpoint/models/event';
-import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 
 type SearchAfterFields = [number, string];
 

@@ -7,8 +7,8 @@
 
 import type { ApiResponse, estypes } from '@elastic/elasticsearch';
 import { IScopedClusterClient } from 'src/core/server';
+import { JsonObject, JsonValue } from '@kbn/utils';
 import { FieldsObject, ResolverSchema } from '../../../../../../common/endpoint/types';
-import { JsonObject, JsonValue } from '../../../../../../../../../src/plugins/kibana_utils/common';
 import { NodeID, TimeRange, docValueFields, validIDs } from '../utils/index';
 
 interface DescendantsParams {

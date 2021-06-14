@@ -7,8 +7,8 @@
 
 import stringify from 'json-stable-stringify';
 import React from 'react';
+import { JsonArray, JsonValue } from '@kbn/utils';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { JsonArray, JsonValue } from '../../../../../../../src/plugins/kibana_utils/common';
 import { ActiveHighlightMarker, highlightFieldValue, HighlightMarker } from './highlighting';
 
 export const FieldValue: React.FC<{
