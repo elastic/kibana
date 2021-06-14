@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { isBoom } from '@hapi/boom';
 import type { SavedObjectsClient, ElasticsearchClient } from 'kibana/server';
 
 import { packagePolicyService, settingsService } from '../services';
@@ -38,11 +40,18 @@ export const getFleetServerUsage = async (
     return DEFAULT_USAGE;
   }
 
-  const numHostsUrls =
-    (await settingsService.getSettings(soClient)).fleet_server_hosts?.length ?? 0;
+  const numHostsUrls = await settingsService
+    .getSettings(soClient)
+    .then((settings) => settings.fleet_server_hosts?.length ?? 0)
+    .catch((err) => {
+      if (isBoom(error) && error.output.statusCode === 404) {
+        return 0;
+      }
+
+      throw err;
+    });
 
   // Find all policies with Fleet server than query agent status
-
   let hasMore = true;
   const policyIds = new Set<string>();
   let page = 1;
