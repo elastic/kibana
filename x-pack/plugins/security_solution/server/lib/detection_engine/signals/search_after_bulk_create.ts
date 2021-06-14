@@ -18,13 +18,10 @@ import {
   mergeReturns,
   mergeSearchResults,
   getSafeSortIds,
-  getLock,
-  releaseLock,
 } from './utils';
 import { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
 
 // search_after through documents and re-index using bulk endpoint.
-// eslint-disable-next-line complexity
 export const searchAfterAndBulkCreate = async ({
   tuple,
   ruleSO,
@@ -40,7 +37,6 @@ export const searchAfterAndBulkCreate = async ({
   enrichment = identity,
   bulkCreate,
   wrapHits,
-  state,
 }: SearchAfterAndBulkCreateParams): Promise<SearchAfterAndBulkCreateReturnType> => {
   const ruleParams = ruleSO.attributes.params;
   let toReturn = createSearchAfterReturnType();
@@ -52,22 +48,16 @@ export const searchAfterAndBulkCreate = async ({
   // signalsCreatedCount keeps track of how many signals we have created,
   // to ensure we don't exceed maxSignals
   let signalsCreatedCount = 0;
-  const signalsAlreadyCreated = () => state?.signalsCreated || 0;
-  const totalSignalsCreated = (_signalsCreatedCount: number): number => {
-    return _signalsCreatedCount + signalsAlreadyCreated();
-  };
 
   if (tuple == null || tuple.to == null || tuple.from == null) {
     logger.error(buildRuleMessage(`[-] malformed date tuple`));
-    if (state != null) {
-      releaseLock(state);
-    }
     return createSearchAfterReturnType({
       success: false,
       errors: ['malformed date tuple'],
     });
   }
-  while (totalSignalsCreated(signalsCreatedCount) < tuple.maxSignals) {
+  signalsCreatedCount = 0;
+  while (signalsCreatedCount < tuple.maxSignals) {
     try {
       let mergedSearchResults = createSearchResultReturnType();
       logger.debug(buildRuleMessage(`sortIds: ${sortIds}`));
@@ -144,25 +134,11 @@ export const searchAfterAndBulkCreate = async ({
       // skip the call to bulk create and proceed to the next search_after,
       // if there is a sort id to continue the search_after with.
       if (filteredEvents.hits.hits.length !== 0) {
-        if (state != null) {
-          const error = await getLock(state);
-          if (error != null) {
-            logger.error(buildRuleMessage(error));
-            return createSearchAfterReturnType({
-              success: false,
-              errors: [error],
-            });
-          }
-        }
-
         // make sure we are not going to create more signals than maxSignals allows
-        if (
-          totalSignalsCreated(signalsCreatedCount) + filteredEvents.hits.hits.length >
-          tuple.maxSignals
-        ) {
+        if (signalsCreatedCount + filteredEvents.hits.hits.length > tuple.maxSignals) {
           filteredEvents.hits.hits = filteredEvents.hits.hits.slice(
             0,
-            tuple.maxSignals - totalSignalsCreated(signalsCreatedCount)
+            tuple.maxSignals - signalsCreatedCount
           );
         }
         const enrichedEvents = await enrichment(filteredEvents);
@@ -186,12 +162,6 @@ export const searchAfterAndBulkCreate = async ({
           }),
         ]);
         signalsCreatedCount += createdCount;
-        if (state != null) {
-          // Protected by lock
-          // eslint-disable-next-line require-atomic-updates
-          state.signalsCreated += createdCount;
-          releaseLock(state);
-        }
         logger.debug(buildRuleMessage(`created ${createdCount} signals`));
         logger.debug(buildRuleMessage(`signalsCreatedCount: ${signalsCreatedCount}`));
         logger.debug(
@@ -207,9 +177,6 @@ export const searchAfterAndBulkCreate = async ({
       }
     } catch (exc: unknown) {
       logger.error(buildRuleMessage(`[-] search_after and bulk threw an error ${exc}`));
-      if (state != null) {
-        releaseLock(state);
-      }
       return mergeReturns([
         toReturn,
         createSearchAfterReturnType({
