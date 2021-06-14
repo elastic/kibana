@@ -12,7 +12,7 @@ import { Artifact } from '../../../../fleet/server';
 import { sourceMapRt } from '../../routes/source_maps';
 import { APMPluginStartDependencies } from '../../types';
 
-interface ApmArtifactBody {
+export interface ApmArtifactBody {
   serviceName: string;
   serviceVersion: string;
   bundleFilepath: string;
