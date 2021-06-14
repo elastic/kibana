@@ -11,13 +11,12 @@ import { i18n } from '@kbn/i18n';
 import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
 import type { LegendAction, XYChartSeriesIdentifier } from '@elastic/charts';
 import type { LayerArgs } from './types';
-import type { LensMultiTable, LensFilterEvent, FormatFactory } from '../types';
+import type { LensMultiTable, LensFilterEvent } from '../types';
 
-export const getLegendActions = (
+export const getLegendAction = (
   filteredLayers: LayerArgs[],
   tables: LensMultiTable['tables'],
-  onFilter: (data: LensFilterEvent['data']) => void,
-  formatFactory: FormatFactory
+  onFilter: (data: LensFilterEvent['data']) => void
 ): LegendAction => ({ series: [xySeries], label }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const series = xySeries as XYChartSeriesIdentifier;
@@ -37,35 +36,24 @@ export const getLegendActions = (
   }
 
   const table = tables[layer.layerId];
-  const splitColumn = table.columns.find((col) => col.id === accessor);
-
-  const formatter = splitColumn ? formatFactory(splitColumn.meta.params) : null;
 
   const rowIndex = table.rows.findIndex((row) => {
-    if (formatter) {
-      // stringify the value to compare with the chart value
-      return formatter.convert(row[accessor]) === splitLabel;
-    }
-    return row[accessor] === splitLabel;
+    return row[accessor] === series.seriesKeys[0];
   });
 
   if (rowIndex < 0) return null;
 
-  const points = [
+  const data = [
     {
       row: rowIndex,
       column: table.columns.findIndex((col) => col.id === accessor),
-      value: accessor ? table.rows[rowIndex][accessor] : splitLabel,
+      value: accessor ? table.rows[rowIndex][accessor] : series.seriesKeys[0],
+      table,
     },
   ];
 
   const context: LensFilterEvent['data'] = {
-    data: points.map((point) => ({
-      row: point.row,
-      column: point.column,
-      value: point.value,
-      table,
-    })),
+    data,
   };
 
   const panels: EuiContextMenuPanelDescriptor[] = [
@@ -74,7 +62,7 @@ export const getLegendActions = (
       title: `${splitLabel}`,
       items: [
         {
-          name: i18n.translate('visTypeXy.legend.filterForValueButtonAriaLabel', {
+          name: i18n.translate('xpack.lens.xyChart.legend.filterForValueButtonAriaLabel', {
             defaultMessage: 'Filter for value',
           }),
           'data-test-subj': `legend-${splitLabel}-filterIn`,
@@ -85,7 +73,7 @@ export const getLegendActions = (
           },
         },
         {
-          name: i18n.translate('visTypeXy.legend.filterOutValueButtonAriaLabel', {
+          name: i18n.translate('xpack.lens.xyChart.legend.filterOutValueButtonAriaLabel', {
             defaultMessage: 'Filter out value',
           }),
           'data-test-subj': `legend-${splitLabel}-filterOut`,
@@ -125,7 +113,7 @@ export const getLegendActions = (
       closePopover={() => setPopoverOpen(false)}
       panelPaddingSize="none"
       anchorPosition="upLeft"
-      title={i18n.translate('visTypeXy.legend.filterOptionsLegend', {
+      title={i18n.translate('xpack.lens.xyChart.legend.filterOptionsLegend', {
         defaultMessage: '{legendDataLabel}, filter options',
         values: { legendDataLabel: splitLabel },
       })}

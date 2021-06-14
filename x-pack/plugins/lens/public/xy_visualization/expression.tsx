@@ -58,7 +58,7 @@ import { fittingFunctionDefinitions, getFitOptions } from './fitting_functions';
 import { getAxesConfiguration, GroupsConfiguration, validateExtent } from './axes_configuration';
 import { getColorAssignments } from './color_assignment';
 import { getXDomain, XyEndzones } from './x_domain';
-import { getLegendActions } from './legend_actions';
+import { getLegendAction } from './get_legend_action';
 
 declare global {
   interface Window {
@@ -380,10 +380,11 @@ export function XYChart({
   const darkMode = chartsThemeService.useDarkMode();
   const filteredLayers = getFilteredLayers(layers, data);
 
-  const legendActions = useMemo(
-    () => getLegendActions(filteredLayers, data.tables, onClickValue, formatFactory),
-    [data.tables, filteredLayers, formatFactory, onClickValue]
-  );
+  const legendAction = useMemo(() => getLegendAction(filteredLayers, data.tables, onClickValue), [
+    data.tables,
+    filteredLayers,
+    onClickValue,
+  ]);
 
   if (filteredLayers.length === 0) {
     const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
@@ -635,7 +636,7 @@ export function XYChart({
         xDomain={xDomain}
         onBrushEnd={renderMode !== 'noInteractivity' ? brushHandler : undefined}
         onElementClick={renderMode !== 'noInteractivity' ? clickHandler : undefined}
-        legendAction={legendActions}
+        legendAction={legendAction}
         showLegendExtra={isHistogramViz && valuesInLegend}
       />
 
