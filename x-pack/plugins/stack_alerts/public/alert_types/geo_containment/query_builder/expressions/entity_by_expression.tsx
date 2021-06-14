@@ -23,7 +23,7 @@ interface Props {
 }
 
 const ENTITY_TYPES = ['string', 'number', 'ip'];
-function getValidIndexPatternFields(fields: IFieldType[]): IFieldType[] {
+export function getValidIndexPatternFields(fields: IFieldType[]): IFieldType[] {
   return fields.filter((field) => {
     const isSpecifiedSupportedField = ENTITY_TYPES.includes(field.type);
     const hasLeadingUnderscore = field.name.startsWith('_');
