@@ -12,7 +12,6 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiOverlayMask,
   EuiTitle,
 } from '@elastic/eui';
 import React, { Fragment, useState } from 'react';
@@ -47,37 +46,39 @@ export const PrivilegeSummary = (props: Props) => {
         />
       </EuiButtonEmpty>
       {isOpen && (
-        <EuiOverlayMask headerZindexLocation="below">
-          <EuiFlyout onClose={() => setIsOpen(false)} size={flyoutSize}>
-            <EuiFlyoutHeader>
-              <EuiTitle size="m">
-                <h2>
-                  <FormattedMessage
-                    id="xpack.security.management.editRole.privilegeSummary.modalHeaderTitle"
-                    defaultMessage="Privilege summary"
-                  />
-                </h2>
-              </EuiTitle>
-            </EuiFlyoutHeader>
-            <EuiFlyoutBody>
-              <PrivilegeSummaryTable
-                role={props.role}
-                spaces={props.spaces}
-                kibanaPrivileges={props.kibanaPrivileges}
-                canCustomizeSubFeaturePrivileges={props.canCustomizeSubFeaturePrivileges}
-                spacesApiUi={props.spacesApiUi}
-              />
-            </EuiFlyoutBody>
-            <EuiFlyoutFooter>
-              <EuiButton onClick={() => setIsOpen(false)}>
+        <EuiFlyout
+          onClose={() => setIsOpen(false)}
+          size={flyoutSize}
+          maskProps={{ headerZindexLocation: 'below' }}
+        >
+          <EuiFlyoutHeader>
+            <EuiTitle size="m">
+              <h2>
                 <FormattedMessage
-                  id="xpack.security.management.editRole.privilegeSummary.closeSummaryButtonText"
-                  defaultMessage="Close"
+                  id="xpack.security.management.editRole.privilegeSummary.modalHeaderTitle"
+                  defaultMessage="Privilege summary"
                 />
-              </EuiButton>
-            </EuiFlyoutFooter>
-          </EuiFlyout>
-        </EuiOverlayMask>
+              </h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <PrivilegeSummaryTable
+              role={props.role}
+              spaces={props.spaces}
+              kibanaPrivileges={props.kibanaPrivileges}
+              canCustomizeSubFeaturePrivileges={props.canCustomizeSubFeaturePrivileges}
+              spacesApiUi={props.spacesApiUi}
+            />
+          </EuiFlyoutBody>
+          <EuiFlyoutFooter>
+            <EuiButton onClick={() => setIsOpen(false)}>
+              <FormattedMessage
+                id="xpack.security.management.editRole.privilegeSummary.closeSummaryButtonText"
+                defaultMessage="Close"
+              />
+            </EuiButton>
+          </EuiFlyoutFooter>
+        </EuiFlyout>
       )}
     </Fragment>
   );
