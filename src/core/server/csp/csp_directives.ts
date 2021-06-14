@@ -17,11 +17,13 @@ export const defaultRules: Partial<Record<CspDirectiveName, string[]>> = {
 };
 
 export class CspDirectives {
-  private readonly directives = new Map<CspDirectiveName, string[]>();
+  private readonly directives = new Map<CspDirectiveName, Set<string>>();
 
   addDirectiveValue(directiveName: CspDirectiveName, directiveValue: string) {
-    const directives = this.directives.get(directiveName) ?? [];
-    this.directives.set(directiveName, [...directives, directiveValue]);
+    if (!this.directives.has(directiveName)) {
+      this.directives.set(directiveName, new Set());
+    }
+    this.directives.get(directiveName)!.add(directiveValue);
   }
 
   getCspHeader() {

@@ -1,0 +1,134 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { CspDirectives } from './csp_directives';
+import { config as cspConfig } from './config';
+
+describe('CspDirectives', () => {
+  describe('#addDirectiveValue', () => {
+    it('properly updates the rules', () => {
+      const directives = new CspDirectives();
+      directives.addDirectiveValue('style-src', 'foo');
+
+      expect(directives.getRules()).toMatchInlineSnapshot(`
+        Array [
+          "style-src foo",
+        ]
+      `);
+
+      directives.addDirectiveValue('style-src', 'bar');
+
+      expect(directives.getRules()).toMatchInlineSnapshot(`
+        Array [
+          "style-src foo bar",
+        ]
+      `);
+    });
+
+    it('properly updates the header', () => {
+      const directives = new CspDirectives();
+      directives.addDirectiveValue('style-src', 'foo');
+
+      expect(directives.getCspHeader()).toMatchInlineSnapshot(`"style-src foo"`);
+
+      directives.addDirectiveValue('style-src', 'bar');
+
+      expect(directives.getCspHeader()).toMatchInlineSnapshot(`"style-src foo bar"`);
+    });
+
+    it('handles distinct directives', () => {
+      const directives = new CspDirectives();
+      directives.addDirectiveValue('style-src', 'foo');
+      directives.addDirectiveValue('style-src', 'bar');
+      directives.addDirectiveValue('worker-src', 'self');
+
+      expect(directives.getCspHeader()).toMatchInlineSnapshot(
+        `"style-src foo bar; worker-src self"`
+      );
+      expect(directives.getRules()).toMatchInlineSnapshot(`
+        Array [
+          "style-src foo bar",
+          "worker-src self",
+        ]
+      `);
+    });
+
+    it('removes duplicates', () => {
+      const directives = new CspDirectives();
+      directives.addDirectiveValue('style-src', 'foo');
+      directives.addDirectiveValue('style-src', 'foo');
+      directives.addDirectiveValue('style-src', 'bar');
+
+      expect(directives.getCspHeader()).toMatchInlineSnapshot(`"style-src foo bar"`);
+      expect(directives.getRules()).toMatchInlineSnapshot(`
+        Array [
+          "style-src foo bar",
+        ]
+      `);
+    });
+  });
+
+  describe('#fromConfig', () => {
+    it('returns the correct rules for the default config', () => {
+      const config = cspConfig.schema.validate({});
+      const directives = CspDirectives.fromConfig(config);
+      expect(directives.getRules()).toMatchInlineSnapshot(`
+        Array [
+          "script-src 'unsafe-eval' 'self'",
+          "worker-src blob: 'self'",
+          "style-src 'unsafe-inline' 'self'",
+        ]
+      `);
+    });
+
+    it('returns the correct header for the default config', () => {
+      const config = cspConfig.schema.validate({});
+      const directives = CspDirectives.fromConfig(config);
+      expect(directives.getCspHeader()).toMatchInlineSnapshot(
+        `"script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'"`
+      );
+    });
+
+    it('handles config with rules', () => {
+      const config = cspConfig.schema.validate({
+        rules: [`script-src 'self' http://foo.com`, `worker-src 'self'`],
+      });
+      const directives = CspDirectives.fromConfig(config);
+
+      expect(directives.getRules()).toMatchInlineSnapshot(`
+        Array [
+          "script-src 'self' http://foo.com",
+          "worker-src 'self'",
+        ]
+      `);
+      expect(directives.getCspHeader()).toMatchInlineSnapshot(
+        `"script-src 'self' http://foo.com; worker-src 'self'"`
+      );
+    });
+
+    it('adds default value for config with directives', () => {
+      const config = cspConfig.schema.validate({
+        script_src: [`baz`],
+        worker_src: [`foo`],
+        style_src: [`bar`, `dolly`],
+      });
+      const directives = CspDirectives.fromConfig(config);
+
+      expect(directives.getRules()).toMatchInlineSnapshot(`
+        Array [
+          "script-src 'unsafe-eval' 'self' baz",
+          "worker-src blob: 'self' foo",
+          "style-src 'unsafe-inline' 'self' bar dolly",
+        ]
+      `);
+      expect(directives.getCspHeader()).toMatchInlineSnapshot(
+        `"script-src 'unsafe-eval' 'self' baz; worker-src blob: 'self' foo; style-src 'unsafe-inline' 'self' bar dolly"`
+      );
+    });
+  });
+});
