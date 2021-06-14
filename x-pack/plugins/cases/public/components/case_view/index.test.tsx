@@ -29,6 +29,10 @@ import { usePostPushToService } from '../../containers/use_post_push_to_service'
 import { CaseType, ConnectorTypes } from '../../../common';
 import { useKibana } from '../../common/lib/kibana';
 
+const mockId = basicCase.id;
+jest.mock('react-router-dom', () => ({
+  useParams: () => ({ detailName: mockId }),
+}));
 jest.mock('../../containers/use_update_case');
 jest.mock('../../containers/use_get_case_user_actions');
 jest.mock('../../containers/use_get_case');
