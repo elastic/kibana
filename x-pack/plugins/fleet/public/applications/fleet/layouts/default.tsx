@@ -73,6 +73,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({ section, childre
           isSelected: section === 'agents',
           href: getHref('agent_list'),
           disabled: !agents?.enabled,
+          'data-test-subj': 'fleet-agents-tab',
         },
         {
           name: (
@@ -83,6 +84,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({ section, childre
           ),
           isSelected: section === 'agent_policies',
           href: getHref('policies_list'),
+          'data-test-subj': 'fleet-agent-policies-tab',
         },
         {
           name: (
@@ -93,6 +95,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({ section, childre
           ),
           isSelected: section === 'enrollment_tokens',
           href: getHref('enrollment_tokens'),
+          'data-test-subj': 'fleet-enrollment-tokens-tab',
         },
         {
           name: (
@@ -103,6 +106,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({ section, childre
           ),
           isSelected: section === 'data_streams',
           href: getHref('data_streams'),
+          'data-test-subj': 'fleet-datastreams-tab',
         },
       ]}
     >

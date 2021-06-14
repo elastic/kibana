@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export { IngestManagerOverview } from './overview';
 export { AgentPolicyApp } from './agent_policy';
 export { DataStreamApp } from './data_stream';
 export { AgentsApp } from './agents';

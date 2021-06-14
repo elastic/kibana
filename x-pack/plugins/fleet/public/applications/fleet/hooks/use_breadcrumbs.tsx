@@ -20,7 +20,7 @@ interface AdditionalBreadcrumbOptions {
 type Breadcrumb = ChromeBreadcrumb & Partial<AdditionalBreadcrumbOptions>;
 
 const BASE_BREADCRUMB: Breadcrumb = {
-  href: pagePathGetters.overview()[1],
+  href: pagePathGetters.base()[1],
   text: i18n.translate('xpack.fleet.breadcrumbs.appTitle', {
     defaultMessage: 'Fleet',
   }),
@@ -38,14 +38,6 @@ const breadcrumbGetters: {
   [key in Page]?: (values: DynamicPagePathValues) => Breadcrumb[];
 } = {
   base: () => [BASE_BREADCRUMB],
-  overview: () => [
-    BASE_BREADCRUMB,
-    {
-      text: i18n.translate('xpack.fleet.breadcrumbs.overviewPageTitle', {
-        defaultMessage: 'Overview',
-      }),
-    },
-  ],
   policies: () => [
     BASE_BREADCRUMB,
     {
