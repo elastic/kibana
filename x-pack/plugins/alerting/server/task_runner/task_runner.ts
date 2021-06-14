@@ -303,6 +303,10 @@ export class TaskRunner<
     event.message = `alert executed: ${alertLabel}`;
     event.event = event.event || {};
     event.event.outcome = 'success';
+    event.rule = {
+      ...event.rule,
+      name: alert.name,
+    };
 
     // Cleanup alert instances that are no longer scheduling actions to avoid over populating the alertInstances object
     const instancesWithScheduledActions = pickBy(
@@ -337,7 +341,8 @@ export class TaskRunner<
       alertId,
       alertLabel,
       namespace,
-      ruleTypeId: alert.alertTypeId,
+      ruleType: alertType,
+      rule: alert,
     });
 
     if (!muteAll) {
@@ -493,7 +498,11 @@ export class TaskRunner<
       // explicitly set execute timestamp so it will be before other events
       // generated here (new-instance, schedule-action, etc)
       '@timestamp': runDate,
-      event: { action: EVENT_LOG_ACTIONS.execute },
+      event: {
+        action: EVENT_LOG_ACTIONS.execute,
+        kind: 'alert',
+        category: [this.alertType.producer],
+      },
       kibana: {
         saved_objects: [
           {
@@ -504,6 +513,13 @@ export class TaskRunner<
             namespace,
           },
         ],
+      },
+      rule: {
+        id: alertId,
+        license: this.alertType.minimumLicenseRequired,
+        category: this.alertType.id,
+        ruleset: this.alertType.producer,
+        namespace,
       },
     };
     eventLogger.startTiming(event);
@@ -665,7 +681,19 @@ interface GenerateNewAndRecoveredInstanceEventsParams<
   alertId: string;
   alertLabel: string;
   namespace: string | undefined;
-  ruleTypeId: string;
+  ruleType: NormalizedAlertType<
+    AlertTypeParams,
+    AlertTypeState,
+    {
+      [x: string]: unknown;
+    },
+    {
+      [x: string]: unknown;
+    },
+    string,
+    string
+  >;
+  rule: SanitizedAlert<AlertTypeParams>;
 }
 
 function generateNewAndRecoveredInstanceEvents<
@@ -679,7 +707,8 @@ function generateNewAndRecoveredInstanceEvents<
     currentAlertInstances,
     originalAlertInstances,
     recoveredAlertInstances,
-    ruleTypeId,
+    rule,
+    ruleType,
   } = params;
   const originalAlertInstanceIds = Object.keys(originalAlertInstances);
   const currentAlertInstanceIds = Object.keys(currentAlertInstances);
@@ -746,6 +775,8 @@ function generateNewAndRecoveredInstanceEvents<
     const event: IEvent = {
       event: {
         action,
+        kind: 'alert',
+        category: [ruleType.producer],
         ...(state?.start ? { start: state.start as string } : {}),
         ...(state?.end ? { end: state.end as string } : {}),
         ...(state?.duration !== undefined ? { duration: state.duration as number } : {}),
@@ -761,12 +792,20 @@ function generateNewAndRecoveredInstanceEvents<
             rel: SAVED_OBJECT_REL_PRIMARY,
             type: 'alert',
             id: alertId,
-            type_id: ruleTypeId,
+            type_id: ruleType.id,
             namespace,
           },
         ],
       },
       message,
+      rule: {
+        id: rule.id,
+        license: ruleType.minimumLicenseRequired,
+        category: ruleType.id,
+        ruleset: ruleType.producer,
+        namespace,
+        name: rule.name,
+      },
     };
     eventLogger.logEvent(event);
   }
