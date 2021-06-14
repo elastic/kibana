@@ -64,12 +64,6 @@ export interface ColumnConfig {
 }
 
 export const DatatableComponent = (props: DatatableRenderProps) => {
-  const [firstRender, setFirstRender] = useState(true);
-  useEffect(() => {
-    setTimeout(() => {
-      //      setFirstRender(false);
-    }, 1);
-  }, []);
   const [firstTable] = Object.values(props.data.tables);
 
   const [columnConfig, setColumnConfig] = useState({
