@@ -201,7 +201,9 @@ export class GraphPageObject extends FtrService {
   }
 
   async getSearchFilter() {
-    const searchFilter = await this.find.allByCssSelector('main .euiFieldSearch');
+    const searchFilter = await this.find.allByCssSelector(
+      '[data-test-subj="graphLandingPage"] .euiFieldSearch'
+    );
     return searchFilter[0];
   }
 
