@@ -24,7 +24,7 @@ export const HostIsolationRequestSchema = {
 export const EndpointActionLogRequestSchema = {
   query: schema.object({
     page: schema.maybe(schema.number({ defaultValue: 1, min: 1 })),
-    page_size: schema.maybe(schema.number({ defaultValue: 50, min: 1, max: 100 })),
+    page_size: schema.maybe(schema.number({ defaultValue: 10, min: 1, max: 100 })),
   }),
   params: schema.object({
     agent_id: schema.string(),
