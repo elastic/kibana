@@ -25,7 +25,8 @@ export const LegacyIndexTemplatesDeprecation: React.FunctionComponent<Props> = (
   return (
     <EuiCallOut
       title={i18n.translate('xpack.idxMgmt.legacyIndexTemplatesDeprecation.title', {
-        defaultMessage: 'Legacy index templates are deprecated in favor of composable templates',
+        defaultMessage:
+          'Legacy index templates are deprecated in favor of composable index templates',
       })}
       color="warning"
       iconType="alert"
