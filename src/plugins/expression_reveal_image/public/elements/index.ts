@@ -5,19 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export interface ElementSpec {
-  name: string;
-  icon?: string;
-  expression: string;
-  displayName?: string;
-  type?: string;
-  help?: string;
-  filter?: string;
-  width?: number;
-  height?: number;
-}
 
-export type ElementFactory = () => ElementSpec;
+import { ElementFactory } from '../../common/types';
 
 export const revealImage: ElementFactory = () => ({
   name: 'revealImage',
