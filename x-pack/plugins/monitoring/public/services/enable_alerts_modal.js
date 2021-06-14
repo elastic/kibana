@@ -6,14 +6,12 @@
  */
 
 export function enableAlertsModalProvider($http, $window) {
-  let hasBeenShown = false;
-
   function shouldShowAlertsModal() {
-    const showAlertsModal = $window.localStorage.getItem(
-      'STACK_MONITORING_SHOW_ALERTS_MODAL',
-      false
-    );
-    if (!hasBeenShown && (showAlertsModal || showAlertsModal === null)) {
+    const modalHasBeenShown = $window.sessionStorage.getItem('ALERTS_MODAL_HAS_BEEN_SHOWN');
+
+    const decisionMade = $window.localStorage.getItem('ALERTS_MODAL_DECISION_MADE');
+
+    if (!modalHasBeenShown && !decisionMade) {
       return true;
     }
 
@@ -23,15 +21,15 @@ export function enableAlertsModalProvider($http, $window) {
   function enableAlerts() {
     // TODO: handle errors
     $http.post('../api/monitoring/v1/alerts/enable', {});
-    $window.localStorage.setItem('STACK_MONITORING_SHOW_ALERTS_MODAL', false);
+    $window.localStorage.setItem('ALERTS_MODAL_DECISION_MADE', true);
   }
 
   function notAskAgain() {
-    $window.localStorage.setItem('STACK_MONITORING_SHOW_ALERTS_MODAL', false);
+    $window.localStorage.setItem('ALERTS_MODAL_DECISION_MADE', true);
   }
 
   function hideModalForSession() {
-    hasBeenShown = true;
+    $window.sessionStorage.setItem('ALERTS_MODAL_HAS_BEEN_SHOWN', true);
   }
 
   return {

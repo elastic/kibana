@@ -35,7 +35,6 @@ export const EnableAlertsModal: React.FC<{}> = () => {
 
   const closeModal = () => {
     setIsModalVisible(false);
-    alertsEnableModalProvider.hideModalForSession();
   };
   // const idPrefix = htmlIdGenerator()();
   const radios = [
@@ -72,6 +71,11 @@ export const EnableAlertsModal: React.FC<{}> = () => {
       alertsEnableModalProvider.notAskAgain();
     }
 
+    closeModal();
+  };
+
+  const remindLaterClick = () => {
+    alertsEnableModalProvider.hideModalForSession();
     closeModal();
   };
 
@@ -129,7 +133,7 @@ export const EnableAlertsModal: React.FC<{}> = () => {
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={closeModal}>
+        <EuiButtonEmpty onClick={remindLaterClick}>
           <FormattedMessage
             id="xpack.monitoring.alerts.modal.remindLater"
             defaultMessage="Remind me later"
