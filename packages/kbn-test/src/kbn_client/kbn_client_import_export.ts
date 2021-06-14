@@ -48,7 +48,12 @@ export class KbnClientImportExport {
       path = `${path}.json`;
     }
 
-    const absolutePath = Path.resolve(this.baseDir, path);
+    return Path.resolve(this.baseDir, path);
+  }
+
+  private resolveAndValidatePath(path: string) {
+    const absolutePath = this.resolvePath(path);
+
     if (!existsSync(absolutePath)) {
       throw new Error(
         `unable to resolve path [${path}] to import/export, resolved relative to [${this.baseDir}]`
@@ -59,7 +64,7 @@ export class KbnClientImportExport {
   }
 
   async load(path: string, options?: { space?: string }) {
-    const src = this.resolvePath(path);
+    const src = this.resolveAndValidatePath(path);
     this.log.debug('resolved import for', path, 'to', src);
 
     const objects = await parseArchive(src);
@@ -94,7 +99,7 @@ export class KbnClientImportExport {
   }
 
   async unload(path: string, options?: { space?: string }) {
-    const src = this.resolvePath(path);
+    const src = this.resolveAndValidatePath(path);
     this.log.debug('unloading docs from archive at', src);
 
     const objects = await parseArchive(src);
@@ -143,6 +148,7 @@ export class KbnClientImportExport {
       })
       .join('\n\n');
 
+    await Fs.mkdir(Path.dirname(dest), { recursive: true });
     await Fs.writeFile(dest, fileContents, 'utf-8');
 
     this.log.success('Exported', objects.length, 'saved objects to', dest);
