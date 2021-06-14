@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
-import { render } from '../../lib/helper/rtl_helpers';
-import { HTTPAdvancedFields } from './http_advanced_fields';
-import { ConfigKeys, DataStream, HTTPMethod, IHTTPAdvancedFields, Validation } from './types';
+import { render } from '../../../lib/helper/rtl_helpers';
+import { HTTPAdvancedFields } from './advanced_fields';
+import { ConfigKeys, DataStream, HTTPMethod, IHTTPAdvancedFields, Validation } from '../types';
 import {
   HTTPAdvancedFieldsContextProvider,
   defaultHTTPAdvancedFields as defaultConfig,
-} from './contexts';
-import { validate as centralValidation } from './validation';
+} from '../contexts';
+import { validate as centralValidation } from '../validation';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,
