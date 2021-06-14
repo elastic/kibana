@@ -38,7 +38,7 @@ export interface ReturnUsePushToService {
 }
 
 export const usePushToService = ({
-  configureCasesNavigation: { onClick, href },
+  configureCasesNavigation: { href },
   connector,
   caseId,
   caseServices,
@@ -82,7 +82,7 @@ export const usePushToService = ({
               id="xpack.cases.caseView.pushToServiceDisableByNoConnectors"
               values={{
                 link: (
-                  <LinkAnchor onClick={onClick} href={href} target="_blank">
+                  <LinkAnchor href={href} target="_blank">
                     {i18n.LINK_CONNECTOR_CONFIGURE}
                   </LinkAnchor>
                 ),

@@ -18,7 +18,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
-import { CaseStatuses, CaseAttributes, CaseType, Case, CaseConnector } from '../../../common';
+import { CaseStatuses, CaseAttributes, CaseType, Case, CaseConnector, Ecs } from '../../../common';
 import { HeaderPage } from '../header_page';
 import { EditableTitle } from '../header_page/editable_title';
 import { TagList } from '../tag_list';
@@ -40,11 +40,11 @@ import {
 } from '../configure_cases/utils';
 import { StatusActionButton } from '../status/button';
 import * as i18n from './translations';
-import { Ecs } from '../../../common';
 import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../timeline_context';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 import { CasesNavigation } from '../links';
 import { OwnerProvider } from '../owner_context';
+import { DoesNotExist } from './does_not_exist';
 
 const gutterTimeline = '70px'; // seems to be a timeline reference from the original file
 export interface CaseViewComponentProps {
@@ -54,8 +54,8 @@ export interface CaseViewComponentProps {
   configureCasesNavigation: CasesNavigation;
   getCaseDetailHrefWithCommentId: (commentId: string) => string;
   onComponentInitialized?: () => void;
-  ruleDetailsNavigation: CasesNavigation<string | null | undefined, 'configurable'>;
-  showAlertDetails: (alertId: string, index: string) => void;
+  ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;
+  showAlertDetails?: (alertId: string, index: string) => void;
   subCaseId?: string;
   useFetchAlertData: (alertIds: string[]) => [boolean, Record<string, Ecs>];
   userCanCrud: boolean;
@@ -328,7 +328,9 @@ export const CaseComponent = React.memo<CaseComponentProps>(
 
     const onShowAlertDetails = useCallback(
       (alertId: string, index: string) => {
-        showAlertDetails(alertId, index);
+        if (showAlertDetails) {
+          showAlertDetails(alertId, index);
+        }
       },
       [showAlertDetails]
     );
@@ -364,9 +366,11 @@ export const CaseComponent = React.memo<CaseComponentProps>(
               onClick={configureCasesNavigation.onClick}
             >{`Click click motherfucker`}</EuiButton>
             <CaseActionBar
-              currentExternalIncident={currentExternalIncident}
+              allCasesNavigation={allCasesNavigation}
               caseData={caseData}
+              currentExternalIncident={currentExternalIncident}
               disabled={!userCanCrud}
+              disableAlerting={ruleDetailsNavigation == null}
               isLoading={isLoading && (updateKey === 'status' || updateKey === 'settings')}
               onRefresh={handleRefresh}
               onUpdateField={onUpdateField}
@@ -385,8 +389,8 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                   <>
                     <UserActionTree
                       getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
-                      getRuleDetailsHref={ruleDetailsNavigation.href}
-                      onRuleDetailsClick={ruleDetailsNavigation.onClick}
+                      getRuleDetailsHref={ruleDetailsNavigation?.href}
+                      onRuleDetailsClick={ruleDetailsNavigation?.onClick}
                       caseServices={caseServices}
                       caseUserActions={caseUserActions}
                       connectors={connectors}
@@ -498,7 +502,7 @@ export const CaseView = React.memo(
   }: CaseViewProps) => {
     const { data, isLoading, isError, fetchCase, updateCase } = useGetCase(caseId, subCaseId);
     if (isError) {
-      return null;
+      return <DoesNotExist allCasesNavigation={allCasesNavigation} caseId={caseId} />;
     }
     if (isLoading) {
       return (

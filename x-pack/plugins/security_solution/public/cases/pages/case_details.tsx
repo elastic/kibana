@@ -16,7 +16,7 @@ import { useGetUserCasesPermissions, useKibana } from '../../common/lib/kibana';
 import { getCaseUrl } from '../../common/components/link_to';
 import { navTabs } from '../../app/home/home_navigations';
 import { CaseView } from '../components/case_view';
-import { savedObjectReadOnlyErrorMessage, CaseCallOut } from '../components/callout';
+import { permissionsReadOnlyErrorMessage, CaseCallOut } from '../components/callout';
 import { APP_ID } from '../../../common/constants';
 
 export const CaseDetailsPage = React.memo(() => {
@@ -40,8 +40,8 @@ export const CaseDetailsPage = React.memo(() => {
       <WrapperPage noPadding>
         {userPermissions != null && !userPermissions?.crud && userPermissions?.read && (
           <CaseCallOut
-            title={savedObjectReadOnlyErrorMessage.title}
-            messages={[{ ...savedObjectReadOnlyErrorMessage, title: '' }]}
+            title={permissionsReadOnlyErrorMessage.title}
+            messages={[{ ...permissionsReadOnlyErrorMessage, title: '' }]}
           />
         )}
         <CaseView
