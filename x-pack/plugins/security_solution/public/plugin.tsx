@@ -44,6 +44,7 @@ import {
   APP_PATH,
   DEFAULT_INDEX_KEY,
   DETECTION_ENGINE_INDEX_URL,
+  DEFAULT_ALERTS_INDEX,
 } from '../common/constants';
 
 import { SecurityPageName } from './app/types';
@@ -446,6 +447,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
    */
   private async store(coreStart: CoreStart, startPlugins: StartPlugins): Promise<SecurityAppStore> {
     if (!this._store) {
+      const experimentalFeatures = parseExperimentalConfigValue(
+        this.config.enableExperimental || []
+      );
       const defaultIndicesName = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
       const [
         { createStore, createInitialState },
@@ -474,9 +478,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
       let signal: { name: string | null } = { name: null };
       try {
-        signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
-          method: 'GET',
-        });
+        // TODO: Once we are past experimental phase this code should be removed
+        // TODO: This currently prevents TGrid from refreshing
+        if (experimentalFeatures.ruleRegistryEnabled) {
+          signal = { name: DEFAULT_ALERTS_INDEX };
+        } else {
+          signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
+            method: 'GET',
+          });
+        }
       } catch {
         signal = { name: null };
       }
@@ -514,7 +524,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             kibanaIndexPatterns,
             configIndexPatterns: configIndexPatterns.indicesExist,
             signalIndexName: signal.name,
-            enableExperimental: parseExperimentalConfigValue(this.config.enableExperimental || []),
+            enableExperimental: experimentalFeatures,
           }
         ),
         {

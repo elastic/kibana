@@ -15,7 +15,7 @@ const bodySchema = schema.object({
   maxNumSegments: schema.maybe(schema.number()),
 });
 
-export function registerForcemergeRoute({ router, license, lib }: RouteDependencies) {
+export function registerForcemergeRoute({ router, lib }: RouteDependencies) {
   router.post(
     {
       path: addBasePath('/indices/forcemerge'),
@@ -23,7 +23,7 @@ export function registerForcemergeRoute({ router, license, lib }: RouteDependenc
         body: bodySchema,
       },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
+    async (ctx, req, res) => {
       const { maxNumSegments, indices = [] } = req.body as typeof bodySchema.type;
       const params = {
         expandWildcards: 'none',
@@ -47,6 +47,6 @@ export function registerForcemergeRoute({ router, license, lib }: RouteDependenc
         // Case: default
         throw e;
       }
-    })
+    }
   );
 }

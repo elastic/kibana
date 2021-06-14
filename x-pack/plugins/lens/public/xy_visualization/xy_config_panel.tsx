@@ -41,9 +41,8 @@ import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_h
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { LegendSettingsPopover } from '../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
-import { TooltipWrapper } from './tooltip_wrapper';
 import { getAxesConfiguration, GroupsConfiguration } from './axes_configuration';
-import { PalettePicker } from '../shared_components';
+import { PalettePicker, TooltipWrapper } from '../shared_components';
 import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
 import { getScaleType, getSortedAccessors } from './to_expression';
 import { VisualOptionsPopover } from './visual_options_popover/visual_options_popover';
@@ -228,6 +227,15 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
     });
   };
 
+  const nonOrdinalXAxis = state?.layers.every(
+    (layer) =>
+      !layer.xAccessor ||
+      getScaleType(
+        props.frame.datasourceLayers[layer.layerId].getOperationForColumnId(layer.xAccessor),
+        ScaleType.Linear
+      ) !== 'ordinal'
+  );
+
   // only allow changing endzone visibility if it could show up theoretically (if it's a time viz)
   const onChangeEndzoneVisiblity = state?.layers.every(
     (layer) =>
@@ -322,6 +330,14 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
               setState({
                 ...state,
                 legend: { ...state.legend, position: id as Position },
+              });
+            }}
+            renderValueInLegendSwitch={nonOrdinalXAxis}
+            valueInLegend={state?.valuesInLegend}
+            onValueInLegendChange={() => {
+              setState({
+                ...state,
+                valuesInLegend: !state.valuesInLegend,
               });
             }}
           />

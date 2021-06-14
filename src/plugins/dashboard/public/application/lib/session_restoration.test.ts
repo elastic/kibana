@@ -6,23 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { dataPluginMock } from '../../../../data/public/mocks';
-import { createSessionRestorationDataProvider } from './session_restoration';
-import { getAppStateDefaults } from './get_app_state_defaults';
 import { getSavedDashboardMock } from '../test_helpers';
-import { SavedObjectTagDecoratorTypeGuard } from '../../../../saved_objects_tagging_oss/public';
-import { ViewMode } from '../../services/embeddable';
+import { dataPluginMock } from '../../../../data/public/mocks';
+import { createSessionRestorationDataProvider, savedObjectToDashboardState } from '.';
 
 describe('createSessionRestorationDataProvider', () => {
   const mockDataPlugin = dataPluginMock.createStartContract();
+  const version = '8.0.0';
   const searchSessionInfoProvider = createSessionRestorationDataProvider({
+    kibanaVersion: version,
     data: mockDataPlugin,
     getAppState: () =>
-      getAppStateDefaults(
-        ViewMode.VIEW,
-        getSavedDashboardMock(),
-        ((() => false) as unknown) as SavedObjectTagDecoratorTypeGuard
-      ),
+      savedObjectToDashboardState({
+        version,
+        hideWriteControls: false,
+        usageCollection: undefined,
+        savedObjectsTagging: undefined,
+        savedDashboard: getSavedDashboardMock(),
+      }),
     getDashboardTitle: () => 'Dashboard',
     getDashboardId: () => 'Id',
   });

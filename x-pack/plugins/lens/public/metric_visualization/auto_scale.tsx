@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import _ from 'lodash';
+import { throttle } from 'lodash';
 import { EuiResizeObserver } from '@elastic/eui';
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
@@ -26,7 +26,7 @@ export class AutoScale extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    this.scale = _.throttle(() => {
+    this.scale = throttle(() => {
       const scale = computeScale(this.parent, this.child, this.props.minScale);
 
       // Prevent an infinite render loop

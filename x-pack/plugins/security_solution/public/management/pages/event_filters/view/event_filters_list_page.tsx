@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect } from 'react';
+import React, { memo, useCallback, useMemo, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiSpacer, EuiHorizontalRule, EuiText } from '@elastic/eui';
@@ -34,7 +34,7 @@ import {
   showDeleteModal,
 } from '../store/selector';
 import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
-import { Immutable } from '../../../../../common/endpoint/types';
+import { Immutable, ListPageRouteState } from '../../../../../common/endpoint/types';
 import {
   ExceptionItem,
   ExceptionItemProps,
@@ -42,6 +42,7 @@ import {
 import { EventFilterDeleteModal } from './components/event_filter_delete_modal';
 
 import { SearchBar } from '../../../components/search_bar';
+import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
 
 type EventListPaginatedContent = PaginatedContentProps<
   Immutable<ExceptionListItemSchema>,
@@ -59,6 +60,7 @@ const AdministrationListPage = styled(_AdministrationListPage)`
 `;
 
 export const EventFiltersListPage = memo(() => {
+  const { state: routeState } = useLocation<ListPageRouteState | undefined>();
   const history = useHistory();
   const dispatch = useDispatch<Dispatch<AppAction>>();
   const isActionError = useEventFiltersSelector(getActionError);
@@ -102,6 +104,13 @@ export const EventFiltersListPage = memo(() => {
       });
     }
   }, [dispatch, formEntry, history, isActionError, location, navigateCallback]);
+
+  const backButton = useMemo(() => {
+    if (routeState && routeState.onBackButtonNavigateTo) {
+      return <BackToExternalAppButton {...routeState} />;
+    }
+    return null;
+  }, [routeState]);
 
   const handleAddButtonClick = useCallback(
     () =>
@@ -173,6 +182,7 @@ export const EventFiltersListPage = memo(() => {
   return (
     <AdministrationListPage
       beta={false}
+      headerBackComponent={backButton}
       title={
         <FormattedMessage
           id="xpack.securitySolution.eventFilters.list.pageTitle"

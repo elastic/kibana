@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { TypeMapping } from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { IndexPatternsFetcher } from '../../../../../src/plugins/data/server';
 import {
@@ -73,8 +73,8 @@ export class RuleDataClient implements IRuleDataClient {
         return clusterClient.bulk(requestWithDefaultParameters).then((response) => {
           if (response.body.errors) {
             if (
-              response.body.items.length === 1 &&
-              response.body.items[0]?.index?.error?.type === 'index_not_found_exception'
+              response.body.items.length > 0 &&
+              response.body.items?.[0]?.index?.error?.type === 'index_not_found_exception'
             ) {
               return this.createOrUpdateWriteTarget({ namespace }).then(() => {
                 return clusterClient.bulk(requestWithDefaultParameters);
@@ -125,7 +125,7 @@ export class RuleDataClient implements IRuleDataClient {
       path: `/_index_template/_simulate_index/${concreteIndexName}`,
     });
 
-    const mappings: TypeMapping = simulateResponse.template.mappings;
+    const mappings: estypes.MappingTypeMapping = simulateResponse.template.mappings;
 
     await clusterClient.indices.putMapping({ index: `${alias}*`, body: mappings });
   }

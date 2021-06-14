@@ -384,7 +384,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       });
     },
 
-    async createCalendarEvents(calendarId: string, events: estypes.ScheduledEvent[]) {
+    async createCalendarEvents(calendarId: string, events: estypes.MlCalendarEvent[]) {
       log.debug(`Creating events for calendar with id '${calendarId}'...`);
       await esSupertest.post(`/_ml/calendars/${calendarId}/events`).send({ events }).expect(200);
       await this.waitForEventsToExistInCalendar(calendarId, events);
@@ -396,7 +396,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     },
 
     assertAllEventsExistInCalendar: (
-      eventsToCheck: estypes.ScheduledEvent[],
+      eventsToCheck: estypes.MlCalendarEvent[],
       calendar: Calendar
     ): boolean => {
       const updatedCalendarEvents = calendar.events;
@@ -409,7 +409,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
             (updatedEvent) =>
               updatedEvent.description === eventToCheck.description &&
               // updatedEvent are fetched with suptertest which converts start_time and end_time to number
-              // sometimes eventToCheck declared manually with types incompatible with estypes.ScheduledEvent
+              // sometimes eventToCheck declared manually with types incompatible with estypes.MlCalendarEvent
               String(updatedEvent.start_time) === String(eventToCheck.start_time) &&
               String(updatedEvent.end_time) === String(eventToCheck.end_time)
           ) < 0
@@ -429,7 +429,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async waitForEventsToExistInCalendar(
       calendarId: string,
-      eventsToCheck: estypes.ScheduledEvent[],
+      eventsToCheck: estypes.MlCalendarEvent[],
       errorMsg?: string
     ) {
       await retry.waitForWithTimeout(`'${calendarId}' events to exist`, 5 * 1000, async () => {
@@ -541,7 +541,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     },
 
     async waitForDatafeedToNotExist(datafeedId: string) {
-      await retry.waitForWithTimeout(`'${datafeedId}' to exist`, 5 * 1000, async () => {
+      await retry.waitForWithTimeout(`'${datafeedId}' to not exist`, 5 * 1000, async () => {
         if ((await this.datafeedExist(datafeedId)) === false) {
           return true;
         } else {

@@ -59,7 +59,6 @@ exports[`EmptyState should render normally 1`] = `
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiCard
-            betaBadgeTooltipContent="This feature requires a Basic license."
             className="inpEmptyState__card"
             description={
               <FormattedMessage
@@ -75,7 +74,6 @@ exports[`EmptyState should render normally 1`] = `
                 type="document"
               />
             }
-            isDisabled={false}
             onClick={[Function]}
             title={
               <FormattedMessage

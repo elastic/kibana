@@ -55,11 +55,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Signals from audit beat are of the expected structure', () => {
       beforeEach(async () => {
-        await esArchiver.load('auditbeat/hosts');
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       afterEach(async () => {
-        await esArchiver.unload('auditbeat/hosts');
+        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       it('should have the specific audit record for _id or none of these tests below will pass', async () => {
@@ -550,43 +550,149 @@ export default ({ getService }: FtrProviderContext) => {
               get(signal._source, 'signal.original_event.category') === 'anomoly'
           );
           expect(buildingBlock).not.eql(undefined);
-          const signal = buildingBlock!._source.signal;
+          const fullSignal = buildingBlock!._source;
 
-          expect(signal).eql({
-            rule: signal.rule,
-            group: signal.group,
-            original_time: signal.original_time,
-            status: 'open',
-            depth: 1,
-            ancestors: [
-              {
-                depth: 0,
-                id: 'VhXOBmkBR346wHgnLP8T',
-                index: 'auditbeat-8.0.0-2019.02.19-000001',
-                type: 'event',
+          expect(fullSignal).eql({
+            '@timestamp': fullSignal['@timestamp'],
+            agent: {
+              ephemeral_id: '1b4978a0-48be-49b1-ac96-323425b389ab',
+              hostname: 'zeek-sensor-amsterdam',
+              id: 'e52588e6-7aa3-4c89-a2c4-d6bc5c286db1',
+              type: 'auditbeat',
+              version: '8.0.0',
+            },
+            auditd: {
+              data: {
+                a0: '3',
+                a1: '107',
+                a2: '1',
+                a3: '7ffc186b58e0',
+                arch: 'x86_64',
+                auid: 'unset',
+                dev: 'eth0',
+                exit: '0',
+                gid: '0',
+                old_prom: '0',
+                prom: '256',
+                ses: 'unset',
+                syscall: 'setsockopt',
+                tty: '(none)',
+                uid: '0',
               },
-            ],
-            original_event: {
+              message_type: 'anom_promiscuous',
+              result: 'success',
+              sequence: 1392,
+              session: 'unset',
+              summary: {
+                actor: {
+                  primary: 'unset',
+                  secondary: 'root',
+                },
+                how: '/usr/bin/bro',
+                object: {
+                  primary: 'eth0',
+                  type: 'network-device',
+                },
+              },
+            },
+            cloud: { instance: { id: '133551048' }, provider: 'digitalocean', region: 'ams3' },
+            ecs: { version: '1.0.0-beta2' },
+            event: {
               action: 'changed-promiscuous-mode-on-device',
               category: 'anomoly',
               module: 'auditd',
+              kind: 'signal',
             },
-            parent: {
-              depth: 0,
-              id: 'VhXOBmkBR346wHgnLP8T',
-              index: 'auditbeat-8.0.0-2019.02.19-000001',
-              type: 'event',
+            host: {
+              architecture: 'x86_64',
+              containerized: false,
+              hostname: 'zeek-sensor-amsterdam',
+              id: '2ce8b1e7d69e4a1d9c6bcddc473da9d9',
+              name: 'zeek-sensor-amsterdam',
+              os: {
+                codename: 'bionic',
+                family: 'debian',
+                kernel: '4.15.0-45-generic',
+                name: 'Ubuntu',
+                platform: 'ubuntu',
+                version: '18.04.2 LTS (Bionic Beaver)',
+              },
             },
-            parents: [
-              {
+            process: {
+              executable: '/usr/bin/bro',
+              name: 'bro',
+              pid: 30157,
+              ppid: 30151,
+              title:
+                '/usr/bin/bro -i eth0 -U .status -p broctl -p broctl-live -p standalone -p local -p bro local.bro broctl broctl/standalone broctl',
+            },
+            service: { type: 'auditd' },
+            user: {
+              audit: { id: 'unset' },
+              effective: {
+                group: {
+                  id: '0',
+                  name: 'root',
+                },
+                id: '0',
+                name: 'root',
+              },
+              filesystem: {
+                group: {
+                  id: '0',
+                  name: 'root',
+                },
+                id: '0',
+                name: 'root',
+              },
+              group: { id: '0', name: 'root' },
+              id: '0',
+              name: 'root',
+              saved: {
+                group: {
+                  id: '0',
+                  name: 'root',
+                },
+                id: '0',
+                name: 'root',
+              },
+            },
+            signal: {
+              rule: fullSignal.signal.rule,
+              group: fullSignal.signal.group,
+              original_time: fullSignal.signal.original_time,
+              status: 'open',
+              depth: 1,
+              ancestors: [
+                {
+                  depth: 0,
+                  id: 'VhXOBmkBR346wHgnLP8T',
+                  index: 'auditbeat-8.0.0-2019.02.19-000001',
+                  type: 'event',
+                },
+              ],
+              original_event: {
+                action: 'changed-promiscuous-mode-on-device',
+                category: 'anomoly',
+                module: 'auditd',
+              },
+              parent: {
                 depth: 0,
                 id: 'VhXOBmkBR346wHgnLP8T',
                 index: 'auditbeat-8.0.0-2019.02.19-000001',
                 type: 'event',
               },
-            ],
-            _meta: {
-              version: SIGNALS_TEMPLATE_VERSION,
+              parents: [
+                {
+                  depth: 0,
+                  id: 'VhXOBmkBR346wHgnLP8T',
+                  index: 'auditbeat-8.0.0-2019.02.19-000001',
+                  type: 'event',
+                },
+              ],
+              _meta: {
+                version: SIGNALS_TEMPLATE_VERSION,
+              },
             },
           });
         });
@@ -606,59 +712,90 @@ export default ({ getService }: FtrProviderContext) => {
           const sequenceSignal = signalsOpen.hits.hits.find(
             (signal) => signal._source.signal.depth === 2
           );
-          const signal = sequenceSignal!._source.signal;
-          const eventIds = signal.parents.map((event) => event.id);
-          expect(signal).eql({
-            status: 'open',
-            depth: 2,
-            group: signal.group,
-            rule: signal.rule,
-            ancestors: [
-              {
-                depth: 0,
-                id: 'VhXOBmkBR346wHgnLP8T',
-                index: 'auditbeat-8.0.0-2019.02.19-000001',
-                type: 'event',
+          const source = sequenceSignal!._source;
+          const eventIds = source.signal.parents.map((event) => event.id);
+          expect(source).eql({
+            '@timestamp': source['@timestamp'],
+            agent: {
+              ephemeral_id: '1b4978a0-48be-49b1-ac96-323425b389ab',
+              hostname: 'zeek-sensor-amsterdam',
+              id: 'e52588e6-7aa3-4c89-a2c4-d6bc5c286db1',
+              type: 'auditbeat',
+              version: '8.0.0',
+            },
+            auditd: { session: 'unset', summary: { actor: { primary: 'unset' } } },
+            cloud: { instance: { id: '133551048' }, provider: 'digitalocean', region: 'ams3' },
+            ecs: { version: '1.0.0-beta2' },
+            event: { kind: 'signal' },
+            host: {
+              architecture: 'x86_64',
+              containerized: false,
+              hostname: 'zeek-sensor-amsterdam',
+              id: '2ce8b1e7d69e4a1d9c6bcddc473da9d9',
+              name: 'zeek-sensor-amsterdam',
+              os: {
+                codename: 'bionic',
+                family: 'debian',
+                kernel: '4.15.0-45-generic',
+                name: 'Ubuntu',
+                platform: 'ubuntu',
+                version: '18.04.2 LTS (Bionic Beaver)',
               },
-              {
-                depth: 1,
-                id: eventIds[0],
-                index: '.siem-signals-default',
-                rule: signal.rule.id,
-                type: 'signal',
+            },
+            service: { type: 'auditd' },
+            user: { audit: { id: 'unset' }, id: '0', name: 'root' },
+            signal: {
+              status: 'open',
+              depth: 2,
+              group: source.signal.group,
+              rule: source.signal.rule,
+              ancestors: [
+                {
+                  depth: 0,
+                  id: 'VhXOBmkBR346wHgnLP8T',
+                  index: 'auditbeat-8.0.0-2019.02.19-000001',
+                  type: 'event',
+                },
+                {
+                  depth: 1,
+                  id: eventIds[0],
+                  index: '.siem-signals-default',
+                  rule: source.signal.rule.id,
+                  type: 'signal',
+                },
+                {
+                  depth: 0,
+                  id: '4hbXBmkBR346wHgn6fdp',
+                  index: 'auditbeat-8.0.0-2019.02.19-000001',
+                  type: 'event',
+                },
+                {
+                  depth: 1,
+                  id: eventIds[1],
+                  index: '.siem-signals-default',
+                  rule: source.signal.rule.id,
+                  type: 'signal',
+                },
+              ],
+              parents: [
+                {
+                  depth: 1,
+                  id: eventIds[0],
+                  index: '.siem-signals-default',
+                  rule: source.signal.rule.id,
+                  type: 'signal',
+                },
+                {
+                  depth: 1,
+                  id: eventIds[1],
+                  index: '.siem-signals-default',
+                  rule: source.signal.rule.id,
+                  type: 'signal',
+                },
+              ],
+              _meta: {
+                version: SIGNALS_TEMPLATE_VERSION,
               },
-              {
-                depth: 0,
-                id: '4hbXBmkBR346wHgn6fdp',
-                index: 'auditbeat-8.0.0-2019.02.19-000001',
-                type: 'event',
-              },
-              {
-                depth: 1,
-                id: eventIds[1],
-                index: '.siem-signals-default',
-                rule: signal.rule.id,
-                type: 'signal',
-              },
-            ],
-            parents: [
-              {
-                depth: 1,
-                id: eventIds[0],
-                index: '.siem-signals-default',
-                rule: signal.rule.id,
-                type: 'signal',
-              },
-              {
-                depth: 1,
-                id: eventIds[1],
-                index: '.siem-signals-default',
-                rule: signal.rule.id,
-                type: 'signal',
-              },
-            ],
-            _meta: {
-              version: SIGNALS_TEMPLATE_VERSION,
             },
           });
         });
@@ -709,16 +846,51 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForSignalsToBePresent(supertest, 1, [id]);
           const signalsOpen = await getSignalsByRuleIds(supertest, [ruleId]);
           expect(signalsOpen.hits.hits.length).eql(1);
-          const signal = signalsOpen.hits.hits[0];
-          expect(signal._source.signal.threshold_result).eql({
-            terms: [
-              {
-                field: 'host.id',
-                value: '8cc95778cce5407c809480e8e32ad76b',
+          const fullSignal = signalsOpen.hits.hits[0]._source;
+          const eventIds = fullSignal.signal.parents.map((event) => event.id);
+          expect(fullSignal).eql({
+            '@timestamp': fullSignal['@timestamp'],
+            'host.id': '8cc95778cce5407c809480e8e32ad76b',
+            event: { kind: 'signal' },
+            signal: {
+              _meta: { version: SIGNALS_TEMPLATE_VERSION },
+              parents: [
+                {
+                  depth: 0,
+                  id: eventIds[0],
+                  index: 'auditbeat-*',
+                  type: 'event',
+                },
+              ],
+              ancestors: [
+                {
+                  depth: 0,
+                  id: eventIds[0],
+                  index: 'auditbeat-*',
+                  type: 'event',
+                },
+              ],
+              status: 'open',
+              rule: fullSignal.signal.rule,
+              original_time: fullSignal.signal.original_time,
+              depth: 1,
+              parent: {
+                id: eventIds[0],
+                type: 'event',
+                index: 'auditbeat-*',
+                depth: 0,
               },
-            ],
-            count: 788,
-            from: '1900-01-01T00:00:00.000Z',
+              threshold_result: {
+                terms: [
+                  {
+                    field: 'host.id',
+                    value: '8cc95778cce5407c809480e8e32ad76b',
+                  },
+                ],
+                count: 788,
+                from: '1900-01-01T00:00:00.000Z',
+              },
+            },
           });
         });
 
@@ -832,22 +1004,57 @@ export default ({ getService }: FtrProviderContext) => {
           const createdRule = await createRule(supertest, rule);
           const signalsOpen = await getOpenSignals(supertest, es, createdRule);
           expect(signalsOpen.hits.hits.length).eql(1);
-          const signal = signalsOpen.hits.hits[0];
-          expect(signal._source.signal.threshold_result).eql({
-            terms: [
-              {
-                field: 'host.id',
-                value: '8cc95778cce5407c809480e8e32ad76b',
+          const fullSignal = signalsOpen.hits.hits[0]._source;
+          const eventIds = fullSignal.signal.parents.map((event) => event.id);
+          expect(fullSignal).eql({
+            '@timestamp': fullSignal['@timestamp'],
+            'host.id': '8cc95778cce5407c809480e8e32ad76b',
+            event: { kind: 'signal' },
+            signal: {
+              _meta: { version: SIGNALS_TEMPLATE_VERSION },
+              parents: [
+                {
+                  depth: 0,
+                  id: eventIds[0],
+                  index: 'auditbeat-*',
+                  type: 'event',
+                },
+              ],
+              ancestors: [
+                {
+                  depth: 0,
+                  id: eventIds[0],
+                  index: 'auditbeat-*',
+                  type: 'event',
+                },
+              ],
+              status: 'open',
+              rule: fullSignal.signal.rule,
+              original_time: fullSignal.signal.original_time,
+              depth: 1,
+              parent: {
+                id: eventIds[0],
+                type: 'event',
+                index: 'auditbeat-*',
+                depth: 0,
               },
-            ],
-            cardinality: [
-              {
-                field: 'destination.ip',
-                value: 7,
+              threshold_result: {
+                terms: [
+                  {
+                    field: 'host.id',
+                    value: '8cc95778cce5407c809480e8e32ad76b',
+                  },
+                ],
+                cardinality: [
+                  {
+                    field: 'destination.ip',
+                    value: 7,
+                  },
+                ],
+                count: 788,
+                from: '1900-01-01T00:00:00.000Z',
               },
-            ],
-            count: 788,
-            from: '1900-01-01T00:00:00.000Z',
+            },
           });
         });
 
@@ -885,24 +1092,61 @@ export default ({ getService }: FtrProviderContext) => {
           const createdRule = await createRule(supertest, rule);
           const signalsOpen = await getOpenSignals(supertest, es, createdRule);
           expect(signalsOpen.hits.hits.length).eql(1);
-          const signal = signalsOpen.hits.hits[0];
-          expect(signal._source.signal.threshold_result).eql({
-            terms: [
-              {
-                field: 'event.module',
-                value: 'system',
+          const fullSignal = signalsOpen.hits.hits[0]._source;
+          const eventIds = fullSignal.signal.parents.map((event) => event.id);
+          expect(fullSignal).eql({
+            '@timestamp': fullSignal['@timestamp'],
+            'event.module': 'system',
+            'host.id': '2ab45fc1c41e4c84bbd02202a7e5761f',
+            'process.name': 'sshd',
+            event: { kind: 'signal' },
+            signal: {
+              _meta: { version: SIGNALS_TEMPLATE_VERSION },
+              parents: [
+                {
+                  depth: 0,
+                  id: eventIds[0],
+                  index: 'auditbeat-*',
+                  type: 'event',
+                },
+              ],
+              ancestors: [
+                {
+                  depth: 0,
+                  id: eventIds[0],
+                  index: 'auditbeat-*',
+                  type: 'event',
+                },
+              ],
+              status: 'open',
+              rule: fullSignal.signal.rule,
+              original_time: fullSignal.signal.original_time,
+              depth: 1,
+              parent: {
+                id: eventIds[0],
+                type: 'event',
+                index: 'auditbeat-*',
+                depth: 0,
               },
-              {
-                field: 'host.id',
-                value: '2ab45fc1c41e4c84bbd02202a7e5761f',
+              threshold_result: {
+                terms: [
+                  {
+                    field: 'event.module',
+                    value: 'system',
+                  },
+                  {
+                    field: 'host.id',
+                    value: '2ab45fc1c41e4c84bbd02202a7e5761f',
+                  },
+                  {
+                    field: 'process.name',
+                    value: 'sshd',
+                  },
+                ],
+                count: 21,
+                from: '1900-01-01T00:00:00.000Z',
               },
-              {
-                field: 'process.name',
-                value: 'sshd',
-              },
-            ],
-            count: 21,
-            from: '1900-01-01T00:00:00.000Z',
+            },
           });
         });
       });
@@ -916,11 +1160,11 @@ export default ({ getService }: FtrProviderContext) => {
      */
     describe('Signals generated from name clashes', () => {
       beforeEach(async () => {
-        await esArchiver.load('signals/numeric_name_clash');
+        await esArchiver.load('x-pack/test/functional/es_archives/signals/numeric_name_clash');
       });
 
       afterEach(async () => {
-        await esArchiver.unload('signals/numeric_name_clash');
+        await esArchiver.unload('x-pack/test/functional/es_archives/signals/numeric_name_clash');
       });
 
       it('should have the specific audit record for _id or none of these tests below will pass', async () => {
@@ -1070,11 +1314,11 @@ export default ({ getService }: FtrProviderContext) => {
      */
     describe('Signals generated from object clashes', () => {
       beforeEach(async () => {
-        await esArchiver.load('signals/object_clash');
+        await esArchiver.load('x-pack/test/functional/es_archives/signals/object_clash');
       });
 
       afterEach(async () => {
-        await esArchiver.unload('signals/object_clash');
+        await esArchiver.unload('x-pack/test/functional/es_archives/signals/object_clash');
       });
 
       it('should have the specific audit record for _id or none of these tests below will pass', async () => {
@@ -1227,11 +1471,13 @@ export default ({ getService }: FtrProviderContext) => {
      */
     describe('Signals generated from events with custom severity and risk score fields', () => {
       beforeEach(async () => {
-        await esArchiver.load('signals/severity_risk_overrides');
+        await esArchiver.load('x-pack/test/functional/es_archives/signals/severity_risk_overrides');
       });
 
       afterEach(async () => {
-        await esArchiver.unload('signals/severity_risk_overrides');
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/signals/severity_risk_overrides'
+        );
       });
 
       const executeRuleAndGetSignals = async (rule: QueryCreateSchema) => {
@@ -1372,116 +1618,112 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Signals generated from events with timestamp override field and ensures search_after continues to work when documents are missing timestamp override field', () => {
+    describe('Signals generated from events with name override field', async () => {
       beforeEach(async () => {
+        await deleteSignalsIndex(supertest);
         await createSignalsIndex(supertest);
-        await esArchiver.load('auditbeat/hosts');
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
-        await esArchiver.unload('auditbeat/hosts');
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
-      /**
-       * This represents our worst case scenario where this field is not mapped on any index
-       * We want to check that our logic continues to function within the constraints of search after
-       * Elasticsearch returns java's long.MAX_VALUE for unmapped date fields
-       * Javascript does not support numbers this large, but without passing in a number of this size
-       * The search_after will continue to return the same results and not iterate to the next set
-       * So to circumvent this limitation of javascript we return the stringified version of Java's
-       * Long.MAX_VALUE so that search_after does not enter into an infinite loop.
-       *
-       * ref: https://github.com/elastic/elasticsearch/issues/28806#issuecomment-369303620
-       */
-      it('should generate 200 signals when timestamp override does not exist', async () => {
+      it('should generate signals with name_override field', async () => {
         const rule: QueryCreateSchema = {
           ...getRuleForSignalTesting(['auditbeat-*']),
-          timestamp_override: 'event.fakeingested',
-          max_signals: 200,
-        };
-
-        const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
-        await waitForSignalsToBePresent(supertest, 200, [id]);
-        const signalsResponse = await getSignalsByIds(supertest, [id], 200);
-        const signals = signalsResponse.hits.hits.map((hit) => hit._source);
-
-        expect(signals.length).equal(200);
-      });
-    });
-
-    /**
-     * Here we test the functionality of timestamp overrides. If the rule specifies a timestamp override,
-     * then the documents will be queried and sorted using the timestamp override field.
-     * If no timestamp override field exists in the indices but one was provided to the rule,
-     * the rule's query will additionally search for events using the `@timestamp` field
-     */
-    describe('Signals generated from events with timestamp override field', async () => {
-      beforeEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await createSignalsIndex(supertest);
-        await esArchiver.load('security_solution/timestamp_override_1');
-        await esArchiver.load('security_solution/timestamp_override_2');
-        await esArchiver.load('security_solution/timestamp_override_3');
-        await esArchiver.load('security_solution/timestamp_override_4');
-      });
-
-      afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
-        await esArchiver.unload('security_solution/timestamp_override_1');
-        await esArchiver.unload('security_solution/timestamp_override_2');
-        await esArchiver.unload('security_solution/timestamp_override_3');
-        await esArchiver.unload('security_solution/timestamp_override_4');
-      });
-
-      it('should generate signals with event.ingested, @timestamp and (event.ingested + timestamp)', async () => {
-        const rule: QueryCreateSchema = {
-          ...getRuleForSignalTesting(['myfa*']),
-          timestamp_override: 'event.ingested',
+          rule_name_override: 'event.action',
         };
 
         const { id } = await createRule(supertest, rule);
 
-        await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
-        await waitForSignalsToBePresent(supertest, 3, [id]);
-        const signalsResponse = await getSignalsByIds(supertest, [id], 3);
+        await waitForRuleSuccessOrStatus(supertest, id);
+        await waitForSignalsToBePresent(supertest, 1, [id]);
+        const signalsResponse = await getSignalsByIds(supertest, [id], 1);
         const signals = signalsResponse.hits.hits.map((hit) => hit._source);
         const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
+        const fullSignal = signalsOrderedByEventId[0];
 
-        expect(signalsOrderedByEventId.length).equal(3);
-      });
-
-      it('should generate 2 signals with @timestamp', async () => {
-        const rule: QueryCreateSchema = getRuleForSignalTesting(['myfa*']);
-
-        const { id } = await createRule(supertest, rule);
-
-        await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
-        await waitForSignalsToBePresent(supertest, 2, [id]);
-        const signalsResponse = await getSignalsByIds(supertest, [id]);
-        const signals = signalsResponse.hits.hits.map((hit) => hit._source);
-        const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
-
-        expect(signalsOrderedByEventId.length).equal(2);
-      });
-
-      it('should generate 2 signals when timestamp override does not exist', async () => {
-        const rule: QueryCreateSchema = {
-          ...getRuleForSignalTesting(['myfa*']),
-          timestamp_override: 'event.fakeingestfield',
-        };
-        const { id } = await createRule(supertest, rule);
-
-        await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
-        await waitForSignalsToBePresent(supertest, 2, [id]);
-        const signalsResponse = await getSignalsByIds(supertest, [id, id]);
-        const signals = signalsResponse.hits.hits.map((hit) => hit._source);
-        const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
-
-        expect(signalsOrderedByEventId.length).equal(2);
+        expect(fullSignal).eql({
+          '@timestamp': fullSignal['@timestamp'],
+          agent: {
+            ephemeral_id: '1b4978a0-48be-49b1-ac96-323425b389ab',
+            hostname: 'zeek-sensor-amsterdam',
+            id: 'e52588e6-7aa3-4c89-a2c4-d6bc5c286db1',
+            type: 'auditbeat',
+            version: '8.0.0',
+          },
+          cloud: { instance: { id: '133551048' }, provider: 'digitalocean', region: 'ams3' },
+          ecs: { version: '1.0.0-beta2' },
+          event: {
+            action: 'boot',
+            dataset: 'login',
+            kind: 'signal',
+            module: 'system',
+            origin: '/var/log/wtmp',
+          },
+          host: {
+            architecture: 'x86_64',
+            containerized: false,
+            hostname: 'zeek-sensor-amsterdam',
+            id: '2ce8b1e7d69e4a1d9c6bcddc473da9d9',
+            name: 'zeek-sensor-amsterdam',
+            os: {
+              codename: 'bionic',
+              family: 'debian',
+              kernel: '4.15.0-45-generic',
+              name: 'Ubuntu',
+              platform: 'ubuntu',
+              version: '18.04.2 LTS (Bionic Beaver)',
+            },
+          },
+          message: 'System boot',
+          service: { type: 'system' },
+          signal: {
+            _meta: {
+              version: SIGNALS_TEMPLATE_VERSION,
+            },
+            parents: [
+              {
+                depth: 0,
+                id: 'UBXOBmkBR346wHgnLP8T',
+                index: 'auditbeat-8.0.0-2019.02.19-000001',
+                type: 'event',
+              },
+            ],
+            ancestors: [
+              {
+                depth: 0,
+                id: 'UBXOBmkBR346wHgnLP8T',
+                index: 'auditbeat-8.0.0-2019.02.19-000001',
+                type: 'event',
+              },
+            ],
+            status: 'open',
+            rule: {
+              ...fullSignal.signal.rule,
+              name: 'boot',
+              rule_name_override: 'event.action',
+            },
+            original_time: fullSignal.signal.original_time,
+            depth: 1,
+            parent: {
+              id: 'UBXOBmkBR346wHgnLP8T',
+              type: 'event',
+              index: 'auditbeat-8.0.0-2019.02.19-000001',
+              depth: 0,
+            },
+            original_event: {
+              action: 'boot',
+              dataset: 'login',
+              kind: 'event',
+              module: 'system',
+              origin: '/var/log/wtmp',
+            },
+          },
+        });
       });
     });
   });

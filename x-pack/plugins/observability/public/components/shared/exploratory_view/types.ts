@@ -12,6 +12,7 @@ import {
   FieldBasedIndexPatternColumn,
   SeriesType,
   OperationType,
+  YConfig,
 } from '../../../../../lens/public';
 
 import { PersistableFilter } from '../../../../../lens/common';
@@ -21,6 +22,7 @@ import { ExistsFilter } from '../../../../../../../src/plugins/data/common/es_qu
 export const ReportViewTypes = {
   pld: 'page-load-dist',
   kpi: 'kpi-trends',
+  cwv: 'core-web-vitals',
   upd: 'uptime-duration',
   upp: 'uptime-pings',
   svl: 'service-latency',
@@ -37,16 +39,22 @@ export type ReportViewTypeId = keyof typeof ReportViewTypes;
 
 export type ReportViewType = ValueOf<typeof ReportViewTypes>;
 
+export interface ColumnFilter {
+  language: 'kuery';
+  query: string;
+}
+
 export interface ReportDefinition {
   field: string;
   required?: boolean;
   custom?: boolean;
-  defaultValue?: string;
   options?: Array<{
-    field: string;
+    id: string;
+    field?: string;
     label: string;
     description?: string;
-    columnType?: 'range' | 'operation';
+    columnType?: 'range' | 'operation' | 'FILTER_RECORDS';
+    columnFilters?: ColumnFilter[];
   }>;
 }
 
@@ -66,6 +74,7 @@ export interface DataSeries {
   hasOperationType: boolean;
   palette?: PaletteOutput;
   yTitle?: string;
+  yConfig?: YConfig[];
 }
 
 export type URLReportDefinition = Record<string, string[]>;
@@ -99,13 +108,14 @@ export type AppDataType = 'synthetics' | 'ux' | 'infra_logs' | 'infra_metrics' |
 
 type FormatType = 'duration' | 'number';
 type InputFormat = 'microseconds' | 'milliseconds' | 'seconds';
-type OutputFormat = 'asSeconds' | 'asMilliseconds' | 'humanize';
+type OutputFormat = 'asSeconds' | 'asMilliseconds' | 'humanize' | 'humanizePrecise';
 
 export interface FieldFormatParams {
   inputFormat: InputFormat;
   outputFormat: OutputFormat;
   outputPrecision?: number;
   showSuffix?: boolean;
+  useShortSuffix?: boolean;
 }
 
 export interface FieldFormat {
