@@ -130,7 +130,8 @@ export class ManifestTask {
       const diff = newManifest.diff(oldManifest);
 
       const persistErrors = await manifestManager.pushArtifacts(
-        diff.additions as InternalArtifactCompleteSchema[]
+        diff.additions as InternalArtifactCompleteSchema[],
+        newManifest
       );
       if (persistErrors.length) {
         reportErrors(this.logger, persistErrors);
