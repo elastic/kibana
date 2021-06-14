@@ -876,6 +876,16 @@ module.exports = {
     },
 
     /**
+     * Cases overrides
+     */
+    {
+      files: ['x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'arrow-body-style': ['error', 'as-needed'],
+      },
+    },
+
+    /**
      * Security Solution overrides
      */
     {
