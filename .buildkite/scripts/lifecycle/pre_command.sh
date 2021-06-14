@@ -8,6 +8,9 @@ if [[ ! -d '.buildkite/node_modules' ]]; then
   cd -
 fi
 
+BUILDKITE_TOKEN="$(vault read -field=buildkite_token_all_jobs secret/kibana-issues/dev/buildkite-ci)"
+export BUILDKITE_TOKEN
+
 # Set up a custom ES Snapshot Manifest if one has been specified for this build
 {
   ES_SNAPSHOT_MANIFEST=${ES_SNAPSHOT_MANIFEST:-$(buildkite-agent meta-data get ES_SNAPSHOT_MANIFEST --default '')}
