@@ -16,7 +16,6 @@ import { useGetUserCasesPermissions } from '../../common/lib/kibana';
 import { getCaseUrl } from '../../common/components/link_to';
 import { navTabs } from '../../app/home/home_navigations';
 import { CaseView } from '../components/case_view';
-import { permissionsReadOnlyErrorMessage, CaseCallOut } from '../components/callout';
 
 export const CaseDetailsPage = React.memo(() => {
   const history = useHistory();
@@ -35,12 +34,6 @@ export const CaseDetailsPage = React.memo(() => {
   return caseId != null ? (
     <>
       <WrapperPage noPadding>
-        {userPermissions != null && !userPermissions?.crud && userPermissions?.read && (
-          <CaseCallOut
-            title={permissionsReadOnlyErrorMessage.title}
-            messages={[{ ...permissionsReadOnlyErrorMessage, title: '' }]}
-          />
-        )}
         <CaseView
           caseId={caseId}
           subCaseId={subCaseId}

@@ -25,6 +25,7 @@ import { getNewsFeed } from '../../services/get_news_feed';
 import { getBucketSize } from '../../utils/get_bucket_size';
 import { DataSections } from './data_sections';
 import { LoadingObservability } from './loading_observability';
+import { useKibana } from '../../utils/kibana_react';
 
 interface Props {
   routeParams: RouteParams<'/overview'>;
@@ -39,6 +40,11 @@ function calculateBucketSize({ start, end }: { start?: number; end?: number }) {
 export function OverviewPage({ routeParams }: Props) {
   useTrackPageview({ app: 'observability-overview', path: 'overview' });
   useTrackPageview({ app: 'observability-overview', path: 'overview', delay: 15000 });
+
+  // TODO: figure out if this is really necessary? If I don't add this then navigating from cases to
+  // the overview page leaves the glasses icon in the header
+  useKibana().services.chrome.setBadge();
+
   const { core, ObservabilityPageTemplate } = usePluginContext();
 
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();

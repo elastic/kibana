@@ -12,7 +12,6 @@ import { useGetUserCasesPermissions } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { AllCases } from '../components/all_cases';
 
-import { permissionsReadOnlyErrorMessage, CaseCallOut } from '../components/callout';
 import { CaseFeatureNoPermissions } from './feature_no_permissions';
 import { SecurityPageName } from '../../app/types';
 
@@ -22,12 +21,6 @@ export const CasesPage = React.memo(() => {
   return userPermissions == null || userPermissions?.read ? (
     <>
       <WrapperPage>
-        {userPermissions != null && !userPermissions?.crud && userPermissions?.read && (
-          <CaseCallOut
-            title={permissionsReadOnlyErrorMessage.title}
-            messages={[{ ...permissionsReadOnlyErrorMessage, title: '' }]}
-          />
-        )}
         <AllCases userCanCrud={userPermissions?.crud ?? false} />
       </WrapperPage>
       <SpyRoute pageName={SecurityPageName.case} />
