@@ -379,11 +379,13 @@ describe('Terms Agg Other bucket helper', () => {
 
     test('does not build query if sum_other_doc_count is 0 (exhaustive terms)', () => {
       const aggConfigs = getAggConfigs(nestedTerm.aggs);
-      expect(buildOtherBucketAgg(
-        aggConfigs,
-        aggConfigs.aggs[1] as IBucketAggConfig,
-        exhaustiveNestedTermResponse
-      )).toBeFalsy();
+      expect(
+        buildOtherBucketAgg(
+          aggConfigs,
+          aggConfigs.aggs[1] as IBucketAggConfig,
+          exhaustiveNestedTermResponse
+        )
+      ).toBeFalsy();
     });
 
     test('excludes exists filter for scripted fields', () => {
