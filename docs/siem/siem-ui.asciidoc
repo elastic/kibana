@@ -28,7 +28,7 @@ image::../siem/images/workflow.png[Elastic Security workflow]
 Here's an overview of the flow and its components:
 
 * Data is shipped from your hosts to {es} via beat modules and the Elastic https://www.elastic.co/endpoint-security/[Endpoint Security agent integration]. This integration provides capabilities such as collecting events, detecting and preventing {security-guide}/detection-engine-overview.html#malware-prevention[malicious activity], and artifact delivery. The {fleet-guide}/fleet-overview.html[{fleet}] app is used to
-install and manage {agents}s and integrations on your hosts.
+install and manage agents and integrations on your hosts.
 +
 The Endpoint Security integration ships the following data sets:
 +
@@ -113,7 +113,7 @@ Self-protection is enabled on the following 64-bit Windows versions:
 * Windows Server 2016
 * Windows Server 2019
 
-Self-protection is enabled on the following macOS versions:
+And on the following macOS versions:
 
 * macOS 10.15 (Catalina)
 * macOS 11 (Big Sur)
@@ -138,8 +138,6 @@ identify and investigate suspicious activity:
 * https://www.elastic.co/products/stack/machine-learning[{ml-cap}]
 * https://www.elastic.co/products/stack/alerting[Alerting]
 * https://www.elastic.co/products/stack/canvas[Canvas]
-
-
 
 [discrete]
 [[data-sources]]
