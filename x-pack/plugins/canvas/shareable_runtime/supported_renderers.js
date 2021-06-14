@@ -31,7 +31,6 @@ export const renderFunctions = [
   error,
   image,
   repeatImage,
-  revealImage,
   markdown,
   metric,
   pie,

@@ -6,7 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './expression_functions';
-export * from './expression_renderers';
-export * from './elements';
-export * from './ui';
+export { strings as revealImage } from './reveal_image';
