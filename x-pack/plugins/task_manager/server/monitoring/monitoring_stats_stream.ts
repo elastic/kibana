@@ -15,6 +15,7 @@ import { TaskPollingLifecycle } from '../polling_lifecycle';
 import {
   createWorkloadAggregator,
   summarizeWorkloadStat,
+  SummarizedWorkloadStat,
   WorkloadStat,
 } from './workload_statistics';
 import {
@@ -27,6 +28,7 @@ import { ConfigStat, createConfigurationAggregator } from './configuration_stati
 import { TaskManagerConfig } from '../config';
 import { AggregatedStatProvider } from './runtime_statistics_aggregator';
 import { ManagedConfiguration } from '../lib/create_managed_configuration';
+import { CapacityEstimationStat, withCapacityEstimate } from './capacity_estimation';
 
 export { AggregatedStatProvider, AggregatedStat } from './runtime_statistics_aggregator';
 
@@ -48,9 +50,9 @@ export enum HealthStatus {
 interface MonitoredStat<T> {
   timestamp: string;
   value: T;
-  customStatus: HealthStatus;
+  customStatus?: HealthStatus;
 }
-type RawMonitoredStat<T extends JsonObject> = Omit<MonitoredStat<T>, 'customStatus'> & {
+export type RawMonitoredStat<T extends JsonObject> = Omit<MonitoredStat<T>, 'customStatus'> & {
   status: HealthStatus;
 };
 
@@ -58,8 +60,9 @@ export interface RawMonitoringStats {
   last_update: string;
   stats: {
     configuration?: RawMonitoredStat<ConfigStat>;
-    workload?: RawMonitoredStat<WorkloadStat>;
+    workload?: RawMonitoredStat<SummarizedWorkloadStat>;
     runtime?: RawMonitoredStat<SummarizedTaskRunStat>;
+    capacity_estimation?: RawMonitoredStat<CapacityEstimationStat>;
   };
 }
 
@@ -121,45 +124,47 @@ export function summarizeMonitoringStats(
   }: MonitoringStats,
   config: TaskManagerConfig
 ): RawMonitoringStats {
+  const summarizedStats = withCapacityEstimate({
+    ...(configuration
+      ? {
+          configuration: {
+            ...configuration,
+            status: configuration.customStatus ?? HealthStatus.OK,
+          },
+        }
+      : {}),
+    ...(runtime
+      ? {
+          runtime: {
+            timestamp: runtime.timestamp,
+            ...(() => {
+              const summarized = summarizeTaskRunStat(runtime.value, config);
+              return {
+                ...summarized,
+                status: runtime.customStatus ?? summarized.status,
+              };
+            })(),
+          },
+        }
+      : {}),
+    ...(workload
+      ? {
+          workload: {
+            timestamp: workload.timestamp,
+            ...(() => {
+              const summarized = summarizeWorkloadStat(workload.value);
+              return {
+                ...summarized,
+                status: workload.customStatus ?? summarized.status,
+              };
+            })(),
+          },
+        }
+      : {}),
+  });
+
   return {
     last_update,
-    stats: {
-      ...(configuration
-        ? {
-            configuration: {
-              ...configuration,
-              status: configuration.customStatus ?? HealthStatus.OK,
-            },
-          }
-        : {}),
-      ...(runtime
-        ? {
-            runtime: {
-              timestamp: runtime.timestamp,
-              ...(() => {
-                const summarized = summarizeTaskRunStat(runtime.value, config);
-                return {
-                  ...summarized,
-                  status: runtime.customStatus ?? summarized.status,
-                };
-              })(),
-            },
-          }
-        : {}),
-      ...(workload
-        ? {
-            workload: {
-              timestamp: workload.timestamp,
-              ...(() => {
-                const summarized = summarizeWorkloadStat(workload.value);
-                return {
-                  ...summarized,
-                  status: workload.customStatus ?? summarized.status,
-                };
-              })(),
-            },
-          }
-        : {}),
-    },
+    stats: summarizedStats,
   };
 }
