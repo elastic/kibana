@@ -230,9 +230,6 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
             processingPluginRenderer: lensMarkdownPlugin.renderer,
             uiPlugin: lensMarkdownPlugin.plugin,
           },
-          // hooks: {
-          //   useInsertLens,
-          // },
         },
         onCaseDataSuccess,
         onComponentInitialized,

@@ -9,10 +9,6 @@ import React, { useState } from 'react';
 import { EuiMarkdownEditorUiPlugin, EuiMarkdownAstNodePosition } from '@elastic/eui';
 import { Plugin } from 'unified';
 
-interface UseInsertLensReturn {
-  handleOnLensChange: (title: string, id: string | null, graphEventId?: string) => void;
-}
-
 interface LensProcessingPluginRendererProps {
   id: string | null;
   title: string;
@@ -29,13 +25,6 @@ export interface CasesLensIntegration {
     >;
     uiPlugin: EuiMarkdownEditorUiPlugin;
   };
-  // hooks: {
-  //   useInsertLens: (value: string, onChange: (newValue: string) => void) => UseInsertLensReturn;
-  // };
-  // ui?: {
-  //   renderInvestigateInLensActionComponent?: (alertIds: string[]) => JSX.Element;
-  //   renderLensDetailsPanel?: () => JSX.Element;
-  // };
 }
 
 // This context is available to all children of the stateful_event component where the provider is currently set
