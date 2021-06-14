@@ -7,7 +7,7 @@
 
 import React, { memo, useEffect, useState } from 'react';
 import type { AppMountParameters } from 'kibana/public';
-import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel } from '@elastic/eui';
+import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel, EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
 import { createHashHistory } from 'history';
 import { Router, Redirect, Route, Switch } from 'react-router-dom';
@@ -35,7 +35,7 @@ import {
   useStartServices,
   UIExtensionsContext,
 } from './hooks';
-import { Error, Loading } from './components';
+import { Error, Loading, SettingFlyout } from './components';
 import type { UIExtensionsStorage } from './types';
 
 import { FLEET_ROUTING_PATHS } from './constants';
@@ -270,33 +270,47 @@ const FleetTopNav = memo(
 );
 
 export const AppRoutes = memo(
-  ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => (
-    <>
-      <FleetTopNav setHeaderActionMenu={setHeaderActionMenu} />
+  ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => {
+    const { modal, setModal } = useUrlModal();
 
-      <Switch>
-        <Route path={FLEET_ROUTING_PATHS.agents}>
-          <AgentsApp />
-        </Route>
-        <Route path={FLEET_ROUTING_PATHS.policies}>
-          <AgentPolicyApp />
-        </Route>
-        <Route path={FLEET_ROUTING_PATHS.enrollment_tokens}>
-          <EnrollmentTokenListPage />
-        </Route>
-        <Route path={FLEET_ROUTING_PATHS.data_streams}>
-          <DataStreamApp />
-        </Route>
+    return (
+      <>
+        <FleetTopNav setHeaderActionMenu={setHeaderActionMenu} />
 
-        {/* TODO: Move this route to the Integrations app */}
-        <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>
-          <DefaultLayout>
-            <CreatePackagePolicyPage />
-          </DefaultLayout>
-        </Route>
+        {modal === 'settings' && (
+          <EuiPortal>
+            <SettingFlyout
+              onClose={() => {
+                setModal(null);
+              }}
+            />
+          </EuiPortal>
+        )}
 
-        <Redirect to={FLEET_ROUTING_PATHS.agents} />
-      </Switch>
-    </>
-  )
+        <Switch>
+          <Route path={FLEET_ROUTING_PATHS.agents}>
+            <AgentsApp />
+          </Route>
+          <Route path={FLEET_ROUTING_PATHS.policies}>
+            <AgentPolicyApp />
+          </Route>
+          <Route path={FLEET_ROUTING_PATHS.enrollment_tokens}>
+            <EnrollmentTokenListPage />
+          </Route>
+          <Route path={FLEET_ROUTING_PATHS.data_streams}>
+            <DataStreamApp />
+          </Route>
+
+          {/* TODO: Move this route to the Integrations app */}
+          <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>
+            <DefaultLayout>
+              <CreatePackagePolicyPage />
+            </DefaultLayout>
+          </Route>
+
+          <Redirect to={FLEET_ROUTING_PATHS.agents} />
+        </Switch>
+      </>
+    );
+  }
 );
