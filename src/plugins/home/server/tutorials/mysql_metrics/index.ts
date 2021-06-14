@@ -42,7 +42,7 @@ export function mysqlMetricsSpecProvider(context: TutorialContext): TutorialSche
     artifacts: {
       dashboards: [
         {
-          id: '66881e90-0006-11e7-bf7f-c9acc3d3e306-ecs',
+          id: '57b3fb50-6309-11ea-a83e-25b8612d00cc',
           linkLabel: i18n.translate('home.tutorials.mysqlMetrics.artifacts.dashboards.linkLabel', {
             defaultMessage: 'MySQL metrics dashboard',
           }),
