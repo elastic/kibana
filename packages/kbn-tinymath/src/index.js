@@ -7,6 +7,7 @@
  */
 
 const { get } = require('lodash');
+const memoizeOne = require('memoize-one');
 // eslint-disable-next-line import/no-unresolved
 const { parse: parseFn } = require('../grammar');
 const { functions: includedFunctions } = require('./functions');
@@ -23,7 +24,7 @@ function parse(input, options) {
   }
 
   try {
-    return parseFn(input, options);
+    return memoizeOne(parseFn)(input, options);
   } catch (e) {
     throw new Error(`Failed to parse expression. ${e.message}`);
   }
