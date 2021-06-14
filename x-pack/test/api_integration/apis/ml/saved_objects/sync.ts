@@ -88,7 +88,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    it('should sync datafeeds and saved objects2', async () => {
+    it('should sync datafeeds after recreation in ES with different name', async () => {
       // prepare test data
       const jobConfig1 = ml.commonConfig.getADFqSingleMetricJobConfig(adJobId1);
       await ml.api.createAnomalyDetectionJob(jobConfig1, idSpace1);
