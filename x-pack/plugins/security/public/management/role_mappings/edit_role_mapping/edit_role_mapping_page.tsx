@@ -95,7 +95,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
 
     if (loadState === 'loading') {
       return (
-        <EuiPageContent>
+        <EuiPageContent horizontalPosition="center" verticalPosition="center" color="subdued">
           <SectionLoading />
         </EuiPageContent>
       );

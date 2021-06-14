@@ -20,7 +20,7 @@ exports[`SpacesGridPage renders as expected 1`] = `
         <EuiButton
           data-test-subj="createSpace"
           fill={true}
-          iconType="plusInCircle"
+          iconType="plusInCircleFilled"
           onClick={[Function]}
         >
           <FormattedMessage
