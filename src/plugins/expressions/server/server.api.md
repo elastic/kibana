@@ -347,7 +347,7 @@ export interface ExpressionFunctionDefinition<Name extends string, Input, Argume
     help: string;
     inputTypes?: Array<TypeToString<Input>>;
     name: Name;
-    type?: TypeToString<UnwrapPromiseOrReturn<Output>>;
+    type?: TypeString<Output> | UnmappedTypeStrings;
 }
 
 // @public
