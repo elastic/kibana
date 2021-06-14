@@ -63,7 +63,7 @@ describe('Policy Details', () => {
   describe('when displayed with invalid id', () => {
     let releaseApiFailure: () => void;
     beforeEach(() => {
-      http.get.mockImplementationOnce(async () => {
+      http.get.mockImplementation(async () => {
         await new Promise((_, reject) => {
           releaseApiFailure = reject.bind(null, new Error('policy not found'));
         });

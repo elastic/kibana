@@ -16,7 +16,6 @@
     "embeddable",
     "uiActions",
     "kibanaLegacy",
-    "indexPatternManagement",
     "discover",
     "triggersActionsUi"
   ],
@@ -40,7 +39,8 @@
     "dashboard",
     "savedObjects",
     "home",
-    "maps"
+    "maps",
+    "usageCollection"
   ],
   "extraPublicDirs": [
     "common"
