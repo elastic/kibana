@@ -408,4 +408,106 @@ describe('http service', () => {
       expect(body.message).toMatch('[error_type]: error_reason');
     });
   });
+
+  describe('execution context', () => {
+    let root: ReturnType<typeof kbnTestServer.createRoot>;
+    beforeEach(async () => {
+      root = kbnTestServer.createRoot({ plugins: { initialize: false } });
+    }, 30000);
+
+    afterEach(async () => {
+      await root.shutdown();
+    });
+
+    it('sets execution context for a request handler', async () => {
+      const { executionContext, http } = await root.setup();
+      const { createRouter } = http;
+
+      const router = createRouter('');
+      router.get({ path: '/execution-context', validate: false }, (context, req, res) =>
+        res.ok({ body: executionContext.client.get() })
+      );
+
+      await root.start();
+      const response = await kbnTestServer.request.get(root, '/execution-context').expect(200);
+      expect(response.body).toEqual({ requestId: expect.any(String) });
+      expect(response.body.requestId).not.toHaveLength(0);
+    });
+
+    it('execution context is uniq for every request', async () => {
+      const { executionContext, http } = await root.setup();
+      const { createRouter } = http;
+
+      const router = createRouter('');
+      router.get({ path: '/execution-context', validate: false }, (context, req, res) =>
+        res.ok({ body: executionContext.client.get() })
+      );
+
+      await root.start();
+      const responseA = await kbnTestServer.request.get(root, '/execution-context').expect(200);
+      const responseB = await kbnTestServer.request.get(root, '/execution-context').expect(200);
+
+      expect(responseA.body).toEqual({ requestId: expect.any(String) });
+      expect(responseB.body).toEqual({ requestId: expect.any(String) });
+      expect(responseA.body.requestId).not.toBe(responseB.body.requestId);
+    });
+
+    it('execution context is the same for all the lifecycle events', async () => {
+      const { executionContext, http } = await root.setup();
+      const {
+        createRouter,
+        registerOnPreRouting,
+        registerOnPreAuth,
+        registerAuth,
+        registerOnPostAuth,
+        registerOnPreResponse,
+      } = http;
+
+      const router = createRouter('');
+      router.get({ path: '/execution-context', validate: false }, (context, req, res) =>
+        res.ok({ body: executionContext.client.get() })
+      );
+
+      let onPreRoutingContext;
+      registerOnPreRouting((request, response, t) => {
+        onPreRoutingContext = executionContext.client.get();
+        return t.next();
+      });
+
+      let onPreAuthContext;
+      registerOnPreAuth((request, response, t) => {
+        onPreAuthContext = executionContext.client.get();
+        return t.next();
+      });
+
+      let authContext;
+      registerAuth((request, response, t) => {
+        authContext = executionContext.client.get();
+        return t.authenticated();
+      });
+
+      let onPostAuthContext;
+      registerOnPostAuth((request, response, t) => {
+        onPostAuthContext = executionContext.client.get();
+        return t.next();
+      });
+
+      let onPreResponseContext;
+      registerOnPreResponse((request, response, t) => {
+        onPreResponseContext = executionContext.client.get();
+        return t.next();
+      });
+
+      await root.start();
+      const response = await kbnTestServer.request.get(root, '/execution-context').expect(200);
+
+      expect(response.body).toEqual({ requestId: expect.any(String) });
+
+      expect(response.body).toEqual(onPreRoutingContext);
+      expect(response.body).toEqual(onPreAuthContext);
+      expect(response.body).toEqual(authContext);
+      expect(response.body).toEqual(onPostAuthContext);
+      expect(response.body).toEqual(onPreResponseContext);
+    });
+  });
 });
