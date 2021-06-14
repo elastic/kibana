@@ -111,6 +111,23 @@ describe('Event filter form', () => {
     expect(store.getState()!.management!.eventFilters!.form!.hasNameError).toBeFalsy();
   });
 
+  it('should change name with a white space still shows an error', async () => {
+    component = renderComponentWithdata();
+
+    const nameInput = component.getByPlaceholderText(NAME_PLACEHOLDER);
+
+    act(() => {
+      fireEvent.change(nameInput, {
+        target: {
+          value: ' ',
+        },
+      });
+    });
+
+    expect(store.getState()!.management!.eventFilters!.form!.entry!.name).toBe('');
+    expect(store.getState()!.management!.eventFilters!.form!.hasNameError).toBeTruthy();
+  });
+
   it('should change comments', async () => {
     component = renderComponentWithdata();
 

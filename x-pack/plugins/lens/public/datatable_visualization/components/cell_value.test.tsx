@@ -192,5 +192,16 @@ describe('datatable cell renderer', () => {
         style: expect.objectContaining({ color: 'blue' }),
       });
     });
+
+    it('should not color the cell when the value is an array', async () => {
+      const columnConfig = getColumnConfiguration();
+      columnConfig.columns[0].colorMode = 'cell';
+
+      const { setCellProps } = await renderCellComponent(columnConfig, {
+        table: { ...table, rows: [{ a: [10, 123] }] },
+      });
+
+      expect(setCellProps).not.toHaveBeenCalled();
+    });
   });
 });
