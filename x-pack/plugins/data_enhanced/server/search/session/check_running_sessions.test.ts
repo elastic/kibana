@@ -14,7 +14,7 @@ import {
   SearchSessionSavedObjectAttributes,
   ENHANCED_ES_SEARCH_STRATEGY,
   EQL_SEARCH_STRATEGY,
-} from '../../../common';
+} from '../../../../../../src/plugins/data/common';
 import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { SearchSessionsConfig, SearchStatus } from './types';
 import moment from 'moment';

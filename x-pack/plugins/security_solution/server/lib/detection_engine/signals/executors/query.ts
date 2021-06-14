@@ -7,20 +7,20 @@
 
 import { SavedObject } from 'src/core/types';
 import { Logger } from 'src/core/server';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
 } from '../../../../../../alerting/server';
 import { ListClient } from '../../../../../../lists/server';
-import { ExceptionListItemSchema } from '../../../../../common/shared_imports';
-import { RefreshTypes } from '../../types';
 import { getFilter } from '../get_filter';
 import { getInputIndex } from '../get_input_output_index';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
-import { QueryRuleAttributes, RuleRangeTuple } from '../types';
+import { AlertAttributes, RuleRangeTuple, BulkCreate, WrapHits } from '../types';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
+import { QueryRuleParams, SavedQueryRuleParams } from '../../schemas/rule_schemas';
 
 export const queryExecutor = async ({
   rule,
@@ -31,11 +31,12 @@ export const queryExecutor = async ({
   version,
   searchAfterSize,
   logger,
-  refresh,
   eventsTelemetry,
   buildRuleMessage,
+  bulkCreate,
+  wrapHits,
 }: {
-  rule: SavedObject<QueryRuleAttributes>;
+  rule: SavedObject<AlertAttributes<QueryRuleParams | SavedQueryRuleParams>>;
   tuples: RuleRangeTuple[];
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];
@@ -43,9 +44,10 @@ export const queryExecutor = async ({
   version: string;
   searchAfterSize: number;
   logger: Logger;
-  refresh: RefreshTypes;
   eventsTelemetry: TelemetryEventsSender | undefined;
   buildRuleMessage: BuildRuleMessage;
+  bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
 }) => {
   const ruleParams = rule.attributes.params;
   const inputIndex = await getInputIndex(services, version, ruleParams.index);
@@ -64,7 +66,7 @@ export const queryExecutor = async ({
     tuples,
     listClient,
     exceptionsList: exceptionItems,
-    ruleParams,
+    ruleSO: rule,
     services,
     logger,
     eventsTelemetry,
@@ -72,18 +74,9 @@ export const queryExecutor = async ({
     inputIndexPattern: inputIndex,
     signalsIndex: ruleParams.outputIndex,
     filter: esFilter,
-    actions: rule.attributes.actions,
-    name: rule.attributes.name,
-    createdBy: rule.attributes.createdBy,
-    createdAt: rule.attributes.createdAt,
-    updatedBy: rule.attributes.updatedBy,
-    updatedAt: rule.updated_at ?? '',
-    interval: rule.attributes.schedule.interval,
-    enabled: rule.attributes.enabled,
     pageSize: searchAfterSize,
-    refresh,
-    tags: rule.attributes.tags,
-    throttle: rule.attributes.throttle,
     buildRuleMessage,
+    bulkCreate,
+    wrapHits,
   });
 };

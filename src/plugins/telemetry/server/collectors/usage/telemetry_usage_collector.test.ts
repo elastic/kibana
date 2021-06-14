@@ -15,10 +15,11 @@ import {
   readTelemetryFile,
   MAX_FILE_SIZE,
 } from './telemetry_usage_collector';
+import { usageCollectionPluginMock } from '../../../../usage_collection/server/mocks';
 
-const mockUsageCollector = () => ({
-  makeUsageCollector: jest.fn().mockImplementationOnce((arg: object) => arg),
-});
+const mockUsageCollector = () => {
+  return usageCollectionPluginMock.createSetupContract();
+};
 
 describe('telemetry_usage_collector', () => {
   const tempDir = tmpdir();
@@ -105,14 +106,15 @@ describe('telemetry_usage_collector', () => {
       // dir
 
       // the `makeUsageCollector` is mocked above to return the argument passed to it
-      const usageCollector = mockUsageCollector() as any;
+      const usageCollector = mockUsageCollector();
       const collectorOptions = createTelemetryUsageCollector(
         usageCollector,
         async () => tempFiles.unreadable
       );
 
       expect(collectorOptions.type).toBe('static_telemetry');
-      expect(await collectorOptions.fetch({} as any)).toEqual(expectedObject); // Sending any as the callCluster client because it's not needed in this collector but TS requires it when calling it.
+      // @ts-expect-error this collector does not require any arguments in the fetch method, but TS complains
+      expect(await collectorOptions.fetch()).toEqual(expectedObject);
     });
   });
 });

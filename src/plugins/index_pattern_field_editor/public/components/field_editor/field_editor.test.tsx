@@ -14,12 +14,11 @@ import { registerTestBed, TestBed, getCommonActions } from '../../test_utils';
 import { RuntimeFieldPainlessError } from '../../lib';
 import { Field } from '../../types';
 import { FieldEditor, Props, FieldEditorFormState } from './field_editor';
+import { docLinksServiceMock } from '../../../../../core/public/mocks';
 
 const defaultProps: Props = {
   onChange: jest.fn(),
-  links: {
-    runtimePainless: 'https://elastic.co',
-  },
+  links: docLinksServiceMock.createStartContract() as any,
   ctx: {
     existingConcreteFields: [],
     namesNotAllowed: [],
@@ -268,7 +267,7 @@ describe('<FieldEditor />', () => {
       expect(form.getErrorsMessages()).toEqual(['Awwww! Painless syntax error']);
 
       // We change the type and expect the form error to not be there anymore
-      await changeFieldType('long');
+      await changeFieldType('keyword');
       expect(form.getErrorsMessages()).toEqual([]);
     });
   });

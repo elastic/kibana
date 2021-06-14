@@ -41,7 +41,6 @@ export default ({ getService }: FtrProviderContext) => {
     beforeEach(async () => {
       await es.deleteByQuery({
         index: '.kibana',
-        // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
         q: 'type:lens-ui-telemetry',
         wait_for_completion: true,
         refresh: true,
@@ -52,7 +51,6 @@ export default ({ getService }: FtrProviderContext) => {
     afterEach(async () => {
       await es.deleteByQuery({
         index: '.kibana',
-        // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
         q: 'type:lens-ui-telemetry',
         wait_for_completion: true,
         refresh: true,
@@ -176,7 +174,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('should collect telemetry on saved visualization types with a painless script', async () => {
       const esArchiver = getService('esArchiver');
 
-      await esArchiver.loadIfNeeded('lens/basic');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/basic');
 
       const results = await getVisualizationCounts(() => Promise.resolve(es), '.kibana');
 
@@ -196,7 +194,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
       expect(results.saved_overall_total).to.eql(3);
 
-      await esArchiver.unload('lens/basic');
+      await esArchiver.unload('x-pack/test/functional/es_archives/lens/basic');
     });
   });
 };

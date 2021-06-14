@@ -62,6 +62,44 @@ yarn kbn watch-bazel
 === List of Already Migrated Packages to Bazel
 
 - @elastic/datemath
+- @elastic/eslint-config-kibana
+- @elastic/safer-lodash-set
+- @kbn/ace
+- @kbn/analytics
+- @kbn/apm-config-loader
 - @kbn/apm-utils
-
-
+- @kbn/babel-code-parser
+- @kbn/babel-preset
+- @kbn/config
+- @kbn/config-schema
+- @kbn/crypto
+- @kbn/dev-utils
+- @kbn/docs-utils
+- @kbn/es
+- @kbn/eslint-import-resolver-kibana
+- @kbn/eslint-plugin-eslint
+- @kbn/expect
+- @kbn/i18n
+- @kbn/io-ts-utils
+- @kbn/legacy-logging
+- @kbn/logging
+- @kbn/mapbox-gl
+- @kbn/monaco
+- @kbn/rule-data-utils
+- @kbn/securitysolution-es-utils
+- @kbn/securitysolution-io-ts-alerting-types
+- @kbn/securitysolution-io-ts-list-types
+- @kbn/securitysolution-io-ts-types
+- @kbn/securitysolution-io-ts-utils
+- @kbn/securitysolution-list-api
+- @kbn/securitysolution-list-constants
+- @kbn/securitysolution-list-hooks
+- @kbn/securitysolution-list-utils
+- @kbn/securitysolution-utils
+- @kbn/server-http-tools
+- @kbn/server-route-repository
+- @kbn/std
+- @kbn/telemetry-utils
+- @kbn/tinymath
+- @kbn/utility-types
+- @kbn/utils

@@ -9,6 +9,7 @@ import React from 'react';
 import { isEmpty } from 'lodash';
 
 import { CellValueElementProps } from '../../cell_rendering';
+import { ControlColumnProps } from '../control_columns';
 import { inputsModel } from '../../../../../common/store';
 import { BrowserFields } from '../../../../../common/containers/source';
 import {
@@ -46,6 +47,8 @@ interface Props {
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showCheckboxes: boolean;
   tabType?: TimelineTabs;
+  leadingControlColumns: ControlColumnProps[];
+  trailingControlColumns: ControlColumnProps[];
 }
 
 const EventsComponent: React.FC<Props> = ({
@@ -68,6 +71,8 @@ const EventsComponent: React.FC<Props> = ({
   selectedEventIds,
   showCheckboxes,
   tabType,
+  leadingControlColumns,
+  trailingControlColumns,
 }) => (
   <EventsTbody data-test-subj="events">
     {data.map((event, i) => (
@@ -95,6 +100,8 @@ const EventsComponent: React.FC<Props> = ({
         showCheckboxes={showCheckboxes}
         tabType={tabType}
         timelineId={id}
+        leadingControlColumns={leadingControlColumns}
+        trailingControlColumns={trailingControlColumns}
       />
     ))}
   </EventsTbody>

@@ -20,19 +20,48 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { XJsonMode } from '@kbn/ace';
-import { RuntimeField } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
 import { useMlContext } from '../../../../../contexts/ml';
 import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { XJson } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
 import { getCombinedRuntimeMappings } from '../../../../../components/data_grid/common';
 import { isPopulatedObject } from '../../../../../../../common/util/object_utils';
 import { RuntimeMappingsEditor } from './runtime_mappings_editor';
+import { isRuntimeMappings } from '../../../../../../../common';
+import { SwitchModal } from './switch_modal';
 
 const advancedEditorsSidebarWidth = '220px';
-const COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS = i18n.translate(
+const COPY_RUNTIME_FIELDS_TO_CLIPBOARD_TEXT = i18n.translate(
   'xpack.ml.dataframe.analytics.createWizard.indexPreview.copyRuntimeMappingsClipboardTooltip',
   {
-    defaultMessage: 'Copy Dev Console statement of the runtime mappings to the clipboard.',
+    defaultMessage: 'Copy Dev Console statement of the runtime fields to the clipboard.',
+  }
+);
+
+const APPLY_CHANGES_TEXT = i18n.translate(
+  'xpack.ml.dataframe.analytics.createWizard.advancedSourceEditorApplyButtonText',
+  {
+    defaultMessage: 'Apply changes',
+  }
+);
+
+const RUNTIME_FIELDS_EDITOR_HELP_TEXT = i18n.translate(
+  'xpack.ml.dataframe.analytics.createWizard.advancedRuntimeFieldsEditorHelpText',
+  {
+    defaultMessage: 'The advanced editor allows you to edit the runtime fields of the source.',
+  }
+);
+
+const EDIT_SWITCH_LABEL_TEXT = i18n.translate(
+  'xpack.ml.dataframe.analytics.createWizard.advancedEditorRuntimeFieldsSwitchLabel',
+  {
+    defaultMessage: 'Edit runtime fields',
+  }
+);
+
+const RUNTIME_FIELDS_LABEL_TEXT = i18n.translate(
+  'xpack.ml.dataframe.analytics.createWizard.runtimeFieldsLabel',
+  {
+    defaultMessage: 'Runtime fields',
   }
 );
 
@@ -45,12 +74,15 @@ interface Props {
   state: CreateAnalyticsFormProps['state'];
 }
 
-type RuntimeMappings = Record<string, RuntimeField>;
-
 export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
   const [isRuntimeMappingsEditorEnabled, setIsRuntimeMappingsEditorEnabled] = useState<boolean>(
     false
   );
+  const [
+    isRuntimeMappingsEditorSwitchModalVisible,
+    setRuntimeMappingsEditorSwitchModalVisible,
+  ] = useState<boolean>(false);
+
   const [
     isRuntimeMappingsEditorApplyButtonEnabled,
     setIsRuntimeMappingsEditorApplyButtonEnabled,
@@ -59,7 +91,6 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
     advancedEditorRuntimeMappingsLastApplied,
     setAdvancedEditorRuntimeMappingsLastApplied,
   ] = useState<string>();
-  const [advancedEditorRuntimeMappings, setAdvancedEditorRuntimeMappings] = useState<string>();
 
   const { setFormState } = actions;
   const { jobType, previousRuntimeMapping, runtimeMappings } = state.form;
@@ -90,22 +121,22 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
       runtimeMappingsUpdated: true,
       previousRuntimeMapping: previous,
     });
-    setAdvancedEditorRuntimeMappings(prettySourceConfig);
+    setAdvancedRuntimeMappingsConfig(prettySourceConfig);
     setAdvancedEditorRuntimeMappingsLastApplied(prettySourceConfig);
     setIsRuntimeMappingsEditorApplyButtonEnabled(false);
   };
 
-  // If switching to KQL after updating via editor - reset search
   const toggleEditorHandler = (reset = false) => {
     if (reset === true) {
-      setFormState({ runtimeMappingsUpdated: false });
-    }
-    if (isRuntimeMappingsEditorEnabled === false) {
-      setAdvancedEditorRuntimeMappingsLastApplied(advancedEditorRuntimeMappings);
+      setFormState({
+        runtimeMappingsUpdated: false,
+      });
+
+      setAdvancedRuntimeMappingsConfig(advancedEditorRuntimeMappingsLastApplied ?? '');
     }
 
     setIsRuntimeMappingsEditorEnabled(!isRuntimeMappingsEditorEnabled);
-    setIsRuntimeMappingsEditorApplyButtonEnabled(false);
+    setIsRuntimeMappingsEditorApplyButtonEnabled(isRuntimeMappings(runtimeMappings));
   };
 
   useEffect(function getInitialRuntimeMappings() {
@@ -114,8 +145,11 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
       runtimeMappings
     );
 
+    const prettySourceConfig = JSON.stringify(combinedRuntimeMappings, null, 2);
+
     if (combinedRuntimeMappings) {
-      setAdvancedRuntimeMappingsConfig(JSON.stringify(combinedRuntimeMappings, null, 2));
+      setAdvancedRuntimeMappingsConfig(prettySourceConfig);
+      setAdvancedEditorRuntimeMappingsLastApplied(prettySourceConfig);
       setFormState({
         runtimeMappings: combinedRuntimeMappings,
       });
@@ -125,12 +159,7 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiFormRow
-        fullWidth={true}
-        label={i18n.translate('xpack.ml.dataframe.analytics.createWizard.runtimeMappingsLabel', {
-          defaultMessage: 'Runtime mappings',
-        })}
-      >
+      <EuiFormRow fullWidth={true} label={RUNTIME_FIELDS_LABEL_TEXT}>
         <EuiFlexGroup alignItems="baseline" justifyContent="spaceBetween">
           <EuiFlexItem grow={true}>
             {isPopulatedObject(runtimeMappings) ? (
@@ -139,8 +168,8 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
               </EuiText>
             ) : (
               <FormattedMessage
-                id="xpack.ml.dataframe.analytics.createWizard.noRuntimeMappingsLabel"
-                defaultMessage="No runtime mapping"
+                id="xpack.ml.dataframe.analytics.createWizard.noRuntimeFieldLabel"
+                defaultMessage="No runtime field"
               />
             )}
 
@@ -170,27 +199,41 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
                   <EuiFlexItem grow={false}>
                     <EuiSwitch
                       disabled={jobType === undefined}
-                      label={i18n.translate(
-                        'xpack.ml.dataframe.analytics.createWizard.advancedEditorRuntimeMappingsSwitchLabel',
-                        {
-                          defaultMessage: 'Edit runtime mappings',
-                        }
-                      )}
+                      label={EDIT_SWITCH_LABEL_TEXT}
                       checked={isRuntimeMappingsEditorEnabled}
-                      onChange={() => toggleEditorHandler()}
+                      onChange={() => {
+                        if (
+                          isRuntimeMappingsEditorEnabled &&
+                          advancedRuntimeMappingsConfig !== advancedEditorRuntimeMappingsLastApplied
+                        ) {
+                          setRuntimeMappingsEditorSwitchModalVisible(true);
+                          return;
+                        }
+
+                        toggleEditorHandler();
+                      }}
                       data-test-subj="mlDataFrameAnalyticsRuntimeMappingsEditorSwitch"
                     />
+                    {isRuntimeMappingsEditorSwitchModalVisible && (
+                      <SwitchModal
+                        onCancel={() => setRuntimeMappingsEditorSwitchModalVisible(false)}
+                        onConfirm={() => {
+                          setRuntimeMappingsEditorSwitchModalVisible(false);
+                          toggleEditorHandler(true);
+                        }}
+                      />
+                    )}
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiCopy
-                      beforeMessage={COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS}
+                      beforeMessage={COPY_RUNTIME_FIELDS_TO_CLIPBOARD_TEXT}
                       textToCopy={advancedRuntimeMappingsConfig ?? ''}
                     >
                       {(copy: () => void) => (
                         <EuiButtonIcon
                           onClick={copy}
                           iconType="copyClipboard"
-                          aria-label={COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS}
+                          aria-label={COPY_RUNTIME_FIELDS_TO_CLIPBOARD_TEXT}
                         />
                       )}
                     </EuiCopy>
@@ -201,15 +244,7 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
               {isRuntimeMappingsEditorEnabled && (
                 <EuiFlexItem style={{ width: advancedEditorsSidebarWidth }}>
                   <EuiSpacer size="s" />
-                  <EuiText size="xs">
-                    {i18n.translate(
-                      'xpack.ml.dataframe.analytics.createWizard.advancedRuntimeMappingsEditorHelpText',
-                      {
-                        defaultMessage:
-                          'The advanced editor allows you to edit the runtime mappings of the source.',
-                      }
-                    )}
-                  </EuiText>
+                  <EuiText size="xs">{RUNTIME_FIELDS_EDITOR_HELP_TEXT}</EuiText>
                   <EuiSpacer size="s" />
                   <EuiButton
                     style={{ width: 'fit-content' }}
@@ -219,12 +254,7 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
                     disabled={!isRuntimeMappingsEditorApplyButtonEnabled}
                     data-test-subj="mlDataFrameAnalyticsRuntimeMappingsApplyButton"
                   >
-                    {i18n.translate(
-                      'xpack.ml.dataframe.analytics.createWizard.advancedSourceEditorApplyButtonText',
-                      {
-                        defaultMessage: 'Apply changes',
-                      }
-                    )}
+                    {APPLY_CHANGES_TEXT}
                   </EuiButton>
                 </EuiFlexItem>
               )}

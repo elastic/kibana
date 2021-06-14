@@ -43,6 +43,12 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     );
   }
 
+  consoleLog$.subscribe(({ message, level }) => {
+    log[level === 'SEVERE' || level === 'error' ? 'error' : 'debug'](
+      `browser[${level}] ${message}`
+    );
+  });
+
   lifecycle.beforeTests.add(async () => {
     // hard coded default, can be overridden per suite using `browser.setWindowSize()`
     // and will be automatically reverted after each suite

@@ -13,17 +13,18 @@ import { SecurityPageName } from '../../app/types';
 import { getCaseUrl } from '../../common/components/link_to';
 import { useGetUrlSearch } from '../../common/components/navigation/use_get_url_search';
 import { WrapperPage } from '../../common/components/wrapper_page';
-import { useGetUserSavedObjectPermissions } from '../../common/lib/kibana';
+import { useGetUserCasesPermissions, useKibana } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { navTabs } from '../../app/home/home_navigations';
 import { CaseHeaderPage } from '../components/case_header_page';
-import { ConfigureCases } from '../components/configure_cases';
 import { WhitePageWrapper, SectionWrapper } from '../components/wrappers';
 import * as i18n from './translations';
+import { APP_ID } from '../../../common/constants';
 
 const ConfigureCasesPageComponent: React.FC = () => {
+  const { cases } = useKibana().services;
   const history = useHistory();
-  const userPermissions = useGetUserSavedObjectPermissions();
+  const userPermissions = useGetUserCasesPermissions();
   const search = useGetUrlSearch(navTabs.case);
 
   const backOptions = useMemo(
@@ -53,7 +54,10 @@ const ConfigureCasesPageComponent: React.FC = () => {
           </HeaderWrapper>
         </SectionWrapper>
         <WhitePageWrapper>
-          <ConfigureCases userCanCrud={userPermissions?.crud ?? false} />
+          {cases.getConfigureCases({
+            userCanCrud: userPermissions?.crud ?? false,
+            owner: [APP_ID],
+          })}
         </WhitePageWrapper>
       </WrapperPage>
       <SpyRoute pageName={SecurityPageName.case} />

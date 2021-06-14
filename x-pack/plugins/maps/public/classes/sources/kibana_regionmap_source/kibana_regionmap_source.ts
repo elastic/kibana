@@ -104,7 +104,7 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
     return this._descriptor.name;
   }
 
-  canFormatFeatureProperties() {
+  hasTooltipProperties() {
     return true;
   }
 }

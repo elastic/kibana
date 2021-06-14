@@ -18,7 +18,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { getAutoFollowPatternUrl } from '../services/documentation_links';
+import { documentationLinks } from '../services/documentation_links';
 
 export const AutoFollowPatternPageTitle = ({ title }) => (
   <Fragment>
@@ -36,7 +36,7 @@ export const AutoFollowPatternPageTitle = ({ title }) => (
           <EuiButtonEmpty
             size="s"
             flush="right"
-            href={getAutoFollowPatternUrl()}
+            href={documentationLinks.apis.createAutoFollowPattern}
             target="_blank"
             iconType="help"
             data-test-subj="docsButton"

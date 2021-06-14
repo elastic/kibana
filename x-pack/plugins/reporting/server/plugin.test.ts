@@ -65,23 +65,6 @@ describe('Reporting Plugin', () => {
     expect(plugin.setup(coreSetup, pluginSetup)).not.toHaveProperty('then');
   });
 
-  it('logs setup issues', async () => {
-    initContext.config = null;
-    const plugin = new ReportingPlugin(initContext);
-    // @ts-ignore overloading error logger
-    plugin.logger.error = jest.fn();
-    plugin.setup(coreSetup, pluginSetup);
-
-    await sleep(5);
-
-    // @ts-ignore overloading error logger
-    expect(plugin.logger.error.mock.calls[0][0]).toMatch(
-      /Error in Reporting setup, reporting may not function properly/
-    );
-    // @ts-ignore overloading error logger
-    expect(plugin.logger.error).toHaveBeenCalledTimes(2);
-  });
-
   it('has a sync startup process', async () => {
     const plugin = new ReportingPlugin(initContext);
     plugin.setup(coreSetup, pluginSetup);

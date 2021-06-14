@@ -13,17 +13,16 @@ import { PartialAlert } from '../../../../../alerting/server';
 import { readRules } from './read_rules';
 import { UpdateRulesOptions } from './types';
 import { addTags } from './add_tags';
-import { ruleStatusSavedObjectsClientFactory } from '../signals/rule_status_saved_objects_client';
 import { typeSpecificSnakeToCamel } from '../schemas/rule_converters';
-import { InternalRuleUpdate } from '../schemas/rule_schemas';
-import { RuleTypeParams } from '../types';
+import { InternalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
+import { enableRule } from './enable_rule';
 
 export const updateRules = async ({
   alertsClient,
   savedObjectsClient,
   defaultOutputIndex,
   ruleUpdate,
-}: UpdateRulesOptions): Promise<PartialAlert<RuleTypeParams> | null> => {
+}: UpdateRulesOptions): Promise<PartialAlert<RuleParams> | null> => {
   const existingRule = await readRules({
     alertsClient,
     ruleId: ruleUpdate.rule_id,
@@ -34,7 +33,6 @@ export const updateRules = async ({
   }
 
   const typeSpecificParams = typeSpecificSnakeToCamel(ruleUpdate);
-  const throttle = ruleUpdate.throttle ?? null;
   const enabled = ruleUpdate.enabled ?? true;
   const newInternalRule: InternalRuleUpdate = {
     name: ruleUpdate.name,
@@ -74,41 +72,23 @@ export const updateRules = async ({
       ...typeSpecificParams,
     },
     schedule: { interval: ruleUpdate.interval ?? '5m' },
-    actions: throttle === 'rule' ? (ruleUpdate.actions ?? []).map(transformRuleToAlertAction) : [],
+    actions:
+      ruleUpdate.throttle === 'rule'
+        ? (ruleUpdate.actions ?? []).map(transformRuleToAlertAction)
+        : [],
     throttle: null,
     notifyWhen: null,
   };
 
-  /**
-   * TODO: Remove this use of `as` by utilizing the proper type
-   */
-  const update = (await alertsClient.update({
+  const update = await alertsClient.update({
     id: existingRule.id,
     data: newInternalRule,
-  })) as PartialAlert<RuleTypeParams>;
+  });
 
   if (existingRule.enabled && enabled === false) {
     await alertsClient.disable({ id: existingRule.id });
   } else if (!existingRule.enabled && enabled === true) {
-    await alertsClient.enable({ id: existingRule.id });
-
-    const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
-    const ruleCurrentStatus = await ruleStatusClient.find({
-      perPage: 1,
-      sortField: 'statusDate',
-      sortOrder: 'desc',
-      search: existingRule.id,
-      searchFields: ['alertId'],
-    });
-
-    // set current status for this rule to be 'going to run'
-    if (ruleCurrentStatus && ruleCurrentStatus.saved_objects.length > 0) {
-      const currentStatusToDisable = ruleCurrentStatus.saved_objects[0];
-      await ruleStatusClient.update(currentStatusToDisable.id, {
-        ...currentStatusToDisable.attributes,
-        status: 'going to run',
-      });
-    }
+    await enableRule({ rule: existingRule, alertsClient, savedObjectsClient });
   }
   return { ...update, enabled };
 };

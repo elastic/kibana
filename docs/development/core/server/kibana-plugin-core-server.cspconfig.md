@@ -21,6 +21,7 @@ The constructor for this class is marked as internal. Third-party code should no
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
 |  [DEFAULT](./kibana-plugin-core-server.cspconfig.default.md) | <code>static</code> | <code>CspConfig</code> |  |
+|  [disableEmbedding](./kibana-plugin-core-server.cspconfig.disableembedding.md) |  | <code>boolean</code> |  |
 |  [header](./kibana-plugin-core-server.cspconfig.header.md) |  | <code>string</code> |  |
 |  [rules](./kibana-plugin-core-server.cspconfig.rules.md) |  | <code>string[]</code> |  |
 |  [strict](./kibana-plugin-core-server.cspconfig.strict.md) |  | <code>boolean</code> |  |

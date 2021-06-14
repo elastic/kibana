@@ -35,9 +35,10 @@ describe('getTelemetryFailureDetails: get details about server usage fetcher fai
     expect(
       getTelemetryFailureDetails({
         telemetrySavedObject: {
+          // @ts-expect-error the test is intentionally testing malformed SOs
           reportFailureCount: null,
           reportFailureVersion: failureVersion,
-        } as any,
+        },
       })
     ).toStrictEqual({ failureVersion, failureCount: 0 });
     expect(
@@ -51,9 +52,10 @@ describe('getTelemetryFailureDetails: get details about server usage fetcher fai
     expect(
       getTelemetryFailureDetails({
         telemetrySavedObject: {
+          // @ts-expect-error the test is intentionally testing malformed SOs
           reportFailureCount: 'not_a_number',
           reportFailureVersion: failureVersion,
-        } as any,
+        },
       })
     ).toStrictEqual({ failureVersion, failureCount: 0 });
   });
@@ -63,9 +65,10 @@ describe('getTelemetryFailureDetails: get details about server usage fetcher fai
     expect(
       getTelemetryFailureDetails({
         telemetrySavedObject: {
+          // @ts-expect-error the test is intentionally testing malformed SOs
           reportFailureVersion: null,
           reportFailureCount: failureCount,
-        } as any,
+        },
       })
     ).toStrictEqual({ failureCount, failureVersion: undefined });
     expect(
@@ -76,9 +79,10 @@ describe('getTelemetryFailureDetails: get details about server usage fetcher fai
     expect(
       getTelemetryFailureDetails({
         telemetrySavedObject: {
+          // @ts-expect-error the test is intentionally testing malformed SOs
           reportFailureVersion: 123,
           reportFailureCount: failureCount,
-        } as any,
+        },
       })
     ).toStrictEqual({ failureCount, failureVersion: undefined });
   });

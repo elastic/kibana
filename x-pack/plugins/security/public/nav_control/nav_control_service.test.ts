@@ -70,7 +70,7 @@ describe('SecurityNavControlService', () => {
               aria-expanded="false"
               aria-haspopup="true"
               aria-label="Account menu"
-              class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItem__button"
+              class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
               data-test-subj="userMenuButton"
               type="button"
             >
@@ -80,18 +80,22 @@ describe('SecurityNavControlService', () => {
                 <span
                   class="euiButtonEmpty__text"
                 >
-                  <div
-                    aria-label="some-user"
-                    class="euiAvatar euiAvatar--s euiAvatar--user"
-                    style="background-image: none; background-color: rgb(255, 126, 98); color: rgb(0, 0, 0);"
-                    title="some-user"
+                  <span
+                    class="euiHeaderSectionItemButton__content"
                   >
-                    <span
-                      aria-hidden="true"
+                    <div
+                      aria-label="some-user"
+                      class="euiAvatar euiAvatar--s euiAvatar--user"
+                      style="background-color: rgb(255, 126, 98); color: rgb(0, 0, 0);"
+                      title="some-user"
                     >
-                      s
-                    </span>
-                  </div>
+                      <span
+                        aria-hidden="true"
+                      >
+                        s
+                      </span>
+                    </div>
+                  </span>
                 </span>
               </span>
             </button>

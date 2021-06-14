@@ -6,14 +6,14 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { setupEnvironment } from '../../helpers/setup_environment';
+import { licensingMock } from '../../../../../licensing/public/mocks';
+import { setupEnvironment } from '../../helpers';
 import {
   getDefaultHotPhasePolicy,
   POLICY_WITH_INCLUDE_EXCLUDE,
   POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS,
 } from '../constants';
 import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
-import { licensingMock } from '../../../../../licensing/public/mocks';
 
 describe('<EditPolicy /> serialization', () => {
   let testBed: EditPolicyTestBed;
@@ -24,13 +24,7 @@ describe('<EditPolicy /> serialization', () => {
   });
 
   beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
-    httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
-    httpRequestsMockHelpers.setListNodes({
-      nodesByRoles: {},
-      nodesByAttributes: { test: ['123'] },
-      isUsingDeprecatedDataRoleConfig: false,
-    });
+    httpRequestsMockHelpers.setDefaultResponses();
 
     await act(async () => {
       testBed = await setup();
@@ -57,9 +51,9 @@ describe('<EditPolicy /> serialization', () => {
       component.update();
 
       // Set max docs to test whether we keep the unknown fields in that object after serializing
-      await actions.hot.setMaxDocs('1000');
+      await actions.rollover.setMaxDocs('1000');
       // Remove the delete phase to ensure that we also correctly remove data
-      await actions.delete.enable(false);
+      await actions.togglePhase('delete');
       await actions.savePolicy();
 
       const latestRequest = server.requests[server.requests.length - 1];
@@ -115,7 +109,7 @@ describe('<EditPolicy /> serialization', () => {
             actions: {
               rollover: {
                 max_age: '30d',
-                max_size: '50gb',
+                max_primary_shard_size: '50gb',
               },
               set_priority: {
                 priority: 100,
@@ -153,7 +147,7 @@ describe('<EditPolicy /> serialization', () => {
             actions: {
               rollover: {
                 max_age: '30d',
-                max_size: '50gb',
+                max_primary_shard_size: '50gb',
               },
               set_priority: {
                 priority: 100,
@@ -170,50 +164,51 @@ describe('<EditPolicy /> serialization', () => {
     test('setting all values', async () => {
       const { actions } = testBed;
 
-      await actions.hot.toggleDefaultRollover(false);
-      await actions.hot.setMaxSize('123', 'mb');
-      await actions.hot.setMaxDocs('123');
-      await actions.hot.setMaxAge('123', 'h');
-      await actions.hot.toggleForceMerge(true);
+      await actions.rollover.toggleDefault();
+      await actions.rollover.setMaxSize('123', 'mb');
+      await actions.rollover.setMaxDocs('123');
+      await actions.rollover.setMaxAge('123', 'h');
+      await actions.hot.toggleForceMerge();
       await actions.hot.setForcemergeSegmentsCount('123');
       await actions.hot.setBestCompression(true);
-      await actions.hot.toggleShrink(true);
+      await actions.hot.toggleShrink();
       await actions.hot.setShrink('2');
-      await actions.hot.toggleReadonly(true);
-      await actions.hot.toggleIndexPriority(true);
+      await actions.hot.toggleReadonly();
+      await actions.hot.toggleIndexPriority();
       await actions.hot.setIndexPriority('123');
 
       await actions.savePolicy();
       const latestRequest = server.requests[server.requests.length - 1];
       const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
       expect(entirePolicy).toMatchInlineSnapshot(`
-          Object {
-            "name": "my_policy",
-            "phases": Object {
-              "hot": Object {
-                "actions": Object {
-                  "forcemerge": Object {
-                    "index_codec": "best_compression",
-                    "max_num_segments": 123,
-                  },
-                  "readonly": Object {},
-                  "rollover": Object {
-                    "max_age": "123h",
-                    "max_docs": 123,
-                    "max_size": "123mb",
-                  },
-                  "set_priority": Object {
-                    "priority": 123,
-                  },
-                  "shrink": Object {
-                    "number_of_shards": 2,
-                  },
+        Object {
+          "name": "my_policy",
+          "phases": Object {
+            "hot": Object {
+              "actions": Object {
+                "forcemerge": Object {
+                  "index_codec": "best_compression",
+                  "max_num_segments": 123,
                 },
-                "min_age": "0ms",
+                "readonly": Object {},
+                "rollover": Object {
+                  "max_age": "123h",
+                  "max_docs": 123,
+                  "max_primary_shard_size": "50gb",
+                  "max_size": "123mb",
+                },
+                "set_priority": Object {
+                  "priority": 123,
+                },
+                "shrink": Object {
+                  "number_of_shards": 2,
+                },
               },
+              "min_age": "0ms",
             },
-          }
-        `);
+          },
+        }
+      `);
     });
 
     test('setting searchable snapshot', async () => {
@@ -231,8 +226,8 @@ describe('<EditPolicy /> serialization', () => {
 
     test('disabling rollover', async () => {
       const { actions } = testBed;
-      await actions.hot.toggleDefaultRollover(false);
-      await actions.hot.toggleRollover(false);
+      await actions.rollover.toggleDefault();
+      await actions.rollover.toggle();
       await actions.savePolicy();
       const latestRequest = server.requests[server.requests.length - 1];
       const policy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
@@ -245,13 +240,7 @@ describe('<EditPolicy /> serialization', () => {
 
   describe('warm phase', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
-      httpRequestsMockHelpers.setListNodes({
-        nodesByRoles: {},
-        nodesByAttributes: { test: ['123'] },
-        isUsingDeprecatedDataRoleConfig: false,
-      });
-      httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+      httpRequestsMockHelpers.setDefaultResponses();
 
       await act(async () => {
         testBed = await setup();
@@ -263,7 +252,7 @@ describe('<EditPolicy /> serialization', () => {
 
     test('default values', async () => {
       const { actions } = testBed;
-      await actions.warm.enable(true);
+      await actions.togglePhase('warm');
       await actions.warm.setMinAgeValue('11');
       await actions.savePolicy();
       const latestRequest = server.requests[server.requests.length - 1];
@@ -282,60 +271,60 @@ describe('<EditPolicy /> serialization', () => {
 
     test('setting all values', async () => {
       const { actions } = testBed;
-      await actions.warm.enable(true);
+      await actions.togglePhase('warm');
       await actions.warm.setMinAgeValue('11');
       await actions.warm.setDataAllocation('node_attrs');
       await actions.warm.setSelectedNodeAttribute('test:123');
       await actions.warm.setReplicas('123');
-      await actions.warm.toggleShrink(true);
+      await actions.warm.toggleShrink();
       await actions.warm.setShrink('123');
-      await actions.warm.toggleForceMerge(true);
+      await actions.warm.toggleForceMerge();
       await actions.warm.setForcemergeSegmentsCount('123');
       await actions.warm.setBestCompression(true);
-      await actions.warm.toggleReadonly(true);
+      await actions.warm.toggleReadonly();
       await actions.warm.setIndexPriority('123');
       await actions.savePolicy();
       const latestRequest = server.requests[server.requests.length - 1];
       const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
       // Check shape of entire policy
       expect(entirePolicy).toMatchInlineSnapshot(`
-          Object {
-            "name": "my_policy",
-            "phases": Object {
-              "hot": Object {
-                "actions": Object {
-                  "rollover": Object {
-                    "max_age": "30d",
-                    "max_size": "50gb",
-                  },
+        Object {
+          "name": "my_policy",
+          "phases": Object {
+            "hot": Object {
+              "actions": Object {
+                "rollover": Object {
+                  "max_age": "30d",
+                  "max_primary_shard_size": "50gb",
                 },
-                "min_age": "0ms",
               },
-              "warm": Object {
-                "actions": Object {
-                  "allocate": Object {
-                    "number_of_replicas": 123,
-                    "require": Object {
-                      "test": "123",
-                    },
-                  },
-                  "forcemerge": Object {
-                    "index_codec": "best_compression",
-                    "max_num_segments": 123,
-                  },
-                  "readonly": Object {},
-                  "set_priority": Object {
-                    "priority": 123,
-                  },
-                  "shrink": Object {
-                    "number_of_shards": 123,
-                  },
-                },
-                "min_age": "11d",
-              },
+              "min_age": "0ms",
             },
-          }
-        `);
+            "warm": Object {
+              "actions": Object {
+                "allocate": Object {
+                  "number_of_replicas": 123,
+                  "require": Object {
+                    "test": "123",
+                  },
+                },
+                "forcemerge": Object {
+                  "index_codec": "best_compression",
+                  "max_num_segments": 123,
+                },
+                "readonly": Object {},
+                "set_priority": Object {
+                  "priority": 123,
+                },
+                "shrink": Object {
+                  "number_of_shards": 123,
+                },
+              },
+              "min_age": "11d",
+            },
+          },
+        }
+      `);
     });
 
     describe('policy with include and exclude', () => {
@@ -383,13 +372,7 @@ describe('<EditPolicy /> serialization', () => {
 
   describe('cold phase', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
-      httpRequestsMockHelpers.setListNodes({
-        nodesByRoles: {},
-        nodesByAttributes: { test: ['123'] },
-        isUsingDeprecatedDataRoleConfig: false,
-      });
-      httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+      httpRequestsMockHelpers.setDefaultResponses();
 
       await act(async () => {
         testBed = await setup();
@@ -402,7 +385,7 @@ describe('<EditPolicy /> serialization', () => {
     test('default values', async () => {
       const { actions } = testBed;
 
-      await actions.cold.enable(true);
+      await actions.togglePhase('cold');
       await actions.cold.setMinAgeValue('11');
       await actions.savePolicy();
       const latestRequest = server.requests[server.requests.length - 1];
@@ -422,14 +405,14 @@ describe('<EditPolicy /> serialization', () => {
     test('setting all values, excluding searchable snapshot', async () => {
       const { actions } = testBed;
 
-      await actions.cold.enable(true);
+      await actions.togglePhase('cold');
       await actions.cold.setMinAgeValue('123');
       await actions.cold.setMinAgeUnits('s');
       await actions.cold.setDataAllocation('node_attrs');
       await actions.cold.setSelectedNodeAttribute('test:123');
       await actions.cold.setReplicas('123');
-      await actions.cold.setFreeze(true);
-      await actions.cold.toggleReadonly(true);
+      await actions.cold.setFreeze();
+      await actions.cold.toggleReadonly();
       await actions.cold.setIndexPriority('123');
 
       await actions.savePolicy();
@@ -437,43 +420,43 @@ describe('<EditPolicy /> serialization', () => {
       const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
 
       expect(entirePolicy).toMatchInlineSnapshot(`
-          Object {
-            "name": "my_policy",
-            "phases": Object {
-              "cold": Object {
-                "actions": Object {
-                  "allocate": Object {
-                    "number_of_replicas": 123,
-                    "require": Object {
-                      "test": "123",
-                    },
-                  },
-                  "freeze": Object {},
-                  "readonly": Object {},
-                  "set_priority": Object {
-                    "priority": 123,
+        Object {
+          "name": "my_policy",
+          "phases": Object {
+            "cold": Object {
+              "actions": Object {
+                "allocate": Object {
+                  "number_of_replicas": 123,
+                  "require": Object {
+                    "test": "123",
                   },
                 },
-                "min_age": "123s",
-              },
-              "hot": Object {
-                "actions": Object {
-                  "rollover": Object {
-                    "max_age": "30d",
-                    "max_size": "50gb",
-                  },
+                "freeze": Object {},
+                "readonly": Object {},
+                "set_priority": Object {
+                  "priority": 123,
                 },
-                "min_age": "0ms",
               },
+              "min_age": "123s",
             },
-          }
-        `);
+            "hot": Object {
+              "actions": Object {
+                "rollover": Object {
+                  "max_age": "30d",
+                  "max_primary_shard_size": "50gb",
+                },
+              },
+              "min_age": "0ms",
+            },
+          },
+        }
+      `);
     });
 
     // Setting searchable snapshot field disables setting replicas so we test this separately
     test('setting searchable snapshot', async () => {
       const { actions } = testBed;
-      await actions.cold.enable(true);
+      await actions.togglePhase('cold');
       await actions.cold.setMinAgeValue('10');
       await actions.cold.setSearchableSnapshot('my-repo');
       await actions.savePolicy();
@@ -488,7 +471,7 @@ describe('<EditPolicy /> serialization', () => {
   describe('frozen phase', () => {
     test('default value', async () => {
       const { actions } = testBed;
-      await actions.frozen.enable(true);
+      await actions.togglePhase('frozen');
       await actions.frozen.setMinAgeValue('13');
       await actions.frozen.setSearchableSnapshot('myRepo');
 
@@ -550,8 +533,8 @@ describe('<EditPolicy /> serialization', () => {
   describe('delete phase', () => {
     test('default value', async () => {
       const { actions } = testBed;
-      await actions.delete.enable(true);
-      await actions.setWaitForSnapshotPolicy('test');
+      await actions.togglePhase('delete');
+      await actions.delete.setWaitForSnapshotPolicy('test');
       await actions.savePolicy();
       const latestRequest = server.requests[server.requests.length - 1];
       const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);

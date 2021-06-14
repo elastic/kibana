@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { combineLatest } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import {
@@ -16,12 +15,16 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'src/core/server';
-import { mapValues } from 'lodash';
+import { mapValues, once } from 'lodash';
+import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../rule_registry/common/assets';
+import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
+import { RuleDataClient } from '../../rule_registry/server';
 import { APMConfig, APMXPackConfig } from '.';
 import { mergeConfigs } from './index';
 import { UI_SETTINGS } from '../../../../src/plugins/data/common';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
 import { registerApmAlerts } from './lib/alerts/register_apm_alerts';
+import { registerFleetPolicyCallbacks } from './lib/fleet/register_fleet_policy_callbacks';
 import { createApmTelemetry } from './lib/apm_telemetry';
 import { createApmEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
 import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
@@ -29,7 +32,6 @@ import { createApmAgentConfigurationIndex } from './lib/settings/agent_configura
 import { getApmIndices } from './lib/settings/apm_indices/get_apm_indices';
 import { createApmCustomLinkIndex } from './lib/settings/custom_link/create_custom_link_index';
 import { apmIndices, apmTelemetry } from './saved_objects';
-import { createElasticCloudInstructions } from './tutorial/elastic_cloud';
 import { uiSettings } from './ui_settings';
 import type {
   ApmPluginRequestHandlerContext,
@@ -42,8 +44,13 @@ import {
 } from './types';
 import { registerRoutes } from './routes/register_routes';
 import { getGlobalApmServerRouteRepository } from './routes/get_global_apm_server_route_repository';
-
-export type APMRuleRegistry = ReturnType<APMPlugin['setup']>['ruleRegistry'];
+import {
+  PROCESSOR_EVENT,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRANSACTION_TYPE,
+} from '../common/elasticsearch_fieldnames';
+import { tutorialProvider } from './tutorial';
 
 export class APMPlugin
   implements
@@ -96,52 +103,113 @@ export class APMPlugin
       });
     }
 
-    const ossTutorialProvider = plugins.apmOss.getRegisteredTutorialProvider();
-    plugins.home?.tutorials.unregisterTutorial(ossTutorialProvider);
-    plugins.home?.tutorials.registerTutorial(() => {
-      const ossPart = ossTutorialProvider({});
-      if (this.currentConfig!['xpack.apm.ui.enabled'] && ossPart.artifacts) {
-        ossPart.artifacts.application = {
-          path: '/app/apm',
-          label: i18n.translate(
-            'xpack.apm.tutorial.specProvider.artifacts.application.label',
-            {
-              defaultMessage: 'Launch APM',
-            }
-          ),
-        };
-      }
-
-      return {
-        ...ossPart,
-        elasticCloud: createElasticCloudInstructions(plugins.cloud),
-      };
-    });
+    plugins.home?.tutorials.registerTutorial(
+      tutorialProvider({
+        isEnabled: this.currentConfig['xpack.apm.ui.enabled'],
+        indexPatternTitle: this.currentConfig['apm_oss.indexPattern'],
+        cloud: plugins.cloud,
+        indices: {
+          errorIndices: this.currentConfig['apm_oss.errorIndices'],
+          metricsIndices: this.currentConfig['apm_oss.metricsIndices'],
+          onboardingIndices: this.currentConfig['apm_oss.onboardingIndices'],
+          sourcemapIndices: this.currentConfig['apm_oss.sourcemapIndices'],
+          transactionIndices: this.currentConfig['apm_oss.transactionIndices'],
+        },
+      })
+    );
 
     plugins.features.registerKibanaFeature(APM_FEATURE);
 
     registerFeaturesUsage({ licensingPlugin: plugins.licensing });
 
+    const { ruleDataService } = plugins.ruleRegistry;
+    const getCoreStart = () =>
+      core.getStartServices().then(([coreStart]) => coreStart);
+
+    const ready = once(async () => {
+      const componentTemplateName = ruleDataService.getFullAssetName(
+        'apm-mappings'
+      );
+
+      if (!ruleDataService.isWriteEnabled()) {
+        return;
+      }
+
+      await ruleDataService.createOrUpdateComponentTemplate({
+        name: componentTemplateName,
+        body: {
+          template: {
+            settings: {
+              number_of_shards: 1,
+            },
+            mappings: mappingFromFieldMap({
+              [SERVICE_NAME]: {
+                type: 'keyword',
+              },
+              [SERVICE_ENVIRONMENT]: {
+                type: 'keyword',
+              },
+              [TRANSACTION_TYPE]: {
+                type: 'keyword',
+              },
+              [PROCESSOR_EVENT]: {
+                type: 'keyword',
+              },
+            }),
+          },
+        },
+      });
+
+      await ruleDataService.createOrUpdateIndexTemplate({
+        name: ruleDataService.getFullAssetName('apm-index-template'),
+        body: {
+          index_patterns: [
+            ruleDataService.getFullAssetName('observability-apm*'),
+          ],
+          composed_of: [
+            ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
+            componentTemplateName,
+          ],
+        },
+      });
+    });
+
+    ready().catch((err) => {
+      this.logger!.error(err);
+    });
+
+    const ruleDataClient = new RuleDataClient({
+      alias: ruleDataService.getFullAssetName('observability-apm'),
+      getClusterClient: async () => {
+        const coreStart = await getCoreStart();
+        return coreStart.elasticsearch.client.asInternalUser;
+      },
+      ready,
+    });
+
+    const resourcePlugins = mapValues(plugins, (value, key) => {
+      return {
+        setup: value,
+        start: () =>
+          core.getStartServices().then((services) => {
+            const [, pluginsStartContracts] = services;
+            return pluginsStartContracts[
+              key as keyof APMPluginStartDependencies
+            ];
+          }),
+      };
+    }) as APMRouteHandlerResources['plugins'];
+
     registerRoutes({
       core: {
         setup: core,
-        start: () => core.getStartServices().then(([coreStart]) => coreStart),
+        start: getCoreStart,
       },
       logger: this.logger,
       config: currentConfig,
       repository: getGlobalApmServerRouteRepository(),
-      plugins: mapValues(plugins, (value, key) => {
-        return {
-          setup: value,
-          start: () =>
-            core.getStartServices().then((services) => {
-              const [, pluginsStartContracts] = services;
-              return pluginsStartContracts[
-                key as keyof APMPluginStartDependencies
-              ];
-            }),
-        };
-      }) as APMRouteHandlerResources['plugins'],
+      ruleDataClient,
+      plugins: resourcePlugins,
     });
 
     const boundGetApmIndices = async () =>
@@ -150,26 +218,21 @@ export class APMPlugin
         config: await mergedConfig$.pipe(take(1)).toPromise(),
       });
 
-    const apmRuleRegistry = plugins.observability.ruleRegistry.create({
-      name: 'apm',
-      fieldMap: {
-        'service.environment': {
-          type: 'keyword',
-        },
-        'transaction.type': {
-          type: 'keyword',
-        },
-        'processor.event': {
-          type: 'keyword',
-        },
-      },
-    });
+    if (plugins.alerting) {
+      registerApmAlerts({
+        ruleDataClient,
+        alerting: plugins.alerting,
+        ml: plugins.ml,
+        config$: mergedConfig$,
+        logger: this.logger!.get('rule'),
+      });
+    }
 
-    registerApmAlerts({
-      registry: apmRuleRegistry,
-      ml: plugins.ml,
-      config$: mergedConfig$,
-      logger: this.logger!.get('rule'),
+    registerFleetPolicyCallbacks({
+      plugins: resourcePlugins,
+      ruleDataClient,
+      config: this.currentConfig,
+      logger: this.logger,
     });
 
     return {
@@ -201,7 +264,6 @@ export class APMPlugin
           },
         });
       },
-      ruleRegistry: apmRuleRegistry,
     };
   }
 

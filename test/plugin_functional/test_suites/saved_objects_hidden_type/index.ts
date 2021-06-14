@@ -15,6 +15,5 @@ export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
     loadTestFile(require.resolve('./resolve_import_errors'));
     loadTestFile(require.resolve('./find'));
     loadTestFile(require.resolve('./delete'));
-    loadTestFile(require.resolve('./interface/saved_objects_management'));
   });
 }

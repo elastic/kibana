@@ -9,6 +9,7 @@ import React, { ChangeEvent, ReactElement } from 'react';
 import { createMockedDragDropContext } from './mocks';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { InnerIndexPatternDataPanel, IndexPatternDataPanel, MemoizedDataPanel } from './datapanel';
+import { FieldList } from './field_list';
 import { FieldItem } from './field_item';
 import { NoFieldsCallout } from './no_fields_callout';
 import { act } from 'react-dom/test-utils';
@@ -21,6 +22,7 @@ import { documentField } from './document_field';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { indexPatternFieldEditorPluginMock } from '../../../../../src/plugins/index_pattern_field_editor/public/mocks';
 import { getFieldByNameFactory } from './pure_helpers';
+import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
 
 const fieldsOne = [
   {
@@ -235,7 +237,7 @@ const initialState: IndexPatternPrivateState = {
   isFirstExistenceFetch: false,
 };
 
-const dslQuery = { bool: { must: [{ match_all: {} }], filter: [], should: [], must_not: [] } };
+const dslQuery = { bool: { must: [], filter: [], should: [], must_not: [] } };
 
 describe('IndexPattern Data Panel', () => {
   let defaultProps: Parameters<typeof InnerIndexPatternDataPanel>[0] & {
@@ -266,6 +268,7 @@ describe('IndexPattern Data Panel', () => {
       showNoDataPopover: jest.fn(),
       dropOntoWorkspace: jest.fn(),
       hasSuggestionForField: jest.fn(() => false),
+      uiActions: uiActionsPluginMock.createStartContract(),
     };
   });
 
@@ -711,6 +714,30 @@ describe('IndexPattern Data Panel', () => {
       ).toEqual(1);
       wrapper.setProps({ existingFields: { idx1: {} } });
       expect(wrapper.find(NoFieldsCallout).length).toEqual(2);
+    });
+
+    it('should not allow field details when error', () => {
+      const wrapper = mountWithIntl(
+        <InnerIndexPatternDataPanel {...props} existenceFetchFailed={true} />
+      );
+
+      expect(wrapper.find(FieldList).prop('fieldGroups')).toEqual(
+        expect.objectContaining({
+          AvailableFields: expect.objectContaining({ hideDetails: true }),
+        })
+      );
+    });
+
+    it('should allow field details when timeout', () => {
+      const wrapper = mountWithIntl(
+        <InnerIndexPatternDataPanel {...props} existenceFetchTimeout={true} />
+      );
+
+      expect(wrapper.find(FieldList).prop('fieldGroups')).toEqual(
+        expect.objectContaining({
+          AvailableFields: expect.objectContaining({ hideDetails: false }),
+        })
+      );
     });
 
     it('should filter down by name', () => {

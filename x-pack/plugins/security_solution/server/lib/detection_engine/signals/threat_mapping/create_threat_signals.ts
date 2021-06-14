@@ -30,28 +30,20 @@ export const createThreatSignals = async ({
   eventsTelemetry,
   alertId,
   outputIndex,
-  params,
+  ruleSO,
   searchAfterSize,
-  actions,
-  createdBy,
-  createdAt,
-  updatedBy,
-  interval,
-  updatedAt,
-  enabled,
-  refresh,
-  tags,
-  throttle,
   threatFilters,
   threatQuery,
   threatLanguage,
   buildRuleMessage,
   threatIndex,
   threatIndicatorPath,
-  name,
   concurrentSearches,
   itemsPerSearch,
+  bulkCreate,
+  wrapHits,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
+  const params = ruleSO.attributes.params;
   logger.debug(buildRuleMessage('Indicator matching rule starting'));
   const perPage = concurrentSearches * itemsPerSearch;
 
@@ -64,6 +56,7 @@ export const createThreatSignals = async ({
     createdSignalsCount: 0,
     createdSignals: [],
     errors: [],
+    warningMessages: [],
   };
 
   let threatListCount = await getThreatListCount({
@@ -127,22 +120,13 @@ export const createThreatSignals = async ({
           eventsTelemetry,
           alertId,
           outputIndex,
-          params,
+          ruleSO,
           searchAfterSize,
-          actions,
-          createdBy,
-          createdAt,
-          updatedBy,
-          updatedAt,
-          interval,
-          enabled,
-          tags,
-          refresh,
-          throttle,
           buildRuleMessage,
-          name,
           currentThreatList: slicedChunk,
           currentResult: results,
+          bulkCreate,
+          wrapHits,
         })
     );
     const searchesPerformed = await Promise.all(concurrentSearchesPerformed);
@@ -173,7 +157,7 @@ export const createThreatSignals = async ({
       language: threatLanguage,
       threatFilters,
       index: threatIndex,
-      // @ts-expect-error@elastic/elasticsearch SortResults might contain null
+      // @ts-expect-error@elastic/elasticsearch SearchSortResults might contain null
       searchAfter: threatList.hits.hits[threatList.hits.hits.length - 1].sort,
       sortField: undefined,
       sortOrder: undefined,

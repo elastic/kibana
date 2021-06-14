@@ -51,6 +51,8 @@ describe('migration v2', () => {
         migrations: {
           skip: false,
           enableV2: true,
+          // There are 53 docs in fixtures. Batch size configured to enforce 3 migration steps.
+          batchSize: 20,
         },
         logging: {
           appenders: {
@@ -93,7 +95,9 @@ describe('migration v2', () => {
       .getAllTypes()
       .reduce((versionMap, type) => {
         if (type.migrations) {
-          const highestVersion = Object.keys(type.migrations).sort(Semver.compare).reverse()[0];
+          const migrationsMap =
+            typeof type.migrations === 'function' ? type.migrations() : type.migrations;
+          const highestVersion = Object.keys(migrationsMap).sort(Semver.compare).reverse()[0];
           return {
             ...versionMap,
             [type.name]: highestVersion,
@@ -153,7 +157,10 @@ describe('migration v2', () => {
       const response = body[migratedIndex];
 
       expect(response).toBeDefined();
-      expect(Object.keys(response.aliases).sort()).toEqual(['.kibana', `.kibana_${kibanaVersion}`]);
+      expect(Object.keys(response.aliases!).sort()).toEqual([
+        '.kibana',
+        `.kibana_${kibanaVersion}`,
+      ]);
     });
 
     it('copies all the document of the previous index to the new one', async () => {

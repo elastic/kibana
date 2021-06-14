@@ -13,8 +13,6 @@
     "kbn:watch": "rm -rf target && ../../node_modules/.bin/tsc --watch"
   },
   "dependencies": {
-    "@kbn/dev-utils": "link:../kbn-dev-utils",
-    "@kbn/test": "link:../kbn-test",
-    "@kbn/utils": "link:../kbn-utils"
+    "@kbn/test": "link:../kbn-test"
   }
 }

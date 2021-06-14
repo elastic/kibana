@@ -36,6 +36,11 @@ test('accepts valid hostnames', () => {
   }
 });
 
+test('accepts `0` as hostname', () => {
+  const { host } = config.schema.validate({ host: '0' });
+  expect(host).toEqual('0');
+});
+
 test('throws if invalid hostname', () => {
   const httpSchema = config.schema;
   const obj = {
@@ -107,6 +112,35 @@ test('can specify max payload as string', () => {
   };
   const configValue = config.schema.validate(obj);
   expect(configValue.maxPayload.getValueInBytes()).toBe(2 * 1024 * 1024);
+});
+
+describe('shutdownTimeout', () => {
+  test('can specify a valid shutdownTimeout', () => {
+    const configValue = config.schema.validate({ shutdownTimeout: '5s' });
+    expect(configValue.shutdownTimeout.asMilliseconds()).toBe(5000);
+  });
+
+  test('can specify a valid shutdownTimeout (lower-edge of 1 second)', () => {
+    const configValue = config.schema.validate({ shutdownTimeout: '1s' });
+    expect(configValue.shutdownTimeout.asMilliseconds()).toBe(1000);
+  });
+
+  test('can specify a valid shutdownTimeout (upper-edge of 2 minutes)', () => {
+    const configValue = config.schema.validate({ shutdownTimeout: '2m' });
+    expect(configValue.shutdownTimeout.asMilliseconds()).toBe(120000);
+  });
+
+  test('should error if below 1s', () => {
+    expect(() => config.schema.validate({ shutdownTimeout: '100ms' })).toThrow(
+      '[shutdownTimeout]: the value should be between 1 second and 2 minutes'
+    );
+  });
+
+  test('should error if over 2 minutes', () => {
+    expect(() => config.schema.validate({ shutdownTimeout: '3m' })).toThrow(
+      '[shutdownTimeout]: the value should be between 1 second and 2 minutes'
+    );
+  });
 });
 
 describe('basePath', () => {
@@ -250,6 +284,34 @@ test('accepts any type of objects for custom headers', () => {
     },
   };
   expect(() => httpSchema.validate(obj)).not.toThrow();
+});
+
+test('forbids the "location" custom response header', () => {
+  const httpSchema = config.schema;
+  const obj = {
+    customResponseHeaders: {
+      location: 'string',
+      Location: 'string',
+      lOcAtIoN: 'string',
+    },
+  };
+  expect(() => httpSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
+    `"[customResponseHeaders]: The following custom response headers are not allowed to be set: location, Location, lOcAtIoN"`
+  );
+});
+
+test('forbids the "refresh" custom response header', () => {
+  const httpSchema = config.schema;
+  const obj = {
+    customResponseHeaders: {
+      refresh: 'string',
+      Refresh: 'string',
+      rEfReSh: 'string',
+    },
+  };
+  expect(() => httpSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
+    `"[customResponseHeaders]: The following custom response headers are not allowed to be set: refresh, Refresh, rEfReSh"`
+  );
 });
 
 describe('with TLS', () => {

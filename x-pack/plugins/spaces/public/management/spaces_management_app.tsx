@@ -14,7 +14,10 @@ import type { StartServicesAccessor } from 'src/core/public';
 import type { RegisterManagementAppArgs } from 'src/plugins/management/public';
 import type { Space } from 'src/plugins/spaces_oss/common';
 
-import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  RedirectAppLinks,
+} from '../../../../../src/plugins/kibana_react/public';
 import type { PluginsStart } from '../plugin';
 import type { SpacesManager } from '../spaces_manager';
 
@@ -34,13 +37,16 @@ export const spacesManagementApp = Object.freeze({
       }),
 
       async mount({ element, setBreadcrumbs, history }) {
-        const [startServices, { SpacesGridPage }, { ManageSpacePage }] = await Promise.all([
+        const [
+          [coreStart, { features }],
+          { SpacesGridPage },
+          { ManageSpacePage },
+        ] = await Promise.all([
           getStartServices(),
           import('./spaces_grid'),
           import('./edit_space'),
         ]);
 
-        const [{ notifications, i18n: i18nStart, application }, { features }] = startServices;
         const spacesBreadcrumbs = [
           {
             text: i18n.translate('xpack.spaces.management.breadcrumb', {
@@ -49,6 +55,7 @@ export const spacesManagementApp = Object.freeze({
             href: `/`,
           },
         ];
+        const { notifications, i18n: i18nStart, application } = coreStart;
 
         const SpacesGridPageWithBreadcrumbs = () => {
           setBreadcrumbs(spacesBreadcrumbs);
@@ -114,23 +121,25 @@ export const spacesManagementApp = Object.freeze({
         };
 
         render(
-          <i18nStart.Context>
-            <RedirectAppLinks application={application}>
-              <Router history={history}>
-                <Switch>
-                  <Route path={['', '/']} exact>
-                    <SpacesGridPageWithBreadcrumbs />
-                  </Route>
-                  <Route path="/create">
-                    <CreateSpacePageWithBreadcrumbs />
-                  </Route>
-                  <Route path="/edit/:spaceId">
-                    <EditSpacePageWithBreadcrumbs />
-                  </Route>
-                </Switch>
-              </Router>
-            </RedirectAppLinks>
-          </i18nStart.Context>,
+          <KibanaContextProvider services={coreStart}>
+            <i18nStart.Context>
+              <RedirectAppLinks application={application}>
+                <Router history={history}>
+                  <Switch>
+                    <Route path={['', '/']} exact>
+                      <SpacesGridPageWithBreadcrumbs />
+                    </Route>
+                    <Route path="/create">
+                      <CreateSpacePageWithBreadcrumbs />
+                    </Route>
+                    <Route path="/edit/:spaceId">
+                      <EditSpacePageWithBreadcrumbs />
+                    </Route>
+                  </Switch>
+                </Router>
+              </RedirectAppLinks>
+            </i18nStart.Context>
+          </KibanaContextProvider>,
           element
         );
 

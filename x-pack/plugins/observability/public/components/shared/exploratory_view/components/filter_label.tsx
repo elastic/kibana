@@ -8,7 +8,7 @@
 import React from 'react';
 import { injectI18n } from '@kbn/i18n/react';
 import { esFilters, Filter, IndexPattern } from '../../../../../../../../src/plugins/data/public';
-import { useIndexPatternContext } from '../hooks/use_default_index_pattern';
+import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useSeriesFilters } from '../hooks/use_series_filters';
 
@@ -58,7 +58,7 @@ export function FilterLabel({
 }: Props) {
   const FilterItem = injectI18n(esFilters.FilterItem);
 
-  const { indexPattern } = useIndexPatternContext();
+  const { indexPattern } = useAppIndexPatternContext();
 
   const filter = buildFilterLabel({ field, value, label, indexPattern, negate });
 

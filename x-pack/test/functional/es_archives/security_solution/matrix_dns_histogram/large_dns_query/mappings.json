@@ -1,0 +1,35 @@
+{
+  "type": "index",
+  "value": {
+    "index": "large_volume_dns_data",
+    "mappings": {
+      "dynamic": "strict",
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "dns": {
+          "properties": {
+            "question": {
+              "properties": {
+                "name": {
+                  "type": "keyword"
+                },
+                "registered_domain": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "refresh_interval": "5s",
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

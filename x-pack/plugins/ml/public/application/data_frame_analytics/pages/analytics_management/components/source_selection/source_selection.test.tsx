@@ -97,6 +97,7 @@ jest.mock('../../../../../util/index_utils', () => {
         };
       }
     ),
+    isCcsIndexPattern: (a: string) => a.includes(':'),
   };
 });
 

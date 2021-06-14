@@ -24,12 +24,12 @@ import type {
   VisTypeTimeseriesRequestServices,
   VisTypeTimeseriesVisDataRequest,
 } from '../../types';
-import type { PanelSchema } from '../../../common/types';
+import type { Panel } from '../../../common/types';
 
 export async function getTableData(
   requestContext: VisTypeTimeseriesRequestHandlerContext,
   req: VisTypeTimeseriesVisDataRequest,
-  panel: PanelSchema,
+  panel: Panel,
   services: VisTypeTimeseriesRequestServices
 ) {
   const panelIndex = await services.cachedIndexPatternFetcher(panel.index_pattern);
@@ -107,7 +107,7 @@ export async function getTableData(
       series,
     };
   } catch (err) {
-    if (err.body || err.name === 'KQLSyntaxError') {
+    if (err.body) {
       err.response = err.body;
 
       return {
@@ -115,5 +115,6 @@ export async function getTableData(
         ...handleErrorResponse(panel)(err),
       };
     }
+    return meta;
   }
 }

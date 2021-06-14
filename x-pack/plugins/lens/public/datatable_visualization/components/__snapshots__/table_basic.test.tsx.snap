@@ -13,6 +13,13 @@ exports[`DatatableComponent it renders actions column when there are row actions
           "b": "left",
           "c": "right",
         },
+        "getColorForValue": [MockFunction],
+        "minMaxByColumnId": Object {
+          "c": Object {
+            "max": 3,
+            "min": 3,
+          },
+        },
         "rowHasRowClickTriggerActions": Array [
           true,
           true,
@@ -244,6 +251,13 @@ exports[`DatatableComponent it renders the title and value 1`] = `
           "b": "left",
           "c": "right",
         },
+        "getColorForValue": [MockFunction],
+        "minMaxByColumnId": Object {
+          "c": Object {
+            "max": 3,
+            "min": 3,
+          },
+        },
         "rowHasRowClickTriggerActions": undefined,
         "table": Object {
           "columns": Array [
@@ -461,6 +475,13 @@ exports[`DatatableComponent it should not render actions on header when it is in
           "a": "left",
           "b": "left",
           "c": "right",
+        },
+        "getColorForValue": [MockFunction],
+        "minMaxByColumnId": Object {
+          "c": Object {
+            "max": 3,
+            "min": 3,
+          },
         },
         "rowHasRowClickTriggerActions": Array [
           false,

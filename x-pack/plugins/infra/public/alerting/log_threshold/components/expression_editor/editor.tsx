@@ -102,7 +102,11 @@ export const ExpressionEditor: React.FC<
           <Editor {...props} />
         </SourceStatusWrapper>
       ) : (
-        <LogSourceProvider sourceId={sourceId} fetch={http!.fetch}>
+        <LogSourceProvider
+          sourceId={sourceId}
+          fetch={http!.fetch}
+          indexPatternsService={props.data.indexPatterns}
+        >
           <SourceStatusWrapper {...props}>
             <Editor {...props} />
           </SourceStatusWrapper>
@@ -115,10 +119,10 @@ export const ExpressionEditor: React.FC<
 export const SourceStatusWrapper: React.FC = ({ children }) => {
   const {
     initialize,
-    isLoadingSourceStatus,
+    loadSource,
+    isLoadingSourceConfiguration,
+    hasFailedLoadingSource,
     isUninitialized,
-    hasFailedLoadingSourceStatus,
-    loadSourceStatus,
   } = useLogSourceContext();
 
   useMount(() => {
@@ -127,13 +131,13 @@ export const SourceStatusWrapper: React.FC = ({ children }) => {
 
   return (
     <>
-      {isLoadingSourceStatus || isUninitialized ? (
+      {isLoadingSourceConfiguration || isUninitialized ? (
         <div>
           <EuiSpacer size="m" />
           <EuiLoadingSpinner size="l" />
           <EuiSpacer size="m" />
         </div>
-      ) : hasFailedLoadingSourceStatus ? (
+      ) : hasFailedLoadingSource ? (
         <EuiCallOut
           title={i18n.translate('xpack.infra.logs.alertFlyout.sourceStatusError', {
             defaultMessage: 'Sorry, there was a problem loading field information',
@@ -141,7 +145,7 @@ export const SourceStatusWrapper: React.FC = ({ children }) => {
           color="danger"
           iconType="alert"
         >
-          <EuiButton onClick={loadSourceStatus} iconType="refresh">
+          <EuiButton onClick={loadSource} iconType="refresh">
             {i18n.translate('xpack.infra.logs.alertFlyout.sourceStatusErrorTryAgain', {
               defaultMessage: 'Try again',
             })}
@@ -159,7 +163,7 @@ export const Editor: React.FC<
 > = (props) => {
   const { setAlertParams, alertParams, errors } = props;
   const [hasSetDefaults, setHasSetDefaults] = useState<boolean>(false);
-  const { sourceId, sourceStatus } = useLogSourceContext();
+  const { sourceId, resolvedSourceConfiguration } = useLogSourceContext();
 
   const {
     criteria: criteriaErrors,
@@ -169,24 +173,24 @@ export const Editor: React.FC<
   } = useMemo(() => decodeOrThrow(errorsRT)(errors), [errors]);
 
   const supportedFields = useMemo(() => {
-    if (sourceStatus?.logIndexFields) {
-      return sourceStatus.logIndexFields.filter((field) => {
+    if (resolvedSourceConfiguration?.fields) {
+      return resolvedSourceConfiguration.fields.filter((field) => {
         return (field.type === 'string' || field.type === 'number') && field.searchable;
       });
     } else {
       return [];
     }
-  }, [sourceStatus]);
+  }, [resolvedSourceConfiguration]);
 
   const groupByFields = useMemo(() => {
-    if (sourceStatus?.logIndexFields) {
-      return sourceStatus.logIndexFields.filter((field) => {
+    if (resolvedSourceConfiguration?.fields) {
+      return resolvedSourceConfiguration.fields.filter((field) => {
         return field.type === 'string' && field.aggregatable;
       });
     } else {
       return [];
     }
-  }, [sourceStatus]);
+  }, [resolvedSourceConfiguration]);
 
   const updateThreshold = useCallback(
     (thresholdParams) => {

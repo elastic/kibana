@@ -16,6 +16,7 @@ import {
 import { buildEmbeddableFilters } from '../../../public/lib/build_embeddable_filters';
 import { ExpressionValueFilter } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
+import { SavedObjectReference } from '../../../../../../src/core/types';
 
 interface Arguments {
   id: string;
@@ -52,6 +53,31 @@ export function savedSearch(): ExpressionFunctionDefinition<
         embeddableType: EmbeddableTypes.search,
         generatedAt: Date.now(),
       };
+    },
+    extract(state) {
+      const refName = 'savedSearch.id';
+      const references: SavedObjectReference[] = [
+        {
+          name: refName,
+          type: 'search',
+          id: state.id[0] as string,
+        },
+      ];
+      return {
+        state: {
+          ...state,
+          id: [refName],
+        },
+        references,
+      };
+    },
+
+    inject(state, references) {
+      const reference = references.find((ref) => ref.name === 'savedSearch.id');
+      if (reference) {
+        state.id[0] = reference.id;
+      }
+      return state;
     },
   };
 }

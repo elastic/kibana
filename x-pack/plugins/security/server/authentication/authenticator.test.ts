@@ -20,6 +20,10 @@ import {
   loggingSystemMock,
 } from 'src/core/server/mocks';
 
+import {
+  AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
+  AUTH_URL_HASH_QUERY_STRING_PARAMETER,
+} from '../../common/constants';
 import type { SecurityLicenseFeatures } from '../../common/licensing';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
@@ -338,7 +342,7 @@ describe('Authenticator', () => {
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
-          event: { action: 'user_login', category: 'authentication', outcome: 'success' },
+          event: { action: 'user_login', category: ['authentication'], outcome: 'success' },
         })
       );
     });
@@ -354,7 +358,7 @@ describe('Authenticator', () => {
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
-          event: { action: 'user_login', category: 'authentication', outcome: 'failure' },
+          event: { action: 'user_login', category: ['authentication'], outcome: 'failure' },
         })
       );
     });
@@ -1781,13 +1785,13 @@ describe('Authenticator', () => {
       );
     });
 
-    it('returns `notHandled` if session does not exist.', async () => {
+    it('redirects to login form if session does not exist.', async () => {
       const request = httpServerMock.createKibanaRequest();
       mockOptions.session.get.mockResolvedValue(null);
       mockBasicAuthenticationProvider.logout.mockResolvedValue(DeauthenticationResult.notHandled());
 
       await expect(authenticator.logout(request)).resolves.toEqual(
-        DeauthenticationResult.notHandled()
+        DeauthenticationResult.redirectTo('/mock-server-basepath/login?msg=LOGGED_OUT')
       );
 
       expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
@@ -1844,12 +1848,12 @@ describe('Authenticator', () => {
       expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
     });
 
-    it('returns `notHandled` if session does not exist and provider name is invalid', async () => {
+    it('redirects to login form if session does not exist and provider name is invalid', async () => {
       const request = httpServerMock.createKibanaRequest({ query: { provider: 'foo' } });
       mockOptions.session.get.mockResolvedValue(null);
 
       await expect(authenticator.logout(request)).resolves.toEqual(
-        DeauthenticationResult.notHandled()
+        DeauthenticationResult.redirectTo('/mock-server-basepath/login?msg=LOGGED_OUT')
       );
 
       expect(mockBasicAuthenticationProvider.logout).not.toHaveBeenCalled();
@@ -1936,6 +1940,66 @@ describe('Authenticator', () => {
       expect(mockOptions.featureUsageService.recordPreAccessAgreementUsage).toHaveBeenCalledTimes(
         1
       );
+    });
+  });
+
+  describe('`getRequestOriginalURL` method', () => {
+    let authenticator: Authenticator;
+    let mockOptions: ReturnType<typeof getMockOptions>;
+    beforeEach(() => {
+      mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
+      authenticator = new Authenticator(mockOptions);
+    });
+
+    it('filters out auth specific query parameters', () => {
+      expect(authenticator.getRequestOriginalURL(httpServerMock.createKibanaRequest())).toBe(
+        '/mock-server-basepath/path'
+      );
+
+      expect(
+        authenticator.getRequestOriginalURL(
+          httpServerMock.createKibanaRequest({
+            query: {
+              [AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER]: 'saml1',
+            },
+          })
+        )
+      ).toBe('/mock-server-basepath/path');
+
+      expect(
+        authenticator.getRequestOriginalURL(
+          httpServerMock.createKibanaRequest({
+            query: {
+              [AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER]: 'saml1',
+              [AUTH_URL_HASH_QUERY_STRING_PARAMETER]: '#some-hash',
+            },
+          })
+        )
+      ).toBe('/mock-server-basepath/path');
+    });
+
+    it('allows to include additional query parameters', () => {
+      expect(
+        authenticator.getRequestOriginalURL(httpServerMock.createKibanaRequest(), [
+          ['some-param', 'some-value'],
+          ['some-param2', 'some-value2'],
+        ])
+      ).toBe('/mock-server-basepath/path?some-param=some-value&some-param2=some-value2');
+
+      expect(
+        authenticator.getRequestOriginalURL(
+          httpServerMock.createKibanaRequest({
+            query: {
+              [AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER]: 'saml1',
+              [AUTH_URL_HASH_QUERY_STRING_PARAMETER]: '#some-hash',
+            },
+          }),
+          [
+            ['some-param', 'some-value'],
+            [AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER, 'oidc1'],
+          ]
+        )
+      ).toBe('/mock-server-basepath/path?some-param=some-value&auth_provider_hint=oidc1');
     });
   });
 });

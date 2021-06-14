@@ -1,14 +1,14 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "incremental": false,
-    "outDir": "./target/out",
-    "declarationDir": "./target/types",
-    "stripInternal": true,
     "declaration": true,
     "declarationMap": true,
+    "incremental": true,
+    "outDir": "target",
+    "rootDir": "src",
     "sourceMap": true,
-    "sourceRoot": "../../../../../packages/kbn-config-schema/src",
+    "sourceRoot": "../../../../packages/kbn-config-schema/src",
+    "stripInternal": true,
     "types": [
       "jest",
       "node"

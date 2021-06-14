@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import { combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { last, map, startWith, switchMap } from 'rxjs/operators';
-import { LogSourceColumnConfiguration } from '../../../../common/http_api/log_sources';
+import { LogSourceColumnConfiguration } from '../../../../common/log_sources';
 import { LogEntryCursor } from '../../../../common/log_entry';
 import { LogEntriesSearchRequestQuery } from '../../../../common/search_strategies/log_entries/log_entries';
 import { flattenDataSearchResponseDescriptor } from '../../../utils/data_search';

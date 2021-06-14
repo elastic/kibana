@@ -5,45 +5,47 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPage, EuiPageHeader } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 import { RouteParams } from '../../routes';
+import { usePluginContext } from '../../hooks/use_plugin_context';
 
 interface CasesProps {
   routeParams: RouteParams<'/cases'>;
 }
 
 export function CasesPage(props: CasesProps) {
+  const { ObservabilityPageTemplate } = usePluginContext();
   return (
-    <EuiPage>
-      <EuiPageHeader
-        pageTitle={
+    <ObservabilityPageTemplate
+      pageHeader={{
+        pageTitle: (
           <>
             {i18n.translate('xpack.observability.casesTitle', { defaultMessage: 'Cases' })}{' '}
             <ExperimentalBadge />
           </>
-        }
-      >
-        <EuiFlexGroup direction="column">
-          <EuiFlexItem>
-            <EuiCallOut
-              title={i18n.translate('xpack.observability.casesDisclaimerTitle', {
-                defaultMessage: 'Coming soon',
+        ),
+      }}
+    >
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem>
+          <EuiCallOut
+            title={i18n.translate('xpack.observability.casesDisclaimerTitle', {
+              defaultMessage: 'Coming soon',
+            })}
+            color="warning"
+            iconType="beaker"
+          >
+            <p>
+              {i18n.translate('xpack.observability.casesDisclaimerText', {
+                defaultMessage: 'This is the future home of cases.',
               })}
-              color="warning"
-              iconType="beaker"
-            >
-              <p>
-                {i18n.translate('xpack.observability.casesDisclaimerText', {
-                  defaultMessage: 'This is the future home of cases.',
-                })}
-              </p>
-            </EuiCallOut>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPageHeader>
-    </EuiPage>
+            </p>
+          </EuiCallOut>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </ObservabilityPageTemplate>
   );
 }

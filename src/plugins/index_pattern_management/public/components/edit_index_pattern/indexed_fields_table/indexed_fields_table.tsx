@@ -68,6 +68,7 @@ export class IndexedFieldsTable extends Component<
             excluded: fieldWildcardMatch ? fieldWildcardMatch(field.name) : false,
             info: helpers.getFieldInfo && helpers.getFieldInfo(indexPattern, field),
             isMapped: !!field.isMapped,
+            hasRuntime: !!field.runtimeField,
           };
         })) ||
       []

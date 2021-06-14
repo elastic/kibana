@@ -286,6 +286,11 @@ export function FilterItem(props: FilterItemProps) {
       message: '',
       status: FILTER_ITEM_OK,
     };
+
+    if (filter.meta?.isMultiIndex) {
+      return label;
+    }
+
     if (indexPatternExists === false) {
       label.status = FILTER_ITEM_ERROR;
       label.title = props.intl.formatMessage({

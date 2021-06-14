@@ -13,6 +13,7 @@ import {
   createMockReportingCore,
   createMockLevelLogger,
   createMockPluginSetup,
+  createMockConfigSchema,
 } from '../../test_helpers';
 import { registerDiagnoseScreenshot } from './screenshot';
 import type { ReportingRequestHandlerContext } from '../../types';
@@ -38,14 +39,7 @@ describe('POST /diagnose/screenshot', () => {
     (generatePngObservableFactory as any).mockResolvedValue(generateMock);
   };
 
-  const config = {
-    get: jest.fn().mockImplementation((...keys) => {
-      if (keys.join('.') === 'queue.timeout') {
-        return 120000;
-      }
-    }),
-    kbnConfig: { get: jest.fn() },
-  };
+  const config = createMockConfigSchema({ queue: { timeout: 120000 } });
   const mockLogger = createMockLevelLogger();
 
   beforeEach(async () => {
@@ -53,13 +47,10 @@ describe('POST /diagnose/screenshot', () => {
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
-      () => ({})
+      () => ({ usesUiCapabilities: () => false })
     );
 
     const mockSetupDeps = createMockPluginSetup({
-      elasticsearch: {
-        legacy: { client: { callAsInternalUser: jest.fn() } },
-      },
       router: httpSetup.createRouter(''),
     });
 

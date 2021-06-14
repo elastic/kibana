@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import { ElasticsearchClient } from 'kibana/server';
 import * as sinon from 'sinon';
-import { ReportingConfig, ReportingCore } from '../../server';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { ReportingCore } from '../../server';
 import {
-  createMockConfig,
   createMockConfigSchema,
   createMockLevelLogger,
   createMockReportingCore,
@@ -16,8 +18,6 @@ import {
 import { createWorkerFactory } from './create_worker';
 // @ts-ignore
 import { Esqueue } from './esqueue';
-// @ts-ignore
-import { ClientMock } from './esqueue/__fixtures__/legacy_elasticsearch';
 import { ExportTypesRegistry } from './export_types_registry';
 
 const logger = createMockLevelLogger();
@@ -37,17 +37,14 @@ const getMockExportTypesRegistry = (
 
 describe('Create Worker', () => {
   let mockReporting: ReportingCore;
-  let mockConfig: ReportingConfig;
   let queue: Esqueue;
-  let client: ClientMock;
+  let client: DeeplyMockedKeys<ElasticsearchClient>;
 
   beforeEach(async () => {
-    const mockSchema = createMockConfigSchema(reportingConfig);
-    mockConfig = createMockConfig(mockSchema);
-    mockReporting = await createMockReportingCore(mockConfig);
+    mockReporting = await createMockReportingCore(createMockConfigSchema(reportingConfig));
     mockReporting.getExportTypesRegistry = () => getMockExportTypesRegistry();
 
-    client = new ClientMock();
+    ({ asInternalUser: client } = elasticsearchServiceMock.createClusterClient());
     queue = new Esqueue('reporting-queue', { client });
     executeJobFactoryStub.reset();
   });

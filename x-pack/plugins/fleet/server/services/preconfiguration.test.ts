@@ -7,10 +7,16 @@
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
+import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+
 import type { PreconfiguredAgentPolicy } from '../../common/types';
 import type { AgentPolicy, NewPackagePolicy, Output } from '../types';
 
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
+
 import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
+
+jest.mock('./agent_policy_update');
 
 const mockInstalledPackages = new Map();
 const mockConfiguredPolicies = new Map();
@@ -27,36 +33,49 @@ const mockDefaultOutput: Output = {
 function getPutPreconfiguredPackagesMock() {
   const soClient = savedObjectsClientMock.create();
   soClient.find.mockImplementation(async ({ type, search }) => {
-    const attributes = mockConfiguredPolicies.get(search!.replace(/"/g, ''));
-    if (attributes) {
-      return {
-        saved_objects: [
-          {
-            id: `mocked-${attributes.preconfiguration_id}`,
-            attributes,
-            type: type as string,
-            score: 1,
-            references: [],
-          },
-        ],
-        total: 1,
-        page: 1,
-        per_page: 1,
-      };
-    } else {
-      return {
-        saved_objects: [],
-        total: 0,
-        page: 1,
-        per_page: 0,
-      };
+    if (type === AGENT_POLICY_SAVED_OBJECT_TYPE) {
+      const id = search!.replace(/"/g, '');
+      const attributes = mockConfiguredPolicies.get(id);
+      if (attributes) {
+        return {
+          saved_objects: [
+            {
+              id: `mocked-${id}`,
+              attributes,
+              type: type as string,
+              score: 1,
+              references: [],
+            },
+          ],
+          total: 1,
+          page: 1,
+          per_page: 1,
+        };
+      }
     }
-  });
-  soClient.create.mockImplementation(async (type, policy) => {
-    const attributes = policy as AgentPolicy;
-    mockConfiguredPolicies.set(attributes.preconfiguration_id, attributes);
     return {
-      id: `mocked-${attributes.preconfiguration_id}`,
+      saved_objects: [],
+      total: 0,
+      page: 1,
+      per_page: 0,
+    };
+  });
+  soClient.get.mockImplementation(async (type, id) => {
+    const attributes = mockConfiguredPolicies.get(id);
+    if (!attributes) throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    return {
+      id: `mocked-${id}`,
+      attributes,
+      type: type as string,
+      references: [],
+    };
+  });
+  soClient.create.mockImplementation(async (type, policy, options) => {
+    const attributes = policy as AgentPolicy;
+    const { id } = options!;
+    mockConfiguredPolicies.set(id, attributes);
+    return {
+      id: `mocked-${id}`,
       attributes,
       type,
       references: [],
@@ -66,15 +85,8 @@ function getPutPreconfiguredPackagesMock() {
 }
 
 jest.mock('./epm/packages/install', () => ({
-  ensureInstalledPackage({
-    pkgName,
-    pkgVersion,
-    force,
-  }: {
-    pkgName: string;
-    pkgVersion: string;
-    force?: boolean;
-  }) {
+  installPackage({ pkgkey, force }: { pkgkey: string; force?: boolean }) {
+    const [pkgName, pkgVersion] = pkgkey.split('-');
     const installedPackage = mockInstalledPackages.get(pkgName);
     if (installedPackage) {
       if (installedPackage.version === pkgVersion) return installedPackage;
@@ -82,7 +94,14 @@ jest.mock('./epm/packages/install', () => ({
 
     const packageInstallation = { name: pkgName, version: pkgVersion, title: pkgName };
     mockInstalledPackages.set(pkgName, packageInstallation);
+
     return packageInstallation;
+  },
+  ensurePackagesCompletedInstall() {
+    return [];
+  },
+  isPackageVersionOrLaterInstalled() {
+    return false;
   },
 }));
 
@@ -112,9 +131,17 @@ jest.mock('./package_policy', () => ({
   },
 }));
 
-jest.mock('./agents/setup', () => ({
-  isAgentsSetup() {
-    return false;
+jest.mock('./app_context', () => ({
+  appContextService: {
+    getLogger: () =>
+      new Proxy(
+        {},
+        {
+          get() {
+            return jest.fn();
+          },
+        }
+      ),
   },
 }));
 

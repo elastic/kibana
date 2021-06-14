@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { ByteSizeValue } from '@kbn/config-schema';
+import { schema, ByteSizeValue } from '@kbn/config-schema';
 import { PluginInitializerContext, RequestHandlerContext } from '../../../../src/core/server';
 import { coreMock, httpServerMock } from '../../../../src/core/server/mocks';
 import { usageCollectionPluginMock } from '../../../../src/plugins/usage_collection/server/mocks';
@@ -43,6 +43,12 @@ describe('Actions Plugin', () => {
         rejectUnauthorized: true,
         maxResponseContentLength: new ByteSizeValue(1000000),
         responseTimeout: moment.duration(60000),
+        cleanupFailedExecutionsTask: {
+          enabled: true,
+          cleanupInterval: schema.duration().validate('5m'),
+          idleInterval: schema.duration().validate('1h'),
+          pageSize: 100,
+        },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -207,6 +213,12 @@ describe('Actions Plugin', () => {
         rejectUnauthorized: true,
         maxResponseContentLength: new ByteSizeValue(1000000),
         responseTimeout: moment.duration(60000),
+        cleanupFailedExecutionsTask: {
+          enabled: true,
+          cleanupInterval: schema.duration().validate('5m'),
+          idleInterval: schema.duration().validate('1h'),
+          pageSize: 100,
+        },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -274,6 +286,12 @@ describe('Actions Plugin', () => {
           rejectUnauthorized: true,
           maxResponseContentLength: new ByteSizeValue(1000000),
           responseTimeout: moment.duration('60s'),
+          cleanupFailedExecutionsTask: {
+            enabled: true,
+            cleanupInterval: schema.duration().validate('5m'),
+            idleInterval: schema.duration().validate('1h'),
+            pageSize: 100,
+          },
           ...overrides,
         };
       }

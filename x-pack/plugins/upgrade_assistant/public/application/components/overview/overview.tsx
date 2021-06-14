@@ -5,70 +5,152 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useEffect } from 'react';
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPageContent,
   EuiPageContentBody,
-  EuiSpacer,
   EuiText,
+  EuiPageHeader,
+  EuiButtonEmpty,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiSpacer,
+  EuiTitle,
+  EuiLink,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { RouteComponentProps } from 'react-router-dom';
 import { useAppContext } from '../../app_context';
-import { LoadingErrorBanner } from '../error_banner';
-import { UpgradeAssistantTabProps } from '../types';
-import { Steps } from './steps';
+import { LatestMinorBanner } from '../latest_minor_banner';
+import { ESDeprecationStats } from './es_stats';
+import { KibanaDeprecationStats } from './kibana_stats';
+import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 
-export const OverviewTab: FunctionComponent<UpgradeAssistantTabProps> = (props) => {
-  const { kibanaVersionInfo } = useAppContext();
+const i18nTexts = {
+  pageTitle: i18n.translate('xpack.upgradeAssistant.overview.pageTitle', {
+    defaultMessage: 'Upgrade Assistant',
+  }),
+  pageDescription: i18n.translate('xpack.upgradeAssistant.overview.pageDescription', {
+    defaultMessage:
+      'Prepare to upgrade by identifying deprecated settings and updating your configuration.',
+  }),
+  docLink: i18n.translate('xpack.upgradeAssistant.overview.documentationLinkText', {
+    defaultMessage: 'Documentation',
+  }),
+  deprecationLoggingTitle: i18n.translate(
+    'xpack.upgradeAssistant.overview.deprecationLoggingTitle',
+    {
+      defaultMessage: 'Deprecation logs',
+    }
+  ),
+  getDeprecationLoggingDescription: (nextMajor: string, href: string) => (
+    <FormattedMessage
+      id="xpack.upgradeAssistant.overview.deprecationLoggingDescription"
+      defaultMessage="Enable {deprecationLoggingLink} to see if you are using deprecated features that will not be available after you upgrade to Elastic {nextMajor}."
+      values={{
+        nextMajor,
+        deprecationLoggingLink: (
+          <EuiLink href={href} target="_blank">
+            {i18n.translate(
+              'xpack.upgradeAssistant.deprecationLoggingDescription.deprecationLoggingLink',
+              {
+                defaultMessage: 'deprecation logging',
+              }
+            )}
+          </EuiLink>
+        ),
+      }}
+    />
+  ),
+};
+
+interface Props {
+  history: RouteComponentProps['history'];
+}
+
+export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
+  const { kibanaVersionInfo, breadcrumbs, docLinks, api } = useAppContext();
   const { nextMajor } = kibanaVersionInfo;
 
+  useEffect(() => {
+    async function sendTelemetryData() {
+      await api.sendTelemetryData({
+        overview: true,
+      });
+    }
+
+    sendTelemetryData();
+  }, [api]);
+
+  useEffect(() => {
+    breadcrumbs.setBreadcrumbs('overview');
+  }, [breadcrumbs]);
+
   return (
-    <>
-      <EuiSpacer />
+    <div data-test-subj="overviewPageContent">
+      <EuiPageHeader
+        bottomBorder
+        pageTitle={i18nTexts.pageTitle}
+        description={i18nTexts.pageDescription}
+        rightSideItems={[
+          <EuiButtonEmpty
+            href={docLinks.links.upgradeAssistant}
+            target="_blank"
+            iconType="help"
+            data-test-subj="documentationLink"
+          >
+            {i18nTexts.docLink}
+          </EuiButtonEmpty>,
+        ]}
+      />
 
-      <EuiText data-test-subj="upgradeAssistantOverviewTabDetail" grow={false}>
-        <p>
-          <FormattedMessage
-            id="xpack.upgradeAssistant.overviewTab.tabDetail"
-            defaultMessage="This assistant helps you prepare your cluster and indices for Elasticsearch
-           {nextEsVersion} For other issues that need your attention, see the Elasticsearch logs."
-            values={{
-              nextEsVersion: `${nextMajor}.x`,
-            }}
-          />
-        </p>
-      </EuiText>
+      <EuiSpacer size="l" />
 
-      <EuiSpacer />
-
-      {props.alertBanner && (
+      <EuiPageContentBody>
         <>
-          {props.alertBanner}
+          {/* Remove this in last minor of the current major (e.g., 7.15) */}
+          <LatestMinorBanner />
+
+          <EuiSpacer size="xl" />
+
+          {/* Deprecation stats */}
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <ESDeprecationStats history={history} />
+            </EuiFlexItem>
+
+            <EuiFlexItem>
+              <KibanaDeprecationStats history={history} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
           <EuiSpacer />
+
+          {/* Deprecation logging */}
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiTitle size="s">
+                <h2>{i18nTexts.deprecationLoggingTitle}</h2>
+              </EuiTitle>
+
+              <EuiText>
+                <p>
+                  {i18nTexts.getDeprecationLoggingDescription(
+                    `${nextMajor}.x`,
+                    docLinks.links.elasticsearch.deprecationLogging
+                  )}
+                </p>
+              </EuiText>
+
+              <EuiSpacer size="m" />
+
+              <DeprecationLoggingToggle />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </>
-      )}
-
-      <EuiPageContent>
-        <EuiPageContentBody>
-          {props.isLoading && (
-            <EuiFlexGroup justifyContent="center">
-              <EuiFlexItem grow={false}>
-                <EuiLoadingSpinner />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
-
-          {props.checkupData && <Steps {...props} />}
-
-          {props.loadingError && <LoadingErrorBanner loadingError={props.loadingError} />}
-        </EuiPageContentBody>
-      </EuiPageContent>
-    </>
+      </EuiPageContentBody>
+    </div>
   );
 };

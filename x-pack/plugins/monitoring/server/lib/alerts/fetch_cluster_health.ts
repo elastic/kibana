@@ -6,7 +6,7 @@
  */
 import { ElasticsearchClient } from 'kibana/server';
 import { AlertCluster, AlertClusterHealth } from '../../../common/types/alerts';
-import { ElasticsearchSource } from '../../../common/types/es';
+import { ElasticsearchSource, ElasticsearchResponse } from '../../../common/types/es';
 
 export async function fetchClusterHealth(
   esClient: ElasticsearchClient,
@@ -59,8 +59,9 @@ export async function fetchClusterHealth(
     },
   };
 
-  const { body: response } = await esClient.search<ElasticsearchSource>(params);
-  return response.hits.hits.map((hit) => {
+  const result = await esClient.search<ElasticsearchSource>(params);
+  const response: ElasticsearchResponse = result.body as ElasticsearchResponse;
+  return (response.hits?.hits ?? []).map((hit) => {
     return {
       health: hit._source!.cluster_state?.status,
       clusterUuid: hit._source!.cluster_uuid,

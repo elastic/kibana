@@ -10,6 +10,7 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { useKibana } from '../../../common/lib/kibana';
 import { useMatrixHistogram } from '.';
 import { MatrixHistogramType } from '../../../../common/search_strategy';
+import { TestProviders } from '../../mock/test_providers';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -26,7 +27,9 @@ describe('useMatrixHistogram', () => {
 
   it('should update request when props has changed', async () => {
     const localProps = { ...props };
-    const { rerender } = renderHook(() => useMatrixHistogram(localProps));
+    const { rerender } = renderHook(() => useMatrixHistogram(localProps), {
+      wrapper: TestProviders,
+    });
 
     localProps.stackByField = 'event.action';
 
@@ -40,7 +43,9 @@ describe('useMatrixHistogram', () => {
   });
 
   it('returns a memoized value', async () => {
-    const { result, rerender } = renderHook(() => useMatrixHistogram(props));
+    const { result, rerender } = renderHook(() => useMatrixHistogram(props), {
+      wrapper: TestProviders,
+    });
 
     const result1 = result.current[1];
     act(() => rerender());

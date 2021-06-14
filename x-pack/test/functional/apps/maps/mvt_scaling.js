@@ -29,9 +29,11 @@ export default function ({ getPageObjects, getService }) {
       const mapboxStyle = await PageObjects.maps.getMapboxStyle();
 
       //Source should be correct
-      expect(mapboxStyle.sources[VECTOR_SOURCE_ID].tiles[0]).to.equal(
-        '/api/maps/mvt/getTile?x={x}&y={y}&z={z}&geometryFieldName=geometry&index=geo_shapes*&requestBody=(_source:!(geometry),docvalue_fields:!(prop1),query:(bool:(filter:!((match_all:())),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(),size:10001,stored_fields:!(geometry,prop1))&geoFieldType=geo_shape'
-      );
+      expect(
+        mapboxStyle.sources[VECTOR_SOURCE_ID].tiles[0].startsWith(
+          `/api/maps/mvt/getTile/{z}/{x}/{y}.pbf?geometryFieldName=geometry&index=geo_shapes*&requestBody=(_source:!(geometry),docvalue_fields:!(prop1),query:(bool:(filter:!(),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(),size:10001,stored_fields:!(geometry,prop1))&geoFieldType=geo_shape`
+        )
+      ).to.equal(true);
 
       //Should correctly load meta for style-rule (sigma is set to 1, opacity to 1)
       const fillLayer = mapboxStyle.layers.find((layer) => layer.id === VECTOR_SOURCE_ID + '_fill');

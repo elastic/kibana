@@ -522,7 +522,7 @@ platform, these were referred to as `hidden` applications and were set
 via the `hidden` property in a {kib} plugin. Chromeless applications
 are also not displayed in the left navbar.
 
-To mark an application as chromeless, specify `chromeless: false` when
+To mark an application as chromeless, specify `chromeless: true` when
 registering your application to hide the chrome UI when the application
 is mounted:
 
@@ -813,7 +813,7 @@ been renamed: `SavedObjectsType.management.importableAndExportable`.
 ----
 `(doc: SavedObjectUnsanitizedDoc, log: SavedObjectsMigrationLogger) => SavedObjectUnsanitizedDoc;`
 ----
-In {kib} Platform, it is 
+In {kib} Platform, it is
 [source,typescript]
 ----
 `(doc: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) => SavedObjectUnsanitizedDoc;`
@@ -1092,7 +1092,7 @@ the current user.
 
 [source,typescript]
 ----
-const request = client.asCurrentUser.ping({}, { 
+const request = client.asCurrentUser.ping({}, {
   headers: {
     authorization: 'foo',
     custom: 'bar',
@@ -1143,9 +1143,9 @@ router.get(
 
 ==== Accessing the client from a collector's `fetch` method
 
-At the moment, the `fetch` method's context receives preconfigured 
-<<scoped-services, scoped clients>> for Elasticsearch and SavedObjects. 
-To help in the transition, both, the legacy (`callCluster`) and new clients are provided, 
+At the moment, the `fetch` method's context receives preconfigured
+<<scoped-services, scoped clients>> for Elasticsearch and SavedObjects.
+To help in the transition, both, the legacy (`callCluster`) and new clients are provided,
 but we strongly discourage using the deprecated legacy ones for any new implementation.
 
 [source,typescript]
@@ -1156,19 +1156,19 @@ usageCollection.makeUsageCollector<MyUsage>({
   schema: {...},
   async fetch(context) {
     const { callCluster, esClient, soClient } = context;
-    
+
     // Before:
     const result = callCluster('search', options)
 
     // After:
     const { body: result } = esClient.search(options);
-    
+
     return result;
   }
 });
 ----
 
-Regarding the `soClient`, it is encouraged to use it instead of the plugin's owned SavedObject's repository 
+Regarding the `soClient`, it is encouraged to use it instead of the plugin's owned SavedObject's repository
 as we used to do in the past.
 
 Before:
@@ -1176,7 +1176,7 @@ Before:
 [source,typescript]
 ----
 function getUsageCollector(
-  usageCollection: UsageCollectionSetup, 
+  usageCollection: UsageCollectionSetup,
   getSavedObjectsRepository: () => ISavedObjectsRepository | undefined
 ) {
   usageCollection.makeUsageCollector<MyUsage>({
@@ -1185,12 +1185,12 @@ function getUsageCollector(
     schema: {...},
     async fetch() {
       const savedObjectsRepository = getSavedObjectsRepository();
-      
+
       const { attributes: result } = await savedObjectsRepository.get('my-so-type', 'my-so-id');
-      
+
       return result;
     }
-  });  
+  });
 }
 ----
 
@@ -1205,10 +1205,10 @@ function getUsageCollector(usageCollection: UsageCollectionSetup) {
     schema: {...},
     async fetch({ soClient }) {
       const { attributes: result } = await soClient.get('my-so-type', 'my-so-id');
-      
+
       return result;
     }
-  });  
+  });
 }
 ----
 

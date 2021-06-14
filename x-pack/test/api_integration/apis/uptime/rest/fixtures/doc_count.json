@@ -1,4 +1,5 @@
 {
   "indexExists": true,
-  "docCount": 1
+  "docCount": 1,
+  "indices": "heartbeat-7*,synthetics-*"
 }

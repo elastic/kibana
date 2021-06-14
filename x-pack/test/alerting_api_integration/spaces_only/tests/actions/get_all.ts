@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { Spaces } from '../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -35,7 +36,17 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
 
-      await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connectors`).expect(200, [
+      const { body: connectors } = await supertest
+        .get(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connectors`)
+        .expect(200);
+
+      // the custom tls connectors have dynamic ports, so remove them before
+      // comparing to what we expect
+      const nonCustomTlsConnectors = connectors.filter(
+        (conn: { id: string }) => !conn.id.startsWith('custom.tls.')
+      );
+
+      expect(nonCustomTlsConnectors).to.eql([
         {
           id: 'preconfigured-alert-history-es-index',
           name: 'Alert history Elasticsearch index',
@@ -48,6 +59,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           is_preconfigured: false,
           name: 'My action',
           connector_type_id: 'test.index-record',
+          is_missing_secrets: false,
           config: {
             unencrypted: `This value shouldn't get encrypted`,
           },
@@ -101,7 +113,17 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
 
-      await supertest.get(`${getUrlPrefix(Spaces.other.id)}/api/actions/connectors`).expect(200, [
+      const { body: connectors } = await supertest
+        .get(`${getUrlPrefix(Spaces.other.id)}/api/actions/connectors`)
+        .expect(200);
+
+      // the custom tls connectors have dynamic ports, so remove them before
+      // comparing to what we expect
+      const nonCustomTlsConnectors = connectors.filter(
+        (conn: { id: string }) => !conn.id.startsWith('custom.tls.')
+      );
+
+      expect(nonCustomTlsConnectors).to.eql([
         {
           id: 'preconfigured-alert-history-es-index',
           name: 'Alert history Elasticsearch index',
@@ -158,7 +180,17 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           .expect(200);
         objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
 
-        await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/actions`).expect(200, [
+        const { body: connectors } = await supertest
+          .get(`${getUrlPrefix(Spaces.space1.id)}/api/actions`)
+          .expect(200);
+
+        // the custom tls connectors have dynamic ports, so remove them before
+        // comparing to what we expect
+        const nonCustomTlsConnectors = connectors.filter(
+          (conn: { id: string }) => !conn.id.startsWith('custom.tls.')
+        );
+
+        expect(nonCustomTlsConnectors).to.eql([
           {
             id: 'preconfigured-alert-history-es-index',
             name: 'Alert history Elasticsearch index',
@@ -171,6 +203,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
             isPreconfigured: false,
             name: 'My action',
             actionTypeId: 'test.index-record',
+            isMissingSecrets: false,
             config: {
               unencrypted: `This value shouldn't get encrypted`,
             },

@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-export enum AlertSeverityLevel {
-  warning = 'warning',
-  critical = 'critical',
-}
+import { estypes } from '@elastic/elasticsearch';
 
-const alertSeverityLevelValues = {
-  [AlertSeverityLevel.warning]: 70,
-  [AlertSeverityLevel.critical]: 90,
+export type PutIndexTemplateRequest = estypes.IndicesPutIndexTemplateRequest & {
+  body?: { composed_of?: string[] };
 };
 
-export function getAlertSeverityLevelValue(level: AlertSeverityLevel) {
-  return alertSeverityLevelValues[level];
+export interface ClusterPutComponentTemplateBody {
+  template: {
+    settings: {
+      number_of_shards: number;
+    };
+    mappings: estypes.MappingTypeMapping;
+  };
 }

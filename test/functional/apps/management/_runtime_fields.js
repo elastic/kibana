@@ -17,12 +17,13 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['settings']);
   const testSubjects = getService('testSubjects');
 
-  describe('runtime fields', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/95376
+  describe.skip('runtime fields', function () {
     this.tags(['skipFirefox']);
 
     before(async function () {
       await browser.setWindowSize(1200, 800);
-      await esArchiver.load('discover');
+      await esArchiver.load('test/functional/fixtures/es_archiver/discover');
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});
       await kibanaServer.uiSettings.update({});
@@ -54,6 +55,7 @@ export default function ({ getService, getPageObjects }) {
         await testSubjects.click('editFieldFormat');
         await PageObjects.settings.setFieldType('Long');
         await PageObjects.settings.changeFieldScript('emit(6);');
+        await testSubjects.find('changeWarning');
         await PageObjects.settings.clickSaveField();
         await PageObjects.settings.confirmSave();
       });

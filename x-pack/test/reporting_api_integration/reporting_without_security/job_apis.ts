@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { forOwn } from 'lodash';
-import { JOB_PARAMS_RISON_CSV_DEPRECATED } from '../fixtures';
+import { JOB_PARAMS_RISON_CSV_DEPRECATED } from '../services/fixtures';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -16,15 +16,15 @@ export default function ({ getService }: FtrProviderContext) {
   const supertestNoAuth = getService('supertestWithoutAuth');
   const reportingAPI = getService('reportingAPI');
 
-  describe('Job Listing APIs, Without Security', () => {
+  describe('Job Listing APIs', () => {
     before(async () => {
-      await esArchiver.load('reporting/logs');
-      await esArchiver.load('logstash_functional');
+      await esArchiver.load('x-pack/test/functional/es_archives/reporting/logs');
+      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
     });
 
     after(async () => {
-      await esArchiver.unload('reporting/logs');
-      await esArchiver.unload('logstash_functional');
+      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/logs');
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
     });
 
     afterEach(async () => {

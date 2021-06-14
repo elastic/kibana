@@ -47,7 +47,7 @@ describe('Discover flyout', function () {
     const component = mountWithIntl(<DiscoverGridFlyout {...props} />);
 
     const url = findTestSubject(component, 'docTableRowAction').prop('href');
-    expect(url).toMatchInlineSnapshot(`"/base#/doc/the-index-pattern-id/i?id=1"`);
+    expect(url).toMatchInlineSnapshot(`"/base/app/discover#/doc/the-index-pattern-id/i?id=1"`);
     findTestSubject(component, 'euiFlyoutCloseButton').simulate('click');
     expect(props.onClose).toHaveBeenCalled();
   });
@@ -60,7 +60,7 @@ describe('Discover flyout', function () {
     const actions = findTestSubject(component, 'docTableRowAction');
     expect(actions.length).toBe(2);
     expect(actions.first().prop('href')).toMatchInlineSnapshot(
-      `"/base#/doc/index-pattern-with-timefield-id/i?id=1"`
+      `"/base/app/discover#/doc/index-pattern-with-timefield-id/i?id=1"`
     );
     expect(actions.last().prop('href')).toMatchInlineSnapshot(
       `"/base/app/discover#/context/index-pattern-with-timefield-id/1?_g=(filters:!())&_a=(columns:!(date),filters:!())"`
@@ -142,5 +142,25 @@ describe('Discover flyout', function () {
     findTestSubject(component, 'pagination-button-previous').simulate('click');
     expect(props.setExpandedDoc).toHaveBeenCalledTimes(1);
     expect(props.setExpandedDoc.mock.calls[0][0]._id).toBe('4');
+  });
+
+  it('allows navigating with arrow keys through documents', () => {
+    const props = getProps();
+    const component = mountWithIntl(<DiscoverGridFlyout {...props} />);
+    findTestSubject(component, 'docTableDetailsFlyout').simulate('keydown', { key: 'ArrowRight' });
+    expect(props.setExpandedDoc).toHaveBeenCalledWith(expect.objectContaining({ _id: '2' }));
+    component.setProps({ ...props, hit: props.hits[1] });
+    findTestSubject(component, 'docTableDetailsFlyout').simulate('keydown', { key: 'ArrowLeft' });
+    expect(props.setExpandedDoc).toHaveBeenCalledWith(expect.objectContaining({ _id: '1' }));
+  });
+
+  it('should not navigate with keypresses when already at the border of documents', () => {
+    const props = getProps();
+    const component = mountWithIntl(<DiscoverGridFlyout {...props} />);
+    findTestSubject(component, 'docTableDetailsFlyout').simulate('keydown', { key: 'ArrowLeft' });
+    expect(props.setExpandedDoc).not.toHaveBeenCalled();
+    component.setProps({ ...props, hit: props.hits[props.hits.length - 1] });
+    findTestSubject(component, 'docTableDetailsFlyout').simulate('keydown', { key: 'ArrowRight' });
+    expect(props.setExpandedDoc).not.toHaveBeenCalled();
   });
 });

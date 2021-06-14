@@ -100,7 +100,7 @@ export const getSavedObjects = (): SavedObject[] => [
         defaultMessage: '[Flights] Airline Carrier',
       }),
       visState:
-        '{"title":"[Flights] Airline Carrier","type":"pie","params":{"type":"pie","addTooltip":true,"addLegend":true,"legendPosition":"right","isDonut":true,"labels":{"show":true,"values":true,"last_level":true,"truncate":100}},"aggs":[{"id":"1","enabled":true,"type":"count","schema":"metric","params":{}},{"id":"2","enabled":true,"type":"terms","schema":"segment","params":{"field":"Carrier","size":5,"order":"desc","orderBy":"1","otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing"}}]}',
+        '{"title":"[Flights] Airline Carrier","type":"pie","params":{"type":"pie","addTooltip":true,"addLegend":true,"legendPosition":"right","isDonut":true,"labels":{"show":true,"values":true,"last_level":true,"truncate":100},"palette":{"type":"palette","name":"default"}},"aggs":[{"id":"1","enabled":true,"type":"count","schema":"metric","params":{}},{"id":"2","enabled":true,"type":"terms","schema":"segment","params":{"field":"Carrier","size":5,"order":"desc","orderBy":"1","otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing"}}]}',
       uiStateJSON: '{"vis":{"legendOpen":false}}',
       description: '',
       version: 1,
@@ -438,10 +438,10 @@ export const getSavedObjects = (): SavedObject[] => [
     attributes: {
       title: 'kibana_sample_data_flights',
       timeFieldName: 'timestamp',
-      fields:
-        '[{"name":"hour_of_day","type":"number","count":0,"scripted":true,"script":"doc[\'timestamp\'].value.hourOfDay","lang":"painless","searchable":true,"aggregatable":true,"readFromDocValues":false}]',
       fieldFormatMap:
         '{"hour_of_day":{"id":"number","params":{"pattern":"00"}},"AvgTicketPrice":{"id":"number","params":{"pattern":"$0,0.[00]"}}}',
+        runtimeFieldMap:
+        '{"hour_of_day":{"type":"long","script":{"source":"emit(doc[\'timestamp\'].value.hourOfDay);"}}}',
     },
     references: [],
   },

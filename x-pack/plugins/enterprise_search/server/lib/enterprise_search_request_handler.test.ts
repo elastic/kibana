@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mockConfig, mockLogger } from '../__mocks__';
+import { mockConfig, mockLogger, mockHttpAgent } from '../__mocks__';
 
 import {
   ENTERPRISE_SEARCH_KIBANA_COOKIE,
@@ -94,6 +94,17 @@ describe('EnterpriseSearchRequestHandler', () => {
           path: '/api/example',
         });
         await makeAPICall(requestHandler, { body: { bodacious: true } });
+
+        EnterpriseSearchAPI.shouldHaveBeenCalledWith('http://localhost:3002/api/example', {
+          body: '{"bodacious":true}',
+        });
+      });
+
+      it('passes a body if that body is a string buffer', async () => {
+        const requestHandler = enterpriseSearchRequestHandler.createRequest({
+          path: '/api/example',
+        });
+        await makeAPICall(requestHandler, { body: Buffer.from('{"bodacious":true}') });
 
         EnterpriseSearchAPI.shouldHaveBeenCalledWith('http://localhost:3002/api/example', {
           body: '{"bodacious":true}',
@@ -465,6 +476,7 @@ const EnterpriseSearchAPI = {
       headers: { Authorization: 'Basic 123', ...JSON_HEADER },
       method: 'GET',
       body: undefined,
+      agent: mockHttpAgent,
       ...expectedParams,
     });
   },

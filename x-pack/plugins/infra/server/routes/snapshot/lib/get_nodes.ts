@@ -53,21 +53,25 @@ export const getNodes = async (
   client: ESSearchClient,
   snapshotRequest: SnapshotRequest,
   source: InfraSource,
-  logQueryFields: LogQueryFields,
-  compositeSize: number
+  compositeSize: number,
+  logQueryFields?: LogQueryFields
 ) => {
   let nodes;
 
   if (snapshotRequest.metrics.find((metric) => metric.type === 'logRate')) {
     // *Only* the log rate metric has been requested
     if (snapshotRequest.metrics.length === 1) {
-      nodes = await transformAndQueryData({
-        client,
-        snapshotRequest,
-        source,
-        compositeSize,
-        sourceOverrides: logQueryFields,
-      });
+      if (logQueryFields != null) {
+        nodes = await transformAndQueryData({
+          client,
+          snapshotRequest,
+          source,
+          compositeSize,
+          sourceOverrides: logQueryFields,
+        });
+      } else {
+        nodes = { nodes: [], interval: '60s' };
+      }
     } else {
       // A scenario whereby a single host might be shipping metrics and logs.
       const metricsWithoutLogsMetrics = snapshotRequest.metrics.filter(
@@ -79,13 +83,16 @@ export const getNodes = async (
         source,
         compositeSize,
       });
-      const logRateNodes = await transformAndQueryData({
-        client,
-        snapshotRequest: { ...snapshotRequest, metrics: [{ type: 'logRate' }] },
-        source,
-        compositeSize,
-        sourceOverrides: logQueryFields,
-      });
+      const logRateNodes =
+        logQueryFields != null
+          ? await transformAndQueryData({
+              client,
+              snapshotRequest: { ...snapshotRequest, metrics: [{ type: 'logRate' }] },
+              source,
+              compositeSize,
+              sourceOverrides: logQueryFields,
+            })
+          : { nodes: [], interval: '60s' };
       // Merge nodes where possible - e.g. a single host is shipping metrics and logs
       const mergedNodes = nodesWithoutLogsMetrics.nodes.map((node) => {
         const logRateNode = logRateNodes.nodes.find(

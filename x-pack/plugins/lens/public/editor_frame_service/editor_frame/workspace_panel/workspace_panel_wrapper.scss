@@ -12,6 +12,9 @@
   overflow: visible;
   border: none;
   height: 100%;
+  @include kbnThemeStyle('v7') {
+    border: none !important; // sass-lint:disable-line no-important
+  }
 
   .lnsWorkspacePanelWrapper__pageContentBody {
     @include euiScrollBar;
@@ -28,13 +31,17 @@
       overflow: hidden;
     }
   }
+
+  &.lnsWorkspacePanelWrapper--fullscreen {
+    margin-bottom: 0;
+  }
 }
 
 .lnsWorkspacePanel__dragDrop {
   width: 100%;
   height: 100%;
   border: $euiBorderThin;
-  border-radius: $euiBorderRadius;
+  border-radius: $euiBorderRadiusSmall;
 
   &.lnsDragDrop-isDropTarget {
     @include lnsDroppable;
@@ -58,6 +65,10 @@
     .lnsDropIllustration__hand {
       animation: lnsWorkspacePanel__illustrationPulseContinuous 1.5s ease-in-out 0s infinite normal forwards;
     }
+  }
+
+  &.lnsWorkspacePanel__dragDrop--fullscreen {
+    border: none;
   }
 }
 

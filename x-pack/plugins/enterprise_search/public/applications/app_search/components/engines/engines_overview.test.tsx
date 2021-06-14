@@ -6,16 +6,17 @@
  */
 
 import '../../../__mocks__/shallow_useeffect.mock';
-import { setMockValues, setMockActions, rerender } from '../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { rerender } from '../../../test_helpers';
 
 import { LoadingState, EmptyState } from './components';
-import { EnginesTable } from './engines_table';
+import { EnginesTable } from './components/tables/engines_table';
+import { MetaEnginesTable } from './components/tables/meta_engines_table';
 
 import { EnginesOverview } from './';
 
@@ -41,7 +42,11 @@ describe('EnginesOverview', () => {
     },
     metaEnginesLoading: false,
     hasPlatinumLicense: false,
+    // AppLogic
     myRole: { canManageEngines: false },
+    // MetaEnginesTableLogic
+    expandedSourceEngines: {},
+    conflictingEnginesSets: {},
   };
   const actions = {
     loadEngines: jest.fn(),
@@ -120,7 +125,7 @@ describe('EnginesOverview', () => {
         });
         const wrapper = shallow(<EnginesOverview />);
 
-        expect(wrapper.find(EnginesTable)).toHaveLength(2);
+        expect(wrapper.find(MetaEnginesTable)).toHaveLength(1);
         expect(actions.loadMetaEngines).toHaveBeenCalled();
       });
 
@@ -136,26 +141,6 @@ describe('EnginesOverview', () => {
           expect(
             wrapper.find('[data-test-subj="appSearchEnginesMetaEngineCreationButton"]').prop('to')
           ).toEqual('/meta_engine_creation');
-        });
-
-        describe('when metaEngines is empty', () => {
-          it('contains an EuiEmptyPrompt that takes users to the create meta engine page', () => {
-            setMockValues({
-              ...valuesWithEngines,
-              hasPlatinumLicense: true,
-              myRole: { canManageEngines: true },
-              metaEngines: [],
-            });
-            const wrapper = shallow(<EnginesOverview />);
-            const metaEnginesTable = wrapper.find(EnginesTable).last().dive();
-            const emptyPrompt = metaEnginesTable.dive().find(EuiEmptyPrompt).dive();
-
-            expect(
-              emptyPrompt
-                .find('[data-test-subj="appSearchMetaEnginesEmptyStateCreationButton"]')
-                .prop('to')
-            ).toEqual('/meta_engine_creation');
-          });
         });
       });
     });
@@ -199,10 +184,10 @@ describe('EnginesOverview', () => {
         const wrapper = shallow(<EnginesOverview />);
         const pageEvent = { page: { index: 0 } };
 
-        wrapper.find(EnginesTable).first().simulate('change', pageEvent);
+        wrapper.find(EnginesTable).simulate('change', pageEvent);
         expect(actions.onEnginesPagination).toHaveBeenCalledWith(1);
 
-        wrapper.find(EnginesTable).last().simulate('change', pageEvent);
+        wrapper.find(MetaEnginesTable).simulate('change', pageEvent);
         expect(actions.onMetaEnginesPagination).toHaveBeenCalledWith(1);
       });
     });

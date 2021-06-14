@@ -11,16 +11,17 @@ import type { RequestHandler, RouteConfig } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import type { AuthenticationServiceStart } from '../../authentication';
+import type { InternalAuthenticationServiceStart } from '../../authentication';
 import { AuthenticationResult, SAMLLogin } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 import type { SecurityRouter } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
+import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';
 import { defineSAMLRoutes } from './saml';
 
 describe('SAML authentication routes', () => {
   let router: jest.Mocked<SecurityRouter>;
-  let authc: DeeplyMockedKeys<AuthenticationServiceStart>;
+  let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;
@@ -52,7 +53,11 @@ describe('SAML authentication routes', () => {
     });
 
     it('correctly defines route.', () => {
-      expect(routeConfig.options).toEqual({ authRequired: false, xsrfRequired: false });
+      expect(routeConfig.options).toEqual({
+        authRequired: false,
+        xsrfRequired: false,
+        tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
+      });
       expect(routeConfig.validate).toEqual({
         body: expect.any(Type),
         query: undefined,

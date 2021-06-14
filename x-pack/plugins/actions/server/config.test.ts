@@ -23,6 +23,12 @@ describe('config validation', () => {
         "allowedHosts": Array [
           "*",
         ],
+        "cleanupFailedExecutionsTask": Object {
+          "cleanupInterval": "PT5M",
+          "enabled": true,
+          "idleInterval": "PT1H",
+          "pageSize": 100,
+        },
         "enabled": true,
         "enabledActionTypes": Array [
           "*",
@@ -58,6 +64,12 @@ describe('config validation', () => {
         "allowedHosts": Array [
           "*",
         ],
+        "cleanupFailedExecutionsTask": Object {
+          "cleanupInterval": "PT5M",
+          "enabled": true,
+          "idleInterval": "PT1H",
+          "pageSize": 100,
+        },
         "enabled": true,
         "enabledActionTypes": Array [
           "*",
@@ -150,6 +162,57 @@ describe('config validation', () => {
           "The confgurations xpack.actions.proxyBypassHosts and xpack.actions.proxyOnlyHosts can not be used at the same time. The configuration xpack.actions.proxyOnlyHosts will be ignored.",
         ],
       ]
+    `);
+  });
+
+  // Most of the customHostSettings tests are in ./lib/custom_host_settings.test.ts
+  // but this one seemed more relevant for this test suite, since url is the one
+  // required property.
+  test('validates customHostSettings contains a URL', () => {
+    const config: Record<string, unknown> = {
+      customHostSettings: [{}],
+    };
+
+    expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+      `"[customHostSettings.0.url]: expected value of type [string] but got [undefined]"`
+    );
+  });
+
+  test('action with tls configuration', () => {
+    const config: Record<string, unknown> = {
+      tls: {
+        verificationMode: 'none',
+        proxyVerificationMode: 'none',
+      },
+    };
+    expect(configSchema.validate(config)).toMatchInlineSnapshot(`
+      Object {
+        "allowedHosts": Array [
+          "*",
+        ],
+        "cleanupFailedExecutionsTask": Object {
+          "cleanupInterval": "PT5M",
+          "enabled": true,
+          "idleInterval": "PT1H",
+          "pageSize": 100,
+        },
+        "enabled": true,
+        "enabledActionTypes": Array [
+          "*",
+        ],
+        "maxResponseContentLength": ByteSizeValue {
+          "valueInBytes": 1048576,
+        },
+        "preconfigured": Object {},
+        "preconfiguredAlertHistoryEsIndex": false,
+        "proxyRejectUnauthorizedCertificates": true,
+        "rejectUnauthorized": true,
+        "responseTimeout": "PT1M",
+        "tls": Object {
+          "proxyVerificationMode": "none",
+          "verificationMode": "none",
+        },
+      }
     `);
   });
 });

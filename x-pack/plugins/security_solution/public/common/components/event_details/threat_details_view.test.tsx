@@ -8,8 +8,6 @@
 import React from 'react';
 
 import { ThreatDetailsView } from './threat_details_view';
-import { mockAlertDetailsData } from './__mocks__';
-import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 
 import { TestProviders } from '../../mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
@@ -20,11 +18,56 @@ jest.mock('../../../detections/containers/detection_engine/rules/use_rule_async'
   };
 });
 
-const props = {
-  data: mockAlertDetailsData as TimelineEventsDetailsItem[],
-  eventId: '5d1d53da502f56aacc14c3cb5c669363d102b31f99822e5d369d4804ed370a31',
-  timelineId: 'detections-page',
-};
+const mostRecentDate = '2021-04-25T18:17:00.000Z';
+
+const threatData = [
+  [
+    {
+      category: 'matched',
+      field: 'matched.field',
+      isObjectArray: false,
+      originalValue: ['test_field_2'],
+      values: ['test_field_2'],
+    },
+    {
+      category: 'first_seen',
+      field: 'first_seen',
+      isObjectArray: false,
+      originalValue: ['2019-04-25T18:17:00.000Z'],
+      values: ['2019-04-25T18:17:00.000Z'],
+    },
+    {
+      category: 'event',
+      field: 'event.reference',
+      isObjectArray: false,
+      originalValue: ['https://test.com/'],
+      values: ['https://test.com/'],
+    },
+    {
+      category: 'event',
+      field: 'event.url',
+      isObjectArray: false,
+      originalValue: ['https://test2.com/'],
+      values: ['https://test2.com/'],
+    },
+  ],
+  [
+    {
+      category: 'first_seen',
+      field: 'first_seen',
+      isObjectArray: false,
+      originalValue: [mostRecentDate],
+      values: [mostRecentDate],
+    },
+    {
+      category: 'matched',
+      field: 'matched.field',
+      isObjectArray: false,
+      originalValue: ['test_field'],
+      values: ['test_field'],
+    },
+  ],
+];
 
 describe('ThreatDetailsView', () => {
   const mount = useMountAppended();
@@ -36,9 +79,36 @@ describe('ThreatDetailsView', () => {
   test('render correct items', () => {
     const wrapper = mount(
       <TestProviders>
-        <ThreatDetailsView {...props} />
+        <ThreatDetailsView threatData={threatData} />
       </TestProviders>
     );
     expect(wrapper.find('[data-test-subj="threat-details-view-0"]').exists()).toEqual(true);
+  });
+
+  test('renders empty view if there are no items', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <ThreatDetailsView threatData={[[]]} />
+      </TestProviders>
+    );
+    expect(wrapper.find('[data-test-subj="empty-threat-details-view"]').exists()).toEqual(true);
+  });
+
+  test('renders link for event.url and event.reference', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <ThreatDetailsView threatData={threatData} />
+      </TestProviders>
+    );
+    expect(wrapper.find('a').length).toEqual(2);
+  });
+
+  test('orders items by first_seen', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <ThreatDetailsView threatData={threatData} />
+      </TestProviders>
+    );
+    expect(wrapper.find('.euiToolTipAnchor span').at(0).text()).toEqual(mostRecentDate);
   });
 });

@@ -49,7 +49,7 @@ describe('When migrating artifacts to fleet', () => {
           type: '',
           id: 'abc123',
           references: [],
-          attributes: await getInternalArtifactMock('windows', 'v1', { compress: true }),
+          attributes: await getInternalArtifactMock('windows', 'v1'),
         },
       ])
     );
@@ -58,22 +58,14 @@ describe('When migrating artifacts to fleet', () => {
   it('should do nothing if there are no artifacts', async () => {
     soClient.find.mockReset();
     soClient.find.mockResolvedValue(createSoFindResult([], 0));
-    await migrateArtifactsToFleet(soClient, artifactClient, logger, true);
+    await migrateArtifactsToFleet(soClient, artifactClient, logger);
     expect(soClient.find).toHaveBeenCalled();
     expect(artifactClient.createArtifact).not.toHaveBeenCalled();
     expect(soClient.delete).not.toHaveBeenCalled();
   });
 
-  it('should do nothing if `fleetServerEnabled` flag is false', async () => {
-    await migrateArtifactsToFleet(soClient, artifactClient, logger, false);
-    expect(logger.debug).toHaveBeenCalledWith(
-      'Skipping Artifacts migration. [fleetServerEnabled] flag is off'
-    );
-    expect(soClient.find).not.toHaveBeenCalled();
-  });
-
   it('should create new artifact via fleet client and delete prior SO one', async () => {
-    await migrateArtifactsToFleet(soClient, artifactClient, logger, true);
+    await migrateArtifactsToFleet(soClient, artifactClient, logger);
     expect(artifactClient.createArtifact).toHaveBeenCalled();
     expect(soClient.delete).toHaveBeenCalled();
   });
@@ -82,7 +74,7 @@ describe('When migrating artifacts to fleet', () => {
     const notFoundError: Error & { output?: { statusCode: number } } = new Error('not found');
     notFoundError.output = { statusCode: 404 };
     soClient.delete.mockRejectedValue(notFoundError);
-    await expect(migrateArtifactsToFleet(soClient, artifactClient, logger, true)).resolves.toEqual(
+    await expect(migrateArtifactsToFleet(soClient, artifactClient, logger)).resolves.toEqual(
       undefined
     );
     expect(logger.debug).toHaveBeenCalledWith(
@@ -93,7 +85,7 @@ describe('When migrating artifacts to fleet', () => {
   it('should Throw() and log error if migration fails', async () => {
     const error = new Error('test: delete failed');
     soClient.delete.mockRejectedValue(error);
-    await expect(migrateArtifactsToFleet(soClient, artifactClient, logger, true)).rejects.toThrow(
+    await expect(migrateArtifactsToFleet(soClient, artifactClient, logger)).rejects.toThrow(
       'Artifact SO migration failed'
     );
   });

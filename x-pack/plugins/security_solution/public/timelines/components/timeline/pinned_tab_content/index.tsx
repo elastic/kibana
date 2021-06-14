@@ -36,6 +36,7 @@ import { TimelineTabs } from '../../../../../common/types/timeline';
 import { DetailsPanel } from '../../side_panel';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
+import { defaultControlColumn, ControlColumnProps } from '../body/control_columns';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   overflow-y: hidden;
@@ -62,11 +63,7 @@ const StyledEuiFlyoutFooter = styled(EuiFlyoutFooter)`
   }
 `;
 
-const ExitFullScreenFlexItem = styled(EuiFlexItem)`
-  &.euiFlexItem {
-    ${({ theme }) => `margin: ${theme.eui.euiSizeS} 0 0 ${theme.eui.euiSizeS};`}
-  }
-
+const ExitFullScreenContainer = styled.div`
   width: 180px;
 `;
 
@@ -202,16 +199,21 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     onEventClosed({ tabType: TimelineTabs.pinned, timelineId });
   }, [timelineId, onEventClosed]);
 
+  const leadingControlColumns: ControlColumnProps[] = [defaultControlColumn];
+  const trailingControlColumns: ControlColumnProps[] = [];
+
   return (
     <>
       <FullWidthFlexGroup data-test-subj={`${TimelineTabs.pinned}-tab`}>
-        {timelineFullScreen && setTimelineFullScreen != null && (
-          <ExitFullScreenFlexItem grow={false}>
-            <ExitFullScreen fullScreen={timelineFullScreen} setFullScreen={setTimelineFullScreen} />
-          </ExitFullScreenFlexItem>
-        )}
-
         <ScrollableFlexItem grow={2}>
+          {timelineFullScreen && setTimelineFullScreen != null && (
+            <ExitFullScreenContainer>
+              <ExitFullScreen
+                fullScreen={timelineFullScreen}
+                setFullScreen={setTimelineFullScreen}
+              />
+            </ExitFullScreenContainer>
+          )}
           <EventDetailsWidthProvider>
             <StyledEuiFlyoutBody
               data-test-subj={`${TimelineTabs.pinned}-tab-flyout-body`}
@@ -231,6 +233,8 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
                   itemsCount: totalCount,
                   itemsPerPage,
                 })}
+                leadingControlColumns={leadingControlColumns}
+                trailingControlColumns={trailingControlColumns}
               />
             </StyledEuiFlyoutBody>
             <StyledEuiFlyoutFooter

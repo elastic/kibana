@@ -17,7 +17,7 @@ const PIPELINE = {
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'ingestPipelines']);
   const log = getService('log');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   describe('Ingest Pipelines', function () {
     this.tags('smoke');

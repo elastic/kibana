@@ -3,13 +3,13 @@
 
 Once you create a dashboard or a visualization, you might want to share it with your colleagues or friends. The easiest way to do this is to share a direct link to your dashboard or visualization. However, some users might not have access to your {kib}.
 
-With the {kib} embedding functionality, you can display the content you created in {kib} to an internal company website or a personal web page. 
+With the {kib} embedding functionality, you can display the content you created in {kib} to an internal company website or a personal web page.
 
-. Open the main menu, then click *Dashboard* or *Visualize Library*. 
+. Open the main menu, then click *Dashboard* or *Visualize Library*.
 
 . Open the dashboard or visualization you want to embed.
 
-. To generate the HTML code snippet, open the *Share* menu, then click *Embed code > Copy iFrame code*. 
+. To generate the HTML code snippet, open the *Share* menu, then click *Embed code > Copy iFrame code*.
 +
 You can embed this snippet in your web page, and then add analysis, images, and links to give more context to the object you're sharing.
 +

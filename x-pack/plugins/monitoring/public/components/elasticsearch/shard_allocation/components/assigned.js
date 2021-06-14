@@ -31,8 +31,16 @@ function sortByName(item) {
 
 export class Assigned extends React.Component {
   createShard = (shard) => {
-    const type = shard.primary ? 'primary' : 'replica';
-    const key = `${shard.index}.${shard.node}.${type}.${shard.state}.${shard.shard}`;
+    const type = get(shard, 'shard.primary', shard.primary) ? 'primary' : 'replica';
+    const key = `${get(shard, 'index.name', shard.index)}.${get(
+      shard,
+      'node.name',
+      shard.node
+    )}.${type}.${get(shard, 'shard.state', shard.state)}.${get(
+      shard,
+      'shard.number',
+      shard.shard
+    )}`;
     return <Shard shard={shard} key={key} />;
   };
 

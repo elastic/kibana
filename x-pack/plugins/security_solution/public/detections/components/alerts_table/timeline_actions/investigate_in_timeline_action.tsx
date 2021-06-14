@@ -13,7 +13,6 @@ import { TimelineId } from '../../../../../common/types/timeline';
 import { Ecs } from '../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
 import { timelineActions } from '../../../../timelines/store/timeline';
-import { useApolloClient } from '../../../../common/utils/apollo_context';
 import { sendAlertToTimelineAction } from '../actions';
 import { dispatchUpdateTimeline } from '../../../../timelines/components/open_timeline/helpers';
 import { ActionIconItem } from '../../../../timelines/components/timeline/body/actions/action_icon_item';
@@ -42,7 +41,6 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
     data: { search: searchStrategyClient },
   } = useKibana().services;
   const dispatch = useDispatch();
-  const apolloClient = useApolloClient();
 
   const updateTimelineIsLoading = useCallback(
     (payload) => dispatch(timelineActions.updateIsLoading(payload)),
@@ -74,7 +72,6 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
     try {
       if (ecsRowData != null) {
         await sendAlertToTimelineAction({
-          apolloClient,
           createTimeline,
           ecsData: ecsRowData,
           nonEcsData: nonEcsRowData,
@@ -85,7 +82,6 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
       if (ecsRowData == null && fetchEcsAlertsData) {
         const alertsEcsData = await fetchEcsAlertsData(alertIds);
         await sendAlertToTimelineAction({
-          apolloClient,
           createTimeline,
           ecsData: alertsEcsData,
           nonEcsData: nonEcsRowData,
@@ -98,7 +94,6 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
     }
   }, [
     alertIds,
-    apolloClient,
     createTimeline,
     ecsRowData,
     fetchEcsAlertsData,

@@ -6,15 +6,13 @@
  */
 
 import Boom from '@hapi/boom';
-import { errors } from '@elastic/elasticsearch';
 
 import { SavedObjectsFindResponse } from 'kibana/server';
 
 import { alertsClientMock } from '../../../../../alerting/server/mocks';
 import { IRuleSavedAttributesSavedObjectAttributes, IRuleStatusSOAttributes } from '../rules/types';
-import { BadRequestError } from '../errors/bad_request_error';
+import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import {
-  transformError,
   transformBulkError,
   BulkError,
   createSuccessObject,
@@ -27,102 +25,14 @@ import {
   getFailingRules,
 } from './utils';
 import { responseMock } from './__mocks__';
-import { exampleRuleStatus, exampleFindRuleStatusResponse } from '../signals/__mocks__/es_results';
-import { getResult } from './__mocks__/request_responses';
+import { exampleRuleStatus } from '../signals/__mocks__/es_results';
+import { getAlertMock } from './__mocks__/request_responses';
 import { AlertExecutionStatusErrorReasons } from '../../../../../alerting/common';
+import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
 let alertsClient: ReturnType<typeof alertsClientMock.create>;
 
 describe('utils', () => {
-  describe('transformError', () => {
-    test('returns transformed output error from boom object with a 500 and payload of internal server error', () => {
-      const boom = new Boom.Boom('some boom message');
-      const transformed = transformError(boom);
-      expect(transformed).toEqual({
-        message: 'An internal server error occurred',
-        statusCode: 500,
-      });
-    });
-
-    test('returns transformed output if it is some non boom object that has a statusCode', () => {
-      const error: Error & { statusCode?: number } = {
-        statusCode: 403,
-        name: 'some name',
-        message: 'some message',
-      };
-      const transformed = transformError(error);
-      expect(transformed).toEqual({
-        message: 'some message',
-        statusCode: 403,
-      });
-    });
-
-    test('returns a transformed message with the message set and statusCode', () => {
-      const error: Error & { statusCode?: number } = {
-        statusCode: 403,
-        name: 'some name',
-        message: 'some message',
-      };
-      const transformed = transformError(error);
-      expect(transformed).toEqual({
-        message: 'some message',
-        statusCode: 403,
-      });
-    });
-
-    test('transforms best it can if it is some non boom object but it does not have a status Code.', () => {
-      const error: Error = {
-        name: 'some name',
-        message: 'some message',
-      };
-      const transformed = transformError(error);
-      expect(transformed).toEqual({
-        message: 'some message',
-        statusCode: 500,
-      });
-    });
-
-    test('it detects a BadRequestError and returns a status code of 400 from that particular error type', () => {
-      const error: BadRequestError = new BadRequestError('I have a type error');
-      const transformed = transformError(error);
-      expect(transformed).toEqual({
-        message: 'I have a type error',
-        statusCode: 400,
-      });
-    });
-
-    test('it detects a BadRequestError and returns a Boom status of 400', () => {
-      const error: BadRequestError = new BadRequestError('I have a type error');
-      const transformed = transformError(error);
-      expect(transformed).toEqual({
-        message: 'I have a type error',
-        statusCode: 400,
-      });
-    });
-
-    it('transforms a ResponseError returned by the elasticsearch client', () => {
-      const error: errors.ResponseError = {
-        name: 'ResponseError',
-        message: 'illegal_argument_exception',
-        headers: {},
-        body: {
-          error: {
-            type: 'illegal_argument_exception',
-            reason: 'detailed explanation',
-          },
-        },
-        meta: ({} as unknown) as errors.ResponseError['meta'],
-        statusCode: 400,
-      };
-      const transformed = transformError(error);
-
-      expect(transformed).toEqual({
-        message: 'illegal_argument_exception: detailed explanation',
-        statusCode: 400,
-      });
-    });
-  });
-
   describe('transformBulkError', () => {
     test('returns transformed object if it is a boom object', () => {
       const boom = new Boom.Boom('some boom message', { statusCode: 400 });
@@ -391,8 +301,8 @@ describe('utils', () => {
       const statusTwo = exampleRuleStatus();
       statusTwo.attributes.status = 'failed';
       const currentStatus = exampleRuleStatus();
-      const foundRules = exampleFindRuleStatusResponse([currentStatus, statusOne, statusTwo]);
-      const res = mergeStatuses(currentStatus.attributes.alertId, foundRules.saved_objects, {
+      const foundRules = [currentStatus.attributes, statusOne.attributes, statusTwo.attributes];
+      const res = mergeStatuses(currentStatus.attributes.alertId, foundRules, {
         'myfakealertid-8cfac': {
           current_status: {
             alert_id: 'myfakealertid-8cfac',
@@ -405,7 +315,7 @@ describe('utils', () => {
             gap: null,
             bulk_create_time_durations: [],
             search_after_time_durations: [],
-            last_look_back_date: null,
+            last_look_back_date: null, // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
           },
           failures: [],
         },
@@ -423,7 +333,7 @@ describe('utils', () => {
             gap: null,
             bulk_create_time_durations: [],
             search_after_time_durations: [],
-            last_look_back_date: null,
+            last_look_back_date: null, // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
           },
           failures: [],
         },
@@ -439,7 +349,7 @@ describe('utils', () => {
             gap: null,
             bulk_create_time_durations: [],
             search_after_time_durations: [],
-            last_look_back_date: null,
+            last_look_back_date: null, // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
           },
           failures: [
             {
@@ -453,7 +363,7 @@ describe('utils', () => {
               gap: null,
               bulk_create_time_durations: [],
               search_after_time_durations: [],
-              last_look_back_date: null,
+              last_look_back_date: null, // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
             },
             {
               alert_id: 'f4b8e31d-cf93-4bde-a265-298bde885cd7',
@@ -466,7 +376,7 @@ describe('utils', () => {
               gap: null,
               bulk_create_time_durations: [],
               search_after_time_durations: [],
-              last_look_back_date: null,
+              last_look_back_date: null, // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
             },
           ],
         },
@@ -479,12 +389,12 @@ describe('utils', () => {
       alertsClient = alertsClientMock.create();
     });
     it('getFailingRules finds no failing rules', async () => {
-      alertsClient.get.mockResolvedValue(getResult());
+      alertsClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
       const res = await getFailingRules(['my-fake-id'], alertsClient);
       expect(res).toEqual({});
     });
     it('getFailingRules finds a failing rule', async () => {
-      const foundRule = getResult();
+      const foundRule = getAlertMock(getQueryRuleParams());
       foundRule.executionStatus = {
         status: 'error',
         lastExecutionDate: foundRule.executionStatus.lastExecutionDate,

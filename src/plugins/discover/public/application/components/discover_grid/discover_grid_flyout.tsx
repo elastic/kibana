@@ -21,6 +21,7 @@ import {
   EuiPortal,
   EuiPagination,
   EuiHideFor,
+  keys,
 } from '@elastic/eui';
 import { DocViewer } from '../doc_viewer/doc_viewer';
 import { IndexPattern } from '../../../kibana_services';
@@ -87,9 +88,25 @@ export function DiscoverGridFlyout({
     [hits, setExpandedDoc]
   );
 
+  const onKeyDown = useCallback(
+    (ev: React.KeyboardEvent) => {
+      if (ev.key === keys.ARROW_LEFT || ev.key === keys.ARROW_RIGHT) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        setPage(activePage + (ev.key === keys.ARROW_RIGHT ? 1 : -1));
+      }
+    },
+    [activePage, setPage]
+  );
+
   return (
     <EuiPortal>
-      <EuiFlyout onClose={onClose} size="m" data-test-subj="docTableDetailsFlyout">
+      <EuiFlyout
+        onClose={onClose}
+        size="m"
+        data-test-subj="docTableDetailsFlyout"
+        onKeyDown={onKeyDown}
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle
             size="s"
@@ -122,7 +139,7 @@ export function DiscoverGridFlyout({
                 iconType="document"
                 flush="left"
                 href={services.addBasePath(
-                  `#/doc/${indexPattern.id}/${hit._index}?id=${encodeURIComponent(
+                  `/app/discover#/doc/${indexPattern.id}/${hit._index}?id=${encodeURIComponent(
                     hit._id as string
                   )}`
                 )}
@@ -178,15 +195,29 @@ export function DiscoverGridFlyout({
             indexPattern={indexPattern}
             filter={(mapping, value, mode) => {
               onFilter(mapping, value, mode);
-              onClose();
+              services.toastNotifications.addSuccess(
+                i18n.translate('discover.grid.flyout.toastFilterAdded', {
+                  defaultMessage: `Filter was added`,
+                })
+              );
             }}
             onRemoveColumn={(columnName: string) => {
               onRemoveColumn(columnName);
-              onClose();
+              services.toastNotifications.addSuccess(
+                i18n.translate('discover.grid.flyout.toastColumnRemoved', {
+                  defaultMessage: `Column '{columnName}' was removed`,
+                  values: { columnName },
+                })
+              );
             }}
             onAddColumn={(columnName: string) => {
               onAddColumn(columnName);
-              onClose();
+              services.toastNotifications.addSuccess(
+                i18n.translate('discover.grid.flyout.toastColumnAdded', {
+                  defaultMessage: `Column '{columnName}' was added`,
+                  values: { columnName },
+                })
+              );
             }}
           />
         </EuiFlyoutBody>

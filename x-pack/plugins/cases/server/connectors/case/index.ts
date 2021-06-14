@@ -14,7 +14,6 @@ import {
   CommentRequest,
   CommentType,
 } from '../../../common/api';
-import { createExternalCasesClient } from '../../client';
 import { CaseExecutorParamsSchema, CaseConfigurationSchema, CommentSchemaType } from './schema';
 import {
   CaseExecutorResponse,
@@ -25,21 +24,14 @@ import {
 import * as i18n from './translations';
 
 import { GetActionTypeParams, isCommentGeneratedAlert, separator } from '..';
-import { nullUser } from '../../common';
 import { createCaseError } from '../../common/error';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
+import { CasesClient } from '../../client';
 
 const supportedSubActions: string[] = ['create', 'update', 'addComment'];
 
 // action type definition
-export function getActionType({
-  logger,
-  caseService,
-  caseConfigureService,
-  connectorMappingsService,
-  userActionService,
-  alertsService,
-}: GetActionTypeParams): CaseActionType {
+export function getActionType({ logger, factory }: GetActionTypeParams): CaseActionType {
   return {
     id: '.case',
     minimumLicenseRequired: 'basic',
@@ -49,26 +41,15 @@ export function getActionType({
       params: CaseExecutorParamsSchema,
     },
     executor: curry(executor)({
-      alertsService,
-      caseConfigureService,
-      caseService,
-      connectorMappingsService,
+      factory,
       logger,
-      userActionService,
     }),
   };
 }
 
 // action executor
 async function executor(
-  {
-    alertsService,
-    caseConfigureService,
-    caseService,
-    connectorMappingsService,
-    logger,
-    userActionService,
-  }: GetActionTypeParams,
+  { logger, factory }: GetActionTypeParams,
   execOptions: CaseActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<CaseExecutorResponse | {}>> {
   if (!ENABLE_CASE_CONNECTOR) {
@@ -77,23 +58,11 @@ async function executor(
     throw new Error(msg);
   }
 
-  const { actionId, params, services } = execOptions;
+  const { actionId, params } = execOptions;
   const { subAction, subActionParams } = params;
   let data: CaseExecutorResponse | null = null;
 
-  const { savedObjectsClient, scopedClusterClient } = services;
-  const casesClient = createExternalCasesClient({
-    savedObjectsClient,
-    scopedClusterClient,
-    // we might want the user information to be passed as part of the action request
-    user: nullUser,
-    caseService,
-    caseConfigureService,
-    connectorMappingsService,
-    userActionService,
-    alertsService,
-    logger,
-  });
+  let casesClient: CasesClient | undefined;
 
   if (!supportedSubActions.includes(subAction)) {
     const errorMessage = `[Action][Case] subAction ${subAction} not implemented.`;
@@ -101,54 +70,57 @@ async function executor(
     throw new Error(errorMessage);
   }
 
-  if (subAction === 'create') {
-    try {
-      data = await casesClient.create({
-        ...(subActionParams as CasePostRequest),
-      });
-    } catch (error) {
-      throw createCaseError({
-        message: `Failed to create a case using connector: ${error}`,
-        error,
-        logger,
-      });
+  // When the actions framework provides the request and a way to retrieve the saved objects client with access to our
+  // hidden types then remove this outer if block and initialize the casesClient using the factory.
+  if (casesClient) {
+    if (subAction === 'create') {
+      try {
+        data = await casesClient.cases.create({
+          ...(subActionParams as CasePostRequest),
+        });
+      } catch (error) {
+        throw createCaseError({
+          message: `Failed to create a case using connector: ${error}`,
+          error,
+          logger,
+        });
+      }
+    }
+
+    if (subAction === 'update') {
+      const updateParamsWithoutNullValues = Object.entries(subActionParams).reduce(
+        (acc, [key, value]) => ({
+          ...acc,
+          ...(value != null ? { [key]: value } : {}),
+        }),
+        {} as CasePatchRequest
+      );
+
+      try {
+        data = await casesClient.cases.update({ cases: [updateParamsWithoutNullValues] });
+      } catch (error) {
+        throw createCaseError({
+          message: `Failed to update case using connector id: ${updateParamsWithoutNullValues?.id} version: ${updateParamsWithoutNullValues?.version}: ${error}`,
+          error,
+          logger,
+        });
+      }
+    }
+
+    if (subAction === 'addComment') {
+      const { caseId, comment } = subActionParams as ExecutorSubActionAddCommentParams;
+      try {
+        const formattedComment = transformConnectorComment(comment, logger);
+        data = await casesClient.attachments.add({ caseId, comment: formattedComment });
+      } catch (error) {
+        throw createCaseError({
+          message: `Failed to create comment using connector case id: ${caseId}: ${error}`,
+          error,
+          logger,
+        });
+      }
     }
   }
-
-  if (subAction === 'update') {
-    const updateParamsWithoutNullValues = Object.entries(subActionParams).reduce(
-      (acc, [key, value]) => ({
-        ...acc,
-        ...(value != null ? { [key]: value } : {}),
-      }),
-      {} as CasePatchRequest
-    );
-
-    try {
-      data = await casesClient.update({ cases: [updateParamsWithoutNullValues] });
-    } catch (error) {
-      throw createCaseError({
-        message: `Failed to update case using connector id: ${updateParamsWithoutNullValues?.id} version: ${updateParamsWithoutNullValues?.version}: ${error}`,
-        error,
-        logger,
-      });
-    }
-  }
-
-  if (subAction === 'addComment') {
-    const { caseId, comment } = subActionParams as ExecutorSubActionAddCommentParams;
-    try {
-      const formattedComment = transformConnectorComment(comment, logger);
-      data = await casesClient.addComment({ caseId, comment: formattedComment });
-    } catch (error) {
-      throw createCaseError({
-        message: `Failed to create comment using connector case id: ${caseId}: ${error}`,
-        error,
-        logger,
-      });
-    }
-  }
-
   return { status: 'ok', data: data ?? {}, actionId };
 }
 
@@ -205,6 +177,7 @@ export const transformConnectorComment = (
         alertId: ids,
         index: indices,
         rule,
+        owner: comment.owner,
       };
     } catch (e) {
       throw createCaseError({

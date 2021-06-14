@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 import { pageObjects } from './page_objects';
 
@@ -36,6 +36,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/canvas'),
       require.resolve('./apps/security_solution'),
       require.resolve('./apps/ml_embeddables_in_dashboard'),
+      require.resolve('./apps/remote_clusters'),
     ],
 
     pageObjects,

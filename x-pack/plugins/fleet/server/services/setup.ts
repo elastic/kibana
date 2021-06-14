@@ -5,36 +5,26 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
-import { i18n } from '@kbn/i18n';
 
-import { DEFAULT_AGENT_POLICIES_PACKAGES, FLEET_SERVER_PACKAGE } from '../../common';
+import type { DefaultPackagesInstallationError, PreconfigurationError } from '../../common';
+import { SO_SEARCH_LIMIT, REQUIRED_PACKAGES } from '../constants';
 
-import type { PackagePolicy } from '../../common';
-
-import { SO_SEARCH_LIMIT } from '../constants';
-
-import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
+import { appContextService } from './app_context';
+import { agentPolicyService } from './agent_policy';
+import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
 import { outputService } from './output';
-import {
-  ensureInstalledDefaultPackages,
-  ensureInstalledPackage,
-  ensurePackagesCompletedInstall,
-} from './epm/packages/install';
 
-import { generateEnrollmentAPIKey } from './api_keys';
+import { generateEnrollmentAPIKey, hasEnrollementAPIKeysForPolicy } from './api_keys';
 import { settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
-import { createDefaultSettings } from './settings';
 import { ensureAgentActionPolicyChangeExists } from './agents';
 import { awaitIfFleetServerSetupPending } from './fleet_server';
-
-const FLEET_ENROLL_USERNAME = 'fleet_enroll';
-const FLEET_ENROLL_ROLE = 'fleet_enroll';
+import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_pipeline/install';
 
 export interface SetupStatus {
-  isIntialized: true | undefined;
+  isInitialized: boolean;
+  nonFatalErrors?: Array<PreconfigurationError | DefaultPackagesInstallationError>;
 }
 
 export async function setupIngestManager(
@@ -48,190 +38,71 @@ async function createSetupSideEffects(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ): Promise<SetupStatus> {
-  const [
-    installedPackages,
-    defaultOutput,
-    { created: defaultAgentPolicyCreated, policy: defaultAgentPolicy },
-    { created: defaultFleetServerPolicyCreated, policy: defaultFleetServerPolicy },
-  ] = await Promise.all([
-    // packages installed by default
-    ensureInstalledDefaultPackages(soClient, esClient),
+  const [defaultOutput] = await Promise.all([
     outputService.ensureDefaultOutput(soClient),
-    agentPolicyService.ensureDefaultAgentPolicy(soClient, esClient),
-    agentPolicyService.ensureDefaultFleetServerAgentPolicy(soClient, esClient),
-    updateFleetRoleIfExists(esClient),
-    settingsService.getSettings(soClient).catch((e: any) => {
-      if (e.isBoom && e.output.statusCode === 404) {
-        const defaultSettings = createDefaultSettings();
-        return settingsService.saveSettings(soClient, defaultSettings);
-      }
-
-      return Promise.reject(e);
-    }),
+    settingsService.settingsSetup(soClient),
   ]);
 
-  // Keeping this outside of the Promise.all because it introduces a race condition.
-  // If one of the required packages fails to install/upgrade it might get stuck in the installing state.
-  // On the next call to the /setup API, if there is a upgrade available for one of the required packages a race condition
-  // will occur between upgrading the package and reinstalling the previously failed package.
-  // By moving this outside of the Promise.all, the upgrade will occur first, and then we'll attempt to reinstall any
-  // packages that are stuck in the installing state.
-  await ensurePackagesCompletedInstall(soClient, esClient);
+  await ensureFleetFinalPipelineIsInstalled(esClient);
 
   await awaitIfFleetServerSetupPending();
 
-  const fleetServerPackage = await ensureInstalledPackage({
-    savedObjectsClient: soClient,
-    pkgName: FLEET_SERVER_PACKAGE,
+  const { agentPolicies: policiesOrUndefined, packages: packagesOrUndefined } =
+    appContextService.getConfig() ?? {};
+
+  const policies = policiesOrUndefined ?? [];
+
+  let packages = packagesOrUndefined ?? [];
+  // Ensure that required packages are always installed even if they're left out of the config
+  const preconfiguredPackageNames = new Set(packages.map((pkg) => pkg.name));
+  packages = [
+    ...packages,
+    ...REQUIRED_PACKAGES.filter((pkg) => !preconfiguredPackageNames.has(pkg.name)),
+  ];
+
+  const { nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
+    soClient,
     esClient,
-  });
+    policies,
+    packages,
+    defaultOutput
+  );
 
-  if (defaultFleetServerPolicyCreated) {
-    await addPackageToAgentPolicy(
-      soClient,
-      esClient,
-      fleetServerPackage,
-      defaultFleetServerPolicy,
-      defaultOutput
-    );
-  }
+  await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
+  await ensureAgentActionPolicyChangeExists(soClient, esClient);
 
-  // If we just created the default fleet server policy add the fleet server package
-
-  // If we just created the default policy, ensure default packages are added to it
-  if (defaultAgentPolicyCreated) {
-    const agentPolicyWithPackagePolicies = await agentPolicyService.get(
-      soClient,
-      defaultAgentPolicy.id,
-      true
-    );
-    if (!agentPolicyWithPackagePolicies) {
-      throw new Error(
-        i18n.translate('xpack.fleet.setup.policyNotFoundError', {
-          defaultMessage: 'Policy not found',
-        })
-      );
-    }
-    if (
-      agentPolicyWithPackagePolicies.package_policies.length &&
-      typeof agentPolicyWithPackagePolicies.package_policies[0] === 'string'
-    ) {
-      throw new Error(
-        i18n.translate('xpack.fleet.setup.policyNotFoundError', {
-          defaultMessage: 'Policy not found',
-        })
-      );
-    }
-
-    for (const installedPackage of installedPackages) {
-      const packageShouldBeInstalled = DEFAULT_AGENT_POLICIES_PACKAGES.some(
-        (packageName) => installedPackage.name === packageName
-      );
-      if (!packageShouldBeInstalled) {
-        continue;
-      }
-
-      const isInstalled = agentPolicyWithPackagePolicies.package_policies.some(
-        (d: PackagePolicy | string) => {
-          return typeof d !== 'string' && d.package?.name === installedPackage.name;
-        }
-      );
-
-      if (!isInstalled) {
-        await addPackageToAgentPolicy(
-          soClient,
-          esClient,
-          installedPackage,
-          agentPolicyWithPackagePolicies,
-          defaultOutput
-        );
-      }
-    }
-  }
-
-  await ensureAgentActionPolicyChangeExists(soClient);
-
-  return { isIntialized: true };
+  return {
+    isInitialized: true,
+    nonFatalErrors,
+  };
 }
 
-async function updateFleetRoleIfExists(esClient: ElasticsearchClient) {
-  try {
-    await esClient.security.getRole({ name: FLEET_ENROLL_ROLE });
-  } catch (e) {
-    if (e.statusCode === 404) {
-      return;
-    }
-
-    throw e;
-  }
-
-  return putFleetRole(esClient);
-}
-
-async function putFleetRole(esClient: ElasticsearchClient) {
-  return await esClient.security.putRole({
-    name: FLEET_ENROLL_ROLE,
-    body: {
-      cluster: ['monitor', 'manage_api_key'],
-      indices: [
-        {
-          names: ['logs-*', 'metrics-*', 'traces-*', '.logs-endpoint.diagnostic.collection-*'],
-          privileges: ['auto_configure', 'create_doc'],
-        },
-      ],
-    },
-  });
-}
-
-export async function setupFleet(
+export async function ensureDefaultEnrollmentAPIKeysExists(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   options?: { forceRecreate?: boolean }
 ) {
-  // Create fleet_enroll role
-  // This should be done directly in ES at some point
-  const { body: res } = await putFleetRole(esClient);
-
-  // If the role is already created skip the rest unless you have forceRecreate set to true
-  if (options?.forceRecreate !== true && res.role.created === false) {
+  const security = appContextService.getSecurity();
+  if (!security) {
     return;
   }
-  const password = generateRandomPassword();
-  // Create fleet enroll user
-  await esClient.security.putUser({
-    username: FLEET_ENROLL_USERNAME,
-    body: {
-      password,
-      roles: [FLEET_ENROLL_ROLE],
-      metadata: {
-        updated_at: new Date().toISOString(),
-      },
-    },
-  });
 
-  outputService.invalidateCache();
-
-  // save fleet admin user
-  const defaultOutputId = await outputService.getDefaultOutputId(soClient);
-  if (!defaultOutputId) {
-    throw new Error(
-      i18n.translate('xpack.fleet.setup.defaultOutputError', {
-        defaultMessage: 'Default output does not exist',
-      })
-    );
+  if (!(await security.authc.apiKeys.areAPIKeysEnabled())) {
+    return;
   }
-
-  await outputService.updateOutput(soClient, defaultOutputId, {
-    fleet_enroll_username: FLEET_ENROLL_USERNAME,
-    fleet_enroll_password: password,
-  });
 
   const { items: agentPolicies } = await agentPolicyService.list(soClient, {
     perPage: SO_SEARCH_LIMIT,
   });
 
   await Promise.all(
-    agentPolicies.map((agentPolicy) => {
+    agentPolicies.map(async (agentPolicy) => {
+      const hasKey = await hasEnrollementAPIKeysForPolicy(esClient, agentPolicy.id);
+
+      if (hasKey) {
+        return;
+      }
+
       return generateEnrollmentAPIKey(soClient, esClient, {
         name: `Default`,
         agentPolicyId: agentPolicy.id,
@@ -239,14 +110,4 @@ export async function setupFleet(
       });
     })
   );
-
-  await Promise.all(
-    agentPolicies.map((agentPolicy) =>
-      agentPolicyService.createFleetPolicyChangeAction(soClient, agentPolicy.id)
-    )
-  );
-}
-
-function generateRandomPassword() {
-  return Buffer.from(uuid.v4()).toString('base64');
 }

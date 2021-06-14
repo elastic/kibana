@@ -18,7 +18,7 @@ const theme = {
     euiColorVis5: 'red',
     euiColorVis7: 'black',
     euiColorVis9: 'yellow',
-    euiColorLightestShade: 'green',
+    euiColorMediumShade: 'green',
   },
 } as EuiTheme;
 

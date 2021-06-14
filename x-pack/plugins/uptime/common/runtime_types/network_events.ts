@@ -35,7 +35,6 @@ const NetworkEventType = t.intersection([
     url: t.string,
   }),
   t.partial({
-    bytesDownloadedCompressed: t.number,
     certificates: CertificateDataType,
     ip: t.string,
     method: t.string,
@@ -44,6 +43,8 @@ const NetworkEventType = t.intersection([
     responseHeaders: t.record(t.string, t.string),
     requestHeaders: t.record(t.string, t.string),
     timings: NetworkTimingsType,
+    transferSize: t.number,
+    resourceSize: t.number,
   }),
 ]);
 

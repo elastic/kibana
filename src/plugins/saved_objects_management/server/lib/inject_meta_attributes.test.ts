@@ -49,6 +49,7 @@ describe('injectMetaAttributes', () => {
           uiCapabilitiesPath: 'uiCapabilitiesPath',
         },
         namespaceType: 'single',
+        hiddenType: false,
       },
     });
   });

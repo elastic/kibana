@@ -29,7 +29,7 @@ import { CronEditor } from '../../../../../../../../src/plugins/es_ui_shared/pub
 import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
 
 import { indices } from '../../../../shared_imports';
-import { getLogisticalDetailsUrl, getCronUrl } from '../../../services';
+import { documentationLinks } from '../../../services/documentation_links';
 import { StepError } from './components';
 
 const indexPatternIllegalCharacters = indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.join(' ');
@@ -149,7 +149,7 @@ export class StepLogistics extends Component {
             isInvalid={Boolean(areStepErrorsVisible && errorRollupCron)}
             helpText={
               <p>
-                <EuiLink href={getCronUrl()} target="_blank">
+                <EuiLink href={documentationLinks.apis.cronExpressions} target="_blank">
                   <FormattedMessage
                     id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpReferenceLinkLabel"
                     defaultMessage="Learn more about cron expressions"
@@ -263,7 +263,7 @@ export class StepLogistics extends Component {
             <EuiButtonEmpty
               size="s"
               flush="right"
-              href={getLogisticalDetailsUrl()}
+              href={documentationLinks.apis.createRollupJobsRequest}
               target="_blank"
               iconType="help"
               data-test-subj="rollupJobCreateLogisticsDocsButton"

@@ -11,15 +11,14 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { createSplitStream, createMapStream, createConcatStream } from '@kbn/utils';
 
-import { formatErrors } from '../../../../common/format_errors';
+import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
+import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { importRuleValidateTypeDependents } from '../../../../common/detection_engine/schemas/request/import_rules_type_dependents';
-import { exactCheck } from '../../../../common/exact_check';
 import {
   importRulesSchema,
   ImportRulesSchema,
   ImportRulesSchemaDecoded,
 } from '../../../../common/detection_engine/schemas/request/import_rules_schema';
-import { BadRequestError } from '../errors/bad_request_error';
 import {
   parseNdjsonStrings,
   filterExportedCounts,

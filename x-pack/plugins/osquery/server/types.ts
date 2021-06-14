@@ -11,6 +11,7 @@ import {
   PluginStart as DataPluginStart,
 } from '../../../../src/plugins/data/server';
 import { FleetStartContract } from '../../fleet/server';
+import { PluginSetupContract } from '../../features/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginSetup {}
@@ -20,6 +21,7 @@ export interface OsqueryPluginStart {}
 export interface SetupPlugins {
   actions: ActionsPlugin['setup'];
   data: DataPluginSetup;
+  features: PluginSetupContract;
 }
 
 export interface StartPlugins {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ElasticsearchClient } from 'kibana/server';
 import { ReportingCore } from '../core';
 import { createWorkerFactory } from './create_worker';
 // @ts-ignore
@@ -40,18 +41,17 @@ type GenericWorkerFn<JobParamsType> = (
 export async function createQueueFactory(
   reporting: ReportingCore,
   store: ReportingStore,
-  logger: LevelLogger
+  logger: LevelLogger,
+  client: ElasticsearchClient
 ): Promise<ESQueueInstance> {
   const config = reporting.getConfig();
 
   // esqueue-related
   const queueTimeout = config.get('queue', 'timeout');
   const isPollingEnabled = config.get('queue', 'pollEnabled');
-
-  const elasticsearch = reporting.getElasticsearchService();
   const queueOptions = {
+    client,
     timeout: queueTimeout,
-    client: elasticsearch.legacy.client,
     logger: createTaggedLogger(logger, ['esqueue', 'queue-worker']),
   };
 

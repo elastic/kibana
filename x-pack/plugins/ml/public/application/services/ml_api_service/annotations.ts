@@ -19,9 +19,9 @@ export const annotations = {
     earliestMs: number;
     latestMs: number;
     maxAnnotations: number;
-    fields: FieldToBucket[];
-    detectorIndex: number;
-    entities: any[];
+    fields?: FieldToBucket[];
+    detectorIndex?: number;
+    entities?: any[];
   }) {
     const body = JSON.stringify(obj);
     return http$<GetAnnotationsResponse>({

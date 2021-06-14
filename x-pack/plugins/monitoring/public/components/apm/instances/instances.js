@@ -30,7 +30,22 @@ import { SetupModeBadge } from '../../setup_mode/badge';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
 
-function getColumns(alerts, setupMode) {
+function getColumns(alerts, setupMode, cgroup) {
+  const memoryField = cgroup
+    ? {
+        name: i18n.translate('xpack.monitoring.apm.instances.cgroupMemoryUsageTitle', {
+          defaultMessage: 'Memory Usage (cgroup)',
+        }),
+        field: 'cgroup_memory',
+        render: (value) => formatMetric(value, 'byte'),
+      }
+    : {
+        name: i18n.translate('xpack.monitoring.apm.instances.allocatedMemoryTitle', {
+          defaultMessage: 'Allocated Memory',
+        }),
+        field: 'memory',
+        render: (value) => formatMetric(value, 'byte'),
+      };
   return [
     {
       name: i18n.translate('xpack.monitoring.apm.instances.nameTitle', {
@@ -112,13 +127,7 @@ function getColumns(alerts, setupMode) {
           },
         }),
     },
-    {
-      name: i18n.translate('xpack.monitoring.apm.instances.allocatedMemoryTitle', {
-        defaultMessage: 'Allocated Memory',
-      }),
-      field: 'memory',
-      render: (value) => formatMetric(value, 'byte'),
-    },
+    memoryField,
     {
       name: i18n.translate('xpack.monitoring.apm.instances.versionTitle', {
         defaultMessage: 'Version',
@@ -166,7 +175,7 @@ export function ApmServerInstances({ apms, alerts, setupMode }) {
           <EuiMonitoringTable
             className="apmInstancesTable"
             rows={data.apms}
-            columns={getColumns(alerts, setupMode)}
+            columns={getColumns(alerts, setupMode, data.cgroup)}
             sorting={sorting}
             pagination={pagination}
             setupMode={setupMode}

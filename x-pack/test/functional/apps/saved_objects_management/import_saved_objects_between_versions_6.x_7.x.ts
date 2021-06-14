@@ -22,17 +22,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Export import saved objects between versions - 6.8.x -> 7.x', function () {
     beforeEach(async function () {
-      await esArchiver.load('empty_kibana');
-      await esArchiver.load('logstash_functional');
-      await esArchiver.load('getting_started/shakespeare');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.load('x-pack/test/functional/es_archives/getting_started/shakespeare');
       await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSavedObjects();
     });
 
     after(async () => {
-      await esArchiver.unload('logstash_functional');
-      await esArchiver.unload('getting_started/shakespeare');
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/test/functional/es_archives/getting_started/shakespeare');
     });
 
     it('should be able to import 6.8 saved objects into 7.x', async function () {

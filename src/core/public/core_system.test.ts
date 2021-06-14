@@ -199,7 +199,7 @@ describe('#start()', () => {
     root.innerHTML = '<p>foo bar</p>';
     await startCore(root);
     expect(root.innerHTML).toMatchInlineSnapshot(
-      `"<div id=\\"kibana-body\\"></div><div></div><div></div>"`
+      `"<div id=\\"kibana-body\\" data-test-subj=\\"kibanaChrome\\"></div><div></div><div></div>"`
     );
   });
 

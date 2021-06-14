@@ -15,15 +15,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const pageObjects = getPageObjects(['common', 'infraHome']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/75724
-  describe.skip('Home page', function () {
+  describe('Home page', function () {
     this.tags('includeFirefox');
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     describe('without metrics present', () => {
-      before(async () => await esArchiver.unload('infra/metrics_and_logs'));
+      before(
+        async () =>
+          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs')
+      );
 
       it('renders an empty data prompt', async () => {
         await pageObjects.common.navigateToApp('infraOps');
@@ -33,15 +35,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('with metrics present', () => {
       before(async () => {
-        await esArchiver.load('infra/metrics_and_logs');
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await pageObjects.common.navigateToApp('infraOps');
         await pageObjects.infraHome.waitForLoading();
       });
-      after(async () => await esArchiver.unload('infra/metrics_and_logs'));
+      after(
+        async () =>
+          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs')
+      );
 
-      it('renders the waffle map for dates with data', async () => {
+      it('renders the waffle map and tooltips for dates with data', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraHome.getWaffleMap();
+        await pageObjects.infraHome.getWaffleMapTooltips();
       });
 
       it('renders an empty data prompt for dates with no data', async () => {

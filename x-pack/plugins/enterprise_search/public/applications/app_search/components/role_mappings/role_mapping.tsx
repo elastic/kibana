@@ -5,76 +5,30 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-
-import { useParams } from 'react-router-dom';
+import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import {
-  EuiButton,
-  EuiCheckbox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiPageContentBody,
-  EuiPageHeader,
-  EuiPanel,
-  EuiRadio,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiForm, EuiSpacer } from '@elastic/eui';
 
-import { FlashMessages } from '../../../shared/flash_messages';
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { Loading } from '../../../shared/loading';
-import {
-  AttributeSelector,
-  DeleteMappingCallout,
-  RoleSelector,
-} from '../../../shared/role_mapping';
-import { ROLE_MAPPINGS_TITLE } from '../../../shared/role_mapping/constants';
+import { AttributeSelector, RoleSelector, RoleMappingFlyout } from '../../../shared/role_mapping';
 import { AppLogic } from '../../app_logic';
+import { AdvanceRoleType } from '../../types';
 
-import { roleHasScopedEngines } from '../../utils/role/has_scoped_engines';
-import { Engine } from '../engine/types';
-
-import {
-  SAVE_ROLE_MAPPING,
-  UPDATE_ROLE_MAPPING,
-  ADD_ROLE_MAPPING_TITLE,
-  MANAGE_ROLE_MAPPING_TITLE,
-  ADVANCED_ROLE_TYPES,
-  STANDARD_ROLE_TYPES,
-  ADVANCED_ROLE_SELECTORS_TITLE,
-  ROLE_TITLE,
-  FULL_ENGINE_ACCESS_TITLE,
-  FULL_ENGINE_ACCESS_DESCRIPTION,
-  LIMITED_ENGINE_ACCESS_TITLE,
-  LIMITED_ENGINE_ACCESS_DESCRIPTION,
-  ENGINE_ACCESS_TITLE,
-} from './constants';
+import { ADVANCED_ROLE_TYPES, STANDARD_ROLE_TYPES } from './constants';
+import { EngineAssignmentSelector } from './engine_assignment_selector';
 import { RoleMappingsLogic } from './role_mappings_logic';
 
-interface RoleMappingProps {
-  isNew?: boolean;
-}
-
-export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
-  const { roleId } = useParams() as { roleId: string };
+export const RoleMapping: React.FC = () => {
   const { myRole } = useValues(AppLogic);
 
   const {
-    handleAccessAllEnginesChange,
     handleAttributeSelectorChange,
     handleAttributeValueChange,
     handleAuthProviderChange,
-    handleDeleteMapping,
-    handleEngineSelectionChange,
     handleRoleChange,
     handleSaveMapping,
-    initializeRoleMapping,
-    resetState,
+    closeRoleMappingFlyout,
   } = useActions(RoleMappingsLogic);
 
   const {
@@ -83,8 +37,6 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
     attributeValue,
     attributes,
     availableAuthProviders,
-    availableEngines,
-    dataLoading,
     elasticsearchRoles,
     hasAdvancedRoles,
     multipleAuthProvidersConfig,
@@ -92,67 +44,38 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
     roleType,
     selectedEngines,
     selectedAuthProviders,
+    roleMappingErrors,
   } = useValues(RoleMappingsLogic);
 
-  useEffect(() => {
-    initializeRoleMapping(roleId);
-    return resetState;
-  }, []);
+  const isNew = !roleMapping;
+  const hasEngineAssignment = selectedEngines.size > 0 || accessAllEngines;
+  const attributeValueInvalid = attributeName !== 'role' && !attributeValue;
 
-  if (dataLoading) return <Loading />;
+  const mapRoleOptions = ({ id, description }: AdvanceRoleType) => ({
+    id,
+    description,
+    disabled: !myRole.availableRoleTypes.includes(id),
+  });
 
-  const SAVE_ROLE_MAPPING_LABEL = isNew ? SAVE_ROLE_MAPPING : UPDATE_ROLE_MAPPING;
-  const TITLE = isNew ? ADD_ROLE_MAPPING_TITLE : MANAGE_ROLE_MAPPING_TITLE;
+  const standardRoleOptions = STANDARD_ROLE_TYPES.map(mapRoleOptions);
+  const advancedRoleOptions = ADVANCED_ROLE_TYPES.map(mapRoleOptions);
 
-  const saveRoleMappingButton = (
-    <EuiButton onClick={handleSaveMapping} fill>
-      {SAVE_ROLE_MAPPING_LABEL}
-    </EuiButton>
-  );
-
-  const engineSelector = (engine: Engine) => (
-    <EuiCheckbox
-      key={engine.name}
-      name={engine.name}
-      id={`engine_option_${engine.name}`}
-      checked={selectedEngines.has(engine.name)}
-      onChange={(e) => {
-        handleEngineSelectionChange(engine.name, e.target.checked);
-      }}
-      label={engine.name}
-    />
-  );
-
-  const advancedRoleSelectors = (
-    <>
-      <EuiSpacer />
-      <EuiTitle size="xs">
-        <h4>{ADVANCED_ROLE_SELECTORS_TITLE}</h4>
-      </EuiTitle>
-      <EuiSpacer />
-      {ADVANCED_ROLE_TYPES.map(({ type, description }) => (
-        <RoleSelector
-          key={type}
-          disabled={!myRole.availableRoleTypes.includes(type)}
-          roleType={roleType}
-          roleTypeOption={type}
-          description={description}
-          onChange={handleRoleChange}
-        />
-      ))}
-    </>
-  );
+  const roleOptions = hasAdvancedRoles
+    ? [...standardRoleOptions, ...advancedRoleOptions]
+    : standardRoleOptions;
 
   return (
-    <>
-      <SetPageChrome trail={[ROLE_MAPPINGS_TITLE, TITLE]} />
-      <EuiPageHeader rightSideItems={[saveRoleMappingButton]} pageTitle={TITLE} />
-      <EuiSpacer />
-      <EuiPageContentBody>
-        <FlashMessages />
+    <RoleMappingFlyout
+      disabled={attributeValueInvalid || !hasEngineAssignment}
+      isNew={isNew}
+      closeRoleMappingFlyout={closeRoleMappingFlyout}
+      handleSaveMapping={handleSaveMapping}
+    >
+      <EuiForm isInvalid={roleMappingErrors.length > 0} error={roleMappingErrors}>
         <AttributeSelector
           attributeName={attributeName}
           attributeValue={attributeValue}
+          attributeValueInvalid={attributeValueInvalid}
           attributes={attributes}
           availableAuthProviders={availableAuthProviders}
           elasticsearchRoles={elasticsearchRoles}
@@ -163,83 +86,15 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
           handleAuthProviderChange={handleAuthProviderChange}
           multipleAuthProvidersConfig={multipleAuthProvidersConfig}
         />
-        <EuiSpacer />
-        <EuiFlexGroup alignItems="stretch">
-          <EuiFlexItem>
-            <EuiPanel hasShadow={false} color="subdued" paddingSize="l">
-              <EuiTitle size="s">
-                <h3>{ROLE_TITLE}</h3>
-              </EuiTitle>
-              <EuiSpacer />
-              <EuiTitle size="xs">
-                <h4>{FULL_ENGINE_ACCESS_TITLE}</h4>
-              </EuiTitle>
-              <EuiSpacer />
-              {STANDARD_ROLE_TYPES.map(({ type, description }) => (
-                <RoleSelector
-                  key={type}
-                  roleType={roleType}
-                  onChange={handleRoleChange}
-                  roleTypeOption={type}
-                  description={description}
-                />
-              ))}
-              {hasAdvancedRoles && advancedRoleSelectors}
-            </EuiPanel>
-          </EuiFlexItem>
-          {hasAdvancedRoles && (
-            <EuiFlexItem>
-              <EuiPanel hasShadow={false} color="subdued" paddingSize="l">
-                <EuiTitle size="s">
-                  <h3>{ENGINE_ACCESS_TITLE}</h3>
-                </EuiTitle>
-                <EuiSpacer />
-                <EuiFormRow>
-                  <EuiRadio
-                    id="accessAllEngines"
-                    disabled={!roleHasScopedEngines(roleType)}
-                    checked={accessAllEngines}
-                    onChange={handleAccessAllEnginesChange}
-                    label={
-                      <>
-                        <EuiTitle size="xs">
-                          <h4>{FULL_ENGINE_ACCESS_TITLE}</h4>
-                        </EuiTitle>
-                        <p>{FULL_ENGINE_ACCESS_DESCRIPTION}</p>
-                      </>
-                    }
-                  />
-                </EuiFormRow>
-                <EuiFormRow>
-                  <>
-                    <EuiRadio
-                      id="selectEngines"
-                      disabled={!roleHasScopedEngines(roleType)}
-                      checked={!accessAllEngines}
-                      onChange={handleAccessAllEnginesChange}
-                      label={
-                        <>
-                          <EuiTitle size="xs">
-                            <h4>{LIMITED_ENGINE_ACCESS_TITLE}</h4>
-                          </EuiTitle>
-                          <p>{LIMITED_ENGINE_ACCESS_DESCRIPTION}</p>
-                        </>
-                      }
-                    />
-                    {!accessAllEngines && (
-                      <div className="engines-list">
-                        {availableEngines.map((engine) => engineSelector(engine))}
-                      </div>
-                    )}
-                  </>
-                </EuiFormRow>
-              </EuiPanel>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-        <EuiSpacer />
-        {roleMapping && <DeleteMappingCallout handleDeleteMapping={handleDeleteMapping} />}
-      </EuiPageContentBody>
-    </>
+        <EuiSpacer size="m" />
+        <RoleSelector
+          roleType={roleType}
+          roleOptions={roleOptions}
+          onChange={handleRoleChange}
+          label="Role"
+        />
+        {hasAdvancedRoles && <EngineAssignmentSelector />}
+      </EuiForm>
+    </RoleMappingFlyout>
   );
 };

@@ -14,6 +14,7 @@ import { IContainer } from '../containers/i_container';
 import { PropertySpec } from '../types';
 import { PersistableState } from '../../../../kibana_utils/common';
 import { EmbeddableStateWithType } from '../../../common/types';
+import { UiActionsPresentableGrouping } from '../../../../ui_actions/public';
 
 export interface EmbeddableInstanceConfiguration {
   id: string;
@@ -49,6 +50,12 @@ export interface EmbeddableFactory<
   readonly savedObjectMetaData?: SavedObjectMetaData<TSavedObjectAttributes>;
 
   /**
+   * Indicates the grouping this factory should appear in a sub-menu. Example, this is used for grouping
+   * options in the editors menu in Dashboard for creating new embeddables
+   */
+  readonly grouping?: UiActionsPresentableGrouping;
+
+  /**
    * True if is this factory create embeddables that are Containers. Used in the add panel to
    * conditionally show whether these can be added to another container. It's just not
    * supported right now, but once nested containers are officially supported we can probably get
@@ -61,6 +68,16 @@ export interface EmbeddableFactory<
    * in the add panel for containers.
    */
   getDisplayName(): string;
+
+  /**
+   * Returns an EUI Icon type to be displayed in a menu.
+   */
+  getIconType(): string;
+
+  /**
+   * Returns a description about the embeddable.
+   */
+  getDescription(): string;
 
   /**
    * If false, this type of embeddable can't be created with the "createNew" functionality. Instead,

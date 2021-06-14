@@ -97,6 +97,9 @@ export const jobSummaryRT = rt.intersection([
       custom_settings: jobCustomSettingsRT,
       finished_time: rt.number,
       model_size_stats: jobModelSizeStatsRT,
+      datafeed_config: rt.partial({
+        runtime_mappings: rt.UnknownRecord,
+      }),
     }),
   }),
 ]);

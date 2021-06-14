@@ -245,7 +245,7 @@ export const EndpointDetails = memo(
           title: i18n.translate('xpack.securitySolution.endpoint.details.hostname', {
             defaultMessage: 'Hostname',
           }),
-          description: <EuiText>{details.host.hostname}</EuiText>,
+          description: <EuiText className="eui-textBreakAll">{details.host.hostname}</EuiText>,
         },
         {
           title: i18n.translate('xpack.securitySolution.endpoint.details.endpointVersion', {
@@ -258,6 +258,7 @@ export const EndpointDetails = memo(
 
     return (
       <>
+        <EuiSpacer size="l" />
         <EuiDescriptionList
           type="column"
           listItems={detailsResultsUpper}

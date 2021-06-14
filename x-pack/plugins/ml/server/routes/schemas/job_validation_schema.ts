@@ -9,9 +9,22 @@ import { schema } from '@kbn/config-schema';
 import { analysisConfigSchema, anomalyDetectionJobSchema } from './anomaly_detectors_schema';
 import { datafeedConfigSchema, indicesOptionsSchema } from './datafeeds_schema';
 import { runtimeMappingsSchema } from './runtime_mappings_schema';
+import { ES_AGGREGATION } from '../../../common/constants/aggregation_types';
 
 export const estimateBucketSpanSchema = schema.object({
-  aggTypes: schema.arrayOf(schema.nullable(schema.string())),
+  aggTypes: schema.arrayOf(
+    schema.nullable(
+      schema.oneOf([
+        schema.literal(ES_AGGREGATION.COUNT),
+        schema.literal(ES_AGGREGATION.AVG),
+        schema.literal(ES_AGGREGATION.MAX),
+        schema.literal(ES_AGGREGATION.MIN),
+        schema.literal(ES_AGGREGATION.SUM),
+        schema.literal(ES_AGGREGATION.PERCENTILES),
+        schema.literal(ES_AGGREGATION.CARDINALITY),
+      ])
+    )
+  ),
   duration: schema.object({ start: schema.number(), end: schema.number() }),
   fields: schema.arrayOf(schema.nullable(schema.string())),
   filters: schema.maybe(schema.arrayOf(schema.any())),
@@ -19,8 +32,8 @@ export const estimateBucketSpanSchema = schema.object({
   query: schema.any(),
   splitField: schema.maybe(schema.string()),
   timeField: schema.maybe(schema.string()),
-  runtimeMappings: runtimeMappingsSchema,
-  indicesOptions: indicesOptionsSchema,
+  runtimeMappings: schema.maybe(runtimeMappingsSchema),
+  indicesOptions: schema.maybe(indicesOptionsSchema),
 });
 
 export const modelMemoryLimitSchema = schema.object({
@@ -41,7 +54,10 @@ export const validateJobSchema = schema.object({
     })
   ),
   fields: schema.maybe(schema.any()),
-  job: schema.object(anomalyDetectionJobSchema),
+  job: schema.object({
+    ...anomalyDetectionJobSchema,
+    datafeed_config: datafeedConfigSchema,
+  }),
 });
 
 export const validateCardinalitySchema = schema.object({

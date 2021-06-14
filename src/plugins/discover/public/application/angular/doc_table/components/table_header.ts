@@ -11,6 +11,7 @@ import { getServices } from '../../../../kibana_services';
 import { SORT_DEFAULT_ORDER_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../../common';
 import { UI_SETTINGS } from '../../../../../../data/public';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createTableHeaderDirective(reactDirective: any) {
   const { uiSettings: config } = getServices();
 

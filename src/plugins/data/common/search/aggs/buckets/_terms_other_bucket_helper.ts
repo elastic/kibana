@@ -7,6 +7,7 @@
  */
 
 import { isNumber, keys, values, find, each, cloneDeep, flatten } from 'lodash';
+import { estypes } from '@elastic/elasticsearch';
 import { buildExistsFilter, buildPhrasesFilter, buildQueryFromFilters } from '../../../../common';
 import { AggGroupNames } from '../agg_groups';
 import { IAggConfigs } from '../agg_configs';
@@ -42,7 +43,7 @@ const getNestedAggDSL = (aggNestedDsl: Record<string, any>, startFromAggId: stri
  */
 const getAggResultBuckets = (
   aggConfigs: IAggConfigs,
-  response: any,
+  response: estypes.SearchResponse<any>['aggregations'],
   aggWithOtherBucket: IBucketAggConfig,
   key: string
 ) => {
@@ -72,8 +73,8 @@ const getAggResultBuckets = (
       }
     }
   }
-  if (responseAgg[aggWithOtherBucket.id]) {
-    return responseAgg[aggWithOtherBucket.id].buckets;
+  if (responseAgg?.[aggWithOtherBucket.id]) {
+    return (responseAgg[aggWithOtherBucket.id] as any).buckets;
   }
   return [];
 };
@@ -165,7 +166,7 @@ export const buildOtherBucketAgg = (
     key: string
   ) => {
     // make sure there are actually results for the buckets
-    if (aggregations[aggId].buckets.length < 1) {
+    if (aggregations[aggId]?.buckets.length < 1) {
       noAggBucketResults = true;
       return;
     }
@@ -235,11 +236,11 @@ export const buildOtherBucketAgg = (
 
 export const mergeOtherBucketAggResponse = (
   aggsConfig: IAggConfigs,
-  response: any,
+  response: estypes.SearchResponse<any>,
   otherResponse: any,
   otherAgg: IBucketAggConfig,
   requestAgg: Record<string, any>
-) => {
+): estypes.SearchResponse<any> => {
   const updatedResponse = cloneDeep(response);
   each(otherResponse.aggregations['other-filter'].buckets, (bucket, key) => {
     if (!bucket.doc_count || key === undefined) return;
@@ -276,7 +277,7 @@ export const mergeOtherBucketAggResponse = (
 };
 
 export const updateMissingBucket = (
-  response: any,
+  response: estypes.SearchResponse<any>,
   aggConfigs: IAggConfigs,
   agg: IBucketAggConfig
 ) => {

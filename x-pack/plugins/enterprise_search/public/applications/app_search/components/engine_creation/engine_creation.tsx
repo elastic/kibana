@@ -40,7 +40,7 @@ import {
 import { EngineCreationLogic } from './engine_creation_logic';
 
 export const EngineCreation: React.FC = () => {
-  const { name, rawName, language } = useValues(EngineCreationLogic);
+  const { name, rawName, language, isLoading } = useValues(EngineCreationLogic);
   const { setLanguage, setRawName, submitEngine } = useActions(EngineCreationLogic);
 
   return (
@@ -104,10 +104,11 @@ export const EngineCreation: React.FC = () => {
             <EuiSpacer />
             <EuiButton
               disabled={name.length === 0}
+              isLoading={isLoading}
               type="submit"
               data-test-subj="NewEngineSubmitButton"
-              fill
               color="secondary"
+              fill
             >
               {ENGINE_CREATION_FORM_SUBMIT_BUTTON_LABEL}
             </EuiButton>

@@ -12,9 +12,9 @@ import { identity } from 'fp-ts/lib/function';
 
 import { wrapError, escapeHatch } from '../utils';
 
-import { throwErrors, CasePushRequestParamsRt } from '../../../../common/api';
+import { throwErrors, CasePushRequestParamsRt } from '../../../../common';
 import { RouteDeps } from '../types';
-import { CASE_PUSH_URL } from '../../../../common/constants';
+import { CASE_PUSH_URL } from '../../../../common';
 
 export function initPushCaseApi({ router, logger }: RouteDeps) {
   router.post(
@@ -31,12 +31,7 @@ export function initPushCaseApi({ router, logger }: RouteDeps) {
           return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
         }
 
-        const casesClient = context.cases.getCasesClient();
-        const actionsClient = context.actions?.getActionsClient();
-
-        if (actionsClient == null) {
-          return response.badRequest({ body: 'Action client not found' });
-        }
+        const casesClient = await context.cases.getCasesClient();
 
         const params = pipe(
           CasePushRequestParamsRt.decode(request.params),
@@ -44,8 +39,7 @@ export function initPushCaseApi({ router, logger }: RouteDeps) {
         );
 
         return response.ok({
-          body: await casesClient.push({
-            actionsClient,
+          body: await casesClient.cases.push({
             caseId: params.case_id,
             connectorId: params.connector_id,
           }),

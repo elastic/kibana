@@ -8,6 +8,7 @@
 import type { IRouter, KibanaRequest, RequestHandlerContext } from 'src/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { DataPluginStart } from 'src/plugins/data/server/plugin';
+import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
@@ -30,14 +31,18 @@ export interface ReportingSetupDeps {
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  screenshotMode: ScreenshotModePluginSetup;
 }
 
 export interface ReportingStartDeps {
   data: DataPluginStart;
 }
 
-export type ReportingStart = object;
-export type ReportingSetup = object;
+export interface ReportingSetup {
+  usesUiCapabilities: () => boolean;
+}
+
+export type ReportingStart = ReportingSetup;
 
 /*
  * Internal Types
@@ -97,8 +102,9 @@ export interface ExportTypeDefinition<
 /**
  * @internal
  */
-export interface ReportingRequestHandlerContext extends RequestHandlerContext {
+export interface ReportingRequestHandlerContext {
   reporting: ReportingStart | null;
+  core: RequestHandlerContext['core'];
 }
 
 /**

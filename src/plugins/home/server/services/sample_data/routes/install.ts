@@ -7,7 +7,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, Logger, RequestHandlerContext } from 'src/core/server';
+import type {
+  IRouter,
+  Logger,
+  IScopedClusterClient,
+  SavedObjectsBulkCreateObject,
+} from 'src/core/server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { createIndexName } from '../lib/create_index_name';
 import {
@@ -22,7 +27,7 @@ const insertDataIntoIndex = (
   dataIndexConfig: any,
   index: string,
   nowReference: string,
-  context: RequestHandlerContext,
+  esClient: IScopedClusterClient,
   logger: Logger
 ) => {
   function updateTimestamps(doc: any) {
@@ -51,9 +56,11 @@ const insertDataIntoIndex = (
       bulk.push(insertCmd);
       bulk.push(updateTimestamps(doc));
     });
-    const resp = await context.core.elasticsearch.legacy.client.callAsCurrentUser('bulk', {
+
+    const { body: resp } = await esClient.asCurrentUser.bulk({
       body: bulk,
     });
+
     if (resp.errors) {
       const errMsg = `sample_data install errors while bulk inserting. Elasticsearch response: ${JSON.stringify(
         resp,
@@ -100,7 +107,7 @@ export function createInstallRoute(
 
         // clean up any old installation of dataset
         try {
-          await context.core.elasticsearch.legacy.client.callAsCurrentUser('indices.delete', {
+          await context.core.elasticsearch.client.asCurrentUser.indices.delete({
             index,
           });
         } catch (err) {
@@ -108,17 +115,13 @@ export function createInstallRoute(
         }
 
         try {
-          const createIndexParams = {
+          await context.core.elasticsearch.client.asCurrentUser.indices.create({
             index,
             body: {
               settings: { index: { number_of_shards: 1, auto_expand_replicas: '0-1' } },
               mappings: { properties: dataIndexConfig.fields },
             },
-          };
-          await context.core.elasticsearch.legacy.client.callAsCurrentUser(
-            'indices.create',
-            createIndexParams
-          );
+          });
         } catch (err) {
           const errMsg = `Unable to create sample data index "${index}", error: ${err.message}`;
           logger.warn(errMsg);
@@ -130,7 +133,7 @@ export function createInstallRoute(
             dataIndexConfig,
             index,
             nowReference,
-            context,
+            context.core.elasticsearch.client,
             logger
           );
           (counts as any)[index] = count;
@@ -150,8 +153,9 @@ export function createInstallRoute(
 
         const client = getClient({ includedHiddenTypes });
 
+        const savedObjects = sampleDataset.savedObjects as SavedObjectsBulkCreateObject[];
         createResults = await client.bulkCreate(
-          sampleDataset.savedObjects.map(({ version, ...savedObject }) => savedObject),
+          savedObjects.map(({ version, ...savedObject }) => savedObject),
           { overwrite: true }
         );
       } catch (err) {

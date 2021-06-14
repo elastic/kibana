@@ -34,6 +34,7 @@ export class VegaBaseView {
   destroy(): Promise<void>;
 
   _$container: any;
+  _$controls: any;
   _parser: any;
   _vegaViewConfig: any;
   _serviceSettings: VegaViewParams['serviceSettings'];

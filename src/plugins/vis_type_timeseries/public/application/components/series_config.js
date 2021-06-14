@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { DataFormatPicker } from './data_format_picker';
@@ -21,10 +22,7 @@ import {
   EuiFormRow,
   EuiCode,
   EuiHorizontalRule,
-  EuiFormLabel,
-  EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { SeriesConfigQueryBarWithIgnoreGlobalFilter } from './series_config_query_bar_with_ignore_global_filter';
 
 export const SeriesConfig = (props) => {
@@ -104,18 +102,17 @@ export const SeriesConfig = (props) => {
 
       <EuiFlexGroup gutterSize="s" responsive={false} wrap={true}>
         <EuiFlexItem grow={false}>
-          <EuiFormLabel>
-            <FormattedMessage
-              id="visTypeTimeseries.seriesConfig.overrideIndexPatternLabel"
-              defaultMessage="Override Index Pattern?"
+          <EuiFormRow
+            label={i18n.translate('visTypeTimeseries.seriesConfig.overrideIndexPatternLabel', {
+              defaultMessage: 'Override Index Pattern?',
+            })}
+          >
+            <YesNo
+              value={model.override_index_pattern}
+              name="override_index_pattern"
+              onChange={props.onChange}
             />
-          </EuiFormLabel>
-          <EuiSpacer size="s" />
-          <YesNo
-            value={model.override_index_pattern}
-            name="override_index_pattern"
-            onChange={props.onChange}
-          />
+          </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
           <IndexPattern

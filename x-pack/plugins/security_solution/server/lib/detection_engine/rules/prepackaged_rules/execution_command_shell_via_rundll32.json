@@ -3,6 +3,9 @@
     "Elastic"
   ],
   "description": "Identifies command shell activity started via RunDLL32, which is commonly abused by attackers to host malicious code.",
+  "false_positives": [
+    "Microsoft Windows installers leveraging RunDLL32 for installation."
+  ],
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
@@ -12,7 +15,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Command Shell Activity Started via RunDLL32",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n process.name : (\"cmd.exe\", \"powershell.exe\") and\n  process.parent.name : \"rundll32.exe\" and \n  /* common FPs can be added here */\n  not process.parent.args : \"C:\\\\Windows\\\\System32\\\\SHELL32.dll,RunAsNewUser_RunDLL\"\n",
+  "query": "process where event.type == \"start\" and\n process.name : (\"cmd.exe\", \"powershell.exe\") and\n  process.parent.name : \"rundll32.exe\" and process.parent.command_line != null and\n  /* common FPs can be added here */\n  not process.parent.args : (\"C:\\\\Windows\\\\System32\\\\SHELL32.dll,RunAsNewUser_RunDLL\",\n                             \"C:\\\\WINDOWS\\\\*.tmp,zzzzInvokeManagedCustomActionOutOfProc\")\n",
   "risk_score": 21,
   "rule_id": "9ccf3ce0-0057-440a-91f5-870c6ad39093",
   "severity": "low",
@@ -49,5 +52,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }

@@ -21,7 +21,6 @@ import React, { useState } from 'react';
 import { EuiSelect } from '@elastic/eui';
 import { uniqBy } from 'lodash';
 import { Alert } from '../../../../../../alerting/common';
-import { enableAlertingExperience } from '../../../../../common/ui_settings_keys';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { SectionContainer } from '..';
 
@@ -38,10 +37,9 @@ interface Props {
 }
 
 export function AlertsSection({ alerts }: Props) {
-  const { core } = usePluginContext();
+  const { config, core } = usePluginContext();
   const [filter, setFilter] = useState(ALL_TYPES);
-
-  const href = core.uiSettings.get(enableAlertingExperience)
+  const href = config.unsafe.alertingExperience.enabled
     ? '/app/observability/alerts'
     : '/app/management/insightsAndAlerting/triggersActions/alerts';
 

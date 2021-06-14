@@ -7,6 +7,7 @@
  */
 
 import { TypeWithGeneric, ImAType } from './types';
+import { ImNotExportedFromIndex } from './foo';
 
 /**
  * This is a non arrow function.
@@ -69,11 +70,7 @@ export const crazyFunction = (
   { str }: { str: string }
 ) => () => () => fn({ param: str });
 
-interface ImNotExported {
-  foo: string;
-}
-
-export const fnWithNonExportedRef = (a: ImNotExported) => 'shi';
+export const fnWithNonExportedRef = (a: ImNotExportedFromIndex) => a;
 
 export type NotAnArrowFnType = typeof notAnArrowFn;
 

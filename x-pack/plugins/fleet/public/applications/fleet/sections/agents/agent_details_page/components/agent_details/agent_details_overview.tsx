@@ -21,10 +21,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import type { Agent, AgentPolicy } from '../../../../../types';
-import { useKibanaVersion, useLink } from '../../../../../hooks';
+import { useKibanaVersion } from '../../../../../hooks';
 import { isAgentUpgradeable } from '../../../../../services';
-import { AgentPolicyPackageBadges } from '../../../components/agent_policy_package_badges';
-import { LinkAndRevision } from '../../../../../components';
+import { AgentPolicyPackageBadges, AgentPolicySummaryLine } from '../../../../../components';
 
 // Allows child text to be truncated
 const FlexItemWithMinWidth = styled(EuiFlexItem)`
@@ -35,8 +34,8 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
   agent: Agent;
   agentPolicy?: AgentPolicy;
 }> = memo(({ agent, agentPolicy }) => {
-  const { getHref } = useLink();
   const kibanaVersion = useKibanaVersion();
+
   return (
     <EuiPanel>
       <EuiDescriptionList compressed>
@@ -52,13 +51,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               defaultMessage: 'Agent policy',
             }),
             description: agentPolicy ? (
-              <LinkAndRevision
-                href={getHref('policy_details', { policyId: agentPolicy.id })}
-                title={agentPolicy.name || agent.policy_id}
-                revision={agent.policy_revision || undefined}
-              >
-                {agentPolicy.name || agentPolicy.id}
-              </LinkAndRevision>
+              <AgentPolicySummaryLine policy={agentPolicy} />
             ) : (
               agent.policy_id || '-'
             ),

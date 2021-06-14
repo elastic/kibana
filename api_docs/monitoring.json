@@ -13,50 +13,61 @@
     "functions": [],
     "interfaces": [
       {
+        "parentPluginId": "monitoring",
         "id": "def-server.IBulkUploader",
         "type": "Interface",
+        "tags": [],
         "label": "IBulkUploader",
         "description": [],
-        "tags": [],
+        "source": {
+          "path": "x-pack/plugins/monitoring/server/types.ts",
+          "lineNumber": 94
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "monitoring",
             "id": "def-server.IBulkUploader.getKibanaStats",
             "type": "Function",
+            "tags": [],
             "label": "getKibanaStats",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/monitoring/server/types.ts",
-              "lineNumber": 94
-            },
             "signature": [
               "() => any"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.IBulkUploader.stop",
-            "type": "Function",
-            "label": "stop",
-            "description": [],
+            ],
             "source": {
               "path": "x-pack/plugins/monitoring/server/types.ts",
               "lineNumber": 95
             },
-            "signature": [
-              "() => void"
-            ]
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
-            "tags": [],
-            "id": "def-server.IBulkUploader.start",
+            "parentPluginId": "monitoring",
+            "id": "def-server.IBulkUploader.stop",
             "type": "Function",
-            "label": "start",
+            "tags": [],
+            "label": "stop",
             "description": [],
+            "signature": [
+              "() => void"
+            ],
             "source": {
               "path": "x-pack/plugins/monitoring/server/types.ts",
               "lineNumber": 96
             },
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "monitoring",
+            "id": "def-server.IBulkUploader.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
             "signature": [
               "(esClient: ",
               {
@@ -67,92 +78,144 @@
                 "text": "ElasticsearchClient"
               },
               ") => void"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.IBulkUploader.handleNotEnabled",
-            "type": "Function",
-            "label": "handleNotEnabled",
-            "description": [],
+            ],
             "source": {
               "path": "x-pack/plugins/monitoring/server/types.ts",
               "lineNumber": 97
             },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "monitoring",
+                "id": "def-server.esClient",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "esClient",
+                "description": [],
+                "signature": [
+                  "Pick<",
+                  "KibanaClient",
+                  ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"helpers\" | \"count\" | \"search\" | \"security\" | \"eql\" | \"on\" | \"off\" | \"transform\" | \"emit\" | \"once\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
+                  "TransportRequestParams",
+                  ", options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): ",
+                  "TransportRequestPromise",
+                  "<",
+                  "ApiResponse",
+                  "<Record<string, any>, unknown>>; }; }"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/monitoring/server/types.ts",
+                  "lineNumber": 97
+                },
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "monitoring",
+            "id": "def-server.IBulkUploader.handleNotEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "handleNotEnabled",
+            "description": [],
             "signature": [
               "() => void"
-            ]
+            ],
+            "source": {
+              "path": "x-pack/plugins/monitoring/server/types.ts",
+              "lineNumber": 98
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/monitoring/server/types.ts",
-          "lineNumber": 93
-        },
         "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
       {
+        "parentPluginId": "monitoring",
         "id": "def-server.KibanaSettingsCollector",
         "type": "Type",
-        "label": "KibanaSettingsCollector",
         "tags": [],
+        "label": "KibanaSettingsCollector",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "usageCollection",
+            "scope": "server",
+            "docId": "kibUsageCollectionPluginApi",
+            "section": "def-server.ICollector",
+            "text": "ICollector"
+          },
+          "<EmailSettingData | undefined, {}> & ",
+          "KibanaSettingsCollectorExtraOptions"
+        ],
         "source": {
           "path": "x-pack/plugins/monitoring/server/kibana_monitoring/collectors/get_settings_collector.ts",
           "lineNumber": 79
         },
-        "signature": [
-          "Collector<EmailSettingData | undefined, {}> & KibanaSettingsCollectorExtraOptions"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "monitoring",
         "id": "def-server.MonitoringConfig",
         "type": "Type",
-        "label": "MonitoringConfig",
         "tags": [],
+        "label": "MonitoringConfig",
         "description": [],
+        "signature": [
+          "{ ui: { elasticsearch: ",
+          "MonitoringElasticsearchConfig",
+          "; enabled: boolean; container: Readonly<{} & { logstash: Readonly<{} & { enabled: boolean; }>; elasticsearch: Readonly<{} & { enabled: boolean; }>; apm: Readonly<{} & { enabled: boolean; }>; }>; logs: Readonly<{} & { index: string; }>; metricbeat: Readonly<{} & { index: string; }>; ccs: Readonly<{} & { enabled: boolean; }>; max_bucket_size: number; min_interval_seconds: number; show_license_expiration: boolean; }; enabled: boolean; kibana: Readonly<{} & { collection: Readonly<{} & { enabled: boolean; interval: number; }>; }>; licensing: Readonly<{} & { api_polling_frequency: moment.Duration; }>; agent: Readonly<{} & { interval: string; }>; cluster_alerts: Readonly<{} & { enabled: boolean; allowedSpaces: string[]; email_notifications: Readonly<{} & { enabled: boolean; email_address: string; }>; }>; tests: Readonly<{} & { cloud_detector: Readonly<{} & { enabled: boolean; }>; }>; }"
+        ],
         "source": {
           "path": "x-pack/plugins/monitoring/server/config.ts",
-          "lineNumber": 92
+          "lineNumber": 93
         },
-        "signature": [
-          "{ ui: { elasticsearch: MonitoringElasticsearchConfig; enabled: boolean; logs: Readonly<{} & { index: string; }>; container: Readonly<{} & { logstash: Readonly<{} & { enabled: boolean; }>; elasticsearch: Readonly<{} & { enabled: boolean; }>; apm: Readonly<{} & { enabled: boolean; }>; }>; ccs: Readonly<{} & { enabled: boolean; }>; metricbeat: Readonly<{} & { index: string; }>; max_bucket_size: number; min_interval_seconds: number; show_license_expiration: boolean; }; enabled: boolean; kibana: Readonly<{} & { collection: Readonly<{} & { enabled: boolean; interval: number; }>; }>; cluster_alerts: Readonly<{} & { enabled: boolean; email_notifications: Readonly<{} & { enabled: boolean; email_address: string; }>; }>; licensing: Readonly<{} & { api_polling_frequency: ",
-          "Duration",
-          "; }>; agent: Readonly<{} & { interval: string; }>; tests: Readonly<{} & { cloud_detector: Readonly<{} & { enabled: boolean; }>; }>; }"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "objects": [],
     "setup": {
+      "parentPluginId": "monitoring",
       "id": "def-server.MonitoringPluginSetup",
       "type": "Interface",
+      "tags": [],
       "label": "MonitoringPluginSetup",
       "description": [],
-      "tags": [],
-      "children": [
-        {
-          "tags": [],
-          "id": "def-server.MonitoringPluginSetup.getKibanaStats",
-          "type": "Function",
-          "label": "getKibanaStats",
-          "description": [],
-          "source": {
-            "path": "x-pack/plugins/monitoring/server/types.ts",
-            "lineNumber": 101
-          },
-          "signature": [
-            "() => any"
-          ]
-        }
-      ],
       "source": {
         "path": "x-pack/plugins/monitoring/server/types.ts",
-        "lineNumber": 100
+        "lineNumber": 101
       },
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "monitoring",
+          "id": "def-server.MonitoringPluginSetup.getKibanaStats",
+          "type": "Function",
+          "tags": [],
+          "label": "getKibanaStats",
+          "description": [],
+          "signature": [
+            "() => any"
+          ],
+          "source": {
+            "path": "x-pack/plugins/monitoring/server/types.ts",
+            "lineNumber": 102
+          },
+          "deprecated": false,
+          "returnComment": [],
+          "children": []
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     }

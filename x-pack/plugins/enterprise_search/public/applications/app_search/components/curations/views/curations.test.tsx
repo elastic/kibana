@@ -5,21 +5,18 @@
  * 2.0.
  */
 
-import {
-  mountWithIntl,
-  mockKibanaValues,
-  setMockActions,
-  setMockValues,
-} from '../../../../__mocks__';
+import { mockKibanaValues, setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
 import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
 import { shallow, ReactWrapper } from 'enzyme';
 
-import { EuiPageHeader, EuiBasicTable, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiPageHeader, EuiBasicTable } from '@elastic/eui';
 
 import { Loading } from '../../../../shared/loading';
+import { mountWithIntl } from '../../../../test_helpers';
+import { EmptyState } from '../components';
 
 import { Curations, CurationsTable } from './curations';
 
@@ -82,11 +79,12 @@ describe('Curations', () => {
   });
 
   describe('CurationsTable', () => {
-    it('renders an EuiEmptyPrompt if curations is empty', () => {
+    it('renders an empty state', () => {
       setMockValues({ ...values, curations: [] });
-      const wrapper = shallow(<CurationsTable />);
+      const table = shallow(<CurationsTable />).find(EuiBasicTable);
+      const noItemsMessage = table.prop('noItemsMessage') as React.ReactElement;
 
-      expect(wrapper.find(EuiBasicTable).prop('noItemsMessage').type).toEqual(EuiEmptyPrompt);
+      expect(noItemsMessage.type).toEqual(EmptyState);
     });
 
     it('passes loading prop based on dataLoading', () => {

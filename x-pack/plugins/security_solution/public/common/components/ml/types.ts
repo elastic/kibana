@@ -6,10 +6,10 @@
  */
 
 import { Influencer } from '../../../../../ml/public';
+import { FlowTarget } from '../../../../common/search_strategy';
 
 import { HostsType } from '../../../hosts/store/model';
 import { NetworkType } from '../../../network/store/model';
-import { FlowTarget } from '../../../graphql/types';
 
 export interface Source {
   job_id: string;

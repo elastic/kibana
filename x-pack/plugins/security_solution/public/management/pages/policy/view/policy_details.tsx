@@ -194,7 +194,7 @@ export const PolicyDetails = React.memo(() => {
         noTimeline
         data-test-subj="policyDetailsPage"
         noPadding
-        style={{ 'background-color': theme.eui.euiHeaderBackgroundColor }}
+        style={{ backgroundColor: theme.eui.euiHeaderBackgroundColor }}
         className="policyDetailsPage"
       >
         <PolicyDetailsHeader>

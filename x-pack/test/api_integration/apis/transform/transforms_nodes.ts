@@ -20,14 +20,14 @@ export default ({ getService }: FtrProviderContext) => {
 
   const expected = {
     apiTransformTransformsNodes: {
-      count: 1,
+      minCount: 1,
     },
   };
 
   function assertTransformsNodesResponseBody(body: GetTransformNodesResponseSchema) {
     expect(isGetTransformNodesResponseSchema(body)).to.eql(true);
 
-    expect(body.count).to.eql(expected.apiTransformTransformsNodes.count);
+    expect(body.count).to.not.be.lessThan(expected.apiTransformTransformsNodes.minCount);
   }
 
   describe('/api/transform/transforms/_nodes', function () {

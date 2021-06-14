@@ -11,7 +11,6 @@ import sinon from 'sinon';
 import proxyquire from 'proxyquire';
 import { noop, times } from 'lodash';
 import { constants } from './constants';
-import { ClientMock } from './__fixtures__/legacy_elasticsearch';
 import { JobMock } from './__fixtures__/job';
 import { WorkerMock } from './__fixtures__/worker';
 
@@ -25,7 +24,7 @@ describe.skip('Esqueue class', function () {
   let client;
 
   beforeEach(function () {
-    client = new ClientMock();
+    client = { ping: () => {} };
   });
 
   it('should be an event emitter', function () {
@@ -42,8 +41,7 @@ describe.skip('Esqueue class', function () {
 
   describe('Queue construction', function () {
     it('should ping the ES server', function () {
-      const pingSpy = sinon.spy(client, 'callAsInternalUser').withArgs('ping');
-      new Esqueue('esqueue', { client });
+      const pingSpy = sinon.spy(client, 'ping');
       sinon.assert.calledOnce(pingSpy);
     });
   });

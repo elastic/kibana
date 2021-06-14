@@ -16,6 +16,7 @@ export interface TimelionFunctionArgsSuggestion {
 export interface TimelionFunctionArgs {
   name: string;
   help?: string;
+  insertText?: string;
   multi?: boolean;
   types: TimelionFunctionArgsTypes[];
   suggestions?: TimelionFunctionArgsSuggestion[];

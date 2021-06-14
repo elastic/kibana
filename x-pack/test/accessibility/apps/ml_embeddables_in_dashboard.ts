@@ -58,7 +58,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const PageObjects = getPageObjects(['common', 'timePicker', 'dashboard']);
-  const dashboardAddPanel = getService('dashboardAddPanel');
   const a11y = getService('a11y'); /* this is the wrapping service around axe */
 
   describe('machine learning embeddables anomaly charts', function () {
@@ -66,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.securityCommon.createMlRoles();
       await ml.securityCommon.createMlUsers();
 
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
@@ -75,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await ml.securityCommon.cleanMlUsers();
       await ml.securityCommon.cleanMlRoles();
-      await esArchiver.unload('ml/farequote');
+      await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
       await ml.securityUI.logout();
     });
 
@@ -96,10 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('can open job selection flyout', async () => {
           await PageObjects.dashboard.clickCreateDashboardPrompt();
           await ml.dashboardEmbeddables.assertDashboardIsEmpty();
-          await dashboardAddPanel.clickOpenAddPanel();
-          await dashboardAddPanel.ensureAddPanelIsShowing();
-          await dashboardAddPanel.clickAddNewEmbeddableLink('ml_anomaly_charts');
-          await ml.dashboardJobSelectionTable.assertJobSelectionTableExists();
+          await ml.dashboardEmbeddables.openJobSelectionFlyout();
           await a11y.testAppSnapshot();
         });
 

@@ -8,7 +8,9 @@
 
 import expect from '@kbn/expect';
 import supertestAsPromised from 'supertest-as-promised';
+import { omit } from 'lodash';
 import { basicUiCounters } from './__fixtures__/ui_counters';
+import { basicUsageCounters } from './__fixtures__/usage_counters';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { SavedObject } from '../../../../src/core/server';
 import ossRootTelemetrySchema from '../../../../src/plugins/telemetry/schema/oss_root.json';
@@ -34,8 +36,12 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   describe('/api/telemetry/v2/clusters/_stats', () => {
-    before('make sure there are some saved objects', () => esArchiver.load('saved_objects/basic'));
-    after('cleanup saved objects changes', () => esArchiver.unload('saved_objects/basic'));
+    before('make sure there are some saved objects', () =>
+      esArchiver.load('test/api_integration/fixtures/es_archiver/saved_objects/basic')
+    );
+    after('cleanup saved objects changes', () =>
+      esArchiver.unload('test/api_integration/fixtures/es_archiver/saved_objects/basic')
+    );
 
     before('create some telemetry-data tracked indices', async () => {
       await es.indices.create({ index: 'filebeat-telemetry_tests_logs' });
@@ -85,6 +91,35 @@ export default function ({ getService }: FtrProviderContext) {
         expect(stats.stack_stats.kibana.plugins.csp.strict).to.be(false);
         expect(stats.stack_stats.kibana.plugins.csp.warnLegacyBrowsers).to.be(true);
         expect(stats.stack_stats.kibana.plugins.csp.rulesChangedFromDefault).to.be(false);
+        expect(stats.stack_stats.kibana.plugins.kibana_config_usage).to.be.an('object');
+        // non-default kibana configs. Configs set at 'test/api_integration/config.js'.
+        expect(omit(stats.stack_stats.kibana.plugins.kibana_config_usage, 'server.port')).to.eql({
+          'elasticsearch.username': '[redacted]',
+          'elasticsearch.password': '[redacted]',
+          'elasticsearch.hosts': '[redacted]',
+          'elasticsearch.healthCheck.delay': 3600000,
+          'plugins.paths': '[redacted]',
+          'logging.json': false,
+          'server.xsrf.disableProtection': true,
+          'server.compression.referrerWhitelist': '[redacted]',
+          'server.maxPayload': 1679958,
+          'status.allowAnonymous': true,
+          'home.disableWelcomeScreen': true,
+          'data.search.aggs.shardDelay.enabled': true,
+          'security.showInsecureClusterWarning': false,
+          'telemetry.banner': false,
+          'telemetry.url': '[redacted]',
+          'telemetry.optInStatusUrl': '[redacted]',
+          'telemetry.optIn': false,
+          'newsfeed.service.urlRoot': '[redacted]',
+          'newsfeed.service.pathTemplate': '[redacted]',
+          'savedObjects.maxImportPayloadBytes': 10485760,
+          'savedObjects.maxImportExportSize': 10001,
+          'usageCollection.usageCounters.bufferDuration': 0,
+        });
+        expect(stats.stack_stats.kibana.plugins.kibana_config_usage['server.port']).to.be.a(
+          'number'
+        );
 
         // Testing stack_stats.data
         expect(stats.stack_stats.data).to.be.an('object');
@@ -96,6 +131,15 @@ export default function ({ getService }: FtrProviderContext) {
         expect(stats.stack_stats.data[0].doc_count).to.be(0);
         expect(stats.stack_stats.data[0].ecs_index_count).to.be(0);
         expect(stats.stack_stats.data[0].size_in_bytes).to.be.a('number');
+
+        expect(stats.stack_stats.kibana.plugins.saved_objects_counts).to.be.an('object');
+        expect(stats.stack_stats.kibana.plugins.saved_objects_counts.by_type).to.be.an('array');
+        expect(stats.stack_stats.kibana.plugins.saved_objects_counts.by_type).to.eql([
+          { type: 'config', count: 2 },
+          { type: 'dashboard', count: 2 },
+          { type: 'index-pattern', count: 2 },
+          { type: 'visualization', count: 2 },
+        ]);
       });
 
       it('should validate mandatory fields exist', () => {
@@ -145,11 +189,29 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('UI Counters telemetry', () => {
-      before('Add UI Counters saved objects', () => esArchiver.load('saved_objects/ui_counters'));
-      after('cleanup saved objects changes', () => esArchiver.unload('saved_objects/ui_counters'));
+      before('Add UI Counters saved objects', () =>
+        esArchiver.load('test/api_integration/fixtures/es_archiver/saved_objects/ui_counters')
+      );
+      after('cleanup saved objects changes', () =>
+        esArchiver.unload('test/api_integration/fixtures/es_archiver/saved_objects/ui_counters')
+      );
       it('returns ui counters aggregated by day', async () => {
         const stats = await retrieveTelemetry(supertest);
         expect(stats.stack_stats.kibana.plugins.ui_counters).to.eql(basicUiCounters);
+      });
+    });
+
+    describe('Usage Counters telemetry', () => {
+      before('Add UI Counters saved objects', () =>
+        esArchiver.load('test/api_integration/fixtures/es_archiver/saved_objects/usage_counters')
+      );
+      after('cleanup saved objects changes', () =>
+        esArchiver.unload('test/api_integration/fixtures/es_archiver/saved_objects/usage_counters')
+      );
+
+      it('returns usage counters aggregated by day', async () => {
+        const stats = await retrieveTelemetry(supertest);
+        expect(stats.stack_stats.kibana.plugins.usage_counters).to.eql(basicUsageCounters);
       });
     });
 

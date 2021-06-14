@@ -11,14 +11,14 @@ import { PolicyData, UIPolicyConfig } from '../../../../../../common/endpoint/ty
 import { ServerApiError } from '../../../../../common/types';
 import { PolicyDetailsState } from '../../types';
 
-interface ServerReturnedPolicyDetailsData {
+export interface ServerReturnedPolicyDetailsData {
   type: 'serverReturnedPolicyDetailsData';
   payload: {
     policyItem: PolicyData | undefined;
   };
 }
 
-interface ServerFailedToReturnPolicyDetailsData {
+export interface ServerFailedToReturnPolicyDetailsData {
   type: 'serverFailedToReturnPolicyDetailsData';
   payload: ServerApiError;
 }
@@ -26,33 +26,33 @@ interface ServerFailedToReturnPolicyDetailsData {
 /**
  * When users change a policy via forms, this action is dispatched with a payload that modifies the configuration of a cloned policy config.
  */
-interface UserChangedPolicyConfig {
+export interface UserChangedPolicyConfig {
   type: 'userChangedPolicyConfig';
   payload: {
     policyConfig: UIPolicyConfig;
   };
 }
 
-interface UserChangedAntivirusRegistration {
+export interface UserChangedAntivirusRegistration {
   type: 'userChangedAntivirusRegistration';
   payload: {
     enabled: boolean;
   };
 }
 
-interface ServerReturnedPolicyDetailsAgentSummaryData {
+export interface ServerReturnedPolicyDetailsAgentSummaryData {
   type: 'serverReturnedPolicyDetailsAgentSummaryData';
   payload: {
     agentStatusSummary: GetAgentStatusResponse['results'];
   };
 }
 
-interface ServerReturnedPolicyDetailsUpdateFailure {
+export interface ServerReturnedPolicyDetailsUpdateFailure {
   type: 'serverReturnedPolicyDetailsUpdateFailure';
   payload: PolicyDetailsState['updateStatus'];
 }
 
-interface ServerReturnedUpdatedPolicyDetailsData {
+export interface ServerReturnedUpdatedPolicyDetailsData {
   type: 'serverReturnedUpdatedPolicyDetailsData';
   payload: {
     policyItem: PolicyData;
@@ -60,11 +60,11 @@ interface ServerReturnedUpdatedPolicyDetailsData {
   };
 }
 
-interface UserClickedPolicyDetailsSaveButton {
+export interface UserClickedPolicyDetailsSaveButton {
   type: 'userClickedPolicyDetailsSaveButton';
 }
 
-interface LicenseChanged {
+export interface LicenseChanged {
   type: 'licenseChanged';
   payload: ILicense;
 }

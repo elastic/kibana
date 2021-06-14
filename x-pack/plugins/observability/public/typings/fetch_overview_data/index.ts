@@ -32,8 +32,12 @@ export interface HasDataParams {
   absoluteTime: { start: number; end: number };
 }
 
-export interface UXHasDataResponse {
+export interface HasDataResponse {
   hasData: boolean;
+  indices: string;
+}
+
+export interface UXHasDataResponse extends HasDataResponse {
   serviceName: string | number | undefined;
 }
 
@@ -47,7 +51,7 @@ export type HasData<T extends ObservabilityFetchDataPlugins> = (
 
 export type ObservabilityFetchDataPlugins = Exclude<
   ObservabilityApp,
-  'observability-overview' | 'stack_monitoring'
+  'observability-overview' | 'stack_monitoring' | 'uptime' | 'fleet'
 >;
 
 export interface DataHandler<
@@ -125,7 +129,7 @@ export interface ObservabilityFetchDataResponse {
   apm: ApmFetchDataResponse;
   infra_metrics: MetricsFetchDataResponse;
   infra_logs: LogsFetchDataResponse;
-  uptime: UptimeFetchDataResponse;
+  synthetics: UptimeFetchDataResponse;
   ux: UxFetchDataResponse;
 }
 
@@ -133,6 +137,6 @@ export interface ObservabilityHasDataResponse {
   apm: boolean;
   infra_metrics: boolean;
   infra_logs: boolean;
-  uptime: boolean;
+  synthetics: HasDataResponse;
   ux: UXHasDataResponse;
 }

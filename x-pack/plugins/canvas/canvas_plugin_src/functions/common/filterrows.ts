@@ -5,18 +5,20 @@
  * 2.0.
  */
 
+import { Observable, combineLatest, defer } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Datatable, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
-  fn: (datatable: Datatable) => Promise<boolean>;
+  fn: (datatable: Datatable) => Observable<boolean>;
 }
 
 export function filterrows(): ExpressionFunctionDefinition<
   'filterrows',
   Datatable,
   Arguments,
-  Promise<Datatable>
+  Observable<Datatable>
 > {
   const { help, args: argHelp } = getFunctionHelp().filterrows;
 
@@ -36,22 +38,12 @@ export function filterrows(): ExpressionFunctionDefinition<
       },
     },
     fn(input, { fn }) {
-      const checks = input.rows.map((row) =>
-        fn({
-          ...input,
-          rows: [row],
-        })
+      return defer(() =>
+        combineLatest(input.rows.map((row) => fn({ ...input, rows: [row] })))
+      ).pipe(
+        map((checks) => input.rows.filter((row, i) => checks[i])),
+        map((rows) => ({ ...input, rows }))
       );
-
-      return Promise.all(checks)
-        .then((results) => input.rows.filter((row, i) => results[i]))
-        .then(
-          (rows) =>
-            ({
-              ...input,
-              rows,
-            } as Datatable)
-        );
     },
   };
 }

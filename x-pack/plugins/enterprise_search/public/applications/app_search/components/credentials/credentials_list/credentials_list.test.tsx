@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../../__mocks__/kea.mock';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -87,7 +87,7 @@ describe('CredentialsList', () => {
   });
 
   describe('empty state', () => {
-    it('renders an EuiEmptyState when no credentials are available', () => {
+    it('renders an EuiEmptyPrompt when no credentials are available', () => {
       setMockValues({
         ...values,
         apiTokens: [],

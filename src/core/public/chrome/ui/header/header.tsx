@@ -98,7 +98,7 @@ export function Header({
     );
   }
 
-  const toggleCollapsibleNavRef = createRef<HTMLButtonElement>();
+  const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const navId = htmlIdGenerator()();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
 

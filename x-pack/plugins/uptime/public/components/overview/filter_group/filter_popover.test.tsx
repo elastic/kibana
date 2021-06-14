@@ -7,7 +7,12 @@
 
 import React from 'react';
 import { fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
-import { FilterPopoverProps, FilterPopover } from './filter_popover';
+import {
+  FilterPopoverProps,
+  FilterPopover,
+  removeFilterForItemLabel,
+  filterByItemLabel,
+} from './filter_popover';
 import { render } from '../../../lib/helper/rtl_helpers';
 
 describe('FilterPopover component', () => {
@@ -77,17 +82,25 @@ describe('FilterPopover component', () => {
 
       fireEvent.click(uptimeFilterButton);
 
-      const generateLabelText = (item: string) => `Filter by ${props.title} ${item}.`;
+      selectedPropsItems.forEach((item) => {
+        expect(getByLabelText(removeFilterForItemLabel(item, props.title)));
+      });
 
       itemsToClick.forEach((item) => {
-        const optionButtonLabelText = generateLabelText(item);
-        const optionButton = getByLabelText(optionButtonLabelText);
+        let optionButton: HTMLElement;
+        if (selectedPropsItems.some((i) => i === item)) {
+          optionButton = getByLabelText(removeFilterForItemLabel(item, props.title));
+        } else {
+          optionButton = getByLabelText(filterByItemLabel(item, props.title));
+        }
         fireEvent.click(optionButton);
       });
 
       fireEvent.click(uptimeFilterButton);
 
-      await waitForElementToBeRemoved(() => queryByLabelText(generateLabelText(itemsToClick[0])));
+      await waitForElementToBeRemoved(() =>
+        queryByLabelText(`by ${props.title} ${itemsToClick[0]}`, { exact: false })
+      );
 
       expect(props.onFilterFieldChange).toHaveBeenCalledTimes(1);
       expect(props.onFilterFieldChange).toHaveBeenCalledWith(props.fieldName, expectedSelections);

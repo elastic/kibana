@@ -177,6 +177,21 @@ export default async function ({ readConfigFile }) {
           kibana: [],
         },
 
+        kibana_sample_read: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['kibana_sample*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
         kibana_date_nanos: {
           elasticsearch: {
             cluster: [],

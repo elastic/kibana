@@ -17,12 +17,12 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     describe('saved objects with hidden type', () => {
       before(() =>
         esArchiver.load(
-          '../functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
+          'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
         )
       );
       after(() =>
         esArchiver.unload(
-          '../functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
+          'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
         )
       );
       it('returns saved objects with importableAndExportable types', async () =>
@@ -33,30 +33,17 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
           .set('kbn-xsrf', 'true')
           .expect(200)
           .then((resp) => {
-            const { saved_objects: savedObjects, ...paginationDetails } = resp.body;
-            expect(paginationDetails).to.eql({
-              page: 1,
-              per_page: 20,
-              total: 1,
-            });
-
-            expect(savedObjects.length).to.be(1);
-            const { version, coreMigrationVersion, ...savedObjectDetails } = savedObjects[0];
-
-            expect(savedObjectDetails).to.eql({
-              type: 'test-hidden-importable-exportable',
-              id: 'ff3733a0-9fty-11e7-ahb3-3dcb94193fab',
-              attributes: {
-                title: 'Hidden Saved object type that is importable/exportable.',
+            expect(
+              resp.body.saved_objects.map((so: { id: string; type: string }) => ({
+                id: so.id,
+                type: so.type,
+              }))
+            ).to.eql([
+              {
+                type: 'test-hidden-importable-exportable',
+                id: 'ff3733a0-9fty-11e7-ahb3-3dcb94193fab',
               },
-              references: [],
-              updated_at: '2021-02-11T18:51:23.794Z',
-              namespaces: ['default'],
-              score: 0,
-              meta: {
-                namespaceType: 'single',
-              },
-            });
+            ]);
           }));
 
       it('returns empty response for non importableAndExportable types', async () =>
@@ -67,12 +54,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
           .set('kbn-xsrf', 'true')
           .expect(200)
           .then((resp) => {
-            expect(resp.body).to.eql({
-              page: 1,
-              per_page: 20,
-              total: 0,
-              saved_objects: [],
-            });
+            expect(resp.body.saved_objects).to.eql([]);
           }));
     });
   });

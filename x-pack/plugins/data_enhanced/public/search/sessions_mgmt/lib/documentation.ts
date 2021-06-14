@@ -12,8 +12,7 @@ export class AsyncSearchIntroDocumentation {
 
   constructor(docs: DocLinksStart) {
     const { links } = docs;
-    // TODO: There should be Kibana documentation link about Search Sessions in Kibana
-    this.docUrl = links.elasticsearch.asyncSearch;
+    this.docUrl = links.search.sessions;
   }
 
   public getElasticsearchDocLink() {

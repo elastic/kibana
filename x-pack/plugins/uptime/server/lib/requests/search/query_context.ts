@@ -48,7 +48,9 @@ export class QueryContext {
   }
 
   async count(params: any): Promise<any> {
-    const { body } = await this.callES.count(params);
+    const {
+      result: { body },
+    } = await this.callES.count(params);
     return body;
   }
 

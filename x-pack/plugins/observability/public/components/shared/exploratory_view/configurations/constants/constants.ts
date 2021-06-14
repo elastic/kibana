@@ -5,66 +5,81 @@
  * 2.0.
  */
 
-import { AppDataType, ReportViewTypeId } from '../../types';
+import { ReportViewTypeId } from '../../types';
 import { CLS_FIELD, FCP_FIELD, FID_FIELD, LCP_FIELD, TBT_FIELD } from './elasticsearch_fieldnames';
+import {
+  AGENT_HOST_LABEL,
+  BROWSER_FAMILY_LABEL,
+  BROWSER_VERSION_LABEL,
+  CLS_LABEL,
+  CORE_WEB_VITALS_LABEL,
+  DEVICE_LABEL,
+  ENVIRONMENT_LABEL,
+  FCP_LABEL,
+  FID_LABEL,
+  HOST_NAME_LABEL,
+  KIP_OVER_TIME_LABEL,
+  KPI_LABEL,
+  LCP_LABEL,
+  LOCATION_LABEL,
+  METRIC_LABEL,
+  MONITOR_ID_LABEL,
+  MONITOR_NAME_LABEL,
+  MONITOR_STATUS_LABEL,
+  MONITOR_TYPE_LABEL,
+  OBSERVER_LOCATION_LABEL,
+  OS_LABEL,
+  PERF_DIST_LABEL,
+  PORT_LABEL,
+  SERVICE_NAME_LABEL,
+  TAGS_LABEL,
+  TBT_LABEL,
+  URL_LABEL,
+} from './labels';
 
 export const DEFAULT_TIME = { from: 'now-1h', to: 'now' };
 
+export const RECORDS_FIELD = 'Records';
+
 export const FieldLabels: Record<string, string> = {
-  'user_agent.name': 'Browser family',
-  'user_agent.version': 'Browser version',
-  'user_agent.os.name': 'Operating system',
-  'client.geo.country_name': 'Location',
-  'user_agent.device.name': 'Device',
-  'observer.geo.name': 'Observer location',
-  'service.name': 'Service Name',
-  'service.environment': 'Environment',
+  'user_agent.name': BROWSER_FAMILY_LABEL,
+  'user_agent.version': BROWSER_VERSION_LABEL,
+  'user_agent.os.name': OS_LABEL,
+  'client.geo.country_name': LOCATION_LABEL,
+  'user_agent.device.name': DEVICE_LABEL,
+  'observer.geo.name': OBSERVER_LOCATION_LABEL,
+  'service.name': SERVICE_NAME_LABEL,
+  'service.environment': ENVIRONMENT_LABEL,
 
-  [LCP_FIELD]: 'Largest contentful paint (Seconds)',
-  [FCP_FIELD]: 'First contentful paint (Seconds)',
-  [TBT_FIELD]: 'Total blocking time  (Seconds)',
-  [FID_FIELD]: 'First input delay (Seconds)',
-  [CLS_FIELD]: 'Cumulative layout shift',
+  [LCP_FIELD]: LCP_LABEL,
+  [FCP_FIELD]: FCP_LABEL,
+  [TBT_FIELD]: TBT_LABEL,
+  [FID_FIELD]: FID_LABEL,
+  [CLS_FIELD]: CLS_LABEL,
 
-  'monitor.id': 'Monitor Id',
-  'monitor.status': 'Monitor Status',
+  'monitor.id': MONITOR_ID_LABEL,
+  'monitor.status': MONITOR_STATUS_LABEL,
 
-  'agent.hostname': 'Agent host',
-  'host.hostname': 'Host name',
-  'monitor.name': 'Monitor name',
-  'monitor.type': 'Monitor Type',
-  'url.port': 'Port',
-  'url.full': 'Url',
-  tags: 'Tags',
+  'agent.hostname': AGENT_HOST_LABEL,
+  'host.hostname': HOST_NAME_LABEL,
+  'monitor.name': MONITOR_NAME_LABEL,
+  'monitor.type': MONITOR_TYPE_LABEL,
+  'url.port': PORT_LABEL,
+  'url.full': URL_LABEL,
+  tags: TAGS_LABEL,
 
   // custom
 
-  'performance.metric': 'Metric',
-  'Business.KPI': 'KPI',
+  'performance.metric': METRIC_LABEL,
+  'Business.KPI': KPI_LABEL,
 };
 
 export const DataViewLabels: Record<ReportViewTypeId, string> = {
-  pld: 'Performance Distribution',
-  upd: 'Uptime monitor duration',
-  upp: 'Uptime pings',
-  svl: 'APM Service latency',
-  kpi: 'KPI over time',
-  tpt: 'APM Service throughput',
-  cpu: 'System CPU Usage',
-  logs: 'Logs Frequency',
-  mem: 'System Memory Usage',
-  nwk: 'Network Activity',
+  dist: PERF_DIST_LABEL,
+  kpi: KIP_OVER_TIME_LABEL,
+  cwv: CORE_WEB_VITALS_LABEL,
 };
 
-export const ReportToDataTypeMap: Record<ReportViewTypeId, AppDataType> = {
-  upd: 'synthetics',
-  upp: 'synthetics',
-  tpt: 'apm',
-  svl: 'apm',
-  kpi: 'rum',
-  pld: 'rum',
-  nwk: 'metrics',
-  mem: 'metrics',
-  logs: 'logs',
-  cpu: 'metrics',
-};
+export const USE_BREAK_DOWN_COLUMN = 'USE_BREAK_DOWN_COLUMN';
+export const FILTER_RECORDS = 'FILTER_RECORDS';
+export const OPERATION_COLUMN = 'operation';

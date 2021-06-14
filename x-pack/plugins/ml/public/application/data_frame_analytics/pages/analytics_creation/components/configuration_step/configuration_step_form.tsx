@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { debounce, cloneDeep } from 'lodash';
 
-import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
+import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 import { useMlContext } from '../../../../../contexts/ml';
 import { getCombinedRuntimeMappings } from '../../../../../components/data_grid/common';
 
@@ -196,7 +196,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
         const depVarOptions = [];
         let depVarUpdate = formState.dependentVariable;
         // Get fields and filter for supported types for job type
-        const { fields } = newJobCapsService;
+        const { fields } = newJobCapsServiceAnalytics;
 
         let resetDependentVariable = true;
         for (const field of fields) {
@@ -364,7 +364,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
           }
           return !option.key?.includes(runtimeMappingKey);
         });
-        // Runtime mappings have been removed
+        // Runtime fields have been removed
         if (runtimeMappings === undefined && runtimeMappingsUpdated === true) {
           setDependentVariableOptions(filteredOptions);
         } else if (runtimeMappings) {
@@ -374,7 +374,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
         }
       }
 
-      // Update includes - remove previous runtime mappings then add supported runtime fields to includes
+      // Update includes - remove previous runtime fields then add supported runtime fields to includes
       const updatedIncludes = includes.filter((field) => {
         const isRemovedRuntimeField = previousRuntimeMapping && previousRuntimeMapping[field];
         return !isRemovedRuntimeField;

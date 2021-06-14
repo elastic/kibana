@@ -9,8 +9,10 @@
 
 include::{docs-root}/shared/versions/stack/{source_branch}.asciidoc[]
 
-:docker-repo:    docker.elastic.co/kibana/kibana
-:docker-image:   docker.elastic.co/kibana/kibana:{version}
+:docker-repo:     docker.elastic.co/kibana/kibana
+:docker-image:    {docker-repo}:{version}
+:es-docker-repo:  docker.elastic.co/elasticsearch/elasticsearch
+:es-docker-image: {es-docker-repo}:{version}
 :blob:           {kib-repo}blob/{branch}/
 :security-ref:   https://www.elastic.co/community/security/
 :kibana-ref-all: https://www.elastic.co/guide/en/kibana

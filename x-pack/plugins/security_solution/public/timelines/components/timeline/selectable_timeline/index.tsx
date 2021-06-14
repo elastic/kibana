@@ -23,15 +23,16 @@ import styled from 'styled-components';
 import {
   TimelineTypeLiteralWithNull,
   TimelineTypeLiteral,
+  SortFieldTimeline,
 } from '../../../../../common/types/timeline';
 
 import { useGetAllTimeline } from '../../../containers/all';
-import { SortFieldTimeline, Direction } from '../../../../graphql/types';
 import { isUntitled } from '../../open_timeline/helpers';
 import * as i18nTimeline from '../../open_timeline/translations';
 import { OpenTimelineResult } from '../../open_timeline/types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import * as i18n from '../translations';
+import { Direction } from '../../../../../common/search_strategy';
 
 const MyEuiFlexItem = styled(EuiFlexItem)`
   display: inline-block;

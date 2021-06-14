@@ -8,19 +8,23 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { SeriesFilter } from './columns/series_filter';
-import { ActionsCol } from './columns/actions_col';
-import { Breakdowns } from './columns/breakdowns';
 import { DataSeries } from '../types';
-import { SeriesBuilder } from '../series_builder/series_builder';
-import { NEW_SERIES_KEY, useUrlStorage } from '../hooks/use_url_storage';
+import { NEW_SERIES_KEY, useSeriesStorage } from '../hooks/use_series_storage';
 import { getDefaultConfigs } from '../configurations/default_configs';
 import { DatePickerCol } from './columns/date_picker_col';
-import { RemoveSeries } from './columns/remove_series';
-import { useIndexPatternContext } from '../hooks/use_default_index_pattern';
+import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
+import { SeriesActions } from './columns/series_actions';
+import { ChartEditOptions } from './chart_edit_options';
+
+interface EditItem {
+  seriesConfig: DataSeries;
+  id: string;
+}
 
 export function SeriesEditor() {
-  const { allSeries, firstSeriesId } = useUrlStorage();
+  const { allSeries, firstSeriesId } = useSeriesStorage();
 
   const columns = [
     {
@@ -32,7 +36,7 @@ export function SeriesEditor() {
       render: (val: string) => (
         <EuiText>
           <EuiIcon type="dot" color="green" size="l" />{' '}
-          {val === NEW_SERIES_KEY ? 'new-series-preview' : val}
+          {val === NEW_SERIES_KEY ? 'series-preview' : val}
         </EuiText>
       ),
     },
@@ -43,9 +47,9 @@ export function SeriesEditor() {
               defaultMessage: 'Filters',
             }),
             field: 'defaultFilters',
-            width: '25%',
-            render: (defaultFilters: string[], series: DataSeries) => (
-              <SeriesFilter defaultFilters={defaultFilters} seriesId={series.id} series={series} />
+            width: '15%',
+            render: (defaultFilters: string[], { id, seriesConfig }: EditItem) => (
+              <SeriesFilter defaultFilters={defaultFilters} seriesId={id} series={seriesConfig} />
             ),
           },
           {
@@ -53,44 +57,33 @@ export function SeriesEditor() {
               defaultMessage: 'Breakdowns',
             }),
             field: 'breakdowns',
-            width: '15%',
-            render: (val: string[], item: DataSeries) => (
-              <Breakdowns seriesId={item.id} breakdowns={val} />
+            width: '25%',
+            render: (val: string[], item: EditItem) => (
+              <ChartEditOptions seriesId={item.id} breakdowns={val} series={item.seriesConfig} />
             ),
           },
           {
-            name: '',
-            align: 'center' as const,
-            width: '15%',
+            name: (
+              <div>
+                <FormattedMessage
+                  id="xpack.observability.expView.seriesEditor.time"
+                  defaultMessage="Time"
+                />
+              </div>
+            ),
+            width: '20%',
             field: 'id',
-            render: (val: string, item: DataSeries) => <ActionsCol series={item} />,
+            align: 'right' as const,
+            render: (val: string, item: EditItem) => <DatePickerCol seriesId={item.id} />,
           },
-        ]
-      : []),
-    {
-      name: (
-        <div>
-          {i18n.translate('xpack.observability.expView.seriesEditor.time', {
-            defaultMessage: 'Time',
-          })}
-        </div>
-      ),
-      width: '20%',
-      field: 'id',
-      align: 'right' as const,
-      render: (val: string, item: DataSeries) => <DatePickerCol seriesId={item.id} />,
-    },
-
-    ...(firstSeriesId !== NEW_SERIES_KEY
-      ? [
           {
             name: i18n.translate('xpack.observability.expView.seriesEditor.actions', {
               defaultMessage: 'Actions',
             }),
             align: 'center' as const,
-            width: '5%',
+            width: '10%',
             field: 'id',
-            render: (val: string, item: DataSeries) => <RemoveSeries series={item} />,
+            render: (val: string, item: EditItem) => <SeriesActions seriesId={item.id} />,
           },
         ]
       : []),
@@ -98,20 +91,21 @@ export function SeriesEditor() {
 
   const allSeriesKeys = Object.keys(allSeries);
 
-  const items: DataSeries[] = [];
+  const items: EditItem[] = [];
 
-  const { indexPattern } = useIndexPatternContext();
+  const { indexPattern } = useAppIndexPatternContext();
 
   allSeriesKeys.forEach((seriesKey) => {
     const series = allSeries[seriesKey];
     if (series.reportType && indexPattern) {
-      items.push(
-        getDefaultConfigs({
+      items.push({
+        id: seriesKey,
+        seriesConfig: getDefaultConfigs({
           indexPattern,
           reportType: series.reportType,
-          seriesId: seriesKey,
-        })
-      );
+          dataType: series.dataType,
+        }),
+      });
     }
   });
 
@@ -131,9 +125,9 @@ export function SeriesEditor() {
             verticalAlign: 'top',
           },
         }}
+        tableLayout="auto"
       />
       <EuiSpacer />
-      <SeriesBuilder />
     </>
   );
 }

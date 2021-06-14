@@ -1,0 +1,31 @@
+[[set-time-filter]]
+=== Set the time range
+Display data within a
+specified time range when your index contains time-based events, and a time-field is configured for the
+selected <<index-patterns, index pattern>>.
+The default time range is 15 minutes, but you can customize
+it in <<advanced-options,Advanced Settings>>.
+
+. Click image:concepts/images/time-filter-icon.png[clock icon].
+
+. Choose one of the following:
+
+* *Quick select* to use a recent time range, then use the back and forward
+  arrows to move through the time ranges.
+
+* *Commonly used* to use a time range from options such as *Last 15 minutes*,
+  *Today*, and *Week to date*.
+
+* *Recently used date ranges* to use a previously selected data range.
+
+* *Refresh every* to specify an automatic refresh rate.
++
+[role="screenshot"]
+image::concepts/images/time-filter.png[Time filter menu]
+
+. To set start and end times, click the bar next to the time filter.
+In the popup, select *Absolute*, *Relative* or *Now*, then specify the required
+options.
++
+[role="screenshot"]
+image::concepts/images/time-relative.png[Time filter showing relative time]

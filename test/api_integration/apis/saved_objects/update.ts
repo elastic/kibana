@@ -16,8 +16,12 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('update', () => {
     describe('with kibana index', () => {
-      before(() => esArchiver.load('saved_objects/basic'));
-      after(() => esArchiver.unload('saved_objects/basic'));
+      before(() =>
+        esArchiver.load('test/api_integration/fixtures/es_archiver/saved_objects/basic')
+      );
+      after(() =>
+        esArchiver.unload('test/api_integration/fixtures/es_archiver/saved_objects/basic')
+      );
       it('should return 200', async () => {
         await supertest
           .put(`/api/saved_objects/visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab`)
@@ -94,6 +98,52 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.body).to.have.property('references');
         expect(resp.body.references).to.eql([]);
+      });
+
+      it('handles upsert', async () => {
+        await supertest
+          .put(`/api/saved_objects/visualization/upserted-viz`)
+          .send({
+            attributes: {
+              title: 'foo',
+            },
+            upsert: {
+              title: 'upserted title',
+              description: 'upserted description',
+            },
+          })
+          .expect(200);
+
+        const { body: upserted } = await supertest
+          .get(`/api/saved_objects/visualization/upserted-viz`)
+          .expect(200);
+
+        expect(upserted.attributes).to.eql({
+          title: 'upserted title',
+          description: 'upserted description',
+        });
+
+        await supertest
+          .put(`/api/saved_objects/visualization/upserted-viz`)
+          .send({
+            attributes: {
+              title: 'foobar',
+            },
+            upsert: {
+              description: 'new upserted description',
+              version: 9000,
+            },
+          })
+          .expect(200);
+
+        const { body: notUpserted } = await supertest
+          .get(`/api/saved_objects/visualization/upserted-viz`)
+          .expect(200);
+
+        expect(notUpserted.attributes).to.eql({
+          title: 'foobar',
+          description: 'upserted description',
+        });
       });
 
       describe('unknown id', () => {

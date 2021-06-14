@@ -6,7 +6,8 @@
  */
 
 import React, { useEffect } from 'react';
-import { Route, Switch, useParams } from 'react-router-dom';
+
+import { Route, Switch, useLocation, useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 import moment from 'moment';
@@ -47,12 +48,17 @@ import { SourceLogic } from './source_logic';
 
 export const SourceRouter: React.FC = () => {
   const { sourceId } = useParams() as { sourceId: string };
-  const { initializeSource } = useActions(SourceLogic);
+  const { pathname } = useLocation();
+  const { initializeSource, resetSourceState } = useActions(SourceLogic);
   const { contentSource, dataLoading } = useValues(SourceLogic);
   const { isOrganization } = useValues(AppLogic);
 
   useEffect(() => {
     initializeSource(sourceId);
+  }, [pathname]);
+
+  useEffect(() => {
+    return resetSourceState;
   }, []);
 
   if (dataLoading) return <Loading />;

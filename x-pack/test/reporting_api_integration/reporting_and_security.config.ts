@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-// @ts-expect-error https://github.com/elastic/kibana/issues/95679
-import { esTestConfig, kbnTestConfig, kibanaServerTestUser } from '@kbn/test';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
-import { format as formatUrl } from 'url';
+import { FtrConfigProviderContext } from '@kbn/test';
+import { resolve } from 'path';
 import { ReportingAPIProvider } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const apiConfig = await readConfigFile(require.resolve('../api_integration/config'));
-  const functionalConfig = await readConfigFile(require.resolve('../functional/config')); // Reporting API tests need a fully working UI
 
+  // config for testing network policy
   const testPolicyRules = [
     { allow: true, protocol: 'http:' },
     { allow: false, host: 'via.placeholder.com' },
@@ -24,9 +22,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   ];
 
   return {
-    servers: apiConfig.get('servers'),
+    ...apiConfig.getAll(),
     junit: { reportName: 'X-Pack Reporting API Integration Tests' },
-    testFiles: [require.resolve('./reporting_and_security')],
+    testFiles: [resolve(__dirname, './reporting_and_security')],
     services: {
       ...apiConfig.get('services'),
       reportingAPI: ReportingAPIProvider,
@@ -34,22 +32,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     kbnTestServer: {
       ...apiConfig.get('kbnTestServer'),
       serverArgs: [
-        ...functionalConfig.get('kbnTestServer.serverArgs'),
-
-        `--elasticsearch.hosts=${formatUrl(esTestConfig.getUrlParts())}`,
-        `--elasticsearch.password=${kibanaServerTestUser.password}`,
-        `--elasticsearch.username=${kibanaServerTestUser.username}`,
-        `--logging.json=false`,
-        `--server.maxPayloadBytes=1679958`,
-        `--server.port=${kbnTestConfig.getPort()}`,
+        ...apiConfig.get('kbnTestServer.serverArgs'),
+        `--xpack.reporting.capture.networkPolicy.rules=${JSON.stringify(testPolicyRules)}`,
         `--xpack.reporting.capture.maxAttempts=1`,
         `--xpack.reporting.csv.maxSizeBytes=6000`,
-        `--xpack.reporting.queue.pollInterval=3000`,
-        `--xpack.security.session.idleTimeout=3600000`,
-        `--xpack.reporting.capture.networkPolicy.rules=${JSON.stringify(testPolicyRules)}`,
       ],
     },
-    esArchiver: apiConfig.get('esArchiver'),
-    esTestCluster: apiConfig.get('esTestCluster'),
   };
 }

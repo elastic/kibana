@@ -11,5 +11,5 @@ If the type extends a Promise, we still need to return the string representation
 <b>Signature:</b>
 
 ```typescript
-export declare type TypeString<T> = KnownTypeToString<UnwrapPromiseOrReturn<T>>;
+export declare type TypeString<T> = KnownTypeToString<T extends ObservableLike<any> ? UnwrapObservable<T> : UnwrapPromiseOrReturn<T>>;
 ```

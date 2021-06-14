@@ -41,7 +41,6 @@ import {
   ChromeNavControls,
   ChromeNavLink,
   ChromeNavLinks,
-  ChromeNavLinkUpdateableFields,
   ChromeDocTitle,
   ChromeStart,
   ChromeRecentlyAccessed,
@@ -67,19 +66,15 @@ import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
 import { DeprecationsServiceStart } from './deprecations';
 
-export type { PackageInfo, EnvironmentMode, IExternalUrlPolicy } from '../server/types';
-export type { CoreContext, CoreSystem } from './core_system';
-export { DEFAULT_APP_CATEGORIES } from '../utils';
 export type {
-  AppCategory,
-  UiSettingsParams,
-  UserProvidedValues,
-  UiSettingsType,
-  ImageValidation,
-  StringValidation,
-  StringValidationRegex,
-  StringValidationRegexString,
-} from '../types';
+  PackageInfo,
+  EnvironmentMode,
+  IExternalUrlPolicy,
+  DomainDeprecationDetails,
+} from '../server/types';
+export type { CoreContext, CoreSystem } from './core_system';
+export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
+export type { AppCategory, UiSettingsParams, UserProvidedValues, UiSettingsType } from '../types';
 
 export { AppNavLinkStatus, AppStatus, ScopedHistory } from './application';
 export type {
@@ -94,13 +89,12 @@ export type {
   AppLeaveAction,
   AppLeaveDefaultAction,
   AppLeaveConfirmAction,
-  AppMeta,
   AppUpdatableFields,
   AppUpdater,
-  AppSearchDeepLink,
+  AppNavOptions,
+  AppDeepLink,
   PublicAppInfo,
-  PublicAppMetaInfo,
-  PublicAppSearchDeepLinkInfo,
+  PublicAppDeepLinkInfo,
   NavigateToAppOptions,
 } from './application';
 
@@ -139,6 +133,8 @@ export type {
   SavedObjectsImportSimpleWarning,
   SavedObjectsImportActionRequiredWarning,
   SavedObjectsImportWarning,
+  SavedObjectReferenceWithContext,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
 } from './saved_objects';
 
 export { HttpFetchError } from './http';
@@ -300,7 +296,6 @@ export type {
   ChromeNavControls,
   ChromeNavLink,
   ChromeNavLinks,
-  ChromeNavLinkUpdateableFields,
   ChromeDocTitle,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,

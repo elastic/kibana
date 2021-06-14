@@ -33,6 +33,8 @@ import { InspectResponse } from '../../../types';
 import { hostsModel, hostsSelectors } from '../../store';
 
 import * as i18n from './translations';
+import { useTransforms } from '../../../transforms/containers/use_transforms';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
 const ID = 'hostsAuthenticationsQuery';
 
@@ -71,7 +73,7 @@ export const useAuthentications = ({
   const { activePage, limit } = useDeepEqualSelector((state) =>
     pick(['activePage', 'limit'], getAuthenticationsSelector(state, type))
   );
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
@@ -80,6 +82,8 @@ export const useAuthentications = ({
     authenticationsRequest,
     setAuthenticationsRequest,
   ] = useState<HostAuthenticationsRequestOptions | null>(null);
+  const { getTransformChangesIfTheyExist } = useTransforms();
+  const { addError, addWarning } = useAppToasts();
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
@@ -145,15 +149,14 @@ export const useAuthentications = ({
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
-                notifications.toasts.addWarning(i18n.ERROR_AUTHENTICATIONS);
+                addWarning(i18n.ERROR_AUTHENTICATIONS);
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
               setLoading(false);
-              notifications.toasts.addDanger({
+              addError(msg, {
                 title: i18n.FAIL_AUTHENTICATIONS,
-                text: msg.message,
               });
               searchSubscription$.current.unsubscribe();
             },
@@ -164,23 +167,30 @@ export const useAuthentications = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, notifications.toasts, skip]
+    [data.search, addError, addWarning, skip]
   );
 
   useEffect(() => {
     setAuthenticationsRequest((prevRequest) => {
-      const myRequest = {
-        ...(prevRequest ?? {}),
-        defaultIndex: indexNames,
-        docValueFields: docValueFields ?? [],
+      const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
         factoryQueryType: HostsQueries.authentications,
-        filterQuery: createFilter(filterQuery),
-        pagination: generateTablePaginationOptions(activePage, limit),
+        indices: indexNames,
+        filterQuery,
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
+      });
+
+      const myRequest = {
+        ...(prevRequest ?? {}),
+        defaultIndex: indices,
+        docValueFields: docValueFields ?? [],
+        factoryQueryType,
+        filterQuery: createFilter(filterQuery),
+        pagination: generateTablePaginationOptions(activePage, limit),
+        timerange,
         sort: {} as SortField,
       };
       if (!deepEqual(prevRequest, myRequest)) {
@@ -188,7 +198,16 @@ export const useAuthentications = ({
       }
       return prevRequest;
     });
-  }, [activePage, docValueFields, endDate, filterQuery, indexNames, limit, startDate]);
+  }, [
+    activePage,
+    docValueFields,
+    endDate,
+    filterQuery,
+    indexNames,
+    limit,
+    startDate,
+    getTransformChangesIfTheyExist,
+  ]);
 
   useEffect(() => {
     authenticationsSearch(authenticationsRequest);

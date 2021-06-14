@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
   const find = getService('find');
-  const dashboardVisualizations = getService('dashboardVisualizations');
+  const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects([
     'common',
@@ -30,8 +30,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('lens tagging', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.loadIfNeeded('lens/basic');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/basic');
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.clickNewDashboard();
@@ -39,8 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('adds a new tag to a Lens visualization', async () => {
       // create lens
-      await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
-      await PageObjects.visualize.clickLensWidget();
+      await dashboardAddPanel.clickCreateNewLink();
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',

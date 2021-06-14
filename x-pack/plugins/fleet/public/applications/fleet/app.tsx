@@ -20,28 +20,31 @@ import type { FleetConfigType, FleetStartServices } from '../../plugin';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 
+import { PackageInstallProvider } from '../integrations/hooks';
+
 import {
   ConfigContext,
   FleetStatusProvider,
+  IntraAppStateProvider,
   KibanaVersionContext,
   sendGetPermissionsCheck,
   sendSetup,
   useBreadcrumbs,
   useConfig,
+  useStartServices,
+  UIExtensionsContext,
 } from './hooks';
 import { Error, Loading } from './components';
-import { IntraAppStateProvider } from './hooks/use_intra_app_state';
-import { PackageInstallProvider } from './sections/epm/hooks';
-import { PAGE_ROUTING_PATHS } from './constants';
+import type { UIExtensionsStorage } from './types';
+
+import { FLEET_ROUTING_PATHS } from './constants';
 import { DefaultLayout, WithoutHeaderLayout } from './layouts';
-import { EPMApp } from './sections/epm';
 import { AgentPolicyApp } from './sections/agent_policy';
 import { DataStreamApp } from './sections/data_stream';
 import { FleetApp } from './sections/agents';
 import { IngestManagerOverview } from './sections/overview';
 import { ProtectedRoute } from './index';
-import type { UIExtensionsStorage } from './types';
-import { UIExtensionsContext } from './hooks/use_ui_extension';
+import { CreatePackagePolicyPage } from './sections/agent_policy/create_package_policy_page';
 
 const ErrorLayout = ({ children }: { children: JSX.Element }) => (
   <EuiErrorBoundary>
@@ -59,6 +62,7 @@ const Panel = styled(EuiPanel)`
 
 export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
   useBreadcrumbs('base');
+  const { notifications } = useStartServices();
 
   const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);
   const [permissionsError, setPermissionsError] = useState<string>();
@@ -81,6 +85,13 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
             if (setupResponse.error) {
               setInitializationError(setupResponse.error);
             }
+            if (setupResponse.data?.nonFatalErrors?.length) {
+              notifications.toasts.addError(setupResponse.data.nonFatalErrors[0], {
+                title: i18n.translate('xpack.fleet.setup.uiPreconfigurationErrorTitle', {
+                  defaultMessage: 'Configuration error',
+                }),
+              });
+            }
           } catch (err) {
             setInitializationError(err);
           }
@@ -92,7 +103,7 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
         setPermissionsError('REQUEST_ERROR');
       }
     })();
-  }, []);
+  }, [notifications.toasts]);
 
   if (isPermissionsLoading || permissionsError) {
     return (
@@ -227,29 +238,29 @@ export const AppRoutes = memo(() => {
 
   return (
     <Switch>
-      <Route path={PAGE_ROUTING_PATHS.integrations}>
-        <DefaultLayout section="epm">
-          <EPMApp />
-        </DefaultLayout>
-      </Route>
-      <Route path={PAGE_ROUTING_PATHS.policies}>
+      <Route path={FLEET_ROUTING_PATHS.policies}>
         <DefaultLayout section="agent_policy">
           <AgentPolicyApp />
         </DefaultLayout>
       </Route>
-      <Route path={PAGE_ROUTING_PATHS.data_streams}>
+      <Route path={FLEET_ROUTING_PATHS.data_streams}>
         <DefaultLayout section="data_stream">
           <DataStreamApp />
         </DefaultLayout>
       </Route>
-      <ProtectedRoute path={PAGE_ROUTING_PATHS.fleet} isAllowed={agents.enabled}>
+      <ProtectedRoute path={FLEET_ROUTING_PATHS.fleet} isAllowed={agents.enabled}>
         <DefaultLayout section="fleet">
           <FleetApp />
         </DefaultLayout>
       </ProtectedRoute>
-      <Route exact path={PAGE_ROUTING_PATHS.overview}>
+      <Route exact path={FLEET_ROUTING_PATHS.overview}>
         <DefaultLayout section="overview">
           <IngestManagerOverview />
+        </DefaultLayout>
+      </Route>
+      <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>
+        <DefaultLayout showNav={false}>
+          <CreatePackagePolicyPage />
         </DefaultLayout>
       </Route>
       <Redirect to="/" />

@@ -19,122 +19,169 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
   const esArchiver = getService('esArchiver');
 
   describe('export transforms', () => {
-    before(async () => {
-      await esArchiver.load(
-        '../functional/fixtures/es_archiver/saved_objects_management/export_transform'
-      );
-    });
+    describe('root objects export transforms', () => {
+      before(async () => {
+        await esArchiver.load(
+          'test/functional/fixtures/es_archiver/saved_objects_management/export_transform'
+        );
+      });
 
-    after(async () => {
-      await esArchiver.unload(
-        '../functional/fixtures/es_archiver/saved_objects_management/export_transform'
-      );
-    });
+      after(async () => {
+        await esArchiver.unload(
+          'test/functional/fixtures/es_archiver/saved_objects_management/export_transform'
+        );
+      });
 
-    it('allows to mutate the objects during an export', async () => {
-      await supertest
-        .post('/api/saved_objects/_export')
-        .set('kbn-xsrf', 'true')
-        .send({
-          type: ['test-export-transform'],
-          excludeExportDetails: true,
-        })
-        .expect(200)
-        .then((resp) => {
-          const objects = parseNdJson(resp.text);
-          expect(objects.map((obj) => ({ id: obj.id, enabled: obj.attributes.enabled }))).to.eql([
-            {
-              id: 'type_1-obj_1',
-              enabled: false,
-            },
-            {
-              id: 'type_1-obj_2',
-              enabled: false,
-            },
-          ]);
-        });
-    });
-
-    it('allows to add additional objects to an export', async () => {
-      await supertest
-        .post('/api/saved_objects/_export')
-        .set('kbn-xsrf', 'true')
-        .send({
-          objects: [
-            {
-              type: 'test-export-add',
-              id: 'type_2-obj_1',
-            },
-          ],
-          excludeExportDetails: true,
-        })
-        .expect(200)
-        .then((resp) => {
-          const objects = parseNdJson(resp.text);
-          expect(objects.map((obj) => obj.id)).to.eql(['type_2-obj_1', 'type_dep-obj_1']);
-        });
-    });
-
-    it('allows to add additional objects to an export when exporting by type', async () => {
-      await supertest
-        .post('/api/saved_objects/_export')
-        .set('kbn-xsrf', 'true')
-        .send({
-          type: ['test-export-add'],
-          excludeExportDetails: true,
-        })
-        .expect(200)
-        .then((resp) => {
-          const objects = parseNdJson(resp.text);
-          expect(objects.map((obj) => obj.id)).to.eql([
-            'type_2-obj_1',
-            'type_2-obj_2',
-            'type_dep-obj_1',
-            'type_dep-obj_2',
-          ]);
-        });
-    });
-
-    it('returns a 400 when the type causes a transform error', async () => {
-      await supertest
-        .post('/api/saved_objects/_export')
-        .set('kbn-xsrf', 'true')
-        .send({
-          type: ['test-export-transform-error'],
-          excludeExportDetails: true,
-        })
-        .expect(400)
-        .then((resp) => {
-          const { attributes, ...error } = resp.body;
-          expect(error).to.eql({
-            error: 'Bad Request',
-            message: 'Error transforming objects to export',
-            statusCode: 400,
+      it('allows to mutate the objects during an export', async () => {
+        await supertest
+          .post('/api/saved_objects/_export')
+          .set('kbn-xsrf', 'true')
+          .send({
+            type: ['test-export-transform'],
+            excludeExportDetails: true,
+          })
+          .expect(200)
+          .then((resp) => {
+            const objects = parseNdJson(resp.text);
+            expect(objects.map((obj) => ({ id: obj.id, enabled: obj.attributes.enabled }))).to.eql([
+              {
+                id: 'type_1-obj_1',
+                enabled: false,
+              },
+              {
+                id: 'type_1-obj_2',
+                enabled: false,
+              },
+            ]);
           });
-          expect(attributes.cause).to.eql('Error during transform');
-          expect(attributes.objects.map((obj: any) => obj.id)).to.eql(['type_4-obj_1']);
-        });
+      });
+
+      it('allows to add additional objects to an export', async () => {
+        await supertest
+          .post('/api/saved_objects/_export')
+          .set('kbn-xsrf', 'true')
+          .send({
+            objects: [
+              {
+                type: 'test-export-add',
+                id: 'type_2-obj_1',
+              },
+            ],
+            excludeExportDetails: true,
+          })
+          .expect(200)
+          .then((resp) => {
+            const objects = parseNdJson(resp.text);
+            expect(objects.map((obj) => obj.id)).to.eql(['type_2-obj_1', 'type_dep-obj_1']);
+          });
+      });
+
+      it('allows to add additional objects to an export when exporting by type', async () => {
+        await supertest
+          .post('/api/saved_objects/_export')
+          .set('kbn-xsrf', 'true')
+          .send({
+            type: ['test-export-add'],
+            excludeExportDetails: true,
+          })
+          .expect(200)
+          .then((resp) => {
+            const objects = parseNdJson(resp.text);
+            expect(objects.map((obj) => obj.id)).to.eql([
+              'type_2-obj_1',
+              'type_2-obj_2',
+              'type_dep-obj_1',
+              'type_dep-obj_2',
+            ]);
+          });
+      });
+
+      it('returns a 400 when the type causes a transform error', async () => {
+        await supertest
+          .post('/api/saved_objects/_export')
+          .set('kbn-xsrf', 'true')
+          .send({
+            type: ['test-export-transform-error'],
+            excludeExportDetails: true,
+          })
+          .expect(400)
+          .then((resp) => {
+            const { attributes, ...error } = resp.body;
+            expect(error).to.eql({
+              error: 'Bad Request',
+              message: 'Error transforming objects to export',
+              statusCode: 400,
+            });
+            expect(attributes.cause).to.eql('Error during transform');
+            expect(attributes.objects.map((obj: any) => obj.id)).to.eql(['type_4-obj_1']);
+          });
+      });
+
+      it('returns a 400 when the type causes an invalid transform', async () => {
+        await supertest
+          .post('/api/saved_objects/_export')
+          .set('kbn-xsrf', 'true')
+          .send({
+            type: ['test-export-invalid-transform'],
+            excludeExportDetails: true,
+          })
+          .expect(400)
+          .then((resp) => {
+            expect(resp.body).to.eql({
+              error: 'Bad Request',
+              message: 'Invalid transform performed on objects to export',
+              statusCode: 400,
+              attributes: {
+                objectKeys: ['test-export-invalid-transform|type_3-obj_1'],
+              },
+            });
+          });
+      });
     });
 
-    it('returns a 400 when the type causes an invalid transform', async () => {
-      await supertest
-        .post('/api/saved_objects/_export')
-        .set('kbn-xsrf', 'true')
-        .send({
-          type: ['test-export-invalid-transform'],
-          excludeExportDetails: true,
-        })
-        .expect(400)
-        .then((resp) => {
-          expect(resp.body).to.eql({
-            error: 'Bad Request',
-            message: 'Invalid transform performed on objects to export',
-            statusCode: 400,
-            attributes: {
-              objectKeys: ['test-export-invalid-transform|type_3-obj_1'],
-            },
+    describe('nested export transforms', () => {
+      before(async () => {
+        await esArchiver.load(
+          'test/functional/fixtures/es_archiver/saved_objects_management/nested_export_transform'
+        );
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'test/functional/fixtures/es_archiver/saved_objects_management/nested_export_transform'
+        );
+      });
+
+      it('execute export transforms for reference objects', async () => {
+        await supertest
+          .post('/api/saved_objects/_export')
+          .set('kbn-xsrf', 'true')
+          .send({
+            objects: [
+              {
+                type: 'test-export-transform',
+                id: 'type_1-obj_1',
+              },
+            ],
+            includeReferencesDeep: true,
+            excludeExportDetails: true,
+          })
+          .expect(200)
+          .then((resp) => {
+            const objects = parseNdJson(resp.text).sort((obj1, obj2) =>
+              obj1.id.localeCompare(obj2.id)
+            );
+            expect(objects.map((obj) => obj.id)).to.eql([
+              'type_1-obj_1',
+              'type_1-obj_2',
+              'type_2-obj_1',
+              'type_dep-obj_1',
+            ]);
+
+            expect(objects[0].attributes.enabled).to.eql(false);
+            expect(objects[1].attributes.enabled).to.eql(false);
           });
-        });
+      });
     });
   });
 }

@@ -12,11 +12,11 @@ import { savedObjectsRepositoryMock } from '../../../../core/server/mocks';
 import { storeReport } from './store_report';
 import { ReportSchemaType } from './schema';
 import { METRIC_TYPE } from '@kbn/analytics';
-import moment from 'moment';
+import { usageCountersServiceMock } from '../usage_counters/usage_counters_service.mock';
 
 describe('store_report', () => {
-  const momentTimestamp = moment();
-  const date = momentTimestamp.format('DDMMYYYY');
+  const usageCountersServiceSetup = usageCountersServiceMock.createSetupContract();
+  const uiCountersUsageCounter = usageCountersServiceSetup.createUsageCounter('uiCounter');
 
   let repository: ReturnType<typeof savedObjectsRepositoryMock.create>;
 
@@ -64,39 +64,61 @@ describe('store_report', () => {
         },
       },
     };
-    await storeReport(repository, report);
+    await storeReport(repository, uiCountersUsageCounter, report);
 
-    expect(repository.create).toHaveBeenCalledWith(
-      'ui-metric',
-      { count: 1 },
-      {
-        id: 'key-user-agent:test-user-agent',
-        overwrite: true,
-      }
-    );
-    expect(repository.incrementCounter).toHaveBeenNthCalledWith(
-      1,
-      'ui-metric',
-      'test-app-name:test-event-name',
-      [{ fieldName: 'count', incrementBy: 3 }]
-    );
-    expect(repository.incrementCounter).toHaveBeenNthCalledWith(
-      2,
-      'ui-counter',
-      `test-app-name:${date}:${METRIC_TYPE.LOADED}:test-event-name`,
-      [{ fieldName: 'count', incrementBy: 1 }]
-    );
-    expect(repository.incrementCounter).toHaveBeenNthCalledWith(
-      3,
-      'ui-counter',
-      `test-app-name:${date}:${METRIC_TYPE.CLICK}:test-event-name`,
-      [{ fieldName: 'count', incrementBy: 2 }]
-    );
+    expect(repository.create.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "ui-metric",
+          Object {
+            "count": 1,
+          },
+          Object {
+            "id": "key-user-agent:test-user-agent",
+            "overwrite": true,
+          },
+        ],
+      ]
+    `);
+
+    expect(repository.incrementCounter.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "ui-metric",
+          "test-app-name:test-event-name",
+          Array [
+            Object {
+              "fieldName": "count",
+              "incrementBy": 3,
+            },
+          ],
+        ],
+      ]
+    `);
+    expect((uiCountersUsageCounter.incrementCounter as jest.Mock).mock.calls)
+      .toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "counterName": "test-app-name:test-event-name",
+            "counterType": "loaded",
+            "incrementBy": 1,
+          },
+        ],
+        Array [
+          Object {
+            "counterName": "test-app-name:test-event-name",
+            "counterType": "click",
+            "incrementBy": 2,
+          },
+        ],
+      ]
+    `);
 
     expect(storeApplicationUsageMock).toHaveBeenCalledTimes(1);
     expect(storeApplicationUsageMock).toHaveBeenCalledWith(
       repository,
-      Object.values(report.application_usage as Record<string, any>),
+      Object.values(report.application_usage!),
       expect.any(Date)
     );
   });
@@ -108,7 +130,7 @@ describe('store_report', () => {
       uiCounter: void 0,
       application_usage: void 0,
     };
-    await storeReport(repository, report);
+    await storeReport(repository, uiCountersUsageCounter, report);
 
     expect(repository.bulkCreate).not.toHaveBeenCalled();
     expect(repository.incrementCounter).not.toHaveBeenCalled();

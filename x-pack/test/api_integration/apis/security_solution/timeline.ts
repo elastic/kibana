@@ -6,135 +6,54 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  SavedTimeline,
+  TimelineType,
+} from '../../../../plugins/security_solution/common/types/timeline';
 
-import { Direction } from '../../../../plugins/security_solution/common/search_strategy';
-// @ts-expect-error
-import { timelineQuery } from '../../../../plugins/security_solution/public/timelines/containers/index.gql_query';
-// @ts-expect-error
-import { GetTimelineQuery } from '../../../../plugins/security_solution/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
-
-const TO = '3000-01-01T00:00:00.000Z';
-const FROM = '2000-01-01T00:00:00.000Z';
-
-// typical values that have to change after an update from "scripts/es_archiver"
-const DATA_COUNT = 2;
-const HOST_NAME = 'suricata-sensor-amsterdam';
-const TOTAL_COUNT = 96;
-const EDGE_LENGTH = 2;
-const CURSOR_ID = '1550608949681';
-
-const FILTER_VALUE = {
-  bool: {
-    filter: [
-      {
-        bool: {
-          should: [{ match_phrase: { 'host.name': HOST_NAME } }],
-          minimum_should_match: 1,
-        },
-      },
-      {
-        bool: {
-          filter: [
-            {
-              bool: {
-                should: [{ range: { '@timestamp': { gte: FROM } } }],
-                minimum_should_match: 1,
-              },
-            },
-            {
-              bool: {
-                should: [{ range: { '@timestamp': { lte: TO } } }],
-                minimum_should_match: 1,
-              },
-            },
-          ],
-        },
-      },
-    ],
-  },
-};
+import { createBasicTimeline, createBasicTimelineTemplate } from './saved_objects/helpers';
 
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
-  const client = getService('securitySolutionGraphQLClient');
+  const supertest = getService('supertest');
 
   describe('Timeline', () => {
-    before(() => esArchiver.load('auditbeat/hosts'));
-    after(() => esArchiver.unload('auditbeat/hosts'));
+    it('Make sure that we get Timeline data', async () => {
+      const titleToSaved = 'hello timeline';
+      await createBasicTimeline(supertest, titleToSaved);
 
-    it('Make sure that we get Timeline data', () => {
-      return client
-        .query<GetTimelineQuery.Query>({
-          query: timelineQuery,
-          variables: {
-            sourceId: 'default',
-            filterQuery: JSON.stringify(FILTER_VALUE),
-            pagination: {
-              limit: 2,
-              cursor: null,
-              tiebreaker: null,
-            },
-            sortField: {
-              sortFieldId: 'timestamp',
-              direction: Direction.desc,
-            },
-            fieldRequested: ['@timestamp', 'host.name'],
-            defaultIndex: ['auditbeat-*'],
-            docValueFields: [],
-            inspect: false,
-            timerange: {
-              from: FROM,
-              to: TO,
-              interval: '12h',
-            },
-            wait_for_completion_timeout: '10s',
-          },
-        })
-        .then((resp) => {
-          const timeline = resp.data.source.Timeline;
-          expect(timeline.edges.length).to.be(EDGE_LENGTH);
-          expect(timeline.edges[0].node.data.length).to.be(DATA_COUNT);
-          expect(timeline.totalCount).to.be(TOTAL_COUNT);
-          expect(timeline.pageInfo.endCursor!.value).to.equal(CURSOR_ID);
-        });
+      const resp = await supertest.get('/api/timelines').set('kbn-xsrf', 'true');
+
+      const timelines = resp.body.timeline;
+
+      expect(timelines.length).to.greaterThan(0);
     });
 
-    it('Make sure that pagination is working in Timeline query', () => {
-      return client
-        .query<GetTimelineQuery.Query>({
-          query: timelineQuery,
-          variables: {
-            sourceId: 'default',
-            filterQuery: JSON.stringify(FILTER_VALUE),
-            pagination: {
-              limit: 2,
-              cursor: CURSOR_ID,
-              tiebreaker: '191',
-            },
-            sortField: {
-              sortFieldId: 'timestamp',
-              direction: Direction.desc,
-            },
-            fieldRequested: ['@timestamp', 'host.name'],
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-            docValueFields: [],
-            inspect: false,
-            timerange: {
-              from: FROM,
-              to: TO,
-              interval: '12h',
-            },
-            wait_for_completion_timeout: '10s',
-          },
-        })
-        .then((resp) => {
-          const timeline = resp.data.source.Timeline;
-          expect(timeline.edges.length).to.be(EDGE_LENGTH);
-          expect(timeline.totalCount).to.be(TOTAL_COUNT);
-          expect(timeline.edges[0].node.data.length).to.be(DATA_COUNT);
-          expect(timeline.edges[0]!.node.ecs.host!.name).to.eql([HOST_NAME]);
-        });
+    it('Make sure that pagination is working in Timeline query', async () => {
+      const titleToSaved = 'hello timeline';
+      await createBasicTimeline(supertest, titleToSaved);
+
+      const resp = await supertest
+        .get('/api/timelines?page_size=1&page_index=1')
+        .set('kbn-xsrf', 'true');
+
+      const timelines = resp.body.timeline;
+
+      expect(timelines.length).to.equal(1);
+    });
+
+    it('Make sure that we get Timeline template data', async () => {
+      const titleToSaved = 'hello timeline template';
+      await createBasicTimelineTemplate(supertest, titleToSaved);
+
+      const resp = await supertest
+        .get('/api/timelines?timeline_type=template')
+        .set('kbn-xsrf', 'true');
+
+      const templates: SavedTimeline[] = resp.body.timeline;
+
+      expect(templates.length).to.greaterThan(0);
+      expect(templates.filter((t) => t.timelineType === TimelineType.default).length).to.equal(0);
     });
   });
 }

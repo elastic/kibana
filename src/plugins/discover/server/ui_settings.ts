@@ -24,9 +24,10 @@ import {
   DOC_TABLE_LEGACY,
   MODIFY_COLUMNS_ON_SWITCH,
   SEARCH_FIELDS_FROM_SOURCE,
+  MAX_DOC_FIELDS_DISPLAYED,
 } from '../common';
 
-export const uiSettings: Record<string, UiSettingsParams> = {
+export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
   [DEFAULT_COLUMNS_SETTING]: {
     name: i18n.translate('discover.advancedSettings.defaultColumnsTitle', {
       defaultMessage: 'Default columns',
@@ -37,6 +38,17 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     }),
     category: ['discover'],
     schema: schema.arrayOf(schema.string()),
+  },
+  [MAX_DOC_FIELDS_DISPLAYED]: {
+    name: i18n.translate('discover.advancedSettings.maxDocFieldsDisplayedTitle', {
+      defaultMessage: 'Maximum document fields displayed',
+    }),
+    value: 200,
+    description: i18n.translate('discover.advancedSettings.maxDocFieldsDisplayedText', {
+      defaultMessage: 'Maximum number of fields rendered in the document column',
+    }),
+    category: ['discover'],
+    schema: schema.number(),
   },
   [SAMPLE_SIZE_SETTING]: {
     name: i18n.translate('discover.advancedSettings.sampleSizeTitle', {
@@ -143,13 +155,13 @@ export const uiSettings: Record<string, UiSettingsParams> = {
   },
   [DOC_TABLE_LEGACY]: {
     name: i18n.translate('discover.advancedSettings.docTableVersionName', {
-      defaultMessage: 'Use legacy table',
+      defaultMessage: 'Use classic table',
     }),
     value: true,
     description: i18n.translate('discover.advancedSettings.docTableVersionDescription', {
       defaultMessage:
-        'Discover uses a new table layout that includes better data sorting, drag-and-drop columns, and a full screen ' +
-        'view. Enable this option if you prefer to fall back to the legacy table.',
+        'Discover uses a new table layout that includes better data sorting, drag-and-drop columns, and a full screen view. ' +
+        'Turn on this option to use the classic table. Turn off to use the new table. ',
     }),
     category: ['discover'],
     schema: schema.boolean(),
@@ -174,10 +186,17 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     },
   },
   [SEARCH_FIELDS_FROM_SOURCE]: {
-    name: 'Read fields from _source',
-    description: `When enabled will load documents directly from \`_source\`. This is soon going to be deprecated. When disabled, will retrieve fields via the new Fields API in the high-level search service.`,
+    name: i18n.translate('discover.advancedSettings.discover.readFieldsFromSource', {
+      defaultMessage: 'Read fields from _source',
+    }),
+    description: i18n.translate(
+      'discover.advancedSettings.discover.readFieldsFromSourceDescription',
+      {
+        defaultMessage: `When enabled will load documents directly from \`_source\`. This is soon going to be deprecated. When disabled, will retrieve fields via the new Fields API in the high-level search service.`,
+      }
+    ),
     value: false,
     category: ['discover'],
     schema: schema.boolean(),
   },
-};
+});

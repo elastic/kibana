@@ -14,42 +14,53 @@ import {
 } from '../../../../../../../../src/plugins/data/public';
 import { rumFieldFormats } from '../configurations/rum/field_formats';
 import { syntheticsFieldFormats } from '../configurations/synthetics/field_formats';
-import { FieldFormat, FieldFormatParams } from '../types';
+import { AppDataType, FieldFormat, FieldFormatParams } from '../types';
+import { apmFieldFormats } from '../configurations/apm/field_formats';
 
-const appFieldFormats: Record<DataType, FieldFormat[] | null> = {
-  rum: rumFieldFormats,
-  apm: null,
-  logs: null,
-  metrics: null,
+const appFieldFormats: Record<AppDataType, FieldFormat[] | null> = {
+  infra_logs: null,
+  infra_metrics: null,
+  ux: rumFieldFormats,
+  apm: apmFieldFormats,
   synthetics: syntheticsFieldFormats,
 };
 
-function getFieldFormatsForApp(app: DataType) {
+function getFieldFormatsForApp(app: AppDataType) {
   return appFieldFormats[app];
 }
 
-export type DataType = 'synthetics' | 'apm' | 'logs' | 'metrics' | 'rum';
-
-export const indexPatternList: Record<DataType, string> = {
+export const indexPatternList: Record<AppDataType, string> = {
   synthetics: 'synthetics_static_index_pattern_id',
   apm: 'apm_static_index_pattern_id',
-  rum: 'rum_static_index_pattern_id',
-  logs: 'logs_static_index_pattern_id',
-  metrics: 'metrics_static_index_pattern_id',
+  ux: 'rum_static_index_pattern_id',
+  infra_logs: 'infra_logs_static_index_pattern_id',
+  infra_metrics: 'infra_metrics_static_index_pattern_id',
 };
 
-const appToPatternMap: Record<DataType, string> = {
-  synthetics: '(synthetics-data-view)*,heartbeat-*,synthetics-*',
+const appToPatternMap: Record<AppDataType, string> = {
+  synthetics: '(synthetics-data-view)*',
   apm: 'apm-*',
-  rum: '(rum-data-view)*,apm-*',
-  logs: 'logs-*,filebeat-*',
-  metrics: 'metrics-*,metricbeat-*',
+  ux: '(rum-data-view)*',
+  infra_logs: '',
+  infra_metrics: '',
+};
+
+const getAppIndicesWithPattern = (app: AppDataType, indices: string) => {
+  return `${appToPatternMap[app]},${indices}`;
+};
+
+const getAppIndexPatternId = (app: AppDataType, indices: string) => {
+  // Replace characters / ? , " < > | * with _
+  const postfix = indices.replace(/[^A-Z0-9]+/gi, '_').toLowerCase();
+
+  return `${indexPatternList[app]}_${postfix}`;
 };
 
 export function isParamsSame(param1: IFieldFormat['_params'], param2: FieldFormatParams) {
   const isSame =
     param1?.inputFormat === param2?.inputFormat &&
     param1?.outputFormat === param2?.outputFormat &&
+    param1?.useShortSuffix === param2?.useShortSuffix &&
     param1?.showSuffix === param2?.showSuffix;
 
   if (param2.outputPrecision !== undefined) {
@@ -66,22 +77,22 @@ export class ObservabilityIndexPatterns {
     this.data = data;
   }
 
-  async createIndexPattern(app: DataType) {
+  async createIndexPattern(app: AppDataType, indices: string) {
     if (!this.data) {
       throw new Error('data is not defined');
     }
 
-    const pattern = appToPatternMap[app];
+    const appIndicesPattern = getAppIndicesWithPattern(app, indices);
 
     return await this.data.indexPatterns.createAndSave({
-      title: pattern,
-      id: indexPatternList[app],
+      title: appIndicesPattern,
+      id: getAppIndexPatternId(app, indices),
       timeFieldName: '@timestamp',
       fieldFormats: this.getFieldFormats(app),
     });
   }
   // we want to make sure field formats remain same
-  async validateFieldFormats(app: DataType, indexPattern: IndexPattern) {
+  async validateFieldFormats(app: AppDataType, indexPattern: IndexPattern) {
     const defaultFieldFormats = getFieldFormatsForApp(app);
     if (defaultFieldFormats && defaultFieldFormats.length > 0) {
       let isParamsDifferent = false;
@@ -99,7 +110,7 @@ export class ObservabilityIndexPatterns {
     }
   }
 
-  getFieldFormats(app: DataType) {
+  getFieldFormats(app: AppDataType) {
     const fieldFormatMap: IndexPatternSpec['fieldFormats'] = {};
 
     (appFieldFormats?.[app] ?? []).forEach(({ field, format }) => {
@@ -109,19 +120,27 @@ export class ObservabilityIndexPatterns {
     return fieldFormatMap;
   }
 
-  async getIndexPattern(app: DataType): Promise<IndexPattern | undefined> {
+  async getIndexPattern(app: AppDataType, indices: string): Promise<IndexPattern | undefined> {
     if (!this.data) {
       throw new Error('data is not defined');
     }
     try {
-      const indexPattern = await this.data?.indexPatterns.get(indexPatternList[app]);
+      const indexPatternId = getAppIndexPatternId(app, indices);
+      const indexPatternTitle = getAppIndicesWithPattern(app, indices);
+      // we will get index pattern by id
+      const indexPattern = await this.data?.indexPatterns.get(indexPatternId);
+
+      // and make sure title matches, otherwise, we will need to create it
+      if (indexPattern.title !== indexPatternTitle) {
+        return await this.createIndexPattern(app, indices);
+      }
 
       // this is intentional a non blocking call, so no await clause
       this.validateFieldFormats(app, indexPattern);
       return indexPattern;
     } catch (e: unknown) {
       if (e instanceof SavedObjectNotFound) {
-        return await this.createIndexPattern(app || 'apm');
+        return await this.createIndexPattern(app, indices);
       }
     }
   }

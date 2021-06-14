@@ -32,7 +32,7 @@ const ServiceOverviewTableContainerDiv = euiStyled.div<{
     shouldUseMobileLayout
       ? ''
       : `
-  height: ${tableHeight}px;
+  min-height: ${tableHeight}px;
   display: flex;
   flex-direction: column;
 

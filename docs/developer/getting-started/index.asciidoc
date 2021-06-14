@@ -4,6 +4,26 @@
 Get started building your own plugins, or contributing directly to the {kib} repo.
 
 [discrete]
+[[developing-on-windows]]
+=== Developing on Windows
+
+In order to support Windows development we currently require you to use one of the following:
+
+- https://git-scm.com/download/win[Git bash] (other bash emulators like https://cmder.net/[Cmder] could work but we did not test them)
+- https://docs.microsoft.com/en-us/windows/wsl/about[WSL]
+
+As well as installing https://www.microsoft.com/en-us/download/details.aspx?id=48145[Visual C++ Redistributable for Visual Studio 2015].
+
+In addition we also require you to do the following:
+
+- Install https://www.microsoft.com/en-us/download/details.aspx?id=48145[Visual C++ Redistributable for Visual Studio 2015]
+- Enable the https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development[Windows Developer Mode]
+- Enable https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/fsutil-8dot3name[8.3 filename support] by running the following command in a windows command prompt with admin rights `fsutil 8dot3name set 0`
+
+Before running the steps listed below, please make sure you have installed everything 
+that we require and listed above and that you are running all the commands from now on through Git bash or WSL.
+
+[discrete]
 [[get-kibana-code]]
 === Get the code
 
@@ -76,6 +96,10 @@ may need to run:
 ----
 yarn kbn clean
 ----
+
+NOTE: Running this command is only necessary in rare circumstance where you need to recover
+a consistent state when problems arise. If you need to run this command often, complete
+this form to provide feedback: https://ela.st/yarn-kbn-clean
 
 If you have failures during `yarn kbn bootstrap` you may have some
 corrupted packages in your yarn cache which you can clean with:

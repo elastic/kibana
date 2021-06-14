@@ -97,18 +97,24 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const pieChart = getService('pieChart');
   const browser = getService('browser');
   const dashboardExpect = getService('dashboardExpect');
-  const PageObjects = getPageObjects(['common']);
+  const elasticChart = getService('elasticChart');
+  const PageObjects = getPageObjects(['common', 'visChart']);
 
   describe('dashboard container', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/dashboard/current/data');
-      await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/dashboard/current/kibana');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
+      await esArchiver.loadIfNeeded(
+        'test/functional/fixtures/es_archiver/dashboard/current/kibana'
+      );
       await PageObjects.common.navigateToApp('dashboardEmbeddableExamples');
       await testSubjects.click('dashboardEmbeddableByValue');
       await updateInput(JSON.stringify(testDashboardInput, null, 4));
     });
 
     it('pie charts', async () => {
+      if (await PageObjects.visChart.isNewChartsLibraryEnabled()) {
+        await elasticChart.setNewChartUiDebugFlag();
+      }
       await pieChart.expectPieSliceCount(5);
     });
 
@@ -117,7 +123,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
 
     it('saved search', async () => {
-      await dashboardExpect.savedSearchRowCount(50);
+      await dashboardExpect.savedSearchRowCount(10);
     });
   });
 

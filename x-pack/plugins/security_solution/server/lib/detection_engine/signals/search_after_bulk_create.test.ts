@@ -6,9 +6,9 @@
  */
 
 import {
-  sampleRuleAlertParams,
   sampleEmptyDocSearchResults,
   sampleRuleGuid,
+  sampleRuleSO,
   mockLogger,
   repeatedSearchResultsWithSortId,
   repeatedSearchResultsWithNoSortId,
@@ -16,32 +16,34 @@ import {
   sampleDocWithSortId,
 } from './__mocks__/es_results';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
-import { buildRuleMessageFactory } from './rule_messages';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import uuid from 'uuid';
 import { listMock } from '../../../../../lists/server/mocks';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { BulkResponse, RuleRangeTuple } from './types';
-import { SearchListItemArraySchema } from '../../../../../lists/common/schemas';
+import { BulkCreate, BulkResponse, RuleRangeTuple, WrapHits } from './types';
+import type { SearchListItemArraySchema } from '@kbn/securitysolution-io-ts-list-types';
 import { getSearchListItemResponseMock } from '../../../../../lists/common/schemas/response/search_list_item_schema.mock';
 import { getRuleRangeTuples } from './utils';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
+import { bulkCreateFactory } from './bulk_create_factory';
+import { wrapHitsFactory } from './wrap_hits_factory';
+import { mockBuildRuleMessage } from './__mocks__/build_rule_message.mock';
 
-const buildRuleMessage = buildRuleMessageFactory({
-  id: 'fake id',
-  ruleId: 'fake rule id',
-  index: 'fakeindex',
-  name: 'fake name',
-});
+const buildRuleMessage = mockBuildRuleMessage;
 
 describe('searchAfterAndBulkCreate', () => {
   let mockService: AlertServicesMock;
+  let bulkCreate: BulkCreate;
+  let wrapHits: WrapHits;
   let inputIndexPattern: string[] = [];
   let listClient = listMock.getListClient();
   const someGuids = Array.from({ length: 13 }).map(() => uuid.v4());
-  const sampleParams = sampleRuleAlertParams(30);
+  const sampleParams = getQueryRuleParams();
+  const ruleSO = sampleRuleSO(getQueryRuleParams());
+  sampleParams.maxSignals = 30;
   let tuples: RuleRangeTuple[];
   beforeEach(() => {
     jest.clearAllMocks();
@@ -58,6 +60,13 @@ describe('searchAfterAndBulkCreate', () => {
       maxSignals: sampleParams.maxSignals,
       buildRuleMessage,
     }));
+    bulkCreate = bulkCreateFactory(
+      mockLogger,
+      mockService.scopedClusterClient.asCurrentUser,
+      buildRuleMessage,
+      false
+    );
+    wrapHits = wrapHitsFactory({ ruleSO, signalsIndex: DEFAULT_SIGNALS_INDEX });
   });
 
   test('should return success with number of searches less than max signals', async () => {
@@ -163,9 +172,10 @@ describe('searchAfterAndBulkCreate', () => {
         },
       },
     ];
+
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      ruleParams: sampleParams,
       tuples,
+      ruleSO,
       listClient,
       exceptionsList: [exceptionItem],
       services: mockService,
@@ -174,20 +184,11 @@ describe('searchAfterAndBulkCreate', () => {
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
-      name: 'rule-name',
-      actions: [],
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
       pageSize: 1,
       filter: undefined,
-      refresh: false,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
       buildRuleMessage,
+      bulkCreate,
+      wrapHits,
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(5);
@@ -277,7 +278,7 @@ describe('searchAfterAndBulkCreate', () => {
       },
     ];
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      ruleParams: sampleParams,
+      ruleSO,
       tuples,
       listClient,
       exceptionsList: [exceptionItem],
@@ -287,20 +288,11 @@ describe('searchAfterAndBulkCreate', () => {
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
-      name: 'rule-name',
-      actions: [],
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
       pageSize: 1,
       filter: undefined,
-      refresh: false,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
       buildRuleMessage,
+      bulkCreate,
+      wrapHits,
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(4);
@@ -364,7 +356,7 @@ describe('searchAfterAndBulkCreate', () => {
       },
     ];
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      ruleParams: sampleParams,
+      ruleSO,
       tuples,
       listClient,
       exceptionsList: [exceptionItem],
@@ -374,20 +366,11 @@ describe('searchAfterAndBulkCreate', () => {
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
-      name: 'rule-name',
-      actions: [],
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
       pageSize: 1,
       filter: undefined,
-      refresh: false,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
       buildRuleMessage,
+      bulkCreate,
+      wrapHits,
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
@@ -432,7 +415,7 @@ describe('searchAfterAndBulkCreate', () => {
       },
     ];
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      ruleParams: sampleParams,
+      ruleSO,
       tuples,
       listClient,
       exceptionsList: [exceptionItem],
@@ -442,24 +425,94 @@ describe('searchAfterAndBulkCreate', () => {
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
-      name: 'rule-name',
-      actions: [],
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
       pageSize: 1,
       filter: undefined,
-      refresh: false,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
       buildRuleMessage,
+      bulkCreate,
+      wrapHits,
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
     expect(createdSignalsCount).toEqual(0); // should not create any signals because all events were in the allowlist
+    expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
+  });
+
+  test('should return success when empty string sortId present', async () => {
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        took: 100,
+        errors: false,
+        items: [
+          {
+            create: {
+              _id: someGuids[0],
+              _index: 'myfakeindex',
+              status: 201,
+            },
+          },
+          {
+            create: {
+              _id: someGuids[1],
+              _index: 'myfakeindex',
+              status: 201,
+            },
+          },
+          {
+            create: {
+              _id: someGuids[2],
+              _index: 'myfakeindex',
+              status: 201,
+            },
+          },
+          {
+            create: {
+              _id: someGuids[3],
+              _index: 'myfakeindex',
+              status: 201,
+            },
+          },
+        ],
+      })
+    );
+    mockService.scopedClusterClient.asCurrentUser.search
+      .mockResolvedValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          repeatedSearchResultsWithSortId(
+            4,
+            4,
+            someGuids.slice(0, 3),
+            ['1.1.1.1', '2.2.2.2', '2.2.2.2', '2.2.2.2'],
+            // this is the case we are testing, if we receive an empty string for one of the sort ids.
+            ['', '2222222222222']
+          )
+        )
+      )
+      .mockResolvedValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          sampleDocSearchResultsNoSortIdNoHits()
+        )
+      );
+
+    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+      ruleSO,
+      tuples,
+      listClient,
+      exceptionsList: [],
+      services: mockService,
+      logger: mockLogger,
+      eventsTelemetry: undefined,
+      id: sampleRuleGuid,
+      inputIndexPattern,
+      signalsIndex: DEFAULT_SIGNALS_INDEX,
+      pageSize: 1,
+      filter: undefined,
+      buildRuleMessage,
+      bulkCreate,
+      wrapHits,
+    });
+    expect(success).toEqual(true);
+    expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
+    expect(createdSignalsCount).toEqual(4);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
@@ -496,7 +549,7 @@ describe('searchAfterAndBulkCreate', () => {
       },
     ];
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      ruleParams: sampleParams,
+      ruleSO,
       tuples,
       listClient,
       exceptionsList: [exceptionItem],
@@ -506,20 +559,11 @@ describe('searchAfterAndBulkCreate', () => {
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
-      name: 'rule-name',
-      actions: [],
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
       pageSize: 1,
       filter: undefined,
-      refresh: false,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
       buildRuleMessage,
+      bulkCreate,
+      wrapHits,
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
@@ -582,7 +626,7 @@ describe('searchAfterAndBulkCreate', () => {
       },
     ];
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      ruleParams: sampleParams,
+      ruleSO,
       tuples,
       listClient,
       exceptionsList: [exceptionItem],
@@ -592,30 +636,16 @@ describe('searchAfterAndBulkCreate', () => {
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
-      name: 'rule-name',
-      actions: [],
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
       pageSize: 1,
       filter: undefined,
-      refresh: false,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
       buildRuleMessage,
+      bulkCreate,
+      wrapHits,
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
     expect(createdSignalsCount).toEqual(4);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
-    // I don't like testing log statements since logs change but this is the best
-    // way I can think of to ensure this section is getting hit with this test case.
-    expect(((mockLogger.debug as unknown) as jest.Mock).mock.calls[14][0]).toContain(
-      'ran out of sort ids to sort on name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
-    );
   });
 
   test('should return success when no exceptions list provided', async () => {
@@ -670,7 +700,7 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      ruleParams: sampleParams,
+      ruleSO,
       tuples,
       listClient,
       exceptionsList: [],
@@ -680,20 +710,11 @@ describe('searchAfterAndBulkCreate', () => {
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
-      name: 'rule-name',
-      actions: [],
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
       pageSize: 1,
       filter: undefined,
-      refresh: false,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
       buildRuleMessage,
+      bulkCreate,
+      wrapHits,
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
@@ -726,27 +747,18 @@ describe('searchAfterAndBulkCreate', () => {
       listClient,
       exceptionsList: [exceptionItem],
       tuples,
-      ruleParams: sampleParams,
+      ruleSO,
       services: mockService,
       logger: mockLogger,
       eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
-      name: 'rule-name',
-      actions: [],
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
       pageSize: 1,
       filter: undefined,
-      refresh: false,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
       buildRuleMessage,
+      bulkCreate,
+      wrapHits,
     });
     expect(mockLogger.error).toHaveBeenCalled();
     expect(success).toEqual(false);
@@ -782,27 +794,18 @@ describe('searchAfterAndBulkCreate', () => {
       listClient,
       exceptionsList: [exceptionItem],
       tuples,
-      ruleParams: sampleParams,
+      ruleSO,
       services: mockService,
       logger: mockLogger,
       eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
-      name: 'rule-name',
-      actions: [],
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
       pageSize: 1,
       filter: undefined,
-      refresh: false,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
       buildRuleMessage,
+      bulkCreate,
+      wrapHits,
     });
     expect(success).toEqual(true);
     expect(createdSignalsCount).toEqual(0);
@@ -852,27 +855,18 @@ describe('searchAfterAndBulkCreate', () => {
       listClient,
       exceptionsList: [exceptionItem],
       tuples,
-      ruleParams: sampleParams,
+      ruleSO,
       services: mockService,
       logger: mockLogger,
       eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
-      name: 'rule-name',
-      actions: [],
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
       pageSize: 1,
       filter: undefined,
-      refresh: false,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
       buildRuleMessage,
+      bulkCreate,
+      wrapHits,
     });
     expect(success).toEqual(false);
     expect(createdSignalsCount).toEqual(0); // should not create signals if search threw error
@@ -984,7 +978,7 @@ describe('searchAfterAndBulkCreate', () => {
       lastLookBackDate,
       errors,
     } = await searchAfterAndBulkCreate({
-      ruleParams: sampleParams,
+      ruleSO,
       tuples,
       listClient,
       exceptionsList: [],
@@ -994,20 +988,11 @@ describe('searchAfterAndBulkCreate', () => {
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
-      name: 'rule-name',
-      actions: [],
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
       pageSize: 1,
       filter: undefined,
-      refresh: false,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
       buildRuleMessage,
+      bulkCreate,
+      wrapHits,
     });
     expect(success).toEqual(false);
     expect(errors).toEqual(['error on creation']);
@@ -1089,7 +1074,7 @@ describe('searchAfterAndBulkCreate', () => {
     const mockEnrichment = jest.fn((a) => a);
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       enrichment: mockEnrichment,
-      ruleParams: sampleParams,
+      ruleSO,
       tuples,
       listClient,
       exceptionsList: [],
@@ -1099,20 +1084,11 @@ describe('searchAfterAndBulkCreate', () => {
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
-      name: 'rule-name',
-      actions: [],
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
       pageSize: 1,
       filter: undefined,
-      refresh: false,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
       buildRuleMessage,
+      bulkCreate,
+      wrapHits,
     });
 
     expect(mockEnrichment).toHaveBeenCalledWith(

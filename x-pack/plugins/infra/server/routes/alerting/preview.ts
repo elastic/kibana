@@ -86,7 +86,8 @@ export const initAlertPreviewRoute = ({
           case METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID: {
             const logQueryFields = await getLogQueryFields(
               sourceId || 'default',
-              requestContext.core.savedObjects.client
+              requestContext.core.savedObjects.client,
+              requestContext.core.elasticsearch.client.asCurrentUser
             );
             const {
               nodeType,

@@ -8,4 +8,4 @@
 export { EngineRouter } from './engine_router';
 export { EngineNav } from './engine_nav';
 export { EngineLogic } from './engine_logic';
-export { generateEnginePath } from './utils';
+export { generateEnginePath, getEngineBreadcrumbs } from './utils';

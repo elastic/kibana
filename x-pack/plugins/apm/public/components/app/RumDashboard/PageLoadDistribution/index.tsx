@@ -6,7 +6,14 @@
  */
 
 import React, { useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { I18LABELS } from '../translations';
@@ -14,6 +21,8 @@ import { BreakdownFilter } from '../Breakdowns/BreakdownFilter';
 import { PageLoadDistChart } from '../Charts/PageLoadDistChart';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
 import { ResetPercentileZoom } from './ResetPercentileZoom';
+import { createExploratoryViewUrl } from '../../../../../../observability/public';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 export interface PercentileRange {
   min?: number | null;
@@ -21,9 +30,15 @@ export interface PercentileRange {
 }
 
 export function PageLoadDistribution() {
+  const {
+    services: { http },
+  } = useKibana();
+
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { start, end, searchTerm } = urlParams;
+  const { start, end, rangeFrom, rangeTo, searchTerm } = urlParams;
+
+  const { serviceName } = uiFilters;
 
   const [percentileRange, setPercentileRange] = useState<PercentileRange>({
     min: null,
@@ -34,8 +49,6 @@ export function PageLoadDistribution() {
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      const { serviceName } = uiFilters;
-
       if (start && end && serviceName) {
         return callApmApi({
           endpoint: 'GET /api/apm/rum-client/page-load-distribution',
@@ -64,12 +77,30 @@ export function PageLoadDistribution() {
       percentileRange.min,
       percentileRange.max,
       searchTerm,
+      serviceName,
     ]
   );
 
   const onPercentileChange = (min: number, max: number) => {
     setPercentileRange({ min, max });
   };
+
+  const exploratoryViewLink = createExploratoryViewUrl(
+    {
+      [`${serviceName}-page-views`]: {
+        dataType: 'ux',
+        reportType: 'dist',
+        time: { from: rangeFrom!, to: rangeTo! },
+        reportDefinitions: {
+          'service.name': serviceName as string[],
+        },
+        ...(breakdown ? { breakdown: breakdown.fieldName } : {}),
+      },
+    },
+    http?.basePath.get()
+  );
+
+  const showAnalyzeButton = false;
 
   return (
     <div data-cy="pageLoadDist">
@@ -79,12 +110,10 @@ export function PageLoadDistribution() {
             <h3>{I18LABELS.pageLoadDistribution}</h3>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <ResetPercentileZoom
-            percentileRange={percentileRange}
-            setPercentileRange={setPercentileRange}
-          />
-        </EuiFlexItem>
+        <ResetPercentileZoom
+          percentileRange={percentileRange}
+          setPercentileRange={setPercentileRange}
+        />
         <EuiFlexItem grow={false} style={{ width: 170 }}>
           <BreakdownFilter
             selectedBreakdown={breakdown}
@@ -92,6 +121,20 @@ export function PageLoadDistribution() {
             dataTestSubj={'pldBreakdownFilter'}
           />
         </EuiFlexItem>
+        {showAnalyzeButton && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              isDisabled={!serviceName?.[0]}
+              href={exploratoryViewLink}
+            >
+              <FormattedMessage
+                id="xpack.apm.csm.pageViews.analyze"
+                defaultMessage="Analyze"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <PageLoadDistChart

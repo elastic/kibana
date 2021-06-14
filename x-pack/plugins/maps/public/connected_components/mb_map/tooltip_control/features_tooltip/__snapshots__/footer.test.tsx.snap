@@ -1,0 +1,151 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Footer multiple features, multiple layers: locked should show pagination controls, features count, and layer select 1`] = `
+<Fragment>
+  <EuiHorizontalRule
+    margin="xs"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+  >
+    <EuiFlexItem
+      grow={false}
+      key="pagination"
+    >
+      <EuiPagination
+        activePage={0}
+        compressed={true}
+        onPageClick={[Function]}
+        pageCount={3}
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="layerSelect"
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        display="rowCompressed"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        labelType="label"
+      >
+        <EuiSelect
+          aria-label="Filter results by layer"
+          compressed={true}
+          fullWidth={true}
+          onChange={[Function]}
+          options={
+            Array [
+              Object {
+                "text": "All layers",
+                "value": "_ALL_LAYERS_",
+              },
+              Object {
+                "text": "(2) display + layer1",
+                "value": "layer1",
+              },
+              Object {
+                "text": "(1) display + layer2",
+                "value": "layer2",
+              },
+            ]
+          }
+          value="_ALL_LAYERS_"
+        />
+      </EuiFormRow>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;
+
+exports[`Footer multiple features, multiple layers: mouseover (unlocked) should only show features count 1`] = `
+<Fragment>
+  <EuiHorizontalRule
+    margin="xs"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+  >
+    <EuiFlexItem
+      grow={true}
+      key="pageNumber"
+    >
+      <EuiTextColor
+        color="subdued"
+      >
+        <FormattedMessage
+          defaultMessage="{pageNumber} of {total}"
+          id="xpack.maps.tooltip.pageNumerText"
+          values={
+            Object {
+              "pageNumber": 1,
+              "total": 3,
+            }
+          }
+        />
+      </EuiTextColor>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;
+
+exports[`Footer multiple features, single layer: locked should show pagination controls and features count 1`] = `
+<Fragment>
+  <EuiHorizontalRule
+    margin="xs"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+  >
+    <EuiFlexItem
+      grow={false}
+      key="pagination"
+    >
+      <EuiPagination
+        activePage={0}
+        compressed={true}
+        onPageClick={[Function]}
+        pageCount={2}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;
+
+exports[`Footer multiple features, single layer: mouseover (unlocked) should only show features count 1`] = `
+<Fragment>
+  <EuiHorizontalRule
+    margin="xs"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+  >
+    <EuiFlexItem
+      grow={true}
+      key="pageNumber"
+    >
+      <EuiTextColor
+        color="subdued"
+      >
+        <FormattedMessage
+          defaultMessage="{pageNumber} of {total}"
+          id="xpack.maps.tooltip.pageNumerText"
+          values={
+            Object {
+              "pageNumber": 1,
+              "total": 2,
+            }
+          }
+        />
+      </EuiTextColor>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;
+
+exports[`Footer single feature: mouseover (unlocked) should not render header 1`] = `""`;

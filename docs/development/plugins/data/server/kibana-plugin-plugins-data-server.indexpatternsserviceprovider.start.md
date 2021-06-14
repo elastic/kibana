@@ -8,7 +8,7 @@
 
 ```typescript
 start(core: CoreStart, { fieldFormats, logger }: IndexPatternsServiceStartDeps): {
-        indexPatternsServiceFactory: (savedObjectsClient: Pick<import("../../../../core/server").SavedObjectsClient, "get" | "delete" | "create" | "bulkCreate" | "checkConflicts" | "find" | "bulkGet" | "resolve" | "update" | "addToNamespaces" | "deleteFromNamespaces" | "bulkUpdate" | "removeReferencesTo" | "openPointInTimeForType" | "closePointInTime" | "createPointInTimeFinder" | "errors">, elasticsearchClient: ElasticsearchClient) => Promise<IndexPatternsCommonService>;
+        indexPatternsServiceFactory: (savedObjectsClient: Pick<import("../../../../core/server").SavedObjectsClient, "update" | "get" | "delete" | "create" | "bulkCreate" | "checkConflicts" | "find" | "bulkGet" | "resolve" | "collectMultiNamespaceReferences" | "updateObjectsSpaces" | "bulkUpdate" | "removeReferencesTo" | "openPointInTimeForType" | "closePointInTime" | "createPointInTimeFinder" | "errors">, elasticsearchClient: ElasticsearchClient) => Promise<IndexPatternsCommonService>;
     };
 ```
 
@@ -22,6 +22,6 @@ start(core: CoreStart, { fieldFormats, logger }: IndexPatternsServiceStartDeps):
 <b>Returns:</b>
 
 `{
-        indexPatternsServiceFactory: (savedObjectsClient: Pick<import("../../../../core/server").SavedObjectsClient, "get" | "delete" | "create" | "bulkCreate" | "checkConflicts" | "find" | "bulkGet" | "resolve" | "update" | "addToNamespaces" | "deleteFromNamespaces" | "bulkUpdate" | "removeReferencesTo" | "openPointInTimeForType" | "closePointInTime" | "createPointInTimeFinder" | "errors">, elasticsearchClient: ElasticsearchClient) => Promise<IndexPatternsCommonService>;
+        indexPatternsServiceFactory: (savedObjectsClient: Pick<import("../../../../core/server").SavedObjectsClient, "update" | "get" | "delete" | "create" | "bulkCreate" | "checkConflicts" | "find" | "bulkGet" | "resolve" | "collectMultiNamespaceReferences" | "updateObjectsSpaces" | "bulkUpdate" | "removeReferencesTo" | "openPointInTimeForType" | "closePointInTime" | "createPointInTimeFinder" | "errors">, elasticsearchClient: ElasticsearchClient) => Promise<IndexPatternsCommonService>;
     }`
 

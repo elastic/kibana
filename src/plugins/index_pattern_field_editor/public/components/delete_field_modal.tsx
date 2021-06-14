@@ -87,7 +87,7 @@ export function DeleteFieldModal({ fieldsToDelete, closeModal, confirmDelete }: 
   const i18nTexts = geti18nTexts(fieldsToDelete);
   const { modalTitle, confirmButtonText, cancelButtonText, warningMultipleFields } = i18nTexts;
   const isMultiple = Boolean(fieldsToDelete.length > 1);
-  const [confirmContent, setConfirmContent] = useState<string>();
+  const [confirmContent, setConfirmContent] = useState<string>('');
   return (
     <EuiConfirmModal
       title={modalTitle}

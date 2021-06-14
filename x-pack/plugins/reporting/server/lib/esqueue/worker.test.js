@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import sinon from 'sinon';
 import moment from 'moment';
 import { noop, random, get, find, identity } from 'lodash';
-import { ClientMock } from './__fixtures__/legacy_elasticsearch';
 import { QueueMock } from './__fixtures__/queue';
 import { formatJobObject, getUpdatedDocPath, Worker } from './worker';
 import { constants } from './constants';
@@ -49,7 +48,7 @@ describe.skip('Worker class', function () {
   };
 
   beforeEach(function () {
-    client = new ClientMock();
+    client = { search: () => {} };
     mockQueue = new QueueMock();
     mockQueue.setClient(client);
   });
@@ -319,8 +318,7 @@ describe.skip('Worker class', function () {
 
         it('should return an empty array', function (done) {
           searchStub = sinon
-            .stub(mockQueue.client, 'callAsInternalUser')
-            .withArgs('search')
+            .stub(mockQueue.client, 'search')
             .callsFake(() => Promise.reject({ status: 404 }));
           worker = new Worker(mockQueue, 'test', noop, defaultWorkerOptions);
           worker

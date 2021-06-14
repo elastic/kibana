@@ -9,7 +9,6 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { SavedObject } from '../../../../src/core/server';
-import { getKibanaVersion } from './lib/saved_objects_test_utils';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -17,48 +16,22 @@ export default function ({ getService }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('find', () => {
-    let KIBANA_VERSION: string;
-
-    before(async () => {
-      KIBANA_VERSION = await getKibanaVersion(getService);
-    });
-
     describe('with kibana index', () => {
-      before(() => esArchiver.load('saved_objects/basic'));
-      after(() => esArchiver.unload('saved_objects/basic'));
+      before(() =>
+        esArchiver.load('test/api_integration/fixtures/es_archiver/saved_objects/basic')
+      );
+      after(() =>
+        esArchiver.unload('test/api_integration/fixtures/es_archiver/saved_objects/basic')
+      );
 
       it('should return 200 with individual responses', async () =>
         await supertest
           .get('/api/saved_objects/_find?type=visualization&fields=title')
           .expect(200)
           .then((resp) => {
-            expect(resp.body).to.eql({
-              page: 1,
-              per_page: 20,
-              total: 1,
-              saved_objects: [
-                {
-                  type: 'visualization',
-                  id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                  version: 'WzE4LDJd',
-                  attributes: {
-                    title: 'Count of requests',
-                  },
-                  score: 0,
-                  migrationVersion: resp.body.saved_objects[0].migrationVersion,
-                  coreMigrationVersion: KIBANA_VERSION,
-                  namespaces: ['default'],
-                  references: [
-                    {
-                      id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-                      name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-                      type: 'index-pattern',
-                    },
-                  ],
-                  updated_at: '2017-09-21T18:51:23.794Z',
-                },
-              ],
-            });
+            expect(resp.body.saved_objects.map((so: { id: string }) => so.id)).to.eql([
+              'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+            ]);
             expect(resp.body.saved_objects[0].migrationVersion).to.be.ok();
           }));
 
@@ -129,33 +102,12 @@ export default function ({ getService }: FtrProviderContext) {
             .get('/api/saved_objects/_find?type=visualization&fields=title&namespaces=default')
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({
-                page: 1,
-                per_page: 20,
-                total: 1,
-                saved_objects: [
-                  {
-                    type: 'visualization',
-                    id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                    version: 'WzE4LDJd',
-                    attributes: {
-                      title: 'Count of requests',
-                    },
-                    migrationVersion: resp.body.saved_objects[0].migrationVersion,
-                    coreMigrationVersion: KIBANA_VERSION,
-                    namespaces: ['default'],
-                    score: 0,
-                    references: [
-                      {
-                        id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-                        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-                        type: 'index-pattern',
-                      },
-                    ],
-                    updated_at: '2017-09-21T18:51:23.794Z',
-                  },
-                ],
-              });
+              expect(
+                resp.body.saved_objects.map((so: { id: string; namespaces: string[] }) => ({
+                  id: so.id,
+                  namespaces: so.namespaces,
+                }))
+              ).to.eql([{ id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab', namespaces: ['default'] }]);
               expect(resp.body.saved_objects[0].migrationVersion).to.be.ok();
             }));
       });
@@ -166,53 +118,15 @@ export default function ({ getService }: FtrProviderContext) {
             .get('/api/saved_objects/_find?type=visualization&fields=title&namespaces=*')
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({
-                page: 1,
-                per_page: 20,
-                total: 2,
-                saved_objects: [
-                  {
-                    type: 'visualization',
-                    id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                    version: 'WzE4LDJd',
-                    attributes: {
-                      title: 'Count of requests',
-                    },
-                    migrationVersion: resp.body.saved_objects[0].migrationVersion,
-                    coreMigrationVersion: KIBANA_VERSION,
-                    namespaces: ['default'],
-                    score: 0,
-                    references: [
-                      {
-                        id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-                        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-                        type: 'index-pattern',
-                      },
-                    ],
-                    updated_at: '2017-09-21T18:51:23.794Z',
-                  },
-                  {
-                    attributes: {
-                      title: 'Count of requests',
-                    },
-                    id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                    migrationVersion: resp.body.saved_objects[0].migrationVersion,
-                    coreMigrationVersion: KIBANA_VERSION,
-                    namespaces: ['foo-ns'],
-                    references: [
-                      {
-                        id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-                        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-                        type: 'index-pattern',
-                      },
-                    ],
-                    score: 0,
-                    type: 'visualization',
-                    updated_at: '2017-09-21T18:51:23.794Z',
-                    version: 'WzIyLDJd',
-                  },
-                ],
-              });
+              expect(
+                resp.body.saved_objects.map((so: { id: string; namespaces: string[] }) => ({
+                  id: so.id,
+                  namespaces: so.namespaces,
+                }))
+              ).to.eql([
+                { id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab', namespaces: ['default'] },
+                { id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab', namespaces: ['foo-ns'] },
+              ]);
             }));
       });
 
@@ -224,42 +138,9 @@ export default function ({ getService }: FtrProviderContext) {
             )
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({
-                page: 1,
-                per_page: 20,
-                total: 1,
-                saved_objects: [
-                  {
-                    type: 'visualization',
-                    id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                    attributes: {
-                      title: 'Count of requests',
-                      visState: resp.body.saved_objects[0].attributes.visState,
-                      uiStateJSON: '{"spy":{"mode":{"name":null,"fill":false}}}',
-                      description: '',
-                      version: 1,
-                      kibanaSavedObjectMeta: {
-                        searchSourceJSON:
-                          resp.body.saved_objects[0].attributes.kibanaSavedObjectMeta
-                            .searchSourceJSON,
-                      },
-                    },
-                    namespaces: ['default'],
-                    score: 0,
-                    references: [
-                      {
-                        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-                        type: 'index-pattern',
-                        id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-                      },
-                    ],
-                    migrationVersion: resp.body.saved_objects[0].migrationVersion,
-                    coreMigrationVersion: KIBANA_VERSION,
-                    updated_at: '2017-09-21T18:51:23.794Z',
-                    version: 'WzE4LDJd',
-                  },
-                ],
-              });
+              expect(resp.body.saved_objects.map((so: { id: string }) => so.id)).to.eql([
+                'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+              ]);
             }));
 
         it('wrong type should return 400 with Bad Request', async () =>
@@ -293,9 +174,82 @@ export default function ({ getService }: FtrProviderContext) {
             }));
       });
 
+      describe('using aggregations', () => {
+        it('should return 200 with valid response for a valid aggregation', async () =>
+          await supertest
+            .get(
+              `/api/saved_objects/_find?type=visualization&per_page=0&aggs=${encodeURIComponent(
+                JSON.stringify({
+                  type_count: { max: { field: 'visualization.attributes.version' } },
+                })
+              )}`
+            )
+            .expect(200)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                aggregations: {
+                  type_count: {
+                    value: 1,
+                  },
+                },
+                page: 1,
+                per_page: 0,
+                saved_objects: [],
+                total: 1,
+              });
+            }));
+
+        it('should return a 400 when referencing an invalid SO attribute', async () =>
+          await supertest
+            .get(
+              `/api/saved_objects/_find?type=visualization&per_page=0&aggs=${encodeURIComponent(
+                JSON.stringify({
+                  type_count: { max: { field: 'dashboard.attributes.version' } },
+                })
+              )}`
+            )
+            .expect(400)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                error: 'Bad Request',
+                message:
+                  'Invalid aggregation: [type_count.max.field] Invalid attribute path: dashboard.attributes.version: Bad Request',
+                statusCode: 400,
+              });
+            }));
+
+        it('should return a 400 when using a forbidden aggregation option', async () =>
+          await supertest
+            .get(
+              `/api/saved_objects/_find?type=visualization&per_page=0&aggs=${encodeURIComponent(
+                JSON.stringify({
+                  type_count: {
+                    max: {
+                      field: 'visualization.attributes.version',
+                      script: 'Bad script is bad',
+                    },
+                  },
+                })
+              )}`
+            )
+            .expect(400)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                error: 'Bad Request',
+                message:
+                  'Invalid aggregation: [type_count.max.script]: definition for this key is missing: Bad Request',
+                statusCode: 400,
+              });
+            }));
+      });
+
       describe('`has_reference` and `has_reference_operator` parameters', () => {
-        before(() => esArchiver.load('saved_objects/references'));
-        after(() => esArchiver.unload('saved_objects/references'));
+        before(() =>
+          esArchiver.load('test/api_integration/fixtures/es_archiver/saved_objects/references')
+        );
+        after(() =>
+          esArchiver.unload('test/api_integration/fixtures/es_archiver/saved_objects/references')
+        );
 
         it('search for a reference', async () => {
           await supertest
@@ -357,8 +311,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('searching for special characters', () => {
-      before(() => esArchiver.load('saved_objects/find_edgecases'));
-      after(() => esArchiver.unload('saved_objects/find_edgecases'));
+      before(() =>
+        esArchiver.load('test/api_integration/fixtures/es_archiver/saved_objects/find_edgecases')
+      );
+      after(() =>
+        esArchiver.unload('test/api_integration/fixtures/es_archiver/saved_objects/find_edgecases')
+      );
 
       it('can search for objects with dashes', async () =>
         await supertest

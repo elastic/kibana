@@ -7,33 +7,30 @@
 
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
-import { render } from '../../../../../utils/test_helper';
 import { getDefaultConfigs } from '../../configurations/default_configs';
-import { mockIndexPattern, mockUrlStorage } from '../../rtl_helpers';
-import { NEW_SERIES_KEY } from '../../hooks/use_url_storage';
+import { mockIndexPattern, render } from '../../rtl_helpers';
 import { ReportBreakdowns } from './report_breakdowns';
 import { USER_AGENT_OS } from '../../configurations/constants/elasticsearch_fieldnames';
 
 describe('Series Builder ReportBreakdowns', function () {
+  const seriesId = 'test-series-id';
   const dataViewSeries = getDefaultConfigs({
-    reportType: 'pld',
+    reportType: 'dist',
+    dataType: 'ux',
     indexPattern: mockIndexPattern,
-    seriesId: NEW_SERIES_KEY,
   });
 
   it('should render properly', function () {
-    mockUrlStorage({});
-
-    render(<ReportBreakdowns dataViewSeries={dataViewSeries} />);
+    render(<ReportBreakdowns dataViewSeries={dataViewSeries} seriesId={seriesId} />);
 
     screen.getByText('Select an option: , is selected');
     screen.getAllByText('Browser family');
   });
 
   it('should set new series breakdown on change', function () {
-    const { setSeries } = mockUrlStorage({});
-
-    render(<ReportBreakdowns dataViewSeries={dataViewSeries} />);
+    const { setSeries } = render(
+      <ReportBreakdowns dataViewSeries={dataViewSeries} seriesId={seriesId} />
+    );
 
     const btn = screen.getByRole('button', {
       name: /select an option: Browser family , is selected/i,
@@ -45,16 +42,17 @@ describe('Series Builder ReportBreakdowns', function () {
     fireEvent.click(screen.getByText(/operating system/i));
 
     expect(setSeries).toHaveBeenCalledTimes(1);
-    expect(setSeries).toHaveBeenCalledWith('newSeriesKey', {
+    expect(setSeries).toHaveBeenCalledWith(seriesId, {
       breakdown: USER_AGENT_OS,
-      reportType: 'pld',
+      dataType: 'ux',
+      reportType: 'dist',
       time: { from: 'now-15m', to: 'now' },
     });
   });
   it('should set undefined on new series on no select breakdown', function () {
-    const { setSeries } = mockUrlStorage({});
-
-    render(<ReportBreakdowns dataViewSeries={dataViewSeries} />);
+    const { setSeries } = render(
+      <ReportBreakdowns dataViewSeries={dataViewSeries} seriesId={seriesId} />
+    );
 
     const btn = screen.getByRole('button', {
       name: /select an option: Browser family , is selected/i,
@@ -66,9 +64,10 @@ describe('Series Builder ReportBreakdowns', function () {
     fireEvent.click(screen.getByText(/no breakdown/i));
 
     expect(setSeries).toHaveBeenCalledTimes(1);
-    expect(setSeries).toHaveBeenCalledWith('newSeriesKey', {
+    expect(setSeries).toHaveBeenCalledWith(seriesId, {
       breakdown: undefined,
-      reportType: 'pld',
+      dataType: 'ux',
+      reportType: 'dist',
       time: { from: 'now-15m', to: 'now' },
     });
   });

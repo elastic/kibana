@@ -7,21 +7,16 @@
 
 import { Logger } from 'src/core/server';
 import { SavedObject } from 'src/core/types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
 } from '../../../../../../alerting/server';
-import {
-  hasLargeValueItem,
-  normalizeThresholdField,
-} from '../../../../../common/detection_engine/utils';
-import { ExceptionListItemSchema } from '../../../../../common/shared_imports';
-import { RefreshTypes } from '../../types';
+import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
+import { ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { getFilter } from '../get_filter';
 import { getInputIndex } from '../get_input_output_index';
-import { BuildRuleMessage } from '../rule_messages';
-import { RuleStatusService } from '../rule_status_service';
 import {
   bulkCreateThresholdSignals,
   findThresholdSignals,
@@ -29,43 +24,46 @@ import {
   getThresholdSignalHistory,
 } from '../threshold';
 import {
+  AlertAttributes,
+  BulkCreate,
   RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
-  ThresholdRuleAttributes,
+  WrapHits,
 } from '../types';
 import {
   createSearchAfterReturnType,
   createSearchAfterReturnTypeFromResponse,
   mergeReturns,
 } from '../utils';
+import { BuildRuleMessage } from '../rule_messages';
 
 export const thresholdExecutor = async ({
   rule,
   tuples,
   exceptionItems,
-  ruleStatusService,
   services,
   version,
   logger,
-  refresh,
   buildRuleMessage,
   startedAt,
+  bulkCreate,
+  wrapHits,
 }: {
-  rule: SavedObject<ThresholdRuleAttributes>;
+  rule: SavedObject<AlertAttributes<ThresholdRuleParams>>;
   tuples: RuleRangeTuple[];
   exceptionItems: ExceptionListItemSchema[];
-  ruleStatusService: RuleStatusService;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
   logger: Logger;
-  refresh: RefreshTypes;
   buildRuleMessage: BuildRuleMessage;
   startedAt: Date;
+  bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
 }): Promise<SearchAfterAndBulkCreateReturnType> => {
   let result = createSearchAfterReturnType();
   const ruleParams = rule.attributes.params;
   if (hasLargeValueItem(exceptionItems)) {
-    await ruleStatusService.partialFailure(
+    result.warningMessages.push(
       'Exceptions that use "is in list" or "is not in list" operators are not applied to Threshold rules'
     );
     result.warning = true;
@@ -83,7 +81,7 @@ export const thresholdExecutor = async ({
       services,
       logger,
       ruleId: ruleParams.ruleId,
-      bucketByFields: normalizeThresholdField(ruleParams.threshold.field),
+      bucketByFields: ruleParams.threshold.field,
       timestampOverride: ruleParams.timestampOverride,
       buildRuleMessage,
     });
@@ -127,30 +125,18 @@ export const thresholdExecutor = async ({
       createdItems,
       errors,
     } = await bulkCreateThresholdSignals({
-      actions: rule.attributes.actions,
-      throttle: rule.attributes.throttle,
       someResult: thresholdResults,
-      ruleParams,
+      ruleSO: rule,
       filter: esFilter,
       services,
       logger,
-      id: rule.id,
       inputIndexPattern: inputIndex,
       signalsIndex: ruleParams.outputIndex,
-      timestampOverride: ruleParams.timestampOverride,
       startedAt,
       from: tuple.from.toDate(),
-      name: rule.attributes.name,
-      createdBy: rule.attributes.createdBy,
-      createdAt: rule.attributes.createdAt,
-      updatedBy: rule.attributes.updatedBy,
-      updatedAt: rule.updated_at ?? '',
-      interval: rule.attributes.schedule.interval,
-      enabled: rule.attributes.enabled,
-      refresh,
-      tags: rule.attributes.tags,
       thresholdSignalHistory,
-      buildRuleMessage,
+      bulkCreate,
+      wrapHits,
     });
 
     result = mergeReturns([

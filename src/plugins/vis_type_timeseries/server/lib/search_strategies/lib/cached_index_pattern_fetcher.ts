@@ -11,7 +11,10 @@ import { getIndexPatternKey, fetchIndexPattern } from '../../../../common/index_
 import type { IndexPatternsService } from '../../../../../data/server';
 import type { IndexPatternValue, FetchedIndexPattern } from '../../../../common/types';
 
-export const getCachedIndexPatternFetcher = (indexPatternsService: IndexPatternsService) => {
+export const getCachedIndexPatternFetcher = (
+  indexPatternsService: IndexPatternsService,
+  fetchKibanaIndexForStringIndexes: boolean = false
+) => {
   const cache = new Map();
 
   return async (indexPatternValue: IndexPatternValue): Promise<FetchedIndexPattern> => {
@@ -21,9 +24,11 @@ export const getCachedIndexPatternFetcher = (indexPatternsService: IndexPatterns
       return cache.get(key);
     }
 
-    const fetchedIndex = fetchIndexPattern(indexPatternValue, indexPatternsService);
+    const fetchedIndex = fetchIndexPattern(indexPatternValue, indexPatternsService, {
+      fetchKibanaIndexForStringIndexes,
+    });
 
-    cache.set(indexPatternValue, fetchedIndex);
+    cache.set(key, fetchedIndex);
 
     return fetchedIndex;
   };

@@ -7,44 +7,39 @@
 
 import React, { useState } from 'react';
 
-import { useDebounce } from 'react-use';
-import { PopoverAnchorPosition } from '@elastic/eui/src/components/popover/popover';
+import useDebounce from 'react-use/lib/useDebounce';
 import { useValuesList } from '../../../hooks/use_values_list';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common';
 import { FieldValueSelection } from './field_value_selection';
-import { ESFilter } from '../../../../../../../typings/elasticsearch';
-
-export interface FieldValueSuggestionsProps {
-  value?: string;
-  label: string;
-  indexPattern: IndexPattern;
-  sourceField: string;
-  onChange: (val?: string) => void;
-  filters: ESFilter[];
-  anchorPosition?: PopoverAnchorPosition;
-  time?: { from: string; to: string };
-  forceOpen?: boolean;
-  button?: JSX.Element;
-  width?: number;
-}
+import { FieldValueSuggestionsProps } from './types';
+import { FieldValueCombobox } from './field_value_combobox';
 
 export function FieldValueSuggestions({
+  fullWidth,
   sourceField,
   label,
   indexPattern,
-  value,
+  selectedValue,
   filters,
   button,
   time,
   width,
   forceOpen,
   anchorPosition,
+  singleSelection,
+  asCombobox = true,
   onChange: onSelectionChange,
 }: FieldValueSuggestionsProps) {
   const [query, setQuery] = useState('');
   const [debouncedValue, setDebouncedValue] = useState('');
 
-  const { values, loading } = useValuesList({ indexPattern, query, sourceField, filters, time });
+  const { values, loading } = useValuesList({
+    indexPattern,
+    query,
+    sourceField,
+    filters,
+    time,
+    keepHistory: true,
+  });
 
   useDebounce(
     () => {
@@ -54,14 +49,18 @@ export function FieldValueSuggestions({
     [debouncedValue]
   );
 
+  const SelectionComponent = asCombobox ? FieldValueCombobox : FieldValueSelection;
+
   return (
-    <FieldValueSelection
+    <SelectionComponent
+      fullWidth={fullWidth}
+      singleSelection={singleSelection}
       values={values as string[]}
       label={label}
       onChange={onSelectionChange}
       setQuery={setDebouncedValue}
       loading={loading}
-      value={value}
+      selectedValue={selectedValue}
       button={button}
       forceOpen={forceOpen}
       anchorPosition={anchorPosition}

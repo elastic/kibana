@@ -2,10 +2,27 @@
   "id": "observability",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
-  "configPath": ["xpack", "observability"],
-  "optionalPlugins": ["licensing", "home", "usageCollection","lens", "ruleRegistry"],
-  "requiredPlugins": ["data"],
+  "configPath": [
+    "xpack",
+    "observability"
+  ],
+  "optionalPlugins": [
+    "licensing",
+    "home",
+    "usageCollection",
+    "lens"
+  ],
+  "requiredPlugins": [
+    "data",
+    "alerting",
+    "ruleRegistry",
+    "triggersActionsUi"
+  ],
   "ui": true,
   "server": true,
-  "requiredBundles": ["data", "kibanaReact", "kibanaUtils"]
+  "requiredBundles": [
+    "data",
+    "kibanaReact",
+    "kibanaUtils"
+  ]
 }

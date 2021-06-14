@@ -15,42 +15,42 @@ export const defaultHeaders: ColumnHeaderOptions[] = [
     columnHeaderType: defaultColumnHeaderType,
     id: '@timestamp',
     type: 'number',
-    width: DEFAULT_DATE_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'message',
-    width: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'event.category',
-    width: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'event.action',
-    width: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'host.name',
-    width: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'source.ip',
-    width: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'destination.ip',
-    width: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'user.name',
-    width: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
 ];
 

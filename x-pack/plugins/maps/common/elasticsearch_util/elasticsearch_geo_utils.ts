@@ -16,61 +16,13 @@ import { BBox } from '@turf/helpers';
 import {
   DECIMAL_DEGREES_PRECISION,
   ES_GEO_FIELD_TYPE,
-  ES_SPATIAL_RELATIONS,
   GEO_JSON_TYPE,
   POLYGON_COORDINATES_EXTERIOR_INDEX,
   LON_INDEX,
   LAT_INDEX,
 } from '../constants';
-import { getEsSpatialRelationLabel } from '../i18n_getters';
-import { Filter, FilterMeta, FILTERS } from '../../../../../src/plugins/data/common';
 import { MapExtent } from '../descriptor_types';
-
-const SPATIAL_FILTER_TYPE = FILTERS.SPATIAL_FILTER;
-
-type Coordinates = Position | Position[] | Position[][] | Position[][][];
-
-// Elasticsearch stores more then just GeoJSON.
-// 1) geometry.type as lower case string
-// 2) circle and envelope types
-interface ESGeometry {
-  type: string;
-  coordinates: Coordinates;
-}
-
-export interface ESBBox {
-  top_left: number[];
-  bottom_right: number[];
-}
-
-interface GeoShapeQueryBody {
-  shape?: Polygon;
-  relation?: ES_SPATIAL_RELATIONS;
-  indexed_shape?: PreIndexedShape;
-}
-
-// Index signature explicitly states that anything stored in an object using a string conforms to the structure
-// problem is that Elasticsearch signature also allows for other string keys to conform to other structures, like 'ignore_unmapped'
-// Use intersection type to exclude certain properties from the index signature
-// https://basarat.gitbook.io/typescript/type-system/index-signatures#excluding-certain-properties-from-the-index-signature
-type GeoShapeQuery = { ignore_unmapped: boolean } & { [geoFieldName: string]: GeoShapeQueryBody };
-
-export type GeoFilter = Filter & {
-  geo_bounding_box?: {
-    [geoFieldName: string]: ESBBox;
-  };
-  geo_distance?: {
-    distance: string;
-    [geoFieldName: string]: Position | { lat: number; lon: number } | string;
-  };
-  geo_shape?: GeoShapeQuery;
-};
-
-export interface PreIndexedShape {
-  index: string;
-  id: string | number;
-  path: string;
-}
+import { Coordinates, ESBBox, ESGeometry } from './types';
 
 function ensureGeoField(type: string) {
   const expectedTypes = [ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE];
@@ -349,105 +301,6 @@ export function makeESBbox({ maxLat, maxLon, minLat, minLon }: MapExtent): ESBBo
   return esBbox;
 }
 
-export function createExtentFilter(mapExtent: MapExtent, geoFieldName: string): GeoFilter {
-  return {
-    geo_bounding_box: {
-      [geoFieldName]: makeESBbox(mapExtent),
-    },
-    meta: {
-      alias: null,
-      disabled: false,
-      negate: false,
-      key: geoFieldName,
-    },
-  };
-}
-
-export function createSpatialFilterWithGeometry({
-  preIndexedShape,
-  geometry,
-  geometryLabel,
-  indexPatternId,
-  geoFieldName,
-  relation = ES_SPATIAL_RELATIONS.INTERSECTS,
-}: {
-  preIndexedShape?: PreIndexedShape;
-  geometry: Polygon;
-  geometryLabel: string;
-  indexPatternId: string;
-  geoFieldName: string;
-  relation: ES_SPATIAL_RELATIONS;
-}): GeoFilter {
-  const meta: FilterMeta = {
-    type: SPATIAL_FILTER_TYPE,
-    negate: false,
-    index: indexPatternId,
-    key: geoFieldName,
-    alias: `${geoFieldName} ${getEsSpatialRelationLabel(relation)} ${geometryLabel}`,
-    disabled: false,
-  };
-
-  const shapeQuery: GeoShapeQueryBody = {
-    relation,
-  };
-  if (preIndexedShape) {
-    shapeQuery.indexed_shape = preIndexedShape;
-  } else {
-    shapeQuery.shape = geometry;
-  }
-
-  return {
-    meta,
-    // Currently no way to create an object with exclude property from index signature
-    // typescript error for "ignore_unmapped is not assignable to type 'GeoShapeQueryBody'" expected"
-    // @ts-expect-error
-    geo_shape: {
-      ignore_unmapped: true,
-      [geoFieldName]: shapeQuery,
-    },
-  };
-}
-
-export function createDistanceFilterWithMeta({
-  alias,
-  distanceKm,
-  geoFieldName,
-  indexPatternId,
-  point,
-}: {
-  alias: string;
-  distanceKm: number;
-  geoFieldName: string;
-  indexPatternId: string;
-  point: Position;
-}): GeoFilter {
-  const meta: FilterMeta = {
-    type: SPATIAL_FILTER_TYPE,
-    negate: false,
-    index: indexPatternId,
-    key: geoFieldName,
-    alias: alias
-      ? alias
-      : i18n.translate('xpack.maps.es_geo_utils.distanceFilterAlias', {
-          defaultMessage: '{geoFieldName} within {distanceKm}km of {pointLabel}',
-          values: {
-            distanceKm,
-            geoFieldName,
-            pointLabel: point.join(', '),
-          },
-        }),
-    disabled: false,
-  };
-
-  return {
-    geo_distance: {
-      distance: `${distanceKm}km`,
-      [geoFieldName]: point,
-    },
-    meta,
-  };
-}
-
 export function roundCoordinates(coordinates: Coordinates): void {
   for (let i = 0; i < coordinates.length; i++) {
     const value = coordinates[i];
@@ -516,44 +369,6 @@ export function clamp(val: number, min: number, max: number): number {
   } else {
     return val;
   }
-}
-
-export function extractFeaturesFromFilters(filters: GeoFilter[]): Feature[] {
-  const features: Feature[] = [];
-  filters
-    .filter((filter) => {
-      return filter.meta.key && filter.meta.type === SPATIAL_FILTER_TYPE;
-    })
-    .forEach((filter) => {
-      const geoFieldName = filter.meta.key!;
-      let geometry;
-      if (filter.geo_distance && filter.geo_distance[geoFieldName]) {
-        const distanceSplit = filter.geo_distance.distance.split('km');
-        const distance = parseFloat(distanceSplit[0]);
-        const circleFeature = turfCircle(filter.geo_distance[geoFieldName], distance);
-        geometry = circleFeature.geometry;
-      } else if (
-        filter.geo_shape &&
-        filter.geo_shape[geoFieldName] &&
-        filter.geo_shape[geoFieldName].shape
-      ) {
-        geometry = filter.geo_shape[geoFieldName].shape;
-      } else {
-        // do not know how to convert spatial filter to geometry
-        // this includes pre-indexed shapes
-        return;
-      }
-
-      features.push({
-        type: 'Feature',
-        geometry,
-        properties: {
-          filter: filter.meta.alias,
-        },
-      });
-    });
-
-  return features;
 }
 
 export function scaleBounds(bounds: MapExtent, scaleFactor: number): MapExtent {

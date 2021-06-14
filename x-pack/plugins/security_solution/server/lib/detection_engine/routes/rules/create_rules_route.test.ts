@@ -8,7 +8,7 @@
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import {
   getEmptyFindResult,
-  getResult,
+  getAlertMock,
   getCreateRequest,
   getFindResultStatus,
   getNonEmptyIndex,
@@ -23,6 +23,7 @@ import { updateRulesNotifications } from '../../rules/update_rules_notifications
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 jest.mock('../../rules/update_rules_notifications');
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
@@ -38,7 +39,7 @@ describe('create_rules', () => {
 
     clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex()); // index exists
     clients.alertsClient.find.mockResolvedValue(getEmptyFindResult()); // no current rules
-    clients.alertsClient.create.mockResolvedValue(getResult()); // creation succeeds
+    clients.alertsClient.create.mockResolvedValue(getAlertMock(getQueryRuleParams())); // creation succeeds
     clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus()); // needed to transform
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

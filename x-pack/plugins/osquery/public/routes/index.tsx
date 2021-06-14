@@ -8,24 +8,24 @@
 import React from 'react';
 import { Switch, Redirect, Route } from 'react-router-dom';
 
-import { LiveQueries } from './live_query';
+import { useBreadcrumbs } from '../common/hooks/use_breadcrumbs';
+import { LiveQueries } from './live_queries';
+import { ScheduledQueryGroups } from './scheduled_query_groups';
 
-const OsqueryAppRoutesComponent = () => (
-  <Switch>
-    {/* <Route path="/packs">
-            <Packs />
-          </Route>
-          <Route path={`/scheduled_queries`}>
-            <ScheduledQueries />
-          </Route>
-          <Route path={`/queries`}>
-            <Queries />
-          </Route> */}
-    <Route path="/live_query">
-      <LiveQueries />
-    </Route>
-    <Redirect to="/live_query" />
-  </Switch>
-);
+const OsqueryAppRoutesComponent = () => {
+  useBreadcrumbs('base');
+
+  return (
+    <Switch>
+      <Route path={`/scheduled_query_groups`}>
+        <ScheduledQueryGroups />
+      </Route>
+      <Route path="/live_queries">
+        <LiveQueries />
+      </Route>
+      <Redirect to="/live_queries" />
+    </Switch>
+  );
+};
 
 export const OsqueryAppRoutes = React.memo(OsqueryAppRoutesComponent);

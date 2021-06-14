@@ -18,6 +18,7 @@
     ],
     "optionalPlugins": [
       "home",
+      "reporting",
       "usageCollection"
     ],
     "requiredBundles": [
@@ -28,7 +29,6 @@
       "kibanaUtils",
       "lens",
       "maps",
-      "reporting",
       "savedObjects",
       "visualizations"
     ]

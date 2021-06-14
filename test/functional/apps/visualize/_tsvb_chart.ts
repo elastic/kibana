@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const retry = getService('retry');
   const security = getService('security');
+
   const PageObjects = getPageObjects([
     'visualize',
     'visualBuilder',
@@ -27,12 +28,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('visual builder', function describeIndexTests() {
     this.tags('includeFirefox');
+
+    before(async () => {
+      await PageObjects.visualize.initTests();
+    });
+
     beforeEach(async () => {
-      await security.testUser.setRoles([
-        'kibana_admin',
-        'test_logstash_reader',
-        'kibana_sample_admin',
-      ]);
+      await security.testUser.setRoles(
+        ['kibana_admin', 'test_logstash_reader', 'kibana_sample_admin'],
+        false
+      );
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisualBuilder();
       await PageObjects.visualBuilder.checkVisualBuilderIsPresent();
@@ -45,6 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualBuilder.checkMetricTabIsPresent();
         await PageObjects.visualBuilder.clickPanelOptions('metric');
         await PageObjects.visualBuilder.setMetricsDataTimerangeMode('Last value');
+        await PageObjects.visualBuilder.setDropLastBucket(true);
         await PageObjects.visualBuilder.clickDataTab('metric');
       });
 
@@ -106,6 +112,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualBuilder.checkTopNTabIsPresent();
         await PageObjects.visualBuilder.clickPanelOptions('topN');
         await PageObjects.visualBuilder.setMetricsDataTimerangeMode('Last value');
+        await PageObjects.visualBuilder.setDropLastBucket(true);
         await PageObjects.visualBuilder.clickDataTab('topN');
       });
 
@@ -120,7 +127,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('switch index patterns', () => {
       before(async () => {
-        await esArchiver.loadIfNeeded('index_pattern_without_timefield');
+        await esArchiver.loadIfNeeded(
+          'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
+        );
       });
 
       beforeEach(async () => {
@@ -129,6 +138,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualBuilder.checkMetricTabIsPresent();
         await PageObjects.visualBuilder.clickPanelOptions('metric');
         await PageObjects.visualBuilder.setMetricsDataTimerangeMode('Last value');
+        await PageObjects.visualBuilder.setDropLastBucket(true);
         await PageObjects.visualBuilder.clickDataTab('metric');
         await PageObjects.timePicker.setAbsoluteRange(
           'Sep 22, 2019 @ 00:00:00.000',
@@ -138,7 +148,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       after(async () => {
         await security.testUser.restoreDefaults();
-        await esArchiver.unload('index_pattern_without_timefield');
+        await esArchiver.load('test/functional/fixtures/es_archiver/empty_kibana');
+        await PageObjects.visualize.initTests();
       });
 
       const switchIndexTest = async (useKibanaIndexes: boolean) => {
@@ -215,6 +226,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const finalLegendItems = ['jpg: 106', 'css: 22', 'png: 14', 'gif: 8', 'php: 6'];
 
         log.debug('Group metrics by terms: extension.raw');
+        await PageObjects.visualBuilder.clickPanelOptions('timeSeries');
+        await PageObjects.visualBuilder.setDropLastBucket(true);
+        await PageObjects.visualBuilder.clickDataTab('timeSeries');
         await PageObjects.visualBuilder.setMetricsGroupByTerms('extension.raw');
         await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         const legendItems1 = await PageObjects.visualBuilder.getLegendItemsContent();

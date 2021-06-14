@@ -183,8 +183,8 @@
             },
             "plugins": {
               "properties": {
-                "THIS_WILL_BE_REPLACED_BY_THE_PLUGINS_JSON": {
-                  "type": "text"
+                "kibana_config_usage": {
+                  "type": "pass_through"
                 }
               }
             }

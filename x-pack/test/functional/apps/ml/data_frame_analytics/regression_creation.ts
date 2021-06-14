@@ -6,6 +6,7 @@
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -14,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('regression creation', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/egs_regression');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/egs_regression');
       await ml.testResources.createIndexPatternIfNeeded('ft_egs_regression', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -25,15 +26,16 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.cleanMlIndices();
     });
 
+    const jobId = `egs_1_${Date.now()}`;
     const testDataList = [
       {
         suiteTitle: 'electrical grid stability',
         jobType: 'regression',
-        jobId: `egs_1_${Date.now()}`,
-        jobDescription: 'This is the job description',
+        jobId,
+        jobDescription: 'Regression job based on ft_egs_regression dataset with runtime fields',
         source: 'ft_egs_regression',
         get destinationIndex(): string {
-          return `user-${this.jobId}`;
+          return `user-${jobId}`;
         },
         runtimeFields: {
           uppercase_stab: {
@@ -55,11 +57,28 @@ export default function ({ getService }: FtrProviderContext) {
             { color: '#F5F7FA', percentage: 10 },
             { color: '#D3DAE6', percentage: 3 },
           ],
+          runtimeFieldsEditorContent: ['{', '  "uppercase_stab": {', '    "type": "keyword",'],
           row: {
             type: 'regression',
             status: 'stopped',
             progress: '100',
           },
+          rowDetails: {
+            jobDetails: [
+              {
+                section: 'state',
+                expectedEntries: {
+                  id: jobId,
+                  state: 'stopped',
+                  data_counts:
+                    '{"training_docs_count":400,"test_docs_count":1600,"skipped_docs_count":0}',
+                  description:
+                    'Regression job based on ft_egs_regression dataset with runtime fields',
+                },
+              },
+              { section: 'progress', expectedEntries: { Phase: '8/8' } },
+            ],
+          } as AnalyticsTableRowDetails,
         },
       },
     ];
@@ -107,9 +126,9 @@ export default function ({ getService }: FtrProviderContext) {
             JSON.stringify(testData.runtimeFields)
           );
           await ml.dataFrameAnalyticsCreation.applyRuntimeMappings();
-          await ml.dataFrameAnalyticsCreation.assertRuntimeMappingsEditorContent([
-            '{"uppercase_stab":{"type":"keyword","script":"emit(params._source.stabf.toUpperCase())"}}',
-          ]);
+          await ml.dataFrameAnalyticsCreation.assertRuntimeMappingsEditorContent(
+            testData.expected.runtimeFieldsEditorContent
+          );
 
           await ml.testExecution.logTestStep('inputs the dependent variable');
           await ml.dataFrameAnalyticsCreation.assertDependentVariableInputExists();
@@ -218,6 +237,10 @@ export default function ({ getService }: FtrProviderContext) {
             status: testData.expected.row.status,
             progress: testData.expected.row.progress,
           });
+          await ml.dataFrameAnalyticsTable.assertAnalyticsRowDetails(
+            testData.jobId,
+            testData.expected.rowDetails
+          );
         });
 
         it('edits the analytics job and displays it correctly in the job list', async () => {

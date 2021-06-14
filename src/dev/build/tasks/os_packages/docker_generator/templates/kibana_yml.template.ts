@@ -18,6 +18,7 @@ function generator({ imageFlavor }: TemplateContext) {
 
   # Default Kibana configuration for docker target
   server.host: "0"
+  server.shutdownTimeout: "5s"
   elasticsearch.hosts: [ "http://elasticsearch:9200" ]
   ${!imageFlavor ? 'monitoring.ui.container.elasticsearch.enabled: true' : ''}
   `);

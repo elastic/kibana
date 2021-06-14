@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import '../../../__mocks__/react_router_history.mock';
-import { setMockValues, setMockActions } from '../../../__mocks__/kea.mock';
+import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
+import { mockUseParams } from '../../../__mocks__/react_router';
 import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
+import '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
@@ -38,23 +38,23 @@ describe('DocumentDetail', () => {
     setMockValues(values);
     setMockActions(actions);
 
-    (useParams as jest.Mock).mockImplementationOnce(() => ({
+    mockUseParams.mockImplementationOnce(() => ({
       documentId: '1',
     }));
   });
 
   it('renders', () => {
-    const wrapper = shallow(<DocumentDetail engineBreadcrumb={['test']} />);
+    const wrapper = shallow(<DocumentDetail />);
     expect(wrapper.find(EuiPageContent).length).toBe(1);
   });
 
   it('initializes data on mount', () => {
-    shallow(<DocumentDetail engineBreadcrumb={['test']} />);
+    shallow(<DocumentDetail />);
     expect(actions.getDocumentDetails).toHaveBeenCalledWith('1');
   });
 
   it('calls setFields on unmount', () => {
-    shallow(<DocumentDetail engineBreadcrumb={['test']} />);
+    shallow(<DocumentDetail />);
     unmountHandler();
     expect(actions.setFields).toHaveBeenCalledWith([]);
   });
@@ -65,7 +65,7 @@ describe('DocumentDetail', () => {
       dataLoading: true,
     });
 
-    const wrapper = shallow(<DocumentDetail engineBreadcrumb={['test']} />);
+    const wrapper = shallow(<DocumentDetail />);
 
     expect(wrapper.find(Loading).length).toBe(1);
   });
@@ -80,7 +80,7 @@ describe('DocumentDetail', () => {
     };
 
     beforeEach(() => {
-      const wrapper = shallow(<DocumentDetail engineBreadcrumb={['test']} />);
+      const wrapper = shallow(<DocumentDetail />);
       columns = wrapper.find(EuiBasicTable).props().columns;
     });
 
@@ -101,7 +101,7 @@ describe('DocumentDetail', () => {
   });
 
   it('will delete the document when the delete button is pressed', () => {
-    const wrapper = shallow(<DocumentDetail engineBreadcrumb={['test']} />);
+    const wrapper = shallow(<DocumentDetail />);
     const header = wrapper.find(EuiPageHeader).dive().children().dive();
     const button = header.find('[data-test-subj="DeleteDocumentButton"]');
 

@@ -83,6 +83,14 @@ export const createDeserializer = (isCloudEnabled: boolean) => (
           draft._meta.hot.customRollover.maxStorageSizeUnit = maxSize.units;
         }
 
+        if (draft.phases.hot.actions.rollover.max_primary_shard_size) {
+          const maxPrimaryShardSize = splitSizeAndUnits(
+            draft.phases.hot.actions.rollover.max_primary_shard_size
+          );
+          draft.phases.hot.actions.rollover.max_primary_shard_size = maxPrimaryShardSize.size;
+          draft._meta.hot.customRollover.maxPrimaryShardSizeUnit = maxPrimaryShardSize.units;
+        }
+
         if (draft.phases.hot.actions.rollover.max_age) {
           const maxAge = splitSizeAndUnits(draft.phases.hot.actions.rollover.max_age);
           draft.phases.hot.actions.rollover.max_age = maxAge.size;

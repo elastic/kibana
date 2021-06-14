@@ -9,27 +9,28 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
-
 import { FlashMessages } from '../../../shared/flash_messages';
+import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { Loading } from '../../../shared/loading';
-import { AddRoleMappingButton, RoleMappingsTable } from '../../../shared/role_mapping';
-import {
-  EMPTY_ROLE_MAPPINGS_TITLE,
-  ROLE_MAPPINGS_TITLE,
-  ROLE_MAPPINGS_DESCRIPTION,
-} from '../../../shared/role_mapping/constants';
-import { ViewContentHeader } from '../../components/shared/view_content_header';
-import { getRoleMappingPath, ROLE_MAPPING_NEW_PATH } from '../../routes';
+import { RoleMappingsTable, RoleMappingsHeading } from '../../../shared/role_mapping';
+import { ROLE_MAPPINGS_TITLE } from '../../../shared/role_mapping/constants';
 
-import { EMPTY_ROLE_MAPPINGS_BODY, ROLE_MAPPINGS_TABLE_HEADER } from './constants';
+import { ROLE_MAPPINGS_TABLE_HEADER } from './constants';
 
+import { RoleMapping } from './role_mapping';
 import { RoleMappingsLogic } from './role_mappings_logic';
 
 export const RoleMappings: React.FC = () => {
-  const { initializeRoleMappings } = useActions(RoleMappingsLogic);
+  const { initializeRoleMappings, initializeRoleMapping, handleDeleteMapping } = useActions(
+    RoleMappingsLogic
+  );
 
-  const { roleMappings, dataLoading, multipleAuthProvidersConfig } = useValues(RoleMappingsLogic);
+  const {
+    roleMappings,
+    dataLoading,
+    multipleAuthProvidersConfig,
+    roleMappingFlyoutOpen,
+  } = useValues(RoleMappingsLogic);
 
   useEffect(() => {
     initializeRoleMappings();
@@ -37,35 +38,26 @@ export const RoleMappings: React.FC = () => {
 
   if (dataLoading) return <Loading />;
 
-  const addMappingButton = <AddRoleMappingButton path={ROLE_MAPPING_NEW_PATH} />;
-  const emptyPrompt = (
-    <EuiPanel paddingSize="l" color="subdued" hasBorder={false}>
-      <EuiEmptyPrompt
-        iconType="usersRolesApp"
-        title={<h2>{EMPTY_ROLE_MAPPINGS_TITLE}</h2>}
-        body={<p>{EMPTY_ROLE_MAPPINGS_BODY}</p>}
-        actions={addMappingButton}
+  const roleMappingsSection = (
+    <>
+      <RoleMappingsHeading productName="Workplace Search" onClick={() => initializeRoleMapping()} />
+      <RoleMappingsTable
+        roleMappings={roleMappings}
+        accessItemKey="groups"
+        accessHeader={ROLE_MAPPINGS_TABLE_HEADER}
+        shouldShowAuthProvider={multipleAuthProvidersConfig}
+        initializeRoleMapping={initializeRoleMapping}
+        handleDeleteMapping={handleDeleteMapping}
       />
-    </EuiPanel>
-  );
-  const roleMappingsTable = (
-    <RoleMappingsTable
-      roleMappings={roleMappings}
-      accessItemKey="groups"
-      accessHeader={ROLE_MAPPINGS_TABLE_HEADER}
-      addMappingButton={addMappingButton}
-      getRoleMappingPath={getRoleMappingPath}
-      shouldShowAuthProvider={multipleAuthProvidersConfig}
-    />
+    </>
   );
 
   return (
     <>
-      <ViewContentHeader title={ROLE_MAPPINGS_TITLE} description={ROLE_MAPPINGS_DESCRIPTION} />
-      <div>
-        <FlashMessages />
-        {roleMappings.length === 0 ? emptyPrompt : roleMappingsTable}
-      </div>
+      <SetPageChrome trail={[ROLE_MAPPINGS_TITLE]} />
+      {roleMappingFlyoutOpen && <RoleMapping />}
+      <FlashMessages />
+      {roleMappingsSection}
     </>
   );
 };

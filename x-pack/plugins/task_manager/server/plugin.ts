@@ -28,10 +28,13 @@ import { TaskScheduling } from './task_scheduling';
 import { healthRoute } from './routes';
 import { createMonitoringStats, MonitoringStats } from './monitoring';
 
-export type TaskManagerSetupContract = { addMiddleware: (middleware: Middleware) => void } & Pick<
-  TaskTypeDictionary,
-  'registerTaskDefinitions'
->;
+export type TaskManagerSetupContract = {
+  /**
+   * @deprecated
+   */
+  index: string;
+  addMiddleware: (middleware: Middleware) => void;
+} & Pick<TaskTypeDictionary, 'registerTaskDefinitions'>;
 
 export type TaskManagerStartContract = Pick<
   TaskScheduling,
@@ -84,17 +87,16 @@ export class TaskManagerPlugin
       this.config!
     );
 
-    core.getStartServices().then(async () => {
-      core.status.set(
-        combineLatest([core.status.derivedStatus$, serviceStatus$]).pipe(
-          map(([derivedStatus, serviceStatus]) =>
-            serviceStatus.level > derivedStatus.level ? serviceStatus : derivedStatus
-          )
+    core.status.set(
+      combineLatest([core.status.derivedStatus$, serviceStatus$]).pipe(
+        map(([derivedStatus, serviceStatus]) =>
+          serviceStatus.level > derivedStatus.level ? serviceStatus : derivedStatus
         )
-      );
-    });
+      )
+    );
 
     return {
+      index: this.config.index,
       addMiddleware: (middleware: Middleware) => {
         this.assertStillInSetup('add Middleware');
         this.middleware = addMiddlewareToChain(this.middleware, middleware);

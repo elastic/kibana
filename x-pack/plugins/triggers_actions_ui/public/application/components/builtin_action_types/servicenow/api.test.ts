@@ -56,12 +56,12 @@ describe('ServiceNow API', () => {
       const res = await getChoices({
         http,
         signal: abortCtrl.signal,
-        connectorId: 'test',
+        connectorId: 'te/st',
         fields: ['priority'],
       });
 
       expect(res).toEqual(choicesResponse);
-      expect(http.post).toHaveBeenCalledWith('/api/actions/connector/test/_execute', {
+      expect(http.post).toHaveBeenCalledWith('/api/actions/connector/te%2Fst/_execute', {
         body: '{"params":{"subAction":"getChoices","subActionParams":{"fields":["priority"]}}}',
         signal: abortCtrl.signal,
       });

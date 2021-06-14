@@ -8,11 +8,11 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { isNotOperator, isOperator } from '@kbn/securitysolution-list-utils';
 
 import { getField } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 
 import { OperatorComponent } from './operator';
-import { isNotOperator, isOperator } from './operators';
 
 describe('OperatorComponent', () => {
   test('it renders disabled if "isDisabled" is true', () => {

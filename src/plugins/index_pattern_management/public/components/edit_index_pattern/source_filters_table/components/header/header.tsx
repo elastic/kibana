@@ -8,20 +8,12 @@
 
 import React from 'react';
 
-import { EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const Header = () => (
   <>
-    <EuiTitle size="s">
-      <h3>
-        <FormattedMessage
-          id="indexPatternManagement.editIndexPattern.sourceHeader"
-          defaultMessage="Field filters"
-        />
-      </h3>
-    </EuiTitle>
-    <EuiText>
+    <EuiText size="s">
       <p>
         <FormattedMessage
           id="indexPatternManagement.editIndexPattern.sourceLabel"

@@ -138,6 +138,113 @@ describe('XY Config panels', () => {
 
       expect(component.find(AxisSettingsPopover).length).toEqual(3);
     });
+
+    it('should pass in endzone visibility setter and current sate for time chart', () => {
+      (frame.datasourceLayers.first.getOperationForColumnId as jest.Mock).mockReturnValue({
+        dataType: 'date',
+      });
+      const state = testState();
+      const component = shallow(
+        <XyToolbar
+          frame={frame}
+          setState={jest.fn()}
+          state={{
+            ...state,
+            hideEndzones: true,
+            layers: [{ ...state.layers[0], yConfig: [{ axisMode: 'right', forAccessor: 'foo' }] }],
+          }}
+        />
+      );
+
+      expect(component.find(AxisSettingsPopover).at(0).prop('setEndzoneVisibility')).toBeFalsy();
+      expect(component.find(AxisSettingsPopover).at(1).prop('setEndzoneVisibility')).toBeTruthy();
+      expect(component.find(AxisSettingsPopover).at(1).prop('endzonesVisible')).toBe(false);
+      expect(component.find(AxisSettingsPopover).at(2).prop('setEndzoneVisibility')).toBeFalsy();
+    });
+
+    it('should pass in information about current data bounds', () => {
+      const state = testState();
+      frame.activeData = {
+        first: {
+          type: 'datatable',
+          rows: [{ bar: -5 }, { bar: 50 }],
+          columns: [
+            {
+              id: 'baz',
+              meta: {
+                type: 'number',
+              },
+              name: 'baz',
+            },
+            {
+              id: 'foo',
+              meta: {
+                type: 'number',
+              },
+              name: 'foo',
+            },
+            {
+              id: 'bar',
+              meta: {
+                type: 'number',
+              },
+              name: 'bar',
+            },
+          ],
+        },
+      };
+      const component = shallow(
+        <XyToolbar
+          frame={frame}
+          setState={jest.fn()}
+          state={{
+            ...state,
+            yLeftExtent: {
+              mode: 'custom',
+              lowerBound: 123,
+              upperBound: 456,
+            },
+          }}
+        />
+      );
+
+      expect(component.find(AxisSettingsPopover).at(0).prop('dataBounds')).toEqual({
+        min: -5,
+        max: 50,
+      });
+    });
+
+    it('should pass in extent information', () => {
+      const state = testState();
+      const component = shallow(
+        <XyToolbar
+          frame={frame}
+          setState={jest.fn()}
+          state={{
+            ...state,
+            yLeftExtent: {
+              mode: 'custom',
+              lowerBound: 123,
+              upperBound: 456,
+            },
+          }}
+        />
+      );
+
+      expect(component.find(AxisSettingsPopover).at(0).prop('extent')).toEqual({
+        mode: 'custom',
+        lowerBound: 123,
+        upperBound: 456,
+      });
+      expect(component.find(AxisSettingsPopover).at(0).prop('setExtent')).toBeTruthy();
+      expect(component.find(AxisSettingsPopover).at(1).prop('extent')).toBeFalsy();
+      expect(component.find(AxisSettingsPopover).at(1).prop('setExtent')).toBeFalsy();
+      // default extent
+      expect(component.find(AxisSettingsPopover).at(2).prop('extent')).toEqual({
+        mode: 'full',
+      });
+      expect(component.find(AxisSettingsPopover).at(2).prop('setExtent')).toBeTruthy();
+    });
   });
 
   describe('Dimension Editor', () => {
@@ -153,6 +260,7 @@ describe('XY Config panels', () => {
           state={{ ...state, layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' }] }}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
+          panelRef={React.createRef()}
         />
       );
 
@@ -176,6 +284,7 @@ describe('XY Config panels', () => {
           state={state}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
+          panelRef={React.createRef()}
         />
       );
 
@@ -219,6 +328,7 @@ describe('XY Config panels', () => {
           }}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
+          panelRef={React.createRef()}
         />
       );
 
@@ -258,6 +368,7 @@ describe('XY Config panels', () => {
           }}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
+          panelRef={React.createRef()}
         />
       );
 

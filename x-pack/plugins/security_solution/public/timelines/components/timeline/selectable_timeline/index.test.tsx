@@ -9,9 +9,9 @@ import { EuiSelectableProps } from '@elastic/eui';
 import React from 'react';
 import { shallow, ShallowWrapper, mount } from 'enzyme';
 
-import { TimelineType } from '../../../../../common/types/timeline';
-import { SortFieldTimeline, Direction } from '../../../../graphql/types';
+import { SortFieldTimeline, TimelineType } from '../../../../../common/types/timeline';
 import { SelectableTimeline, ORIGINAL_PAGE_SIZE } from './';
+import { Direction } from '../../../../../common/search_strategy';
 
 const mockFetchAllTimeline = jest.fn();
 jest.mock('../../../containers/all', () => {

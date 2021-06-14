@@ -7,8 +7,6 @@
 
 import Boom from '@hapi/boom';
 import rison from 'rison-node';
-import { ElasticsearchClient } from 'kibana/server';
-import moment from 'moment';
 import { Duration } from 'moment/moment';
 import { MlClient } from '../ml_client';
 import {
@@ -27,8 +25,11 @@ import {
 } from '../../../common/types/alerts';
 import { AnomalyDetectionAlertContext } from './register_anomaly_detection_alert_type';
 import { MlJobsResponse } from '../../../common/types/job_service';
-import { resolveBucketSpanInSeconds } from '../../../common/util/job_utils';
+import { resolveMaxTimeInterval } from '../../../common/util/job_utils';
 import { isDefined } from '../../../common/types/guards';
+import { getTopNBuckets, resolveLookbackInterval } from '../../../common/util/alerts';
+import type { DatafeedsService } from '../../models/job_service/datafeeds';
+import { getEntityFieldName, getEntityFieldValue } from '../../../common/util/anomaly_utils';
 
 type AggResultsResponse = { key?: number } & {
   [key in PreviewResultsKeys]: {
@@ -40,53 +41,27 @@ type AggResultsResponse = { key?: number } & {
   };
 };
 
+const TIME_RANGE_PADDING = 10;
+
+/**
+ * Mapping for result types and corresponding score fields.
+ */
+const resultTypeScoreMapping = {
+  [ANOMALY_RESULT_TYPE.BUCKET]: 'anomaly_score',
+  [ANOMALY_RESULT_TYPE.RECORD]: 'record_score',
+  [ANOMALY_RESULT_TYPE.INFLUENCER]: 'influencer_score',
+};
+
 /**
  * Alerting related server-side methods
  * @param mlClient
- * @param esClient
+ * @param datafeedsService
  */
-export function alertingServiceProvider(mlClient: MlClient, esClient: ElasticsearchClient) {
+export function alertingServiceProvider(mlClient: MlClient, datafeedsService: DatafeedsService) {
   const getAggResultsLabel = (resultType: AnomalyResultType) => {
     return {
       aggGroupLabel: `${resultType}_results` as PreviewResultsKeys,
       topHitsLabel: `top_${resultType}_hits` as TopHitsResultsKeys,
-    };
-  };
-
-  const getCommonScriptedFields = () => {
-    return {
-      start: {
-        script: {
-          lang: 'painless',
-          source: `LocalDateTime.ofEpochSecond((doc["timestamp"].value.getMillis()-((doc["bucket_span"].value * 1000)
- * params.padding)) / 1000, 0, ZoneOffset.UTC).toString()+\":00.000Z\"`,
-          params: {
-            padding: 10,
-          },
-        },
-      },
-      end: {
-        script: {
-          lang: 'painless',
-          source: `LocalDateTime.ofEpochSecond((doc["timestamp"].value.getMillis()+((doc["bucket_span"].value * 1000)
- * params.padding)) / 1000, 0, ZoneOffset.UTC).toString()+\":00.000Z\"`,
-          params: {
-            padding: 10,
-          },
-        },
-      },
-      timestamp_epoch: {
-        script: {
-          lang: 'painless',
-          source: 'doc["timestamp"].value.getMillis()/1000',
-        },
-      },
-      timestamp_iso8601: {
-        script: {
-          lang: 'painless',
-          source: 'doc["timestamp"].value',
-        },
-      },
     };
   };
 
@@ -95,12 +70,20 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
    * @param resultType
    * @param severity
    */
-  const getResultTypeAggRequest = (resultType: AnomalyResultType, severity: number) => {
+  const getResultTypeAggRequest = (
+    resultType: AnomalyResultType,
+    severity: number,
+    useInitialScore?: boolean
+  ) => {
+    const influencerScoreField = getScoreFields(ANOMALY_RESULT_TYPE.INFLUENCER, useInitialScore);
+    const recordScoreField = getScoreFields(ANOMALY_RESULT_TYPE.RECORD, useInitialScore);
+    const bucketScoreField = getScoreFields(ANOMALY_RESULT_TYPE.BUCKET, useInitialScore);
+
     return {
       influencer_results: {
         filter: {
           range: {
-            influencer_score: {
+            [influencerScoreField]: {
               gte: resultType === ANOMALY_RESULT_TYPE.INFLUENCER ? severity : 0,
             },
           },
@@ -110,7 +93,7 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
             top_hits: {
               sort: [
                 {
-                  influencer_score: {
+                  [influencerScoreField]: {
                     order: 'desc',
                   },
                 },
@@ -122,27 +105,13 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
                   'influencer_field_name',
                   'influencer_field_value',
                   'influencer_score',
+                  'initial_influencer_score',
                   'is_interim',
                   'job_id',
+                  'bucket_span',
                 ],
               },
               size: 3,
-              script_fields: {
-                ...getCommonScriptedFields(),
-                score: {
-                  script: {
-                    lang: 'painless',
-                    source: 'Math.floor(doc["influencer_score"].value)',
-                  },
-                },
-                unique_key: {
-                  script: {
-                    lang: 'painless',
-                    source:
-                      'doc["timestamp"].value + "_" + doc["influencer_field_name"].value + "_" + doc["influencer_field_value"].value',
-                  },
-                },
-              },
             },
           },
         },
@@ -150,7 +119,7 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
       record_results: {
         filter: {
           range: {
-            record_score: {
+            [recordScoreField]: {
               gte: resultType === ANOMALY_RESULT_TYPE.RECORD ? severity : 0,
             },
           },
@@ -160,7 +129,7 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
             top_hits: {
               sort: [
                 {
-                  record_score: {
+                  [recordScoreField]: {
                     order: 'desc',
                   },
                 },
@@ -170,6 +139,7 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
                   'result_type',
                   'timestamp',
                   'record_score',
+                  'initial_record_score',
                   'is_interim',
                   'function',
                   'field_name',
@@ -181,24 +151,10 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
                   'partition_field_value',
                   'job_id',
                   'detector_index',
+                  'bucket_span',
                 ],
               },
               size: 3,
-              script_fields: {
-                ...getCommonScriptedFields(),
-                score: {
-                  script: {
-                    lang: 'painless',
-                    source: 'Math.floor(doc["record_score"].value)',
-                  },
-                },
-                unique_key: {
-                  script: {
-                    lang: 'painless',
-                    source: 'doc["timestamp"].value + "_" + doc["function"].value',
-                  },
-                },
-              },
             },
           },
         },
@@ -208,7 +164,7 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
             bucket_results: {
               filter: {
                 range: {
-                  anomaly_score: {
+                  [bucketScoreField]: {
                     gt: severity,
                   },
                 },
@@ -218,7 +174,7 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
                   top_hits: {
                     sort: [
                       {
-                        anomaly_score: {
+                        [bucketScoreField]: {
                           order: 'desc',
                         },
                       },
@@ -229,25 +185,12 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
                         'result_type',
                         'timestamp',
                         'anomaly_score',
+                        'initial_anomaly_score',
                         'is_interim',
+                        'bucket_span',
                       ],
                     },
                     size: 1,
-                    script_fields: {
-                      ...getCommonScriptedFields(),
-                      score: {
-                        script: {
-                          lang: 'painless',
-                          source: 'Math.floor(doc["anomaly_score"].value)',
-                        },
-                      },
-                      unique_key: {
-                        script: {
-                          lang: 'painless',
-                          source: 'doc["timestamp"].value',
-                        },
-                      },
-                    },
                   },
                 },
               },
@@ -264,45 +207,74 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
     return source.job_id;
   };
 
-  const getResultsFormatter = (resultType: AnomalyResultType) => {
+  const getScoreFields = (resultType: AnomalyResultType, useInitialScore?: boolean) => {
+    return `${useInitialScore ? 'initial_' : ''}${resultTypeScoreMapping[resultType]}`;
+  };
+
+  const getRecordKey = (source: AnomalyRecordDoc): string => {
+    let alertInstanceKey = `${source.job_id}_${source.timestamp}`;
+
+    const fieldName = getEntityFieldName(source);
+    const fieldValue = getEntityFieldValue(source);
+    const entity =
+      fieldName !== undefined && fieldValue !== undefined ? `_${fieldName}_${fieldValue}` : '';
+    alertInstanceKey += `_${source.detector_index}_${source.function}${entity}`;
+
+    return alertInstanceKey;
+  };
+
+  /**
+   * Returns a callback for formatting elasticsearch aggregation response
+   * to the alert context.
+   * @param resultType
+   */
+  const getResultsFormatter = (resultType: AnomalyResultType, useInitialScore: boolean = false) => {
     const resultsLabel = getAggResultsLabel(resultType);
     return (v: AggResultsResponse): AlertExecutionResult | undefined => {
       const aggTypeResults = v[resultsLabel.aggGroupLabel];
       if (aggTypeResults.doc_count === 0) {
         return;
       }
-
       const requestedAnomalies = aggTypeResults[resultsLabel.topHitsLabel].hits.hits;
-
       const topAnomaly = requestedAnomalies[0];
       const alertInstanceKey = getAlertInstanceKey(topAnomaly._source);
+      const timestamp = topAnomaly._source.timestamp;
+      const bucketSpanInSeconds = topAnomaly._source.bucket_span;
 
       return {
         count: aggTypeResults.doc_count,
         key: v.key,
+        message:
+          'Alerts are raised based on real-time scores. Remember that scores may be adjusted over time as data continues to be analyzed.',
         alertInstanceKey,
         jobIds: [...new Set(requestedAnomalies.map((h) => h._source.job_id))],
         isInterim: requestedAnomalies.some((h) => h._source.is_interim),
-        timestamp: topAnomaly._source.timestamp,
-        timestampIso8601: topAnomaly.fields.timestamp_iso8601[0],
-        timestampEpoch: topAnomaly.fields.timestamp_epoch[0],
-        score: topAnomaly.fields.score[0],
+        timestamp,
+        timestampIso8601: new Date(timestamp).toISOString(),
+        timestampEpoch: timestamp / 1000,
+        score: Math.floor(topAnomaly._source[getScoreFields(resultType, useInitialScore)]),
         bucketRange: {
-          start: topAnomaly.fields.start[0],
-          end: topAnomaly.fields.end[0],
+          start: new Date(
+            timestamp - bucketSpanInSeconds * 1000 * TIME_RANGE_PADDING
+          ).toISOString(),
+          end: new Date(timestamp + bucketSpanInSeconds * 1000 * TIME_RANGE_PADDING).toISOString(),
         },
         topRecords: v.record_results.top_record_hits.hits.hits.map((h) => {
           return {
             ...h._source,
-            score: h.fields.score[0],
-            unique_key: h.fields.unique_key[0],
+            score: Math.floor(
+              h._source[getScoreFields(ANOMALY_RESULT_TYPE.RECORD, useInitialScore)]
+            ),
+            unique_key: getRecordKey(h._source),
           };
         }) as RecordAnomalyAlertDoc[],
         topInfluencers: v.influencer_results.top_influencer_hits.hits.hits.map((h) => {
           return {
             ...h._source,
-            score: h.fields.score[0],
-            unique_key: h.fields.unique_key[0],
+            score: Math.floor(
+              h._source[getScoreFields(ANOMALY_RESULT_TYPE.INFLUENCER, useInitialScore)]
+            ),
+            unique_key: `${h._source.timestamp}_${h._source.influencer_field_name}_${h._source.influencer_field_value}`,
           };
         }) as InfluencerAnomalyAlertDoc[],
       };
@@ -332,7 +304,16 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
 
     if (jobsResponse.length === 0) {
       // Probably assigned groups don't contain any jobs anymore.
-      return;
+      throw new Error("Couldn't find the job with provided id");
+    }
+
+    const maxBucket = resolveMaxTimeInterval(
+      jobsResponse.map((v) => v.analysis_config.bucket_span)
+    );
+
+    if (maxBucket === undefined) {
+      // Technically it's not possible, just in case.
+      throw new Error('Unable to resolve a valid bucket length');
     }
 
     /**
@@ -341,9 +322,7 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
      */
     const lookBackTimeInterval = `${Math.max(
       // Double the max bucket span
-      Math.round(
-        resolveBucketSpanInSeconds(jobsResponse.map((v) => v.analysis_config.bucket_span)) * 2
-      ),
+      Math.round(maxBucket * 2),
       checkIntervalGap ? Math.round(checkIntervalGap.asSeconds()) : 0
     )}s`;
 
@@ -368,7 +347,7 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
             },
             {
               terms: {
-                result_type: Object.values(ANOMALY_RESULT_TYPE),
+                result_type: Object.values(ANOMALY_RESULT_TYPE) as string[],
               },
             },
             ...(params.includeInterim
@@ -386,11 +365,11 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
             alerts_over_time: {
               date_histogram: {
                 field: 'timestamp',
-                fixed_interval: lookBackTimeInterval,
+                fixed_interval: `${maxBucket}s`,
                 // Ignore empty buckets
                 min_doc_count: 1,
               },
-              aggs: getResultTypeAggRequest(params.resultType, params.severity),
+              aggs: getResultTypeAggRequest(params.resultType, params.severity, true),
             },
           }
         : getResultTypeAggRequest(params.resultType, params.severity),
@@ -408,7 +387,7 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
 
     const resultsLabel = getAggResultsLabel(params.resultType);
 
-    const formatter = getResultsFormatter(params.resultType);
+    const formatter = getResultsFormatter(params.resultType, !!previewTimeInterval);
 
     return (previewTimeInterval
       ? (result as {
@@ -429,6 +408,139 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
       : // @ts-expect-error
         [formatter(result as AggResultsResponse)]
     ).filter(isDefined);
+  };
+
+  /**
+   * Fetches the most recent anomaly according the top N buckets within the lookback interval
+   * that satisfies a rule criteria.
+   *
+   * @param params - Alert params
+   */
+  const fetchResult = async (
+    params: MlAnomalyDetectionAlertParams
+  ): Promise<AlertExecutionResult | undefined> => {
+    const jobAndGroupIds = [
+      ...(params.jobSelection.jobIds ?? []),
+      ...(params.jobSelection.groupIds ?? []),
+    ];
+
+    // Extract jobs from group ids and make sure provided jobs assigned to a current space
+    const jobsResponse = (
+      await mlClient.getJobs<MlJobsResponse>({ job_id: jobAndGroupIds.join(',') })
+    ).body.jobs;
+
+    if (jobsResponse.length === 0) {
+      // Probably assigned groups don't contain any jobs anymore.
+      return;
+    }
+
+    const jobIds = jobsResponse.map((v) => v.job_id);
+
+    const dataFeeds = await datafeedsService.getDatafeedByJobId(jobIds);
+
+    const maxBucketInSeconds = resolveMaxTimeInterval(
+      jobsResponse.map((v) => v.analysis_config.bucket_span)
+    );
+
+    if (maxBucketInSeconds === undefined) {
+      // Technically it's not possible, just in case.
+      throw new Error('Unable to resolve a valid bucket length');
+    }
+
+    const lookBackTimeInterval: string =
+      params.lookbackInterval ?? resolveLookbackInterval(jobsResponse, dataFeeds ?? []);
+
+    const topNBuckets: number = params.topNBuckets ?? getTopNBuckets(jobsResponse[0]);
+
+    const requestBody = {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            {
+              terms: { job_id: jobIds },
+            },
+            {
+              terms: {
+                result_type: Object.values(ANOMALY_RESULT_TYPE) as string[],
+              },
+            },
+            {
+              range: {
+                timestamp: {
+                  gte: `now-${lookBackTimeInterval}`,
+                },
+              },
+            },
+            ...(params.includeInterim
+              ? []
+              : [
+                  {
+                    term: { is_interim: false },
+                  },
+                ]),
+          ],
+        },
+      },
+      aggs: {
+        alerts_over_time: {
+          date_histogram: {
+            field: 'timestamp',
+            fixed_interval: `${maxBucketInSeconds}s`,
+            order: {
+              _key: 'desc' as const,
+            },
+          },
+          aggs: {
+            max_score: {
+              max: {
+                field: resultTypeScoreMapping[params.resultType],
+              },
+            },
+            ...getResultTypeAggRequest(params.resultType, params.severity),
+            truncate: {
+              bucket_sort: {
+                size: topNBuckets,
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const response = await mlClient.anomalySearch(
+      {
+        // @ts-expect-error
+        body: requestBody,
+      },
+      jobIds
+    );
+
+    const result = response.body.aggregations as {
+      alerts_over_time: {
+        buckets: Array<
+          {
+            doc_count: number;
+            key: number;
+            key_as_string: string;
+            max_score: {
+              value: number;
+            };
+          } & AggResultsResponse
+        >;
+      };
+    };
+
+    if (result.alerts_over_time.buckets.length === 0) {
+      return;
+    }
+
+    // Find the most anomalous result from the top N buckets
+    const topResult = result.alerts_over_time.buckets.reduce((prev, current) =>
+      prev.max_score.value > current.max_score.value ? prev : current
+    );
+
+    return getResultsFormatter(params.resultType)(topResult);
   };
 
   /**
@@ -520,17 +632,8 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
       startedAt: Date,
       previousStartedAt: Date | null
     ): Promise<AnomalyDetectionAlertContext | undefined> => {
-      const checkIntervalGap = previousStartedAt
-        ? moment.duration(moment(startedAt).diff(previousStartedAt))
-        : undefined;
+      const result = await fetchResult(params);
 
-      const res = await fetchAnomalies(params, undefined, checkIntervalGap);
-
-      if (!res) {
-        throw new Error('No results found');
-      }
-
-      const result = res[0];
       if (!result) return;
 
       const anomalyExplorerUrl = buildExplorerUrl(result, params.resultType);

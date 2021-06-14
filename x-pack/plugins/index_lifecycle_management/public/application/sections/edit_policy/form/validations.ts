@@ -6,13 +6,18 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { fieldValidators, ValidationFunc, ValidationConfig } from '../../../../shared_imports';
+import {
+  fieldValidators,
+  ValidationFunc,
+  ValidationConfig,
+  ValidationError,
+} from '../../../../shared_imports';
 
 import { ROLLOVER_FORM_PATHS } from '../constants';
 
 import { i18nTexts } from '../i18n_texts';
-import { PolicyFromES } from '../../../../../common/types';
-import { FormInternal, MinAgePhase } from '../types';
+import { PhaseWithTiming, PolicyFromES } from '../../../../../common/types';
+import { FormInternal } from '../types';
 
 const { numberGreaterThanField, containsCharsField, emptyField, startsWithField } = fieldValidators;
 
@@ -50,7 +55,9 @@ export const ifExistsNumberNonNegative = createIfNumberExistsValidator({
  * A special validation type used to keep track of validation errors for
  * the rollover threshold values not being set (e.g., age and doc count)
  */
-export const ROLLOVER_EMPTY_VALIDATION = 'ROLLOVER_EMPTY_VALIDATION';
+export const ROLLOVER_VALUE_REQUIRED_VALIDATION_CODE = 'ROLLOVER_VALUE_REQUIRED_VALIDATION_CODE';
+
+const rolloverFieldPaths = Object.values(ROLLOVER_FORM_PATHS);
 
 /**
  * An ILM policy requires that for rollover a value must be set for one of the threshold values.
@@ -60,33 +67,33 @@ export const ROLLOVER_EMPTY_VALIDATION = 'ROLLOVER_EMPTY_VALIDATION';
  */
 export const rolloverThresholdsValidator: ValidationFunc = ({ form, path }) => {
   const fields = form.getFields();
-  if (
-    !(
-      fields[ROLLOVER_FORM_PATHS.maxAge]?.value ||
-      fields[ROLLOVER_FORM_PATHS.maxDocs]?.value ||
-      fields[ROLLOVER_FORM_PATHS.maxSize]?.value
-    )
-  ) {
-    if (path === ROLLOVER_FORM_PATHS.maxAge) {
-      return {
-        code: ROLLOVER_EMPTY_VALIDATION,
-        message: i18nTexts.editPolicy.errors.maximumAgeRequiredMessage,
-      };
-    } else if (path === ROLLOVER_FORM_PATHS.maxDocs) {
-      return {
-        code: ROLLOVER_EMPTY_VALIDATION,
-        message: i18nTexts.editPolicy.errors.maximumDocumentsRequiredMessage,
-      };
-    } else {
-      return {
-        code: ROLLOVER_EMPTY_VALIDATION,
-        message: i18nTexts.editPolicy.errors.maximumSizeRequiredMessage,
-      };
+  // At least one rollover field needs a value specified for this action.
+  const someRolloverFieldHasAValue = rolloverFieldPaths.some((rolloverFieldPath) =>
+    Boolean(fields[rolloverFieldPath]?.value)
+  );
+  if (!someRolloverFieldHasAValue) {
+    const errorToReturn: ValidationError = {
+      code: ROLLOVER_VALUE_REQUIRED_VALIDATION_CODE,
+      message: '', // We need to map the current path to the corresponding validation error message
+    };
+    switch (path) {
+      case ROLLOVER_FORM_PATHS.maxAge:
+        errorToReturn.message = i18nTexts.editPolicy.errors.maximumAgeRequiredMessage;
+        break;
+      case ROLLOVER_FORM_PATHS.maxDocs:
+        errorToReturn.message = i18nTexts.editPolicy.errors.maximumDocumentsRequiredMessage;
+        break;
+      case ROLLOVER_FORM_PATHS.maxPrimaryShardSize:
+        errorToReturn.message = i18nTexts.editPolicy.errors.maximumPrimaryShardSizeRequiredMessage;
+        break;
+      default:
+        errorToReturn.message = i18nTexts.editPolicy.errors.maximumSizeRequiredMessage;
     }
+    return errorToReturn;
   } else {
-    fields[ROLLOVER_FORM_PATHS.maxAge].clearErrors(ROLLOVER_EMPTY_VALIDATION);
-    fields[ROLLOVER_FORM_PATHS.maxDocs].clearErrors(ROLLOVER_EMPTY_VALIDATION);
-    fields[ROLLOVER_FORM_PATHS.maxSize].clearErrors(ROLLOVER_EMPTY_VALIDATION);
+    rolloverFieldPaths.forEach((rolloverFieldPath) => {
+      fields[rolloverFieldPath]?.clearErrors(ROLLOVER_VALUE_REQUIRED_VALIDATION_CODE);
+    });
   }
 };
 
@@ -157,7 +164,7 @@ export const createPolicyNameValidations = ({
  * For example, the user can't define '5 days' for cold phase if the
  * warm phase is set to '10 days'.
  */
-export const minAgeGreaterThanPreviousPhase = (phase: MinAgePhase) => ({
+export const minAgeGreaterThanPreviousPhase = (phase: PhaseWithTiming) => ({
   formData,
 }: {
   formData: Record<string, number>;
@@ -166,7 +173,7 @@ export const minAgeGreaterThanPreviousPhase = (phase: MinAgePhase) => ({
     return;
   }
 
-  const getValueFor = (_phase: MinAgePhase) => {
+  const getValueFor = (_phase: PhaseWithTiming) => {
     const milli = formData[`_meta.${_phase}.minAgeToMilliSeconds`];
 
     const esFormat =

@@ -64,6 +64,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
                 id: createdAction.id,
                 is_preconfigured: false,
                 connector_type_id: 'test.index-record',
+                is_missing_secrets: false,
                 name: 'My action',
                 config: {
                   unencrypted: `This value shouldn't get encrypted`,

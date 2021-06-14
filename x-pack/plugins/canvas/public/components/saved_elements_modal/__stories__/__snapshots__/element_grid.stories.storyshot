@@ -15,7 +15,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
       className="euiFlexItem canvasElementCard__wrapper"
     >
       <div
-        className="euiCard euiCard--hasShadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
+        className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard"
         onClick={[Function]}
       >
         <div
@@ -84,6 +84,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
               <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="pencil"
                 size="m"
               />
@@ -112,6 +113,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
               <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="trash"
                 size="m"
               />
@@ -124,7 +126,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
       className="euiFlexItem canvasElementCard__wrapper"
     >
       <div
-        className="euiCard euiCard--hasShadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
+        className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard"
         onClick={[Function]}
       >
         <div
@@ -193,6 +195,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
               <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="pencil"
                 size="m"
               />
@@ -221,6 +224,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
               <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="trash"
                 size="m"
               />
@@ -233,7 +237,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
       className="euiFlexItem canvasElementCard__wrapper"
     >
       <div
-        className="euiCard euiCard--hasShadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
+        className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard"
         onClick={[Function]}
       >
         <div
@@ -302,6 +306,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
               <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="pencil"
                 size="m"
               />
@@ -330,6 +335,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
               <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="trash"
                 size="m"
               />

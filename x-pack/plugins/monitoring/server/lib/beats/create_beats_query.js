@@ -21,7 +21,7 @@ export function createBeatsQuery(options = {}) {
   options = defaults(options, {
     filters: [],
     metric: BeatsMetric.getMetricFields(),
-    type: 'beats_stats',
+    types: ['stats', 'beats_stats'],
   });
 
   // avoid showing APM Server stats alongside other Beats because APM Server will have its own UI

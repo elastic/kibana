@@ -4,19 +4,21 @@
     "classes": [],
     "functions": [
       {
+        "parentPluginId": "pluginA",
         "id": "def-public.doTheFooFnThing",
         "type": "Function",
-        "children": [],
+        "tags": [],
+        "label": "doTheFooFnThing",
+        "description": [],
         "signature": [
           "() => void"
         ],
-        "description": [],
-        "label": "doTheFooFnThing",
         "source": {
           "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/foo/index.ts",
           "lineNumber": 9
         },
-        "tags": [],
+        "deprecated": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -25,18 +27,20 @@
     "enums": [],
     "misc": [
       {
+        "parentPluginId": "pluginA",
         "id": "def-public.FooType",
         "type": "Type",
-        "label": "FooType",
         "tags": [],
+        "label": "FooType",
         "description": [],
+        "signature": [
+          "() => \"foo\""
+        ],
         "source": {
           "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/foo/index.ts",
           "lineNumber": 11
         },
-        "signature": [
-          "() => \"foo\""
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
@@ -57,18 +61,20 @@
     "enums": [],
     "misc": [
       {
-        "tags": [],
+        "parentPluginId": "pluginA",
         "id": "def-common.commonFoo",
         "type": "string",
+        "tags": [],
         "label": "commonFoo",
         "description": [],
+        "signature": [
+          "\"COMMON VAR!\""
+        ],
         "source": {
           "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/common/foo/index.ts",
           "lineNumber": 9
         },
-        "signature": [
-          "\"COMMON VAR!\""
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],

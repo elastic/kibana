@@ -267,9 +267,10 @@ export class TimeBuckets {
         originalUnit = splitStringInterval(this._originalInterval!)?.unit;
       }
 
-      const esInterval = useNormalizedEsInterval
-        ? convertDurationToNormalizedEsInterval(interval, originalUnit)
-        : convertIntervalToEsInterval(String(this._originalInterval));
+      const esInterval =
+        useNormalizedEsInterval || !this._originalInterval
+          ? convertDurationToNormalizedEsInterval(interval, originalUnit)
+          : convertIntervalToEsInterval(this._originalInterval);
 
       const prettyUnits = moment.normalizeUnits(esInterval.unit);
 

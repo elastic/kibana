@@ -47,8 +47,8 @@ import {
   convertCloudUrlToProxyConnection,
   convertProxyConnectionToCloudUrl,
   validateCluster,
+  isCloudUrlEnabled,
 } from './validators';
-import { isCloudUrlEnabled } from './validators/validate_cloud_url';
 
 const defaultClusterValues: Cluster = {
   name: '',
@@ -369,7 +369,7 @@ export class RemoteClusterForm extends Component<Props, State> {
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={this.toggleRequest}>
+          <EuiButtonEmpty onClick={this.toggleRequest} data-test-subj="remoteClustersRequestButton">
             {isRequestVisible ? (
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.hideRequestButtonLabel"

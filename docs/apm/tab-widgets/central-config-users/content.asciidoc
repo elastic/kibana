@@ -1,0 +1,53 @@
+// tag::classic-indices[]
+[options="header"]
+|====
+|Type |Privilege |Purpose
+
+|Index
+|`read` on `apm-*`
+|Read-only access to `apm-*` data
+
+|Index
+|`view_index_metadata` on `apm-*`
+|Read-only access to `apm-*` index metadata
+|====
+// end::classic-indices[]
+
+// tag::data-streams[]
+[options="header"]
+|====
+|Type |Privilege |Purpose
+
+|Index
+|`read` on `apm-agent-configuration`
+|Read-only access to `apm-agent-configuration` data
+
+|Index
+|`view_index_metadata` on `apm-agent-configuration`
+|Read-only access to `apm-agent-configuration` index metadata
+
+|Index
+|`read` on `logs-apm*`
+|Read-only access to `logs-apm*` data
+
+|Index
+|`view_index_metadata` on `logs-apm*`
+|Read-only access to `logs-apm*` index metadata
+
+|Index
+|`read` on `metrics-apm*`
+|Read-only access to `metrics-apm*` data
+
+|Index
+|`view_index_metadata` on `metrics-apm*`
+|Read-only access to `metrics-apm*` index metadata
+
+|Index
+|`read` on `traces-apm*`
+|Read-only access to `traces-apm*` data
+
+|Index
+|`view_index_metadata` on `traces-apm*`
+|Read-only access to `traces-apm*` index metadata
+|====
+// end::data-streams[]

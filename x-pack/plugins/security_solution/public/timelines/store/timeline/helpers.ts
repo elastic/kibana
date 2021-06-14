@@ -11,7 +11,6 @@ import uuid from 'uuid';
 import { ToggleDetailPanel } from './actions';
 import { Filter } from '../../../../../../../src/plugins/data/public';
 
-import { getColumnWidthFromType } from '../../../timelines/components/timeline/body/column_headers/helpers';
 import { Sort } from '../../../timelines/components/timeline/body/sort';
 import {
   DataProvider,
@@ -42,6 +41,10 @@ import {
   DEFAULT_FROM_MOMENT,
   DEFAULT_TO_MOMENT,
 } from '../../../common/utils/default_date_settings';
+import {
+  DEFAULT_COLUMN_MIN_WIDTH,
+  RESIZED_COLUMN_MIN_WITH,
+} from '../../components/timeline/body/constants';
 import { activeTimeline } from '../../containers/active_timeline_context';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
@@ -495,13 +498,14 @@ export const applyDeltaToTimelineColumnWidth = ({
       },
     };
   }
-  const minWidthPixels = getColumnWidthFromType(timeline.columns[columnIndex].type!);
-  const requestedWidth = timeline.columns[columnIndex].width + delta; // raw change in width
-  const width = Math.max(minWidthPixels, requestedWidth); // if the requested width is smaller than the min, use the min
+
+  const requestedWidth =
+    (timeline.columns[columnIndex].initialWidth ?? DEFAULT_COLUMN_MIN_WIDTH) + delta; // raw change in width
+  const initialWidth = Math.max(RESIZED_COLUMN_MIN_WITH, requestedWidth); // if the requested width is smaller than the min, use the min
 
   const columnWithNewWidth = {
     ...timeline.columns[columnIndex],
-    width,
+    initialWidth,
   };
 
   const columns = [

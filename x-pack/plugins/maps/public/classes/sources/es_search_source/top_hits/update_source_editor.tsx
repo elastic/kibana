@@ -16,7 +16,7 @@ import { getIndexPatternService } from '../../../../kibana_services';
 import { getTermsFields, getSortFields, getSourceFields } from '../../../../index_pattern_util';
 import { SortDirection, IFieldType } from '../../../../../../../../src/plugins/data/public';
 import { ESDocField } from '../../../fields/es_doc_field';
-import { OnSourceChangeArgs } from '../../../../connected_components/layer_panel/view';
+import { OnSourceChangeArgs } from '../../source';
 import { TopHitsForm } from './top_hits_form';
 import { ESSearchSource } from '../es_search_source';
 import { IField } from '../../../fields/field';

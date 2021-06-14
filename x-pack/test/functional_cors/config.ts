@@ -7,8 +7,7 @@
 
 import Url from 'url';
 import Path from 'path';
-import type { FtrConfigProviderContext } from '@kbn/test/types/ftr';
-// @ts-expect-error https://github.com/elastic/kibana/issues/95679
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { kbnTestConfig } from '@kbn/test';
 import { pageObjects } from '../functional/page_objects';
 
