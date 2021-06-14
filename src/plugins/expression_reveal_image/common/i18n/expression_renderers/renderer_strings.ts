@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
-import { UnionToIntersection } from '@kbn/utility-types';
-
 import { revealImage } from './dict';
 
 /**
