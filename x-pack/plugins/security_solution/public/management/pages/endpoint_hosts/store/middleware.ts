@@ -53,7 +53,7 @@ import {
   createLoadedResourceState,
   createLoadingResourceState,
 } from '../../../state';
-import { isolateHost, unIsolateHost } from '../../../../common/lib/host_isolation';
+import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
 import { AppAction } from '../../../../common/store/actions';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import { ServerReturnedEndpointPackageInfo } from './action';

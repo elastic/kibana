@@ -50,6 +50,7 @@ import {
 import { isTrainingFilter } from './is_training_filter';
 import { useRocCurve } from './use_roc_curve';
 import { useConfusionMatrix } from './use_confusion_matrix';
+import { MulticlassConfusionMatrixHelpPopover } from './confusion_matrix_help_popover';
 import { RocCurveHelpPopover } from './roc_curve_help_popover';
 
 export interface EvaluatePanelProps {
@@ -289,21 +290,12 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
                 {errorConfusionMatrix !== null && <ErrorCallout error={errorConfusionMatrix} />}
                 {errorConfusionMatrix === null && (
                   <>
-                    <EuiFlexGroup gutterSize="none">
+                    <EuiFlexGroup gutterSize="none" alignItems="center">
                       <EuiTitle size="xxs">
                         <span>{getHelpText(dataSubsetTitle)}</span>
                       </EuiTitle>
                       <EuiFlexItem grow={false}>
-                        <EuiIconTip
-                          anchorClassName="mlDataFrameAnalyticsClassificationInfoTooltip"
-                          content={i18n.translate(
-                            'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixTooltip',
-                            {
-                              defaultMessage:
-                                'The multi-class confusion matrix contains the number of occurrences where the analysis classified data points correctly with their actual class as well as the number of occurrences where it misclassified them with another class',
-                            }
-                          )}
-                        />
+                        <MulticlassConfusionMatrixHelpPopover />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                     {/* BEGIN TABLE ELEMENTS */}
