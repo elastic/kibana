@@ -61,9 +61,9 @@ export interface FullAgentPolicyInput {
 }
 
 export interface FullAgentPolicyOutputPermissions {
-  [role: string]: {
-    cluster: string[];
-    indices: Array<{
+  [packagePolicyName: string]: {
+    cluster?: string[];
+    indices?: Array<{
       names: string[];
       privileges: string[];
     }>;

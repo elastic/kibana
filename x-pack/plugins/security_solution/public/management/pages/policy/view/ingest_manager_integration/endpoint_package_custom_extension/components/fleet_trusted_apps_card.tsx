@@ -17,7 +17,7 @@ import {
 import { useKibana } from '../../../../../../../../../../../src/plugins/kibana_react/public';
 import { getTrustedAppsListPath } from '../../../../../../common/routing';
 import {
-  TrustedAppsListPageRouteState,
+  ListPageRouteState,
   GetExceptionSummaryResponse,
 } from '../../../../../../../../common/endpoint/types';
 import { PLUGIN_ID as FLEET_PLUGIN_ID } from '../../../../../../../../../fleet/common';
@@ -67,7 +67,7 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
   }, [toasts, trustedAppsApi]);
   const trustedAppsListUrlPath = getTrustedAppsListPath();
 
-  const trustedAppRouteState = useMemo<TrustedAppsListPageRouteState>(() => {
+  const trustedAppRouteState = useMemo<ListPageRouteState>(() => {
     const fleetPackageCustomUrlPath = `#${pagePathGetters.integration_details_custom({ pkgkey })}`;
     return {
       backButtonLabel: i18n.translate(

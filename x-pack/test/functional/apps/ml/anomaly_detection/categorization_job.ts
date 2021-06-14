@@ -77,7 +77,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('categorization', function () {
     this.tags(['mlqa']);
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/categorization');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/categorization');
       await ml.testResources.createIndexPatternIfNeeded('ft_categorization', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 

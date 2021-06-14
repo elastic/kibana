@@ -65,7 +65,7 @@ describe('get buckets', () => {
   });
 
   it('should limit query results to error documents', () => {
-    const query = clientSpy.mock.calls[0][0];
+    const query = clientSpy.mock.calls[0][1];
     expect(query.apm.events).toEqual([ProcessorEvent.error]);
   });
 });
