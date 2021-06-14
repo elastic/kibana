@@ -19,4 +19,4 @@ export const DOC_TABLE_LEGACY = 'doc_table:legacy';
 export const MODIFY_COLUMNS_ON_SWITCH = 'discover:modifyColumnsOnSwitch';
 export const SEARCH_FIELDS_FROM_SOURCE = 'discover:searchFieldsFromSource';
 export const MAX_DOC_FIELDS_DISPLAYED = 'discover:maxDocFieldsDisplayed';
-export const SHOW_MULTIFIELDS = 'discover:showMultifields';
+export const SHOW_MULTIFIELDS = 'discover:showMultiFields';
