@@ -7,7 +7,7 @@
 
 import './table_basic.scss';
 
-import React, { useCallback, useMemo, useRef, useState, useContext } from 'react';
+import React, { useCallback, useMemo, useRef, useState, useContext, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 import {
@@ -64,6 +64,12 @@ export interface ColumnConfig {
 }
 
 export const DatatableComponent = (props: DatatableRenderProps) => {
+  const [firstRender, setFirstRender] = useState(true);
+  useEffect(() => {
+    setTimeout(() => {
+      //      setFirstRender(false);
+    }, 1);
+  }, []);
   const [firstTable] = Object.values(props.data.tables);
 
   const [columnConfig, setColumnConfig] = useState({
@@ -278,9 +284,13 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     [formatters, columnConfig, props.uiSettings]
   );
 
-  const columnVisibility = useMemo(() => ({ visibleColumns, setVisibleColumns: () => {} }), [
-    visibleColumns,
-  ]);
+  const columnVisibility = useMemo(
+    () => ({
+      visibleColumns,
+      setVisibleColumns: () => {},
+    }),
+    [visibleColumns]
+  );
 
   const sorting = useMemo<EuiDataGridSorting>(
     () => createGridSortingConfig(sortBy, sortDirection as LensGridDirection, onEditAction),
