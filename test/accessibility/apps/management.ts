@@ -44,11 +44,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('Index pattern field editor', async () => {
+    it('Index pattern field editor - initial view', async () => {
       await PageObjects.settings.clickAddField();
       await a11y.testAppSnapshot();
+    });
 
-      // make sure all settings are expanded before taking a snapshot
+    it('Index pattern field editor - all options shown', async () => {
       await PageObjects.settings.setFieldName('test');
       await PageObjects.settings.setFieldType('Keyword');
       await PageObjects.settings.setFieldScript("emit('hello world')");
@@ -59,6 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('toggleAdvancedSetting');
 
       await a11y.testAppSnapshot();
+
       await testSubjects.click('euiFlyoutCloseButton');
       await PageObjects.settings.closeIndexPatternFieldEditor();
     });
