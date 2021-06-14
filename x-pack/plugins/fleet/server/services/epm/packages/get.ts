@@ -126,6 +126,7 @@ export async function getPackageInfo(options: {
     title: packageInfo.title || nameAsTitle(packageInfo.name),
     assets: Registry.groupPathsByService(paths || []),
     removable: !isRequiredPackage(pkgName),
+    notice: Registry.getNoticePath(paths || []),
   };
   const updated = { ...packageInfo, ...additions };
 
