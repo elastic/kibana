@@ -16,7 +16,7 @@ import {
   StateFromReducersMapObject,
   CombinedState,
 } from 'redux';
-
+import { RouteProps } from 'react-router-dom';
 import { AppMountParameters, AppDeepLink } from '../../../../../src/core/public';
 import { StartedSubPlugins, StartServices } from '../types';
 
@@ -51,8 +51,12 @@ export interface SecuritySubPluginStore<K extends SecuritySubPluginKeyStore, T> 
   middleware?: Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>;
 }
 
+export type SecuritySubPluginRoutes = RouteProps[];
+
+// TODO: [1101] remove SubPluginRoutes and make routes required
 export interface SecuritySubPlugin {
   SubPluginRoutes: React.FC;
+  routes?: SecuritySubPluginRoutes;
   storageTimelines?: Pick<TimelineState, 'timelineById'>;
 }
 

@@ -7,7 +7,9 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { Route, Switch } from 'react-router-dom';
 
+import { NotFoundPage } from '../app/404';
 import { SecurityApp } from './app';
 import { RenderAppProps, RenderAppPropsOld } from './types';
 
@@ -53,8 +55,17 @@ export const renderApp = ({
       setHeaderActionMenu={setHeaderActionMenu}
       store={store}
     >
-      {/* TODO: [1101] add subPlugins routes here when migrating sections, once all migrated we will be able to inject all subPlugins routes directly */}
-      <subPlugins.overview.SubPluginRoutes />
+      <Switch>
+        {
+          /* TODO: [1101] add subPlugins routes here when migrating sections, once all migrated we will be able to inject all subPlugins routes at once */
+          subPlugins.overview.routes!.map((route) => (
+            <Route {...route} />
+          ))
+        }
+        <Route>
+          <NotFoundPage />
+        </Route>
+      </Switch>
     </SecurityApp>,
     element
   );
