@@ -16,7 +16,6 @@ import { useLensAttributes } from './hooks/use_lens_attributes';
 import { EmptyView } from './components/empty_view';
 import { TypedLensByValueInput } from '../../../../../lens/public';
 import { useAppIndexPatternContext } from './hooks/use_app_index_pattern';
-import { ReportToDataTypeMap } from './configurations/constants';
 import { SeriesBuilder } from './series_builder/series_builder';
 
 export function ExploratoryView({
@@ -61,10 +60,10 @@ export function ExploratoryView({
   };
 
   useEffect(() => {
-    if (series?.reportType || series?.dataType) {
-      loadIndexPattern({ dataType: series?.dataType ?? ReportToDataTypeMap[series?.reportType] });
+    if (series?.dataType) {
+      loadIndexPattern({ dataType: series?.dataType });
     }
-  }, [series?.reportType, series?.dataType, loadIndexPattern]);
+  }, [series?.dataType, loadIndexPattern]);
 
   useEffect(() => {
     setLensAttributes(lensAttributesT);
@@ -91,7 +90,7 @@ export function ExploratoryView({
                 timeRange={series?.time}
                 attributes={lensAttributes}
                 onBrushEnd={({ range }) => {
-                  if (series?.reportType !== 'pld') {
+                  if (series?.reportType !== 'dist') {
                     setSeries(seriesId, {
                       ...series,
                       time: {
