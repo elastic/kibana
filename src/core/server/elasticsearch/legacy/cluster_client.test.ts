@@ -101,6 +101,30 @@ describe('#callAsInternalUser', () => {
     expect(mockEsClientInstance.ping).toHaveBeenLastCalledWith(mockParams);
   });
 
+  test('sets the authorization header when a service account token is configured', async () => {
+    clusterClient = new LegacyClusterClient(
+      { apiVersion: 'es-version', serviceAccountToken: 'ABC123' } as any,
+      logger.get(),
+      'custom-type'
+    );
+
+    const mockResponse = { data: 'ping' };
+    const mockParams = { param: 'ping' };
+    mockEsClientInstance.ping.mockImplementation(function mockCall(this: any) {
+      return Promise.resolve({
+        context: this,
+        response: mockResponse,
+      });
+    });
+
+    await clusterClient.callAsInternalUser('ping', mockParams);
+
+    expect(mockEsClientInstance.ping).toHaveBeenCalledWith({
+      headers: { authorization: 'Bearer ABC123' },
+      param: 'ping',
+    });
+  });
+
   test('correctly deals with nested endpoint', async () => {
     const mockResponse = { data: 'authenticate' };
     const mockParams = { param: 'authenticate' };
@@ -352,6 +376,31 @@ describe('#asScoped', () => {
       expect.any(Function),
       expect.any(Function),
       { 'x-opaque-id': 'alpha' }
+    );
+  });
+
+  test('does not set the authorization header when a service account token is configured', async () => {
+    clusterClient = new LegacyClusterClient(
+      {
+        apiVersion: 'es-version',
+        requestHeadersWhitelist: ['zero'],
+        serviceAccountToken: 'ABC123',
+      } as any,
+      logger.get(),
+      'custom-type'
+    );
+
+    clusterClient.asScoped(
+      httpServerMock.createRawRequest({ headers: { zero: '0', one: '1', two: '2', three: '3' } })
+    );
+
+    const expectedHeaders = { zero: '0' };
+
+    expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
+    expect(MockScopedClusterClient).toHaveBeenCalledWith(
+      expect.any(Function),
+      expect.any(Function),
+      expectedHeaders
     );
   });
 

@@ -345,6 +345,7 @@ export const config: {
             hosts: Type<string | string[]>;
             username: Type<string | undefined>;
             password: Type<string | undefined>;
+            serviceAccountToken: Type<string | undefined>;
             requestHeadersWhitelist: Type<string | string[]>;
             customHeaders: Type<Record<string, string>>;
             shardTimeout: Type<import("moment").Duration>;
@@ -924,7 +925,7 @@ export type ElasticsearchClient = Omit<KibanaClient, 'connectionPool' | 'transpo
 };
 
 // @public
-export type ElasticsearchClientConfig = Pick<ElasticsearchConfig, 'customHeaders' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'requestHeadersWhitelist' | 'sniffInterval' | 'hosts' | 'username' | 'password'> & {
+export type ElasticsearchClientConfig = Pick<ElasticsearchConfig, 'customHeaders' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'requestHeadersWhitelist' | 'sniffInterval' | 'hosts' | 'username' | 'password' | 'serviceAccountToken'> & {
     pingTimeout?: ElasticsearchConfig['pingTimeout'] | ClientOptions['pingTimeout'];
     requestTimeout?: ElasticsearchConfig['requestTimeout'] | ClientOptions['requestTimeout'];
     ssl?: Partial<ElasticsearchConfig['ssl']>;
@@ -944,6 +945,7 @@ export class ElasticsearchConfig {
     readonly pingTimeout: Duration;
     readonly requestHeadersWhitelist: string[];
     readonly requestTimeout: Duration;
+    readonly serviceAccountToken?: string;
     readonly shardTimeout: Duration;
     readonly sniffInterval: false | Duration;
     readonly sniffOnConnectionFault: boolean;
@@ -1619,7 +1621,7 @@ export class LegacyClusterClient implements ILegacyClusterClient {
     }
 
 // @public @deprecated (undocumented)
-export type LegacyElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' | 'plugins'> & Pick<ElasticsearchConfig, 'apiVersion' | 'customHeaders' | 'requestHeadersWhitelist' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'hosts' | 'username' | 'password'> & {
+export type LegacyElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' | 'plugins'> & Pick<ElasticsearchConfig, 'apiVersion' | 'customHeaders' | 'requestHeadersWhitelist' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'hosts' | 'username' | 'password' | 'serviceAccountToken'> & {
     pingTimeout?: ElasticsearchConfig['pingTimeout'] | ConfigOptions['pingTimeout'];
     requestTimeout?: ElasticsearchConfig['requestTimeout'] | ConfigOptions['requestTimeout'];
     sniffInterval?: ElasticsearchConfig['sniffInterval'] | ConfigOptions['sniffInterval'];
