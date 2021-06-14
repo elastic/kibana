@@ -9,8 +9,8 @@ import { ChromeBreadcrumb } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { MouseEvent, useEffect } from 'react';
 import { EuiBreadcrumb } from '@elastic/eui';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { useQueryParams } from './use_query_params';
+import { useKibana } from '../utils/kibana_react';
 
 function handleBreadcrumbClick(
   breadcrumbs: ChromeBreadcrumb[],
@@ -39,17 +39,35 @@ export const makeBaseBreadcrumb = (href: string): EuiBreadcrumb => {
     href,
   };
 };
-
+export const casesBreadcrumbs = {
+  cases: {
+    text: i18n.translate('xpack.observability.breadcrumbs.observability.cases', {
+      defaultMessage: 'Cases',
+    }),
+  },
+  create: {
+    text: i18n.translate('xpack.observability.breadcrumbs.observability.cases.create', {
+      defaultMessage: 'Create',
+    }),
+  },
+  configure: {
+    text: i18n.translate('xpack.observability.breadcrumbs.observability.cases.configure', {
+      defaultMessage: 'Configure',
+    }),
+  },
+};
 export const useBreadcrumbs = (extraCrumbs: ChromeBreadcrumb[]) => {
   const params = useQueryParams();
 
   const {
-    services: { chrome, application },
+    services: {
+      chrome: { setBreadcrumbs },
+      application: { getUrlForApp, navigateToUrl },
+    },
   } = useKibana();
 
-  const setBreadcrumbs = chrome?.setBreadcrumbs;
-  const appPath = application?.getUrlForApp('observability-overview') ?? '';
-  const navigate = application?.navigateToUrl;
+  const appPath = getUrlForApp('observability-overview') ?? '';
+  const navigate = navigateToUrl;
 
   useEffect(() => {
     if (setBreadcrumbs) {
