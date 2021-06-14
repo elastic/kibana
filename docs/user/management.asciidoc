@@ -75,7 +75,7 @@ You can add and remove remote clusters, and check their connectivity.
 |===
 
 | <<alerting-getting-started, Rules&nbsp;and Connectors>>
-| Centrally <<alert-management, manage your rules>> across {kib}. Create and <<connector-management, manage reusable
+| Centrally <<create-and-manage-rules, manage your rules>> across {kib}. Create and <<connector-management, manage reusable
 connectors>> for triggering actions.
 
 | <<reporting-getting-started, Reporting>>
