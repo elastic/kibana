@@ -8,7 +8,8 @@
 
 import { action } from '@storybook/addon-actions';
 import React, { useRef, useEffect } from 'react';
-import { RendererFactory, RendererHandlers } from '../../common/types';
+import { ExpressionRenderDefinition } from 'src/plugins/expressions';
+import { RendererHandlers } from '../../common/types';
 
 export const defaultHandlers: RendererHandlers = {
   destroy: () => action('destroy'),
@@ -44,7 +45,7 @@ export const Render = <Renderer,>({
   renderer,
   config,
   ...rest
-}: Renderer extends RendererFactory<infer Config>
+}: Renderer extends () => ExpressionRenderDefinition<infer Config>
   ? { renderer: Renderer; config: Config } & RenderAdditionalProps
   : { renderer: undefined; config: undefined } & RenderAdditionalProps) => {
   const { height, width, handlers } = {

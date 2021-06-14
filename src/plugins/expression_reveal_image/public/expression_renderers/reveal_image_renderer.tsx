@@ -8,8 +8,9 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
+import { ExpressionRenderDefinition } from 'src/plugins/expressions';
 import { getRendererStrings } from '../../common/i18n';
-import { RendererHandlers, RendererSpec } from '../../common/types';
+import { RendererHandlers } from '../../common/types';
 import { RevealImageRendererConfig } from './types';
 import { RendererWrapper } from '../components/renderer_wrapper';
 import './reveal_image.scss';
@@ -18,7 +19,7 @@ const { revealImage: revealImageStrings } = getRendererStrings();
 
 const RevealImageComponent = lazy(() => import('../components/reveal_image_component'));
 
-export const revealImageRenderer = (): RendererSpec<RevealImageRendererConfig> => ({
+export const revealImageRenderer = (): ExpressionRenderDefinition<RevealImageRendererConfig> => ({
   name: 'revealImage',
   displayName: revealImageStrings.getDisplayName(),
   help: revealImageStrings.getHelpDescription(),

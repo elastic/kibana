@@ -5,17 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { ExpressionRenderDefinition } from 'src/plugins/expressions';
 import { elasticOutline } from '../../common/lib/elastic_outline';
 import { isValidUrl } from '../../common/lib/url';
 import { getRendererStrings } from '../../common/i18n';
-import { Output as Arguments, RendererSpec, RendererHandlers } from '../../common/types';
+import { Output as Arguments, RendererHandlers } from '../../common/types';
 
 import './reveal_image.scss';
 
 const { revealImage: strings } = getRendererStrings();
 
-export const revealImage = (): RendererSpec<Arguments> => {
+export const revealImage = (): ExpressionRenderDefinition<Arguments> => {
   return {
     name: 'revealImage',
     displayName: strings.getDisplayName(),
@@ -33,6 +33,7 @@ export const revealImage = (): RendererSpec<Arguments> => {
         setSize();
         finish();
       }
+
       img.onload = onLoad;
 
       img.className = 'revealImage__image';

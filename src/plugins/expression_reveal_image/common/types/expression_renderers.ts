@@ -30,22 +30,3 @@ export interface RendererHandlers extends IInterpreterRenderHandlers {
   /** Sets the value of the filter property on the element object persisted on the workpad */
   setFilter?: (filter: string) => void;
 }
-
-export interface RendererSpec<RendererConfig = {}> {
-  /** The render type */
-  name: string;
-  /** The name to display */
-  displayName: string;
-  /** A description of what is rendered */
-  help: string;
-  /** Indicate whether the element should reuse the existing DOM element when re-rendering */
-  reuseDomNode: boolean;
-  /** The default width of the element in pixels */
-  width?: number;
-  /** The default height of the element in pixels */
-  height?: number;
-  /** A function that renders an element into the specified DOM element */
-  render: (domNode: HTMLElement, config: RendererConfig, handlers: RendererHandlers) => void;
-}
-
-export type RendererFactory<RendererConfig = {}> = () => RendererSpec<RendererConfig>;
