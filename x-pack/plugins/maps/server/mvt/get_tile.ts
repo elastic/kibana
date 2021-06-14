@@ -140,7 +140,7 @@ export async function getGridTile({
         }
       }
 
-      const metaDataFeature = {
+      const metaDataFeature: Feature = {
         type: 'Feature',
         properties: {
           [KBN_TOO_MANY_FEATURES_PROPERTY]: true,

@@ -137,7 +137,7 @@ export class MbMap extends Component<Props, State> {
   _queryForMeta = (() => {
     const callMap = new Map<string, ILayer>();
 
-    let timerId: number | null = null;
+    let timerId: ReturnType<typeof setTimeout> | null = null;
 
     const updateAllLayers = () => {
       callMap.forEach((layer: ILayer, layerId: string) => {

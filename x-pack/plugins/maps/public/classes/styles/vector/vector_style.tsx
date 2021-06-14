@@ -516,8 +516,9 @@ export class VectorStyle implements IVectorStyle {
       let min = Infinity;
       let max = -Infinity;
       for (let i = 0; i < features.length; i++) {
-        if (features[i].properties && features[i].properties[name]) {
-          const metaFromTiles = JSON.parse(features[i].properties[name]);
+        const properties = features[i].properties;
+        if (properties && properties[name]) {
+          const metaFromTiles = JSON.parse(properties[name]);
           min = Math.min(metaFromTiles.min, min);
           max = Math.max(metaFromTiles.max, max);
         }

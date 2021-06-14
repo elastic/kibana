@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import type {
   Map as MbMap,
   GeoJSONSource as MbGeoJSONSource,

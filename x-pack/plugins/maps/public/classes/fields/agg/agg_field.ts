@@ -8,7 +8,6 @@
 import { IndexPattern } from 'src/plugins/data/public';
 import { AGG_TYPE } from '../../../../common/constants';
 import { CountAggField } from './count_agg_field';
-import { isMetricCountable } from '../../util/is_metric_countable';
 import { CountAggFieldParams } from './agg_field_types';
 import { addFieldToDSL, getField } from '../../../../common/elasticsearch_util';
 import { IField } from '../field';
