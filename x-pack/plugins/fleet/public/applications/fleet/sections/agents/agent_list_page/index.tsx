@@ -22,7 +22,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 
-import { AgentEnrollmentFlyout } from '../components';
 import type { Agent, AgentPolicy, SimplifiedAgentStatus } from '../../../types';
 import {
   usePagination,
@@ -37,7 +36,11 @@ import {
   useKibanaVersion,
   useStartServices,
 } from '../../../hooks';
-import { AgentPolicySummaryLine, ContextMenuActions } from '../../../components';
+import {
+  AgentEnrollmentFlyout,
+  AgentPolicySummaryLine,
+  ContextMenuActions,
+} from '../../../components';
 import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../../services';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
