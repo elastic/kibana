@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect, useCallback, useMemo, useRef, RefObject } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { compact, cloneDeep, last, map } from 'lodash';
 import {
   Chart,
@@ -14,7 +14,6 @@ import {
   Position,
   Axis,
   TooltipType,
-  YDomainRange,
   PointerEvent,
   LegendPositionConfig,
   LayoutDirection,
@@ -79,16 +78,12 @@ const TimelionVisComponent = ({
 }: TimelionVisComponentProps) => {
   const kibana = useKibana<TimelionVisDependencies>();
   const [chart, setChart] = useState(() => cloneDeep(seriesList.list));
-  const chartRef = useRef<Chart>();
+  const chartRef = useRef<Chart>(null);
 
   useEffect(() => {
-    const updateCursor = (cursor: PointerEvent) => {
-      if (chartRef.current) {
-        chartRef.current.dispatchExternalPointerEvent(cursor);
-      }
-    };
-
-    const subscription = activeCursor$.subscribe(updateCursor);
+    const subscription = activeCursor$.subscribe((cursor: PointerEvent) => {
+      chartRef.current?.dispatchExternalPointerEvent(cursor);
+    });
 
     return () => {
       subscription.unsubscribe();
@@ -98,6 +93,7 @@ const TimelionVisComponent = ({
   useEffect(() => {
     const newChart = seriesList.list.map((series: Series, seriesIndex: number) => {
       const newSeries = { ...series };
+
       if (!newSeries.color) {
         const colorIndex = seriesIndex % colors.length;
         newSeries.color = colors[colorIndex];
@@ -187,7 +183,7 @@ const TimelionVisComponent = ({
   return (
     <div className="timelionChart">
       <div className="timelionChart__topTitle">{title}</div>
-      <Chart ref={chartRef as RefObject<Chart>} renderer="canvas" size={{ width: '100%' }}>
+      <Chart ref={chartRef} renderer="canvas" size={{ width: '100%' }}>
         <Settings
           onBrushEnd={brushEndListener}
           showLegend={legend.showLegend}
@@ -212,13 +208,13 @@ const TimelionVisComponent = ({
 
             return yaxis ? (
               <Axis
-                groupId={`${y ? y : 1}`}
+                groupId={`${y ? y : MAIN_GROUP_ID}`}
                 key={index}
                 id={yaxis.position + yaxis.axisLabel}
                 title={yaxis.axisLabel}
                 position={yaxis.position}
                 tickFormat={yaxis.tickFormatter}
-                domain={yaxis.domain as YDomainRange}
+                domain={yaxis.domain}
               />
             ) : (
               <DefaultYAxis />
