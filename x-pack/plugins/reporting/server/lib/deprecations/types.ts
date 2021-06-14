@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export { ReportDocument } from '../../../common/types';
-export { Report } from './report';
-export { ReportingStore } from './store';
-export { ReportingIlmPolicyManager } from './reporting_ilm_policy_manager';
+import type { ElasticsearchClient } from 'src/core/server';
+import type { ReportingCore } from '../../core';
+
+export interface DeprecationsDependencies {
+  reportingCore: ReportingCore;
+  elasticsearchClient: ElasticsearchClient;
+}

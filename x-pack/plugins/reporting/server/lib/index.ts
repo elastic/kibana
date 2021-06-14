@@ -10,5 +10,5 @@ export { cryptoFactory } from './crypto';
 export { ExportTypesRegistry, getExportTypesRegistry } from './export_types_registry';
 export { LevelLogger } from './level_logger';
 export { statuses } from './statuses';
-export { ReportingStore } from './store';
+export { ReportingStore, ReportingIlmPolicyManager } from './store';
 export { startTrace } from './trace';
