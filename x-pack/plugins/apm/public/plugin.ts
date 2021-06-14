@@ -6,6 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { from } from 'rxjs';
+import { map } from 'rxjs/operators';
 import type { ConfigSchema } from '.';
 import {
   AppMountParameters,
@@ -34,6 +36,7 @@ import type {
   FetchDataParams,
   HasDataParams,
   ObservabilityPublicSetup,
+  ObservabilityPublicStart,
 } from '../../observability/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
@@ -48,24 +51,25 @@ export type ApmPluginStart = void;
 
 export interface ApmPluginSetupDeps {
   alerting?: AlertingPluginPublicSetup;
-  ml?: MlPluginSetup;
   data: DataPublicPluginSetup;
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  ml?: MlPluginSetup;
   observability: ObservabilityPublicSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }
 
 export interface ApmPluginStartDeps {
   alerting?: AlertingPluginPublicStart;
-  ml?: MlPluginStart;
   data: DataPublicPluginStart;
+  embeddable: EmbeddableStart;
   home: void;
   licensing: void;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  embeddable: EmbeddableStart;
   maps?: MapsStartApi;
+  ml?: MlPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  observability: ObservabilityPublicStart;
 }
 
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
@@ -82,6 +86,58 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       pluginSetupDeps.home.environment.update({ apmUi: true });
       pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
     }
+
+    const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
+      defaultMessage: 'Services',
+    });
+    const tracesTitle = i18n.translate('xpack.apm.navigation.tracesTitle', {
+      defaultMessage: 'Traces',
+    });
+    const serviceMapTitle = i18n.translate(
+      'xpack.apm.navigation.serviceMapTitle',
+      { defaultMessage: 'Service Map' }
+    );
+
+    // register observability nav if user has access to plugin
+    plugins.observability.navigation.registerSections(
+      from(core.getStartServices()).pipe(
+        map(([coreStart]) => {
+          if (coreStart.application.capabilities.apm.show) {
+            return [
+              // APM navigation
+              {
+                label: 'APM',
+                sortKey: 200,
+                entries: [
+                  { label: servicesTitle, app: 'apm', path: '/services' },
+                  { label: tracesTitle, app: 'apm', path: '/traces' },
+                  { label: serviceMapTitle, app: 'apm', path: '/service-map' },
+                ],
+              },
+
+              // UX navigation
+              {
+                label: 'User Experience',
+                sortKey: 201,
+                entries: [
+                  {
+                    label: i18n.translate('xpack.apm.ux.overview.heading', {
+                      defaultMessage: 'Overview',
+                    }),
+                    app: 'ux',
+                    path: '/',
+                    matchFullPath: true,
+                    ignoreTrailingSlash: true,
+                  },
+                ],
+              },
+            ];
+          }
+
+          return [];
+        })
+      )
+    );
 
     const getApmDataHelper = async () => {
       const {
@@ -140,29 +196,10 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       appRoute: '/app/apm',
       icon: 'plugins/apm/public/icon.svg',
       category: DEFAULT_APP_CATEGORIES.observability,
-      // !! Need to be kept in sync with the routes in x-pack/plugins/apm/public/components/app/Main/route_config/index.tsx
       deepLinks: [
-        {
-          id: 'services',
-          title: i18n.translate('xpack.apm.breadcrumb.servicesTitle', {
-            defaultMessage: 'Services',
-          }),
-          path: '/services',
-        },
-        {
-          id: 'traces',
-          title: i18n.translate('xpack.apm.breadcrumb.tracesTitle', {
-            defaultMessage: 'Traces',
-          }),
-          path: '/traces',
-        },
-        {
-          id: 'service-map',
-          title: i18n.translate('xpack.apm.breadcrumb.serviceMapTitle', {
-            defaultMessage: 'Service Map',
-          }),
-          path: '/service-map',
-        },
+        { id: 'services', title: servicesTitle, path: '/services' },
+        { id: 'traces', title: tracesTitle, path: '/traces' },
+        { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
       ],
 
       async mount(appMountParameters: AppMountParameters<unknown>) {
@@ -213,7 +250,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       async mount(appMountParameters: AppMountParameters<unknown>) {
         // Load application bundle and Get start service
         const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([
-          import('./application/csmApp'),
+          import('./application/uxApp'),
           core.getStartServices(),
         ]);
 

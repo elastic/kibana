@@ -18,7 +18,8 @@ import {
   Immutable,
   HostResultList,
   HostIsolationResponse,
-  EndpointAction,
+  ActivityLog,
+  ISOLATION_ACTIONS,
 } from '../../../../../common/endpoint/types';
 import { AppAction } from '../../../../common/store/actions';
 import { mockEndpointResultList } from './mock_endpoint_result_list';
@@ -40,7 +41,7 @@ import {
   hostIsolationHttpMocks,
   hostIsolationRequestBodyMock,
   hostIsolationResponseMock,
-} from '../../../../common/lib/host_isolation/mocks';
+} from '../../../../common/lib/endpoint_isolation/mocks';
 import { FleetActionGenerator } from '../../../../../common/endpoint/data_generators/fleet_action_generator';
 
 jest.mock('../../policy/store/services/ingest', () => ({
@@ -135,10 +136,13 @@ describe('endpoint list middleware', () => {
 
   describe('handling of IsolateEndpointHost action', () => {
     const getKibanaServicesMock = KibanaServices.get as jest.Mock;
-    const dispatchIsolateEndpointHost = () => {
+    const dispatchIsolateEndpointHost = (action: ISOLATION_ACTIONS = 'isolate') => {
       dispatch({
         type: 'endpointIsolationRequest',
-        payload: hostIsolationRequestBodyMock(),
+        payload: {
+          type: action,
+          data: hostIsolationRequestBodyMock(),
+        },
       });
     };
     let isolateApiResponseHandlers: ReturnType<typeof hostIsolationHttpMocks>;
@@ -161,7 +165,24 @@ describe('endpoint list middleware', () => {
 
     it('should call isolate api', async () => {
       dispatchIsolateEndpointHost();
-      expect(fakeHttpServices.post).toHaveBeenCalled();
+      await waitForAction('endpointIsolationRequestStateChange', {
+        validate(action) {
+          return isLoadedResourceState(action.payload);
+        },
+      });
+
+      expect(isolateApiResponseHandlers.responseProvider.isolateHost).toHaveBeenCalled();
+    });
+
+    it('should call unisolate api', async () => {
+      dispatchIsolateEndpointHost('unisolate');
+      await waitForAction('endpointIsolationRequestStateChange', {
+        validate(action) {
+          return isLoadedResourceState(action.payload);
+        },
+      });
+
+      expect(isolateApiResponseHandlers.responseProvider.unIsolateHost).toHaveBeenCalled();
     });
 
     it('should set Isolation state to loaded if api is successful', async () => {
@@ -212,16 +233,40 @@ describe('endpoint list middleware', () => {
         },
       });
     };
+
     const fleetActionGenerator = new FleetActionGenerator(Math.random().toString());
-    const activityLog = [
-      fleetActionGenerator.generate({
-        agents: [endpointList.hosts[0].metadata.agent.id],
-      }),
-    ];
+    const actionData = fleetActionGenerator.generate({
+      agents: [endpointList.hosts[0].metadata.agent.id],
+    });
+    const responseData = fleetActionGenerator.generateResponse({
+      agent_id: endpointList.hosts[0].metadata.agent.id,
+    });
+    const getMockEndpointActivityLog = () =>
+      ({
+        total: 2,
+        page: 1,
+        pageSize: 50,
+        data: [
+          {
+            type: 'response',
+            item: {
+              id: '',
+              data: responseData,
+            },
+          },
+          {
+            type: 'action',
+            item: {
+              id: '',
+              data: actionData,
+            },
+          },
+        ],
+      } as ActivityLog);
     const dispatchGetActivityLog = () => {
       dispatch({
         type: 'endpointDetailsActivityLogChanged',
-        payload: createLoadedResourceState(activityLog),
+        payload: createLoadedResourceState(getMockEndpointActivityLog()),
       });
     };
 
@@ -249,11 +294,10 @@ describe('endpoint list middleware', () => {
 
       dispatchGetActivityLog();
       const loadedDispatchedResponse = await loadedDispatched;
-      const activityLogData = (loadedDispatchedResponse.payload as LoadedResourceState<
-        EndpointAction[]
-      >).data;
+      const activityLogData = (loadedDispatchedResponse.payload as LoadedResourceState<ActivityLog>)
+        .data;
 
-      expect(activityLogData).toEqual(activityLog);
+      expect(activityLogData).toEqual(getMockEndpointActivityLog());
     });
   });
 });

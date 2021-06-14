@@ -7,5 +7,10 @@
   "optionalPlugins": ["usageCollection", "security", "home", "spaces", "cloud"],
   "server": true,
   "ui": true,
-  "requiredBundles": ["home"]
+  "requiredBundles": ["home"],
+  "owner": {
+    "name": "Enterprise Search",
+    "githubTeam": "enterprise-search-frontend"
+  },
+  "description": "Adds dashboards for discovering and managing Enterprise Search products"
 }

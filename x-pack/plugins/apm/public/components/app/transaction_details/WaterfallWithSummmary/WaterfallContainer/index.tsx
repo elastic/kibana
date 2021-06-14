@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Location } from 'history';
 import React from 'react';
 import { keyBy } from 'lodash';
 import { useParams } from 'react-router-dom';
@@ -19,13 +18,11 @@ import { WaterfallLegends } from './WaterfallLegends';
 
 interface Props {
   urlParams: IUrlParams;
-  location: Location;
   waterfall: IWaterfall;
   exceedsMax: boolean;
 }
 
 export function WaterfallContainer({
-  location,
   urlParams,
   waterfall,
   exceedsMax,
@@ -84,7 +81,6 @@ export function WaterfallContainer({
     <div>
       <WaterfallLegends legends={legendsWithFallbackLabel} type={colorBy} />
       <Waterfall
-        location={location}
         waterfallItemId={urlParams.waterfallItemId}
         waterfall={waterfall}
         exceedsMax={exceedsMax}

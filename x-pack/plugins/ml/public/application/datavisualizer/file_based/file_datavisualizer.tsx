@@ -15,13 +15,13 @@ import { useMlKibana } from '../../contexts/kibana';
 export const FileDataVisualizerPage: FC = () => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
-    services: { docLinks, fileDataVisualizer },
+    services: { docLinks, dataVisualizer },
   } = useMlKibana();
   const [FileDataVisualizer, setFileDataVisualizer] = useState<FC<{}> | null>(null);
 
   useEffect(() => {
-    if (fileDataVisualizer !== undefined) {
-      const { getFileDataVisualizerComponent } = fileDataVisualizer;
+    if (dataVisualizer !== undefined) {
+      const { getFileDataVisualizerComponent } = dataVisualizer;
       getFileDataVisualizerComponent().then(setFileDataVisualizer);
     }
   }, []);

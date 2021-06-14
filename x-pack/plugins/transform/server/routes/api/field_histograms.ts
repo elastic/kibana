@@ -41,7 +41,6 @@ export function registerFieldHistogramsRoutes({ router, license }: RouteDependen
             query,
             fields,
             samplerShardSize,
-            // @ts-expect-error script is not compatible with StoredScript from @elastic/elasticsearch: string is not supported
             runtimeMappings
           );
 

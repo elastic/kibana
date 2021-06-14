@@ -92,7 +92,7 @@ export async function getDerivedServiceAnnotations({
                 },
               },
               sort: {
-                '@timestamp': 'desc',
+                '@timestamp': 'asc',
               },
             },
           });

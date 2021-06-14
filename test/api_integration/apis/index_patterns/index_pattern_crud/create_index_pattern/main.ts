@@ -78,11 +78,15 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('creating fields', () => {
       before(async () => {
-        await esArchiver.load('index_patterns/basic_index');
+        await esArchiver.load(
+          'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('index_patterns/basic_index');
+        await esArchiver.unload(
+          'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+        );
       });
 
       it('can specify optional fields attribute when creating an index pattern', async () => {
@@ -113,7 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.body.index_pattern.fields.bar.type).to.be('boolean');
       });
 
-      it('Can add scripted fields, other fields created from es index', async () => {
+      it('can add scripted fields, other fields created from es index', async () => {
         const title = `basic_index*`;
         const response = await supertest.post('/api/index_patterns/index_pattern').send({
           override: true,
@@ -154,6 +158,32 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.body.index_pattern.fields.bar.script).to.be('');
         expect(response.body.index_pattern.fields.bar.esTypes[0]).to.be('test-type');
         expect(response.body.index_pattern.fields.bar.scripted).to.be(true);
+      });
+
+      it('can add runtime fields', async () => {
+        const title = `basic_index*`;
+        const response = await supertest.post('/api/index_patterns/index_pattern').send({
+          override: true,
+          index_pattern: {
+            title,
+            runtimeFieldMap: {
+              runtimeFoo: {
+                type: 'keyword',
+                script: {
+                  source: 'emit(doc["foo"].value)',
+                },
+              },
+            },
+          },
+        });
+
+        expect(response.status).to.be(200);
+        expect(response.body.index_pattern.title).to.be(title);
+
+        expect(response.body.index_pattern.runtimeFieldMap.runtimeFoo.type).to.be('keyword');
+        expect(response.body.index_pattern.runtimeFieldMap.runtimeFoo.script.source).to.be(
+          'emit(doc["foo"].value)'
+        );
       });
     });
 
