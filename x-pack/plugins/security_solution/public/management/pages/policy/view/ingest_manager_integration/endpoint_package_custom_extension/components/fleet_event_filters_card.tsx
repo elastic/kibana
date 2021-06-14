@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useState, useEffect } from 'react';
+import React, { memo, useMemo, useState, useEffect, useRef } from 'react';
 import { ApplicationStart, CoreStart } from 'kibana/public';
 import { EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -16,7 +16,10 @@ import {
 } from '../../../../../../../../../fleet/public';
 import { useKibana } from '../../../../../../../../../../../src/plugins/kibana_react/public';
 import { getEventFiltersListPath } from '../../../../../../common/routing';
-import { GetExceptionSummaryResponse } from '../../../../../../../../common/endpoint/types';
+import {
+  GetExceptionSummaryResponse,
+  ListPageRouteState,
+} from '../../../../../../../../common/endpoint/types';
 import { PLUGIN_ID as FLEET_PLUGIN_ID } from '../../../../../../../../../fleet/common';
 import { MANAGEMENT_APP_ID } from '../../../../../../common/constants';
 import { useToasts } from '../../../../../../../common/lib/kibana';
@@ -36,12 +39,16 @@ export const FleetEventFiltersCard = memo<PackageCustomExtensionComponentProps>(
   const [stats, setStats] = useState<GetExceptionSummaryResponse | undefined>();
   const eventFiltersListUrlPath = getEventFiltersListPath();
   const eventFiltersApi = useMemo(() => new EventFiltersHttpService(http), [http]);
+  const isMounted = useRef<boolean>();
 
   useEffect(() => {
+    isMounted.current = true;
     const fetchStats = async () => {
       try {
         const summary = await eventFiltersApi.getSummary();
-        setStats(summary);
+        if (isMounted.current) {
+          setStats(summary);
+        }
       } catch (error) {
         toasts.addDanger(
           i18n.translate(
@@ -55,9 +62,12 @@ export const FleetEventFiltersCard = memo<PackageCustomExtensionComponentProps>(
       }
     };
     fetchStats();
+    return () => {
+      isMounted.current = false;
+    };
   }, [eventFiltersApi, toasts]);
 
-  const eventFiltersRouteState = useMemo(() => {
+  const eventFiltersRouteState = useMemo<ListPageRouteState>(() => {
     const fleetPackageCustomUrlPath = `#${pagePathGetters.integration_details_custom({ pkgkey })}`;
     return {
       backButtonLabel: i18n.translate(
@@ -79,7 +89,7 @@ export const FleetEventFiltersCard = memo<PackageCustomExtensionComponentProps>(
   return (
     <EuiPanel paddingSize="l">
       <StyledEuiFlexGridGroup alignItems="baseline" justifyContent="center">
-        <StyledEuiFlexGridItem gridArea="title" alignItems="flex-start">
+        <StyledEuiFlexGridItem gridarea="title" alignitems="flex-start">
           <EuiText>
             <h4>
               <FormattedMessage
@@ -89,10 +99,10 @@ export const FleetEventFiltersCard = memo<PackageCustomExtensionComponentProps>(
             </h4>
           </EuiText>
         </StyledEuiFlexGridItem>
-        <StyledEuiFlexGridItem gridArea="summary">
+        <StyledEuiFlexGridItem gridarea="summary">
           <ExceptionItemsSummary stats={stats} />
         </StyledEuiFlexGridItem>
-        <StyledEuiFlexGridItem gridArea="link" alignItems="flex-end">
+        <StyledEuiFlexGridItem gridarea="link" alignitems="flex-end">
           <>
             <LinkWithIcon
               appId={MANAGEMENT_APP_ID}

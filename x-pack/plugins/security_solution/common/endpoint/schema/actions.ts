@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 export const HostIsolationRequestSchema = {
   body: schema.object({
@@ -18,5 +18,27 @@ export const HostIsolationRequestSchema = {
     /** Case IDs to be updated */
     case_ids: schema.maybe(schema.arrayOf(schema.string())),
     comment: schema.maybe(schema.string()),
+  }),
+};
+
+export const EndpointActionLogRequestSchema = {
+  query: schema.object({
+    page: schema.number({ defaultValue: 1, min: 1 }),
+    page_size: schema.number({ defaultValue: 10, min: 1, max: 100 }),
+  }),
+  params: schema.object({
+    agent_id: schema.string(),
+  }),
+};
+
+export type EndpointActionLogRequestParams = TypeOf<typeof EndpointActionLogRequestSchema.params>;
+export type EndpointActionLogRequestQuery = TypeOf<typeof EndpointActionLogRequestSchema.query>;
+
+export const ActionStatusRequestSchema = {
+  query: schema.object({
+    agent_ids: schema.oneOf([
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1, maxSize: 50 }),
+      schema.string({ minLength: 1 }),
+    ]),
   }),
 };

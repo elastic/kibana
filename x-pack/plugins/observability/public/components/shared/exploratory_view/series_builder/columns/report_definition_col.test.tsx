@@ -11,7 +11,6 @@ import { getDefaultConfigs } from '../../configurations/default_configs';
 import {
   mockAppIndexPattern,
   mockIndexPattern,
-  mockUrlStorage,
   mockUseValuesList,
   render,
 } from '../../rtl_helpers';
@@ -23,26 +22,28 @@ describe('Series Builder ReportDefinitionCol', function () {
   const seriesId = 'test-series-id';
 
   const dataViewSeries = getDefaultConfigs({
-    seriesId,
-    reportType: 'pld',
+    reportType: 'dist',
     indexPattern: mockIndexPattern,
+    dataType: 'ux',
   });
 
-  const { setSeries } = mockUrlStorage({
+  const initSeries = {
     data: {
       [seriesId]: {
-        dataType: 'ux',
-        reportType: 'pld',
+        dataType: 'ux' as const,
+        reportType: 'dist' as const,
         time: { from: 'now-30d', to: 'now' },
         reportDefinitions: { [SERVICE_NAME]: ['elastic-co'] },
       },
     },
-  });
+  };
 
   mockUseValuesList(['elastic-co']);
 
   it('should render properly', async function () {
-    render(<ReportDefinitionCol dataViewSeries={dataViewSeries} seriesId={seriesId} />);
+    render(<ReportDefinitionCol dataViewSeries={dataViewSeries} seriesId={seriesId} />, {
+      initSeries,
+    });
 
     screen.getByText('Web Application');
     screen.getByText('Environment');
@@ -51,7 +52,9 @@ describe('Series Builder ReportDefinitionCol', function () {
   });
 
   it('should render selected report definitions', async function () {
-    render(<ReportDefinitionCol dataViewSeries={dataViewSeries} seriesId={seriesId} />);
+    render(<ReportDefinitionCol dataViewSeries={dataViewSeries} seriesId={seriesId} />, {
+      initSeries,
+    });
 
     expect(await screen.findByText('elastic-co')).toBeInTheDocument();
 
@@ -59,7 +62,10 @@ describe('Series Builder ReportDefinitionCol', function () {
   });
 
   it('should be able to remove selected definition', async function () {
-    render(<ReportDefinitionCol dataViewSeries={dataViewSeries} seriesId={seriesId} />);
+    const { setSeries } = render(
+      <ReportDefinitionCol dataViewSeries={dataViewSeries} seriesId={seriesId} />,
+      { initSeries }
+    );
 
     expect(
       await screen.findByLabelText('Remove elastic-co from selection in this group')
@@ -75,7 +81,7 @@ describe('Series Builder ReportDefinitionCol', function () {
     expect(setSeries).toHaveBeenCalledWith(seriesId, {
       dataType: 'ux',
       reportDefinitions: {},
-      reportType: 'pld',
+      reportType: 'dist',
       time: { from: 'now-30d', to: 'now' },
     });
   });

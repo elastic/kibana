@@ -254,10 +254,10 @@ interface HostInfo {
         version: number;
       };
     };
-    configuration: {
+    configuration?: {
       isolation: boolean;
     };
-    state: {
+    state?: {
       isolation: boolean;
     };
   };

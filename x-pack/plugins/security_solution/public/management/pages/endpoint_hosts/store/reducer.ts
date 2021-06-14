@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EndpointDetailsActivityLogChanged } from './action';
 import {
   isOnEndpointPage,
   hasSelectedEndpoint,
@@ -12,52 +13,36 @@ import {
   getCurrentIsolationRequestState,
 } from './selectors';
 import { EndpointState } from '../types';
+import { initialEndpointPageState } from './builders';
 import { AppAction } from '../../../../common/store/actions';
 import { ImmutableReducer } from '../../../../common/store';
 import { Immutable } from '../../../../../common/endpoint/types';
-import { DEFAULT_POLL_INTERVAL } from '../../../common/constants';
 import { createUninitialisedResourceState, isUninitialisedResourceState } from '../../../state';
 
-export const initialEndpointListState: Immutable<EndpointState> = {
-  hosts: [],
-  pageSize: 10,
-  pageIndex: 0,
-  total: 0,
-  loading: false,
-  error: undefined,
-  details: undefined,
-  detailsLoading: false,
-  detailsError: undefined,
-  policyResponse: undefined,
-  policyResponseLoading: false,
-  policyResponseError: undefined,
-  location: undefined,
-  policyItems: [],
-  selectedPolicyId: undefined,
-  policyItemsLoading: false,
-  endpointPackageInfo: undefined,
-  nonExistingPolicies: {},
-  agentPolicies: {},
-  endpointsExist: true,
-  patterns: [],
-  patternsError: undefined,
-  isAutoRefreshEnabled: true,
-  autoRefreshInterval: DEFAULT_POLL_INTERVAL,
-  agentsWithEndpointsTotal: 0,
-  agentsWithEndpointsTotalError: undefined,
-  endpointsTotal: 0,
-  endpointsTotalError: undefined,
-  queryStrategyVersion: undefined,
-  policyVersionInfo: undefined,
-  hostStatus: undefined,
-  isolationRequestState: createUninitialisedResourceState(),
+type StateReducer = ImmutableReducer<EndpointState, AppAction>;
+type CaseReducer<T extends AppAction> = (
+  state: Immutable<EndpointState>,
+  action: Immutable<T>
+) => Immutable<EndpointState>;
+
+const handleEndpointDetailsActivityLogChanged: CaseReducer<EndpointDetailsActivityLogChanged> = (
+  state,
+  action
+) => {
+  return {
+    ...state!,
+    endpointDetails: {
+      ...state.endpointDetails!,
+      activityLog: {
+        ...state.endpointDetails.activityLog,
+        logData: action.payload,
+      },
+    },
+  };
 };
 
 /* eslint-disable-next-line complexity */
-export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
-  state = initialEndpointListState,
-  action
-) => {
+export const endpointListReducer: StateReducer = (state = initialEndpointPageState(), action) => {
   if (action.type === 'serverReturnedEndpointList') {
     const {
       hosts,
@@ -115,18 +100,47 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
   } else if (action.type === 'serverReturnedEndpointDetails') {
     return {
       ...state,
-      details: action.payload.metadata,
+      endpointDetails: {
+        ...state.endpointDetails,
+        hostDetails: {
+          ...state.endpointDetails.hostDetails,
+          details: action.payload.metadata,
+          detailsLoading: false,
+          detailsError: undefined,
+        },
+      },
       policyVersionInfo: action.payload.policy_info,
       hostStatus: action.payload.host_status,
-      detailsLoading: false,
-      detailsError: undefined,
     };
   } else if (action.type === 'serverFailedToReturnEndpointDetails') {
     return {
       ...state,
-      detailsError: action.payload,
-      detailsLoading: false,
+      endpointDetails: {
+        ...state.endpointDetails,
+        hostDetails: {
+          ...state.endpointDetails.hostDetails,
+          detailsError: action.payload,
+          detailsLoading: false,
+        },
+      },
     };
+  } else if (action.type === 'appRequestedEndpointActivityLog') {
+    const pageData = {
+      page: action.payload.page,
+      pageSize: action.payload.pageSize,
+    };
+    return {
+      ...state,
+      endpointDetails: {
+        ...state.endpointDetails!,
+        activityLog: {
+          ...state.endpointDetails.activityLog,
+          ...pageData,
+        },
+      },
+    };
+  } else if (action.type === 'endpointDetailsActivityLogChanged') {
+    return handleEndpointDetailsActivityLogChanged(state, action);
   } else if (action.type === 'serverReturnedPoliciesForOnboarding') {
     return {
       ...state,
@@ -221,8 +235,13 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
     const stateUpdates: Partial<EndpointState> = {
       location: action.payload,
       error: undefined,
-      detailsError: undefined,
       policyResponseError: undefined,
+    };
+
+    const activityLog = {
+      logData: createUninitialisedResourceState(),
+      page: 1,
+      pageSize: 50,
     };
 
     // Reset `isolationRequestState` if needed
@@ -239,6 +258,14 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
         return {
           ...state,
           ...stateUpdates,
+          endpointDetails: {
+            ...state.endpointDetails,
+            activityLog,
+            hostDetails: {
+              ...state.endpointDetails.hostDetails,
+              detailsError: undefined,
+            },
+          },
           loading: true,
           policyItemsLoading: true,
         };
@@ -249,6 +276,15 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
         return {
           ...state,
           ...stateUpdates,
+          endpointDetails: {
+            ...state.endpointDetails,
+            activityLog,
+            hostDetails: {
+              ...state.endpointDetails.hostDetails,
+              detailsLoading: true,
+              detailsError: undefined,
+            },
+          },
           detailsLoading: true,
           policyResponseLoading: true,
         };
@@ -257,8 +293,16 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
         return {
           ...state,
           ...stateUpdates,
+          endpointDetails: {
+            ...state.endpointDetails,
+            activityLog,
+            hostDetails: {
+              ...state.endpointDetails.hostDetails,
+              detailsLoading: true,
+              detailsError: undefined,
+            },
+          },
           loading: true,
-          detailsLoading: true,
           policyResponseLoading: true,
           policyItemsLoading: true,
         };
@@ -268,6 +312,14 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
     return {
       ...state,
       ...stateUpdates,
+      endpointDetails: {
+        ...state.endpointDetails,
+        activityLog,
+        hostDetails: {
+          ...state.endpointDetails.hostDetails,
+          detailsError: undefined,
+        },
+      },
       endpointsExist: true,
     };
   }

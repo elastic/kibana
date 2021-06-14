@@ -5,4 +5,16 @@
  * 2.0.
  */
 
-export { ToolbarOverlay } from './toolbar_overlay';
+import { connect } from 'react-redux';
+import { MapStoreState } from '../../reducers/store';
+import { getGeoFieldNames } from '../../selectors/map_selectors';
+import { ToolbarOverlay } from './toolbar_overlay';
+
+function mapStateToProps(state: MapStoreState) {
+  return {
+    showToolsControl: getGeoFieldNames(state).length !== 0,
+  };
+}
+
+const connected = connect(mapStateToProps)(ToolbarOverlay);
+export { connected as ToolbarOverlay };

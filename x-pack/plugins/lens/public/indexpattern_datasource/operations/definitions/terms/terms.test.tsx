@@ -9,7 +9,12 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { shallow, mount } from 'enzyme';
 import { EuiFieldNumber, EuiSelect, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
-import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
+import type {
+  IUiSettingsClient,
+  SavedObjectsClientContract,
+  HttpSetup,
+  CoreStart,
+} from 'kibana/public';
 import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
 import { createMockedIndexPattern } from '../../../mocks';
@@ -17,6 +22,7 @@ import { ValuesInput } from './values_input';
 import type { TermsIndexPatternColumn } from '.';
 import { termsOperation } from '../index';
 import { IndexPattern, IndexPatternLayer } from '../../../types';
+import { FramePublicAPI } from '../../../../types';
 
 const uiSettingsMock = {} as IUiSettingsClient;
 
@@ -29,6 +35,9 @@ const defaultProps = {
   http: {} as HttpSetup,
   indexPattern: createMockedIndexPattern(),
   operationDefinitionMap: {},
+  isFullscreen: false,
+  toggleFullscreen: jest.fn(),
+  setIsCloseable: jest.fn(),
 };
 
 describe('terms', () => {
@@ -986,8 +995,8 @@ describe('terms', () => {
         indexPatternId: '',
       };
     });
-    it('returns undefined if sourceField exists in index pattern', () => {
-      expect(termsOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual(undefined);
+    it('returns empty array', () => {
+      expect(termsOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual([]);
     });
     it('returns error message if the sourceField does not exist in index pattern', () => {
       layer = {
@@ -1002,6 +1011,103 @@ describe('terms', () => {
       expect(termsOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual([
         'Field notExisting was not found',
       ]);
+    });
+
+    describe('time shift error', () => {
+      beforeEach(() => {
+        layer = {
+          ...layer,
+          columnOrder: ['col1', 'col2', 'col3'],
+          columns: {
+            ...layer.columns,
+            col2: {
+              dataType: 'number',
+              isBucketed: false,
+              operationType: 'count',
+              label: 'Count',
+              sourceField: 'document',
+            },
+            col3: {
+              dataType: 'number',
+              isBucketed: false,
+              operationType: 'count',
+              label: 'Count',
+              sourceField: 'document',
+              timeShift: '1d',
+            },
+          },
+        };
+      });
+      it('returns error message if two time shifts are used together with terms', () => {
+        expect(termsOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual([
+          expect.objectContaining({
+            message:
+              'In a single layer, you are unable to combine metrics with different time shifts and dynamic top values. Use the same time shift value for all metrics, or use filters instead of top values.',
+          }),
+        ]);
+      });
+      it('returns fix action which calls field information endpoint and creates a pinned top values', async () => {
+        const errorMessage = termsOperation.getErrorMessage!(layer, 'col1', indexPattern)![0];
+        const fixAction = (typeof errorMessage === 'object'
+          ? errorMessage.fixAction!.newState
+          : undefined)!;
+        const coreMock = ({
+          uiSettings: {
+            get: () => undefined,
+          },
+          http: {
+            post: jest.fn(() =>
+              Promise.resolve({
+                topValues: {
+                  buckets: [
+                    {
+                      key: 'A',
+                    },
+                    {
+                      key: 'B',
+                    },
+                  ],
+                },
+              })
+            ),
+          },
+        } as unknown) as CoreStart;
+        const newLayer = await fixAction(
+          coreMock,
+          ({
+            query: { language: 'kuery', query: 'a: b' },
+            filters: [],
+            dateRange: {
+              fromDate: '2020',
+              toDate: '2021',
+            },
+          } as unknown) as FramePublicAPI,
+          'first'
+        );
+        expect(newLayer.columns.col1).toEqual(
+          expect.objectContaining({
+            operationType: 'filters',
+            params: {
+              filters: [
+                {
+                  input: {
+                    language: 'kuery',
+                    query: 'bytes: "A"',
+                  },
+                  label: 'A',
+                },
+                {
+                  input: {
+                    language: 'kuery',
+                    query: 'bytes: "B"',
+                  },
+                  label: 'B',
+                },
+              ],
+            },
+          })
+        );
+      });
     });
   });
 });

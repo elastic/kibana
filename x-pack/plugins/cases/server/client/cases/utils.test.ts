@@ -6,7 +6,6 @@
  */
 
 import { actionsClientMock } from '../../../../actions/server/actions_client.mock';
-import { flattenCaseSavedObject } from '../../routes/api/utils';
 import { mockCases } from '../../routes/api/__fixtures__';
 
 import { BasicParams, ExternalServiceParams, Incident } from './types';
@@ -29,6 +28,9 @@ import {
   transformers,
   transformFields,
 } from './utils';
+import { flattenCaseSavedObject } from '../../common';
+import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import { casesConnectors } from '../../connectors';
 
 const formatComment = {
   commentId: commentObj.id,
@@ -442,6 +444,7 @@ describe('utils', () => {
         connector,
         mappings,
         alerts: [],
+        casesConnectors,
       });
 
       expect(res).toEqual({
@@ -470,6 +473,7 @@ describe('utils', () => {
         connector,
         mappings,
         alerts: [],
+        casesConnectors,
       });
 
       expect(res.comments).toEqual([
@@ -500,6 +504,7 @@ describe('utils', () => {
           },
         ],
         alerts: [],
+        casesConnectors,
       });
 
       expect(res.comments).toEqual([]);
@@ -530,6 +535,7 @@ describe('utils', () => {
           },
         ],
         alerts: [],
+        casesConnectors,
       });
 
       expect(res.comments).toEqual([
@@ -560,6 +566,7 @@ describe('utils', () => {
         connector,
         mappings,
         alerts: [],
+        casesConnectors,
       });
 
       expect(res.comments).toEqual([
@@ -594,6 +601,7 @@ describe('utils', () => {
         connector,
         mappings,
         alerts: [],
+        casesConnectors,
       });
 
       expect(res).toEqual({
@@ -625,6 +633,7 @@ describe('utils', () => {
         connector,
         mappings,
         alerts: [],
+        casesConnectors,
       }).catch((e) => {
         expect(e).not.toBeNull();
         expect(e).toEqual(
@@ -644,6 +653,7 @@ describe('utils', () => {
         connector: { ...connector, actionTypeId: 'not-supported' },
         mappings,
         alerts: [],
+        casesConnectors,
       }).catch((e) => {
         expect(e).not.toBeNull();
         expect(e).toEqual(new Error('Invalid external service'));
@@ -701,6 +711,7 @@ describe('utils', () => {
             action_id: '9b91d8f0-6647-11eb-a291-51bf6b175a53',
             case_id: 'fcdedd20-6646-11eb-a291-51bf6b175a53',
             comment_id: null,
+            owner: SECURITY_SOLUTION_OWNER,
           },
         ]);
 
