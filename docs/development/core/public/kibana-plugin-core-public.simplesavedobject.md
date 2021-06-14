@@ -30,7 +30,7 @@ export declare class SimpleSavedObject<T = unknown>
 |  [error](./kibana-plugin-core-public.simplesavedobject.error.md) |  | <code>SavedObjectType&lt;T&gt;['error']</code> |  |
 |  [id](./kibana-plugin-core-public.simplesavedobject.id.md) |  | <code>SavedObjectType&lt;T&gt;['id']</code> |  |
 |  [migrationVersion](./kibana-plugin-core-public.simplesavedobject.migrationversion.md) |  | <code>SavedObjectType&lt;T&gt;['migrationVersion']</code> |  |
-|  [namespaces](./kibana-plugin-core-public.simplesavedobject.namespaces.md) |  | <code>SavedObjectType&lt;T&gt;['namespaces']</code> |  |
+|  [namespaces](./kibana-plugin-core-public.simplesavedobject.namespaces.md) |  | <code>SavedObjectType&lt;T&gt;['namespaces']</code> | Space(s) that this saved object exists in. This attribute is not used for "global" saved object types which are registered with <code>namespaceType: 'agnostic'</code>. |
 |  [references](./kibana-plugin-core-public.simplesavedobject.references.md) |  | <code>SavedObjectType&lt;T&gt;['references']</code> |  |
 |  [type](./kibana-plugin-core-public.simplesavedobject.type.md) |  | <code>SavedObjectType&lt;T&gt;['type']</code> |  |
 

@@ -4,6 +4,8 @@
 
 ## ResolvedSimpleSavedObject.aliasTargetId property
 
+The ID of the object that the legacy URL alias points to. This is only defined when the outcome is `'aliasMatch'` or `'conflict'`<!-- -->.
+
 <b>Signature:</b>
 
 ```typescript

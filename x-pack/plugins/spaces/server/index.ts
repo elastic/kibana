@@ -21,14 +21,14 @@ export { addSpaceIdToPath } from '../common';
 
 export { SpacesPluginSetup, SpacesPluginStart } from './plugin';
 export { SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
-export {
-  ISpacesClient,
-  LegacyUrlAliasTarget,
-  SpacesClientRepositoryFactory,
-  SpacesClientWrapper,
-} from './spaces_client';
+export { ISpacesClient, SpacesClientRepositoryFactory, SpacesClientWrapper } from './spaces_client';
 
-export { GetAllSpacesOptions, GetAllSpacesPurpose, GetSpaceResult } from '../common';
+export {
+  GetAllSpacesOptions,
+  GetAllSpacesPurpose,
+  GetSpaceResult,
+  LegacyUrlAliasTarget,
+} from '../common';
 
 // re-export types from oss definition
 export type { Space } from 'src/plugins/spaces_oss/common';

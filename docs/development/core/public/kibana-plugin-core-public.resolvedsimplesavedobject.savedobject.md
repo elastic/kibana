@@ -4,6 +4,8 @@
 
 ## ResolvedSimpleSavedObject.savedObject property
 
+The saved object that was found.
+
 <b>Signature:</b>
 
 ```typescript

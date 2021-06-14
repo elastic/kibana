@@ -24,7 +24,7 @@ export declare class ResolvedSimpleSavedObject<T = unknown>
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [aliasTargetId](./kibana-plugin-core-public.resolvedsimplesavedobject.aliastargetid.md) |  | <code>SavedObjectsResolveResponse['aliasTargetId']</code> |  |
-|  [outcome](./kibana-plugin-core-public.resolvedsimplesavedobject.outcome.md) |  | <code>SavedObjectsResolveResponse['outcome']</code> |  |
-|  [savedObject](./kibana-plugin-core-public.resolvedsimplesavedobject.savedobject.md) |  | <code>SimpleSavedObject&lt;T&gt;</code> |  |
+|  [aliasTargetId](./kibana-plugin-core-public.resolvedsimplesavedobject.aliastargetid.md) |  | <code>SavedObjectsResolveResponse['aliasTargetId']</code> | The ID of the object that the legacy URL alias points to. This is only defined when the outcome is <code>'aliasMatch'</code> or <code>'conflict'</code>. |
+|  [outcome](./kibana-plugin-core-public.resolvedsimplesavedobject.outcome.md) |  | <code>SavedObjectsResolveResponse['outcome']</code> | The outcome for a successful <code>resolve</code> call is one of the following values:<!-- -->\* <code>'exactMatch'</code> -- One document exactly matched the given ID. \* <code>'aliasMatch'</code> -- One document with a legacy URL alias matched the given ID; in this case the <code>saved_object.id</code> field is different than the given ID. \* <code>'conflict'</code> -- Two documents matched the given ID, one was an exact match and another with a legacy URL alias; in this case the <code>saved_object</code> object is the exact match, and the <code>saved_object.id</code> field is the same as the given ID. |
+|  [savedObject](./kibana-plugin-core-public.resolvedsimplesavedobject.savedobject.md) |  | <code>SimpleSavedObject&lt;T&gt;</code> | The saved object that was found. |
 

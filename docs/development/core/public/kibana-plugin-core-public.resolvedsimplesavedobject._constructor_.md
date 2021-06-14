@@ -9,7 +9,10 @@ Constructs a new instance of the `ResolvedSimpleSavedObject` class
 <b>Signature:</b>
 
 ```typescript
-constructor(savedObject: SimpleSavedObject<T>, outcome: SavedObjectsResolveResponse['outcome'], aliasTargetId: SavedObjectsResolveResponse['aliasTargetId']);
+constructor(
+    savedObject: SimpleSavedObject<T>, 
+    outcome: SavedObjectsResolveResponse['outcome'], 
+    aliasTargetId: SavedObjectsResolveResponse['aliasTargetId']);
 ```
 
 ## Parameters

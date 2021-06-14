@@ -1103,12 +1103,12 @@ export type ResolveDeprecationResponse = {
 
 // @public
 export class ResolvedSimpleSavedObject<T = unknown> {
-    constructor(savedObject: SimpleSavedObject<T>, outcome: SavedObjectsResolveResponse['outcome'], aliasTargetId: SavedObjectsResolveResponse['aliasTargetId']);
-    // (undocumented)
+    constructor(
+    savedObject: SimpleSavedObject<T>,
+    outcome: SavedObjectsResolveResponse['outcome'],
+    aliasTargetId: SavedObjectsResolveResponse['aliasTargetId']);
     aliasTargetId: SavedObjectsResolveResponse['aliasTargetId'];
-    // (undocumented)
     outcome: SavedObjectsResolveResponse['outcome'];
-    // (undocumented)
     savedObject: SimpleSavedObject<T>;
 }
 
@@ -1466,7 +1466,6 @@ export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolat
 export interface SavedObjectsResolveResponse<T = unknown> {
     aliasTargetId?: string;
     outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
-    // (undocumented)
     saved_object: SavedObject<T>;
 }
 
@@ -1524,7 +1523,6 @@ export class SimpleSavedObject<T = unknown> {
     id: SavedObject<T>['id'];
     // (undocumented)
     migrationVersion: SavedObject<T>['migrationVersion'];
-    // (undocumented)
     namespaces: SavedObject<T>['namespaces'];
     // (undocumented)
     references: SavedObject<T>['references'];

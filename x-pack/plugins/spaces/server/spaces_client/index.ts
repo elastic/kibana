@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { SpacesClient, ISpacesClient, LegacyUrlAliasTarget } from './spaces_client';
+export { SpacesClient, ISpacesClient } from './spaces_client';
 export {
   SpacesClientService,
   SpacesClientServiceSetup,
