@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
@@ -376,8 +377,16 @@ export function MlCorrelations({ onClose }: Props) {
           />
         </>
       )}
-      {histograms.length < 0 && progress * 100 > 98 ? (
-        <div>No correlation</div>
+      {histograms.length < 1 && progress > 0.99 ? (
+        <>
+          <EuiSpacer size="m" />
+          <EuiText textAlign="center">
+            <FormattedMessage
+              id="xpack.apm.correlations.latency.noCorrelationsMsg"
+              defaultMessage="No correlations found"
+            />
+          </EuiText>
+        </>
       ) : null}
     </>
   );
