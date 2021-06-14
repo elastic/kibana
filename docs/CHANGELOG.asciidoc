@@ -58,8 +58,6 @@ Review important information about the {kib} 7.13.x releases.
 [[release-notes-7.13.2]]
 == {kib} 7.13.2
 
-coming::[7.13.2]
-
 The 7.13.2 release includes the following bug fixes.
 
 [float]
