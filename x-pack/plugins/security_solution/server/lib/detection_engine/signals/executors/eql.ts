@@ -117,7 +117,7 @@ export const eqlExecutor = async ({
     );
   }
 
-  if (newSignals.length > 0) {
+  if (newSignals?.length) {
     const insertResult = await bulkCreate(newSignals);
     result.bulkCreateTimes.push(insertResult.bulkCreateDuration);
     result.createdSignalsCount += insertResult.createdItemsCount;

@@ -18,11 +18,9 @@ import { filterDuplicateSignals } from './filter_duplicate_signals';
 export const wrapHitsFactory = ({
   ruleSO,
   signalsIndex,
-  isRuleRegistryEnabled,
 }: {
   ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
   signalsIndex: string;
-  isRuleRegistryEnabled: boolean;
 }): WrapHits => (events) => {
   const wrappedDocs: WrappedSignalHit[] = events.flatMap((doc) => [
     {
@@ -37,5 +35,5 @@ export const wrapHitsFactory = ({
     },
   ]);
 
-  return filterDuplicateSignals(ruleSO.id, wrappedDocs, isRuleRegistryEnabled);
+  return filterDuplicateSignals(ruleSO.id, wrappedDocs, false);
 };

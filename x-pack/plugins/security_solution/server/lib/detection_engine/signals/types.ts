@@ -262,7 +262,7 @@ export type SimpleHit = BaseHit<{ '@timestamp': string }>;
 
 export type WrapHits = (hits: Array<estypes.SearchHit<unknown>>) => SimpleHit[];
 
-export type WrapSequences = (sequences: Array<EqlSequence<SignalSource | unknown>>) => SimpleHit[];
+export type WrapSequences = (sequences: Array<EqlSequence<SignalSource>>) => SimpleHit[];
 
 export interface SearchAfterAndBulkCreateParams {
   tuples: Array<{

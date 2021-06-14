@@ -75,14 +75,12 @@ export const signalRulesAlertType = ({
   version,
   ml,
   lists,
-  isRuleRegistryEnabled,
 }: {
   logger: Logger;
   eventsTelemetry: TelemetryEventsSender | undefined;
   version: string;
   ml: SetupPlugins['ml'];
   lists: SetupPlugins['lists'] | undefined;
-  isRuleRegistryEnabled: boolean;
 }): SignalRuleAlertTypeDefinition => {
   return {
     id: SIGNALS_ID,
@@ -234,13 +232,11 @@ export const signalRulesAlertType = ({
         const wrapHits = wrapHitsFactory({
           ruleSO: savedObject,
           signalsIndex: params.outputIndex,
-          isRuleRegistryEnabled,
         });
 
         const wrapSequences = wrapSequencesFactory({
           ruleSO: savedObject,
           signalsIndex: params.outputIndex,
-          isRuleRegistryEnabled,
         });
 
         if (isMlRule(type)) {

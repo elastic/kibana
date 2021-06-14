@@ -38,11 +38,11 @@ const mockSignals = [
 describe('filterDuplicateSignals', () => {
   describe('detection engine implementation', () => {
     it('filters duplicate signals', () => {
-      expect(filterDuplicateSignals(mockRuleId1, mockSignals, true).length).toEqual(1);
+      expect(filterDuplicateSignals(mockRuleId1, mockSignals, false).length).toEqual(1);
     });
 
     it('does not filter non-duplicate signals', () => {
-      expect(filterDuplicateSignals(mockRuleId3, mockSignals, true).length).toEqual(2);
+      expect(filterDuplicateSignals(mockRuleId3, mockSignals, false).length).toEqual(2);
     });
   });
 
