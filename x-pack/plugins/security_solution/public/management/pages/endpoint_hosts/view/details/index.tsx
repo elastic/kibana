@@ -167,6 +167,7 @@ export const EndpointDetailsFlyout = memo(() => {
       data-test-subj="endpointDetailsFlyout"
       size="m"
       paddingSize="m"
+      ownFocus={false}
     >
       <EuiFlyoutHeader hasBorder>
         {hostDetailsLoading ? (

@@ -175,6 +175,7 @@ const AlertAdd = ({
         aria-labelledby="flyoutAlertAddTitle"
         size="m"
         maxWidth={620}
+        ownFocus={false}
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s" data-test-subj="addAlertFlyoutTitle">
