@@ -56,7 +56,7 @@ plugins/
 
 [1], [2]: Every internal plugin should fill in the owner and description properties.
 
-[3], [4]: Any plugin that you have a dependency on should be listed in `requiredPlugins` or `optionalPlugins`. Doing this will ensure that you have access to that plugin's start and setup contract inside your own plugin's start and setup lifecycle methods. If a plugin you optionally depend on is not installed, it will be undefined if you try to access it. If a plugin you require is not installed, kibana will fail to build.
+[3], [4]: Any plugin that you have a dependency on should be listed in `requiredPlugins` or `optionalPlugins`. Doing this will ensure that you have access to that plugin's start and setup contract inside your own plugin's start and setup lifecycle methods. If a plugin you optionally depend on is not installed or disabled, it will be undefined if you try to access it. If a plugin you require is not installed or disabled, kibana will fail to build.
 
 [5]: Don't worry too much about getting 5 right. The build optimizer will complain if any of these values are incorrect.
 
