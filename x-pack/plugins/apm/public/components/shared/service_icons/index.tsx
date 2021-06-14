@@ -8,7 +8,6 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactChild, useState } from 'react';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useTheme } from '../../../hooks/use_theme';
 import { ContainerType } from '../../../../common/service_metadata';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -71,8 +70,6 @@ export function ServiceIcons({ serviceName }: Props) {
   ] = useState<Icons | null>();
 
   const theme = useTheme();
-
-  const { alerts } = useApmServiceContext();
 
   const { data: icons, status: iconsFetchStatus } = useFetcher(
     (callApmApi) => {
