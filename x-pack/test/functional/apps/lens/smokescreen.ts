@@ -688,7 +688,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await testSubjects.isEnabled('lnsApp_downloadCSVButton')).to.eql(true);
     });
 
-    it('should allow filtering by legend', async () => {
+    it('should allow filtering by legend on an xy chart', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
@@ -709,6 +709,37 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'extension.raw',
+      });
+
+      await PageObjects.lens.filterLegend('jpg');
+      const hasExtensionFilter = await filterBar.hasFilter('extension.raw', 'jpg');
+      expect(hasExtensionFilter).to.be(true);
+
+      await filterBar.removeFilter('extension.raw');
+    });
+
+    it('should allow filtering by legend on a pie chart', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.switchToVisualization('pie');
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsPie_sliceByDimensionPanel > lns-empty-dimension',
+        operation: 'terms',
+        field: 'extension.raw',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsPie_sliceByDimensionPanel > lns-empty-dimension',
+        operation: 'terms',
+        field: 'agent.raw',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsPie_sizeByDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
       });
 
       await PageObjects.lens.filterLegend('jpg');
