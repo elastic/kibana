@@ -58,6 +58,11 @@ Object {
               "transaction.type": "page-load",
             },
           },
+          Object {
+            "term": Object {
+              "service.environment": "staging",
+            },
+          },
         ],
       },
     },

@@ -8,6 +8,8 @@
 import { ESFilter } from '../../../../../../../typings/elasticsearch';
 import { UIFilters } from '../../../../typings/ui_filters';
 import { localUIFilters, localUIFilterNames } from './local_ui_filters/config';
+import { SERVICE_ENVIRONMENT } from '../../../../common/elasticsearch_fieldnames';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
 export function getEsFilter(uiFilters: UIFilters) {
   const localFilterValues = uiFilters;
@@ -22,6 +24,17 @@ export function getEsFilter(uiFilters: UIFilters) {
         },
       };
     }) as ESFilter[];
+
+  if (
+    uiFilters.environment &&
+    uiFilters.environment !== ENVIRONMENT_ALL.value
+  ) {
+    mappedFilters.push({
+      term: {
+        [SERVICE_ENVIRONMENT]: uiFilters.environment,
+      },
+    });
+  }
 
   return mappedFilters;
 }
