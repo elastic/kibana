@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { useHistory, useParams } from 'react-router-dom';
 
@@ -159,7 +159,7 @@ export function MlCorrelations({ onClose }: Props) {
         { defaultMessage: 'Correlation' }
       ),
       render: (_: any, term: MlCorrelationsTerms) => {
-        return <div>{roundToDecimalPlace(term.correlation, 3)}</div>;
+        return <div>{roundToDecimalPlace(term.correlation, 4)}</div>;
       },
     },
     {
@@ -274,6 +274,31 @@ export function MlCorrelations({ onClose }: Props) {
     },
   ];
 
+  const histogramTerms = useMemo(() => {
+    return histograms.map((d) => {
+      // all docs for this field/value pair
+      const fieldCount = sum(d.histogram.map((h) => h.doc_count));
+      // docs for this field/value pair above the percentile threshold
+      const valueCount = sum(
+        d.histogram
+          .filter((h) => h.key > (percentileThresholdValue ?? 0))
+          .map((h) => h.doc_count)
+      );
+
+      return {
+        distribution: [],
+        fieldName: d.field,
+        fieldValue: d.value,
+        score: d.correlation,
+        impact: d.correlation,
+        ksTest: d.ksTest,
+        correlation: d.correlation,
+        fieldCount,
+        valueCount,
+      };
+    });
+  }, [histograms, percentileThresholdValue]);
+
   return (
     <>
       <EuiText size="s" color="subdued">
@@ -344,34 +369,16 @@ export function MlCorrelations({ onClose }: Props) {
               'xpack.apm.correlations.latency.ksTestColumnName',
               { defaultMessage: 'KS test p value' }
             )}
-            significantTerms={histograms.map((d) => {
-              // all docs for this field/value pair
-              const fieldCount = sum(d.histogram.map((h) => h.doc_count));
-              // docs for this field/value pair above the percentile threshold
-              const valueCount = sum(
-                d.histogram
-                  .filter((h) => h.key > (percentileThresholdValue ?? 0))
-                  .map((h) => h.doc_count)
-              );
-
-              return {
-                distribution: [],
-                fieldName: d.field,
-                fieldValue: d.value,
-                score: d.correlation,
-                impact: d.correlation,
-                ksTest: d.ksTest,
-                correlation: d.correlation,
-                fieldCount,
-                valueCount,
-              };
-            })}
+            significantTerms={histogramTerms}
             status={FETCH_STATUS.SUCCESS}
             setSelectedSignificantTerm={setSelectedSignificantTerm}
             onFilter={onClose}
           />
         </>
       )}
+      {histograms.length < 0 && progress * 100 > 98 ? (
+        <div>No correlation</div>
+      ) : null}
     </>
   );
 }

@@ -69,6 +69,42 @@ export const getTransactionDurationCorrelationRequest = (
   );
   ranges.push({ from: ranges[ranges.length - 1].to });
 
+  const step = 2;
+  const tempPercentiles = [percentileValues[0]];
+  const tempFractions = [step / 100];
+  // Collapse duplicates
+  for (let i = 1; i < percentileValues.length; i++) {
+    if (percentileValues[i] !== percentileValues[i - 1]) {
+      tempPercentiles.push(percentileValues[i]);
+      tempFractions.push(2 / 100);
+    } else {
+      tempFractions[tempFractions.length - 1] =
+        tempFractions[tempFractions.length - 1] + step / 100;
+    }
+  }
+  tempFractions.push(2 / 100);
+
+  const tempRanges = percentileValues.reduce((p, to) => {
+    const from = p[p.length - 1]?.to;
+    if (from) {
+      p.push({ from, to });
+    } else {
+      p.push({ to });
+    }
+    return p;
+  }, [] as Array<{ from?: number; to?: number }>);
+  tempRanges.push({ from: tempRanges[tempRanges.length - 1].to });
+
+  const tempExpectations = [tempPercentiles[0]];
+  for (let i = 1; i < tempPercentiles.length; i++) {
+    tempExpectations.push(
+      (tempFractions[i - 1] * tempPercentiles[i - 1] +
+        tempFractions[i] * tempPercentiles[i]) /
+        (tempFractions[i - 1] + tempFractions[i])
+    );
+  }
+  tempExpectations.push(tempPercentiles[tempPercentiles.length - 1]);
+
   const expectations = percentileValues.map((d, index) => {
     const previous = percentileValues[index - 1] || 0;
     return (previous + d) / 2;
@@ -81,38 +117,40 @@ export const getTransactionDurationCorrelationRequest = (
     function: {
       count_correlation: {
         indicator: {
-          expectations,
+          expectations: tempExpectations,
           doc_count: totalHits,
         },
       },
     },
   };
 
+  const body = {
+    query,
+    size: 0,
+    aggs: {
+      latency_ranges: {
+        range: {
+          field: TRANSACTION_DURATION,
+          ranges: tempRanges,
+        },
+      },
+      // Pearson correlation value
+      transaction_duration_correlation: {
+        bucket_correlation: bucketCorrelation,
+      } as estypes.AggregationsAggregationContainer,
+      // KS test p value = ks_test.less
+      ks_test: {
+        bucket_count_ks_test: {
+          buckets_path: 'latency_ranges>_count',
+          alternative: ['less', 'greater', 'two_sided'],
+        },
+      } as estypes.AggregationsAggregationContainer,
+    },
+  };
+
   return {
     index: params.index,
-    body: {
-      query,
-      size: 0,
-      aggs: {
-        latency_ranges: {
-          range: {
-            field: TRANSACTION_DURATION,
-            ranges,
-          },
-        },
-        // Pearson correlation value
-        transaction_duration_correlation: {
-          bucket_correlation: bucketCorrelation,
-        } as estypes.AggregationsAggregationContainer,
-        // KS test p value = ks_test.less
-        ks_test: {
-          bucket_count_ks_test: {
-            buckets_path: 'latency_ranges>_count',
-            alternative: ['less', 'greater', 'two_sided'],
-          },
-        } as estypes.AggregationsAggregationContainer,
-      },
-    },
+    body,
   };
 };
 
@@ -143,7 +181,8 @@ export const fetchTransactionDurationCorrelation = async (
       'fetchTransactionDurationCorrelation failed, did not return aggregations.'
     );
   }
-  return {
+
+  const result = {
     ranges: (resp.body.aggregations
       .latency_ranges as estypes.AggregationsMultiBucketAggregate).buckets,
     correlation: (resp.body.aggregations
@@ -152,4 +191,5 @@ export const fetchTransactionDurationCorrelation = async (
     // @ts-ignore
     ksTest: resp.body.aggregations.ks_test.less,
   };
+  return result;
 };
