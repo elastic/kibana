@@ -112,7 +112,7 @@ export function useDiscoverState({
     const unsubscribe = appStateContainer.subscribe(async (nextState) => {
       const { hideChart, interval, sort, index } = state;
       // chart was hidden, now it should be displayed, so data is needed
-      const chartDisplayChanged = nextState.hideChart !== hideChart && !hideChart;
+      const chartDisplayChanged = nextState.hideChart !== hideChart && hideChart;
       const chartIntervalChanged = nextState.interval !== interval;
       const docTableSortChanged = !isEqual(nextState.sort, sort);
       const indexPatternChanged = !isEqual(nextState.index, index);
