@@ -8,10 +8,21 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { NewTimeline, NewTimelineProps } from './helpers';
+import { AddToFavoritesButton, NewTimeline, NewTimelineProps } from './helpers';
 import { useCreateTimelineButton } from './use_create_timeline';
-
-jest.mock('../../../../common/hooks/use_selector');
+import {
+  apolloClientObservable,
+  kibanaObservable,
+  TestProviders,
+} from '../../../../common/mock/test_providers';
+import { timelineActions } from '../../../../timelines/store/timeline';
+import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
+import {
+  createSecuritySolutionStorageMock,
+  mockGlobalState,
+  SUB_PLUGINS_REDUCER,
+} from '../../../../common/mock';
+import { createStore } from '../../../../common/store';
 
 jest.mock('./use_create_timeline');
 
@@ -81,6 +92,149 @@ describe('NewTimeline', () => {
       test('it should render title', () => {
         expect(mockGetButton.mock.calls[0][0].title).toEqual(props.title);
       });
+    });
+  });
+});
+
+describe('Favorite Button', () => {
+  describe('Non Elastic prebuilt templates', () => {
+    test('should render favorite button', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <AddToFavoritesButton timelineId="test" />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="timeline-favorite-empty-star"]').exists()).toBeTruthy();
+    });
+
+    test('Favorite button should be enabled ', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <AddToFavoritesButton timelineId="test" />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper.find('[data-test-subj="timeline-favorite-empty-star"]').first().prop('disabled')
+      ).toEqual(false);
+    });
+
+    test('Should update isFavorite after clicking on favorite button', async () => {
+      const spy = jest.spyOn(timelineActions, 'updateIsFavorite');
+      const wrapper = mount(
+        <TestProviders>
+          <AddToFavoritesButton timelineId="test" />
+        </TestProviders>
+      );
+
+      wrapper.simulate('click');
+
+      expect(spy).toHaveBeenCalled();
+    });
+
+    test('should disable favorite button with filled star', () => {
+      const { storage } = createSecuritySolutionStorageMock();
+
+      const store = createStore(
+        {
+          ...mockGlobalState,
+          timeline: {
+            ...mockGlobalState.timeline,
+            timelineById: {
+              test: {
+                ...mockGlobalState.timeline.timelineById.test,
+                isFavorite: true,
+              },
+            },
+          },
+        },
+        SUB_PLUGINS_REDUCER,
+        apolloClientObservable,
+        kibanaObservable,
+        storage
+      );
+      const wrapper = mount(
+        <TestProviders store={store}>
+          <AddToFavoritesButton timelineId="test" />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper.find('[data-test-subj="timeline-favorite-filled-star"]').exists()
+      ).toBeTruthy();
+    });
+  });
+
+  describe('Elast prebuilt templates', () => {
+    test('should disable favorite button', () => {
+      const { storage } = createSecuritySolutionStorageMock();
+
+      const store = createStore(
+        {
+          ...mockGlobalState,
+          timeline: {
+            ...mockGlobalState.timeline,
+            timelineById: {
+              test: {
+                ...mockGlobalState.timeline.timelineById.test,
+                status: TimelineStatus.immutable,
+                timelineType: TimelineType.template,
+                templateTimelineId: 'mock-template-timeline-id',
+                templateTimelineVersion: 1,
+              },
+            },
+          },
+        },
+        SUB_PLUGINS_REDUCER,
+        apolloClientObservable,
+        kibanaObservable,
+        storage
+      );
+      const wrapper = mount(
+        <TestProviders store={store}>
+          <AddToFavoritesButton timelineId="test" />
+        </TestProviders>
+      );
+      expect(
+        wrapper.find('[data-test-subj="timeline-favorite-empty-star"]').first().prop('disabled')
+      ).toEqual(true);
+    });
+  });
+
+  describe('Custom templates', () => {
+    test('should enable favorite button', () => {
+      const { storage } = createSecuritySolutionStorageMock();
+
+      const store = createStore(
+        {
+          ...mockGlobalState,
+          timeline: {
+            ...mockGlobalState.timeline,
+            timelineById: {
+              test: {
+                ...mockGlobalState.timeline.timelineById.test,
+                status: TimelineStatus.active,
+                timelineType: TimelineType.template,
+                templateTimelineId: 'mock-template-timeline-id',
+                templateTimelineVersion: 1,
+              },
+            },
+          },
+        },
+        SUB_PLUGINS_REDUCER,
+        apolloClientObservable,
+        kibanaObservable,
+        storage
+      );
+      const wrapper = mount(
+        <TestProviders store={store}>
+          <AddToFavoritesButton timelineId="test" />
+        </TestProviders>
+      );
+      expect(
+        wrapper.find('[data-test-subj="timeline-favorite-empty-star"]').first().prop('disabled')
+      ).toEqual(false);
     });
   });
 });
