@@ -11,6 +11,10 @@
   flex-direction: column;
 }
 
+.tgcChart__wrapper text {
+  cursor: pointer;
+}
+
 .tgcChart__label {
   width: 100%;
   text-align: center;
