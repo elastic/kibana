@@ -18,7 +18,7 @@
   }
 }
 
-.privateSourcesLayout {
+.personalDashboardLayout {
   $sideBarWidth: $euiSize * 30;
   $consoleHeaderHeight: 48px; // NOTE: Keep an eye on this for changes
   $pageHeight: calc(100vh - #{$consoleHeaderHeight});

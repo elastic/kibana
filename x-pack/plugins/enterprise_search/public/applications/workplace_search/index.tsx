@@ -34,7 +34,7 @@ import { AccountSettings } from './views/account_settings';
 import { SourcesRouter } from './views/content_sources';
 import { SourceAdded } from './views/content_sources/components/source_added';
 import { SourceSubNav } from './views/content_sources/components/source_sub_nav';
-import { PrivateSourcesLayout } from './views/content_sources/private_sources_layout';
+import { PersonalDashboardLayout } from './views/content_sources/private_sources_layout';
 import { ErrorState } from './views/error_state';
 import { GroupsRouter } from './views/groups';
 import { GroupSubNav } from './views/groups/components/group_sub_nav';
@@ -101,14 +101,14 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
         )}
       </Route>
       <Route path={PERSONAL_SOURCES_PATH}>
-        <PrivateSourcesLayout restrictWidth readOnlyMode={readOnlyMode}>
+        <PersonalDashboardLayout restrictWidth readOnlyMode={readOnlyMode}>
           <SourcesRouter />
-        </PrivateSourcesLayout>
+        </PersonalDashboardLayout>
       </Route>
       <Route path={PERSONAL_SETTINGS_PATH}>
-        <PrivateSourcesLayout restrictWidth readOnlyMode={readOnlyMode}>
+        <PersonalDashboardLayout restrictWidth readOnlyMode={readOnlyMode}>
           <AccountSettings />
-        </PrivateSourcesLayout>
+        </PersonalDashboardLayout>
       </Route>
       <Route path={SOURCES_PATH}>
         <Layout

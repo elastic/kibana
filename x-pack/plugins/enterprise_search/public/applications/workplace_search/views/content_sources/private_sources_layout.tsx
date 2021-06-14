@@ -32,7 +32,7 @@ interface LayoutProps {
   readOnlyMode?: boolean;
 }
 
-export const PrivateSourcesLayout: React.FC<LayoutProps> = ({
+export const PersonalDashboardLayout: React.FC<LayoutProps> = ({
   children,
   restrictWidth,
   readOnlyMode,
@@ -51,8 +51,8 @@ export const PrivateSourcesLayout: React.FC<LayoutProps> = ({
   return (
     <>
       <AccountHeader />
-      <EuiPage className="enterpriseSearchLayout privateSourcesLayout">
-        <EuiPageSideBar className="enterpriseSearchLayout__sideBar privateSourcesLayout__sideBar">
+      <EuiPage className="enterpriseSearchLayout personalDashboardLayout">
+        <EuiPageSideBar className="enterpriseSearchLayout__sideBar personalDashboardLayout__sideBar">
           <ViewContentHeader title={PAGE_TITLE} description={PAGE_DESCRIPTION} />
           <SourceSubNav />
         </EuiPageSideBar>
