@@ -26,7 +26,7 @@ import {
   PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION,
   PRIVATE_CAN_CREATE_PAGE_DESCRIPTION,
 } from './constants';
-import { PersonalDashboardLayout } from './private_sources_layout';
+import { PersonalDashboardLayout } from './personal_dashboard_layout';
 
 describe('PersonalDashboardLayout', () => {
   const mockValues = {
