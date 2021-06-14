@@ -7,7 +7,6 @@
 
 import { notFound } from '@hapi/boom';
 import { debounce } from 'lodash';
-import { duration } from 'moment';
 import {
   CoreSetup,
   CoreStart,
