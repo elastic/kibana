@@ -69,7 +69,6 @@ interface Props {
   onTermChange: () => void;
   onChange: (updatedOptions: UrlOption[]) => void;
   searchValue: string;
-  onClose: () => void;
   popoverIsOpen: boolean;
   initialValue?: string;
   setPopoverIsOpen: React.Dispatch<SetStateAction<boolean>>;
@@ -82,7 +81,6 @@ export function SelectableUrlList({
   onTermChange,
   onChange,
   searchValue,
-  onClose,
   popoverIsOpen,
   setPopoverIsOpen,
   initialValue,
@@ -119,7 +117,6 @@ export function SelectableUrlList({
 
   const closePopover = () => {
     setPopoverIsOpen(false);
-    onClose();
     if (searchRef) {
       searchRef.blur();
     }
@@ -208,6 +205,7 @@ export function SelectableUrlList({
             button={search}
             closePopover={closePopover}
             style={{ minWidth: 400 }}
+            anchorPosition="downLeft"
           >
             <div style={{ width: 600, maxWidth: '100%' }}>
               <PopOverTitle />

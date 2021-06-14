@@ -5,40 +5,37 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { omit } from 'lodash';
 import { URLSearch } from './URLSearch';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
-import { LocalUIFilterName } from '../../../../../common/ui_filter';
 
 export function URLFilter() {
   const history = useHistory();
 
-  const setFilterValue = (name: LocalUIFilterName, value: string[]) => {
-    const search = omit(toQuery(history.location.search), name);
+  const setFilterValue = useCallback(
+    (value: string[]) => {
+      const name = 'transactionUrl';
+      const search = omit(toQuery(history.location.search), name);
 
-    history.push({
-      ...history.location,
-      search: fromQuery(
-        removeUndefinedProps({
-          ...search,
-          [name]: value.length ? value.join(',') : undefined,
-        })
-      ),
-    });
-  };
-
-  const name = 'transactionUrl';
+      history.push({
+        ...history.location,
+        search: fromQuery(
+          removeUndefinedProps({
+            ...search,
+            [name]: value.length ? value.join(',') : undefined,
+          })
+        ),
+      });
+    },
+    [history]
+  );
 
   return (
     <span data-cy="csmUrlFilter">
-      <URLSearch
-        onChange={(value) => {
-          setFilterValue(name, value);
-        }}
-      />
+      <URLSearch onChange={setFilterValue} />
     </span>
   );
 }

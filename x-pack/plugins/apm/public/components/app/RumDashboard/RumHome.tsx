@@ -35,7 +35,9 @@ export function RumHome() {
         pageHeader={
           isXXL
             ? {
-                pageTitle: UX_LABEL,
+                pageTitle: i18n.translate('xpack.apm.ux.overview', {
+                  defaultMessage: 'Overview',
+                }),
                 rightSideItems: [
                   <DatePicker />,
                   <div style={envStyle}>

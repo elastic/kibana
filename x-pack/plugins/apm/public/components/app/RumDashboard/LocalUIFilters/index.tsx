@@ -16,13 +16,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useLocalUIFilters } from '../hooks/useLocalUIFilters';
-import { LocalUIFilterName } from '../../../../../common/ui_filter';
+import {
+  filtersByName,
+  LocalUIFilterName,
+} from '../../../../../common/ui_filter';
 import { useBreakPoints } from '../../../../hooks/use_break_points';
 import { FieldValueSuggestions } from '../../../../../../observability/public';
 import { URLFilter } from '../URLFilter';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { SelectedFilters } from './SelectedFilters';
-import { useDynamicIndexPatternFetcher } from '../../../../hooks/use_dynamic_index_pattern';
 import { TRANSACTION_TYPE } from '../../../../../common/elasticsearch_fieldnames';
 import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
 import { useIndexPattern } from './use_index_pattern';
@@ -69,17 +71,19 @@ function LocalUIFilters() {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFilterGroup fullWidth={true}>
-            {filters.map((filter) => (
+            {filterNames.map((filterName) => (
               <FieldValueSuggestions
-                key={filter.name}
-                sourceField={filter.fieldName}
+                key={filterName}
+                sourceField={filtersByName[filterName].fieldName}
                 indexPatternTitle={indexPatternTitle}
-                label={filter.title}
+                label={filtersByName[filterName].title}
                 asCombobox={false}
-                selectedValue={filter.value}
+                selectedValue={
+                  filters.find((ft) => ft.name === filterName)?.value
+                }
                 asFilterButton={true}
                 onChange={(values) => {
-                  setFilterValue(filter.name, values || []);
+                  setFilterValue(filterName, values || []);
                 }}
                 filters={RUM_DATA_FILTERS}
                 time={{ from: start!, to: end! }}

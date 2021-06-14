@@ -131,11 +131,11 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
     updateSearchTerm(searchValue);
   };
 
-  const onClose = () => {
-    if (uiFilters.transactionUrl || checkedUrls.length > 0) {
+  useEffect(() => {
+    if (!popoverIsOpen) {
       onFilterChange(checkedUrls);
     }
-  };
+  }, [checkedUrls, onFilterChange, popoverIsOpen]);
 
   return (
     <SelectableUrlList
@@ -145,7 +145,6 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
       onTermChange={onTermChange}
       data={{ items, total: data?.total ?? 0 }}
       onChange={onChange}
-      onClose={onClose}
       searchValue={searchValue}
       popoverIsOpen={popoverIsOpen}
       setPopoverIsOpen={setPopoverIsOpen}

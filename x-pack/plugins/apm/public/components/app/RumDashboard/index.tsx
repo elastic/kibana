@@ -18,7 +18,7 @@ export function RumOverview() {
   return (
     <>
       <LocalUIFilters />
-      <EuiSpacer size="xs" />
+      <EuiSpacer size="m" />
       <RumDashboard />
     </>
   );
