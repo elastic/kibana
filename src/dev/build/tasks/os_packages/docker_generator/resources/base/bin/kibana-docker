@@ -38,6 +38,7 @@ kibana_vars=(
     elasticsearch.pingTimeout
     elasticsearch.requestHeadersWhitelist
     elasticsearch.requestTimeout
+    elasticsearch.serviceAccountToken
     elasticsearch.shardTimeout
     elasticsearch.sniffInterval
     elasticsearch.sniffOnConnectionFault
