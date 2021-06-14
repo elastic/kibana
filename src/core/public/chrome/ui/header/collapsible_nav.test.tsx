@@ -8,7 +8,6 @@
 
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { BehaviorSubject } from 'rxjs';
 import sinon from 'sinon';
 import { StubBrowserStorage } from '@kbn/test/jest';
