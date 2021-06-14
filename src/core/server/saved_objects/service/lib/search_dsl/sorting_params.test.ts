@@ -50,7 +50,7 @@ const MAPPINGS = {
       },
     },
   },
-};
+} as const;
 
 describe('searchDsl/getSortParams', () => {
   describe('type, no sortField', () => {

@@ -14,8 +14,8 @@ export default function ({ getPageObjects, getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('waffle map', () => {
-    before(() => esArchiver.load('infra/metrics_and_logs'));
-    after(() => esArchiver.unload('infra/metrics_and_logs'));
+    before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
+    after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
 
     it('should just work', async () => {
       await PageObjects.common.navigateToApp('infraOps');

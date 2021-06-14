@@ -38,6 +38,8 @@ export enum ConnectorTypes {
   none = '.none',
 }
 
+export const connectorTypes = Object.values(ConnectorTypes);
+
 const ConnectorJiraTypeFieldsRt = rt.type({
   type: rt.literal(ConnectorTypes.jira),
   fields: rt.union([JiraFieldsRT, rt.null]),
