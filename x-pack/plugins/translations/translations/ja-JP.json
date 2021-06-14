@@ -23627,7 +23627,6 @@
     "xpack.uptime.alerts.tls.criteriaExpression.ariaLabel": "このアラートで監視されるモニターの条件を示す式",
     "xpack.uptime.alerts.tls.criteriaExpression.description": "タイミング",
     "xpack.uptime.alerts.tls.criteriaExpression.value": "任意のモニター",
-    "xpack.uptime.alerts.tls.defaultActionMessage": "期限切れになるか古くなりすぎた{count} TLS個のTLS証明書証明書を検知しました。\n\n{expiringConditionalOpen}\n期限切れになる証明書数：{expiringCount}\n期限切れになる証明書：{expiringCommonNameAndDate}\n{expiringConditionalClose}\n\n{agingConditionalOpen}\n古い証明書数：{agingCount}\n古い証明書：{agingCommonNameAndDate}\n{agingConditionalClose}\n",
     "xpack.uptime.alerts.tls.description": "アップタイム監視の TLS 証明書の有効期限が近いときにアラートを発行します。",
     "xpack.uptime.alerts.tls.expirationExpression.ariaLabel": "証明書有効期限の TLS アラートをトリガーするしきい値を示す式",
     "xpack.uptime.alerts.tls.expirationExpression.description": "証明書が",

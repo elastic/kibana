@@ -23994,7 +23994,6 @@
     "xpack.uptime.alerts.tls.criteriaExpression.ariaLabel": "显示此告警监视的监测条件的表达式",
     "xpack.uptime.alerts.tls.criteriaExpression.description": "当",
     "xpack.uptime.alerts.tls.criteriaExpression.value": "任意监测",
-    "xpack.uptime.alerts.tls.defaultActionMessage": "已检测到 {count} 个即将过期或即将过时的 TLS 证书。\n\n{expiringConditionalOpen}\n即将过期的证书计数：{expiringCount}\n即将过期的证书：{expiringCommonNameAndDate}\n{expiringConditionalClose}\n\n{agingConditionalOpen}\n过时的证书计数：{agingCount}\n过时的证书：{agingCommonNameAndDate}\n{agingConditionalClose}\n",
     "xpack.uptime.alerts.tls.description": "运行时间监测的 TLS 证书即将过期时告警。",
     "xpack.uptime.alerts.tls.expirationExpression.ariaLabel": "显示将触发证书过期 TLS 告警的阈值的表达式",
     "xpack.uptime.alerts.tls.expirationExpression.description": "具有将在",
