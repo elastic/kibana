@@ -26,6 +26,15 @@ const ExpandedContent = styled.div`
   overflow-y: auto;
 `;
 
+const StyledLineClamp = styled.div<{ lineClampHeight: number }>`
+  display: -webkit-box;
+  -webkit-line-clamp: ${LINE_CLAMP};
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-height: ${({ lineClampHeight }) => lineClampHeight}em;
+  height: ${({ lineClampHeight }) => lineClampHeight}em;
+`;
+
 const LineClampComponent: React.FC<{
   content?: string | null;
   lineClampHeight?: number;
@@ -58,15 +67,6 @@ const LineClampComponent: React.FC<{
     return null;
   }
 
-  const StyledLineClamp = styled.div`
-    display: -webkit-box;
-    -webkit-line-clamp: ${LINE_CLAMP};
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    max-height: ${`${lineClampHeight}em`};
-    height: ${`${lineClampHeight}em`};
-  `;
-
   return (
     <>
       {isExpanded ? (
@@ -74,7 +74,11 @@ const LineClampComponent: React.FC<{
           <p>{content}</p>
         </ExpandedContent>
       ) : isOverflow == null || isOverflow === true ? (
-        <StyledLineClamp data-test-subj="styled-line-clamp" ref={descriptionRef}>
+        <StyledLineClamp
+          data-test-subj="styled-line-clamp"
+          ref={descriptionRef}
+          lineClampHeight={lineClampHeight}
+        >
           {content}
         </StyledLineClamp>
       ) : (
