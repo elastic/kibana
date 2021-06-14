@@ -178,7 +178,11 @@ export function createExecutionHandler<
       const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
 
       const event: IEvent = {
-        event: { action: EVENT_LOG_ACTIONS.executeAction },
+        event: {
+          action: EVENT_LOG_ACTIONS.executeAction,
+          kind: 'alert',
+          category: [alertType.producer],
+        },
         kibana: {
           alerting: {
             instance_id: alertInstanceId,
@@ -195,6 +199,14 @@ export function createExecutionHandler<
             },
             { type: 'action', id: action.id, type_id: action.actionTypeId, ...namespace },
           ],
+        },
+        rule: {
+          id: alertId,
+          license: alertType.minimumLicenseRequired,
+          category: alertType.id,
+          ruleset: alertType.producer,
+          ...namespace,
+          name: alertName,
         },
       };
 

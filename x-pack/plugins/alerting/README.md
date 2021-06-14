@@ -623,7 +623,7 @@ The _registerNavigation_ api allows you to register a handler for a specific ale
 alerting.registerNavigation(
 	'my-application-id',
 	'my-application-id.my-rule-type',
-	(alert: SanitizedAlert, alertType: AlertType) => `/my-unique-rule/${rule.id}`
+	(alert: SanitizedAlert) => `/my-unique-rule/${rule.id}`
 );
 ```
 
@@ -639,7 +639,7 @@ The _registerDefaultNavigation_ API allows you to register a handler for any rul
 ```
 alerting.registerDefaultNavigation(
 	'my-application-id',
-	(alert: SanitizedAlert, alertType: AlertType) => `/my-other-rules/${rule.id}`
+	(alert: SanitizedAlert) => `/my-other-rules/${rule.id}`
 );
 ```
 
