@@ -181,7 +181,9 @@ describe('healthRoute', () => {
       id,
       timestamp: expect.any(String),
       status: expect.any(String),
-      ...summarizeMonitoringStats(warnRuntimeStat, getTaskManagerConfig({})),
+      ...ignoreCapacityEstimation(
+        summarizeMonitoringStats(warnRuntimeStat, getTaskManagerConfig({}))
+      ),
     });
 
     const warnConfigurationLog = JSON.parse(
@@ -194,7 +196,9 @@ describe('healthRoute', () => {
       id,
       timestamp: expect.any(String),
       status: expect.any(String),
-      ...summarizeMonitoringStats(warnConfigurationStat, getTaskManagerConfig({})),
+      ...ignoreCapacityEstimation(
+        summarizeMonitoringStats(warnConfigurationStat, getTaskManagerConfig({}))
+      ),
     });
 
     const warnWorkloadLog = JSON.parse(
@@ -207,7 +211,9 @@ describe('healthRoute', () => {
       id,
       timestamp: expect.any(String),
       status: expect.any(String),
-      ...summarizeMonitoringStats(warnWorkloadStat, getTaskManagerConfig({})),
+      ...ignoreCapacityEstimation(
+        summarizeMonitoringStats(warnWorkloadStat, getTaskManagerConfig({}))
+      ),
     });
 
     expect(logger.warn).toHaveBeenCalledTimes(3);
@@ -270,7 +276,9 @@ describe('healthRoute', () => {
       id,
       timestamp: expect.any(String),
       status: expect.any(String),
-      ...summarizeMonitoringStats(errorRuntimeStat, getTaskManagerConfig({})),
+      ...ignoreCapacityEstimation(
+        summarizeMonitoringStats(errorRuntimeStat, getTaskManagerConfig({}))
+      ),
     });
 
     const errorConfigurationLog = JSON.parse(
@@ -283,7 +291,9 @@ describe('healthRoute', () => {
       id,
       timestamp: expect.any(String),
       status: expect.any(String),
-      ...summarizeMonitoringStats(errorConfigurationStat, getTaskManagerConfig({})),
+      ...ignoreCapacityEstimation(
+        summarizeMonitoringStats(errorConfigurationStat, getTaskManagerConfig({}))
+      ),
     });
 
     const errorWorkloadLog = JSON.parse(
@@ -296,7 +306,9 @@ describe('healthRoute', () => {
       id,
       timestamp: expect.any(String),
       status: expect.any(String),
-      ...summarizeMonitoringStats(errorWorkloadStat, getTaskManagerConfig({})),
+      ...ignoreCapacityEstimation(
+        summarizeMonitoringStats(errorWorkloadStat, getTaskManagerConfig({}))
+      ),
     });
 
     expect(logger.error).toHaveBeenCalledTimes(3);
@@ -358,7 +370,7 @@ describe('healthRoute', () => {
       id,
       timestamp: expect.any(String),
       status: expect.any(String),
-      ...summarizeMonitoringStats(stat, getTaskManagerConfig({})),
+      ...ignoreCapacityEstimation(summarizeMonitoringStats(stat, getTaskManagerConfig({}))),
     });
 
     const debugLog = JSON.parse(
@@ -371,7 +383,7 @@ describe('healthRoute', () => {
       id,
       timestamp: expect.any(String),
       status: expect.any(String),
-      ...summarizeMonitoringStats(nonWarnStat, getTaskManagerConfig({})),
+      ...ignoreCapacityEstimation(summarizeMonitoringStats(nonWarnStat, getTaskManagerConfig({}))),
     });
 
     expect(logger.warn).toHaveBeenCalledTimes(1);
