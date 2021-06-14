@@ -37,6 +37,7 @@ import {
 } from './correlations_table';
 import { useCorrelations } from './use_correlations';
 import { createHref, push } from '../../shared/Links/url_helpers';
+import { useUiTracker } from '../../../../../observability/public';
 
 export function roundToDecimalPlace(
   num?: number,
@@ -148,6 +149,7 @@ export function MlCorrelations({ onClose }: Props) {
     );
   }
   const history = useHistory();
+  const trackApmEvent = useUiTracker({ app: 'apm' });
 
   const mlCorrelationcolumns: Array<
     EuiBasicTableColumn<MlCorrelationsTerms>
@@ -211,8 +213,8 @@ export function MlCorrelations({ onClose }: Props) {
                 )}"`,
               },
             });
-            // onFilter();
-            // trackApmEvent({ metric: 'correlations_term_include_filter' });
+            onClose();
+            trackApmEvent({ metric: 'correlations_term_include_filter' });
           },
         },
         {
@@ -234,8 +236,8 @@ export function MlCorrelations({ onClose }: Props) {
                 )}"`,
               },
             });
-            // onFilter();
-            // trackApmEvent({ metric: 'correlations_term_exclude_filter' });
+            onClose();
+            trackApmEvent({ metric: 'correlations_term_exclude_filter' });
           },
         },
       ],
