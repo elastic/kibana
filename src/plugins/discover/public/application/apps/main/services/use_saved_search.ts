@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useEffect, useRef, useCallback, useMemo } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { merge, Subject, BehaviorSubject } from 'rxjs';
 import { debounceTime, tap, filter } from 'rxjs/operators';
-import { isEqual } from 'lodash';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverSearchSessionManager } from './discover_search_session';
 import {
@@ -18,13 +17,11 @@ import {
   SearchSource,
   tabifyAggResponse,
 } from '../../../../../../data/common';
-import { SavedSearch } from '../../../../saved_searches';
-import { AppState, GetStateReturn } from './discover_state';
+import { GetStateReturn } from './discover_state';
 import { ElasticSearchHit } from '../../../doc_views/doc_views_types';
 import { RequestAdapter } from '../../../../../../inspector/public';
 import { AutoRefreshDoneFn, search } from '../../../../../../data/public';
 import { calcFieldCounts } from '../utils/calc_field_counts';
-import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../../common';
 import { validateTimeRange } from '../utils/validate_time_range';
 import { updateSearchSource } from '../utils/update_search_source';
 import { SortOrder } from '../../../../saved_searches/types';
@@ -40,6 +37,7 @@ export type SavedSearchRefetchSubject = Subject<SavedSearchRefetchMsg>;
 export interface UseSavedSearch {
   refetch$: SavedSearchRefetchSubject;
   data$: SavedSearchDataSubject;
+  reset: () => void;
 }
 
 export type SavedSearchRefetchMsg = 'reset' | undefined;
@@ -59,47 +57,26 @@ export interface SavedSearchDataMessage {
 /**
  * This hook return 2 observables, refetch$ allows to trigger data fetching, data$ to subscribe
  * to the data fetching
- * @param indexPattern
- * @param savedSearch
- * @param searchSessionManager
- * @param searchSource
- * @param services
- * @param state
- * @param stateContainer
- * @param useNewFieldsApi
  */
 export const useSavedSearch = ({
   indexPattern,
-  savedSearch,
+  initialFetchStatus,
   searchSessionManager,
   searchSource,
   services,
-  state,
   stateContainer,
   useNewFieldsApi,
 }: {
   indexPattern: IndexPattern;
-  savedSearch: SavedSearch;
+  initialFetchStatus: FetchStatus;
   searchSessionManager: DiscoverSearchSessionManager;
   searchSource: SearchSource;
   services: DiscoverServices;
-  state: AppState;
   stateContainer: GetStateReturn;
   useNewFieldsApi: boolean;
 }): UseSavedSearch => {
-  const { data, filterManager, uiSettings } = services;
+  const { data, filterManager } = services;
   const timefilter = data.query.timefilter.timefilter;
-
-  const initFetchState: FetchStatus = useMemo(() => {
-    // A saved search is created on every page load, so we check the ID to see if we're loading a
-    // previously saved search or if it is just transient
-    const shouldSearchOnPageLoad =
-      uiSettings.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
-      savedSearch.id !== undefined ||
-      timefilter.getRefreshInterval().pause === false ||
-      searchSessionManager.hasSearchSessionIdInURL();
-    return shouldSearchOnPageLoad ? FetchStatus.LOADING : FetchStatus.UNINITIALIZED;
-  }, [uiSettings, savedSearch.id, searchSessionManager, timefilter]);
 
   /**
    * The observable the UI (aka React component) subscribes to get notified about
@@ -108,7 +85,7 @@ export const useSavedSearch = ({
   const data$: SavedSearchDataSubject = useSingleton(
     () =>
       new BehaviorSubject<SavedSearchDataMessage>({
-        state: initFetchState,
+        state: initialFetchStatus,
       })
   );
   /**
@@ -124,14 +101,13 @@ export const useSavedSearch = ({
   const refs = useRef<{
     abortController?: AbortController;
     /**
-     * used to compare a new state against an old one, to evaluate if data needs to be fetched
-     */
-    appState: AppState;
-    /**
      * handler emitted by `timefilter.getAutoRefreshFetch$()`
      * to notify when data completed loading and to start a new autorefresh loop
      */
     autoRefreshDoneCb?: AutoRefreshDoneFn;
+    /**
+     * Number of fetches used for functional testing
+     */
     fetchCounter: number;
     /**
      * needed to right auto refresh behavior, a new auto refresh shouldnt be triggered when
@@ -144,11 +120,26 @@ export const useSavedSearch = ({
      */
     fieldCounts: Record<string, number>;
   }>({
-    appState: state,
     fetchCounter: 0,
     fieldCounts: {},
-    fetchStatus: initFetchState,
+    fetchStatus: initialFetchStatus,
   });
+
+  const sendResetMsg = useCallback(
+    (fetchStatus?: FetchStatus) => {
+      refs.current.fieldCounts = {};
+      refs.current.fetchStatus = fetchStatus ?? initialFetchStatus;
+      data$.next({
+        state: initialFetchStatus,
+        fetchCounter: 0,
+        rows: [],
+        fieldCounts: {},
+        chartData: undefined,
+        bucketInterval: undefined,
+      });
+    },
+    [data$, initialFetchStatus]
+  );
 
   const fetchAll = useCallback(
     (reset = false) => {
@@ -161,23 +152,18 @@ export const useSavedSearch = ({
       refs.current.abortController = new AbortController();
       const sessionId = searchSessionManager.getNextSearchSessionId();
 
-      // Let the UI know, data fetching started
-      const loadingMessage: SavedSearchDataMessage = {
-        state: FetchStatus.LOADING,
-        fetchCounter: ++refs.current.fetchCounter,
-      };
-
       if (reset) {
-        // when runtime field was added, changed, deleted, index pattern was switched
-        loadingMessage.rows = [];
-        loadingMessage.fieldCounts = {};
-        loadingMessage.chartData = undefined;
-        loadingMessage.bucketInterval = undefined;
+        sendResetMsg(FetchStatus.LOADING);
+      } else {
+        // Let the UI know, data fetching started
+        data$.next({
+          state: FetchStatus.LOADING,
+          fetchCounter: ++refs.current.fetchCounter,
+        });
+        refs.current.fetchStatus = FetchStatus.LOADING;
       }
-      data$.next(loadingMessage);
-      refs.current.fetchStatus = loadingMessage.state;
 
-      const { sort } = stateContainer.appStateContainer.getState();
+      const { sort, hideChart, interval } = stateContainer.appStateContainer.getState();
       updateSearchSource(searchSource, false, {
         indexPattern,
         services,
@@ -185,8 +171,8 @@ export const useSavedSearch = ({
         useNewFieldsApi,
       });
       const chartAggConfigs =
-        indexPattern.timeFieldName && !state.hideChart && state.interval
-          ? getChartAggConfigs(searchSource, state.interval, data)
+        indexPattern.timeFieldName && !hideChart && interval
+          ? getChartAggConfigs(searchSource, interval, data)
           : undefined;
 
       if (!chartAggConfigs) {
@@ -217,16 +203,12 @@ export const useSavedSearch = ({
             state: FetchStatus.COMPLETE,
             rows: documents,
             inspectorAdapters,
-            fieldCounts: calcFieldCounts(
-              reset ? {} : refs.current.fieldCounts,
-              documents,
-              indexPattern
-            ),
+            fieldCounts: calcFieldCounts(refs.current.fieldCounts, documents, indexPattern),
             hits: res.rawResponse.hits.total as number,
           };
 
           if (chartAggConfigs) {
-            const bucketAggConfig = chartAggConfigs!.aggs[1];
+            const bucketAggConfig = chartAggConfigs.aggs[1];
             const tabifiedData = tabifyAggResponse(chartAggConfigs, res.rawResponse);
             const dimensions = getDimensions(chartAggConfigs, data);
             if (dimensions) {
@@ -259,14 +241,13 @@ export const useSavedSearch = ({
     [
       timefilter,
       services,
+      searchSessionManager,
       stateContainer.appStateContainer,
       searchSource,
       indexPattern,
       useNewFieldsApi,
-      state.hideChart,
-      state.interval,
       data,
-      searchSessionManager,
+      sendResetMsg,
       data$,
     ]
   );
@@ -306,32 +287,9 @@ export const useSavedSearch = ({
     fetchAll,
   ]);
 
-  /**
-   * Track state changes that should trigger a fetch
-   */
-  useEffect(() => {
-    const prevAppState = refs.current.appState;
-
-    // chart was hidden, now it should be displayed, so data is needed
-    const chartDisplayChanged = state.hideChart !== prevAppState.hideChart && !state.hideChart;
-    const chartIntervalChanged = state.interval !== prevAppState.interval;
-    const docTableSortChanged = !isEqual(state.sort, prevAppState.sort);
-    const indexPatternChanged = !isEqual(state.index, prevAppState.index);
-
-    refs.current.appState = state;
-    if (chartDisplayChanged || chartIntervalChanged || docTableSortChanged || indexPatternChanged) {
-      refetch$.next(indexPatternChanged ? 'reset' : undefined);
-    }
-  }, [refetch$, state.interval, state.sort, state]);
-
-  useEffect(() => {
-    if (initFetchState === FetchStatus.LOADING) {
-      refetch$.next();
-    }
-  }, [initFetchState, refetch$]);
-
   return {
     refetch$,
     data$,
+    reset: sendResetMsg,
   };
 };

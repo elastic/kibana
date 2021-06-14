@@ -6,19 +6,25 @@
  * Side Public License, v 1.
  */
 import { useMemo, useEffect, useState, useCallback } from 'react';
-import { cloneDeep } from 'lodash';
+import { isEqual } from 'lodash';
 import { History } from 'history';
 import { getState } from './discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
-import {
-  esFilters,
-  connectToQueryState,
-  syncQueryStateWithUrl,
-  IndexPattern,
-} from '../../../../../../data/public';
+import { IndexPattern } from '../../../../../../data/public';
 import { DiscoverServices } from '../../../../build_services';
 import { SavedSearch } from '../../../../saved_searches';
 import { loadIndexPattern } from '../utils/resolve_index_pattern';
+import { useSavedSearch as useSavedSearchData } from './use_saved_search';
+import {
+  MODIFY_COLUMNS_ON_SWITCH,
+  SEARCH_FIELDS_FROM_SOURCE,
+  SEARCH_ON_PAGE_LOAD_SETTING,
+  SORT_DEFAULT_ORDER_SETTING,
+} from '../../../../../common';
+import { useSearchSession } from './use_search_session';
+import { FetchStatus } from '../../../types';
+import { getSwitchIndexPatternAppState } from '../utils/get_switch_index_pattern_app_state';
+import { SortPairArr } from '../../../angular/doc_table/lib/get_sort';
 
 export function useDiscoverState({
   services,
@@ -31,9 +37,11 @@ export function useDiscoverState({
   history: History;
   initialIndexPattern: IndexPattern;
 }) {
-  const { uiSettings: config, data, filterManager } = services;
+  const { uiSettings: config, data, filterManager, indexPatterns } = services;
   const [indexPattern, setIndexPattern] = useState(initialIndexPattern);
   const [savedSearch, setSavedSearch] = useState(initialSavedSearch);
+  const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
+  const timefilter = data.query.timefilter.timefilter;
 
   const searchSource = useMemo(() => {
     savedSearch.searchSource.setField('index', indexPattern);
@@ -57,73 +65,80 @@ export function useDiscoverState({
     [config, data, history, savedSearch, services.core.notifications.toasts]
   );
 
-  const { appStateContainer, getPreviousAppState } = stateContainer;
+  const { appStateContainer } = stateContainer;
 
   const [state, setState] = useState(appStateContainer.getState());
 
-  useEffect(() => {
-    if (stateContainer.appStateContainer.getState().index !== indexPattern.id) {
-      // used index pattern is different than the given by url/state which is invalid
-      stateContainer.setAppState({ index: indexPattern.id });
-    }
-    // sync initial app filters from state to filterManager
-    const filters = appStateContainer.getState().filters;
-    if (filters) {
-      filterManager.setAppFilters(cloneDeep(filters));
-    }
-    const query = appStateContainer.getState().query;
-    if (query) {
-      data.query.queryString.setQuery(query);
-    }
+  /**
+   * Search session logic
+   */
+  const searchSessionManager = useSearchSession({ services, history, stateContainer, savedSearch });
 
-    const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
-      data.query,
-      appStateContainer,
-      {
-        filters: esFilters.FilterStateStore.APP_STATE,
-        query: true,
-      }
-    );
+  const initialFetchStatus: FetchStatus = useMemo(() => {
+    // A saved search is created on every page load, so we check the ID to see if we're loading a
+    // previously saved search or if it is just transient
+    const shouldSearchOnPageLoad =
+      config.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
+      savedSearch.id !== undefined ||
+      timefilter.getRefreshInterval().pause === false ||
+      searchSessionManager.hasSearchSessionIdInURL();
+    return shouldSearchOnPageLoad ? FetchStatus.LOADING : FetchStatus.UNINITIALIZED;
+  }, [config, savedSearch.id, searchSessionManager, timefilter]);
 
-    // syncs `_g` portion of url with query services
-    const { stop: stopSyncingGlobalStateWithUrl } = syncQueryStateWithUrl(
-      data.query,
-      stateContainer.kbnUrlStateStorage
-    );
-    return () => {
-      stopSyncingQueryAppStateWithStateContainer();
-      stopSyncingGlobalStateWithUrl();
-    };
-  }, [
-    appStateContainer,
-    config,
-    data.query,
-    data.search.session,
-    getPreviousAppState,
-    indexPattern.id,
-    filterManager,
-    services.indexPatterns,
+  /**
+   * Data fetching logic
+   */
+  const { data$, refetch$, reset } = useSavedSearchData({
+    indexPattern,
+    initialFetchStatus,
+    searchSessionManager,
+    searchSource,
+    services,
     stateContainer,
-  ]);
+    useNewFieldsApi,
+  });
 
   useEffect(() => {
-    const unsubscribe = stateContainer.appStateContainer.subscribe(async (nextState) => {
+    const stopSync = stateContainer.initializeAndSync(indexPattern, filterManager, data);
+    return () => {
+      stopSync();
+    };
+  }, [stateContainer, filterManager, data, indexPattern]);
+
+  /**
+   * Track state changes that should trigger a fetch
+   */
+  useEffect(() => {
+    const unsubscribe = appStateContainer.subscribe(async (nextState) => {
+      const { hideChart, interval, sort, index } = state;
+      // chart was hidden, now it should be displayed, so data is needed
+      const chartDisplayChanged = nextState.hideChart !== hideChart && !hideChart;
+      const chartIntervalChanged = nextState.interval !== interval;
+      const docTableSortChanged = !isEqual(nextState.sort, sort);
+      const indexPatternChanged = !isEqual(nextState.index, index);
       // NOTE: this is also called when navigating from discover app to context app
-      if (nextState.index && state.index !== nextState.index) {
-        const nextIndexPattern = await loadIndexPattern(
-          nextState.index,
-          services.indexPatterns,
-          config
-        );
+      if (nextState.index && indexPatternChanged) {
+        /**
+         *  Without resetting the fetch state, e.g. a time column would be displayed when switching
+         *  from a index pattern without to a index pattern with time filter for a brief moment
+         *  That's because appState is updated before savedSearchData$
+         *  The following line of code catches this, but should be improved
+         */
+        reset();
+        const nextIndexPattern = await loadIndexPattern(nextState.index, indexPatterns, config);
 
         if (nextIndexPattern) {
           setIndexPattern(nextIndexPattern.loaded);
         }
       }
+
+      if (chartDisplayChanged || chartIntervalChanged || docTableSortChanged) {
+        refetch$.next();
+      }
       setState(nextState);
     });
     return () => unsubscribe();
-  }, [config, services.indexPatterns, state.index, stateContainer.appStateContainer, setState]);
+  }, [config, indexPatterns, appStateContainer, setState, state, refetch$, data$, reset]);
 
   const resetSavedSearch = useCallback(
     async (id?: string) => {
@@ -143,13 +158,57 @@ export function useDiscoverState({
     [services, indexPattern, config, data, stateContainer, savedSearch.id]
   );
 
+  const onChangeIndexPattern = useCallback(
+    async (id: string) => {
+      const nextIndexPattern = await indexPatterns.get(id);
+      if (nextIndexPattern && indexPattern) {
+        const nextAppState = getSwitchIndexPatternAppState(
+          indexPattern,
+          nextIndexPattern,
+          state.columns || [],
+          (state.sort || []) as SortPairArr[],
+          config.get(MODIFY_COLUMNS_ON_SWITCH),
+          config.get(SORT_DEFAULT_ORDER_SETTING)
+        );
+        stateContainer.setAppState(nextAppState);
+      }
+    },
+    [config, indexPattern, indexPatterns, state.columns, state.sort, stateContainer]
+  );
+
+  const onUpdateQuery = useCallback(
+    (_payload, isUpdate?: boolean) => {
+      if (isUpdate === false) {
+        searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
+        refetch$.next();
+      }
+    },
+    [refetch$, searchSessionManager]
+  );
+
+  /**
+   * Initial data fetching, also if index pattern changes
+   */
+  useEffect(() => {
+    if (!indexPattern) {
+      return;
+    }
+    if (initialFetchStatus === FetchStatus.LOADING) {
+      refetch$.next();
+    }
+  }, [initialFetchStatus, refetch$, indexPattern, data$]);
+
   return {
-    state,
-    setState,
-    stateContainer,
+    data$,
     indexPattern,
-    searchSource,
-    savedSearch,
+    refetch$,
     resetSavedSearch,
+    onChangeIndexPattern,
+    onUpdateQuery,
+    savedSearch,
+    searchSource,
+    setState,
+    state,
+    stateContainer,
   };
 }

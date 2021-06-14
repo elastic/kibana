@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { isEqual } from 'lodash';
+import { isEqual, cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import { NotificationsStart, IUiSettingsClient } from 'kibana/public';
@@ -20,11 +20,15 @@ import {
   withNotifyOnErrors,
 } from '../../../../../../kibana_utils/public';
 import {
+  connectToQueryState,
   DataPublicPluginStart,
   esFilters,
   Filter,
+  FilterManager,
+  IndexPattern,
   Query,
   SearchSessionInfoProvider,
+  syncQueryStateWithUrl,
 } from '../../../../../../data/public';
 import { migrateLegacyQuery } from '../../../helpers/migrate_legacy_query';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
@@ -107,6 +111,12 @@ export interface GetStateReturn {
    * App state, the _a part of the URL
    */
   appStateContainer: ReduxLikeStateContainer<AppState>;
+
+  initializeAndSync: (
+    indexPattern: IndexPattern,
+    filterManager: FilterManager,
+    data: DataPublicPluginStart
+  ) => () => void;
   /**
    * Start sync between state and URL
    */
@@ -204,16 +214,18 @@ export function getState({
     stateStorage,
   });
 
+  const replaceUrlAppState = async (newPartial: AppState = {}) => {
+    const state = { ...appStateContainer.getState(), ...newPartial };
+    await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
+  };
+
   return {
     kbnUrlStateStorage: stateStorage,
     appStateContainer: appStateContainerModified,
     startSync: start,
     stopSync: stop,
     setAppState: (newPartial: AppState) => setState(appStateContainerModified, newPartial),
-    replaceUrlAppState: async (newPartial: AppState = {}) => {
-      const state = { ...appStateContainer.getState(), ...newPartial };
-      await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
-    },
+    replaceUrlAppState,
     resetInitialAppState: () => {
       initialAppState = appStateContainer.getState();
     },
@@ -224,6 +236,50 @@ export function getState({
     getPreviousAppState: () => previousAppState,
     flushToUrl: () => stateStorage.kbnUrlControls.flush(),
     isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
+    initializeAndSync: (
+      indexPattern: IndexPattern,
+      filterManager: FilterManager,
+      data: DataPublicPluginStart
+    ) => {
+      if (appStateContainer.getState().index !== indexPattern.id) {
+        // used index pattern is different than the given by url/state which is invalid
+        setState(appStateContainerModified, { index: indexPattern.id });
+      }
+      // sync initial app filters from state to filterManager
+      const filters = appStateContainer.getState().filters;
+      if (filters) {
+        filterManager.setAppFilters(cloneDeep(filters));
+      }
+      const query = appStateContainer.getState().query;
+      if (query) {
+        data.query.queryString.setQuery(query);
+      }
+
+      const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
+        data.query,
+        appStateContainer,
+        {
+          filters: esFilters.FilterStateStore.APP_STATE,
+          query: true,
+        }
+      );
+
+      // syncs `_g` portion of url with query services
+      const { stop: stopSyncingGlobalStateWithUrl } = syncQueryStateWithUrl(
+        data.query,
+        stateStorage
+      );
+
+      replaceUrlAppState({}).then(() => {
+        start();
+      });
+
+      return () => {
+        stopSyncingQueryAppStateWithStateContainer();
+        stopSyncingGlobalStateWithUrl();
+        stop();
+      };
+    },
   };
 }
 
