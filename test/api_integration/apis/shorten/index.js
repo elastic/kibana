@@ -13,16 +13,16 @@ export default function ({ getService }) {
   const kibanaServer = getService('kibanaServer');
 
   describe('url shortener', () => {
-    before(async () => {
-      await kibanaServer.importExport.load(
+    before(() =>
+      kibanaServer.importExport.load(
         'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
-      );
-    });
-    after(async () => {
-      await kibanaServer.importExport.unload(
+      )
+    );
+    after(() =>
+      kibanaServer.importExport.unload(
         'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
-      );
-    });
+      )
+    );
 
     it('generates shortened urls', async () => {
       const resp = await supertest
