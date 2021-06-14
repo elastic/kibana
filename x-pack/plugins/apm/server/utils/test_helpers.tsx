@@ -109,7 +109,7 @@ export async function inspectSearchParams(
   }
 
   return {
-    params: spy.mock.calls[0][0],
+    params: spy.mock.calls[0][1],
     response,
     error,
     spy,
