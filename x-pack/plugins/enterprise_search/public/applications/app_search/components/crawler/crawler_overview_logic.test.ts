@@ -73,7 +73,7 @@ describe('CrawlerOverviewLogic', () => {
           {
             id: '507f1f77bcf86cd799439011',
             createdOn: 'Mon, 31 Aug 2020 17:00:00 +0000',
-            url: 'moviedatabase.com',
+            url: 'elastic.co',
             documentCount: 13,
             sitemaps: [],
             entryPoints: [],
