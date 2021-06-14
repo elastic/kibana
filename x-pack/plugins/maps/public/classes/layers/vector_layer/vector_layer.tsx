@@ -49,6 +49,7 @@ import {
   DynamicStylePropertyOptions,
   MapFilters,
   MapQuery,
+  Timeslice,
   VectorJoinSourceRequestMeta,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
