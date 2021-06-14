@@ -14,21 +14,22 @@ import { FETCH_STATUS } from '../hooks/use_fetcher';
 import { usePluginContext } from '../hooks/use_plugin_context';
 import { useTimeRange } from '../hooks/use_time_range';
 import { getObservabilityAlerts } from '../services/get_observability_alerts';
-import {
-  HasDataResponse,
-  ObservabilityFetchDataPlugins,
-  UXHasDataResponse,
-} from '../typings/fetch_overview_data';
+import { ObservabilityFetchDataPlugins } from '../typings/fetch_overview_data';
+import { ApmIndicesConfig } from '../../common/typings';
 
 type DataContextApps = ObservabilityFetchDataPlugins | 'alert';
 
 export type HasDataMap = Record<
   DataContextApps,
-  { status: FETCH_STATUS; hasData?: boolean | HasDataResponse | UXHasDataResponse | Alert[] }
+  {
+    status: FETCH_STATUS;
+    hasData?: boolean | Alert[];
+    indices?: string | ApmIndicesConfig;
+  }
 >;
 
 export interface HasDataContextValue {
-  hasData: Partial<HasDataMap>;
+  hasDataMap: Partial<HasDataMap>;
   hasAnyData: boolean;
   isAllRequestsComplete: boolean;
   onRefreshTimeRange: () => void;
@@ -44,7 +45,7 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
   const [forceUpdate, setForceUpdate] = useState('');
   const { absoluteStart, absoluteEnd } = useTimeRange();
 
-  const [hasData, setHasData] = useState<HasDataContextValue['hasData']>({});
+  const [hasDataMap, setHasDataMap] = useState<HasDataContextValue['hasDataMap']>({});
 
   const isExploratoryView = useRouteMatch('/exploratory-view');
 
@@ -53,23 +54,39 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
       if (!isExploratoryView)
         apps.forEach(async (app) => {
           try {
-            if (app !== 'alert') {
-              const params =
-                app === 'ux'
-                  ? { absoluteTime: { start: absoluteStart, end: absoluteEnd } }
-                  : undefined;
-
-              const result = await getDataHandler(app)?.hasData(params);
-              setHasData((prevState) => ({
+            const updateState = (hasData?: boolean) => {
+              setHasDataMap((prevState) => ({
                 ...prevState,
                 [app]: {
-                  hasData: result,
+                  hasData,
                   status: FETCH_STATUS.SUCCESS,
                 },
               }));
+            };
+            switch (app) {
+              case 'ux':
+                const params = { absoluteTime: { start: absoluteStart, end: absoluteEnd } };
+                const resultUx = await getDataHandler(app)?.hasData(params);
+                updateState(resultUx?.hasData);
+                break;
+              case 'synthetics':
+                const resultSy = await getDataHandler(app)?.hasData();
+                updateState(resultSy?.hasData);
+
+                break;
+              case 'apm':
+                const resultApm = await getDataHandler(app)?.hasData();
+                updateState(resultApm?.hasData);
+
+                break;
+              case 'infra_logs':
+              case 'infra_metrics':
+                const resultInfra = await getDataHandler(app)?.hasData();
+                updateState(resultInfra);
+                break;
             }
           } catch (e) {
-            setHasData((prevState) => ({
+            setHasDataMap((prevState) => ({
               ...prevState,
               [app]: {
                 hasData: undefined,
@@ -87,7 +104,7 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
     async function fetchAlerts() {
       try {
         const alerts = await getObservabilityAlerts({ core });
-        setHasData((prevState) => ({
+        setHasDataMap((prevState) => ({
           ...prevState,
           alert: {
             hasData: alerts,
@@ -95,7 +112,7 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
           },
         }));
       } catch (e) {
-        setHasData((prevState) => ({
+        setHasDataMap((prevState) => ({
           ...prevState,
           alert: {
             hasData: undefined,
@@ -109,19 +126,18 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
   }, [forceUpdate, core]);
 
   const isAllRequestsComplete = apps.every((app) => {
-    const appStatus = hasData[app]?.status;
+    const appStatus = hasDataMap[app]?.status;
     return appStatus !== undefined && appStatus !== FETCH_STATUS.LOADING;
   });
 
-  const hasAnyData = (Object.keys(hasData) as ObservabilityFetchDataPlugins[]).some(
-    (app) =>
-      hasData[app]?.hasData === true || (hasData[app]?.hasData as HasDataResponse)?.hasData === true
+  const hasAnyData = (Object.keys(hasDataMap) as ObservabilityFetchDataPlugins[]).some(
+    (app) => hasDataMap[app]?.hasData === true
   );
 
   return (
     <HasDataContext.Provider
       value={{
-        hasData,
+        hasDataMap,
         hasAnyData,
         isAllRequestsComplete,
         forceUpdate,

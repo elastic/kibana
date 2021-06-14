@@ -19,17 +19,17 @@ import { EmptySection } from './empty_section';
 export function EmptySections() {
   const { core } = usePluginContext();
   const theme = useContext(ThemeContext);
-  const { hasData } = useHasData();
+  const { hasDataMap } = useHasData();
 
   const appEmptySections = getEmptySections({ core }).filter(({ id }) => {
     if (id === 'alert') {
-      const { status, hasData: alerts } = hasData.alert || {};
+      const { status, hasData: alerts } = hasDataMap.alert || {};
       return (
         status === FETCH_STATUS.FAILURE ||
         (status === FETCH_STATUS.SUCCESS && (alerts as Alert[]).length === 0)
       );
     } else {
-      const app = hasData[id];
+      const app = hasDataMap[id];
       if (app) {
         const _hasData = id === 'ux' ? (app.hasData as UXHasDataResponse)?.hasData : app.hasData;
         return app.status === FETCH_STATUS.FAILURE || !_hasData;

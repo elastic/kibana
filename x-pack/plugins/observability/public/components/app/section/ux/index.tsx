@@ -20,9 +20,9 @@ interface Props {
 }
 
 export function UXSection({ bucketSize }: Props) {
-  const { forceUpdate, hasData } = useHasData();
+  const { forceUpdate, hasDataMap } = useHasData();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
-  const uxHasDataResponse = (hasData.ux?.hasData as UXHasDataResponse) || {};
+  const uxHasDataResponse = (hasDataMap.ux?.hasData as UXHasDataResponse) || {};
   const serviceName = uxHasDataResponse.serviceName as string;
 
   const { data, status } = useFetcher(

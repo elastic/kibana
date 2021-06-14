@@ -127,6 +127,7 @@ export class ObservabilityIndexPatterns {
     if (!this.data) {
       throw new Error('data is not defined');
     }
+
     try {
       const indexPatternId = getAppIndexPatternId(app, indices);
       const indexPatternTitle = getAppIndicesWithPattern(app, indices);

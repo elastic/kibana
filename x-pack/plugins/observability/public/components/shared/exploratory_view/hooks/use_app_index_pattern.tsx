@@ -12,7 +12,6 @@ import { useKibana } from '../../../../../../../../src/plugins/kibana_react/publ
 import { ObservabilityPublicPluginsStart } from '../../../../plugin';
 import { ObservabilityIndexPatterns } from '../utils/observability_index_patterns';
 import { getDataHandler } from '../../../../data_handler';
-import { HasDataResponse } from '../../../../typings/fetch_overview_data';
 
 export interface IIndexPatternContext {
   loading: boolean;
@@ -48,11 +47,6 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
     services: { data },
   } = useKibana<ObservabilityPublicPluginsStart>();
 
-  const checkIfAppHasData = async (dataType: AppDataType) => {
-    const handler = getDataHandler(dataType === 'mobile' ? 'apm' : dataType);
-    return handler?.hasData();
-  };
-
   const loadIndexPattern: IIndexPatternContext['loadIndexPattern'] = useCallback(
     async ({ dataType }) => {
       setSelectedApp(dataType);
@@ -60,15 +54,27 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
       if (hasAppData[dataType] === null) {
         setLoading(true);
         try {
-          const hasDataResponse = (await checkIfAppHasData(dataType)) as HasDataResponse;
-
-          const hasDataT = hasDataResponse.hasData;
-
+          let hasDataT = false;
+          let indices: string | undefined = '';
+          switch (dataType) {
+            case 'ux':
+            case 'synthetics':
+              const resultUx = await getDataHandler(dataType)?.hasData();
+              hasDataT = Boolean(resultUx?.hasData);
+              indices = resultUx?.indices;
+              break;
+            case 'apm':
+            case 'mobile':
+              const resultApm = await getDataHandler('apm')?.hasData();
+              hasDataT = Boolean(resultApm?.hasData);
+              indices = resultApm?.indices['apm_oss.transactionIndices'];
+              break;
+          }
           setHasAppData((prevState) => ({ ...prevState, [dataType]: hasDataT }));
 
-          if (hasDataT || hasAppData?.[dataType]) {
+          if (hasDataT && indices) {
             const obsvIndexP = new ObservabilityIndexPatterns(data);
-            const indPattern = await obsvIndexP.getIndexPattern(dataType, hasDataResponse.indices);
+            const indPattern = await obsvIndexP.getIndexPattern(dataType, indices);
 
             setIndexPatterns((prevState) => ({ ...prevState, [dataType]: indPattern }));
           }

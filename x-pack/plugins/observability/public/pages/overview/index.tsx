@@ -48,13 +48,13 @@ export function OverviewPage({ routeParams }: Props) {
 
   const { data: newsFeed } = useFetcher(() => getNewsFeed({ core }), [core]);
 
-  const { hasData, hasAnyData } = useHasData();
+  const { hasDataMap, hasAnyData } = useHasData();
 
   if (hasAnyData === undefined) {
     return <LoadingObservability />;
   }
 
-  const alerts = (hasData.alert?.hasData as Alert[]) || [];
+  const alerts = (hasDataMap.alert?.hasData as Alert[]) || [];
 
   const { refreshInterval = 10000, refreshPaused = true } = routeParams.query;
 

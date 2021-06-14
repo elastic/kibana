@@ -7,6 +7,8 @@
 
 import { ObservabilityApp } from '../../../typings/common';
 import { UXMetrics } from '../../components/shared/core_web_vitals';
+import { ApmIndicesConfig } from '../../../common/typings';
+
 export interface Stat {
   type: 'number' | 'percent' | 'bytesPerSecond';
   value: number;
@@ -34,11 +36,20 @@ export interface HasDataParams {
 
 export interface HasDataResponse {
   hasData: boolean;
-  indices: string;
 }
 
 export interface UXHasDataResponse extends HasDataResponse {
   serviceName: string | number | undefined;
+  indices: string;
+}
+
+export interface SyntheticsHasDataResponse extends HasDataResponse {
+  indices: string;
+}
+
+export interface APMHasDataResponse {
+  hasData: boolean;
+  indices: ApmIndicesConfig;
 }
 
 export type FetchData<T extends FetchDataResponse = FetchDataResponse> = (
@@ -134,9 +145,9 @@ export interface ObservabilityFetchDataResponse {
 }
 
 export interface ObservabilityHasDataResponse {
-  apm: HasDataResponse;
+  apm: APMHasDataResponse;
   infra_metrics: boolean;
   infra_logs: boolean;
-  synthetics: HasDataResponse;
+  synthetics: SyntheticsHasDataResponse;
   ux: UXHasDataResponse;
 }

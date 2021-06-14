@@ -30,12 +30,12 @@ export function getHasData({ setup }: { setup: Setup }) {
       const response = await apmEventClient.search(params);
       return {
         hasData: response.hits.total.value > 0,
-        indices: setup.indices['apm_oss.transactionIndices']!,
+        indices: setup.indices,
       };
     } catch (e) {
       return {
         hasData: false,
-        indices: setup.indices['apm_oss.transactionIndices']!,
+        indices: setup.indices,
       };
     }
   });
