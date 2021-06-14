@@ -31,7 +31,6 @@ export default async function ({ readConfigFile }) {
         '--server.xsrf.disableProtection=true',
         '--server.compression.referrerWhitelist=["some-host.com"]',
         `--savedObjects.maxImportExportSize=10001`,
-        '--savedObjects.maxImportPayloadBytes=30000000',
         // for testing set buffer duration to 0 to immediately flush counters into saved objects.
         '--usageCollection.usageCounters.bufferDuration=0',
       ],

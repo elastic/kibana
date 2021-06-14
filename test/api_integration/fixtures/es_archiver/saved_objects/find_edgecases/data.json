@@ -1,0 +1,93 @@
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "visualization:title-with-dash",
+    "source": {
+      "type": "visualization",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "visualization": {
+        "title": "my-visualization",
+        "visState": "{}",
+        "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+        }
+      },
+      "references": []
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "visualization:title-with-asterisk",
+    "source": {
+      "type": "visualization",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "visualization": {
+        "title": "some*visualization",
+        "visState": "{}",
+        "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+        }
+      },
+      "references": []
+    }
+  }
+}
+
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "visualization:noise-1",
+    "source": {
+      "type": "visualization",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "visualization": {
+        "title": "Just some noise in the dataset",
+        "visState": "{}",
+        "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+        }
+      },
+      "references": []
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "visualization:noise-2",
+    "source": {
+      "type": "visualization",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "visualization": {
+        "title": "Just some noise in the dataset",
+        "visState": "{}",
+        "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+        }
+      },
+      "references": []
+    }
+  }
+}
+

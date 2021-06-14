@@ -9,20 +9,12 @@
 import expect from '@kbn/expect';
 
 export default function ({ getService }) {
+  const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  const kibanaServer = getService('kibanaServer');
 
   describe('url shortener', () => {
-    before(async () => {
-      await kibanaServer.importExport.load(
-        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
-      );
-    });
-    after(async () => {
-      await kibanaServer.importExport.unload(
-        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
-      );
-    });
+    before(() => esArchiver.load('test/api_integration/fixtures/es_archiver/saved_objects/basic'));
+    after(() => esArchiver.unload('test/api_integration/fixtures/es_archiver/saved_objects/basic'));
 
     it('generates shortened urls', async () => {
       const resp = await supertest
