@@ -6,7 +6,6 @@
  */
 
 import { maybe } from '../../../../common/utils/maybe';
-import awsIcon from './icons/aws.svg';
 import cassandraIcon from './icons/cassandra.svg';
 import databaseIcon from './icons/database.svg';
 import defaultIcon from './icons/default.svg';
