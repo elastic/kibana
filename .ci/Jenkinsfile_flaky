@@ -4,7 +4,6 @@ library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
 def TASK_PARAM = params.TASK ?: params.CI_GROUP
-TASK_PARAM = 'oss:pluginFunctional' // TODO remove after testing
 // Looks like 'oss:ciGroup:1', 'oss:firefoxSmoke'
 def JOB_PARTS = TASK_PARAM.split(':')
 def IS_XPACK = JOB_PARTS[0] == 'xpack'
