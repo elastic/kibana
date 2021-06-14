@@ -188,13 +188,13 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     describe('isExportable API', () => {
       before(async () => {
         await esArchiver.load(
-          '../functional/fixtures/es_archiver/saved_objects_management/export_exclusion'
+          'test/functional/fixtures/es_archiver/saved_objects_management/export_exclusion'
         );
       });
 
       after(async () => {
         await esArchiver.unload(
-          '../functional/fixtures/es_archiver/saved_objects_management/export_exclusion'
+          'test/functional/fixtures/es_archiver/saved_objects_management/export_exclusion'
         );
       });
 
