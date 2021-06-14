@@ -16,20 +16,21 @@ export class DashboardExpectService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
   private readonly filterBar = this.ctx.getService('filterBar');
-  private readonly PageObjects = this.ctx.getPageObjects(['dashboard', 'visualize', 'visChart']);
+  private readonly dashboard = this.ctx.getPageObject('dashboard');
+  private readonly visChart = this.ctx.getPageObject('visChart');
   private readonly findTimeout = 2500;
 
   async panelCount(expectedCount: number) {
     this.log.debug(`DashboardExpect.panelCount(${expectedCount})`);
     await this.retry.try(async () => {
-      const panelCount = await this.PageObjects.dashboard.getPanelCount();
+      const panelCount = await this.dashboard.getPanelCount();
       expect(panelCount).to.be(expectedCount);
     });
   }
 
   async visualizationsArePresent(vizList: string[]) {
     this.log.debug('Checking all visualisations are present on dashsboard');
-    let notLoaded = await this.PageObjects.dashboard.getNotLoadedVisualizations(vizList);
+    let notLoaded = await this.dashboard.getNotLoadedVisualizations(vizList);
     // TODO: Determine issue occasionally preventing 'geo map' from loading
     notLoaded = notLoaded.filter((x) => x !== 'Rendering Test: geo map');
     expect(notLoaded).to.be.empty();
@@ -231,7 +232,7 @@ export class DashboardExpectService extends FtrService {
   async dataTableRowCount(expectedCount: number) {
     this.log.debug(`DashboardExpect.dataTableRowCount(${expectedCount})`);
     await this.retry.try(async () => {
-      const dataTableRows = await this.PageObjects.visChart.getTableVisContent();
+      const dataTableRows = await this.visChart.getTableVisContent();
       expect(dataTableRows.length).to.be(expectedCount);
     });
   }
@@ -239,7 +240,7 @@ export class DashboardExpectService extends FtrService {
   async dataTableNoResult() {
     this.log.debug(`DashboardExpect.dataTableNoResult`);
     await this.retry.try(async () => {
-      await this.PageObjects.visChart.getTableVisNoResult();
+      await this.visChart.getTableVisNoResult();
     });
   }
 
