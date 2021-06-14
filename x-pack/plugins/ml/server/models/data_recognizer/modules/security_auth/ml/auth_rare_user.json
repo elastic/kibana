@@ -22,7 +22,7 @@
   },
   "allow_lazy_open": true,
   "analysis_limits": {
-    "model_memory_limit": "2mb"
+    "model_memory_limit": "128mb"
   },
   "data_description": {
     "time_field": "@timestamp"
