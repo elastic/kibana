@@ -17,11 +17,16 @@ import { MetricsExplorerCharts } from './components/charts';
 import { MetricsExplorerToolbar } from './components/toolbar';
 import { useMetricsExplorerState } from './hooks/use_metric_explorer_state';
 import { useSavedViewContext } from '../../../containers/saved_view/saved_view';
+import { MetricsPageTemplate } from '../page_template';
 
 interface MetricsExplorerPageProps {
   source: MetricsSourceConfigurationProperties;
   derivedIndexPattern: IIndexPattern;
 }
+
+const metricsExplorerTitle = i18n.translate('xpack.infra.metrics.metricsExplorerTitle', {
+  defaultMessage: 'Metrics Explorer',
+});
 
 export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExplorerPageProps) => {
   const {
@@ -73,43 +78,49 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
           })
         }
       />
-      <MetricsExplorerToolbar
-        derivedIndexPattern={derivedIndexPattern}
-        timeRange={currentTimerange}
-        options={options}
-        chartOptions={chartOptions}
-        onRefresh={handleRefresh}
-        onTimeChange={handleTimeChange}
-        onGroupByChange={handleGroupByChange}
-        onFilterQuerySubmit={handleFilterQuerySubmit}
-        onMetricsChange={handleMetricsChange}
-        onAggregationChange={handleAggregationChange}
-        onChartOptionsChange={setChartOptions}
-      />
-      {error ? (
-        <NoData
-          titleText="Whoops!"
-          bodyText={i18n.translate('xpack.infra.metricsExplorer.errorMessage', {
-            defaultMessage: 'It looks like the request failed with "{message}"',
-            values: { message: error.message },
-          })}
-          onRefetch={handleRefresh}
-          refetchText="Try Again"
-        />
-      ) : (
-        <MetricsExplorerCharts
+      <MetricsPageTemplate
+        pageHeader={{
+          pageTitle: metricsExplorerTitle,
+        }}
+      >
+        <MetricsExplorerToolbar
+          derivedIndexPattern={derivedIndexPattern}
           timeRange={currentTimerange}
-          loading={loading}
-          data={data}
-          source={source}
           options={options}
           chartOptions={chartOptions}
-          onLoadMore={handleLoadMore}
-          onFilter={handleFilterQuerySubmit}
-          onRefetch={handleRefresh}
+          onRefresh={handleRefresh}
           onTimeChange={handleTimeChange}
+          onGroupByChange={handleGroupByChange}
+          onFilterQuerySubmit={handleFilterQuerySubmit}
+          onMetricsChange={handleMetricsChange}
+          onAggregationChange={handleAggregationChange}
+          onChartOptionsChange={setChartOptions}
         />
-      )}
+        {error ? (
+          <NoData
+            titleText="Whoops!"
+            bodyText={i18n.translate('xpack.infra.metricsExplorer.errorMessage', {
+              defaultMessage: 'It looks like the request failed with "{message}"',
+              values: { message: error.message },
+            })}
+            onRefetch={handleRefresh}
+            refetchText="Try Again"
+          />
+        ) : (
+          <MetricsExplorerCharts
+            timeRange={currentTimerange}
+            loading={loading}
+            data={data}
+            source={source}
+            options={options}
+            chartOptions={chartOptions}
+            onLoadMore={handleLoadMore}
+            onFilter={handleFilterQuerySubmit}
+            onRefetch={handleRefresh}
+            onTimeChange={handleTimeChange}
+          />
+        )}
+      </MetricsPageTemplate>
     </EuiErrorBoundary>
   );
 };
