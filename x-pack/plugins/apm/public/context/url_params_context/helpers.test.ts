@@ -171,21 +171,13 @@ describe('url_params_context helpers', () => {
     it('returns undefined when date in not relative', () => {
       expect(helpers.getExactDate('2021-01-28T05:47:52.134Z')).toBeUndefined();
     });
-    it('returns exact date', () => {
-      jest
-        .spyOn(datemath, 'parse')
-        .mockReturnValue(moment('2021-06-02T17:56:49.260Z').utc());
-      expect(helpers.getExactDate('now-24h/h')?.toISOString()).toEqual(
-        '2021-06-02T17:56:49.260Z'
-      );
-    });
-    it('returns original date when now/d is passed', () => {
-      jest
-        .spyOn(datemath, 'parse')
-        .mockReturnValue(moment('2021-06-02T17:00:00.000Z').utc());
-      expect(helpers.getExactDate('now/d')?.toISOString()).toEqual(
-        '2021-06-02T17:00:00.000Z'
-      );
+
+    it('removes rounding option from relative time', () => {
+      const spy = jest.spyOn(datemath, 'parse');
+      helpers.getExactDate('now/d');
+      expect(spy).toHaveBeenCalledWith('now', {});
+      helpers.getExactDate('now-24h/h');
+      expect(spy).toHaveBeenCalledWith('now-24h', {});
     });
   });
 });

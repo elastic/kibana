@@ -23,18 +23,7 @@ export function getExactDate(rawDate?: string, options = {}) {
   if (rawDate) {
     const isRelativeDate = rawDate.substring(0, 3) === 'now';
     if (isRelativeDate) {
-      const isSubtractingDate = rawDate.indexOf('-') > 0;
-      const isRoundingDate = rawDate.indexOf('/') > 0;
-
-      const rawDateWithouRounding =
-        // When relative time is subtracting a period and rounding the result (e.g. now-24h/h)
-        // removed the rounding part in order to get the exact time.
-        // This is needed because of of "Today"(now/d) and "This week"(now/w) options, it rounds the values up and down
-        // so the exact time is the rounded value.
-        isSubtractingDate && isRoundingDate
-          ? rawDate.substring(0, rawDate.indexOf('/'))
-          : rawDate;
-
+      const rawDateWithouRounding = rawDate.replace(/\/(\w)$/, '');
       return getParsedDate(rawDateWithouRounding, options);
     }
   }
@@ -74,15 +63,15 @@ export function getDateRange({
 
   // rounds down start to minute
   const roundedStart = moment(start).startOf('minute');
+  // rounds down to minute
+  const exactStart = getExactDate(rangeFrom) || roundedStart;
+  const exactEnd = getExactDate(rangeTo, { roundUp: true }) || end;
 
   return {
     start: roundedStart.toISOString(),
-    exactStart:
-      getExactDate(rangeFrom)?.toISOString() || roundedStart.toISOString(),
+    exactStart: exactStart.toISOString(),
     end: end.toISOString(),
-    exactEnd:
-      getExactDate(rangeTo, { roundUp: true })?.toISOString() ||
-      end.toISOString(),
+    exactEnd: exactEnd.toISOString(),
   };
 }
 
