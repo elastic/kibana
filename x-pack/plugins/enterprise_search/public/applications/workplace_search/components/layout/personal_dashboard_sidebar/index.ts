@@ -6,3 +6,4 @@
  */
 
 export { PrivateSourcesSidebar } from './private_sources_sidebar';
+export { AccountSettingsSidebar } from './account_settings_sidebar';

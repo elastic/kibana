@@ -662,6 +662,20 @@ export const PRIVATE_SOURCES = i18n.translate(
   }
 );
 
+export const ACCOUNT_SETTINGS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.accountSettings.title',
+  {
+    defaultMessage: 'Account Settings',
+  }
+);
+
+export const ACCOUNT_SETTINGS_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.accountSettings.description',
+  {
+    defaultMessage: 'Manage access, passwords, and other account settings.',
+  }
+);
+
 export const CONFIRM_CHANGES_TEXT = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.confirmChanges.text',
   {
