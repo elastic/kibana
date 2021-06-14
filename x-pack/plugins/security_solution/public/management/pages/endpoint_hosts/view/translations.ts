@@ -16,46 +16,43 @@ export const ACTIVITY_LOG = {
     defaultMessage: 'Activity Log',
   }),
   LogEntry: {
-    host: i18n.translate('xpack.securitySolution.endpointDetails.activityLog.logEntry', {
-      defaultMessage: 'host',
-    }),
     action: {
-      isolated: i18n.translate(
+      isolatedAction: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.action.isolated',
         {
-          defaultMessage: 'isolated',
+          defaultMessage: 'isolated host',
         }
       ),
-      unisolated: i18n.translate(
+      unisolatedAction: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.action.unisolated',
         {
-          defaultMessage: 'unisolated',
+          defaultMessage: 'unisolated host',
         }
       ),
     },
     response: {
-      isolation: i18n.translate(
-        'xpack.securitySolution.endpointDetails.activityLog.logEntry.response.isolation',
+      isolationSuccessful: i18n.translate(
+        'xpack.securitySolution.endpointDetails.activityLog.logEntry.response.isolationSuccessful',
         {
-          defaultMessage: 'isolation',
+          defaultMessage: 'host isolation successful',
         }
       ),
-      unisolation: i18n.translate(
-        'xpack.securitySolution.endpointDetails.activityLog.logEntry.response.unisolation',
+      isolationFailed: i18n.translate(
+        'xpack.securitySolution.endpointDetails.activityLog.logEntry.response.isolationFailed',
         {
-          defaultMessage: 'unisolation',
+          defaultMessage: 'host isolation failed',
         }
       ),
-      successful: i18n.translate(
-        'xpack.securitySolution.endpointDetails.activityLog.logEntry.response.successful.',
+      unisolationSuccessful: i18n.translate(
+        'xpack.securitySolution.endpointDetails.activityLog.logEntry.response.unisolationSuccessful',
         {
-          defaultMessage: 'successful',
+          defaultMessage: 'host unisolation successful',
         }
       ),
-      failed: i18n.translate(
-        'xpack.securitySolution.endpointDetails.activityLog.logEntry.response.failed',
+      unisolationFailed: i18n.translate(
+        'xpack.securitySolution.endpointDetails.activityLog.logEntry.response.unisolationFailed',
         {
-          defaultMessage: 'failed',
+          defaultMessage: 'host unisolation failed',
         }
       ),
     },
