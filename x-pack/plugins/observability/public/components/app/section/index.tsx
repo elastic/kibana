@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiLink, EuiPanel, EuiSpacer, EuiTitle, EuiButton } from '@elastic/eui';
+import { EuiAccordion, EuiPanel, EuiSpacer, EuiTitle, EuiButton } from '@elastic/eui';
 import React from 'react';
 import { ErrorPanel } from './error_panel';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
@@ -37,7 +37,7 @@ export function SectionContainer({ title, appLink, children, hasError }: Props) 
         }
         extraAction={
           appLink?.href && (
-  <EuiButton href={core.http.basePath.prepend(appLink.href)}>{appLink.label}</EuiButton>
+            <EuiButton href={core.http.basePath.prepend(appLink.href)}>{appLink.label}</EuiButton>
           )
         }
       >
