@@ -25,7 +25,12 @@ export interface UseConnectorsResponse {
   permissionsError?: string;
 }
 
-export const useConnectors = (): UseConnectorsResponse => {
+/**
+ * Retrieves the configured case connectors
+ *
+ * @param toastPermissionsErrors boolean controlling whether 403 and 401 errors should be displayed in a toast error
+ */
+export const useConnectors = (toastPermissionsErrors: boolean = true): UseConnectorsResponse => {
   const toasts = useToasts();
   const [state, setState] = useState<ConnectorsState>({
     loading: true,
@@ -56,11 +61,14 @@ export const useConnectors = (): UseConnectorsResponse => {
       if (!isCancelledRef.current) {
         let permissionsError: string | undefined;
         if (error.name !== 'AbortError') {
-          // if the error was related to permissions then attempt to let the caller know if we have a callback
-          // if it's not permissions related then toast it, or if the callback is undefined toast it as well
+          // if the error was related to permissions then let's return a boilerplate error message describing the problem
           if (error.body?.statusCode === 403 || error.body?.statusCode === 401) {
             permissionsError = i18n.READ_PERMISSIONS_ERROR_MSG;
-          } else {
+          }
+
+          // if the error was not permissions related then toast it
+          // if it was permissions related (permissionsError was defined) and the caller wants to toast, then create a toast
+          if (permissionsError === undefined || toastPermissionsErrors) {
             toasts.addError(
               error.body && error.body.message ? new Error(error.body.message) : error,
               { title: i18n.ERROR_TITLE }
