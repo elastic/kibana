@@ -55,6 +55,8 @@ export function UXActionMenu({
     http?.basePath.get()
   );
 
+  const kibana = useKibana();
+
   return (
     <HeaderMenuPortal
       setHeaderActionMenu={appMountParameters.setHeaderActionMenu}
@@ -78,8 +80,16 @@ export function UXActionMenu({
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiButtonEmpty iconType="indexOpen" iconSide="left">
-            Add data
+          <EuiButtonEmpty
+            iconType="indexOpen"
+            iconSide="left"
+            href={kibana.services?.application?.getUrlForApp(
+              '/home#/tutorial/apm'
+            )}
+          >
+            {i18n.translate('xpack.apm.addDataButtonLabel', {
+              defaultMessage: 'Add data',
+            })}
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
