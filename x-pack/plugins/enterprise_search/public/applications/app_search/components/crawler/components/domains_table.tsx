@@ -53,9 +53,12 @@ export const DomainsTable: React.FC = () => {
   ];
 
   const actionsColumn: EuiBasicTableColumn<CrawlerDomain> = {
-    name: i18n.translate('xpack.enterpriseSearch.appSearch.crawlerOverview.table.column.actions', {
-      defaultMessage: 'Actions',
-    }),
+    name: i18n.translate(
+      'xpack.enterpriseSearch.appSearch.crawlerOverview.domainsTable.column.actions',
+      {
+        defaultMessage: 'Actions',
+      }
+    ),
     actions: [
       {
         name: MANAGE_BUTTON_LABEL,
