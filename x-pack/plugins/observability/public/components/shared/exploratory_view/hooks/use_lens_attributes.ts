@@ -42,7 +42,8 @@ export const useLensAttributes = ({
 }: Props): TypedLensByValueInput['attributes'] | null => {
   const { getSeries } = useSeriesStorage();
   const series = getSeries(seriesId);
-  const { breakdown, seriesType, operationType, reportType, reportDefinitions = {} } = series ?? {};
+  const { breakdown, seriesType, operationType, reportType, dataType, reportDefinitions = {} } =
+    series ?? {};
 
   const { indexPattern } = useAppIndexPatternContext();
 
@@ -52,8 +53,8 @@ export const useLensAttributes = ({
     }
 
     const dataViewConfig = getDefaultConfigs({
-      seriesId,
       reportType,
+      dataType,
       indexPattern,
     });
 
@@ -78,12 +79,12 @@ export const useLensAttributes = ({
     return lensAttributes.getJSON();
   }, [
     indexPattern,
-    breakdown,
-    seriesType,
-    operationType,
     reportType,
     reportDefinitions,
-    seriesId,
+    dataType,
     series.filters,
+    seriesType,
+    operationType,
+    breakdown,
   ]);
 };
