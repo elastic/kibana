@@ -1,14 +1,14 @@
 [role="xpack"]
 [[geo-alerting]]
-=== Geo rule type
+=== Tracking containment
 
-The Tracking containment rule type runs an {es} query over indices, determining if any
+<<maps, Maps>> offers the Tracking containment rule type which runs an {es} query over indices to determine whether any
 documents are currently contained within any boundaries from the specified boundary index.
 In the event that an entity is contained within a boundary, an alert may be generated.
 
 [float]
-==== Geo alerting requirements
-To create a *Tracking containment* rule, the following requirements must be present:
+==== Requirements
+To create a Tracking containment rule, the following requirements must be present:
 
 - *Tracks index or index pattern*: An index containing a `geo_point` field, `date` field,
 and some form of entity identifier. An entity identifier is a `keyword` or `number`
@@ -29,7 +29,7 @@ than the current time minus the amount of the interval. If data older than
 [float]
 ==== Create the rule
 
-Fill in the <<defining-rules-general-details, rule details>>, then select *Tracking containment*.
+Fill in the <<defining-rules-general-details, rule details>>, then select Tracking containment.
 
 [float]
 ==== Define the conditions

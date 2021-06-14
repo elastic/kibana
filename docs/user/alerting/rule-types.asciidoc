@@ -15,7 +15,7 @@ see {subscriptions}[the subscription page].
 [[stack-rules]]
 === Stack rules
 
-Stack rules are built into {kib}.  To access the *Stack Rules* feature and create and edit rules, users require the `all` privilege. See <<kibana-feature-privileges, feature privileges>> for more information.
+<<alert-management, Stack rules>> are built into {kib}.  To access the *Stack Rules* feature and create and edit rules, users require the `all` privilege. See <<kibana-feature-privileges, feature privileges>> for more information.
 
 [cols="2*<"]
 |===
@@ -32,7 +32,7 @@ Stack rules are built into {kib}.  To access the *Stack Rules* feature and creat
 [[domain-specific-rules]]
 === Domain rules
 
-Domain rules are registered by *Observability*, *Security*, <maps, Maps>> and <<xpack-ml, Machine Learning>>.
+Domain rules are registered by *Observability*, *Security*, <<maps, Maps>> and <<xpack-ml, Machine Learning>>.
 
 [cols="2*<"]
 |===
