@@ -93,6 +93,15 @@ function DefaultEditorControls({
             ) : (
               <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    content={i18n.translate('visDefaultEditor.sidebar.updateInfoTooltip', {
+                      defaultMessage: 'Use CTRL + Enter as a shortcut',
+                    })}
+                    type="keyboardShortcut"
+                    color="subdued"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <EuiButton
                     data-test-subj="visualizeEditorRenderButton"
                     disabled={!isDirty}
@@ -106,15 +115,6 @@ function DefaultEditorControls({
                       defaultMessage="Update"
                     />
                   </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiIconTip
-                    content={i18n.translate('visDefaultEditor.sidebar.updateInfoTooltip', {
-                      defaultMessage: 'Use CTRL + Enter as a shortcut',
-                    })}
-                    type="iInCircle"
-                    color="subdued"
-                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             )}
