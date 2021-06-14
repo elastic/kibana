@@ -6083,8 +6083,6 @@
     "xpack.canvas.elements.progressWheelHelpText": "進捗状況をホイールで表示します",
     "xpack.canvas.elements.repeatImageDisplayName": "画像の繰り返し",
     "xpack.canvas.elements.repeatImageHelpText": "画像を N 回繰り返します",
-    "xpack.canvas.elements.revealImageDisplayName": "画像の部分表示",
-    "xpack.canvas.elements.revealImageHelpText": "画像のパーセンテージを表示します",
     "xpack.canvas.elements.shapeDisplayName": "形状",
     "xpack.canvas.elements.shapeHelpText": "カスタマイズ可能な図形です",
     "xpack.canvas.elements.tableDisplayName": "データテーブル",
