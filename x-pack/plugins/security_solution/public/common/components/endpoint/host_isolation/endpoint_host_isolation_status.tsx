@@ -82,7 +82,7 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
                 </div>
               }
             >
-              <EuiTextColor color="subdued">
+              <EuiTextColor color="subdued" data-test-subj={getTestId('pending')}>
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.hostIsolationStatus.multiplePendingActions"
                   defaultMessage="{count} actions pending"
@@ -97,7 +97,7 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
       // Show 'pending [un]isolate' depending on what's pending
       return (
         <EuiBadge color="hollow" data-test-subj={dataTestSubj}>
-          <EuiTextColor color="subdued">
+          <EuiTextColor color="subdued" data-test-subj={getTestId('pending')}>
             {pendingIsolate ? (
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.hostIsolationStatus.isIsolating"
