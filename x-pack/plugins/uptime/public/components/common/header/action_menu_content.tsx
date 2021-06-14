@@ -62,7 +62,6 @@ export function ActionMenuContent(): React.ReactElement {
             pathname: SETTINGS_ROUTE,
             search: stringifyUrlParams(params, true),
           })}
-          iconType="gear"
         >
           <FormattedMessage id="xpack.uptime.page_header.settingsLink" defaultMessage="Settings" />
         </EuiButtonEmpty>
