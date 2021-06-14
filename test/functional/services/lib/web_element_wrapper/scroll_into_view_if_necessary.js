@@ -67,7 +67,7 @@ export function scrollIntoViewIfNecessary(target, fixedHeaderHeight, fixedFooter
   if (fixedFooterHeight) {
     var bottomOfVisibility = viewportHeight - fixedFooterHeight;
     if (bottomOfVisibility < boundingRect.top) {
-      rootScroller.scrollTop = rootScroller.scrollTop - boundingRect.height;
+      rootScroller.scrollTop = rootScroller.scrollTop + boundingRect.height;
     }
   }
 }
