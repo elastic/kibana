@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
+import { mockKibanaValues, setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
 import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
@@ -14,7 +14,6 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiBasicTable, EuiButtonIcon, EuiInMemoryTable } from '@elastic/eui';
 
-import { KibanaLogic } from '../../../../shared/kibana';
 import { mountWithIntl } from '../../../../test_helpers';
 
 import { CrawlerDomain } from '../types';
@@ -49,21 +48,26 @@ const actions = {
 };
 
 describe('DomainsTable', () => {
+  let wrapper: ShallowWrapper;
+  let tableContent: string;
+
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+  beforeAll(() => {
     setMockValues(values);
     setMockActions(actions);
+    wrapper = shallow(<DomainsTable />);
+    tableContent = mountWithIntl(<DomainsTable />)
+      .find(EuiInMemoryTable)
+      .text();
   });
 
   it('renders', () => {
-    const wrapper = shallow(<DomainsTable />);
     expect(wrapper.find(EuiInMemoryTable)).toHaveLength(1);
   });
 
   describe('columns', () => {
-    let wrapper: ShallowWrapper;
-    let tableContent: string;
-
     const getTable = () => wrapper.find(EuiInMemoryTable).dive().find(EuiBasicTable).dive();
 
     beforeEach(() => {
@@ -117,13 +121,11 @@ describe('DomainsTable', () => {
 
         describe('manage action', () => {
           it('sends the user to the engine overview on click', () => {
-            jest.spyOn(KibanaLogic.values, 'navigateToUrl');
+            const { navigateToUrl } = mockKibanaValues;
 
             getManageAction().simulate('click');
 
-            expect(KibanaLogic.values.navigateToUrl).toHaveBeenCalledWith(
-              '/engines/some-engine/crawler/domains/1234'
-            );
+            expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/crawler/domains/1234');
           });
         });
 
