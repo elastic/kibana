@@ -30,6 +30,7 @@ import { InternalLoggingServiceSetup } from './logging';
 import { CoreUsageDataStart } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
 import { InternalDeprecationsServiceSetup } from './deprecations';
+import type { ExecutionContextSetup } from './execution_context';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -37,6 +38,7 @@ export interface InternalCoreSetup {
   context: ContextSetup;
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
+  executionContext: ExecutionContextSetup;
   i18n: I18nServiceSetup;
   savedObjects: InternalSavedObjectsServiceSetup;
   status: InternalStatusServiceSetup;

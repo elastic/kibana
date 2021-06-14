@@ -30,6 +30,7 @@ import { statusServiceMock } from './status/status_service.mock';
 import { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
 import { i18nServiceMock } from './i18n/i18n_service.mock';
 import { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
+import { executionContextServiceMock } from './execution_context/execution_context_service.mock';
 
 export { configServiceMock } from './config/mocks';
 export { httpServerMock } from './http/http_server.mocks';
@@ -182,6 +183,7 @@ function createInternalCoreSetupMock() {
     logging: loggingServiceMock.createInternalSetupContract(),
     metrics: metricsServiceMock.createInternalSetupContract(),
     deprecations: deprecationsServiceMock.createInternalSetupContract(),
+    executionContext: executionContextServiceMock.createInternalSetupContract(),
   };
   return setupDeps;
 }
