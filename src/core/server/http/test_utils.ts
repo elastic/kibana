@@ -56,7 +56,11 @@ configService.atPath.mockImplementation((path) => {
     } as any);
   }
   if (path === 'csp') {
-    return new BehaviorSubject({} as any);
+    return new BehaviorSubject({
+      script_src: [],
+      worker_src: [],
+      style_src: [],
+    } as any);
   }
   throw new Error(`Unexpected config path: ${path}`);
 });
