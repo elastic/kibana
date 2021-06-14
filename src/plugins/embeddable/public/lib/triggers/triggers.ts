@@ -117,3 +117,7 @@ export const isContextMenuTriggerContext = (context: unknown): context is Embedd
   typeof context === 'object' &&
   !!(context as EmbeddableContext).embeddable &&
   typeof (context as EmbeddableContext).embeddable === 'object';
+
+export const ACTION_INSPECT_PANEL = 'openInspector';
+
+export const ACTION_EXPORT_CSV = 'ACTION_EXPORT_CSV';

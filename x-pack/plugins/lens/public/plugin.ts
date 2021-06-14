@@ -7,6 +7,7 @@
 
 import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { DashboardStart } from '../../../../src/plugins/dashboard/public';
@@ -79,6 +80,7 @@ export interface LensPluginStartDependencies {
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  inspector: InspectorStartContract;
 }
 
 export interface LensPublicStart {
@@ -250,7 +252,7 @@ export class LensPlugin {
     );
 
     return {
-      EmbeddableComponent: getEmbeddableComponent(startDependencies.embeddable),
+      EmbeddableComponent: getEmbeddableComponent(core, startDependencies),
       navigateToPrefilledEditor: (input: LensEmbeddableInput, openInNewTab?: boolean) => {
         // for openInNewTab, we set the time range in url via getEditPath below
         if (input.timeRange && !openInNewTab) {

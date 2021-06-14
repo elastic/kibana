@@ -10,8 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { Action } from 'src/plugins/ui_actions/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { IEmbeddable } from '../../../embeddables';
-
-export const ACTION_INSPECT_PANEL = 'openInspector';
+import { ACTION_INSPECT_PANEL } from '../../../triggers';
 
 interface ActionContext {
   embeddable: IEmbeddable;
