@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { HttpStart } from 'kibana/public';
+import { Dispatch } from 'redux';
+import { CoreStart, HttpStart } from 'kibana/public';
 import {
   ActivityLog,
   HostInfo,
@@ -13,6 +14,7 @@ import {
   HostIsolationResponse,
   HostResultList,
   Immutable,
+  ImmutableObject,
 } from '../../../../../common/endpoint/types';
 import { GetPolicyListResponse } from '../../policy/types';
 import { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../common/store';
@@ -53,9 +55,10 @@ import {
   createLoadedResourceState,
   createLoadingResourceState,
 } from '../../../state';
-import { isolateHost, unIsolateHost } from '../../../../common/lib/host_isolation';
+import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
 import { AppAction } from '../../../../common/store/actions';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
+import { ServerReturnedEndpointPackageInfo } from './action';
 
 type EndpointPageStore = ImmutableMiddlewareAPI<EndpointState, AppAction>;
 
@@ -80,26 +83,14 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
 
     const { getState, dispatch } = store;
 
+    await getEndpointPackageInfo(getState(), dispatch, coreStart);
+
     // Endpoint list
     if (
       (action.type === 'userChangedUrl' || action.type === 'appRequestedEndpointList') &&
       isOnEndpointPage(getState()) &&
       hasSelectedEndpoint(getState()) !== true
     ) {
-      if (!endpointPackageInfo(getState())) {
-        try {
-          const packageInfo = await sendGetEndpointSecurityPackage(coreStart.http);
-          dispatch({
-            type: 'serverReturnedEndpointPackageInfo',
-            payload: packageInfo,
-          });
-        } catch (error) {
-          // Ignore Errors, since this should not hinder the user's ability to use the UI
-          // eslint-disable-next-line no-console
-          console.error(error);
-        }
-      }
-
       const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
       let endpointResponse;
 
@@ -579,3 +570,23 @@ const handleIsolateEndpointHost = async (
     });
   }
 };
+
+async function getEndpointPackageInfo(
+  state: ImmutableObject<EndpointState>,
+  dispatch: Dispatch<ServerReturnedEndpointPackageInfo>,
+  coreStart: CoreStart
+) {
+  if (endpointPackageInfo(state)) return;
+
+  try {
+    const packageInfo = await sendGetEndpointSecurityPackage(coreStart.http);
+    dispatch({
+      type: 'serverReturnedEndpointPackageInfo',
+      payload: packageInfo,
+    });
+  } catch (error) {
+    // Ignore Errors, since this should not hinder the user's ability to use the UI
+    // eslint-disable-next-line no-console
+    console.error(error);
+  }
+}

@@ -41,7 +41,7 @@ import {
   hostIsolationHttpMocks,
   hostIsolationRequestBodyMock,
   hostIsolationResponseMock,
-} from '../../../../common/lib/host_isolation/mocks';
+} from '../../../../common/lib/endpoint_isolation/mocks';
 import { FleetActionGenerator } from '../../../../../common/endpoint/data_generators/fleet_action_generator';
 
 jest.mock('../../policy/store/services/ingest', () => ({

@@ -15,7 +15,7 @@ export function getMonitorPingsConfig({ seriesId, indexPattern }: ConfigProps): 
     id: seriesId,
     reportType: 'uptime-pings',
     defaultSeriesType: 'bar_stacked',
-    seriesTypes: ['bar_stacked', 'bar'],
+    seriesTypes: [],
     xAxisColumn: {
       sourceField: '@timestamp',
     },
