@@ -23,7 +23,8 @@ export function getExactDate(rawDate?: string, options = {}) {
   if (rawDate) {
     const isRelativeDate = rawDate.substring(0, 3) === 'now';
     if (isRelativeDate) {
-      const rawDateWithouRounding = rawDate.replace(/\/(\w)$/, '');
+      // remove rounding from relative dates "Today" (now/d) and "This week" (now/w)
+      const rawDateWithouRounding = rawDate.replace(/\/([smhdw])$/, '');
       return getParsedDate(rawDateWithouRounding, options);
     }
   }
@@ -63,9 +64,8 @@ export function getDateRange({
 
   // rounds down start to minute
   const roundedStart = moment(start).startOf('minute');
-  // rounds down to minute
   const exactStart = getExactDate(rangeFrom) || roundedStart;
-  const exactEnd = getExactDate(rangeTo, { roundUp: true }) || end;
+  const exactEnd = getExactDate(rangeTo) || end;
 
   return {
     start: roundedStart.toISOString(),

@@ -172,12 +172,24 @@ describe('url_params_context helpers', () => {
       expect(helpers.getExactDate('2021-01-28T05:47:52.134Z')).toBeUndefined();
     });
 
-    it('removes rounding option from relative time', () => {
+    ['s', 'm', 'h', 'd', 'w'].map((roundingOption) =>
+      it(`removes /${roundingOption} rounding option from relative time`, () => {
+        const spy = jest.spyOn(datemath, 'parse');
+        helpers.getExactDate(`now/${roundingOption}`);
+        expect(spy).toHaveBeenCalledWith('now', {});
+      })
+    );
+
+    it('removes rounding option but keeps subtracting time', () => {
       const spy = jest.spyOn(datemath, 'parse');
-      helpers.getExactDate('now/d');
-      expect(spy).toHaveBeenCalledWith('now', {});
       helpers.getExactDate('now-24h/h');
       expect(spy).toHaveBeenCalledWith('now-24h', {});
+    });
+
+    it('removes rounding option but keeps adding time', () => {
+      const spy = jest.spyOn(datemath, 'parse');
+      helpers.getExactDate('now+15m/h');
+      expect(spy).toHaveBeenCalledWith('now+15m', {});
     });
   });
 });

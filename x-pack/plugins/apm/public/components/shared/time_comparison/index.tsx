@@ -69,14 +69,12 @@ export function getComparisonTypes({
   const momentStart = moment(start);
   const momentEnd = moment(end);
 
-  const dateDiff = Number(
-    getDateDifference({
-      start: momentStart,
-      end: momentEnd,
-      unitOfTime: 'days',
-      precise: true,
-    })
-  );
+  const dateDiff = getDateDifference({
+    start: momentStart,
+    end: momentEnd,
+    unitOfTime: 'days',
+    precise: true,
+  });
 
   // Less than or equals to one day
   if (dateDiff <= 1) {
