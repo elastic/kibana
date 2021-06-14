@@ -33,7 +33,6 @@ describe('map_actions', () => {
     describe('store mapState is empty', () => {
       beforeEach(() => {
         require('../selectors/map_selectors').getDataFilters = () => {
-          console.log('get dg');
           return {
             zoom: 5,
           };
