@@ -6,14 +6,6 @@
  * Side Public License, v 1.
  */
 
-/**
- * Use * syntax so that these exports do not break when internal
- * types are stripped.
- */
-export * from './core_service';
-export * from './capabilities';
-export * from './app_category';
-export * from './ui_settings';
-export * from './saved_objects';
-export * from './serializable';
-export type { KibanaExecutionContext } from './execution_context';
+export { ExecutionContextService } from './execution_context_service';
+export type { ExecutionContextSetup, ExecutionContextStart } from './execution_context_service';
+export type { IExecutionContext } from './execution_context_client';
