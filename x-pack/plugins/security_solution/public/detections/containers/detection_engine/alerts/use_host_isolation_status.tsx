@@ -36,6 +36,7 @@ export const useHostIsolationStatus = ({
     const fetchData = async () => {
       try {
         const metadataResponse = await getHostMetadata({ agentId });
+        console.log(metadataResponse);
         if (isMounted) {
           setIsIsolated(isEndpointHostIsolated(metadataResponse.metadata));
         }
