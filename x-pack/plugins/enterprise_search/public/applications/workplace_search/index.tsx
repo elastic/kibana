@@ -19,7 +19,7 @@ import { NotFound } from '../shared/not_found';
 
 import { AppLogic } from './app_logic';
 import { WorkplaceSearchNav, WorkplaceSearchHeaderActions } from './components/layout';
-import { PersonalDashboardLayout } from './components/layout';
+import { PersonalDashboardLayout, PrivateSourcesSidebar } from './components/layout';
 import {
   GROUPS_PATH,
   SETUP_GUIDE_PATH,
@@ -101,12 +101,20 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
         )}
       </Route>
       <Route path={PERSONAL_SOURCES_PATH}>
-        <PersonalDashboardLayout restrictWidth readOnlyMode={readOnlyMode}>
+        <PersonalDashboardLayout
+          restrictWidth
+          readOnlyMode={readOnlyMode}
+          sidebar={<PrivateSourcesSidebar />}
+        >
           <SourcesRouter />
         </PersonalDashboardLayout>
       </Route>
       <Route path={PERSONAL_SETTINGS_PATH}>
-        <PersonalDashboardLayout restrictWidth readOnlyMode={readOnlyMode}>
+        <PersonalDashboardLayout
+          restrictWidth
+          readOnlyMode={readOnlyMode}
+          sidebar={<PrivateSourcesSidebar />}
+        >
           <AccountSettings />
         </PersonalDashboardLayout>
       </Route>
