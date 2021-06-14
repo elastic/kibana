@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -15,6 +15,7 @@ import { sendGetOneAgentPolicy } from '../../hooks';
 import { FLEET_SERVER_PACKAGE } from '../../constants';
 
 import { EnrollmentStepAgentPolicy } from './agent_policy_selection';
+import { AdvancedAgentAuthenticationSettings } from './advanced_agent_authentication_settings';
 
 export const DownloadStep = () => {
   return {
@@ -59,12 +60,14 @@ export const AgentPolicySelectionStep = ({
   setIsFleetServerPolicySelected?: (selected: boolean) => void;
   excludeFleetServer?: boolean;
 }) => {
-  const regularAgentPolicies = Array.isArray(agentPolicies)
-    ? agentPolicies.filter(
-        (policy) =>
-          policy && !policy.is_managed && (!excludeFleetServer || !policy.is_default_fleet_server)
-      )
-    : [];
+  const regularAgentPolicies = useMemo(() => {
+    return Array.isArray(agentPolicies)
+      ? agentPolicies.filter(
+          (policy) =>
+            policy && !policy.is_managed && (!excludeFleetServer || !policy.is_default_fleet_server)
+        )
+      : [];
+  }, [agentPolicies, excludeFleetServer]);
 
   const onAgentPolicyChange = useCallback(
     async (policyId?: string) => {
@@ -100,6 +103,38 @@ export const AgentPolicySelectionStep = ({
         onAgentPolicyChange={onAgentPolicyChange}
         excludeFleetServer={excludeFleetServer}
       />
+    ),
+  };
+};
+
+export const AgentEnrollmentKeySelectionStep = ({
+  agentPolicy,
+  setSelectedAPIKeyId,
+}: {
+  agentPolicy: AgentPolicy;
+  setSelectedAPIKeyId: (key?: string) => void;
+}) => {
+  return {
+    title: i18n.translate('xpack.fleet.agentEnrollment.stepConfigurePolicyAuthenticationTitle', {
+      defaultMessage: 'Configure agent authentication',
+    }),
+    children: (
+      <>
+        <EuiText>
+          <FormattedMessage
+            id="xpack.fleet.agentEnrollment.agentAuthenticationSettings"
+            defaultMessage="{agentPolicyName} has been selected. Configure agent authentication based on the available policy options."
+            values={{
+              agentPolicyName: <strong>{agentPolicy.name}</strong>,
+            }}
+          />
+        </EuiText>
+        <EuiSpacer size="l" />
+        <AdvancedAgentAuthenticationSettings
+          agentPolicyId={agentPolicy.id}
+          onKeyChange={setSelectedAPIKeyId}
+        />
+      </>
     ),
   };
 };
