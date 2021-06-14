@@ -46,6 +46,7 @@ export function ApmHeaderActionMenu() {
           defaultMessage: 'Settings',
         })}
       </EuiHeaderLink>
+      {canAccessML && <AnomalyDetectionSetupLink />}
       {isAlertingAvailable && (
         <AlertingPopoverAndFlyout
           basePath={basePath}
@@ -55,7 +56,6 @@ export function ApmHeaderActionMenu() {
           includeTransactionDuration={serviceName !== undefined}
         />
       )}
-      {canAccessML && <AnomalyDetectionSetupLink />}
       <EuiHeaderLink
         color="primary"
         href={kibanaHref('/app/home#/tutorial/apm')}
