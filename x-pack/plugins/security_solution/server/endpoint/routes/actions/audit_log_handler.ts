@@ -27,7 +27,7 @@ export const actionsLogRequestHandler = (
   return async (context, req, res) => {
     const {
       params: { agent_id: elasticAgentId },
-      query: { page = 1, page_size: pageSize = 50 },
+      query: { page, page_size: pageSize },
     } = req;
 
     const body = await getAuditLogResponse({ elasticAgentId, page, pageSize, context, logger });
