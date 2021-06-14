@@ -17,7 +17,7 @@ import {
   KibanaPageTemplateSolutionNavAvatarProps,
 } from './solution_nav_avatar';
 
-export type KibanaPageTemplateSolutionNavProps = EuiSideNavProps<{}> & {
+export type KibanaPageTemplateSolutionNavProps = Partial<EuiSideNavProps<{}>> & {
   /**
    * Name of the solution, i.e. "Observability"
    */
