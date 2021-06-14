@@ -17,7 +17,6 @@ import {
   EuiDataGridPopoverContents,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
   EuiSpacer,
   EuiText,
   EuiTitle,
