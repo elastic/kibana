@@ -43,7 +43,7 @@ function checkSessionExpirationPage(
   );
 }
 
-export function checkCompleteSessionExpiration(
+export function checkPersistedCompletedSessionExpiration(
   deps: CheckSearchSessionsDeps,
   config: SearchSessionsConfig
 ) {

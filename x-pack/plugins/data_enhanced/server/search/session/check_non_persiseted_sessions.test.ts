@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { checkNonPersistedSessions as checkNonPersistedSessions$ } from './cleanup_stale_sessions';
+import { checkNonPersistedSessions as checkNonPersistedSessions$ } from './check_non_persiseted_sessions';
 import {
   SearchSessionStatus,
   SearchSessionSavedObjectAttributes,
@@ -37,6 +37,7 @@ describe('checkNonPersistedSessions', () => {
     maxUpdateRetries: 3,
     defaultExpiration: moment.duration(7, 'd'),
     trackingInterval: moment.duration(10, 's'),
+    expireInterval: moment.duration(10, 'm'),
     monitoringTaskTimeout: moment.duration(5, 'm'),
     cleanupInterval: moment.duration(10, 's'),
     management: {} as any,

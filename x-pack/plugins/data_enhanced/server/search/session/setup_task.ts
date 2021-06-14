@@ -21,6 +21,7 @@ import {
 export function searchSessionTaskRunner(
   core: CoreSetup<DataEnhancedStartDependencies>,
   deps: SearchSessionTaskSetupDeps,
+  title: string,
   checkFn: SearchSessionTaskFn
 ): TaskRunCreatorFunction {
   const { logger, config } = deps;
@@ -32,7 +33,7 @@ export function searchSessionTaskRunner(
           const sessionConfig = config.search.sessions;
           const [coreStart] = await core.getStartServices();
           if (!sessionConfig.enabled) {
-            logger.debug('Search sessions are disabled. Skipping task.');
+            logger.debug(`Search sessions are disabled. Skipping task ${title}.`);
             return;
           }
           if (aborted$.getValue()) return;
@@ -56,7 +57,7 @@ export function searchSessionTaskRunner(
             state: {},
           };
         } catch (e) {
-          logger.debug('And error occurred. Skipping task.');
+          logger.error(`An error occurred. Skipping task ${title}.`);
         }
       },
       cancel: async () => {
@@ -76,7 +77,7 @@ export function registerSearchSessionsTask(
   deps.taskManager.registerTaskDefinitions({
     [taskType]: {
       title,
-      createTaskRunner: searchSessionTaskRunner(core, deps, checkFn),
+      createTaskRunner: searchSessionTaskRunner(core, deps, title, checkFn),
       timeout: `${deps.config.search.sessions.monitoringTaskTimeout.asSeconds()}s`,
     },
   });

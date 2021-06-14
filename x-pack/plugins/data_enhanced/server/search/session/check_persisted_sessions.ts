@@ -43,7 +43,7 @@ function checkPersistedSessionsPage(
   );
 }
 
-export function checkPersistedSessions(
+export function checkPersistedSessionsProgress(
   deps: CheckSearchSessionsDeps,
   config: SearchSessionsConfig
 ) {

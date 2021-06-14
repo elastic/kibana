@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { checkPersistedSessions } from './check_persisted_sessions';
+import { checkPersistedSessionsProgress } from './check_persisted_sessions';
 import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { SearchSessionsConfig } from './types';
 import moment from 'moment';
 import { SavedObjectsClientContract } from '../../../../../../src/core/server';
 
-describe('checkPersistedSessions', () => {
+describe('checkPersistedSessionsProgress', () => {
   let mockClient: any;
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   const config: SearchSessionsConfig = {
@@ -23,6 +23,7 @@ describe('checkPersistedSessions', () => {
     defaultExpiration: moment.duration(7, 'd'),
     trackingInterval: moment.duration(10, 's'),
     cleanupInterval: moment.duration(10, 's'),
+    expireInterval: moment.duration(10, 'm'),
     monitoringTaskTimeout: moment.duration(5, 'm'),
     management: {} as any,
   };
@@ -52,7 +53,7 @@ describe('checkPersistedSessions', () => {
       total: 0,
     } as any);
 
-    await checkPersistedSessions(
+    await checkPersistedSessionsProgress(
       {
         savedObjectsClient,
         client: mockClient,

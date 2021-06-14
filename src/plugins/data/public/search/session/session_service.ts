@@ -128,21 +128,6 @@ export class SessionService {
       this.subscription.add(
         coreStart.application.currentAppId$.subscribe((newAppName) => {
           this.currentApp = newAppName;
-          if (!this.getSessionId()) return;
-
-          // Apps required to clean up their sessions before unmounting
-          // Make sure that apps don't leave sessions open by throwing an error in DEV mode
-          const message = `Application '${
-            this.state.get().appName
-          }' had an open session while navigating`;
-          if (initializerContext.env.mode.dev) {
-            coreStart.fatalErrors.add(message);
-          } else {
-            // this should never happen in prod because should be caught in dev mode
-            // in case this happen we don't want to throw fatal error, as most likely possible bugs are not that critical
-            // eslint-disable-next-line no-console
-            console.warn(message);
-          }
         })
       );
     });

@@ -15,6 +15,7 @@ import {
   SEARCH_SESSION_TYPE,
   SearchSessionSavedObjectAttributes,
   SearchSessionStatus,
+  KueryNode,
 } from '../../../../../../src/plugins/data/common';
 import { checkSearchSessionsByPage, getSearchSessionsPage$ } from './get_search_session_page';
 import { SearchSessionsConfig, CheckSearchSessionsDeps } from './types';
@@ -45,7 +46,7 @@ function isSessionStale(
 function checkNonPersistedSessionsPage(
   deps: CheckSearchSessionsDeps,
   config: SearchSessionsConfig,
-  filter: any,
+  filter: KueryNode,
   page: number
 ) {
   const { logger, client, savedObjectsClient } = deps;

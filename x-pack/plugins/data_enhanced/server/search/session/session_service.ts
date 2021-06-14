@@ -46,7 +46,7 @@ import {
 import { SearchSessionsConfig, SearchStatus } from './types';
 import { DataEnhancedStartDependencies } from '../../type';
 import {
-  checkPersistedSessions,
+  checkPersistedSessionsProgress,
   SEARCH_SESSIONS_TASK_ID,
   SEARCH_SESSIONS_TASK_TYPE,
 } from './check_persisted_sessions';
@@ -54,11 +54,11 @@ import {
   SEARCH_SESSIONS_CLEANUP_TASK_TYPE,
   checkNonPersistedSessions,
   SEARCH_SESSIONS_CLEANUP_TASK_ID,
-} from './cleanup_stale_sessions';
+} from './check_non_persiseted_sessions';
 import {
   SEARCH_SESSIONS_EXPIRE_TASK_TYPE,
   SEARCH_SESSIONS_EXPIRE_TASK_ID,
-  checkCompleteSessionExpiration,
+  checkPersistedCompletedSessionExpiration,
 } from './expire_persisted_sessions';
 
 export interface SearchSessionDependencies {
@@ -112,7 +112,7 @@ export class SearchSessionService
       taskDeps,
       SEARCH_SESSIONS_TASK_TYPE,
       'persisted session progress',
-      checkPersistedSessions
+      checkPersistedSessionsProgress
     );
 
     registerSearchSessionsTask(
@@ -128,7 +128,7 @@ export class SearchSessionService
       taskDeps,
       SEARCH_SESSIONS_EXPIRE_TASK_TYPE,
       'complete session expiration',
-      checkCompleteSessionExpiration
+      checkPersistedCompletedSessionExpiration
     );
   }
 
@@ -164,7 +164,7 @@ export class SearchSessionService
         taskDeps,
         SEARCH_SESSIONS_EXPIRE_TASK_ID,
         SEARCH_SESSIONS_EXPIRE_TASK_TYPE,
-        duration('60', 'm')
+        this.sessionConfig.expireInterval
       );
     } else {
       unscheduleSearchSessionsTask(taskDeps, SEARCH_SESSIONS_TASK_ID);
