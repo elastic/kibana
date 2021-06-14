@@ -14,8 +14,7 @@
       "features",
       "inspector",
       "presentationUtil",
-      "uiActions",
-      "expressionRevealImage"
+      "uiActions"
     ],
     "optionalPlugins": [
       "home",

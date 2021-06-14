@@ -9,7 +9,6 @@ import { debug } from '../canvas_plugin_src/renderers/debug';
 import { error } from '../canvas_plugin_src/renderers/error';
 import { image } from '../canvas_plugin_src/renderers/image';
 import { repeatImage } from '../canvas_plugin_src/renderers/repeat_image';
-import { revealImageRenderer as revealImage } from '../../../../src/plugins/expression_reveal_image/public';
 import { markdown } from '../canvas_plugin_src/renderers/markdown';
 import { metric } from '../canvas_plugin_src/renderers/metric';
 import { pie } from '../canvas_plugin_src/renderers/pie';
@@ -29,7 +28,6 @@ export const renderFunctions = [
   error,
   image,
   repeatImage,
-  revealImage,
   markdown,
   metric,
   pie,
