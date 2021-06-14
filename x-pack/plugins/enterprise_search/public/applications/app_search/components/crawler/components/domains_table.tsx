@@ -23,7 +23,7 @@ import { generateEnginePath } from '../../engine';
 import { CrawlerOverviewLogic } from '../crawler_overview_logic';
 import { CrawlerDomain } from '../types';
 
-import { determineTimestampDisplay } from './utils';
+import { CustomFormattedTimestamp } from './custom_formatted_timestamp';
 
 export const DomainsTable: React.FC = () => {
   const { domains } = useValues(CrawlerOverviewLogic);
@@ -53,7 +53,7 @@ export const DomainsTable: React.FC = () => {
         }
       ),
       render: (lastCrawl: CrawlerDomain['lastCrawl']) =>
-        lastCrawl ? determineTimestampDisplay(lastCrawl) : '',
+        lastCrawl ? <CustomFormattedTimestamp timestamp={lastCrawl} /> : '',
     },
     {
       field: 'documentCount',
