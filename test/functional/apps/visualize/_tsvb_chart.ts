@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const retry = getService('retry');
   const security = getService('security');
+  const testSubjects = getService('testSubjects');
 
   const PageObjects = getPageObjects([
     'visualize',
@@ -24,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
     'visChart',
     'common',
+    'settings',
   ]);
 
   describe('visual builder', function describeIndexTests() {
@@ -254,6 +256,128 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         const legendItems3 = await PageObjects.visualBuilder.getLegendItemsContent();
         expect(legendItems3).to.eql(finalLegendItems);
+      });
+    });
+
+    describe('applying field formats from Advanced Settings', () => {
+      const termsField = 'machine.os.raw';
+
+      const toggleSetFormatForFieldInIndexPatterns = async (fieldName: string) => {
+        log.debug(
+          'Navigate to Advanced Settings Index Patterns and toggle Set Format for the specified field'
+        );
+        await PageObjects.settings.navigateTo();
+        await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.clickIndexPatternLogstash();
+        await PageObjects.settings.filterField(fieldName);
+        await PageObjects.settings.openControlsByName(fieldName);
+        const formatRow = await testSubjects.find('formatRow');
+        const [formatRowToggle] = await formatRow.findAllByCssSelector('[data-test-subj="toggle"]');
+        await formatRowToggle.click();
+      };
+
+      before(async () => {
+        log.debug('Toggle on Set Format for machine.os.raw and set it to the title case');
+        await toggleSetFormatForFieldInIndexPatterns(termsField);
+        await PageObjects.settings.setFieldFormat('string');
+        await PageObjects.settings.setScriptedFieldStringTransform('title');
+        await PageObjects.settings.controlChangeSave();
+      });
+
+      beforeEach(async () => {
+        await PageObjects.visualBuilder.resetPage();
+        await PageObjects.visualBuilder.selectAggType('Average');
+        await PageObjects.visualBuilder.setFieldForAggregation('bytes');
+        await PageObjects.visualBuilder.setMetricsGroupByTerms(termsField);
+        await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+      });
+
+      it('should display title field formatted labels with raw values', async () => {
+        const expectedLegendItems = [
+          'Win 8: 5,087.5',
+          'Win Xp: 4,332',
+          'Win 7: 6,328.938',
+          'Ios: 5,980',
+          'Osx: 6,070',
+        ];
+        const legendItems = await PageObjects.visualBuilder.getLegendItemsContent();
+
+        expect(legendItems).to.eql(expectedLegendItems);
+      });
+
+      it('should display title field formatted labels with TSVB formatted values by default', async () => {
+        const expectedLegendItems = [
+          'Win 8: 5,087.5 format',
+          'Win Xp: 4,332 format',
+          'Win 7: 6,328.938 format',
+          'Ios: 5,980 format',
+          'Osx: 6,070 format',
+        ];
+
+        await PageObjects.visualBuilder.clickSeriesOption();
+        await PageObjects.visualBuilder.enterSeriesTemplate('{{value}} format');
+        await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+
+        const legendItems = await PageObjects.visualBuilder.getLegendItemsContent();
+        expect(legendItems).to.eql(expectedLegendItems);
+      });
+
+      it('should display title field formatted labels with byte field formatted values', async () => {
+        const expectedLegendItems = [
+          'Win 8: 4.968KB',
+          'Win Xp: 4.23KB',
+          'Win 7: 6.181KB',
+          'Ios: 5.84KB',
+          'Osx: 5.928KB',
+        ];
+
+        await PageObjects.visualBuilder.clickSeriesOption();
+        await PageObjects.visualBuilder.setSeriesIgnoreFieldFormatting(false);
+
+        const legendItems = await PageObjects.visualBuilder.getLegendItemsContent();
+        expect(legendItems).to.eql(expectedLegendItems);
+      });
+
+      describe('formatting values for Metric, TopN and Gauge', () => {
+        beforeEach(async () => {
+          await PageObjects.visualBuilder.clickSeriesOption();
+          await PageObjects.visualBuilder.setSeriesIgnoreFieldFormatting(false);
+        });
+
+        it('should display field formatted value for Metric', async () => {
+          await PageObjects.visualBuilder.clickMetric();
+          await PageObjects.visualBuilder.checkMetricTabIsPresent();
+
+          const metricValue = await PageObjects.visualBuilder.getMetricValue();
+          expect(metricValue).to.eql('5.514KB');
+        });
+
+        it('should display field formatted label and value for TopN', async () => {
+          await PageObjects.visualBuilder.clickTopN();
+          await PageObjects.visualBuilder.checkTopNTabIsPresent();
+
+          const topNLabel = await PageObjects.visualBuilder.getTopNLabel();
+          const topNCount = await PageObjects.visualBuilder.getTopNCount();
+
+          expect(topNLabel).to.eql('Win 7');
+          expect(topNCount).to.eql('5.664KB');
+        });
+
+        it('should display field formatted label and value for Gauge', async () => {
+          await PageObjects.visualBuilder.clickGauge();
+          await PageObjects.visualBuilder.checkGaugeTabIsPresent();
+
+          const gaugeLabel = await PageObjects.visualBuilder.getGaugeLabel();
+          const gaugeCount = await PageObjects.visualBuilder.getGaugeCount();
+
+          expect(gaugeLabel).to.eql('Average of bytes');
+          expect(gaugeCount).to.eql('5.514KB');
+        });
+      });
+
+      after(async () => {
+        log.debug('Toggle off Set Format for machine.os.raw');
+        await toggleSetFormatForFieldInIndexPatterns(termsField);
       });
     });
   });

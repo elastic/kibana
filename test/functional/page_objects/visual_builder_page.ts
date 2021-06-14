@@ -480,6 +480,14 @@ export class VisualBuilderPageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
   }
 
+  public async setSeriesIgnoreFieldFormatting(value: boolean) {
+    const option = await this.testSubjects.find(
+      `seriesIgnoreFieldFormatting-${value ? 'yes' : 'no'}`
+    );
+    (await option.findByCssSelector('label')).click();
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
   public async waitForIndexPatternTimeFieldOptionsLoaded() {
     await this.retry.waitFor('combobox options loaded', async () => {
       const options = await this.comboBox.getOptions('metricsIndexPatternFieldsSelect');

@@ -146,13 +146,14 @@ export class TableSeriesConfig extends Component {
           <EuiFlexItem grow={false}>
             <EuiFormRow
               label={i18n.translate('visTypeTimeseries.table.ignoreFieldFormatting', {
-                defaultMessage: 'Ignore global formatting?',
+                defaultMessage: 'Ignore common formatting?',
               })}
             >
               <YesNo
                 value={model.ignore_field_formatting}
                 name="ignore_field_formatting"
                 onChange={this.props.onChange}
+                data-test-subj="seriesIgnoreFieldFormatting"
               />
             </EuiFormRow>
           </EuiFlexItem>
