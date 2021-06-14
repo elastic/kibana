@@ -20,11 +20,12 @@ import { fetchTransactionDurationFieldValuePairs } from './query_field_value_pai
 import { fetchTransactionDurationPecentiles } from './query_percentiles';
 import { fetchTransactionDurationCorrelation } from './query_correlation';
 import { fetchTransactionDurationHistogramRangesteps } from './query_histogram_rangesteps';
-import { fetchTransactionDurationRanges } from './query_ranges';
-import { range } from './utils';
+import { fetchTransactionDurationRanges, HistogramItem } from './query_ranges';
+import { getRandomInt, range } from './utils';
 
 const CORRELATION_THRESHOLD = 0.3;
 const KS_TEST_THRESHOLD = 0.1;
+const SIGNIFICANT_FRACTION = 3;
 
 export function roundToDecimalPlace(
   num?: number,
@@ -263,18 +264,41 @@ export const asyncSearchServiceProvider = (
     //
     // console.log('---HASHTABLE---');
     // console.log(JSON.stringify(hashTable));
+
+    // Roughly compare histograms by sampling random bins
+    // And rounding up histogram count to account for different floating points
+    const isHistogramRoughlyEqual = (
+      a: HistogramItem[],
+      b: HistogramItem[],
+      numBinsToSample = 10
+    ) => {
+      if (a.length !== b.length) return false;
+
+      const sampledIndices = Array.from(Array(numBinsToSample).keys()).map(() =>
+        getRandomInt(0, a.length - 1)
+      );
+      return !sampledIndices.some((idx) => {
+        return (
+          roundToDecimalPlace(a[idx].key, SIGNIFICANT_FRACTION) !==
+            roundToDecimalPlace(b[idx].key, SIGNIFICANT_FRACTION) &&
+          roundToDecimalPlace(a[idx].doc_count, SIGNIFICANT_FRACTION) !==
+            roundToDecimalPlace(b[idx].doc_count, SIGNIFICANT_FRACTION)
+        );
+      });
+    };
     const uniqueValues = uniqWith(
       values.sort((a, b) => b.correlation - a.correlation),
       (a, b) => {
         const isDuplicate =
           isEqual(
-            roundToDecimalPlace(b.correlation, 3),
-            roundToDecimalPlace(a.correlation, 3)
+            roundToDecimalPlace(b.correlation, SIGNIFICANT_FRACTION),
+            roundToDecimalPlace(a.correlation, SIGNIFICANT_FRACTION)
           ) &&
           isEqual(
-            roundToDecimalPlace(b.ksTest, 3),
-            roundToDecimalPlace(a.ksTest, 3)
-          );
+            roundToDecimalPlace(b.ksTest, SIGNIFICANT_FRACTION),
+            roundToDecimalPlace(a.ksTest, SIGNIFICANT_FRACTION)
+          ) &&
+          isHistogramRoughlyEqual(b.histogram, a.histogram);
         return isDuplicate;
       }
     )
