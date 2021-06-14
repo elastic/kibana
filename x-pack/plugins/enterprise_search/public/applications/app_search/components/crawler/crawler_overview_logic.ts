@@ -36,7 +36,7 @@ interface CrawlerOverviewValues {
 interface CrawlerOverviewActions {
   deleteDomain(domain: CrawlerDomain): { domain: CrawlerDomain };
   fetchCrawlerData(): void;
-  onRecieveCrawlerData(data: CrawlerData): { data: CrawlerData };
+  onReceiveCrawlerData(data: CrawlerData): { data: CrawlerData };
 }
 
 export const CrawlerOverviewLogic = kea<
@@ -46,19 +46,19 @@ export const CrawlerOverviewLogic = kea<
   actions: {
     deleteDomain: (domain) => ({ domain }),
     fetchCrawlerData: true,
-    onRecieveCrawlerData: (data) => ({ data }),
+    onReceiveCrawlerData: (data) => ({ data }),
   },
   reducers: {
     dataLoading: [
       true,
       {
-        onRecieveCrawlerData: () => false,
+        onReceiveCrawlerData: () => false,
       },
     ],
     domains: [
       [],
       {
-        onRecieveCrawlerData: (_, { data: { domains } }) => domains,
+        onReceiveCrawlerData: (_, { data: { domains } }) => domains,
       },
     ],
   },
@@ -70,7 +70,7 @@ export const CrawlerOverviewLogic = kea<
       try {
         const response = await http.get(`/api/app_search/engines/${engineName}/crawler`);
         const crawlerData = crawlerDataServerToClient(response as CrawlerDataFromServer);
-        actions.onRecieveCrawlerData(crawlerData);
+        actions.onReceiveCrawlerData(crawlerData);
       } catch (e) {
         flashAPIErrors(e);
       }
@@ -89,7 +89,7 @@ export const CrawlerOverviewLogic = kea<
           }
         );
         const crawlerData = crawlerDataServerToClient(response as CrawlerDataFromServer);
-        actions.onRecieveCrawlerData(crawlerData);
+        actions.onReceiveCrawlerData(crawlerData);
         setSuccessMessage(DELETE_DOMAIN_MESSAGE(domain.url));
       } catch (e) {
         flashAPIErrors(e);

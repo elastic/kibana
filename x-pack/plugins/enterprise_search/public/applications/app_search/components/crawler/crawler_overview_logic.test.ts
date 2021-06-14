@@ -67,7 +67,7 @@ describe('CrawlerOverviewLogic', () => {
   });
 
   describe('actions', () => {
-    describe('onRecieveCrawlerData', () => {
+    describe('onReceiveCrawlerData', () => {
       const crawlerData = {
         domains: [
           {
@@ -84,7 +84,7 @@ describe('CrawlerOverviewLogic', () => {
       };
 
       beforeEach(() => {
-        CrawlerOverviewLogic.actions.onRecieveCrawlerData(crawlerData);
+        CrawlerOverviewLogic.actions.onReceiveCrawlerData(crawlerData);
       });
 
       it('should set all received data as top-level values', () => {
@@ -99,15 +99,15 @@ describe('CrawlerOverviewLogic', () => {
 
   describe('listeners', () => {
     describe('fetchCrawlerData', () => {
-      it('calls onRecieveCrawlerData with retrieved data that has been converted from server to client', async () => {
-        jest.spyOn(CrawlerOverviewLogic.actions, 'onRecieveCrawlerData');
+      it('calls onReceiveCrawlerData with retrieved data that has been converted from server to client', async () => {
+        jest.spyOn(CrawlerOverviewLogic.actions, 'onReceiveCrawlerData');
 
         http.get.mockReturnValue(Promise.resolve(MOCK_SERVER_DATA));
         CrawlerOverviewLogic.actions.fetchCrawlerData();
         await nextTick();
 
         expect(http.get).toHaveBeenCalledWith('/api/app_search/engines/some-engine/crawler');
-        expect(CrawlerOverviewLogic.actions.onRecieveCrawlerData).toHaveBeenCalledWith(
+        expect(CrawlerOverviewLogic.actions.onReceiveCrawlerData).toHaveBeenCalledWith(
           MOCK_CLIENT_DATA
         );
       });
@@ -122,8 +122,8 @@ describe('CrawlerOverviewLogic', () => {
     });
 
     describe('deleteDomain', () => {
-      it('calls onRecieveCrawlerData with retrieved data that has been converted from server to client', async () => {
-        jest.spyOn(CrawlerOverviewLogic.actions, 'onRecieveCrawlerData');
+      it('calls onReceiveCrawlerData with retrieved data that has been converted from server to client', async () => {
+        jest.spyOn(CrawlerOverviewLogic.actions, 'onReceiveCrawlerData');
 
         http.delete.mockReturnValue(Promise.resolve(MOCK_SERVER_DATA));
         CrawlerOverviewLogic.actions.deleteDomain({ id: '1234' } as CrawlerDomain);
@@ -135,7 +135,7 @@ describe('CrawlerOverviewLogic', () => {
             query: { respond_with: 'crawler_details' },
           }
         );
-        expect(CrawlerOverviewLogic.actions.onRecieveCrawlerData).toHaveBeenCalledWith(
+        expect(CrawlerOverviewLogic.actions.onReceiveCrawlerData).toHaveBeenCalledWith(
           MOCK_CLIENT_DATA
         );
         expect(setSuccessMessage).toHaveBeenCalled();
