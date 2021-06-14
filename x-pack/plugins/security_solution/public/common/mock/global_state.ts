@@ -31,7 +31,6 @@ import { ManagementState } from '../../management/types';
 import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/model';
 import { mockBrowserFields, mockDocValueFields } from '../containers/source/mock';
 import { mockIndexPattern } from './index_pattern';
-import { defaultHeaders as defaultColumns } from '../../timelines/components/timeline/body/column_headers/default_headers';
 
 export const mockGlobalState: State = {
   app: {
@@ -255,13 +254,6 @@ export const mockGlobalState: State = {
         isSaving: false,
         version: null,
         status: TimelineStatus.active,
-        defaultColumns,
-        loadingText: 'events',
-        footerText: 'events',
-        documentType: '',
-        selectAll: false,
-        queryFields: [],
-        unit: (n: number) => n,
       },
     },
     insertTimeline: null,

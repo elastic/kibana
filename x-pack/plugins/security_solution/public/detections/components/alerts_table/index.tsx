@@ -12,7 +12,7 @@ import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Filter, esQuery } from '../../../../../../../src/plugins/data/public';
-import { TimelineIdLiteral } from '../../../../common/types/timeline';
+import { RowRendererId, TimelineIdLiteral } from '../../../../common/types/timeline';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
 import { HeaderSection } from '../../../common/components/header_section';
@@ -336,12 +336,9 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   useEffect(() => {
     dispatch(
       timelineActions.initializeTGridSettings({
-        // defaultModel: {
-        //   ...defaultTimelineModel,
-        //   columns,
-        // },
         defaultColumns: columns,
         documentType: i18n.ALERTS_DOCUMENT_TYPE,
+        excludedRowRendererIds: defaultTimelineModel.excludedRowRendererIds as RowRendererId[],
         filterManager,
         footerText: i18n.TOTAL_COUNT_OF_ALERTS,
         id: timelineId,
@@ -351,7 +348,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         title: '',
       })
     );
-  }, [dispatch, filterManager, timelineId]);
+  }, [dispatch, defaultTimelineModel, filterManager, timelineId]);
 
   const headerFilterGroup = useMemo(
     () => <AlertsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />,

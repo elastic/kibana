@@ -18,6 +18,7 @@ import { ManagementPluginReducer } from '../../management';
 import { SubPluginsInitReducer } from '../store';
 import { mockGlobalState } from './global_state';
 import { TimelineState } from '../../timelines/store/timeline/types';
+import { defaultHeaders } from '../../timelines/components/timeline/body/column_headers/default_headers';
 
 interface Global extends NodeJS.Global {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -26,11 +27,27 @@ interface Global extends NodeJS.Global {
 
 export const globalNode: Global = global;
 
-const combineTimelineReducer = (reduceReducers(
-  mockGlobalState.timeline,
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const combineTimelineReducer = reduceReducers<any>(
+  {
+    ...mockGlobalState.timeline,
+    timelineById: {
+      ...mockGlobalState.timeline.timelineById,
+      test: {
+        ...mockGlobalState.timeline.timelineById.test,
+        defaultColumns: defaultHeaders,
+        loadingText: 'events',
+        footerText: 'events',
+        documentType: '',
+        selectAll: false,
+        queryFields: [],
+        unit: (n: number) => n,
+      },
+    },
+  },
   tGridReducer,
   timelineReducer
-) as unknown) as Reducer<TimelineState, AnyAction>;
+) as Reducer<TimelineState, AnyAction>;
 
 export const SUB_PLUGINS_REDUCER: SubPluginsInitReducer = {
   hosts: hostsReducer,

@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/react';
 
 import { BodyComponent, StatefulBodyProps } from '.';
 import { Sort } from './sort';

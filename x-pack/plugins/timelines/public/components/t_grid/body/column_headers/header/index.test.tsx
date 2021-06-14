@@ -14,7 +14,6 @@ import { defaultHeaders } from '../default_headers';
 
 import { HeaderComponent } from '.';
 import { getNewSortDirectionOnClick, getNextSortDirection, getSortDirection } from './helpers';
-import { ColumnHeaderType } from '../../../../../../common/types/timeline';
 import { Direction } from '../../../../../../common/search_strategy';
 import { TestProviders } from '../../../../../mock';
 import { tGridActions } from '../../../../../store/t_grid';
@@ -35,8 +34,6 @@ jest.mock('react-redux', () => {
     useDispatch: () => mockDispatch,
   };
 });
-
-const filteredColumnHeader: ColumnHeaderType = 'text-filter';
 
 describe('Header', () => {
   const columnHeader = defaultHeaders[0];

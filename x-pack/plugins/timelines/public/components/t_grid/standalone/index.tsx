@@ -21,6 +21,7 @@ import type {
   RowRenderer,
   SortColumnTimeline,
 } from '../../../../common/types/timeline';
+// eslint-disable-next-line no-duplicate-imports
 import { TimelineTabs } from '../../../../common/types/timeline';
 import { esQuery, Filter, Query } from '../../../../../../../src/plugins/data/public';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
@@ -258,7 +259,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
           start,
           end,
         },
-        excludedRowRendererIds: [],
         indexNames,
         sort,
         itemsPerPage,

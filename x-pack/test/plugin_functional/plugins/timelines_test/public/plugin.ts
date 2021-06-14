@@ -7,13 +7,13 @@
 
 import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { TimelinesPluginSetup } from '../../../../../plugins/timelines/public';
+import { TimelinesUIStart } from '../../../../../plugins/timelines/public';
 import { renderApp } from './applications/timelines_test';
 
 export type TimelinesTestPluginSetup = void;
 export type TimelinesTestPluginStart = void;
 export interface TimelinesTestPluginSetupDependencies {
-  timelines: TimelinesPluginSetup;
+  timelines: TimelinesUIStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
