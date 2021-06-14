@@ -47,7 +47,7 @@ describe('createApmEventClient', () => {
           },
         });
 
-        await eventClient.search({
+        await eventClient.search('foo', {
           apm: {
             events: [],
           },

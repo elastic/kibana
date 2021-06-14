@@ -38,37 +38,38 @@ export function getLocalUIFilters({
     delete projectionWithoutAggs.body.aggs;
 
     return Promise.all(
-      localFilterNames.map(async (name) =>
-        withApmSpan('get_ui_filter_options_for_field', async () => {
-          const query = getLocalFilterQuery({
-            uiFilters,
-            projection,
-            localUIFilterName: name,
-          });
+      localFilterNames.map(async (name) => {
+        const query = getLocalFilterQuery({
+          uiFilters,
+          projection,
+          localUIFilterName: name,
+        });
 
-          const response = await apmEventClient.search(query);
+        const response = await apmEventClient.search(
+          'get_ui_filter_options_for_field',
+          query
+        );
 
-          const filter = localUIFilters[name];
+        const filter = localUIFilters[name];
 
-          const buckets = response?.aggregations?.by_terms?.buckets ?? [];
+        const buckets = response?.aggregations?.by_terms?.buckets ?? [];
 
-          return {
-            ...filter,
-            options: orderBy(
-              buckets.map((bucket) => {
-                return {
-                  name: bucket.key as string,
-                  count: bucket.bucket_count
-                    ? bucket.bucket_count.value
-                    : bucket.doc_count,
-                };
-              }),
-              'count',
-              'desc'
-            ),
-          };
-        })
-      )
+        return {
+          ...filter,
+          options: orderBy(
+            buckets.map((bucket) => {
+              return {
+                name: bucket.key as string,
+                count: bucket.bucket_count
+                  ? bucket.bucket_count.value
+                  : bucket.doc_count,
+              };
+            }),
+            'count',
+            'desc'
+          ),
+        };
+      })
     );
   });
 }
