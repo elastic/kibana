@@ -6,17 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  Logger,
-  // SavedObjectReference
-} from 'src/core/server';
-import {
-  AlertType,
-  AlertExecutorOptions,
-  StackAlertsStartDeps,
-  // RuleParamsAndRefs,
-} from '../../types';
-import { Params, ExtractedParams, ParamsSchema } from './alert_type_params';
+import { Logger } from 'src/core/server';
+import { AlertType, AlertExecutorOptions, StackAlertsStartDeps } from '../../types';
+import { Params, ParamsSchema } from './alert_type_params';
 import { ActionContext, BaseActionContext, addMessages } from './action_context';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import {
@@ -31,7 +23,7 @@ const ActionGroupId = 'threshold met';
 export function getAlertType(
   logger: Logger,
   data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>
-): AlertType<Params, ExtractedParams, {}, {}, ActionContext, typeof ActionGroupId> {
+): AlertType<Params, never, {}, {}, ActionContext, typeof ActionGroupId> {
   const alertTypeName = i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeTitle', {
     defaultMessage: 'Index threshold',
   });
@@ -135,38 +127,6 @@ export function getAlertType(
     minimumLicenseRequired: 'basic',
     executor,
     producer: STACK_ALERTS_FEATURE_ID,
-    // useSavedObjectReferences: {
-    //   extractReferences: (params: Params): RuleParamsAndRefs<ExtractedParams> => {
-    //     const { index, ...otherParams } = params;
-
-    //     let indexRef: string | string[];
-    //     const references = [];
-    //     if (Array.isArray(index)) {
-    //       const extractedIndex: string[] = [];
-    //       index.forEach((indexId: string, idx: number) => {
-    //         extractedIndex.push(`indexRef_${idx}`);
-    //         references.push({
-    //           name: `indexRef_${idx}`,
-    //           id: indexId,
-    //           type: 'index-pattern',
-    //         });
-    //       });
-    //       indexRef = extractedIndex;
-    //     } else {
-    //       indexRef = `indexRef_0`;
-    //       references.push({
-    //         name: `indexRef_0`,
-    //         id: index,
-    //         type: 'index-pattern',
-    //       });
-    //     }
-    //     return { params: { ...otherParams, indexRef }, references };
-    //   },
-    //   injectReferences: (params: ExtractedParams, references: SavedObjectReference[]) => {
-    //     const { indexRef, ...otherParams } = params;
-    //     return { ...otherParams, index: 'hi' };
-    //   },
-    // },
   };
 
   async function executor(

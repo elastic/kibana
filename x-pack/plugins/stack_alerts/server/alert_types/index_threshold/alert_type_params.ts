@@ -16,7 +16,6 @@ import {
 // alert type parameters
 
 export type Params = TypeOf<typeof ParamsSchema>;
-export type ExtractedParams = Omit<Params, 'index'> & { indexRef: string | string[] };
 
 export const ParamsSchema = schema.object(
   {
