@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import { canSkipSourceUpdate, updateDueToExtent } from './can_skip_fetch';
 import { DataRequest } from './data_request';
 
@@ -310,8 +309,8 @@ describe('canSkipSourceUpdate', () => {
         isGeoGridPrecisionAware: () => {
           return false;
         },
-        updateDueToTimeslice: (prevMeta, timeslice) => {
-          return !_.isEqual(prevMeta.timeslice, timeslice);
+        updateDueToTimeslice: () => {
+          return true;
         },
       };
     }
