@@ -57,7 +57,9 @@ describe('checkSearchSessionsByPage', () => {
         {
           savedObjectsClient,
         } as any,
-        config,
+        {
+          type: 'literal',
+        },
         1,
         1
       );
