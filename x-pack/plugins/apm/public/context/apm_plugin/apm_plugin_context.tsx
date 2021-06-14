@@ -12,7 +12,6 @@ import { ConfigSchema } from '../..';
 import { ApmPluginSetupDeps } from '../../plugin';
 import { MapsStartApi } from '../../../../maps/public';
 import { ObservabilityPublicStart } from '../../../../observability/public';
-import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 
 export interface ApmPluginContextValue {
   appMountParameters: AppMountParameters;
@@ -21,7 +20,6 @@ export interface ApmPluginContextValue {
   plugins: ApmPluginSetupDeps & { maps?: MapsStartApi };
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   observability: ObservabilityPublicStart;
-  data: DataPublicPluginStart;
 }
 
 export const ApmPluginContext = createContext({} as ApmPluginContextValue);

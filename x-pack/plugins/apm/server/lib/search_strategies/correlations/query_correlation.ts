@@ -147,7 +147,6 @@ export const getTransactionDurationCorrelationRequest = (
       } as estypes.AggregationsAggregationContainer,
     },
   };
-
   return {
     index: params.index,
     body,

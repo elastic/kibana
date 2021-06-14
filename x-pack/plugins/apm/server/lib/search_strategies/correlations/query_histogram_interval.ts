@@ -43,10 +43,10 @@ export const fetchTransactionDurationHistogramInterval = async (
   }
 
   const transactionDurationDelta =
-    (resp.body.aggregations.transaction_duration_max as estypes.ValueAggregate)
-      .value -
-    (resp.body.aggregations.transaction_duration_min as estypes.ValueAggregate)
-      .value;
+    (resp.body.aggregations
+      .transaction_duration_max as estypes.AggregationsValueAggregate).value -
+    (resp.body.aggregations
+      .transaction_duration_min as estypes.AggregationsValueAggregate).value;
 
   return transactionDurationDelta / (HISTOGRAM_INTERVALS - 1);
 };

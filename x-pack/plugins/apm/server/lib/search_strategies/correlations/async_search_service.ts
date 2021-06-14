@@ -23,7 +23,7 @@ import { fetchTransactionDurationHistogramRangesteps } from './query_histogram_r
 import { fetchTransactionDurationRanges } from './query_ranges';
 import { range } from './utils';
 
-const CORRELATION_THRESHOLD = 0.03;
+const CORRELATION_THRESHOLD = 0.3;
 const KS_TEST_THRESHOLD = 0.1;
 
 export function roundToDecimalPlace(

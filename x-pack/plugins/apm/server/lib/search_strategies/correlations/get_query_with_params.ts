@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { i18n } from '@kbn/i18n';
 
@@ -23,7 +23,6 @@ export enum ProcessorEvent {
 const PROCESSOR_EVENT = 'processor.event';
 const SERVICE_ENVIRONMENT = 'service.environment';
 const SERVICE_NAME = 'service.name';
-const TRANSACTION_TYPE = 'transaction.type';
 
 const ENVIRONMENT_ALL_VALUE = 'ENVIRONMENT_ALL';
 const ENVIRONMENT_NOT_DEFINED_VALUE = 'ENVIRONMENT_NOT_DEFINED';
@@ -55,7 +54,9 @@ export const ENVIRONMENT_NOT_DEFINED = {
   text: environmentLabels[ENVIRONMENT_NOT_DEFINED_VALUE],
 };
 
-const getEnvironmentQuery = (environment?: string): QueryContainer[] => {
+const getEnvironmentQuery = (
+  environment?: string
+): estypes.QueryDslQueryContainer[] => {
   if (!environment || environment === ENVIRONMENT_ALL.value) {
     return [];
   }
@@ -67,7 +68,10 @@ const getEnvironmentQuery = (environment?: string): QueryContainer[] => {
   return [{ term: { [SERVICE_ENVIRONMENT]: environment } }];
 };
 
-const getRangeQuery = (start?: string, end?: string): QueryContainer[] => {
+const getRangeQuery = (
+  start?: string,
+  end?: string
+): estypes.QueryDslQueryContainer[] => {
   return [
     {
       range: {
@@ -82,7 +86,7 @@ const getRangeQuery = (start?: string, end?: string): QueryContainer[] => {
 
 const getPercentileThresholdValueQuery = (
   percentileThresholdValue: number
-): QueryContainer[] => {
+): estypes.QueryDslQueryContainer[] => {
   return [
     {
       range: {
@@ -97,7 +101,6 @@ const getPercentileThresholdValueQuery = (
 export const getQueryWithParams = ({
   environment,
   serviceName,
-  transactionType,
   start,
   end,
   percentileThresholdValue,
@@ -107,15 +110,12 @@ export const getQueryWithParams = ({
       filter: [
         { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
         ...(serviceName ? [{ term: { [SERVICE_NAME]: serviceName } }] : []),
-        ...(transactionType
-          ? [{ term: { [TRANSACTION_TYPE]: transactionType } }]
-          : []),
         ...getRangeQuery(start, end),
         ...getEnvironmentQuery(environment),
         ...(percentileThresholdValue
           ? getPercentileThresholdValueQuery(percentileThresholdValue)
           : []),
-      ] as QueryContainer[],
+      ] as estypes.QueryDslQueryContainer[],
     },
   };
 };

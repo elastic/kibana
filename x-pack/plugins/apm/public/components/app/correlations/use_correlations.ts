@@ -14,7 +14,8 @@ import {
   isErrorResponse,
 } from '../../../../../../../src/plugins/data/public';
 import type { SearchServiceValue } from '../../../../common/search_strategies/correlations/types';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { ApmPluginStartDeps } from '../../../plugin';
 
 interface CorrelationsOptions {
   index: string;
@@ -34,7 +35,9 @@ interface RawResponse {
 }
 
 export const useCorrelations = (params: CorrelationsOptions) => {
-  const { data } = useApmPluginContext();
+  const {
+    services: { data },
+  } = useKibana<ApmPluginStartDeps>();
 
   const [error, setError] = useState<Error>();
   const [isComplete, setIsComplete] = useState(false);
@@ -70,7 +73,7 @@ export const useCorrelations = (params: CorrelationsOptions) => {
         abortSignal: abortCtrl.current.signal,
       })
       .subscribe({
-        next: (res) => {
+        next: (res: IKibanaSearchResponse<RawResponse>) => {
           setResponse(res);
           if (isCompleteResponse(res)) {
             searchSubscription$.current?.unsubscribe();
@@ -82,7 +85,7 @@ export const useCorrelations = (params: CorrelationsOptions) => {
             setIsRunning(false);
           }
         },
-        error: (e) => {
+        error: (e: Error) => {
           setError(e);
           setIsRunning(false);
         },

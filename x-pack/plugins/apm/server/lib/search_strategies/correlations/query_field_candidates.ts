@@ -64,6 +64,6 @@ export const fetchTransactionDurationFieldCandidates = async (
 
   return {
     fieldCandidates,
-    totalHits: (resp.body.hits.total as estypes.TotalHits).value,
+    totalHits: (resp.body.hits.total as estypes.SearchTotalHits).value,
   };
 };
