@@ -118,7 +118,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
               // UX navigation
               {
                 label: 'User Experience',
-                sortKey: 500,
+                sortKey: 600,
                 entries: [
                   {
                     label: i18n.translate('xpack.apm.ux.overview.heading', {
