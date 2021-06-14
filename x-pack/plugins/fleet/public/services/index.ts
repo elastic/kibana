@@ -30,6 +30,14 @@ export {
   LicenseService,
   isAgentUpgradeable,
   doesPackageHaveIntegrations,
+  PackagePolicyValidationResults,
+  PackagePolicyConfigValidationResults,
+  PackagePolicyInputValidationResults,
+  validatePackagePolicy,
+  validatePackagePolicyConfig,
+  validationHasErrors,
+  countValidationErrors,
+  getStreamsForInputType,
 } from '../../common';
 
 export * from './pkg_key_from_package_info';

@@ -15,7 +15,7 @@ and enables central management of all alerts from <<management,Kibana Management
 image::apm/images/apm-alert.png[Create an alert in the APM app]
 
 For a walkthrough of the alert flyout panel, including detailed information on each configurable property,
-see Kibana's <<defining-alerts,defining alerts>>.
+see Kibana's <<create-edit-rules,defining alerts>>.
 
 The APM app supports four different types of alerts:
 
@@ -126,4 +126,4 @@ See {kibana-ref}/alerting-getting-started.html[alerting and actions] for more in
 
 NOTE: If you are using an **on-premise** Elastic Stack deployment with security,
 communication between Elasticsearch and Kibana must have TLS configured.
-More information is in the alerting {kibana-ref}/alerting-getting-started.html#alerting-setup-prerequisites[prerequisites].
+More information is in the alerting {kibana-ref}/alerting-setup.html#alerting-prerequisites[prerequisites].

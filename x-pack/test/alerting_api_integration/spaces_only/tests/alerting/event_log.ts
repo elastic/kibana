@@ -134,6 +134,14 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               outcome: 'success',
               message: `alert executed: test.patternFiring:${alertId}: 'abc'`,
               status: executeStatuses[executeCount++],
+              rule: {
+                id: alertId,
+                category: response.body.rule_type_id,
+                license: 'basic',
+                ruleset: 'alertsFixture',
+                namespace: Spaces.space1.id,
+                name: response.body.name,
+              },
             });
             break;
           case 'execute-action':
@@ -146,6 +154,14 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               message: `alert: test.patternFiring:${alertId}: 'abc' instanceId: 'instance' scheduled actionGroup: 'default' action: test.noop:${createdAction.id}`,
               instanceId: 'instance',
               actionGroupId: 'default',
+              rule: {
+                id: alertId,
+                category: response.body.rule_type_id,
+                license: 'basic',
+                ruleset: 'alertsFixture',
+                namespace: Spaces.space1.id,
+                name: response.body.name,
+              },
             });
             break;
           case 'new-instance':
@@ -181,6 +197,14 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           instanceId: 'instance',
           actionGroupId: 'default',
           shouldHaveEventEnd,
+          rule: {
+            id: alertId,
+            category: response.body.rule_type_id,
+            license: 'basic',
+            ruleset: 'alertsFixture',
+            namespace: Spaces.space1.id,
+            name: response.body.name,
+          },
         });
       }
     });
@@ -279,6 +303,14 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               outcome: 'success',
               message: `alert executed: test.patternFiring:${alertId}: 'abc'`,
               status: executeStatuses[executeCount++],
+              rule: {
+                id: alertId,
+                category: response.body.rule_type_id,
+                license: 'basic',
+                ruleset: 'alertsFixture',
+                namespace: Spaces.space1.id,
+                name: response.body.name,
+              },
             });
             break;
           case 'execute-action':
@@ -294,6 +326,14 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               message: `alert: test.patternFiring:${alertId}: 'abc' instanceId: 'instance' scheduled actionGroup(subgroup): 'default(${event?.kibana?.alerting?.action_subgroup})' action: test.noop:${createdAction.id}`,
               instanceId: 'instance',
               actionGroupId: 'default',
+              rule: {
+                id: alertId,
+                category: response.body.rule_type_id,
+                license: 'basic',
+                ruleset: 'alertsFixture',
+                namespace: Spaces.space1.id,
+                name: response.body.name,
+              },
             });
             break;
           case 'new-instance':
@@ -332,6 +372,14 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           instanceId: 'instance',
           actionGroupId: 'default',
           shouldHaveEventEnd,
+          rule: {
+            id: alertId,
+            category: response.body.rule_type_id,
+            license: 'basic',
+            ruleset: 'alertsFixture',
+            namespace: Spaces.space1.id,
+            name: response.body.name,
+          },
         });
       }
     });
@@ -374,6 +422,13 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
         errorMessage: 'this alert is intended to fail',
         status: 'error',
         reason: 'execute',
+        rule: {
+          id: alertId,
+          category: response.body.rule_type_id,
+          license: 'basic',
+          ruleset: 'alertsFixture',
+          namespace: Spaces.space1.id,
+        },
       });
     });
   });
@@ -397,10 +452,21 @@ interface ValidateEventLogParams {
   actionGroupId?: string;
   instanceId?: string;
   reason?: string;
+  rule: {
+    id: string;
+    name?: string;
+    version?: string;
+    category?: string;
+    reference?: string;
+    author?: string[];
+    license?: string;
+    ruleset?: string;
+    namespace?: string;
+  };
 }
 
 export function validateEvent(event: IValidatedEvent, params: ValidateEventLogParams): void {
-  const { spaceId, savedObjects, outcome, message, errorMessage } = params;
+  const { spaceId, savedObjects, outcome, message, errorMessage, rule } = params;
   const { status, actionGroupId, instanceId, reason, shouldHaveEventEnd } = params;
 
   if (status) {
@@ -455,6 +521,8 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
   }
 
   expect(event?.message).to.eql(message);
+
+  expect(event?.rule).to.eql(rule);
 
   if (errorMessage) {
     expect(event?.error?.message).to.eql(errorMessage);
