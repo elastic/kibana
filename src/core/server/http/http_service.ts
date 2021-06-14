@@ -11,6 +11,7 @@ import { first, map } from 'rxjs/operators';
 import { pick } from '@kbn/std';
 
 import type { RequestHandlerContext } from 'src/core/server';
+import type { ExecutionContextSetup } from '../execution_context';
 import { CoreService } from '../../types';
 import { Logger, LoggerFactory } from '../logging';
 import { ContextSetup } from '../context';
@@ -41,6 +42,7 @@ import {
 
 interface SetupDeps {
   context: ContextSetup;
+  executionContext: ExecutionContextSetup;
 }
 
 /** @internal */
@@ -90,7 +92,10 @@ export class HttpService
 
     const notReadyServer = await this.setupNotReadyService({ config, context: deps.context });
 
-    const { registerRouter, ...serverContract } = await this.httpServer.setup(config);
+    const { registerRouter, ...serverContract } = await this.httpServer.setup(
+      config,
+      deps.executionContext
+    );
 
     registerCoreHandlers(serverContract, config, this.env);
 
