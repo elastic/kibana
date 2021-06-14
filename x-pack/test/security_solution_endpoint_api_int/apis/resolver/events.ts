@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { JsonObject } from 'src/plugins/kibana_utils/common';
+import { JsonObject } from '@kbn/utils';
 import { eventsIndexPattern } from '../../../../plugins/security_solution/common/endpoint/constants';
 import {
   eventIDSafeVersion,

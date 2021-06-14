@@ -9,7 +9,7 @@ import { TaskManagerConfig } from '../config';
 import { of, Subject } from 'rxjs';
 import { take, bufferCount } from 'rxjs/operators';
 import { createMonitoringStatsStream, AggregatedStat } from './monitoring_stats_stream';
-import { JsonValue } from 'src/plugins/kibana_utils/common';
+import { JsonValue } from '@kbn/utils';
 
 beforeEach(() => {
   jest.resetAllMocks();

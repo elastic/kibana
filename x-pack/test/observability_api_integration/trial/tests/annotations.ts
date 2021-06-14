@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { JsonObject } from 'src/plugins/kibana_utils/common';
+import { JsonObject } from '@kbn/utils';
 import { Annotation } from '../../../../plugins/observability/common/annotations';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
