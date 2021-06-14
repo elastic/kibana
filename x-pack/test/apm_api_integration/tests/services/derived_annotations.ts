@@ -16,10 +16,10 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
   const es = getService('es');
 
   const dates = [
-    new Date(2021, 1, 1, 1),
-    new Date(2021, 1, 1, 2),
-    new Date(2021, 1, 1, 3),
-    new Date(2021, 1, 1, 4),
+    new Date('2021-02-01T00:00:00.000Z'),
+    new Date('2021-02-01T01:00:00.000Z'),
+    new Date('2021-02-01T02:00:00.000Z'),
+    new Date('2021-02-01T03:00:00.000Z'),
   ];
 
   const indexName = 'apm-8.0.0-transaction';
