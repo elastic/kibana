@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { PendingActionsResponse } from '../../../../common/endpoint/types';
+import {
+  PendingActionsRequestQuery,
+  PendingActionsResponse,
+} from '../../../../common/endpoint/types';
 import {
   httpHandlerMockFactory,
   ResponseProvidersInterface,
@@ -16,19 +19,13 @@ export const pendingActionsResponseMock = (): PendingActionsResponse => ({
   data: [
     {
       agent_id: '111-111',
-      pending_actions: {
-        isolate: 1,
-      },
+      pending_actions: {},
     },
     {
       agent_id: '222-222',
       pending_actions: {
-        unisolate: 1,
+        isolate: 1,
       },
-    },
-    {
-      agent_id: '333-333',
-      pending_actions: {},
     },
   ],
 });
@@ -42,6 +39,25 @@ export const pendingActionsHttpMocks = httpHandlerMockFactory<PendingActionsHttp
     id: 'pendingActions',
     method: 'get',
     path: ACTION_STATUS_ROUTE,
-    handler: () => pendingActionsResponseMock(),
+    /** Will build a response based on the number of agent ids received. */
+    handler: (options) => {
+      const agentIds = (options.query as PendingActionsRequestQuery).agent_ids as string[];
+
+      if (agentIds.length) {
+        return {
+          data: agentIds.map((id, index) => ({
+            agent_id: id,
+            pending_actions:
+              index % 2 // index's of the array that are not divisible by 2 will will have `isolate: 1`
+                ? {
+                    isolate: 1,
+                  }
+                : {},
+          })),
+        };
+      }
+
+      return pendingActionsResponseMock();
+    },
   },
 ]);
