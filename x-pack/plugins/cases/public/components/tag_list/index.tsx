@@ -27,7 +27,6 @@ import { Tags } from './tags';
 
 const CommonUseField = getUseField({ component: Field });
 
-// exporting so it can be used in the tests
 export interface TagListProps {
   userCanCrud?: boolean;
   isLoading: boolean;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 
 import { EuiButtonEmpty } from '@elastic/eui';
@@ -37,10 +37,12 @@ function ConfigureCasesPageComponent() {
   const { formatUrl } = useFormatUrl(CASES_APP_ID);
   const href = formatUrl(getCaseUrl());
   useBreadcrumbs([{ ...casesBreadcrumbs.cases, href }, casesBreadcrumbs.configure]);
-  if (userPermissions != null && !userPermissions.read) {
-    navigateToApp(`${CASES_APP_ID}`);
-    return null;
-  }
+
+  useEffect(() => {
+    if (userPermissions != null && !userPermissions.read) {
+      navigateToApp(`${CASES_APP_ID}`);
+    }
+  }, [userPermissions, navigateToApp]);
 
   return (
     <ObservabilityPageTemplate

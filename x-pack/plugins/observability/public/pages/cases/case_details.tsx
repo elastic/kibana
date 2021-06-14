@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { CaseView } from '../../components/app/cases/case_view';
@@ -24,10 +24,11 @@ export const CaseDetailsPage = React.memo(() => {
     subCaseId?: string;
   }>();
 
-  if (userPermissions != null && !userPermissions.read) {
-    navigateToApp(`${CASES_APP_ID}`);
-    return null;
-  }
+  useEffect(() => {
+    if (userPermissions != null && !userPermissions.read) {
+      navigateToApp(`${CASES_APP_ID}`);
+    }
+  }, [navigateToApp, userPermissions]);
 
   return caseId != null ? (
     <>

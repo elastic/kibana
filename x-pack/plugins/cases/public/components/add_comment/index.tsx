@@ -33,7 +33,6 @@ export interface AddCommentRefObject {
   addQuote: (quote: string) => void;
 }
 
-// Exporting so that the tests can use the appropriate props interface.
 export interface AddCommentProps {
   caseId: string;
   userCanCrud?: boolean;

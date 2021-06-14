@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Route, Switch } from 'react-router-dom';
 
 import * as i18n from './translations';
@@ -27,14 +27,16 @@ const CaseContainerComponent: React.FC = () => {
   const userPermissions = useGetUserCasesPermissions();
   const chrome = useKibana().services.chrome;
 
-  // if the user is read only then display the glasses badge in the global navigation header
-  if (userPermissions != null && !userPermissions.crud && userPermissions.read) {
-    chrome.setBadge({
-      text: i18n.READ_ONLY_BADGE_TEXT,
-      tooltip: i18n.READ_ONLY_BADGE_TOOLTIP,
-      iconType: 'glasses',
-    });
-  }
+  useEffect(() => {
+    // if the user is read only then display the glasses badge in the global navigation header
+    if (userPermissions != null && !userPermissions.crud && userPermissions.read) {
+      chrome.setBadge({
+        text: i18n.READ_ONLY_BADGE_TEXT,
+        tooltip: i18n.READ_ONLY_BADGE_TOOLTIP,
+        iconType: 'glasses',
+      });
+    }
+  }, [userPermissions, chrome]);
 
   return (
     <Switch>

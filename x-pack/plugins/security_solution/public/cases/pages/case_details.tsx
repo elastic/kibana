@@ -5,31 +5,35 @@
  * 2.0.
  */
 
-import React from 'react';
-import { useParams, useHistory } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 
 import { SecurityPageName } from '../../app/types';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { WrapperPage } from '../../common/components/wrapper_page';
 import { useGetUrlSearch } from '../../common/components/navigation/use_get_url_search';
-import { useGetUserCasesPermissions } from '../../common/lib/kibana';
+import { useGetUserCasesPermissions, useKibana } from '../../common/lib/kibana';
 import { getCaseUrl } from '../../common/components/link_to';
 import { navTabs } from '../../app/home/home_navigations';
 import { CaseView } from '../components/case_view';
+import { CASES_SUB_PLUGIN_ID } from '../../../common/constants';
 
 export const CaseDetailsPage = React.memo(() => {
-  const history = useHistory();
   const userPermissions = useGetUserCasesPermissions();
   const { detailName: caseId, subCaseId } = useParams<{
     detailName?: string;
     subCaseId?: string;
   }>();
   const search = useGetUrlSearch(navTabs.case);
+  const {
+    application: { navigateToApp },
+  } = useKibana().services;
 
-  if (userPermissions != null && !userPermissions.read) {
-    history.replace(getCaseUrl(search));
-    return null;
-  }
+  useEffect(() => {
+    if (userPermissions != null && !userPermissions.read) {
+      navigateToApp(CASES_SUB_PLUGIN_ID, { path: getCaseUrl(search) });
+    }
+  }, [navigateToApp, userPermissions, search]);
 
   return caseId != null ? (
     <>

@@ -80,6 +80,11 @@ export const APP_MANAGEMENT_PATH = `${APP_PATH}/administration`;
 
 export const DETECTIONS_SUB_PLUGIN_ID = `${APP_ID}:${SecurityPageName.detections}`;
 
+/**
+ * The ID of the cases plugin to make it easier for the failed permissions cases to navigate back to the main app
+ */
+export const CASES_SUB_PLUGIN_ID = `${APP_ID}:${SecurityPageName.case}`;
+
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events */
 export const DEFAULT_INDEX_PATTERN = [
   'apm-*-transaction*',

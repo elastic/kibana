@@ -30,7 +30,6 @@ import { schema } from './schema';
 import { getConnectorFieldsFromUserActions } from './helpers';
 import * as i18n from './translations';
 
-// exporting for use in tests
 export interface EditConnectorProps {
   caseFields: ConnectorTypeFields['fields'];
   connectors: ActionConnector[];
