@@ -11,11 +11,13 @@ import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 
 export const Wrapper = styled.div`
   background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
-  // HACK: Kibana introduces a div element around the app component that
-  // results in us being unable to stretch this Wrapper to full height
-  // via flex: 1. This calc sets the min height to the viewport size minus
-  // the height of the two global Kibana headers
-  min-height: calc(100vh - 48px - 48px);
+
+  // HACK: Kibana introduces a div element around the app component that results in us
+  // being unable to stretch this Wrapper to full height via flex: 1. This calc sets
+  // the min height to the viewport size minus the height of the two global Kibana headers.
+  min-height: calc(
+    100vh - ${(props) => parseFloat(props.theme.eui.euiHeaderHeightCompensation) * 2}px
+  );
 `;
 
 export const Page = styled(EuiPage)`
