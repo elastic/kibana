@@ -64,7 +64,7 @@ export function processBucket(
       })
     );
 
-    const key = getFieldFormatByName(panel.pivot_id).convert(bucket.key);
+    const key = getFieldFormatByName?.(panel.pivot_id).convert(bucket.key) ?? bucket.key;
 
     return { key, series };
   };
