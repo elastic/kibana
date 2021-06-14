@@ -13,7 +13,7 @@ import type {
   TinymathNamedArgument,
   TinymathVariable,
 } from 'packages/kbn-tinymath';
-import type { OperationDefinition, IndexPatternColumn } from '../index';
+import type { OperationDefinition, IndexPatternColumn, GenericOperationDefinition } from '../index';
 import type { GroupedNodes } from './types';
 
 export function groupArgsByType(args: TinymathAST[]) {
@@ -66,6 +66,16 @@ export function getOperationParams(
   }, {});
 }
 
+function getTypeI18n(type: string) {
+  if (type === 'number') {
+    return i18n.translate('xpack.lens.formula.number', { defaultMessage: 'number' });
+  }
+  if (type === 'string') {
+    return i18n.translate('xpack.lens.formula.string', { defaultMessage: 'string' });
+  }
+  return '';
+}
+
 // Todo: i18n everything here
 export const tinymathFunctions: Record<
   string,
@@ -73,145 +83,254 @@ export const tinymathFunctions: Record<
     positionalArguments: Array<{
       name: string;
       optional?: boolean;
+      defaultValue?: string | number;
+      type?: string;
     }>;
-    // help: React.ReactElement;
     // Help is in Markdown format
     help: string;
   }
 > = {
   add: {
     positionalArguments: [
-      { name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }) },
-      { name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }) },
+      {
+        name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
+        type: getTypeI18n('number'),
+      },
+      {
+        name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }),
+        type: getTypeI18n('number'),
+      },
     ],
     help: `
+Adds up two numbers.
 Also works with + symbol
-Example: ${'`count() + sum(bytes)`'}
-Example: ${'`add(count(), 5)`'}
+
+Example: Calculate the sum of two fields
+
+${'`sum(price) + sum(tax)`'}
+
+Example: Offset count by a static value
+
+${'`add(count(), 5)`'}
     `,
   },
   subtract: {
     positionalArguments: [
-      { name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }) },
-      { name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }) },
+      {
+        name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
+        type: getTypeI18n('number'),
+      },
+      {
+        name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }),
+        type: getTypeI18n('number'),
+      },
     ],
     help: `
+Subtracts the first number from the second number.
 Also works with ${'`-`'} symbol
-Example: ${'`subtract(sum(bytes), avg(bytes))`'}
+
+Example: Calculate the range of a field
+${'`subtract(max(bytes), min(bytes))`'}
     `,
   },
   multiply: {
     positionalArguments: [
-      { name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }) },
-      { name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }) },
+      {
+        name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
+        type: getTypeI18n('number'),
+      },
+      {
+        name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }),
+        type: getTypeI18n('number'),
+      },
     ],
     help: `
-Also works with ${'`*`'} symbol
-Example: ${'`multiply(sum(bytes), 2)`'}
+Multiplies two numbers.
+Also works with ${'`*`'} symbol.
+
+Example: Calculate price after current tax rate
+${'`sum(bytes) * last_value(tax_rate)`'}
+
+Example: Calculate price after constant tax rate
+${'`multiply(sum(price), 1.2)`'}
     `,
   },
   divide: {
     positionalArguments: [
-      { name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }) },
-      { name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }) },
+      {
+        name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
+        type: getTypeI18n('number'),
+      },
+      {
+        name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }),
+        type: getTypeI18n('number'),
+      },
     ],
     help: `
+Divides the first number by the second number.
 Also works with ${'`/`'} symbol
-Example: ${'`ceil(sum(bytes))`'}
+
+Example: Calculate profit margin 
+${'`sum(profit) / sum(revenue)`'}
+
+Example: ${'`divide(sum(bytes), 2)`'}
     `,
   },
   abs: {
     positionalArguments: [
-      { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
+      {
+        name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
+        type: getTypeI18n('number'),
+      },
     ],
     help: `
-Absolute value
-Example: ${'`abs(sum(bytes))`'}
+Calculates absolute value. A negative value is multiplied by -1, a positive value stays the same.
+
+Example: Calculate average distance to sea level ${'`abs(average(altitude))`'}
     `,
   },
   cbrt: {
     positionalArguments: [
-      { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
+      {
+        name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
+        type: getTypeI18n('number'),
+      },
     ],
     help: `
-Cube root of value
-Example: ${'`cbrt(sum(bytes))`'}
+Cube root of value.
+
+Example: Calculate side length from volume
+${'`cbrt(last_value(volume))`'}
     `,
   },
   ceil: {
     positionalArguments: [
-      { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
+      {
+        name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
+        type: getTypeI18n('number'),
+      },
     ],
+    // signature: 'ceil(value: number)',
     help: `
-Ceiling of value, rounds up
-Example: ${'`ceil(sum(bytes))`'}
+Ceiling of value, rounds up.
+
+Example: Round up price to the next dollar 
+${'`ceil(sum(price))`'}
     `,
   },
   clamp: {
     positionalArguments: [
-      { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
-      { name: i18n.translate('xpack.lens.formula.min', { defaultMessage: 'min' }) },
-      { name: i18n.translate('xpack.lens.formula.max', { defaultMessage: 'max' }) },
+      {
+        name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
+        type: getTypeI18n('number'),
+      },
+      {
+        name: i18n.translate('xpack.lens.formula.min', { defaultMessage: 'min' }),
+        type: getTypeI18n('number'),
+      },
+      {
+        name: i18n.translate('xpack.lens.formula.max', { defaultMessage: 'max' }),
+        type: getTypeI18n('number'),
+      },
     ],
+    // signature: 'clamp(value: number, minimum: number, maximum: number)',
     help: `
-Limits the value from a minimum to maximum
-Example: ${'`ceil(sum(bytes))`'}
-    `,
+Limits the value from a minimum to maximum.
+
+Example: Make sure to catch outliers
+\`\`\`
+clamp(
+  average(bytes),
+  percentile(bytes, percentile=5),
+  percentile(bytes, percentile=95)
+)
+\`\`\`
+`,
   },
   cube: {
     positionalArguments: [
-      { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
+      {
+        name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
+        type: getTypeI18n('number'),
+      },
     ],
     help: `
-Limits the value from a minimum to maximum
-Example: ${'`ceil(sum(bytes))`'}
+Calculates the cube of a number.
+
+Example: Calculate volume from side length
+${'`cube(last_value(length))`'}
     `,
   },
   exp: {
     positionalArguments: [
-      { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
+      {
+        name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
+        type: getTypeI18n('number'),
+      },
     ],
     help: `
-Raises <em>e</em> to the nth power.
-Example: ${'`exp(sum(bytes))`'}
+Raises *e* to the nth power.
+
+Example: Calculate the natural exponential function
+
+${'`exp(last_value(duration))`'}
     `,
   },
   fix: {
     positionalArguments: [
-      { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
+      {
+        name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
+        type: getTypeI18n('number'),
+      },
     ],
     help: `
 For positive values, takes the floor. For negative values, takes the ceiling.
-Example: ${'`fix(sum(bytes))`'}
+
+Example: Rounding towards zero
+${'`fix(sum(profit))`'}
     `,
   },
   floor: {
     positionalArguments: [
-      { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
+      {
+        name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
+        type: getTypeI18n('number'),
+      },
     ],
     help: `
 Round down to nearest integer value
-Example: ${'`floor(sum(bytes))`'}
+
+Example: Round down a price
+${'`floor(sum(price))`'}
     `,
   },
   log: {
     positionalArguments: [
-      { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
+      {
+        name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
+        type: getTypeI18n('number'),
+      },
       {
         name: i18n.translate('xpack.lens.formula.base', { defaultMessage: 'base' }),
         optional: true,
+        defaultValue: 'e',
+        type: getTypeI18n('number'),
       },
     ],
     help: `
-Logarithm with optional base. The natural base <em>e</em> is used as default.
-Example: ${'`log(sum(bytes))`'}
-Example: ${'`log(sum(bytes), 2)`'}
+Logarithm with optional base. The natural base *e* is used as default.
+
+Example: Calculate number of bits required to store values
+\`\`\`
+log(sum(bytes))
+log(sum(bytes), 2)
+\`\`\`
     `,
   },
   // TODO: check if this is valid for Tinymath
   //   log10: {
   //     positionalArguments: [
-  //       { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
+  //       { name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }), type: getTypeI18n('number') },
   //     ],
   //     help: `
   // Base 10 logarithm.
@@ -220,59 +339,89 @@ Example: ${'`log(sum(bytes), 2)`'}
   //   },
   mod: {
     positionalArguments: [
-      { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
+      {
+        name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
+        type: getTypeI18n('number'),
+      },
       {
         name: i18n.translate('xpack.lens.formula.base', { defaultMessage: 'base' }),
-        optional: true,
+        type: getTypeI18n('number'),
       },
     ],
     help: `
 Remainder after dividing the function by a number
-Example: ${'`mod(sum(bytes), 2)`'}
+
+Example: Calculate last three digits of a value
+${'`mod(sum(price), 1000)`'}
     `,
   },
   pow: {
     positionalArguments: [
-      { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
+      {
+        name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
+        type: getTypeI18n('number'),
+      },
       {
         name: i18n.translate('xpack.lens.formula.base', { defaultMessage: 'base' }),
+        type: getTypeI18n('number'),
       },
     ],
     help: `
 Raises the value to a certain power. The second argument is required
-Example: ${'`pow(sum(bytes), 3)`'}
+
+Example: Calculate volume based on side length
+${'`pow(last_value(length), 3)`'}
     `,
   },
   round: {
     positionalArguments: [
-      { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
+      {
+        name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
+        type: getTypeI18n('number'),
+      },
       {
         name: i18n.translate('xpack.lens.formula.decimals', { defaultMessage: 'decimals' }),
         optional: true,
+        defaultValue: 0,
+        type: getTypeI18n('number'),
       },
     ],
     help: `
 Rounds to a specific number of decimal places, default of 0
-Example: ${'`round(sum(bytes))`'}
-Example: ${'`round(sum(bytes), 2)`'}
+
+Examples: Round to the cent
+\`\`\`
+round(sum(bytes))
+round(sum(bytes), 2)
+\`\`\`
     `,
   },
   sqrt: {
     positionalArguments: [
-      { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
+      {
+        name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
+        type: getTypeI18n('number'),
+      },
     ],
     help: `
 Square root of a positive value only
-Example: ${'`sqrt(sum(bytes))`'}
+
+Example: Calculate side length based on area
+${'`sqrt(last_value(area))`'}
     `,
   },
   square: {
     positionalArguments: [
-      { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
+      {
+        name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
+        type: getTypeI18n('number'),
+      },
     ],
     help: `
 Raise the value to the 2nd power
-Example: ${'`square(sum(bytes))`'}
+
+Example: Calculate area based on side length
+${'`square(last_value(length))`'}
     `,
   },
 };
@@ -314,4 +463,12 @@ export function findVariables(node: TinymathAST | string): TinymathVariable[] {
     return [node];
   }
   return node.args.flatMap(findVariables);
+}
+
+export function filterByVisibleOperation(
+  operationDefinitionMap: Record<string, GenericOperationDefinition>
+) {
+  return Object.fromEntries(
+    Object.entries(operationDefinitionMap).filter(([, operation]) => !operation.hidden)
+  );
 }

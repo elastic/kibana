@@ -52,7 +52,7 @@ export const createGridColumns = (
     columnId,
   }: Pick<EuiDataGridColumnCellActionProps, 'rowIndex' | 'columnId'>) => {
     const rowValue = table.rows[rowIndex][columnId];
-    const column = columnsReverseLookup[columnId];
+    const column = columnsReverseLookup?.[columnId];
     const contentsIsDefined = rowValue != null;
 
     const cellContent = formatFactory(column?.meta?.params).convert(rowValue);
