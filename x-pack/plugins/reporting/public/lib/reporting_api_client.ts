@@ -12,6 +12,7 @@ import {
   API_BASE_GENERATE,
   API_BASE_URL,
   API_LIST_URL,
+  API_GET_ILM_POLICY_STATUS,
   REPORTING_MANAGEMENT_HOME,
 } from '../../common/constants';
 import {
@@ -21,6 +22,7 @@ import {
   ReportApiJSON,
   ReportDocument,
   ReportSource,
+  IlmPolicyStatusResponse,
 } from '../../common/types';
 import { add } from './job_completion_notifications';
 
@@ -167,4 +169,8 @@ export class ReportingAPIClient {
     this.http.post(`${API_BASE_URL}/diagnose/screenshot`, {
       asSystemRequest: true,
     });
+
+  public checkIlmPolicyStatus = (): Promise<IlmPolicyStatusResponse> => {
+    return this.http.get(`${API_GET_ILM_POLICY_STATUS}`);
+  };
 }
