@@ -13,7 +13,7 @@ import { AccountHeader } from '..';
 
 import { PRIVATE_DASHBOARD_READ_ONLY_MODE_WARNING } from '../../../views/content_sources/constants';
 
-import './sources.scss';
+import './personal_dashboard_layout.scss';
 
 interface LayoutProps {
   restrictWidth?: boolean;
