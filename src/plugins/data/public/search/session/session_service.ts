@@ -215,18 +215,6 @@ export class SessionService {
    * Cleans up current state
    */
   public clear() {
-    // make sure apps can't clear other apps' sessions
-    const currentSessionApp = this.state.get().appName;
-    if (currentSessionApp && currentSessionApp !== this.currentApp) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        `Skip clearing session "${this.getSessionId()}" because it belongs to a different app. current: "${
-          this.currentApp
-        }", owner: "${currentSessionApp}"`
-      );
-      return;
-    }
-
     this.state.transitions.clear();
     this.searchSessionInfoProvider = undefined;
     this.searchSessionIndicatorUiConfig = undefined;
