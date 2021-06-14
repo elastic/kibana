@@ -10,6 +10,7 @@ import supertest from 'supertest';
 import { REPO_ROOT } from '@kbn/dev-utils';
 import { HttpService, InternalHttpServiceSetup } from '../../http';
 import { contextServiceMock } from '../../context/context_service.mock';
+import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { Env } from '../../config';
 import { getEnvOptions } from '../../config/mocks';
@@ -31,6 +32,7 @@ describe('CapabilitiesService', () => {
     server = createHttpServer();
     httpSetup = await server.setup({
       context: contextServiceMock.createSetupContract(),
+      executionContext: executionContextServiceMock.createInternalSetupContract(),
     });
     service = new CapabilitiesService({
       coreId,

@@ -10,6 +10,7 @@ import { resolve } from 'path';
 import { readFile } from 'fs/promises';
 import supertest from 'supertest';
 import { contextServiceMock } from '../../context/context_service.mock';
+import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { HttpService, IRouter } from '../../http';
 import { createHttpServer } from '../../http/test_utils';
@@ -53,6 +54,7 @@ describe('bundle routes', () => {
   it('serves images inside from the bundle path', async () => {
     const { server: innerServer, createRouter } = await server.setup({
       context: contextSetup,
+      executionContext: executionContextServiceMock.createInternalSetupContract(),
     });
 
     registerFooPluginRoute(createRouter(''));
@@ -70,6 +72,7 @@ describe('bundle routes', () => {
   it('serves uncompressed js files', async () => {
     const { server: innerServer, createRouter } = await server.setup({
       context: contextSetup,
+      executionContext: executionContextServiceMock.createInternalSetupContract(),
     });
 
     registerFooPluginRoute(createRouter(''));
@@ -87,6 +90,7 @@ describe('bundle routes', () => {
   it('returns 404 for files outside of the bundlePath', async () => {
     const { server: innerServer, createRouter } = await server.setup({
       context: contextSetup,
+      executionContext: executionContextServiceMock.createInternalSetupContract(),
     });
 
     registerFooPluginRoute(createRouter(''));
@@ -100,6 +104,7 @@ describe('bundle routes', () => {
   it('returns 404 for non-existing files', async () => {
     const { server: innerServer, createRouter } = await server.setup({
       context: contextSetup,
+      executionContext: executionContextServiceMock.createInternalSetupContract(),
     });
 
     registerFooPluginRoute(createRouter(''));
@@ -113,6 +118,7 @@ describe('bundle routes', () => {
   it('returns gzip version if present', async () => {
     const { server: innerServer, createRouter } = await server.setup({
       context: contextSetup,
+      executionContext: executionContextServiceMock.createInternalSetupContract(),
     });
 
     registerFooPluginRoute(createRouter(''));
@@ -137,6 +143,7 @@ describe('bundle routes', () => {
     it('uses max-age cache-control', async () => {
       const { server: innerServer, createRouter } = await server.setup({
         context: contextSetup,
+        executionContext: executionContextServiceMock.createInternalSetupContract(),
       });
 
       registerFooPluginRoute(createRouter(''), { isDist: true });
@@ -155,6 +162,7 @@ describe('bundle routes', () => {
     it('uses etag cache-control', async () => {
       const { server: innerServer, createRouter } = await server.setup({
         context: contextSetup,
+        executionContext: executionContextServiceMock.createInternalSetupContract(),
       });
 
       registerFooPluginRoute(createRouter(''), { isDist: false });
