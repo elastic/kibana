@@ -150,7 +150,8 @@ describe('tag cloud tests', () => {
   });
 
   [5, 100, 200, 300, 500].forEach((timeout) => {
-    describe(`should only send single renderComplete event at the very end, using ${timeout}ms timeout`, () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/94043
+    describe.skip(`should only send single renderComplete event at the very end, using ${timeout}ms timeout`, () => {
       beforeEach(async () => {
         //TagCloud takes at least 600ms to complete (due to d3 animation)
         //renderComplete should only notify at the last one

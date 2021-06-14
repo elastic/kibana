@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
 
   describe('check metricbeat Dashboard', function () {
     before(async function () {
-      await esArchiver.load('metricbeat');
+      await esArchiver.load('../integration-test/test/es_archives/metricbeat');
 
       // this navigateToActualURL takes the place of navigating to the dashboard landing page,
       // filtering on the dashboard name, selecting it, setting the timepicker, and going to full screen
@@ -42,6 +42,10 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.common.sleep(2000);
       await PageObjects.dashboard.waitForRenderComplete();
       await browser.setScreenshotSize(1000, 1000);
+    });
+
+    after(async function () {
+      await esArchiver.unload('../integration-test/test/es_archives/metricbeat');
     });
 
     it('[Metricbeat System] Overview ECS should match snapshot', async function () {
