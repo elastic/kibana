@@ -55,7 +55,18 @@ export const getAuditLogResponse = async ({
   pageSize: number;
   context: SecuritySolutionRequestHandlerContext;
   logger: Logger;
-}) => {
+}): Promise<{
+  total: number;
+  page: number;
+  pageSize: number;
+  data: Array<{
+    type: 'action' | 'response';
+    item: {
+      id: string;
+      data: unknown;
+    };
+  }>;
+}> => {
   const size = pageSize;
   const from = page <= 1 ? 0 : page * pageSize - pageSize + 1;
 
