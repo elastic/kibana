@@ -44,7 +44,7 @@ export function getPerformanceDistLensConfig({ seriesId, indexPattern }: ConfigP
     id: seriesId ?? 'unique-key',
     reportType: 'page-load-dist',
     defaultSeriesType: 'line',
-    seriesTypes: ['line', 'bar'],
+    seriesTypes: [],
     xAxisColumn: {
       sourceField: 'performance.metric',
     },
