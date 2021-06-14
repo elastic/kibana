@@ -219,11 +219,12 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         handleAuthProviderChange: (previous, { value }) => {
           const previouslyContainedAny = previous.includes(ANY_AUTH_PROVIDER);
           const newSelectionsContainAny = value.includes(ANY_AUTH_PROVIDER);
+          const hasItems = value.length > 0;
 
-          if (value.length < 1) return [ANY_AUTH_PROVIDER];
           if (value.length === 1) return value;
-          if (!newSelectionsContainAny) return value;
-          if (previouslyContainedAny) return value.filter((v) => v !== ANY_AUTH_PROVIDER);
+          if (!newSelectionsContainAny && hasItems) return value;
+          if (previouslyContainedAny && hasItems)
+            return value.filter((v) => v !== ANY_AUTH_PROVIDER);
           return [ANY_AUTH_PROVIDER];
         },
         setRoleMapping: (_, { roleMapping }) => roleMapping.authProvider,

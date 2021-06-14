@@ -199,12 +199,6 @@ describe('RoleMappingsLogic', () => {
 
         expect(RoleMappingsLogic.values.selectedAuthProviders).toEqual([providers[1]]);
       });
-
-      it('handles catch-all state', () => {
-        RoleMappingsLogic.actions.handleAuthProviderChange(providerWithAny);
-
-        expect(RoleMappingsLogic.values.selectedAuthProviders).toEqual([ANY_AUTH_PROVIDER]);
-      });
     });
 
     it('resetState', () => {
