@@ -17,12 +17,12 @@ import {
   ESCaseAttributes,
   ESCasesConfigureAttributes,
   CaseType,
+  ENABLE_CASE_CONNECTOR,
 } from '../../../common';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 
 import { createIncident, getCommentContextFromAttributes } from './utils';
 import { createCaseError, flattenCaseSavedObject, getAlertInfoFromComments } from '../../common';
-import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { CasesClient, CasesClientArgs, CasesClientInternal } from '..';
 import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ServiceNowITSMFieldsType } from '../../../common/api';
+import { ServiceNowITSMFieldsType } from '../../../common';
 import { ICasesConnector } from '../types';
 
 export interface ServiceNowSIRFieldsType {

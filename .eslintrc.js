@@ -882,6 +882,7 @@ module.exports = {
       files: ['x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'arrow-body-style': ['error', 'as-needed'],
+        'no-duplicate-imports': 'error',
       },
     },
 

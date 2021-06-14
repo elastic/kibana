@@ -21,15 +21,17 @@ import { isRight } from 'fp-ts/Either';
 
 import * as i18n from './translations';
 
-import { Case, CaseUserActions } from '../../../common';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { useCurrentUser } from '../../common/lib/kibana';
 import { AddComment, AddCommentRefObject } from '../add_comment';
 import {
   ActionConnector,
   AlertCommentRequestRt,
+  Case,
+  CaseUserActions,
   CommentType,
   ContextTypeUserRt,
+  Ecs,
 } from '../../../common';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { parseString } from '../../containers/utils';
@@ -50,7 +52,6 @@ import { UserActionTimestamp } from './user_action_timestamp';
 import { UserActionUsername } from './user_action_username';
 import { UserActionContentToolbar } from './user_action_content_toolbar';
 import { getManualAlertIdsWithNoRuleId } from '../case_view/helpers';
-import { Ecs } from '../../../common';
 
 export interface UserActionTreeProps {
   caseServices: CaseServices;
