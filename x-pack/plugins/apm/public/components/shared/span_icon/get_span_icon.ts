@@ -6,7 +6,6 @@
  */
 
 import { maybe } from '../../../../common/utils/maybe';
-import awsIcon from './icons/aws.svg';
 import cassandraIcon from './icons/cassandra.svg';
 import databaseIcon from './icons/database.svg';
 import defaultIcon from './icons/default.svg';
@@ -33,12 +32,14 @@ const defaultTypeIcons: { [key: string]: string } = {
   resource: globeIcon,
 };
 
-const typeIcons: { [key: string]: { [key: string]: string } } = {
+export const typeIcons: { [type: string]: { [subType: string]: string } } = {
   aws: {
-    servicename: awsIcon,
+    servicename: 'logoAWS',
   },
   db: {
     cassandra: cassandraIcon,
+    cosmosdb: 'logoAzure',
+    dynamodb: 'logoAWS',
     elasticsearch: elasticsearchIcon,
     mongodb: mongodbIcon,
     mysql: mysqlIcon,
@@ -51,8 +52,18 @@ const typeIcons: { [key: string]: { [key: string]: string } } = {
     websocket: websocketIcon,
   },
   messaging: {
+    azurequeue: 'logoAzure',
+    azureservicebus: 'logoAzure',
     jms: javaIcon,
     kafka: kafkaIcon,
+    sns: 'logoAWS',
+    sqs: 'logoAWS',
+  },
+  storage: {
+    azureblob: 'logoAzure',
+    azurefile: 'logoAzure',
+    azuretable: 'logoAzure',
+    s3: 'logoAWS',
   },
   template: {
     handlebars: handlebarsIcon,
