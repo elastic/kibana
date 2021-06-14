@@ -208,7 +208,8 @@ export const asyncSearchServiceProvider = (
           values.push(item);
         }
         loadedHistograms++;
-        progress.loadedHistograms = loadedHistograms / fieldValuePairs.length;
+        progress.loadedHistograms =
+          loadedHistograms / (fieldValuePairs.length - 1);
       }
 
       isRunning = false;
@@ -284,7 +285,7 @@ export const asyncSearchServiceProvider = (
     return {
       error,
       isRunning,
-      loaded: Math.floor(progress.getOverallProgress() * 100),
+      loaded: Math.round(progress.getOverallProgress() * 100),
       started: progress.started,
       total: 100,
       values: uniqueValues,
