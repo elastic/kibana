@@ -38,7 +38,7 @@ export async function runKibanaServer({ procs, config, options }) {
       ...extendNodeOptions(installDir),
     },
     cwd: installDir || KIBANA_ROOT,
-    wait: /\[Kibana\]\[http\] http server running/,
+    wait: /Kibana is now available/,
   });
 }
 
