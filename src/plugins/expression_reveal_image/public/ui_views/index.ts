@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 import { getUIStrings } from '../../common/i18n';
+import { StartInitializer } from '../../common/types';
 
 const { revealImage: strings } = getUIStrings();
 
-export const revealImage = () => ({
+export const revealImageUIView: StartInitializer<unknown> = () => ({
   name: 'revealImage',
   displayName: strings.getDisplayName(),
   modelArgs: [['_', { label: 'Value' }]],

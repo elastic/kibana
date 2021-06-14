@@ -8,14 +8,14 @@
 
 import { ElementFactory } from '../../common/types';
 
-export const revealImage: ElementFactory = () => ({
+export const revealImageElement: ElementFactory = () => ({
   name: 'revealImage',
   displayName: 'Image reveal',
   type: 'image',
   help: 'Reveals a percentage of an image',
   expression: `filters
-| demodata
-| math "mean(percent_uptime)"
-| revealImage origin=bottom image=null
-| render`,
+    | demodata
+    | math "mean(percent_uptime)"
+    | revealImage origin=bottom image=null
+    | render`,
 });
