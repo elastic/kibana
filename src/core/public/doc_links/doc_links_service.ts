@@ -253,7 +253,7 @@ export class DocLinksService {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/index.html`,
         },
         alerting: {
-          guide: `${KIBANA_DOCS}alert-management.html`,
+          guide: `${KIBANA_DOCS}create-and-manage-rules.html`,
           actionTypes: `${KIBANA_DOCS}action-types.html`,
           emailAction: `${KIBANA_DOCS}email-action-type.html`,
           emailActionConfig: `${KIBANA_DOCS}email-action-type.html`,

@@ -7,7 +7,7 @@ The {es} query rule type runs a user-configured {es} query, compares the number 
 [float]
 ==== Create the rule
 
-Fill in the <<defining-alerts-general-details, rule details>>, then select *{es} query*.
+Fill in the <<defining-rules-general-details, rule details>>, then select *{es} query*.
 
 [float]
 ==== Define the conditions
@@ -22,12 +22,12 @@ Size:: This clause specifies the number of documents to pass to the configured a
 {es} query:: This clause specifies the ES DSL query to execute. The number of documents that match this query will be evaulated against the threshold
 condition. Aggregations are not supported at this time. 
 Threshold:: This clause defines a threshold value and a comparison operator  (`is above`, `is above or equals`, `is below`, `is below or equals`, or `is between`). The number of documents that match the specified query is compared to this threshold.
-Time window:: This clause determines how far back to search for documents, using the *time field* set in the *index* clause. Generally this value should be set to a value higher than the *check every* value in the <<defining-alerts-general-details, general rule details>>, to avoid gaps in detection. 
+Time window:: This clause determines how far back to search for documents, using the *time field* set in the *index* clause. Generally this value should be set to a value higher than the *check every* value in the <<defining-rules-general-details, general rule details>>, to avoid gaps in detection. 
 
 [float]
 ==== Add action variables
 
-<<defining-alerts-actions-details, Add an action>> to run when the rule condition is met. The following variables are specific to the {es} query rule. You can also specify <<defining-alerts-actions-variables, variables common to all rules>>.
+<<defining-rules-actions-details, Add an action>> to run when the rule condition is met. The following variables are specific to the {es} query rule. You can also specify <<defining-rules-actions-variables, variables common to all rules>>.
 
 `context.title`:: A preconstructed title for the rule. Example: `rule term match alert query matched`.
 `context.message`:: A preconstructed message for the rule. Example: +
