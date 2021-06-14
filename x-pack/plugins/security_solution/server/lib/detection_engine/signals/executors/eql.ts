@@ -21,17 +21,18 @@ import { isOutdated } from '../../migrations/helpers';
 import { getIndexVersion } from '../../routes/index/get_index_version';
 import { MIN_EQL_RULE_INDEX_VERSION } from '../../routes/index/get_signals_template';
 import { EqlRuleParams } from '../../schemas/rule_schemas';
-import { buildSignalFromEvent, buildSignalGroupFromSequence } from '../build_bulk_body';
 import { getInputIndex } from '../get_input_output_index';
-import { filterDuplicateSignals } from '../filter_duplicate_signals';
+
 import {
   AlertAttributes,
   BulkCreate,
+  WrapHits,
+  WrapSequences,
   EqlSignalSearchResponse,
   SearchAfterAndBulkCreateReturnType,
-  WrappedSignalHit,
+  SimpleHit,
 } from '../types';
-import { createSearchAfterReturnType, makeFloatString, wrapSignal } from '../utils';
+import { createSearchAfterReturnType, makeFloatString } from '../utils';
 
 export const eqlExecutor = async ({
   rule,
@@ -41,6 +42,8 @@ export const eqlExecutor = async ({
   logger,
   searchAfterSize,
   bulkCreate,
+  wrapHits,
+  wrapSequences,
 }: {
   rule: SavedObject<AlertAttributes<EqlRuleParams>>;
   exceptionItems: ExceptionListItemSchema[];
@@ -49,6 +52,8 @@ export const eqlExecutor = async ({
   logger: Logger;
   searchAfterSize: number;
   bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
+  wrapSequences: WrapSequences;
 }): Promise<SearchAfterAndBulkCreateReturnType> => {
   const result = createSearchAfterReturnType();
   const ruleParams = rule.attributes.params;
@@ -101,20 +106,11 @@ export const eqlExecutor = async ({
   const eqlSignalSearchEnd = performance.now();
   const eqlSearchDuration = makeFloatString(eqlSignalSearchEnd - eqlSignalSearchStart);
   result.searchAfterTimes = [eqlSearchDuration];
-  let newSignals: WrappedSignalHit[] | undefined;
+  let newSignals: SimpleHit[] | undefined;
   if (response.hits.sequences !== undefined) {
-    newSignals = response.hits.sequences.reduce(
-      (acc: WrappedSignalHit[], sequence) =>
-        acc.concat(buildSignalGroupFromSequence(sequence, rule, ruleParams.outputIndex)),
-      []
-    );
+    newSignals = wrapSequences(response.hits.sequences);
   } else if (response.hits.events !== undefined) {
-    newSignals = filterDuplicateSignals(
-      rule.id,
-      response.hits.events.map((event) =>
-        wrapSignal(buildSignalFromEvent(event, rule, true), ruleParams.outputIndex)
-      )
-    );
+    newSignals = wrapHits(response.hits.events);
   } else {
     throw new Error(
       'eql query response should have either `sequences` or `events` but had neither'

@@ -18,18 +18,24 @@ import { filterDuplicateSignals } from './filter_duplicate_signals';
 export const wrapHitsFactory = ({
   ruleSO,
   signalsIndex,
+  isRuleRegistryEnabled,
 }: {
   ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
   signalsIndex: string;
+  isRuleRegistryEnabled: boolean;
 }): WrapHits => (events) => {
   const wrappedDocs: WrappedSignalHit[] = events.flatMap((doc) => [
     {
       _index: signalsIndex,
-      // TODO: bring back doc._version
-      _id: generateId(doc._index, doc._id, '', ruleSO.attributes.params.ruleId ?? ''),
+      _id: generateId(
+        doc._index,
+        doc._id,
+        doc._version ? doc._version.toString() : '',
+        ruleSO.attributes.params.ruleId ?? ''
+      ),
       _source: buildBulkBody(ruleSO, doc as SignalSourceHit),
     },
   ]);
 
-  return filterDuplicateSignals(ruleSO.id, wrappedDocs);
+  return filterDuplicateSignals(ruleSO.id, wrappedDocs, isRuleRegistryEnabled);
 };

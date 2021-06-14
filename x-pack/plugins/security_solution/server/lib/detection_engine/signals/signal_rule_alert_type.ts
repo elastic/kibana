@@ -67,6 +67,7 @@ import {
 } from '../schemas/rule_schemas';
 import { bulkCreateFactory } from './bulk_create_factory';
 import { wrapHitsFactory } from './wrap_hits_factory';
+import { wrapSequencesFactory } from './wrap_sequences_factory';
 
 export const signalRulesAlertType = ({
   logger,
@@ -74,12 +75,14 @@ export const signalRulesAlertType = ({
   version,
   ml,
   lists,
+  isRuleRegistryEnabled,
 }: {
   logger: Logger;
   eventsTelemetry: TelemetryEventsSender | undefined;
   version: string;
   ml: SetupPlugins['ml'];
   lists: SetupPlugins['lists'] | undefined;
+  isRuleRegistryEnabled: boolean;
 }): SignalRuleAlertTypeDefinition => {
   return {
     id: SIGNALS_ID,
@@ -231,6 +234,13 @@ export const signalRulesAlertType = ({
         const wrapHits = wrapHitsFactory({
           ruleSO: savedObject,
           signalsIndex: params.outputIndex,
+          isRuleRegistryEnabled,
+        });
+
+        const wrapSequences = wrapSequencesFactory({
+          ruleSO: savedObject,
+          signalsIndex: params.outputIndex,
+          isRuleRegistryEnabled,
         });
 
         if (isMlRule(type)) {
@@ -302,6 +312,8 @@ export const signalRulesAlertType = ({
             searchAfterSize,
             bulkCreate,
             logger,
+            wrapHits,
+            wrapSequences,
           });
         } else {
           throw new Error(`unknown rule type ${type}`);

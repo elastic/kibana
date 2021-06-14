@@ -70,6 +70,8 @@ describe('eql_executor', () => {
         logger,
         searchAfterSize,
         bulkCreate: jest.fn(),
+        wrapHits: jest.fn(),
+        wrapSequences: jest.fn(),
       });
       expect(response.warningMessages.length).toEqual(1);
     });
