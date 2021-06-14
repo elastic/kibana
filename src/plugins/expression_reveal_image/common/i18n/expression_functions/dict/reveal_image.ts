@@ -11,11 +11,11 @@ import { Position } from '../../../types';
 import { BASE64, URL } from '../../constants';
 
 export const help = {
-  help: i18n.translate('xpack.canvas.functions.revealImageHelpText', {
+  help: i18n.translate('expressionRevealImage.functions.revealImageHelpText', {
     defaultMessage: 'Configures an image reveal element.',
   }),
   args: {
-    image: i18n.translate('xpack.canvas.functions.revealImage.args.imageHelpText', {
+    image: i18n.translate('expressionRevealImage.functions.revealImage.args.imageHelpText', {
       defaultMessage:
         'The image to reveal. Provide an image asset as a {BASE64} data {URL}, ' +
         'or pass in a sub-expression.',
@@ -24,16 +24,19 @@ export const help = {
         URL,
       },
     }),
-    emptyImage: i18n.translate('xpack.canvas.functions.revealImage.args.emptyImageHelpText', {
-      defaultMessage:
-        'An optional background image to reveal over. ' +
-        'Provide an image asset as a `{BASE64}` data {URL}, or pass in a sub-expression.',
-      values: {
-        BASE64,
-        URL,
-      },
-    }),
-    origin: i18n.translate('xpack.canvas.functions.revealImage.args.originHelpText', {
+    emptyImage: i18n.translate(
+      'expressionRevealImage.functions.revealImage.args.emptyImageHelpText',
+      {
+        defaultMessage:
+          'An optional background image to reveal over. ' +
+          'Provide an image asset as a `{BASE64}` data {URL}, or pass in a sub-expression.',
+        values: {
+          BASE64,
+          URL,
+        },
+      }
+    ),
+    origin: i18n.translate('expressionRevealImage.functions.revealImage.args.originHelpText', {
       defaultMessage: 'The position to start the image fill. For example, {list}, or {end}.',
       values: {
         list: Object.values(Position)
@@ -48,7 +51,7 @@ export const help = {
 export const errors = {
   invalidPercent: (percent: number) =>
     new Error(
-      i18n.translate('xpack.canvas.functions.revealImage.invalidPercentErrorMessage', {
+      i18n.translate('expressionRevealImage.functions.revealImage.invalidPercentErrorMessage', {
         defaultMessage: "Invalid value: '{percent}'. Percentage must be between 0 and 1",
         values: {
           percent,
