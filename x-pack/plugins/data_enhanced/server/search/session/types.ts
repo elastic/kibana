@@ -12,7 +12,7 @@ import {
   SavedObjectsFindResponse,
 } from 'kibana/server';
 import { Observable } from 'rxjs';
-import { SearchSessionSavedObjectAttributes } from 'src/plugins/data/common';
+import { KueryNode, SearchSessionSavedObjectAttributes } from 'src/plugins/data/common';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -58,6 +58,6 @@ export type SearchSessionsResponse = SavedObjectsFindResponse<
 export type CheckSearchSessionsFn = (
   deps: CheckSearchSessionsDeps,
   config: SearchSessionsConfig,
-  filter: any,
+  filter: KueryNode,
   page: number
 ) => Observable<SearchSessionsResponse>;

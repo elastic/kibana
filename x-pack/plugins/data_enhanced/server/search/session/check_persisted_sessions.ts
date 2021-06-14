@@ -11,6 +11,7 @@ import {
   nodeBuilder,
   SEARCH_SESSION_TYPE,
   SearchSessionStatus,
+  KueryNode,
 } from '../../../../../../src/plugins/data/common';
 import { checkSearchSessionsByPage, getSearchSessionsPage$ } from './get_search_session_page';
 import { SearchSessionsConfig, CheckSearchSessionsDeps, SearchSessionsResponse } from './types';
@@ -22,7 +23,7 @@ export const SEARCH_SESSIONS_TASK_ID = `data_enhanced_${SEARCH_SESSIONS_TASK_TYP
 function checkPersistedSessionsPage(
   deps: CheckSearchSessionsDeps,
   config: SearchSessionsConfig,
-  filter: any,
+  filter: KueryNode,
   page: number
 ): Observable<SearchSessionsResponse> {
   const { logger } = deps;

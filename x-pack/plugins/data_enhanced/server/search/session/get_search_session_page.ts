@@ -11,6 +11,7 @@ import { concatMap } from 'rxjs/operators';
 import {
   SearchSessionSavedObjectAttributes,
   SEARCH_SESSION_TYPE,
+  KueryNode,
 } from '../../../../../../src/plugins/data/common';
 import { CheckSearchSessionsDeps, CheckSearchSessionsFn, SearchSessionsConfig } from './types';
 
@@ -21,7 +22,7 @@ export interface GetSessionsDeps {
 
 export function getSearchSessionsPage$(
   { savedObjectsClient }: GetSessionsDeps,
-  filter: any,
+  filter: KueryNode,
   pageSize: number,
   page: number
 ) {
